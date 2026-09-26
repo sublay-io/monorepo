@@ -1,0 +1,60 @@
+---
+title: "Restore Row"
+api: "POST /v7/:projectId/db/:tableName/:rowId/restore"
+description: "Bring back a soft-deleted row on a paranoid table"
+---
+
+Clears a row's `deletedAt`, returning it to normal reads.
+
+Only works on a **paranoid** table — one created with `paranoid: true`, where deletes are soft by default. Restoring on a non-paranoid table fails with `database/not-paranoid`, since a delete there removed the row permanently and there is nothing to bring back.
+
+<Warning>
+  Row endpoints capture the caller's identity but **enforce no authorization**. See [Security: open row CRUD](/custom-tables#security-open-row-crud).
+</Warning>
+
+## Path Parameters
+
+<ParamField path="tableName" type="string" required>
+  Logical name of the custom table — pass `orders`, not `custom_orders`.
+</ParamField>
+
+<ParamField path="rowId" type="string" required>
+  UUID of the soft-deleted row to restore.
+</ParamField>
+
+## Response
+
+<ResponseField name="row" type="object">
+  The restored row, with `deletedAt` cleared.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Parameters — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Table Not Paranoid — 400">
+    The table does not soft-delete, so it has nothing to restore.
+    ```json
+    { "error": "Bad Request", "code": "database/not-paranoid" }
+    ```
+  </Accordion>
+  <Accordion title="Table Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/table-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Row Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/row-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

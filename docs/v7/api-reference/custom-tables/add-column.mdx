@@ -1,0 +1,103 @@
+---
+title: "Add Column"
+api: "POST /v7/:projectId/db/tables/:tableName/columns"
+description: "Add a column to an existing custom table"
+---
+
+Adds one column to a custom table.
+
+<Warning>
+  **Service or master key required.**
+</Warning>
+
+## Path Parameters
+
+<ParamField path="tableName" type="string" required>
+  Logical name of the table — pass `orders`, not `custom_orders`.
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="columnName" type="string" required>
+  Matches `^[a-zA-Z_][a-zA-Z0-9_]{0,62}$`. Cannot be one of the managed column names (`id`, `createdAt`, `updatedAt`, `deletedAt`).
+</ParamField>
+
+<ParamField body="dataType" type="string" required>
+  One of `text`, `integer`, `float`, `boolean`, `timestamp`, `json`, `decimal`, `date`, `uuid`.
+</ParamField>
+
+<ParamField body="nullable" type="boolean" required>
+  Whether the column accepts `NULL`. Adding a non-nullable column to a table that already holds rows needs a `defaultValue`, or the existing rows have nothing to put in it.
+</ParamField>
+
+<ParamField body="defaultValue" type="string | null">
+  Optional default, as a string.
+</ParamField>
+
+```json
+{
+  "columnName": "priority",
+  "dataType": "integer",
+  "nullable": false,
+  "defaultValue": "0"
+}
+```
+
+## Response
+
+Returns `201 Created`.
+
+<ResponseField name="added" type="string">
+  The name of the column that was added.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Body — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Reserved Column — 400">
+    The name is one of the managed columns.
+    ```json
+    { "error": "Bad Request", "code": "database/reserved-column" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Default Value — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-default-value" }
+    ```
+  </Accordion>
+  <Accordion title="Elevated Auth Required — 403">
+    ```json
+    {
+      "error": "Service or master key required.",
+      "code": "auth/elevated-auth-required"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Table Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/table-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Column Conflict — 409">
+    A column with that name already exists on the table.
+    ```json
+    { "error": "Conflict", "code": "database/column-conflict" }
+    ```
+  </Accordion>
+  <Accordion title="Column Limit Reached — 409">
+    A table may hold at most 100 columns.
+    ```json
+    { "error": "Conflict", "code": "database/column-limit-reached" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

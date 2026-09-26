@@ -1,0 +1,64 @@
+---
+title: "Delete Row"
+api: "DELETE /v7/:projectId/db/:tableName/:rowId"
+description: "Delete a single custom-table row, softly or permanently"
+---
+
+Deletes one row.
+
+On a **paranoid** table the row is soft-deleted (its `deletedAt` is set) and can be brought back with [Restore Row](/api-reference/custom-tables/restore-row). Pass `?force=true` to delete it permanently instead. On a non-paranoid table every delete is permanent, and `force` makes no difference.
+
+<Warning>
+  Row endpoints capture the caller's identity but **enforce no authorization**. See [Security: open row CRUD](/custom-tables#security-open-row-crud).
+</Warning>
+
+## Path Parameters
+
+<ParamField path="tableName" type="string" required>
+  Logical name of the custom table — pass `orders`, not `custom_orders`.
+</ParamField>
+
+<ParamField path="rowId" type="string" required>
+  UUID of the row to delete.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="force" type="string">
+  `"true"` hard-deletes the row even on a paranoid table. Any other value, or omitting it, leaves the default soft-delete behavior in place.
+</ParamField>
+
+## Response
+
+<ResponseField name="deleted" type="boolean">
+  Always `true` when the call succeeds.
+</ResponseField>
+
+<ResponseField name="soft" type="boolean">
+  Whether the row was soft-deleted (`true`) or removed permanently (`false`). Read this rather than assuming, since it reflects both the table's `paranoid` setting and `force`.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Parameters — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Table Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/table-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Row Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/row-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

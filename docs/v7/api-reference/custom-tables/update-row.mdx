@@ -1,0 +1,83 @@
+---
+title: "Update Row"
+api: "PATCH /v7/:projectId/db/:tableName/:rowId"
+description: "Update columns on a single custom-table row"
+---
+
+Updates one row and returns it. Only the columns present in the body are changed.
+
+<Warning>
+  Row endpoints capture the caller's identity but **enforce no authorization**. See [Security: open row CRUD](/custom-tables#security-open-row-crud).
+</Warning>
+
+## Path Parameters
+
+<ParamField path="tableName" type="string" required>
+  Logical name of the custom table — pass `orders`, not `custom_orders`.
+</ParamField>
+
+<ParamField path="rowId" type="string" required>
+  UUID of the row to update.
+</ParamField>
+
+## Body
+
+A free-form column map of the columns to change. At least one key is required.
+
+```json
+{ "status": "closed" }
+```
+
+<Warning>
+  **Managed columns are rejected, unknown columns are ignored.** Writing `id`, `createdAt`, `updatedAt` or `deletedAt` fails with `database/managed-column`. A key matching no column is silently dropped; if every key is dropped, the request fails with `database/no-writable-columns`.
+</Warning>
+
+## Response
+
+<ResponseField name="row" type="object">
+  The updated row.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Body — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Managed Column — 400">
+    ```json
+    {
+      "error": "Bad Request",
+      "code": "database/managed-column",
+      "column": "<column name>"
+    }
+    ```
+  </Accordion>
+  <Accordion title="No Writable Columns — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/no-writable-columns" }
+    ```
+  </Accordion>
+  <Accordion title="Table Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/table-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Row Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/row-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Foreign Key Violation — 409">
+    ```json
+    { "error": "Conflict", "code": "database/foreign-key-violation" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

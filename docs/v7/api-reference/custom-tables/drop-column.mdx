@@ -1,0 +1,70 @@
+---
+title: "Drop Column"
+api: "DELETE /v7/:projectId/db/tables/:tableName/columns/:columnName"
+description: "Permanently drop a column and its data from a custom table"
+---
+
+Drops one column from a custom table.
+
+<Warning>
+  **This is irreversible** — every value stored in that column is lost.
+</Warning>
+
+<Warning>
+  **Service or master key required.**
+</Warning>
+
+## Path Parameters
+
+<ParamField path="tableName" type="string" required>
+  Logical name of the table — pass `orders`, not `custom_orders`.
+</ParamField>
+
+<ParamField path="columnName" type="string" required>
+  Name of the column to drop. Managed columns (`id`, `createdAt`, `updatedAt`, `deletedAt`) cannot be dropped — the platform owns them, and dropping one would break the table's row machinery.
+</ParamField>
+
+## Response
+
+<ResponseField name="dropped" type="string">
+  The name of the column that was dropped.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Parameters — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Reserved Column — 400">
+    The column is server-managed and cannot be dropped.
+    ```json
+    { "error": "Bad Request", "code": "database/reserved-column" }
+    ```
+  </Accordion>
+  <Accordion title="Elevated Auth Required — 403">
+    ```json
+    {
+      "error": "Service or master key required.",
+      "code": "auth/elevated-auth-required"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Table Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/table-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Column Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/column-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

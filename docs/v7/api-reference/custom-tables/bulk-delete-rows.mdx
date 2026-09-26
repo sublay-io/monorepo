@@ -1,0 +1,89 @@
+---
+title: "Bulk Delete Rows"
+api: "DELETE /v7/:projectId/db/:tableName"
+description: "Delete many custom-table rows by ID list, filter predicate, or both"
+---
+
+Deletes multiple rows in one request and reports how many were removed.
+
+Targets are selected by an ID list, a filter predicate, or both — **at least one is required**, so an empty body cannot wipe a table by accident.
+
+<Warning>
+  Row endpoints capture the caller's identity but **enforce no authorization** — any caller who can reach your project can delete these rows. See [Security: open row CRUD](/custom-tables#security-open-row-crud).
+</Warning>
+
+## Path Parameters
+
+<ParamField path="tableName" type="string" required>
+  Logical name of the custom table — pass `orders`, not `custom_orders`.
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="rowIds" type="string[]">
+  Between 1 and 100 row IDs to delete.
+</ParamField>
+
+<ParamField body="filters" type="object[]">
+  Up to 50 filter clauses, AND-combined, in the same `{ column, operator, value }` form as [Fetch Rows](/api-reference/custom-tables/fetch-many-rows) — but as a real JSON array here, not a JSON-encoded string. A column that does not exist fails with `database/invalid-filter-column`.
+</ParamField>
+
+<ParamField body="force" type="boolean">
+  `true` hard-deletes even on a paranoid table. Defaults to `false`.
+</ParamField>
+
+```json
+{
+  "filters": [{ "column": "status", "operator": "eq", "value": "archived" }],
+  "force": false
+}
+```
+
+<Note>
+  Supplying both `rowIds` and `filters` narrows the target set — a row must match the filters **and** be in the ID list.
+</Note>
+
+## Response
+
+<ResponseField name="deletedCount" type="number">
+  How many rows were deleted. `0` is a successful response, not an error.
+</ResponseField>
+
+<ResponseField name="soft" type="boolean">
+  Whether the rows were soft-deleted or removed permanently.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Body — 400">
+    Neither `rowIds` nor `filters` was supplied, or one exceeded its cap (100 IDs, 50 filters).
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Filter Column — 400">
+    ```json
+    {
+      "error": "Bad Request",
+      "code": "database/invalid-filter-column",
+      "column": "<column name>"
+    }
+    ```
+  </Accordion>
+  <Accordion title="No Delete Target — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/no-delete-target" }
+    ```
+  </Accordion>
+  <Accordion title="Table Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/table-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

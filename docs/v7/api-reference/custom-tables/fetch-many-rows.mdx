@@ -1,0 +1,124 @@
+---
+title: "Fetch Rows"
+api: "GET /v7/:projectId/db/:tableName"
+description: "Query rows from a custom table with filters, sorting and pagination"
+---
+
+Returns a paginated page of rows from a custom table.
+
+<Warning>
+  Row endpoints capture the caller's identity but **enforce no authorization** — any caller who can reach your project can read these rows. See [Security: open row CRUD](/custom-tables#security-open-row-crud).
+</Warning>
+
+<Note>
+  `tableName` is the **logical** name. The server applies the `custom_` prefix itself, so pass `orders`, not `custom_orders`. Only custom tables are reachable here — a built-in or bundle table returns `database/table-not-found`, so the existence of built-in tables is never revealed through this surface.
+</Note>
+
+## Path Parameters
+
+<ParamField path="tableName" type="string" required>
+  Logical name of the custom table. Must match `^[a-zA-Z_][a-zA-Z0-9_]{0,62}$`.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="page" type="number">
+  1-indexed page number. Defaults to `1`.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Rows per page. Defaults to `50`. Maximum `200`.
+</ParamField>
+
+<ParamField query="sortBy" type="string">
+  Column to sort by. Must be a real column on the table, or the request fails with `database/invalid-sort-column`.
+</ParamField>
+
+<ParamField query="sortDir" type="string">
+  `asc` or `desc`.
+</ParamField>
+
+<ParamField query="includeDeleted" type="string">
+  `"true"` to include soft-deleted rows on a paranoid table. Defaults to `"false"`.
+</ParamField>
+
+<ParamField query="filters" type="string">
+  A **JSON-encoded array** of filter clauses, URL-encoded. Maximum 50 clauses, all AND-combined.
+
+  Each clause is `{ "column": string, "operator": string, "value": unknown }`.
+
+  <Expandable title="Operators and their value shapes">
+    <ResponseField name="eq, ne, gt, gte, lt, lte, contains, like" type="string | number | boolean">
+      A single non-null primitive.
+    </ResponseField>
+    <ResponseField name="in" type="array">
+      A non-empty array of primitives.
+    </ResponseField>
+    <ResponseField name="isNull" type="boolean">
+      `true` matches `IS NULL`, `false` matches `IS NOT NULL`.
+    </ResponseField>
+  </Expandable>
+
+  ```
+  ?filters=[{"column":"status","operator":"eq","value":"open"}]
+  ```
+
+  A column that does not exist on the table fails with `database/invalid-filter-column`.
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="object[]">
+  The page of rows. Each row is a free-form column map, including the managed columns (`id`, and `createdAt` / `updatedAt` / `deletedAt` where the table has them).
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="pagination fields">
+    <ResponseField name="page" type="number">Current 1-indexed page.</ResponseField>
+    <ResponseField name="pageSize" type="number">Rows per page, as requested.</ResponseField>
+    <ResponseField name="totalPages" type="number">Total pages available.</ResponseField>
+    <ResponseField name="totalItems" type="number">Total matching rows.</ResponseField>
+    <ResponseField name="hasMore" type="boolean">Whether more pages follow.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Parameters — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Query — 400">
+    Malformed `filters` JSON, an unknown operator, a value of the wrong shape for its operator, or an out-of-range `page` / `limit`.
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Filter Column — 400">
+    ```json
+    {
+      "error": "Bad Request",
+      "code": "database/invalid-filter-column",
+      "column": "<column name>"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Sort Column — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-sort-column" }
+    ```
+  </Accordion>
+  <Accordion title="Table Not Found — 404">
+    Also returned for a built-in or bundle table, which this surface never exposes.
+    ```json
+    { "error": "Not Found", "code": "database/table-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

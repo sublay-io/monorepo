@@ -1,0 +1,60 @@
+---
+title: "Drop Table"
+api: "DELETE /v7/:projectId/db/tables/:tableName"
+description: "Permanently drop a custom table and all of its rows"
+---
+
+Drops a custom table.
+
+<Warning>
+  **This is irreversible and takes every row with it.** A table's `paranoid` setting protects rows from deletion, not the table itself — dropping a paranoid table destroys its soft-deleted rows too.
+</Warning>
+
+<Warning>
+  **Service or master key required.**
+</Warning>
+
+## Path Parameters
+
+<ParamField path="tableName" type="string" required>
+  Logical name of the table to drop — pass `orders`, not `custom_orders`. Only custom tables can be dropped here; a built-in or bundle table returns `database/table-not-found`.
+</ParamField>
+
+## Response
+
+<ResponseField name="dropped" type="string">
+  The logical name of the dropped table.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Parameters — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Not A Custom Table — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/not-a-custom-table" }
+    ```
+  </Accordion>
+  <Accordion title="Elevated Auth Required — 403">
+    ```json
+    {
+      "error": "Service or master key required.",
+      "code": "auth/elevated-auth-required"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Table Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/table-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

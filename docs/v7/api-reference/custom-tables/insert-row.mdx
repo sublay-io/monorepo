@@ -1,0 +1,83 @@
+---
+title: "Insert Row"
+api: "POST /v7/:projectId/db/:tableName"
+description: "Insert a single row into a custom table"
+---
+
+Inserts one row and returns it.
+
+<Warning>
+  Row endpoints capture the caller's identity but **enforce no authorization** — any caller who can reach your project can write these rows. See [Security: open row CRUD](/custom-tables#security-open-row-crud).
+</Warning>
+
+<Note>
+  `tableName` is the **logical** name — pass `orders`, not `custom_orders`.
+</Note>
+
+## Path Parameters
+
+<ParamField path="tableName" type="string" required>
+  Logical name of the custom table.
+</ParamField>
+
+## Body
+
+The body is a free-form column map — one key per column you are setting. At least one key is required.
+
+```json
+{ "status": "open", "total": 42 }
+```
+
+<Warning>
+  **Managed columns are rejected, unknown columns are ignored.** Writing `id`, `createdAt`, `updatedAt` or `deletedAt` fails with `database/managed-column`. A key that matches no column on the table is silently dropped — so a typo in a column name does not error, it simply does not persist. If every key is dropped, the request fails with `database/no-writable-columns`.
+</Warning>
+
+## Response
+
+Returns `201 Created`.
+
+<ResponseField name="row" type="object">
+  The inserted row, including its generated managed columns.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Body — 400">
+    Returned when the body is empty or not an object.
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Managed Column — 400">
+    ```json
+    {
+      "error": "Bad Request",
+      "code": "database/managed-column",
+      "column": "<column name>"
+    }
+    ```
+  </Accordion>
+  <Accordion title="No Writable Columns — 400">
+    Every key in the body matched no column on the table.
+    ```json
+    { "error": "Bad Request", "code": "database/no-writable-columns" }
+    ```
+  </Accordion>
+  <Accordion title="Table Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/table-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Foreign Key Violation — 409">
+    A value references a row that does not exist.
+    ```json
+    { "error": "Conflict", "code": "database/foreign-key-violation" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

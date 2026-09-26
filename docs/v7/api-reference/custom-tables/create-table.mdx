@@ -1,0 +1,129 @@
+---
+title: "Create Table"
+api: "POST /v7/:projectId/db/tables"
+description: "Create a custom table in your project's schema"
+---
+
+Creates a new custom table.
+
+<Warning>
+  **Service or master key required.** Table management is not reachable with an end-user token, which is why the JS SDK and the React hook are row-only.
+</Warning>
+
+<Note>
+  Pass the **logical** name. The server prepends `custom_` exactly once, so `orders` is stored as `custom_orders`. A logical name that itself begins with `custom_` is not special-cased — `custom_x` stores as `custom_custom_x`.
+</Note>
+
+## Body Parameters
+
+<ParamField body="tableName" type="string" required>
+  Logical table name, matching `^[a-zA-Z_][a-zA-Z0-9_]{0,62}$`. The physical name is 7 characters longer and must still fit Postgres's 63-character identifier limit, so an over-long name fails with `database/name-too-long`.
+</ParamField>
+
+<ParamField body="columns" type="object[]">
+  Column definitions. Defaults to an empty array — a table can be created with only its managed columns and have columns added later.
+
+  <Expandable title="Column definition">
+    <ResponseField name="columnName" type="string" required>
+      Matches `^[a-zA-Z_][a-zA-Z0-9_]{0,62}$`. Cannot be a managed column name.
+    </ResponseField>
+    <ResponseField name="dataType" type="string" required>
+      One of `text`, `integer`, `float`, `boolean`, `timestamp`, `json`, `decimal`, `date`, `uuid`.
+    </ResponseField>
+    <ResponseField name="nullable" type="boolean" required>
+      Whether the column accepts `NULL`.
+    </ResponseField>
+    <ResponseField name="defaultValue" type="string | null">
+      Optional default, as a string.
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="timestamps" type="boolean">
+  Adds managed `createdAt` and `updatedAt` columns. Defaults to `true`.
+</ParamField>
+
+<ParamField body="paranoid" type="boolean">
+  Adds a managed `deletedAt` column and makes deletes soft by default, so rows can be restored. Defaults to `false`. **Requires `timestamps` to be enabled** — `paranoid: true` with `timestamps: false` is rejected.
+</ParamField>
+
+```json
+{
+  "tableName": "orders",
+  "columns": [
+    { "columnName": "status", "dataType": "text", "nullable": false },
+    { "columnName": "total", "dataType": "decimal", "nullable": true }
+  ],
+  "timestamps": true,
+  "paranoid": true
+}
+```
+
+<Note>
+  `id`, `createdAt`, `updatedAt` and `deletedAt` are **managed columns** — the platform owns them end to end. They are created for you according to the flags above and cannot be declared here.
+</Note>
+
+## Response
+
+Returns `201 Created`.
+
+<ResponseField name="table" type="string">
+  The logical name of the created table.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Body — 400">
+    A malformed name, an unknown `dataType`, or `paranoid: true` without `timestamps`.
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Name Too Long — 400">
+    The physical `custom_`-prefixed name exceeds Postgres's 63-character identifier limit.
+    ```json
+    { "error": "Bad Request", "code": "database/name-too-long" }
+    ```
+  </Accordion>
+  <Accordion title="Reserved Column — 400">
+    A column definition used a managed column name.
+    ```json
+    { "error": "Bad Request", "code": "database/reserved-column" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Default Value — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-default-value" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Flags — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-flags" }
+    ```
+  </Accordion>
+  <Accordion title="Elevated Auth Required — 403">
+    ```json
+    {
+      "error": "Service or master key required.",
+      "code": "auth/elevated-auth-required"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Table Already Exists — 409">
+    ```json
+    { "error": "Conflict", "code": "database/table-already-exists" }
+    ```
+  </Accordion>
+  <Accordion title="Table Limit Reached — 409">
+    A project may hold at most 100 custom tables.
+    ```json
+    { "error": "Conflict", "code": "database/table-limit-reached" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

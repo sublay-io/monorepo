@@ -898,6 +898,28 @@
                 ]
               },
               {
+                "group": "Custom Tables — Rows",
+                "pages": [
+                  "v7/api-reference/custom-tables/fetch-many-rows",
+                  "v7/api-reference/custom-tables/fetch-row",
+                  "v7/api-reference/custom-tables/insert-row",
+                  "v7/api-reference/custom-tables/bulk-insert-rows",
+                  "v7/api-reference/custom-tables/update-row",
+                  "v7/api-reference/custom-tables/delete-row",
+                  "v7/api-reference/custom-tables/bulk-delete-rows",
+                  "v7/api-reference/custom-tables/restore-row"
+                ]
+              },
+              {
+                "group": "Custom Tables — Management",
+                "pages": [
+                  "v7/api-reference/custom-tables/create-table",
+                  "v7/api-reference/custom-tables/drop-table",
+                  "v7/api-reference/custom-tables/add-column",
+                  "v7/api-reference/custom-tables/drop-column"
+                ]
+              },
+              {
                 "group": "Utils",
                 "pages": ["v7/api-reference/utils/get-metadata"]
               },

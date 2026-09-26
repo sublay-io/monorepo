@@ -1,0 +1,80 @@
+---
+title: "Bulk Insert Rows"
+api: "POST /v7/:projectId/db/:tableName/bulk"
+description: "Insert up to 100 rows into a custom table in one request"
+---
+
+Inserts many rows in a single request and returns them.
+
+<Warning>
+  Row endpoints capture the caller's identity but **enforce no authorization**. See [Security: open row CRUD](/custom-tables#security-open-row-crud).
+</Warning>
+
+## Path Parameters
+
+<ParamField path="tableName" type="string" required>
+  Logical name of the custom table — pass `orders`, not `custom_orders`.
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="rows" type="object[]" required>
+  Between 1 and 100 rows. Each entry is a free-form column map, following the same rules as [Insert Row](/api-reference/custom-tables/insert-row): managed columns are rejected, unknown columns are silently dropped.
+</ParamField>
+
+```json
+{
+  "rows": [
+    { "status": "open", "total": 42 },
+    { "status": "closed", "total": 7 }
+  ]
+}
+```
+
+## Response
+
+Returns `201 Created`.
+
+<ResponseField name="rows" type="object[]">
+  The inserted rows, including their generated managed columns.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Body — 400">
+    Missing `rows`, an empty array, or more than 100 entries.
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Managed Column — 400">
+    ```json
+    {
+      "error": "Bad Request",
+      "code": "database/managed-column",
+      "column": "<column name>"
+    }
+    ```
+  </Accordion>
+  <Accordion title="No Writable Columns — 400">
+    ```json
+    { "error": "Bad Request", "code": "database/no-writable-columns" }
+    ```
+  </Accordion>
+  <Accordion title="Table Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/table-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Foreign Key Violation — 409">
+    ```json
+    { "error": "Conflict", "code": "database/foreign-key-violation" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

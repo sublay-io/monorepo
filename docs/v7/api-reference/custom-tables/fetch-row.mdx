@@ -1,0 +1,57 @@
+---
+title: "Fetch Row"
+api: "GET /v7/:projectId/db/:tableName/:rowId"
+description: "Fetch a single row from a custom table by ID"
+---
+
+Returns one row from a custom table.
+
+<Warning>
+  Row endpoints capture the caller's identity but **enforce no authorization**. See [Security: open row CRUD](/custom-tables#security-open-row-crud).
+</Warning>
+
+<Note>
+  `tableName` is the **logical** name — pass `orders`, not `custom_orders`.
+</Note>
+
+## Path Parameters
+
+<ParamField path="tableName" type="string" required>
+  Logical name of the custom table.
+</ParamField>
+
+<ParamField path="rowId" type="string" required>
+  UUID of the row.
+</ParamField>
+
+## Response
+
+<ResponseField name="row" type="object">
+  The row as a free-form column map, including managed columns.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Parameters — 400">
+    Returned when `rowId` is not a UUID, or `tableName` is not a valid identifier.
+    ```json
+    { "error": "Bad Request", "code": "database/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Table Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/table-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Row Not Found — 404">
+    ```json
+    { "error": "Not Found", "code": "database/row-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

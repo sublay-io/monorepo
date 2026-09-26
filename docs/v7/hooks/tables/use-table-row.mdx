@@ -19,11 +19,14 @@ See [Custom Tables — Overview](/v7/sdk/tables/overview) for a guide, and [Cust
 ```tsx
 import { useTableRow } from "@sublay/react-js";
 
-interface EventRow {
+// A `type`, not an `interface`: `TableRow` carries an index signature for the
+// table's own columns, and an interface gets no implicit one — so an interface
+// here fails the `T extends TableRow` constraint.
+type EventRow = {
   id: string;
   name: string;
   capacity: number;
-}
+};
 
 function EventDetail({ eventId }: { eventId: string | null }) {
   const { row, loading, error } = useTableRow<EventRow>("Events", eventId);

@@ -45,6 +45,28 @@ describe("tablesApi", () => {
     expect(call.url).not.toContain("includeDeleted=");
   });
 
+  it("fetchTableRow builds a GET to the exact single-row route", async () => {
+    const rowId = "3f0d9f2e-1c4a-4b7e-9f11-0a2b3c4d5e6f";
+    fetchHandle.fetchMock.mockResolvedValueOnce(
+      jsonResponse({ row: { id: rowId, name: "alpha" } }),
+    );
+
+    await store.dispatch(
+      tablesApi.endpoints.fetchTableRow.initiate({
+        projectId: "test-project",
+        tableName: "Events",
+        rowId,
+      }),
+    );
+
+    const call = fetchHandle.calls()[0];
+    expect(call.method).toBe("GET");
+    // Full equality: a substring cannot catch an extra or reordered segment.
+    expect(call.url).toBe(
+      `https://api.sublay.io/v7/test-project/db/Events/${rowId}`,
+    );
+  });
+
   it("serializes filters as a JSON string param and includeDeleted as a string boolean", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
       jsonResponse({

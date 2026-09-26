@@ -1,13 +1,13 @@
 ---
 title: "Overview"
-description: "Read and write your project's custom-table rows from React and React Native with useTable"
+description: "Read and write your project's custom-table rows from React and React Native"
 ---
 
-Custom tables let your project provision its own database tables alongside Sublay's built-in models — the app-specific data that doesn't fit a built-in feature. In React and React Native, you access a custom table's rows through the **`useTable`** hook. For the full feature overview — the `custom_` naming model, managed columns, soft-delete, and the dashboard editor — see [Custom Tables](/v7/custom-tables).
+Custom tables let your project provision its own database tables alongside Sublay's built-in models — the app-specific data that doesn't fit a built-in feature. In React and React Native, you read a table's rows with the **`useTable`** hook and a single row with **`useTableRow`**. For the full feature overview — the `custom_` naming model, managed columns, soft-delete, and the dashboard editor — see [Custom Tables](/v7/custom-tables).
 
 <Note>
   `@sublay/core` is hook-only — there is no imperative `client.table(...)` in the
-  React SDK. `useTable` is the custom-table surface. For an imperative, server-
+  React SDK. `useTable` and `useTableRow` are the custom-table surface. For an imperative, server-
   side client use [`@sublay/node`](/v7/node-sdk/tables); for browser/vanilla JS,
   use [`@sublay/js`](/v7/js-sdk/tables).
 </Note>
@@ -19,12 +19,12 @@ Custom tables let your project provision its own database tables alongside Subla
 ```tsx
 import { useTable } from "@sublay/react-js";
 
-interface EventRow {
+type EventRow = {
   id: string;
   name: string;
   capacity: number;
   createdAt: string;
-}
+};
 
 function EventsTable() {
   const { rows, loading, setSort, setFilters, createRow } =
@@ -46,7 +46,7 @@ function EventsTable() {
 }
 ```
 
-The `name` you pass is the **logical** table name — Sublay applies the `custom_` prefix for you. `useTable` is re-exported from both `@sublay/react-js` and `@sublay/react-native`.
+The `name` you pass is the **logical** table name — Sublay applies the `custom_` prefix for you. Both hooks are re-exported from `@sublay/react-js`, `@sublay/react-native` and `@sublay/expo`.
 
 ## Reads, filters, and soft delete
 
@@ -57,6 +57,9 @@ On a **paranoid** table, soft-deleted rows are hidden by default; call `setInclu
 ## Hooks
 
 <CardGroup cols={1}>
+  <Card title="useTableRow" href="/v7/hooks/tables/use-table-row">
+    One row by ID, for a detail view.
+  </Card>
   <Card title="useTable" href="/v7/hooks/tables/use-table">
     Full reference — props, return values, and the CRUD actions.
   </Card>

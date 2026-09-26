@@ -15,12 +15,12 @@ See [Custom Tables — Overview](/v7/sdk/tables/overview) for a guide, and [Cust
 ```tsx
 import { useTable } from "@sublay/react-js";
 
-interface EventRow {
+type EventRow = {
   id: string;
   name: string;
   capacity: number;
   createdAt: string;
-}
+};
 
 function Events() {
   const {

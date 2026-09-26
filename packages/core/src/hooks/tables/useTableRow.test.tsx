@@ -20,25 +20,39 @@ const ID_GONE = "9e8d7c6b-5a49-4382-9170-6f5e4d3c2b1a";
 const ROW_A = { id: ID_A, name: "alpha" };
 const ROW_B = { id: ID_B, name: "bravo" };
 
+/**
+ * A response the test releases explicitly. A timer-based delay makes every
+ * in-flight assertion a wall-clock race: the window can close before the
+ * assertion runs, which both invites flakes and lets mutations survive. A gate
+ * turns "while the request is in flight" into a deterministic state.
+ */
+function makeGate() {
+  let release!: () => void;
+  const opened = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  return { opened, release };
+}
+
 let fetchHandle: FetchMockHandle;
 
-/** Delay applied to the ID_B response so mid-flight state is observable. */
-let slowB = 0;
-/** Flips ID_A from 200 to 404, to model a row deleted behind our back. */
-let rowAGone = false;
-/** Flips ID_A to a 500, to model a transient failure (not a deletion). */
-let rowAFails = false;
-/** Delay on the ID_A response, so mid-flight state is observable. */
-let slowA = 0;
+/** Set to hold the next GET for that row open until released. */
+let gateA: ReturnType<typeof makeGate> | null;
+let gateB: ReturnType<typeof makeGate> | null;
+/** Incremented when a GET for ID_A *starts*, so a test can wait for entry. */
+let startsA: number;
+
+let rowAStatus: "ok" | "gone" | "server-error" | "bad-request";
 /** Server-side name for ID_A, so a PATCH is visible to a later GET. */
-let rowAName = "alpha";
+let rowAName: string;
 
 beforeEach(() => {
-  slowB = 0;
-  rowAGone = false;
-  rowAFails = false;
-  slowA = 0;
+  gateA = null;
+  gateB = null;
+  startsA = 0;
+  rowAStatus = "ok";
   rowAName = "alpha";
+
   fetchHandle = stubFetchMock(async (...args: unknown[]) => {
     const req = args[0] as Request | string;
     const url = typeof req === "string" ? req : req.url;
@@ -47,35 +61,43 @@ beforeEach(() => {
         ? (args[1] as RequestInit | undefined)?.method
         : (req as Request).method) ?? "GET";
 
-    if (method === "GET" && url.includes(`/db/Events/${ID_A}`)) {
-      if (slowA) await new Promise((r) => setTimeout(r, slowA));
-      if (rowAFails) {
+    if (method === "GET" && url.endsWith(`/db/Events/${ID_A}`)) {
+      startsA += 1;
+      if (gateA) await gateA.opened;
+      if (rowAStatus === "gone") {
+        return jsonResponse(
+          { error: "Not Found", code: "database/row-not-found" },
+          404,
+        );
+      }
+      if (rowAStatus === "server-error") {
         return jsonResponse({ error: "Internal Server Error" }, 500);
       }
-      return rowAGone
-        ? jsonResponse(
-            { error: "Not Found", code: "database/row-not-found" },
-            404,
-          )
-        : jsonResponse({ row: { ...ROW_A, name: rowAName } });
+      if (rowAStatus === "bad-request") {
+        return jsonResponse(
+          { error: "Bad Request", code: "database/invalid-params" },
+          400,
+        );
+      }
+      return jsonResponse({ row: { ...ROW_A, name: rowAName } });
     }
-    if (method === "GET" && url.includes(`/db/Events/${ID_B}`)) {
-      if (slowB) await new Promise((r) => setTimeout(r, slowB));
+    if (method === "GET" && url.endsWith(`/db/Events/${ID_B}`)) {
+      if (gateB) await gateB.opened;
       return jsonResponse({ row: ROW_B });
     }
-    if (method === "GET" && url.includes(`/db/Events/${ID_GONE}`)) {
+    if (method === "GET" && url.endsWith(`/db/Events/${ID_GONE}`)) {
       return jsonResponse(
         { error: "Not Found", code: "database/row-not-found" },
         404,
       );
     }
-    if (method === "PATCH" && url.includes(`/db/Events/${ID_B}`)) {
+    if (method === "PATCH" && url.endsWith(`/db/Events/${ID_B}`)) {
       return jsonResponse({ row: ROW_B });
     }
-    if (method === "DELETE" && url.includes(`/db/Events/${ID_A}`)) {
+    if (method === "DELETE" && url.endsWith(`/db/Events/${ID_A}`)) {
       return jsonResponse({ deleted: true, soft: false });
     }
-    if (method === "PATCH" && url.includes(`/db/Events/${ID_A}`)) {
+    if (method === "PATCH" && url.endsWith(`/db/Events/${ID_A}`)) {
       rowAName = "renamed";
       return jsonResponse({ row: { ...ROW_A, name: rowAName } });
     }
@@ -96,9 +118,18 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  // Never leave a gated request hanging into the next test.
+  gateA?.release();
+  gateB?.release();
   cleanup();
   unstubFetchMock();
 });
+
+const getsForA = () =>
+  fetchHandle
+    .calls()
+    .filter((c) => c.method === "GET" && c.url.endsWith(`/db/Events/${ID_A}`))
+    .length;
 
 describe("useTableRow", () => {
   it("loads a single row from the exact /db single-row route", async () => {
@@ -110,33 +141,71 @@ describe("useTableRow", () => {
     expect(result.current.row).toEqual(ROW_A);
     expect(result.current.error).toBeFalsy();
 
-    // Full-URL equality, not a substring: a substring match cannot catch an
-    // extra or reordered path segment, which is the failure mode that has
-    // shipped here before (server#122).
+    // Full-URL equality, not a substring: a substring cannot catch an extra or
+    // reordered path segment, which is the failure mode that has shipped here
+    // before.
     expect(fetchHandle.calls()[0].url).toBe(
       `https://api.sublay.io/v7/test-project/db/Events/${ID_A}`,
     );
   });
 
-  it("skips the request until rowId is present", async () => {
-    const { result, rerender } = renderHookWithStore(
-      ({ id }: { id: string | null }) => useTableRow("Events", id),
-      { initialProps: { id: null as string | null } },
-    );
+  describe("skipping", () => {
+    it("skips until rowId is present, then loads", async () => {
+      const { result, rerender } = renderHookWithStore(
+        ({ id }: { id: string | null }) => useTableRow("Events", id),
+        { initialProps: { id: null as string | null } },
+      );
 
-    expect(result.current.loading).toBe(false);
-    expect(result.current.row).toBeNull();
-    expect(
-      fetchHandle.calls().filter((c) => c.url.includes("/db/Events")),
-    ).toHaveLength(0);
+      expect(result.current.loading).toBe(false);
+      expect(result.current.row).toBeNull();
+      expect(getsForA()).toBe(0);
 
-    rerender({ id: ID_A });
+      rerender({ id: ID_A });
+      await waitFor(() => expect(result.current.row).toEqual(ROW_A));
+    });
 
-    await waitFor(() => expect(result.current.row).toEqual(ROW_A));
+    it("skips on an undefined rowId, not just null", async () => {
+      const { result } = renderHookWithStore(() =>
+        useTableRow("Events", undefined),
+      );
+
+      expect(result.current.loading).toBe(false);
+      expect(result.current.row).toBeNull();
+      await new Promise((r) => setTimeout(r, 20));
+      expect(getsForA()).toBe(0);
+    });
+
+    it("skips while the project has no id", async () => {
+      // Omitting `projectId` re-applies the harness default, so it has to be
+      // explicitly falsy to exercise this branch.
+      const { result } = renderHookWithStore(
+        () => useTableRow("Events", ID_A),
+        { projectId: "" },
+      );
+
+      expect(result.current.loading).toBe(false);
+      expect(result.current.row).toBeNull();
+      await new Promise((r) => setTimeout(r, 20));
+      expect(getsForA()).toBe(0);
+    });
+
+    it("clears the row when rowId goes back to null", async () => {
+      const { result, rerender } = renderHookWithStore(
+        ({ id }: { id: string | null }) => useTableRow("Events", id),
+        { initialProps: { id: ID_A as string | null } },
+      );
+
+      await waitFor(() => expect(result.current.row).toEqual(ROW_A));
+
+      rerender({ id: null });
+
+      expect(result.current.row).toBeNull();
+      expect(result.current.loading).toBe(false);
+    });
   });
 
   it("does not serve the previous row while a new rowId is in flight", async () => {
-    slowB = 150;
+    gateB = makeGate();
     const { result, rerender } = renderHookWithStore(
       ({ id }: { id: string }) => useTableRow("Events", id),
       { initialProps: { id: ID_A } },
@@ -146,197 +215,200 @@ describe("useTableRow", () => {
 
     rerender({ id: ID_B });
 
-    // Mid-flight: the old row must be gone, not rendered under the new id.
-    await waitFor(() => expect(result.current.loading).toBe(true));
+    // Deterministically mid-flight: B is gated open.
     expect(result.current.row).toBeNull();
+    expect(result.current.loading).toBe(true);
 
-    await waitFor(() => expect(result.current.row).toEqual(ROW_B), {
-      timeout: 2000,
+    gateB.release();
+    await waitFor(() => expect(result.current.row).toEqual(ROW_B));
+    expect(result.current.loading).toBe(false);
+  });
+
+  describe("failure handling", () => {
+    it("surfaces a cold 404 as error, not as a row", async () => {
+      const { result } = renderHookWithStore(() =>
+        useTableRow("Events", ID_GONE),
+      );
+
+      await waitFor(() => expect(result.current.error).toBeTruthy());
+      expect(result.current.row).toBeNull();
+      expect(result.current.loading).toBe(false);
     });
-    expect(result.current.loading).toBe(false);
-  });
 
-  it("clears the row when rowId goes back to null", async () => {
-    const { result, rerender } = renderHookWithStore(
-      ({ id }: { id: string | null }) => useTableRow("Events", id),
-      { initialProps: { id: ID_A as string | null } },
-    );
+    it("drops the stale row when a refetch of a loaded row 404s", async () => {
+      const { result } = renderHookWithStore(() => useTableRow("Events", ID_A));
 
-    await waitFor(() => expect(result.current.row).toEqual(ROW_A));
+      await waitFor(() => expect(result.current.row).toEqual(ROW_A));
 
-    rerender({ id: null });
+      rowAStatus = "gone";
+      result.current.refetch();
 
-    expect(result.current.row).toBeNull();
-    expect(result.current.loading).toBe(false);
-  });
+      await waitFor(() => expect(result.current.error).toBeTruthy());
+      // Must not keep rendering a record the server says is gone.
+      expect(result.current.row).toBeNull();
+    });
 
-  it("surfaces a cold 404 as error, not as a row", async () => {
-    const { result } = renderHookWithStore(() =>
-      useTableRow("Events", ID_GONE),
-    );
+    it("keeps the last good row when a refetch fails with a 500", async () => {
+      const { result } = renderHookWithStore(() => useTableRow("Events", ID_A));
 
-    await waitFor(() => expect(result.current.error).toBeTruthy());
-    expect(result.current.row).toBeNull();
-    expect(result.current.loading).toBe(false);
-  });
+      await waitFor(() => expect(result.current.row).toEqual(ROW_A));
 
-  it("drops the stale row when a refetch of a loaded row 404s", async () => {
-    const { result } = renderHookWithStore(() => useTableRow("Events", ID_A));
+      rowAStatus = "server-error";
+      result.current.refetch();
 
-    await waitFor(() => expect(result.current.row).toEqual(ROW_A));
+      await waitFor(() => expect(result.current.error).toBeTruthy());
+      // A 500 does not mean the row is gone — degrade to stale-plus-error, not
+      // to a blank page.
+      expect(result.current.row).toEqual(ROW_A);
+    });
 
-    // The row is deleted behind our back; the next read 404s.
-    rowAGone = true;
-    result.current.refetch();
+    it("keeps the last good row when a refetch fails with a 400", async () => {
+      const { result } = renderHookWithStore(() => useTableRow("Events", ID_A));
 
-    await waitFor(() => expect(result.current.error).toBeTruthy());
-    // Must not keep rendering a record the server says is gone.
-    expect(result.current.row).toBeNull();
-  });
+      await waitFor(() => expect(result.current.row).toEqual(ROW_A));
 
-  it("refetch() is a no-op instead of throwing while skipped", () => {
-    const { result } = renderHookWithStore(() => useTableRow("Events", null));
+      rowAStatus = "bad-request";
+      result.current.refetch();
 
-    expect(() => result.current.refetch()).not.toThrow();
-  });
+      await waitFor(() => expect(result.current.error).toBeTruthy());
+      // Only a 404 means absent. Everything else keeps what we last had.
+      expect(result.current.row).toEqual(ROW_A);
+    });
 
-  it("picks up an edit made through useTable, via the shared row tag", async () => {
-    const { result } = renderHookWithStore(() => ({
-      detail: useTableRow("Events", ID_A),
-      list: useTable("Events"),
-    }));
+    it("keeps the last good row when the request never reaches the server", async () => {
+      const { result } = renderHookWithStore(() => useTableRow("Events", ID_A));
 
-    await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
+      await waitFor(() => expect(result.current.row).toEqual(ROW_A));
 
-    await result.current.list.updateRow(ID_A, { name: "renamed" });
+      fetchHandle.fetchMock.mockRejectedValueOnce(
+        new TypeError("Failed to fetch"),
+      );
+      result.current.refetch();
 
-    // No wiring between the two hooks — the mutation invalidates the row tag
-    // this query provides, so the detail view refreshes on its own.
-    await waitFor(() =>
-      expect(result.current.detail.row?.name).toBe("renamed"),
-    );
-  });
-  it("keeps the row on screen during a background refetch, without a spinner", async () => {
-    const { result } = renderHookWithStore(() => ({
-      detail: useTableRow("Events", ID_A),
-      list: useTable("Events"),
-    }));
+      await waitFor(() => expect(result.current.error).toBeTruthy());
+      // A transport failure is the case most easily mistaken for "gone".
+      expect(result.current.row).toEqual(ROW_A);
+    });
 
-    await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
+    it("reports loading while retrying after the row was dropped by a 404", async () => {
+      const { result } = renderHookWithStore(() => useTableRow("Events", ID_A));
 
-    // Slow the invalidation-triggered GET so its in-flight window is wide
-    // enough to sample across.
-    slowA = 200;
-    await result.current.list.updateRow(ID_A, { name: "renamed" });
+      await waitFor(() => expect(result.current.row).toEqual(ROW_A));
 
-    const samples: Array<{ loading: boolean; hasRow: boolean }> = [];
-    for (let i = 0; i < 20; i += 1) {
-      await new Promise((r) => setTimeout(r, 10));
-      samples.push({
-        loading: result.current.detail.loading,
-        hasRow: result.current.detail.row !== null,
-      });
-    }
+      rowAStatus = "gone";
+      result.current.refetch();
+      await waitFor(() => expect(result.current.row).toBeNull());
 
-    // Stale-while-revalidate: across the whole refetch the previous row stays
-    // on screen and the caller is never told to show a spinner.
-    expect(samples.every((s) => s.loading === false)).toBe(true);
-    expect(samples.every((s) => s.hasRow)).toBe(true);
+      // Retry with nothing on screen: the caller needs a spinner here.
+      rowAStatus = "ok";
+      gateA = makeGate();
+      const before = startsA;
+      result.current.refetch();
 
-    await waitFor(
-      () => expect(result.current.detail.row?.name).toBe("renamed"),
-      { timeout: 2000 },
-    );
-  });
+      await waitFor(() => expect(startsA).toBe(before + 1));
+      expect(result.current.loading).toBe(true);
 
-  it("keeps the last good row when a refetch fails transiently", async () => {
-    const { result } = renderHookWithStore(() => useTableRow("Events", ID_A));
-
-    await waitFor(() => expect(result.current.row).toEqual(ROW_A));
-
-    rowAFails = true;
-    result.current.refetch();
-
-    await waitFor(() => expect(result.current.error).toBeTruthy());
-    // A 500 does not mean the row is gone — degrade to stale-plus-error, not
-    // to a blank page.
-    expect(result.current.row).toEqual(ROW_A);
-  });
-
-  it("reports loading while retrying after the row was dropped by a 404", async () => {
-    const { result } = renderHookWithStore(() => useTableRow("Events", ID_A));
-
-    await waitFor(() => expect(result.current.row).toEqual(ROW_A));
-
-    rowAGone = true;
-    result.current.refetch();
-    await waitFor(() => expect(result.current.row).toBeNull());
-
-    // Retry with nothing on screen: the caller needs a spinner here.
-    rowAGone = false;
-    rowAFails = false;
-    slowA = 150;
-    result.current.refetch();
-    await waitFor(() => expect(result.current.loading).toBe(true));
-    await waitFor(() => expect(result.current.row).toEqual(ROW_A), {
-      timeout: 2000,
+      gateA.release();
+      await waitFor(() => expect(result.current.row).toEqual(ROW_A));
+      expect(result.current.loading).toBe(false);
     });
   });
 
-  it("a delete through useTable clears the detail view", async () => {
-    const { result } = renderHookWithStore(() => ({
-      detail: useTableRow("Events", ID_A),
-      list: useTable("Events"),
-    }));
+  describe("interaction with useTable", () => {
+    it("picks up an edit made through useTable, via the shared row tag", async () => {
+      const { result } = renderHookWithStore(() => ({
+        detail: useTableRow("Events", ID_A),
+        list: useTable("Events"),
+      }));
 
-    await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
+      await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
 
-    rowAGone = true;
-    await result.current.list.deleteRow(ID_A);
+      await result.current.list.updateRow(ID_A, { name: "renamed" });
 
-    await waitFor(() => expect(result.current.detail.row).toBeNull());
-    expect(result.current.detail.error).toBeTruthy();
+      // No wiring between the two hooks — the mutation invalidates the row tag
+      // this query provides, so the detail view refreshes on its own.
+      await waitFor(() =>
+        expect(result.current.detail.row?.name).toBe("renamed"),
+      );
+    });
+
+    it("keeps the row on screen during that refetch, without a spinner", async () => {
+      const { result } = renderHookWithStore(() => ({
+        detail: useTableRow("Events", ID_A),
+        list: useTable("Events"),
+      }));
+
+      await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
+
+      // Hold the invalidation-triggered GET open so its in-flight state is a
+      // fact, not a timing window.
+      gateA = makeGate();
+      const before = startsA;
+      await result.current.list.updateRow(ID_A, { name: "renamed" });
+      await waitFor(() => expect(startsA).toBe(before + 1));
+
+      // Stale-while-revalidate: the previous row stays on screen and the
+      // caller is NOT told to show a spinner.
+      expect(result.current.detail.row).toBeTruthy();
+      expect(result.current.detail.loading).toBe(false);
+
+      gateA.release();
+      await waitFor(() =>
+        expect(result.current.detail.row?.name).toBe("renamed"),
+      );
+    });
+
+    it("a delete through useTable clears the detail view", async () => {
+      const { result } = renderHookWithStore(() => ({
+        detail: useTableRow("Events", ID_A),
+        list: useTable("Events"),
+      }));
+
+      await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
+
+      rowAStatus = "gone";
+      await result.current.list.deleteRow(ID_A);
+
+      await waitFor(() => expect(result.current.detail.row).toBeNull());
+      expect(result.current.detail.error).toBeTruthy();
+    });
+
+    it("is not refetched by a mutation on a different row", async () => {
+      const { result } = renderHookWithStore(() => ({
+        detail: useTableRow("Events", ID_A),
+        list: useTable("Events"),
+      }));
+
+      await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
+      const before = getsForA();
+
+      await result.current.list.updateRow(ID_B, { name: "other" });
+      await new Promise((r) => setTimeout(r, 30));
+
+      // Tagged by row id, so an unrelated row's edit must not refetch this one.
+      expect(getsForA()).toBe(before);
+    });
   });
 
-  it("is not refetched by a mutation on a different row", async () => {
-    const { result } = renderHookWithStore(() => ({
-      detail: useTableRow("Events", ID_A),
-      list: useTable("Events"),
-    }));
+  describe("refetch", () => {
+    it("is a no-op instead of throwing while skipped", () => {
+      const { result } = renderHookWithStore(() => useTableRow("Events", null));
 
-    await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
-    const before = fetchHandle
-      .calls()
-      .filter((c) => c.url.endsWith(`/db/Events/${ID_A}`)).length;
+      expect(() => result.current.refetch()).not.toThrow();
+    });
 
-    await result.current.list.updateRow(ID_B, { name: "other" });
-    await new Promise((r) => setTimeout(r, 50));
+    it("works once rowId resolves after mounting skipped", async () => {
+      const { result, rerender } = renderHookWithStore(
+        ({ id }: { id: string | null }) => useTableRow("Events", id),
+        { initialProps: { id: null as string | null } },
+      );
 
-    // Tagged by row id, so an unrelated row's edit must not refetch this one.
-    expect(
-      fetchHandle.calls().filter((c) => c.url.endsWith(`/db/Events/${ID_A}`))
-        .length,
-    ).toBe(before);
-  });
+      rerender({ id: ID_A });
+      await waitFor(() => expect(result.current.row).toEqual(ROW_A));
 
-  it("refetch() works once rowId resolves after mounting skipped", async () => {
-    const { result, rerender } = renderHookWithStore(
-      ({ id }: { id: string | null }) => useTableRow("Events", id),
-      { initialProps: { id: null as string | null } },
-    );
-
-    rerender({ id: ID_A });
-    await waitFor(() => expect(result.current.row).toEqual(ROW_A));
-
-    const before = fetchHandle
-      .calls()
-      .filter((c) => c.url.endsWith(`/db/Events/${ID_A}`)).length;
-    expect(() => result.current.refetch()).not.toThrow();
-    await waitFor(() =>
-      expect(
-        fetchHandle.calls().filter((c) => c.url.endsWith(`/db/Events/${ID_A}`))
-          .length,
-      ).toBe(before + 1),
-    );
+      const before = getsForA();
+      expect(() => result.current.refetch()).not.toThrow();
+      await waitFor(() => expect(getsForA()).toBe(before + 1));
+    });
   });
 });

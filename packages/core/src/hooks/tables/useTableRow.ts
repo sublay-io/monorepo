@@ -13,14 +13,23 @@ export interface UseTableRowValues<T extends TableRow = TableRow> {
 
 /**
  * Did the server tell us this row no longer exists, as opposed to failing to
- * answer? `fetchBaseQuery` puts the HTTP status on `error.status`; a transport
- * failure yields a string status ("FETCH_ERROR") instead, which is precisely
- * the case we must NOT treat as "gone".
+ * answer? Only a 404 means gone — it is the single "absent" status this route
+ * emits, for both `database/row-not-found` and `database/table-not-found`. A
+ * dropped table is deliberately treated the same as a deleted row: the record
+ * is unreachable either way, and keeping it on screen would render data from a
+ * table that no longer exists.
+ *
+ * Everything else is transient, including the cases most easily mistaken for
+ * "gone": `fetchBaseQuery` reports a transport failure as the string status
+ * "FETCH_ERROR", and a 404 whose body is not JSON (a proxy's HTML error page)
+ * as "PARSING_ERROR". Neither is the server saying the row is absent.
  */
 function isRowGone(error: unknown): boolean {
-  if (!error || typeof error !== "object" || !("status" in error)) return false;
-  const status = (error as { status: unknown }).status;
-  return status === 404 || status === 410;
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { status?: unknown }).status === 404
+  );
 }
 
 /**

@@ -70,7 +70,7 @@ function Events() {
 <ResponseField name="loading" type="boolean">
   `true` during the first load only. Changing page, sort or filters keeps the previous rows on screen with `loading: false` while the new query runs, so a table does not blank out between pages.
 
-  Note this differs from [`useTableRow`](/v7/hooks/tables/use-table-row), where a `rowId` change **does** report `loading: true` — showing a stale page of the same table is reasonable, showing the wrong record is not.
+  Note this differs from [`useTableRow`](/v7/hooks/tables/use-table-row), where a `rowId` change **does** report `loading: true` — a stale page of rows you are already looking at is reasonable, a stale single record under a new id is not.
 </ResponseField>
 
 <ResponseField name="error" type="unknown">

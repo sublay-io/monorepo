@@ -29,13 +29,19 @@ type EventRow = {
 };
 
 function EventDetail({ eventId }: { eventId: string | null }) {
-  const { row, loading, error } = useTableRow<EventRow>("Events", eventId);
+  const { row, loading, error, refetch } = useTableRow<EventRow>("Events", eventId);
 
   if (loading) return <Spinner />;
-  if (error) return <NotFound />;
-  if (!row) return null;
+  // Check `row` before `error`: a transient failure keeps the last loaded row
+  // here, and re-rendering it under a banner beats blanking the page.
+  if (!row) return error ? <NotFound /> : null;
 
-  return <h1>{row.name}</h1>;
+  return (
+    <>
+      {error && <StaleBanner onRetry={refetch} />}
+      <h1>{row.name}</h1>
+    </>
+  );
 }
 ```
 
@@ -52,7 +58,7 @@ function EventDetail({ eventId }: { eventId: string | null }) {
 ## Return Values
 
 <ResponseField name="row" type="T | null">
-  The row, or `null` before the first load, while a different `rowId` is loading, while the request is skipped, or once the server has said the row is gone (`404`/`410`).
+  The row, or `null` before the first load, while a different `rowId` is loading, while the request is skipped, or once the server has said the row is gone (`404`).
 
   A **transient** failure — a `500`, or the network being down — keeps the last loaded row here alongside `error`, so a detail view degrades to stale-content-plus-banner rather than to a blank page. Read `error` to tell the two apart.
 </ResponseField>
@@ -64,7 +70,9 @@ function EventDetail({ eventId }: { eventId: string | null }) {
 </ResponseField>
 
 <ResponseField name="error" type="unknown">
-  The query error, if any. A row that does not exist comes back as a `404` with code `database/row-not-found`, which surfaces here rather than as a `null` row.
+  The query error, if any.
+
+  A `404` (`database/row-not-found`, or `database/table-not-found` if the table itself was dropped) sets this **and** clears `row` — the record is unreachable, so there is nothing valid to show. Any other failure sets this while leaving `row` intact.
 </ResponseField>
 
 <ResponseField name="refetch" type="() => void">

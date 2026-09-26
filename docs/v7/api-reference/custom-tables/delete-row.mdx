@@ -6,10 +6,10 @@ description: "Delete a single custom-table row, softly or permanently"
 
 Deletes one row.
 
-On a **paranoid** table the row is soft-deleted (its `deletedAt` is set) and can be brought back with [Restore Row](/api-reference/custom-tables/restore-row). Pass `?force=true` to delete it permanently instead. On a non-paranoid table every delete is permanent, and `force` makes no difference.
+On a **paranoid** table the row is soft-deleted (its `deletedAt` is set) and can be brought back with [Restore Row](/v7/api-reference/custom-tables/restore-row). Pass `?force=true` to delete it permanently instead. On a non-paranoid table every delete is permanent, and `force` makes no difference.
 
 <Warning>
-  Row endpoints capture the caller's identity but **enforce no authorization**. See [Security: open row CRUD](/custom-tables#security-open-row-crud).
+  Row endpoints capture the caller's identity but **enforce no authorization**. See [Security: open row CRUD](/v7/custom-tables#security-open-row-crud).
 </Warning>
 
 ## Path Parameters

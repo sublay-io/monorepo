@@ -7,7 +7,7 @@ description: "Set or clear the NSFW flag on an entity within a space"
 Sets the `nsfw` flag on an entity in a space, including entities authored by other users. Requires the caller to be a moderator or admin of the space.
 
 <Note>
-  NSFW is a separate axis from moderation. This endpoint writes the entity's own `nsfw` field and never touches `moderationStatus` — labelling content does not hide it the way [Moderate Entity](/api-reference/spaces/moderation/moderate-entity) with `"remove"` does. Effective NSFW is computed live on read, so a space's own NSFW setting still applies on top of this flag.
+  NSFW is a separate axis from moderation. This endpoint writes the entity's own `nsfw` field and never touches `moderationStatus` — labelling content does not hide it the way [Moderate Entity](/v7/api-reference/spaces/moderation/moderate-entity) with `"remove"` does. Effective NSFW is computed live on read, so a space's own NSFW setting still applies on top of this flag.
 </Note>
 
 Requires the `entities` bundle in addition to `spaces`.
@@ -84,4 +84,4 @@ Requires the `entities` bundle in addition to `spaces`.
   </Accordion>
 </AccordionGroup>
 
-See also: [useSetSpaceEntityNsfw](/hooks/spaces/use-set-space-entity-nsfw)
+See also: [useSetSpaceEntityNsfw](/v7/hooks/spaces/use-set-space-entity-nsfw)

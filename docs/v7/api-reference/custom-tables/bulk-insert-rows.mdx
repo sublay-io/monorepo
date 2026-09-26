@@ -7,7 +7,7 @@ description: "Insert up to 100 rows into a custom table in one request"
 Inserts many rows in a single request and returns them.
 
 <Warning>
-  Row endpoints capture the caller's identity but **enforce no authorization**. See [Security: open row CRUD](/custom-tables#security-open-row-crud).
+  Row endpoints capture the caller's identity but **enforce no authorization**. See [Security: open row CRUD](/v7/custom-tables#security-open-row-crud).
 </Warning>
 
 ## Path Parameters
@@ -19,7 +19,7 @@ Inserts many rows in a single request and returns them.
 ## Body Parameters
 
 <ParamField body="rows" type="object[]" required>
-  Between 1 and 100 rows. Each entry is a free-form column map, following the same rules as [Insert Row](/api-reference/custom-tables/insert-row): managed columns are rejected, unknown columns are silently dropped.
+  Between 1 and 100 rows. Each entry is a free-form column map, following the same rules as [Insert Row](/v7/api-reference/custom-tables/insert-row): managed columns are rejected, unknown columns are silently dropped.
 </ParamField>
 
 ```json

@@ -10,7 +10,7 @@ Returns a cursor-paginated list of `ConversationPreview` objects for the acting 
   A `direct` conversation stays out of both parties' lists until it has a visible last message, so an opened-but-never-sent DM is invisible to the other side. If a DM's only message is later deleted or moderated away, it drops back out of the list and reappears when either party sends again. `group` and `space` conversations appear from creation.
 </Note>
 
-To fetch a single conversation in this same shape — one that was paginated out, or just created — use [Fetch Conversation Preview](/api-reference/chat/conversations/fetch-conversation-preview). Both endpoints are served by the same query, so the shapes stay identical.
+To fetch a single conversation in this same shape — one that was paginated out, or just created — use [Fetch Conversation Preview](/v7/api-reference/chat/conversations/fetch-conversation-preview). Both endpoints are served by the same query, so the shapes stay identical.
 
 ## Query Parameters
 
@@ -37,7 +37,7 @@ To fetch a single conversation in this same shape — one that was paginated out
 ## Response
 
 <ResponseField name="conversations" type="ConversationPreview[]">
-  Array of conversation preview objects. Each item is a [Conversation](/data-models/conversation) extended with the following fields:
+  Array of conversation preview objects. Each item is a [Conversation](/v7/data-models/conversation) extended with the following fields:
 
   <Expandable title="ConversationPreview fields">
     <ResponseField name="unreadCount" type="number">
@@ -57,7 +57,7 @@ To fetch a single conversation in this same shape — one that was paginated out
     </ResponseField>
 
     <ResponseField name="lastMessage" type="ChatMessage | null">
-      The most recent visible [message](/data-models/chat-message) in the conversation, or `null` if there is none. The same object the `message:created` socket event delivers, so both paths render identically.
+      The most recent visible [message](/v7/data-models/chat-message) in the conversation, or `null` if there is none. The same object the `message:created` socket event delivers, so both paths render identically.
 
       <Expandable title="lastMessage fields">
         <ResponseField name="id" type="string">
@@ -82,7 +82,7 @@ To fetch a single conversation in this same shape — one that was paginated out
           ISO timestamp of when the message was sent.
         </ResponseField>
         <ResponseField name="files" type="File[]">
-          Attached [files](/data-models/file), with proxy URLs and image variants resolved. Empty array when the message has no attachments.
+          Attached [files](/v7/data-models/file), with proxy URLs and image variants resolved. Empty array when the message has no attachments.
         </ResponseField>
         <ResponseField name="user" type="object | null">
           Sender identity (`id`, `name`, `username`, `avatar`, `reputation`) — populated for `group` and `space` conversations only. Always `null` for `direct` conversations, where the counterparty is already in `otherMembers`.

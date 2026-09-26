@@ -9,7 +9,7 @@ Clears a row's `deletedAt`, returning it to normal reads.
 Only works on a **paranoid** table — one created with `paranoid: true`, where deletes are soft by default. Restoring on a non-paranoid table fails with `database/not-paranoid`, since a delete there removed the row permanently and there is nothing to bring back.
 
 <Warning>
-  Row endpoints capture the caller's identity but **enforce no authorization**. See [Security: open row CRUD](/custom-tables#security-open-row-crud).
+  Row endpoints capture the caller's identity but **enforce no authorization**. See [Security: open row CRUD](/v7/custom-tables#security-open-row-crud).
 </Warning>
 
 ## Path Parameters

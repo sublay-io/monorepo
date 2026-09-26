@@ -52,11 +52,15 @@ function EventDetail({ eventId }: { eventId: string | null }) {
 ## Return Values
 
 <ResponseField name="row" type="T | null">
-  The row, or `null` before the first load, while the request is skipped, or when the request failed.
+  The row, or `null` before the first load, while a different `rowId` is loading, while the request is skipped, or once the server has said the row is gone (`404`/`410`).
+
+  A **transient** failure — a `500`, or the network being down — keeps the last loaded row here alongside `error`, so a detail view degrades to stale-content-plus-banner rather than to a blank page. Read `error` to tell the two apart.
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
-  `true` while the request is in flight. A skipped request never loads, so waiting on an unresolved `rowId` reports `loading: false` with `row: null` rather than a spinner that never resolves.
+  `true` when a request is in flight **and there is no row to show** — the first load, a `rowId` change, and a retry after the row was dropped.
+
+  A background refresh with a row already on screen reports `false`: an edit made through `useTable` invalidates this row and it updates in place, rather than flashing a spinner. A skipped request never loads, so waiting on an unresolved `rowId` reports `false` with `row: null` rather than a spinner that never resolves.
 </ResponseField>
 
 <ResponseField name="error" type="unknown">
@@ -64,7 +68,7 @@ function EventDetail({ eventId }: { eventId: string | null }) {
 </ResponseField>
 
 <ResponseField name="refetch" type="() => void">
-  Re-runs the query.
+  Re-runs the query. A no-op while the request is skipped, so a retry control mounted before `rowId` resolves is safe to wire directly.
 </ResponseField>
 
 <Warning>

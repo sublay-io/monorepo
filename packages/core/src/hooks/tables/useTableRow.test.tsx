@@ -26,12 +26,18 @@ let fetchHandle: FetchMockHandle;
 let slowB = 0;
 /** Flips ID_A from 200 to 404, to model a row deleted behind our back. */
 let rowAGone = false;
+/** Flips ID_A to a 500, to model a transient failure (not a deletion). */
+let rowAFails = false;
+/** Delay on the ID_A response, so mid-flight state is observable. */
+let slowA = 0;
 /** Server-side name for ID_A, so a PATCH is visible to a later GET. */
 let rowAName = "alpha";
 
 beforeEach(() => {
   slowB = 0;
   rowAGone = false;
+  rowAFails = false;
+  slowA = 0;
   rowAName = "alpha";
   fetchHandle = stubFetchMock(async (...args: unknown[]) => {
     const req = args[0] as Request | string;
@@ -42,6 +48,10 @@ beforeEach(() => {
         : (req as Request).method) ?? "GET";
 
     if (method === "GET" && url.includes(`/db/Events/${ID_A}`)) {
+      if (slowA) await new Promise((r) => setTimeout(r, slowA));
+      if (rowAFails) {
+        return jsonResponse({ error: "Internal Server Error" }, 500);
+      }
       return rowAGone
         ? jsonResponse(
             { error: "Not Found", code: "database/row-not-found" },
@@ -58,6 +68,12 @@ beforeEach(() => {
         { error: "Not Found", code: "database/row-not-found" },
         404,
       );
+    }
+    if (method === "PATCH" && url.includes(`/db/Events/${ID_B}`)) {
+      return jsonResponse({ row: ROW_B });
+    }
+    if (method === "DELETE" && url.includes(`/db/Events/${ID_A}`)) {
+      return jsonResponse({ deleted: true, soft: false });
     }
     if (method === "PATCH" && url.includes(`/db/Events/${ID_A}`)) {
       rowAName = "renamed";
@@ -198,6 +214,129 @@ describe("useTableRow", () => {
     // this query provides, so the detail view refreshes on its own.
     await waitFor(() =>
       expect(result.current.detail.row?.name).toBe("renamed"),
+    );
+  });
+  it("keeps the row on screen during a background refetch, without a spinner", async () => {
+    const { result } = renderHookWithStore(() => ({
+      detail: useTableRow("Events", ID_A),
+      list: useTable("Events"),
+    }));
+
+    await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
+
+    // Slow the invalidation-triggered GET so its in-flight window is wide
+    // enough to sample across.
+    slowA = 200;
+    await result.current.list.updateRow(ID_A, { name: "renamed" });
+
+    const samples: Array<{ loading: boolean; hasRow: boolean }> = [];
+    for (let i = 0; i < 20; i += 1) {
+      await new Promise((r) => setTimeout(r, 10));
+      samples.push({
+        loading: result.current.detail.loading,
+        hasRow: result.current.detail.row !== null,
+      });
+    }
+
+    // Stale-while-revalidate: across the whole refetch the previous row stays
+    // on screen and the caller is never told to show a spinner.
+    expect(samples.every((s) => s.loading === false)).toBe(true);
+    expect(samples.every((s) => s.hasRow)).toBe(true);
+
+    await waitFor(
+      () => expect(result.current.detail.row?.name).toBe("renamed"),
+      { timeout: 2000 },
+    );
+  });
+
+  it("keeps the last good row when a refetch fails transiently", async () => {
+    const { result } = renderHookWithStore(() => useTableRow("Events", ID_A));
+
+    await waitFor(() => expect(result.current.row).toEqual(ROW_A));
+
+    rowAFails = true;
+    result.current.refetch();
+
+    await waitFor(() => expect(result.current.error).toBeTruthy());
+    // A 500 does not mean the row is gone — degrade to stale-plus-error, not
+    // to a blank page.
+    expect(result.current.row).toEqual(ROW_A);
+  });
+
+  it("reports loading while retrying after the row was dropped by a 404", async () => {
+    const { result } = renderHookWithStore(() => useTableRow("Events", ID_A));
+
+    await waitFor(() => expect(result.current.row).toEqual(ROW_A));
+
+    rowAGone = true;
+    result.current.refetch();
+    await waitFor(() => expect(result.current.row).toBeNull());
+
+    // Retry with nothing on screen: the caller needs a spinner here.
+    rowAGone = false;
+    rowAFails = false;
+    slowA = 150;
+    result.current.refetch();
+    await waitFor(() => expect(result.current.loading).toBe(true));
+    await waitFor(() => expect(result.current.row).toEqual(ROW_A), {
+      timeout: 2000,
+    });
+  });
+
+  it("a delete through useTable clears the detail view", async () => {
+    const { result } = renderHookWithStore(() => ({
+      detail: useTableRow("Events", ID_A),
+      list: useTable("Events"),
+    }));
+
+    await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
+
+    rowAGone = true;
+    await result.current.list.deleteRow(ID_A);
+
+    await waitFor(() => expect(result.current.detail.row).toBeNull());
+    expect(result.current.detail.error).toBeTruthy();
+  });
+
+  it("is not refetched by a mutation on a different row", async () => {
+    const { result } = renderHookWithStore(() => ({
+      detail: useTableRow("Events", ID_A),
+      list: useTable("Events"),
+    }));
+
+    await waitFor(() => expect(result.current.detail.row).toEqual(ROW_A));
+    const before = fetchHandle
+      .calls()
+      .filter((c) => c.url.endsWith(`/db/Events/${ID_A}`)).length;
+
+    await result.current.list.updateRow(ID_B, { name: "other" });
+    await new Promise((r) => setTimeout(r, 50));
+
+    // Tagged by row id, so an unrelated row's edit must not refetch this one.
+    expect(
+      fetchHandle.calls().filter((c) => c.url.endsWith(`/db/Events/${ID_A}`))
+        .length,
+    ).toBe(before);
+  });
+
+  it("refetch() works once rowId resolves after mounting skipped", async () => {
+    const { result, rerender } = renderHookWithStore(
+      ({ id }: { id: string | null }) => useTableRow("Events", id),
+      { initialProps: { id: null as string | null } },
+    );
+
+    rerender({ id: ID_A });
+    await waitFor(() => expect(result.current.row).toEqual(ROW_A));
+
+    const before = fetchHandle
+      .calls()
+      .filter((c) => c.url.endsWith(`/db/Events/${ID_A}`)).length;
+    expect(() => result.current.refetch()).not.toThrow();
+    await waitFor(() =>
+      expect(
+        fetchHandle.calls().filter((c) => c.url.endsWith(`/db/Events/${ID_A}`))
+          .length,
+      ).toBe(before + 1),
     );
   });
 });

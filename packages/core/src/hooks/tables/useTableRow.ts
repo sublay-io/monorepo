@@ -12,6 +12,18 @@ export interface UseTableRowValues<T extends TableRow = TableRow> {
 }
 
 /**
+ * Did the server tell us this row no longer exists, as opposed to failing to
+ * answer? `fetchBaseQuery` puts the HTTP status on `error.status`; a transport
+ * failure yields a string status ("FETCH_ERROR") instead, which is precisely
+ * the case we must NOT treat as "gone".
+ */
+function isRowGone(error: unknown): boolean {
+  if (!error || typeof error !== "object" || !("status" in error)) return false;
+  const status = (error as { status: unknown }).status;
+  return status === 404 || status === 410;
+}
+
+/**
  * React hook for a single custom-table row, backed by RTK Query against
  * `GET /db/:tableName/:rowId`.
  *
@@ -34,21 +46,15 @@ export function useTableRow<T extends TableRow = TableRow>(
   const { projectId } = useProject();
   const skip = !projectId || !rowId;
 
-  const { currentData, isLoading, isFetching, error, refetch } =
-    useFetchTableRowQuery(
-      {
-        projectId: projectId as string,
-        tableName,
-        rowId: rowId as string,
-      },
-      { skip },
-    );
+  const { currentData, isFetching, error, refetch } = useFetchTableRowQuery(
+    {
+      projectId: projectId as string,
+      tableName,
+      rowId: rowId as string,
+    },
+    { skip },
+  );
 
-  // `currentData`, not `data`: `data` is the last result for ANY arg this hook
-  // instance has held, so on a rowId change it keeps serving the PREVIOUS row
-  // until the new one lands. For a read-by-id that means rendering the wrong
-  // record — the list-shaped `useTable` can live with the equivalent (a stale
-  // page is still that table's data), a detail view cannot.
   const safeRefetch = useCallback(() => {
     // RTK Query throws "Cannot refetch a query that has not been started yet"
     // on a skipped query, and this hook invites a null rowId, so a Retry button
@@ -57,22 +63,35 @@ export function useTableRow<T extends TableRow = TableRow>(
     refetch();
   }, [skip, refetch]);
 
-  return useMemo<UseTableRowValues<T>>(
-    () => ({
-      // An errored refetch retains the last good value for the cache key; a
-      // detail view that reads `row` before `error` would render a row the
-      // server just told us is gone.
-      row: error ? null : ((currentData?.row as T) ?? null),
-      // True only when there is nothing to show and a request is in flight:
-      // the first load, and a rowId change. A background refetch (an edit made
-      // through `useTable` invalidating this row) keeps the current row on
-      // screen rather than flashing a spinner. A skipped query never loads.
-      loading: isLoading || (isFetching && currentData === undefined),
+  return useMemo<UseTableRowValues<T>>(() => {
+    // `currentData`, not `data`: `data` is the last result for ANY arg this
+    // hook instance has held, so on a rowId change it keeps serving the
+    // PREVIOUS row until the new one lands. For a read-by-id that means
+    // rendering the wrong record.
+    //
+    // A failed request keeps its last good value in the cache. Drop it only
+    // when the server said the row is GONE — a 404 must not leave a deleted
+    // record on screen. A transient failure (500, offline) keeps the last good
+    // row alongside `error`, so a detail view degrades to stale-plus-banner
+    // rather than to a blank page, and one consumer's failed refetch cannot
+    // blank another consumer's view of a perfectly healthy row.
+    const row = isRowGone(error) ? null : ((currentData?.row as T) ?? null);
+
+    return {
+      row,
+      // True whenever a request is in flight and there is nothing to render:
+      // the first load, a rowId change, and a retry after the row was dropped.
+      // A background refetch with a row still on screen (an edit made through
+      // `useTable` invalidating this row) stays false rather than flashing a
+      // spinner. Derived from `row` rather than `currentData` so it cannot
+      // drift from what the caller actually has. `isLoading` is not consulted:
+      // RTK Query only reports it when it has no data, which this already
+      // covers.
+      loading: isFetching && row === null,
       error,
       refetch: safeRefetch,
-    }),
-    [currentData, isLoading, isFetching, error, safeRefetch],
-  );
+    };
+  }, [currentData, isFetching, error, safeRefetch]);
 }
 
 export default useTableRow;

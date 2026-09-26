@@ -1,63 +1,90 @@
+{/*
+  Shared space-reputation parameter block.
+
+  NOTE ON AUTHORING: the body below is inside an `export const`, so it is parsed
+  as plain JSX, NOT as markdown. Two consequences:
+
+    1. Markdown syntax does not render — `code`, **bold** and [links](x) would
+       appear literally, backticks and asterisks and all. Use <code>,
+       <strong> and <a> instead.
+    2. Angle brackets in prose are parsed as JSX tags. A literal `<uuid>`
+       reads as an unclosed <uuid> element and breaks the whole file. Write
+       &lt;uuid&gt;.
+
+  Both rules were learned the hard way: a `<uuid>` in prose made this snippet
+  unparseable from the day it was added, and Mintlify compiled it away, so the
+  59 pages that include it silently rendered none of these parameters.
+*/}
+
 export const SpaceReputationParams = ({ variant = "context", field = "path" }) => {
   const isUser = variant === "user";
   return (
     <>
       <ParamField {...{ [field]: "spaceReputation", type: "object" }}>
-        Opt-in. Adds a `spaceReputation` number to each returned user, scoped to a
-        single space. Requires the `reputation` bundle. The `reputation` total is
-        always present regardless; `spaceReputation` is purely additive and only
-        appears when you pass this object. **This object is the primary form** —
-        it replaces the deprecated flat props below. See the
-        [Reputation data model](/data-models/reputation) for the full contract.
+        Opt-in. Adds a <code>spaceReputation</code> number to each returned user,
+        scoped to a single space. Requires the <code>reputation</code> bundle.
+        The <code>reputation</code> total is always present regardless;{" "}
+        <code>spaceReputation</code> is purely additive and only appears when you
+        pass this object. <strong>This object is the primary form</strong> — it
+        replaces the deprecated flat props below. See the{" "}
+        <a href="/v7/data-models/reputation">Reputation data model</a> for the
+        full contract.
 
         <Expandable title="spaceReputation">
           {isUser ? (
             <ParamField name="spaceId" type='string | "none"' required>
-              Which bucket to read. A space **`<uuid>`** reads that space's bucket;
-              **`"none"`** reads the project-general (space-less) bucket.
-              **`"context"` is rejected (400)** on this endpoint — there is no
-              space context to derive. The empty string and the legacy `general` /
-              `null` aliases are also rejected. Missing buckets read as `0`.
+              Which bucket to read. A space <strong><code>&lt;uuid&gt;</code></strong> reads that
+              space's bucket; <strong><code>"none"</code></strong> reads the
+              project-general (space-less) bucket.{" "}
+              <strong><code>"context"</code> is rejected (400)</strong> on this
+              endpoint — there is no space context to derive. The empty string
+              and the legacy <code>general</code> / <code>null</code> aliases are
+              also rejected. Missing buckets read as <code>0</code>.
             </ParamField>
           ) : (
             <ParamField name="spaceId" type='string | "none" | "context"' required>
-              Which bucket to read. One of: a space **`<uuid>`** (that space's
-              bucket), **`"none"`** (the project-general, space-less bucket), or
-              **`"context"`** (the space derived from the request context —
-              resolved per-row on lists, or the single space on
-              member/team/conversation surfaces). The empty string and the legacy
-              `general` / `null` aliases are rejected (400). Missing buckets read
-              as `0`.
+              Which bucket to read. One of: a space <strong><code>&lt;uuid&gt;</code></strong>{" "}
+              (that space's bucket), <strong><code>"none"</code></strong> (the
+              project-general, space-less bucket), or{" "}
+              <strong><code>"context"</code></strong> (the space derived from the
+              request context — resolved per-row on lists, or the single space on
+              member/team/conversation surfaces). The empty string and the legacy{" "}
+              <code>general</code> / <code>null</code> aliases are rejected (400).
+              Missing buckets read as <code>0</code>.
             </ParamField>
           )}
           <ParamField name="includeDescendants" type="boolean">
-            Only honored when `spaceId` is an explicit space `<uuid>`. When `true`,
-            `spaceReputation` is the **subtree sum** — the named space plus all of
-            its descendant spaces (the root space's own bucket included). Ignored
-            for `"none"`; not allowed with `"context"`.
+            Only honored when <code>spaceId</code> is an explicit space <code>&lt;uuid&gt;</code>.
+            When <code>true</code>, <code>spaceReputation</code> is the{" "}
+            <strong>subtree sum</strong> — the named space plus all of its
+            descendant spaces (the root space's own bucket included). Ignored for{" "}
+            <code>"none"</code>; not allowed with <code>"context"</code>.
           </ParamField>
         </Expandable>
       </ParamField>
 
       {isUser ? (
         <ParamField {...{ [field]: "spaceReputationId", type: "string", deprecated: true }}>
-          **Deprecated** — use the `spaceReputation` object instead. The flat form
-          of `spaceReputation.spaceId`. Still accepted (the object wins if both are
-          passed); removal is a later major version. Accepts a space `<uuid>` or
-          `"none"` only — `"context"` is rejected (400) on this endpoint.
+          <strong>Deprecated</strong> — use the <code>spaceReputation</code>{" "}
+          object instead. The flat form of <code>spaceReputation.spaceId</code>.
+          Still accepted (the object wins if both are passed); removal is a later
+          major version. Accepts a space <code>&lt;uuid&gt;</code> or <code>"none"</code> only —{" "}
+          <code>"context"</code> is rejected (400) on this endpoint.
         </ParamField>
       ) : (
         <ParamField {...{ [field]: "spaceReputationId", type: "string", deprecated: true }}>
-          **Deprecated** — use the `spaceReputation` object instead. The flat form
-          of `spaceReputation.spaceId`. Still accepted (the object wins if both are
-          passed); removal is a later major version. Accepts a space `<uuid>`,
-          `"none"`, or `"context"`.
+          <strong>Deprecated</strong> — use the <code>spaceReputation</code>{" "}
+          object instead. The flat form of <code>spaceReputation.spaceId</code>.
+          Still accepted (the object wins if both are passed); removal is a later
+          major version. Accepts a space <code>&lt;uuid&gt;</code>, <code>"none"</code>, or{" "}
+          <code>"context"</code>.
         </ParamField>
       )}
 
       <ParamField {...{ [field]: "spaceReputationDescendants", type: "boolean", deprecated: true }}>
-        **Deprecated** — use `spaceReputation.includeDescendants` instead. The flat
-        form, only honored alongside an explicit `spaceReputationId` `<uuid>`.
+        <strong>Deprecated</strong> — use{" "}
+        <code>spaceReputation.includeDescendants</code> instead. The flat form,
+        only honored alongside an explicit <code>spaceReputationId</code> <code>&lt;uuid&gt;</code>.
       </ParamField>
     </>
   );

@@ -654,6 +654,7 @@
                   "v7/api-reference/entities/publish-entity",
                   "v7/api-reference/entities/fetch-top-comment",
                   "v7/api-reference/entities/update-entity",
+                  "v7/api-reference/entities/increment-entity-views",
                   "v7/api-reference/entities/delete-entity",
                   "v7/api-reference/entities/add-reaction",
                   "v7/api-reference/entities/remove-reaction",
@@ -685,6 +686,7 @@
                   "v7/api-reference/chat/conversations/create-direct",
                   "v7/api-reference/chat/conversations/unread-count",
                   "v7/api-reference/chat/conversations/fetch-conversation",
+                  "v7/api-reference/chat/conversations/fetch-conversation-preview",
                   "v7/api-reference/chat/conversations/update-conversation",
                   "v7/api-reference/chat/conversations/delete-conversation",
                   "v7/api-reference/chat/conversations/mute-conversation"
@@ -812,6 +814,7 @@
                   "v7/api-reference/spaces/moderation/moderate-entity",
                   "v7/api-reference/spaces/moderation/moderate-comment",
                   "v7/api-reference/spaces/moderation/moderate-message",
+                  "v7/api-reference/spaces/moderation/set-entity-nsfw",
                   "v7/api-reference/spaces/moderation/handle-entity-report",
                   "v7/api-reference/spaces/moderation/handle-comment-report",
                   "v7/api-reference/spaces/moderation/handle-message-report"

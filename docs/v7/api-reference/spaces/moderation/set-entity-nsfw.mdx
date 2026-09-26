@@ -1,0 +1,87 @@
+---
+title: "Set Entity NSFW"
+api: "PATCH /v7/:projectId/spaces/:spaceId/entities/:entityId/nsfw"
+description: "Set or clear the NSFW flag on an entity within a space"
+---
+
+Sets the `nsfw` flag on an entity in a space, including entities authored by other users. Requires the caller to be a moderator or admin of the space.
+
+<Note>
+  NSFW is a separate axis from moderation. This endpoint writes the entity's own `nsfw` field and never touches `moderationStatus` — labelling content does not hide it the way [Moderate Entity](/api-reference/spaces/moderation/moderate-entity) with `"remove"` does. Effective NSFW is computed live on read, so a space's own NSFW setting still applies on top of this flag.
+</Note>
+
+Requires the `entities` bundle in addition to `spaces`.
+
+## Path Parameters
+
+<ParamField path="spaceId" type="string" required>
+  UUID of the space.
+</ParamField>
+
+<ParamField path="entityId" type="string" required>
+  UUID of the entity to flag. Must belong to the space named in `spaceId`.
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="nsfw" type="boolean" required>
+  `true` to flag the entity as NSFW, `false` to clear the flag.
+</ParamField>
+
+## Response
+
+<ResponseField name="message" type="string">
+  Confirmation message.
+</ResponseField>
+
+<ResponseField name="nsfw" type="boolean">
+  The flag as it now stands on the entity.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Body — 400">
+    ```json
+    { "error": "Invalid request body.", "code": "moderation/invalid-body" }
+    ```
+  </Accordion>
+
+  <Accordion title="Entities Bundle Unavailable — 403">
+    ```json
+    {
+      "error": "Entities bundle is not available for this project",
+      "code": "database/tables-not-available"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Entity Not Found — 404">
+    ```json
+    { "error": "Entity not found.", "code": "moderation/entity-not-found" }
+    ```
+  </Accordion>
+
+  <Accordion title="Entity Not In Space — 404">
+    The entity exists but belongs to a different space.
+
+    ```json
+    {
+      "error": "Entity does not belong to this space.",
+      "code": "moderation/entity-not-in-space"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Server Error — 500">
+    ```json
+    {
+      "error": "Failed to set entity NSFW flag.",
+      "code": "moderation/server-error",
+      "details": "<error message>"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+See also: [useSetSpaceEntityNsfw](/hooks/spaces/use-set-space-entity-nsfw)

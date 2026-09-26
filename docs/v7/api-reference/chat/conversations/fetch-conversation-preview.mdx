@@ -1,0 +1,91 @@
+---
+title: "Fetch Conversation Preview"
+api: "GET /v7/:projectId/chat/conversations/:conversationId/preview"
+description: "Fetch one conversation in the same shape as a single List Conversations row"
+---
+
+Returns a single `ConversationPreview` — the same shape as one element of [List Conversations](/api-reference/chat/conversations/list-conversations). Use it to load a conversation the client does not already hold: one that was paginated out of the list, or one that was just created.
+
+Both this endpoint and the list are served by the same underlying query, so the two shapes stay identical.
+
+<Note>
+  This is distinct from [Fetch Conversation](/api-reference/chat/conversations/fetch-conversation), which returns a different shape — the conversation plus `currentMember` and `memberCount`. Reach for this endpoint when you are inserting a row into a conversation list, and for Fetch Conversation when you are opening a conversation.
+</Note>
+
+Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) reads its own view of the conversation. A service/master key acts on behalf of a named user via the optional query `userId` — a service key without `userId` is rejected, and an end-user token may not name a different user. Requires the `chat` bundle.
+
+Membership is enforced by the query itself. A conversation the caller is not a member of, and a conversation that does not exist, both return `404` — no `lastMessage`, `otherMembers` or `unreadCount` is exposed in either case.
+
+## Path Parameters
+
+<ParamField path="conversationId" type="string" required>
+  UUID of the conversation to fetch.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="userId" type="string">
+  The acting user whose view of the conversation is returned. **Service/master keys only** — a service key must pass it (there is no implicit session user); an end-user token infers it from the auth token and may not name a different user.
+</ParamField>
+
+## Response
+
+Returns a [Conversation](/data-models/conversation) extended with the following fields.
+
+<ResponseField name="unreadCount" type="number">
+  Number of unread messages in this conversation for the acting user.
+</ResponseField>
+
+<ResponseField name="memberCount" type="number">
+  Number of currently active members.
+</ResponseField>
+
+<ResponseField name="lastMessage" type="ChatMessage | null">
+  The most recent [message](/data-models/chat-message) in the conversation, with its `content` truncated to 100 characters and its `files` populated. `null` if the conversation has no messages.
+</ResponseField>
+
+<ResponseField name="mutedUntil" type="string | null">
+  ISO timestamp until which the acting user has muted this conversation. `null` when the conversation is not muted, and also when it is muted forever.
+</ResponseField>
+
+<ResponseField name="mutedForever" type="boolean">
+  Whether the acting user has muted this conversation indefinitely. A forever mute returns `mutedForever: true` with `mutedUntil: null` — the far-future storage sentinel is never exposed as a date. Read the boolean; never string-match a date.
+</ResponseField>
+
+<ResponseField name="otherMembers" type="object[]">
+  Up to 5 active members other than the acting user, each with public user fields (`id`, `name`, `username`, `avatar`). Populated for `direct` and `group` conversations only — a DM or group has no `name`, so the counterparty is how a client renders the title and avatar. Capped at 5; use `memberCount` for the full group total. Always an empty array (`[]`) for `space` conversations, which carry their own `name`. Ordered by member join time.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Parameters — 400">
+    ```json
+    { "error": "Invalid path parameters.", "code": "chat/invalid-params" }
+    ```
+  </Accordion>
+
+  <Accordion title="Invalid Query — 400">
+    ```json
+    { "error": "Invalid query parameters.", "code": "chat/invalid-query" }
+    ```
+  </Accordion>
+
+  <Accordion title="Not Found — 404">
+    Returned both when the conversation does not exist and when the acting user is not a member of it.
+
+    ```json
+    { "error": "Conversation not found.", "code": "chat/not-found" }
+    ```
+  </Accordion>
+
+  <Accordion title="Server Error — 500">
+    ```json
+    {
+      "error": "Internal server error.",
+      "code": "chat/server-error",
+      "details": "<error message>"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>

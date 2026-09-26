@@ -1,0 +1,78 @@
+---
+title: "Increment Entity Views"
+api: "PATCH /v7/:projectId/entities/:entityId/increment-views"
+description: "Add to an entity's view count"
+---
+
+Increments an entity's `views` counter and returns the updated entity.
+
+<Warning>
+  This endpoint requires a **service or master key** and cannot be called with an end-user token. Count views from your own backend rather than from the client, so a browser cannot inflate the number.
+</Warning>
+
+## Path Parameters
+
+<ParamField path="entityId" type="string" required>
+  UUID of the entity.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="count" type="number">
+  How much to add to the counter. Defaults to `1`. Must be a positive integer — pass a batch total to record views your backend has buffered rather than calling the endpoint once per view.
+</ParamField>
+
+## Response
+
+Returns the full updated [Entity](/data-models/entity), with `views` reflecting the increment.
+
+<ResponseField name="id" type="string">
+  UUID of the entity.
+</ResponseField>
+
+<ResponseField name="views" type="number">
+  The view count after the increment.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Parameters — 400">
+    ```json
+    { "error": "Invalid path parameters.", "code": "entity/invalid-params" }
+    ```
+  </Accordion>
+
+  <Accordion title="Invalid Count — 400">
+    Returned when `count` is not a positive integer.
+
+    ```json
+    { "error": "Count must be a positive integer", "code": "entity/invalid-query" }
+    ```
+  </Accordion>
+
+  <Accordion title="Elevated Auth Required — 403">
+    ```json
+    {
+      "error": "Service or master key required.",
+      "code": "auth/elevated-auth-required"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Entity Not Found — 404">
+    ```json
+    { "error": "Entity not found.", "code": "entity/not-found" }
+    ```
+  </Accordion>
+
+  <Accordion title="Server Error — 500">
+    ```json
+    {
+      "error": "An error occurred while updating entity views.",
+      "code": "entity/server-error",
+      "details": "<error message>"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>

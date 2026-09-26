@@ -19,6 +19,12 @@ interface FetchTableRowsParams {
   includeDeleted?: boolean;
 }
 
+interface FetchTableRowParams {
+  projectId: string;
+  tableName: string;
+  rowId: string;
+}
+
 interface CreateRowParams {
   projectId: string;
   tableName: string;
@@ -89,6 +95,19 @@ export const tablesApi = baseApi.injectEndpoints({
       ],
     }),
 
+    fetchTableRow: builder.query<{ row: TableRow }, FetchTableRowParams>({
+      query: ({ projectId, tableName, rowId }) => ({
+        url: `/${projectId}/db/${tableName}/${rowId}`,
+        method: "GET",
+      }),
+      // Tagged by row id only — the row-level mutations below already
+      // invalidate that id, so a detail view stays in step with an edit made
+      // through `useTable` without either hook knowing about the other.
+      providesTags: (_result, _error, { rowId }) => [
+        { type: "TableRow" as const, id: rowId },
+      ],
+    }),
+
     createRow: builder.mutation<{ row: TableRow }, CreateRowParams>({
       query: ({ projectId, tableName, data }) => ({
         url: `/${projectId}/db/${tableName}`,
@@ -143,6 +162,8 @@ export const tablesApi = baseApi.injectEndpoints({
 export const {
   useFetchTableRowsQuery,
   useLazyFetchTableRowsQuery,
+  useFetchTableRowQuery,
+  useLazyFetchTableRowQuery,
   useCreateRowMutation,
   useUpdateRowMutation,
   useDeleteRowMutation,
@@ -151,6 +172,7 @@ export const {
 
 export const {
   fetchTableRows,
+  fetchTableRow,
   createRow,
   updateRow,
   deleteRow,

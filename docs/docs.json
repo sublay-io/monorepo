@@ -534,7 +534,10 @@
               },
               {
                 "group": "Custom Tables",
-                "pages": ["v7/hooks/tables/use-table"]
+                "pages": [
+                  "v7/hooks/tables/use-table",
+                  "v7/hooks/tables/use-table-row"
+                ]
               }
             ]
           },

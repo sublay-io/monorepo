@@ -385,8 +385,10 @@ export {
 // -- custom tables
 export {
   useTable,
+  useTableRow,
   type UseTableOptions,
   type UseTableValues,
+  type UseTableRowValues,
 } from "./hooks/tables";
 
 // -- spaces

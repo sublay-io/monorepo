@@ -1,0 +1,69 @@
+---
+title: "Use table row"
+description: "Read a single custom-table row by ID for a detail view"
+icon: "table"
+---
+
+## Overview
+
+`useTableRow` is the React/React Native hook for one custom-table row, backed by RTK Query against `GET /db/:tableName/:rowId`.
+
+[`useTable`](/v7/hooks/tables/use-table) is list-shaped — it owns a page of rows plus the view state behind it. A detail view wants one row by ID and none of that, and filtering a fetched page client-side only finds the row when it happens to be on the current page. This hook is that read.
+
+Row writes stay on `useTable`. They invalidate the row's cache tag, so an edit made there refreshes this hook without the two being wired together.
+
+See [Custom Tables — Overview](/v7/sdk/tables/overview) for a guide, and [Custom Tables](/v7/custom-tables) for the feature concept.
+
+## Usage Example
+
+```tsx
+import { useTableRow } from "@sublay/react-js";
+
+interface EventRow {
+  id: string;
+  name: string;
+  capacity: number;
+}
+
+function EventDetail({ eventId }: { eventId: string | null }) {
+  const { row, loading, error } = useTableRow<EventRow>("Events", eventId);
+
+  if (loading) return <Spinner />;
+  if (error) return <NotFound />;
+  if (!row) return null;
+
+  return <h1>{row.name}</h1>;
+}
+```
+
+## Parameters
+
+<ParamField path="tableName" type="string" required>
+  The **logical** custom-table name (without the `custom_` prefix).
+</ParamField>
+
+<ParamField path="rowId" type="string | null | undefined" required>
+  UUID of the row. May be `null` or `undefined` — a route parameter that has not resolved yet, for example. The request is skipped until it is present, so the call site needs no guard.
+</ParamField>
+
+## Return Values
+
+<ResponseField name="row" type="T | null">
+  The row, or `null` before the first load, while the request is skipped, or when the request failed.
+</ResponseField>
+
+<ResponseField name="loading" type="boolean">
+  `true` while the request is in flight. A skipped request never loads, so waiting on an unresolved `rowId` reports `loading: false` with `row: null` rather than a spinner that never resolves.
+</ResponseField>
+
+<ResponseField name="error" type="unknown">
+  The query error, if any. A row that does not exist comes back as a `404` with code `database/row-not-found`, which surfaces here rather than as a `null` row.
+</ResponseField>
+
+<ResponseField name="refetch" type="() => void">
+  Re-runs the query.
+</ResponseField>
+
+<Warning>
+  Row reads on the `/db` surface capture the caller's identity but **enforce no authorization** — any caller who can reach your project can read any row. See [Security: open row CRUD](/v7/custom-tables#security-open-row-crud).
+</Warning>

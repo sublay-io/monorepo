@@ -57,7 +57,7 @@ Targets are selected by an ID list, a filter predicate, or both — **at least o
 
 <AccordionGroup>
   <Accordion title="Invalid Body — 400">
-    Neither `rowIds` nor `filters` was supplied, or one exceeded its cap (100 IDs, 50 filters).
+    No delete target was given — neither `rowIds` nor `filters` was supplied, or both were empty arrays — or one exceeded its cap (100 IDs, 50 filters).
     ```json
     { "error": "Bad Request", "code": "database/invalid-body" }
     ```
@@ -69,11 +69,6 @@ Targets are selected by an ID list, a filter predicate, or both — **at least o
       "code": "database/invalid-filter-column",
       "column": "<column name>"
     }
-    ```
-  </Accordion>
-  <Accordion title="No Delete Target — 400">
-    ```json
-    { "error": "Bad Request", "code": "database/no-delete-target" }
     ```
   </Accordion>
   <Accordion title="Table Not Found — 404">

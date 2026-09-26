@@ -59,8 +59,17 @@ Returns a paginated page of rows from a custom table.
     </ResponseField>
   </Expandable>
 
+  The value, before encoding:
+
+  ```json
+  [{ "column": "status", "operator": "eq", "value": "open" }]
   ```
-  ?filters=[{"column":"status","operator":"eq","value":"open"}]
+
+  And the same request ready to run — the JSON must be percent-encoded, so let your HTTP client do it rather than pasting raw braces into a URL:
+
+  ```bash
+  curl -G "https://api.sublay.io/v7/$PROJECT_ID/db/orders" \
+    --data-urlencode 'filters=[{"column":"status","operator":"eq","value":"open"}]'
   ```
 
   A column that does not exist on the table fails with `database/invalid-filter-column`.

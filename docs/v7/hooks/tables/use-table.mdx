@@ -27,6 +27,7 @@ function Events() {
     rows,
     pagination,
     loading,
+    view,
     setPage,
     setSort,
     setFilters,
@@ -41,7 +42,9 @@ function Events() {
       {rows.map((e) => (
         <Row key={e.id} event={e} onSave={(d) => updateRow(e.id, d)} onDelete={() => deleteRow(e.id)} />
       ))}
-      {pagination?.hasMore && <button onClick={() => setPage(pagination.page + 1)}>Next</button>}
+      {/* Page off `view.page` (what you asked for), not `pagination.page`
+          (what is on screen) — see the note below. */}
+      {pagination?.hasMore && <button onClick={() => setPage(view.page + 1)}>Next</button>}
     </>
   );
 }
@@ -65,6 +68,8 @@ function Events() {
 
 <ResponseField name="pagination" type="PaginationMetadata | null">
   Pagination metadata (`page`, `pageSize`, `totalPages`, `totalItems`, `hasMore`), or `null` before the first load.
+
+  It describes the page **currently on screen**, which during a page change is still the previous one — the rows and their metadata stay in step. Drive a pager off `view.page` instead, which is the page you last asked for: a "Next" button built on `pagination.page` computes the same target twice if it is clicked again before the first request lands, and the second click appears to do nothing.
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">

@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+
+import { useSelector } from "react-redux";
 
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
 import useProject from "../projects/useProject";
@@ -11,6 +13,7 @@ import {
   type TableViewState,
 } from "../../store/slices/tablesSlice";
 import {
+  tablesApi,
   useCreateRowMutation,
   useDeleteRowMutation,
   useFetchTableRowsQuery,
@@ -81,8 +84,8 @@ export function useTable<T extends TableRow = TableRow>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableName]);
 
-  const { data, isLoading, error, refetch } = useFetchTableRowsQuery(
-    {
+  const queryArgs = useMemo(
+    () => ({
       projectId: projectId as string,
       tableName,
       page: view.page,
@@ -91,9 +94,65 @@ export function useTable<T extends TableRow = TableRow>(
       sortDir: view.sortDir,
       filters: view.filters,
       includeDeleted: view.includeDeleted,
-    },
+    }),
+    [
+      projectId,
+      tableName,
+      view.page,
+      view.limit,
+      view.sortBy,
+      view.sortDir,
+      view.filters,
+      view.includeDeleted,
+    ],
+  );
+
+  const { currentData, isFetching, error, refetch } = useFetchTableRowsQuery(
+    queryArgs,
     { skip: !projectId },
   );
+
+  // Which page to show while a request is in flight.
+  //
+  // RTK Query's `data` is the last result for ANY arg this hook instance has
+  // held, which conflates two different changes. A page/sort/filter change
+  // should keep the previous rows on screen — blanking the grid on every
+  // click is worse than a moment of staleness. A change of *table* (or of
+  // project) must not: another table's rows under this table's name is wrong
+  // data, not stale data, and `data` reports it with `loading: false` and no
+  // error.
+  //
+  // So remember the ARGS of the last page shown, and re-read that page out of
+  // RTK Query's own cache. Keeping the fallback inside the cache is what makes
+  // it safe: `resetApiState()` on sign-out or account switch, tag
+  // invalidation, and `keepUnusedDataFor` eviction all apply to it for free. A
+  // second copy held in a ref would survive all three and quietly serve the
+  // previous session's rows — the same bug one axis over.
+  const lastShownArgs = useRef<typeof queryArgs | null>(null);
+  useEffect(() => {
+    if (currentData) lastShownArgs.current = queryArgs;
+  }, [currentData, queryArgs]);
+
+  // Only fall back within the same project AND table; every other part of the
+  // args (page, sort, filters) is what we deliberately show stale.
+  const prev = lastShownArgs.current;
+  const fallbackArgs =
+    !currentData &&
+    prev &&
+    prev.projectId === queryArgs.projectId &&
+    prev.tableName === queryArgs.tableName
+      ? prev
+      : null;
+  // `useSublaySelector` is typed to the `sublay` namespace only, while the API
+  // reducer is mounted beside it at the root, so this one read goes through
+  // the untyped selector.
+  const fallbackPage = useSelector((state: unknown) => {
+    if (!fallbackArgs) return undefined;
+    const selectPrev = tablesApi.endpoints.fetchTableRows.select(fallbackArgs);
+    return selectPrev(state as Parameters<typeof selectPrev>[0]).data;
+  });
+
+  const shownPage = currentData ?? fallbackPage;
 
   const [createRowMutation] = useCreateRowMutation();
   const [updateRowMutation] = useUpdateRowMutation();
@@ -156,9 +215,12 @@ export function useTable<T extends TableRow = TableRow>(
 
   return useMemo<UseTableValues<T>>(
     () => ({
-      rows: (data?.data as T[]) ?? [],
-      pagination: data?.pagination ?? null,
-      loading: isLoading,
+      rows: (shownPage?.data as T[]) ?? [],
+      pagination: shownPage?.pagination ?? null,
+      // Nothing to show and a request in flight: the first load, and a
+      // tableName change. A page/sort/filter change keeps the previous page
+      // visible and stays false.
+      loading: isFetching && shownPage === undefined,
       error,
       refetch,
       view,
@@ -173,8 +235,8 @@ export function useTable<T extends TableRow = TableRow>(
       restoreRow,
     }),
     [
-      data,
-      isLoading,
+      shownPage,
+      isFetching,
       error,
       refetch,
       view,

@@ -50,7 +50,7 @@ function Events() {
 ## Parameters
 
 <ParamField path="tableName" type="string" required>
-  The **logical** custom-table name (without the `custom_` prefix). Must be stable across renders.
+  The **logical** custom-table name (without the `custom_` prefix). It may change between renders: the hook never shows the previous table's rows under the new name. It loads the new table from scratch, or shows that table's own rows straight away if they are still cached.
 </ParamField>
 
 <ParamField path="options" type="Partial<TableViewState>">
@@ -68,9 +68,11 @@ function Events() {
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
-  `true` during the first load only. Changing page, sort or filters keeps the previous rows on screen with `loading: false` while the new query runs, so a table does not blank out between pages.
+  `true` when there is no page to show and a request is in flight — the first load, and a `tableName` or project change. An empty table is a page, so it reports `false` with zero rows.
 
-  Note this differs from [`useTableRow`](/v7/hooks/tables/use-table-row), where a `rowId` change **does** report `loading: true` — a stale page of rows you are already looking at is reasonable, a stale single record under a new id is not.
+  Changing page, sort or filters keeps the previous rows on screen with `loading: false` while the new query runs, so the table does not blank out between pages. Changing `tableName` does blank it: another table's rows under a new table's name would be wrong data, not stale data. Returning to a table this hook has already loaded shows that table's own rows again rather than blanking, for as long as they remain cached.
+
+  [`useTableRow`](/v7/hooks/tables/use-table-row) follows the same rule for the same reason — a `rowId` change reports `loading: true` rather than leaving the previous record on screen.
 </ResponseField>
 
 <ResponseField name="error" type="unknown">

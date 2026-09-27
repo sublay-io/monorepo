@@ -404,9 +404,10 @@ describe("useTable", () => {
     });
 
     it("does not show another project's rows when projectId changes", async () => {
-      // The harness fixes projectId at mount, so this needs its own wrapper.
-      // SublayProvider updates the context in place rather than remounting,
-      // so a project switcher changes the query arg under a live hook.
+      // Changing project is NOT a supported flow — an app stays on one
+      // project. This covers the invariant, not a feature: the fallback must
+      // never outlive the identity of the data it came from. The harness
+      // fixes projectId at mount, hence the local wrapper.
       const store = makeRtkQueryStore();
       let pid = "project-a";
       const wrapper = ({ children }: { children: React.ReactNode }) => (

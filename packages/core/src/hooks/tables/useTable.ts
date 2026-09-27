@@ -117,24 +117,29 @@ export function useTable<T extends TableRow = TableRow>(
   // RTK Query's `data` is the last result for ANY arg this hook instance has
   // held, which conflates two different changes. A page/sort/filter change
   // should keep the previous rows on screen — blanking the grid on every
-  // click is worse than a moment of staleness. A change of *table* (or of
-  // project) must not: another table's rows under this table's name is wrong
-  // data, not stale data, and `data` reports it with `loading: false` and no
-  // error.
+  // click is worse than a moment of staleness. A change of *table* must not:
+  // another table's rows under this table's name is wrong data, not stale
+  // data, and `data` reports it with `loading: false` and no error.
   //
   // So remember the ARGS of the last page shown, and re-read that page out of
   // RTK Query's own cache. Keeping the fallback inside the cache is what makes
-  // it safe: `resetApiState()` on sign-out or account switch, tag
-  // invalidation, and `keepUnusedDataFor` eviction all apply to it for free. A
-  // second copy held in a ref would survive all three and quietly serve the
-  // previous session's rows — the same bug one axis over.
+  // it safe: `resetApiState()` on sign-out or account switch, and
+  // `keepUnusedDataFor` eviction, both apply to it for free. A second copy
+  // held in a ref would survive them and quietly serve the previous session's
+  // rows — the same bug one axis over.
   const lastShownArgs = useRef<typeof queryArgs | null>(null);
   useEffect(() => {
     if (currentData) lastShownArgs.current = queryArgs;
   }, [currentData, queryArgs]);
 
-  // Only fall back within the same project AND table; every other part of the
-  // args (page, sort, filters) is what we deliberately show stale.
+  // Fall back only within the same table; page/sort/filters are exactly what
+  // we deliberately show stale.
+  //
+  // `projectId` is compared too, purely as a cheap invariant. An app does not
+  // change project — that is not a supported flow and nothing should be built
+  // to enable it. The comparison is here so the fallback can never outlive the
+  // identity of the data it came from, not because switching projects is a
+  // case worth supporting.
   const prev = lastShownArgs.current;
   const fallbackArgs =
     !currentData &&

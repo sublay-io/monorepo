@@ -10,6 +10,11 @@
     2. Angle brackets in prose are parsed as JSX tags. A literal `<uuid>`
        reads as an unclosed <uuid> element and breaks the whole file. Write
        &lt;uuid&gt;.
+    3. Links here must be version-prefixed by hand. This file lives outside
+       v6/ and v7/, so the prefix cannot be derived from the including page.
+       Every includer is currently under v7/, which is why the link below is
+       hardcoded to /v7/. If this is ever included from a v6 page, that link
+       silently points across versions and needs a per-version fix.
 
   Both rules were learned the hard way: a `<uuid>` in prose made this snippet
   unparseable from the day it was added, and Mintlify compiled it away, so the

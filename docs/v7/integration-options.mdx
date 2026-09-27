@@ -23,10 +23,10 @@ If your application uses React or React Native, the SDK is the recommended integ
 - **Context providers** — Features like the entity subtree, comment section, conversation, and space are scoped via React context providers, so any component in the subtree can access the full feature state with a single hook call.
 
 <CardGroup cols={2}>
-  <Card title="React (Web)" icon="react" href="/sdk/getting-started">
+  <Card title="React (Web)" icon="react" href="/v7/sdk/getting-started">
     Install `@sublay/react-js`. Works with Next.js, Vite, Create React App, or any React web setup.
   </Card>
-  <Card title="React Native / Expo" icon="mobile" href="/sdk/getting-started">
+  <Card title="React Native / Expo" icon="mobile" href="/v7/sdk/getting-started">
     Install `@sublay/react-native` (or `@sublay/expo` for Expo-managed workflows with secure token storage).
   </Card>
 </CardGroup>
@@ -77,7 +77,7 @@ x-sublay-project-id: <your-project-id>
   When using the API from a client-side (browser/mobile) context without a service key, you are responsible for requesting and refreshing user access tokens, maintaining auth state, and handling real-time features (WebSockets) yourself if needed.
 </Note>
 
-See [API Reference → Getting Started](/api-reference/getting-started) for authentication details and base URL configuration.
+See [API Reference → Getting Started](/v7/api-reference/getting-started) for authentication details and base URL configuration.
 
 ## Option 3: Redux Store Integration
 
@@ -90,7 +90,7 @@ This requires:
 - Adding `sublayMiddleware` to your middleware chain
 - Using `SublayIntegrationProvider` instead of `SublayProvider`
 
-See [SDK Reference → Redux Integration](/sdk/redux-integration) for the full setup guide.
+See [SDK Reference → Redux Integration](/v7/sdk/redux-integration) for the full setup guide.
 
 ## Choosing the Right Path
 

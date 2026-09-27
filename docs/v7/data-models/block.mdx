@@ -3,7 +3,7 @@ title: "Block"
 description: "The Block interface shape representing one user blocking another"
 ---
 
-A block record represents a directed edge where one user (the blocker) has blocked another (the blocked). A block simply exists or doesn't — there is no status column. Blocks are part of the trust & safety [moderation bundle](/sdk/moderation/overview#blocking); the table is provisioned only in projects that have that bundle installed.
+A block record represents a directed edge where one user (the blocker) has blocked another (the blocked). A block simply exists or doesn't — there is no status column. Blocks are part of the trust & safety [moderation bundle](/v7/sdk/moderation/overview#blocking); the table is provisioned only in projects that have that bundle installed.
 
 Blocks are **private to the blocker** — only the blocker can read their own block list, and the block-status read is outbound-only, so the block is never disclosed to the blocked user.
 
@@ -22,7 +22,7 @@ Blocks are **private to the blocker** — only the blocker can read their own bl
 
 ## See Also
 
-- [Moderation — Blocking](/sdk/moderation/overview#blocking) — enforcement behavior
-- [useBlockManager hook](/hooks/blocks/use-block-manager)
-- [Block User](/api-reference/users/blocks/block-user)
-- [Fetch Blocked Users](/api-reference/blocks/fetch-blocks)
+- [Moderation — Blocking](/v7/sdk/moderation/overview#blocking) — enforcement behavior
+- [useBlockManager hook](/v7/hooks/blocks/use-block-manager)
+- [Block User](/v7/api-reference/users/blocks/block-user)
+- [Fetch Blocked Users](/v7/api-reference/blocks/fetch-blocks)

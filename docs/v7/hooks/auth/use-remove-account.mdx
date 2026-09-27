@@ -21,7 +21,7 @@ If the removed account is the currently active one, **the session ends and no ac
 </Warning>
 
 <Note>
-  Removing an account never activates a different one. Read `activeAccount` from [`useAccounts`](/hooks/auth/use-accounts) and render your own next screen when it is `null`.
+  Removing an account never activates a different one. Read `activeAccount` from [`useAccounts`](/v7/hooks/auth/use-accounts) and render your own next screen when it is `null`.
 </Note>
 
 ## Usage Example
@@ -93,7 +93,7 @@ The hook returns a `removeAccount` function that accepts:
 <ResponseField name="removeAccount" type="function">
   Async function that removes the specified account. It **rejects** without
   doing anything when `userId` is not in the accounts map — with an
-  [`AccountTransitionError`](/sdk/authentication/multi-account#telling-a-dead-account-from-a-dead-network)
+  [`AccountTransitionError`](/v7/sdk/authentication/multi-account#telling-a-dead-account-from-a-dead-network)
   carrying `accountNotFound: true`, so a stale id is distinguishable from a
   credential failure without matching on message text — or when no `projectId`
   is available. Runtime errors during removal set `error` **and reject** the
@@ -111,4 +111,4 @@ The hook returns a `removeAccount` function that accepts:
 
 ## Integration Guide
 
-For multi-account integration guidance, see [Multi-Account](/sdk/authentication/multi-account).
+For multi-account integration guidance, see [Multi-Account](/v7/sdk/authentication/multi-account).

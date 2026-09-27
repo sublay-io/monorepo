@@ -5,7 +5,7 @@ description: "Remove the authenticated user's reaction from an entity"
 ---
 
 <Note>
-  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/bundles).
+  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v7/bundles).
 </Note>
 
 Removes the authenticated user's reaction from an entity. The entity's `reactionCounts` map is decremented for the removed reaction type.
@@ -20,7 +20,7 @@ Removes the authenticated user's reaction from an entity. The entity's `reaction
 
 ## Response
 
-Returns the updated [Entity](/data-models/entity) object with the new `reactionCounts`.
+Returns the updated [Entity](/v7/data-models/entity) object with the new `reactionCounts`.
 
 ## Error Responses
 

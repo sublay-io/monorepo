@@ -5,7 +5,7 @@ description: "Per-space reputation buckets, the maintained overall total, and th
 
 Reputation in Sublay is **space-scoped**. Instead of a single number per user, each user accrues reputation into separate **buckets** — one per space, plus a project-general bucket — and their `reputation` field is the maintained sum of all of them.
 
-Reputation is owned by the optional **`reputation`** bundle. Install it from the **Database** page of your project to turn the feature on. The `reputation` bundle works with or without the `spaces` bundle: without spaces, only the general bucket accrues. See [Bundles](/bundles).
+Reputation is owned by the optional **`reputation`** bundle. Install it from the **Database** page of your project to turn the feature on. The `reputation` bundle works with or without the `spaces` bundle: without spaces, only the general bucket accrues. See [Bundles](/v7/bundles).
 
 ## Buckets
 
@@ -27,9 +27,9 @@ A few rules govern buckets:
 Reputation accrues two ways:
 
 - **Earned** — the system credits a user for what they do: creating entities and comments, and receiving votes and reactions on them. These changes are not individually recorded.
-- **Granted** — reputation is deliberately *given*, either by another user (a transfer that debits their bucket) or by your app (a mint that creates it from nothing, or destroys it). Every grant is persisted as a [ReputationGrant](/data-models/reputation-grant) record, so a user's grant history is readable while their earned history is not.
+- **Granted** — reputation is deliberately *given*, either by another user (a transfer that debits their bucket) or by your app (a mint that creates it from nothing, or destroys it). Every grant is persisted as a [ReputationGrant](/v7/data-models/reputation-grant) record, so a user's grant history is readable while their earned history is not.
 
-Grants ship with this bundle — every project that has reputation has them, with no separate opt-in. A transfer never moves reputation between the general bucket and a space bucket: it lands in the recipient's bucket for the same space it left. See [ReputationGrant](/data-models/reputation-grant) and the [Reputation Grants SDK overview](/sdk/reputation/overview).
+Grants ship with this bundle — every project that has reputation has them, with no separate opt-in. A transfer never moves reputation between the general bucket and a space bucket: it lands in the recipient's bucket for the same space it left. See [ReputationGrant](/v7/data-models/reputation-grant) and the [Reputation Grants SDK overview](/v7/sdk/reputation/overview).
 
 ## The maintained total
 
@@ -118,11 +118,11 @@ Project-wide user search (`search-users`) and the self-relative follows/connecti
 
 ## Uninstalling is lossy
 
-Removing the `reputation` bundle drops the buckets table and the grants table — destroying all grant history — **and** zeroes the `reputation` column on every user. Reinstalling starts fresh from zero — past scores are not recomputed. Back up anything you need before uninstalling. See [Bundles](/bundles).
+Removing the `reputation` bundle drops the buckets table and the grants table — destroying all grant history — **and** zeroes the `reputation` column on every user. Reinstalling starts fresh from zero — past scores are not recomputed. Back up anything you need before uninstalling. See [Bundles](/v7/bundles).
 
 ## See Also
 
-- [Bundles](/bundles)
-- [ReputationGrant data model](/data-models/reputation-grant)
-- [User data model](/data-models/user)
-- [Space data model](/data-models/space)
+- [Bundles](/v7/bundles)
+- [ReputationGrant data model](/v7/data-models/reputation-grant)
+- [User data model](/v7/data-models/user)
+- [Space data model](/v7/data-models/space)

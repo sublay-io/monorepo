@@ -8,10 +8,10 @@ icon: "plug"
 
 Returns state and a `search` function for finding spaces by natural language query. Matches against space name, description, and other text fields using vector similarity.
 
-For integration guidance, see [Semantic Search](/sdk/search/semantic-search).
+For integration guidance, see [Semantic Search](/v7/sdk/search/semantic-search).
 
 <Note>
-  Only `public` spaces are returned. `unlisted` and `private` spaces are never surfaced in search results for non-members. Hidden spaces stay indexed but filtered out, so re-listing a space (setting it back to `"public"`) makes it searchable again immediately. See [Space visibility](/data-models/space#visibility).
+  Only `public` spaces are returned. `unlisted` and `private` spaces are never surfaced in search results for non-members. Hidden spaces stay indexed but filtered out, so re-listing a space (setting it back to `"public"`) makes it searchable again immediately. See [Space visibility](/v7/data-models/space#visibility).
 </Note>
 
 ## Usage Example
@@ -56,7 +56,7 @@ Call `search` with:
       Cosine similarity score (0–1).
     </ResponseField>
     <ResponseField name="record" type="Space">
-      The matched space. See [Space data model](/data-models/space).
+      The matched space. See [Space data model](/v7/data-models/space).
     </ResponseField>
   </Expandable>
 </ResponseField>

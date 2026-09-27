@@ -6,7 +6,7 @@ description: "Add follows and connections to your app with Sublay's social graph
 Sublay provides two distinct social relationship systems: **Follows** (one-directional) and **Connections** (mutual/bidirectional). You can use one or both depending on the social model your app needs.
 
 <Note>
-  **Requires the `follows` and/or `connections` bundles.** Follows need the `follows` bundle and connections need the `connections` bundle — install whichever you use. See [Bundles](/bundles) to add them.
+  **Requires the `follows` and/or `connections` bundles.** Follows need the `follows` bundle and connections need the `connections` bundle — install whichever you use. See [Bundles](/v7/bundles) to add them.
 </Note>
 
 ## Follows
@@ -28,18 +28,18 @@ Connections are bidirectional and require mutual acceptance — similar to Linke
 
 ## Blocking
 
-User-to-user **blocking** severs interaction between two users across every Sublay surface (follows, connections, DMs, content, mentions, notifications, discovery, and profiles). Blocking is a trust & safety primitive that ships with the **moderation bundle**, not the follows/connections bundles — see [Moderation — Blocking](/sdk/moderation/overview#blocking) for the full enforcement behavior and the [`useBlockManager`](/sdk/relationships/use-block-manager) hook.
+User-to-user **blocking** severs interaction between two users across every Sublay surface (follows, connections, DMs, content, mentions, notifications, discovery, and profiles). Blocking is a trust & safety primitive that ships with the **moderation bundle**, not the follows/connections bundles — see [Moderation — Blocking](/v7/sdk/moderation/overview#blocking) for the full enforcement behavior and the [`useBlockManager`](/v7/sdk/relationships/use-block-manager) hook.
 
 ## In This Section
 
 <CardGroup cols={2}>
-  <Card title="useFollowManager" href="/sdk/relationships/use-follow-manager">
+  <Card title="useFollowManager" href="/v7/sdk/relationships/use-follow-manager">
     High-level hook for toggling follow state on a profile
   </Card>
-  <Card title="useConnectionManager" href="/sdk/relationships/use-connection-manager">
+  <Card title="useConnectionManager" href="/v7/sdk/relationships/use-connection-manager">
     High-level hook that manages the full connection lifecycle
   </Card>
-  <Card title="useBlockManager" href="/sdk/relationships/use-block-manager">
+  <Card title="useBlockManager" href="/v7/sdk/relationships/use-block-manager">
     High-level hook for toggling block state on a profile
   </Card>
 </CardGroup>
@@ -47,10 +47,10 @@ User-to-user **blocking** severs interaction between two users across every Subl
 ## Hooks
 
 <CardGroup cols={2}>
-  <Card title="useFollowUser (+ more)" href="/hooks/follows/use-follow-user">
+  <Card title="useFollowUser (+ more)" href="/v7/hooks/follows/use-follow-user">
     All individual follow hooks for custom UIs
   </Card>
-  <Card title="useRequestConnection (+ more)" href="/hooks/connections/use-request-connection">
+  <Card title="useRequestConnection (+ more)" href="/v7/hooks/connections/use-request-connection">
     All individual connection hooks for custom UIs
   </Card>
 </CardGroup>

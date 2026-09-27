@@ -25,11 +25,11 @@ This endpoint accepts `multipart/form-data` to support file attachments alongsid
 </ParamField>
 
 <ParamField body="gif" type="object">
-  GIF attachment. Optional. See [GifData](/data-models/chat-message#gifdata) for the expected shape.
+  GIF attachment. Optional. See [GifData](/v7/data-models/chat-message#gifdata) for the expected shape.
 </ParamField>
 
 <ParamField body="mentions" type="array">
-  Array of [Mention](/data-models/chat-message#mention) objects for @mentions in the message content. Optional.
+  Array of [Mention](/v7/data-models/chat-message#mention) objects for @mentions in the message content. Optional.
 </ParamField>
 
 <ParamField body="parentMessageId" type="string">
@@ -56,13 +56,13 @@ This endpoint accepts `multipart/form-data` to support file attachments alongsid
 
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to the message sender's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to the message sender's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation) for the full contract.
 
 <SpaceReputationParams variant="context" field="query" />
 
 ## Response
 
-Returns the created [ChatMessage](/data-models/chat-message) object, fully populated with `user`, `quotedMessage`, `files`, `reactionCounts` (empty on creation), and `userReactions` (empty on creation). If `localId` was provided, it is echoed in the response.
+Returns the created [ChatMessage](/v7/data-models/chat-message) object, fully populated with `user`, `quotedMessage`, `files`, `reactionCounts` (empty on creation), and `userReactions` (empty on creation). If `localId` was provided, it is echoed in the response.
 
 ## Error Responses
 

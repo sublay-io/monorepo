@@ -3,7 +3,7 @@ title: "Workspace Invitation"
 description: "The shape of a WorkspaceInvitation object, plus the identity-matched, no-token acceptance model"
 ---
 
-A **WorkspaceInvitation** is a persistent record inviting a person into a [workspace](/data-models/workspace) with a pre-chosen grant (capabilities, permissions, rank, title) applied atomically on accept. Every invite **always sends an email** (there is no developer toggle).
+A **WorkspaceInvitation** is a persistent record inviting a person into a [workspace](/v7/data-models/workspace) with a pre-chosen grant (capabilities, permissions, rank, title) applied atomically on accept. Every invite **always sends an email** (there is no developer toggle).
 
 Acceptance is **identity-matched + verified-email, with no token** — see [Acceptance model](#acceptance-model).
 
@@ -16,9 +16,9 @@ Acceptance is **identity-matched + verified-email, with no token** — see [Acce
 | `invitedBy` | `string` | User id of the inviter. |
 | `userId` | `string \| null` | The resolved invitee's user id. Set at invite time when the email/username matches an existing user, and bound at signup for email-only invites. `null` only while no account exists for the address. |
 | `email` | `string \| null` | The invitee email, stored **normalized** (lowercase + trim). `null` for `userId`/`username`-addressed invites. |
-| `capabilities` | `string[]` | The [capabilities](/data-models/workspace-member#capabilities-the-closed-vocabulary) to apply on accept. |
-| `permissions` | `string[]` | The opaque [permissions](/data-models/workspace-member#permissions-opaque) to apply on accept. |
-| `rank` | `number` | The initial [rank](/data-models/workspace-member#rank-semantics) to apply on accept — always **absolute**, whichever coordinate the inviter used. A [`relativeRank`](/data-models/workspace-member#two-coordinates-rank-and-relativerank) offset (or the default, one rung below the inviter) is resolved to a number when the invitation is created and **frozen** here; it does not follow the inviter's rank afterwards. |
+| `capabilities` | `string[]` | The [capabilities](/v7/data-models/workspace-member#capabilities-the-closed-vocabulary) to apply on accept. |
+| `permissions` | `string[]` | The opaque [permissions](/v7/data-models/workspace-member#permissions-opaque) to apply on accept. |
+| `rank` | `number` | The initial [rank](/v7/data-models/workspace-member#rank-semantics) to apply on accept — always **absolute**, whichever coordinate the inviter used. A [`relativeRank`](/v7/data-models/workspace-member#two-coordinates-rank-and-relativerank) offset (or the default, one rung below the inviter) is resolved to a number when the invitation is created and **frozen** here; it does not follow the inviter's rank afterwards. |
 | `title` | `string \| null` | Optional initial cosmetic title. |
 | `status` | `"pending" \| "accepted" \| "declined" \| "revoked"` | Invitation status. **There is no `expired` status** — expiry is lazy (see below). |
 | `expiresAt` | `string` | Absolute expiry timestamp (ISO). Set to now + **14 days**. |
@@ -26,7 +26,7 @@ Acceptance is **identity-matched + verified-email, with no token** — see [Acce
 | `updatedAt` | `string` | Last-update timestamp. |
 
 <Note>
-  **[`GET /me/workspace-invites`](/api-reference/workspaces/invitations/list-my-invites) returns an enriched variant of this shape.** Every other read of a `WorkspaceInvitation` (listing what a workspace has issued, creating one, resending one) is by a capability-holder who already has full reach on the workspace, so `workspaceId`/`invitedBy` as bare ids are enough. The my-invites read is different: it's addressed to the *invitee*, who otherwise has no reach on the workspace at all (a direct workspace read 404s for a non-member) or the inviter. So that one endpoint replaces `invitedBy` with a populated object and adds a sibling `workspace` field, so the invite can be rendered ("X invited you to *Y*") without a follow-up read per invitation:
+  **[`GET /me/workspace-invites`](/v7/api-reference/workspaces/invitations/list-my-invites) returns an enriched variant of this shape.** Every other read of a `WorkspaceInvitation` (listing what a workspace has issued, creating one, resending one) is by a capability-holder who already has full reach on the workspace, so `workspaceId`/`invitedBy` as bare ids are enough. The my-invites read is different: it's addressed to the *invitee*, who otherwise has no reach on the workspace at all (a direct workspace read 404s for a non-member) or the inviter. So that one endpoint replaces `invitedBy` with a populated object and adds a sibling `workspace` field, so the invite can be rendered ("X invited you to *Y*") without a follow-up read per invitation:
 
   | Property | Type | Description |
   |----------|------|-------------|
@@ -49,7 +49,7 @@ Acceptance is an authenticated, in-app action gated by **identity**, not a token
 Combined with the verified-email gate on root-workspace creation — which **service and master keys do not bypass** either — **every workspace participant (member or owner) has a confirmed email.**
 
 <Note>
-  **Delivery requires one project setting.** Invitation emails deep-link to your app via [`workspaces.inviteAcceptUrl`](/sdk/workspaces/overview#project-settings), which has **no default**. Until it is set, creating or resending an invitation is refused with `409 workspace/missing-invite-accept-url` — including for invitees who already have an account. The link itself carries nothing secret; acceptance is identity-matched.
+  **Delivery requires one project setting.** Invitation emails deep-link to your app via [`workspaces.inviteAcceptUrl`](/v7/sdk/workspaces/overview#project-settings), which has **no default**. Until it is set, creating or resending an invitation is refused with `409 workspace/missing-invite-accept-url` — including for invitees who already have an account. The link itself carries nothing secret; acceptance is identity-matched.
 </Note>
 
 ### Binding to `userId`
@@ -67,6 +67,6 @@ This is a documented v1 limitation. A future dev-flippable project flag (treat t
 
 ## Related
 
-- [Workspace data model](/data-models/workspace)
-- [Create Invite API](/api-reference/workspaces/invitations/create-invite)
-- [Accept Invite API](/api-reference/workspaces/invitations/accept-invite)
+- [Workspace data model](/v7/data-models/workspace)
+- [Create Invite API](/v7/api-reference/workspaces/invitations/create-invite)
+- [Accept Invite API](/v7/api-reference/workspaces/invitations/accept-invite)

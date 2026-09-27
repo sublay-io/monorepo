@@ -25,7 +25,7 @@ Removes a member from a workspace. Requires the `remove-member` capability and i
 <ParamField body="actingUserId" type="string" required>
   Service/master keys only — the **acting** user (sent in the body so the act-as-user path works on `DELETE`; the path `:userId` is the target). **Required for a key:** this route has no unbounded path, so a key that names nobody is refused with `400 workspace/missing-user-id`. The `remove-member` capability and the rank bound are enforced against the named user — act as the **owner** for an unrestricted removal.
 
-  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response

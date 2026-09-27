@@ -8,10 +8,10 @@ icon: "plug"
 
 `useFetchManySpaces` returns a callable function for fetching multiple spaces. It supports searching by name, slug, description, or a combined query; filtering by membership or parent space; and sorting.
 
-For paginated, stateful lists with load-more support, use [`useSpaceList`](/hooks/space-lists/use-space-list) instead.
+For paginated, stateful lists with load-more support, use [`useSpaceList`](/v7/hooks/space-lists/use-space-list) instead.
 
 <Note>
-  This is a discovery surface: only `public` spaces are listed. `unlisted` and `private` spaces are excluded for non-members (they stay reachable by direct link/slug). The `memberOf=true` filter is the exception — it returns the caller's own spaces regardless of visibility. See [Space visibility](/data-models/space#visibility).
+  This is a discovery surface: only `public` spaces are listed. `unlisted` and `private` spaces are excluded for non-members (they stay reachable by direct link/slug). The `memberOf=true` filter is the exception — it returns the caller's own spaces regardless of visibility. See [Space visibility](/v7/data-models/space#visibility).
 </Note>
 
 ## Usage Example
@@ -68,7 +68,7 @@ function SpaceSearch() {
 </ParamField>
 
 <ParamField path="nsfwFilter" type='"include-all" | "exclude" | "only"'>
-  Filter by each space's `nsfwEffective` (own flag OR any ancestor). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW spaces; `"only"` returns only them. Because the filter keys off effective status, `"only"` may return an NSFW child whose safe parent is omitted — results are not guaranteed to form a contiguous tree. See [Space NSFW flagging](/data-models/space#nsfw-flagging).
+  Filter by each space's `nsfwEffective` (own flag OR any ancestor). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW spaces; `"only"` returns only them. Because the filter keys off effective status, `"only"` may return an NSFW child whose safe parent is omitted — results are not guaranteed to form a contiguous tree. See [Space NSFW flagging](/v7/data-models/space#nsfw-flagging).
 </ParamField>
 
 <ParamField path="include" type='"files" | string[]'>
@@ -78,7 +78,7 @@ function SpaceSearch() {
 ## Returns
 
 <ResponseField name="data" type="Space[]">
-  Array of [Space](/data-models/space) objects.
+  Array of [Space](/v7/data-models/space) objects.
 </ResponseField>
 
 <ResponseField name="pagination" type="object">

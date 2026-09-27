@@ -5,7 +5,7 @@ description: "Publish a draft entity, making it publicly visible"
 ---
 
 <Note>
-  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/bundles).
+  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v7/bundles).
 </Note>
 
 Publishes a draft entity. After publishing, the entity appears in normal feeds and is visible to all users. The entity's `isDraft` field is set to `false` and `createdAt` is reset to the current time.
@@ -20,7 +20,7 @@ Publishes a draft entity. After publishing, the entity appears in normal feeds a
 
 ## Response
 
-Returns the published [Entity](/data-models/entity) object with `isDraft: false`.
+Returns the published [Entity](/v7/data-models/entity) object with `isDraft: false`.
 
 <Note>
   Publishing resets `createdAt` to the current time, so the entity appears as "new" in chronological feeds regardless of when the draft was created.

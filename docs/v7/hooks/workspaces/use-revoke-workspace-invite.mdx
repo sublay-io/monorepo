@@ -6,12 +6,12 @@ icon: "plug"
 
 ## Overview
 
-`useRevokeWorkspaceInvite` returns a callable that marks a pending [invitation](/data-models/workspace-invitation) `revoked`. Fires `workspace.invite.revoked`.
+`useRevokeWorkspaceInvite` returns a callable that marks a pending [invitation](/v7/data-models/workspace-invitation) `revoked`. Fires `workspace.invite.revoked`.
 
 **Authorization:** capability-gated. Requires the `invite` capability on the workspace (owners hold it implicitly) — the same gate as creating and listing invites.
 
 <Note>
-  The underlying route is a verb-suffixed **`POST /workspaces/:id/invites/:inviteId/revoke`**, not a `DELETE`. The hook handles this for you; it is worth knowing if you are comparing against the [API reference](/api-reference/workspaces/invitations/revoke-invite).
+  The underlying route is a verb-suffixed **`POST /workspaces/:id/invites/:inviteId/revoke`**, not a `DELETE`. The hook handles this for you; it is worth knowing if you are comparing against the [API reference](/v7/api-reference/workspaces/invitations/revoke-invite).
 </Note>
 
 ## Usage Example
@@ -64,6 +64,6 @@ function InviteRow({
 
 ## Related
 
-- [`useFetchWorkspaceInvites`](/hooks/workspaces/use-fetch-workspace-invites) — list what there is to revoke
-- [`useResendWorkspaceInvite`](/hooks/workspaces/use-resend-workspace-invite)
-- [Revoke Invite API](/api-reference/workspaces/invitations/revoke-invite)
+- [`useFetchWorkspaceInvites`](/v7/hooks/workspaces/use-fetch-workspace-invites) — list what there is to revoke
+- [`useResendWorkspaceInvite`](/v7/hooks/workspaces/use-resend-workspace-invite)
+- [Revoke Invite API](/v7/api-reference/workspaces/invitations/revoke-invite)

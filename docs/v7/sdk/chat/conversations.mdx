@@ -43,10 +43,10 @@ const { conversations } = useConversations({ types: ["direct", "group"] });
 Each item in the list is a `ConversationPreview` — a `Conversation` extended with `unreadCount` and a truncated `lastMessage`.
 
 <Note>
-  The list is **live**. It reorders on new messages, inserts conversations as they're created or added (including ones paginated out that receive a new message), removes conversations you leave or that are deleted, and self-heals on socket reconnect — across direct, group, and space chats. You don't need to refetch it manually. See [Real-time › Live Conversation List](/sdk/chat/real-time#live-conversation-list).
+  The list is **live**. It reorders on new messages, inserts conversations as they're created or added (including ones paginated out that receive a new message), removes conversations you leave or that are deleted, and self-heals on socket reconnect — across direct, group, and space chats. You don't need to refetch it manually. See [Real-time › Live Conversation List](/v7/sdk/chat/real-time#live-conversation-list).
 </Note>
 
-See [`useConversations`](/hooks/chat/conversations/use-conversations) for the full API.
+See [`useConversations`](/v7/hooks/chat/conversations/use-conversations) for the full API.
 
 ## Creating a Direct Conversation
 
@@ -67,7 +67,7 @@ function StartChat({ userId }: { userId: string }) {
 }
 ```
 
-See [`useCreateDirectConversation`](/hooks/chat/conversations/use-create-direct-conversation).
+See [`useCreateDirectConversation`](/v7/hooks/chat/conversations/use-create-direct-conversation).
 
 ## Creating a Group Conversation
 
@@ -116,7 +116,7 @@ function ConversationHeader({ conversationId }: { conversationId: string }) {
 
 The conversation is fetched once on mount if not already in Redux state. Real-time `conversation:updated` socket events keep it current automatically.
 
-See [`useConversation`](/hooks/chat/conversations/use-conversation).
+See [`useConversation`](/v7/hooks/chat/conversations/use-conversation).
 
 ## Managing Members
 
@@ -144,7 +144,7 @@ function MemberList({ conversationId }: { conversationId: string }) {
 }
 ```
 
-See [`useConversationMembers`](/hooks/chat/conversations/use-conversation-members).
+See [`useConversationMembers`](/v7/hooks/chat/conversations/use-conversation-members).
 
 ## Space Conversations
 
@@ -162,15 +162,15 @@ function SpaceChat({ spaceId }: { spaceId: string }) {
 }
 ```
 
-See [`useFetchSpaceConversation`](/hooks/chat/conversations/use-fetch-space-conversation).
+See [`useFetchSpaceConversation`](/v7/hooks/chat/conversations/use-fetch-space-conversation).
 
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="Messages" icon="message" href="/sdk/chat/messages">
+  <Card title="Messages" icon="message" href="/v7/sdk/chat/messages">
     Send and receive messages in a conversation
   </Card>
-  <Card title="Real-time" icon="bolt" href="/sdk/chat/real-time">
+  <Card title="Real-time" icon="bolt" href="/v7/sdk/chat/real-time">
     Typing indicators, unread counts, read receipts
   </Card>
 </CardGroup>

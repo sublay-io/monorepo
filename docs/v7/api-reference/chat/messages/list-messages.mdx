@@ -6,7 +6,7 @@ description: "Fetch messages in a conversation or thread"
 
 import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
-Returns a cursor-paginated list of [ChatMessage](/data-models/chat-message) objects. By default returns the main conversation stream (excludes thread replies). Pass `parentId` to fetch replies for a specific thread.
+Returns a cursor-paginated list of [ChatMessage](/v7/data-models/chat-message) objects. By default returns the main conversation stream (excludes thread replies). Pass `parentId` to fetch replies for a specific thread.
 
 The caller must be a member. Former members (who left) can only read messages up to when they left.
 
@@ -39,7 +39,7 @@ The caller must be a member. Former members (who left) can only read messages up
 </ParamField>
 
 <ParamField query="include" type="string">
-  Comma-separated list of extra fields to include: `files` (attachments) and `grants` (the [reputation-grant summary](/data-models/reputation-grant#grantsummary)). Combine them as `include=files,grants`.
+  Comma-separated list of extra fields to include: `files` (attachments) and `grants` (the [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary)). Combine them as `include=files,grants`.
 </ParamField>
 
 <ParamField query="filters" type="object">
@@ -52,7 +52,7 @@ The caller must be a member. Former members (who left) can only read messages up
 
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each message sender's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each message sender's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation) for the full contract.
 
 <SpaceReputationParams variant="context" field="query" />
 

@@ -11,7 +11,7 @@ Requires authentication. **Acting-user-scoped:** an end-user token (`Authorizati
 ## Body Parameters
 
 <ParamField body="disabledTypes" type="string[]" required>
-  The complete set of event types to disable for push. Each value must be one of the server's exact event type names (see the [event palette](/notification-preferences#the-event-palette)) — unknown names are rejected. Pass `[]` to re-enable everything (all-on).
+  The complete set of event types to disable for push. Each value must be one of the server's exact event type names (see the [event palette](/v7/notification-preferences#the-event-palette)) — unknown names are rejected. Pass `[]` to re-enable everything (all-on).
 </ParamField>
 
 <ParamField body="userId" type="string">
@@ -91,6 +91,6 @@ Returns `200` with the stored set (deduplicated).
 
 ## See Also
 
-- [Get Notification Preferences](/api-reference/push-notifications/get-preferences)
-- [`useNotificationPreferences`](/hooks/push/use-notification-preferences)
-- [Notification Preferences & Mute](/notification-preferences)
+- [Get Notification Preferences](/v7/api-reference/push-notifications/get-preferences)
+- [`useNotificationPreferences`](/v7/hooks/push/use-notification-preferences)
+- [Notification Preferences & Mute](/v7/notification-preferences)

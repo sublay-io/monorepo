@@ -6,14 +6,14 @@ icon: "plug"
 
 ## Overview
 
-`useCreateWorkspaceInvite` returns a callable that creates an [invitation](/data-models/workspace-invitation). Address the invitee by **exactly one** of `email`, `userId`, or `username` (here `userId`/`username` is the invite **target**, not the actor — the inviter is the signed-in user).
+`useCreateWorkspaceInvite` returns a callable that creates an [invitation](/v7/data-models/workspace-invitation). Address the invitee by **exactly one** of `email`, `userId`, or `username` (here `userId`/`username` is the invite **target**, not the actor — the inviter is the signed-in user).
 
-**Authorization:** capability-gated + rank-bounded. Requires the `invite` capability (or ownership). The invited `capabilities`/`permissions` are subject to [no-escalation](/data-models/workspace-member#no-privilege-escalation), and if the inviter holds a direct member row the invited rank must be strictly larger (less senior) than their own.
+**Authorization:** capability-gated + rank-bounded. Requires the `invite` capability (or ownership). The invited `capabilities`/`permissions` are subject to [no-escalation](/v7/data-models/workspace-member#no-privilege-escalation), and if the inviter holds a direct member row the invited rank must be strictly larger (less senior) than their own.
 
-**Rank comes in either coordinate.** Pass `relativeRank` (an offset from the inviter — `1` = one rung below me) or `rank` (absolute), never both. Pass **neither** and the server applies `relativeRank: 1`, which is well defined for every inviter and can never fail the rank floor. See [choosing a rank](/sdk/workspaces/overview#choosing-a-rank).
+**Rank comes in either coordinate.** Pass `relativeRank` (an offset from the inviter — `1` = one rung below me) or `rank` (absolute), never both. Pass **neither** and the server applies `relativeRank: 1`, which is well defined for every inviter and can never fail the rank floor. See [choosing a rank](/v7/sdk/workspaces/overview#choosing-a-rank).
 
 <Warning>
-  **Your project must have `workspaces.inviteAcceptUrl` set before this hook can succeed.** The invitation email deep-links to that URL, and it has **no default** — so a freshly added `workspaces` bundle has none and every call fails with `409 workspace/missing-invite-accept-url` until you configure it. This holds **even when the invitee already has an account**. See [Project settings](/sdk/workspaces/overview#project-settings).
+  **Your project must have `workspaces.inviteAcceptUrl` set before this hook can succeed.** The invitation email deep-links to that URL, and it has **no default** — so a freshly added `workspaces` bundle has none and every call fails with `409 workspace/missing-invite-accept-url` until you configure it. This holds **even when the invitee already has an account**. See [Project settings](/v7/sdk/workspaces/overview#project-settings).
 </Warning>
 
 ## Usage Example
@@ -53,7 +53,7 @@ function InviteForm({ workspaceId }: { workspaceId: string }) {
 
 ## Returns
 
-Returns the created [WorkspaceInvitation](/data-models/workspace-invitation) object.
+Returns the created [WorkspaceInvitation](/v7/data-models/workspace-invitation) object.
 
 ## Error codes
 
@@ -63,7 +63,7 @@ Returns the created [WorkspaceInvitation](/data-models/workspace-invitation) obj
 | `workspace/no-escalation` | 403 | You tried to grant a capability/permission you do not hold. |
 | `workspace/insufficient-rank` | 403 | The invited rank is not strictly below your own. Checked on the resolved absolute value, so `relativeRank` clears it by construction. |
 | `workspace/unauthorized` | 403 | You lack the `invite` capability. |
-| `workspace/missing-invite-accept-url` | 409 | The **project** has no [`workspaces.inviteAcceptUrl`](/sdk/workspaces/overview#project-settings) configured, so the invite email would have nowhere to link. Nothing is persisted. A misconfiguration to fix in project settings, not something the end user can act on — surface it to yourself, not to them. |
+| `workspace/missing-invite-accept-url` | 409 | The **project** has no [`workspaces.inviteAcceptUrl`](/v7/sdk/workspaces/overview#project-settings) configured, so the invite email would have nowhere to link. Nothing is persisted. A misconfiguration to fix in project settings, not something the end user can act on — surface it to yourself, not to them. |
 
 <Warning>
   **Omitting the rank field is the easiest way to mint rank 0.** The default is "one rung below me", and a signed-in user with **no member row on this workspace** — the workspace's `owner`, an ancestor owner, or a reach holder — anchors at apex, so their default lands on **rank 0**, the most senior rung. That is correct (one below apex *is* the top rung), but it is the opposite of what "I left the field off" usually implies. If a caller with no row here should be inviting people to the *bottom* of the ladder, name a coordinate instead.
@@ -73,7 +73,7 @@ Returns the created [WorkspaceInvitation](/data-models/workspace-invitation) obj
 
 ## Related
 
-- [`useFetchWorkspaceInvites`](/hooks/workspaces/use-fetch-workspace-invites) — the invites this workspace has issued
-- [`useRevokeWorkspaceInvite`](/hooks/workspaces/use-revoke-workspace-invite) · [`useResendWorkspaceInvite`](/hooks/workspaces/use-resend-workspace-invite)
-- [Project settings](/sdk/workspaces/overview#project-settings) — the required `workspaces.inviteAcceptUrl`
-- [Create Invite API](/api-reference/workspaces/invitations/create-invite)
+- [`useFetchWorkspaceInvites`](/v7/hooks/workspaces/use-fetch-workspace-invites) — the invites this workspace has issued
+- [`useRevokeWorkspaceInvite`](/v7/hooks/workspaces/use-revoke-workspace-invite) · [`useResendWorkspaceInvite`](/v7/hooks/workspaces/use-resend-workspace-invite)
+- [Project settings](/v7/sdk/workspaces/overview#project-settings) — the required `workspaces.inviteAcceptUrl`
+- [Create Invite API](/v7/api-reference/workspaces/invitations/create-invite)

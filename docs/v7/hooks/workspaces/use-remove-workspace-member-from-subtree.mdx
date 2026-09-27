@@ -15,7 +15,7 @@ icon: "plug"
 </Warning>
 
 <Warning>
-  **Owned descendants block, they do not cascade.** Because owners have no member row, this sweep does not cover descendant workspaces the target *owns*. It fails with `409 workspace/owns-descendants` and reports them, rather than silently orphaning ownership. Reassign each via [`useTransferWorkspaceOwnership`](/hooks/workspaces/use-transfer-workspace-ownership) or delete it, then retry.
+  **Owned descendants block, they do not cascade.** Because owners have no member row, this sweep does not cover descendant workspaces the target *owns*. It fails with `409 workspace/owns-descendants` and reports them, rather than silently orphaning ownership. Reassign each via [`useTransferWorkspaceOwnership`](/v7/hooks/workspaces/use-transfer-workspace-ownership) or delete it, then retry.
 </Warning>
 
 ## Usage Example
@@ -76,7 +76,7 @@ function OffboardButton({
 
 Each entry names a descendant where the target is **still a member** after this call.
 
-- `id` / `name` are `null` when you have no standing on that workspace. The call tells you a membership survived without disclosing the existence or name of a sealed sub-workspace you have no authority over — the same sealing fence [`useFetchWorkspaceMembers`](/hooks/workspaces/use-fetch-workspace-members) applies to `include=descendants`. Escalate to an owner or ancestor owner of that branch.
+- `id` / `name` are `null` when you have no standing on that workspace. The call tells you a membership survived without disclosing the existence or name of a sealed sub-workspace you have no authority over — the same sealing fence [`useFetchWorkspaceMembers`](/v7/hooks/workspaces/use-fetch-workspace-members) applies to `include=descendants`. Escalate to an owner or ancestor owner of that branch.
 - `reason` is currently always `"out-of-reach"`.
 - Only descendants where the target **actually still holds a direct membership** are listed — unreachable descendants they were never in are never disclosed.
 
@@ -90,5 +90,5 @@ Each entry names a descendant where the target is **still a member** after this 
 
 ## Related
 
-- [`useRemoveWorkspaceMember`](/hooks/workspaces/use-remove-workspace-member) — this node only
-- [Remove From Subtree API](/api-reference/workspaces/members/remove-from-subtree)
+- [`useRemoveWorkspaceMember`](/v7/hooks/workspaces/use-remove-workspace-member) — this node only
+- [Remove From Subtree API](/v7/api-reference/workspaces/members/remove-from-subtree)

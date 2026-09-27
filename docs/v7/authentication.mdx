@@ -52,7 +52,7 @@ Sublay provides a complete email/password authentication system out of the box. 
 
 Users created through built-in auth can link OAuth providers to their account later — see the OAuth section below.
 
-See [SDK Reference → Authentication → Built-in](/sdk/authentication/built-in) for implementation guidance, or [API Reference → Auth](/api-reference/auth/sign-up) for the raw endpoint reference.
+See [SDK Reference → Authentication → Built-in](/v7/sdk/authentication/built-in) for implementation guidance, or [API Reference → Auth](/v7/api-reference/auth/sign-up) for the raw endpoint reference.
 
 ---
 
@@ -110,7 +110,7 @@ Every time a valid external JWT is presented, Sublay compares the `userData` fie
 
 The private key must never leave your server. Signing happens server-side; the client only receives the finished JWT. Because Sublay verifies using your public key, a client cannot forge or modify user data.
 
-See [SDK Reference → Authentication → External](/sdk/authentication/external) for implementation guidance.
+See [SDK Reference → Authentication → External](/v7/sdk/authentication/external) for implementation guidance.
 
 ---
 
@@ -155,7 +155,7 @@ A user can link multiple OAuth providers (and a password account) to a single Su
 
 This enables scenarios like "sign in with Google on a laptop and GitHub on another device" — both map to the same user.
 
-See [SDK Reference → Authentication → OAuth](/sdk/authentication/oauth) for the full integration guide.
+See [SDK Reference → Authentication → OAuth](/v7/sdk/authentication/oauth) for the full integration guide.
 
 ---
 
@@ -165,7 +165,7 @@ The SDK supports multiple simultaneously signed-in accounts in a single app inst
 
 Use cases: apps where a person manages multiple accounts, shared devices, or testing flows.
 
-See [SDK Reference → Authentication → Multi-Account](/sdk/authentication/multi-account) for the full guide.
+See [SDK Reference → Authentication → Multi-Account](/v7/sdk/authentication/multi-account) for the full guide.
 
 ---
 
@@ -176,4 +176,4 @@ Beyond authentication, Sublay enforces authorization on every request:
 - Most write operations require an authenticated user (or a service API key)
 - Ownership checks are enforced server-side — a user cannot modify another user's content through the normal API
 - Space roles (owner, admin, moderator, member) control what is permitted within a space
-- Service API keys bypass user-level authorization and are intended for server-side use only — see [Integration Options](/integration-options#service-api-key-recommended-for-server-to-server)
+- Service API keys bypass user-level authorization and are intended for server-side use only — see [Integration Options](/v7/integration-options#service-api-key-recommended-for-server-to-server)

@@ -13,17 +13,17 @@ Sublay provides a two-tier moderation system:
 
 Both tiers share the same reporting flow. The difference is in who can act on reports and what scope they have access to.
 
-Beyond acting on individual pieces of content, moderators can also **[suspend a user](/sdk/moderation/suspensions)** — an enforced, platform-wide timeout that blocks all participation writes while leaving reads, sign-in, and account self-management open.
+Beyond acting on individual pieces of content, moderators can also **[suspend a user](/v7/sdk/moderation/suspensions)** — an enforced, platform-wide timeout that blocks all participation writes while leaving reads, sign-in, and account self-management open.
 
 <Note>
-  **Requires the `moderation` bundle.** Reports, suspensions, and **user blocking** are only available when the `moderation` bundle is installed on your project. See [Bundles](/bundles) to add it.
+  **Requires the `moderation` bundle.** Reports, suspensions, and **user blocking** are only available when the `moderation` bundle is installed on your project. See [Bundles](/v7/bundles) to add it.
 </Note>
 
 ## Blocking
 
 Beyond moderator-driven reporting and suspensions, the moderation bundle also provides **end-user blocking** — a user-to-user safety primitive. Any user can block any other user (no prior interaction required), and Sublay reliably severs interaction between them across every relevant surface.
 
-Blocking is **not a moderator action** — it is exposed to your app's end users, alongside follows and connections, through the same SDK surfaces (React/React Native/Expo hooks, the node SDK, and the js SDK). Sublay ships the *capability and enforcement*; your app builds the block button/menu UI. See the [`useBlockManager`](/sdk/relationships/use-block-manager) hook to wire up a block/unblock toggle.
+Blocking is **not a moderator action** — it is exposed to your app's end users, alongside follows and connections, through the same SDK surfaces (React/React Native/Expo hooks, the node SDK, and the js SDK). Sublay ships the *capability and enforcement*; your app builds the block button/menu UI. See the [`useBlockManager`](/v7/sdk/relationships/use-block-manager) hook to wire up a block/unblock toggle.
 
 <Note>
   Blocking ships with the moderation bundle because app stores check for **reporting, blocking, and moderation together** — it is the trust & safety package an app installs to be app-store compliant. A project without the moderation bundle has neither reporting nor blocking.
@@ -50,7 +50,7 @@ Unblocking lifts the barrier immediately but **restores nothing** — removed fo
 
 ### Content-list opt-in
 
-Post and comment list endpoints (and their SDK equivalents) accept a `blockedFilter` parameter. It defaults to `"exclude"` (hide block-edged authors). Setting it to `"include-outbound-blocked"` re-includes content authored **only** by users the viewer themselves blocked — their own "view anyway" affordance. It can **never** surface content from users who blocked the viewer, and interaction remains blocked regardless of whether the content is shown. See [Fetch Many Entities](/api-reference/entities/fetch-many-entities) and [Fetch Many Comments](/api-reference/comments/fetch-many-comments).
+Post and comment list endpoints (and their SDK equivalents) accept a `blockedFilter` parameter. It defaults to `"exclude"` (hide block-edged authors). Setting it to `"include-outbound-blocked"` re-includes content authored **only** by users the viewer themselves blocked — their own "view anyway" affordance. It can **never** surface content from users who blocked the viewer, and interaction remains blocked regardless of whether the content is shown. See [Fetch Many Entities](/v7/api-reference/entities/fetch-many-entities) and [Fetch Many Comments](/v7/api-reference/comments/fetch-many-comments).
 
 ### Non-disclosure
 
@@ -58,27 +58,27 @@ A block is invisible to the blocked user. There is no notification, no "you have
 
 ### Block SDK surfaces
 
-- **React / React Native / Expo hooks:** [`useBlockManager`](/hooks/blocks/use-block-manager), [`useBlockUser`](/hooks/blocks/use-block-user), [`useUnblockUser`](/hooks/blocks/use-unblock-user), [`useFetchBlockStatus`](/hooks/blocks/use-fetch-block-status), [`useFetchBlockedUsers`](/hooks/blocks/use-fetch-blocked-users).
+- **React / React Native / Expo hooks:** [`useBlockManager`](/v7/hooks/blocks/use-block-manager), [`useBlockUser`](/v7/hooks/blocks/use-block-user), [`useUnblockUser`](/v7/hooks/blocks/use-unblock-user), [`useFetchBlockStatus`](/v7/hooks/blocks/use-fetch-block-status), [`useFetchBlockedUsers`](/v7/hooks/blocks/use-fetch-blocked-users).
 - **Node SDK** (act-on-behalf via `actingUserId`): `createBlock`, `deleteBlock`, `fetchBlockStatus`, `fetchBlockedUsers` on the [`users`](/v7/node-sdk/users) module.
 - **JS SDK** (token-derived actor): `createBlock`, `deleteBlock`, `fetchBlockStatus`, `fetchBlockedUsers` on the [`users`](/v7/js-sdk/users) module.
-- **REST:** [Block User](/api-reference/users/blocks/block-user), [Unblock User](/api-reference/users/blocks/unblock-user), [Get Block Status](/api-reference/users/blocks/get-block-status), [Fetch Blocked Users](/api-reference/blocks/fetch-blocks).
+- **REST:** [Block User](/v7/api-reference/users/blocks/block-user), [Unblock User](/v7/api-reference/users/blocks/unblock-user), [Get Block Status](/v7/api-reference/users/blocks/get-block-status), [Fetch Blocked Users](/v7/api-reference/blocks/fetch-blocks).
 
 ## Reporting Flow
 
 <Steps>
   <Step title="User submits a report">
-    Call [`useCreateReport`](/hooks/reports/use-create-report) with the target ID and a reason key. If the target has already been reported, the user's report is appended to the existing report record.
+    Call [`useCreateReport`](/v7/hooks/reports/use-create-report) with the target ID and a reason key. If the target has already been reported, the user's report is appended to the existing report record.
   </Step>
   <Step title="Report is associated with a space">
     The server automatically determines which space the reported content belongs to. Reports with no space (content outside a space) are visible only to project-level moderators.
   </Step>
   <Step title="Moderator reviews pending reports">
-    A moderator fetches pending reports with [`useFetchModeratedReports`](/hooks/reports/use-fetch-moderated-reports):
+    A moderator fetches pending reports with [`useFetchModeratedReports`](/v7/hooks/reports/use-fetch-moderated-reports):
     - **Project-level moderators** see all reports across the entire project.
     - **Space-level moderators** see only reports for content within their space.
   </Step>
   <Step title="Moderator takes action">
-    Use [`useHandleSpaceEntityReport`](/hooks/reports/use-handle-space-entity-report) or [`useHandleSpaceCommentReport`](/hooks/reports/use-handle-space-comment-report) to remove content, ban the author, or dismiss the report. Space-level moderators can only act on content within their space.
+    Use [`useHandleSpaceEntityReport`](/v7/hooks/reports/use-handle-space-entity-report) or [`useHandleSpaceCommentReport`](/v7/hooks/reports/use-handle-space-comment-report) to remove content, ban the author, or dismiss the report. Space-level moderators can only act on content within their space.
   </Step>
 </Steps>
 
@@ -134,26 +134,26 @@ import { reportReasons } from "@sublay/core";
 The hooks below are used for **space-level moderation** integrated in your app. Project-level moderation does not require any hooks — it is handled through the Sublay Dashboard.
 
 <CardGroup cols={2}>
-  <Card title="useCreateReport" href="/hooks/reports/use-create-report">
+  <Card title="useCreateReport" href="/v7/hooks/reports/use-create-report">
     Submit a report against an entity, comment, or chat message.
   </Card>
-  <Card title="useFetchModeratedReports" href="/hooks/reports/use-fetch-moderated-reports">
+  <Card title="useFetchModeratedReports" href="/v7/hooks/reports/use-fetch-moderated-reports">
     Fetch pending reports for spaces the current user moderates.
   </Card>
-  <Card title="useHandleSpaceEntityReport" href="/hooks/reports/use-handle-space-entity-report">
+  <Card title="useHandleSpaceEntityReport" href="/v7/hooks/reports/use-handle-space-entity-report">
     Action an entity report as a space moderator.
   </Card>
-  <Card title="useHandleSpaceCommentReport" href="/hooks/reports/use-handle-space-comment-report">
+  <Card title="useHandleSpaceCommentReport" href="/v7/hooks/reports/use-handle-space-comment-report">
     Action a comment report as a space moderator.
   </Card>
-  <Card title="useHandleSpaceChatReport" href="/hooks/reports/use-handle-space-chat-report">
+  <Card title="useHandleSpaceChatReport" href="/v7/hooks/reports/use-handle-space-chat-report">
     Action a chat message report as a space moderator.
   </Card>
 </CardGroup>
 
 ## Related
 
-- [Blocking](#blocking) — End-user user-to-user blocking (via [`useBlockManager`](/sdk/relationships/use-block-manager))
-- [Suspensions](/sdk/moderation/suspensions) — Platform-wide user timeouts that block participation writes
-- [Space Moderation](/sdk/spaces/moderation) — Direct moderation of entities and comments within a space (without the reporting flow)
-- [Space Rules](/sdk/spaces/rules) — Define community rules that appear alongside moderation decisions
+- [Blocking](#blocking) — End-user user-to-user blocking (via [`useBlockManager`](/v7/sdk/relationships/use-block-manager))
+- [Suspensions](/v7/sdk/moderation/suspensions) — Platform-wide user timeouts that block participation writes
+- [Space Moderation](/v7/sdk/spaces/moderation) — Direct moderation of entities and comments within a space (without the reporting flow)
+- [Space Rules](/v7/sdk/spaces/rules) — Define community rules that appear alongside moderation decisions

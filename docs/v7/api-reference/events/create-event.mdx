@@ -89,7 +89,7 @@ Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bu
 </ParamField>
 
 <ParamField body="cover.options" type="string">
-  JSON-stringified image-processing options for the cover (the same discriminated union used by [Upload Image](/api-reference/storage/upload-image)).
+  JSON-stringified image-processing options for the cover (the same discriminated union used by [Upload Image](/v7/api-reference/storage/upload-image)).
 </ParamField>
 
 <ParamField body="gallery" type="file[]">
@@ -102,7 +102,7 @@ Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bu
 
 ## Response
 
-Returns `201` with the created [Event](/data-models/event) object, including inline `rsvpCounts` and (with images) the `files` association.
+Returns `201` with the created [Event](/v7/data-models/event) object, including inline `rsvpCounts` and (with images) the `files` association.
 
 ## Error Responses
 
@@ -144,4 +144,4 @@ Returns `201` with the created [Event](/data-models/event) object, including inl
   </Accordion>
 </AccordionGroup>
 
-See also: [useCreateEvent](/hooks/events/use-create-event) · [node-sdk](/v7/node-sdk/events) · [js-sdk](/v7/js-sdk/events)
+See also: [useCreateEvent](/v7/hooks/events/use-create-event) · [node-sdk](/v7/node-sdk/events) · [js-sdk](/v7/js-sdk/events)

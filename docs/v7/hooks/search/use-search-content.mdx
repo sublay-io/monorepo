@@ -10,7 +10,7 @@ import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
 Returns state and a `search` function for executing natural language searches over project content. Supports filtering by content type and scoping by space or conversation.
 
-For integration guidance, see [Semantic Search](/sdk/search/semantic-search).
+For integration guidance, see [Semantic Search](/v7/sdk/search/semantic-search).
 
 ## Usage Example
 
@@ -75,7 +75,7 @@ This hook returns an object. Call `search` with:
       Cosine similarity score (0–1).
     </ResponseField>
     <ResponseField name="record" type="Entity | Comment | ChatMessage">
-      The full matched record. When `spaceReputation` is requested, its embedded author carries an added `spaceReputation` number. See [Reputation](/data-models/reputation).
+      The full matched record. When `spaceReputation` is requested, its embedded author carries an added `spaceReputation` number. See [Reputation](/v7/data-models/reputation).
     </ResponseField>
   </Expandable>
 </ResponseField>

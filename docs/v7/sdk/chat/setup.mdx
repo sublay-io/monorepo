@@ -49,7 +49,7 @@ When the access token rotates (e.g. after a refresh), `ChatProvider` updates the
 
 ## Checking Connection State
 
-Use [`useChatSocket`](/hooks/chat/use-chat-socket) to read the connection state in your UI:
+Use [`useChatSocket`](/v7/hooks/chat/use-chat-socket) to read the connection state in your UI:
 
 ```tsx
 import { useChatSocket } from "@sublay/react-js";
@@ -64,8 +64,8 @@ function ConnectionBadge() {
 
 Two hooks expose the unread counts fetched on mount:
 
-- [`useTotalUnreadCount`](/hooks/chat/use-total-unread-count) — total number of unread messages across all conversations
-- [`useUnreadConversationCount`](/hooks/chat/use-unread-conversation-count) — number of conversations with at least one unread message
+- [`useTotalUnreadCount`](/v7/hooks/chat/use-total-unread-count) — total number of unread messages across all conversations
+- [`useUnreadConversationCount`](/v7/hooks/chat/use-unread-conversation-count) — number of conversations with at least one unread message
 
 These are useful for badges in navigation:
 
@@ -82,10 +82,10 @@ function NavBadge() {
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="Conversations" icon="comments" href="/sdk/chat/conversations">
+  <Card title="Conversations" icon="comments" href="/v7/sdk/chat/conversations">
     Create and list conversations
   </Card>
-  <Card title="Messages" icon="message" href="/sdk/chat/messages">
+  <Card title="Messages" icon="message" href="/v7/sdk/chat/messages">
     Send and receive messages
   </Card>
 </CardGroup>

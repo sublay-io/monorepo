@@ -4,7 +4,7 @@ api: "GET /dashboard/users/:userId/reputation-grants"
 description: "A single user's full grant history, negative grants included — the only surface that exposes them"
 ---
 
-Returns one user's complete reputation-grant history, received and sent, **including negative grants**. This is the only route on which negatives are readable: the public [list endpoint](/api-reference/reputation-grants/fetch-many-reputation-grants) bakes `amount > 0` into its query for every caller, so a service key sees no more there than an ordinary user does.
+Returns one user's complete reputation-grant history, received and sent, **including negative grants**. This is the only route on which negatives are readable: the public [list endpoint](/v7/api-reference/reputation-grants/fetch-many-reputation-grants) bakes `amount > 0` into its query for every caller, so a service key sees no more there than an ordinary user does.
 
 This is a dashboard route, not a `/v7/:projectId` route — it powers the grant-history dialog on a user's detail view in the [dashboard](https://dash.sublay.io) — but it is callable with a service or master key, which is how a backend reads its own moderation deductions back.
 
@@ -72,7 +72,7 @@ Returns `200` with the dashboard list shape. `grants` is always an array, never 
 }
 ```
 
-Both counterparties are hydrated with a display-only projection — `id`, `name`, `username`, `avatar`. No sensitive user columns are returned. See [ReputationGrant](/data-models/reputation-grant) for the row shape.
+Both counterparties are hydrated with a display-only projection — `id`, `name`, `username`, `avatar`. No sensitive user columns are returned. See [ReputationGrant](/v7/data-models/reputation-grant) for the row shape.
 
 ## Error Responses
 
@@ -101,4 +101,4 @@ Both counterparties are hydrated with a display-only projection — `id`, `name`
 
 **Rate limit:** 25 requests per 5 minutes per IP. Exceeding it returns `429` with a plain-text message and no `code`.
 
-See also: [ReputationGrant](/data-models/reputation-grant) · [Fetch Many Reputation Grants](/api-reference/reputation-grants/fetch-many-reputation-grants)
+See also: [ReputationGrant](/v7/data-models/reputation-grant) · [Fetch Many Reputation Grants](/v7/api-reference/reputation-grants/fetch-many-reputation-grants)

@@ -8,7 +8,7 @@ icon: "cube"
 
 Combines block-status fetching and toggle actions into a single hook. On mount, loads whether the current user blocks `userId`, then provides a `toggleBlock` function to block or unblock in one call. This is the hook to wire to a block/unblock button.
 
-Blocking is part of the trust & safety (moderation) bundle. See [Moderation — Blocking](/sdk/moderation/overview#blocking) for what a block prevents and hides.
+Blocking is part of the trust & safety (moderation) bundle. See [Moderation — Blocking](/v7/sdk/moderation/overview#blocking) for what a block prevents and hides.
 
 ## Usage Example
 
@@ -48,7 +48,7 @@ function BlockButton({ userId }: { userId: string }) {
 
 ## Related
 
-- [useBlockUser](/hooks/blocks/use-block-user)
-- [useUnblockUser](/hooks/blocks/use-unblock-user)
-- [useFetchBlockStatus](/hooks/blocks/use-fetch-block-status)
-- [useFetchBlockedUsers](/hooks/blocks/use-fetch-blocked-users)
+- [useBlockUser](/v7/hooks/blocks/use-block-user)
+- [useUnblockUser](/v7/hooks/blocks/use-unblock-user)
+- [useFetchBlockStatus](/v7/hooks/blocks/use-fetch-block-status)
+- [useFetchBlockedUsers](/v7/hooks/blocks/use-fetch-blocked-users)

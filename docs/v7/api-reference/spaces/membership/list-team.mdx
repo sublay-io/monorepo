@@ -18,14 +18,14 @@ Returns all admins and moderators of a space in a single non-paginated response.
 
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each returned member's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each returned member's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation) for the full contract.
 
 <SpaceReputationParams variant="context" field="query" />
 
 ## Response
 
 <ResponseField name="data" type="SpaceMemberWithUser[]">
-  Array of [SpaceMemberWithUser](/data-models/space-member) objects with `role` of `"admin"` or `"moderator"` and `status` of `"active"`.
+  Array of [SpaceMemberWithUser](/v7/data-models/space-member) objects with `role` of `"admin"` or `"moderator"` and `status` of `"active"`.
 </ResponseField>
 
-See also: [useFetchSpaceTeam](/hooks/spaces/use-fetch-space-team)
+See also: [useFetchSpaceTeam](/v7/hooks/spaces/use-fetch-space-team)

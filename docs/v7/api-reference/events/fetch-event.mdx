@@ -4,7 +4,7 @@ api: "GET /v7/:projectId/events/:eventId"
 description: "Fetch a single event by ID, with visibility enforced"
 ---
 
-Returns a single event by UUID. The [server-side visibility predicate](/data-models/event#visibility) is applied: if the event does not exist **or** the caller cannot see it, the response is `404` (existence is never leaked).
+Returns a single event by UUID. The [server-side visibility predicate](/v7/data-models/event#visibility) is applied: if the event does not exist **or** the caller cannot see it, the response is `404` (existence is never leaked).
 
 The response always includes inline `rsvpCounts`. Authentication is optional; pass the `userRsvp` include with an authenticated caller to populate `userRsvp`.
 
@@ -26,7 +26,7 @@ The response always includes inline `rsvpCounts`. Authentication is optional; pa
 
 ## Response
 
-Returns the [Event](/data-models/event) object.
+Returns the [Event](/v7/data-models/event) object.
 
 ## Error Responses
 
@@ -38,4 +38,4 @@ Returns the [Event](/data-models/event) object.
   </Accordion>
 </AccordionGroup>
 
-See also: [useFetchEvent](/hooks/events/use-fetch-event) · [EventProvider & useEvent](/sdk/events/provider-and-hook)
+See also: [useFetchEvent](/v7/hooks/events/use-fetch-event) · [EventProvider & useEvent](/v7/sdk/events/provider-and-hook)

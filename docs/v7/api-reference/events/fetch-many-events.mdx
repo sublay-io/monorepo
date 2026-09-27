@@ -4,7 +4,7 @@ api: "GET /v7/:projectId/events"
 description: "List events with visibility enforcement, filtering, sorting, geo, and free-text search"
 ---
 
-Returns a paginated list of events. The [server-side visibility predicate](/data-models/event#visibility) is always applied: anonymous callers see only `public` events; authenticated callers additionally see `members` events of spaces they belong to, `invite` events they were invited to, and any event they host. Service/master keys see everything.
+Returns a paginated list of events. The [server-side visibility predicate](/v7/data-models/event#visibility) is always applied: anonymous callers see only `public` events; authenticated callers additionally see `members` events of spaces they belong to, `invite` events they were invited to, and any event they host. Service/master keys see everything.
 
 Each event includes inline `rsvpCounts`, and—with the `userRsvp` include and an authenticated caller—the caller's own `userRsvp`.
 
@@ -82,7 +82,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 
 ## Response
 
-Returns a paginated response: `{ data: Event[], pagination: { page, limit, totalItems, hasMore, ... } }`. See [Event](/data-models/event).
+Returns a paginated response: `{ data: Event[], pagination: { page, limit, totalItems, hasMore, ... } }`. See [Event](/v7/data-models/event).
 
 ## Error Responses
 
@@ -99,4 +99,4 @@ Returns a paginated response: `{ data: Event[], pagination: { page, limit, total
   </Accordion>
 </AccordionGroup>
 
-See also: [useFetchManyEvents](/hooks/events/use-fetch-many-events) · [useFetchManyEventsWrapper](/hooks/events/use-fetch-many-events-wrapper)
+See also: [useFetchManyEvents](/v7/hooks/events/use-fetch-many-events) · [useFetchManyEventsWrapper](/v7/hooks/events/use-fetch-many-events-wrapper)

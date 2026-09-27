@@ -5,7 +5,7 @@ description: "Load a single event into React context with bound RSVP and managem
 
 `EventProvider` loads one event and exposes it — plus bound actions — to descendants via `useEvent`. It's the simplest way to build an event detail page: the provider fetches the event (or accepts a pre-fetched one), and `useEvent` gives you the event state and callbacks that keep it in sync.
 
-There is no Redux store behind this — state is local to the provider. For lists, use [`useFetchManyEventsWrapper`](/hooks/events/use-fetch-many-events-wrapper) instead.
+There is no Redux store behind this — state is local to the provider. For lists, use [`useFetchManyEventsWrapper`](/v7/hooks/events/use-fetch-many-events-wrapper) instead.
 
 ## EventProvider
 
@@ -113,6 +113,6 @@ function EventDetail() {
 
 ## See Also
 
-- [Events Overview](/sdk/events/overview)
-- [Event data model](/data-models/event)
-- [useEvent hook reference](/hooks/events/use-event)
+- [Events Overview](/v7/sdk/events/overview)
+- [Event data model](/v7/data-models/event)
+- [useEvent hook reference](/v7/hooks/events/use-event)

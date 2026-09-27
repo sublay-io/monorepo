@@ -18,7 +18,7 @@ Requires a valid access token. The identity must belong to the authenticated use
 
 <ParamField path="identityId" type="string" required>
   UUID of the identity to unlink. Retrieve identity IDs from the
-  [List Identities](/api-reference/oauth/list-identities) endpoint.
+  [List Identities](/v7/api-reference/oauth/list-identities) endpoint.
 </ParamField>
 
 ## Response
@@ -49,7 +49,7 @@ Requires a valid access token. The identity must belong to the authenticated use
     ```
     Returned when this is the only identity on the account and the user
     has no password set. Unlinking would lock the user out. Have the user
-    [set a password](/api-reference/auth/set-password) or link another
+    [set a password](/v7/api-reference/auth/set-password) or link another
     provider first.
   </Accordion>
   <Accordion title="User Not Found — 404">
@@ -64,7 +64,7 @@ Requires a valid access token. The identity must belong to the authenticated use
 
 ## See Also
 
-- [`useOAuthIdentities` hook](/hooks/auth/use-oauth-identities)
-- [List Identities](/api-reference/oauth/list-identities)
-- [Set Password](/api-reference/auth/set-password)
-- [OAuth integration guide](/sdk/authentication/oauth)
+- [`useOAuthIdentities` hook](/v7/hooks/auth/use-oauth-identities)
+- [List Identities](/v7/api-reference/oauth/list-identities)
+- [Set Password](/v7/api-reference/auth/set-password)
+- [OAuth integration guide](/v7/sdk/authentication/oauth)

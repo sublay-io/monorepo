@@ -9,7 +9,7 @@ icon: "plug"
 Returns a function that blocks a user by their ID. On a new block, the server retroactively removes any existing follows and connections between the two users (both directions). Blocking is idempotent — re-blocking an already-blocked user succeeds.
 
 <Note>
-  Requires the `moderation` bundle. See [Moderation — Blocking](/sdk/moderation/overview#blocking).
+  Requires the `moderation` bundle. See [Moderation — Blocking](/v7/sdk/moderation/overview#blocking).
 </Note>
 
 ## Usage Example
@@ -38,5 +38,5 @@ The returned function resolves to `void` on success.
 
 ## Related
 
-- [useUnblockUser](/hooks/blocks/use-unblock-user)
-- [useBlockManager](/hooks/blocks/use-block-manager) — combines block/unblock with status loading
+- [useUnblockUser](/v7/hooks/blocks/use-unblock-user)
+- [useBlockManager](/v7/hooks/blocks/use-block-manager) — combines block/unblock with status loading

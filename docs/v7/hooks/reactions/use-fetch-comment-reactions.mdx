@@ -63,7 +63,7 @@ function CommentLikers({ commentId }: { commentId: string }) {
 ## Returns
 
 <ResponseField name="data" type="Reaction[]">
-  Array of reaction records. Each includes `id`, `userId`, `reactionType`, `targetId`, `targetType`, `createdAt`. The `user` field is populated when user data is available; when `spaceReputation` is requested it carries an added `spaceReputation` number. See [Reputation](/data-models/reputation).
+  Array of reaction records. Each includes `id`, `userId`, `reactionType`, `targetId`, `targetType`, `createdAt`. The `user` field is populated when user data is available; when `spaceReputation` is requested it carries an added `spaceReputation` number. See [Reputation](/v7/data-models/reputation).
 </ResponseField>
 
 <ResponseField name="pagination" type="PaginationMetadata">

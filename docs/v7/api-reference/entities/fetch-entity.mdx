@@ -5,7 +5,7 @@ description: "Get a single entity by its Sublay ID"
 ---
 
 <Note>
-  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/bundles).
+  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v7/bundles).
 </Note>
 
 import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
@@ -27,18 +27,18 @@ Returns a single entity by its Sublay UUID. Always returns the entity regardless
   - `topComment` — the highest-voted comment
   - `saved` — whether the authenticated user has saved this entity (requires auth)
   - `files` — uploaded file/image attachments
-  - `grants` — the [reputation-grant summary](/data-models/reputation-grant#grantsummary) for the entity
+  - `grants` — the [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary) for the entity
 </ParamField>
 
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to the populated author `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to the populated author `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation) for the full contract.
 
 <SpaceReputationParams variant="context" field="query" />
 
 ## Response
 
-Returns an [Entity](/data-models/entity) object.
+Returns an [Entity](/v7/data-models/entity) object.
 
 ## Error Responses
 

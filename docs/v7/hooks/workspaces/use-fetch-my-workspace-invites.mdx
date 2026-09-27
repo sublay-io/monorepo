@@ -8,12 +8,12 @@ icon: "plug"
 
 `useFetchMyWorkspaceInvites` returns a callable for the signed-in user's **live** pending invites (`status='pending' AND expiresAt > now`), matched by `userId` from the token, across **every** workspace. This is the read that powers a "You've been invited" screen — and unlike every other workspace-invite read, each item embeds `workspace: { id, name }` and a populated `invitedBy` (instead of a bare id), since the invitee otherwise has no reach on either (a direct workspace read 404s for a non-member).
 
-**Authorization:** self-service. No capability and no workspace scope — the caller is derived from the token. **Surfacing is not verification-gated**: a user sees invites right after signup; the verified check applies when they act on one — [accept](/hooks/workspaces/use-accept-workspace-invite) *and* [decline](/hooks/workspaces/use-decline-workspace-invite).
+**Authorization:** self-service. No capability and no workspace scope — the caller is derived from the token. **Surfacing is not verification-gated**: a user sees invites right after signup; the verified check applies when they act on one — [accept](/v7/hooks/workspaces/use-accept-workspace-invite) *and* [decline](/v7/hooks/workspaces/use-decline-workspace-invite).
 
 <Warning>
   **Inbox, not outbox.** `useFetchMyWorkspaceInvites` (`GET /me/workspace-invites`) lists the invites **addressed to the signed-in user**, spanning every workspace, with no capability required.
 
-  [`useFetchWorkspaceInvites`](/hooks/workspaces/use-fetch-workspace-invites) (`GET /workspaces/:id/invites`) lists the invites **one workspace has issued**, and requires the `invite` capability there.
+  [`useFetchWorkspaceInvites`](/v7/hooks/workspaces/use-fetch-workspace-invites) (`GET /workspaces/:id/invites`) lists the invites **one workspace has issued**, and requires the `invite` capability there.
 
   These are the two most confusable hooks in the bundle. A members/admin panel wants the **other** hook; a personal notifications screen wants this one.
 </Warning>
@@ -39,10 +39,10 @@ None — the user is derived from the token.
 
 ## Returns
 
-`{ data: MyWorkspaceInvitation[] }` — each item a `MyWorkspaceInvitation`: a [WorkspaceInvitation](/data-models/workspace-invitation) with `workspace` and `invitedBy` embedded (see the note on that page). Never paginated.
+`{ data: MyWorkspaceInvitation[] }` — each item a `MyWorkspaceInvitation`: a [WorkspaceInvitation](/v7/data-models/workspace-invitation) with `workspace` and `invitedBy` embedded (see the note on that page). Never paginated.
 
 ## Related
 
-- [`useFetchWorkspaceInvites`](/hooks/workspaces/use-fetch-workspace-invites) — the **outbox** counterpart
-- [`useAcceptWorkspaceInvite`](/hooks/workspaces/use-accept-workspace-invite) · [`useDeclineWorkspaceInvite`](/hooks/workspaces/use-decline-workspace-invite)
-- [List My Invites API](/api-reference/workspaces/invitations/list-my-invites)
+- [`useFetchWorkspaceInvites`](/v7/hooks/workspaces/use-fetch-workspace-invites) — the **outbox** counterpart
+- [`useAcceptWorkspaceInvite`](/v7/hooks/workspaces/use-accept-workspace-invite) · [`useDeclineWorkspaceInvite`](/v7/hooks/workspaces/use-decline-workspace-invite)
+- [List My Invites API](/v7/api-reference/workspaces/invitations/list-my-invites)

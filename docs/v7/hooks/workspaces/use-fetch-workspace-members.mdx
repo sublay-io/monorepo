@@ -6,10 +6,10 @@ icon: "plug"
 
 ## Overview
 
-`useFetchWorkspaceMembers` returns a callable for the [unified roster](/api-reference/workspaces/members/list-members): one entry per distinct user, each with a `reasons` array. Always returned in full (never paginated). With `countOnly`, the shape is `WorkspaceRosterCountsResponse` instead.
+`useFetchWorkspaceMembers` returns a callable for the [unified roster](/v7/api-reference/workspaces/members/list-members): one entry per distinct user, each with a `reasons` array. Always returned in full (never paginated). With `countOnly`, the shape is `WorkspaceRosterCountsResponse` instead.
 
 <Warning>
-  **No `page` / `limit` on this roster.** It is never paginated. `FetchWorkspaceMembersProps` carries only `workspaceId`, `include` and `countOnly`, and the hook builds its query string from exactly those three — so a `page` or `limit` hand-written past the types is never even sent. Calling the [REST route](/api-reference/workspaces/members/list-members) directly does not help either: that endpoint declares `include`, `countOnly`, `actingUserId` and `projectId`, and refuses anything else — `?page=2&limit=10` comes back as `{ "error": "Unrecognized keys: \"page\", \"limit\"", "code": "workspace/invalid-query" }`.
+  **No `page` / `limit` on this roster.** It is never paginated. `FetchWorkspaceMembersProps` carries only `workspaceId`, `include` and `countOnly`, and the hook builds its query string from exactly those three — so a `page` or `limit` hand-written past the types is never even sent. Calling the [REST route](/v7/api-reference/workspaces/members/list-members) directly does not help either: that endpoint declares `include`, `countOnly`, `actingUserId` and `projectId`, and refuses anything else — `?page=2&limit=10` comes back as `{ "error": "Unrecognized keys: \"page\", \"limit\"", "code": "workspace/invalid-query" }`.
 
   The response is `{ data, total }` — no `pagination` object, because there is no pagination. `total` equals `data.length`.
 
@@ -62,4 +62,4 @@ Each `WorkspaceRosterEntry` is `{ user, reasons }`, where a reason is `{ type, .
 
 ## Related
 
-- [List Members API](/api-reference/workspaces/members/list-members)
+- [List Members API](/v7/api-reference/workspaces/members/list-members)

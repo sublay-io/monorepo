@@ -34,7 +34,7 @@ Returns a paginated list of users that the specified user follows. Authenticatio
 
 ### Space-scoped reputation
 
-This endpoint has no space in context, so the opt-in `spaceReputation` object accepts a `spaceId` of a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to each returned user, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation).
+This endpoint has no space in context, so the opt-in `spaceReputation` object accepts a `spaceId` of a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to each returned user, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation).
 
 <SpaceReputationParams variant="user" field="query" />
 
@@ -71,6 +71,6 @@ On success, returns HTTP `200` with a paginated response:
 
 ## See Also
 
-- [`useFetchFollowing` hook](/hooks/follows/use-fetch-following)
-- [`useFetchFollowingByUserId` hook](/hooks/follows/use-fetch-following-by-user-id)
-- [Follow data model](/data-models/follow)
+- [`useFetchFollowing` hook](/v7/hooks/follows/use-fetch-following)
+- [`useFetchFollowingByUserId` hook](/v7/hooks/follows/use-fetch-following-by-user-id)
+- [Follow data model](/v7/data-models/follow)

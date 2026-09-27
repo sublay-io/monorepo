@@ -7,7 +7,7 @@ A `ReputationGrant` records one deliberate movement of reputation. Where ordinar
 
 Grants are the primitive behind tipping, bounties, contest payouts, staff picks, "best answer" awards, and peer recognition. Sublay stays unopinionated about *why* a grant happens: the reason, the amounts, the eligibility rules, and the UI framing are all your app's logic. Sublay moves the points correctly, keeps the per-space economies honest, records what happened, and notifies the recipient.
 
-Grants belong to the **`reputation`** bundle — every project with reputation has them, with no separate opt-in. See [Reputation](/data-models/reputation) and [Bundles](/bundles).
+Grants belong to the **`reputation`** bundle — every project with reputation has them, with no separate opt-in. See [Reputation](/v7/data-models/reputation) and [Bundles](/v7/bundles).
 
 ## The two kinds of grant
 
@@ -39,7 +39,7 @@ Grants belong to the **`reputation`** bundle — every project with reputation h
 
 ## Which bucket moves
 
-A user's reputation lives in [buckets](/data-models/reputation) — one per space, plus a project-general bucket. A grant always concerns exactly one bucket on each side, and the sender chooses which of *their* buckets pays:
+A user's reputation lives in [buckets](/v7/data-models/reputation) — one per space, plus a project-general bucket. A grant always concerns exactly one bucket on each side, and the sender chooses which of *their* buckets pays:
 
 - The reputation lands in the recipient's bucket **for the same space it came from**. Senders never choose where it lands.
 - The general bucket is its own lane. Reputation cannot move between the general bucket and a space bucket in either direction.
@@ -75,13 +75,13 @@ The summary covers **positive grants only**. When the token is requested on a pr
   **One surface nests the record.** `GET /comments/:id` and `GET /comments/by-foreign-id` return the comment under a `comment` key, so the summary is at **`comment.grants`**. Every other read surface — entity reads, the comment feed, chat messages — returns the record bare, with the summary at `grants`.
 </Warning>
 
-The full per-item list of individual grants comes from [Fetch Many Reputation Grants](/api-reference/reputation-grants/fetch-many-reputation-grants), not from the summary.
+The full per-item list of individual grants comes from [Fetch Many Reputation Grants](/v7/api-reference/reputation-grants/fetch-many-reputation-grants), not from the summary.
 
 ## Grants on chat messages are private
 
 A grant row carries its `targetType`, `targetId` and the granter's free-text `note`, and a list read can hydrate both parties. On a `chat-message` target those facts describe a private conversation — who is talking to whom, and what one of them said about it — so such a grant is exactly as private as the message it points at:
 
-- **The target shape is gated on membership.** Listing grants by `targetType: "chat-message"` + `targetId` returns rows only to a **member** of that message's conversation. The test is the one [Fetch Message](/api-reference/chat/messages/fetch-message) itself applies — any membership row counts, so a member who has since left the conversation still sees the grants on a message chat still hands them. Everyone else — a user who was never a member, any user on a project without the `chat` bundle — gets a successful empty page with the zero summary, never a `403`, so the response cannot be used to prove the message exists. Service and master keys pass the gate unconditionally: they are the app's own backend, which holds no membership.
+- **The target shape is gated on membership.** Listing grants by `targetType: "chat-message"` + `targetId` returns rows only to a **member** of that message's conversation. The test is the one [Fetch Message](/v7/api-reference/chat/messages/fetch-message) itself applies — any membership row counts, so a member who has since left the conversation still sees the grants on a message chat still hands them. Everyone else — a user who was never a member, any user on a project without the `chat` bundle — gets a successful empty page with the zero summary, never a `403`, so the response cannot be used to prove the message exists. Service and master keys pass the gate unconditionally: they are the app's own backend, which holds no membership.
 - **The user-keyed shapes carry the same test into the query.** Listing by `recipientId` or `senderId` returns a chat-message-targeted grant to a caller who can see the underlying message and withholds it from one who cannot. So a user's own "reputation I received" feed does include the grants made on messages in their own conversations, and reconciles with the reputation on their profile; a caller outside the conversation loses those rows from the page **and** from `totalItems` together, leaving nothing to infer arithmetically. Service and master keys are filtered on neither shape and read every row.
 - **A removed message takes its grants with it.** Once moderation removes a message it is invisible on every chat surface, so its grants are invisible on both of these shapes too — to a member of the conversation as much as to a stranger, and to the grant's own sender and recipient. Only service and master keys still read them.
 
@@ -96,7 +96,7 @@ A mint may be negative — a moderation clawback, a decay sweep, or a correction
 - They are excluded from the public list endpoint **for every caller**, including service and master keys.
 - They are excluded from every `GrantSummary`.
 
-The only way to read them is the dashboard history route, [Fetch User Grant History](/api-reference/reputation-grants/fetch-user-grant-history), and the user detail view in the [dashboard](https://dash.sublay.io).
+The only way to read them is the dashboard history route, [Fetch User Grant History](/v7/api-reference/reputation-grants/fetch-user-grant-history), and the user detail view in the [dashboard](https://dash.sublay.io).
 
 ## Immutability
 
@@ -113,8 +113,8 @@ Grant creation is **not idempotent**. A retried request creates a second grant a
 
 ## See Also
 
-- [Reputation](/data-models/reputation)
-- [Reputation Grants SDK overview](/sdk/reputation/overview)
-- [Create Reputation Grant API](/api-reference/reputation-grants/create-reputation-grant)
-- [Mint Reputation Grant API](/api-reference/reputation-grants/mint-reputation-grant)
-- [Fetch Many Reputation Grants API](/api-reference/reputation-grants/fetch-many-reputation-grants)
+- [Reputation](/v7/data-models/reputation)
+- [Reputation Grants SDK overview](/v7/sdk/reputation/overview)
+- [Create Reputation Grant API](/v7/api-reference/reputation-grants/create-reputation-grant)
+- [Mint Reputation Grant API](/v7/api-reference/reputation-grants/mint-reputation-grant)
+- [Fetch Many Reputation Grants API](/v7/api-reference/reputation-grants/fetch-many-reputation-grants)

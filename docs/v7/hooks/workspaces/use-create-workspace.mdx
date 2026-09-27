@@ -6,10 +6,10 @@ icon: "plug"
 
 ## Overview
 
-`useCreateWorkspace` returns a callable that creates a [workspace](/data-models/workspace). The signed-in caller becomes the owner. Omit `parentWorkspaceId` for a root workspace (requires a **verified email**); pass it for a child (requires the `create-sub-workspace` capability on the parent).
+`useCreateWorkspace` returns a callable that creates a [workspace](/v7/data-models/workspace). The signed-in caller becomes the owner. Omit `parentWorkspaceId` for a root workspace (requires a **verified email**); pass it for a child (requires the `create-sub-workspace` capability on the parent).
 
 <Note>
-  The verified-email gate on root creation is **absolute** — there is no server-side escape hatch. A service or master key acting as a named user via the [node SDK](/node-sdk/workspaces) is held to the same rule, exactly as accepting an invite and receiving an ownership transfer are. Prompt the user through email verification before showing a "Create workspace" flow.
+  The verified-email gate on root creation is **absolute** — there is no server-side escape hatch. A service or master key acting as a named user via the [node SDK](/v7/node-sdk/workspaces) is held to the same rule, exactly as accepting an invite and receiving an ownership transfer are. Prompt the user through email verification before showing a "Create workspace" flow.
 </Note>
 
 ## Usage Example
@@ -43,7 +43,7 @@ function CreateTeam() {
 
 ## Returns
 
-Returns the created [Workspace](/data-models/workspace) object.
+Returns the created [Workspace](/v7/data-models/workspace) object.
 
 ## Error codes
 
@@ -56,4 +56,4 @@ Returns the created [Workspace](/data-models/workspace) object.
 
 ## Related
 
-- [Create Workspace API](/api-reference/workspaces/create-workspace)
+- [Create Workspace API](/v7/api-reference/workspaces/create-workspace)

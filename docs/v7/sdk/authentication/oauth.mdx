@@ -197,7 +197,7 @@ Tokens dispatched by the hook are picked up by the `SublayProvider`'s account ma
 
 ### The Account Limit
 
-A device stores at most **5 accounts** ([Multi-Account](/sdk/authentication/multi-account)). Signing in a sixth through OAuth is refused — but **on both platforms the limit surfaces as state, not as a thrown error**, unlike email sign-up/sign-in and external auth, which reject the call.
+A device stores at most **5 accounts** ([Multi-Account](/v7/sdk/authentication/multi-account)). Signing in a sixth through OAuth is refused — but **on both platforms the limit surfaces as state, not as a thrown error**, unlike email sign-up/sign-in and external auth, which reject the call.
 
 Read it from `useAccounts` (or `useAddAccount`) rather than from the hook's `error` field, which stays reserved for failures the provider itself reported:
 
@@ -268,8 +268,8 @@ function LinkedAccounts() {
 
 ## See Also
 
-- [`useOAuthIdentities` hook reference](/hooks/auth/use-oauth-identities)
-- [OAuth Authorize API reference](/api-reference/oauth/authorize)
-- [OAuth Link API reference](/api-reference/oauth/link)
-- [List Identities API reference](/api-reference/oauth/list-identities)
-- [Unlink Identity API reference](/api-reference/oauth/unlink-identity)
+- [`useOAuthIdentities` hook reference](/v7/hooks/auth/use-oauth-identities)
+- [OAuth Authorize API reference](/v7/api-reference/oauth/authorize)
+- [OAuth Link API reference](/v7/api-reference/oauth/link)
+- [List Identities API reference](/v7/api-reference/oauth/list-identities)
+- [Unlink Identity API reference](/v7/api-reference/oauth/unlink-identity)

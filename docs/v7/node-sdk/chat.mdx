@@ -321,7 +321,7 @@ const withReplies = await sublay.chat.listMessages({
 <ParamField body="after" type="string">ISO timestamp — messages created after this. Mutually exclusive with `before`.</ParamField>
 <ParamField body="limit" type="number">1–100, defaults to `50`.</ParamField>
 <ParamField body="sort" type='"asc" | "desc"' />
-<ParamField body="include" type="string">Comma-separated associations to populate: `"files"` (message attachments) and `"grants"` (each message's [reputation-grant summary](/data-models/reputation-grant#grantsummary)). Combine them as `"files,grants"`.</ParamField>
+<ParamField body="include" type="string">Comma-separated associations to populate: `"files"` (message attachments) and `"grants"` (each message's [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary)). Combine them as `"files,grants"`.</ParamField>
 <ParamField body="filters" type="MessageFilters">Optional filters. `filters.hasReplies` (boolean): when `true`, returns only messages that have thread replies (`threadReplyCount > 0`); when `false`, only messages with none. Filters by thread replies, not quotings. Threads are one level deep, so `hasReplies: true` together with `parentId` always returns an empty list — the response's `notice` field explains why.</ParamField>
 <SpaceReputationParams variant="context" field="body" />
 
@@ -385,7 +385,7 @@ const message = await sublay.chat.getMessage({
 <ParamField body="conversationId" type="string" required />
 <ParamField body="messageId" type="string" required />
 <ParamField body="userId" type="string" required>The acting user (must be a member).</ParamField>
-<ParamField body="include" type="string">Comma-separated associations to populate. Only `"grants"` is supported here — it attaches the message's [reputation-grant summary](/data-models/reputation-grant#grantsummary) at `message.grants`.</ParamField>
+<ParamField body="include" type="string">Comma-separated associations to populate. Only `"grants"` is supported here — it attaches the message's [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary) at `message.grants`.</ParamField>
 <SpaceReputationParams variant="context" field="body" />
 
 **Returns** — `Promise<ChatMessage>`
@@ -409,7 +409,7 @@ const message = await sublay.chat.editMessage({
 <ParamField body="messageId" type="string" required />
 <ParamField body="userId" type="string" required>The acting user (must be the message author).</ParamField>
 <ParamField body="content" type="string" />
-<ParamField body="gif" type="GifData | null">A [GifData](/data-models/chat-message#gifdata) attachment, or `null` to clear it.</ParamField>
+<ParamField body="gif" type="GifData | null">A [GifData](/v7/data-models/chat-message#gifdata) attachment, or `null` to clear it.</ParamField>
 <ParamField body="mentions" type="Mention[]" />
 <ParamField body="metadata" type="object | null" />
 
@@ -454,7 +454,7 @@ await sublay.reports.createReport({
 
 `targetId` is the message id; the conversation is resolved server-side, so no
 `conversationId` is needed. The reporter must be a member of the conversation
-and cannot report their own message. See [createReport](/node-sdk/reports).
+and cannot report their own message. See [createReport](/v7/node-sdk/reports).
 
 ---
 
@@ -532,7 +532,7 @@ await sublay.chat.markAsRead({
 
 ### muteConversation
 
-Sets or clears a user's mute on a conversation. Muting suppresses the `message` push for this conversation only; the message is still delivered. See [Notification Preferences & Mute](/notification-preferences).
+Sets or clears a user's mute on a conversation. Muting suppresses the `message` push for this conversation only; the message is still delivered. See [Notification Preferences & Mute](/v7/notification-preferences).
 
 ```typescript
 // Mute for a week

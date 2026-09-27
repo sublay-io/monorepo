@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useConfirmAccountDeletion` returns a function that submits the confirmation code from [`useRequestAccountDeletion`](/hooks/auth/use-request-account-deletion) and **permanently deletes** the authenticated user's account. On success, the local session is torn down just like a sign-out: the deleted account is removed from the multi-account map and **no other account is activated**, even if the user has others signed in. The app renders signed-out.
+`useConfirmAccountDeletion` returns a function that submits the confirmation code from [`useRequestAccountDeletion`](/v7/hooks/auth/use-request-account-deletion) and **permanently deletes** the authenticated user's account. On success, the local session is torn down just like a sign-out: the deleted account is removed from the multi-account map and **no other account is activated**, even if the user has others signed in. The app renders signed-out.
 
 <Warning>
   Deletion is **immediate and irreversible**. There is no grace period and no
@@ -14,7 +14,7 @@ icon: "plug"
 </Warning>
 
 <Note>
-  Deleting an account ends the session and leaves nothing active, even when other accounts remain stored — read `activeAccount` from [`useAccounts`](/hooks/auth/use-accounts) and render your own next screen when it is `null`.
+  Deleting an account ends the session and leaves nothing active, even when other accounts remain stored — read `activeAccount` from [`useAccounts`](/v7/hooks/auth/use-accounts) and render your own next screen when it is `null`.
 </Note>
 
 ## Usage Example
@@ -90,5 +90,5 @@ The hook returns an async function that resolves to `void` on success. It throws
 
 ## See Also
 
-- [`useRequestAccountDeletion`](/hooks/auth/use-request-account-deletion)
-- [Confirm Account Deletion API reference](/api-reference/auth/confirm-account-deletion)
+- [`useRequestAccountDeletion`](/v7/hooks/auth/use-request-account-deletion)
+- [Confirm Account Deletion API reference](/v7/api-reference/auth/confirm-account-deletion)

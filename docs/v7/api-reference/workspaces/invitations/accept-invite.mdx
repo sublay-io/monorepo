@@ -12,7 +12,7 @@ Accepts an invitation. Note the path is **not** `:id`-scoped — it is addressed
 - Knowing the `inviteId` does **not** let a non-target accept.
 
 <Warning>
-  **A service/master key does not bypass either gate.** Naming an `actingUserId` means *being* that user, so a backend auto-join flow must satisfy the invitee's own conditions: the invitation must be **actually addressed to** the named user (otherwise `404 workspace/invite-not-found` — accepting Alice's invite while naming Bob does not work), and that user's **email must be verified** (otherwise `403 workspace/email-not-verified`). And there is **no** unbounded path here to fall back on: an acceptance has to land on somebody's membership row, so `actingUserId` is **required** for a key — omitting it is a `400 workspace/missing-user-id`, not a bypass. If your onboarding pre-accepts invites server-side, verify the address first. See [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  **A service/master key does not bypass either gate.** Naming an `actingUserId` means *being* that user, so a backend auto-join flow must satisfy the invitee's own conditions: the invitation must be **actually addressed to** the named user (otherwise `404 workspace/invite-not-found` — accepting Alice's invite while naming Bob does not work), and that user's **email must be verified** (otherwise `403 workspace/email-not-verified`). And there is **no** unbounded path here to fall back on: an acceptance has to land on somebody's membership row, so `actingUserId` is **required** for a key — omitting it is a `400 workspace/missing-user-id`, not a bypass. If your onboarding pre-accepts invites server-side, verify the address first. See [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </Warning>
 
 On accept, the stored grant is applied and the `WorkspaceMember` is created **transactionally**; the invite is marked `accepted`. Fires **both** `workspace.invite.accepted` **and** `workspace.member.added` (invitation-lifecycle vs roster-sync — intentionally two streams).
@@ -30,7 +30,7 @@ On accept, the stored grant is applied and the `WorkspaceMember` is created **tr
 <ParamField body="actingUserId" type="string" required>
   Service/master keys only — the accepting user. **Required for a key:** an acceptance has to land on somebody's membership row, so there is no unbounded path — a key that names nobody is refused with `400 workspace/missing-user-id`. Enforced: both gates above run against *that* user.
 
-  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
@@ -97,4 +97,4 @@ On accept, the stored grant is applied and the `WorkspaceMember` is created **tr
   </Accordion>
 </AccordionGroup>
 
-See also: [useAcceptWorkspaceInvite](/hooks/workspaces/use-accept-workspace-invite)
+See also: [useAcceptWorkspaceInvite](/v7/hooks/workspaces/use-accept-workspace-invite)

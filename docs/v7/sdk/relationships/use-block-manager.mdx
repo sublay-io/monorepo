@@ -5,10 +5,10 @@ description: "High-level hook for managing block state with a single user"
 
 `useBlockManager` is a convenience hook for building block/unblock buttons on a user profile. It automatically loads the current block status on mount and exposes a `toggleBlock` function that handles both blocking and unblocking.
 
-Blocking is a trust & safety primitive shipped as part of the **moderation bundle** — the same package that provides reporting and suspensions. See [Moderation — Blocking](/sdk/moderation/overview#blocking) for the full enforcement behavior.
+Blocking is a trust & safety primitive shipped as part of the **moderation bundle** — the same package that provides reporting and suspensions. See [Moderation — Blocking](/v7/sdk/moderation/overview#blocking) for the full enforcement behavior.
 
 <Note>
-  **Requires the `moderation` bundle.** Blocking is available in any project that has the moderation bundle installed. See [Bundles](/bundles) to add it.
+  **Requires the `moderation` bundle.** Blocking is available in any project that has the moderation bundle installed. See [Bundles](/v7/bundles) to add it.
 </Note>
 
 ## Usage Example
@@ -55,7 +55,7 @@ function BlockButton({ userId }: { userId: string }) {
 
 ## Related
 
-- [useBlockUser](/hooks/blocks/use-block-user)
-- [useUnblockUser](/hooks/blocks/use-unblock-user)
-- [useFetchBlockStatus](/hooks/blocks/use-fetch-block-status)
-- [useFetchBlockedUsers](/hooks/blocks/use-fetch-blocked-users)
+- [useBlockUser](/v7/hooks/blocks/use-block-user)
+- [useUnblockUser](/v7/hooks/blocks/use-unblock-user)
+- [useFetchBlockStatus](/v7/hooks/blocks/use-fetch-block-status)
+- [useFetchBlockedUsers](/v7/hooks/blocks/use-fetch-blocked-users)

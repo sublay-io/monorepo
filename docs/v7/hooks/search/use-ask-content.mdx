@@ -10,7 +10,7 @@ import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
 Streams an AI-generated answer to a natural language question, grounded in your project's content. Uses SSE (Server-Sent Events) to deliver tokens incrementally. Returns source citations once the stream completes.
 
-For integration guidance, see [Ask Content](/sdk/search/ask).
+For integration guidance, see [Ask Content](/v7/sdk/search/ask).
 
 ## Usage Example
 
@@ -69,7 +69,7 @@ Call `ask` with:
 </ResponseField>
 
 <ResponseField name="sources" type="ContentSearchResult[]">
-  Source records used as context. Populated after streaming ends. When `spaceReputation` is requested, each record's embedded author carries an added `spaceReputation` number. See [Reputation](/data-models/reputation).
+  Source records used as context. Populated after streaming ends. When `spaceReputation` is requested, each record's embedded author carries an added `spaceReputation` number. See [Reputation](/v7/data-models/reputation).
 </ResponseField>
 
 <ResponseField name="streaming" type="boolean">

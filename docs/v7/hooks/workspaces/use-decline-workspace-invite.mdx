@@ -6,9 +6,9 @@ icon: "plug"
 
 ## Overview
 
-`useDeclineWorkspaceInvite` returns a callable that declines an [invitation](/data-models/workspace-invitation).
+`useDeclineWorkspaceInvite` returns a callable that declines an [invitation](/v7/data-models/workspace-invitation).
 
-**Authorization:** self-service. The invite must be addressed to the signed-in user (identity-matched), and a **verified email is required** — the same gate as [accept](/hooks/workspaces/use-accept-workspace-invite). Otherwise a squatter who signed up with someone else's address could burn that person's invite by declining it.
+**Authorization:** self-service. The invite must be addressed to the signed-in user (identity-matched), and a **verified email is required** — the same gate as [accept](/v7/hooks/workspaces/use-accept-workspace-invite). Otherwise a squatter who signed up with someone else's address could burn that person's invite by declining it.
 
 ## Usage Example
 
@@ -44,5 +44,5 @@ function DeclineButton({ inviteId }: { inviteId: string }) {
 
 ## Related
 
-- [`useFetchMyWorkspaceInvites`](/hooks/workspaces/use-fetch-my-workspace-invites) — list the invites addressed to you
-- [Decline Invite API](/api-reference/workspaces/invitations/decline-invite)
+- [`useFetchMyWorkspaceInvites`](/v7/hooks/workspaces/use-fetch-my-workspace-invites) — list the invites addressed to you
+- [Decline Invite API](/v7/api-reference/workspaces/invitations/decline-invite)

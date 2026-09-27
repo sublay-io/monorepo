@@ -7,7 +7,7 @@ description: "Get a paginated list of spaces with filtering and sorting"
 Fetches a paginated list of spaces. Supports filtering by search query, membership, and parent space. Authentication is optional — if provided, member-only spaces the user belongs to are included.
 
 <Note>
-  This is a discovery surface: only `public` spaces are listed. Spaces with `visibility` of `"unlisted"` or `"private"` are excluded for non-members (they remain reachable by direct link/slug via [Fetch Space by Slug](/api-reference/spaces/fetch-space-by-slug) or [by Short ID](/api-reference/spaces/fetch-space-by-short-id)). The exception is `memberOf=true`, which returns the caller's own spaces regardless of visibility. See [Space visibility](/data-models/space#visibility).
+  This is a discovery surface: only `public` spaces are listed. Spaces with `visibility` of `"unlisted"` or `"private"` are excluded for non-members (they remain reachable by direct link/slug via [Fetch Space by Slug](/v7/api-reference/spaces/fetch-space-by-slug) or [by Short ID](/v7/api-reference/spaces/fetch-space-by-short-id)). The exception is `memberOf=true`, which returns the caller's own spaces regardless of visibility. See [Space visibility](/v7/data-models/space#visibility).
 </Note>
 
 ## Query Parameters
@@ -55,7 +55,7 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
 ## Response
 
 <ResponseField name="data" type="Space[]">
-  Array of [Space](/data-models/space) objects.
+  Array of [Space](/v7/data-models/space) objects.
 </ResponseField>
 
 <ResponseField name="pagination" type="object">
@@ -68,4 +68,4 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
   </Expandable>
 </ResponseField>
 
-See also: [useFetchManySpaces](/hooks/spaces/use-fetch-many-spaces)
+See also: [useFetchManySpaces](/v7/hooks/spaces/use-fetch-many-spaces)

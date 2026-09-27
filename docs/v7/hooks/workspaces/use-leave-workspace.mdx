@@ -8,10 +8,10 @@ icon: "plug"
 
 `useLeaveWorkspace` returns a callable that removes the **signed-in user's own** direct membership on **this workspace node only**. Descendant memberships are untouched, and leaving a parent while still owning a child is fine — ownership is independent of membership. Fires `workspace.member.removed`.
 
-**Authorization:** self-service. No capability is required; the actor is always the signed-in user, so this hook cannot remove anyone else (use [`useRemoveWorkspaceMember`](/hooks/workspaces/use-remove-workspace-member) for that).
+**Authorization:** self-service. No capability is required; the actor is always the signed-in user, so this hook cannot remove anyone else (use [`useRemoveWorkspaceMember`](/v7/hooks/workspaces/use-remove-workspace-member) for that).
 
 <Note>
-  An **owner** has no member row and cannot leave this way — an owner exits by [transferring ownership](/hooks/workspaces/use-transfer-workspace-ownership) or [deleting](/hooks/workspaces/use-delete-workspace) the workspace. If you have no direct member row here (you only reach in from an ancestor), leaving is a no-op / `404`.
+  An **owner** has no member row and cannot leave this way — an owner exits by [transferring ownership](/v7/hooks/workspaces/use-transfer-workspace-ownership) or [deleting](/v7/hooks/workspaces/use-delete-workspace) the workspace. If you have no direct member row here (you only reach in from an ancestor), leaving is a no-op / `404`.
 </Note>
 
 ## Usage Example
@@ -49,5 +49,5 @@ Resolves to `void` (the endpoint returns `204 No Content`).
 
 ## Related
 
-- [`useRemoveWorkspaceMember`](/hooks/workspaces/use-remove-workspace-member) — remove someone else
-- [Leave Workspace API](/api-reference/workspaces/members/leave-workspace)
+- [`useRemoveWorkspaceMember`](/v7/hooks/workspaces/use-remove-workspace-member) — remove someone else
+- [Leave Workspace API](/v7/api-reference/workspaces/members/leave-workspace)

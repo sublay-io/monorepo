@@ -22,10 +22,10 @@ Tokens are issued by the auth endpoints. Depending on your auth setup:
 
 | Method | Endpoint |
 |--------|----------|
-| Email + password sign-up | [POST `/auth/sign-up`](/api-reference/auth/sign-up) |
-| Email + password sign-in | [POST `/auth/sign-in`](/api-reference/auth/sign-in) |
-| External user (JWT-verified) | [POST `/auth/verify-external-user`](/api-reference/auth/verify-external-user) |
-| OAuth (Google, GitHub, etc.) | [POST `/oauth/authorize`](/api-reference/oauth/authorize) |
+| Email + password sign-up | [POST `/auth/sign-up`](/v7/api-reference/auth/sign-up) |
+| Email + password sign-in | [POST `/auth/sign-in`](/v7/api-reference/auth/sign-in) |
+| External user (JWT-verified) | [POST `/auth/verify-external-user`](/v7/api-reference/auth/verify-external-user) |
+| OAuth (Google, GitHub, etc.) | [POST `/oauth/authorize`](/v7/api-reference/oauth/authorize) |
 
 All of these return the same token structure:
 
@@ -52,13 +52,13 @@ Content-Type: application/json
 
 The response includes a new `accessToken` and a rotated `refreshToken`. Always store and use the latest refresh token — reusing a revoked one will invalidate the entire session. Each rotated refresh token is valid for another **30 days**, so active users stay signed in indefinitely. Only if a refresh token goes unused for 30 days will it expire and require the user to sign in again.
 
-See [Request New Access Token](/api-reference/auth/request-access-token) for full details.
+See [Request New Access Token](/v7/api-reference/auth/request-access-token) for full details.
 
 ## SDK Token Management
 
 If you are using the Sublay SDK (`@sublay/react-js`, `@sublay/react-native`, etc.), **you do not need to manage tokens manually**. The SDK stores tokens, attaches them to every request, and automatically refreshes them before they expire.
 
-Token management is only relevant when calling the REST API directly — for example, from a server-side environment using the [Node SDK](/sdk/getting-started) or a custom HTTP client.
+Token management is only relevant when calling the REST API directly — for example, from a server-side environment using the [Node SDK](/v7/sdk/getting-started) or a custom HTTP client.
 
 ## Unauthenticated Requests
 

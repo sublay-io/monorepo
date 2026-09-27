@@ -57,7 +57,7 @@ function MemberList({ conversationId }: { conversationId: string }) {
 ## Returns
 
 <ResponseField name="members" type="ConversationMember[]">
-  The current member list. When `spaceReputation` is requested, each embedded user carries an added `spaceReputation` number. See [ConversationMember](/data-models/conversation-member) and [Reputation](/data-models/reputation).
+  The current member list. When `spaceReputation` is requested, each embedded user carries an added `spaceReputation` number. See [ConversationMember](/v7/data-models/conversation-member) and [Reputation](/v7/data-models/reputation).
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
@@ -91,4 +91,4 @@ function MemberList({ conversationId }: { conversationId: string }) {
 ## Notes
 
 - The member list is fetched with a limit of 100. For very large conversations, consider lazy-loading or paginating members separately.
-- For integration guidance, see [Chat: Conversations](/sdk/chat/conversations).
+- For integration guidance, see [Chat: Conversations](/v7/sdk/chat/conversations).

@@ -9,12 +9,12 @@ Creates an invitation, addressed by **exactly one** of `email`, `userId`, or `us
 <Warning>
   **Requires `workspaces.inviteAcceptUrl` on the project.** The invitation email's only call to action is a deep-link built from that setting, and it has no default — so an unconfigured project cannot create invitations at all. Without it this endpoint returns `409 workspace/missing-invite-accept-url` and persists nothing (no invitation row, no email, no webhook).
 
-  This applies **even when the invitee already has an account** — there is no special case. See [Project settings](/sdk/workspaces/overview#project-settings) for how to configure it.
+  This applies **even when the invitee already has an account** — there is no special case. See [Project settings](/v7/sdk/workspaces/overview#project-settings) for how to configure it.
 </Warning>
 
 The invited `capabilities`/`permissions` are validated against the inviter's own resolved set on the workspace — no-escalation on both arrays. The rank floor applies **only when the inviter has a direct member row** on the workspace: then the invited rank must be strictly larger (less senior) than the inviter's own. A **reach-holder** inviter (holding `invite` via an open inherit chain, with no direct row) is not in the workspace's rank ladder and may invite at any rank.
 
-The invited rank is named in **either coordinate** — `rank` (absolute) or `relativeRank` (an offset from the inviter) — and they are **mutually exclusive**. Supplying **neither** applies the default, `relativeRank: 1`: one rung below the inviter. Whichever arrives, it is resolved to an absolute number here and stored absolute on the invitation row. See [choosing a rank](/sdk/workspaces/overview#choosing-a-rank).
+The invited rank is named in **either coordinate** — `rank` (absolute) or `relativeRank` (an offset from the inviter) — and they are **mutually exclusive**. Supplying **neither** applies the default, `relativeRank: 1`: one rung below the inviter. Whichever arrives, it is resolved to an absolute number here and stored absolute on the invitation row. See [choosing a rank](/v7/sdk/workspaces/overview#choosing-a-rank).
 
 The inviter is the caller's own token subject, or — for a service/master key — the `actingUserId` it names. Both floors are skipped for an owner or ancestor owner, and for a key that names nobody.
 
@@ -33,7 +33,7 @@ The inviter is the caller's own token subject, or — for a service/master key �
 </Warning>
 
 **Duplicate handling:**
-- Inviting an **existing member** → `409` (change the grant via [Update Member](/api-reference/workspaces/members/update-member)).
+- Inviting an **existing member** → `409` (change the grant via [Update Member](/v7/api-reference/workspaces/members/update-member)).
 - A **live** invite (`pending` and not past `expiresAt`) for the same target → the existing invitation is **updated in place**, under the same `id`, and its 14-day expiry restarts. See [what a re-invite does to the grant](#what-a-re-invite-does-to-the-grant) — it is not a plain replace.
 - A **terminal** (`accepted`/`declined`/`revoked`) or **effectively-expired** invite does **not** block — a fresh `pending` is created. (An `accepted` invite means the user is already a member, so re-inviting them returns `409` instead.)
 
@@ -48,7 +48,7 @@ This endpoint doubles as an **upsert**, so a second call for a target who alread
 - **An explicit `relativeRank` re-resolves against the *current* caller.** The offset is anchored on whoever is calling now, not on whoever created the invitation — so `relativeRank: 1` sent by a rank-3 member rewrites the invitation to rank 4, while the same field sent by the owner rewrites it to rank 0. If you mean "leave the rank alone", send neither rank field.
 
 <Note>
-  A re-invite may **preserve** a rank the current caller could not have minted themselves — omission is not a write, so no floor is re-applied to it. That is deliberate and matches [Resend Invite](/api-reference/workspaces/invitations/resend-invite), which extends the very same invitation, rank intact, on the same `invite` capability. Values you *do* supply are floored normally.
+  A re-invite may **preserve** a rank the current caller could not have minted themselves — omission is not a write, so no floor is re-applied to it. That is deliberate and matches [Resend Invite](/v7/api-reference/workspaces/invitations/resend-invite), which extends the very same invitation, rank intact, on the same `invite` capability. Values you *do* supply are floored normally.
 </Note>
 
 ## Path Parameters
@@ -66,7 +66,7 @@ This endpoint doubles as an **upsert**, so a second call for a target who alread
 <ParamField body="userId" type="string">
   Invitee user id (existing users only). Here `userId` is the invite **target**, not an acting user.
 
-  This route is the **one exception** to a bundle-wide rule: on every other workspace route a body or query `userId` is rejected with a `400`, because there it can only be a stale spelling of the actor. See [Shapes the server rejects](/sdk/workspaces/overview#shapes-the-server-rejects).
+  This route is the **one exception** to a bundle-wide rule: on every other workspace route a body or query `userId` is rejected with a `400`, because there it can only be a stale spelling of the actor. See [Shapes the server rejects](/v7/sdk/workspaces/overview#shapes-the-server-rejects).
 
   **The exception is the body only.** A query `?userId=` is rejected here exactly as it is everywhere else — `400 workspace/invalid-query` — because this endpoint never reads one, so in the query string it can only be the stale actor spelling. Send the invitee in the JSON body.
 </ParamField>
@@ -104,12 +104,12 @@ This endpoint doubles as an **upsert**, so a second call for a target who alread
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service/master keys only — the **inviter** to act as. Enforced: the no-escalation and rank floors above run against *that* user's resolved standing, so a key naming a rank-5 manager may only invite at rank 6+ and only with capabilities that manager holds. Omit it to invite as the app itself (unbounded; `invitedBy` then falls back to the workspace owner) — but omit means **absent**: `actingUserId: ""` or `null` is a `400`, not a fall-through to that mode. Every top-level field this endpoint does not declare is a `400` too — `Unrecognized key: "…"`, in the body and the query string alike, for every caller. The fields this endpoint *does* declare are accepted on their own terms: `username` reaches the server intact and behaves identically to `email` and `userId`. The **body** `userId` is the one declared field on the bundle that names a person and is not the actor, so it carries a carve-out from the bundle-wide `userId` rejection; a query `userId` is refused here as everywhere else. See [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user) and [Shapes the server rejects](/sdk/workspaces/overview#shapes-the-server-rejects).
+  Service/master keys only — the **inviter** to act as. Enforced: the no-escalation and rank floors above run against *that* user's resolved standing, so a key naming a rank-5 manager may only invite at rank 6+ and only with capabilities that manager holds. Omit it to invite as the app itself (unbounded; `invitedBy` then falls back to the workspace owner) — but omit means **absent**: `actingUserId: ""` or `null` is a `400`, not a fall-through to that mode. Every top-level field this endpoint does not declare is a `400` too — `Unrecognized key: "…"`, in the body and the query string alike, for every caller. The fields this endpoint *does* declare are accepted on their own terms: `username` reaches the server intact and behaves identically to `email` and `userId`. The **body** `userId` is the one declared field on the bundle that names a person and is not the actor, so it carries a carve-out from the bundle-wide `userId` rejection; a query `userId` is refused here as everywhere else. See [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user) and [Shapes the server rejects](/v7/sdk/workspaces/overview#shapes-the-server-rejects).
 </ParamField>
 
 ## Response
 
-Returns the created [WorkspaceInvitation](/data-models/workspace-invitation) object.
+Returns the created [WorkspaceInvitation](/v7/data-models/workspace-invitation) object.
 
 ## Error Responses
 
@@ -160,7 +160,7 @@ Returns the created [WorkspaceInvitation](/data-models/workspace-invitation) obj
     ```json
     { "error": "This project has no workspaces.inviteAcceptUrl configured...", "code": "workspace/missing-invite-accept-url" }
     ```
-    A **project misconfiguration**, not a bad request — the payload is fine and the caller is authorized. Set [`workspaces.inviteAcceptUrl`](/sdk/workspaces/overview#project-settings) in your project settings and retry the identical request.
+    A **project misconfiguration**, not a bad request — the payload is fine and the caller is authorized. Set [`workspaces.inviteAcceptUrl`](/v7/sdk/workspaces/overview#project-settings) in your project settings and retry the identical request.
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json
@@ -172,7 +172,7 @@ Returns the created [WorkspaceInvitation](/data-models/workspace-invitation) obj
     ```json
     { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body" }
     ```
-    Every workspaces endpoint declares its fields exactly, and a top-level field it does not declare is refused rather than ignored — in the request body and in the query string alike, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. An offender in the query string carries `workspace/invalid-query` instead. Send only the fields documented above, plus `actingUserId` and `projectId`, which every workspaces route accepts. See [Shapes the server rejects](/sdk/workspaces/overview#shapes-the-server-rejects).
+    Every workspaces endpoint declares its fields exactly, and a top-level field it does not declare is refused rather than ignored — in the request body and in the query string alike, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. An offender in the query string carries `workspace/invalid-query` instead. Send only the fields documented above, plus `actingUserId` and `projectId`, which every workspaces route accepts. See [Shapes the server rejects](/v7/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
   <Accordion title="Unparsed Body — 400">
     ```json
@@ -181,8 +181,8 @@ Returns the created [WorkspaceInvitation](/data-models/workspace-invitation) obj
       "code": "workspace/invalid-body"
     }
     ```
-    Returned when a service/master key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would fall through to the unbounded path. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/sdk/workspaces/overview#shapes-the-server-rejects).
+    Returned when a service/master key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would fall through to the unbounded path. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v7/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
 </AccordionGroup>
 
-See also: [useCreateWorkspaceInvite](/hooks/workspaces/use-create-workspace-invite) · [createWorkspaceInvite (js-sdk)](/js-sdk/workspaces) · [createWorkspaceInvite (node-sdk)](/node-sdk/workspaces)
+See also: [useCreateWorkspaceInvite](/v7/hooks/workspaces/use-create-workspace-invite) · [createWorkspaceInvite (js-sdk)](/v7/js-sdk/workspaces) · [createWorkspaceInvite (node-sdk)](/v7/node-sdk/workspaces)

@@ -4,7 +4,7 @@ api: "POST /v7/:projectId/oauth/link"
 description: "Link a new OAuth provider to the current authenticated user"
 ---
 
-Initiates an OAuth 2.0 flow to link an additional provider to the currently authenticated user's account. Requires a valid access token. The flow and callback behavior are identical to the [Authorize OAuth](/api-reference/oauth/authorize) endpoint.
+Initiates an OAuth 2.0 flow to link an additional provider to the currently authenticated user's account. Requires a valid access token. The flow and callback behavior are identical to the [Authorize OAuth](/v7/api-reference/oauth/authorize) endpoint.
 
 The authenticated user's ID is taken from the access token — it cannot be specified in the request body.
 
@@ -69,6 +69,6 @@ https://yourapp.com/callback?error=...&error_description=...
 
 ## See Also
 
-- [OAuth integration guide](/sdk/authentication/oauth)
-- [Authorize OAuth](/api-reference/oauth/authorize)
-- [`useOAuthIdentities` hook](/hooks/auth/use-oauth-identities)
+- [OAuth integration guide](/v7/sdk/authentication/oauth)
+- [Authorize OAuth](/v7/api-reference/oauth/authorize)
+- [`useOAuthIdentities` hook](/v7/hooks/auth/use-oauth-identities)

@@ -137,7 +137,7 @@ function SignInButton() {
 
   **It does not sign you into another account.** If other accounts are stored,
   they stay in the map but none is activated — see
-  [Multi-Account](/sdk/authentication/multi-account).
+  [Multi-Account](/v7/sdk/authentication/multi-account).
 </ResponseField>
 
 <ResponseField name="changePassword" type="function">
@@ -159,7 +159,7 @@ function SignInButton() {
   session, so the others stay quiet until each is next opened. On a device that
   has never registered for push there is no identifier to send and no binding to
   keep, and every one of the user's bindings goes. See
-  [Change Password](/api-reference/auth/change-password).
+  [Change Password](/v7/api-reference/auth/change-password).
 
   Only this user's sessions are ended. Other accounts stored on this device
   belong to other users and are untouched. The mirror case is the one to plan
@@ -167,7 +167,7 @@ function SignInButton() {
   account stored here as a background account dies — and a stored account killed
   that way still has a valid-looking expiry, so it is only discovered by trying,
   which is what `needsReauth` on
-  [`useAccounts`](/hooks/auth/use-accounts#telling-a-live-account-from-a-dead-one)
+  [`useAccounts`](/v7/hooks/auth/use-accounts#telling-a-live-account-from-a-dead-one)
   records.
 
   An access token minted before the change keeps working until it expires, up to
@@ -198,7 +198,7 @@ function SignInButton() {
   before it touches the live session, so it cannot disturb the account you are
   currently signed into. If you were observing `auth/requestNewAccessToken`
   actions to detect account switches, watch the accounts slice instead. See
-  [When a transition fails](/sdk/authentication/multi-account#when-a-transition-fails).
+  [When a transition fails](/v7/sdk/authentication/multi-account#when-a-transition-fails).
 </ResponseField>
 
 ## The Account Limit
@@ -219,10 +219,10 @@ try {
 
 Two behaviours worth knowing:
 
-- **Sign-up is normally refused before the network call**; sign-in is refused after it, because only the server can say which account the credentials belong to. That is deliberate — checking the typed email against the stored accounts would lock users out of their own account whenever the stored email is stale, absent or cased differently. (A sign-up whose fifth slot fills *mid-request* is refused afterwards, and that user record does persist — see [what a refusal leaves behind](/sdk/authentication/multi-account#what-is-left-behind).)
+- **Sign-up is normally refused before the network call**; sign-in is refused after it, because only the server can say which account the credentials belong to. That is deliberate — checking the typed email against the stored accounts would lock users out of their own account whenever the stored email is stale, absent or cased differently. (A sign-up whose fifth slot fills *mid-request* is refused afterwards, and that user record does persist — see [what a refusal leaves behind](/v7/sdk/authentication/multi-account#what-is-left-behind).)
 - **A refused sign-in leaves the currently active account signed in.** Nothing is torn down, the accounts map is untouched, and the session the server created for the refused attempt is signed back out, so nothing is left dangling.
 
-The same refusal also sets `accountLimitReached` on [`useAccounts`](/hooks/auth/use-accounts) and [`useAddAccount`](/hooks/auth/use-add-account). That flag is the **only** channel on the OAuth paths, which cannot reject their caller — see [Reaching the account limit](/sdk/authentication/multi-account#reaching-the-account-limit).
+The same refusal also sets `accountLimitReached` on [`useAccounts`](/v7/hooks/auth/use-accounts) and [`useAddAccount`](/v7/hooks/auth/use-add-account). That flag is the **only** channel on the OAuth paths, which cannot reject their caller — see [Reaching the account limit](/v7/sdk/authentication/multi-account#reaching-the-account-limit).
 
 ## Controlling Error Logging
 
@@ -238,4 +238,4 @@ It is a bare setter rather than a `SublayProvider` prop because the setting is p
 
 ## Integration Guide
 
-For full integration guidance, see [Built-in Auth](/sdk/authentication/built-in).
+For full integration guidance, see [Built-in Auth](/v7/sdk/authentication/built-in).

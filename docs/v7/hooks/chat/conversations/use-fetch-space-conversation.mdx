@@ -34,7 +34,7 @@ function SpaceChatPanel({ spaceId }: { spaceId: string }) {
 ## Returns
 
 <ResponseField name="conversation" type="Conversation | null">
-  The [Conversation](/data-models/conversation) associated with the space, or `null` while loading.
+  The [Conversation](/v7/data-models/conversation) associated with the space, or `null` while loading.
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
@@ -44,4 +44,4 @@ function SpaceChatPanel({ spaceId }: { spaceId: string }) {
 ## Notes
 
 - The conversation is fetched on mount and stored in both local state and Redux.
-- For integration guidance, see [Chat: Conversations](/sdk/chat/conversations).
+- For integration guidance, see [Chat: Conversations](/v7/sdk/chat/conversations).

@@ -5,7 +5,7 @@ description: "Get the authenticated user's draft entities"
 ---
 
 <Note>
-  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/bundles).
+  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v7/bundles).
 </Note>
 
 Returns a paginated list of draft entities belonging to the authenticated user. Drafts are invisible to all other users and excluded from all other entity list endpoints until published.
@@ -35,7 +35,7 @@ Returns a paginated list of draft entities belonging to the authenticated user. 
   - `user` — the author's user profile
   - `space` — the space the entity belongs to
   - `files` — uploaded file/image attachments
-  - `grants` — the [reputation-grant summary](/data-models/reputation-grant#grantsummary) for the entity
+  - `grants` — the [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary) for the entity
 
   <Note>`topComment` and `saved` are not supported for drafts.</Note>
 </ParamField>
@@ -57,7 +57,7 @@ Returns a paginated response:
 }
 ```
 
-Each item is an [Entity](/data-models/entity) with `isDraft: true`. Results are ordered by most recently updated.
+Each item is an [Entity](/v7/data-models/entity) with `isDraft: true`. Results are ordered by most recently updated.
 
 ## Error Responses
 

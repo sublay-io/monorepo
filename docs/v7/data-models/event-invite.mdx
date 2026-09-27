@@ -5,7 +5,7 @@ description: "The shape of an EventInvite record returned by the event invitee-l
 
 An `EventInvite` grants a specific user access to an `invite`-only event. There is at most one invite per user per event (enforced by a unique `(eventId, userId)` constraint), so re-inviting a user is idempotent. Invites are managed by hosts and always reference a Sublay `userId` (never a foreign ID).
 
-Invite records are returned by the host-only invitee-list endpoint ([Fetch Invitees](/api-reference/events/fetch-invitees)).
+Invite records are returned by the host-only invitee-list endpoint ([Fetch Invitees](/v7/api-reference/events/fetch-invitees)).
 
 ## EventInvite
 
@@ -27,7 +27,7 @@ Invite records are returned by the host-only invitee-list endpoint ([Fetch Invit
 
 ## Related
 
-- [Event data model](/data-models/event)
-- [Add Invite API](/api-reference/events/add-invite)
-- [Remove Invite API](/api-reference/events/remove-invite)
-- [Fetch Invitees API](/api-reference/events/fetch-invitees)
+- [Event data model](/v7/data-models/event)
+- [Add Invite API](/v7/api-reference/events/add-invite)
+- [Remove Invite API](/v7/api-reference/events/remove-invite)
+- [Fetch Invitees API](/v7/api-reference/events/fetch-invitees)

@@ -4,11 +4,11 @@ api: "GET /v7/:projectId/workspaces/:id/authority/me"
 description: "The resolved standing of a user on a workspace — permissions as a service"
 ---
 
-Returns the caller's **resolved standing** on a workspace: `{ reasons, capabilities, permissions, rank }`, computed via the [authority resolver](/data-models/workspace#reach-and-the-wall-door-rule) (fast-path + bounded ancestor climb). This is the endpoint your authorization server reads (via the [node SDK](/node-sdk/workspaces)) to make its own app-level decisions.
+Returns the caller's **resolved standing** on a workspace: `{ reasons, capabilities, permissions, rank }`, computed via the [authority resolver](/v7/data-models/workspace#reach-and-the-wall-door-rule) (fast-path + bounded ancestor climb). This is the endpoint your authorization server reads (via the [node SDK](/v7/node-sdk/workspaces)) to make its own app-level decisions.
 
-`reasons` is an array of **structured entries** — `{ type, viaWorkspaceId? }` — distinguishing **`owner` / `ancestor-owner` / `member` / `reach-holder`**, so you always know *why* a user has what they have **and which workspace grants it**. It is the same object shape a [roster](/api-reference/workspaces/members/list-members) entry's `reasons` carries. `viaWorkspaceId` names the granting ancestor and is present on `ancestor-owner` / `reach-holder` only (`owner` / `member` are grants on the workspace itself). A user reaching in from several ancestors carries **one entry per granting ancestor**.
+`reasons` is an array of **structured entries** — `{ type, viaWorkspaceId? }` — distinguishing **`owner` / `ancestor-owner` / `member` / `reach-holder`**, so you always know *why* a user has what they have **and which workspace grants it**. It is the same object shape a [roster](/v7/api-reference/workspaces/members/list-members) entry's `reasons` carries. `viaWorkspaceId` names the granting ancestor and is present on `ancestor-owner` / `reach-holder` only (`owner` / `member` are grants on the workspace itself). A user reaching in from several ancestors carries **one entry per granting ancestor**.
 
-This read is inherently a **self** read (or a privileged-key read of a named user), so `capabilities` / `permissions` / `rank` are always returned in full here — unlike the [member-standing read](/api-reference/workspaces/members/fetch-member-standing), which fences them. (The fence exists to stop a caller reconstructing *someone else's* rank; there is nobody else in this payload.)
+This read is inherently a **self** read (or a privileged-key read of a named user), so `capabilities` / `permissions` / `rank` are always returned in full here — unlike the [member-standing read](/v7/api-reference/workspaces/members/fetch-member-standing), which fences them. (The fence exists to stop a caller reconstructing *someone else's* rank; there is nobody else in this payload.)
 
 <Note>
   There is **no** convenience `?permission=` check and **no** `can()` middleware. Sublay never consumes your opaque `permissions`, so a permission check is a one-line `.includes()` on the returned record:
@@ -30,7 +30,7 @@ This read is inherently a **self** read (or a privileged-key read of a named use
 <ParamField query="actingUserId" type="string" required>
   Service/master keys only — the user to act as, whose standing is resolved. **Required for a key:** this route has no unbounded path (there is no such thing as "the app's standing"), so a key that names nobody is refused with `400 workspace/missing-user-id`.
 
-  A client token omits it — the subject is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  A client token omits it — the subject is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
@@ -51,7 +51,7 @@ This read is inherently a **self** read (or a privileged-key read of a named use
 - `capabilities` — the fully-resolved set (direct + reach + ownership). **`view` is implied by every other capability** — any user with standing on the workspace resolves with `view`, including a member whose stored `capabilities` array is empty. A user with no relation at all resolves to an empty set.
 - `permissions` — **per-node** (the direct membership on this workspace only; may be empty). Does not cascade.
 - `rank` — the direct-membership rank, or `null` for owners / ancestor-owners / reach-only holders.
-- There is **no `relativeRank`** on this read. It is an offset from the caller, and here the caller *is* the subject — so it could only ever be `0`, a constant dressed as a coordinate. `rank` is the position this endpoint reports. `relativeRank` is meaningful on the [roster](/api-reference/workspaces/members/list-members) and [member-standing](/api-reference/workspaces/members/fetch-member-standing) reads, where the subject is somebody else.
+- There is **no `relativeRank`** on this read. It is an offset from the caller, and here the caller *is* the subject — so it could only ever be `0`, a constant dressed as a coordinate. `rank` is the position this endpoint reports. `relativeRank` is meaningful on the [roster](/v7/api-reference/workspaces/members/list-members) and [member-standing](/v7/api-reference/workspaces/members/fetch-member-standing) reads, where the subject is somebody else.
 
 ## Error Responses
 
@@ -76,4 +76,4 @@ This read is inherently a **self** read (or a privileged-key read of a named use
   </Accordion>
 </AccordionGroup>
 
-See also: [useFetchWorkspaceAuthority](/hooks/workspaces/use-fetch-workspace-authority) · [fetchWorkspaceAuthority (node-sdk)](/node-sdk/workspaces) · [fetchWorkspaceAuthority (js-sdk)](/js-sdk/workspaces)
+See also: [useFetchWorkspaceAuthority](/v7/hooks/workspaces/use-fetch-workspace-authority) · [fetchWorkspaceAuthority (node-sdk)](/v7/node-sdk/workspaces) · [fetchWorkspaceAuthority (js-sdk)](/v7/js-sdk/workspaces)

@@ -11,15 +11,15 @@ Minting (creating reputation from nothing, or destroying it) is service-key-only
 
 All hooks are importable from `@sublay/react-js`, `@sublay/react-native`, and `@sublay/expo`.
 
-Requires the `reputation` bundle on the project. See [Bundles](/bundles) and the [Reputation](/data-models/reputation) model.
+Requires the `reputation` bundle on the project. See [Bundles](/v7/bundles) and the [Reputation](/v7/data-models/reputation) model.
 
 ## Hooks at a glance
 
 | Hook | Purpose |
 |------|---------|
-| [`useCreateReputationGrant`](/hooks/reputation/use-create-reputation-grant) | Transfer reputation from the logged-in user to another user. |
-| [`useFetchManyReputationGrants`](/hooks/reputation/use-fetch-many-reputation-grants) | One-shot list query (low-level). |
-| [`useFetchManyReputationGrantsWrapper`](/hooks/reputation/use-fetch-many-reputation-grants-wrapper) | Stateful, paginated list with `loadMore` and `refresh`. |
+| [`useCreateReputationGrant`](/v7/hooks/reputation/use-create-reputation-grant) | Transfer reputation from the logged-in user to another user. |
+| [`useFetchManyReputationGrants`](/v7/hooks/reputation/use-fetch-many-reputation-grants) | One-shot list query (low-level). |
+| [`useFetchManyReputationGrantsWrapper`](/v7/hooks/reputation/use-fetch-many-reputation-grants-wrapper) | Stateful, paginated list with `loadMore` and `refresh`. |
 
 There is **no Redux store and no provider** for grants. Lists are local state held by the wrapper hook, and per-item totals ride along on the items themselves.
 
@@ -115,7 +115,7 @@ function WhoRewardedThis({ commentId }) {
 
 ## Grants in chat
 
-A grant landing on a chat message is broadcast live to everyone in the conversation, the same way message reactions are. `ChatProvider` handles the [`message:grant`](/sdk/chat/real-time) event for you: the message's `grants` summary updates in the store and your components re-render.
+A grant landing on a chat message is broadcast live to everyone in the conversation, the same way message reactions are. `ChatProvider` handles the [`message:grant`](/v7/sdk/chat/real-time) event for you: the message's `grants` summary updates in the store and your components re-render.
 
 Load messages with `includeGrants: true` so each message carries a baseline summary — without it, `viewerTotal` starts at `0` and only reflects grants seen live in that session.
 
@@ -129,8 +129,8 @@ A project can switch **user-initiated grants off** from **Settings → SDK** in 
 
 ## See Also
 
-- [ReputationGrant data model](/data-models/reputation-grant)
-- [Reputation data model](/data-models/reputation)
-- [Create Reputation Grant API](/api-reference/reputation-grants/create-reputation-grant)
+- [ReputationGrant data model](/v7/data-models/reputation-grant)
+- [Reputation data model](/v7/data-models/reputation)
+- [Create Reputation Grant API](/v7/api-reference/reputation-grants/create-reputation-grant)
 - [Node SDK reputation module](/v7/node-sdk/reputation)
 - [JS SDK reputation module](/v7/js-sdk/reputation)

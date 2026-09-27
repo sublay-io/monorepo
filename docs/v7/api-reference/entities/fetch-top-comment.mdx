@@ -5,7 +5,7 @@ description: "Get the highest-voted comment on an entity"
 ---
 
 <Note>
-  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/bundles).
+  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v7/bundles).
 </Note>
 
 Returns the single comment with the most upvotes for the given entity. Useful for previewing the best comment alongside an entity in a feed. When multiple comments are tied, the oldest is returned.
@@ -20,7 +20,7 @@ Returns `null` if the entity has no comments.
 
 ## Response
 
-Returns a [Comment](/data-models/comment) object, or `null` if there are no comments.
+Returns a [Comment](/v7/data-models/comment) object, or `null` if there are no comments.
 
 ```json
 null

@@ -9,16 +9,16 @@ Sublay is not one monolithic feature set. It's a collection of **bundles** — s
 Every project gets its own isolated database schema. Installing a bundle provisions that bundle's tables into your project's schema and switches the feature on. Removing a bundle takes it back out.
 
 <Note>
-  Bundles are about **provisioning**, not pricing. Installing a bundle makes the feature available in your project; what each plan allows (quotas, AI access, etc.) is a separate concern. See [Semantic Search & AI](/semantic-search-ai) for an example of a feature that needs both its bundle *and* a paid plan.
+  Bundles are about **provisioning**, not pricing. Installing a bundle makes the feature available in your project; what each plan allows (quotas, AI access, etc.) is a separate concern. See [Semantic Search & AI](/v7/semantic-search-ai) for an example of a feature that needs both its bundle *and* a paid plan.
 </Note>
 
 ## The core bundle
 
 Every project always has the **`core`** bundle. It's installed automatically when the project is created and cannot be removed. Core provides the foundation that every other feature builds on:
 
-- **Users, authentication & identity** — email/password accounts, OAuth identities, and OAuth provider configuration. See [Authentication](/authentication).
+- **Users, authentication & identity** — email/password accounts, OAuth identities, and OAuth provider configuration. See [Authentication](/v7/authentication).
 
-Because OAuth identity lives in core, [OAuth sign-in](/sdk/authentication/oauth) works on every project without installing anything extra.
+Because OAuth identity lives in core, [OAuth sign-in](/v7/sdk/authentication/oauth) works on every project without installing anything extra.
 
 ## Available bundles
 
@@ -26,21 +26,21 @@ On top of core, you choose which of these to install. Most are independent — i
 
 | Bundle | Feature | What it adds |
 |--------|---------|--------------|
-| `entities` | [Entities](/sdk/entities/overview) | The base content unit — posts, articles, listings, anything your users create — with views, drafts, and publishing |
-| `comments` | [Comments](/sdk/comments/overview) | Threaded comments on entities |
-| `reactions` | [Reactions](/sdk/reactions/overview) | Emoji reactions on entities and comments |
-| `files-images` | [Storage](/sdk/storage/overview) | File and image uploads, including user avatars and banners |
-| `follows` | [Follows](/sdk/relationships/overview) | Unidirectional follow relationships |
-| `connections` | [Connections](/sdk/relationships/overview) | Bidirectional connection (friend-style) requests |
-| `spaces` | [Spaces](/sdk/spaces/overview) | Hierarchical community spaces, membership, roles, and rules |
-| `workspaces` | [Workspaces](/sdk/workspaces/overview) | Self-nesting SaaS/team workspaces with invitations and per-member authority |
-| `chat` | [Chat](/sdk/chat/overview) | Real-time 1:1 and group conversations with message reactions |
-| `collections` | [Collections](/sdk/collections/overview) | User-owned bookmarking and folders for saving entities |
-| `moderation` | [Moderation](/sdk/moderation/overview) | Reports, report resolution, and user suspensions |
-| `notifications` | [App Notifications](/sdk/app-notifications/overview) | In-app notification system |
-| `push` | [Push Notifications](/push-notifications) | Native OS push delivery to iOS, Android, and Web |
-| `ai-search` | [Semantic Search & AI](/sdk/search/overview) | Content embeddings, semantic search, and the AI ask endpoint |
-| `reputation` | [Reputation](/data-models/reputation), [ReputationGrant](/data-models/reputation-grant) | Per-space reputation buckets with a maintained overall total on each user, plus reputation grants — reputation deliberately given by a user or minted by your app |
+| `entities` | [Entities](/v7/sdk/entities/overview) | The base content unit — posts, articles, listings, anything your users create — with views, drafts, and publishing |
+| `comments` | [Comments](/v7/sdk/comments/overview) | Threaded comments on entities |
+| `reactions` | [Reactions](/v7/sdk/reactions/overview) | Emoji reactions on entities and comments |
+| `files-images` | [Storage](/v7/sdk/storage/overview) | File and image uploads, including user avatars and banners |
+| `follows` | [Follows](/v7/sdk/relationships/overview) | Unidirectional follow relationships |
+| `connections` | [Connections](/v7/sdk/relationships/overview) | Bidirectional connection (friend-style) requests |
+| `spaces` | [Spaces](/v7/sdk/spaces/overview) | Hierarchical community spaces, membership, roles, and rules |
+| `workspaces` | [Workspaces](/v7/sdk/workspaces/overview) | Self-nesting SaaS/team workspaces with invitations and per-member authority |
+| `chat` | [Chat](/v7/sdk/chat/overview) | Real-time 1:1 and group conversations with message reactions |
+| `collections` | [Collections](/v7/sdk/collections/overview) | User-owned bookmarking and folders for saving entities |
+| `moderation` | [Moderation](/v7/sdk/moderation/overview) | Reports, report resolution, and user suspensions |
+| `notifications` | [App Notifications](/v7/sdk/app-notifications/overview) | In-app notification system |
+| `push` | [Push Notifications](/v7/push-notifications) | Native OS push delivery to iOS, Android, and Web |
+| `ai-search` | [Semantic Search & AI](/v7/sdk/search/overview) | Content embeddings, semantic search, and the AI ask endpoint |
+| `reputation` | [Reputation](/v7/data-models/reputation), [ReputationGrant](/v7/data-models/reputation-grant) | Per-space reputation buckets with a maintained overall total on each user, plus reputation grants — reputation deliberately given by a user or minted by your app |
 
 ### Bundle dependencies
 
@@ -62,7 +62,7 @@ Installing a bundle is an asynchronous operation — the dashboard shows it as *
 <Warning>
   **Removing a bundle is destructive.** Uninstalling drops the bundle's tables and the data in them, and clears references to that data from other bundles. For example, removing the `spaces` bundle deletes all spaces and clears the `spaceId` on any entities, comments, or conversations that pointed at a space. There is no undo — back up anything you need first.
 
-  Uninstalling the `reputation` bundle is doubly lossy: it drops the reputation buckets table and the grants table — destroying all grant history — **and** zeroes the `reputation` column on every user. Reinstalling starts fresh from zero — past scores are not recomputed. See [Reputation](/data-models/reputation).
+  Uninstalling the `reputation` bundle is doubly lossy: it drops the reputation buckets table and the grants table — destroying all grant history — **and** zeroes the `reputation` column on every user. Reinstalling starts fresh from zero — past scores are not recomputed. See [Reputation](/v7/data-models/reputation).
 </Warning>
 
 ## What happens if a bundle isn't installed

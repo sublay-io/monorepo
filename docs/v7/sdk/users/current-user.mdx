@@ -8,7 +8,7 @@ The Current User section covers everything related to the authenticated user's o
 ## Hooks
 
 <CardGroup cols={2}>
-  <Card title="useUser" href="/hooks/user/use-user">
+  <Card title="useUser" href="/v7/hooks/user/use-user">
     Access the authenticated user's full profile state, including loading and error states. Provides an `updateUser` action for modifying profile data.
   </Card>
 </CardGroup>
@@ -29,10 +29,10 @@ The authenticated user can update their own profile fields:
 
 ## User State
 
-The `useUser` hook returns an `AuthUser` object which contains the complete profile of the authenticated user, including fields that are not exposed in public profiles. See the [User data model](/data-models/user) for the full field reference.
+The `useUser` hook returns an `AuthUser` object which contains the complete profile of the authenticated user, including fields that are not exposed in public profiles. See the [User data model](/v7/data-models/user) for the full field reference.
 
 <Note>
   The `AuthUser` type includes `authMethods` (e.g., `["password", "google"]`) and `suspensions` — fields only available for the authenticated user's own profile.
 </Note>
 
-`useUser` also derives `isSuspended` and `activeSuspension` from the user's suspensions, so you can render a suspended state ambiently. See [Suspensions](/sdk/moderation/suspensions) for the full enforcement behavior and the catchable `SuspendedError`.
+`useUser` also derives `isSuspended` and `activeSuspension` from the user's suspensions, so you can render a suspended state ambiently. See [Suspensions](/v7/sdk/moderation/suspensions) for the full enforcement behavior and the catchable `SuspendedError`.

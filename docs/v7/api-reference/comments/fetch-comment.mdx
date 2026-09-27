@@ -24,12 +24,12 @@ Returns a single comment by its Sublay UUID.
 ## Query Parameters
 
 <ParamField query="include" type="string">
-  Comma-separated list of associations to include. Valid values: `user`, `entity`, `space`, `parent`, `grants` (the [reputation-grant summary](/data-models/reputation-grant#grantsummary)).
+  Comma-separated list of associations to include. Valid values: `user`, `entity`, `space`, `parent`, `grants` (the [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary)).
 </ParamField>
 
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to the populated author `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to the populated author `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation) for the full contract.
 
 <SpaceReputationParams variant="context" field="query" />
 
@@ -43,10 +43,10 @@ Returns a `200 OK` with the following shape:
 }
 ```
 
-The `comment` field is a [Comment](/data-models/comment) object. If the comment has been removed (user-deleted or moderation-removed) and the viewer is not the author, identifying fields (`userId`, `user`, `content`, `gif`, `mentions`, `attachments`) are nulled out as a Reddit-style placeholder.
+The `comment` field is a [Comment](/v7/data-models/comment) object. If the comment has been removed (user-deleted or moderation-removed) and the viewer is not the author, identifying fields (`userId`, `user`, `content`, `gif`, `mentions`, `attachments`) are nulled out as a Reddit-style placeholder.
 
 <Note>
-  This endpoint **nests the record under a `comment` key**, unlike every other read surface, which returns the record bare. So a requested grants summary lives at `comment.grants` — see [GrantSummary](/data-models/reputation-grant#grantsummary).
+  This endpoint **nests the record under a `comment` key**, unlike every other read surface, which returns the record bare. So a requested grants summary lives at `comment.grants` — see [GrantSummary](/v7/data-models/reputation-grant#grantsummary).
 </Note>
 
 ## Error Responses

@@ -11,7 +11,7 @@ Refreshes a pending invitation — sets `expiresAt = now + 14 days` and resends 
 </Note>
 
 <Warning>
-  **Requires `workspaces.inviteAcceptUrl` on the project**, exactly as [Create Invite](/api-reference/workspaces/invitations/create-invite) does — resending an email that has nowhere to deep-link is equally pointless. Without it this endpoint returns `409 workspace/missing-invite-accept-url` and the invitation's `expiresAt` is left untouched. See [Project settings](/sdk/workspaces/overview#project-settings).
+  **Requires `workspaces.inviteAcceptUrl` on the project**, exactly as [Create Invite](/v7/api-reference/workspaces/invitations/create-invite) does — resending an email that has nowhere to deep-link is equally pointless. Without it this endpoint returns `409 workspace/missing-invite-accept-url` and the invitation's `expiresAt` is left untouched. See [Project settings](/v7/sdk/workspaces/overview#project-settings).
 </Warning>
 
 ## Path Parameters
@@ -27,12 +27,12 @@ Refreshes a pending invitation — sets `expiresAt = now + 14 days` and resends 
 ## Body Parameters
 
 <ParamField body="actingUserId" type="string">
-  Service/master keys only — the user to act as. Enforced: the `invite` capability (or ownership) is required *of the named user*. Omit it to act as the app itself (unbounded). See [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  Service/master keys only — the user to act as. Enforced: the `invite` capability (or ownership) is required *of the named user*. Omit it to act as the app itself (unbounded). See [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
 
-Returns the refreshed [WorkspaceInvitation](/data-models/workspace-invitation) object.
+Returns the refreshed [WorkspaceInvitation](/v7/data-models/workspace-invitation) object.
 
 ## Error Responses
 
@@ -47,7 +47,7 @@ Returns the refreshed [WorkspaceInvitation](/data-models/workspace-invitation) o
     ```json
     { "error": "This project has no workspaces.inviteAcceptUrl configured...", "code": "workspace/missing-invite-accept-url" }
     ```
-    A **project misconfiguration**, not a bad request. The row is not touched — `expiresAt` is unchanged and no email is sent. Set [`workspaces.inviteAcceptUrl`](/sdk/workspaces/overview#project-settings) and retry.
+    A **project misconfiguration**, not a bad request. The row is not touched — `expiresAt` is unchanged and no email is sent. Set [`workspaces.inviteAcceptUrl`](/v7/sdk/workspaces/overview#project-settings) and retry.
   </Accordion>
   <Accordion title="Terminal Invite — 409">
     ```json
@@ -65,7 +65,7 @@ Returns the refreshed [WorkspaceInvitation](/data-models/workspace-invitation) o
     ```json
     { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body" }
     ```
-    Every workspaces endpoint declares its fields exactly, and a top-level field it does not declare is refused rather than ignored — in the request body and in the query string alike, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. An offender in the query string carries `workspace/invalid-query` instead. Send only the fields documented above, plus `actingUserId` and `projectId`, which every workspaces route accepts. See [Shapes the server rejects](/sdk/workspaces/overview#shapes-the-server-rejects).
+    Every workspaces endpoint declares its fields exactly, and a top-level field it does not declare is refused rather than ignored — in the request body and in the query string alike, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. An offender in the query string carries `workspace/invalid-query` instead. Send only the fields documented above, plus `actingUserId` and `projectId`, which every workspaces route accepts. See [Shapes the server rejects](/v7/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
   <Accordion title="Unparsed Body — 400">
     ```json
@@ -74,8 +74,8 @@ Returns the refreshed [WorkspaceInvitation](/data-models/workspace-invitation) o
       "code": "workspace/invalid-body"
     }
     ```
-    Returned when a service/master key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would fall through to the unbounded path. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/sdk/workspaces/overview#shapes-the-server-rejects).
+    Returned when a service/master key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would fall through to the unbounded path. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v7/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
 </AccordionGroup>
 
-See also: [useResendWorkspaceInvite](/hooks/workspaces/use-resend-workspace-invite) · [Project settings](/sdk/workspaces/overview#project-settings)
+See also: [useResendWorkspaceInvite](/v7/hooks/workspaces/use-resend-workspace-invite) · [Project settings](/v7/sdk/workspaces/overview#project-settings)

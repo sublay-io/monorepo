@@ -79,10 +79,10 @@ The hook returns a function. That function accepts:
 ## Returns
 
 <ResponseField name="ChatMessage" type="ChatMessage">
-  The server-confirmed [ChatMessage](/data-models/chat-message) object. When `spaceReputation` is requested, its embedded sender carries an added `spaceReputation` number. See [Reputation](/data-models/reputation).
+  The server-confirmed [ChatMessage](/v7/data-models/chat-message) object. When `spaceReputation` is requested, its embedded sender carries an added `spaceReputation` number. See [Reputation](/v7/data-models/reputation).
 </ResponseField>
 
 ## Notes
 
 - At least one of `content`, `gif`, `files`, or non-empty `metadata` should be provided for a meaningful message.
-- For integration guidance, see [Chat: Messages](/sdk/chat/messages).
+- For integration guidance, see [Chat: Messages](/v7/sdk/chat/messages).

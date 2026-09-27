@@ -44,11 +44,11 @@ To include attached files in the response, pass `includeFiles: true`:
 const { messages } = useLiveChatMessages({ conversationId, includeFiles: true });
 ```
 
-See [`useLiveChatMessages`](/hooks/chat/messages/use-live-chat-messages).
+See [`useLiveChatMessages`](/v7/hooks/chat/messages/use-live-chat-messages).
 
 ### Filtered / read-only queries
 
-`useLiveChatMessages` is the live conversation stream and intentionally takes no `filters`. To fetch a **filtered** or read-only list of messages — for example, only messages that have replies — use [`useFetchManyChatMessagesWrapper`](/hooks/chat/messages/use-fetch-many-chat-messages), which keeps results in local state and never receives live socket traffic:
+`useLiveChatMessages` is the live conversation stream and intentionally takes no `filters`. To fetch a **filtered** or read-only list of messages — for example, only messages that have replies — use [`useFetchManyChatMessagesWrapper`](/v7/hooks/chat/messages/use-fetch-many-chat-messages), which keeps results in local state and never receives live socket traffic:
 
 ```tsx
 import { useFetchManyChatMessagesWrapper } from "@sublay/react-js";
@@ -60,7 +60,7 @@ const { messages, loading, hasMore, loadMore, refetch } =
   });
 ```
 
-See [`useFetchManyChatMessages`](/hooks/chat/messages/use-fetch-many-chat-messages).
+See [`useFetchManyChatMessages`](/v7/hooks/chat/messages/use-fetch-many-chat-messages).
 
 ## Sending Messages
 
@@ -115,7 +115,7 @@ const handleSendWithFile = async (file: File) => {
 };
 ```
 
-See [`useSendMessage`](/hooks/chat/messages/use-send-message).
+See [`useSendMessage`](/v7/hooks/chat/messages/use-send-message).
 
 ## Editing Messages
 
@@ -135,7 +135,7 @@ function EditableMessage({ conversationId, messageId }) {
 }
 ```
 
-See [`useEditMessage`](/hooks/chat/messages/use-edit-message).
+See [`useEditMessage`](/v7/hooks/chat/messages/use-edit-message).
 
 ## Deleting Messages
 
@@ -155,7 +155,7 @@ function MessageActions({ conversationId, messageId }) {
 }
 ```
 
-See [`useDeleteMessage`](/hooks/chat/messages/use-delete-message).
+See [`useDeleteMessage`](/v7/hooks/chat/messages/use-delete-message).
 
 ## Reactions
 
@@ -183,15 +183,15 @@ function ReactionBar({ conversationId, messageId, reactionCounts, userReactions 
 }
 ```
 
-See [`useToggleReaction`](/hooks/chat/messages/use-toggle-reaction).
+See [`useToggleReaction`](/v7/hooks/chat/messages/use-toggle-reaction).
 
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="Real-time" icon="bolt" href="/sdk/chat/real-time">
+  <Card title="Real-time" icon="bolt" href="/v7/sdk/chat/real-time">
     Typing indicators, unread counts, and read receipts
   </Card>
-  <Card title="Threads" icon="code-branch" href="/sdk/chat/threads">
+  <Card title="Threads" icon="code-branch" href="/v7/sdk/chat/threads">
     Threaded replies on messages
   </Card>
 </CardGroup>

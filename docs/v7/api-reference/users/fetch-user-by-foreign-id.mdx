@@ -58,7 +58,7 @@ Finds a user within the project by their `foreignId` — the external identifier
 
 ### Space-scoped reputation
 
-This endpoint has no space in context, so the opt-in `spaceReputation` object accepts a `spaceId` of a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to each returned user, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation).
+This endpoint has no space in context, so the opt-in `spaceReputation` object accepts a `spaceId` of a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to each returned user, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation).
 
 <SpaceReputationParams variant="user" field="query" />
 
@@ -144,6 +144,6 @@ Returns HTTP `200` (found) or `201` (created) with the user object:
 
 ## See Also
 
-- [`useFetchUserByForeignId` hook](/hooks/users/use-fetch-user-by-foreign-id)
-- [External auth guide](/sdk/authentication/external)
-- [User data model](/data-models/user)
+- [`useFetchUserByForeignId` hook](/v7/hooks/users/use-fetch-user-by-foreign-id)
+- [External auth guide](/v7/sdk/authentication/external)
+- [User data model](/v7/data-models/user)

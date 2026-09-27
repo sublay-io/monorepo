@@ -246,7 +246,7 @@ Triggered when a user is granted reputation — by another user, or by the app. 
 
 | Metadata Field | Type | Description |
 |----------------|------|-------------|
-| `grantId` | `string` | ID of the [ReputationGrant](/data-models/reputation-grant). |
+| `grantId` | `string` | ID of the [ReputationGrant](/v7/data-models/reputation-grant). |
 | `amount` | `number` | The amount granted. Always positive here. |
 | `sourceType` | `"user" \| "app"` | `"user"` = a debited transfer, `"app"` = a mint. |
 | `note` | `string \| null \| undefined` | The granter's note, if any. |
@@ -293,7 +293,7 @@ A manually triggered notification from the project dashboard.
 
 ## See Also
 
-- [ReputationGrant](/data-models/reputation-grant)
-- [useAppNotifications hook](/hooks/app-notifications/use-app-notifications)
-- [Fetch Notifications](/api-reference/app-notifications/fetch-notifications)
-- [Notification Templates](/sdk/app-notifications/notification-templates)
+- [ReputationGrant](/v7/data-models/reputation-grant)
+- [useAppNotifications hook](/v7/hooks/app-notifications/use-app-notifications)
+- [Fetch Notifications](/v7/api-reference/app-notifications/fetch-notifications)
+- [Notification Templates](/v7/sdk/app-notifications/notification-templates)

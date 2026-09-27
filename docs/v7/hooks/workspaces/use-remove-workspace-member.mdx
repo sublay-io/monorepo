@@ -6,12 +6,12 @@ icon: "plug"
 
 ## Overview
 
-`useRemoveWorkspaceMember` returns a callable that removes a direct [member](/data-models/workspace-member) from **this workspace node only**. Fires `workspace.member.removed`.
+`useRemoveWorkspaceMember` returns a callable that removes a direct [member](/v7/data-models/workspace-member) from **this workspace node only**. Fires `workspace.member.removed`.
 
 **Authorization:** capability-gated + rank-bounded. Requires the `remove-member` capability, and you may act only on members ranked strictly below you.
 
 <Note>
-  Owners have no member row, so removal targets member rows only. **Sole-owner protection:** the owner cannot be removed while sole owner — [transfer ownership](/hooks/workspaces/use-transfer-workspace-ownership) first.
+  Owners have no member row, so removal targets member rows only. **Sole-owner protection:** the owner cannot be removed while sole owner — [transfer ownership](/v7/hooks/workspaces/use-transfer-workspace-ownership) first.
 </Note>
 
 ## Usage Example
@@ -60,6 +60,6 @@ Resolves to `void` (the endpoint returns `204 No Content`).
 
 ## Related
 
-- [`useRemoveWorkspaceMemberFromSubtree`](/hooks/workspaces/use-remove-workspace-member-from-subtree) — offboard across descendants too
-- [`useLeaveWorkspace`](/hooks/workspaces/use-leave-workspace) — the self-service equivalent
-- [Remove Member API](/api-reference/workspaces/members/remove-member)
+- [`useRemoveWorkspaceMemberFromSubtree`](/v7/hooks/workspaces/use-remove-workspace-member-from-subtree) — offboard across descendants too
+- [`useLeaveWorkspace`](/v7/hooks/workspaces/use-leave-workspace) — the self-service equivalent
+- [Remove Member API](/v7/api-reference/workspaces/members/remove-member)

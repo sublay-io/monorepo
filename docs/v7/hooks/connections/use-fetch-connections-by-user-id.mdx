@@ -74,7 +74,7 @@ Returns a `PaginatedResponse` containing an array of established connections:
       ID of the connection record.
     </ResponseField>
     <ResponseField name="connectedUser" type="User">
-      The other user's profile. When `spaceReputation` is requested, it carries an added `spaceReputation` number. See [User data model](/data-models/user) and [Reputation](/data-models/reputation).
+      The other user's profile. When `spaceReputation` is requested, it carries an added `spaceReputation` number. See [User data model](/v7/data-models/user) and [Reputation](/v7/data-models/reputation).
     </ResponseField>
     <ResponseField name="connectedAt" type="string">
       ISO timestamp when the connection was established.
@@ -88,5 +88,5 @@ Returns a `PaginatedResponse` containing an array of established connections:
 
 ## Related
 
-- [useFetchConnections](/hooks/connections/use-fetch-connections) — fetch the current user's own connections
-- [useFetchConnectionsCountByUserId](/hooks/connections/use-fetch-connections-count-by-user-id) — get count for any user
+- [useFetchConnections](/v7/hooks/connections/use-fetch-connections) — fetch the current user's own connections
+- [useFetchConnectionsCountByUserId](/v7/hooks/connections/use-fetch-connections-count-by-user-id) — get count for any user

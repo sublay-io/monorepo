@@ -6,7 +6,7 @@ description: "The Entity interface shape returned by the API and SDK"
 An entity is the central content unit in Sublay — it can represent a post, article, product listing, video, or any other piece of content in your application. Entities support reactions, comments, votes, file attachments, geo-location, and more.
 
 <Note>
-  Entities are provided by the optional **`entities`** bundle. A project without it returns `403 database/tables-not-available` for entity endpoints. See [Bundles](/bundles).
+  Entities are provided by the optional **`entities`** bundle. A project without it returns `403 database/tables-not-available` for entity endpoints. See [Bundles](/v7/bundles).
 </Note>
 
 ## Properties
@@ -30,7 +30,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `keywords` | `string[]` | Tags used for filtering and discovery. |
 | `upvotes` | `string[]` | Legacy v6 field — array of user IDs that upvoted. Use `reactionCounts` instead. |
 | `downvotes` | `string[]` | Legacy v6 field — array of user IDs that downvoted. Use `reactionCounts` instead. |
-| `reactionCounts` | `ReactionCounts` | Counts for all 8 reaction types. See [Reaction](/data-models/reaction). |
+| `reactionCounts` | `ReactionCounts` | Counts for all 8 reaction types. See [Reaction](/v7/data-models/reaction). |
 | `userReaction` | `ReactionType \| null` | The current user's reaction. Only present when the user is authenticated and has reacted to this entity. |
 | `repliesCount` | `number` | Total number of comments and replies on this entity. |
 | `views` | `number` | View count. Auto-incremented on every fetch. Can also be incremented manually via the service-key-only `PATCH /entities/:entityId/increment-views` endpoint. |
@@ -40,9 +40,9 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `metadata` | `Record<string, any>` | Custom key-value data (max 10 KB). |
 | `topComment` | `TopComment \| null` | The highest-voted comment. Populated when `include` contains `"topComment"`. |
 | `isSaved` | `boolean` | Whether the current user has saved this entity to a collection. Populated when `include` contains `"saved"`. |
-| `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
+| `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v7/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
 | `isDraft` | `boolean \| null` | Whether this entity is in draft state. |
-| `nsfw` | `boolean` | The entity's **own** NSFW flag. `false` by default. Set on create/update by the owner (or a service/master key), or by a space moderator via the [set-NSFW endpoint](/hooks/spaces/use-set-space-entity-nsfw). See [NSFW flagging](#nsfw-flagging). |
+| `nsfw` | `boolean` | The entity's **own** NSFW flag. `false` by default. Set on create/update by the owner (or a service/master key), or by a space moderator via the [set-NSFW endpoint](/v7/hooks/spaces/use-set-space-entity-nsfw). See [NSFW flagging](#nsfw-flagging). |
 | `nsfwEffective` | `boolean` | **Computed live, read-only.** `true` when the entity's own `nsfw` is `true` **or** its space is effectively NSFW: `entity.nsfw OR (space?.nsfwEffective ?? false)`. This is the value the `nsfwFilter` query param keys off. See [NSFW flagging](#nsfw-flagging). |
 | `moderationStatus` | `"approved" \| "removed" \| null` | Current space moderation status. |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
@@ -85,11 +85,11 @@ An entity carries its own `nsfw` boolean and exposes a live-computed `nsfwEffect
   nsfwEffective = entity.nsfw OR COALESCE(space.nsfwEffective, false)
   ```
 
-  So an entity reads as effectively NSFW when either its own flag is set **or** the space it lives in is effectively NSFW (which itself folds in the space's whole ancestor chain — see [Space → NSFW flagging](/data-models/space#nsfw-flagging)). A space-less entity (`spaceId` is `null`) falls back to its own flag; on a project without the spaces bundle, the space contribution is simply absent and `nsfwEffective` equals `entity.nsfw`.
+  So an entity reads as effectively NSFW when either its own flag is set **or** the space it lives in is effectively NSFW (which itself folds in the space's whole ancestor chain — see [Space → NSFW flagging](/v7/data-models/space#nsfw-flagging)). A space-less entity (`spaceId` is `null`) falls back to its own flag; on a project without the spaces bundle, the space contribution is simply absent and `nsfwEffective` equals `entity.nsfw`.
 
 The effect is a live OR: clearing an entity's own `nsfw` **cannot** make it read safe while its space chain is still NSFW, and flagging a space instantly cascades to every entity inside it without stamping or backfilling entity rows.
 
-To filter a list by effective NSFW, pass `nsfwFilter` to [Fetch many entities](/hooks/entities/use-fetch-many-entities) (`include-all` default / `exclude` / `only`).
+To filter a list by effective NSFW, pass `nsfwFilter` to [Fetch many entities](/v7/hooks/entities/use-fetch-many-entities) (`include-all` default / `exclude` / `only`).
 
 <Note>
   Sublay only **labels** (`nsfw`) and **filters** (`nsfwFilter`) content. It does **not** blur, age-gate, add interstitials, or store a per-viewer "show mature content" preference — how NSFW-flagged content is presented is entirely the consuming app's responsibility.
@@ -110,10 +110,10 @@ Pass an `include` array to populate optional fields:
 
 ## See Also
 
-- [Reaction](/data-models/reaction)
-- [File](/data-models/file)
-- [ReputationGrant](/data-models/reputation-grant)
-- [Space](/data-models/space)
-- [Fetch Entity](/api-reference/entities/fetch-entity)
-- [useEntity hook](/hooks/entities/use-entity)
-- [Set space entity NSFW hook](/hooks/spaces/use-set-space-entity-nsfw)
+- [Reaction](/v7/data-models/reaction)
+- [File](/v7/data-models/file)
+- [ReputationGrant](/v7/data-models/reputation-grant)
+- [Space](/v7/data-models/space)
+- [Fetch Entity](/v7/api-reference/entities/fetch-entity)
+- [useEntity hook](/v7/hooks/entities/use-entity)
+- [Set space entity NSFW hook](/v7/hooks/spaces/use-set-space-entity-nsfw)

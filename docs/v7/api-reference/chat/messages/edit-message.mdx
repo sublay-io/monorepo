@@ -27,11 +27,11 @@ All fields are optional. Only provided fields are updated.
 </ParamField>
 
 <ParamField body="gif" type="object">
-  Updated GIF attachment. See [GifData](/data-models/chat-message#gifdata) for the expected shape. Set to `null` to remove the GIF.
+  Updated GIF attachment. See [GifData](/v7/data-models/chat-message#gifdata) for the expected shape. Set to `null` to remove the GIF.
 </ParamField>
 
 <ParamField body="mentions" type="array">
-  Updated array of [Mention](/data-models/chat-message#mention) objects.
+  Updated array of [Mention](/v7/data-models/chat-message#mention) objects.
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -40,7 +40,7 @@ All fields are optional. Only provided fields are updated.
 
 ## Response
 
-Returns the updated [ChatMessage](/data-models/chat-message), with `editedAt` set to the current time.
+Returns the updated [ChatMessage](/v7/data-models/chat-message), with `editedAt` set to the current time.
 
 ## Error Responses
 

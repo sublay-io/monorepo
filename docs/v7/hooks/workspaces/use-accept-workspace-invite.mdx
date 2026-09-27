@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useAcceptWorkspaceInvite` returns a callable that accepts an [invitation](/data-models/workspace-invitation). The `inviteId` is non-secret. Idempotent when already a member/owner.
+`useAcceptWorkspaceInvite` returns a callable that accepts an [invitation](/v7/data-models/workspace-invitation). The `inviteId` is non-secret. Idempotent when already a member/owner.
 
 **Authorization:** self-service. The invite must be addressed to the signed-in user (identity-matched), and a **verified email is required**.
 
@@ -47,10 +47,10 @@ function AcceptButton({ inviteId }: { inviteId: string }) {
 |------|--------|---------|
 | `workspace/email-not-verified` | 403 | The accepting user's email is not verified. |
 | `workspace/invite-not-found` | 404 | No such invitation, or it is not addressed to you. |
-| `workspace/invite-expired` | 409 | The invitation lapsed — ask for a [resend](/hooks/workspaces/use-resend-workspace-invite). |
+| `workspace/invite-expired` | 409 | The invitation lapsed — ask for a [resend](/v7/hooks/workspaces/use-resend-workspace-invite). |
 | `workspace/invite-terminal` | 409 | Already accepted / declined / revoked. |
 
 ## Related
 
-- [`useFetchMyWorkspaceInvites`](/hooks/workspaces/use-fetch-my-workspace-invites) — list the invites addressed to you
-- [Accept Invite API](/api-reference/workspaces/invitations/accept-invite)
+- [`useFetchMyWorkspaceInvites`](/v7/hooks/workspaces/use-fetch-my-workspace-invites) — list the invites addressed to you
+- [Accept Invite API](/v7/api-reference/workspaces/invitations/accept-invite)

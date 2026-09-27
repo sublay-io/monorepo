@@ -6,7 +6,7 @@ icon: "cube"
 
 ## Overview
 
-`useUserActions` is a low-level hook that provides direct access to the Redux actions and API mutations for the current user. In most cases you should use [`useUser`](/hooks/user/use-user) instead, which wraps `useUserActions` and provides a higher-level interface.
+`useUserActions` is a low-level hook that provides direct access to the Redux actions and API mutations for the current user. In most cases you should use [`useUser`](/v7/hooks/user/use-user) instead, which wraps `useUserActions` and provides a higher-level interface.
 
 Use `useUserActions` directly when you need to manually set or clear user state — for example, in a custom authentication flow.
 
@@ -57,7 +57,7 @@ function CustomAuth() {
       The authenticated user's ID.
     </ResponseField>
     <ResponseField name="update" type="UpdateUserParams" required>
-      Fields to update. See [`useUser`](/hooks/user/use-user) for the full `UpdateUserParams` reference.
+      Fields to update. See [`useUser`](/v7/hooks/user/use-user) for the full `UpdateUserParams` reference.
     </ResponseField>
     <ResponseField name="currentUser" type="AuthUser">
       The current user snapshot used to revert state on failure.
@@ -70,5 +70,5 @@ function CustomAuth() {
 </ResponseField>
 
 <Note>
-  Prefer [`useUser`](/hooks/user/use-user) for typical profile management. `useUserActions` is intended for cases where you need direct control over user state, such as custom authentication integrations.
+  Prefer [`useUser`](/v7/hooks/user/use-user) for typical profile management. `useUserActions` is intended for cases where you need direct control over user state, such as custom authentication integrations.
 </Note>

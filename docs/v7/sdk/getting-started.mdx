@@ -56,7 +56,7 @@ function App() {
 </ParamField>
 
 <ParamField body="signedToken" type="string | null">
-  A signed JWT from your own auth system, used for external authentication mode. Pass `null` or omit when not using external auth. See [External Auth](/sdk/authentication/external).
+  A signed JWT from your own auth system, used for external authentication mode. Pass `null` or omit when not using external auth. See [External Auth](/v7/sdk/authentication/external).
 </ParamField>
 
 ## Choosing an Authentication Mode
@@ -64,16 +64,16 @@ function App() {
 After wrapping with `SublayProvider`, users are unauthenticated by default. You can authenticate them using any combination of:
 
 <CardGroup cols={2}>
-  <Card title="Built-in Auth" icon="lock" href="/sdk/authentication/built-in">
+  <Card title="Built-in Auth" icon="lock" href="/v7/sdk/authentication/built-in">
     Sign up and sign in with email and password. Sublay manages credentials and sessions.
   </Card>
-  <Card title="External Auth" icon="code" href="/sdk/authentication/external">
+  <Card title="External Auth" icon="code" href="/v7/sdk/authentication/external">
     Pass a signed JWT from your own auth system via the `signedToken` prop.
   </Card>
-  <Card title="OAuth" icon="key" href="/sdk/authentication/oauth">
+  <Card title="OAuth" icon="key" href="/v7/sdk/authentication/oauth">
     Let users sign in with Google, GitHub, Apple, or Facebook.
   </Card>
-  <Card title="Multi-Account" icon="users" href="/sdk/authentication/multi-account">
+  <Card title="Multi-Account" icon="users" href="/v7/sdk/authentication/multi-account">
     Support multiple simultaneous signed-in accounts with account switching.
   </Card>
 </CardGroup>
@@ -111,21 +111,21 @@ function Header() {
 
 `SublayProvider` automatically creates and manages an isolated Redux store. You do not need to configure Redux to use Sublay.
 
-If your application already has its own Redux store, we strongly recommend using `SublayIntegrationProvider` instead — running two separate Redux stores in the same app is a common source of subtle bugs. See [Redux Integration](/sdk/redux-integration) for setup details.
+If your application already has its own Redux store, we strongly recommend using `SublayIntegrationProvider` instead — running two separate Redux stores in the same app is a common source of subtle bugs. See [Redux Integration](/v7/sdk/redux-integration) for setup details.
 
 ## What's Next
 
 <CardGroup cols={2}>
-  <Card title="Authentication" icon="lock" href="/sdk/authentication/overview">
+  <Card title="Authentication" icon="lock" href="/v7/sdk/authentication/overview">
     Configure how users sign in to your application
   </Card>
-  <Card title="Entities" icon="file" href="/sdk/entities/overview">
+  <Card title="Entities" icon="file" href="/v7/sdk/entities/overview">
     Attach social features to your app's content
   </Card>
-  <Card title="Spaces" icon="users" href="/sdk/spaces/overview">
+  <Card title="Spaces" icon="users" href="/v7/sdk/spaces/overview">
     Build community spaces with membership and moderation
   </Card>
-  <Card title="Chat" icon="comments" href="/sdk/chat/overview">
+  <Card title="Chat" icon="comments" href="/v7/sdk/chat/overview">
     Add real-time 1:1 and group conversations
   </Card>
 </CardGroup>

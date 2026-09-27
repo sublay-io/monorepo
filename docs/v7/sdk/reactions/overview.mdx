@@ -6,7 +6,7 @@ description: "The 8-type reaction system for entities and comments"
 Sublay supports 8 distinct reaction types on both entities and comments. Each reaction type has a defined impact on the author's reputation score.
 
 <Note>
-  **Requires the `reactions` bundle.** Reactions are only available when the `reactions` bundle is installed on your project. See [Bundles](/bundles) to add it.
+  **Requires the `reactions` bundle.** Reactions are only available when the `reactions` bundle is installed on your project. See [Bundles](/v7/bundles) to add it.
 </Note>
 
 ## Reaction Types
@@ -54,19 +54,19 @@ function ReactionButton({ entity }) {
 ## Hooks
 
 <CardGroup cols={2}>
-  <Card title="useReactionToggle" href="/hooks/reactions/use-reaction-toggle">
+  <Card title="useReactionToggle" href="/v7/hooks/reactions/use-reaction-toggle">
     Manage reaction state with optimistic updates and toggle behavior. The recommended hook for reaction UIs.
   </Card>
-  <Card title="useAddReaction" href="/hooks/reactions/use-add-reaction">
+  <Card title="useAddReaction" href="/v7/hooks/reactions/use-add-reaction">
     Low-level hook to add a reaction to an entity or comment.
   </Card>
-  <Card title="useRemoveReaction" href="/hooks/reactions/use-remove-reaction">
+  <Card title="useRemoveReaction" href="/v7/hooks/reactions/use-remove-reaction">
     Low-level hook to remove the authenticated user's reaction.
   </Card>
-  <Card title="useFetchEntityReactions" href="/hooks/reactions/use-fetch-entity-reactions">
+  <Card title="useFetchEntityReactions" href="/v7/hooks/reactions/use-fetch-entity-reactions">
     Fetch a paginated list of reactions on an entity, optionally filtered by type.
   </Card>
-  <Card title="useFetchCommentReactions" href="/hooks/reactions/use-fetch-comment-reactions">
+  <Card title="useFetchCommentReactions" href="/v7/hooks/reactions/use-fetch-comment-reactions">
     Fetch a paginated list of reactions on a comment, optionally filtered by type.
   </Card>
 </CardGroup>

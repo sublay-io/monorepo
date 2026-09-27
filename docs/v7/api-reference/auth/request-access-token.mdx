@@ -65,7 +65,7 @@ Each call to this endpoint revokes the submitted refresh token and issues a new 
 - **Within 30 seconds of revocation** (grace period): The server returns the successor token to handle concurrent requests gracefully.
 - **After 30 seconds**: The entire token family is destroyed and the user must sign in again on every device that shared it.
 
-Reuse detection ends **sessions only**. Push bindings are left in place, so notifications keep arriving on the user's devices and resume normally once each signs back in. Re-presenting a spent refresh token is a signal, not a proof — an app killed mid-refresh, a staggered multi-tab restore or a response lost in transit all look identical to it, which is what the 30-second grace window exists for — and none of those should silence every handset a user owns. The two events that *do* clear push bindings are ones the user deliberately takes: [Reset Password](/api-reference/auth/reset-password) and [Change Password](/api-reference/auth/change-password).
+Reuse detection ends **sessions only**. Push bindings are left in place, so notifications keep arriving on the user's devices and resume normally once each signs back in. Re-presenting a spent refresh token is a signal, not a proof — an app killed mid-refresh, a staggered multi-tab restore or a response lost in transit all look identical to it, which is what the 30-second grace window exists for — and none of those should silence every handset a user owns. The two events that *do* clear push bindings are ones the user deliberately takes: [Reset Password](/v7/api-reference/auth/reset-password) and [Change Password](/v7/api-reference/auth/change-password).
 
 ## Error Responses
 
@@ -114,5 +114,5 @@ Reuse detection ends **sessions only**. Push bindings are left in place, so noti
 
 ## See Also
 
-- [`useAuth` hook](/hooks/auth/use-auth) — `requestNewAccessToken`
-- [Authentication overview](/sdk/authentication/overview)
+- [`useAuth` hook](/v7/hooks/auth/use-auth) — `requestNewAccessToken`
+- [Authentication overview](/v7/sdk/authentication/overview)

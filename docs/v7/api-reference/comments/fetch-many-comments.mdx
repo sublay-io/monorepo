@@ -29,7 +29,7 @@ Deleted comments in thread view appear as stripped placeholders to preserve tree
 </ParamField>
 
 <ParamField query="blockedFilter" type="string" default="exclude">
-  Controls how comments authored by users the viewer is [block-edged](/sdk/moderation/overview#blocking) with are treated. `"exclude"` (default) hides those comments. `"include-outbound-blocked"` re-includes comments authored **only** by users the viewer themselves blocked (their own "view anyway" choice); it never surfaces content from users who blocked the viewer. Counts reflect what the viewer sees (computed post-filter). Has no effect when the `moderation` bundle is not installed.
+  Controls how comments authored by users the viewer is [block-edged](/v7/sdk/moderation/overview#blocking) with are treated. `"exclude"` (default) hides those comments. `"include-outbound-blocked"` re-includes comments authored **only** by users the viewer themselves blocked (their own "view anyway" choice); it never surfaces content from users who blocked the viewer. Counts reflect what the viewer sees (computed post-filter). Has no effect when the `moderation` bundle is not installed.
 </ParamField>
 
 <ParamField query="sortBy" type="string" default="createdAt">
@@ -59,7 +59,7 @@ Deleted comments in thread view appear as stripped placeholders to preserve tree
 </ParamField>
 
 <ParamField query="include" type="string">
-  Comma-separated list of associations to include. Valid values: `user`, `entity`, `space`, `grants` (the [reputation-grant summary](/data-models/reputation-grant#grantsummary). Note `parent` is accepted by validation on this endpoint but is only resolved on the single-comment reads.)
+  Comma-separated list of associations to include. Valid values: `user`, `entity`, `space`, `grants` (the [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary). Note `parent` is accepted by validation on this endpoint but is only resolved on the single-comment reads.)
 
   <Note>
     Requesting `space` automatically includes `entity` as well, since space membership is resolved via the entity.
@@ -69,7 +69,7 @@ Deleted comments in thread view appear as stripped placeholders to preserve tree
 
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each populated author `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each populated author `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation) for the full contract.
 
 <SpaceReputationParams variant="context" field="query" />
 
@@ -90,4 +90,4 @@ Returns a paginated response:
 }
 ```
 
-Each item is a [Comment](/data-models/comment). In thread view (no `userId` filter), removed comments appear as stripped placeholders: `userId`, `user`, `content`, `gif`, `mentions`, and `attachments` are nulled out. Structural fields such as `id`, `parentId`, `entityId`, `reactionCounts`, `repliesCount`, `createdAt`, `updatedAt`, `metadata`, and `foreignId` are retained so the tree can be rendered. This applies to both user-deleted comments (always stripped) and moderation-removed comments (stripped for non-authors; the author sees full data).
+Each item is a [Comment](/v7/data-models/comment). In thread view (no `userId` filter), removed comments appear as stripped placeholders: `userId`, `user`, `content`, `gif`, `mentions`, and `attachments` are nulled out. Structural fields such as `id`, `parentId`, `entityId`, `reactionCounts`, `repliesCount`, `createdAt`, `updatedAt`, `metadata`, and `foreignId` are retained so the tree can be rendered. This applies to both user-deleted comments (always stripped) and moderation-removed comments (stripped for non-authors; the author sees full data).

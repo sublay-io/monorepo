@@ -29,7 +29,7 @@ Returns a user's public profile by their Sublay user ID. Optionally includes ass
 
 ### Space-scoped reputation
 
-This endpoint has no space in context, so the opt-in `spaceReputation` object accepts a `spaceId` of a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to each returned user, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation).
+This endpoint has no space in context, so the opt-in `spaceReputation` object accepts a `spaceId` of a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to each returned user, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation).
 
 <SpaceReputationParams variant="user" field="query" />
 
@@ -72,7 +72,7 @@ On success, returns HTTP `200` with the user object:
 <ResponseField name="reputation" type="number">
   The user's overall reputation total (the sum of all their reputation buckets).
   This is a global lookup with no space in context, so it returns the total only —
-  see [Reputation](/data-models/reputation) for space-scoped reads.
+  see [Reputation](/v7/data-models/reputation) for space-scoped reads.
 </ResponseField>
 
 <ResponseField name="avatarFile" type="object | null">
@@ -112,5 +112,5 @@ On success, returns HTTP `200` with the user object:
 
 ## See Also
 
-- [`useFetchUser` hook](/hooks/users/use-fetch-user)
-- [User data model](/data-models/user)
+- [`useFetchUser` hook](/v7/hooks/users/use-fetch-user)
+- [User data model](/v7/data-models/user)

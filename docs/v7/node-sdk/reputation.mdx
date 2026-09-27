@@ -3,14 +3,14 @@ title: "Reputation"
 description: "Transfer, mint, and list reputation grants from the server"
 ---
 
-The `reputation` module moves reputation deliberately: **transfers** between two users, **mints** that create reputation from nothing (or destroy it), and reads of the grant history. It maps directly to the [Reputation Grants API](/api-reference/reputation-grants/create-reputation-grant).
+The `reputation` module moves reputation deliberately: **transfers** between two users, **mints** that create reputation from nothing (or destroy it), and reads of the grant history. It maps directly to the [Reputation Grants API](/v7/api-reference/reputation-grants/create-reputation-grant).
 
 Because the Node SDK authenticates with a **service key** (it acts as the whole project, not a single end user), `createGrant` takes an explicit `actingUserId` naming the sender. This is the *mediated transfer* path: it behaves exactly like a user-initiated grant — same bucket routing, same balance check — but it lets your backend enforce its own rules first (caps, cooldowns, daily limits, eligibility), which Sublay deliberately does not impose.
 
 Two things a service key does **not** get you here:
 
 - **Mediated transfers still respect the sender's balance.** Only `mintGrant` can create reputation or drive a bucket below zero.
-- **Negative grants are not readable through `listGrants`.** The `amount > 0` filter applies to every caller, service keys included. Read them from the [dashboard grant-history route](/api-reference/reputation-grants/fetch-user-grant-history).
+- **Negative grants are not readable through `listGrants`.** The `amount > 0` filter applies to every caller, service keys included. Read them from the [dashboard grant-history route](/v7/api-reference/reputation-grants/fetch-user-grant-history).
 
 Requires the `reputation` bundle. A `chat-message` target additionally needs the `chat` bundle, and a `spaceId` needs the `spaces` bundle. `createGrant` and `mintGrant` validate `spaceId` identically: an ID naming no space is rejected with `404 reputation-grant/space-not-found` before anything moves, and naming a space on a project without `spaces` is rejected with `403 database/tables-not-available`.
 
@@ -124,7 +124,7 @@ console.log(summary?.total, "points from", summary?.count, "people");
   Comma-separated associations. Only `"user"` is supported — it hydrates both the sender and the recipient.
 </ParamField>
 <ParamField body="spaceReputation" type="object">
-  Opt-in per-user space reputation on the hydrated users. `{ spaceId: "context" }` scores each user against that grant's own space. See [Reputation](/data-models/reputation#reading-space-scoped-reputation).
+  Opt-in per-user space reputation on the hydrated users. `{ spaceId: "context" }` scores each user against that grant's own space. See [Reputation](/v7/data-models/reputation#reading-space-scoped-reputation).
 </ParamField>
 
 **Returns** — `Promise<{ data: ReputationGrant[]; pagination; summary? }>`. The `summary` block (`{ total, count, viewerTotal }`) is returned **only** on the target filter shape.
@@ -134,18 +134,18 @@ console.log(summary?.total, "points from", summary?.count, "people");
 </Note>
 
 <Warning>
-  **A service key sees no negative grants here.** The `amount > 0` filter is baked into the query for every caller, so this is not the route for auditing moderation deductions — use [Fetch User Grant History](/api-reference/reputation-grants/fetch-user-grant-history), which requires `x-sublay-project-id` alongside your key.
+  **A service key sees no negative grants here.** The `amount > 0` filter is baked into the query for every caller, so this is not the route for auditing moderation deductions — use [Fetch User Grant History](/v7/api-reference/reputation-grants/fetch-user-grant-history), which requires `x-sublay-project-id` alongside your key.
 </Warning>
 
 ---
 
 ## Reading totals inline
 
-For per-item totals, don't page through this module — ask the read that already returns the item. Entities, comments and chat messages all accept a `"grants"` token in their `include` string (combine it with others, e.g. `"files,grants"`). Each item then carries `grants: { total, count, viewerTotal }`. See [GrantSummary](/data-models/reputation-grant#grantsummary).
+For per-item totals, don't page through this module — ask the read that already returns the item. Entities, comments and chat messages all accept a `"grants"` token in their `include` string (combine it with others, e.g. `"files,grants"`). Each item then carries `grants: { total, count, viewerTotal }`. See [GrantSummary](/v7/data-models/reputation-grant#grantsummary).
 
 ## See Also
 
-- [ReputationGrant data model](/data-models/reputation-grant)
-- [Create Reputation Grant API](/api-reference/reputation-grants/create-reputation-grant)
-- [Mint Reputation Grant API](/api-reference/reputation-grants/mint-reputation-grant)
+- [ReputationGrant data model](/v7/data-models/reputation-grant)
+- [Create Reputation Grant API](/v7/api-reference/reputation-grants/create-reputation-grant)
+- [Mint Reputation Grant API](/v7/api-reference/reputation-grants/mint-reputation-grant)
 - [JS SDK reputation module](/v7/js-sdk/reputation)

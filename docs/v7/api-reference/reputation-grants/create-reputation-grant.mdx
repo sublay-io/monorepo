@@ -4,7 +4,7 @@ api: "POST /v7/:projectId/reputation-grants"
 description: "Transfer reputation from one user's bucket to another user's bucket in the same space"
 ---
 
-Transfers reputation between two users. This is a **debited transfer**: the amount leaves the sender's bucket and lands in the recipient's bucket for the same space. Nothing is created — see [Mint Reputation Grant](/api-reference/reputation-grants/mint-reputation-grant) for that.
+Transfers reputation between two users. This is a **debited transfer**: the amount leaves the sender's bucket and lands in the recipient's bucket for the same space. Nothing is created — see [Mint Reputation Grant](/v7/api-reference/reputation-grants/mint-reputation-grant) for that.
 
 Requires authentication. A user token sends from the token's own user. A service or master key may name any sender via `actingUserId`, which is how an app performs a **mediated transfer** — enforcing its own economic rules before letting the transfer through. Mediated transfers skip the project-level user-grant switch and ignore block relationships; they are otherwise identical to a user grant, including the balance check.
 
@@ -48,9 +48,9 @@ Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants
 
 ## Response
 
-Returns `201` with the created [ReputationGrant](/data-models/reputation-grant), written with `sourceType: "user"`.
+Returns `201` with the created [ReputationGrant](/v7/data-models/reputation-grant), written with `sourceType: "user"`.
 
-Both balances move: the sender's bucket and profile total drop by `amount`, the recipient's rise by the same. The recipient is notified (a `reputation-grant` [app notification](/data-models/app-notification)), and a `chat-message`-targeted grant is broadcast to the conversation as [`message:grant`](/sdk/chat/real-time).
+Both balances move: the sender's bucket and profile total drop by `amount`, the recipient's rise by the same. The recipient is notified (a `reputation-grant` [app notification](/v7/data-models/app-notification)), and a `chat-message`-targeted grant is broadcast to the conversation as [`message:grant`](/v7/sdk/chat/real-time).
 
 ## Gating and blocks
 
@@ -144,4 +144,4 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
 
 **Rate limit:** 50 requests per 5 minutes per IP. Exceeding it returns `429` with a plain-text message and no `code`.
 
-See also: [useCreateReputationGrant](/hooks/reputation/use-create-reputation-grant) · [node-sdk](/v7/node-sdk/reputation) · [js-sdk](/v7/js-sdk/reputation)
+See also: [useCreateReputationGrant](/v7/hooks/reputation/use-create-reputation-grant) · [node-sdk](/v7/node-sdk/reputation) · [js-sdk](/v7/js-sdk/reputation)

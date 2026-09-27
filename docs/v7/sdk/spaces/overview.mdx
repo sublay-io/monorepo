@@ -6,25 +6,25 @@ description: "Build community spaces with membership, moderation, rules, and opt
 Spaces are community containers where users can gather, post content, and interact under customizable rules. Each space has its own membership system, permission levels, moderation tools, and optionally an integrated chat conversation.
 
 <Note>
-  **Requires the `spaces` bundle.** Spaces are only available when the `spaces` bundle is installed on your project (space-level chat additionally needs the `chat` bundle). See [Bundles](/bundles) to add it.
+  **Requires the `spaces` bundle.** Spaces are only available when the `spaces` bundle is installed on your project (space-level chat additionally needs the `chat` bundle). See [Bundles](/v7/bundles) to add it.
 </Note>
 
 ## In This Section
 
 <CardGroup cols={2}>
-  <Card title="Provider & Hook" href="/sdk/spaces/provider-and-hook">
+  <Card title="Provider & Hook" href="/v7/sdk/spaces/provider-and-hook">
     Load a space into context and access its state and operations
   </Card>
-  <Card title="Membership" href="/sdk/spaces/membership">
+  <Card title="Membership" href="/v7/sdk/spaces/membership">
     Join/leave spaces, approval workflows, role management
   </Card>
-  <Card title="Moderation" href="/sdk/spaces/moderation">
+  <Card title="Moderation" href="/v7/sdk/spaces/moderation">
     Approve or remove content, handle member and content reports
   </Card>
-  <Card title="Rules" href="/sdk/spaces/rules">
+  <Card title="Rules" href="/v7/sdk/spaces/rules">
     Create and display community rules for members
   </Card>
-  <Card title="Space Lists" href="/sdk/spaces/space-lists">
+  <Card title="Space Lists" href="/v7/sdk/spaces/space-lists">
     Browse and paginate spaces with filtering and sorting
   </Card>
 </CardGroup>
@@ -69,7 +69,7 @@ Each space has two independent permission settings:
 
 When the current user is authenticated and is a member, `useSpace` exposes their resolved permissions (`canPost`, `canRead`, `canModerate`, `isAdmin`, `isModerator`).
 
-Separately, each space has a **`visibility`** setting — `"public"` (default), `"unlisted"`, or `"private"` — that controls whether the space is *listed and discoverable*, independent of the permission model above. `"unlisted"` hides a space from discovery and search but keeps it reachable by direct link; it is **not access control** (use `readingPermission` to gate content). `"private"` currently behaves like `"unlisted"`. See the [Space data model](/data-models/space#visibility).
+Separately, each space has a **`visibility`** setting — `"public"` (default), `"unlisted"`, or `"private"` — that controls whether the space is *listed and discoverable*, independent of the permission model above. `"unlisted"` hides a space from discovery and search but keeps it reachable by direct link; it is **not access control** (use `readingPermission` to gate content). `"private"` currently behaves like `"unlisted"`. See the [Space data model](/v7/data-models/space#visibility).
 
 ## Hierarchy
 
@@ -77,4 +77,4 @@ Spaces can be nested up to 10 levels deep. A child space is created by passing a
 
 ## What's Next
 
-Start with the [Provider & Hook](/sdk/spaces/provider-and-hook) to learn how to set up a space in your component tree, then explore membership and moderation features.
+Start with the [Provider & Hook](/v7/sdk/spaces/provider-and-hook) to learn how to set up a space in your component tree, then explore membership and moderation features.

@@ -21,7 +21,7 @@ Returns a paginated list of workspaces scoped to the caller's **direct membershi
 </ParamField>
 
 <ParamField query="include" type="string">
-  Comma-separated include flags. `include=memberCount` adds a `memberCount` to **every row** — the workspace's **direct** member count, the same number [Fetch Workspace](/api-reference/workspaces/fetch-workspace) returns for one workspace, counting neither descendants nor reach-holders.
+  Comma-separated include flags. `include=memberCount` adds a `memberCount` to **every row** — the workspace's **direct** member count, the same number [Fetch Workspace](/v7/api-reference/workspaces/fetch-workspace) returns for one workspace, counting neither descendants nor reach-holders.
 
   It is resolved with a single grouped query over the page that was returned, so a workspace switcher showing counts costs one request rather than one per row. Omit the flag and the field is **absent** from each row — not `null`, not `0`. An unrecognized flag value is ignored rather than rejected.
 </ParamField>
@@ -29,12 +29,12 @@ Returns a paginated list of workspaces scoped to the caller's **direct membershi
 <ParamField query="actingUserId" type="string" required>
   Service/master keys only — the user to act as, whose workspaces are listed. **Required for a key:** this route has no unbounded path — the list is defined as *somebody's* memberships — so a key that names nobody is refused with `400 workspace/missing-user-id`.
 
-  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
 
-Returns a paginated response of [Workspace](/data-models/workspace) objects.
+Returns a paginated response of [Workspace](/v7/data-models/workspace) objects.
 
 ```
 GET /v7/:projectId/workspaces?page=1&limit=10&include=memberCount
@@ -81,8 +81,8 @@ GET /v7/:projectId/workspaces?page=1&limit=10&include=memberCount
     ```json
     { "error": "Unrecognized key: \"sort\"", "code": "workspace/invalid-query" }
     ```
-    This route declares `page`, `limit`, `include`, `actingUserId` and `projectId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "sort", "order"`. The two exceptions across the bundle are the cache-busters `_` and `_t`, which are dropped before the request is read. See [Shapes the server rejects](/sdk/workspaces/overview#shapes-the-server-rejects).
+    This route declares `page`, `limit`, `include`, `actingUserId` and `projectId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "sort", "order"`. The two exceptions across the bundle are the cache-busters `_` and `_t`, which are dropped before the request is read. See [Shapes the server rejects](/v7/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
 </AccordionGroup>
 
-See also: [useFetchManyWorkspaces](/hooks/workspaces/use-fetch-many-workspaces) · [useFetchManyWorkspacesWrapper](/hooks/workspaces/use-fetch-many-workspaces-wrapper)
+See also: [useFetchManyWorkspaces](/v7/hooks/workspaces/use-fetch-many-workspaces) · [useFetchManyWorkspacesWrapper](/v7/hooks/workspaces/use-fetch-many-workspaces-wrapper)

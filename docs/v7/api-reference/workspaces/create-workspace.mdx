@@ -6,7 +6,7 @@ description: "Create a root or child workspace"
 
 Creates a workspace. The authenticated caller becomes the `ownerId`. Omit `parentWorkspaceId` to create a **root** workspace; pass it to create a **child**.
 
-- **Root creation** requires the creator to have a **verified email** (else `403 workspace/email-not-verified`). This is **not** a key-bypass gate: a service or master key acting as a named `actingUserId` still requires *that* user to be verified. On a purely external-auth project this makes root creation unavailable — see [the external-auth limitation](/data-models/workspace-invitation#v1-external-auth-limitation).
+- **Root creation** requires the creator to have a **verified email** (else `403 workspace/email-not-verified`). This is **not** a key-bypass gate: a service or master key acting as a named `actingUserId` still requires *that* user to be verified. On a purely external-auth project this makes root creation unavailable — see [the external-auth limitation](/v7/data-models/workspace-invitation#v1-external-auth-limitation).
 - **Child creation** requires the `create-sub-workspace` capability on the parent (held directly or via reach). The creator becomes the **child's** owner. No separate verified-email gate (the capability-holder is already a verified member up-tree).
 
 <Note>
@@ -30,12 +30,12 @@ Creates a workspace. The authenticated caller becomes the `ownerId`. Omit `paren
 <ParamField body="actingUserId" type="string" required>
   Service/master keys only — the user to act as (the created workspace's owner). **Required for a key:** this route has no unbounded path, so a key that names nobody is refused with `400 workspace/missing-user-id`. The named user must satisfy the same gates a self-driven call would: for a **root** workspace they must have a **verified email**.
 
-  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
 
-Returns the created [Workspace](/data-models/workspace) object.
+Returns the created [Workspace](/v7/data-models/workspace) object.
 
 ## Error Responses
 
@@ -75,4 +75,4 @@ Returns the created [Workspace](/data-models/workspace) object.
   </Accordion>
 </AccordionGroup>
 
-See also: [useCreateWorkspace](/hooks/workspaces/use-create-workspace) · [createWorkspace (node-sdk)](/node-sdk/workspaces)
+See also: [useCreateWorkspace](/v7/hooks/workspaces/use-create-workspace) · [createWorkspace (node-sdk)](/v7/node-sdk/workspaces)

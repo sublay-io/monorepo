@@ -107,7 +107,7 @@ await sublay.auth.signOut({
   A `200` carrying `auth/push-unbind-status-unknown` is a success, not a failure:
   the server signed the user out without attempting an unbind because it could not
   determine whether the project has push devices. See
-  [`POST /auth/sign-out`](/api-reference/auth/sign-out#response).
+  [`POST /auth/sign-out`](/v7/api-reference/auth/sign-out#response).
 </Warning>
 
 **Returns** — `Promise<void>`
@@ -255,7 +255,7 @@ const { success } = await sublay.auth.sendVerificationEmail({
 
 Changes a user's password, verifying their current password first. Use this for an authenticated "change password" flow (as opposed to the token-based `resetPassword`).
 
-A password change ends **every session** for that user and deletes every push binding they hold — see [Change Password](/api-reference/auth/change-password). A service key is not a session, so a call made with one has nothing to spare.
+A password change ends **every session** for that user and deletes every push binding they hold — see [Change Password](/v7/api-reference/auth/change-password). A service key is not a session, so a call made with one has nothing to spare.
 
 ```typescript
 const { success, message } = await sublay.auth.changePassword({

@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchManyEvents` returns a callable that fetches a single page of events with all filters, sorting, geo, and free-text search. Visibility is enforced server-side. This is the low-level query — for a stateful list with sort state and load-more, use [`useFetchManyEventsWrapper`](/hooks/events/use-fetch-many-events-wrapper).
+`useFetchManyEvents` returns a callable that fetches a single page of events with all filters, sorting, geo, and free-text search. Visibility is enforced server-side. This is the low-level query — for a stateful list with sort state and load-more, use [`useFetchManyEventsWrapper`](/v7/hooks/events/use-fetch-many-events-wrapper).
 
 ## Usage Example
 
@@ -52,5 +52,5 @@ Returns a `Promise<PaginatedResponse<Event>>` — `{ data, pagination }`.
 
 ## See Also
 
-- [useFetchManyEventsWrapper](/hooks/events/use-fetch-many-events-wrapper)
-- [Fetch Many Events API](/api-reference/events/fetch-many-events)
+- [useFetchManyEventsWrapper](/v7/hooks/events/use-fetch-many-events-wrapper)
+- [Fetch Many Events API](/v7/api-reference/events/fetch-many-events)

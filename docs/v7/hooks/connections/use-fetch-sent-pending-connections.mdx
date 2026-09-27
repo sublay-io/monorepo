@@ -61,7 +61,7 @@ Returns a `PaginatedResponse` containing pending connection entries:
       ID of the connection record.
     </ResponseField>
     <ResponseField name="user" type="User">
-      The user the request was sent to. See [User data model](/data-models/user).
+      The user the request was sent to. See [User data model](/v7/data-models/user).
     </ResponseField>
     <ResponseField name="type" type='"sent"'>
       Always `"sent"` for this endpoint.
@@ -81,5 +81,5 @@ Returns a `PaginatedResponse` containing pending connection entries:
 
 ## Related
 
-- [useFetchReceivedPendingConnections](/hooks/connections/use-fetch-received-pending-connections) — incoming requests
-- [useRemoveConnection](/hooks/connections/use-remove-connection) — withdraw a sent request
+- [useFetchReceivedPendingConnections](/v7/hooks/connections/use-fetch-received-pending-connections) — incoming requests
+- [useRemoveConnection](/v7/hooks/connections/use-remove-connection) — withdraw a sent request

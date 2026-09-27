@@ -145,7 +145,7 @@ async function onPick(userId: string) {
 A transition failure rejects with an `AccountTransitionError`, and its two boolean discriminants
 are the only way to tell those failures apart — so check with `instanceof` first, as the example
 above does, rather than assuming the type. (The hook also throws a plain `Error` when no
-`projectId` is configured, and [`removeAccount`](/hooks/auth/use-remove-account) rejects with the
+`projectId` is configured, and [`removeAccount`](/v7/hooks/auth/use-remove-account) rejects with the
 server's own error, unchanged, when it refuses to unbind that account's push notifications.)
 
 <ResponseField name="credentialRejected" type="boolean">
@@ -161,7 +161,7 @@ server's own error, unchanged, when it refuses to unbind that account's push not
   `true` when the `userId` is **not in the accounts map at all** — a stale id, typically from a
   switcher rendered off a snapshot the map has since moved past. No network call went out, nothing
   was marked, and no session was touched. Re-read the list from
-  [`useAccounts`](/hooks/auth/use-accounts) rather than prompting a sign-in for an account that is
+  [`useAccounts`](/v7/hooks/auth/use-accounts) rather than prompting a sign-in for an account that is
   not there.
 
   Never `true` at the same time as `credentialRejected`; both are `false` for a transport failure.
@@ -180,4 +180,4 @@ the server gave no reason) are both exported.
 
 ## Integration Guide
 
-For multi-account integration guidance, see [Multi-Account](/sdk/authentication/multi-account).
+For multi-account integration guidance, see [Multi-Account](/v7/sdk/authentication/multi-account).

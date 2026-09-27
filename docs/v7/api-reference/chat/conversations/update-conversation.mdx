@@ -29,7 +29,7 @@ All fields are optional. Only provided fields are updated.
 </ParamField>
 
 <ParamField body="avatarFileId" type="string | null">
-  ID of an uploaded [File](/data-models/file) to use as the conversation avatar. Pass `null` to remove the current avatar. If a previous avatar exists, it is deleted from storage automatically.
+  ID of an uploaded [File](/v7/data-models/file) to use as the conversation avatar. Pass `null` to remove the current avatar. If a previous avatar exists, it is deleted from storage automatically.
 </ParamField>
 
 <ParamField body="postingPermission" type="string">
@@ -38,7 +38,7 @@ All fields are optional. Only provided fields are updated.
 
 ## Response
 
-Returns the updated [Conversation](/data-models/conversation) object, with `avatarFile` populated if set.
+Returns the updated [Conversation](/v7/data-models/conversation) object, with `avatarFile` populated if set.
 
 ## Error Responses
 

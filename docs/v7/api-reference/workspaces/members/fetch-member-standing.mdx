@@ -8,7 +8,7 @@ Returns a single user's full standing on a workspace, addressed by **`userId`** 
 
 Requires **roster visibility** — any relation to the workspace (owner, ancestor-owner, member, or reach-holder).
 
-`reasons` is an array of **structured entries** — `{ type, viaWorkspaceId? }` — the same object shape a [roster](/api-reference/workspaces/members/list-members) entry's `reasons` carries. `viaWorkspaceId` names the granting ancestor and appears on `ancestor-owner` / `reach-holder` only.
+`reasons` is an array of **structured entries** — `{ type, viaWorkspaceId? }` — the same object shape a [roster](/v7/api-reference/workspaces/members/list-members) entry's `reasons` carries. `viaWorkspaceId` names the granting ancestor and appears on `ancestor-owner` / `reach-holder` only.
 
 <Warning>
   **The authority-bearing fields are fenced, and the gate is scoped to THIS workspace.** `capabilities`, `permissions`, `rank` and `relativeRank` are **omitted from the response** (absent — not `null`) unless the caller:
@@ -16,9 +16,9 @@ Requires **roster visibility** — any relation to the workspace (owner, ancesto
   - holds one of the four people-operating capabilities on this workspace — `invite`, `remove-member`, `edit-member-access`, `edit-member-profile`; **or**
   - is this workspace's `owner` or an `ancestor-owner`; **or**
   - is asking about **themselves** (a caller always sees their own access); **or**
-  - is a service/master key acting as **itself** (naming no `actingUserId`). A key that **does** name one is fenced exactly as that user is — see [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  - is a service/master key acting as **itself** (naming no `actingUserId`). A key that **does** name one is fenced exactly as that user is — see [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 
-  The gate is a **per-node** verdict, not a global one: clearing it here says nothing about any other node, and clearing it elsewhere says nothing about here. "On this workspace" means your **resolved** standing on it — including capabilities [reaching](/data-models/workspace#reach-and-the-wall-door-rule) in from an ancestor through an unbroken open inherit chain, and ownership from any ancestor — but not authority that stops at a **sealed** boundary. The [roster read](/api-reference/workspaces/members/list-members) takes the same verdict independently for each `descendant-member` row it returns, so the two reads agree node for node.
+  The gate is a **per-node** verdict, not a global one: clearing it here says nothing about any other node, and clearing it elsewhere says nothing about here. "On this workspace" means your **resolved** standing on it — including capabilities [reaching](/v7/data-models/workspace#reach-and-the-wall-door-rule) in from an ancestor through an unbroken open inherit chain, and ownership from any ancestor — but not authority that stops at a **sealed** boundary. The [roster read](/v7/api-reference/workspaces/members/list-members) takes the same verdict independently for each `descendant-member` row it returns, so the two reads agree node for node.
 
   Everything else — `user`, `reasons`, `title`, `metadata` — is visible to any relation. Treat these four fields as optional in your types.
 
@@ -38,7 +38,7 @@ Requires **roster visibility** — any relation to the workspace (owner, ancesto
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string">
-  Service/master keys only — the user to act as. Enforced: roster visibility **and** the authority-field fence above both evaluate against the named user, so a key acting as a plain member receives the fenced standing (and the full one when asking about that user themselves). Omit it to read as the app itself (unfenced). See [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  Service/master keys only — the user to act as. Enforced: roster visibility **and** the authority-field fence above both evaluate against the named user, so a key acting as a plain member receives the fenced standing (and the full one when asking about that user themselves). Omit it to read as the app itself (unfenced). See [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
@@ -79,7 +79,7 @@ Caller with a plain relation, reading **someone else's** standing — the four a
 - `capabilities` is the **resolved** set (direct + reach + ownership). **`view` is implied by every other capability** — anyone with standing resolves with `view`, including a member whose stored `capabilities` array is empty. A user with no relation at all returns `reasons: []` and an empty capability set.
 - `permissions` is **per-node** (the direct membership on this workspace only; may be empty).
 - `rank` is the direct-membership rank, or `null` for owners / ancestor-owners / reach-only holders (they sit outside the numbered ladder).
-- `relativeRank` is that same position expressed as an **offset from the caller** — `2` above means the target sits two rungs below you; a negative value means they are *senior* to you, and `0` means they are your peer. `null` exactly when `rank` is `null`. The caller's own anchor is their member row on this workspace if they hold one, and apex (one step above rank 0) otherwise — so an owner reads a rank-0 member back as `1`. See [rank semantics](/data-models/workspace-member#two-coordinates-rank-and-relativerank).
+- `relativeRank` is that same position expressed as an **offset from the caller** — `2` above means the target sits two rungs below you; a negative value means they are *senior* to you, and `0` means they are your peer. `null` exactly when `rank` is `null`. The caller's own anchor is their member row on this workspace if they hold one, and apex (one step above rank 0) otherwise — so an owner reads a rank-0 member back as `1`. See [rank semantics](/v7/data-models/workspace-member#two-coordinates-rank-and-relativerank).
 
 ## Error Responses
 
@@ -92,4 +92,4 @@ Caller with a plain relation, reading **someone else's** standing — the four a
   </Accordion>
 </AccordionGroup>
 
-See also: [useFetchWorkspaceMemberStanding](/hooks/workspaces/use-fetch-workspace-member-standing) · [List Members](/api-reference/workspaces/members/list-members) · [Read Authority](/api-reference/workspaces/fetch-authority)
+See also: [useFetchWorkspaceMemberStanding](/v7/hooks/workspaces/use-fetch-workspace-member-standing) · [List Members](/v7/api-reference/workspaces/members/list-members) · [Read Authority](/v7/api-reference/workspaces/fetch-authority)

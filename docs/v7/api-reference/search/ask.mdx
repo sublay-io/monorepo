@@ -42,7 +42,7 @@ Answers a natural language question using content from your project as context. 
 
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each source record's populated `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each source record's populated `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation) for the full contract.
 
 <SpaceReputationParams variant="context" field="query" />
 
@@ -65,7 +65,7 @@ event: sources
 data: [{"sourceType": "entity", "similarity": 0.87, "record": {...}}, ...]
 ```
 
-Each source object follows the same shape as the [Search Content](/api-reference/search/search-content) response — `sourceType`, `similarity`, and a fully populated `record`. An empty array is sent when no relevant context was found.
+Each source object follows the same shape as the [Search Content](/v7/api-reference/search/search-content) response — `sourceType`, `similarity`, and a fully populated `record`. An empty array is sent when no relevant context was found.
 
 **`done`** — signals the stream is finished:
 ```

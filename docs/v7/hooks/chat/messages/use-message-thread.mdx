@@ -62,7 +62,7 @@ function ThreadPanel({
 ## Returns
 
 <ResponseField name="replies" type="ChatMessage[]">
-  Thread replies in ascending order (oldest first). See [ChatMessage](/data-models/chat-message).
+  Thread replies in ascending order (oldest first). See [ChatMessage](/v7/data-models/chat-message).
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
@@ -78,9 +78,9 @@ function ThreadPanel({
 </ResponseField>
 
 <ResponseField name="sendReply" type="(params: Omit<SendMessageParams, 'parentMessageId'>) => Promise<ChatMessage>">
-  Sends a reply to this thread. Accepts the same parameters as `useSendMessage` except `parentMessageId` (set automatically). Returns the confirmed [ChatMessage](/data-models/chat-message).
+  Sends a reply to this thread. Accepts the same parameters as `useSendMessage` except `parentMessageId` (set automatically). Returns the confirmed [ChatMessage](/v7/data-models/chat-message).
 </ResponseField>
 
 ## Notes
 
-- For integration guidance, see [Chat: Threads](/sdk/chat/threads).
+- For integration guidance, see [Chat: Threads](/v7/sdk/chat/threads).

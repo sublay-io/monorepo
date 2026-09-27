@@ -4,7 +4,7 @@ api: "DELETE /v7/:projectId/follows/:followId"
 description: "Remove a follow relationship by its follow ID"
 ---
 
-Removes a follow relationship by the follow record ID. Only the follower (the user who created the follow) can delete it. Use [Unfollow User](/api-reference/users/follows/unfollow-user) instead if you only have the target user's ID.
+Removes a follow relationship by the follow record ID. Only the follower (the user who created the follow) can delete it. Use [Unfollow User](/v7/api-reference/users/follows/unfollow-user) instead if you only have the target user's ID.
 
 ## Path Parameters
 
@@ -39,5 +39,5 @@ On success, returns HTTP `204` with no body.
 
 ## See Also
 
-- [`useUnfollowByFollowId` hook](/hooks/follows/use-unfollow-by-follow-id)
-- [Unfollow User (by user ID)](/api-reference/users/follows/unfollow-user)
+- [`useUnfollowByFollowId` hook](/v7/hooks/follows/use-unfollow-by-follow-id)
+- [Unfollow User (by user ID)](/v7/api-reference/users/follows/unfollow-user)

@@ -484,10 +484,10 @@ const result = await sublay.users.removeConnectionByUserId({
 
 ## Blocking
 
-User-to-user **blocking** is part of the trust & safety [moderation bundle](/sdk/moderation/overview#blocking). These functions require that bundle; a project without it returns `403 database/tables-not-available`. The blocker is the **token holder** — there is no `actingUserId`.
+User-to-user **blocking** is part of the trust & safety [moderation bundle](/v7/sdk/moderation/overview#blocking). These functions require that bundle; a project without it returns `403 database/tables-not-available`. The blocker is the **token holder** — there is no `actingUserId`.
 
 <Note>
-  Blocking severs interaction between two users across every Sublay surface and is **non-disclosing** — the blocked user is never notified. See [Moderation — Blocking](/sdk/moderation/overview#blocking) for the full enforcement behavior.
+  Blocking severs interaction between two users across every Sublay surface and is **non-disclosing** — the blocked user is never notified. See [Moderation — Blocking](/v7/sdk/moderation/overview#blocking) for the full enforcement behavior.
 </Note>
 
 ---

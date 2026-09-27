@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useEvent` reads the event loaded by [`EventProvider`](/sdk/events/provider-and-hook) from context, returning the event plus bound actions (`updateEvent`, `deleteEvent`, `cancelEvent`, `setRsvp`, `withdrawRsvp`). `useEventData` is the underlying hook the provider uses — call it directly when you want the same managed state without the provider/context.
+`useEvent` reads the event loaded by [`EventProvider`](/v7/sdk/events/provider-and-hook) from context, returning the event plus bound actions (`updateEvent`, `deleteEvent`, `cancelEvent`, `setRsvp`, `withdrawRsvp`). `useEventData` is the underlying hook the provider uses — call it directly when you want the same managed state without the provider/context.
 
 ## useEvent
 
@@ -63,5 +63,5 @@ function EventCard({ eventId }: { eventId: string }) {
 
 ## See Also
 
-- [EventProvider & useEvent guide](/sdk/events/provider-and-hook)
-- [Event data model](/data-models/event)
+- [EventProvider & useEvent guide](/v7/sdk/events/provider-and-hook)
+- [Event data model](/v7/data-models/event)

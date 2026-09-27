@@ -4,7 +4,7 @@ api: "GET /v7/:projectId/connections"
 description: "Get a paginated list of the authenticated user's accepted connections"
 ---
 
-Returns a paginated list of accepted connections for the authenticated user. Each entry includes the connected user's public profile. Unlike the [user-scoped endpoint](/api-reference/users/connections/get-connections), this route always returns data for the current authenticated user.
+Returns a paginated list of accepted connections for the authenticated user. Each entry includes the connected user's public profile. Unlike the [user-scoped endpoint](/v7/api-reference/users/connections/get-connections), this route always returns data for the current authenticated user.
 
 <Note>
   Users with a block between them and you, in either direction, are excluded
@@ -71,5 +71,5 @@ On success, returns HTTP `200` with a paginated response:
 
 ## See Also
 
-- [`useFetchConnections` hook](/hooks/connections/use-fetch-connections)
-- [Get Connections (by user ID)](/api-reference/users/connections/get-connections)
+- [`useFetchConnections` hook](/v7/hooks/connections/use-fetch-connections)
+- [Get Connections (by user ID)](/v7/api-reference/users/connections/get-connections)

@@ -6,7 +6,7 @@ description: "List the active members of a conversation"
 
 import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
-Returns a paginated list of active [ConversationMember](/data-models/conversation-member) objects, each with the member's user profile included. The caller must be a member (any status) to access this endpoint.
+Returns a paginated list of active [ConversationMember](/v7/data-models/conversation-member) objects, each with the member's user profile included. The caller must be a member (any status) to access this endpoint.
 
 ## Path Parameters
 
@@ -30,7 +30,7 @@ Returns a paginated list of active [ConversationMember](/data-models/conversatio
 
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each returned member's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each returned member's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation) for the full contract.
 
 <SpaceReputationParams variant="context" field="query" />
 

@@ -29,7 +29,7 @@ Creates a new space. The authenticated user is automatically added as an admin. 
 </ParamField>
 
 <ParamField body="visibility" type="string">
-  Whether the space is listed and discoverable: `"public"`, `"unlisted"`, or `"private"`. Defaults to `"public"`. Governs discoverability only — independent of `readingPermission`, which governs content. `"unlisted"` hides the space from discovery and search but keeps it reachable by direct link; `"private"` currently behaves like `"unlisted"`. See [Space visibility](/data-models/space#visibility).
+  Whether the space is listed and discoverable: `"public"`, `"unlisted"`, or `"private"`. Defaults to `"public"`. Governs discoverability only — independent of `readingPermission`, which governs content. `"unlisted"` hides the space from discovery and search but keeps it reachable by direct link; `"private"` currently behaves like `"unlisted"`. See [Space visibility](/v7/data-models/space#visibility).
 </ParamField>
 
 <ParamField body="requireJoinApproval" type="boolean">
@@ -54,7 +54,7 @@ Creates a new space. The authenticated user is automatically added as an admin. 
 
 ## Response
 
-Returns the created [Space](/data-models/space) object with `membersCount`, `childSpacesCount`, and optional file associations.
+Returns the created [Space](/v7/data-models/space) object with `membersCount`, `childSpacesCount`, and optional file associations.
 
 ## Error Responses
 
@@ -91,4 +91,4 @@ Returns the created [Space](/data-models/space) object with `membersCount`, `chi
   </Accordion>
 </AccordionGroup>
 
-See also: [useCreateSpace](/hooks/spaces/use-create-space)
+See also: [useCreateSpace](/v7/hooks/spaces/use-create-space)

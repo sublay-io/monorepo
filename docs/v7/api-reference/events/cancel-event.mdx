@@ -8,7 +8,7 @@ Cancels an event by setting its `status` to `"cancelled"`. The event remains fet
 
 On cancel, an `event-cancelled` notification is fanned out to all `going`/`maybe` RSVPs (best-effort, requires the `notifications` bundle).
 
-To remove an event entirely, use [Delete Event](/api-reference/events/delete-event).
+To remove an event entirely, use [Delete Event](/v7/api-reference/events/delete-event).
 
 ## Path Parameters
 
@@ -18,7 +18,7 @@ To remove an event entirely, use [Delete Event](/api-reference/events/delete-eve
 
 ## Response
 
-Returns the updated [Event](/data-models/event) object with `status: "cancelled"`.
+Returns the updated [Event](/v7/data-models/event) object with `status: "cancelled"`.
 
 ## Error Responses
 
@@ -35,4 +35,4 @@ Returns the updated [Event](/data-models/event) object with `status: "cancelled"
   </Accordion>
 </AccordionGroup>
 
-See also: [useCancelEvent](/hooks/events/use-cancel-event)
+See also: [useCancelEvent](/v7/hooks/events/use-cancel-event)

@@ -83,5 +83,5 @@ The returned function returns `Promise<void>`. It resolves when the report is ac
 - If the target has an open report this user already filed, the server returns `200` with code `report/already-reported` without error. The hook function resolves normally in this case. After that report is resolved, the same user may report the target again.
 - You cannot report your own content — the API rejects it with `report/self-report`.
 - Reporting a message requires membership of its conversation; a non-member gets `chat/not-a-member`.
-- Where a message report lands depends on the conversation: reports on **space** conversations reach space moderators via [`useFetchModeratedReports`](/hooks/reports/use-fetch-moderated-reports); reports on **DMs and group chats** have no space, so they are project-level and appear only in the Sublay dashboard.
-- Reports are scoped to the space the content belongs to, enabling space moderators to action them. See [`useFetchModeratedReports`](/hooks/reports/use-fetch-moderated-reports).
+- Where a message report lands depends on the conversation: reports on **space** conversations reach space moderators via [`useFetchModeratedReports`](/v7/hooks/reports/use-fetch-moderated-reports); reports on **DMs and group chats** have no space, so they are project-level and appear only in the Sublay dashboard.
+- Reports are scoped to the space the content belongs to, enabling space moderators to action them. See [`useFetchModeratedReports`](/v7/hooks/reports/use-fetch-moderated-reports).

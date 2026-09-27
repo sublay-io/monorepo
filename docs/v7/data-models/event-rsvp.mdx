@@ -5,7 +5,7 @@ description: "The shape of an EventRsvp record returned by the event guest-list 
 
 An `EventRsvp` records a single user's response to an event. There is at most one RSVP per user per event (enforced by a unique `(eventId, userId)` constraint). Setting, changing, or withdrawing an RSVP keeps the event's denormalized `rsvpCounts` in sync.
 
-Individual RSVP records are returned by the named guest-list endpoint ([Fetch Event RSVPs](/api-reference/events/fetch-event-rsvps)). The aggregate `rsvpCounts` are always available directly on the [Event](/data-models/event), and the caller's own status can be surfaced as `userRsvp` via the `userRsvp` include.
+Individual RSVP records are returned by the named guest-list endpoint ([Fetch Event RSVPs](/v7/api-reference/events/fetch-event-rsvps)). The aggregate `rsvpCounts` are always available directly on the [Event](/v7/data-models/event), and the caller's own status can be surfaced as `userRsvp` via the `userRsvp` include.
 
 ## EventRsvp
 
@@ -38,7 +38,7 @@ The set of valid RSVP values, which also map to the keys of `Event.rsvpCounts`:
 
 ## Related
 
-- [Event data model](/data-models/event)
-- [Set RSVP API](/api-reference/events/set-rsvp)
-- [Withdraw RSVP API](/api-reference/events/withdraw-rsvp)
-- [Fetch Event RSVPs API](/api-reference/events/fetch-event-rsvps)
+- [Event data model](/v7/data-models/event)
+- [Set RSVP API](/v7/api-reference/events/set-rsvp)
+- [Withdraw RSVP API](/v7/api-reference/events/withdraw-rsvp)
+- [Fetch Event RSVPs API](/v7/api-reference/events/fetch-event-rsvps)

@@ -6,10 +6,10 @@ description: "Edit a member's access or profile fields, with two capability tier
 
 Edits a member, with **two capability tiers by field sensitivity**:
 
-- **Powerful fields** (`capabilities`, `permissions`, and rank — as either `rank` or `relativeRank`) require **`edit-member-access`**, plus the [rank rule](/data-models/workspace-member#rank-semantics) and the [no-escalation](/data-models/workspace-member#no-privilege-escalation) guard.
+- **Powerful fields** (`capabilities`, `permissions`, and rank — as either `rank` or `relativeRank`) require **`edit-member-access`**, plus the [rank rule](/v7/data-models/workspace-member#rank-semantics) and the [no-escalation](/v7/data-models/workspace-member#no-privilege-escalation) guard.
 - **Cosmetic fields** (`title`, `metadata`) require only **`edit-member-profile`**. A member editing **their own `title`** needs no capability.
 
-Rank moves in **either coordinate** — `rank` (absolute) or `relativeRank` (an offset from the actor) — and they are **mutually exclusive**; sending both is a `400`. Omitting **both** means **rank unchanged**: unlike [Create Invite](/api-reference/workspaces/invitations/create-invite), this endpoint has no value default, so editing someone's capabilities never moves them on the ladder. See [choosing a rank](/sdk/workspaces/overview#choosing-a-rank).
+Rank moves in **either coordinate** — `rank` (absolute) or `relativeRank` (an offset from the actor) — and they are **mutually exclusive**; sending both is a `400`. Omitting **both** means **rank unchanged**: unlike [Create Invite](/v7/api-reference/workspaces/invitations/create-invite), this endpoint has no value default, so editing someone's capabilities never moves them on the ladder. See [choosing a rank](/v7/sdk/workspaces/overview#choosing-a-rank).
 
 **Grant vs strip asymmetry:** you may only *add* a capability/permission you hold on the target node (resolved set, including via reach); *stripping* is governed by **rank alone**. **Cross-node rank is not compared** — the rank guard runs only when actor and target share a member row on the same workspace.
 
@@ -46,7 +46,7 @@ All optional; the controller enforces which tier each touched field belongs to. 
 
   Because an in-ladder anchor is `>= 0` and the offset is `>= 1`, a direct-member actor can never reach rank `0` this way — and neither can they by naming absolute `rank: 0`, which the assign rule below refuses for exactly the same reason (nothing is strictly below `0`). There is no separate rank-0 guard: rank `0` is effectively owner-only because the owner skips the rank block, not because a check names them. An actor with **no** member row here — an ancestor owner, or a cross-node reach holder — also skips it.
 
-  A service/master key is **not** on that list. Unlike [Create Invite](/api-reference/workspaces/invitations/create-invite), this route has no unbounded path: `actingUserId` is required, so a key is always *somebody*, and it faces exactly the floors that somebody faces. A key that names nobody does not skip the guard — it gets a `400 workspace/missing-user-id`.
+  A service/master key is **not** on that list. Unlike [Create Invite](/v7/api-reference/workspaces/invitations/create-invite), this route has no unbounded path: `actingUserId` is required, so a key is always *somebody*, and it faces exactly the floors that somebody faces. A key that names nobody does not skip the guard — it gets a `400 workspace/missing-user-id`.
 </ParamField>
 
 <ParamField body="title" type="string">
@@ -60,12 +60,12 @@ All optional; the controller enforces which tier each touched field belongs to. 
 <ParamField body="actingUserId" type="string" required>
   Service/master keys only — the **acting** user (sent in the body; the path `:userId` is the target). **Required for a key:** this route has **no unbounded path**, so a key that names nobody is refused with `400 workspace/missing-user-id`. Every check below — the two capability tiers, the rank guard, the assign rule and no-escalation — runs against the named user. Act as the **owner** for an unrestricted edit.
 
-  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
 
-Returns the updated [WorkspaceMember](/data-models/workspace-member) object.
+Returns the updated [WorkspaceMember](/v7/data-models/workspace-member) object.
 
 ## Error Responses
 

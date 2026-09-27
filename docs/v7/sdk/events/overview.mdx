@@ -9,8 +9,8 @@ All hooks are importable from `@sublay/react-js`, `@sublay/react-native`, and `@
 
 <Note>
   Unlike entities, **events have no Redux store**. State is local: load a single
-  event with [`EventProvider` / `useEvent`](/sdk/events/provider-and-hook), and
-  paginate lists with [`useFetchManyEventsWrapper`](/hooks/events/use-fetch-many-events-wrapper).
+  event with [`EventProvider` / `useEvent`](/v7/sdk/events/provider-and-hook), and
+  paginate lists with [`useFetchManyEventsWrapper`](/v7/hooks/events/use-fetch-many-events-wrapper).
 </Note>
 
 Requires the `events` bundle on the project. Space-scoping needs `spaces`, images need `files-images`, and notifications need `notifications`.
@@ -19,20 +19,20 @@ Requires the `events` bundle on the project. Space-scoping needs `spaces`, image
 
 | Hook | Purpose |
 |------|---------|
-| [`useCreateEvent`](/hooks/events/use-create-event) | Create an event (with optional inline cover/gallery). |
-| [`useFetchEvent`](/hooks/events/use-fetch-event) | Fetch a single event by ID. |
-| [`useFetchManyEvents`](/hooks/events/use-fetch-many-events) | One-shot list query (low-level). |
-| [`useFetchManyEventsWrapper`](/hooks/events/use-fetch-many-events-wrapper) | Stateful, paginated list with sort + load-more. |
-| [`useUpdateEvent`](/hooks/events/use-update-event) | Edit an event; replace cover, append/remove gallery images. |
-| [`useDeleteEvent`](/hooks/events/use-delete-event) | Delete an event. |
-| [`useCancelEvent`](/hooks/events/use-cancel-event) | Cancel an event. |
-| [`useSetRsvp`](/hooks/events/use-set-rsvp) | Set/change an RSVP. |
-| [`useWithdrawRsvp`](/hooks/events/use-withdraw-rsvp) | Withdraw an RSVP. |
-| [`useAddHost`](/hooks/events/use-add-host) / [`useRemoveHost`](/hooks/events/use-remove-host) | Manage hosts. |
-| [`useAddInvite`](/hooks/events/use-add-invite) / [`useRemoveInvite`](/hooks/events/use-remove-invite) | Manage invites. |
-| [`useFetchInvitees`](/hooks/events/use-fetch-invitees) | Host-only invitee list. |
-| [`useFetchEventRsvps`](/hooks/events/use-fetch-event-rsvps) | Named guest list. |
-| [`EventProvider` / `useEvent`](/sdk/events/provider-and-hook) | Load one event into context with bound actions. |
+| [`useCreateEvent`](/v7/hooks/events/use-create-event) | Create an event (with optional inline cover/gallery). |
+| [`useFetchEvent`](/v7/hooks/events/use-fetch-event) | Fetch a single event by ID. |
+| [`useFetchManyEvents`](/v7/hooks/events/use-fetch-many-events) | One-shot list query (low-level). |
+| [`useFetchManyEventsWrapper`](/v7/hooks/events/use-fetch-many-events-wrapper) | Stateful, paginated list with sort + load-more. |
+| [`useUpdateEvent`](/v7/hooks/events/use-update-event) | Edit an event; replace cover, append/remove gallery images. |
+| [`useDeleteEvent`](/v7/hooks/events/use-delete-event) | Delete an event. |
+| [`useCancelEvent`](/v7/hooks/events/use-cancel-event) | Cancel an event. |
+| [`useSetRsvp`](/v7/hooks/events/use-set-rsvp) | Set/change an RSVP. |
+| [`useWithdrawRsvp`](/v7/hooks/events/use-withdraw-rsvp) | Withdraw an RSVP. |
+| [`useAddHost`](/v7/hooks/events/use-add-host) / [`useRemoveHost`](/v7/hooks/events/use-remove-host) | Manage hosts. |
+| [`useAddInvite`](/v7/hooks/events/use-add-invite) / [`useRemoveInvite`](/v7/hooks/events/use-remove-invite) | Manage invites. |
+| [`useFetchInvitees`](/v7/hooks/events/use-fetch-invitees) | Host-only invitee list. |
+| [`useFetchEventRsvps`](/v7/hooks/events/use-fetch-event-rsvps) | Named guest list. |
+| [`EventProvider` / `useEvent`](/v7/sdk/events/provider-and-hook) | Load one event into context with bound actions. |
 
 ## Creating an event
 
@@ -62,7 +62,7 @@ function NewEventButton() {
 }
 ```
 
-The required location fields follow `type`: `online` needs `url`; `physical` needs `address` or `location`; `hybrid` needs both. See [`useCreateEvent`](/hooks/events/use-create-event) for the full parameter list.
+The required location fields follow `type`: `online` needs `url`; `physical` needs `address` or `location`; `hybrid` needs both. See [`useCreateEvent`](/v7/hooks/events/use-create-event) for the full parameter list.
 
 ## Listing events
 
@@ -115,11 +115,11 @@ function RsvpButtons({ eventId }: { eventId: string }) {
 }
 ```
 
-Both return the updated [Event](/data-models/event) with refreshed `rsvpCounts` and the caller's `userRsvp`. RSVPs close at `startTime`, are rejected on cancelled events, reject `maybe` when `allowMaybe` is `false`, and reject `going` at capacity.
+Both return the updated [Event](/v7/data-models/event) with refreshed `rsvpCounts` and the caller's `userRsvp`. RSVPs close at `startTime`, are rejected on cancelled events, reject `maybe` when `allowMaybe` is `false`, and reject `going` at capacity.
 
 ## See Also
 
-- [EventProvider & useEvent](/sdk/events/provider-and-hook)
-- [Event data model](/data-models/event)
-- [Events Hooks reference](/hooks/events/use-create-event)
-- [Events API reference](/api-reference/events/create-event)
+- [EventProvider & useEvent](/v7/sdk/events/provider-and-hook)
+- [Event data model](/v7/data-models/event)
+- [Events Hooks reference](/v7/hooks/events/use-create-event)
+- [Events API reference](/v7/api-reference/events/create-event)

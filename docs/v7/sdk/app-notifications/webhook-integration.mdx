@@ -51,12 +51,12 @@ App Notifications in Sublay are in-app records — they appear in a notification
 | `data.userId` | `string` | The recipient's user ID |
 | `data.type` | `string` | The notification type (e.g., `"entity-comment"`) |
 | `data.action` | `string` | Navigation hint for the push tap action |
-| `data.metadata` | `object` | Type-specific data — see [Notification Templates](/sdk/app-notifications/notification-templates) for fields per type |
+| `data.metadata` | `object` | Type-specific data — see [Notification Templates](/v7/sdk/app-notifications/notification-templates) for fields per type |
 
 <Note>
   This page describes the **bring-your-own-provider** bridge: you store the push
   tokens in your own backend and dispatch through your own provider. Sublay can
-  also do this for you — the [`push` bundle](/push-notifications) stores each
+  also do this for you — the [`push` bundle](/v7/push-notifications) stores each
   user's registered devices per account and dispatches to APNs, FCM and Web Push
   itself, in which case no webhook bridge is needed.
 </Note>

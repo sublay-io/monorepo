@@ -4,14 +4,14 @@ api: "POST /v7/:projectId/auth/request-account-deletion"
 description: "Email the authenticated user a one-time code to confirm self-service account deletion"
 ---
 
-Starts the self-service account-deletion flow for the authenticated user. The server generates a one-time, 6-digit confirmation code, emails it to the user's registered address, and stores it for **10 minutes**. The user completes deletion by passing that code to the [Confirm Account Deletion](/api-reference/auth/confirm-account-deletion) endpoint.
+Starts the self-service account-deletion flow for the authenticated user. The server generates a one-time, 6-digit confirmation code, emails it to the user's registered address, and stores it for **10 minutes**. The user completes deletion by passing that code to the [Confirm Account Deletion](/v7/api-reference/auth/confirm-account-deletion) endpoint.
 
 Requires a valid user access token. This step does **not** delete anything — it only sends the code.
 
 <Warning>
   This flow only works for accounts with an email on file. Accounts without one
   (e.g. anonymous or foreign-id users) cannot self-serve deletion — delete them
-  server-side with a service key via the [node SDK](/node-sdk/users).
+  server-side with a service key via the [node SDK](/v7/node-sdk/users).
 </Warning>
 
 ## Body Parameters
@@ -38,6 +38,6 @@ This endpoint takes no body parameters.
 
 ## See Also
 
-- [`useRequestAccountDeletion` hook](/hooks/auth/use-request-account-deletion)
-- [Confirm Account Deletion endpoint](/api-reference/auth/confirm-account-deletion)
-- [Delete User (service key) endpoint](/api-reference/users/delete-user)
+- [`useRequestAccountDeletion` hook](/v7/hooks/auth/use-request-account-deletion)
+- [Confirm Account Deletion endpoint](/v7/api-reference/auth/confirm-account-deletion)
+- [Delete User (service key) endpoint](/v7/api-reference/users/delete-user)

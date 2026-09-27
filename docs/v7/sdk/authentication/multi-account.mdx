@@ -20,7 +20,7 @@ When the user switches accounts, the SDK exchanges the target account's stored r
 | `useSwitchAccount` | Switch the active session to a different stored account |
 | `useRemoveAccount` | Sign out and remove one account from the stored list |
 | `useSignOutAll` | Sign out all accounts simultaneously |
-| [`useAccountPushToggle`](/hooks/push/use-account-push-toggle) | Turn push on or off per account on this device |
+| [`useAccountPushToggle`](/v7/hooks/push/use-account-push-toggle) | Turn push on or off per account on this device |
 
 ## Reading Account State
 
@@ -90,7 +90,7 @@ If a single account entry ever did exceed the budget, the adapter sheds `avatar`
 
 ### Integration mode persists too
 
-Apps that bring their own Redux store use `SublayIntegrationProvider`. **Import it from your platform package, not from `@sublay/core`** — core's version has no `AccountManager` and therefore no storage, so the account map would live only in memory and multi-account would not survive a relaunch. See [Redux Integration](/sdk/redux-integration).
+Apps that bring their own Redux store use `SublayIntegrationProvider`. **Import it from your platform package, not from `@sublay/core`** — core's version has no `AccountManager` and therefore no storage, so the account map would live only in memory and multi-account would not survive a relaunch. See [Redux Integration](/v7/sdk/redux-integration).
 
 ## Adding a New Account
 
@@ -245,7 +245,7 @@ try {
 
 `AccountTransitionError` is the typed error an account-transition failure rejects with — from
 `switchAccount`, `removeAccount` and `activateStoredAccount` alike, and from
-[`setAccountPushEnabled`](/hooks/push/use-account-push-toggle) for the one failure it shares
+[`setAccountPushEnabled`](/v7/hooks/push/use-account-push-toggle) for the one failure it shares
 (`accountNotFound`). It extends `Error`, so
 `message` and `instanceof Error` work as usual, and it carries **two independent boolean
 discriminants**, because the three failures it covers call for three different responses.
@@ -335,7 +335,7 @@ if (!activeAccount && signedOut && accounts.length > 0) {
 
 ## Push Notifications Per Account
 
-Every signed-in account on a device is bound to that device **separately**, so a device holding four accounts receives push for all four — and a message that reaches two of them arrives as **two notifications**, each stamped with its own `recipientUserId`. Read that key in your tap handler before routing, or a tap lands in the wrong session; see [the SDK push page](/sdk/push-notifications/overview#the-notification-data-payload).
+Every signed-in account on a device is bound to that device **separately**, so a device holding four accounts receives push for all four — and a message that reaches two of them arrives as **two notifications**, each stamped with its own `recipientUserId`. Read that key in your tap handler before routing, or a tap lands in the wrong session; see [the SDK push page](/v7/sdk/push-notifications/overview#the-notification-data-payload).
 
 ### Each account has its own switch
 
@@ -348,7 +348,7 @@ const { setAccountPushEnabled, isAccountPushEnabled } = useAccountPushToggle();
 await setAccountPushEnabled({ userId: "other-account-id", enabled: false });
 ```
 
-The preference is **durable**. An account silenced on this device stays silenced across switches and relaunches — including through the refresh-token rotation that rebuilds its stored entry on every launch — until it is turned back on. It is stored per account in the account map, alongside the credential, and merged rather than overwritten every time that entry is rebuilt. See [`useAccountPushToggle`](/hooks/push/use-account-push-toggle).
+The preference is **durable**. An account silenced on this device stays silenced across switches and relaunches — including through the refresh-token rotation that rebuilds its stored entry on every launch — until it is turned back on. It is stored per account in the account map, alongside the credential, and merged rather than overwritten every time that entry is rebuilt. See [`useAccountPushToggle`](/v7/hooks/push/use-account-push-toggle).
 
 <Warning>
   **`register()` turns push on for every stored account that has never expressed a preference.** Permission is a device-level grant, so the call records what it enabled for the whole device: an account you deliberately silenced keeps its `false`, but the four other accounts that were never asked all become enabled. If your UI implies per-account opt-in, follow the first `register()` with explicit toggles.
@@ -364,13 +364,13 @@ The identifier is **device** state and does not imply that the signing-out accou
 
 The permission check is bypassed **exactly once per device**, on the first mount that reads an identifier, and only on a device that already has at least one stored account and no identifier yet. Turning notifications off in system settings does not invalidate a push token or remove a binding — the provider still accepts the notification, the OS simply does not show it, and the server prunes a token only when it reports the app uninstalled. So a device that registered on an older SDK release and has since revoked permission would otherwise hold a binding that nothing could reach: no identifier means no unbind on sign-out, and re-enabling notifications later would deliver that account's notifications to a device nobody is signed into. The one-time read closes that. It cannot prompt (only adapters that read a value the OS already holds participate — web never does), and the SDK records that it has run, so it does not repeat on later launches. A device whose account storage was empty the first time the SDK ran is never eligible: it cannot be carrying a binding from an older release.
 
-Do **not** call `usePushRegistration().unregister()` in a logout flow. It is a durable per-account preference, so using it as cleanup permanently silences that account's next session, and sign-out already unbinds. See [Turning push off](/sdk/push-notifications/overview#turning-push-off).
+Do **not** call `usePushRegistration().unregister()` in a logout flow. It is a durable per-account preference, so using it as cleanup permanently silences that account's next session, and sign-out already unbinds. See [Turning push off](/v7/sdk/push-notifications/overview#turning-push-off).
 
 ### When notifications are paused
 
 When the OS rotates the device's push token, every binding on the old token is dead. As long as `usePushRegistration` is mounted with an adapter that reports rotations, the SDK notices and records the new identifier. The **active** account is re-bound on the spot.
 
-Mount that hook **at your app root**, not on the settings screen that calls `register()`: rotation handling lives exactly as long as the hook is mounted, so a screen-scoped mount only covers the seconds that screen is open and a rotation anywhere else in the app is missed. See [`usePushRegistration`](/hooks/push/use-push-registration). Every other push-enabled account is **marked** as needing a re-bind and repaired the next time the user switches into it, using the live session that switch establishes.
+Mount that hook **at your app root**, not on the settings screen that calls `register()`: rotation handling lives exactly as long as the hook is mounted, so a screen-scoped mount only covers the seconds that screen is open and a rotation anywhere else in the app is missed. See [`usePushRegistration`](/v7/hooks/push/use-push-registration). Every other push-enabled account is **marked** as needing a re-bind and repaired the next time the user switches into it, using the live session that switch establishes.
 
 The marking is deliberate rather than a shortcut. Re-binding a background account would mean spending its stored refresh token on a one-time-use exchange, in the background, for an account the user is not looking at — and an interruption in the middle of that exchange locks the account out permanently. The cost is that a push-enabled account nobody opens goes quiet after a rotation until it is next opened, which is what the marker is for:
 
@@ -388,7 +388,7 @@ accounts.map((account) => (
 
 `needsPushRebind` clears as soon as the account is re-bound. It is **not** `needsReauth` and the two should not read the same in your UI: `needsReauth` means the credential is dead and the user must sign in again, while `needsPushRebind` means the account works perfectly and is merely quiet. It is only ever raised for accounts that explicitly enabled push — an account that never asked for notifications has none to pause.
 
-See [Automatic token rotation](/hooks/push/use-push-registration#automatic-token-rotation) for which platforms report a rotation at all.
+See [Automatic token rotation](/v7/hooks/push/use-push-registration#automatic-token-rotation) for which platforms report a rotation at all.
 
 ## Reaching the Account Limit
 
@@ -459,7 +459,7 @@ Use `canAddAccount` to keep the user from starting a sign-in that cannot succeed
 <ResponseField name="wouldExceedAccountLimit" type="(accounts: Record<string, AccountEntry>, userId?: string | null) => boolean">
   `true` when admitting `userId` into `accounts` would exceed the 5-account
   limit. Pure and read-only — it takes the raw map (from `selectAccounts`, or
-  from your own store in [integration mode](/sdk/redux-integration)) and
+  from your own store in [integration mode](/v7/sdk/redux-integration)) and
   computes; it dispatches nothing.
 
   **An id already in the map is never an admission**, so this returns `false`
@@ -537,13 +537,13 @@ One Sublay project per app is the supported shape. Account storage, the auth gat
 
 Rather than let that happen quietly, mounting a second provider for a different project **throws immediately**, with a message naming both project ids. Remounting the *same* project — a hot reload, a provider that unmounts and mounts again, two providers for one project — is fine and is not affected.
 
-If you need to talk to two projects, run two apps, or drive the second project through [`@sublay/js`](/js-sdk/overview) or your own backend rather than mounting a second provider.
+If you need to talk to two projects, run two apps, or drive the second project through [`@sublay/js`](/v7/js-sdk/overview) or your own backend rather than mounting a second provider.
 
 ## See Also
 
-- [`useAccounts` hook reference](/hooks/auth/use-accounts)
-- [`useAddAccount` hook reference](/hooks/auth/use-add-account)
-- [`useSwitchAccount` hook reference](/hooks/auth/use-switch-account)
-- [`useRemoveAccount` hook reference](/hooks/auth/use-remove-account)
-- [`useSignOutAll` hook reference](/hooks/auth/use-sign-out-all)
-- [`useAccountPushToggle` hook reference](/hooks/push/use-account-push-toggle)
+- [`useAccounts` hook reference](/v7/hooks/auth/use-accounts)
+- [`useAddAccount` hook reference](/v7/hooks/auth/use-add-account)
+- [`useSwitchAccount` hook reference](/v7/hooks/auth/use-switch-account)
+- [`useRemoveAccount` hook reference](/v7/hooks/auth/use-remove-account)
+- [`useSignOutAll` hook reference](/v7/hooks/auth/use-sign-out-all)
+- [`useAccountPushToggle` hook reference](/v7/hooks/push/use-account-push-toggle)

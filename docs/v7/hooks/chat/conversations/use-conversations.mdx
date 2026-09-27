@@ -46,7 +46,7 @@ function ConversationList() {
 ## Returns
 
 <ResponseField name="conversations" type="ConversationPreview[]">
-  The loaded conversations sorted by most recent activity. Each item is a [Conversation](/data-models/conversation) extended with `unreadCount`, a truncated `lastMessage`, and `otherMembers` — up to 5 active members other than the current user (public fields `id`, `name`, `username`, `avatar`), populated for `direct`/`group` conversations so a DM/group row can render the counterparty's name and avatar. Capped at 5 (use `memberCount` for the group total); empty for `space` conversations.
+  The loaded conversations sorted by most recent activity. Each item is a [Conversation](/v7/data-models/conversation) extended with `unreadCount`, a truncated `lastMessage`, and `otherMembers` — up to 5 active members other than the current user (public fields `id`, `name`, `username`, `avatar`), populated for `direct`/`group` conversations so a DM/group row can render the counterparty's name and avatar. Capped at 5 (use `memberCount` for the group total); empty for `space` conversations.
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
@@ -73,4 +73,4 @@ function ConversationList() {
 
 - The initial fetch runs on mount. Re-runs automatically when the authenticated project changes.
 - New messages received via socket update the `lastMessage` and `lastMessageAt` of the relevant conversation in the list automatically — no manual refresh needed.
-- For integration guidance, see [Chat: Conversations](/sdk/chat/conversations).
+- For integration guidance, see [Chat: Conversations](/v7/sdk/chat/conversations).

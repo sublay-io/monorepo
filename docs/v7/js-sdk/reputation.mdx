@@ -3,7 +3,7 @@ title: "Reputation"
 description: "Give and list reputation grants from the browser"
 ---
 
-The `reputation` module gives reputation deliberately and reads grants back. It maps directly to the [Reputation Grants API](/api-reference/reputation-grants/create-reputation-grant).
+The `reputation` module gives reputation deliberately and reads grants back. It maps directly to the [Reputation Grants API](/v7/api-reference/reputation-grants/create-reputation-grant).
 
 Because the JS SDK authenticates as an **end user** (bearer token), you never pass an actor `userId` — the sender is always the user the token belongs to. Naming somebody else as the sender requires a service key, which this SDK never holds.
 
@@ -77,7 +77,7 @@ console.log(summary?.total, "points from", summary?.count, "people");
   Comma-separated associations. Only `"user"` is supported — it hydrates both the sender and the recipient.
 </ParamField>
 <ParamField body="spaceReputation" type="object">
-  Opt-in per-user space reputation on the hydrated users. `{ spaceId: "context" }` scores each user against that grant's own space. See [Reputation](/data-models/reputation#reading-space-scoped-reputation).
+  Opt-in per-user space reputation on the hydrated users. `{ spaceId: "context" }` scores each user against that grant's own space. See [Reputation](/v7/data-models/reputation#reading-space-scoped-reputation).
 </ParamField>
 
 **Returns** — `Promise<{ data: ReputationGrant[]; pagination; summary? }>`. The `summary` block (`{ total, count, viewerTotal }`) is returned **only** on the target filter shape — it's exactly what a standalone "who rewarded this" view needs, so you don't have to fetch the parent item to print the totals.
@@ -94,11 +94,11 @@ console.log(summary?.total, "points from", summary?.count, "people");
 
 ## Reading totals inline
 
-For per-item totals, don't page through this module — ask the read that already returns the item. Entities, comments and chat messages all accept a `"grants"` token in their `include` string (combine it with others, e.g. `"files,grants"`). Each item then carries `grants: { total, count, viewerTotal }`. See [GrantSummary](/data-models/reputation-grant#grantsummary).
+For per-item totals, don't page through this module — ask the read that already returns the item. Entities, comments and chat messages all accept a `"grants"` token in their `include` string (combine it with others, e.g. `"files,grants"`). Each item then carries `grants: { total, count, viewerTotal }`. See [GrantSummary](/v7/data-models/reputation-grant#grantsummary).
 
 ## See Also
 
-- [ReputationGrant data model](/data-models/reputation-grant)
-- [Create Reputation Grant API](/api-reference/reputation-grants/create-reputation-grant)
-- [Fetch Many Reputation Grants API](/api-reference/reputation-grants/fetch-many-reputation-grants)
+- [ReputationGrant data model](/v7/data-models/reputation-grant)
+- [Create Reputation Grant API](/v7/api-reference/reputation-grants/create-reputation-grant)
+- [Fetch Many Reputation Grants API](/v7/api-reference/reputation-grants/fetch-many-reputation-grants)
 - [Node SDK reputation module](/v7/node-sdk/reputation)

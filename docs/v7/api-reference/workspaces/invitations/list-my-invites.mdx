@@ -7,7 +7,7 @@ description: "The authenticated user's live pending invites"
 Returns the authenticated user's **live** pending invites (`status = 'pending' AND expiresAt > now`), matched by **`userId`** (no email-string matching at query time — invitations bind to `userId` at invite time or via the signup-attach step).
 
 <Note>
-  **Surfacing is NOT verification-gated** — a user sees pending invites right after signup (which nudges them to verify). The verified-email check applies when the user **acts** on an invite — [accept](/api-reference/workspaces/invitations/accept-invite) *and* [decline](/api-reference/workspaces/invitations/decline-invite).
+  **Surfacing is NOT verification-gated** — a user sees pending invites right after signup (which nudges them to verify). The verified-email check applies when the user **acts** on an invite — [accept](/v7/api-reference/workspaces/invitations/accept-invite) *and* [decline](/v7/api-reference/workspaces/invitations/decline-invite).
 </Note>
 
 ## Query Parameters
@@ -15,7 +15,7 @@ Returns the authenticated user's **live** pending invites (`status = 'pending' A
 <ParamField query="actingUserId" type="string" required>
   Service/master keys only — the user to act as, whose invites are read. **Required for a key:** this is an *inbox* read, so it has no unbounded path — a key that names nobody is refused with `400 workspace/missing-user-id`.
 
-  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
@@ -24,7 +24,7 @@ Returns the authenticated user's **live** pending invites (`status = 'pending' A
 { "data": [ /* MyWorkspaceInvitation[] — see below */ ] }
 ```
 
-Each item is a `MyWorkspaceInvitation`: a [WorkspaceInvitation](/data-models/workspace-invitation) object with one difference from every other invite read — `invitedBy` is a populated `{ id, name, username, avatar, reputation }` object instead of a bare user id, and a sibling `workspace: { id, name }` is included. The invitee has no other reach on the workspace they're invited to or on the inviter, so both are embedded here to make this endpoint self-sufficient for rendering an invite — see the [note on the data model page](/data-models/workspace-invitation#properties) for the full enriched shape.
+Each item is a `MyWorkspaceInvitation`: a [WorkspaceInvitation](/v7/data-models/workspace-invitation) object with one difference from every other invite read — `invitedBy` is a populated `{ id, name, username, avatar, reputation }` object instead of a bare user id, and a sibling `workspace: { id, name }` is included. The invitee has no other reach on the workspace they're invited to or on the inviter, so both are embedded here to make this endpoint self-sufficient for rendering an invite — see the [note on the data model page](/v7/data-models/workspace-invitation#properties) for the full enriched shape.
 
 ## Error Responses
 
@@ -43,4 +43,4 @@ Each item is a `MyWorkspaceInvitation`: a [WorkspaceInvitation](/data-models/wor
   </Accordion>
 </AccordionGroup>
 
-See also: [useFetchMyWorkspaceInvites](/hooks/workspaces/use-fetch-my-workspace-invites)
+See also: [useFetchMyWorkspaceInvites](/v7/hooks/workspaces/use-fetch-my-workspace-invites)

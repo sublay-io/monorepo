@@ -6,7 +6,7 @@ description: "Get the direct child spaces of a parent space"
 
 Returns a paginated list of child spaces for a given parent space. Authentication is optional — when provided, each child carries an `isMember` flag for the authenticated user.
 
-Only children with `visibility: "public"` are listed, for every caller. Unlike [Fetch Spaces](/api-reference/spaces/fetch-spaces), authenticating does not surface unlisted or private children the caller belongs to.
+Only children with `visibility: "public"` are listed, for every caller. Unlike [Fetch Spaces](/v7/api-reference/spaces/fetch-spaces), authenticating does not surface unlisted or private children the caller belongs to.
 
 ## Path Parameters
 
@@ -27,11 +27,11 @@ Only children with `visibility: "public"` are listed, for every caller. Unlike [
 ## Response
 
 <ResponseField name="data" type="Space[]">
-  Array of child [Space](/data-models/space) objects.
+  Array of child [Space](/v7/data-models/space) objects.
 </ResponseField>
 
 <ResponseField name="pagination" type="object">
   Standard pagination metadata.
 </ResponseField>
 
-See also: [useFetchSpaceChildren](/hooks/spaces/use-fetch-space-children)
+See also: [useFetchSpaceChildren](/v7/hooks/spaces/use-fetch-space-children)

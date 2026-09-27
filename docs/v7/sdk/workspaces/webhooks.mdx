@@ -3,7 +3,7 @@ title: "Webhooks & lifecycle"
 description: "The workspace webhook event catalog, the member.* vs invite.* streams, and uninstall behavior"
 ---
 
-The Workspaces bundle emits webhooks across the invitation lifecycle, on workspace deletion, and on any roster change — so you can keep your own seat/roster mirror and workspace-tagged data in sync. Events use the existing [webhook mechanism](/sdk/app-notifications/webhook-integration): HMAC-SHA256 signed, subscription-gated by the events you enable in the dashboard, fire-and-forget (no retry).
+The Workspaces bundle emits webhooks across the invitation lifecycle, on workspace deletion, and on any roster change — so you can keep your own seat/roster mirror and workspace-tagged data in sync. Events use the existing [webhook mechanism](/v7/sdk/app-notifications/webhook-integration): HMAC-SHA256 signed, subscription-gated by the events you enable in the dashboard, fire-and-forget (no retry).
 
 ## Event catalog
 
@@ -60,6 +60,6 @@ The Workspaces bundle is purely additive — it touches no other bundle's tables
 
 ## Related
 
-- [Webhook integration](/sdk/app-notifications/webhook-integration)
-- [Delete Workspace API](/api-reference/workspaces/delete-workspace)
-- [Workspace Invitation data model](/data-models/workspace-invitation)
+- [Webhook integration](/v7/sdk/app-notifications/webhook-integration)
+- [Delete Workspace API](/v7/api-reference/workspaces/delete-workspace)
+- [Workspace Invitation data model](/v7/data-models/workspace-invitation)

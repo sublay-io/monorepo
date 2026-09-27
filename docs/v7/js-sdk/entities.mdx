@@ -6,7 +6,7 @@ description: "Create and manage content entities, reactions, and drafts"
 import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
 <Note>
-  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available` for entity calls. See [Bundles](/bundles).
+  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available` for entity calls. See [Bundles](/v7/bundles).
 </Note>
 
 Entities are the central content objects in Sublay — posts, articles, products, or any item in your application that users interact with. The `entities` module gives you full control over their lifecycle, reactions, and drafts. All actions are performed on behalf of the logged-in user.
@@ -68,7 +68,7 @@ const entity = await sublay.entities.createEntity({
 </ParamField>
 
 <ParamField body="nsfw" type="boolean">
-  The entity's own NSFW flag. Defaults to `false`. Effective NSFW also inherits from the entity's space. See [Entity NSFW flagging](/data-models/entity#nsfw-flagging).
+  The entity's own NSFW flag. Defaults to `false`. Effective NSFW also inherits from the entity's space. See [Entity NSFW flagging](/v7/data-models/entity#nsfw-flagging).
 </ParamField>
 
 <ParamField body="isDraft" type="boolean">
@@ -239,11 +239,11 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 </ParamField>
 
 <ParamField body="nsfwFilter" type='"include-all" | "exclude" | "only"'>
-  Filter by effective NSFW (`entity.nsfw OR its space's nsfwEffective`). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW entities; `"only"` returns only them. See [Entity NSFW flagging](/data-models/entity#nsfw-flagging).
+  Filter by effective NSFW (`entity.nsfw OR its space's nsfwEffective`). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW entities; `"only"` returns only them. See [Entity NSFW flagging](/v7/data-models/entity#nsfw-flagging).
 </ParamField>
 
 <ParamField body="blockedFilter" type='"exclude" | "include-outbound-blocked"'>
-  How to treat entities authored by users the viewer is [block-edged](/sdk/moderation/overview#blocking) with. `"exclude"` (default) hides them; `"include-outbound-blocked"` re-includes only the viewer's own outbound-blocked authors — never content from users who blocked the viewer. No effect without the `moderation` bundle.
+  How to treat entities authored by users the viewer is [block-edged](/v7/sdk/moderation/overview#blocking) with. `"exclude"` (default) hides them; `"include-outbound-blocked"` re-includes only the viewer's own outbound-blocked authors — never content from users who blocked the viewer. No effect without the `moderation` bundle.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />
@@ -297,7 +297,7 @@ const entity = await sublay.entities.updateEntity({
 </ParamField>
 
 <ParamField body="nsfw" type="boolean">
-  Updated NSFW own-flag. A space moderator flagging another user's entity uses `spaces.setSpaceEntityNsfw` instead. See [Entity NSFW flagging](/data-models/entity#nsfw-flagging).
+  Updated NSFW own-flag. A space moderator flagging another user's entity uses `spaces.setSpaceEntityNsfw` instead. See [Entity NSFW flagging](/v7/data-models/entity#nsfw-flagging).
 </ParamField>
 
 **Returns** — `Promise<Entity>`

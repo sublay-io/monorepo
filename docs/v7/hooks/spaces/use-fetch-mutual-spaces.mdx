@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchMutualSpaces` returns a callable function that fetches the spaces both the authenticated user and another user are active members of — their spaces in common. The response is a paginated list of [Space](/data-models/space) objects.
+`useFetchMutualSpaces` returns a callable function that fetches the spaces both the authenticated user and another user are active members of — their spaces in common. The response is a paginated list of [Space](/v7/data-models/space) objects.
 
 ## Usage Example
 
@@ -47,7 +47,7 @@ function MutualSpaces({ otherUserId }: { otherUserId: string }) {
 ## Returns
 
 <ResponseField name="data" type="Space[]">
-  The spaces both users share ([Space](/data-models/space)). Computed fields such as `membersCount` and `isMember` reflect the authenticated user.
+  The spaces both users share ([Space](/v7/data-models/space)). Computed fields such as `membersCount` and `isMember` reflect the authenticated user.
 </ResponseField>
 
 <ResponseField name="pagination" type="object">

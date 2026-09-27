@@ -6,9 +6,9 @@ icon: "plug"
 
 ## Overview
 
-`useFetchManyChatMessagesWrapper` is a stateful wrapper around [`useFetchManyChatMessages`](/hooks/chat/messages/use-fetch-many-chat-messages) that manages the message list and cursor pagination for you. It keeps results in local component state — **not** Redux — and never receives socket updates.
+`useFetchManyChatMessagesWrapper` is a stateful wrapper around [`useFetchManyChatMessages`](/v7/hooks/chat/messages/use-fetch-many-chat-messages) that manages the message list and cursor pagination for you. It keeps results in local component state — **not** Redux — and never receives socket updates.
 
-Use it for a read-only or **filtered** list of messages that should not be touched by live traffic — for example, a "messages with replies" panel, an admin/moderation view, or any custom message list outside the live conversation stream. For the live canonical conversation view, use [`useLiveChatMessages`](/hooks/chat/messages/use-live-chat-messages) instead.
+Use it for a read-only or **filtered** list of messages that should not be touched by live traffic — for example, a "messages with replies" panel, an admin/moderation view, or any custom message list outside the live conversation stream. For the live canonical conversation view, use [`useLiveChatMessages`](/v7/hooks/chat/messages/use-live-chat-messages) instead.
 
 <Note>This is a point-in-time query: it does not auto-update from socket events. Call `refetch` (e.g. on a refresh button, or on a socket signal of your choosing) to pick up new matches. It does not require `ChatProvider`.</Note>
 
@@ -62,19 +62,19 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
   When `true`, the server populates the `files` field on each message.
 </ParamField>
 <ParamField body="includeGrants" type="boolean">
-  When `true`, each message carries its [reputation-grant summary](/data-models/reputation-grant#grantsummary) at `message.grants` — `{ total, count, viewerTotal }` over positive grants. Populated by the `reputation` bundle; on a project without it the summary comes back zero-filled rather than missing.
+  When `true`, each message carries its [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary) at `message.grants` — `{ total, count, viewerTotal }` over positive grants. Populated by the `reputation` bundle; on a project without it the summary comes back zero-filled rather than missing.
 </ParamField>
 
 <ParamField body="filters" type="MessageFilters">
   Optional filters. `filters.hasReplies` (boolean): when `true`, returns only messages that have thread replies (`threadReplyCount > 0`); when `false`, only messages with none. Filters by thread replies, not quotings.
 
-  <Note>Threads are one level deep, so `hasReplies: true` together with `parentId` always yields an empty list. This wrapper exposes only `messages`; use the lower-level [`useFetchManyChatMessages`](/hooks/chat/messages/use-fetch-many-chat-messages) if you want the `notice` explaining why.</Note>
+  <Note>Threads are one level deep, so `hasReplies: true` together with `parentId` always yields an empty list. This wrapper exposes only `messages`; use the lower-level [`useFetchManyChatMessages`](/v7/hooks/chat/messages/use-fetch-many-chat-messages) if you want the `notice` explaining why.</Note>
 </ParamField>
 
 ## Returns
 
 <ResponseField name="messages" type="ChatMessage[]">
-  The loaded messages. See [ChatMessage](/data-models/chat-message).
+  The loaded messages. See [ChatMessage](/v7/data-models/chat-message).
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">

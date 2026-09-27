@@ -32,7 +32,7 @@ function Breadcrumbs({ spaceId }: { spaceId: string }) {
 ## Returns
 
 <ResponseField name="breadcrumb" type="SpacePreview[]">
-  Ordered array of [SpacePreview](/data-models/space) objects from the root space to the direct parent. Empty for root-level spaces.
+  Ordered array of [SpacePreview](/v7/data-models/space) objects from the root space to the direct parent. Empty for root-level spaces.
 </ResponseField>
 
 <Tip>The `useSpace` hook automatically fetches and exposes the `breadcrumb` field — you only need this hook when fetching breadcrumbs outside of a `SpaceProvider`.</Tip>

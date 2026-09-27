@@ -6,11 +6,11 @@ description: "Threaded comment sections using CommentSectionProvider and useComm
 Comments in Sublay are threaded discussions attached to entities. They support replies (nested or flat), reactions, GIF attachments, user mentions, space mentions, sorting, and pagination.
 
 <Note>
-  **Requires the `comments` bundle.** Comments are only available when the `comments` bundle is installed on your project. See [Bundles](/bundles) to add it.
+  **Requires the `comments` bundle.** Comments are only available when the `comments` bundle is installed on your project. See [Bundles](/v7/bundles) to add it.
 </Note>
 
 <Tip>
-**Don't want to build your own comment UI from scratch?** Sublay ships ready-made comment components — fully featured, themeable, and installed directly into your codebase via the CLI as editable source code. Skip straight to the [Components section](/components/overview) to get up and running in minutes.
+**Don't want to build your own comment UI from scratch?** Sublay ships ready-made comment components — fully featured, themeable, and installed directly into your codebase via the CLI as editable source code. Skip straight to the [Components section](/v7/components/overview) to get up and running in minutes.
 </Tip>
 
 ## The Provider Pattern
@@ -43,7 +43,7 @@ function ArticlePage({ articleId }: { articleId: string }) {
 ## In This Section
 
 <CardGroup cols={2}>
-  <Card title="Comment Section" href="/sdk/comments/comment-section">
+  <Card title="Comment Section" href="/v7/sdk/comments/comment-section">
     Full guide to CommentSectionProvider props and the useCommentSection hook values.
   </Card>
 </CardGroup>
@@ -53,10 +53,10 @@ function ArticlePage({ articleId }: { articleId: string }) {
 If you'd rather not wire up your own comment UI, Sublay provides two production-ready comment components installed via the CLI directly into your project as editable source code.
 
 <CardGroup cols={2}>
-  <Card title="Threaded Comments" href="/components/components/threaded/overview">
+  <Card title="Threaded Comments" href="/v7/components/components/threaded/overview">
     A classic threaded comment section with nested replies, reactions, and sorting. Ideal for blogs, docs, and long-form content.
   </Card>
-  <Card title="Social Comments" href="/components/components/social/overview">
+  <Card title="Social Comments" href="/v7/components/components/social/overview">
     A flat social-style comment feed with inline replies and a familiar social media feel. Great for feeds, posts, and community content.
   </Card>
 </CardGroup>
@@ -65,4 +65,4 @@ Both components are built on top of `CommentSectionProvider` and `useCommentSect
 
 ## Comment Data Model
 
-See the [Comment data model](/data-models/comment) for the full field reference.
+See the [Comment data model](/v7/data-models/comment) for the full field reference.

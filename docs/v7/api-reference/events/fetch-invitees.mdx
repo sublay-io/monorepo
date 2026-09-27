@@ -4,7 +4,7 @@ api: "GET /v7/:projectId/events/:eventId/invites"
 description: "List an event's invited users (host-only)"
 ---
 
-Returns a paginated list of [EventInvite](/data-models/event-invite) records, each with the invited `user` populated. **Host-only** — a non-host receives `403`, and a non-existent event receives `404` (service/master keys bypass the host check). Results are ordered by `invitedAt` descending.
+Returns a paginated list of [EventInvite](/v7/data-models/event-invite) records, each with the invited `user` populated. **Host-only** — a non-host receives `403`, and a non-existent event receives `404` (service/master keys bypass the host check). Results are ordered by `invitedAt` descending.
 
 ## Path Parameters
 
@@ -41,4 +41,4 @@ Returns a paginated response: `{ data: EventInvite[], pagination: {...} }`.
   </Accordion>
 </AccordionGroup>
 
-See also: [useFetchInvitees](/hooks/events/use-fetch-invitees)
+See also: [useFetchInvitees](/v7/hooks/events/use-fetch-invitees)

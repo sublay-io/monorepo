@@ -9,7 +9,7 @@ icon: "plug"
 Returns a function that calls the Sublay API to sign a JWT using your project's private key. This is intended **exclusively for development and testing** of external authentication flows — it lets you generate valid user JWTs from the client without setting up a backend.
 
 <Warning>
-**Never use this hook in production.** Calling this function exposes your project's private key in client-side code, which is a critical security vulnerability. In production, JWT signing must happen on your backend server. See the [External Authentication](/sdk/authentication/external) guide.
+**Never use this hook in production.** Calling this function exposes your project's private key in client-side code, which is a critical security vulnerability. In production, JWT signing must happen on your backend server. See the [External Authentication](/v7/sdk/authentication/external) guide.
 </Warning>
 
 ## Usage Example
@@ -70,4 +70,4 @@ Returns `Promise<string | undefined>`. On success, resolves to a signed JWT stri
 ## Notes
 
 - The function logs a console warning each time it is called as a reminder that it is not for production use.
-- Use the returned token with the external authentication flow described in [External Authentication](/sdk/authentication/external).
+- Use the returned token with the external authentication flow described in [External Authentication](/v7/sdk/authentication/external).

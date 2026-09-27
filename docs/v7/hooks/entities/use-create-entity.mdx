@@ -5,7 +5,7 @@ icon: "plug"
 ---
 
 <Note>
-  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/bundles).
+  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v7/bundles).
 </Note>
 
 ## Overview
@@ -88,7 +88,7 @@ const entity = await createEntity({
 </ParamField>
 
 <ParamField path="nsfw" type="boolean">
-  Marks the entity's own NSFW flag. Defaults to `false`. This is only the entity's own flag — its effective NSFW status also inherits from its space. Sublay labels and filters NSFW content but does not blur or age-gate it. See [Entity NSFW flagging](/data-models/entity#nsfw-flagging).
+  Marks the entity's own NSFW flag. Defaults to `false`. This is only the entity's own flag — its effective NSFW status also inherits from its space. Sublay labels and filters NSFW content but does not blur or age-gate it. See [Entity NSFW flagging](/v7/data-models/entity#nsfw-flagging).
 </ParamField>
 
 <ParamField path="isDraft" type="boolean">
@@ -114,5 +114,5 @@ const entity = await createEntity({
 ## Returns
 
 <ResponseField name="Entity" type="Entity">
-  The newly created entity. See [Entity data model](/data-models/entity).
+  The newly created entity. See [Entity data model](/v7/data-models/entity).
 </ResponseField>

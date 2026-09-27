@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchEventRsvps` returns a callable that fetches the paginated named RSVP (guest) list. Each item is an [EventRsvp](/data-models/event-rsvp) with the `user` populated. The named list is visible to hosts always, and to any viewer when the event's `guestListVisible` is `true` (otherwise `403`). Aggregate counts are always available on the event's `rsvpCounts`.
+`useFetchEventRsvps` returns a callable that fetches the paginated named RSVP (guest) list. Each item is an [EventRsvp](/v7/data-models/event-rsvp) with the `user` populated. The named list is visible to hosts always, and to any viewer when the event's `guestListVisible` is `true` (otherwise `403`). Aggregate counts are always available on the event's `rsvpCounts`.
 
 ## Usage Example
 
@@ -32,5 +32,5 @@ Returns a `Promise<PaginatedResponse<EventRsvp>>` — `{ data, pagination }`.
 
 ## See Also
 
-- [Fetch Event RSVPs API](/api-reference/events/fetch-event-rsvps)
-- [useFetchInvitees](/hooks/events/use-fetch-invitees)
+- [Fetch Event RSVPs API](/v7/api-reference/events/fetch-event-rsvps)
+- [useFetchInvitees](/v7/hooks/events/use-fetch-invitees)

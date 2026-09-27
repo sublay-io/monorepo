@@ -51,7 +51,7 @@ const space = await sublay.spaces.createSpace({
 </ParamField>
 
 <ParamField body="nsfw" type="boolean">
-  The space's own NSFW flag. Defaults to `false`. A space created under an NSFW parent is effectively NSFW regardless of this value. See [Space NSFW flagging](/data-models/space#nsfw-flagging).
+  The space's own NSFW flag. Defaults to `false`. A space created under an NSFW parent is effectively NSFW regardless of this value. See [Space NSFW flagging](/v7/data-models/space#nsfw-flagging).
 </ParamField>
 
 <ParamField body="parentSpaceId" type="string">
@@ -131,7 +131,7 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
 </ParamField>
 
 <ParamField body="nsfwFilter" type='"include-all" | "exclude" | "only"'>
-  Filter by each space's `nsfwEffective` (own flag OR any ancestor). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW spaces; `"only"` returns only them. `"only"` may return an NSFW child whose safe parent is omitted. See [Space NSFW flagging](/data-models/space#nsfw-flagging).
+  Filter by each space's `nsfwEffective` (own flag OR any ancestor). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW spaces; `"only"` returns only them. `"only"` may return an NSFW child whose safe parent is omitted. See [Space NSFW flagging](/v7/data-models/space#nsfw-flagging).
 </ParamField>
 
 <ParamField body="include" type="string">
@@ -290,7 +290,7 @@ const space = await sublay.spaces.updateSpace({
 </ParamField>
 
 <ParamField body="nsfw" type="boolean">
-  Updated NSFW own-flag. Toggling it recomputes this space's effective NSFW and cascades it top-down to every descendant space (and, live, to their entities). See [Space NSFW flagging](/data-models/space#nsfw-flagging).
+  Updated NSFW own-flag. Toggling it recomputes this space's effective NSFW and cascades it top-down to every descendant space (and, live, to their entities). See [Space NSFW flagging](/v7/data-models/space#nsfw-flagging).
 </ParamField>
 
 <ParamField body="metadata" type="Record<string, any>">

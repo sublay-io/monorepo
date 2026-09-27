@@ -4,7 +4,7 @@ api: "POST /v7/:projectId/events/:eventId/invites"
 description: "Invite a user to an event (host-only)"
 ---
 
-Creates an [EventInvite](/data-models/event-invite) for a user. **Host-only** (service/master keys bypass the check). The invite is keyed on a Sublay `userId` (never a foreign ID) and is idempotent against the unique `(eventId, userId)` constraint — re-inviting an already-invited user is a no-op success.
+Creates an [EventInvite](/v7/data-models/event-invite) for a user. **Host-only** (service/master keys bypass the check). The invite is keyed on a Sublay `userId` (never a foreign ID) and is idempotent against the unique `(eventId, userId)` constraint — re-inviting an already-invited user is a no-op success.
 
 For an `invite`-visibility event, the invited user can now see and RSVP to the event. When the `notifications` bundle is present, the invitee receives an `event-invite` notification (best-effort).
 
@@ -22,7 +22,7 @@ For an `invite`-visibility event, the invited user can now see and RSVP to the e
 
 ## Response
 
-Returns the updated [Event](/data-models/event).
+Returns the updated [Event](/v7/data-models/event).
 
 ## Error Responses
 
@@ -39,4 +39,4 @@ Returns the updated [Event](/data-models/event).
   </Accordion>
 </AccordionGroup>
 
-See also: [useAddInvite](/hooks/events/use-add-invite)
+See also: [useAddInvite](/v7/hooks/events/use-add-invite)

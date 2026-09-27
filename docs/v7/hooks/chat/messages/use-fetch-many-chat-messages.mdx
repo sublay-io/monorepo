@@ -10,7 +10,7 @@ import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
 `useFetchManyChatMessages` returns a function that fetches a single page of conversation messages and resolves to the raw response. It stores nothing — no Redux, no socket subscription — so you own the resulting state.
 
-This is the low-level fetcher shared by [`useLiveChatMessages`](/hooks/chat/messages/use-live-chat-messages) (the live store-backed view) and [`useFetchManyChatMessagesWrapper`](/hooks/chat/messages/use-fetch-many-chat-messages-wrapper) (a batteries-included paginated list). Use it directly when you need full control; most apps will prefer the wrapper.
+This is the low-level fetcher shared by [`useLiveChatMessages`](/v7/hooks/chat/messages/use-live-chat-messages) (the live store-backed view) and [`useFetchManyChatMessagesWrapper`](/v7/hooks/chat/messages/use-fetch-many-chat-messages-wrapper) (a batteries-included paginated list). Use it directly when you need full control; most apps will prefer the wrapper.
 
 <Note>Because results never enter the live store, this is the right tool for **filtered** or read-only queries (e.g. only messages that have replies) that should not be polluted by live socket traffic. It is a point-in-time query — call it again to refresh.</Note>
 
@@ -68,7 +68,7 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
   When `true`, the server populates the `files` field on each message.
 </ParamField>
 <ParamField path="includeGrants" type="boolean">
-  When `true`, each message carries its [reputation-grant summary](/data-models/reputation-grant#grantsummary) at `message.grants` — `{ total, count, viewerTotal }` over positive grants. Populated by the `reputation` bundle; on a project without it the summary comes back zero-filled rather than missing.
+  When `true`, each message carries its [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary) at `message.grants` — `{ total, count, viewerTotal }` over positive grants. Populated by the `reputation` bundle; on a project without it the summary comes back zero-filled rather than missing.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="path" />
@@ -84,7 +84,7 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
 A `Promise` resolving to:
 
 <ResponseField name="messages" type="ChatMessage[]">
-  Messages for the requested page. When `spaceReputation` is requested, each embedded sender carries an added `spaceReputation` number. See [ChatMessage](/data-models/chat-message) and [Reputation](/data-models/reputation).
+  Messages for the requested page. When `spaceReputation` is requested, each embedded sender carries an added `spaceReputation` number. See [ChatMessage](/v7/data-models/chat-message) and [Reputation](/v7/data-models/reputation).
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">

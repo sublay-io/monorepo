@@ -8,7 +8,7 @@ icon: "cube"
 
 High-level hook that fetches the connection status between the current user and a target user on mount, then exposes named action functions for every state transition. The appropriate action for each state is enforced — only valid transitions can fire.
 
-For integration guidance and a full example, see [Relationships — useConnectionManager](/sdk/relationships/use-connection-manager).
+For integration guidance and a full example, see [Relationships — useConnectionManager](/v7/sdk/relationships/use-connection-manager).
 
 ## Usage Example
 
@@ -45,7 +45,7 @@ function ConnectionControls({ userId }: { userId: string }) {
 </ResponseField>
 
 <ResponseField name="connectionData" type="object">
-  Metadata about the current connection state (timestamps, direction). See [useConnectionManager SDK page](/sdk/relationships/use-connection-manager) for full shape.
+  Metadata about the current connection state (timestamps, direction). See [useConnectionManager SDK page](/v7/sdk/relationships/use-connection-manager) for full shape.
 </ResponseField>
 
 <ResponseField name="isLoading" type="boolean">

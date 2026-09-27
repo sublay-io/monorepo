@@ -4,18 +4,18 @@ description: "Automatic push fan-out for in-app events, per-user type toggles, p
 icon: "bell-slash"
 ---
 
-Beyond the manual [`push.send()`](/push-notifications) call, Sublay can **automatically** push in-app events (comments, mentions, follows, chat messages, …) to a user's registered devices. This page covers the surfaces that control that automatic delivery:
+Beyond the manual [`push.send()`](/v7/push-notifications) call, Sublay can **automatically** push in-app events (comments, mentions, follows, chat messages, …) to a user's registered devices. This page covers the surfaces that control that automatic delivery:
 
 - **Per-user preferences** — each user can disable push for specific event types.
 - **Per-conversation mute** — a user can silence a single conversation's push for a duration or forever.
 - **Per-event copy templates & project-level toggles** — the developer authors the push title/body per event type and can disable an event project-wide, from the dashboard.
 
 <Note>
-  **These are per-event-type controls for one signed-in user, and they are not the same thing as turning push off for an account on a device.** A user with no disabled types still receives nothing on a device where their account has been silenced with [`useAccountPushToggle`](/hooks/push/use-account-push-toggle) — that decides whether the account is bound to the device at all, while everything on this page decides which event types a bound account receives. The two compose, and neither overwrites the other.
+  **These are per-event-type controls for one signed-in user, and they are not the same thing as turning push off for an account on a device.** A user with no disabled types still receives nothing on a device where their account has been silenced with [`useAccountPushToggle`](/v7/hooks/push/use-account-push-toggle) — that decides whether the account is bound to the device at all, while everything on this page decides which event types a bound account receives. The two compose, and neither overwrites the other.
 </Note>
 
 <Note>
-  **Requires the `push` bundle.** Automatic push and the preference table live in the `push` bundle. Install it from your project's **Database** page in the [dashboard](https://dash.sublay.io). Chat-message push additionally requires the `chat` bundle; app-notification push requires the `notifications` bundle. See [Bundles](/bundles).
+  **Requires the `push` bundle.** Automatic push and the preference table live in the `push` bundle. Install it from your project's **Database** page in the [dashboard](https://dash.sublay.io). Chat-message push additionally requires the `chat` bundle; app-notification push requires the `notifications` bundle. See [Bundles](/v7/bundles).
 </Note>
 
 ## The event palette
@@ -36,7 +36,7 @@ Each user has at most one preference row, holding the set of event types they've
 - **Updating replaces the set.** The update endpoint upserts the whole `disabledTypes` array — send the complete set you want stored, not a delta.
 - **Only valid type names are accepted.** Unknown names are rejected server-side.
 
-Disabling a type only suppresses **push** — the in-app [App Notification](/sdk/app-notifications/overview) is still written, so the bell/inbox is unaffected.
+Disabling a type only suppresses **push** — the in-app [App Notification](/v7/sdk/app-notifications/overview) is still written, so the bell/inbox is unaffected.
 
 ### Per-conversation mute (`mutedUntil` / `mutedForever`)
 
@@ -128,16 +128,16 @@ Muted-conversation content and disabled-type content is **simply not dispatched*
 The SDKs expose the read/update primitives so you can build a notification-settings screen and per-conversation mute control:
 
 <CardGroup cols={2}>
-  <Card title="useNotificationPreferences" icon="cube" href="/hooks/push/use-notification-preferences">
+  <Card title="useNotificationPreferences" icon="cube" href="/v7/hooks/push/use-notification-preferences">
     Read + update the current user's disabled types (React / RN / Expo)
   </Card>
-  <Card title="useMuteConversation" icon="cube" href="/hooks/chat/conversations/use-mute-conversation">
+  <Card title="useMuteConversation" icon="cube" href="/v7/hooks/chat/conversations/use-mute-conversation">
     Set / clear the current user's conversation mute
   </Card>
-  <Card title="Node SDK — Push Notifications" icon="node-js" href="/node-sdk/push-notifications">
+  <Card title="Node SDK — Push Notifications" icon="node-js" href="/v7/node-sdk/push-notifications">
     `push.getNotificationPreferences` / `updateNotificationPreferences`, `chat.muteConversation`
   </Card>
-  <Card title="JS SDK — Push Notifications" icon="js" href="/js-sdk/push-notifications">
+  <Card title="JS SDK — Push Notifications" icon="js" href="/v7/js-sdk/push-notifications">
     `push.getNotificationPreferences` / `updateNotificationPreferences`, `chat.muteConversation`
   </Card>
 </CardGroup>
@@ -145,13 +145,13 @@ The SDKs expose the read/update primitives so you can build a notification-setti
 ### API endpoints
 
 <CardGroup cols={2}>
-  <Card title="Mute Conversation" href="/api-reference/chat/conversations/mute-conversation">
+  <Card title="Mute Conversation" href="/v7/api-reference/chat/conversations/mute-conversation">
     `POST /chat/conversations/:conversationId/mute`
   </Card>
-  <Card title="Get Notification Preferences" href="/api-reference/push-notifications/get-preferences">
+  <Card title="Get Notification Preferences" href="/v7/api-reference/push-notifications/get-preferences">
     `GET /push-notifications/preferences`
   </Card>
-  <Card title="Update Notification Preferences" href="/api-reference/push-notifications/update-preferences">
+  <Card title="Update Notification Preferences" href="/v7/api-reference/push-notifications/update-preferences">
     `PUT /push-notifications/preferences`
   </Card>
 </CardGroup>

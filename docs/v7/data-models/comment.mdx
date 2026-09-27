@@ -23,10 +23,10 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `mentions` | `Mention[]` | Array of user mentions embedded in the comment. |
 | `upvotes` | `string[]` | Legacy v6 field — array of user IDs that upvoted. Use `reactionCounts` in v7. |
 | `downvotes` | `string[]` | Legacy v6 field — array of user IDs that downvoted. Use `reactionCounts` in v7. |
-| `reactionCounts` | `ReactionCounts` | Counts for all 8 reaction types. See [Reaction](/data-models/reaction). |
+| `reactionCounts` | `ReactionCounts` | Counts for all 8 reaction types. See [Reaction](/v7/data-models/reaction). |
 | `userReaction` | `ReactionType \| null` | The current user's reaction, populated when authenticated. |
 | `repliesCount` | `number` | Number of direct replies to this comment. |
-| `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
+| `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v7/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
 | `metadata` | `Record<string, any>` | Custom key-value data (max 10 KB). |
 | `moderationStatus` | `"approved" \| "removed" \| null` | Space moderation status. |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
@@ -66,13 +66,13 @@ Pass an `include` array to populate optional fields:
 | `"grants"` | `grants` — the reputation-grant summary |
 
 <Note>
-  The two single-comment reads ([Fetch Comment](/api-reference/comments/fetch-comment) and [Fetch Comment by Foreign ID](/api-reference/comments/fetch-comment-by-foreign-id)) nest the record under a `comment` key, so on those the summary is at `comment.grants`. The comment feed returns comments bare.
+  The two single-comment reads ([Fetch Comment](/v7/api-reference/comments/fetch-comment) and [Fetch Comment by Foreign ID](/v7/api-reference/comments/fetch-comment-by-foreign-id)) nest the record under a `comment` key, so on those the summary is at `comment.grants`. The comment feed returns comments bare.
 </Note>
 
 ## See Also
 
-- [Reaction](/data-models/reaction)
-- [Entity](/data-models/entity)
-- [ReputationGrant](/data-models/reputation-grant)
-- [Fetch Many Comments](/api-reference/comments/fetch-many-comments)
-- [useEntityComments hook](/hooks/comments/use-entity-comments)
+- [Reaction](/v7/data-models/reaction)
+- [Entity](/v7/data-models/entity)
+- [ReputationGrant](/v7/data-models/reputation-grant)
+- [Fetch Many Comments](/v7/api-reference/comments/fetch-many-comments)
+- [useEntityComments hook](/v7/hooks/comments/use-entity-comments)

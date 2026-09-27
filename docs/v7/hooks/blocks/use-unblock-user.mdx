@@ -9,7 +9,7 @@ icon: "plug"
 Returns a function that unblocks a user by their ID. Unblocking is idempotent and restores nothing — removed follows and connections stay gone; a previously frozen 1:1 conversation becomes usable again.
 
 <Note>
-  Requires the `moderation` bundle. See [Moderation — Blocking](/sdk/moderation/overview#blocking).
+  Requires the `moderation` bundle. See [Moderation — Blocking](/v7/sdk/moderation/overview#blocking).
 </Note>
 
 ## Usage Example
@@ -38,5 +38,5 @@ The returned function resolves to `void` on success.
 
 ## Related
 
-- [useBlockUser](/hooks/blocks/use-block-user)
-- [useBlockManager](/hooks/blocks/use-block-manager) — combines block/unblock with status loading
+- [useBlockUser](/v7/hooks/blocks/use-block-user)
+- [useBlockManager](/v7/hooks/blocks/use-block-manager) — combines block/unblock with status loading

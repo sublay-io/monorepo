@@ -126,7 +126,7 @@ Whenever `signedToken` changes (e.g., after a new user signs in), the SDK re-ini
 
 ## The Account Limit
 
-A device stores at most **5 accounts** ([Multi-Account](/sdk/authentication/multi-account)). If the verified token identifies a **sixth**, distinct user, the exchange is refused: the session Sublay just created is signed back out, the stored accounts are left untouched, and the app renders signed-out with `accountLimitReached` set.
+A device stores at most **5 accounts** ([Multi-Account](/v7/sdk/authentication/multi-account)). If the verified token identifies a **sixth**, distinct user, the exchange is refused: the session Sublay just created is signed back out, the stored accounts are left untouched, and the app renders signed-out with `accountLimitReached` set.
 
 ```tsx
 import { useAccounts } from "@sublay/react-js";
@@ -142,7 +142,7 @@ Two consequences specific to this integration:
 
 - **A `signedToken` for an already-stored user is never refused.** The check is keyed on the user id Sublay resolves from the token, not on anything in `userData`, so returning users sign in normally at the limit.
 - **The refusal is not silent, and it does not fall back.** Because the provider exchanges the token on every launch, a refused exchange would otherwise repeat invisibly forever — or quietly restore some *other* stored account instead. Instead the SDK surfaces the reason and sets `accountLimitReached`. The auth gate still opens, so the app renders normally in its signed-out state rather than hanging.
-- **The refusal is not recorded as a sign-out.** Nobody signed out — an admission was refused — so the selection is left exactly where it was and `signedOut` is not set. The next launch therefore behaves as it would have without the refused attempt, rather than reproducing the same dead end forever. See [Reaching the account limit](/sdk/authentication/multi-account#reaching-the-account-limit).
+- **The refusal is not recorded as a sign-out.** Nobody signed out — an admission was refused — so the selection is left exactly where it was and `signedOut` is not set. The next launch therefore behaves as it would have without the refused attempt, rather than reproducing the same dead end forever. See [Reaching the account limit](/v7/sdk/authentication/multi-account#reaching-the-account-limit).
 
 Apps in integration mode that never store multiple accounts cannot hit this: the limit is only reached once five distinct users have been admitted on the same device.
 
@@ -152,5 +152,5 @@ When a user signs in via external auth, Sublay stores the `sub` claim as `foreig
 
 ## See Also
 
-- [Verify External User API reference](/api-reference/auth/verify-external-user)
-- [Authentication overview](/sdk/authentication/overview)
+- [Verify External User API reference](/v7/api-reference/auth/verify-external-user)
+- [Authentication overview](/v7/sdk/authentication/overview)

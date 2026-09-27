@@ -36,7 +36,7 @@ Requires the `push` bundle.
 
 ### Rich payload fields
 
-All optional. Each is mapped to whichever platform(s) support it at dispatch time and silently ignored on platforms that have no equivalent. See the [Push Notifications guide](/push-notifications#rich-notification-payloads) for the client-side setup some of these require (Android channels, the iOS Notification Service Extension, your web service worker).
+All optional. Each is mapped to whichever platform(s) support it at dispatch time and silently ignored on platforms that have no equivalent. See the [Push Notifications guide](/v7/push-notifications#rich-notification-payloads) for the client-side setup some of these require (Android channels, the iOS Notification Service Extension, your web service worker).
 
 <ParamField body="sound" type="string">
   Sound file to play. iOS: APNs `sound`. Android: governed by the channel on 8+ — pair with `channelId`. Web: forwarded to the service worker.
@@ -179,6 +179,6 @@ Returns `200` with a `results` map keyed by user ID. Every requested `userId` is
 
 ## See Also
 
-- [Node SDK — push.send](/node-sdk/push-notifications)
-- [Register Device](/api-reference/push-notifications/register-device)
-- [Push Notifications overview](/push-notifications)
+- [Node SDK — push.send](/v7/node-sdk/push-notifications)
+- [Register Device](/v7/api-reference/push-notifications/register-device)
+- [Push Notifications overview](/v7/push-notifications)

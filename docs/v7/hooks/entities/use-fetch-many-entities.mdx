@@ -5,14 +5,14 @@ icon: "plug"
 ---
 
 <Note>
-  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/bundles).
+  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v7/bundles).
 </Note>
 
 import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
 ## Overview
 
-`useFetchManyEntities` returns a function that fetches a paginated list of entities with full filtering and sorting support. This is the low-level hook underlying `EntityListProvider`. For continuous-scroll or load-more list UIs, use [`useEntityList`](/hooks/entity-lists/use-entity-list) instead, which wraps this hook with built-in pagination state.
+`useFetchManyEntities` returns a function that fetches a paginated list of entities with full filtering and sorting support. This is the low-level hook underlying `EntityListProvider`. For continuous-scroll or load-more list UIs, use [`useEntityList`](/v7/hooks/entity-lists/use-entity-list) instead, which wraps this hook with built-in pagination state.
 
 ## Usage Example
 
@@ -91,31 +91,31 @@ function EntityFeed() {
 </ParamField>
 
 <ParamField path="keywordsFilters" type="object">
-  Filter by keywords. See [Entity List Filters](/sdk/entity-lists/filters) for the full filter schema.
+  Filter by keywords. See [Entity List Filters](/v7/sdk/entity-lists/filters) for the full filter schema.
 </ParamField>
 
 <ParamField path="titleFilters" type="object">
-  Filter by title content. See [Entity List Filters](/sdk/entity-lists/filters).
+  Filter by title content. See [Entity List Filters](/v7/sdk/entity-lists/filters).
 </ParamField>
 
 <ParamField path="contentFilters" type="object">
-  Filter by body content. See [Entity List Filters](/sdk/entity-lists/filters).
+  Filter by body content. See [Entity List Filters](/v7/sdk/entity-lists/filters).
 </ParamField>
 
 <ParamField path="attachmentsFilters" type="object">
-  Filter by attachments data. See [Entity List Filters](/sdk/entity-lists/filters).
+  Filter by attachments data. See [Entity List Filters](/v7/sdk/entity-lists/filters).
 </ParamField>
 
 <ParamField path="locationFilters" type="object">
-  Filter by geographic proximity. See [Entity List Filters](/sdk/entity-lists/filters).
+  Filter by geographic proximity. See [Entity List Filters](/v7/sdk/entity-lists/filters).
 </ParamField>
 
 <ParamField path="metadataFilters" type="object">
-  Filter by metadata fields. See [Entity List Filters](/sdk/entity-lists/filters).
+  Filter by metadata fields. See [Entity List Filters](/v7/sdk/entity-lists/filters).
 </ParamField>
 
 <ParamField path="nsfwFilter" type='"include-all" | "exclude" | "only"'>
-  Filter by **effective** NSFW status (`entity.nsfw OR its space's nsfwEffective`). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW entities; `"only"` returns only effective-NSFW entities. On projects without the spaces bundle it applies against the entity's own `nsfw` flag alone. See [Entity NSFW flagging](/data-models/entity#nsfw-flagging).
+  Filter by **effective** NSFW status (`entity.nsfw OR its space's nsfwEffective`). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW entities; `"only"` returns only effective-NSFW entities. On projects without the spaces bundle it applies against the entity's own `nsfw` flag alone. See [Entity NSFW flagging](/v7/data-models/entity#nsfw-flagging).
 </ParamField>
 
 <ParamField path="include" type="string | string[]">
@@ -127,7 +127,7 @@ function EntityFeed() {
 ## Returns
 
 <ResponseField name="data" type="Entity[]">
-  Array of entities for the current page. When `spaceReputation` is requested, each embedded author carries an added `spaceReputation` number. See [Reputation](/data-models/reputation).
+  Array of entities for the current page. When `spaceReputation` is requested, each embedded author carries an added `spaceReputation` number. See [Reputation](/v7/data-models/reputation).
 </ResponseField>
 
 <ResponseField name="pagination.page" type="number">

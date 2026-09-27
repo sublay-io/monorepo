@@ -6,7 +6,7 @@ icon: "cube"
 
 ## Overview
 
-`useUser` is the primary hook for interacting with the currently authenticated user's profile. It provides the user's full data (as an `AuthUser`), loading and error states, an `updateUser` action, and derived [suspension](/sdk/moderation/suspensions) state (`isSuspended` / `activeSuspension`).
+`useUser` is the primary hook for interacting with the currently authenticated user's profile. It provides the user's full data (as an `AuthUser`), loading and error states, an `updateUser` action, and derived [suspension](/v7/sdk/moderation/suspensions) state (`isSuspended` / `activeSuspension`).
 
 Updates are applied optimistically — the UI reflects changes immediately, and reverts automatically if the server request fails.
 
@@ -59,7 +59,7 @@ function AvatarUpload({ file }: { file: File }) {
 ## Return Values
 
 <ResponseField name="user" type="AuthUser | null">
-  The authenticated user's full profile. Returns `null` while loading or when no user is authenticated. See [User data model](/data-models/user).
+  The authenticated user's full profile. Returns `null` while loading or when no user is authenticated. See [User data model](/v7/data-models/user).
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
@@ -75,11 +75,11 @@ function AvatarUpload({ file }: { file: File }) {
 </ResponseField>
 
 <ResponseField name="isSuspended" type="boolean">
-  `true` while the authenticated user has an active [suspension](/sdk/moderation/suspensions). Derived from the user's `suspensions` using the same effective definition as the server.
+  `true` while the authenticated user has an active [suspension](/v7/sdk/moderation/suspensions). Derived from the user's `suspensions` using the same effective definition as the server.
 </ResponseField>
 
 <ResponseField name="activeSuspension" type="{ reason: string | null; startDate: string; endDate: string | null } | null">
-  The user's effective (furthest-reaching) active suspension, or `null` when they aren't suspended. `endDate: null` means the suspension is indefinite. Bind a "suspended until X" banner or a disabled composer to this. See [Suspensions](/sdk/moderation/suspensions).
+  The user's effective (furthest-reaching) active suspension, or `null` when they aren't suspended. `endDate: null` means the suspension is indefinite. Bind a "suspended until X" banner or a disabled composer to this. See [Suspensions](/v7/sdk/moderation/suspensions).
 </ResponseField>
 
 <ResponseField name="updateUser" type="(update: UpdateUserParams) => Promise<AuthUser>">

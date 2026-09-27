@@ -96,7 +96,7 @@ function SignInForm() {
 
 ## The Account Limit
 
-A device stores at most **5 accounts** ([Multi-Account](/sdk/authentication/multi-account)). Both calls above refuse a sixth, throwing an `Error` whose message is exported as `ACCOUNT_LIMIT_MESSAGE`:
+A device stores at most **5 accounts** ([Multi-Account](/v7/sdk/authentication/multi-account)). Both calls above refuse a sixth, throwing an `Error` whose message is exported as `ACCOUNT_LIMIT_MESSAGE`:
 
 ```tsx
 import { useAuth, ACCOUNT_LIMIT_MESSAGE } from "@sublay/react-js";
@@ -125,7 +125,7 @@ try {
   **One sign-up case does leave a user record behind.** The pre-request check can only use the accounts stored when the call left. If the fifth slot fills while your sign-up is in flight — another tab, or a second sign-in racing this one — the account has already been created on the server by the time the limit is discovered. The SDK signs that session straight back out, but the **user record persists**, so retrying the same email after freeing a slot fails with "email already in use". Sign in with it instead.
 </Warning>
 
-A refusal leaves the currently active account signed in, leaves the accounts map untouched, signs the server-side session created by the refused attempt back out, and sets `accountLimitReached` — see [Reaching the account limit](/sdk/authentication/multi-account#reaching-the-account-limit).
+A refusal leaves the currently active account signed in, leaves the accounts map untouched, signs the server-side session created by the refused attempt back out, and sets `accountLimitReached` — see [Reaching the account limit](/v7/sdk/authentication/multi-account#reaching-the-account-limit).
 
 ## Sign Out
 
@@ -143,13 +143,13 @@ function SignOutButton() {
 }
 ```
 
-`signOut` **rejects** when the server refuses that unbind, and in that case nothing was torn down on either side — the session survives so the user can retry. Its signature is `() => Promise<void>`, so nothing warns you at compile time; without the `catch` the rejection is unhandled and your UI reports a sign-out that did not happen. Every other failure — no network, a throttled or otherwise rejected request, a device that never registered for push — still signs out locally, because a user must always be able to sign out. See [`useAuth`](/hooks/auth/use-auth).
+`signOut` **rejects** when the server refuses that unbind, and in that case nothing was torn down on either side — the session survives so the user can retry. Its signature is `() => Promise<void>`, so nothing warns you at compile time; without the `catch` the rejection is unhandled and your UI reports a sign-out that did not happen. Every other failure — no network, a throttled or otherwise rejected request, a device that never registered for push — still signs out locally, because a user must always be able to sign out. See [`useAuth`](/v7/hooks/auth/use-auth).
 
 ## Change Password
 
 Users who signed up with email/password can change their password while authenticated. The current password must be provided for verification.
 
-**A password change ends every *other* session for that user**, so their other devices must sign in again with the new password. The session making the call survives — the server reads which session is asking off the access token the request already carries, so nothing extra is sent. It also removes that user's push bindings on every other device while keeping this one's, which the hook arranges by sending the device identifier it already holds. See [`useAuth`](/hooks/auth/use-auth) and [Change Password](/api-reference/auth/change-password).
+**A password change ends every *other* session for that user**, so their other devices must sign in again with the new password. The session making the call survives — the server reads which session is asking off the access token the request already carries, so nothing extra is sent. It also removes that user's push bindings on every other device while keeping this one's, which the hook arranges by sending the device identifier it already holds. See [`useAuth`](/v7/hooks/auth/use-auth) and [Change Password](/v7/api-reference/auth/change-password).
 
 ```tsx
 import { useAuth } from "@sublay/react-js";
@@ -184,7 +184,7 @@ function ChangePasswordForm() {
 
 Users who forget their password can request a reset email. Sublay sends a link to the registered email address. The link expires after 1 hour.
 
-Completing the reset revokes **every** session for that user and removes **every** push binding they hold, on every device — including the one they are standing on. They sign in again everywhere, and each device re-binds for push on its own once it is next opened. The reset itself is completed by the page the link points to, which collects the new password and calls the [Reset Password](/api-reference/auth/reset-password) endpoint — there is no React hook for that step.
+Completing the reset revokes **every** session for that user and removes **every** push binding they hold, on every device — including the one they are standing on. They sign in again everywhere, and each device re-binds for push on its own once it is next opened. The reset itself is completed by the page the link points to, which collects the new password and calls the [Reset Password](/v7/api-reference/auth/reset-password) endpoint — there is no React hook for that step.
 
 ```tsx
 import { useRequestPasswordReset } from "@sublay/react-js";
@@ -339,9 +339,9 @@ The `user.isVerified` field will be `true` the next time the user's session is l
 
 ## See Also
 
-- [`useAuth` hook reference](/hooks/auth/use-auth)
-- [`useRequestPasswordReset` hook reference](/hooks/auth/use-request-password-reset)
-- [`useSendVerificationEmail` hook reference](/hooks/auth/use-send-verification-email)
-- [`useVerifyEmail` hook reference](/hooks/auth/use-verify-email)
-- [Sign Up API reference](/api-reference/auth/sign-up)
-- [Sign In API reference](/api-reference/auth/sign-in)
+- [`useAuth` hook reference](/v7/hooks/auth/use-auth)
+- [`useRequestPasswordReset` hook reference](/v7/hooks/auth/use-request-password-reset)
+- [`useSendVerificationEmail` hook reference](/v7/hooks/auth/use-send-verification-email)
+- [`useVerifyEmail` hook reference](/v7/hooks/auth/use-verify-email)
+- [Sign Up API reference](/v7/api-reference/auth/sign-up)
+- [Sign In API reference](/v7/api-reference/auth/sign-in)

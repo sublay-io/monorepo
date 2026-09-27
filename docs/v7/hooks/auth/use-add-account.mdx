@@ -13,7 +13,7 @@ After the user completes sign-in, the new account is added to the accounts map a
 <Note>
   5 accounts can be stored simultaneously. `canAddAccount` is `false` when the
   limit is reached. All 5 genuinely persist on every platform — see
-  [Where accounts are stored](/sdk/authentication/multi-account#where-accounts-are-stored).
+  [Where accounts are stored](/v7/sdk/authentication/multi-account#where-accounts-are-stored).
 </Note>
 
 ## Usage Example
@@ -90,7 +90,7 @@ They answer different questions and are both needed:
 | Derived from | The map size, on every render | A refusal, latched in the store |
 | Typical use | Enable/disable the "Add account" button *before* the user commits | Render the error *after* a sign-in was rejected at the cap |
 
-A third signal, [`wouldExceedAccountLimit`](/sdk/authentication/multi-account#three-signals-for-the-account-cap),
+A third signal, [`wouldExceedAccountLimit`](/v7/sdk/authentication/multi-account#three-signals-for-the-account-cap),
 answers the same question as `canAddAccount` but *for a specific user id* — which
 matters because signing back into an account this device already stores is never
 an admission and works at the cap. Use it when you already know whose account is
@@ -121,7 +121,7 @@ coming back.
 | External auth (`signedToken`) | The provider's `auth/initialize` action rejects with the reason; the app **renders** signed-out, with the selection left where it was |
 | OAuth, web and Expo | **No** — the flag is the only channel |
 
-It is also readable from [`useAccounts`](/hooks/auth/use-accounts).
+It is also readable from [`useAccounts`](/v7/hooks/auth/use-accounts).
 
 <Note>
   `canAddAccount` is not a substitute. A sign-in can start without ever going
@@ -132,8 +132,8 @@ It is also readable from [`useAccounts`](/hooks/auth/use-accounts).
 </Note>
 
 For what the refusal leaves behind on each path, see
-[Reaching the account limit](/sdk/authentication/multi-account#reaching-the-account-limit).
+[Reaching the account limit](/v7/sdk/authentication/multi-account#reaching-the-account-limit).
 
 ## Integration Guide
 
-For multi-account integration guidance, see [Multi-Account](/sdk/authentication/multi-account).
+For multi-account integration guidance, see [Multi-Account](/v7/sdk/authentication/multi-account).

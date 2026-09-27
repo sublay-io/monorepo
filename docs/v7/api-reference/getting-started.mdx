@@ -44,7 +44,7 @@ GET /v7/:projectId/app-notifications
 Authorization: Bearer <accessToken>
 ```
 
-See [Authentication](/api-reference/authentication) for full details on obtaining and refreshing tokens.
+See [Authentication](/v7/api-reference/authentication) for full details on obtaining and refreshing tokens.
 
 ## Pagination
 
@@ -107,7 +107,7 @@ Some errors include an additional `field` key (e.g., validation errors on a spec
 
 <Note>
   An **expired token returns `403`, not `401`** — see
-  [Authentication](/api-reference/authentication) for why that distinction
+  [Authentication](/v7/api-reference/authentication) for why that distinction
   matters when writing your own refresh logic.
 </Note>
 

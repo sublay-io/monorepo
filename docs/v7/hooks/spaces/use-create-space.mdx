@@ -61,11 +61,11 @@ function CreateSpaceForm() {
 </ParamField>
 
 <ParamField path="visibility" type='"public" | "unlisted" | "private"'>
-  Whether the space is listed and discoverable. Defaults to `"public"`. Independent of `readingPermission` (which governs content). `"unlisted"` hides the space from discovery and search but keeps it reachable by direct link; `"private"` currently behaves like `"unlisted"`. See [Space visibility](/data-models/space#visibility).
+  Whether the space is listed and discoverable. Defaults to `"public"`. Independent of `readingPermission` (which governs content). `"unlisted"` hides the space from discovery and search but keeps it reachable by direct link; `"private"` currently behaves like `"unlisted"`. See [Space visibility](/v7/data-models/space#visibility).
 </ParamField>
 
 <ParamField path="nsfw" type="boolean">
-  The space's own NSFW flag. Defaults to `false`. If the space is created under an NSFW parent, its effective NSFW status is `true` regardless of this value (a live rollup — see [Space NSFW flagging](/data-models/space#nsfw-flagging)). Sublay labels and filters NSFW content; it does not blur or age-gate it.
+  The space's own NSFW flag. Defaults to `false`. If the space is created under an NSFW parent, its effective NSFW status is `true` regardless of this value (a live rollup — see [Space NSFW flagging](/v7/data-models/space#nsfw-flagging)). Sublay labels and filters NSFW content; it does not blur or age-gate it.
 </ParamField>
 
 <ParamField path="requireJoinApproval" type="boolean">
@@ -82,6 +82,6 @@ function CreateSpaceForm() {
 
 ## Returns
 
-Returns the created [Space](/data-models/space) object.
+Returns the created [Space](/v7/data-models/space) object.
 
 <Note>When creating a child space, all admins and moderators of the parent space are automatically added to the new child space with their same roles.</Note>

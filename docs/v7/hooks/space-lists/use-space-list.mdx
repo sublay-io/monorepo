@@ -8,7 +8,7 @@ icon: "cube"
 
 `useSpaceList` provides a stateful, paginated list of spaces with support for filtering, sorting, search, and creation. Each list is identified by a `listId` and maintains independent Redux state, allowing multiple lists on the same page.
 
-For full integration guidance, see [Space Lists](/sdk/spaces/space-lists).
+For full integration guidance, see [Space Lists](/v7/sdk/spaces/space-lists).
 
 ## Usage Example
 
@@ -96,8 +96,8 @@ function SpaceDirectory() {
 
   <Note>
     Space avatars and banners are uploaded as files, not URLs, so they can't be
-    set through this hook. Use [useCreateSpace](/hooks/spaces/use-create-space)
-    or [useUpdateSpace](/hooks/spaces/use-update-space), which send the image as
+    set through this hook. Use [useCreateSpace](/v7/hooks/spaces/use-create-space)
+    or [useUpdateSpace](/v7/hooks/spaces/use-update-space), which send the image as
     `multipart/form-data`.
   </Note>
 </ResponseField>

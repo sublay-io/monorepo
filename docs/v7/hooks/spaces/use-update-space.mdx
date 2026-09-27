@@ -54,10 +54,10 @@ function SpaceSettings({ spaceId }: { spaceId: string }) {
       Updated posting permission.
     </ParamField>
     <ParamField path="visibility" type='"public" | "unlisted" | "private"'>
-      Updated visibility (listing/discoverability). Independent of `readingPermission`. See [Space visibility](/data-models/space#visibility).
+      Updated visibility (listing/discoverability). Independent of `readingPermission`. See [Space visibility](/v7/data-models/space#visibility).
     </ParamField>
     <ParamField path="nsfw" type="boolean">
-      Updated NSFW own-flag. Toggling it recomputes this space's effective NSFW and cascades it top-down to every descendant space (and, live, to their entities) in the same transaction. See [Space NSFW flagging](/data-models/space#nsfw-flagging).
+      Updated NSFW own-flag. Toggling it recomputes this space's effective NSFW and cascades it top-down to every descendant space (and, live, to their entities) in the same transaction. See [Space NSFW flagging](/v7/data-models/space#nsfw-flagging).
     </ParamField>
     <ParamField path="requireJoinApproval" type="boolean">
       Updated join approval requirement.
@@ -76,4 +76,4 @@ function SpaceSettings({ spaceId }: { spaceId: string }) {
 
 ## Returns
 
-Returns the updated [SpaceDetailed](/data-models/space) object.
+Returns the updated [SpaceDetailed](/v7/data-models/space) object.

@@ -6,7 +6,7 @@ icon: "cube"
 
 ## Overview
 
-`useFetchManyCommentsWrapper` is a stateful wrapper around [`useFetchManyComments`](/hooks/comments/use-fetch-many-comments) that manages pagination, sort state, and the comment list for you. Use it when you need a custom paginated comment list outside of `CommentSectionProvider` — for example, a user profile page showing all comments a user has made, or a custom thread viewer.
+`useFetchManyCommentsWrapper` is a stateful wrapper around [`useFetchManyComments`](/v7/hooks/comments/use-fetch-many-comments) that manages pagination, sort state, and the comment list for you. Use it when you need a custom paginated comment list outside of `CommentSectionProvider` — for example, a user profile page showing all comments a user has made, or a custom thread viewer.
 
 Changing `sortBy` resets the list and re-fetches from page 1. At least one of `entityId`, `userId`, or `parentId` must be provided — the hook will not fetch otherwise.
 

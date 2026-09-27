@@ -4,7 +4,7 @@ api: "POST /v7/:projectId/crypto/sign-testing-jwt"
 description: "Generate a signed RS256 JWT for development and testing"
 ---
 
-Signs a short-lived JWT (5 minutes) using your project's RSA private key. Use this during development to generate tokens for testing [external auth](/sdk/authentication/external) without needing to implement JWT signing in your test environment.
+Signs a short-lived JWT (5 minutes) using your project's RSA private key. Use this during development to generate tokens for testing [external auth](/v7/sdk/authentication/external) without needing to implement JWT signing in your test environment.
 
 <Warning>
   Never use this endpoint in production. It requires your RSA private key in the request body, which must be kept secret. Use it only in local development or CI environments.

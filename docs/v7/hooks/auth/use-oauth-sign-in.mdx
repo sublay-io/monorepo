@@ -14,7 +14,7 @@ icon: "cube"
 
 <Note>
   This page documents the `@sublay/react-js` hook, which uses `window.location` for the redirect-based web flow. For Expo apps, `@sublay/expo` exports a
-  `useOAuthSignIn` hook with the **same API** that opens the system browser and returns via a deep link — see [OAuth Authentication → Expo Integration](/sdk/authentication/oauth#expo-integration).
+  `useOAuthSignIn` hook with the **same API** that opens the system browser and returns via a deep link — see [OAuth Authentication → Expo Integration](/v7/sdk/authentication/oauth#expo-integration).
 </Note>
 
 ## Usage Example
@@ -132,12 +132,12 @@ function LinkGitHub() {
   **The account limit does not appear here.** Reaching the 5-account limit is
   discovered after the provider returns, and this hook has no call left to
   reject — read `accountLimitReached` from
-  [`useAccounts`](/hooks/auth/use-accounts) or
-  [`useAddAccount`](/hooks/auth/use-add-account) instead. This is the one place
+  [`useAccounts`](/v7/hooks/auth/use-accounts) or
+  [`useAddAccount`](/v7/hooks/auth/use-add-account) instead. This is the one place
   OAuth differs from email sign-in and external auth, which do throw. See
-  [OAuth → The account limit](/sdk/authentication/oauth#the-account-limit).
+  [OAuth → The account limit](/v7/sdk/authentication/oauth#the-account-limit).
 </ResponseField>
 
 ## Integration Guide
 
-For full OAuth setup instructions, see [OAuth Authentication](/sdk/authentication/oauth).
+For full OAuth setup instructions, see [OAuth Authentication](/v7/sdk/authentication/oauth).

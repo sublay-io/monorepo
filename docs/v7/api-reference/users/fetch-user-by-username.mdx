@@ -28,7 +28,7 @@ Finds a user within the project by their `username`. Optionally includes file as
 
 ### Space-scoped reputation
 
-This endpoint has no space in context, so the opt-in `spaceReputation` object accepts a `spaceId` of a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to each returned user, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation).
+This endpoint has no space in context, so the opt-in `spaceReputation` object accepts a `spaceId` of a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to each returned user, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation).
 
 <SpaceReputationParams variant="user" field="query" />
 
@@ -109,5 +109,5 @@ On success, returns HTTP `200` with the user object:
 
 ## See Also
 
-- [`useFetchUserByUsername` hook](/hooks/users/use-fetch-user-by-username)
-- [User data model](/data-models/user)
+- [`useFetchUserByUsername` hook](/v7/hooks/users/use-fetch-user-by-username)
+- [User data model](/v7/data-models/user)

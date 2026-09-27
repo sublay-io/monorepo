@@ -68,4 +68,4 @@ function MessageInput({ conversationId }: { conversationId: string }) {
 - `startTyping()` is idempotent while already typing — calling it repeatedly does not emit duplicate events; only the keep-alive timer re-emits every 2 seconds.
 - On unmount, if the user was typing, `typing:stop` is emitted automatically to prevent a stale indicator on recipients' screens.
 - Each typing user is auto-removed from `typingUsers` after 5 seconds of no keep-alive (handled by `ChatProvider`).
-- For integration guidance, see [Chat: Real-time](/sdk/chat/real-time).
+- For integration guidance, see [Chat: Real-time](/v7/sdk/chat/real-time).

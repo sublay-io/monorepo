@@ -3,7 +3,7 @@ title: "Workspace"
 description: "The shape of a Workspace object returned by the Workspaces API and SDK"
 ---
 
-A **Workspace** is a self-nesting grouping primitive — an account/team/org that people are invited into and given authority over. Unlike a [Space](/data-models/space) (a community/subreddit shape with join-requests, posting, and moderation), a Workspace is the **B2B/SaaS collaboration shape**: invite-only, with a granular per-member authority model and an owner apex.
+A **Workspace** is a self-nesting grouping primitive — an account/team/org that people are invited into and given authority over. Unlike a [Space](/v7/data-models/space) (a community/subreddit shape with join-requests, posting, and moderation), a Workspace is the **B2B/SaaS collaboration shape**: invite-only, with a granular per-member authority model and an owner apex.
 
 A workspace can optionally contain copies of itself:
 
@@ -12,7 +12,7 @@ A workspace can optionally contain copies of itself:
 - **Nest deeper** → agency-style org → client → project.
 
 <Note>
-  **Requires the `workspaces` bundle.** Workspaces are only available when the `workspaces` bundle is installed on your project. See [Bundles](/bundles) to add it. The bundle is purely additive — it touches no other bundle's data.
+  **Requires the `workspaces` bundle.** Workspaces are only available when the `workspaces` bundle is installed on your project. See [Bundles](/v7/bundles) to add it. The bundle is purely additive — it touches no other bundle's data.
 </Note>
 
 ## Workspace
@@ -32,7 +32,7 @@ A workspace can optionally contain copies of itself:
 
 ## Ownership
 
-`ownerId` is a per-workspace **super-user apex**, stored on the workspace itself (mirroring how a [Space](/data-models/space) stores its owner) — not a role and not a capability.
+`ownerId` is a per-workspace **super-user apex**, stored on the workspace itself (mirroring how a [Space](/v7/data-models/space) stores its owner) — not a role and not a capability.
 
 - The owner implicitly holds **all** authority over the workspace **and its entire subtree**, and this can never be revoked.
 - The owner **never has a `WorkspaceMember` row** — owner and member rows are **disjoint** for a given user + workspace. On becoming owner (creation or transfer), any existing member row for that user is removed.
@@ -54,7 +54,7 @@ Because a sealed node is capability-unreachable, only an owner can un-seal it �
 
 ## Related
 
-- [Workspace Member data model](/data-models/workspace-member)
-- [Workspace Invitation data model](/data-models/workspace-invitation)
-- [Create Workspace API](/api-reference/workspaces/create-workspace)
-- [Authority read API](/api-reference/workspaces/fetch-authority)
+- [Workspace Member data model](/v7/data-models/workspace-member)
+- [Workspace Invitation data model](/v7/data-models/workspace-invitation)
+- [Create Workspace API](/v7/api-reference/workspaces/create-workspace)
+- [Authority read API](/v7/api-reference/workspaces/fetch-authority)

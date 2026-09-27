@@ -163,14 +163,14 @@ On success it also:
 
 - **stores this device's identifier durably**, so account-management paths that hold no adapter (removal, sign-out, the per-account toggle) can still unbind push;
 - **records push as enabled for the active account**, because "push is on for this account on this device" is a sticky preference rather than a one-shot call;
-- **records it for every other stored account that has never expressed a preference.** Permission is a device-level grant, so `register()` speaks for the accounts that were never asked — but never over one the user deliberately silenced, which keeps its `false`. Turn individual accounts back off with [`useAccountPushToggle`](/hooks/push/use-account-push-toggle);
+- **records it for every other stored account that has never expressed a preference.** Permission is a device-level grant, so `register()` speaks for the accounts that were never asked — but never over one the user deliberately silenced, which keeps its `false`. Turn individual accounts back off with [`useAccountPushToggle`](/v7/hooks/push/use-account-push-toggle);
 - **marks accounts as needing a re-bind**, so each is bound the next time the user switches into it, using the live session that switch establishes. Two things put an account in that state, and they are different sets:
   - the device identifier this call brought **differs** from the stored one, which makes every opted-in background account's binding stale — all of them are marked;
   - the identifier is unchanged but this call just flipped some accounts from "never asked" to enabled. Those are reported as push-enabled and have no binding, and only the active account was registered here — so exactly the newly flipped ones are marked, and accounts that were already working are left alone.
 
   A repeat `register()` on the same identifier that flips nothing marks nothing.
 
-Only the **active** account is bound by this call, and the return value reports on that registration. Binding the others here would mean spending each one's stored refresh token on a one-time-use exchange in the background, which permanently locks an account out if it is interrupted — see [When notifications are paused](/sdk/authentication/multi-account#when-notifications-are-paused).
+Only the **active** account is bound by this call, and the return value reports on that registration. Binding the others here would mean spending each one's stored refresh token on a one-time-use exchange in the background, which permanently locks an account out if it is interrupted — see [When notifications are paused](/v7/sdk/authentication/multi-account#when-notifications-are-paused).
 
 ### `unregister()` is a preference, not a logout step
 
@@ -307,12 +307,12 @@ The three built-in adapters are deliberately asymmetric, because the platforms a
 | Hook | Scope |
 |------|-------|
 | `usePushRegistration` | Permission + this device's identifier + the **active** account's binding, plus the re-bind markers for the rest |
-| [`useAccountPushToggle`](/hooks/push/use-account-push-toggle) | Any **stored** account's binding on this device, without switching to it |
-| [`useNotificationPreferences`](/hooks/push/use-notification-preferences) | Which **event types** the signed-in user receives — not whether the device is bound at all |
+| [`useAccountPushToggle`](/v7/hooks/push/use-account-push-toggle) | Any **stored** account's binding on this device, without switching to it |
+| [`useNotificationPreferences`](/v7/hooks/push/use-notification-preferences) | Which **event types** the signed-in user receives — not whether the device is bound at all |
 
 ## See Also
 
-- [useAccountPushToggle](/hooks/push/use-account-push-toggle)
-- [Push Notifications overview](/push-notifications)
-- [Register Device endpoint](/api-reference/push-notifications/register-device)
-- [Node SDK — push.send](/node-sdk/push-notifications)
+- [useAccountPushToggle](/v7/hooks/push/use-account-push-toggle)
+- [Push Notifications overview](/v7/push-notifications)
+- [Register Device endpoint](/v7/api-reference/push-notifications/register-device)
+- [Node SDK — push.send](/v7/node-sdk/push-notifications)

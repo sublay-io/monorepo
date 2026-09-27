@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchManyEventsWrapper` wraps [`useFetchManyEvents`](/hooks/events/use-fetch-many-events) into a ready-to-render list: it holds the accumulated `events`, tracks `loading`/`hasMore`, manages sort state, and exposes `loadMore` and `refresh`. It mirrors `useFetchManyEntitiesWrapper`. Visibility is enforced server-side, so the list only contains events the current user may see.
+`useFetchManyEventsWrapper` wraps [`useFetchManyEvents`](/v7/hooks/events/use-fetch-many-events) into a ready-to-render list: it holds the accumulated `events`, tracks `loading`/`hasMore`, manages sort state, and exposes `loadMore` and `refresh`. It mirrors `useFetchManyEntitiesWrapper`. Visibility is enforced server-side, so the list only contains events the current user may see.
 
 Changing any filter prop (or calling `refresh`) resets the list to page 1.
 
@@ -70,5 +70,5 @@ function EventsList() {
 
 ## See Also
 
-- [Events Overview](/sdk/events/overview)
-- [Fetch Many Events API](/api-reference/events/fetch-many-events)
+- [Events Overview](/v7/sdk/events/overview)
+- [Fetch Many Events API](/v7/api-reference/events/fetch-many-events)

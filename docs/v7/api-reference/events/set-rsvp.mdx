@@ -4,7 +4,7 @@ api: "POST /v7/:projectId/events/:eventId/rsvp"
 description: "Set or change the caller's RSVP to an event"
 ---
 
-Sets or changes the caller's RSVP. A new RSVP is created, or an existing one is switched, and the event's `rsvpCounts` are updated atomically. Requires authentication, and the caller must be able to [see the event](/data-models/event#visibility) (otherwise `404`).
+Sets or changes the caller's RSVP. A new RSVP is created, or an existing one is switched, and the event's `rsvpCounts` are updated atomically. Requires authentication, and the caller must be able to [see the event](/v7/data-models/event#visibility) (otherwise `404`).
 
 Transitions into `going` are capacity-checked under a row-level lock, so an event can never be oversold.
 
@@ -33,7 +33,7 @@ Transitions into `going` are capacity-checked under a row-level lock, so an even
 
 ## Response
 
-Returns the [Event](/data-models/event) with refreshed `rsvpCounts` and the caller's `userRsvp`.
+Returns the [Event](/v7/data-models/event) with refreshed `rsvpCounts` and the caller's `userRsvp`.
 
 ## Error Responses
 
@@ -65,4 +65,4 @@ Returns the [Event](/data-models/event) with refreshed `rsvpCounts` and the call
   </Accordion>
 </AccordionGroup>
 
-See also: [useSetRsvp](/hooks/events/use-set-rsvp)
+See also: [useSetRsvp](/v7/hooks/events/use-set-rsvp)

@@ -170,7 +170,7 @@ differently — `pushUnbindSkipReason` says which:
 - **`"push-unbind-status-unknown"`** — the server was asked and could not answer: it
   could not determine whether the project has push devices, so it attempted no unbind
   and said so in a `200` body (see
-  [`POST /auth/sign-out`](/api-reference/auth/sign-out#response)). The sign-out itself
+  [`POST /auth/sign-out`](/v7/api-reference/auth/sign-out#response)). The sign-out itself
   committed, so there is no credential left to retry with. The binding clears when
   that account next registers on this device, or when the server prunes the token as
   undeliverable.
@@ -275,7 +275,7 @@ await sublay.auth.resetPassword({
 
 Changes the authenticated user's password after verifying the current one. Use this for an authenticated "change password" flow, as opposed to the token-based `resetPassword`.
 
-A password change ends **every other session** for that user and deletes every push binding they hold — see [Change Password](/api-reference/auth/change-password). The session making the call survives: the server reads which session is asking off the access token the request is already authenticated with, so nothing about it has to be sent.
+A password change ends **every other session** for that user and deletes every push binding they hold — see [Change Password](/v7/api-reference/auth/change-password). The session making the call survives: the server reads which session is asking off the access token the request is already authenticated with, so nothing about it has to be sent.
 
 ```typescript
 const { success, message } = await sublay.auth.changePassword({
@@ -293,7 +293,7 @@ const { success, message } = await sublay.auth.changePassword({
 </ParamField>
 
 <ParamField body="pushDevice" type="object">
-  This device, so its push binding survives the change. Same value `auth.signOut` takes and the same one [Register Device](/api-reference/push-notifications/register-device) was called with: `{ platform: "ios" | "android", token }` or `{ platform: "web", subscription }`. (`@sublay/js`'s own `push` module covers preferences only — device registration is the REST endpoint, or `usePushRegistration` in the React packages.)
+  This device, so its push binding survives the change. Same value `auth.signOut` takes and the same one [Register Device](/v7/api-reference/push-notifications/register-device) was called with: `{ platform: "ios" | "android", token }` or `{ platform: "web", subscription }`. (`@sublay/js`'s own `push` module covers preferences only — device registration is the REST endpoint, or `usePushRegistration` in the React packages.)
 
   Omit it and every push binding for the user is deleted, this device's included — and nothing re-binds it until the app cold-starts, switches accounts or rotates its token, so it stops notifying until then.
 </ParamField>
@@ -383,7 +383,7 @@ Starts self-service deletion of the authenticated user's account by emailing the
 const { success } = await sublay.auth.requestAccountDeletion();
 ```
 
-Only works for accounts with an email on file. Accounts without one (e.g. anonymous or foreign-id users) must be deleted server-side with a service key via [`@sublay/node`](/node-sdk/users). The request fails with `auth/no-email-on-file` otherwise.
+Only works for accounts with an email on file. Accounts without one (e.g. anonymous or foreign-id users) must be deleted server-side with a service key via [`@sublay/node`](/v7/node-sdk/users). The request fails with `auth/no-email-on-file` otherwise.
 
 Takes no arguments.
 

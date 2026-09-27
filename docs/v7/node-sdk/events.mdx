@@ -3,7 +3,7 @@ title: "Events"
 description: "Create and manage events, RSVPs, hosts, and invites from the server"
 ---
 
-The `events` module covers the full events surface: creating and editing events, the RSVP lifecycle, host and invite management, and the guest list. It maps directly to the [Events API](/api-reference/events/create-event).
+The `events` module covers the full events surface: creating and editing events, the RSVP lifecycle, host and invite management, and the guest list. It maps directly to the [Events API](/v7/api-reference/events/create-event).
 
 Because the Node SDK authenticates with a **service key** (it acts as the whole project, not a single end user), most write functions take an explicit `userId` naming the user the action is performed as. For host- and invite-management functions, `userId` is instead the **target** user (the host/invitee), and the action is authorized as the project.
 
@@ -12,7 +12,7 @@ Because the Node SDK authenticates with a **service key** (it acts as the whole 
   upload on `createEvent`/`updateEvent` yet. Create the event first, then attach
   images with [`sublay.storage.uploadImage`](/v7/node-sdk/storage) using its
   `eventId` parameter. (The browser [JS SDK](/v7/js-sdk/events) and the
-  [React SDK](/sdk/events/overview) do support inline upload.)
+  [React SDK](/v7/sdk/events/overview) do support inline upload.)
 </Note>
 
 Requires the `events` bundle. Space-scoping needs the `spaces` bundle; images need `files-images`; notifications need `notifications`.
@@ -298,7 +298,7 @@ const event = await sublay.events.removeInvite({
 
 ### fetchInvitees
 
-Host-only invitee (guest) list. Returns paginated [EventInvite](/data-models/event-invite) records with the invited user populated.
+Host-only invitee (guest) list. Returns paginated [EventInvite](/v7/data-models/event-invite) records with the invited user populated.
 
 ```typescript
 const { data, pagination } = await sublay.events.fetchInvitees({
@@ -318,7 +318,7 @@ const { data, pagination } = await sublay.events.fetchInvitees({
 
 ### fetchEventRsvps
 
-Named RSVP (guest) list. Returns paginated [EventRsvp](/data-models/event-rsvp) records with the user populated. Visible to hosts always, to any viewer when `guestListVisible` is `true`, or to service keys. RSVP counts themselves are public via the event's `rsvpCounts`.
+Named RSVP (guest) list. Returns paginated [EventRsvp](/v7/data-models/event-rsvp) records with the user populated. Visible to hosts always, to any viewer when `guestListVisible` is `true`, or to service keys. RSVP counts themselves are public via the event's `rsvpCounts`.
 
 ```typescript
 const { data, pagination } = await sublay.events.fetchEventRsvps({

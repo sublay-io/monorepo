@@ -6,16 +6,16 @@ icon: "plug"
 
 ## Overview
 
-`useUpdateWorkspaceMember` returns a callable that edits a direct [member](/data-models/workspace-member) of a workspace.
+`useUpdateWorkspaceMember` returns a callable that edits a direct [member](/v7/data-models/workspace-member) of a workspace.
 
 **Authorization:** capability-gated + rank-bounded, in **two tiers by field sensitivity**:
 
-- **Powerful fields** (`capabilities`, `permissions`, and rank — as either `rank` or `relativeRank`) require **`edit-member-access`**, plus the [rank rule](/data-models/workspace-member#rank-semantics) and the [no-escalation](/data-models/workspace-member#no-privilege-escalation) guard.
+- **Powerful fields** (`capabilities`, `permissions`, and rank — as either `rank` or `relativeRank`) require **`edit-member-access`**, plus the [rank rule](/v7/data-models/workspace-member#rank-semantics) and the [no-escalation](/v7/data-models/workspace-member#no-privilege-escalation) guard.
 - **Cosmetic fields** (`title`, `metadata`) require only **`edit-member-profile`**. A member editing **their own `title`** needs no capability at all.
 
 **Grant vs strip asymmetry:** you may only *add* a capability/permission you hold on the target node (resolved set, including via reach); *stripping* is governed by rank alone.
 
-**Rank moves in either coordinate** — `rank` (absolute) or `relativeRank` (an offset from you), never both. Omitting **both** means **rank unchanged**: unlike the invite hook there is no value default here, so editing someone's capabilities never quietly moves them on the ladder. See [choosing a rank](/sdk/workspaces/overview#choosing-a-rank).
+**Rank moves in either coordinate** — `rank` (absolute) or `relativeRank` (an offset from you), never both. Omitting **both** means **rank unchanged**: unlike the invite hook there is no value default here, so editing someone's capabilities never quietly moves them on the ladder. See [choosing a rank](/v7/sdk/workspaces/overview#choosing-a-rank).
 
 ## Usage Example
 
@@ -81,7 +81,7 @@ function MemberRow({
 
 ## Returns
 
-Returns the updated [WorkspaceMember](/data-models/workspace-member) object.
+Returns the updated [WorkspaceMember](/v7/data-models/workspace-member) object.
 
 ## Error codes
 
@@ -93,5 +93,5 @@ Returns the updated [WorkspaceMember](/data-models/workspace-member) object.
 
 ## Related
 
-- [`useRemoveWorkspaceMember`](/hooks/workspaces/use-remove-workspace-member)
-- [Update Member API](/api-reference/workspaces/members/update-member)
+- [`useRemoveWorkspaceMember`](/v7/hooks/workspaces/use-remove-workspace-member)
+- [Update Member API](/v7/api-reference/workspaces/members/update-member)

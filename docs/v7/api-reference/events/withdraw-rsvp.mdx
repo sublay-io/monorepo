@@ -4,7 +4,7 @@ api: "DELETE /v7/:projectId/events/:eventId/rsvp"
 description: "Remove the caller's RSVP from an event"
 ---
 
-Removes the caller's RSVP. The RSVP row is deleted and the matching `rsvpCounts` entry is decremented. Requires authentication, and the caller must be able to [see the event](/data-models/event#visibility) (otherwise `404`).
+Removes the caller's RSVP. The RSVP row is deleted and the matching `rsvpCounts` entry is decremented. Requires authentication, and the caller must be able to [see the event](/v7/data-models/event#visibility) (otherwise `404`).
 
 Withdrawing is idempotent — withdrawing when there is no RSVP succeeds and changes nothing.
 
@@ -22,7 +22,7 @@ Withdrawing is idempotent — withdrawing when there is no RSVP succeeds and cha
 
 ## Response
 
-Returns the [Event](/data-models/event) with refreshed `rsvpCounts`.
+Returns the [Event](/v7/data-models/event) with refreshed `rsvpCounts`.
 
 ## Error Responses
 
@@ -34,4 +34,4 @@ Returns the [Event](/data-models/event) with refreshed `rsvpCounts`.
   </Accordion>
 </AccordionGroup>
 
-See also: [useWithdrawRsvp](/hooks/events/use-withdraw-rsvp)
+See also: [useWithdrawRsvp](/v7/hooks/events/use-withdraw-rsvp)

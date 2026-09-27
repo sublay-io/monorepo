@@ -8,7 +8,7 @@ description: "Upload, retrieve, and manage files and images in Sublay"
 Sublay's storage system lets you upload files and images on behalf of authenticated users. Uploaded assets are stored in managed cloud storage and served through a proxy URL so direct storage credentials are never exposed to the client.
 
 <Note>
-  **Requires the `files-images` bundle.** File and image uploads are only available when the `files-images` bundle is installed on your project. See [Bundles](/bundles) to add it.
+  **Requires the `files-images` bundle.** File and image uploads are only available when the `files-images` bundle is installed on your project. See [Bundles](/v7/bundles) to add it.
 </Note>
 
 Files can be optionally associated with an entity, comment, or space, enabling cascade deletion when the parent object is removed.
@@ -42,17 +42,17 @@ When uploading images, you choose a **processing mode** that defines how variant
 ## Hooks
 
 <CardGroup cols={2}>
-  <Card title="useUploadImage" href="/hooks/storage/use-upload-image">
+  <Card title="useUploadImage" href="/v7/hooks/storage/use-upload-image">
     Upload and process an image with automatic variant generation.
   </Card>
-  <Card title="useUploadFile" href="/hooks/storage/use-upload-file">
+  <Card title="useUploadFile" href="/v7/hooks/storage/use-upload-file">
     Upload a generic file and receive a proxy URL.
   </Card>
 </CardGroup>
 
 ## API Reference
 
-- [Upload Image](/api-reference/storage/upload-image) — `POST /v7/:projectId/storage/images`
-- [Upload File](/api-reference/storage/upload-file) — `POST /v7/:projectId/storage`
-- [Fetch File](/api-reference/storage/fetch-file) — `GET /v7/:projectId/storage/:fileId`
-- [Delete File](/api-reference/storage/delete-file) — `DELETE /v7/:projectId/storage/:fileId`
+- [Upload Image](/v7/api-reference/storage/upload-image) — `POST /v7/:projectId/storage/images`
+- [Upload File](/v7/api-reference/storage/upload-file) — `POST /v7/:projectId/storage`
+- [Fetch File](/v7/api-reference/storage/fetch-file) — `GET /v7/:projectId/storage/:fileId`
+- [Delete File](/v7/api-reference/storage/delete-file) — `DELETE /v7/:projectId/storage/:fileId`

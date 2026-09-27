@@ -23,7 +23,7 @@ Requires the `reputation` bundle.
 </ParamField>
 
 <ParamField body="spaceId" type="string | null">
-  UUID of the space whose bucket is credited. Omitted or `null` means the project-general bucket. The space is validated before anything is written — a bucket for a space that does not exist would count toward its owner's profile total while being invisible in every space-scoped view. An ID that names no space is rejected with `404 reputation-grant/space-not-found`, and naming a space on a project without the `spaces` bundle is rejected with `403 database/tables-not-available`. [Transfers](/api-reference/reputation-grants/create-reputation-grant) are validated the same way.
+  UUID of the space whose bucket is credited. Omitted or `null` means the project-general bucket. The space is validated before anything is written — a bucket for a space that does not exist would count toward its owner's profile total while being invisible in every space-scoped view. An ID that names no space is rejected with `404 reputation-grant/space-not-found`, and naming a space on a project without the `spaces` bundle is rejected with `403 database/tables-not-available`. [Transfers](/v7/api-reference/reputation-grants/create-reputation-grant) are validated the same way.
 </ParamField>
 
 <ParamField body="note" type="string | null">
@@ -46,9 +46,9 @@ There is deliberately **no actor field**. The grant is written with a `null` `se
 
 ## Response
 
-Returns `201` with the created [ReputationGrant](/data-models/reputation-grant).
+Returns `201` with the created [ReputationGrant](/v7/data-models/reputation-grant).
 
-A **positive** mint notifies the recipient and, for a `chat-message` target, broadcasts [`message:grant`](/sdk/chat/real-time) to the conversation. A **negative** mint is entirely silent: no notification, no broadcast, and invisible on every public read surface. Read it back from [Fetch User Grant History](/api-reference/reputation-grants/fetch-user-grant-history).
+A **positive** mint notifies the recipient and, for a `chat-message` target, broadcasts [`message:grant`](/v7/sdk/chat/real-time) to the conversation. A **negative** mint is entirely silent: no notification, no broadcast, and invisible on every public read surface. Read it back from [Fetch User Grant History](/v7/api-reference/reputation-grants/fetch-user-grant-history).
 
 ## Error Responses
 
@@ -100,4 +100,4 @@ A **positive** mint notifies the recipient and, for a `chat-message` target, bro
 
 **Rate limit:** 50 requests per 5 minutes per IP. Exceeding it returns `429` with a plain-text message and no `code`.
 
-See also: [node-sdk `mintGrant`](/v7/node-sdk/reputation) · [Create Reputation Grant](/api-reference/reputation-grants/create-reputation-grant)
+See also: [node-sdk `mintGrant`](/v7/node-sdk/reputation) · [Create Reputation Grant](/v7/api-reference/reputation-grants/create-reputation-grant)

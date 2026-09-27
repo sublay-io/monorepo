@@ -13,7 +13,7 @@ The stored flag is **durable intent**: it lives in the account map next to that 
 The flag has **three** states, not two. `true` and `false` are choices the user made; *absent* means the account has never been asked. Absent reads as enabled when *describing* an account — which is what `isAccountPushEnabled` below returns, and what a switch should render — but it is never treated as consent to create a binding. Nothing is bound for an account that has not explicitly opted in.
 
 <Note>
-  Requires the `push` bundle. Reconciling is a no-op until this device has a stored push identifier — there is nothing to bind or unbind. [`usePushRegistration`](/hooks/push/use-push-registration) is what records one, through `register()`, `unregister()`, its rotation subscription, or — on native, when the device already holds notification permission — its mount-time read.
+  Requires the `push` bundle. Reconciling is a no-op until this device has a stored push identifier — there is nothing to bind or unbind. [`usePushRegistration`](/v7/hooks/push/use-push-registration) is what records one, through `register()`, `unregister()`, its rotation subscription, or — on native, when the device already holds notification permission — its mount-time read.
 </Note>
 
 ## Usage Example
@@ -61,13 +61,13 @@ function PerAccountNotificationSettings() {
 
   Resolves `true` when a binding change actually went out to the server, `false` when it was a no-op — this device has no stored identifier yet, so there was nothing to bind or unbind. Both are successful outcomes; the flag is written as the requested intent either way. Use this to tell "repaired" from "there was nothing to repair" directly, instead of diffing `useAccounts()`'s `needsPushRebind` marker before and after the call.
 
-  Rejects when the binding change fails. It also rejects when `userId` names no stored account — with an [`AccountTransitionError`](/sdk/authentication/multi-account#telling-a-dead-account-from-a-dead-network) carrying `accountNotFound: true` and `credentialRejected: false`, the same typed shape `switchAccount` and `removeAccount` use for a stale id. Nothing was attempted and nothing was marked; refresh your account list rather than prompting a sign-in.
+  Rejects when the binding change fails. It also rejects when `userId` names no stored account — with an [`AccountTransitionError`](/v7/sdk/authentication/multi-account#telling-a-dead-account-from-a-dead-network) carrying `accountNotFound: true` and `credentialRejected: false`, the same typed shape `switchAccount` and `removeAccount` use for a stale id. Nothing was attempted and nothing was marked; refresh your account list rather than prompting a sign-in.
 </ResponseField>
 
 <ResponseField name="isAccountPushEnabled" type="(userId: string) => boolean">
   Whether a stored account currently wants push on this device — the value to render as a switch's `checked`. An account that has never expressed a preference reads as **enabled**: absent means "never asked", not "off". Returns `false` for an unknown id.
 
-  It is reported state, not the rule that decides whether a binding exists. An account reading as enabled purely because it never answered has no binding until it explicitly opts in — through this toggle, or through a [`register()`](/hooks/push/use-push-registration) that records a preference for every account that never had one.
+  It is reported state, not the rule that decides whether a binding exists. An account reading as enabled purely because it never answered has no binding until it explicitly opts in — through this toggle, or through a [`register()`](/v7/hooks/push/use-push-registration) that records a preference for every account that never had one.
 </ResponseField>
 
 <ResponseField name="isUpdating" type="boolean">
@@ -86,7 +86,7 @@ This is deliberate and it is not a UI preference: the SDK must never report an a
 
 Failing here destroys nothing. The account stays, its credential stays, and the user can retry.
 
-An account whose binding is stale because this device's push token rotated while it was in the background is a different situation, reported separately as `needsPushRebind` on [`useAccounts`](/hooks/auth/use-accounts) and repaired by switching into the account — not by toggling it.
+An account whose binding is stale because this device's push token rotated while it was in the background is a different situation, reported separately as `needsPushRebind` on [`useAccounts`](/v7/hooks/auth/use-accounts) and repaired by switching into the account — not by toggling it.
 
 ## Turning Off a Background Account
 
@@ -96,7 +96,7 @@ That exchange **rotates** — it revokes the token it presents and issues a succ
 
 ## Not the Same as Notification Preferences
 
-| | `useAccountPushToggle` | [`useNotificationPreferences`](/hooks/push/use-notification-preferences) |
+| | `useAccountPushToggle` | [`useNotificationPreferences`](/v7/hooks/push/use-notification-preferences) |
 |---|---|---|
 | Scope | One account's binding on **this device** | The signed-in user's **event types**, everywhere |
 | Applies to | Any stored account, active or not | The active account only |
@@ -107,7 +107,7 @@ They compose: an account silenced with this hook receives nothing on this device
 
 ## See Also
 
-- [usePushRegistration](/hooks/push/use-push-registration)
-- [Multi-Account](/sdk/authentication/multi-account)
-- [SDK — Push Notifications](/sdk/push-notifications/overview)
-- [Notification Preferences & Mute](/notification-preferences)
+- [usePushRegistration](/v7/hooks/push/use-push-registration)
+- [Multi-Account](/v7/sdk/authentication/multi-account)
+- [SDK — Push Notifications](/v7/sdk/push-notifications/overview)
+- [Notification Preferences & Mute](/v7/notification-preferences)

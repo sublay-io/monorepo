@@ -10,7 +10,7 @@ The live, canonical view of a conversation's messages. Results are stored in Red
 
 <Note>Requires `ChatProvider` in the component tree.</Note>
 
-<Tip>For a read-only or **filtered** query (e.g. "only messages that have replies") that should not be touched by live socket traffic, use [`useFetchManyChatMessages` / `useFetchManyChatMessagesWrapper`](/hooks/chat/messages/use-fetch-many-chat-messages) instead. The live hook intentionally does not take a `filters` prop.</Tip>
+<Tip>For a read-only or **filtered** query (e.g. "only messages that have replies") that should not be touched by live socket traffic, use [`useFetchManyChatMessages` / `useFetchManyChatMessagesWrapper`](/v7/hooks/chat/messages/use-fetch-many-chat-messages) instead. The live hook intentionally does not take a `filters` prop.</Tip>
 
 ## Usage Example
 
@@ -57,13 +57,13 @@ function MessageList({ conversationId }: { conversationId: string }) {
   When `true`, the server populates the `files` field on each message. Omitted by default to keep payloads small.
 </ParamField>
 <ParamField body="includeGrants" type="boolean">
-  When `true`, each message carries its [reputation-grant summary](/data-models/reputation-grant#grantsummary) at `message.grants` — `{ total, count, viewerTotal }` over positive grants. Populated by the `reputation` bundle; on a project without it the summary comes back zero-filled rather than missing.
+  When `true`, each message carries its [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary) at `message.grants` — `{ total, count, viewerTotal }` over positive grants. Populated by the `reputation` bundle; on a project without it the summary comes back zero-filled rather than missing.
 </ParamField>
 
 ## Returns
 
 <ResponseField name="messages" type="ChatMessage[]">
-  The loaded messages in ascending order (oldest first). See [ChatMessage](/data-models/chat-message).
+  The loaded messages in ascending order (oldest first). See [ChatMessage](/v7/data-models/chat-message).
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
@@ -83,4 +83,4 @@ function MessageList({ conversationId }: { conversationId: string }) {
 ## Notes
 
 - New messages that arrive via the socket (`message:created`) are appended to the store automatically — no manual refetch needed.
-- For integration guidance, see [Chat: Messages](/sdk/chat/messages).
+- For integration guidance, see [Chat: Messages](/v7/sdk/chat/messages).

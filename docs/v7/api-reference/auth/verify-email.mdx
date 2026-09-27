@@ -4,7 +4,7 @@ api: "POST /v7/:projectId/auth/verify-email"
 description: "Verify a user's email address using a token from a verification email"
 ---
 
-Verifies a user's email address using the token sent by the [Send Verification Email](/api-reference/auth/send-verification-email) endpoint (when `mode` is `"code"`). On success, the user's `isVerified` field is set to `true` and the token is invalidated.
+Verifies a user's email address using the token sent by the [Send Verification Email](/v7/api-reference/auth/send-verification-email) endpoint (when `mode` is `"code"`). On success, the user's `isVerified` field is set to `true` and the token is invalidated.
 
 This endpoint is unauthenticated — the token itself proves identity.
 
@@ -33,6 +33,6 @@ This endpoint is unauthenticated — the token itself proves identity.
 
 ## See Also
 
-- [`useVerifyEmail` hook](/hooks/auth/use-verify-email)
-- [Send Verification Email endpoint](/api-reference/auth/send-verification-email)
-- [Built-in Auth guide](/sdk/authentication/built-in)
+- [`useVerifyEmail` hook](/v7/hooks/auth/use-verify-email)
+- [Send Verification Email endpoint](/v7/api-reference/auth/send-verification-email)
+- [Built-in Auth guide](/v7/sdk/authentication/built-in)

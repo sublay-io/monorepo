@@ -15,7 +15,7 @@ This endpoint is called automatically by the browser — you do not call it dire
 </ParamField>
 
 <ParamField query="redirect" type="string">
-  The URL to redirect the user to after verification. This is set automatically by the server based on the `redirectUrl` you passed to [Send Verification Email](/api-reference/auth/send-verification-email).
+  The URL to redirect the user to after verification. This is set automatically by the server based on the `redirectUrl` you passed to [Send Verification Email](/v7/api-reference/auth/send-verification-email).
 
   On success: redirects to `{redirectUrl}?verified=true`
   On failure: redirects to `{redirectUrl}?verified=false&error=invalid-or-expired-token`
@@ -31,6 +31,6 @@ This endpoint is called automatically by the browser — you do not call it dire
 
 ## See Also
 
-- [Send Verification Email endpoint](/api-reference/auth/send-verification-email)
-- [`useSendVerificationEmail` hook](/hooks/auth/use-send-verification-email)
-- [Built-in Auth guide](/sdk/authentication/built-in)
+- [Send Verification Email endpoint](/v7/api-reference/auth/send-verification-email)
+- [`useSendVerificationEmail` hook](/v7/hooks/auth/use-send-verification-email)
+- [Built-in Auth guide](/v7/sdk/authentication/built-in)

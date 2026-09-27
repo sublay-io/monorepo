@@ -4,9 +4,9 @@ api: "GET /v7/:projectId/events/:eventId/rsvps"
 description: "List the named guest list (who RSVP'd) for an event"
 ---
 
-Returns a paginated list of [EventRsvp](/data-models/event-rsvp) records, each with the `user` populated — the **named** guest list. Results are ordered by `createdAt` descending.
+Returns a paginated list of [EventRsvp](/v7/data-models/event-rsvp) records, each with the `user` populated — the **named** guest list. Results are ordered by `createdAt` descending.
 
-Authentication is optional. The event is first loaded behind the [visibility predicate](/data-models/event#visibility), so a caller without access to the event gets `404`. The named list itself is then gated:
+Authentication is optional. The event is first loaded behind the [visibility predicate](/v7/data-models/event#visibility), so a caller without access to the event gets `404`. The named list itself is then gated:
 
 - **Hosts** can always see it.
 - **Any viewer** (including anonymous) can see it when the event's `guestListVisible` is `true`.
@@ -54,4 +54,4 @@ Returns a paginated response: `{ data: EventRsvp[], pagination: {...} }`.
   </Accordion>
 </AccordionGroup>
 
-See also: [useFetchEventRsvps](/hooks/events/use-fetch-event-rsvps)
+See also: [useFetchEventRsvps](/v7/hooks/events/use-fetch-event-rsvps)

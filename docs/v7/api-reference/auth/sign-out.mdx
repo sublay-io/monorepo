@@ -20,7 +20,7 @@ Supplying the optional `pushDevice` object changes that in one narrowly scoped w
 <ParamField body="pushDevice" type="object">
   Optional. Identifies the physical device the user is signing out on, so the
   server can unbind that account's push notifications in the same request. Same
-  shape as the [Deregister Device](/api-reference/push-notifications/deregister-device)
+  shape as the [Deregister Device](/v7/api-reference/push-notifications/deregister-device)
   body. Ignored on projects without the `push` bundle.
   <Expandable title="pushDevice fields">
     <ParamField body="platform" type="string" required>
@@ -172,7 +172,7 @@ The budget is sized for a fan-out: signing out of every stored account issues on
 
 ## See Also
 
-- [`useAuth` hook](/hooks/auth/use-auth) — `signOut`
-- [`useSignOutAll` hook](/hooks/auth/use-sign-out-all)
-- [Deregister Device](/api-reference/push-notifications/deregister-device)
-- [Built-in Auth guide](/sdk/authentication/built-in)
+- [`useAuth` hook](/v7/hooks/auth/use-auth) — `signOut`
+- [`useSignOutAll` hook](/v7/hooks/auth/use-sign-out-all)
+- [Deregister Device](/v7/api-reference/push-notifications/deregister-device)
+- [Built-in Auth guide](/v7/sdk/authentication/built-in)

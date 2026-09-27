@@ -34,7 +34,7 @@ Returns a paginated list of accepted connections for the specified user. Each en
 
 ### Space-scoped reputation
 
-This endpoint has no space in context, so the opt-in `spaceReputation` object accepts a `spaceId` of a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to each returned user, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation).
+This endpoint has no space in context, so the opt-in `spaceReputation` object accepts a `spaceId` of a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to each returned user, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation).
 
 <SpaceReputationParams variant="user" field="query" />
 
@@ -71,5 +71,5 @@ On success, returns HTTP `200` with a paginated response:
 
 ## See Also
 
-- [`useFetchConnectionsByUserId` hook](/hooks/connections/use-fetch-connections-by-user-id)
-- [Connection data model](/data-models/connection)
+- [`useFetchConnectionsByUserId` hook](/v7/hooks/connections/use-fetch-connections-by-user-id)
+- [Connection data model](/v7/data-models/connection)

@@ -31,7 +31,7 @@ Returns the roster as a **single unified array, one entry per distinct user**, e
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
-  Service/master keys only — the user to act as. Enforced: roster visibility **and** the authority-field fence below both evaluate against the named user, so a key acting as a plain member receives the fenced view. Omit it to read as the app itself (unfenced) — where "omit" means **absent**: `actingUserId: ""` or `null` is a `400`, not a fall-through to that mode. See [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user) and [Shapes the server rejects](/sdk/workspaces/overview#shapes-the-server-rejects).
+  Service/master keys only — the user to act as. Enforced: roster visibility **and** the authority-field fence below both evaluate against the named user, so a key acting as a plain member receives the fenced view. Omit it to read as the app itself (unfenced) — where "omit" means **absent**: `actingUserId: ""` or `null` is a `400`, not a fall-through to that mode. See [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user) and [Shapes the server rejects](/v7/sdk/workspaces/overview#shapes-the-server-rejects).
 </ParamField>
 
 <Note>
@@ -61,9 +61,9 @@ Each entry's `reasons[]` contains `{ type, ...detail }` objects. A user present 
 
   - holds one of the four people-operating capabilities there — `invite`, `remove-member`, `edit-member-access`, `edit-member-profile`; **or**
   - is that workspace's `owner` or an `ancestor-owner`; **or**
-  - is a service/master key acting as **itself** (naming no `actingUserId`). A key that **does** name one is fenced exactly as that user is — see [Acting on behalf of a user](/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  - is a service/master key acting as **itself** (naming no `actingUserId`). A key that **does** name one is fenced exactly as that user is — see [Acting on behalf of a user](/v7/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 
-  For `owner`, `member`, `ancestor-owner` and `reach-holder` reasons, that workspace **is** the one in the path. For a `descendant-member` reason it is the descendant named by the reason's own `workspaceId`, so the verdict is re-taken there. "Judged on that node" means your **resolved** standing there — which includes capabilities [reaching](/data-models/workspace#reach-and-the-wall-door-rule) in through an unbroken open inherit chain, and ownership from any ancestor. What it does *not* include is authority that stops at a **sealed** boundary.
+  For `owner`, `member`, `ancestor-owner` and `reach-holder` reasons, that workspace **is** the one in the path. For a `descendant-member` reason it is the descendant named by the reason's own `workspaceId`, so the verdict is re-taken there. "Judged on that node" means your **resolved** standing there — which includes capabilities [reaching](/v7/data-models/workspace#reach-and-the-wall-door-rule) in through an unbroken open inherit chain, and ownership from any ancestor. What it does *not* include is authority that stops at a **sealed** boundary.
 
   The caller's **own** entry always carries them in full, on every node, so anyone can discover their own access. Who is on the roster — `user`, the reason `type`s, `title`, `metadata`, `viaWorkspaceId`, `workspaceId` — stays visible to any relation. Treat the four fields as optional in your types.
 
@@ -141,8 +141,8 @@ The same roster read by a caller who cannot manage people here — the `member` 
     ```json
     { "error": "Unrecognized key: \"page\"", "code": "workspace/invalid-query" }
     ```
-    This route declares `include`, `countOnly`, `actingUserId` and `projectId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "page", "limit"`. See [Shapes the server rejects](/sdk/workspaces/overview#shapes-the-server-rejects).
+    This route declares `include`, `countOnly`, `actingUserId` and `projectId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "page", "limit"`. See [Shapes the server rejects](/v7/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
 </AccordionGroup>
 
-See also: [useFetchWorkspaceMembers](/hooks/workspaces/use-fetch-workspace-members) · [Fetch Member Standing](/api-reference/workspaces/members/fetch-member-standing)
+See also: [useFetchWorkspaceMembers](/v7/hooks/workspaces/use-fetch-workspace-members) · [Fetch Member Standing](/v7/api-reference/workspaces/members/fetch-member-standing)

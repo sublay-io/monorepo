@@ -3,10 +3,10 @@ title: "Push Notifications"
 description: "Register the current user's device for native push from your client app"
 ---
 
-This page covers **registering devices from your client SDK**. For the full feature overview — dashboard setup, server-side sending, and device lifecycle — see [Push Notifications](/push-notifications).
+This page covers **registering devices from your client SDK**. For the full feature overview — dashboard setup, server-side sending, and device lifecycle — see [Push Notifications](/v7/push-notifications).
 
 <Note>
-  **Requires the `push` bundle** and configured provider credentials (APNs, FCM, or Web Push) in the dashboard. See the [feature overview](/push-notifications#dashboard-setup) for setup.
+  **Requires the `push` bundle** and configured provider credentials (APNs, FCM, or Web Push) in the dashboard. See the [feature overview](/v7/push-notifications#dashboard-setup) for setup.
 </Note>
 
 ## Registering Devices
@@ -42,11 +42,11 @@ import { webPushTokenAdapter } from "@sublay/react-js";
 const { register, unregister } = usePushRegistration(webPushTokenAdapter);
 ```
 
-The web adapter requires a service worker. Register one before calling `register()`. The public VAPID key your service worker needs is available from the unauthenticated [`GET /vapid-public-key`](/api-reference/push-notifications/get-vapid-public-key) endpoint.
+The web adapter requires a service worker. Register one before calling `register()`. The public VAPID key your service worker needs is available from the unauthenticated [`GET /vapid-public-key`](/v7/api-reference/push-notifications/get-vapid-public-key) endpoint.
 
 ## The Notification `data` Payload
 
-Every push Sublay delivers carries a flat `data` object of string values. Your tap handler reads it to decide where to navigate — the full key list for automatic notifications is on the [feature overview](/push-notifications#tap-routing-data).
+Every push Sublay delivers carries a flat `data` object of string values. Your tap handler reads it to decide where to navigate — the full key list for automatic notifications is on the [feature overview](/v7/push-notifications#tap-routing-data).
 
 One key matters specifically to multi-account apps:
 
@@ -84,7 +84,7 @@ async function handleNotificationTap(data: Record<string, string>) {
 it changes nothing when it does — you stay signed in where you were. Without the `catch` the
 rejection is unhandled and the deep link is silently dropped, which reads to the user as a
 notification that does nothing. See [Telling a dead account from a dead
-network](/sdk/authentication/multi-account#telling-a-dead-account-from-a-dead-network).
+network](/v7/sdk/authentication/multi-account#telling-a-dead-account-from-a-dead-network).
 
 <Note>
   **`recipientUserId` is reserved and server-stamped.** It is added per device at dispatch time, on both the automatic notification paths and server-side `push.send()` calls. If your backend puts a value under the same key in `data`, the server's value **wins** — an account-routing key has to be trustworthy. Dashboard test sends carry no `recipientUserId`, because they target a pasted token rather than a registered account.
@@ -142,10 +142,10 @@ function PerAccountPushSettings() {
 }
 ```
 
-Silencing a background account unbinds it server-side without switching to it. See [`useAccountPushToggle`](/hooks/push/use-account-push-toggle) for the full reference.
+Silencing a background account unbinds it server-side without switching to it. See [`useAccountPushToggle`](/v7/hooks/push/use-account-push-toggle) for the full reference.
 
 <Note>
-  **This is not the same thing as [notification preferences](/notification-preferences).** The per-account toggle decides *whether an account is bound to this device at all*; [`useNotificationPreferences`](/hooks/push/use-notification-preferences) decides *which event types* the signed-in user receives. An account silenced here receives nothing on this device regardless of its per-event-type settings, and its preferences are untouched — they apply again the moment it is turned back on.
+  **This is not the same thing as [notification preferences](/v7/notification-preferences).** The per-account toggle decides *whether an account is bound to this device at all*; [`useNotificationPreferences`](/v7/hooks/push/use-notification-preferences) decides *which event types* the signed-in user receives. An account silenced here receives nothing on this device regardless of its per-event-type settings, and its preferences are untouched — they apply again the moment it is turned back on.
 </Note>
 
 <Warning>
@@ -160,7 +160,7 @@ Device push tokens rotate — on reinstall, on an OS-initiated refresh, after a 
 
 The SDK handles this without the app doing anything. `usePushRegistration` subscribes to the platform's token-change signal — mounted whenever the adapter offers one, so an app whose adapter omits it subscribes to nothing — and on a change it records the new identifier, re-binds the **active** account on the spot, and **marks** every other push-enabled account as needing a re-bind. Each marked account is repaired the next time the user switches into it, from the live session that switch establishes. Silenced accounts stay silenced.
 
-Marking rather than re-binding is what keeps a background account safe: re-binding one would mean spending its stored refresh token on a one-time-use exchange while nobody is looking at it, and an interruption mid-exchange locks that account out for good. The marker is durable and readable as `needsPushRebind` — see [When notifications are paused](/sdk/authentication/multi-account#when-notifications-are-paused).
+Marking rather than re-binding is what keeps a background account safe: re-binding one would mean spending its stored refresh token on a one-time-use exchange while nobody is looking at it, and an interruption mid-exchange locks that account out for good. The marker is durable and readable as `needsPushRebind` — see [When notifications are paused](/v7/sdk/authentication/multi-account#when-notifications-are-paused).
 
 | Platform | How rotation is detected |
 |----------|--------------------------|
@@ -168,23 +168,23 @@ Marking rather than re-binding is what keeps a background account safe: re-bindi
 | React Native | Firebase `onTokenRefresh`, also rotation-only. Android is covered. On iOS the event carries an FCM token while the adapter registers APNs, so APNs rotation is not reported by it at all; the mount-time read below picks it up on the next launch, or a `register()` / `unregister()` sooner |
 | Web | No in-page event exists (`pushsubscriptionchange` fires inside *your* service worker), so the SDK compares the browser's existing subscription against the stored one on mount. It never re-subscribes and never prompts |
 
-On the two native platforms the SDK additionally reads the device's current push identifier **once on mount**, so a device whose token never rotates is not left with a server-side binding it has no local identifier to unbind. It does this only when the device already holds OS notification permission — with one exception: the very first such read on a device ignores permission, because revoking notifications never removes an existing binding and a device upgrading from a release that stored no identifier would otherwise be unable to unbind one. Reading the permission status never prompts, and neither does the read itself. Web needs no equivalent: its mount-time comparison already covers it. See [Reading the current identifier on mount](/hooks/push/use-push-registration#reading-the-current-identifier-on-mount-native).
+On the two native platforms the SDK additionally reads the device's current push identifier **once on mount**, so a device whose token never rotates is not left with a server-side binding it has no local identifier to unbind. It does this only when the device already holds OS notification permission — with one exception: the very first such read on a device ignores permission, because revoking notifications never removes an existing binding and a device upgrading from a release that stored no identifier would otherwise be unable to unbind one. Reading the permission status never prompts, and neither does the read itself. Web needs no equivalent: its mount-time comparison already covers it. See [Reading the current identifier on mount](/v7/hooks/push/use-push-registration#reading-the-current-identifier-on-mount-native).
 
 Nothing here asks the user for anything — receiving a refreshed token is not a permission prompt, and neither is reading a permission the device already granted.
 
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="Feature Overview" icon="bell" href="/push-notifications">
+  <Card title="Feature Overview" icon="bell" href="/v7/push-notifications">
     Dashboard setup, sending, and device lifecycle
   </Card>
-  <Card title="usePushRegistration" icon="cube" href="/hooks/push/use-push-registration">
+  <Card title="usePushRegistration" icon="cube" href="/v7/hooks/push/use-push-registration">
     The full hook API and platform adapters
   </Card>
-  <Card title="useAccountPushToggle" icon="toggle-on" href="/hooks/push/use-account-push-toggle">
+  <Card title="useAccountPushToggle" icon="toggle-on" href="/v7/hooks/push/use-account-push-toggle">
     Per-account push control on a shared device
   </Card>
-  <Card title="Multi-Account" icon="users" href="/sdk/authentication/multi-account">
+  <Card title="Multi-Account" icon="users" href="/v7/sdk/authentication/multi-account">
     How push interacts with several signed-in accounts
   </Card>
 </CardGroup>

@@ -6,12 +6,12 @@ icon: "plug"
 
 ## Overview
 
-`useDeleteWorkspace` returns a callable that deletes a [workspace](/data-models/workspace). Deletion **cascades the entire subtree** in one transaction, bottom-up: invitations → members → workspaces. Each deleted workspace fires `workspace.deleted` — and **no** `workspace.member.removed` events for the memberships it tears down. Treat `workspace.deleted` as removing that workspace's whole roster; see [Webhooks & lifecycle](/sdk/workspaces/webhooks#deleting-a-workspace-does-not-emit-per-member-events).
+`useDeleteWorkspace` returns a callable that deletes a [workspace](/v7/data-models/workspace). Deletion **cascades the entire subtree** in one transaction, bottom-up: invitations → members → workspaces. Each deleted workspace fires `workspace.deleted` — and **no** `workspace.member.removed` events for the memberships it tears down. Treat `workspace.deleted` as removing that workspace's whole roster; see [Webhooks & lifecycle](/v7/sdk/workspaces/webhooks#deleting-a-workspace-does-not-emit-per-member-events).
 
 **Authorization:** owner-only. The signed-in user must be this workspace's own owner or an ancestor owner. **There is no `delete-workspace` capability.**
 
 <Warning>
-  Your own data tagged with a workspace id (docs, issues, etc.) is **not** deleted by Sublay. React to the [`workspace.deleted` webhook](/sdk/workspaces/webhooks) to clean up your own workspace-tagged data.
+  Your own data tagged with a workspace id (docs, issues, etc.) is **not** deleted by Sublay. React to the [`workspace.deleted` webhook](/v7/sdk/workspaces/webhooks) to clean up your own workspace-tagged data.
 </Warning>
 
 ## Usage Example
@@ -50,5 +50,5 @@ function DangerZone({ workspaceId }: { workspaceId: string }) {
 
 ## Related
 
-- [`useTransferWorkspaceOwnership`](/hooks/workspaces/use-transfer-workspace-ownership) — hand it over instead of deleting
-- [Delete Workspace API](/api-reference/workspaces/delete-workspace)
+- [`useTransferWorkspaceOwnership`](/v7/hooks/workspaces/use-transfer-workspace-ownership) — hand it over instead of deleting
+- [Delete Workspace API](/v7/api-reference/workspaces/delete-workspace)

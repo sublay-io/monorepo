@@ -9,7 +9,7 @@ Removes the block edge from the acting user (the blocker) to the specified user 
 Unblocking is **idempotent** — unblocking a user who isn't blocked is a success no-op. Nothing that the block tore down is restored: removed follows and connections stay gone and the two users must re-establish them from scratch. A previously frozen 1:1 conversation becomes usable again (the conversation record still exists).
 
 <Note>
-  **Requires the `moderation` bundle.** A project without the moderation bundle returns `403 database/tables-not-available`. See [Bundles](/bundles).
+  **Requires the `moderation` bundle.** A project without the moderation bundle returns `403 database/tables-not-available`. See [Bundles](/v7/bundles).
 </Note>
 
 ## Path Parameters
@@ -30,6 +30,6 @@ On success, returns HTTP `204` with no body.
 
 ## See Also
 
-- [`useBlockManager` hook](/hooks/blocks/use-block-manager)
-- [Block User](/api-reference/users/blocks/block-user)
-- [Block data model](/data-models/block)
+- [`useBlockManager` hook](/v7/hooks/blocks/use-block-manager)
+- [Block User](/v7/api-reference/users/blocks/block-user)
+- [Block data model](/v7/data-models/block)

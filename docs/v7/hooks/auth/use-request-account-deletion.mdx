@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useRequestAccountDeletion` returns a function that starts the self-service account-deletion flow for the currently authenticated user. It emails the user a 6-digit confirmation code (valid for 10 minutes) and does **not** delete anything on its own. Pass the code the user receives to [`useConfirmAccountDeletion`](/hooks/auth/use-confirm-account-deletion) to finish.
+`useRequestAccountDeletion` returns a function that starts the self-service account-deletion flow for the currently authenticated user. It emails the user a 6-digit confirmation code (valid for 10 minutes) and does **not** delete anything on its own. Pass the code the user receives to [`useConfirmAccountDeletion`](/v7/hooks/auth/use-confirm-account-deletion) to finish.
 
 <Warning>
   Only works for accounts with an email on file. Accounts without one (e.g.
@@ -69,5 +69,5 @@ The hook returns an async function. That function resolves to:
 
 ## See Also
 
-- [`useConfirmAccountDeletion`](/hooks/auth/use-confirm-account-deletion)
-- [Request Account Deletion API reference](/api-reference/auth/request-account-deletion)
+- [`useConfirmAccountDeletion`](/v7/hooks/auth/use-confirm-account-deletion)
+- [Request Account Deletion API reference](/v7/api-reference/auth/request-account-deletion)

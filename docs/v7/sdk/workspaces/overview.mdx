@@ -3,20 +3,20 @@ title: "Overview"
 description: "Build SaaS/team workspaces with invitations, per-member authority, and self-nesting"
 ---
 
-[Workspaces](/data-models/workspace) give your app the B2B/SaaS collaboration layer: an account/team that people are invited into, with granular per-member authority and optional self-nesting (org → client → project). Unlike [Spaces](/sdk/spaces/overview) (a community shape), Workspaces is **invite-only** with an owner apex and a capability/permission model.
+[Workspaces](/v7/data-models/workspace) give your app the B2B/SaaS collaboration layer: an account/team that people are invited into, with granular per-member authority and optional self-nesting (org → client → project). Unlike [Spaces](/v7/sdk/spaces/overview) (a community shape), Workspaces is **invite-only** with an owner apex and a capability/permission model.
 
 <Note>
-  **Requires the `workspaces` bundle.** See [Bundles](/bundles) to add it.
+  **Requires the `workspaces` bundle.** See [Bundles](/v7/bundles) to add it.
 </Note>
 
-The React/React Native surface is a set of plain hooks re-exported from `@sublay/core` (there is **no** `WorkspaceProvider` and **no** Redux slice — the list uses the [Wrapper pattern](/hooks/workspaces/use-fetch-many-workspaces-wrapper), matching house style).
+The React/React Native surface is a set of plain hooks re-exported from `@sublay/core` (there is **no** `WorkspaceProvider` and **no** Redux slice — the list uses the [Wrapper pattern](/v7/hooks/workspaces/use-fetch-many-workspaces-wrapper), matching house style).
 
 ## Key concepts
 
-- **[capabilities vs permissions](/data-models/workspace-member#the-two-arrays-capabilities-vs-permissions)** — Sublay enforces the closed `capabilities` vocabulary; it is blind to your opaque `permissions`.
-- **[Ownership](/data-models/workspace#ownership)** — one owner per workspace (the creator); ancestor owners are gods over descendants.
-- **[Reach & the wall/door rule](/data-models/workspace#reach-and-the-wall-door-rule)** — strict per-node by default; opt-in downward reach via the child-owned `inheritsFromParent` flag.
-- **[Invitations](/data-models/workspace-invitation#acceptance-model)** — identity-matched + verified-email, **no token**.
+- **[capabilities vs permissions](/v7/data-models/workspace-member#the-two-arrays-capabilities-vs-permissions)** — Sublay enforces the closed `capabilities` vocabulary; it is blind to your opaque `permissions`.
+- **[Ownership](/v7/data-models/workspace#ownership)** — one owner per workspace (the creator); ancestor owners are gods over descendants.
+- **[Reach & the wall/door rule](/v7/data-models/workspace#reach-and-the-wall-door-rule)** — strict per-node by default; opt-in downward reach via the child-owned `inheritsFromParent` flag.
+- **[Invitations](/v7/data-models/workspace-invitation#acceptance-model)** — identity-matched + verified-email, **no token**.
 
 ## Project settings
 
@@ -35,51 +35,51 @@ Three project-level settings configure this bundle. They live under `workspaces`
 | Setting | Type | Default | What it does |
 |---------|------|---------|--------------|
 | `workspaces.inviteAcceptUrl` | `string` | *(none)* | The page in **your** app that surfaces workspace invitations. Invitation emails deep-link to it, with a fixed `?workspaceInviteId=<id>` appended (any query string you already have on the URL is preserved). **Required before any invitation can be created** — see the warning below. |
-| `workspaces.inheritsDefault` | `boolean` | `false` | The [`inheritsFromParent`](/data-models/workspace#reach-and-the-wall-door-rule) flag new workspaces are **born with**. `false` (the default) means every workspace starts **sealed** — no downward reach. Set it to `true` if your product wants an org's authority to flow into sub-workspaces by default. This is read at create time only; it is never accepted from client input — sending `inheritsFromParent` on [Create Workspace](/api-reference/workspaces/create-workspace) is a `400`, not a silent override — and changing it does not retroactively alter existing workspaces. |
-| `workspaces.inheritEnforced` | `boolean` | `false` | Locks `inheritsFromParent` to the project default so workspace **owners cannot flip it**. While `true`, [`useUpdateWorkspaceInheritFlag`](/hooks/workspaces/use-update-workspace-inherit-flag) fails with `403 workspace/inherit-enforced`. Use it when the wall/door policy is a product decision rather than a per-team one. |
+| `workspaces.inheritsDefault` | `boolean` | `false` | The [`inheritsFromParent`](/v7/data-models/workspace#reach-and-the-wall-door-rule) flag new workspaces are **born with**. `false` (the default) means every workspace starts **sealed** — no downward reach. Set it to `true` if your product wants an org's authority to flow into sub-workspaces by default. This is read at create time only; it is never accepted from client input — sending `inheritsFromParent` on [Create Workspace](/v7/api-reference/workspaces/create-workspace) is a `400`, not a silent override — and changing it does not retroactively alter existing workspaces. |
+| `workspaces.inheritEnforced` | `boolean` | `false` | Locks `inheritsFromParent` to the project default so workspace **owners cannot flip it**. While `true`, [`useUpdateWorkspaceInheritFlag`](/v7/hooks/workspaces/use-update-workspace-inherit-flag) fails with `403 workspace/inherit-enforced`. Use it when the wall/door policy is a product decision rather than a per-team one. |
 
 <Warning>
   **Set `workspaces.inviteAcceptUrl` before you ship invitations.** It has no default, so a freshly added bundle has none — and an invitation is delivered as an email whose only call to action is that deep-link.
 
-  Because of that, [Create Invite](/api-reference/workspaces/invitations/create-invite) and [Resend Invite](/api-reference/workspaces/invitations/resend-invite) **refuse outright** when it is unset, with `409 workspace/missing-invite-accept-url`. This applies **even when the invitee already has an account** — the in-app inbox is not a substitute for the emailed link, so the invite surface behaves the same for every invitee. Nothing is persisted and no email or webhook is emitted on the refusal; configure the setting and retry the identical request.
+  Because of that, [Create Invite](/v7/api-reference/workspaces/invitations/create-invite) and [Resend Invite](/v7/api-reference/workspaces/invitations/resend-invite) **refuse outright** when it is unset, with `409 workspace/missing-invite-accept-url`. This applies **even when the invitee already has an account** — the in-app inbox is not a substitute for the emailed link, so the invite surface behaves the same for every invitee. Nothing is persisted and no email or webhook is emitted on the refusal; configure the setting and retry the identical request.
 </Warning>
 
 <Note>
-  The accept link carries **nothing secret**. Acceptance is identity-matched — the signed-in caller must *be* the invitation's target and have a verified email — so there is no token to leak and no domain allowlist to maintain. The email is a plain nudge into your app. See the [acceptance model](/data-models/workspace-invitation#acceptance-model).
+  The accept link carries **nothing secret**. Acceptance is identity-matched — the signed-in caller must *be* the invitation's target and have a verified email — so there is no token to leak and no domain allowlist to maintain. The email is a plain nudge into your app. See the [acceptance model](/v7/data-models/workspace-invitation#acceptance-model).
 </Note>
 
 ## What a client app can do
 
 **All 21 workspace endpoints are callable from a browser or mobile app with a normal signed-in user's bearer token** — including every management operation: editing a workspace, deleting it, transferring ownership, flipping the inherit flag, editing a member's capabilities/rank, removing a member, offboarding across a subtree, and the full invite lifecycle (create, list, revoke, resend). Every one of these is exposed as a `@sublay/core` hook and as a `@sublay/js` function. **A members-management panel needs no server-side code and no hand-rolled `fetch`.**
 
-With a client token, every endpoint in the bundle resolves the actor from that token and authorizes the action against **that user's own standing** on the workspace. Most routes enforce this in guard middleware ahead of the controller; the self-scoped ones (create a workspace, list your own, leave, accept or decline an invite, read your own invites or your own authority) carry no guard middleware and authorize inside the controller instead. The one endpoint that does not require a token at all is the single-workspace read, [`GET /workspaces/:id`](/api-reference/workspaces/fetch-workspace) — it takes an *optional* token and returns the workspace when visibility permits. Everything else requires a signed-in user, and whether the call then succeeds depends on their standing:
+With a client token, every endpoint in the bundle resolves the actor from that token and authorizes the action against **that user's own standing** on the workspace. Most routes enforce this in guard middleware ahead of the controller; the self-scoped ones (create a workspace, list your own, leave, accept or decline an invite, read your own invites or your own authority) carry no guard middleware and authorize inside the controller instead. The one endpoint that does not require a token at all is the single-workspace read, [`GET /workspaces/:id`](/v7/api-reference/workspaces/fetch-workspace) — it takes an *optional* token and returns the workspace when visibility permits. Everything else requires a signed-in user, and whether the call then succeeds depends on their standing:
 
 | Rule | Meaning |
 |------|---------|
 | **Owner-only** | The caller must be the workspace's own owner, or an owner of an ancestor workspace. Not a capability — no capability grants it. |
-| **Capability-gated** | The caller's [resolved capability set](/hooks/workspaces/use-fetch-workspace-authority) (direct + reach + ownership) must contain the named capability, e.g. `invite`, `remove-member`, `edit-workspace`. |
-| **Rank-bounded** | On top of a capability, the caller may only act on members ranked strictly below them, and may only grant capabilities/permissions they themselves hold ([no-escalation](/data-models/workspace-member#no-privilege-escalation)). |
+| **Capability-gated** | The caller's [resolved capability set](/v7/hooks/workspaces/use-fetch-workspace-authority) (direct + reach + ownership) must contain the named capability, e.g. `invite`, `remove-member`, `edit-workspace`. |
+| **Rank-bounded** | On top of a capability, the caller may only act on members ranked strictly below them, and may only grant capabilities/permissions they themselves hold ([no-escalation](/v7/data-models/workspace-member#no-privilege-escalation)). |
 | **Visibility** | The caller must be able to see the workspace / its roster at all. This gates three reads — the single workspace, the roster, and one member's standing. **Any relation** to the workspace (owner, ancestor-owner, member, reach-holder) satisfies it. It does *not* gate the authority read (see the note below). |
 | **Self-service** | Anyone signed in can do it for themselves — accept/decline an invite addressed to them, leave a workspace, read their own authority. |
 
 <Note>
-  **The authority read is the one read visibility does not gate.** [`GET /workspaces/:id/authority/me`](/api-reference/workspaces/fetch-authority) is mounted with authentication only — any signed-in user may call it for any workspace id. It returns `404` only when the workspace does not exist; a signed-in stranger gets `200` with `reasons: []` and empty `capabilities` / `permissions`, which is the correct "you have no standing here" answer for a UI gate. The consequence is that the route confirms a workspace *exists* to any signed-in user.
+  **The authority read is the one read visibility does not gate.** [`GET /workspaces/:id/authority/me`](/v7/api-reference/workspaces/fetch-authority) is mounted with authentication only — any signed-in user may call it for any workspace id. It returns `404` only when the workspace does not exist; a signed-in stranger gets `200` with `reasons: []` and empty `capabilities` / `permissions`, which is the correct "you have no standing here" answer for a UI gate. The consequence is that the route confirms a workspace *exists* to any signed-in user.
 
-  Its sibling read, one member's standing ([`GET /workspaces/:id/members/:userId`](/api-reference/workspaces/members/fetch-member-standing)), *is* visibility-gated and deliberately `404`s instead, so it never leaks existence. Do not assume the two behave alike.
+  Its sibling read, one member's standing ([`GET /workspaces/:id/members/:userId`](/v7/api-reference/workspaces/members/fetch-member-standing)), *is* visibility-gated and deliberately `404`s instead, so it never leaks existence. Do not assume the two behave alike.
 </Note>
 
 <Warning>
   **Seeing the roster and seeing people's *authority* are two different tiers.** Any relation may read the roster and one member's standing — who is there, their `reasons`, `title` and `metadata`. But the authority-bearing fields — **`capabilities`, `permissions`, `rank`, `relativeRank`** — are **omitted** (absent, not `null`) unless the caller holds one of the four people-operating capabilities (`invite`, `remove-member`, `edit-member-access`, `edit-member-profile`) or is the `owner` / an `ancestor-owner`.
 
-  A caller **always** sees their own — their own roster row, their own standing, and the [authority read](/api-reference/workspaces/fetch-authority), which is inherently a self read and never fenced. So a plain member can always discover their own access; they just cannot enumerate everyone else's. A service/master key acting as **itself** is never fenced; one that **names** an `actingUserId` is fenced exactly as that user is — see [Acting on behalf of a user](#acting-on-behalf-of-a-user). Type all four fields as optional on client surfaces. (`relativeRank` is fenced *with* `rank` because it is `rank` minus a number the caller already knows — leaking it would leak `rank` exactly.)
+  A caller **always** sees their own — their own roster row, their own standing, and the [authority read](/v7/api-reference/workspaces/fetch-authority), which is inherently a self read and never fenced. So a plain member can always discover their own access; they just cannot enumerate everyone else's. A service/master key acting as **itself** is never fenced; one that **names** an `actingUserId` is fenced exactly as that user is — see [Acting on behalf of a user](#acting-on-behalf-of-a-user). Type all four fields as optional on client surfaces. (`relativeRank` is fenced *with* `rank` because it is `rank` minus a number the caller already knows — leaking it would leak `rank` exactly.)
 
-  **The gate is answered per node, not once per request.** Every row a response returns is judged against your **resolved** standing on the workspace *that row belongs to* — including capabilities [reaching](/data-models/workspace#reach-and-the-wall-door-rule) in through an unbroken open inherit chain, and ownership from any ancestor, but not authority a **sealed** node blocks. The place this bites is [`include=descendants`](/api-reference/workspaces/members/list-members) on the roster: a `descendant-member` row is judged on its own node, so holding `invite` on a parent does not unfence a sealed child's ranks and capabilities. Being allowed to *see* a descendant's roster (sealing) and being allowed to see its members' **authority** (the fence) are two tiers, and passing the first does not pass the second.
+  **The gate is answered per node, not once per request.** Every row a response returns is judged against your **resolved** standing on the workspace *that row belongs to* — including capabilities [reaching](/v7/data-models/workspace#reach-and-the-wall-door-rule) in through an unbroken open inherit chain, and ownership from any ancestor, but not authority a **sealed** node blocks. The place this bites is [`include=descendants`](/v7/api-reference/workspaces/members/list-members) on the roster: a `descendant-member` row is judged on its own node, so holding `invite` on a parent does not unfence a sealed child's ranks and capabilities. Being allowed to *see* a descendant's roster (sealing) and being allowed to see its members' **authority** (the fence) are two tiers, and passing the first does not pass the second.
 </Warning>
 
 <Note>
-  **What actually needs a service key: acting on behalf of a *different* user.** Nearly every endpoint accepts an actor field, `actingUserId`, so a service/master key can perform an action *as* some named user. That parameter is **[node SDK](/node-sdk/workspaces) only** — `@sublay/core` and `@sublay/js` never expose it, because a client's actor is always the token's own user. (There is no client-side strip: a call that hand-writes `actingUserId` past the types is bound by the same rule as any user token — naming a user other than the token's own is rejected with a `403`.) This is the *only* difference in reach between the client SDKs and the node SDK for this bundle; it is **not** a restriction on which operations a client may perform. The rule that governs it is [below](#acting-on-behalf-of-a-user).
+  **What actually needs a service key: acting on behalf of a *different* user.** Nearly every endpoint accepts an actor field, `actingUserId`, so a service/master key can perform an action *as* some named user. That parameter is **[node SDK](/v7/node-sdk/workspaces) only** — `@sublay/core` and `@sublay/js` never expose it, because a client's actor is always the token's own user. (There is no client-side strip: a call that hand-writes `actingUserId` past the types is bound by the same rule as any user token — naming a user other than the token's own is rejected with a `403`.) This is the *only* difference in reach between the client SDKs and the node SDK for this bundle; it is **not** a restriction on which operations a client may perform. The rule that governs it is [below](#acting-on-behalf-of-a-user).
 
-  Note that a **target**-identifying `userId` is a different thing and is fully available on the client: the invitee `userId` on [`useCreateWorkspaceInvite`](/hooks/workspaces/use-create-workspace-invite), and the `targetUserId` path param on the member hooks.
+  Note that a **target**-identifying `userId` is a different thing and is fully available on the client: the invitee `userId` on [`useCreateWorkspaceInvite`](/v7/hooks/workspaces/use-create-workspace-invite), and the `targetUserId` path param on the member hooks.
 </Note>
 
 ## Acting on behalf of a user
@@ -103,7 +103,7 @@ A service or master key therefore has exactly two modes:
 
 A plain user token has only one mode: itself. Sending your **own** user id is a harmless no-op — the resolved actor is the same either way — but naming **anyone else** is a `403 workspace/unauthorized`. The field is never silently ignored for a user token.
 
-Naming an acting user is not a hint or an audit field. It **binds**: if the named user would be refused, so are you. That covers the capability gate, the owner-only gate, the rank guard, [no-escalation](/data-models/workspace-member#no-privilege-escalation), roster/standing [fencing](#what-a-client-app-can-do), and the visibility `404` on a workspace the named user has no relation to.
+Naming an acting user is not a hint or an audit field. It **binds**: if the named user would be refused, so are you. That covers the capability gate, the owner-only gate, the rank guard, [no-escalation](/v7/data-models/workspace-member#no-privilege-escalation), roster/standing [fencing](#what-a-client-app-can-do), and the visibility `404` on a workspace the named user has no relation to.
 
 ### The unrestricted path names a user
 
@@ -135,7 +135,7 @@ On roughly half the bundle the actor is **required**, so acting-as-a-user is not
 The unbounded path survives on the rest — the guard-only routes (`updateWorkspace`, `updateWorkspaceInheritFlag`, `deleteWorkspace`, `transferWorkspaceOwnership`, the invite outbox reads and `revoke`/`resend`), the three reads, and `createWorkspaceInvite`.
 
 <Note>
-  **The [node SDK](/node-sdk/workspaces) types are stricter than the wire on four of those routes.** `updateWorkspace`, `updateWorkspaceInheritFlag`, `deleteWorkspace` and `transferWorkspaceOwnership` accept an omitted actor over REST — that request runs as the app itself — but the node SDK declares `actingUserId` **required** on all four, so TypeScript will not let you omit it. That is a deliberate guardrail on the four most destructive owner-only calls, not a different server rule. Reach the unbounded path on them by calling the REST endpoint directly.
+  **The [node SDK](/v7/node-sdk/workspaces) types are stricter than the wire on four of those routes.** `updateWorkspace`, `updateWorkspaceInheritFlag`, `deleteWorkspace` and `transferWorkspaceOwnership` accept an omitted actor over REST — that request runs as the app itself — but the node SDK declares `actingUserId` **required** on all four, so TypeScript will not let you omit it. That is a deliberate guardrail on the four most destructive owner-only calls, not a different server rule. Reach the unbounded path on them by calling the REST endpoint directly.
 </Note>
 
 ### Shapes the server rejects
@@ -158,7 +158,7 @@ They come from **two layers**, and knowing which one answered tells you what to 
 
     On a workspace route `userId` **never** names the caller — it addresses the request *target*. The rejection is unconditional: it fires for user tokens and keys alike, on every route, and even when a correct `actingUserId` is also present, because a request carrying both is malformed regardless. It is checked at the gate, on the raw request, ahead of any route's own schema.
 
-    **One exception:** the invitee `userId` in the **body** of [Create Invite](/api-reference/workspaces/invitations/create-invite), where the field has always meant the target. The carve-out covers that body field and nothing else — a query `?userId=` is refused on Create Invite exactly as it is everywhere else, because no workspace route reads one, so there it can only be the stale actor spelling. The path parameter `:userId` (on the member routes) is untouched — that is the target too.
+    **One exception:** the invitee `userId` in the **body** of [Create Invite](/v7/api-reference/workspaces/invitations/create-invite), where the field has always meant the target. The carve-out covers that body field and nothing else — a query `?userId=` is refused on Create Invite exactly as it is everywhere else, because no workspace route reads one, so there it can only be the stale actor spelling. The path parameter `:userId` (on the member routes) is untouched — that is the target too.
   </Accordion>
 
   <Accordion title="An empty or null `actingUserId` — 400">
@@ -196,7 +196,7 @@ They come from **two layers**, and knowing which one answered tells you what to 
     Two consequences worth designing around:
 
     - **Send only the documented fields.** The SDKs pass your props object to the request body as-is, so `createWorkspace({ ...orgTemplate })` carries every extra key `orgTemplate` holds into the request and fails. Name the fields you mean; put your own data in `metadata`, which is opaque to Sublay and accepts any JSON.
-    - **A field this API declares is never judged by its name.** `username` on [Create Invite](/api-reference/workspaces/invitations/create-invite), `newOwnerId` on [Transfer Ownership](/api-reference/workspaces/transfer-ownership), `userId` as an invitee — all real fields, all accepted on their own terms.
+    - **A field this API declares is never judged by its name.** `username` on [Create Invite](/v7/api-reference/workspaces/invitations/create-invite), `newOwnerId` on [Transfer Ownership](/v7/api-reference/workspaces/transfer-ownership), `userId` as an invitee — all real fields, all accepted on their own terms.
 
     Two query parameters are the exception: `_` and `_t`, the automatic cache-busters some HTTP clients append, are dropped before the request is read. Nothing else is reserved — in particular tracing and correlation identifiers are *not*, because distributed tracing propagates in HTTP **headers** (`traceparent`, `X-B3-*`, `X-Amzn-Trace-Id`), never in the query string.
   </Accordion>
@@ -239,7 +239,7 @@ They come from **two layers**, and knowing which one answered tells you what to 
 
     Sublay parses `application/json` and nothing else. A body sent as `text/plain`, `application/x-www-form-urlencoded` or `application/vnd.api+json` is read off the wire and thrown away — so an `actingUserId` inside it never reaches the server, and the request names nobody through no fault of its spelling. This is the one shape the schemas cannot catch: with an unparsed content-type the server is handed an empty body, which has no unrecognized key in it.
 
-    **This is the `fetch()` default.** `fetch(url, { method: "DELETE", body: JSON.stringify({ actingUserId }) })` with no `headers` sends `text/plain;charset=UTF-8`. Set `"Content-Type": "application/json"`. Client libraries that set it for you — axios, the Sublay [node SDK](/node-sdk/workspaces), [`@sublay/js`](/js-sdk/workspaces) — never hit this.
+    **This is the `fetch()` default.** `fetch(url, { method: "DELETE", body: JSON.stringify({ actingUserId }) })` with no `headers` sends `text/plain;charset=UTF-8`. Set `"Content-Type": "application/json"`. Client libraries that set it for you — axios, the Sublay [node SDK](/v7/node-sdk/workspaces), [`@sublay/js`](/v7/js-sdk/workspaces) — never hit this.
 
     Detected by **media type**, not by "is the body empty": a legitimate `{}` sent as JSON is indistinguishable from a discarded body after the fact, so an empty JSON body and a bodiless request both pass.
   </Accordion>
@@ -297,12 +297,12 @@ They come from **two layers**, and knowing which one answered tells you what to 
 
 ### Consequence: accepting an invite on someone's behalf
 
-[`acceptWorkspaceInvite`](/api-reference/workspaces/invitations/accept-invite) is bound like everything else, so a backend auto-join flow must satisfy the invitee's own gates:
+[`acceptWorkspaceInvite`](/v7/api-reference/workspaces/invitations/accept-invite) is bound like everything else, so a backend auto-join flow must satisfy the invitee's own gates:
 
 - the invitation must be **actually addressed to** the named user (by `userId`, or by an email that matches their account) — accepting Alice's invite while naming Bob is a `404 workspace/invite-not-found`;
 - the named user's **email must be verified** — otherwise `403 workspace/email-not-verified`.
 
-The same two gates apply to [`declineWorkspaceInvite`](/api-reference/workspaces/invitations/decline-invite). There is no key bypass for either: ownership and membership have exactly three doors (create, accept an invite, receive a transfer) and all three enforce verification identically.
+The same two gates apply to [`declineWorkspaceInvite`](/v7/api-reference/workspaces/invitations/decline-invite). There is no key bypass for either: ownership and membership have exactly three doors (create, accept an invite, receive a transfer) and all three enforce verification identically.
 
 ### Consequence: a tier cannot grow itself
 
@@ -314,15 +314,15 @@ Rank is strict — you may only act on, and invite at, a rank **strictly below**
 | **another rank-5 manager** | someone ranked 0–4, or the owner |
 | **a rank-0 member** | the **owner** — no ranked member clears the floor |
 
-This is not new behavior, but it is easy to hit for the first time when a backend stops running as an implicit owner. If your "add a manager" button is server-driven, act as the owner for it. The floor applies only to an actor with a **direct member row** on the workspace, so it is skipped for an owner or ancestor owner, and for a cross-node [reach](/data-models/workspace#reach-and-the-wall-door-rule) holder with no direct row.
+This is not new behavior, but it is easy to hit for the first time when a backend stops running as an implicit owner. If your "add a manager" button is server-driven, act as the owner for it. The floor applies only to an actor with a **direct member row** on the workspace, so it is skipped for an owner or ancestor owner, and for a cross-node [reach](/v7/data-models/workspace#reach-and-the-wall-door-rule) holder with no direct row.
 
 <Note>
-  **"A key naming nobody" skips the floor on [Create Invite](/api-reference/workspaces/invitations/create-invite) — and nowhere else.** Invite is the one rank-assigning route with an unbounded path left, so a key that names no inviter genuinely faces no floor there. [Update Member](/api-reference/workspaces/members/update-member) has **no** unbounded path: its actor is required, so a key naming nobody is a `400 workspace/missing-user-id` rather than an exemption. On that route a key is always somebody, and faces exactly that somebody's floors.
+  **"A key naming nobody" skips the floor on [Create Invite](/v7/api-reference/workspaces/invitations/create-invite) — and nowhere else.** Invite is the one rank-assigning route with an unbounded path left, so a key that names no inviter genuinely faces no floor there. [Update Member](/v7/api-reference/workspaces/members/update-member) has **no** unbounded path: its actor is required, so a key naming nobody is a `400 workspace/missing-user-id` rather than an exemption. On that route a key is always somebody, and faces exactly that somebody's floors.
 </Note>
 
 ## Choosing a rank
 
-Almost every rule the ladder enforces is **relative** — act only on someone strictly below you, assign only strictly below yourself (minting rank 0 is the one absolute exception, below) — so rank can be named in either coordinate, on [Create Invite](/api-reference/workspaces/invitations/create-invite) and [Update Member](/api-reference/workspaces/members/update-member) alike:
+Almost every rule the ladder enforces is **relative** — act only on someone strictly below you, assign only strictly below yourself (minting rank 0 is the one absolute exception, below) — so rank can be named in either coordinate, on [Create Invite](/v7/api-reference/workspaces/invitations/create-invite) and [Update Member](/v7/api-reference/workspaces/members/update-member) alike:
 
 ```tsx
 const createWorkspaceInvite = useCreateWorkspaceInvite();
@@ -341,18 +341,18 @@ The two are **mutually exclusive**: sending both is a `400`. Storage stays absol
 Reads return **both**. The roster and member-standing reads each carry `rank` (absolute) alongside `relativeRank` (that member's position as an offset from *you*, where `-3` means "three rungs above you"). So there is no "write 2, read 5" asymmetry to reconcile — you can read back in the same coordinate you wrote in. The authority read carries `rank` only: its subject is *you*, so an offset from yourself could only ever be `0`.
 
 <Info>
-  **`relativeRank: 1` is the happy path, and the invite default.** Omit *both* rank fields on an invite and the server applies `relativeRank: 1` — one rung below the inviter. That is well defined for every actor (an inviter with no member row here anchors at apex, so their default lands on rank 0) and, by construction, it can never fail the rank floor. There is no equivalent default on [Update Member](/api-reference/workspaces/members/update-member): omitting both there means **rank unchanged**, so editing someone's capabilities never quietly moves them on the ladder.
+  **`relativeRank: 1` is the happy path, and the invite default.** Omit *both* rank fields on an invite and the server applies `relativeRank: 1` — one rung below the inviter. That is well defined for every actor (an inviter with no member row here anchors at apex, so their default lands on rank 0) and, by construction, it can never fail the rank floor. There is no equivalent default on [Update Member](/v7/api-reference/workspaces/members/update-member): omitting both there means **rank unchanged**, so editing someone's capabilities never quietly moves them on the ladder.
 </Info>
 
 ### The anchor is your member row, not your job title
 
 An offset is measured from **your own rank on this workspace if you hold a member row here**, and from **apex** (one step above rank 0) if you do not.
 
-Owners, ancestor owners, reach holders and keys acting as themselves normally have no row on the node in question, so they normally anchor at apex — but that is a coincidence of the common case, not the rule. An ancestor owner who *also* sits in this node's roster measures from that row: Alice owns `root` and is rank 3 on `child`, so on `child` her `relativeRank: 1` resolves to rank **4**, and she reads `child`'s rank-0 member back as `-3`. See [rank semantics](/data-models/workspace-member#the-anchor-your-member-row-not-what-kind-of-actor-you-are).
+Owners, ancestor owners, reach holders and keys acting as themselves normally have no row on the node in question, so they normally anchor at apex — but that is a coincidence of the common case, not the rule. An ancestor owner who *also* sits in this node's roster measures from that row: Alice owns `root` and is rank 3 on `child`, so on `child` her `relativeRank: 1` resolves to rank **4**, and she reads `child`'s rank-0 member back as `-3`. See [rank semantics](/v7/data-models/workspace-member#the-anchor-your-member-row-not-what-kind-of-actor-you-are).
 
-One consequence worth knowing: because an in-ladder anchor is `>= 0` and a write offset is `>= 1`, **a direct member can never mint rank 0 through the relative form** — the arithmetic simply cannot reach it. The absolute form does not need a special case either. Naming `rank: 0` outright is refused by the ordinary **assign rule**, which requires a strictly larger number than your own: an actor with a member row here is at rank `>= 0`, and nothing is strictly below `0`. They get `403 workspace/insufficient-rank` — *"You may only set ranks strictly below your own."* on [Update Member](/api-reference/workspaces/members/update-member), or *"You may only invite at a rank strictly below your own."* on [Create Invite](/api-reference/workspaces/invitations/create-invite).
+One consequence worth knowing: because an in-ladder anchor is `>= 0` and a write offset is `>= 1`, **a direct member can never mint rank 0 through the relative form** — the arithmetic simply cannot reach it. The absolute form does not need a special case either. Naming `rank: 0` outright is refused by the ordinary **assign rule**, which requires a strictly larger number than your own: an actor with a member row here is at rank `>= 0`, and nothing is strictly below `0`. They get `403 workspace/insufficient-rank` — *"You may only set ranks strictly below your own."* on [Update Member](/v7/api-reference/workspaces/members/update-member), or *"You may only invite at a rank strictly below your own."* on [Create Invite](/v7/api-reference/workspaces/invitations/create-invite).
 
-There is **no separate "only the owner may assign rank 0" check** — owners are the only minters of rank 0 because they skip the rank block entirely, not because a guard names them. So rank 0 is reachable by the owner, and by any actor with **no member row on this workspace** — an ancestor owner or a [reach](/data-models/workspace#reach-and-the-wall-door-rule) holder — who skips or clears the same floor and, from `relativeRank: 1`, anchors at apex and lands on 0. On [Create Invite](/api-reference/workspaces/invitations/create-invite) only, a **key naming nobody** joins that list; on [Update Member](/api-reference/workspaces/members/update-member) it cannot, because the actor is required there (see the note [above](#consequence-a-tier-cannot-grow-itself)).
+There is **no separate "only the owner may assign rank 0" check** — owners are the only minters of rank 0 because they skip the rank block entirely, not because a guard names them. So rank 0 is reachable by the owner, and by any actor with **no member row on this workspace** — an ancestor owner or a [reach](/v7/data-models/workspace#reach-and-the-wall-door-rule) holder — who skips or clears the same floor and, from `relativeRank: 1`, anchors at apex and lands on 0. On [Create Invite](/v7/api-reference/workspaces/invitations/create-invite) only, a **key naming nobody** joins that list; on [Update Member](/v7/api-reference/workspaces/members/update-member) it cannot, because the actor is required there (see the note [above](#consequence-a-tier-cannot-grow-itself)).
 
 <Warning>
   **A relative offset is a snapshot, not a live link.** It is resolved once, at write time, and frozen as an absolute number. Invite at `relativeRank: 1` while you are rank 1 and they land on rank 2 — get promoted to rank 0 later and they are still 2, now two rungs below you rather than one. Nothing re-derives.
@@ -410,48 +410,48 @@ function CreateTeam() {
 
 | Hook | Purpose | Authorization |
 |------|---------|---------------|
-| [`useCreateWorkspace`](/hooks/workspaces/use-create-workspace) | Create a root or child workspace | Verified email (root) / `create-sub-workspace` on the parent (child) |
-| [`useFetchWorkspace`](/hooks/workspaces/use-fetch-workspace) | Read a single workspace | Visibility |
-| [`useFetchManyWorkspaces`](/hooks/workspaces/use-fetch-many-workspaces) | Leaf fetcher for the caller's workspaces | Self-service |
-| [`useFetchManyWorkspacesWrapper`](/hooks/workspaces/use-fetch-many-workspaces-wrapper) | Paginated list with load-more | Self-service |
-| [`useUpdateWorkspace`](/hooks/workspaces/use-update-workspace) | Edit name / metadata | `edit-workspace` (or owner) |
-| [`useUpdateWorkspaceInheritFlag`](/hooks/workspaces/use-update-workspace-inherit-flag) | Flip `inheritsFromParent` | Owner-only |
-| [`useDeleteWorkspace`](/hooks/workspaces/use-delete-workspace) | Delete a workspace (cascades the subtree) | Owner-only |
-| [`useTransferWorkspaceOwnership`](/hooks/workspaces/use-transfer-workspace-ownership) | Hand the workspace to a new owner | Owner-only |
+| [`useCreateWorkspace`](/v7/hooks/workspaces/use-create-workspace) | Create a root or child workspace | Verified email (root) / `create-sub-workspace` on the parent (child) |
+| [`useFetchWorkspace`](/v7/hooks/workspaces/use-fetch-workspace) | Read a single workspace | Visibility |
+| [`useFetchManyWorkspaces`](/v7/hooks/workspaces/use-fetch-many-workspaces) | Leaf fetcher for the caller's workspaces | Self-service |
+| [`useFetchManyWorkspacesWrapper`](/v7/hooks/workspaces/use-fetch-many-workspaces-wrapper) | Paginated list with load-more | Self-service |
+| [`useUpdateWorkspace`](/v7/hooks/workspaces/use-update-workspace) | Edit name / metadata | `edit-workspace` (or owner) |
+| [`useUpdateWorkspaceInheritFlag`](/v7/hooks/workspaces/use-update-workspace-inherit-flag) | Flip `inheritsFromParent` | Owner-only |
+| [`useDeleteWorkspace`](/v7/hooks/workspaces/use-delete-workspace) | Delete a workspace (cascades the subtree) | Owner-only |
+| [`useTransferWorkspaceOwnership`](/v7/hooks/workspaces/use-transfer-workspace-ownership) | Hand the workspace to a new owner | Owner-only |
 
 ### Membership
 
 | Hook | Purpose | Authorization |
 |------|---------|---------------|
-| [`useFetchWorkspaceMembers`](/hooks/workspaces/use-fetch-workspace-members) | The unified roster read | Visibility |
-| [`useFetchWorkspaceMemberStanding`](/hooks/workspaces/use-fetch-workspace-member-standing) | One user's resolved standing | Visibility |
-| [`useUpdateWorkspaceMember`](/hooks/workspaces/use-update-workspace-member) | Edit a member's access / profile | `edit-member-access` or `edit-member-profile`, rank-bounded |
-| [`useRemoveWorkspaceMember`](/hooks/workspaces/use-remove-workspace-member) | Remove a member from this node | `remove-member`, rank-bounded |
-| [`useRemoveWorkspaceMemberFromSubtree`](/hooks/workspaces/use-remove-workspace-member-from-subtree) | Offboard a user across the subtree | `remove-member`, rank-bounded per node |
-| [`useLeaveWorkspace`](/hooks/workspaces/use-leave-workspace) | Leave a workspace yourself | Self-service |
+| [`useFetchWorkspaceMembers`](/v7/hooks/workspaces/use-fetch-workspace-members) | The unified roster read | Visibility |
+| [`useFetchWorkspaceMemberStanding`](/v7/hooks/workspaces/use-fetch-workspace-member-standing) | One user's resolved standing | Visibility |
+| [`useUpdateWorkspaceMember`](/v7/hooks/workspaces/use-update-workspace-member) | Edit a member's access / profile | `edit-member-access` or `edit-member-profile`, rank-bounded |
+| [`useRemoveWorkspaceMember`](/v7/hooks/workspaces/use-remove-workspace-member) | Remove a member from this node | `remove-member`, rank-bounded |
+| [`useRemoveWorkspaceMemberFromSubtree`](/v7/hooks/workspaces/use-remove-workspace-member-from-subtree) | Offboard a user across the subtree | `remove-member`, rank-bounded per node |
+| [`useLeaveWorkspace`](/v7/hooks/workspaces/use-leave-workspace) | Leave a workspace yourself | Self-service |
 
 ### Invitations
 
 | Hook | Purpose | Authorization |
 |------|---------|---------------|
-| [`useCreateWorkspaceInvite`](/hooks/workspaces/use-create-workspace-invite) | Create an invitation | `invite` (or owner), rank + no-escalation |
-| [`useFetchWorkspaceInvites`](/hooks/workspaces/use-fetch-workspace-invites) | **Outbox** — invites *this workspace issued* | `invite` (or owner) |
-| [`useRevokeWorkspaceInvite`](/hooks/workspaces/use-revoke-workspace-invite) | Revoke a pending invitation | `invite` (or owner) |
-| [`useResendWorkspaceInvite`](/hooks/workspaces/use-resend-workspace-invite) | Refresh + resend a pending invitation | `invite` (or owner) |
-| [`useFetchMyWorkspaceInvites`](/hooks/workspaces/use-fetch-my-workspace-invites) | **Inbox** — invites *addressed to me* | Self-service |
-| [`useAcceptWorkspaceInvite`](/hooks/workspaces/use-accept-workspace-invite) | Accept an invitation | Self-service + verified email |
-| [`useDeclineWorkspaceInvite`](/hooks/workspaces/use-decline-workspace-invite) | Decline an invitation | Self-service + verified email |
+| [`useCreateWorkspaceInvite`](/v7/hooks/workspaces/use-create-workspace-invite) | Create an invitation | `invite` (or owner), rank + no-escalation |
+| [`useFetchWorkspaceInvites`](/v7/hooks/workspaces/use-fetch-workspace-invites) | **Outbox** — invites *this workspace issued* | `invite` (or owner) |
+| [`useRevokeWorkspaceInvite`](/v7/hooks/workspaces/use-revoke-workspace-invite) | Revoke a pending invitation | `invite` (or owner) |
+| [`useResendWorkspaceInvite`](/v7/hooks/workspaces/use-resend-workspace-invite) | Refresh + resend a pending invitation | `invite` (or owner) |
+| [`useFetchMyWorkspaceInvites`](/v7/hooks/workspaces/use-fetch-my-workspace-invites) | **Inbox** — invites *addressed to me* | Self-service |
+| [`useAcceptWorkspaceInvite`](/v7/hooks/workspaces/use-accept-workspace-invite) | Accept an invitation | Self-service + verified email |
+| [`useDeclineWorkspaceInvite`](/v7/hooks/workspaces/use-decline-workspace-invite) | Decline an invitation | Self-service + verified email |
 
 <Warning>
-  [`useFetchWorkspaceInvites`](/hooks/workspaces/use-fetch-workspace-invites) and [`useFetchMyWorkspaceInvites`](/hooks/workspaces/use-fetch-my-workspace-invites) are the two most confusable hooks in this bundle. The first is the **outbox** of one workspace (`GET /workspaces/:id/invites`) — who *this team* has invited and not yet heard back from; it powers the "Pending invitations" section of a members panel. The second is the signed-in user's **inbox** (`GET /me/workspace-invites`) across every workspace — it powers a "You've been invited" list.
+  [`useFetchWorkspaceInvites`](/v7/hooks/workspaces/use-fetch-workspace-invites) and [`useFetchMyWorkspaceInvites`](/v7/hooks/workspaces/use-fetch-my-workspace-invites) are the two most confusable hooks in this bundle. The first is the **outbox** of one workspace (`GET /workspaces/:id/invites`) — who *this team* has invited and not yet heard back from; it powers the "Pending invitations" section of a members panel. The second is the signed-in user's **inbox** (`GET /me/workspace-invites`) across every workspace — it powers a "You've been invited" list.
 </Warning>
 
 ### Authority
 
 | Hook | Purpose | Authorization |
 |------|---------|---------------|
-| [`useFetchWorkspaceAuthority`](/hooks/workspaces/use-fetch-workspace-authority) | Resolve the current user's standing | Self-service |
+| [`useFetchWorkspaceAuthority`](/v7/hooks/workspaces/use-fetch-workspace-authority) | Resolve the current user's standing | Self-service |
 
 <Tip>
-  Drive your UI off [`useFetchWorkspaceAuthority`](/hooks/workspaces/use-fetch-workspace-authority) rather than guessing: it returns `{ reasons, capabilities, permissions, rank }`, so showing the "Remove member" button is `authority.capabilities.includes("remove-member")`. `reasons` are structured `{ type, viaWorkspaceId? }` entries — the same shape a roster entry carries — so you can also show *which* ancestor grants an inherited standing. And because **`view` is implied by every other capability**, `capabilities.includes("view")` doubles as "does this user have any standing here at all".
+  Drive your UI off [`useFetchWorkspaceAuthority`](/v7/hooks/workspaces/use-fetch-workspace-authority) rather than guessing: it returns `{ reasons, capabilities, permissions, rank }`, so showing the "Remove member" button is `authority.capabilities.includes("remove-member")`. `reasons` are structured `{ type, viaWorkspaceId? }` entries — the same shape a roster entry carries — so you can also show *which* ancestor grants an inherited standing. And because **`view` is implied by every other capability**, `capabilities.includes("view")` doubles as "does this user have any standing here at all".
 </Tip>

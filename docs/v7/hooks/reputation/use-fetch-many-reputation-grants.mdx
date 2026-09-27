@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchManyReputationGrants` returns a callable that fetches one page of reputation grants. It is the low-level fetcher — for a ready-to-render list with accumulated state, `loadMore`, and `refresh`, use [`useFetchManyReputationGrantsWrapper`](/hooks/reputation/use-fetch-many-reputation-grants-wrapper).
+`useFetchManyReputationGrants` returns a callable that fetches one page of reputation grants. It is the low-level fetcher — for a ready-to-render list with accumulated state, `loadMore`, and `refresh`, use [`useFetchManyReputationGrantsWrapper`](/v7/hooks/reputation/use-fetch-many-reputation-grants-wrapper).
 
 Exactly one filter shape per call — by recipient, by sender, or by target. The shapes are mutually exclusive and are not AND-ed.
 
@@ -51,14 +51,14 @@ function useRecentRewards(userId: string) {
   Associations to expand. Only `"user"` is supported — it hydrates **both** the sender and the recipient on every row.
 </ParamField>
 <ParamField path="spaceReputation" type="object">
-  Opt-in per-user space reputation on the hydrated users. This is a context surface, so `spaceReputation: { spaceId: "context" }` scores each user against *that grant's own* space. See [Reputation](/data-models/reputation#reading-space-scoped-reputation).
+  Opt-in per-user space reputation on the hydrated users. This is a context surface, so `spaceReputation: { spaceId: "context" }` scores each user against *that grant's own* space. See [Reputation](/v7/data-models/reputation#reading-space-scoped-reputation).
 </ParamField>
 
 ## Returns
 
 Returns a `Promise` resolving to the paginated envelope:
 
-<ResponseField name="data" type="ReputationGrant[]">The page of [grants](/data-models/reputation-grant), newest first.</ResponseField>
+<ResponseField name="data" type="ReputationGrant[]">The page of [grants](/v7/data-models/reputation-grant), newest first.</ResponseField>
 <ResponseField name="pagination" type="{ page, pageSize, totalPages, totalItems, hasMore }">Page metadata.</ResponseField>
 <ResponseField name="summary" type="GrantSummary | undefined">
   `{ total, count, viewerTotal }` for the target — returned **only** on the target filter shape, so a standalone "who rewarded this" view doesn't have to fetch the parent item to know the totals.
@@ -80,6 +80,6 @@ The hook mirrors the server's filter rules locally, so a malformed query throws 
 
 ## See Also
 
-- [useFetchManyReputationGrantsWrapper](/hooks/reputation/use-fetch-many-reputation-grants-wrapper)
-- [Reputation Grants Overview](/sdk/reputation/overview)
-- [Fetch Many Reputation Grants API](/api-reference/reputation-grants/fetch-many-reputation-grants)
+- [useFetchManyReputationGrantsWrapper](/v7/hooks/reputation/use-fetch-many-reputation-grants-wrapper)
+- [Reputation Grants Overview](/v7/sdk/reputation/overview)
+- [Fetch Many Reputation Grants API](/v7/api-reference/reputation-grants/fetch-many-reputation-grants)

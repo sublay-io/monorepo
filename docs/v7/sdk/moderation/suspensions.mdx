@@ -7,10 +7,10 @@ description: "Platform-wide user suspensions — the enforced timeout for partic
 
 A **suspension** puts a user in a platform-wide timeout. While an active suspension is in place, the user **cannot participate** — every content and participation write is blocked server-side — but they can still **sign in, read everything, and manage their own account**. It's the "you're in timeout" model (Reddit / Discord / StackOverflow), not an eviction.
 
-Suspensions are set by project owners and admins from the [Sublay Dashboard](#dashboard-flow), or automatically by the report-handling flow. They are platform-wide and distinct from [space membership moderation](/sdk/spaces/membership) (space bans), which is scoped to a single space and set by space admins.
+Suspensions are set by project owners and admins from the [Sublay Dashboard](#dashboard-flow), or automatically by the report-handling flow. They are platform-wide and distinct from [space membership moderation](/v7/sdk/spaces/membership) (space bans), which is scoped to a single space and set by space admins.
 
 <Note>
-  **Requires the `moderation` bundle.** Suspensions are only available when the `moderation` bundle is installed on your project. On projects without it, suspensions are never queried and writes are never blocked on this basis. See [Bundles](/bundles) to add it.
+  **Requires the `moderation` bundle.** Suspensions are only available when the `moderation` bundle is installed on your project. On projects without it, suspensions are never queried and writes are never blocked on this basis. See [Bundles](/v7/bundles) to add it.
 </Note>
 
 ## What a suspension blocks
@@ -76,7 +76,7 @@ The `@sublay/core` SDK **only consumes** the current user's own suspension state
 
 ### Ambient state — `useUser`
 
-[`useUser`](/hooks/user/use-user) exposes derived `isSuspended` and `activeSuspension` fields, computed from the authenticated user's `suspensions` using the same effective definition as the server. Bind your "you're suspended until X" banner or disabled composer to these.
+[`useUser`](/v7/hooks/user/use-user) exposes derived `isSuspended` and `activeSuspension` fields, computed from the authenticated user's `suspensions` using the same effective definition as the server. Bind your "you're suspended until X" banner or disabled composer to these.
 
 ```tsx
 import { useUser } from "@sublay/react-js";
@@ -143,7 +143,7 @@ Suspending and lifting are done from the **Sublay Dashboard** by project owners 
 
 ## Related
 
-- [useUser hook](/hooks/user/use-user) — `isSuspended` / `activeSuspension`
-- [User data model](/data-models/user) — the `Suspension` shape on `AuthUser`
-- [Moderation overview](/sdk/moderation/overview) — reporting and content moderation
-- [Space membership](/sdk/spaces/membership) — space-scoped bans (a separate axis)
+- [useUser hook](/v7/hooks/user/use-user) — `isSuspended` / `activeSuspension`
+- [User data model](/v7/data-models/user) — the `Suspension` shape on `AuthUser`
+- [Moderation overview](/v7/sdk/moderation/overview) — reporting and content moderation
+- [Space membership](/v7/sdk/spaces/membership) — space-scoped bans (a separate axis)

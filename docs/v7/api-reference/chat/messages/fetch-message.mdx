@@ -6,7 +6,7 @@ description: "Fetch a single message by ID"
 
 import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
-Returns a single [ChatMessage](/data-models/chat-message) by ID, fully populated with `user`, `quotedMessage`, `files`, `reactionCounts`, and `userReactions`. The caller must be a member of the conversation.
+Returns a single [ChatMessage](/v7/data-models/chat-message) by ID, fully populated with `user`, `quotedMessage`, `files`, `reactionCounts`, and `userReactions`. The caller must be a member of the conversation.
 
 ## Path Parameters
 
@@ -21,18 +21,18 @@ Returns a single [ChatMessage](/data-models/chat-message) by ID, fully populated
 ## Query Parameters
 
 <ParamField query="include" type="string">
-  Comma-separated list of extra fields to include. Supports `grants` — the [reputation-grant summary](/data-models/reputation-grant#grantsummary) for this message.
+  Comma-separated list of extra fields to include. Supports `grants` — the [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary) for this message.
 </ParamField>
 
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to the message sender's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to the message sender's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation) for the full contract.
 
 <SpaceReputationParams variant="context" field="query" />
 
 ## Response
 
-Returns a [ChatMessage](/data-models/chat-message) with all populated fields including `reactionCounts` and `userReactions` for the requesting user.
+Returns a [ChatMessage](/v7/data-models/chat-message) with all populated fields including `reactionCounts` and `userReactions` for the requesting user.
 
 ## Error Responses
 

@@ -74,7 +74,7 @@ Returns a `PaginatedResponse` containing an array of following entries:
       ID of the follow record.
     </ResponseField>
     <ResponseField name="user" type="User">
-      The followed user's profile. When `spaceReputation` is requested, it carries an added `spaceReputation` number. See [User data model](/data-models/user) and [Reputation](/data-models/reputation).
+      The followed user's profile. When `spaceReputation` is requested, it carries an added `spaceReputation` number. See [User data model](/v7/data-models/user) and [Reputation](/v7/data-models/reputation).
     </ResponseField>
     <ResponseField name="followedAt" type="string">
       ISO timestamp of when the follow was created.
@@ -88,5 +88,5 @@ Returns a `PaginatedResponse` containing an array of following entries:
 
 ## Related
 
-- [useFetchFollowing](/hooks/follows/use-fetch-following) — fetch the current user's own following list
-- [useFetchFollowingCountByUserId](/hooks/follows/use-fetch-following-count-by-user-id) — get following count for a user
+- [useFetchFollowing](/v7/hooks/follows/use-fetch-following) — fetch the current user's own following list
+- [useFetchFollowingCountByUserId](/v7/hooks/follows/use-fetch-following-count-by-user-id) — get following count for a user

@@ -92,14 +92,14 @@ const reports = await fetchReports({ spaceId });
 
 ## Chat Moderation
 
-Spaces with integrated chat also support message moderation via the API. See the [Space Chat API](/api-reference/spaces/chat/get-space-conversation) for details on moderating chat messages within a space.
+Spaces with integrated chat also support message moderation via the API. See the [Space Chat API](/v7/api-reference/spaces/chat/get-space-conversation) for details on moderating chat messages within a space.
 
 ## Hook Reference
 
 | Hook | Description |
 |------|-------------|
-| [`useModerateSpaceEntity`](/hooks/spaces/use-moderate-space-entity) | Approve or remove an entity in a space |
-| [`useModerateSpaceComment`](/hooks/spaces/use-moderate-space-comment) | Approve or remove a comment in a space |
-| [`useFetchModeratedReports`](/hooks/reports/use-fetch-moderated-reports) | Fetch pending content reports |
-| [`useHandleSpaceEntityReport`](/hooks/reports/use-handle-space-entity-report) | Resolve a reported entity |
-| [`useHandleSpaceCommentReport`](/hooks/reports/use-handle-space-comment-report) | Resolve a reported comment |
+| [`useModerateSpaceEntity`](/v7/hooks/spaces/use-moderate-space-entity) | Approve or remove an entity in a space |
+| [`useModerateSpaceComment`](/v7/hooks/spaces/use-moderate-space-comment) | Approve or remove a comment in a space |
+| [`useFetchModeratedReports`](/v7/hooks/reports/use-fetch-moderated-reports) | Fetch pending content reports |
+| [`useHandleSpaceEntityReport`](/v7/hooks/reports/use-handle-space-entity-report) | Resolve a reported entity |
+| [`useHandleSpaceCommentReport`](/v7/hooks/reports/use-handle-space-comment-report) | Resolve a reported comment |

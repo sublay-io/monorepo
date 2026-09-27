@@ -6,7 +6,7 @@ description: "Send push notifications to your users' registered devices from you
 The `push` module lets your backend fan a notification out to every registered device belonging to one or more users — across iOS (APNs), Android (FCM), and Web Push — in a single call.
 
 <Note>
-  Requires the `push` bundle and configured provider credentials (APNs, FCM, or Web Push) in the project dashboard. See [Push Notifications](/push-notifications) for the full setup guide.
+  Requires the `push` bundle and configured provider credentials (APNs, FCM, or Web Push) in the project dashboard. See [Push Notifications](/v7/push-notifications) for the full setup guide.
 </Note>
 
 ---
@@ -52,7 +52,7 @@ const result = await sublay.push.send({
 
 #### Rich payload fields
 
-All optional. Each maps to whichever platform(s) support it and is silently ignored elsewhere (e.g. `subtitle`/`threadId` are iOS-only, `channelId` is Android-only). See [Rich notification payloads](/push-notifications#rich-notification-payloads) for the platform setup each one needs.
+All optional. Each maps to whichever platform(s) support it and is silently ignored elsewhere (e.g. `subtitle`/`threadId` are iOS-only, `channelId` is Android-only). See [Rich notification payloads](/v7/push-notifications#rich-notification-payloads) for the platform setup each one needs.
 
 <ParamField body="sound" type="string">
   Sound file to play. **iOS:** APNs `sound`. **Android:** on 8+ the sound is owned by the notification channel — pair this with `channelId` and create that channel client-side with the sound set. **Web:** forwarded to your service worker.
@@ -85,7 +85,7 @@ All optional. Each maps to whichever platform(s) support it and is silently igno
 <ParamField body="collapseId" type="string">
   Transport-level collapse identifier (APNs `apns-collapse-id`, FCM `collapse_key`) — a newer push supersedes an undelivered one with the same id **for the same account**.
 
-  Both keys are scoped to the recipient before they reach the provider: two accounts signed in on one physical device share a single transport destination, so the server appends a short digest of the recipient's id and each account collapses only against itself. That means the device receives a different string than you sent — client code reading the delivered `tag` must match on a prefix rather than on equality, or carry its own key in `data`, which is passed through untouched. An over-length `collapseId` is folded into a fixed-width digest rather than refused by APNs — see [the endpoint reference](/api-reference/push-notifications/send).
+  Both keys are scoped to the recipient before they reach the provider: two accounts signed in on one physical device share a single transport destination, so the server appends a short digest of the recipient's id and each account collapses only against itself. That means the device receives a different string than you sent — client code reading the delivered `tag` must match on a prefix rather than on equality, or carry its own key in `data`, which is passed through untouched. An over-length `collapseId` is folded into a fixed-width digest rather than refused by APNs — see [the endpoint reference](/v7/api-reference/push-notifications/send).
 </ParamField>
 
 <ParamField body="threadId" type="string">
@@ -144,7 +144,7 @@ Common `reason` values when `success` is `false`:
 
 ## Notification preferences
 
-Read and update a user's per-type push preferences — the set of event types they've disabled for push. See [Notification Preferences & Mute](/notification-preferences) for the model and the full event palette.
+Read and update a user's per-type push preferences — the set of event types they've disabled for push. See [Notification Preferences & Mute](/v7/notification-preferences) for the model and the full event palette.
 
 <Note>
   These endpoints are **per-user**. The Node SDK authenticates with a service key, so — exactly like the other per-user operations — you name the user with an explicit `userId` and the SDK acts on that user's behalf. (End-user-token clients, such as the React hooks and the browser JS SDK, act on the signed-in user and omit `userId`.)
@@ -188,7 +188,7 @@ await sublay.push.updateNotificationPreferences({
 ```
 
 <ParamField body="disabledTypes" type="PushEventType[]" required>
-  The complete set of event types to disable for push. Values must be from `PUSH_EVENT_TYPES` (see the [event palette](/notification-preferences#the-event-palette)); unknown names are rejected. Pass `[]` to re-enable everything.
+  The complete set of event types to disable for push. Values must be from `PUSH_EVENT_TYPES` (see the [event palette](/v7/notification-preferences#the-event-palette)); unknown names are rejected. Pass `[]` to re-enable everything.
 </ParamField>
 
 <ParamField body="userId" type="string" required>
@@ -201,4 +201,4 @@ await sublay.push.updateNotificationPreferences({
 
 ## Conversation mute
 
-Setting or clearing a conversation mute lives on the **`chat`** module (it's a `/chat/...` route): [`chat.muteConversation`](/node-sdk/chat#muteconversation). Like the preference endpoints it is per-user — name the acting user with `userId` — and takes a duration **choice**, never a timestamp.
+Setting or clearing a conversation mute lives on the **`chat`** module (it's a `/chat/...` route): [`chat.muteConversation`](/v7/node-sdk/chat#muteconversation). Like the preference endpoints it is per-user — name the acting user with `userId` — and takes a duration **choice**, never a timestamp.

@@ -6,7 +6,7 @@ description: "Edit an event's mutable fields and curate its images (host-only)"
 
 Updates an event. **Host-only** — the caller must be in `hostIds` (service/master keys bypass this). Every provided field is updated; omitted fields are left untouched. Type-conditional location validation is re-applied when `type` is present.
 
-`hostIds`, `status`, and `spaceId` are **not** editable here — manage hosts via the [host endpoints](/api-reference/events/add-host), cancel via [Cancel Event](/api-reference/events/cancel-event); the space is immutable.
+`hostIds`, `status`, and `spaceId` are **not** editable here — manage hosts via the [host endpoints](/v7/api-reference/events/add-host), cancel via [Cancel Event](/v7/api-reference/events/cancel-event); the space is immutable.
 
 Images can be curated in one request: a new `cover` **replaces** the existing cover, `gallery` files are **appended**, and `removeImageIds` deletes existing event images by File ID. Any image operation requires the `files-images` bundle.
 
@@ -58,7 +58,7 @@ When a time field (`startTime`/`endTime`/`timezone`) or a location field (`locat
 
 ## Response
 
-Returns the updated [Event](/data-models/event) object.
+Returns the updated [Event](/v7/data-models/event) object.
 
 ## Error Responses
 
@@ -85,4 +85,4 @@ Returns the updated [Event](/data-models/event) object.
   </Accordion>
 </AccordionGroup>
 
-See also: [useUpdateEvent](/hooks/events/use-update-event)
+See also: [useUpdateEvent](/v7/hooks/events/use-update-event)

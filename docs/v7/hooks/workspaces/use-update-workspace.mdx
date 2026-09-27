@@ -6,12 +6,12 @@ icon: "plug"
 
 ## Overview
 
-`useUpdateWorkspace` returns a callable that edits a [workspace](/data-models/workspace)'s own `name` and/or `metadata`. The actor is the signed-in user.
+`useUpdateWorkspace` returns a callable that edits a [workspace](/v7/data-models/workspace)'s own `name` and/or `metadata`. The actor is the signed-in user.
 
 **Authorization:** capability-gated. Requires the `edit-workspace` capability (owners hold it implicitly).
 
 <Note>
-  This does **not** flip `inheritsFromParent` — that is a separate owner-only action, [`useUpdateWorkspaceInheritFlag`](/hooks/workspaces/use-update-workspace-inherit-flag).
+  This does **not** flip `inheritsFromParent` — that is a separate owner-only action, [`useUpdateWorkspaceInheritFlag`](/v7/hooks/workspaces/use-update-workspace-inherit-flag).
 </Note>
 
 ## Usage Example
@@ -45,7 +45,7 @@ function RenameWorkspace({ workspaceId }: { workspaceId: string }) {
 
 ## Returns
 
-Returns the updated [Workspace](/data-models/workspace) object.
+Returns the updated [Workspace](/v7/data-models/workspace) object.
 
 ## Error codes
 
@@ -56,5 +56,5 @@ Returns the updated [Workspace](/data-models/workspace) object.
 
 ## Related
 
-- [`useFetchWorkspaceAuthority`](/hooks/workspaces/use-fetch-workspace-authority) — check `edit-workspace` before showing the form
-- [Update Workspace API](/api-reference/workspaces/update-workspace)
+- [`useFetchWorkspaceAuthority`](/v7/hooks/workspaces/use-fetch-workspace-authority) — check `edit-workspace` before showing the form
+- [Update Workspace API](/v7/api-reference/workspaces/update-workspace)

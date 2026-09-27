@@ -42,9 +42,13 @@ function Events() {
       {rows.map((e) => (
         <Row key={e.id} event={e} onSave={(d) => updateRow(e.id, d)} onDelete={() => deleteRow(e.id)} />
       ))}
-      {/* Page off `view.page` (what you asked for), not `pagination.page`
-          (what is on screen) — see the note below. */}
-      {pagination?.hasMore && <button onClick={() => setPage(view.page + 1)}>Next</button>}
+      {/* Both halves come off `view.page` (what you asked for) rather than
+          `pagination` (what is on screen) — see the note below. `totalPages`
+          is safe to read because it describes the whole result set, not the
+          page. */}
+      {pagination && view.page < pagination.totalPages && (
+        <button onClick={() => setPage(view.page + 1)}>Next</button>
+      )}
     </>
   );
 }
@@ -69,7 +73,14 @@ function Events() {
 <ResponseField name="pagination" type="PaginationMetadata | null">
   Pagination metadata (`page`, `pageSize`, `totalPages`, `totalItems`, `hasMore`), or `null` before the first load.
 
-  It describes the page **currently on screen**, which during a page change is still the previous one — the rows and their metadata stay in step. Drive a pager off `view.page` instead, which is the page you last asked for: a "Next" button built on `pagination.page` computes the same target twice if it is clicked again before the first request lands, and the second click appears to do nothing.
+  It describes the page **currently on screen**, which during a page change is still the previous one — the rows and their metadata stay in step.
+
+  So a pager needs its *target* and its *bound* from `view.page`, the page you last asked for, not from `pagination`:
+
+  - `setPage(pagination.page + 1)` computes the same target twice if clicked again before the first request lands, so the second click appears to do nothing.
+  - `pagination.hasMore` is likewise the previous page's answer, so a second click can run off the end — asking for page 3 when page 2 was the last.
+
+  `totalPages` and `totalItems` are safe to read mid-change: they describe the whole result set rather than a page, so `view.page < pagination.totalPages` is a correct bound either way.
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">

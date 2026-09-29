@@ -93,7 +93,7 @@ const { data, pagination } = await sublay.collections.fetchCollectionEntities({
 </ParamField>
 
 <ParamField body="include" type="string">
-  Comma-separated related resources to include in the response.
+  Comma-separated related resources to include in the response: `"user"`, `"space"`, `"topComment"`, `"files"`, `"grants"`.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Entity>>`

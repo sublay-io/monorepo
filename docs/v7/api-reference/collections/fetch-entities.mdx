@@ -31,7 +31,14 @@ Returns a paginated list of entities saved in the specified collection. The coll
 </ParamField>
 
 <ParamField query="include" type="string" optional>
-  Comma-separated list of associations to include: `user`, `space`, `topcomment`, `grants` (the [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary)).
+  Comma-separated list of associations to include:
+  - `user` — the author's user profile
+  - `space` — the space the entity belongs to
+  - `topComment` — the highest-voted comment
+  - `files` — uploaded file/image attachments
+  - `grants` — the [reputation-grant summary](/v7/data-models/reputation-grant#grantsummary) for the entity
+
+  `saved` is not needed here: every entity returned by this endpoint already has `isSaved: true`.
 </ParamField>
 
 ## Response

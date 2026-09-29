@@ -72,7 +72,7 @@ function SavedFeed({ collectionId }) {
 </ParamField>
 
 <ParamField body="include" type="EntityIncludeParam" optional>
-  Optional associations to include with each entity: `"user"`, `"space"`, `"topComment"`, `"grants"`. (`"saved"` and `"files"` are not resolved on this endpoint.)
+  Optional associations to include with each entity: `"user"`, `"space"`, `"topComment"`, `"files"`, `"grants"`. (`"saved"` is not needed: every entity returned already has `isSaved: true`.)
 </ParamField>
 
 ## Returns

@@ -121,7 +121,7 @@ const { data, pagination } = await sublay.collections.fetchCollectionEntities({
 </ParamField>
 
 <ParamField body="include" type="string">
-  Comma-separated list of associations to populate (e.g. `"user"`).
+  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComment"`, `"files"`, `"grants"`.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Entity>>`

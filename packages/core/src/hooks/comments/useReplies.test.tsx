@@ -34,6 +34,52 @@ describe("useReplies", () => {
     expect(axiosPrivate.calls("get")).toHaveLength(0);
   });
 
+  it("does not fetch when paged while the comment is not in the tree", async () => {
+    const { result, axiosPrivate } = renderWithCommentSection(
+      () => useReplies({ commentId: VALID_COMMENT_ID, sortBy: "new" }),
+      { commentSectionValue: { entityCommentsTree: {}, addCommentsToTree: vi.fn() } },
+    );
+
+    act(() => {
+      result.current.setPage(1);
+    });
+
+    expect(result.current.page).toBe(1);
+    expect(result.current.loading).toBe(false);
+    expect(axiosPrivate.calls("get")).toHaveLength(0);
+  });
+
+  it("keeps working when the comment enters and leaves the tree between renders", () => {
+    const reply = makeComment({ id: "reply-1", parentId: VALID_COMMENT_ID });
+    const present: EntityCommentsTree = {
+      [VALID_COMMENT_ID]: {
+        comment: makeComment({ id: VALID_COMMENT_ID }),
+        new: false,
+        replies: { [reply.id]: { ...reply, new: false } },
+      },
+    };
+    // The wrapper hands this same object to the context, so mutating it and
+    // re-rendering is how the tree changes under the hook.
+    const commentSectionValue = {
+      entityCommentsTree: {} as EntityCommentsTree,
+      addCommentsToTree: vi.fn(),
+    };
+
+    const { result, rerender } = renderWithCommentSection(
+      () => useReplies({ commentId: VALID_COMMENT_ID, sortBy: "new" }),
+      { commentSectionValue },
+    );
+    expect(result.current.replies).toEqual([]);
+
+    commentSectionValue.entityCommentsTree = present;
+    rerender();
+    expect(result.current.replies.map((r) => r.id)).toEqual(["reply-1"]);
+
+    commentSectionValue.entityCommentsTree = {};
+    rerender();
+    expect(result.current.replies).toEqual([]);
+  });
+
   it("splits existing replies into already-seen vs. new (sorted most-recent-first)", () => {
     const oldReply = makeComment({ id: "reply-old", parentId: VALID_COMMENT_ID });
     const newReply1 = makeComment({

@@ -29,28 +29,15 @@ function useReplies({ commentId, sortBy, sortDir }: UseRepliesProps): UseReplies
   const [loadingState, setLoadingState] = useState(false);
 
   const commentData = entityCommentsTree![commentId];
-  if (!commentData) {
-    return {
-      replies: [],
-      newReplies: [],
-      loading: loadingState,
-      page,
-      setPage,
-    }; // If the commentID is not found, return an empty array
-  }
 
-  const allReplies = commentData.replies;
-  const replies = Object.values(allReplies).filter((reply) => !reply.new);
-
-  const newReplies = Object.values(allReplies)
-    .filter((reply) => !!reply.new)
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
+  // Registered before the early return below: hooks must run on every render,
+  // and the node can appear or disappear between renders.
   useEffect(() => {
     const loadReplies = async () => {
+      // No node, no fetch: fetched replies would be dropped anyway, since
+      // addCommentsToTree skips replies whose parent isn't in the tree.
+      if (!commentData) return;
+
       if (!commentId || !isUUID(commentId)) {
         // console.warn(
         //   "The 'fetch comments' operation was invoked without a valid comment ID and has been aborted."
@@ -85,6 +72,26 @@ function useReplies({ commentId, sortBy, sortDir }: UseRepliesProps): UseReplies
       loadReplies();
     }
   }, [page]);
+
+  if (!commentData) {
+    return {
+      replies: [],
+      newReplies: [],
+      loading: loadingState,
+      page,
+      setPage,
+    }; // If the commentID is not found, return an empty array
+  }
+
+  const allReplies = commentData.replies;
+  const replies = Object.values(allReplies).filter((reply) => !reply.new);
+
+  const newReplies = Object.values(allReplies)
+    .filter((reply) => !!reply.new)
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
 
   return {
     replies,

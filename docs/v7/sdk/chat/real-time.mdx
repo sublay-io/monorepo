@@ -80,7 +80,9 @@ function ChatBadge() {
 
 ## Read Receipts
 
-Mark a conversation as read by calling `useMarkConversationAsRead`. This clears the unread count in Redux immediately (optimistic) and sends the mark-as-read request to the server.
+`ConversationProvider` marks its conversation as read for you. When it mounts, the conversation's unread count is cleared right away, and whenever the newest loaded message changes (initial load, a live message, your own confirmed send, or messages caught up after a reconnect) the read position on the server advances to it. Loading older pages doesn't mark anything, and optimistic messages are skipped until the server confirms them. Mounting a `ConversationProvider` therefore means "the user is viewing this conversation" — don't mount one for a conversation that isn't on screen.
+
+To mark read yourself outside a `ConversationProvider`, call `useMarkConversationAsRead`. It clears the unread count in Redux immediately (optimistic) and sends the mark-as-read request to the server.
 
 ```tsx
 import { useMarkConversationAsRead } from "@sublay/react-js";

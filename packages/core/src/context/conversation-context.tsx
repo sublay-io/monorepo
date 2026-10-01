@@ -15,7 +15,7 @@ import useConversationData, {
 import useMarkConversationAsRead from "../hooks/chat/useMarkConversationAsRead";
 import useAxiosPrivate from "../config/useAxiosPrivate";
 import useProject from "../hooks/projects/useProject";
-import { upsertMessage } from "../store/slices/chatSlice";
+import { clearUnread, upsertMessage } from "../store/slices/chatSlice";
 import type { ChatMessage } from "../interfaces/models/ChatMessage";
 import type { ConversationMember } from "../interfaces/models/ConversationMember";
 import { handleError } from "../utils/handleError";
@@ -109,12 +109,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     // Join the Socket.io room
     socket.emit("join:conversation", { conversationId });
 
-    // Mark as read on mount (catches up any unread before the view was opened)
-    const newestId = newestMessageIdRef.current;
-    if (newestId) {
-      mark({ messageId: newestId });
-    }
-
     return () => {
       socket.emit("leave:conversation", { conversationId });
       unregisterActiveConversation(room);
@@ -124,8 +118,30 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     conversationId,
     registerActiveConversation,
     unregisterActiveConversation,
-    mark,
   ]);
+
+  // ── Mark read ──────────────────────────────────────────────────────────────
+  // Opening the conversation clears its unread badge immediately, without
+  // waiting for messages to load or the socket to connect.
+  useEffect(() => {
+    if (!conversationId) return;
+    dispatch(clearUnread(conversationId));
+  }, [conversationId, dispatch]);
+
+  // The server read position follows the newest loaded message. One rule covers
+  // the initial fetch (cold or cached), live messages, confirmed sends and
+  // reconnect catch-up. newestMessageId never points at an optimistic `temp-`
+  // message, and loading older pages doesn't change it.
+  const lastMarkedRef = useRef<{ conversationId: string; messageId: string } | null>(null);
+  useEffect(() => {
+    if (!conversationId || !newestMessageId) return;
+    const last = lastMarkedRef.current;
+    if (last?.conversationId === conversationId && last.messageId === newestMessageId) {
+      return;
+    }
+    lastMarkedRef.current = { conversationId, messageId: newestMessageId };
+    mark({ messageId: newestMessageId });
+  }, [conversationId, newestMessageId, mark]);
 
   // ── Reconnect handler ──────────────────────────────────────────────────────
   // On reconnects (not the initial connect), re-join the room and catch up on
@@ -210,22 +226,6 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       socket.off("member:left", handleMemberLeft);
     };
   }, [socket, conversationId, data.upsertMember, data.removeMemberLocally]);
-
-  // ── Mark read on new messages ──────────────────────────────────────────────
-  // While this conversation is mounted, each incoming message is immediately marked read.
-  useEffect(() => {
-    if (!socket || !conversationId) return;
-
-    const handleMessage = (message: ChatMessage) => {
-      if (message.conversationId !== conversationId) return;
-      mark({ messageId: message.id });
-    };
-
-    socket.on("message:created", handleMessage);
-    return () => {
-      socket.off("message:created", handleMessage);
-    };
-  }, [socket, conversationId, mark]);
 
   return (
     <ConversationContext.Provider value={{ ...data, conversationId }}>

@@ -2,6 +2,23 @@ import { Comment } from "../interfaces/models/Comment";
 import { EntityCommentsTree } from "../interfaces/EntityCommentsTree";
 import { handleError } from "../utils/handleError";
 
+// A comment can arrive more than once — e.g. the entity fetch and its parent's
+// replies fetch both return it, or a reaction re-adds it with fresh counts. The
+// incoming copy replaces the comment data, but replies already loaded under the
+// node are kept. Resetting them would silently drop a subtree whose own replies
+// fetch already ran, since that fetch never re-runs on its own.
+function buildNode(
+  entityCommentsTree: EntityCommentsTree,
+  newComment: Comment,
+  newlyAdded?: boolean
+): EntityCommentsTree[string] {
+  return {
+    comment: newComment,
+    replies: entityCommentsTree[newComment.id]?.replies ?? {},
+    new: !!newlyAdded,
+  };
+}
+
 function addSingleCommentToTree(
   entityCommentsTree: EntityCommentsTree,
   newComment: Comment,
@@ -27,20 +44,12 @@ function addSingleCommentToTree(
             [newComment.id]: { ...newComment, new: !!newlyAdded },
           },
         },
-        [newComment.id]: {
-          comment: newComment,
-          replies: {},
-          new: !!newlyAdded,
-        },
+        [newComment.id]: buildNode(entityCommentsTree, newComment, newlyAdded),
       };
     } else {
       return {
         ...entityCommentsTree,
-        [newComment.id]: {
-          comment: newComment,
-          replies: {},
-          new: !!newlyAdded,
-        },
+        [newComment.id]: buildNode(entityCommentsTree, newComment, newlyAdded),
       };
     }
   } catch (err) {

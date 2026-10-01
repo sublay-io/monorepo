@@ -15,6 +15,7 @@ import {
 import { makeProvidersWrapper, createFakeSocket, type FakeSocket } from "./testHelpers";
 import { ChatContext, type ChatContextValue } from "./chat-context";
 import { ConversationProvider, useConversationContext } from "./conversation-context";
+import { SublayContext, type SublayContextValues } from "./sublay-context";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -269,6 +270,36 @@ describe("ConversationProvider", () => {
       await waitFor(() => expect(result.current.messagesLoading).toBe(false));
       await waitFor(() => expect(readCalls(axiosPrivate)).toHaveLength(1));
       expect(readCalls(axiosPrivate)[0].body).toEqual({ messageId: "message-2" });
+    });
+
+    it("marks the newest message once the project becomes ready", async () => {
+      const { Wrapper, store, axiosPrivate } = makeProvidersWrapper({
+        beforeRender: ({ axiosPrivate }) => {
+          axiosPrivate.mockResponse("get", messagesPage([]));
+          axiosPrivate.mockResponse("get", emptyMembersPage());
+          axiosPrivate.mockResponse("post", { message: "Marked as read." });
+        },
+      });
+      store.dispatch(upsertMessage(msg("message-1", "2024-01-01T00:00:01.000Z")));
+
+      let projectId: string | null = null;
+      const { rerender } = renderHook(() => useConversationContext(), {
+        wrapper: ({ children }) => (
+          <Wrapper>
+            <SublayContext.Provider value={{ projectId, project: null } as SublayContextValues}>
+              <ConversationProvider conversationId="conversation-1">{children}</ConversationProvider>
+            </SublayContext.Provider>
+          </Wrapper>
+        ),
+      });
+
+      expect(readCalls(axiosPrivate)).toHaveLength(0);
+
+      projectId = "test-project";
+      rerender();
+
+      await waitFor(() => expect(readCalls(axiosPrivate)).toHaveLength(1));
+      expect(readCalls(axiosPrivate)[0].body).toEqual({ messageId: "message-1" });
     });
 
     it("marks each new newest message, skips optimistic sends and older pages", async () => {

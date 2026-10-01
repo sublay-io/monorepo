@@ -131,17 +131,18 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   // The server read position follows the newest loaded message. One rule covers
   // the initial fetch (cold or cached), live messages, confirmed sends and
   // reconnect catch-up. newestMessageId never points at an optimistic `temp-`
-  // message, and loading older pages doesn't change it.
+  // message, and loading older pages doesn't change it. Wait for projectId so
+  // a no-op mark isn't recorded as sent.
   const lastMarkedRef = useRef<{ conversationId: string; messageId: string } | null>(null);
   useEffect(() => {
-    if (!conversationId || !newestMessageId) return;
+    if (!projectId || !conversationId || !newestMessageId) return;
     const last = lastMarkedRef.current;
     if (last?.conversationId === conversationId && last.messageId === newestMessageId) {
       return;
     }
     lastMarkedRef.current = { conversationId, messageId: newestMessageId };
     mark({ messageId: newestMessageId });
-  }, [conversationId, newestMessageId, mark]);
+  }, [projectId, conversationId, newestMessageId, mark]);
 
   // ── Reconnect handler ──────────────────────────────────────────────────────
   // On reconnects (not the initial connect), re-join the room and catch up on

@@ -71,7 +71,10 @@ function useReplies({ commentId, sortBy, sortDir }: UseRepliesProps): UseReplies
     if (page > 0) {
       loadReplies();
     }
-  }, [page]);
+    // Presence is a dependency so a thread that outlives a tree reset (the
+    // highlighted thread renders from state, not from the tree) refetches when
+    // its node is re-added. Tree-rendered threads unmount on reset instead.
+  }, [page, !!commentData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!commentData) {
     return {

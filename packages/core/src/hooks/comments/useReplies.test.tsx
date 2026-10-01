@@ -80,6 +80,46 @@ describe("useReplies", () => {
     expect(result.current.replies).toEqual([]);
   });
 
+  it("refetches its page when the comment is re-added after leaving the tree", async () => {
+    const node: EntityCommentsTree = {
+      [VALID_COMMENT_ID]: {
+        comment: makeComment({ id: VALID_COMMENT_ID }),
+        new: false,
+        replies: {},
+      },
+    };
+    const commentSectionValue = {
+      entityCommentsTree: node,
+      addCommentsToTree: vi.fn(),
+    };
+
+    const { result, rerender, axiosPrivate } = renderWithCommentSection(
+      () => useReplies({ commentId: VALID_COMMENT_ID, sortBy: "new" }),
+      { commentSectionValue },
+    );
+
+    axiosPrivate.mockResponse("get", makePage([]));
+    act(() => {
+      result.current.setPage(1);
+    });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+
+    // A sort change resets the tree, then the entity refetch re-adds the node.
+    commentSectionValue.entityCommentsTree = {};
+    rerender();
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+
+    axiosPrivate.mockResponse("get", makePage([]));
+    commentSectionValue.entityCommentsTree = node;
+    rerender();
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(2));
+    expect(axiosPrivate.calls("get")[1].config?.params).toMatchObject({
+      parentId: VALID_COMMENT_ID,
+      page: 1,
+    });
+  });
+
   it("splits existing replies into already-seen vs. new (sorted most-recent-first)", () => {
     const oldReply = makeComment({ id: "reply-old", parentId: VALID_COMMENT_ID });
     const newReply1 = makeComment({

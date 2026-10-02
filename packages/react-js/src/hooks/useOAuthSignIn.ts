@@ -25,11 +25,11 @@ export interface UseOAuthSignInReturn {
  *
  * Usage (sign-in):
  *   const { initiateOAuth, handleOAuthCallback } = useOAuthSignIn();
- *   await initiateOAuth("google", "https://myapp.com/auth/callback");
+ *   await initiateOAuth({ provider: "google", redirectAfterAuth: "https://myapp.com/auth/callback" });
  *
  * Usage (link provider to current user):
  *   const { linkOAuthProvider, handleOAuthCallback } = useOAuthSignIn();
- *   await linkOAuthProvider("github", "https://myapp.com/settings");
+ *   await linkOAuthProvider({ provider: "github", redirectAfterAuth: "https://myapp.com/settings" });
  *
  * On the callback page (component mount):
  *   useEffect(() => { handleOAuthCallback(); }, []);

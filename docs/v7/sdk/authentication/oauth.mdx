@@ -32,7 +32,7 @@ function SignInWithGoogle() {
   const handleClick = async () => {
     // The user will be redirected to Google's authorization page.
     // isLoading stays true during the redirect.
-    await initiateOAuth("google", "https://yourapp.com/auth/callback");
+    await initiateOAuth({ provider: "google", redirectAfterAuth: "https://yourapp.com/auth/callback" });
   };
 
   return (
@@ -84,7 +84,7 @@ function LinkGitHubButton() {
   const { linkOAuthProvider } = useOAuthSignIn();
 
   return (
-    <button onClick={() => linkOAuthProvider("github", "https://yourapp.com/settings/callback")}>
+    <button onClick={() => linkOAuthProvider({ provider: "github", redirectAfterAuth: "https://yourapp.com/settings/callback" })}>
       Connect GitHub
     </button>
   );

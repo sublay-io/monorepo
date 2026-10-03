@@ -27,7 +27,7 @@ If your application uses React or React Native, the SDK is the recommended integ
     Install `@sublay/react-js`. Works with Next.js, Vite, Create React App, or any React web setup.
   </Card>
   <Card title="React Native / Expo" icon="mobile" href="/v7/sdk/getting-started">
-    Install `@sublay/react-native` (or `@sublay/expo` for Expo-managed workflows with secure token storage).
+    Install `@sublay/react-native` (or `@sublay/expo` for Expo-managed workflows).
   </Card>
 </CardGroup>
 
@@ -36,8 +36,8 @@ If your application uses React or React Native, the SDK is the recommended integ
 | Package | Platform | Notes |
 |---------|----------|-------|
 | `@sublay/react-js` | React web | Full SDK for browser environments |
-| `@sublay/react-native` | React Native | Full SDK with AsyncStorage token storage |
-| `@sublay/expo` | Expo | Same as React Native but uses SecureStore |
+| `@sublay/react-native` | React Native | Full SDK; tokens are stored in the Keychain (`react-native-keychain`) |
+| `@sublay/expo` | Expo | Same as React Native, but stores tokens with Expo SecureStore |
 | `@sublay/core` | Shared | Platform-agnostic hooks and types — not imported directly in most cases |
 
 ## Option 2: Raw REST API

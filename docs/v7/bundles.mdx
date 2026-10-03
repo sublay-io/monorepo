@@ -28,18 +28,20 @@ On top of core, you choose which of these to install. Most are independent — i
 |--------|---------|--------------|
 | `entities` | [Entities](/v7/sdk/entities/overview) | The base content unit — posts, articles, listings, anything your users create — with views, drafts, and publishing |
 | `comments` | [Comments](/v7/sdk/comments/overview) | Threaded comments on entities |
-| `reactions` | [Reactions](/v7/sdk/reactions/overview) | Emoji reactions on entities and comments |
+| `reactions` | [Reactions](/v7/sdk/reactions/overview) | Reactions on entities and comments, from a fixed set of types (upvote, downvote, like, love, wow, sad, angry, funny) |
 | `files-images` | [Storage](/v7/sdk/storage/overview) | File and image uploads, including user avatars and banners |
 | `follows` | [Follows](/v7/sdk/relationships/overview) | Unidirectional follow relationships |
 | `connections` | [Connections](/v7/sdk/relationships/overview) | Bidirectional connection (friend-style) requests |
-| `spaces` | [Spaces](/v7/sdk/spaces/overview) | Hierarchical community spaces, membership, roles, and rules |
+| `spaces` | [Spaces](/v7/sdk/spaces/overview) | Hierarchical spaces (groups such as teams, cohorts or forums) with membership, roles, and rules |
 | `workspaces` | [Workspaces](/v7/sdk/workspaces/overview) | Self-nesting SaaS/team workspaces with invitations and per-member authority |
+| `events` | [Events](/v7/sdk/events/overview) | Scheduled events with RSVPs, hosts and invites |
 | `chat` | [Chat](/v7/sdk/chat/overview) | Real-time 1:1 and group conversations with message reactions |
 | `collections` | [Collections](/v7/sdk/collections/overview) | User-owned bookmarking and folders for saving entities |
 | `moderation` | [Moderation](/v7/sdk/moderation/overview) | Reports, report resolution, and user suspensions |
 | `notifications` | [App Notifications](/v7/sdk/app-notifications/overview) | In-app notification system |
 | `push` | [Push Notifications](/v7/push-notifications) | Native OS push delivery to iOS, Android, and Web |
 | `ai-search` | [Semantic Search & AI](/v7/sdk/search/overview) | Content embeddings, semantic search, and the AI ask endpoint |
+| `interest-matching` | [Interest Matching](/v7/interest-matching) | Activity-derived interest facets per user and the `POST /match/users` endpoint for matching people (requires `ai-search`) |
 | `reputation` | [Reputation](/v7/data-models/reputation), [ReputationGrant](/v7/data-models/reputation-grant) | Per-space reputation buckets with a maintained overall total on each user, plus reputation grants — reputation deliberately given by a user or minted by your app |
 
 ### Bundle dependencies

@@ -72,6 +72,13 @@
 //      check — the release flow bumps versions before publishing and commits
 //      the bump afterwards. Root-script mode only: --package mode can only be
 //      reached through the root scripts, which have already run it.
+//      It runs once per release command, before any version bump: the
+//      `:patch`/`:minor`/`:prerelease` composites run this gate, bump, then call
+//      the bare publish script with SUBLAY_PUBLISH_FRESHNESS_CHECKED=1, whose
+//      own gate then skips the fetch — otherwise a network blip between the
+//      two runs would refuse *after* the bump and leave bumped manifests
+//      behind. It also only fetches when every other rule has passed, and
+//      gives up after 30 seconds.
 //
 // Node built-ins only, so it can run before (or without) an install.
 
@@ -132,6 +139,7 @@ function freshnessProblems(branch) {
     execFileSync('git', ['fetch', '--quiet', 'origin', branch], {
       cwd: repoRoot,
       stdio: ['ignore', 'ignore', 'pipe'],
+      timeout: 30_000,
     });
   } catch {
     return [`Could not fetch \`origin/${branch}\` to confirm the local branch is up to date (offline, or the branch is not on GitHub).`];
@@ -265,9 +273,12 @@ for (const pkg of packages) {
   problems.push(...packageProblems(channel, branch, group, pkg.name, pkg.version));
 }
 
-// Rule 10 — skipped when the branch is already wrong, so a refusal never
-// waits on the network.
-if (branch === BRANCH_FOR_CHANNEL[channel]) problems.push(...freshnessProblems(branch));
+// Rule 10 — only once everything else has passed (so a refusal for any other
+// reason never touches the network), and skipped by the inner gate of a
+// composite that already ran it before bumping.
+if (problems.length === 0 && process.env.SUBLAY_PUBLISH_FRESHNESS_CHECKED !== '1') {
+  problems.push(...freshnessProblems(branch));
+}
 
 if (problems.length > 0) fail(problems);
 console.log(`Publish target OK: ${channel} for ${group} (${[...versions].join(', ')}) from \`${branch}\`.`);

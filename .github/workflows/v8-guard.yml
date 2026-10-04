@@ -67,9 +67,16 @@ jobs:
         run: |
           const fs = require("fs");
           const dirs = ["core", "react-js", "react-native", "expo", "node", "js"];
-          const v8 = dirs
-            .map((d) => JSON.parse(fs.readFileSync(`packages/${d}/package.json`, "utf8")))
-            .filter((p) => parseInt(String(p.version).replace(/^v/, ""), 10) >= 8);
+          const manifests = dirs.map((d) => {
+            const file = `packages/${d}/package.json`;
+            try {
+              return JSON.parse(fs.readFileSync(file, "utf8"));
+            } catch (err) {
+              console.log(`::error::Could not read ${file} (${err.code || err.message}). If an API package was renamed or removed, update the list in .github/workflows/v8-guard.yml and API_GROUPS in .github/scripts/check-publish-target.mjs.`);
+              process.exit(1);
+            }
+          });
+          const v8 = manifests.filter((p) => parseInt(String(p.version).replace(/^v/, ""), 10) >= 8);
           if (v8.length > 0) {
             const list = v8.map((p) => `${p.name}@${p.version}`).join(", ");
             console.log(`::error::This PR carries 8.x API packages (${list}) and cannot merge into main — it contains v8 work, whatever the branch is called. v8 merges into main only at graduation (plan-v8-beta.md §4.2).`);

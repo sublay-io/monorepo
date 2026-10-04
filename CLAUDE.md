@@ -16,11 +16,11 @@ Scripts are grouped by publish group, and every group carries a `{group}:` prefi
 
 | Group | Packages | Publish |
 |---|---|---|
-| `react` | `@sublay/core`, `@sublay/react-js`, `@sublay/react-native`, `@sublay/expo` | `pnpm run react:publish-prod:patch` / `react:publish-prod:minor` (or `react:publish-beta:patch` / `:minor`) |
+| `react` | `@sublay/core`, `@sublay/react-js`, `@sublay/react-native`, `@sublay/expo` | `pnpm run react:publish-prod:patch` / `react:publish-prod:minor` (beta: `react:publish-beta:prerelease`, from the `v8` branch only) |
 | `ui-core` | `@sublay/ui-core-react-js`, `@sublay/ui-core-react-native` | `pnpm run ui-core:publish-prod:patch` / `:minor` (or `ui-core:publish-beta:patch` / `:minor`) |
 | `cli` | `@sublay/cli` | `pnpm run cli:publish-prod:patch` / `:minor` (or `cli:publish-beta:patch` / `:minor`) |
-| `node` | `@sublay/node` | `pnpm run node:publish-prod:patch` / `:minor` (or `node:publish-beta:patch` / `:minor`) |
-| `js` | `@sublay/js` | `pnpm run js:publish-prod:patch` / `:minor` (or `js:publish-beta:patch` / `:minor`) |
+| `node` | `@sublay/node` | `pnpm run node:publish-prod:patch` / `:minor` (beta: `node:publish-beta:prerelease`, from the `v8` branch only) |
+| `js` | `@sublay/js` | `pnpm run js:publish-prod:patch` / `:minor` (beta: `js:publish-beta:prerelease`, from the `v8` branch only) |
 
 Every group also exposes `{group}:version:patch` and `{group}:version:minor` for bumping without publishing.
 

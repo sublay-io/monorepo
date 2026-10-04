@@ -12,17 +12,19 @@
 // Two modes, one rule set, so the rules cannot drift between them:
 //
 //   --channel prod|beta --group <group>
-//       Run first in every root publish script. Knows which dist-tag is being
-//       published to, so it enforces everything below.
+//       Run first in every root publish script, before any build or version
+//       bump. Checks the whole group, including that its packages agree on
+//       one version.
 //
 //   --package
-//       Run from a package's own `prepublishOnly`, with the package directory
-//       as cwd. Catches a bare `pnpm --filter <pkg> publish` that bypasses the
-//       root scripts. It cannot see the dist-tag, so it enforces the branch and
-//       version-shape rules only — which, because prod and beta each have
-//       exactly one allowed branch, still covers almost everything. The one
-//       gap: a non-API package (cli, ui-core) published straight to `latest`
-//       from `v8`.
+//       Run from each package's own `prepublishOnly`, with the package
+//       directory as cwd. npm and pnpm fire that hook before any publish, so
+//       this catches a bare `pnpm --filter <pkg> publish` that bypasses the
+//       root scripts. The hook cannot see the dist-tag being published to, so
+//       the root scripts state it: their publish command runs with
+//       SUBLAY_PUBLISH_CHANNEL=prod|beta, and this mode refuses any publish
+//       that arrives without it. That matters most under pnpm, which — unlike
+//       npm — publishes a prerelease with no `--tag` straight to `latest`.
 //
 //       Skipped entirely inside GitHub Actions. Every workflow runs
 //       `pnpm publish --dry-run` as a test step, `prepublishOnly` fires during
@@ -31,6 +33,10 @@
 //       merge commit, so this mode would refuse and redden every PR. Skipping
 //       is safe only because nothing in CI publishes for real. If a workflow
 //       ever starts publishing, this skip has to be revisited.
+//
+//       A consequence for local use: a hand-run `pnpm publish --dry-run` is
+//       refused, since it carries no channel. To rehearse a publish locally,
+//       add `--ignore-scripts` to the dry-run.
 //
 // Rules:
 //
@@ -43,10 +49,12 @@
 //      that would make a beta the default `npm install` for everyone.
 //   6. On `v8`, the API groups (react, node, js) must be an 8.x prerelease.
 //      Catches a forgotten bump, or a plain 8.0.0 sitting on the dev branch.
-//      (`npm version patch|minor` on 8.0.0-beta.0 yields 8.0.0, so the ordinary
-//      bump scripts silently do exactly that.)
+//      (`npm version patch|minor` on 8.0.0-beta.0 yields 8.0.0.)
 //   7. On `main`, the API groups must not be 8.x until V8_GRADUATED is flipped.
 //      That constant is the whole graduation switch for this file.
+//   8. Every version must be plain semver (`8.0.0-beta.1`, not `v8.0.0`), and
+//      every package must belong to a known group — an unknown one refuses
+//      rather than silently skipping rules 6 and 7.
 //
 // cli and ui-core have no @sublay/* dependencies, are not tied to the API
 // version, and stay on 7.x; rules 6 and 7 do not apply to them.
@@ -60,8 +68,8 @@ import { fileURLToPath } from 'node:url';
 
 const V8_GRADUATED = false;
 
-const PROD_BRANCH = 'main';
-const BETA_BRANCH = 'v8';
+const BRANCH_FOR_CHANNEL = { prod: 'main', beta: 'v8' };
+const CHANNEL_ENV = 'SUBLAY_PUBLISH_CHANNEL';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..', '..');
@@ -77,25 +85,30 @@ const GROUPS = {
 };
 const API_GROUPS = new Set(['react', 'node', 'js']);
 
+// Strict semver: MAJOR.MINOR.PATCH, optional -prerelease, optional +build.
+const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
+
 function fail(problems) {
   console.error(`\nPublish refused — ${problems.length} problem(s):\n`);
   for (const problem of problems) console.error(`  - ${problem}`);
   console.error(
-    `\nProduction publishes from \`${PROD_BRANCH}\` only; beta publishes from \`${BETA_BRANCH}\` only.\n` +
-      'See plan-v8-beta.md §5.4 at the engine root.'
+    `\nProduction publishes from \`${BRANCH_FOR_CHANNEL.prod}\` only; beta publishes from \`${BRANCH_FOR_CHANNEL.beta}\` only,\n` +
+      'both through the root `{group}:publish-*` scripts. See plan-v8-beta.md §5.4 at the engine root.'
   );
   process.exit(1);
 }
 
+// `--show-current` rather than `rev-parse --abbrev-ref HEAD`: the latter
+// answers `heads/v8` when a tag named `v8` also exists.
 function currentBranch() {
   try {
-    return execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
+    return execFileSync('git', ['branch', '--show-current'], {
       cwd: repoRoot,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
   } catch {
-    return undefined;
+    return '';
   }
 }
 
@@ -103,22 +116,39 @@ function readManifest(dir) {
   return JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
 }
 
-const isPrerelease = (version) => version.includes('-');
-const majorOf = (version) => Number.parseInt(version.split('.')[0], 10);
+function groupOfPackage(name) {
+  return Object.keys(GROUPS).find((group) =>
+    GROUPS[group].some((dir) => readManifest(path.join(repoRoot, 'packages', dir)).name === name)
+  );
+}
 
-// Rules 6 and 7, shared by both modes.
-function versionShapeProblems(branch, label, version, isApi) {
-  if (!isApi) return [];
+// Rules 3/4: one problem per publish, not one per package.
+function branchProblems(channel, branch) {
+  const allowed = BRANCH_FOR_CHANNEL[channel];
+  return branch === allowed
+    ? []
+    : [`${channel} publishes from \`${allowed}\` only; current branch is \`${branch}\`.`];
+}
+
+// Rules 5–8 for a single package.
+function packageProblems(channel, branch, group, name, version) {
+  const parsed = SEMVER.exec(version);
+  if (!parsed) return [`${name} has version ${JSON.stringify(version)}, which is not plain semver (e.g. 8.0.0-beta.1).`];
+
+  const major = Number(parsed[1]);
+  const prerelease = parsed[4] !== undefined;
   const problems = [];
-  if (branch === BETA_BRANCH && !(majorOf(version) === 8 && isPrerelease(version))) {
-    problems.push(
-      `${label} is ${version}; on \`${BETA_BRANCH}\` it must be an 8.x prerelease (e.g. 8.0.0-beta.1).`
-    );
+
+  if (channel === 'prod' && prerelease) {
+    problems.push(`${name} is ${version}; a prerelease cannot publish to prod (latest).`);
   }
-  if (branch === PROD_BRANCH && !V8_GRADUATED && majorOf(version) >= 8) {
-    problems.push(
-      `${label} is ${version}; 8.x cannot publish from \`${PROD_BRANCH}\` until v8 graduates (V8_GRADUATED).`
-    );
+  if (API_GROUPS.has(group)) {
+    if (branch === BRANCH_FOR_CHANNEL.beta && !(major === 8 && prerelease)) {
+      problems.push(`${name} is ${version}; on \`${branch}\` it must be an 8.x prerelease (e.g. 8.0.0-beta.1).`);
+    }
+    if (branch === BRANCH_FOR_CHANNEL.prod && !V8_GRADUATED && major >= 8) {
+      problems.push(`${name} is ${version}; 8.x cannot publish from \`${branch}\` until v8 graduates (V8_GRADUATED).`);
+    }
   }
   return problems;
 }
@@ -143,34 +173,29 @@ if (args.package && process.env.GITHUB_ACTIONS === 'true') {
 }
 
 const branch = currentBranch();
-
-if (!branch || branch === 'HEAD') {
+if (!branch) {
   fail(['Could not resolve the current git branch (detached HEAD or not a git checkout).']);
 }
 
 if (args.package) {
-  const manifest = readManifest(process.cwd());
-  const group = Object.keys(GROUPS).find((g) =>
-    GROUPS[g].some((dir) => readManifest(path.join(repoRoot, 'packages', dir)).name === manifest.name)
-  );
-  const problems = [];
+  const { name, version } = readManifest(process.cwd());
+  const channel = process.env[CHANNEL_ENV];
+  const group = groupOfPackage(name);
 
-  if (branch !== PROD_BRANCH && branch !== BETA_BRANCH) {
-    problems.push(
-      `${manifest.name} is being published from \`${branch}\`; only \`${PROD_BRANCH}\` (prod) and \`${BETA_BRANCH}\` (beta) may publish.`
-    );
+  if (channel !== 'prod' && channel !== 'beta') {
+    fail([
+      `${name} is being published without ${CHANNEL_ENV}. Publish through a root \`{group}:publish-*\` script, ` +
+        'which sets it — a bare `pnpm publish` of a prerelease goes straight to `latest`.',
+    ]);
   }
-  if (branch === PROD_BRANCH && isPrerelease(manifest.version)) {
-    problems.push(
-      `${manifest.name} is ${manifest.version}; a prerelease cannot publish from \`${PROD_BRANCH}\` — beta publishes from \`${BETA_BRANCH}\`.`
-    );
-  }
-  problems.push(
-    ...versionShapeProblems(branch, manifest.name, manifest.version, API_GROUPS.has(group))
-  );
+  if (!group) fail([`${name} is not in any publish group in check-publish-target.mjs.`]);
 
+  const problems = [
+    ...branchProblems(channel, branch),
+    ...packageProblems(channel, branch, group, name, version),
+  ];
   if (problems.length > 0) fail(problems);
-  console.log(`Publish target OK: ${manifest.name}@${manifest.version} from \`${branch}\`.`);
+  console.log(`Publish target OK: ${channel} for ${name}@${version} from \`${branch}\`.`);
   process.exit(0);
 }
 
@@ -182,11 +207,8 @@ if (!GROUPS[group]) {
   fail([`--group must be one of ${Object.keys(GROUPS).join(', ')} (got ${JSON.stringify(group)}).`]);
 }
 
-const packages = GROUPS[group].map((dir) => {
-  const manifest = readManifest(path.join(repoRoot, 'packages', dir));
-  return { name: manifest.name, version: manifest.version };
-});
-const problems = [];
+const packages = GROUPS[group].map((dir) => readManifest(path.join(repoRoot, 'packages', dir)));
+const problems = [...branchProblems(channel, branch)];
 
 // Rule 2
 const versions = new Set(packages.map((p) => p.version));
@@ -196,22 +218,9 @@ if (versions.size > 1) {
   );
 }
 
-// Rules 3 and 4
-const allowedBranch = channel === 'prod' ? PROD_BRANCH : BETA_BRANCH;
-if (branch !== allowedBranch) {
-  problems.push(`${channel} publishes from \`${allowedBranch}\` only; current branch is \`${branch}\`.`);
-}
-
 for (const pkg of packages) {
-  // Rule 5
-  if (channel === 'prod' && isPrerelease(pkg.version)) {
-    problems.push(`${pkg.name} is ${pkg.version}; a prerelease cannot publish to prod (latest).`);
-  }
-  // Rules 6 and 7
-  problems.push(...versionShapeProblems(branch, pkg.name, pkg.version, API_GROUPS.has(group)));
+  problems.push(...packageProblems(channel, branch, group, pkg.name, pkg.version));
 }
 
 if (problems.length > 0) fail(problems);
-console.log(
-  `Publish target OK: ${channel} for ${group} (${[...versions].join(', ')}) from \`${branch}\`.`
-);
+console.log(`Publish target OK: ${channel} for ${group} (${[...versions].join(', ')}) from \`${branch}\`.`);

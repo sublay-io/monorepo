@@ -12,7 +12,10 @@
 # a required status check. `edited` is included so retargeting an existing PR's
 # base to main re-runs it.
 #
-# At graduation, delete this file in the same change that merges v8 into main.
+# A ruleset on `main` makes this check ("No v8 into main") required. At
+# graduation, delete this file AND remove that ruleset in the same change that
+# merges v8 into main — a required check whose workflow no longer exists leaves
+# every PR to main waiting forever.
 name: v8 guard
 
 permissions: {}

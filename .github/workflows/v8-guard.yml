@@ -1,16 +1,26 @@
-# v8 guard: fails any pull request from `v8` or a `v8/<slice>` branch into
-# `main`. Context: plan-v8-beta.md §4.2 and §5.4 (engine root).
+# v8 guard: fails any pull request into `main` that carries v8 work — either
+# because the branch is named `v8` / `v8/<slice>`, or because its API packages
+# are at 8.x. Context: plan-v8-beta.md §4.2 and §5.4 (engine root).
 #
 # `v8` carries the in-progress 8.x SDKs and must not merge into `main` until
 # v8 graduates — `main` is what publishes the npm `latest` tag. Slice branches
 # are cut from `v8` and PR back into `v8`, but GitHub defaults a new PR's base
 # to `main`, so a slice opened against the wrong base is an easy mistake.
 #
-# No `paths:` filter, unlike the test workflows: the head branch is what
-# matters, not what changed. The job runs on every PR into main and passes for
-# anything that isn't a v8 branch, so the check always reports and can be made
-# a required status check. `edited` is included so retargeting an existing PR's
+# No `paths:` filter, unlike the test workflows: the head branch and its
+# versions are what matter, not which files changed. The job runs on every PR
+# into main and passes for anything that isn't v8 work, so the check always
+# reports and can be made a required status check. `edited` is included so retargeting an existing PR's
 # base to main re-runs it.
+#
+# Why the version check as well as the name check: a slice cut from `v8` but
+# named out of habit (`feat/x`) passes the name check and would carry all of
+# v8 into main. The API packages are bumped to 8.0.0-beta.0 the moment `v8` is
+# cut, so anything branched from it is 8.x whatever it is called. Only the PR
+# head's package.json files are read — as JSON, never executed — so checking
+# out a fork's head is safe. The package list mirrors API_GROUPS in
+# .github/scripts/check-publish-target.mjs; they all move together, so any
+# one of them would do, but all six are checked.
 #
 # A ruleset on `main` makes this check ("No v8 into main") required. At
 # graduation, delete this file AND remove that ruleset in the same change that
@@ -30,6 +40,8 @@ jobs:
   v8-guard:
     name: No v8 into main
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Refuse v8 branches targeting main
         # Passed through env rather than interpolated into the script, so a
@@ -42,3 +54,25 @@ jobs:
             exit 1
           fi
           echo "'$HEAD_REF' is not a v8 branch — OK."
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          sparse-checkout: packages/*/package.json
+          sparse-checkout-cone-mode: false
+
+      - name: Refuse 8.x API packages targeting main
+        shell: node {0}
+        run: |
+          const fs = require("fs");
+          const dirs = ["core", "react-js", "react-native", "expo", "node", "js"];
+          const v8 = dirs
+            .map((d) => JSON.parse(fs.readFileSync(`packages/${d}/package.json`, "utf8")))
+            .filter((p) => parseInt(String(p.version).replace(/^v/, ""), 10) >= 8);
+          if (v8.length > 0) {
+            const list = v8.map((p) => `${p.name}@${p.version}`).join(", ");
+            console.log(`::error::This PR carries 8.x API packages (${list}) and cannot merge into main — it contains v8 work, whatever the branch is called. v8 merges into main only at graduation (plan-v8-beta.md §4.2).`);
+            process.exit(1);
+          }
+          console.log("No 8.x API packages — OK.");

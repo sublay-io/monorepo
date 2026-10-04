@@ -21,7 +21,8 @@
     "build": "tsup src/index.ts --dts --format cjs,esm --clean",
     "build:types": "tsc --noEmit",
     "prepare": "pnpm build && pnpm build:types",
-    "test": "jest"
+    "test": "jest",
+    "prepublishOnly": "node ../../.github/scripts/check-publish-target.mjs --package"
   },
   "author": "Sublay team",
   "license": "Apache-2.0",

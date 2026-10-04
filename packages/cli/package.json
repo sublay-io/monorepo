@@ -38,7 +38,7 @@
     "dev": "tsup src/index.ts --format esm --watch",
     "typecheck": "tsc --noEmit",
     "test": "pnpm run build && vitest run",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "node ../../.github/scripts/check-publish-target.mjs --package && pnpm run build"
   },
   "dependencies": {
     "@babel/core": "^7.29.0",

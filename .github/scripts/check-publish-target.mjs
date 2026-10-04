@@ -24,6 +24,14 @@
 //       gap: a non-API package (cli, ui-core) published straight to `latest`
 //       from `v8`.
 //
+//       Skipped entirely inside GitHub Actions. Every workflow runs
+//       `pnpm publish --dry-run` as a test step, `prepublishOnly` fires during
+//       a dry-run, and pnpm 11 exposes no dry-run signal to the hook (no
+//       npm_config_dry_run) — while a pull_request checkout is a detached
+//       merge commit, so this mode would refuse and redden every PR. Skipping
+//       is safe only because nothing in CI publishes for real. If a workflow
+//       ever starts publishing, this skip has to be revisited.
+//
 // Rules:
 //
 //   1. The branch must be resolvable. Detached HEAD or a git failure refuses.
@@ -128,6 +136,12 @@ function parseArgs(argv) {
 }
 
 const args = parseArgs(process.argv.slice(2));
+
+if (args.package && process.env.GITHUB_ACTIONS === 'true') {
+  console.log('Publish target check skipped: CI runs dry-run publishes only (see header).');
+  process.exit(0);
+}
+
 const branch = currentBranch();
 
 if (!branch || branch === 'HEAD') {

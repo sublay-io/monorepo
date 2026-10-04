@@ -39,7 +39,8 @@
     "build": "rimraf dist && pnpm run build:esm && pnpm run build:cjs",
     "prepare": "pnpm run build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepublishOnly": "node ../../.github/scripts/check-publish-target.mjs --package"
   },
   "publishConfig": {
     "access": "public"

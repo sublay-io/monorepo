@@ -57,9 +57,12 @@
 //   8. Every version must be plain semver (`8.0.0-beta.1`, not `v8.0.0`), and
 //      every package must belong to a known group — an unknown one refuses
 //      rather than silently skipping rules 6 and 7.
-//
-// cli and ui-core have no @sublay/* dependencies, are not tied to the API
-// version, and stay on 7.x; rules 6 and 7 do not apply to them.
+//   9. Only the API groups have a beta channel. cli and ui-core have no
+//      @sublay/* dependencies, are not tied to the API version, stay on 7.x,
+//      and publish to prod from `main` only. (A beta of theirs from `v8` would
+//      also take a plain 7.x number that `main`'s next release then reuses —
+//      and pnpm silently skips a version already on the registry.) Rules 6 and
+//      7 do not apply to them.
 //
 // Node built-ins only, so it can run before (or without) an install.
 
@@ -122,6 +125,13 @@ function groupOfPackage(name) {
   return Object.keys(GROUPS).find((group) =>
     GROUPS[group].some((dir) => readManifest(path.join(repoRoot, 'packages', dir)).name === name)
   );
+}
+
+// Rule 9.
+function channelProblems(channel, group) {
+  return channel === 'beta' && !API_GROUPS.has(group)
+    ? [`${group} has no beta channel; it publishes to prod from \`${BRANCH_FOR_CHANNEL.prod}\` only.`]
+    : [];
 }
 
 // Rules 3/4: one problem per publish, not one per package.
@@ -196,6 +206,7 @@ if (args.package) {
   if (!group) fail([`${name} is not in any publish group in check-publish-target.mjs.`]);
 
   const problems = [
+    ...channelProblems(channel, group),
     ...branchProblems(channel, branch),
     ...packageProblems(channel, branch, group, name, version),
   ];
@@ -213,7 +224,7 @@ if (!GROUPS[group]) {
 }
 
 const packages = GROUPS[group].map((dir) => readManifest(path.join(repoRoot, 'packages', dir)));
-const problems = [...branchProblems(channel, branch)];
+const problems = [...channelProblems(channel, group), ...branchProblems(channel, branch)];
 
 // Rule 2
 const versions = new Set(packages.map((p) => p.version));

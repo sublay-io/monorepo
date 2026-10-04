@@ -1,0 +1,41 @@
+# v8 guard: fails any pull request from `v8` or a `v8/<slice>` branch into
+# `main`. Context: plan-v8-beta.md §4.2 and §5.4 (engine root).
+#
+# `v8` carries the in-progress 8.x SDKs and must not merge into `main` until
+# v8 graduates — `main` is what publishes the npm `latest` tag. Slice branches
+# are cut from `v8` and PR back into `v8`, but GitHub defaults a new PR's base
+# to `main`, so a slice opened against the wrong base is an easy mistake.
+#
+# No `paths:` filter, unlike the test workflows: the head branch is what
+# matters, not what changed. The job runs on every PR into main and passes for
+# anything that isn't a v8 branch, so the check always reports and can be made
+# a required status check. `edited` is included so retargeting an existing PR's
+# base to main re-runs it.
+#
+# At graduation, delete this file in the same change that merges v8 into main.
+name: v8 guard
+
+permissions: {}
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches:
+      - main
+
+jobs:
+  v8-guard:
+    name: No v8 into main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refuse v8 branches targeting main
+        # Passed through env rather than interpolated into the script, so a
+        # branch name can never be executed as shell.
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [ "$HEAD_REF" = "v8" ] || [ "${HEAD_REF#v8/}" != "$HEAD_REF" ]; then
+            echo "::error::'$HEAD_REF' is a v8 branch and cannot merge into main. v8 work targets the v8 branch; v8 merges into main only at graduation (plan-v8-beta.md §4.2)."
+            exit 1
+          fi
+          echo "'$HEAD_REF' is not a v8 branch — OK."

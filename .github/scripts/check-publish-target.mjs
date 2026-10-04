@@ -35,8 +35,10 @@
 //       ever starts publishing, this skip has to be revisited.
 //
 //       A consequence for local use: a hand-run `pnpm publish --dry-run` is
-//       refused, since it carries no channel. To rehearse a publish locally,
-//       add `--ignore-scripts` to the dry-run.
+//       refused, since it carries no channel. To rehearse exactly what CI
+//       runs, prefix it with GITHUB_ACTIONS=true (`--ignore-scripts` also
+//       works, but skips the build and every lifecycle hook, so it only packs
+//       whatever is already in dist/).
 //
 // Rules:
 //
@@ -182,11 +184,14 @@ if (args.package) {
   const channel = process.env[CHANNEL_ENV];
   const group = groupOfPackage(name);
 
-  if (channel !== 'prod' && channel !== 'beta') {
+  if (channel === undefined || channel === '') {
     fail([
       `${name} is being published without ${CHANNEL_ENV}. Publish through a root \`{group}:publish-*\` script, ` +
         'which sets it — a bare `pnpm publish` of a prerelease goes straight to `latest`.',
     ]);
+  }
+  if (channel !== 'prod' && channel !== 'beta') {
+    fail([`${CHANNEL_ENV} must be "prod" or "beta" (got ${JSON.stringify(channel)}).`]);
   }
   if (!group) fail([`${name} is not in any publish group in check-publish-target.mjs.`]);
 

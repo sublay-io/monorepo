@@ -25,7 +25,7 @@ pnpm build:types
 pnpm prepare
 
 # Publishing is done from the monorepo root, not this package directory
-# (run from /monorepo): pnpm node:publish-beta:patch / pnpm node:publish-prod:patch
+# (run from /monorepo): pnpm node:publish-prod:patch (main) / pnpm node:publish-beta:prerelease (v8 only)
 # Use the :patch (or :minor) form — see "Publishing to npm" below for why.
 ```
 
@@ -331,7 +331,7 @@ dist/
 ### Publishing to npm
 Run from the monorepo root, not this directory:
 ```bash
-pnpm node:publish-beta:patch   # beta release
+pnpm node:publish-beta:prerelease   # beta release (v8 branch only)
 pnpm node:publish-prod:patch   # production release
 # :minor variants exist too, e.g. pnpm node:publish-prod:minor
 ```

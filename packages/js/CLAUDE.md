@@ -23,7 +23,7 @@ pnpm build:types    # tsc --noEmit (whole-project type-check; catches errors in
 pnpm prepare        # build + build:types (runs before publish)
 ```
 
-Publishing runs from the monorepo root, not this directory: `pnpm js:publish-beta:patch` / `pnpm js:publish-prod:patch` (`:minor` variants exist too).
+Publishing runs from the monorepo root, not this directory: `pnpm js:publish-prod:patch` (or `:minor`) from `main`; beta is `pnpm js:publish-beta:prerelease`, from the `v8` branch only.
 
 Always use the `:patch` / `:minor` form. The bare `js:publish-beta` / `js:publish-prod` scripts build, test, and publish but never bump the version — and `pnpm publish` silently skips a package whose current version is already on the registry and exits 0, so a bare run without a separate version bump looks like a successful release and ships nothing. The `:patch` / `:minor` variants are just `js:version:{patch,minor} && js:publish-{beta,prod}`. Use a bare form only when the version was already bumped as a deliberate separate step (`pnpm js:version:patch`).
 

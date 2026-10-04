@@ -63,6 +63,15 @@
 //      also take a plain 7.x number that `main`'s next release then reuses —
 //      and pnpm silently skips a version already on the registry.) Rules 6 and
 //      7 do not apply to them.
+//  10. The local branch must not be behind GitHub. The gate runs
+//      `git fetch origin <branch>` and refuses if the fetch fails (publishing
+//      needs the network anyway) or if `origin/<branch>` has commits HEAD
+//      lacks — otherwise a stale local `main` publishes a release missing
+//      already-merged work, with no error. Being ahead is fine: that is the
+//      unpushed release-bump commit. There is deliberately no clean-tree
+//      check — the release flow bumps versions before publishing and commits
+//      the bump afterwards. Root-script mode only: --package mode can only be
+//      reached through the root scripts, which have already run it.
 //
 // Node built-ins only, so it can run before (or without) an install.
 
@@ -115,6 +124,24 @@ function currentBranch() {
   } catch {
     return '';
   }
+}
+
+// Rule 10. Only meaningful once the branch is the right one for the channel.
+function freshnessProblems(branch) {
+  try {
+    execFileSync('git', ['fetch', '--quiet', 'origin', branch], {
+      cwd: repoRoot,
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+  } catch {
+    return [`Could not fetch \`origin/${branch}\` to confirm the local branch is up to date (offline, or the branch is not on GitHub).`];
+  }
+  const behind = Number(
+    execFileSync('git', ['rev-list', '--count', 'HEAD..FETCH_HEAD'], { cwd: repoRoot, encoding: 'utf8' }).trim()
+  );
+  return behind > 0
+    ? [`Local \`${branch}\` is ${behind} commit(s) behind GitHub — pull first, or the release will be missing merged work.`]
+    : [];
 }
 
 function readManifest(dir) {
@@ -237,6 +264,10 @@ if (versions.size > 1) {
 for (const pkg of packages) {
   problems.push(...packageProblems(channel, branch, group, pkg.name, pkg.version));
 }
+
+// Rule 10 — skipped when the branch is already wrong, so a refusal never
+// waits on the network.
+if (branch === BRANCH_FOR_CHANNEL[channel]) problems.push(...freshnessProblems(branch));
 
 if (problems.length > 0) fail(problems);
 console.log(`Publish target OK: ${channel} for ${group} (${[...versions].join(', ')}) from \`${branch}\`.`);

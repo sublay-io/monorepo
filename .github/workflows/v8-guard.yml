@@ -76,6 +76,14 @@ jobs:
               process.exit(1);
             }
           });
+          // Fail closed: a version with no readable leading major (missing,
+          // non-numeric) is refused rather than silently treated as "not 8.x".
+          const unreadable = manifests.filter((p) => !/^v?\d+\./.test(String(p.version)));
+          if (unreadable.length > 0) {
+            const list = unreadable.map((p) => `${p.name}@${p.version}`).join(", ");
+            console.log(`::error::Could not read a major version from ${list}; the v8 guard fails closed.`);
+            process.exit(1);
+          }
           const v8 = manifests.filter((p) => parseInt(String(p.version).replace(/^v/, ""), 10) >= 8);
           if (v8.length > 0) {
             const list = v8.map((p) => `${p.name}@${p.version}`).join(", ");

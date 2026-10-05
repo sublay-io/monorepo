@@ -6,8 +6,10 @@
 # owner's ruleset bypass lets direct pushes through (release-bump commits are
 # pushed directly), and a check that runs after a push cannot stop it. The
 # block for that path is the local .githooks/pre-push hook; this run is the
-# safety net for a clone that is missing it — a red ✗ and a notification
-# within a minute of 8.x landing on `main`.
+# safety net for a clone that is missing it: the check fails and marks the
+# commit on `main` red. Whether anyone is emailed depends on their GitHub
+# notification settings (by default, whoever pushed is notified of a failed
+# run they triggered).
 #
 # `v8` carries the in-progress 8.x SDKs and must not merge into `main` until
 # v8 graduates — `main` is what publishes the npm `latest` tag. Slice branches

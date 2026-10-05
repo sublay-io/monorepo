@@ -26,6 +26,16 @@ Every group also exposes `{group}:version:patch` and `{group}:version:minor` for
 
 **One-time setup per clone: `git config core.hooksPath .githooks`.** It enables `.githooks/pre-push`, which refuses a push to `main` whose react/node/js packages are at 8.x — v8 work reaches `main` only at graduation. Pull requests are covered separately by the required "No v8 into main" check (`.github/workflows/v8-guard.yml`), which also runs on every push to `main` as an alarm. Deliberate override: `git push --no-verify`.
 
+### The `v8` branch
+
+v8 (the next major API version) is in beta development on a long-lived **`v8` branch**. Full plan: `plan-v8-beta.md` at the engine root; scope is GitHub issues labelled `v8`.
+
+- **What goes on `v8`:** v8 SDK changes *and* v8 docs (`docs/v8/`), together in the same slice. v8 work never targets `main`.
+- **Slices:** branch from `v8` as `v8/<slice>`, open the PR **into `v8`** — GitHub defaults a new PR's base to `main`, so set it explicitly. A slice cut from `v8` carries the react/node/js packages at 8.x, so the required "No v8 into main" check blocks it from `main` whatever it is called.
+- **What stays on `main`:** ordinary 7.x SDK work and releases, cli and ui-core (never 8.x, no beta channel), the registry, and v7 docs fixes (`docs/v7/`). A v7 docs fix that also applies to `docs/v8/` must be mirrored there by hand on `v8`.
+- **Keeping `v8` current:** merge `main` → `v8` regularly (at least before each beta publish). Every merge conflicts on the `version` field of the react/node/js `package.json` files — **keep `v8`'s version** (8.x prerelease) and take `main`'s side for everything else.
+- **Graduation** is when `v8` merges into `main`; until then, nothing on `v8` reaches `main` or the npm `latest` tag.
+
 **Always publish with `pnpm` from the workspace root (the `{group}:publish-*` scripts) — never `npm publish` from inside a package directory.** `@sublay/react-js`, `@sublay/react-native`, and `@sublay/expo` each declare `"@sublay/core": "workspace:*"` in real `dependencies`; `pnpm publish` rewrites that to the concrete version at pack time, while `npm pack`/`npm publish` ship the literal `"workspace:*"` string, producing a tarball no consumer can install.
 
 `@sublay/cli` fetches every component from `https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/...` (hardcoded to `main` in `packages/cli/src/utils/registry.ts`), so `registry/` has to exist on `main` for a real `sublay add` to work. `.github/scripts/check-registry-integrity.mjs` verifies this URL actually resolves — but only on a GitHub Actions `push` build of `main` (silent elsewhere, since the URL can't resolve on a branch that isn't `main`).

@@ -24,6 +24,8 @@ Scripts are grouped by publish group, and every group carries a `{group}:` prefi
 
 Every group also exposes `{group}:version:patch` and `{group}:version:minor` for bumping without publishing.
 
+**One-time setup per clone: `git config core.hooksPath .githooks`.** It enables `.githooks/pre-push`, which refuses a push to `main` whose react/node/js packages are at 8.x — v8 work reaches `main` only at graduation. Pull requests are covered separately by the required "No v8 into main" check (`.github/workflows/v8-guard.yml`), which also runs on every push to `main` as an alarm. Deliberate override: `git push --no-verify`.
+
 **Always publish with `pnpm` from the workspace root (the `{group}:publish-*` scripts) — never `npm publish` from inside a package directory.** `@sublay/react-js`, `@sublay/react-native`, and `@sublay/expo` each declare `"@sublay/core": "workspace:*"` in real `dependencies`; `pnpm publish` rewrites that to the concrete version at pack time, while `npm pack`/`npm publish` ship the literal `"workspace:*"` string, producing a tarball no consumer can install.
 
 `@sublay/cli` fetches every component from `https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/...` (hardcoded to `main` in `packages/cli/src/utils/registry.ts`), so `registry/` has to exist on `main` for a real `sublay add` to work. `.github/scripts/check-registry-integrity.mjs` verifies this URL actually resolves — but only on a GitHub Actions `push` build of `main` (silent elsewhere, since the URL can't resolve on a branch that isn't `main`).

@@ -2,6 +2,13 @@
 # because the branch is named `v8` / `v8/<slice>`, or because its API packages
 # are at 8.x. Context: plan-v8-beta.md §4.2 and §5.4 (engine root).
 #
+# It also runs on every push to `main`, as an alarm rather than a block: the
+# owner's ruleset bypass lets direct pushes through (release-bump commits are
+# pushed directly), and a check that runs after a push cannot stop it. The
+# block for that path is the local .githooks/pre-push hook; this run is the
+# safety net for a clone that is missing it — a red ✗ and a notification
+# within a minute of 8.x landing on `main`.
+#
 # `v8` carries the in-progress 8.x SDKs and must not merge into `main` until
 # v8 graduates — `main` is what publishes the npm `latest` tag. Slice branches
 # are cut from `v8` and PR back into `v8`, but GitHub defaults a new PR's base
@@ -35,6 +42,9 @@ on:
     types: [opened, synchronize, reopened, edited]
     branches:
       - main
+  push:
+    branches:
+      - main
 
 jobs:
   v8-guard:
@@ -44,6 +54,7 @@ jobs:
       contents: read
     steps:
       - name: Refuse v8 branches targeting main
+        if: github.event_name == 'pull_request'
         # Passed through env rather than interpolated into the script, so a
         # branch name can never be executed as shell.
         env:
@@ -57,7 +68,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
           sparse-checkout: packages/*/package.json
           sparse-checkout-cone-mode: false
@@ -87,7 +98,8 @@ jobs:
           const v8 = manifests.filter((p) => parseInt(String(p.version).replace(/^v/, ""), 10) >= 8);
           if (v8.length > 0) {
             const list = v8.map((p) => `${p.name}@${p.version}`).join(", ");
-            console.log(`::error::This PR carries 8.x API packages (${list}) and cannot merge into main — it contains v8 work, whatever the branch is called. v8 merges into main only at graduation (plan-v8-beta.md §4.2).`);
+            const what = process.env.GITHUB_EVENT_NAME === "push" ? "main now has" : "This PR carries";
+            console.log(`::error::${what} 8.x API packages (${list}). That is v8 work, whatever the branch is called; v8 merges into main only at graduation (plan-v8-beta.md §4.2).`);
             process.exit(1);
           }
           console.log("No 8.x API packages — OK.");

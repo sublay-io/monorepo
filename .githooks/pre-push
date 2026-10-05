@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+// pre-push: refuses a push to `main` whose API packages (react group, node,
+// js) are at 8.x. Context: plan-v8-beta.md §5.4 (engine root).
+//
+// The `v8` branch carries the in-progress 8.x SDKs and must not reach `main`
+// until v8 graduates. Pull requests are covered by the "No v8 into main" check
+// (.github/workflows/v8-guard.yml), but a direct push to `main` never runs it —
+// and the owner's ruleset bypass, which keeps direct release-bump pushes
+// working, would let it through. This hook covers that path: e.g. `v8` merged
+// into `main` locally by mistake and then pushed, or `git push origin v8:main`.
+//
+// Setup, once per clone:   git config core.hooksPath .githooks
+// Deliberate override:     git push --no-verify
+// At graduation, delete this file along with v8-guard.yml and the ruleset.
+//
+// Reads each package.json from the commit being pushed (not the working tree),
+// so it checks exactly what would land on `main`. Node built-ins only.
+
+const { execFileSync } = require('node:child_process');
+
+const API_PACKAGE_DIRS = ['core', 'react-js', 'react-native', 'expo', 'node', 'js'];
+const ZERO_SHA = /^0+$/;
+
+function refuse(lines) {
+  console.error(`\npre-push: refusing to push to main.\n`);
+  for (const line of lines) console.error(`  - ${line}`);
+  console.error(
+    '\nv8 work merges into main only at graduation (plan-v8-beta.md §4.2).\n' +
+      'If this push is deliberate, rerun it with --no-verify.\n'
+  );
+  process.exit(1);
+}
+
+function manifestAt(sha, dir) {
+  const file = `packages/${dir}/package.json`;
+  try {
+    return JSON.parse(
+      execFileSync('git', ['show', `${sha}:${file}`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+    );
+  } catch {
+    refuse([
+      `Could not read ${file} at ${sha.slice(0, 8)}. If an API package was renamed or removed, ` +
+        'update API_PACKAGE_DIRS here and in .github/workflows/v8-guard.yml.',
+    ]);
+  }
+}
+
+// git feeds one line per ref being pushed: <local ref> <local sha> <remote ref> <remote sha>
+const input = require('node:fs').readFileSync(0, 'utf8');
+for (const line of input.split('\n')) {
+  const [, localSha, remoteRef] = line.trim().split(/\s+/);
+  if (remoteRef !== 'refs/heads/main' || !localSha || ZERO_SHA.test(localSha)) continue;
+
+  const problems = [];
+  for (const dir of API_PACKAGE_DIRS) {
+    const { name, version } = manifestAt(localSha, dir);
+    const match = /^v?(\d+)\./.exec(String(version));
+    if (!match) problems.push(`${name} has unreadable version ${JSON.stringify(version)}.`);
+    else if (Number(match[1]) >= 8) problems.push(`${name} is ${version} — 8.x is v8 work.`);
+  }
+  if (problems.length > 0) refuse(problems);
+}

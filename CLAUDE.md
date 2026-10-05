@@ -30,8 +30,9 @@ Every group also exposes `{group}:version:patch` and `{group}:version:minor` for
 
 v8 (the next major API version) is in beta development on a long-lived **`v8` branch**. Full plan: `plan-v8-beta.md` at the engine root; scope is GitHub issues labelled `v8`.
 
+- **Why `v8-<slice>` and not `v8/<slice>`:** git can't hold a branch `v8` and branches under `v8/` at the same time, because a ref can't be both a file and a directory.
 - **What goes on `v8`:** v8 SDK changes *and* v8 docs (`docs/v8/`), together in the same slice. v8 work never targets `main`.
-- **Slices:** branch from `v8` as `v8/<slice>`, open the PR **into `v8`** — GitHub defaults a new PR's base to `main`, so set it explicitly. A slice cut from `v8` carries the react/node/js packages at 8.x, so the required "No v8 into main" check blocks it from `main` whatever it is called.
+- **Slices:** branch from `v8` as `v8-<slice>` (e.g. `v8-docs-fork`), open the PR **into `v8`** — GitHub defaults a new PR's base to `main`, so set it explicitly. A slice cut from `v8` carries the react/node/js packages at 8.x, so the required "No v8 into main" check blocks it from `main` whatever it is called.
 - **What stays on `main`:** ordinary 7.x SDK work and releases, cli and ui-core (never 8.x, no beta channel), the registry, and v7 docs fixes (`docs/v7/`). A v7 docs fix that also applies to `docs/v8/` must be mirrored there by hand on `v8`.
 - **Keeping `v8` current:** merge `main` → `v8` regularly (at least before each beta publish). Every merge conflicts on the `version` field of the react/node/js `package.json` files — **keep `v8`'s version** (8.x prerelease) and take `main`'s side for everything else.
 - **Graduation** is when `v8` merges into `main`; until then, nothing on `v8` reaches `main` or the npm `latest` tag.

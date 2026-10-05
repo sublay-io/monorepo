@@ -1,0 +1,122 @@
+---
+title: "Send verification email"
+description: "Send an email verification token or link to the authenticated user"
+icon: "plug"
+---
+
+## Overview
+
+`useSendVerificationEmail` returns a function that sends a verification email to the currently authenticated user. The token expires after 5 minutes. Calling it on an already-verified user is a no-op (returns `{ success: true }` without sending).
+
+## Usage Example
+
+<CodeGroup>
+```tsx React — numeric code
+import { useSendVerificationEmail } from "@sublay/react-js";
+
+function VerifyEmailPrompt() {
+  const sendVerificationEmail = useSendVerificationEmail();
+
+  return (
+    <button
+      onClick={() =>
+        sendVerificationEmail({
+          mode: "code",
+          tokenFormat: "numeric",
+          tokenLength: 6,
+        })
+      }
+    >
+      Send verification code
+    </button>
+  );
+}
+```
+
+```tsx React — clickable link
+import { useSendVerificationEmail } from "@sublay/react-js";
+
+function VerifyEmailPrompt() {
+  const sendVerificationEmail = useSendVerificationEmail();
+
+  return (
+    <button
+      onClick={() =>
+        sendVerificationEmail({
+          mode: "link",
+          redirectUrl: "https://yourapp.com/email-verified",
+        })
+      }
+    >
+      Send verification link
+    </button>
+  );
+}
+```
+
+```tsx React Native
+import { useSendVerificationEmail } from "@sublay/react-native";
+
+function VerifyEmailPrompt() {
+  const sendVerificationEmail = useSendVerificationEmail();
+
+  return (
+    <Button
+      title="Send code"
+      onPress={() =>
+        sendVerificationEmail({
+          mode: "code",
+          tokenFormat: "numeric",
+          tokenLength: 6,
+        })
+      }
+    />
+  );
+}
+```
+</CodeGroup>
+
+## Parameters
+
+The returned function requires a props object — `mode` is always required, and which other fields are required depends on it:
+
+<ParamField path="mode" type='"code" | "link"' required>
+  How the token is delivered.
+  - `"code"` — user receives a token to type into your app
+  - `"link"` — user receives a clickable button that verifies automatically
+</ParamField>
+
+<ParamField path="tokenFormat" type='"hex" | "numeric" | "alpha" | "alphanumeric"'>
+  Character set for the token.
+  - Required when `mode: "code"` — there's no default, since `"hex"` (see below) produces something no one would want to type.
+  - Optional when `mode: "link"` (defaults to `"hex"`) — the token is embedded in a URL, never read by a human, so the format doesn't matter.
+</ParamField>
+
+<ParamField path="tokenLength" type="number">
+  Length of the generated token (4–12).
+  - Required when `mode: "code"` and `tokenFormat` is `"numeric"`, `"alpha"`, or `"alphanumeric"`.
+  - Not allowed when `tokenFormat` is `"hex"` — hex ignores length and always produces a fixed 64-character token, so specifying one would be silently meaningless.
+  - Optional when `mode: "link"` (defaults to `6`).
+</ParamField>
+
+<ParamField path="redirectUrl" type="string">
+  URL to redirect to after link verification. Only valid with `mode: "link"`. Receives `?verified=true` or `?verified=false&error=...` as query params.
+</ParamField>
+
+<Tip>
+  These requirements are enforced by TypeScript, not just documented — `sendVerificationEmail({ mode: "code", tokenFormat: "hex" })` compiles, but `sendVerificationEmail({ mode: "code" })` or `sendVerificationEmail({ mode: "code", tokenFormat: "numeric" })` (missing `tokenLength`) will fail to type-check.
+</Tip>
+
+## Returns
+
+The hook returns an async function. That function resolves to:
+
+<ResponseField name="success" type="boolean">
+  `true` when the request completes without a server error.
+</ResponseField>
+
+## See Also
+
+- [`useVerifyEmail`](/v8/hooks/auth/use-verify-email)
+- [Send Verification Email API reference](/v8/api-reference/auth/send-verification-email)
+- [Built-in Auth guide](/v8/sdk/authentication/built-in)

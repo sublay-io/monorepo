@@ -1,0 +1,84 @@
+---
+title: "Use table row"
+description: "Read a single custom-table row by ID for a detail view"
+icon: "table"
+---
+
+## Overview
+
+`useTableRow` is the React/React Native hook for one custom-table row, backed by RTK Query against `GET /db/:tableName/:rowId`.
+
+[`useTable`](/v8/hooks/tables/use-table) is list-shaped — it owns a page of rows plus the view state behind it. A detail view wants one row by ID and none of that, and filtering a fetched page client-side only finds the row when it happens to be on the current page. This hook is that read.
+
+Row writes stay on `useTable`. They invalidate the row's cache tag, so an edit made there refreshes this hook without the two being wired together.
+
+See [Custom Tables — Overview](/v8/sdk/tables/overview) for a guide, and [Custom Tables](/v8/custom-tables) for the feature concept.
+
+## Usage Example
+
+```tsx
+import { useTableRow } from "@sublay/react-js";
+
+// A `type`, not an `interface`: `TableRow` carries an index signature for the
+// table's own columns, and an interface gets no implicit one — so an interface
+// here fails the `T extends TableRow` constraint.
+type EventRow = {
+  id: string;
+  name: string;
+  capacity: number;
+};
+
+function EventDetail({ eventId }: { eventId: string | null }) {
+  const { row, loading, error, refetch } = useTableRow<EventRow>("Events", eventId);
+
+  if (loading) return <Spinner />;
+  // Check `row` before `error`: a transient failure keeps the last loaded row
+  // here, and re-rendering it under a banner beats blanking the page.
+  if (!row) return error ? <NotFound /> : null;
+
+  return (
+    <>
+      {error && <StaleBanner onRetry={refetch} />}
+      <h1>{row.name}</h1>
+    </>
+  );
+}
+```
+
+## Parameters
+
+<ParamField path="tableName" type="string" required>
+  The **logical** custom-table name (without the `custom_` prefix).
+</ParamField>
+
+<ParamField path="rowId" type="string | null | undefined" required>
+  UUID of the row. May be `null` or `undefined` — a route parameter that has not resolved yet, for example. The request is skipped until it is present, so the call site needs no guard.
+</ParamField>
+
+## Return Values
+
+<ResponseField name="row" type="T | null">
+  The row, or `null` before the first load, while a different `rowId` is loading, while the request is skipped, or once the server has said the row is gone (`404`).
+
+  A **transient** failure — a `500`, or the network being down — keeps the last loaded row here alongside `error`, so a detail view degrades to stale-content-plus-banner rather than to a blank page. Read `error` to tell the two apart.
+</ResponseField>
+
+<ResponseField name="loading" type="boolean">
+  `true` when a request is in flight **and there is no row to show** — the first load, a `rowId` change, and a retry after the row was dropped.
+
+  A background refresh with a row already on screen reports `false`: an edit made through `useTable` invalidates this row and it updates in place, rather than flashing a spinner. A skipped request never loads, so waiting on an unresolved `rowId` reports `false` with `row: null` rather than a spinner that never resolves.
+</ResponseField>
+
+<ResponseField name="error" type="unknown">
+  The query error, if any.
+
+  A `404` (`database/row-not-found`, or `database/table-not-found` if the table itself was dropped) sets this **and** clears `row` — the record is unreachable, so there is nothing valid to show. Any other failure sets this while leaving `row` intact.
+</ResponseField>
+
+<ResponseField name="refetch" type="() => void">
+  Re-runs the query. A no-op while the request is skipped, so a retry control mounted before `rowId` resolves is safe to wire directly.
+</ResponseField>
+
+<Warning>
+  Row reads on the `/db` surface capture the caller's identity but **enforce no authorization** — any caller who can reach your project can read any row. See [Security: open row CRUD](/v8/custom-tables#security-open-row-crud).
+</Warning>

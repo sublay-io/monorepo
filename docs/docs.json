@@ -11,6 +11,1108 @@
   "navigation": {
     "versions": [
       {
+        "version": "8.0.0",
+        "tabs": [
+          {
+            "tab": "Overview",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "v8/index",
+                  "v8/bundles",
+                  "v8/integration-options",
+                  "v8/authentication",
+                  "v8/webhooks",
+                  "v8/push-notifications",
+                  "v8/notification-preferences",
+                  "v8/custom-tables",
+                  "v8/semantic-search-ai",
+                  "v8/interest-matching",
+                  "v8/mcp-server",
+                  "v8/claude-code"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "SDK Reference",
+            "url": "v8/sdk/getting-started",
+            "groups": [
+              {
+                "group": "Setup",
+                "pages": ["v8/sdk/getting-started", "v8/sdk/redux-integration"]
+              },
+              {
+                "group": "Authentication",
+                "pages": [
+                  "v8/sdk/authentication/overview",
+                  "v8/sdk/authentication/built-in",
+                  "v8/sdk/authentication/external",
+                  "v8/sdk/authentication/oauth",
+                  "v8/sdk/authentication/oauth-providers/overview",
+                  "v8/sdk/authentication/oauth-providers/apple",
+                  "v8/sdk/authentication/oauth-providers/google",
+                  "v8/sdk/authentication/oauth-providers/github",
+                  "v8/sdk/authentication/oauth-providers/facebook",
+                  "v8/sdk/authentication/multi-account"
+                ]
+              },
+              {
+                "group": "Users",
+                "pages": [
+                  "v8/sdk/users/current-user",
+                  "v8/sdk/users/user-profiles"
+                ]
+              },
+              {
+                "group": "Entities",
+                "pages": [
+                  "v8/sdk/entities/overview",
+                  "v8/sdk/entities/provider-and-hook",
+                  "v8/sdk/entities/drafts-and-publishing"
+                ]
+              },
+              {
+                "group": "Entity Lists",
+                "pages": [
+                  "v8/sdk/entity-lists/overview",
+                  "v8/sdk/entity-lists/fetch-entities",
+                  "v8/sdk/entity-lists/infuse-data",
+                  "v8/sdk/entity-lists/filters"
+                ]
+              },
+              {
+                "group": "Comments",
+                "pages": [
+                  "v8/sdk/comments/overview",
+                  "v8/sdk/comments/comment-section"
+                ]
+              },
+              {
+                "group": "Reactions",
+                "pages": ["v8/sdk/reactions/overview"]
+              },
+              {
+                "group": "Reputation",
+                "pages": ["v8/sdk/reputation/overview"]
+              },
+              {
+                "group": "Spaces",
+                "pages": [
+                  "v8/sdk/spaces/overview",
+                  "v8/sdk/spaces/provider-and-hook",
+                  "v8/sdk/spaces/membership",
+                  "v8/sdk/spaces/moderation",
+                  "v8/sdk/spaces/rules",
+                  "v8/sdk/spaces/space-lists"
+                ]
+              },
+              {
+                "group": "Workspaces",
+                "pages": [
+                  "v8/sdk/workspaces/overview",
+                  "v8/sdk/workspaces/webhooks"
+                ]
+              },
+              {
+                "group": "Events",
+                "pages": [
+                  "v8/sdk/events/overview",
+                  "v8/sdk/events/provider-and-hook"
+                ]
+              },
+              {
+                "group": "Chat",
+                "pages": [
+                  "v8/sdk/chat/overview",
+                  "v8/sdk/chat/setup",
+                  "v8/sdk/chat/conversations",
+                  "v8/sdk/chat/messages",
+                  "v8/sdk/chat/real-time",
+                  "v8/sdk/chat/threads"
+                ]
+              },
+              {
+                "group": "Collections",
+                "pages": [
+                  "v8/sdk/collections/overview",
+                  "v8/sdk/collections/managing-collections"
+                ]
+              },
+              {
+                "group": "Relationships",
+                "pages": [
+                  "v8/sdk/relationships/overview",
+                  "v8/sdk/relationships/use-follow-manager",
+                  "v8/sdk/relationships/use-connection-manager",
+                  "v8/sdk/relationships/use-block-manager"
+                ]
+              },
+              {
+                "group": "App Notifications",
+                "pages": [
+                  "v8/sdk/app-notifications/overview",
+                  "v8/sdk/app-notifications/hook",
+                  "v8/sdk/app-notifications/notification-templates",
+                  "v8/sdk/app-notifications/webhook-integration"
+                ]
+              },
+              {
+                "group": "Push Notifications",
+                "pages": [
+                  "v8/sdk/push-notifications/overview"
+                ]
+              },
+              {
+                "group": "Search & AI",
+                "pages": [
+                  "v8/sdk/search/overview",
+                  "v8/sdk/search/semantic-search",
+                  "v8/sdk/search/ask"
+                ]
+              },
+              {
+                "group": "Storage",
+                "pages": ["v8/sdk/storage/overview"]
+              },
+              {
+                "group": "Moderation",
+                "pages": [
+                  "v8/sdk/moderation/overview",
+                  "v8/sdk/moderation/suspensions"
+                ]
+              },
+              {
+                "group": "Custom Tables",
+                "pages": ["v8/sdk/tables/overview"]
+              }
+            ]
+          },
+          {
+            "tab": "Hooks Reference",
+            "url": "v8/hooks/overview",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": ["v8/hooks/overview"]
+              },
+              {
+                "group": "Auth Hooks",
+                "pages": [
+                  "v8/hooks/auth/use-auth",
+                  "v8/hooks/auth/use-accounts",
+                  "v8/hooks/auth/use-add-account",
+                  "v8/hooks/auth/use-remove-account",
+                  "v8/hooks/auth/use-switch-account",
+                  "v8/hooks/auth/use-sign-out-all",
+                  "v8/hooks/auth/use-oauth-identities",
+                  "v8/hooks/auth/use-oauth-sign-in",
+                  "v8/hooks/auth/use-request-password-reset",
+                  "v8/hooks/auth/use-send-verification-email",
+                  "v8/hooks/auth/use-verify-email",
+                  "v8/hooks/auth/use-request-account-deletion",
+                  "v8/hooks/auth/use-confirm-account-deletion"
+                ]
+              },
+              {
+                "group": "Current User",
+                "pages": [
+                  "v8/hooks/user/use-user",
+                  "v8/hooks/user/use-user-actions"
+                ]
+              },
+              {
+                "group": "User Profiles",
+                "pages": [
+                  "v8/hooks/users/use-fetch-user",
+                  "v8/hooks/users/use-fetch-user-by-foreign-id",
+                  "v8/hooks/users/use-fetch-user-by-username",
+                  "v8/hooks/users/use-fetch-user-suggestions",
+                  "v8/hooks/users/use-check-username-availability",
+                  "v8/hooks/users/use-user-mentions"
+                ]
+              },
+              {
+                "group": "Entities",
+                "pages": [
+                  "v8/hooks/entities/use-entity",
+                  "v8/hooks/entities/use-fetch-entity",
+                  "v8/hooks/entities/use-fetch-entity-by-foreign-id",
+                  "v8/hooks/entities/use-fetch-entity-by-short-id",
+                  "v8/hooks/entities/use-fetch-many-entities",
+                  "v8/hooks/entities/use-fetch-many-entities-wrapper",
+                  "v8/hooks/entities/use-create-entity",
+                  "v8/hooks/entities/use-update-entity",
+                  "v8/hooks/entities/use-delete-entity",
+                  "v8/hooks/entities/use-fetch-drafts",
+                  "v8/hooks/entities/use-publish-draft",
+                  "v8/hooks/entities/use-is-entity-saved"
+                ]
+              },
+              {
+                "group": "Entity Lists",
+                "pages": [
+                  "v8/hooks/entity-lists/use-entity-list",
+                  "v8/hooks/entity-lists/use-entity-list-actions",
+                  "v8/hooks/entity-lists/use-infused-data"
+                ]
+              },
+              {
+                "group": "Spaces",
+                "pages": [
+                  "v8/hooks/spaces/use-space",
+                  "v8/hooks/spaces/use-fetch-space",
+                  "v8/hooks/spaces/use-fetch-space-by-short-id",
+                  "v8/hooks/spaces/use-fetch-space-by-slug",
+                  "v8/hooks/spaces/use-fetch-many-spaces",
+                  "v8/hooks/spaces/use-fetch-user-spaces",
+                  "v8/hooks/spaces/use-fetch-mutual-spaces",
+                  "v8/hooks/spaces/use-fetch-space-children",
+                  "v8/hooks/spaces/use-fetch-space-breadcrumb",
+                  "v8/hooks/spaces/use-fetch-space-members",
+                  "v8/hooks/spaces/use-fetch-space-team",
+                  "v8/hooks/spaces/use-check-my-membership",
+                  "v8/hooks/spaces/use-check-slug-availability",
+                  "v8/hooks/spaces/use-create-space",
+                  "v8/hooks/spaces/use-update-space",
+                  "v8/hooks/spaces/use-delete-space",
+                  "v8/hooks/spaces/use-join-space",
+                  "v8/hooks/spaces/use-leave-space",
+                  "v8/hooks/spaces/use-approve-member",
+                  "v8/hooks/spaces/use-decline-member",
+                  "v8/hooks/spaces/use-ban-member",
+                  "v8/hooks/spaces/use-update-member-role",
+                  "v8/hooks/spaces/use-unban-member",
+                  "v8/hooks/spaces/use-moderate-space-entity",
+                  "v8/hooks/spaces/use-set-space-entity-nsfw",
+                  "v8/hooks/spaces/use-moderate-space-comment",
+                  "v8/hooks/spaces/use-space-mentions",
+                  "v8/hooks/spaces/use-space-permissions"
+                ]
+              },
+              {
+                "group": "Spaces — Rules",
+                "pages": [
+                  "v8/hooks/spaces/rules/use-fetch-many-rules",
+                  "v8/hooks/spaces/rules/use-fetch-rule",
+                  "v8/hooks/spaces/rules/use-create-rule",
+                  "v8/hooks/spaces/rules/use-update-rule",
+                  "v8/hooks/spaces/rules/use-delete-rule",
+                  "v8/hooks/spaces/rules/use-reorder-rules"
+                ]
+              },
+              {
+                "group": "Space Lists",
+                "pages": [
+                  "v8/hooks/space-lists/use-space-list",
+                  "v8/hooks/space-lists/use-space-list-actions"
+                ]
+              },
+              {
+                "group": "Workspaces",
+                "pages": [
+                  "v8/hooks/workspaces/use-create-workspace",
+                  "v8/hooks/workspaces/use-fetch-workspace",
+                  "v8/hooks/workspaces/use-fetch-many-workspaces",
+                  "v8/hooks/workspaces/use-fetch-many-workspaces-wrapper",
+                  "v8/hooks/workspaces/use-update-workspace",
+                  "v8/hooks/workspaces/use-update-workspace-inherit-flag",
+                  "v8/hooks/workspaces/use-delete-workspace",
+                  "v8/hooks/workspaces/use-transfer-workspace-ownership",
+                  "v8/hooks/workspaces/use-fetch-workspace-members",
+                  "v8/hooks/workspaces/use-fetch-workspace-member-standing",
+                  "v8/hooks/workspaces/use-update-workspace-member",
+                  "v8/hooks/workspaces/use-remove-workspace-member",
+                  "v8/hooks/workspaces/use-remove-workspace-member-from-subtree",
+                  "v8/hooks/workspaces/use-leave-workspace",
+                  "v8/hooks/workspaces/use-create-workspace-invite",
+                  "v8/hooks/workspaces/use-fetch-workspace-invites",
+                  "v8/hooks/workspaces/use-revoke-workspace-invite",
+                  "v8/hooks/workspaces/use-resend-workspace-invite",
+                  "v8/hooks/workspaces/use-fetch-my-workspace-invites",
+                  "v8/hooks/workspaces/use-accept-workspace-invite",
+                  "v8/hooks/workspaces/use-decline-workspace-invite",
+                  "v8/hooks/workspaces/use-fetch-workspace-authority"
+                ]
+              },
+              {
+                "group": "Events",
+                "pages": [
+                  "v8/hooks/events/use-event",
+                  "v8/hooks/events/use-fetch-event",
+                  "v8/hooks/events/use-fetch-many-events",
+                  "v8/hooks/events/use-fetch-many-events-wrapper",
+                  "v8/hooks/events/use-create-event",
+                  "v8/hooks/events/use-update-event",
+                  "v8/hooks/events/use-cancel-event",
+                  "v8/hooks/events/use-delete-event",
+                  "v8/hooks/events/use-set-rsvp",
+                  "v8/hooks/events/use-withdraw-rsvp",
+                  "v8/hooks/events/use-add-host",
+                  "v8/hooks/events/use-remove-host",
+                  "v8/hooks/events/use-add-invite",
+                  "v8/hooks/events/use-remove-invite",
+                  "v8/hooks/events/use-fetch-invitees",
+                  "v8/hooks/events/use-fetch-event-rsvps"
+                ]
+              },
+              {
+                "group": "Comments",
+                "pages": [
+                  "v8/hooks/comments/use-comment-section",
+                  "v8/hooks/comments/use-entity-comments",
+                  "v8/hooks/comments/use-replies",
+                  "v8/hooks/comments/use-create-comment",
+                  "v8/hooks/comments/use-update-comment",
+                  "v8/hooks/comments/use-delete-comment",
+                  "v8/hooks/comments/use-fetch-comment",
+                  "v8/hooks/comments/use-fetch-comment-by-foreign-id",
+                  "v8/hooks/comments/use-fetch-many-comments",
+                  "v8/hooks/comments/use-fetch-many-comments-wrapper"
+                ]
+              },
+              {
+                "group": "Reactions",
+                "pages": [
+                  "v8/hooks/reactions/use-add-reaction",
+                  "v8/hooks/reactions/use-remove-reaction",
+                  "v8/hooks/reactions/use-reaction-toggle",
+                  "v8/hooks/reactions/use-fetch-entity-reactions",
+                  "v8/hooks/reactions/use-fetch-entity-reactions-wrapper",
+                  "v8/hooks/reactions/use-fetch-comment-reactions",
+                  "v8/hooks/reactions/use-fetch-comment-reactions-wrapper"
+                ]
+              },
+              {
+                "group": "Reputation",
+                "pages": [
+                  "v8/hooks/reputation/use-create-reputation-grant",
+                  "v8/hooks/reputation/use-fetch-many-reputation-grants",
+                  "v8/hooks/reputation/use-fetch-many-reputation-grants-wrapper"
+                ]
+              },
+              {
+                "group": "Follows",
+                "pages": [
+                  "v8/hooks/follows/use-follow-manager",
+                  "v8/hooks/follows/use-follow-user",
+                  "v8/hooks/follows/use-unfollow-by-follow-id",
+                  "v8/hooks/follows/use-unfollow-user-by-user-id",
+                  "v8/hooks/follows/use-fetch-follow-status",
+                  "v8/hooks/follows/use-fetch-followers",
+                  "v8/hooks/follows/use-fetch-followers-by-user-id",
+                  "v8/hooks/follows/use-fetch-followers-count",
+                  "v8/hooks/follows/use-fetch-followers-count-by-user-id",
+                  "v8/hooks/follows/use-fetch-following",
+                  "v8/hooks/follows/use-fetch-following-by-user-id",
+                  "v8/hooks/follows/use-fetch-following-count",
+                  "v8/hooks/follows/use-fetch-following-count-by-user-id"
+                ]
+              },
+              {
+                "group": "Connections",
+                "pages": [
+                  "v8/hooks/connections/use-connection-manager",
+                  "v8/hooks/connections/use-request-connection",
+                  "v8/hooks/connections/use-accept-connection",
+                  "v8/hooks/connections/use-decline-connection",
+                  "v8/hooks/connections/use-remove-connection",
+                  "v8/hooks/connections/use-remove-connection-by-user-id",
+                  "v8/hooks/connections/use-fetch-connections",
+                  "v8/hooks/connections/use-fetch-connections-by-user-id",
+                  "v8/hooks/connections/use-fetch-connections-count",
+                  "v8/hooks/connections/use-fetch-connections-count-by-user-id",
+                  "v8/hooks/connections/use-fetch-connection-status",
+                  "v8/hooks/connections/use-fetch-sent-pending-connections",
+                  "v8/hooks/connections/use-fetch-received-pending-connections"
+                ]
+              },
+              {
+                "group": "Blocks",
+                "pages": [
+                  "v8/hooks/blocks/use-block-manager",
+                  "v8/hooks/blocks/use-block-user",
+                  "v8/hooks/blocks/use-unblock-user",
+                  "v8/hooks/blocks/use-fetch-block-status",
+                  "v8/hooks/blocks/use-fetch-blocked-users"
+                ]
+              },
+              {
+                "group": "Collections",
+                "pages": [
+                  "v8/hooks/collections/use-collections",
+                  "v8/hooks/collections/use-collections-actions",
+                  "v8/hooks/collections/use-collection-entities-wrapper"
+                ]
+              },
+              {
+                "group": "App Notifications",
+                "pages": ["v8/hooks/app-notifications/use-app-notifications"]
+              },
+              {
+                "group": "Push Notifications",
+                "pages": [
+                  "v8/hooks/push/use-push-registration",
+                  "v8/hooks/push/use-account-push-toggle",
+                  "v8/hooks/push/use-notification-preferences"
+                ]
+              },
+              {
+                "group": "Chat — Conversations",
+                "pages": [
+                  "v8/hooks/chat/conversations/use-conversations",
+                  "v8/hooks/chat/conversations/use-conversation",
+                  "v8/hooks/chat/conversations/use-fetch-conversation",
+                  "v8/hooks/chat/conversations/use-update-conversation",
+                  "v8/hooks/chat/conversations/use-delete-conversation",
+                  "v8/hooks/chat/conversations/use-create-direct-conversation",
+                  "v8/hooks/chat/conversations/use-conversation-members",
+                  "v8/hooks/chat/conversations/use-fetch-space-conversation",
+                  "v8/hooks/chat/conversations/use-mute-conversation"
+                ]
+              },
+              {
+                "group": "Chat — Messages",
+                "pages": [
+                  "v8/hooks/chat/messages/use-live-chat-messages",
+                  "v8/hooks/chat/messages/use-fetch-many-chat-messages",
+                  "v8/hooks/chat/messages/use-fetch-many-chat-messages-wrapper",
+                  "v8/hooks/chat/messages/use-send-message",
+                  "v8/hooks/chat/messages/use-edit-message",
+                  "v8/hooks/chat/messages/use-delete-message",
+                  "v8/hooks/chat/messages/use-toggle-reaction",
+                  "v8/hooks/chat/messages/use-message-thread",
+                  "v8/hooks/chat/messages/use-chat-messages"
+                ]
+              },
+              {
+                "group": "Chat — Core",
+                "pages": [
+                  "v8/hooks/chat/use-chat-socket",
+                  "v8/hooks/chat/use-mark-conversation-as-read",
+                  "v8/hooks/chat/use-total-unread-count",
+                  "v8/hooks/chat/use-typing-indicator",
+                  "v8/hooks/chat/use-unread-conversation-count"
+                ]
+              },
+              {
+                "group": "Search",
+                "pages": [
+                  "v8/hooks/search/use-search-content",
+                  "v8/hooks/search/use-search-users",
+                  "v8/hooks/search/use-search-spaces",
+                  "v8/hooks/search/use-ask-content",
+                  "v8/hooks/search/use-match-users"
+                ]
+              },
+              {
+                "group": "Reports",
+                "pages": [
+                  "v8/hooks/reports/use-create-report",
+                  "v8/hooks/reports/use-fetch-moderated-reports",
+                  "v8/hooks/reports/use-handle-space-entity-report",
+                  "v8/hooks/reports/use-handle-space-comment-report",
+                  "v8/hooks/reports/use-handle-space-chat-report"
+                ]
+              },
+              {
+                "group": "Storage",
+                "pages": [
+                  "v8/hooks/storage/use-upload-file",
+                  "v8/hooks/storage/use-upload-image"
+                ]
+              },
+              {
+                "group": "Crypto",
+                "pages": ["v8/hooks/crypto/use-sign-testing-jwt"]
+              },
+              {
+                "group": "Project",
+                "pages": ["v8/hooks/project/use-project"]
+              },
+              {
+                "group": "Custom Tables",
+                "pages": [
+                  "v8/hooks/tables/use-table",
+                  "v8/hooks/tables/use-table-row"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API Reference",
+            "url": "v8/api-reference/getting-started",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "v8/api-reference/getting-started",
+                  "v8/api-reference/authentication"
+                ]
+              },
+              {
+                "group": "Auth Endpoints",
+                "pages": [
+                  "v8/api-reference/auth/sign-up",
+                  "v8/api-reference/auth/sign-in",
+                  "v8/api-reference/auth/sign-out",
+                  "v8/api-reference/auth/change-password",
+                  "v8/api-reference/auth/set-password",
+                  "v8/api-reference/auth/request-access-token",
+                  "v8/api-reference/auth/verify-external-user",
+                  "v8/api-reference/auth/request-password-reset",
+                  "v8/api-reference/auth/reset-password",
+                  "v8/api-reference/auth/send-verification-email",
+                  "v8/api-reference/auth/verify-email",
+                  "v8/api-reference/auth/verify-email-link",
+                  "v8/api-reference/auth/request-account-deletion",
+                  "v8/api-reference/auth/confirm-account-deletion"
+                ]
+              },
+              {
+                "group": "OAuth Endpoints",
+                "pages": [
+                  "v8/api-reference/oauth/authorize",
+                  "v8/api-reference/oauth/link",
+                  "v8/api-reference/oauth/list-identities",
+                  "v8/api-reference/oauth/unlink-identity"
+                ]
+              },
+              {
+                "group": "User Endpoints",
+                "pages": [
+                  "v8/api-reference/users/fetch-user",
+                  "v8/api-reference/users/fetch-user-by-foreign-id",
+                  "v8/api-reference/users/fetch-user-by-username",
+                  "v8/api-reference/users/fetch-user-suggestions",
+                  "v8/api-reference/users/check-username-availability",
+                  "v8/api-reference/users/update-user",
+                  "v8/api-reference/users/delete-user"
+                ]
+              },
+              {
+                "group": "User Follow Operations",
+                "pages": [
+                  "v8/api-reference/users/follows/follow-user",
+                  "v8/api-reference/users/follows/get-follow-status",
+                  "v8/api-reference/users/follows/get-followers",
+                  "v8/api-reference/users/follows/get-followers-count",
+                  "v8/api-reference/users/follows/get-following",
+                  "v8/api-reference/users/follows/get-following-count",
+                  "v8/api-reference/users/follows/unfollow-user"
+                ]
+              },
+              {
+                "group": "User Connection Operations",
+                "pages": [
+                  "v8/api-reference/users/connections/request-connection",
+                  "v8/api-reference/users/connections/get-connection-status",
+                  "v8/api-reference/users/connections/get-connections",
+                  "v8/api-reference/users/connections/get-connections-count",
+                  "v8/api-reference/users/connections/remove-connection"
+                ]
+              },
+              {
+                "group": "User Block Operations",
+                "pages": [
+                  "v8/api-reference/users/blocks/block-user",
+                  "v8/api-reference/users/blocks/unblock-user",
+                  "v8/api-reference/users/blocks/get-block-status",
+                  "v8/api-reference/blocks/fetch-blocks"
+                ]
+              },
+              {
+                "group": "Follow Endpoints",
+                "pages": [
+                  "v8/api-reference/follows/fetch-following",
+                  "v8/api-reference/follows/fetch-followers",
+                  "v8/api-reference/follows/fetch-following-count",
+                  "v8/api-reference/follows/fetch-followers-count",
+                  "v8/api-reference/follows/delete-follow"
+                ]
+              },
+              {
+                "group": "Connection Endpoints",
+                "pages": [
+                  "v8/api-reference/connections/fetch-connections",
+                  "v8/api-reference/connections/fetch-connections-count",
+                  "v8/api-reference/connections/fetch-sent-pending",
+                  "v8/api-reference/connections/fetch-received-pending",
+                  "v8/api-reference/connections/accept-connection",
+                  "v8/api-reference/connections/decline-connection",
+                  "v8/api-reference/connections/remove-connection"
+                ]
+              },
+              {
+                "group": "Entity Endpoints",
+                "pages": [
+                  "v8/api-reference/entities/create-entity",
+                  "v8/api-reference/entities/fetch-entity",
+                  "v8/api-reference/entities/fetch-entity-by-foreign-id",
+                  "v8/api-reference/entities/fetch-entity-by-short-id",
+                  "v8/api-reference/entities/fetch-many-entities",
+                  "v8/api-reference/entities/fetch-drafts",
+                  "v8/api-reference/entities/publish-entity",
+                  "v8/api-reference/entities/fetch-top-comment",
+                  "v8/api-reference/entities/update-entity",
+                  "v8/api-reference/entities/increment-entity-views",
+                  "v8/api-reference/entities/delete-entity",
+                  "v8/api-reference/entities/add-reaction",
+                  "v8/api-reference/entities/remove-reaction",
+                  "v8/api-reference/entities/fetch-reactions",
+                  "v8/api-reference/entities/get-user-reaction",
+                  "v8/api-reference/entities/is-entity-saved"
+                ]
+              },
+              {
+                "group": "Comment Endpoints",
+                "pages": [
+                  "v8/api-reference/comments/create-comment",
+                  "v8/api-reference/comments/fetch-comment",
+                  "v8/api-reference/comments/fetch-comment-by-foreign-id",
+                  "v8/api-reference/comments/fetch-many-comments",
+                  "v8/api-reference/comments/update-comment",
+                  "v8/api-reference/comments/delete-comment",
+                  "v8/api-reference/comments/add-reaction",
+                  "v8/api-reference/comments/remove-reaction",
+                  "v8/api-reference/comments/fetch-reactions",
+                  "v8/api-reference/comments/get-user-reaction"
+                ]
+              },
+              {
+                "group": "Chat — Conversations",
+                "pages": [
+                  "v8/api-reference/chat/conversations/list-conversations",
+                  "v8/api-reference/chat/conversations/create-group",
+                  "v8/api-reference/chat/conversations/create-direct",
+                  "v8/api-reference/chat/conversations/unread-count",
+                  "v8/api-reference/chat/conversations/fetch-conversation",
+                  "v8/api-reference/chat/conversations/fetch-conversation-preview",
+                  "v8/api-reference/chat/conversations/update-conversation",
+                  "v8/api-reference/chat/conversations/delete-conversation",
+                  "v8/api-reference/chat/conversations/mute-conversation"
+                ]
+              },
+              {
+                "group": "Chat — Members",
+                "pages": [
+                  "v8/api-reference/chat/members/list-members",
+                  "v8/api-reference/chat/members/add-member",
+                  "v8/api-reference/chat/members/remove-member",
+                  "v8/api-reference/chat/members/leave-conversation",
+                  "v8/api-reference/chat/members/update-member-role"
+                ]
+              },
+              {
+                "group": "Chat — Messages",
+                "pages": [
+                  "v8/api-reference/chat/messages/list-messages",
+                  "v8/api-reference/chat/messages/send-message",
+                  "v8/api-reference/chat/messages/fetch-message",
+                  "v8/api-reference/chat/messages/edit-message",
+                  "v8/api-reference/chat/messages/delete-message",
+                  "v8/api-reference/chat/messages/toggle-reaction",
+                  "v8/api-reference/chat/messages/fetch-reaction-users",
+                  "v8/api-reference/chat/messages/mark-as-read"
+                ]
+              },
+              {
+                "group": "Collection Endpoints",
+                "pages": [
+                  "v8/api-reference/collections/fetch-root",
+                  "v8/api-reference/collections/create-sub-collection",
+                  "v8/api-reference/collections/fetch-sub-collections",
+                  "v8/api-reference/collections/fetch-entities",
+                  "v8/api-reference/collections/add-entity",
+                  "v8/api-reference/collections/remove-entity",
+                  "v8/api-reference/collections/update-collection",
+                  "v8/api-reference/collections/delete-collection"
+                ]
+              },
+              {
+                "group": "App Notification Endpoints",
+                "pages": [
+                  "v8/api-reference/app-notifications/fetch-notifications",
+                  "v8/api-reference/app-notifications/count-unread",
+                  "v8/api-reference/app-notifications/mark-as-read",
+                  "v8/api-reference/app-notifications/mark-all-as-read"
+                ]
+              },
+              {
+                "group": "Push Notification Endpoints",
+                "pages": [
+                  "v8/api-reference/push-notifications/register-device",
+                  "v8/api-reference/push-notifications/deregister-device",
+                  "v8/api-reference/push-notifications/send",
+                  "v8/api-reference/push-notifications/get-vapid-public-key",
+                  "v8/api-reference/push-notifications/get-preferences",
+                  "v8/api-reference/push-notifications/update-preferences"
+                ]
+              },
+              {
+                "group": "Report Endpoints",
+                "pages": [
+                  "v8/api-reference/reports/create-report",
+                  "v8/api-reference/reports/fetch-moderated-reports"
+                ]
+              },
+              {
+                "group": "Search Endpoints",
+                "pages": [
+                  "v8/api-reference/search/search-content",
+                  "v8/api-reference/search/search-users",
+                  "v8/api-reference/search/search-spaces",
+                  "v8/api-reference/search/ask",
+                  "v8/api-reference/match/match-users"
+                ]
+              },
+              {
+                "group": "Space Endpoints",
+                "pages": [
+                  "v8/api-reference/spaces/create-space",
+                  "v8/api-reference/spaces/fetch-spaces",
+                  "v8/api-reference/spaces/fetch-space",
+                  "v8/api-reference/spaces/fetch-space-by-short-id",
+                  "v8/api-reference/spaces/fetch-space-by-slug",
+                  "v8/api-reference/spaces/fetch-user-spaces",
+                  "v8/api-reference/spaces/fetch-mutual-spaces",
+                  "v8/api-reference/spaces/check-slug",
+                  "v8/api-reference/spaces/update-space",
+                  "v8/api-reference/spaces/delete-space",
+                  "v8/api-reference/spaces/fetch-children",
+                  "v8/api-reference/spaces/fetch-breadcrumb"
+                ]
+              },
+              {
+                "group": "Space — Membership",
+                "pages": [
+                  "v8/api-reference/spaces/membership/join-space",
+                  "v8/api-reference/spaces/membership/leave-space",
+                  "v8/api-reference/spaces/membership/check-my-membership",
+                  "v8/api-reference/spaces/membership/list-members",
+                  "v8/api-reference/spaces/membership/list-team",
+                  "v8/api-reference/spaces/membership/approve-member",
+                  "v8/api-reference/spaces/membership/decline-member",
+                  "v8/api-reference/spaces/membership/ban-member",
+                  "v8/api-reference/spaces/membership/unban-member",
+                  "v8/api-reference/spaces/membership/update-member-role"
+                ]
+              },
+              {
+                "group": "Space — Rules",
+                "pages": [
+                  "v8/api-reference/spaces/rules/list-rules",
+                  "v8/api-reference/spaces/rules/fetch-rule",
+                  "v8/api-reference/spaces/rules/create-rule",
+                  "v8/api-reference/spaces/rules/update-rule",
+                  "v8/api-reference/spaces/rules/delete-rule",
+                  "v8/api-reference/spaces/rules/reorder-rules"
+                ]
+              },
+              {
+                "group": "Space — Moderation",
+                "pages": [
+                  "v8/api-reference/spaces/moderation/moderate-entity",
+                  "v8/api-reference/spaces/moderation/moderate-comment",
+                  "v8/api-reference/spaces/moderation/moderate-message",
+                  "v8/api-reference/spaces/moderation/set-entity-nsfw",
+                  "v8/api-reference/spaces/moderation/handle-entity-report",
+                  "v8/api-reference/spaces/moderation/handle-comment-report",
+                  "v8/api-reference/spaces/moderation/handle-message-report"
+                ]
+              },
+              {
+                "group": "Space — Chat",
+                "pages": ["v8/api-reference/spaces/chat/get-space-conversation"]
+              },
+              {
+                "group": "Workspace Endpoints",
+                "pages": [
+                  "v8/api-reference/workspaces/create-workspace",
+                  "v8/api-reference/workspaces/fetch-workspaces",
+                  "v8/api-reference/workspaces/fetch-workspace",
+                  "v8/api-reference/workspaces/update-workspace",
+                  "v8/api-reference/workspaces/update-inherit-flag",
+                  "v8/api-reference/workspaces/delete-workspace",
+                  "v8/api-reference/workspaces/transfer-ownership",
+                  "v8/api-reference/workspaces/fetch-authority"
+                ]
+              },
+              {
+                "group": "Workspace — Membership",
+                "pages": [
+                  "v8/api-reference/workspaces/members/list-members",
+                  "v8/api-reference/workspaces/members/fetch-member-standing",
+                  "v8/api-reference/workspaces/members/update-member",
+                  "v8/api-reference/workspaces/members/remove-member",
+                  "v8/api-reference/workspaces/members/leave-workspace",
+                  "v8/api-reference/workspaces/members/remove-from-subtree"
+                ]
+              },
+              {
+                "group": "Workspace — Invitations",
+                "pages": [
+                  "v8/api-reference/workspaces/invitations/create-invite",
+                  "v8/api-reference/workspaces/invitations/list-invites",
+                  "v8/api-reference/workspaces/invitations/revoke-invite",
+                  "v8/api-reference/workspaces/invitations/resend-invite",
+                  "v8/api-reference/workspaces/invitations/accept-invite",
+                  "v8/api-reference/workspaces/invitations/decline-invite",
+                  "v8/api-reference/workspaces/invitations/list-my-invites"
+                ]
+              },
+              {
+                "group": "Event Endpoints",
+                "pages": [
+                  "v8/api-reference/events/create-event",
+                  "v8/api-reference/events/fetch-event",
+                  "v8/api-reference/events/fetch-many-events",
+                  "v8/api-reference/events/update-event",
+                  "v8/api-reference/events/cancel-event",
+                  "v8/api-reference/events/delete-event",
+                  "v8/api-reference/events/set-rsvp",
+                  "v8/api-reference/events/withdraw-rsvp",
+                  "v8/api-reference/events/add-host",
+                  "v8/api-reference/events/remove-host",
+                  "v8/api-reference/events/add-invite",
+                  "v8/api-reference/events/remove-invite",
+                  "v8/api-reference/events/fetch-invitees",
+                  "v8/api-reference/events/fetch-event-rsvps"
+                ]
+              },
+              {
+                "group": "Reputation Grant Endpoints",
+                "pages": [
+                  "v8/api-reference/reputation-grants/create-reputation-grant",
+                  "v8/api-reference/reputation-grants/mint-reputation-grant",
+                  "v8/api-reference/reputation-grants/fetch-many-reputation-grants",
+                  "v8/api-reference/reputation-grants/fetch-user-grant-history"
+                ]
+              },
+              {
+                "group": "Storage Endpoints",
+                "pages": [
+                  "v8/api-reference/storage/upload-image",
+                  "v8/api-reference/storage/upload-file",
+                  "v8/api-reference/storage/fetch-file",
+                  "v8/api-reference/storage/delete-file"
+                ]
+              },
+              {
+                "group": "Custom Tables — Rows",
+                "pages": [
+                  "v8/api-reference/custom-tables/fetch-many-rows",
+                  "v8/api-reference/custom-tables/fetch-row",
+                  "v8/api-reference/custom-tables/insert-row",
+                  "v8/api-reference/custom-tables/bulk-insert-rows",
+                  "v8/api-reference/custom-tables/update-row",
+                  "v8/api-reference/custom-tables/delete-row",
+                  "v8/api-reference/custom-tables/bulk-delete-rows",
+                  "v8/api-reference/custom-tables/restore-row"
+                ]
+              },
+              {
+                "group": "Custom Tables — Management",
+                "pages": [
+                  "v8/api-reference/custom-tables/create-table",
+                  "v8/api-reference/custom-tables/drop-table",
+                  "v8/api-reference/custom-tables/add-column",
+                  "v8/api-reference/custom-tables/drop-column"
+                ]
+              },
+              {
+                "group": "Utils",
+                "pages": ["v8/api-reference/utils/get-metadata"]
+              },
+              {
+                "group": "Crypto",
+                "pages": ["v8/api-reference/crypto/sign-testing-jwt"]
+              }
+            ]
+          },
+          {
+            "tab": "Data Models",
+            "url": "v8/data-models/user",
+            "groups": [
+              {
+                "group": "Models",
+                "pages": [
+                  "v8/data-models/user",
+                  "v8/data-models/reputation",
+                  "v8/data-models/reputation-grant",
+                  "v8/data-models/entity",
+                  "v8/data-models/comment",
+                  "v8/data-models/space",
+                  "v8/data-models/space-member",
+                  "v8/data-models/rule",
+                  "v8/data-models/event",
+                  "v8/data-models/event-rsvp",
+                  "v8/data-models/event-invite",
+                  "v8/data-models/conversation",
+                  "v8/data-models/conversation-member",
+                  "v8/data-models/chat-message",
+                  "v8/data-models/collection",
+                  "v8/data-models/reaction",
+                  "v8/data-models/file",
+                  "v8/data-models/follow",
+                  "v8/data-models/connection",
+                  "v8/data-models/block",
+                  "v8/data-models/app-notification",
+                  "v8/data-models/workspace",
+                  "v8/data-models/workspace-member",
+                  "v8/data-models/workspace-invitation"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Node SDK",
+            "url": "v8/node-sdk/overview",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": ["v8/node-sdk/overview"]
+              },
+              {
+                "group": "Modules",
+                "pages": [
+                  "v8/node-sdk/auth",
+                  "v8/node-sdk/users",
+                  "v8/node-sdk/entities",
+                  "v8/node-sdk/comments",
+                  "v8/node-sdk/collections",
+                  "v8/node-sdk/follows",
+                  "v8/node-sdk/connections",
+                  "v8/node-sdk/spaces",
+                  "v8/node-sdk/spaces-members",
+                  "v8/node-sdk/spaces-moderation",
+                  "v8/node-sdk/workspaces",
+                  "v8/node-sdk/events",
+                  "v8/node-sdk/reputation",
+                  "v8/node-sdk/chat",
+                  "v8/node-sdk/search",
+                  "v8/node-sdk/reports",
+                  "v8/node-sdk/app-notifications",
+                  "v8/node-sdk/push-notifications",
+                  "v8/node-sdk/storage",
+                  "v8/node-sdk/tables",
+                  "v8/node-sdk/tables-management"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "JS SDK",
+            "url": "v8/js-sdk/overview",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": ["v8/js-sdk/overview"]
+              },
+              {
+                "group": "Modules",
+                "pages": [
+                  "v8/js-sdk/auth",
+                  "v8/js-sdk/users",
+                  "v8/js-sdk/entities",
+                  "v8/js-sdk/comments",
+                  "v8/js-sdk/collections",
+                  "v8/js-sdk/follows",
+                  "v8/js-sdk/connections",
+                  "v8/js-sdk/spaces",
+                  "v8/js-sdk/spaces-members",
+                  "v8/js-sdk/spaces-moderation",
+                  "v8/js-sdk/workspaces",
+                  "v8/js-sdk/events",
+                  "v8/js-sdk/reputation",
+                  "v8/js-sdk/chat",
+                  "v8/js-sdk/push-notifications",
+                  "v8/js-sdk/search",
+                  "v8/js-sdk/reports",
+                  "v8/js-sdk/app-notifications",
+                  "v8/js-sdk/storage",
+                  "v8/js-sdk/oauth",
+                  "v8/js-sdk/tables"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Components",
+            "url": "v8/components/overview",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": ["v8/components/overview"]
+              },
+              {
+                "group": "Installation",
+                "pages": [
+                  "v8/components/installation/cli-setup",
+                  "v8/components/installation/configuration",
+                  "v8/components/installation/quick-start"
+                ]
+              },
+              {
+                "group": "Component Types",
+                "pages": ["v8/components/components/overview"]
+              },
+              {
+                "group": "Threaded Comments",
+                "pages": [
+                  "v8/components/components/threaded/overview",
+                  "v8/components/components/threaded/installation",
+                  "v8/components/components/threaded/props-api",
+                  "v8/components/components/threaded/file-structure",
+                  "v8/components/components/threaded/features"
+                ]
+              },
+              {
+                "group": "Social Comments",
+                "pages": [
+                  "v8/components/components/social/overview",
+                  "v8/components/components/social/installation",
+                  "v8/components/components/social/props-api",
+                  "v8/components/components/social/file-structure",
+                  "v8/components/components/social/features"
+                ]
+              },
+              {
+                "group": "Notification Control",
+                "pages": [
+                  "v8/components/components/notifications/overview",
+                  "v8/components/components/notifications/installation",
+                  "v8/components/components/notifications/props-api",
+                  "v8/components/components/notifications/customization",
+                  "v8/components/components/notifications/integration-examples"
+                ]
+              },
+              {
+                "group": "Customization",
+                "pages": [
+                  "v8/components/customization/overview",
+                  "v8/components/customization/colors-theming",
+                  "v8/components/customization/layout-structure",
+                  "v8/components/customization/styling-variants",
+                  "v8/components/customization/adding-features",
+                  "v8/components/customization/advanced"
+                ]
+              }
+            ]
+          }
+        ],
+        "global": {
+          "anchors": [
+            {
+              "anchor": "Dashboard",
+              "href": "https://dash.sublay.io",
+              "icon": "gauge"
+            }
+          ]
+        }
+      },
+      {
         "version": "7.0.0",
         "default": true,
         "tabs": [

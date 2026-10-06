@@ -1,5 +1,5 @@
 # v8 guard: fails any pull request into `main` that carries v8 work — either
-# because the branch is named `v8` / `v8/<slice>`, or because its API packages
+# because the branch is named `v8` / `v8-<slice>`, or because its API packages
 # are at 8.x. Context: plan-v8-beta.md §4.2 and §5.4 (engine root).
 #
 # It also runs on every push to `main`, as an alarm rather than a block: the
@@ -62,7 +62,7 @@ jobs:
         env:
           HEAD_REF: ${{ github.head_ref }}
         run: |
-          if [ "$HEAD_REF" = "v8" ] || [ "${HEAD_REF#v8/}" != "$HEAD_REF" ]; then
+          if [ "$HEAD_REF" = "v8" ] || [ "${HEAD_REF#v8-}" != "$HEAD_REF" ]; then
             echo "::error::'$HEAD_REF' is a v8 branch and cannot merge into main. v8 work targets the v8 branch; v8 merges into main only at graduation (plan-v8-beta.md §4.2)."
             exit 1
           fi

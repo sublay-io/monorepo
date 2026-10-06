@@ -14,14 +14,14 @@ describe("useFetchComment", () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchComment());
 
     const comment = makeComment();
-    axiosPrivate.mockResponse("get", { comment });
+    axiosPrivate.mockResponse("get", comment);
 
-    let returned: { comment: typeof comment } | undefined;
+    let returned: typeof comment | undefined;
     await act(async () => {
       returned = await result.current({ commentId: "comment-1" });
     });
 
-    expect(returned).toEqual({ comment });
+    expect(returned).toEqual(comment);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/comments/comment-1");
@@ -30,7 +30,7 @@ describe("useFetchComment", () => {
   it("joins an include array into a comma-separated param", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchComment());
 
-    axiosPrivate.mockResponse("get", { comment: makeComment() });
+    axiosPrivate.mockResponse("get", makeComment());
 
     await act(async () => {
       await result.current({ commentId: "comment-1", include: ["user", "parent"] });

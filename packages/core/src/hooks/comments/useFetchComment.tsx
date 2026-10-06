@@ -10,7 +10,7 @@ export interface FetchCommentProps extends SpaceReputationContextParams {
   include?: CommentIncludeParam;
 }
 
-function useFetchComment(): (props: FetchCommentProps) => Promise<{ comment: Comment }> {
+function useFetchComment(): (props: FetchCommentProps) => Promise<Comment> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -40,9 +40,7 @@ function useFetchComment(): (props: FetchCommentProps) => Promise<{ comment: Com
         params,
       });
 
-      return response.data as {
-        comment: Comment;
-      };
+      return response.data as Comment;
     },
     [axios, projectId]
   );

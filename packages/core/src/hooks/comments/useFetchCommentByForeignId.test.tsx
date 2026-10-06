@@ -16,14 +16,14 @@ describe("useFetchCommentByForeignId", () => {
     );
 
     const comment = makeComment({ foreignId: "ext-1" });
-    axiosPrivate.mockResponse("get", { comment });
+    axiosPrivate.mockResponse("get", comment);
 
-    let returned: { comment: typeof comment } | undefined;
+    let returned: typeof comment | undefined;
     await act(async () => {
       returned = await result.current({ foreignId: "ext-1" });
     });
 
-    expect(returned).toEqual({ comment });
+    expect(returned).toEqual(comment);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/comments/by-foreign-id");

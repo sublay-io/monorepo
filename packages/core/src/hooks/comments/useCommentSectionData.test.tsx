@@ -220,7 +220,7 @@ describe("useCommentSectionData", () => {
       () => useCommentSectionData({ highlightedCommentId: "comment-1" }),
       {
         beforeRender: ({ axiosPrivate }) =>
-          axiosPrivate.mockResponse("get", { comment: targetComment }),
+          axiosPrivate.mockResponse("get", targetComment),
       },
     );
 

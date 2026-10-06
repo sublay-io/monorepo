@@ -24,7 +24,7 @@ function MyComment({ myCommentId }: { myCommentId: string }) {
   const fetchComment = useFetchCommentByForeignId();
 
   const load = async () => {
-    const { comment } = await fetchComment({ foreignId: myCommentId });
+    const comment = await fetchComment({ foreignId: myCommentId });
     console.log(comment);
   };
 
@@ -44,6 +44,6 @@ function MyComment({ myCommentId }: { myCommentId: string }) {
 
 ## Returns
 
-<ResponseField name="comment" type="Comment">
+<ResponseField name="Comment" type="Comment">
   The fetched comment. See [Comment data model](/v8/data-models/comment).
 </ResponseField>

@@ -8,7 +8,7 @@ export interface FetchCommentByForeignIdProps {
   include?: CommentIncludeParam;
 }
 
-function useFetchCommentByForeignId(): (props: FetchCommentByForeignIdProps) => Promise<{ comment: Comment }> {
+function useFetchCommentByForeignId(): (props: FetchCommentByForeignIdProps) => Promise<Comment> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -34,9 +34,7 @@ function useFetchCommentByForeignId(): (props: FetchCommentByForeignIdProps) => 
         params,
       });
 
-      return response.data as {
-        comment: Comment;
-      };
+      return response.data as Comment;
     },
     [axios, projectId]
   );

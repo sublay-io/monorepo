@@ -56,7 +56,7 @@ Google won't let you create credentials until the consent screen exists. This is
     Under **Authorized redirect URIs**, click **Add URI** and enter, exactly:
 
     ```
-    https://api.sublay.io/v7/oauth/callback
+    https://api.sublay.io/oauth/callback
     ```
 
     <Warning>
@@ -94,7 +94,7 @@ Click **Add Provider** to save and enable it.
 
 ## Common pitfalls
 
-- **Wrong URL in Google** — the **Authorized redirect URI** in Google must be `https://api.sublay.io/v7/oauth/callback`, not your app's URL. Your app's URL goes in Sublay's **Allowed Redirect URIs** field instead.
+- **Wrong URL in Google** — the **Authorized redirect URI** in Google must be `https://api.sublay.io/oauth/callback`, not your app's URL. Your app's URL goes in Sublay's **Allowed Redirect URIs** field instead.
 - **Redirect URI mismatch** — the `redirectAfterAuth` in your code and an entry in Sublay's **Allowed Redirect URIs** must match exactly, character for character (a trailing slash mismatch will fail).
 - **Stuck in Testing mode** — if sign-in works for you but not for other users, your consent screen is still in **Testing** and they aren't on the test-user list. Publish the app to open it up.
 - **Wrong application type** — pick **Web application**, not "Android", "iOS", or "Desktop", even for a mobile app. Sublay handles the redirect server-side.

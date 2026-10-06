@@ -11,7 +11,7 @@
 - `path mismatch` — SDK function exists but calls a different URL than the server exposes
 - `—` — no SDK function exists for this endpoint
 
-Base path: `/v7/:projectId/`
+Base path: `/v8/:projectId/`
 
 ---
 

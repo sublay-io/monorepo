@@ -7,7 +7,7 @@ jest.mock("axios");
 const mockedCreate = axios.create as jest.Mock;
 
 describe("SublayHttpClient construction", () => {
-  it("configures projectInstance with the v7 project-scoped baseURL and auth headers", () => {
+  it("configures projectInstance with the v8 project-scoped baseURL and auth headers", () => {
     new SublayHttpClient({ projectId: "proj1", apiKey: "key1" });
 
     expect(mockedCreate).toHaveBeenNthCalledWith(1, {

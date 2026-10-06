@@ -181,7 +181,7 @@ describe("space-reputation serialization guard — askContent URLSearchParams pa
 
     const [url] = fetchMock.mock.calls[0];
     expect(url).toBe(
-      "https://api.sublay.io/v7/proj1/search/ask?spaceReputationId=space-1&spaceReputationDescendants=true"
+      "https://api.sublay.io/v8/proj1/search/ask?spaceReputationId=space-1&spaceReputationDescendants=true"
     );
     expect(url).not.toContain("spaceReputation%5B");
     expect(url).not.toContain("object");

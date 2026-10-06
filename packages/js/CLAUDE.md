@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Version**: 7.9.0 (tracks the v7 server API)
 - **Type**: published npm library (CJS + ESM)
 - **Only runtime dependency**: `axios`
-- **Base URL**: `https://api.sublay.io/v7/{projectId}`
+- **Base URL**: `https://api.sublay.io/v8/{projectId}`
 
 > Sibling SDKs: `@sublay/node` is the server-side SDK (authenticates with a **service key** and may act on behalf of any user). This SDK is its user-token counterpart. The two share the same module/file layout and the `bindModule` pattern, so `@sublay/node` is a useful reference donor — but with one inversion (see **Rule A** below).
 

@@ -11,7 +11,7 @@ describe("SublayHttpClient construction", () => {
     new SublayHttpClient({ projectId: "proj1", apiKey: "key1" });
 
     expect(mockedCreate).toHaveBeenNthCalledWith(1, {
-      baseURL: "https://api.sublay.io/v7/proj1",
+      baseURL: "https://api.sublay.io/v8/proj1",
       headers: {
         Authorization: "Bearer key1",
         "X-Sublay-Project-ID": "proj1",
@@ -43,7 +43,7 @@ describe("SublayHttpClient construction", () => {
     new SublayHttpClient({ projectId: "proj1", apiKey: "key1", isInternal: true });
 
     expect(mockedCreate).toHaveBeenNthCalledWith(1, {
-      baseURL: "https://api.sublay.io/v7/proj1",
+      baseURL: "https://api.sublay.io/v8/proj1",
       headers: {
         Authorization: "Bearer key1",
         "X-Sublay-Project-ID": "proj1",

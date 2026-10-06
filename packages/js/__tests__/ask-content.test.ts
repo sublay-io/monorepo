@@ -75,7 +75,7 @@ describe("js-sdk askContent — request shaping", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe(
-      "https://api.sublay.io/v7/proj1/search/ask?spaceReputationId=rep1&spaceReputationDescendants=true"
+      "https://api.sublay.io/v8/proj1/search/ask?spaceReputationId=rep1&spaceReputationDescendants=true"
     );
     expect(init.method).toBe("POST");
     expect(JSON.parse(init.body)).toEqual({
@@ -95,7 +95,7 @@ describe("js-sdk askContent — request shaping", () => {
     await drain(askContent(client, { query: "hi" }));
 
     expect(fetchMock.mock.calls[0][0]).toBe(
-      "https://api.sublay.io/v7/proj1/search/ask"
+      "https://api.sublay.io/v8/proj1/search/ask"
     );
   });
 

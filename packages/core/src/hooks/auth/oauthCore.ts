@@ -17,7 +17,7 @@ import { getAuthorizedTokenForAccount } from "../../config/authGate";
 // Single source of truth for the API base URL. Matches the web hook's prior
 // hardcoded value exactly — do NOT swap in `getApiBaseUrl()`, which is
 // env-aware and would diverge from the web hook's production-only behavior.
-export const OAUTH_BASE_URL = "https://api.sublay.io/v7";
+export const OAUTH_BASE_URL = "https://api.sublay.io/v8";
 
 /**
  * Server-call head: POST to `/{projectId}/oauth/{authorize|link}` and return the

@@ -71,10 +71,6 @@ Reading entities, comments, or chat messages with the `grants` include attaches 
 
 The summary covers **positive grants only**. When the token is requested on a project whose schema has no grants table, the server returns a zero-filled summary (`{ total: 0, count: 0, viewerTotal: 0 }`) rather than omitting the key — so `grants` being `undefined` always means "nobody asked", never "this project has no grants".
 
-<Warning>
-  **One surface nests the record.** `GET /comments/:id` and `GET /comments/by-foreign-id` return the comment under a `comment` key, so the summary is at **`comment.grants`**. Every other read surface — entity reads, the comment feed, chat messages — returns the record bare, with the summary at `grants`.
-</Warning>
-
 The full per-item list of individual grants comes from [Fetch Many Reputation Grants](/v8/api-reference/reputation-grants/fetch-many-reputation-grants), not from the summary.
 
 ## Grants on chat messages are private

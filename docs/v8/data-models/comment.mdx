@@ -65,10 +65,6 @@ Pass an `include` array to populate optional fields:
 | `"parent"` | `parentComment` — the parent comment, for replies |
 | `"grants"` | `grants` — the reputation-grant summary |
 
-<Note>
-  The two single-comment reads ([Fetch Comment](/v8/api-reference/comments/fetch-comment) and [Fetch Comment by Foreign ID](/v8/api-reference/comments/fetch-comment-by-foreign-id)) nest the record under a `comment` key, so on those the summary is at `comment.grants`. The comment feed returns comments bare.
-</Note>
-
 ## See Also
 
 - [Reaction](/v8/data-models/reaction)

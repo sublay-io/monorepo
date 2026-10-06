@@ -411,22 +411,16 @@ function useCommentSectionData(
       fetchingCommentIdRef.current = highlightedCommentId!;
 
       try {
-        const fetchedCommentData = await fetchComment({
+        const targetComment = await fetchComment({
           commentId: highlightedCommentId!,
           include: ["user", "parent"],
         });
 
-        if (!fetchedCommentData) {
-          console.error("Issue fetching single comment comment not found");
-          return;
-        }
-
-        if (!fetchedCommentData.comment) {
+        if (!targetComment) {
           console.error("Highlighted comment not found");
           return;
         }
 
-        const targetComment = fetchedCommentData.comment;
         const parentComment = targetComment.parentComment ?? null;
 
         // Maintain backward-compatible state structure

@@ -8,7 +8,7 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 ## Overview
 
-`useFetchComment` returns a function that fetches a single comment by ID. The response wraps the comment in a `{ comment }` object to allow future expansion of the response shape.
+`useFetchComment` returns a function that fetches a single comment by ID.
 
 <Note>
   If the comment author is block-edged with the signed-in caller, in either
@@ -26,7 +26,7 @@ function DeepLinkComment({ commentId }: { commentId: string }) {
   const fetchComment = useFetchComment();
 
   const load = async () => {
-    const { comment } = await fetchComment({
+    const comment = await fetchComment({
       commentId,
       include: ["user", "parent"],
     });
@@ -51,6 +51,6 @@ function DeepLinkComment({ commentId }: { commentId: string }) {
 
 ## Returns
 
-<ResponseField name="comment" type="Comment">
+<ResponseField name="Comment" type="Comment">
   The fetched comment. When `"parent"` is included, `comment.parentComment` is populated. When `spaceReputation` is requested, the embedded author carries an added `spaceReputation` number. See [Comment data model](/v8/data-models/comment) and [Reputation](/v8/data-models/reputation).
 </ResponseField>

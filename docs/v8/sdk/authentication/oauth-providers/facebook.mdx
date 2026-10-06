@@ -53,7 +53,7 @@ This is the single most important step, and the same value for every provider.
     In **Valid OAuth Redirect URIs**, add this exact string:
 
     ```
-    https://api.sublay.io/v7/oauth/callback
+    https://api.sublay.io/oauth/callback
     ```
 
     This is **Sublay's** endpoint, not your app's — the provider hands the user back to Sublay, and Sublay forwards them to your app afterward.
@@ -121,7 +121,7 @@ To let the public sign in, flip the app to **Live** using the toggle at the top 
 ## Common pitfalls
 
 - **App ID / App Secret vs. Client ID / Client Secret** — the names differ between Meta and Sublay. App ID → Client ID, App Secret → Client Secret.
-- **Wrong redirect URI** — `https://api.sublay.io/v7/oauth/callback` goes in Meta's **Valid OAuth Redirect URIs**; your app's return URL goes in Sublay's **Allowed Redirect URIs**. Swapping them is the most common failure.
+- **Wrong redirect URI** — `https://api.sublay.io/oauth/callback` goes in Meta's **Valid OAuth Redirect URIs**; your app's return URL goes in Sublay's **Allowed Redirect URIs**. Swapping them is the most common failure.
 - **Only I can sign in** — the app is still in **Development** mode. Add the person as a tester, or switch the app to **Live**.
 - **Redirect URI mismatch** — the value in your code, in Sublay's Allowed Redirect URIs, and (on Meta's side) the Valid OAuth Redirect URIs must all agree exactly.
 

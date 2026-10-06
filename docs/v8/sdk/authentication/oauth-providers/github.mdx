@@ -39,12 +39,12 @@ Everything happens in [github.com](https://github.com) under **Settings → Deve
     | --- | --- |
     | **Application name** | Anything your users will recognize (e.g. `MyApp`) — it's shown on GitHub's consent screen |
     | **Homepage URL** | Your app or site (e.g. `https://yourapp.com`) |
-    | **Authorization callback URL** | `https://api.sublay.io/v7/oauth/callback` |
+    | **Authorization callback URL** | `https://api.sublay.io/oauth/callback` |
 
     <Warning>
       The **Authorization callback URL** is Sublay's endpoint, **not** your app's.
       GitHub sends the user back to Sublay first, and Sublay then redirects to your
-      app. Enter `https://api.sublay.io/v7/oauth/callback` exactly.
+      app. Enter `https://api.sublay.io/oauth/callback` exactly.
     </Warning>
   </Step>
   <Step title="Register the application">
@@ -85,7 +85,7 @@ Click **Add Provider** to save and enable it.
 
 ## Common pitfalls
 
-- **Two different redirect URLs** — the **Authorization callback URL** on GitHub is Sublay's `https://api.sublay.io/v7/oauth/callback`, while the **Allowed Redirect URIs** in the Sublay dashboard are your *own* app's return URLs. Don't put your app URL on GitHub or the Sublay URL in the Allowed Redirect URIs.
+- **Two different redirect URLs** — the **Authorization callback URL** on GitHub is Sublay's `https://api.sublay.io/oauth/callback`, while the **Allowed Redirect URIs** in the Sublay dashboard are your *own* app's return URLs. Don't put your app URL on GitHub or the Sublay URL in the Allowed Redirect URIs.
 - **OAuth App vs. GitHub App** — you want an **OAuth App**. A GitHub App is a different product and won't work here.
 - **The secret is shown once** — if you lose it, generate a new client secret and update the value in Sublay; the old one stops working.
 - **Redirect URI mismatch** — the value in your code, in Allowed Redirect URIs, must match exactly (a trailing-slash difference will fail).

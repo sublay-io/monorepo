@@ -37,12 +37,12 @@ That means:
 Every provider console asks for a callback / redirect / return URL. For **all four providers** it is the same value:
 
 ```
-https://api.sublay.io/v7/oauth/callback
+https://api.sublay.io/oauth/callback
 ```
 
 Register that exact string in the provider's console. It is Sublay's endpoint, not yours — the provider talks to Sublay, and Sublay forwards the user to your app afterward.
 
-The callback URL is `/v7/oauth/callback` for every API version, including v8. It is not a typo: it is the address you registered with each provider, so it stays fixed while the rest of the API moves to `/v8`.
+The callback URL has no API version in it, so it stays the same when you move to a future API version.
 
 ## Step 1 — Register your app with the provider
 
@@ -98,7 +98,7 @@ Scopes control what profile data the provider returns. Sublay pre-fills each pro
 Saving the provider enables it. Wire up the sign-in button as shown in [OAuth](/v8/sdk/authentication/oauth) and run the flow end to end. If something fails, the two usual culprits are:
 
 1. **A redirect URI mismatch** — the value in your code, the Allowed Redirect URIs list, and (on the provider side) the registered callback URL must all agree.
-2. **A missing provider callback** — confirm `https://api.sublay.io/v7/oauth/callback` is registered in the provider's console.
+2. **A missing provider callback** — confirm `https://api.sublay.io/oauth/callback` is registered in the provider's console.
 
 ## See Also
 

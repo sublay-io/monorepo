@@ -78,17 +78,17 @@ export function isProduction(): boolean {
 export function getApiBaseUrl(): string {
   // Check process.env (traditional React apps)
   if (typeof process !== 'undefined' && process.env) {
-    return process.env.REACT_APP_API_BASE_URL || 'https://api.sublay.io/v7';
+    return process.env.REACT_APP_API_BASE_URL || 'https://api.sublay.io/v8';
   }
 
   // Check Vite environment
   const viteEnv = getViteEnv();
   if (viteEnv) {
-    return viteEnv.VITE_API_BASE_URL || 'https://api.sublay.io/v7';
+    return viteEnv.VITE_API_BASE_URL || 'https://api.sublay.io/v8';
   }
 
   // Fallback to default
-  return 'https://api.sublay.io/v7';
+  return 'https://api.sublay.io/v8';
 }
 
 /**

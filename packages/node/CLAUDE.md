@@ -77,7 +77,7 @@ src/
 
 The SDK uses three axios instances for different API endpoints:
 
-- **projectInstance**: `https://api.sublay.io/v7/{projectId}` - Main project-scoped API
+- **projectInstance**: `https://api.sublay.io/v8/{projectId}` - Main project-scoped API
 - **internalInstance**: `https://api.sublay.io/internal` - Internal operations (verification, admin)
 - **baseInstance**: `https://api.sublay.io` - Base API endpoint
 

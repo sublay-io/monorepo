@@ -13,7 +13,7 @@ export class SublayHttpClient {
 
   constructor({ projectId, apiKey, isInternal }: ClientConfig) {
     this.projectInstance = axios.create({
-      baseURL: `https://api.sublay.io/v7/${projectId}`,
+      baseURL: `https://api.sublay.io/v8/${projectId}`,
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "X-Sublay-Project-ID": projectId,

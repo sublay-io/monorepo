@@ -88,7 +88,7 @@ describe("SublayHttpClient — SDK-managed mode (default, no getToken)", () => {
     expect(r2.data).toEqual({ ok: true });
     expect(refreshSpy).toHaveBeenCalledTimes(1);
     expect(refreshSpy).toHaveBeenCalledWith(
-      "https://api.sublay.io/v7/proj1/auth/request-new-access-token",
+      "https://api.sublay.io/v8/proj1/auth/request-new-access-token",
       { refreshToken: "refresh-a" }
     );
     const retriedCalls = calls.filter((c) => c.retry);
@@ -129,7 +129,7 @@ describe("SublayHttpClient — SDK-managed mode (default, no getToken)", () => {
     await client.projectInstance.get("/b");
 
     expect(refreshSpy).toHaveBeenLastCalledWith(
-      "https://api.sublay.io/v7/proj1/auth/request-new-access-token",
+      "https://api.sublay.io/v8/proj1/auth/request-new-access-token",
       { refreshToken: "refresh-b" }
     );
   });

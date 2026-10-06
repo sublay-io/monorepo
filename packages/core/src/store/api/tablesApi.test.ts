@@ -63,7 +63,7 @@ describe("tablesApi", () => {
     expect(call.method).toBe("GET");
     // Full equality: a substring cannot catch an extra or reordered segment.
     expect(call.url).toBe(
-      `https://api.sublay.io/v7/test-project/db/Events/${rowId}`,
+      `https://api.sublay.io/v8/test-project/db/Events/${rowId}`,
     );
   });
 

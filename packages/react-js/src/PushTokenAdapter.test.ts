@@ -13,7 +13,7 @@ const { mockFetch, mockSubscribe, mockGetKey, mockRequestPermission } =
   });
 
 vi.mock("@sublay/core", () => ({
-  getApiBaseUrl: () => "https://api.sublay.io/v7",
+  getApiBaseUrl: () => "https://api.sublay.io/v8",
 }));
 
 // Provide a consistent subscription shape
@@ -119,7 +119,7 @@ describe("webPushTokenAdapter.getDeviceIdentifier", () => {
 
     // Verify the VAPID key endpoint was called with the right URL
     expect(mockFetch).toHaveBeenCalledWith(
-      "https://api.sublay.io/v7/proj-abc/push-notifications/vapid-public-key"
+      "https://api.sublay.io/v8/proj-abc/push-notifications/vapid-public-key"
     );
   });
 

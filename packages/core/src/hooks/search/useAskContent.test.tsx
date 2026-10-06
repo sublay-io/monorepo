@@ -63,7 +63,7 @@ describe("useAskContent", () => {
 
     const [, init] = fetchMock.mock.calls[0];
     expect(fetchMock.mock.calls[0][0]).toBe(
-      "https://api.sublay.io/v7/test-project/search/ask",
+      "https://api.sublay.io/v8/test-project/search/ask",
     );
     expect(init.method).toBe("POST");
     expect(JSON.parse(init.body)).toMatchObject({ query: "What is this about?" });

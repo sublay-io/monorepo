@@ -87,7 +87,7 @@ describe("requestOAuthAuthorizationUrl", () => {
 
     expect(url).toBe("https://provider/auth");
     const [calledUrl, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(calledUrl).toBe("https://api.sublay.io/v7/project-1/oauth/authorize");
+    expect(calledUrl).toBe("https://api.sublay.io/v8/project-1/oauth/authorize");
     expect((init.headers as Record<string, string>).Authorization).toBeUndefined();
     expect(JSON.parse(init.body as string)).toEqual({
       provider: "google",

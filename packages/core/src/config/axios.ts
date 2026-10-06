@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const BASE_URL = "https://api.sublay.io/v7";
+export const BASE_URL = "https://api.sublay.io/v8";
 
 /**
  * How long a request may go unanswered before it is abandoned.

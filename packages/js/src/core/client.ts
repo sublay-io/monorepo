@@ -3,7 +3,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 
-const BASE_URL = "https://api.sublay.io/v7";
+const BASE_URL = "https://api.sublay.io/v8";
 
 export interface AuthTokens {
   accessToken: string;

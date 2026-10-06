@@ -145,7 +145,7 @@ describe("useTableRow", () => {
     // reordered path segment, which is the failure mode that has shipped here
     // before.
     expect(fetchHandle.calls()[0].url).toBe(
-      `https://api.sublay.io/v7/test-project/db/Events/${ID_A}`,
+      `https://api.sublay.io/v8/test-project/db/Events/${ID_A}`,
     );
   });
 

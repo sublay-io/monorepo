@@ -169,7 +169,8 @@ describe("js-sdk comments — response mapping", () => {
   it("fetchComment returns the Comment", async () => {
     const { client, projectInstance } = makeClient();
     const comment = { id: "c1", content: "hi" };
-    projectInstance.get.mockResolvedValueOnce({ data: comment });
+    // v7 wraps the record in { comment }.
+    projectInstance.get.mockResolvedValueOnce({ data: { comment } });
 
     const result = await fetchComment(client, { commentId: "c1" });
 
@@ -179,7 +180,7 @@ describe("js-sdk comments — response mapping", () => {
   it("fetchCommentByForeignId returns the Comment", async () => {
     const { client, projectInstance } = makeClient();
     const comment = { id: "c1", foreignId: "f1" };
-    projectInstance.get.mockResolvedValueOnce({ data: comment });
+    projectInstance.get.mockResolvedValueOnce({ data: { comment } });
 
     const result = await fetchCommentByForeignId(client, { foreignId: "f1" });
 

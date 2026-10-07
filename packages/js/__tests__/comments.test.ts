@@ -169,6 +169,7 @@ describe("js-sdk comments — response mapping", () => {
   it("fetchComment returns the Comment", async () => {
     const { client, projectInstance } = makeClient();
     const comment = { id: "c1", content: "hi" };
+    // v8 returns the record bare.
     projectInstance.get.mockResolvedValueOnce({ data: comment });
 
     const result = await fetchComment(client, { commentId: "c1" });

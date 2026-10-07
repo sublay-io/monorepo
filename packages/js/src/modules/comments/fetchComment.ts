@@ -31,5 +31,7 @@ export async function fetchComment(
     `/comments/${commentId}`,
     { params }
   );
+  // v8 returns the comment bare (v7 wrapped it in { comment }, which the 7.x
+  // SDK unwraps on main).
   return response.data;
 }

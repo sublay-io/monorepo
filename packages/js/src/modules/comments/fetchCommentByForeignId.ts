@@ -14,5 +14,7 @@ export async function fetchCommentByForeignId(
   const response = await client.projectInstance.get<Comment>(path, {
     params: data,
   });
+  // v8 returns the comment bare (v7 wrapped it in { comment }, which the 7.x
+  // SDK unwraps on main).
   return response.data;
 }

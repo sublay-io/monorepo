@@ -125,14 +125,14 @@ describe("node-sdk comments — response mapping", () => {
     ).resolves.toEqual(comment);
   });
 
-  it("fetchComment returns response.data", async () => {
+  it("fetchComment returns the bare v8 response", async () => {
     const { client, projectInstance } = makeClient();
     const comment = { id: "c1" };
     projectInstance.get.mockResolvedValueOnce({ data: comment });
     await expect(fetchComment(client, { commentId: "c1" })).resolves.toEqual(comment);
   });
 
-  it("fetchCommentByForeignId returns response.data", async () => {
+  it("fetchCommentByForeignId returns the bare v8 response", async () => {
     const { client, projectInstance } = makeClient();
     const comment = { id: "c1" };
     projectInstance.get.mockResolvedValueOnce({ data: comment });

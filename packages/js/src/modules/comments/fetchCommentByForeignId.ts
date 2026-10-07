@@ -11,10 +11,10 @@ export async function fetchCommentByForeignId(
   data: FetchCommentByForeignIdProps
 ): Promise<Comment> {
   const path = `/comments/by-foreign-id`;
-  const response = await client.projectInstance.get<{ comment: Comment }>(path, {
+  const response = await client.projectInstance.get<Comment>(path, {
     params: data,
   });
-  // The v7 server wraps single-comment reads in { comment } (the only
-  // single-record read that does); unwrap so callers get the Comment itself.
-  return response.data.comment;
+  // v8 returns the comment bare (v7 wrapped it in { comment }, which the 7.x
+  // SDK unwraps on main).
+  return response.data;
 }

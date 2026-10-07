@@ -27,11 +27,11 @@ export async function fetchComment(
       spaceReputationDescendants,
     }),
   };
-  const response = await client.projectInstance.get<{ comment: Comment }>(
+  const response = await client.projectInstance.get<Comment>(
     `/comments/${commentId}`,
     { params }
   );
-  // The v7 server wraps single-comment reads in { comment } (the only
-  // single-record read that does); unwrap so callers get the Comment itself.
-  return response.data.comment;
+  // v8 returns the comment bare (v7 wrapped it in { comment }, which the 7.x
+  // SDK unwraps on main).
+  return response.data;
 }

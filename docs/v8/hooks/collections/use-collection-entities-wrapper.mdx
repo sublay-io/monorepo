@@ -67,6 +67,10 @@ function SavedFeed({ collectionId }) {
   Initial sort mode. Default: `"added"` (sorted by when the entity was saved).
 </ParamField>
 
+<ParamField body="defaultSortByReaction" type="SortByReaction" optional>
+  Initial reaction type `top` ranks by: `"upvote"`, `"downvote"`, `"like"`, `"love"`, `"wow"`, `"sad"`, `"angry"`, or `"funny"`. Only sent while `sortBy` is `"top"`. Default: `"upvote"`.
+</ParamField>
+
 <ParamField body="defaultSortDir" type='"asc" | "desc"' optional>
   Initial sort direction. Default: `"desc"`.
 </ParamField>
@@ -93,12 +97,20 @@ function SavedFeed({ collectionId }) {
   Current sort mode.
 </ResponseField>
 
+<ResponseField name="sortByReaction" type="SortByReaction">
+  Current reaction type `top` ranks by.
+</ResponseField>
+
 <ResponseField name="sortDir" type='"asc" | "desc"'>
   Current sort direction.
 </ResponseField>
 
 <ResponseField name="setSortBy" type="(sortBy: 'new' | 'top' | 'hot' | 'added') => void">
   Change the sort mode. Resets the entity list and re-fetches from page 1.
+</ResponseField>
+
+<ResponseField name="setSortByReaction" type="(sortByReaction: SortByReaction) => void">
+  Change which reaction `top` ranks by. Resets the entity list and re-fetches from page 1.
 </ResponseField>
 
 <ResponseField name="setSortDir" type="(sortDir: 'asc' | 'desc') => void">
@@ -119,5 +131,7 @@ function SavedFeed({ collectionId }) {
 |-------|-------------|
 | `added` | Sorted by when the entity was added to the collection |
 | `new` | Sorted by entity creation date |
-| `top` | Sorted by vote count |
+| `top` | Sorted by reaction count — upvotes by default, or the reaction set with `sortByReaction` |
 | `hot` | Sorted by hot score (engagement-based) |
+
+The whole collection is sorted before it is paginated, so `loadMore` continues the same order.

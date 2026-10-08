@@ -50,7 +50,7 @@ Returns a paginated list of entities for the project. Supports rich filtering by
 </ParamField>
 
 <ParamField query="sortByReaction" type="string" default="upvote">
-  When `sortBy=top`, which reaction type to rank by. One of `upvote`, `downvote`, `like`, `love`, `wow`, `sad`, `angry`, `funny`.
+  When `sortBy=top`, which reaction type to rank by. One of `upvote`, `downvote`, `like`, `love`, `wow`, `sad`, `angry`, `funny`. Only accepted with `sortBy=top`; sending it with any other sort returns `400 entity/invalid-query`.
 </ParamField>
 
 ### Filtering

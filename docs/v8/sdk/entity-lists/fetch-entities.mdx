@@ -92,6 +92,32 @@ fetchEntities(
 | `resetFilters` | `boolean` | Reset all filters to defaults before applying new ones |
 | `resetSort` | `boolean` | Reset sort to defaults before applying new sort |
 
+## Hot Ranking
+
+`sortBy: "hot"` ranks entities by a score that combines engagement and age:
+
+- **Engagement.** Upvotes, comments and shares raise the score; downvotes lower it. The total is weighed against the entity's views, so an entity that draws a reaction from more of its viewers ranks higher.
+- **Age.** The whole score decays over time, so newer entities overtake older ones. Entities also get a small boost during their first 6 hours.
+- **Ties.** Entities with equal scores are ordered newest first.
+
+Scores are recalculated when an entity is fetched, at most once every 5 minutes. An entity that hasn't been loaded in a while is rescored on its next fetch.
+
+### Feed decay
+
+How fast scores decay is a per-project setting: **Settings → SDK → Feed Decay** in the [dashboard](https://dash.sublay.io). It ranges from 6 hours to 1 month and defaults to 5 days. After one period, an entity's score has dropped to about 37% of what it would otherwise be.
+
+Choose it based on how often new entities arrive:
+
+| New entities arrive | Suggested decay |
+|---------------------|-----------------|
+| Many per hour | 6–12 hours |
+| A few to dozens per day | 5 days – 1 week |
+| Less than one per day | 2 weeks – 1 month |
+
+<Warning>
+  A decay that is too short for your posting volume makes every entity's score drop to almost nothing within a couple of days. Engagement then stops affecting the order, and `hot` behaves like newest first.
+</Warning>
+
 ## Infinite Scroll
 
 Call `loadMore()` to append the next page. The hook tracks pagination state internally.

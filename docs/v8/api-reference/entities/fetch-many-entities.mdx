@@ -175,7 +175,7 @@ Returns a paginated response object:
 Each item in `data` is an [Entity](/v8/data-models/entity) object. File URLs are signed and ready to use.
 
 <Note>
-  Viewing scores (`hot` sort) are updated asynchronously after each fetch. Scores use a configurable half-life that can be set per project in your project settings. Entities with equal scores are ordered newest first.
+  Viewing scores (`hot` sort) are updated asynchronously after each fetch. Scores decay at a rate set per project ([feed decay](/v8/sdk/entity-lists/fetch-entities#feed-decay)). Entities with equal scores are ordered newest first.
 </Note>
 
 ## See Also

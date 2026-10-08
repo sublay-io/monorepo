@@ -1,228 +1,331 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Comment, CommentIncludeParam } from "../../interfaces/models/Comment";
+import {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Comment,
+  CommentThreadIncludeParam,
+} from "../../interfaces/models/Comment";
+import { ReactionType } from "../../interfaces/models/Reaction";
+import { CursorPaginatedResponse } from "../../interfaces/PaginatedResponse";
 import useFetchManyComments from "./useFetchManyComments";
-import { CommentsSortByOptions } from "../../interfaces/CommentsSortByOptions";
+import {
+  CommentReplySortByOptions,
+  CommentsSortByOptions,
+} from "../../interfaces/CommentsSortByOptions";
 import { handleError } from "../../utils/handleError";
-import { EntityCommentsTree } from "../../interfaces/EntityCommentsTree";
-import { addCommentsToTree as addCommentsToTreeHandler } from "../../helpers/addCommentsToTree";
-import { removeCommentFromTree as removeCommentFromTreeHandler } from "../../helpers/removeCommentFromTree";
-import { markCommentAsDeletedInTree as markCommentAsDeletedInTreeHandler } from "../../helpers/markCommentAsDeletedInTree";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
+import {
+  CommentStore,
+  emptyCommentStore,
+  insertComments,
+  selectRootComments,
+} from "../../helpers/commentStore";
+import {
+  COMMENT_REPLY_BUDGET,
+  CommentSortTrio,
+  DEFAULT_COMMENT_REPLY_LIMIT,
+  isDevBuild,
+  resolveReplySort,
+  sendableReplySortByReaction,
+} from "../../helpers/commentThreadConfig";
 
 export interface UseEntityCommentsProps extends SpaceReputationContextParams {
   entityId: string | undefined | null;
+  /** Top-level comments per page. Defaults to 10. */
   limit?: number;
   defaultSortBy?: CommentsSortByOptions;
-  /** Initial sort direction for `sortBy: "createdAt"`. Defaults to `"desc"`. */
+  /** Initial sort direction; applies to every sort. Defaults to `"desc"`. */
   defaultSortDir?: "asc" | "desc";
-  include?: CommentIncludeParam;
+  /** Initial reaction `top` ranks by (server default `"upvote"`). */
+  defaultSortByReaction?: ReactionType;
+  /** Sort for nested replies; each defaults to the current section sort. Not runtime-changeable. */
+  replySortBy?: CommentReplySortByOptions;
+  replySortDir?: "asc" | "desc";
+  replySortByReaction?: ReactionType;
+  /** Levels of replies to bring with each top-level page (0–5). Defaults to 0 (replies load on demand). */
+  replyDepth?: number;
+  /** Replies per comment in the nested levels. Defaults to 3. */
+  replyLimit?: number;
+  /** Applied at every level. Defaults to `"user"`. */
+  include?: CommentThreadIncludeParam;
 }
 
 export interface UseEntityCommentsValues {
-  entityCommentsTree: EntityCommentsTree;
   comments: Comment[];
   newComments: Comment[];
   loading: boolean;
+  /** The last failure loading the list (cleared by the next successful load). */
+  error: Error | null;
   hasMore: boolean;
   sortBy: CommentsSortByOptions | null;
   setSortBy: (newSortBy: CommentsSortByOptions) => void;
-  /** Sort direction for `sortBy: "createdAt"`. */
+  /** Applies to every sort. */
   sortDir: "asc" | "desc";
   setSortDir: (newSortDir: "asc" | "desc") => void;
-  loadMore: () => void;
-  addCommentsToTree: (
-    newComments: Comment[] | undefined,
-    newlyAdded?: boolean
-  ) => void;
-  removeCommentFromTree: ({ commentId }: { commentId: string }) => void;
-  markCommentAsDeleted: ({ commentId }: { commentId: string }) => void;
+  /** The reaction `top` ranks by; only sent with `sortBy: "top"`. */
+  sortByReaction: ReactionType | undefined;
+  setSortByReaction: (newReaction: ReactionType | undefined) => void;
+  /**
+   * Fetch the next page of top-level comments. Does nothing while loading or
+   * when there's nothing more; never throws (failures land in `error`).
+   */
+  loadMore: () => Promise<void>;
+  /** A loaded comment by id (without nested `replies`). */
+  getComment: (commentId: string) => Comment | undefined;
 }
 
-function useEntityComments(
-  props: UseEntityCommentsProps
-): UseEntityCommentsValues {
+/**
+ * What `useReplies` and the section's mutations need from the store. Internal —
+ * not exported from the package (D20).
+ */
+export interface CommentSectionInternals {
+  store: CommentStore;
+  setStore: Dispatch<SetStateAction<CommentStore>>;
+  /** Bumped on every reset; responses from an older generation are dropped. */
+  generationRef: { current: number };
+  entityId: string | null | undefined;
+  replyDepth: number;
+  replyLimit: number;
+  replySort: CommentSortTrio;
+  include: CommentThreadIncludeParam;
+  reputation: SpaceReputationContextParams;
+  /**
+   * Applied to the empty store on every reset — keeps a deep-linked
+   * (highlighted) comment in place across sort changes.
+   */
+  seedRef: { current: ((store: CommentStore) => CommentStore) | null };
+}
+
+export const CommentSectionInternalContext =
+  createContext<CommentSectionInternals | null>(null);
+
+const toError = (err: unknown): Error =>
+  err instanceof Error ? err : new Error(String(err));
+
+/** Dev-mode hint when the section's own request is over the server's row budget. */
+function reportBudgetError(err: unknown) {
+  const data = (err as { response?: { data?: Record<string, unknown> } })
+    ?.response?.data;
+  if (data?.code === "comment/reply-budget-exceeded" && isDevBuild()) {
+    console.error(
+      `[Sublay] This comment section's request could return up to ${String(
+        data.requestedRows ?? "?",
+      )} comments, over the limit of ${String(
+        data.maxRows ?? COMMENT_REPLY_BUDGET,
+      )}. Lower \`limit\`, \`replyLimit\` or \`replyDepth\` on the provider.`,
+    );
+  }
+}
+
+export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
+  values: UseEntityCommentsValues;
+  internals: CommentSectionInternals;
+} {
   const {
     entityId,
     limit = 10,
     defaultSortBy = "createdAt",
     defaultSortDir = "desc",
-    include,
+    defaultSortByReaction,
+    replySortBy,
+    replySortDir,
+    replySortByReaction,
+    replyDepth = 0,
+    replyLimit = DEFAULT_COMMENT_REPLY_LIMIT,
+    include = "user",
     spaceReputation,
     spaceReputationId,
     spaceReputationDescendants,
   } = props;
 
-  // Forwarded to the leaf fetcher, which flattens it via
-  // buildSpaceReputationParams before it reaches the serializer.
-  const reputation = { spaceReputation, spaceReputationId, spaceReputationDescendants };
-  const reputationKey = JSON.stringify(reputation);
+  const reputation = useMemo(
+    () => ({ spaceReputation, spaceReputationId, spaceReputationDescendants }),
+    [JSON.stringify({ spaceReputation, spaceReputationId, spaceReputationDescendants })], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const includeKey = JSON.stringify(include);
 
   const fetchManyComments = useFetchManyComments();
 
-  const loading = useRef(true);
-  const [loadingState, setLoadingState] = useState(true); // required to trigger rerenders
-
-  const hasMore = useRef(true);
-  const [hasMoreState, setHasMoreState] = useState(true); // required to trigger rerenders
-
   const [sortBy, setSortBy] = useState<CommentsSortByOptions>(defaultSortBy);
   const [sortDir, setSortDir] = useState<"asc" | "desc">(defaultSortDir);
-  const [page, setPage] = useState(1);
-
-  const [entityCommentsTree, setEntityCommentsTree] =
-    useState<EntityCommentsTree>({});
-
-  const { comments, newComments } = useMemo(() => {
-    const allRootComments = Object.values(entityCommentsTree).filter(
-      (item) => !item.comment.parentId
-    );
-
-    const comments = allRootComments
-      .filter((entry) => !entry.new)
-      .map((entry) => entry.comment);
-
-    const newComments = allRootComments
-      .filter((entry) => !!entry.new)
-      .map((entry) => entry.comment)
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-
-    return { comments, newComments };
-  }, [entityCommentsTree]);
-
-  const addCommentsToTree = (
-    newComments: Comment[] | undefined,
-    newlyAdded?: boolean
-  ) => {
-    addCommentsToTreeHandler(setEntityCommentsTree, newComments, newlyAdded);
-  };
-
-  const removeCommentFromTree = useCallback(
-    ({ commentId }: { commentId: string }) => {
-      setEntityCommentsTree!((prevTree) =>
-        removeCommentFromTreeHandler(prevTree, commentId)
-      );
-    },
-    [setEntityCommentsTree]
+  const [sortByReaction, setSortByReaction] = useState<ReactionType | undefined>(
+    defaultSortByReaction,
   );
 
-  const markCommentAsDeleted = useCallback(
-    ({ commentId }: { commentId: string }) => {
-      setEntityCommentsTree((prevTree) =>
-        markCommentAsDeletedInTreeHandler(prevTree, commentId)
-      );
-    },
-    [setEntityCommentsTree]
+  const [store, setStore] = useState<CommentStore>(emptyCommentStore);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+
+  const loadingRef = useRef(false);
+  const hasMoreRef = useRef(true);
+  const cursorRef = useRef<string | null>(null);
+  const generationRef = useRef(0);
+  const seedRef = useRef<((store: CommentStore) => CommentStore) | null>(null);
+
+  const sectionSort: CommentSortTrio = useMemo(
+    () => ({
+      sortBy,
+      sortDir,
+      sortByReaction: sortBy === "top" ? sortByReaction : undefined,
+    }),
+    [sortBy, sortDir, sortByReaction],
   );
 
-  const resetComments = useCallback(async () => {
-    if (!entityId) {
-      return;
-    }
+  const replySort = useMemo(
+    () =>
+      resolveReplySort(sectionSort, {
+        replySortBy,
+        replySortDir,
+        replySortByReaction,
+      }),
+    [sectionSort, replySortBy, replySortDir, replySortByReaction],
+  );
 
-    try {
-      loading.current = true;
-      setLoadingState(true);
-
-      hasMore.current = true;
-      setHasMoreState(true);
-
-      setEntityCommentsTree({});
-      setPage(1);
-
-      const response = await fetchManyComments({
-        entityId,
-        page: 1,
-        sortBy,
-        sortDir,
-        limit,
-        include,
-        ...reputation,
-      });
-
-      if (response) {
-        const { data: newComments, pagination } = response;
-        addCommentsToTree(newComments);
-        hasMore.current = pagination.hasMore;
-        setHasMoreState(pagination.hasMore);
-      }
-    } catch (err) {
-      handleError(err, "Failed to reset entity comments:");
-    } finally {
-      loading.current = false;
-      setLoadingState(false);
-    }
-  }, [fetchManyComments, limit, sortBy, sortDir, entityId, include, reputationKey]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const loadMore = () => {
-    if (loading.current || !hasMore.current) return;
-    setPage((prevPage) => {
-      return prevPage + 1;
+  // Everything one top-level page request needs, kept current for loadMore.
+  const requestRef =
+    useRef<() => Promise<CursorPaginatedResponse<Comment>>>(undefined);
+  requestRef.current = () =>
+    fetchManyComments({
+      entityId: entityId as string,
+      cursor: cursorRef.current,
+      limit,
+      sortBy: sectionSort.sortBy,
+      sortDir: sectionSort.sortDir,
+      sortByReaction: sectionSort.sortByReaction,
+      include,
+      ...(replyDepth > 0
+        ? {
+            replyDepth,
+            replyLimit,
+            replySortBy,
+            replySortDir,
+            replySortByReaction: sendableReplySortByReaction(
+              replySortBy,
+              sectionSort.sortBy,
+              replySortByReaction,
+            ),
+          }
+        : {}),
+      ...reputation,
     });
-  };
 
-  useEffect(() => {
-    resetComments();
-  }, [resetComments]);
-
-  // useEffect to get a new batch of comments
-  useEffect(() => {
-    const loadMoreComments = async () => {
-      if (!entityId) {
-        return;
-      }
-
-      try {
-        loading.current = true;
-        setLoadingState(true);
-
-        const response = await fetchManyComments({
-          entityId,
-          page,
-          sortBy,
-          sortDir,
-          limit,
-          include,
-          ...reputation,
-        });
-
-        if (response) {
-          const { data: newComments, pagination } = response;
-          addCommentsToTree(newComments);
-          hasMore.current = pagination.hasMore;
-          setHasMoreState(pagination.hasMore);
-        }
-      } catch (err) {
-        handleError(err, "Loading more comments failed:");
-      } finally {
-        loading.current = false;
-        setLoadingState(false);
-      }
-    };
-
-    // We only load more if th page changed
-    if (page > 1 && hasMore.current && !loading.current) {
-      loadMoreComments();
+  const runFetch = useCallback(async (reset: boolean) => {
+    const generation = reset ? ++generationRef.current : generationRef.current;
+    loadingRef.current = true;
+    setLoading(true);
+    if (reset) {
+      cursorRef.current = null;
+      hasMoreRef.current = true;
+      setHasMore(true);
+      setError(null);
+      const empty = emptyCommentStore();
+      setStore(seedRef.current ? seedRef.current(empty) : empty);
     }
-  }, [page]);
+    try {
+      const response = await requestRef.current!();
+      if (generation !== generationRef.current) return;
+      const { data, pagination } = response;
+      setStore((prev) => insertComments(prev, data));
+      cursorRef.current = pagination.nextCursor;
+      hasMoreRef.current = pagination.hasMore;
+      setHasMore(pagination.hasMore);
+      setError(null);
+    } catch (err) {
+      if (generation !== generationRef.current) return;
+      setError(toError(err));
+      reportBudgetError(err);
+      handleError(err, "Failed to load comments:");
+    } finally {
+      if (generation === generationRef.current) {
+        loadingRef.current = false;
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!entityId) return;
+    runFetch(true);
+  }, [
+    entityId,
+    limit,
+    sectionSort,
+    replyDepth,
+    replyLimit,
+    replySortBy,
+    replySortDir,
+    replySortByReaction,
+    includeKey,
+    reputation,
+    runFetch,
+  ]);
+
+  const loadMore = useCallback(async () => {
+    if (!entityId || loadingRef.current || !hasMoreRef.current) return;
+    await runFetch(false);
+  }, [entityId, runFetch]);
+
+  const { comments, newComments } = useMemo(
+    () => selectRootComments(store),
+    [store],
+  );
+
+  const storeRef = useRef(store);
+  storeRef.current = store;
+  const getComment = useCallback(
+    (commentId: string) => storeRef.current.nodes[commentId]?.comment,
+    // Re-created with the store so consumers re-render on changes.
+    [store], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const internals: CommentSectionInternals = useMemo(
+    () => ({
+      store,
+      setStore,
+      generationRef,
+      entityId,
+      replyDepth,
+      replyLimit,
+      replySort,
+      include,
+      reputation,
+      seedRef,
+    }),
+    [store, entityId, replyDepth, replyLimit, replySort, includeKey, reputation], // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   return {
-    entityCommentsTree,
-    comments,
-    newComments,
-    loading: loadingState, // we use the state to trigger renders
-    hasMore: hasMoreState,
-    sortBy,
-    setSortBy,
-    sortDir,
-    setSortDir,
-    loadMore,
-    addCommentsToTree,
-    removeCommentFromTree,
-    markCommentAsDeleted,
+    values: {
+      comments,
+      newComments,
+      loading,
+      error,
+      hasMore,
+      sortBy,
+      setSortBy,
+      sortDir,
+      setSortDir,
+      sortByReaction,
+      setSortByReaction,
+      loadMore,
+      getComment,
+    },
+    internals,
   };
+}
+
+function useEntityComments(
+  props: UseEntityCommentsProps,
+): UseEntityCommentsValues {
+  return useEntityCommentsInternal(props).values;
 }
 
 export default useEntityComments;

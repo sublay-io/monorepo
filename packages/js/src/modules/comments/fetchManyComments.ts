@@ -1,60 +1,97 @@
 import { SublayHttpClient } from "../../core/client";
-import { Comment } from "../../interfaces/Comment";
-import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
+import {
+  Comment,
+  CommentReplySortBy,
+  CommentsSortBy,
+  CommentThreadIncludeParam,
+} from "../../interfaces/Comment";
+import { ReactionType } from "../../interfaces/Reaction";
+import { CursorPaginatedResponse } from "../../interfaces/IPaginatedResponse";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
-export interface FetchManyCommentsProps extends SpaceReputationContextParams {
-  entityId?: string;
-  userId?: string;
-  parentId?: string;
-  page?: number;
+interface FetchManyCommentsBaseProps extends SpaceReputationContextParams {
+  /** How many comments at the level being fetched (server default 10, max 100). */
   limit?: number;
-  sortBy?:
-    | "createdAt"
-    | "top"
-    | "controversial"
-    /** @deprecated Use "createdAt" instead. "new" is a directional alias for
-     * createdAt DESC, removed in v8; the server still accepts it (identical
-     * behavior) but responds with deprecation headers. */
-    | "new"
-    /** @deprecated Use "createdAt" with sortDir:"asc" instead. "old" is a
-     * directional alias for createdAt ASC, removed in v8; the server still
-     * accepts it (identical behavior) but responds with deprecation headers. */
-    | "old";
-  /** Sort direction for `sortBy: "createdAt"`. Defaults to "desc". */
+  /** `pagination.nextCursor` from the previous response; omit for the first page. */
+  cursor?: string;
+  /** Sort for the level being fetched (server default "createdAt"). */
+  sortBy?: CommentsSortBy;
+  /** Applies to every sort (server default "desc"). */
   sortDir?: "asc" | "desc";
-  include?: string;
-  sourceId?: string;
-
-  // Block filtering: comments authored by users the viewer is block-edged with
-  // are hidden by default ("exclude"). "include-outbound-blocked" re-includes
-  // ONLY the viewer's own outbound-blocked authors; never inbound.
-  blockedFilter?: "exclude" | "include-outbound-blocked";
+  /** With `sortBy: "top"` only: rank by this reaction's raw count (server default "upvote"). */
+  sortByReaction?: ReactionType;
+  include?: CommentThreadIncludeParam;
+  /** Levels of replies to nest under each returned comment (0–5, server default 0). */
+  replyDepth?: number;
+  /** Replies per comment in the nested levels only (≥ 1, server default 3). */
+  replyLimit?: number;
+  /** Sort for the nested levels; each defaults to the level's own. */
+  replySortBy?: CommentReplySortBy;
+  replySortDir?: "asc" | "desc";
+  replySortByReaction?: ReactionType;
 }
+
+/**
+ * A thread fetch (`GET /comments`): `entityId` → that entity's top-level
+ * comments; `parentId` → a comment's direct replies. One of the two is
+ * required. A user's comment history is `users.fetchCommentsByUserId`.
+ */
+export type FetchManyCommentsProps = FetchManyCommentsBaseProps &
+  (
+    | { entityId: string; parentId?: string }
+    | { entityId?: string; parentId: string }
+  );
 
 export async function fetchManyComments(
   client: SublayHttpClient,
   data: FetchManyCommentsProps
-): Promise<PaginatedResponse<Comment>> {
+): Promise<CursorPaginatedResponse<Comment>> {
   const {
+    entityId,
+    parentId,
+    limit,
+    cursor,
+    sortBy,
+    sortDir,
+    sortByReaction,
+    include,
+    replyDepth,
+    replyLimit,
+    replySortBy,
+    replySortDir,
+    replySortByReaction,
     spaceReputation,
     spaceReputationId,
     spaceReputationDescendants,
-    ...rest
   } = data;
-  const response = await client.projectInstance.get<PaginatedResponse<Comment>>(
-    "/comments",
-    {
-      params: {
-        ...rest,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
-      },
-    }
-  );
+  // Only the thread endpoint's own params are forwarded (no spread), so a
+  // stray `page` / `userId` / `sourceId` / `blockedFilter` never reaches it.
+  const params: Record<string, unknown> = {
+    entityId,
+    parentId,
+    limit,
+    cursor,
+    sortBy,
+    sortDir,
+    sortByReaction,
+    include: Array.isArray(include) ? include.join(",") : include,
+    replyDepth,
+    replyLimit,
+    replySortBy,
+    replySortDir,
+    replySortByReaction,
+    ...buildSpaceReputationParams({
+      spaceReputation,
+      spaceReputationId,
+      spaceReputationDescendants,
+    }),
+  };
+  for (const key of Object.keys(params)) {
+    if (params[key] === undefined) delete params[key];
+  }
+  const response = await client.projectInstance.get<
+    CursorPaginatedResponse<Comment>
+  >("/comments", { params });
   return response.data;
 }

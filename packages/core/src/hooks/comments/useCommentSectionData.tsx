@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Comment, GifData } from "../../interfaces/models/Comment";
-import { EntityCommentsTree } from "../../interfaces/EntityCommentsTree";
+import {
+  Comment,
+  CommentThreadIncludeParam,
+  GifData,
+} from "../../interfaces/models/Comment";
 
-import { CommentsSortByOptions } from "../../interfaces/CommentsSortByOptions";
+import {
+  CommentReplySortByOptions,
+  CommentsSortByOptions,
+} from "../../interfaces/CommentsSortByOptions";
 import { User } from "../../interfaces/models/User";
 import useCreateComment from "./useCreateComment";
 import { Mention } from "../../interfaces/models/Mention";
@@ -11,7 +17,17 @@ import useDeleteComment from "./useDeleteComment";
 import useUpdateComment from "./useUpdateComment";
 import useAddReaction from "../reactions/useAddReaction";
 import { ReactionType } from "../../interfaces/models/Reaction";
-import useEntityComments from "./useEntityComments";
+import {
+  CommentSectionInternals,
+  useEntityCommentsInternal,
+} from "./useEntityComments";
+import {
+  insertComments,
+  insertHighlightedComment,
+  markCommentDeleted,
+  patchComment,
+  removeComment,
+} from "../../helpers/commentStore";
 import useFetchComment from "./useFetchComment";
 import { useUser } from "../user";
 import { Entity } from "../../interfaces/models/Entity";
@@ -38,10 +54,27 @@ export interface UseCommentSectionDataProps {
   createIfNotFound?: boolean;
 
   callbacks?: Record<string, (...args: any[]) => void> | undefined;
+  /** Top-level comments per page. Defaults to 15. */
   limit?: number;
+  /** Runtime-changeable via `setSortBy`. Defaults to `"top"`. */
   defaultSortBy?: CommentsSortByOptions;
-  /** Initial sort direction for `sortBy: "createdAt"`. Defaults to `"desc"`. */
+  /** Initial sort direction; applies to every sort. Defaults to `"desc"`. */
   defaultSortDir?: "asc" | "desc";
+  /** Initial reaction `top` ranks by (server default `"upvote"`). Runtime-changeable. */
+  defaultSortByReaction?: ReactionType;
+  /** Sort for replies; each defaults to the current section sort. Not runtime-changeable. */
+  replySortBy?: CommentReplySortByOptions;
+  replySortDir?: "asc" | "desc";
+  replySortByReaction?: ReactionType;
+  /**
+   * Levels of replies to bring with every top-level page (0–5). Defaults to
+   * 0: replies load on demand through `useReplies`.
+   */
+  replyDepth?: number;
+  /** Replies per comment in the nested levels. Defaults to 3. */
+  replyLimit?: number;
+  /** Applied at every level. Defaults to `"user"`. */
+  include?: CommentThreadIncludeParam;
   highlightedCommentId?: string | null;
   mentionTriggers?: MentionTriggers;
 }
@@ -66,7 +99,6 @@ export interface CommentSectionDeleteCommentProps {
 export interface UseCommentSectionDataValues {
   entity: Entity | null | undefined;
   callbacks?: Record<string, (...args: any[]) => void> | undefined;
-  entityCommentsTree: EntityCommentsTree;
   comments: Comment[];
   newComments: Comment[];
   highlightedComment: {
@@ -74,14 +106,25 @@ export interface UseCommentSectionDataValues {
     parentComment: Comment | null;
   } | null;
   loading: boolean;
+  /** The last failure loading the comment list (cleared by the next successful load). */
+  error: Error | null;
   hasMore: boolean;
   submittingComment: boolean;
-  loadMore: () => void;
+  /**
+   * Fetch the next page of top-level comments. Does nothing while loading or
+   * when there's nothing more; never throws (failures land in `error`).
+   */
+  loadMore: () => Promise<void>;
   sortBy: CommentsSortByOptions | null;
   setSortBy: (newSortBy: CommentsSortByOptions) => void;
-  /** Sort direction for `sortBy: "createdAt"`. */
+  /** Applies to every sort. */
   sortDir: "asc" | "desc";
   setSortDir: (newSortDir: "asc" | "desc") => void;
+  /** The reaction `top` ranks by; only sent with `sortBy: "top"`. */
+  sortByReaction: ReactionType | undefined;
+  setSortByReaction: (newReaction: ReactionType | undefined) => void;
+  /** A loaded comment by id (without nested `replies`). */
+  getComment: (commentId: string) => Comment | undefined;
   pushMention: User | null;
   selectedComment: Comment | null;
   setSelectedComment: (newSelectedComment: Comment | null) => void;
@@ -89,11 +132,6 @@ export interface UseCommentSectionDataValues {
   setRepliedToComment: (newRepliedToComment: Comment | null) => void;
   showReplyBanner: boolean;
   setShowReplyBanner: ({ newState }: { newState: boolean }) => void;
-  addCommentsToTree: (
-    newComments: Comment[] | undefined,
-    newlyAdded?: boolean,
-  ) => void;
-  removeCommentFromTree: ({ commentId }: { commentId: string }) => void;
   handleDeepReply: (comment: Comment) => void;
   handleShallowReply: (comment: Comment) => void;
 
@@ -102,9 +140,9 @@ export interface UseCommentSectionDataValues {
   deleteComment: (props: CommentSectionDeleteCommentProps) => Promise<void>;
 }
 
-function useCommentSectionData(
+export function useCommentSectionDataInternal(
   props: UseCommentSectionDataProps,
-): UseCommentSectionDataValues {
+): { values: UseCommentSectionDataValues; internals: CommentSectionInternals } {
   const {
     entity: entityProp,
     entityId,
@@ -114,6 +152,13 @@ function useCommentSectionData(
 
     defaultSortBy = "top" as CommentsSortByOptions,
     defaultSortDir = "desc",
+    defaultSortByReaction,
+    replySortBy,
+    replySortDir,
+    replySortByReaction,
+    replyDepth,
+    replyLimit,
+    include = "user",
     limit = 15,
     callbacks: callbacksProp = {},
     highlightedCommentId,
@@ -136,27 +181,35 @@ function useCommentSectionData(
 
   const { user } = useUser();
 
+  const { values: entityComments, internals } = useEntityCommentsInternal({
+    entityId: entity?.id,
+    defaultSortBy,
+    defaultSortDir,
+    defaultSortByReaction,
+    replySortBy,
+    replySortDir,
+    replySortByReaction,
+    replyDepth,
+    replyLimit,
+    limit,
+    include,
+  });
   const {
-    entityCommentsTree,
     comments,
     newComments,
     loading,
+    error,
     hasMore,
     sortBy,
     setSortBy,
     sortDir,
     setSortDir,
+    sortByReaction,
+    setSortByReaction,
     loadMore,
-    addCommentsToTree,
-    removeCommentFromTree,
-    markCommentAsDeleted,
-  } = useEntityComments({
-    entityId: entity?.id,
-    defaultSortBy,
-    defaultSortDir,
-    limit,
-    include: "user",
-  });
+    getComment,
+  } = entityComments;
+  const { setStore, seedRef } = internals;
 
   const createComment = useCreateComment();
   const deleteComment = useDeleteComment();
@@ -297,6 +350,7 @@ function useCommentSectionData(
         parentDeletedAt: null,
         userDeletedAt: null,
         repliesCount: 0,
+        attachments: [],
         metadata: {},
         moderationStatus: null,
         moderatedAt: null,
@@ -309,8 +363,30 @@ function useCommentSectionData(
       setShowReplyBanner(false);
       setPushMention(null);
 
+      const newParentId = tempNewComment.parentId;
+      // D24: a new comment is counted at once (its parent's repliesCount and
+      // the entity's commentsCount); a failed create rolls both back.
+      const bumpCounts = (delta: 1 | -1) => {
+        if (newParentId) {
+          setStore((prev) =>
+            patchComment(prev, newParentId, (parent) => ({
+              ...parent,
+              repliesCount: Math.max(0, (parent.repliesCount ?? 0) + delta),
+            })),
+          );
+        }
+        setContextEntity?.((prevEntity) => {
+          if (!prevEntity) return prevEntity;
+          return {
+            ...prevEntity,
+            commentsCount: Math.max(0, (prevEntity.commentsCount ?? 0) + delta),
+          };
+        });
+      };
+
       try {
-        addCommentsToTree([tempNewComment], true);
+        setStore((prev) => insertComments(prev, [tempNewComment], { newlyAdded: true }));
+        bumpCounts(1);
         const newCommentData = await createComment({
           entityId: entity.id,
           parentCommentId: parentId ?? repliedToComment?.id ?? null,
@@ -320,36 +396,52 @@ function useCommentSectionData(
         });
 
         if (newCommentData) {
-          removeCommentFromTree({ commentId: TEMP_ID });
+          setStore((prev) => removeComment(prev, TEMP_ID));
 
           if (autoReaction) {
             // Add comment with optimistic reaction data while the API call is in flight
-            addCommentsToTree(
-              [{ ...newCommentData, userReaction: autoReaction, reactionCounts: { ...newCommentData.reactionCounts, [autoReaction]: (newCommentData.reactionCounts?.[autoReaction] ?? 0) + 1 } }],
-              true,
+            setStore((prev) =>
+              insertComments(
+                prev,
+                [
+                  {
+                    ...newCommentData,
+                    userReaction: autoReaction,
+                    reactionCounts: {
+                      ...newCommentData.reactionCounts,
+                      [autoReaction]:
+                        (newCommentData.reactionCounts?.[autoReaction] ?? 0) + 1,
+                    },
+                  },
+                ],
+                { newlyAdded: true },
+              ),
             );
-            // Fire-and-forget: update the tree with server truth when the reaction API resolves
+            // Fire-and-forget: update the store with server truth when the reaction API resolves
             addReaction({
               targetType: "comment",
               targetId: newCommentData.id,
               reactionType: autoReaction,
             })
               .then((updatedComment) => {
-                addCommentsToTree([updatedComment as Comment], true);
+                setStore((prev) =>
+                  insertComments(prev, [updatedComment as Comment], {
+                    newlyAdded: true,
+                  }),
+                );
               })
               .catch(() => {});
           } else {
-            addCommentsToTree([newCommentData], true);
+            setStore((prev) =>
+              insertComments(prev, [newCommentData], { newlyAdded: true }),
+            );
           }
         }
-        setContextEntity?.((prevEntity) => {
-          if (!prevEntity) return prevEntity;
-          return { ...prevEntity, repliesCount: prevEntity.repliesCount + 1 };
-        });
         return newCommentData;
       } catch (err: unknown) {
-        // TODO: currently we remove the temp comment from the tree but don't offer the user any option to retry. It's as if they've never sent anything and all they typed is gone. We need to add a flag for comment in the tree that says t failed so we can give he user a try again button
-        removeCommentFromTree({ commentId: TEMP_ID });
+        // TODO: currently we remove the temp comment from the store but don't offer the user any option to retry. It's as if they've never sent anything and all they typed is gone. We need to add a flag for comment in the store that says it failed so we can give the user a try again button
+        setStore((prev) => removeComment(prev, TEMP_ID));
+        bumpCounts(-1);
         handleError(err, "Failed to submit a new comment: ");
         return undefined;
       } finally {
@@ -359,8 +451,8 @@ function useCommentSectionData(
     },
     [
       user,
-      addCommentsToTree,
-      removeCommentFromTree,
+      setStore,
+      setContextEntity,
       entity,
       createComment,
       addReaction,
@@ -373,18 +465,15 @@ function useCommentSectionData(
     async ({ commentId }: CommentSectionDeleteCommentProps) => {
       if (!isUUID(commentId)) return;
       try {
-        // Reddit-style: mark as deleted placeholder instead of removing from tree
-        markCommentAsDeleted({ commentId });
+        // Reddit-style: the comment stays as a placeholder (its replies stay
+        // intact). Counts don't change: the placeholder is still counted (D24).
+        setStore((prev) => markCommentDeleted(prev, commentId));
         await deleteComment({ commentId });
-        setContextEntity?.((prevEntity) => {
-          if (!prevEntity) return prevEntity;
-          return { ...prevEntity, repliesCount: prevEntity.repliesCount - 1 };
-        });
       } catch (err) {
         handleError(err, "Failed to delete comment");
       }
     },
-    [deleteComment, markCommentAsDeleted],
+    [deleteComment, setStore],
   );
 
   const handleUpdateComment = useCallback(
@@ -393,13 +482,25 @@ function useCommentSectionData(
         const updatedComment = await updateComment({ commentId, content });
 
         if (updatedComment) {
-          console.log("update comment in tree. Implement!");
+          // The update response is the bare comment row (no `user`, no
+          // reactions), so only the edited fields are taken from it.
+          setStore((prev) =>
+            patchComment(prev, commentId, (current) => ({
+              ...current,
+              content: updatedComment.content ?? content,
+              metadata:
+                updatedComment.metadata !== undefined
+                  ? updatedComment.metadata
+                  : current.metadata,
+              updatedAt: updatedComment.updatedAt ?? current.updatedAt,
+            })),
+          );
         }
       } catch (err) {
         handleError(err, "Failed to update comment");
       }
     },
-    [updateComment],
+    [updateComment, setStore],
   );
 
   useEffect(() => {
@@ -423,16 +524,19 @@ function useCommentSectionData(
 
         const parentComment = targetComment.parentComment ?? null;
 
-        // Maintain backward-compatible state structure
         setHighlightedComment({
           comment: targetComment,
           parentComment: parentComment,
         });
 
-        addCommentsToTree?.(
-          parentComment ? [targetComment, parentComment] : [targetComment],
-        );
+        // Parent first, then the target (kept across sort resets).
+        const seed = (store: Parameters<typeof insertHighlightedComment>[0]) =>
+          insertHighlightedComment(store, targetComment, parentComment);
+        seedRef.current = seed;
+        setStore(seed);
       } catch (err) {
+        // A missing highlight (deleted, nonexistent, hidden) isn't a section
+        // failure: the section loads normally and `error` is untouched.
         handleError(err, "Fetching single comment failed");
       }
     };
@@ -440,7 +544,7 @@ function useCommentSectionData(
     if (highlightedCommentId) {
       handleFetchSingleComment();
     }
-  }, [highlightedCommentId, fetchComment, addCommentsToTree]);
+  }, [highlightedCommentId, fetchComment, setStore, seedRef]);
 
   useEffect(() => {
     const handleFetchEntity = async () => {
@@ -495,16 +599,16 @@ function useCommentSectionData(
     createIfNotFound,
   ]);
 
-  return {
+  const values: UseCommentSectionDataValues = {
     entity,
     callbacks,
 
-    entityCommentsTree,
     comments,
     newComments,
     highlightedComment,
 
     loading,
+    error,
     hasMore,
     submittingComment: submittingCommentState,
 
@@ -513,6 +617,9 @@ function useCommentSectionData(
     setSortBy,
     sortDir,
     setSortDir,
+    sortByReaction,
+    setSortByReaction,
+    getComment,
     pushMention,
     selectedComment,
     setSelectedComment,
@@ -521,9 +628,6 @@ function useCommentSectionData(
     showReplyBanner,
     setShowReplyBanner: setShowReplyBannerHandler,
 
-    addCommentsToTree,
-    removeCommentFromTree,
-
     handleShallowReply,
     handleDeepReply,
 
@@ -531,6 +635,14 @@ function useCommentSectionData(
     updateComment: handleUpdateComment,
     deleteComment: handleDeleteComment,
   };
+
+  return { values, internals };
+}
+
+function useCommentSectionData(
+  props: UseCommentSectionDataProps,
+): UseCommentSectionDataValues {
+  return useCommentSectionDataInternal(props).values;
 }
 
 export default useCommentSectionData;

@@ -6,7 +6,7 @@ import NoCommentsPlaceHolder from "./no-comments-placeholder";
 
 const CommentsFeed = React.memo(
   ({ children: customNoCommentsView }: { children?: ReactNode }) => {
-    const { comments, newComments, loading, highlightedComment } =
+    const { comments, newComments, loading, hasMore, loadMore, highlightedComment } =
       useCommentSection();
 
     const mergedComments = useMemo(() => {
@@ -35,6 +35,17 @@ const CommentsFeed = React.memo(
     return (
       <div className="flex-1">
         {showLoadedComments && <LoadedComments data={mergedComments} />}
+        {showLoadedComments && hasMore && (
+          <div className="flex justify-center py-2">
+            <button
+              onClick={() => loadMore?.()}
+              disabled={loading}
+              className="text-xs font-medium text-blue-600 dark:text-blue-500 px-3 py-1 rounded-full bg-transparent border-none cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950"
+            >
+              {loading ? "Loading..." : "Load more comments"}
+            </button>
+          </div>
+        )}
         {showFetchingSkeletons && <FetchingCommentsSkeletons />}
         {showNoComments && (customNoCommentsView ?? <NoCommentsPlaceHolder />)}
       </div>

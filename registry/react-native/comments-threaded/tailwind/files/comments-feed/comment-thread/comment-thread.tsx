@@ -1,10 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { View } from "react-native";
-import {
-  Comment as CommentType,
-  useCommentSection,
-  useReplies,
-} from "@sublay/react-native";
+import { Comment as CommentType, useReplies } from "@sublay/react-native";
 import SingleComment from "./single-comment";
 import CommentReplies from "./comment-replies";
 
@@ -22,50 +18,27 @@ function CommentThread({
   isLastReply = false,
 }: CommentThreadProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [showAllReplies, setShowAllReplies] = useState(false);
 
-  const { sortBy, sortDir } = useCommentSection();
-
-  const { replies, newReplies, loading, page, setPage } = useReplies({
+  // Replies the section already brought in (nested) are here from the start;
+  // "load more" / "continue this thread" fetch the rest on demand.
+  const { replies, newReplies, loading, hasMore, loadMore } = useReplies({
     commentId: comment.id,
-    sortBy: sortBy || "createdAt",
-    sortDir,
   });
 
-  useEffect(() => {
-    // Reset the page when the comment changes
-    setPage(1);
-  }, [setPage]);
-
-  const initialVisibleReplies = 3;
-
-  const allReplies = useMemo(() => {
-    const combined = [...(newReplies || []), ...(replies || [])];
-    return combined;
-  }, [newReplies, replies, comment.content]);
-
-  const visibleReplies = useMemo(() => {
-    const visible = showAllReplies
-      ? allReplies
-      : allReplies.slice(0, initialVisibleReplies);
-    return visible;
-  }, [showAllReplies, allReplies, initialVisibleReplies, comment.content]);
-
-  const hiddenRepliesCount = Math.max(
-    0,
-    allReplies.length - initialVisibleReplies
+  const allReplies = useMemo(
+    () => [...(newReplies || []), ...(replies || [])],
+    [newReplies, replies]
   );
+
+  // Counts come from repliesCount; the button is driven by hasMore.
+  const replyCount = Math.max(comment.repliesCount ?? 0, allReplies.length);
+  const hiddenRepliesCount = Math.max(0, replyCount - allReplies.length);
 
   const handleToggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
   };
 
-  const handleShowAllReplies = () => {
-    setShowAllReplies(true);
-  };
-
   const hasReplies = allReplies.length > 0;
-  const replyCount = allReplies.length;
 
   return (
     <View>
@@ -83,10 +56,10 @@ function CommentThread({
         depth={depth}
         isCollapsed={isCollapsed}
         loading={loading}
-        visibleReplies={visibleReplies}
+        visibleReplies={allReplies}
         hiddenRepliesCount={hiddenRepliesCount}
-        showAllReplies={showAllReplies}
-        onShowAllReplies={handleShowAllReplies}
+        hasMore={hasMore}
+        onLoadMore={() => loadMore()}
         CommentThreadComponent={CommentThread}
       />
     </View>

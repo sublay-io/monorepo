@@ -2,6 +2,7 @@ import { createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
 import { resetAccountScopedState } from "../actions";
 import type { SublayState } from '../sublayReducers';
 import { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
+import { ReactionType } from "../../interfaces/models/Reaction";
 import {
   EntityListSortByOptions,
   SortByReaction,
@@ -33,6 +34,8 @@ export interface EntityListState {
   spaceId: string | null;
   limit: number;
   include: EntityIncludeParam | null;
+  topCommentsLimit: number | null;
+  topCommentsSortByReaction: ReactionType | null;
   spaceReputationId: string | null;
   spaceReputationDescendants: boolean | null;
 
@@ -72,6 +75,8 @@ const createDefaultEntityListState = (): EntityListState => ({
   spaceId: null,
   limit: 10,
   include: null,
+  topCommentsLimit: null,
+  topCommentsSortByReaction: null,
   spaceReputationId: null,
   spaceReputationDescendants: null,
 
@@ -126,6 +131,10 @@ export interface EntityListConfig {
   spaceId?: string | null;
   limit?: number;
   include?: EntityIncludeParam | null;
+  /** With `include` containing `"topComments"`: how many per entity (default 1, max 5). */
+  topCommentsLimit?: number | null;
+  /** With `include` containing `"topComments"`: the reaction that ranks them (default `"upvote"`). */
+  topCommentsSortByReaction?: ReactionType | null;
   /**
    * Opt the embedded authors into a space-scoped `spaceReputation`. This is the
    * primary form; it supersedes the deprecated flat props below. Normalized to
@@ -198,8 +207,11 @@ export interface EntitiesSetPayload {
   append?: boolean;
 }
 
-// Create the slice
-export const entityListsSlice = createSlice({
+// Create the slice. Not exported: `Entity` and `Comment` reference each other
+// (`Entity.topComments` / `Comment.entity`), and the declaration emit can't
+// name immer's draft type for that cycle. The reducer and actions are exported
+// below.
+const entityListsSlice = createSlice({
   name: "entityLists",
   initialState,
   reducers: {
@@ -277,6 +289,12 @@ export const entityListsSlice = createSlice({
         }
         if (config.include !== undefined) {
           list.include = config.include;
+        }
+        if (config.topCommentsLimit !== undefined) {
+          list.topCommentsLimit = config.topCommentsLimit;
+        }
+        if (config.topCommentsSortByReaction !== undefined) {
+          list.topCommentsSortByReaction = config.topCommentsSortByReaction;
         }
         // Normalize the reputation params at this input boundary so the
         // `spaceReputation` object never reaches the persisted (flat) state or
@@ -592,6 +610,8 @@ export const selectEntityListConfig = createSelector(
     spaceId: string | null;
     limit: number;
     include: EntityIncludeParam | null;
+    topCommentsLimit: number | null;
+    topCommentsSortByReaction: ReactionType | null;
     spaceReputationId: string | null;
     spaceReputationDescendants: boolean | null;
   } | null => {
@@ -602,6 +622,8 @@ export const selectEntityListConfig = createSelector(
       spaceId: entityList.spaceId,
       limit: entityList.limit,
       include: entityList.include,
+      topCommentsLimit: entityList.topCommentsLimit,
+      topCommentsSortByReaction: entityList.topCommentsSortByReaction,
       spaceReputationId: entityList.spaceReputationId,
       spaceReputationDescendants: entityList.spaceReputationDescendants,
     };

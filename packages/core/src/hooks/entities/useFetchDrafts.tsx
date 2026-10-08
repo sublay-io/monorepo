@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
-import { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
+import { DraftIncludeParam, Entity } from "../../interfaces/models/Entity";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 
 interface FetchDraftsParams {
@@ -9,7 +9,7 @@ interface FetchDraftsParams {
   limit?: number;
   sourceId?: string;
   spaceId?: string;
-  include?: EntityIncludeParam;
+  include?: DraftIncludeParam;
 }
 
 function useFetchDrafts(): (params?: FetchDraftsParams) => Promise<PaginatedResponse<Entity>> {

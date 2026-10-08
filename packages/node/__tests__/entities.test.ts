@@ -8,7 +8,6 @@ import {
   fetchEntityByShortId,
   fetchManyEntities,
   fetchReactions,
-  fetchTopComment,
   getUserReaction,
   incrementEntityViews,
   isEntitySaved,
@@ -116,10 +115,23 @@ describe("node-sdk entities — request shaping", () => {
     expect(projectInstance.patch).toHaveBeenCalledWith("/entities/e1/publish");
   });
 
-  it("fetchTopComment hits the top-comment route", async () => {
+  it("entity fetchers forward topCommentsLimit / topCommentsSortByReaction", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchTopComment(client, { entityId: "e1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/entities/e1/top-comment");
+    const top = { include: "topComments", topCommentsLimit: 3, topCommentsSortByReaction: "love" as const };
+    await fetchEntity(client, { entityId: "e1", ...top });
+    await fetchEntityByShortId(client, { shortId: "s1", ...top });
+    await fetchEntityByForeignId(client, { foreignId: "f1", ...top });
+    await fetchManyEntities(client, { ...top });
+    for (const [, config] of projectInstance.get.mock.calls) {
+      expect(config.params).toMatchObject(top);
+    }
+  });
+
+  it("fetchDrafts joins an include array into a comma string", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchDrafts(client, { userId: "u1", include: ["user", "files"] });
+    const [, config] = projectInstance.get.mock.calls[0];
+    expect(config.params).toMatchObject({ userId: "u1", include: "user,files" });
   });
 
   it("addReaction posts reactionType and userId to /entities/:id/reactions", async () => {
@@ -240,12 +252,6 @@ describe("node-sdk entities — response mapping", () => {
     const entity = { id: "e1", isDraft: false };
     projectInstance.patch.mockResolvedValueOnce({ data: entity });
     await expect(publishDraft(client, { entityId: "e1" })).resolves.toEqual(entity);
-  });
-
-  it("fetchTopComment returns response.data, including null", async () => {
-    const { client, projectInstance } = makeClient();
-    projectInstance.get.mockResolvedValueOnce({ data: null });
-    await expect(fetchTopComment(client, { entityId: "e1" })).resolves.toBeNull();
   });
 
   it("addReaction returns response.data", async () => {

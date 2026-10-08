@@ -8,7 +8,6 @@ export { incrementEntityViews } from "./incrementEntityViews";
 export { deleteEntity } from "./deleteEntity";
 export { fetchDrafts } from "./fetchDrafts";
 export { publishDraft } from "./publishDraft";
-export { fetchTopComment } from "./fetchTopComment";
 export { addReaction } from "./addReaction";
 export { removeReaction } from "./removeReaction";
 export { fetchReactions } from "./fetchReactions";

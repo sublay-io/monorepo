@@ -9,8 +9,8 @@ interface CommentRepliesProps {
   loading: boolean;
   visibleReplies: CommentType[];
   hiddenRepliesCount: number;
-  showAllReplies: boolean;
-  onShowAllReplies: () => void;
+  hasMore: boolean;
+  onLoadMore: () => void;
   onDeleteComment?: (commentId: string) => void;
   onReportComment?: (commentId: string) => void;
   CommentThreadComponent: React.ComponentType<CommentThreadProps>;
@@ -22,18 +22,26 @@ function CommentReplies({
   loading,
   visibleReplies,
   hiddenRepliesCount,
-  showAllReplies,
-  onShowAllReplies,
+  hasMore,
+  onLoadMore,
   onDeleteComment,
   onReportComment,
   CommentThreadComponent,
 }: CommentRepliesProps) {
   const { theme } = useUIState();
 
-  // Don't render anything if collapsed or no replies
-  if (isCollapsed || visibleReplies.length === 0) {
+  // Don't render anything if collapsed, or if there are no replies to show or load
+  if (isCollapsed || (visibleReplies.length === 0 && !hasMore)) {
     return null;
   }
+
+  // At the depth boundary nothing is loaded yet: the replies load right here.
+  const loadMoreLabel =
+    visibleReplies.length === 0
+      ? "Continue this thread"
+      : hiddenRepliesCount > 0
+      ? `${hiddenRepliesCount} more ${hiddenRepliesCount === 1 ? "reply" : "replies"}`
+      : "More replies";
 
   return (
     <div
@@ -59,10 +67,12 @@ function CommentReplies({
       ))}
 
       {/* Load more replies button */}
-      {hiddenRepliesCount > 0 && !showAllReplies && (
-        <div style={{ marginTop: "12px", marginLeft: "4px" }}>
+      {hasMore && (
+        // Indented to the level the replies load at (same 24px-per-level cap as single comments)
+        <div style={{ marginTop: "12px", marginLeft: `${Math.min(depth + 1, 6) * 24 + 4}px` }}>
           <button
-            onClick={onShowAllReplies}
+            onClick={onLoadMore}
+            disabled={loading}
             style={{
               display: "flex",
               alignItems: "center",
@@ -97,8 +107,7 @@ function CommentReplies({
                 clipRule="evenodd"
               />
             </svg>
-            {hiddenRepliesCount} more{" "}
-            {hiddenRepliesCount === 1 ? "reply" : "replies"}
+            {loading ? "Loading..." : loadMoreLabel}
           </button>
         </div>
       )}

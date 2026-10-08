@@ -115,7 +115,32 @@ export type { ClientConfig, AuthTokens } from "./core/client";
 export type {
   PaginatedResponse,
   PaginationMetadata,
+  CursorPaginatedResponse,
+  CursorPagination,
 } from "./interfaces/IPaginatedResponse";
+export type {
+  Comment,
+  GifData,
+  CommentInclude,
+  CommentIncludeArray,
+  CommentIncludeParam,
+  CommentThreadInclude,
+  CommentThreadIncludeArray,
+  CommentThreadIncludeParam,
+  CommentsSortBy,
+  CommentReplySortBy,
+} from "./interfaces/Comment";
+export type {
+  Entity,
+  EntityInclude,
+  CollectionEntityInclude,
+  CollectionEntityIncludeArray,
+  CollectionEntityIncludeParam,
+  DraftInclude,
+  DraftIncludeArray,
+  DraftIncludeParam,
+  TopCommentsParams,
+} from "./interfaces/Entity";
 export type {
   SpaceReputationContextParams,
   SpaceReputationUserParams,

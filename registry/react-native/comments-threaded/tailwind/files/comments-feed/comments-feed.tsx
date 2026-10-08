@@ -1,14 +1,16 @@
 import React, { ReactNode, useMemo } from "react";
-import { View } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { useCommentSection } from "@sublay/react-native";
 import LoadedComments from "./loaded-comments";
 import FetchingCommentsSkeletons from "./fetching-comments-skeletons";
 import NoCommentsPlaceHolder from "./no-comments-placeholder";
+import useUIState from "../../hooks/use-ui-state";
 
 const CommentsFeed = React.memo(
   ({ children: customNoCommentsView }: { children?: ReactNode }) => {
-    const { comments, newComments, loading, highlightedComment } =
+    const { comments, newComments, loading, hasMore, loadMore, highlightedComment } =
       useCommentSection();
+    const { theme } = useUIState();
 
     const mergedComments = useMemo(() => {
       let combinedComments = [...(newComments ?? []), ...(comments ?? [])];
@@ -36,6 +38,23 @@ const CommentsFeed = React.memo(
     return (
       <View className="flex-1">
         {showLoadedComments && <LoadedComments data={mergedComments} />}
+        {showLoadedComments && hasMore && (
+          <View className="items-center py-2">
+            <TouchableOpacity
+              onPress={() => loadMore?.()}
+              disabled={loading}
+              className="px-3 py-1 rounded-full"
+            >
+              <Text
+                className={`text-xs font-medium ${
+                  theme === 'dark' ? 'text-blue-500' : 'text-blue-600'
+                }`}
+              >
+                {loading ? "Loading..." : "Load more comments"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
         {showFetchingSkeletons && <FetchingCommentsSkeletons />}
         {showNoComments && (customNoCommentsView ?? <NoCommentsPlaceHolder />)}
       </View>

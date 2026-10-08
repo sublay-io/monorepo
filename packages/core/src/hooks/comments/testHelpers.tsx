@@ -12,7 +12,9 @@ import { setTokens, setUser, setInitialized } from "../../store/slices/authSlice
 import { SublayContext, type SublayContextValues } from "../../context/sublay-context";
 import {
   CommentSectionContext,
+  CommentSectionProvider,
   type CommentSectionContextValues,
+  type CommentSectionProviderProps,
 } from "../../context/comment-section-context";
 import type { AuthUser } from "../../interfaces/models/User";
 
@@ -22,6 +24,12 @@ export interface RenderWithCommentSectionOptions {
   projectId?: string;
   user?: AuthUser | null;
   commentSectionValue?: Partial<CommentSectionContextValues>;
+  /**
+   * Mount a real `CommentSectionProvider` with these props instead of a bare
+   * context value — needed by hooks that read the section's internal store
+   * (`useReplies`).
+   */
+  providerProps?: Omit<CommentSectionProviderProps, "children">;
   beforeRender?: (handles: {
     axiosPrivate: AxiosMockHandle;
     axiosPublic: AxiosMockHandle;
@@ -47,6 +55,7 @@ export function renderWithCommentSection<Result>(
     projectId = "test-project",
     user = null,
     commentSectionValue = {},
+    providerProps,
     beforeRender,
   } = options;
 
@@ -66,9 +75,13 @@ export function renderWithCommentSection<Result>(
         <SublayContext.Provider
           value={{ projectId, project: null } as SublayContextValues}
         >
-          <CommentSectionContext.Provider value={commentSectionValue}>
-            {children}
-          </CommentSectionContext.Provider>
+          {providerProps ? (
+            <CommentSectionProvider {...providerProps}>{children}</CommentSectionProvider>
+          ) : (
+            <CommentSectionContext.Provider value={commentSectionValue}>
+              {children}
+            </CommentSectionContext.Provider>
+          )}
         </SublayContext.Provider>
       </Provider>
     );

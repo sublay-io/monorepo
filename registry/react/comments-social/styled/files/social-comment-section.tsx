@@ -7,7 +7,7 @@
  * Installation: npx @sublay/cli add comments-social
  *
  * Required dependencies:
- * - @sublay/react-js ^7.0.0
+ * - @sublay/react-js ^8.0.0-beta.0
  * - @sublay/ui-core-react-js ^7.0.0
  *
  * @see https://docs.sublay.io/components/comments-social

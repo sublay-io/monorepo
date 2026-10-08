@@ -206,3 +206,21 @@ describe("js-sdk collections — response mapping", () => {
     expect(result).toBeUndefined();
   });
 });
+
+describe("collections — include and top comments", () => {
+  it("fetchCollectionEntities joins an include array and forwards top-comment params", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchCollectionEntities(client, {
+      collectionId: "col1",
+      include: ["user", "topComments"],
+      topCommentsLimit: 2,
+      topCommentsSortByReaction: "funny",
+    } as any);
+    const [, config] = projectInstance.get.mock.calls[0];
+    expect(config.params).toMatchObject({
+      include: "user,topComments",
+      topCommentsLimit: 2,
+      topCommentsSortByReaction: "funny",
+    });
+  });
+});

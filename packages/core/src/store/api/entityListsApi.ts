@@ -1,6 +1,7 @@
 import { baseApi } from "./baseApi";
 import type { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 import type { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
+import type { ReactionType } from "../../interfaces/models/Reaction";
 import type { EntityListSortByOptions, SortByReaction, SortDirection, SortType } from "../../interfaces/EntityListSortByOptions";
 import { validateSortBy } from "../../interfaces/EntityListSortByOptions";
 import type { TimeFrame } from "../../interfaces/TimeFrame";
@@ -99,6 +100,8 @@ interface FetchEntitiesParams {
   sourceId?: string | null;
   spaceId?: string | null;
   include?: EntityIncludeParam | null;
+  topCommentsLimit?: number | null;
+  topCommentsSortByReaction?: ReactionType | null;
   spaceReputationId?: string | null;
   spaceReputationDescendants?: boolean | null;
 }
@@ -166,6 +169,8 @@ export const entityListsApi = baseApi.injectEndpoints({
         attachmentsFilters,
         nsfwFilter,
         include,
+        topCommentsLimit,
+        topCommentsSortByReaction,
         spaceReputationId,
         spaceReputationDescendants
       }) => {
@@ -205,6 +210,8 @@ export const entityListsApi = baseApi.injectEndpoints({
             include: include
               ? Array.isArray(include) ? include.join(',') : include
               : undefined,
+            topCommentsLimit: topCommentsLimit ?? undefined,
+            topCommentsSortByReaction: topCommentsSortByReaction ?? undefined,
           }),
         };
       },

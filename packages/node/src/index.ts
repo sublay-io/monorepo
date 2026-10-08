@@ -111,7 +111,12 @@ async function verifyClient(client: SublayHttpClient): Promise<void> {
 }
 
 // Export pagination types
-export type { PaginatedResponse, PaginationMetadata } from "./interfaces/IPaginatedResponse";
+export type {
+  PaginatedResponse,
+  PaginationMetadata,
+  CursorPaginatedResponse,
+  CursorPagination,
+} from "./interfaces/IPaginatedResponse";
 
 // Export custom-table types
 export type {
@@ -130,7 +135,17 @@ export type {
 export type { AddColumnProps } from "./modules/tables-management/addColumn";
 
 // Export commonly used interfaces
-export type { Entity, TopComment } from "./interfaces/Entity";
+export type {
+  Entity,
+  EntityInclude,
+  CollectionEntityInclude,
+  CollectionEntityIncludeArray,
+  CollectionEntityIncludeParam,
+  DraftInclude,
+  DraftIncludeArray,
+  DraftIncludeParam,
+  TopCommentsParams,
+} from "./interfaces/Entity";
 export type {
   Event,
   EventRsvp,
@@ -141,7 +156,18 @@ export type {
   RsvpStatus,
   RsvpCounts,
 } from "./interfaces/Event";
-export type { Comment, GifData } from "./interfaces/Comment";
+export type {
+  Comment,
+  GifData,
+  CommentInclude,
+  CommentIncludeArray,
+  CommentIncludeParam,
+  CommentThreadInclude,
+  CommentThreadIncludeArray,
+  CommentThreadIncludeParam,
+  CommentsSortBy,
+  CommentReplySortBy,
+} from "./interfaces/Comment";
 export type { User, UserFull, AuthUser, UserRole } from "./interfaces/User";
 export type {
   SpaceReputationContextParams,

@@ -87,6 +87,11 @@ function useThreadedComments({
         callbacks={callbacks as Record<string, (...args: any[]) => void>}
         defaultSortBy="top"
         limit={10}
+        // 🔧 CUSTOMIZE: Replies brought with each page of comments — 2 levels,
+        // up to 3 per comment — so the first paint is a single request. Deeper
+        // replies load on demand ("Continue this thread").
+        replyDepth={2}
+        replyLimit={3}
         highlightedCommentId={highlightedCommentId}
       >
         <UIStateProvider>

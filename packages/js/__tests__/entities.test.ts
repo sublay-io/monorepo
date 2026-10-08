@@ -8,7 +8,6 @@ import {
   fetchEntityByShortId,
   fetchManyEntities,
   fetchReactions,
-  fetchTopComment,
   getUserReaction,
   isEntitySaved,
   publishDraft,
@@ -184,12 +183,23 @@ describe("js-sdk entities — request shaping", () => {
     );
   });
 
-  it("fetchTopComment gets the top-comment route with no params", async () => {
+  it("entity fetchers forward topCommentsLimit / topCommentsSortByReaction", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchTopComment(client, { entityId: "e1" });
-    expect(projectInstance.get).toHaveBeenCalledWith(
-      "/entities/e1/top-comment"
-    );
+    const top = { include: "topComments", topCommentsLimit: 3, topCommentsSortByReaction: "love" as const };
+    await fetchEntity(client, { entityId: "e1", ...top });
+    await fetchEntityByShortId(client, { shortId: "s1", ...top });
+    await fetchEntityByForeignId(client, { foreignId: "f1", ...top });
+    await fetchManyEntities(client, { ...top });
+    for (const [, config] of projectInstance.get.mock.calls) {
+      expect(config.params).toMatchObject(top);
+    }
+  });
+
+  it("fetchDrafts joins an include array into a comma string", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchDrafts(client, { include: ["user", "files"] });
+    const [, config] = projectInstance.get.mock.calls[0];
+    expect(config.params.include).toBe("user,files");
   });
 
   it("addReaction posts only reactionType to /entities/:entityId/reactions (no userId)", async () => {
@@ -350,25 +360,6 @@ describe("js-sdk entities — response mapping", () => {
     const result = await publishDraft(client, { entityId: "e1" });
 
     expect(result).toEqual(entity);
-  });
-
-  it("fetchTopComment returns the TopComment", async () => {
-    const { client, projectInstance } = makeClient();
-    const topComment = { id: "c1", content: "great post", upvotesCount: 3 };
-    projectInstance.get.mockResolvedValueOnce({ data: topComment });
-
-    const result = await fetchTopComment(client, { entityId: "e1" });
-
-    expect(result).toEqual(topComment);
-  });
-
-  it("fetchTopComment returns null when there is no top comment", async () => {
-    const { client, projectInstance } = makeClient();
-    projectInstance.get.mockResolvedValueOnce({ data: null });
-
-    const result = await fetchTopComment(client, { entityId: "e1" });
-
-    expect(result).toBeNull();
   });
 
   it("addReaction returns the full populated Entity", async () => {

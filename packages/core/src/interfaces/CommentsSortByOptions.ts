@@ -11,3 +11,12 @@ export type CommentsSortByOptions =
   | "top"
   | "controversial"
   | DeprecatedCommentsSortBy;
+
+/**
+ * Sort options for the nested reply levels (`replySortBy`). The deprecated
+ * `new`/`old` aliases aren't accepted there.
+ */
+export type CommentReplySortByOptions = Exclude<
+  CommentsSortByOptions,
+  DeprecatedCommentsSortBy
+>;

@@ -142,7 +142,6 @@ Base path: `/v8/:projectId/`
 | GET | `/entities/is-entity-saved` | can access with a key | `entities.isEntitySaved` | yes |
 | PATCH | `/entities/:entityId/publish` | can access with a key | `entities.publishDraft` | yes |
 | GET | `/entities/:entityId` | no key needed | `entities.fetchEntity` | yes |
-| GET | `/entities/:entityId/top-comment` | no key needed | `entities.fetchTopComment` | yes |
 | POST | `/entities/:entityId/reactions` | can access with a key | `entities.addReaction` | yes |
 | DELETE | `/entities/:entityId/reactions` | can access with a key | `entities.removeReaction` | yes |
 | GET | `/entities/:entityId/reactions` | no key needed | `entities.fetchReactions` | yes |
@@ -245,6 +244,7 @@ Base path: `/v8/:projectId/`
 | PATCH | `/users/:userId` | can access with a key | `users.updateUser` | yes |
 | POST | `/users/:userId/follow` | can access with a key | `users.createFollow` | yes |
 | GET | `/users/:userId/follow` | can access with a key | `users.fetchFollowStatus` | yes |
+| GET | `/users/:userId/comments` | no key needed | `users.fetchCommentsByUserId` | yes |
 | GET | `/users/:userId/followers` | no key needed | `users.fetchFollowersByUserId` | yes |
 | GET | `/users/:userId/followers-count` | no key needed | `users.fetchFollowersCountByUserId` | yes |
 | GET | `/users/:userId/following` | no key needed | `users.fetchFollowingByUserId` | yes |

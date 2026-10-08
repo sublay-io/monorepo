@@ -3,11 +3,13 @@ import { useCommentSection } from "@sublay/react-js";
 import LoadedComments from "./loaded-comments";
 import FetchingCommentsSkeletons from "./fetching-comments-skeletons";
 import NoCommentsPlaceHolder from "./no-comments-placeholder";
+import useUIState from "../../hooks/use-ui-state";
 
 const CommentsFeed = React.memo(
   ({ children: customNoCommentsView }: { children?: ReactNode }) => {
-    const { comments, newComments, loading, highlightedComment } =
+    const { comments, newComments, loading, hasMore, loadMore, highlightedComment } =
       useCommentSection();
+    const { theme } = useUIState();
 
     const mergedComments = useMemo(() => {
       let combinedComments = [...(newComments ?? []), ...(comments ?? [])];
@@ -35,6 +37,24 @@ const CommentsFeed = React.memo(
     return (
       <div style={{ flex: 1 }}>
         {showLoadedComments && <LoadedComments data={mergedComments} />}
+        {showLoadedComments && hasMore && (
+          <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
+            <button
+              onClick={() => loadMore?.()}
+              disabled={loading}
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              {loading ? "Loading..." : "Load more comments"}
+            </button>
+          </div>
+        )}
         {showFetchingSkeletons && <FetchingCommentsSkeletons />}
         {showNoComments && (customNoCommentsView ?? <NoCommentsPlaceHolder />)}
       </div>

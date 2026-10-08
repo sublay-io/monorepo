@@ -78,7 +78,7 @@ describe("collectionsApi", () => {
         limit: 10,
         sortBy: "top",
         sortDir: "desc",
-        include: ["author", "metrics"],
+        include: ["user", "space"],
       }),
     );
 
@@ -88,7 +88,7 @@ describe("collectionsApi", () => {
     expect(url.searchParams.get("limit")).toBe("10");
     expect(url.searchParams.get("sortBy")).toBe("top");
     expect(url.searchParams.get("sortDir")).toBe("desc");
-    expect(url.searchParams.get("include")).toBe("author,metrics");
+    expect(url.searchParams.get("include")).toBe("user,space");
   });
 
   it("fetchCollectionEntities sends sortByReaction only with sortBy=top", async () => {

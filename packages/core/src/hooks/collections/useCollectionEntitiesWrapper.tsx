@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
+import {
+  CollectionEntityIncludeParam,
+  Entity,
+  TopCommentsParams,
+} from "../../interfaces/models/Entity";
 import { SortByReaction } from "../../interfaces/EntityListSortByOptions";
 import { useLazyFetchCollectionEntitiesQuery } from "../../store/api/collectionsApi";
 import { handleError } from "../../utils/handleError";
@@ -12,10 +16,11 @@ import {
   selectCollectionEntities,
 } from "../../store/slices/collectionsSlice";
 
-export interface UseCollectionEntitiesWrapperProps {
+export interface UseCollectionEntitiesWrapperProps extends TopCommentsParams {
   collectionId?: string | null; // Optional - defaults to current collection from Redux
   limit?: number;
-  include?: EntityIncludeParam;
+  /** No `"saved"`: every entity in a collection is saved. */
+  include?: CollectionEntityIncludeParam;
   defaultSortBy?: "new" | "top" | "hot" | "added";
   defaultSortByReaction?: SortByReaction;
   defaultSortDir?: "asc" | "desc";
@@ -45,6 +50,8 @@ function useCollectionEntitiesWrapper(
     defaultSortByReaction = "upvote",
     defaultSortDir = "desc",
     include,
+    topCommentsLimit,
+    topCommentsSortByReaction,
   } = props;
 
   const dispatch = useSublayDispatch();
@@ -97,6 +104,8 @@ function useCollectionEntitiesWrapper(
         sortByReaction,
         sortDir,
         include,
+        topCommentsLimit,
+        topCommentsSortByReaction,
       }).unwrap();
 
       if (response) {
@@ -121,6 +130,8 @@ function useCollectionEntitiesWrapper(
     sortByReaction,
     sortDir,
     includeString,
+    topCommentsLimit,
+    topCommentsSortByReaction,
   ]);
 
   const loadMore = useCallback(() => {
@@ -151,6 +162,8 @@ function useCollectionEntitiesWrapper(
           sortByReaction,
           sortDir,
           include,
+          topCommentsLimit,
+          topCommentsSortByReaction,
         }).unwrap();
 
         if (response) {
@@ -181,6 +194,8 @@ function useCollectionEntitiesWrapper(
     sortByReaction,
     sortDir,
     includeString,
+    topCommentsLimit,
+    topCommentsSortByReaction,
   ]);
 
   return {

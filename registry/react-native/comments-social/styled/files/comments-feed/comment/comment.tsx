@@ -103,6 +103,17 @@ const Comment = React.memo(
     // doing math with it. Falls back to 1 (square) if it's missing or unparsable.
     const gifAspectRatio = Number(comment.gif?.aspectRatio) || 1;
 
+    const [showBlockedComment, setShowBlockedComment] = useState(false);
+
+    // isUnavailable wins over every other marker (the author blocked the
+    // viewer): a neutral row with no reply/react — only removing the viewer's
+    // own reaction stays possible. A comment by someone the viewer blocked
+    // starts collapsed, and can be shown (then replied to / reacted to).
+    const isUnavailable = !!comment.isUnavailable;
+    const isBlockedCollapsed =
+      !isUnavailable && !!comment.isAuthorBlocked && !showBlockedComment;
+    const isPlaceholderRow = isUnavailable || isBlockedCollapsed;
+
     const imageStyle = {
       width: gifAspectRatio > 1 ? 200 : 200 * gifAspectRatio,
       height: gifAspectRatio < 1 ? 200 : 200 / gifAspectRatio,
@@ -132,6 +143,66 @@ const Comment = React.memo(
               : "transparent",
         }}
       >
+        {isPlaceholderRow ? (
+          <View
+            style={{
+              paddingRight: 16,
+              paddingLeft: 16 + extraLeftPadding,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 32,
+                backgroundColor: theme === 'dark' ? '#374151' : '#E5E7EB',
+              }}
+            />
+            <Text
+              style={{
+                fontSize: 13,
+                fontStyle: "italic",
+                color: theme === 'dark' ? '#9CA3AF' : '#737373',
+              }}
+            >
+              {isUnavailable
+                ? "This comment is unavailable"
+                : "Comment from a user you blocked"}
+            </Text>
+            {isUnavailable ? (
+              currentReaction && (
+                <TouchableOpacity
+                  onPress={() => toggleReaction({ reactionType: currentReaction })}
+                >
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: "600",
+                      color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                    }}
+                  >
+                    Remove your reaction
+                  </Text>
+                </TouchableOpacity>
+              )
+            ) : (
+              <TouchableOpacity onPress={() => setShowBlockedComment(true)}>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontWeight: "600",
+                    color: theme === 'dark' ? '#F9FAFB' : '#000',
+                  }}
+                >
+                  Show anyway
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : (
         <Pressable
           onLongPress={() => {
             Vibration.vibrate(50);
@@ -271,6 +342,7 @@ const Comment = React.memo(
             </View>
           </View>
         </Pressable>
+        )}
         {!comment.parentId && <Replies commentId={comment.id} />}
       </View>
     );

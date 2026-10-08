@@ -550,6 +550,8 @@ export {
   useDeleteComment,
   useEntityComments,
   useFetchManyCommentsWrapper,
+  useFetchCommentsByUserId,
+  useFetchCommentsByUserIdWrapper,
   type CommentSectionCreateCommentProps,
   type CommentSectionUpdateCommentProps,
   type CommentSectionDeleteCommentProps,
@@ -558,6 +560,13 @@ export {
   type FetchCommentProps,
   type FetchCommentByForeignIdProps,
   type UseRepliesProps,
+  type UseRepliesValues,
+  type LoadMoreRepliesOptions,
+  type UseEntityCommentsProps,
+  type UseEntityCommentsValues,
+  type FetchCommentsByUserIdProps,
+  type UseFetchCommentsByUserIdWrapperProps,
+  type UseFetchCommentsByUserIdWrapperValues,
   type UpdateCommentProps,
   type DeleteCommentProps,
   type UseFetchManyCommentsWrapperProps,
@@ -754,8 +763,9 @@ export {
 export type {
   PaginatedResponse,
   PaginationMetadata,
+  CursorPaginatedResponse,
+  CursorPagination,
 } from "./interfaces/PaginatedResponse";
-export type { EntityCommentsTree } from "./interfaces/EntityCommentsTree";
 export type {
   UserFull,
   User,
@@ -771,6 +781,13 @@ export type {
   EntityInclude,
   EntityIncludeArray,
   EntityIncludeParam,
+  CollectionEntityInclude,
+  CollectionEntityIncludeArray,
+  CollectionEntityIncludeParam,
+  DraftInclude,
+  DraftIncludeArray,
+  DraftIncludeParam,
+  TopCommentsParams,
 } from "./interfaces/models/Entity";
 export type {
   Event,
@@ -803,6 +820,9 @@ export type {
   CommentInclude,
   CommentIncludeArray,
   CommentIncludeParam,
+  CommentThreadInclude,
+  CommentThreadIncludeArray,
+  CommentThreadIncludeParam,
 } from "./interfaces/models/Comment";
 export type {
   Reaction,
@@ -882,7 +902,10 @@ export type {
   FetchManyRulesResponse,
   DeleteRuleResponse,
 } from "./interfaces/models/Rule";
-export type { CommentsSortByOptions } from "./interfaces/CommentsSortByOptions";
+export type {
+  CommentsSortByOptions,
+  CommentReplySortByOptions,
+} from "./interfaces/CommentsSortByOptions";
 export type {
   EntityListSortByOptions,
   SortByReaction,

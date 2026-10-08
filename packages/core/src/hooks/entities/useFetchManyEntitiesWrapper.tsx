@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EntityListSortByOptions, SortByReaction, SortDirection, SortType } from "../../interfaces/EntityListSortByOptions";
-import { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
+import {
+  Entity,
+  EntityIncludeParam,
+  TopCommentsParams,
+} from "../../interfaces/models/Entity";
 import { TimeFrame } from "../../interfaces/TimeFrame";
 import { KeywordsFilters } from "../../interfaces/entity-filters/KeywordsFilters";
 import { TitleFilters } from "../../interfaces/entity-filters/TitleFilters";
@@ -14,7 +18,9 @@ import useFetchManyEntities from "./useFetchManyEntities";
 import { handleError } from "../../utils/handleError";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 
-export interface UseFetchManyEntitiesWrapperProps extends SpaceReputationContextParams {
+export interface UseFetchManyEntitiesWrapperProps
+  extends SpaceReputationContextParams,
+    TopCommentsParams {
   userId?: string | null;
   limit?: number;
   sourceId?: string | null;
@@ -65,6 +71,8 @@ function useFetchManyEntitiesWrapper(
     sourceId,
     spaceId,
     include,
+    topCommentsLimit,
+    topCommentsSortByReaction,
     followedOnly,
     keywordsFilters,
     titleFilters,
@@ -121,6 +129,8 @@ function useFetchManyEntitiesWrapper(
         spaceId,
         limit,
         include,
+        topCommentsLimit,
+        topCommentsSortByReaction,
         followedOnly,
         keywordsFilters,
         titleFilters,
@@ -157,6 +167,8 @@ function useFetchManyEntitiesWrapper(
     spaceId,
     userId,
     include,
+    topCommentsLimit,
+    topCommentsSortByReaction,
     followedOnly,
     keywordsFilters,
     titleFilters,
@@ -198,6 +210,8 @@ function useFetchManyEntitiesWrapper(
           spaceId,
           limit,
           include,
+          topCommentsLimit,
+          topCommentsSortByReaction,
           followedOnly,
           keywordsFilters,
           titleFilters,
@@ -240,6 +254,8 @@ function useFetchManyEntitiesWrapper(
     spaceId,
     limit,
     include,
+    topCommentsLimit,
+    topCommentsSortByReaction,
     followedOnly,
     keywordsFilters,
     titleFilters,

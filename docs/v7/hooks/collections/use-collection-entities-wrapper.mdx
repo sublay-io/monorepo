@@ -119,5 +119,7 @@ function SavedFeed({ collectionId }) {
 |-------|-------------|
 | `added` | Sorted by when the entity was added to the collection |
 | `new` | Sorted by entity creation date |
-| `top` | Sorted by vote count |
+| `top` | Sorted by upvote count |
 | `hot` | Sorted by hot score (engagement-based) |
+
+The whole collection is sorted before it is paginated, so `loadMore` continues the same order.

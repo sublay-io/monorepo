@@ -120,6 +120,28 @@ describe("useCollectionEntitiesWrapper", () => {
     expect(new URL(call!.url).searchParams.get("sortBy")).toBe("top");
   });
 
+  it("sends sortByReaction (default upvote) only while sortBy is top", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([makeEntity("e1")], false));
+    const { result } = renderHookWithStore(() =>
+      useCollectionEntitiesWrapper({ collectionId: "col-1" }),
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.sortByReaction).toBe("upvote");
+    expect(new URL(fetchHandle.calls()[0].url).searchParams.has("sortByReaction")).toBe(false);
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([makeEntity("top-1")], false));
+    act(() => result.current.setSortBy("top"));
+    await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["top-1"]));
+    let calls = fetchHandle.calls();
+    expect(new URL(calls[calls.length - 1]!.url).searchParams.get("sortByReaction")).toBe("upvote");
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([makeEntity("love-1")], false));
+    act(() => result.current.setSortByReaction("love"));
+    await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["love-1"]));
+    calls = fetchHandle.calls();
+    expect(new URL(calls[calls.length - 1]!.url).searchParams.get("sortByReaction")).toBe("love");
+  });
+
   it("surfaces a failed fetch by leaving entities empty and loading false", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
     const { result } = renderHookWithStore(() =>

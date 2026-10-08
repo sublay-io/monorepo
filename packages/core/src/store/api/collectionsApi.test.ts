@@ -91,6 +91,36 @@ describe("collectionsApi", () => {
     expect(url.searchParams.get("include")).toBe("author,metrics");
   });
 
+  it("fetchCollectionEntities sends sortByReaction only with sortBy=top", async () => {
+    const empty = () =>
+      jsonResponse({
+        data: [],
+        pagination: { page: 1, pageSize: 20, totalPages: 0, totalItems: 0, hasMore: false },
+      });
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(empty());
+    await store.dispatch(
+      collectionsApi.endpoints.fetchCollectionEntities.initiate({
+        projectId: "test-project",
+        collectionId: "c-top",
+        sortBy: "top",
+        sortByReaction: "love",
+      }),
+    );
+    expect(new URL(fetchHandle.calls()[0].url).searchParams.get("sortByReaction")).toBe("love");
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(empty());
+    await store.dispatch(
+      collectionsApi.endpoints.fetchCollectionEntities.initiate({
+        projectId: "test-project",
+        collectionId: "c-hot",
+        sortBy: "hot",
+        sortByReaction: "love",
+      }),
+    );
+    expect(new URL(fetchHandle.calls()[1].url).searchParams.has("sortByReaction")).toBe(false);
+  });
+
   it("createCollection issues a POST with the collection name as the body", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
       jsonResponse({ ...ROOT, id: "child", parentId: "root" }, 201),

@@ -88,7 +88,10 @@ function useFetchManyEntities(): (params?: FetchManyEntitiesParams) => Promise<P
       if (params?.page !== undefined) queryParams.page = params.page;
       if (params?.limit !== undefined) queryParams.limit = params.limit;
       if (params?.sortBy) queryParams.sortBy = params.sortBy;
-      if (params?.sortByReaction) queryParams.sortByReaction = params.sortByReaction;
+      // The server only accepts sortByReaction with sortBy=top (400 otherwise).
+      if (params?.sortByReaction && params.sortBy === "top") {
+        queryParams.sortByReaction = params.sortByReaction;
+      }
       if (params?.sortDir) queryParams.sortDir = params.sortDir;
       if (params?.sortType) queryParams.sortType = params.sortType;
       if (params?.timeFrame) queryParams.timeFrame = params.timeFrame;

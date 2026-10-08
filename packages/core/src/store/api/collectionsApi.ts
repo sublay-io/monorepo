@@ -1,6 +1,7 @@
 import { baseApi } from "./baseApi";
 import type { Collection } from "../../interfaces/models/Collection";
 import type { Entity } from "../../interfaces/models/Entity";
+import type { SortByReaction } from "../../interfaces/EntityListSortByOptions";
 
 // API parameters types
 interface FetchRootCollectionParams {
@@ -18,6 +19,7 @@ interface FetchCollectionEntitiesParams {
   page?: number;
   limit?: number;
   sortBy?: "new" | "top" | "hot" | "added";
+  sortByReaction?: SortByReaction;
   sortDir?: "asc" | "desc";
   include?: string | string[];
 }
@@ -110,13 +112,15 @@ export const collectionsApi = baseApi.injectEndpoints({
 
     // Fetch paginated entities in a collection
     fetchCollectionEntities: builder.query<FetchCollectionEntitiesResponse, FetchCollectionEntitiesParams>({
-      query: ({ projectId, collectionId, page, limit, sortBy, sortDir, include }) => ({
+      query: ({ projectId, collectionId, page, limit, sortBy, sortByReaction, sortDir, include }) => ({
         url: `/${projectId}/collections/${collectionId}/entities`,
         method: "GET",
         params: {
           page,
           limit,
           sortBy,
+          // The server only accepts sortByReaction with sortBy=top (400 otherwise).
+          sortByReaction: sortBy === "top" ? sortByReaction : undefined,
           sortDir,
           include: Array.isArray(include) ? include.join(',') : include,
         },

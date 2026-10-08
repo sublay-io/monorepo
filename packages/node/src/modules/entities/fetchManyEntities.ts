@@ -51,6 +51,7 @@ export interface FetchManyEntitiesProps extends SpaceReputationContextParams {
     | (string & {});
   sortDir?: "asc" | "desc";
   sortType?: "auto" | "numeric" | "text" | "boolean" | "timestamp";
+  /** Which reaction `top` ranks by (server default: "upvote"). Only valid with `sortBy: "top"` — the server rejects it otherwise. */
   sortByReaction?:
     | "upvote"
     | "downvote"

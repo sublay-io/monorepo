@@ -190,7 +190,8 @@ export const entityListsApi = baseApi.injectEndpoints({
             spaceReputationDescendants:
               spaceReputationDescendants === null ? undefined : spaceReputationDescendants,
             sortBy,
-            sortByReaction,
+            // The server only accepts sortByReaction with sortBy=top (400 otherwise).
+            sortByReaction: sortBy === "top" ? sortByReaction : undefined,
             sortDir,
             sortType,
             timeFrame,

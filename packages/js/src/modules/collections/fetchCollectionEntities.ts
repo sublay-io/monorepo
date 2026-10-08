@@ -7,6 +7,16 @@ export interface FetchCollectionEntitiesProps {
   page?: number;
   limit?: number;
   sortBy?: "new" | "added" | "top" | "hot";
+  /** Which reaction `top` ranks by (server default: "upvote"). Only valid with `sortBy: "top"` — the server rejects it otherwise. */
+  sortByReaction?:
+    | "upvote"
+    | "downvote"
+    | "like"
+    | "love"
+    | "wow"
+    | "sad"
+    | "angry"
+    | "funny";
   sortDir?: "asc" | "desc";
   /** Comma-separated list of associations to populate, e.g. "user". */
   include?: string;

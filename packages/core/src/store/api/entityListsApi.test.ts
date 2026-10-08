@@ -104,6 +104,32 @@ describe("entityListsApi", () => {
       expect(new URL(fetchHandle.calls()[1].url).searchParams.get("followedOnly")).toBe("true");
     });
 
+    it("sends sortByReaction only with sortBy=top (the server rejects it otherwise)", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ data: [], pagination: { page: 1, pageSize: 10, totalPages: 0, totalItems: 0, hasMore: false } }));
+      await store.dispatch(
+        entityListsApi.endpoints.fetchEntities.initiate({
+          projectId: "test-project",
+          page: 1,
+          limit: 10,
+          sortBy: "top",
+          sortByReaction: "love",
+        }),
+      );
+      expect(new URL(fetchHandle.calls()[0].url).searchParams.get("sortByReaction")).toBe("love");
+
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ data: [], pagination: { page: 1, pageSize: 10, totalPages: 0, totalItems: 0, hasMore: false } }));
+      await store.dispatch(
+        entityListsApi.endpoints.fetchEntities.initiate({
+          projectId: "test-project",
+          page: 1,
+          limit: 10,
+          sortBy: "hot",
+          sortByReaction: "love",
+        }),
+      );
+      expect(new URL(fetchHandle.calls()[1].url).searchParams.has("sortByReaction")).toBe(false);
+    });
+
     it("serializes keywordsFilters using bracket notation, like axios", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(
         jsonResponse({ data: [], pagination: { page: 1, pageSize: 10, totalPages: 0, totalItems: 0, hasMore: false } }),

@@ -187,7 +187,7 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 </ParamField>
 
 <ParamField body="sortByReaction" type="string">
-  Sort by the count of a specific reaction: `"upvote"`, `"downvote"`, `"like"`, `"love"`, `"wow"`, `"sad"`, `"angry"`, or `"funny"`.
+  Which reaction `top` ranks by: `"upvote"`, `"downvote"`, `"like"`, `"love"`, `"wow"`, `"sad"`, `"angry"`, or `"funny"`. Defaults to `"upvote"`. Only valid with `sortBy: "top"` — the server rejects it with any other sort.
 </ParamField>
 
 <ParamField body="page" type="number">

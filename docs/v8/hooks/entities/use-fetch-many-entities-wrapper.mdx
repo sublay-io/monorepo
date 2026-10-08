@@ -87,7 +87,7 @@ function UserFeed({ userId }: { userId: string }) {
 </ParamField>
 
 <ParamField body="defaultSortByReaction" type="SortByReaction" optional>
-  Initial reaction type to sort by when `sortBy` is reaction-based. Default: `"upvote"`.
+  Initial reaction type `top` ranks by. Only sent while `sortBy` is `"top"`. Default: `"upvote"`.
 </ParamField>
 
 <ParamField body="defaultSortDir" type='"asc" | "desc"' optional>
@@ -145,7 +145,7 @@ function UserFeed({ userId }: { userId: string }) {
 </ResponseField>
 
 <ResponseField name="sortByReaction" type="SortByReaction">
-  Current reaction type used for reaction-based sorting.
+  Current reaction type `top` ranks by. Only sent while `sortBy` is `"top"`.
 </ResponseField>
 
 <ResponseField name="sortDir" type='"asc" | "desc"'>

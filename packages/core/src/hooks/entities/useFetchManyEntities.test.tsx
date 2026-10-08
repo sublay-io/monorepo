@@ -89,6 +89,23 @@ describe("useFetchManyEntities", () => {
     });
   });
 
+  it("sends sortByReaction only with sortBy=top (the server rejects it otherwise)", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyEntities());
+
+    axiosPrivate.mockResponse("get", makePage([]));
+    await act(async () => {
+      await result.current({ sortBy: "top", sortByReaction: "love" });
+    });
+    axiosPrivate.mockResponse("get", makePage([]));
+    await act(async () => {
+      await result.current({ sortBy: "hot", sortByReaction: "love" });
+    });
+
+    const [topCall, hotCall] = axiosPrivate.calls("get");
+    expect(topCall.config?.params).toMatchObject({ sortBy: "top", sortByReaction: "love" });
+    expect(hotCall.config?.params).not.toHaveProperty("sortByReaction");
+  });
+
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyEntities());
 

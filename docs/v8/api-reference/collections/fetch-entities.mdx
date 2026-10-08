@@ -23,7 +23,17 @@ Returns a paginated list of entities saved in the specified collection. The coll
 </ParamField>
 
 <ParamField query="sortBy" type='"new" | "top" | "hot" | "added"' optional>
-  Sort mode. `added` sorts by when the entity was saved; others sort by entity properties. Default: `"new"`.
+  Sort mode. Default: `"new"`.
+  - `new` — by when the entity was created
+  - `added` — by when the entity was saved to this collection
+  - `top` — by reaction count (use `sortByReaction` to choose which reaction)
+  - `hot` — by computed engagement score (decays over time)
+
+  The whole collection is sorted before it is paginated. Ties in `top` and `hot` are broken by newest entity first.
+</ParamField>
+
+<ParamField query="sortByReaction" type="string" default="upvote">
+  When `sortBy=top`, which reaction type to rank by. One of `upvote`, `downvote`, `like`, `love`, `wow`, `sad`, `angry`, `funny`. Only accepted with `sortBy=top`; sending it with any other sort returns `400 collection/invalid-query`.
 </ParamField>
 
 <ParamField query="sortDir" type='"asc" | "desc"' optional>
@@ -54,7 +64,7 @@ Returns a paginated list of entities saved in the specified collection. The coll
     <ResponseField name="page" type="number">Current page.</ResponseField>
     <ResponseField name="limit" type="number">Page size.</ResponseField>
     <ResponseField name="totalPages" type="number">Total number of pages.</ResponseField>
-    <ResponseField name="totalItems" type="number">Total count of saved entities.</ResponseField>
+    <ResponseField name="totalItems" type="number">Number of saved entities the list can return. Entities deleted, removed by moderation, or turned back into drafts after being saved are not counted.</ResponseField>
     <ResponseField name="hasMore" type="boolean">`true` if more pages exist.</ResponseField>
   </Expandable>
 </ResponseField>
@@ -62,6 +72,12 @@ Returns a paginated list of entities saved in the specified collection. The coll
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Query — 400">
+    Returned when a query parameter is invalid, including `sortByReaction` sent without `sortBy=top`.
+    ```json
+    { "error": "sortByReaction: sortByReaction is only supported with sortBy=top", "code": "collection/invalid-query" }
+    ```
+  </Accordion>
   <Accordion title="Collection Not Found — 404">
     ```json
     { "error": "Collection not found", "code": "collection/not-found" }

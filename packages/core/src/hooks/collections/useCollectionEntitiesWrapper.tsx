@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
+import { SortByReaction } from "../../interfaces/EntityListSortByOptions";
 import { useLazyFetchCollectionEntitiesQuery } from "../../store/api/collectionsApi";
 import { handleError } from "../../utils/handleError";
 import useProject from "../projects/useProject";
@@ -16,6 +17,7 @@ export interface UseCollectionEntitiesWrapperProps {
   limit?: number;
   include?: EntityIncludeParam;
   defaultSortBy?: "new" | "top" | "hot" | "added";
+  defaultSortByReaction?: SortByReaction;
   defaultSortDir?: "asc" | "desc";
 }
 
@@ -24,8 +26,10 @@ export interface UseCollectionEntitiesWrapperValues {
   loading: boolean;
   hasMore: boolean;
   sortBy: "new" | "top" | "hot" | "added";
+  sortByReaction: SortByReaction;
   sortDir: "asc" | "desc";
   setSortBy: (newSortBy: "new" | "top" | "hot" | "added") => void;
+  setSortByReaction: (newSortByReaction: SortByReaction) => void;
   setSortDir: (newSortDir: "asc" | "desc") => void;
   loadMore: () => void;
   refetch: () => void;
@@ -38,6 +42,7 @@ function useCollectionEntitiesWrapper(
     collectionId: passedCollectionId,
     limit = 20,
     defaultSortBy = "added",
+    defaultSortByReaction = "upvote",
     defaultSortDir = "desc",
     include,
   } = props;
@@ -64,6 +69,8 @@ function useCollectionEntitiesWrapper(
   const [hasMoreState, setHasMoreState] = useState(true);
 
   const [sortBy, setSortBy] = useState<"new" | "top" | "hot" | "added">(defaultSortBy);
+  // Only sent when sortBy is "top" (see collectionsApi).
+  const [sortByReaction, setSortByReaction] = useState<SortByReaction>(defaultSortByReaction);
   const [sortDir, setSortDir] = useState<"asc" | "desc">(defaultSortDir);
   const [page, setPage] = useState(1);
 
@@ -87,6 +94,7 @@ function useCollectionEntitiesWrapper(
         page: 1,
         limit,
         sortBy,
+        sortByReaction,
         sortDir,
         include,
       }).unwrap();
@@ -110,6 +118,7 @@ function useCollectionEntitiesWrapper(
     effectiveCollectionId,
     limit,
     sortBy,
+    sortByReaction,
     sortDir,
     includeString,
   ]);
@@ -139,6 +148,7 @@ function useCollectionEntitiesWrapper(
           page,
           limit,
           sortBy,
+          sortByReaction,
           sortDir,
           include,
         }).unwrap();
@@ -168,6 +178,7 @@ function useCollectionEntitiesWrapper(
     effectiveCollectionId,
     limit,
     sortBy,
+    sortByReaction,
     sortDir,
     includeString,
   ]);
@@ -177,8 +188,10 @@ function useCollectionEntitiesWrapper(
     loading: loadingState,
     hasMore: hasMoreState,
     sortBy,
+    sortByReaction,
     sortDir,
     setSortBy,
+    setSortByReaction,
     setSortDir,
     loadMore,
     refetch: resetEntities,

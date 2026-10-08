@@ -31,7 +31,7 @@ Blocking is **not a moderator action** — it is exposed to your app's end users
 
 ### What a block does
 
-When user A blocks user B, the effects are **mutual** (both directions) unless noted, and the block is **silent** — B is never notified and can never tell they've been blocked (see [Non-disclosure](#non-disclosure) below).
+When user A blocks user B, the effects are **mutual** (both directions) unless noted, and the block is **silent** — B is never notified and can never tell they've been blocked (see [Non-disclosure](#non-disclosure) below). Comments follow one principle throughout: **B can't add to or change anything in A's space, while A decides what A sees**.
 
 | Surface | Effect of a block |
 |---------|-------------------|
@@ -39,18 +39,25 @@ When user A blocks user B, the effects are **mutual** (both directions) unless n
 | **Connections** | Any existing connection is removed and any pending request in either direction is cancelled. Neither can send a new request to the other. |
 | **Direct messages (1:1)** | Neither can start a new 1:1 conversation with the other. An existing 1:1 is frozen — history is retained and remains readable, but no new messages, edits, reactions, or deletes go through in either direction. |
 | **Group / space conversations** | Untouched. Both remain members of any shared group/space conversation and continue to see each other's messages there. |
-| **Content interaction** | Neither can comment on, reply to, quote, or react to the other's posts or comments. |
-| **Content lists** | Posts and comments authored by a block-edged user are hidden from the other's feeds and threads by default. An app may opt in to re-show **only** content the viewer themselves blocked (see [content-list opt-in](#content-list-opt-in)). |
-| **Mentions** | Neither can mention the other; a mention does not notify or resolve to the blocked user. Pre-existing mentions are left in place but stop notifying. |
+| **Commenting and comment reactions (asymmetric)** | B can't comment on A's entities, reply to A's comments, quote A, react to A's comments, or react to any comment on A's entities — these fail as "not found". B also can't edit their own earlier comment on A's entity or under A's comment; deleting it, and removing their own reaction, still work. A — the blocker — can still comment on B's entities and reply to, quote and react to B's comments; it's A's own choice, and B isn't notified. |
+| **Entity reactions and reputation grants** | Neither can react to the other's entities or grant reputation on the other's comments. |
+| **Entities** | Entities authored by a block-edged user are hidden from the other's entity lists by default (see [content-list opt-in](#content-list-opt-in)). |
+| **Comment threads** | Threads keep everyone's comments in place so other people's replies aren't lost. For A, B's comments come back in full, marked `isAuthorBlocked: true` — your app decides whether to collapse, offer "show anyway", or hide them. For B, A's comments are neutral placeholders marked `isUnavailable: true`, with no author or content (see [Comment → Blocked authors](/v8/data-models/comment#blocked-authors)). |
+| **A's entities and their threads** | B can't see A's entities, their threads, or any comment on them, by any route: thread fetches return an empty page and single-comment fetches return "not found". The one exception is B's **own** comments there — B still finds them in their comment history and can open and delete them, with A's entity and parent comment blanked; they are read-and-delete only. |
+| **Comment history** | A user's comment history leaves out comments by block-edged users by default (see [content-list opt-in](#content-list-opt-in)). |
+| **Search and Ask** | Content by a block-edged user, and comments on an entity whose author blocked the viewer, are left out of search results and Ask answers. |
+| **Mentions** | A mention across a block is still saved, but it doesn't notify the other user. Pre-existing mentions are left in place and stop notifying. |
 | **Notifications** | No notifications flow between the two users in either direction, for any reason. |
 | **Discovery** | Each user is excluded from the other's user suggestions, search results, interest matches, and follower/following/connection lists (and their counts). |
-| **Profile (asymmetric)** | The **blocked** user can no longer view the **blocker's** profile — it presents as not found. The blocker retains access to the blocked user's profile and manages the block from their block list. This is the one asymmetric surface, so the blocker always keeps a way back to unblock. |
+| **Profile (asymmetric)** | The **blocked** user can no longer view the **blocker's** profile — it presents as not found. The blocker retains access to the blocked user's profile and manages the block from their block list. This way the blocker always keeps a way back to unblock. |
 
 Unblocking lifts the barrier immediately but **restores nothing** — removed follows and connections stay gone and must be re-established from scratch; a frozen 1:1 conversation simply becomes usable again.
 
 ### Content-list opt-in
 
-Post and comment list endpoints (and their SDK equivalents) accept a `blockedFilter` parameter. It defaults to `"exclude"` (hide block-edged authors). Setting it to `"include-outbound-blocked"` re-includes content authored **only** by users the viewer themselves blocked — their own "view anyway" affordance. It can **never** surface content from users who blocked the viewer, and interaction remains blocked regardless of whether the content is shown. See [Fetch Many Entities](/v8/api-reference/entities/fetch-many-entities) and [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments).
+Entity lists and a user's comment history (and their SDK equivalents) accept a `blockedFilter` parameter. It defaults to `"exclude"` (hide block-edged authors). Setting it to `"include-outbound-blocked"` re-includes content authored **only** by users the viewer themselves blocked — their own "view anyway" affordance. It can **never** surface content from users who blocked the viewer. See [Fetch Many Entities](/v8/api-reference/entities/fetch-many-entities) and [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id).
+
+Comment threads don't take `blockedFilter`: they always keep comments in place, marked with `isAuthorBlocked` or shown as `isUnavailable` placeholders, so your app chooses how to render them. See [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments#blocked-authors).
 
 ### Non-disclosure
 

@@ -26,6 +26,10 @@ Both fields are individually optional, but **at least one must be provided**.
   Arbitrary JSON metadata, up to 1 MB. **Replaces** the stored metadata wholesale rather than merging into it.
 </ParamField>
 
+## Blocks
+
+Editing changes content in someone else's space, so when the `moderation` bundle is installed, editing is refused with `404 comment/not-found` when the author of the comment's entity, or the author of the comment it replies to, has blocked the comment's author. Deleting the comment is still allowed. Requests made with a master key aren't subject to this check.
+
 ## Response
 
 Returns the updated [Comment](/v8/data-models/comment) object.
@@ -41,6 +45,8 @@ Returns the updated [Comment](/v8/data-models/comment) object.
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    Returned when the comment doesn't exist, or when a block refuses the edit (see [Blocks](#blocks)).
+
     ```json
     { "error": "Comment not found", "code": "comment/not-found" }
     ```

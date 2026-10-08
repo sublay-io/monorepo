@@ -218,6 +218,75 @@ const { available } = await sublay.users.checkUsernameAvailability({
 
 ---
 
+### fetchCommentsByUserId
+
+Returns a user's comments — top-level comments and replies alike, across entities — cursor-paginated. See [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id).
+
+<Note>
+  Service-key reads have no signed-in viewer, so this is the anonymous view of the user's history: deleted and moderator-removed comments are left out, no block rule applies, `isAuthorBlocked` and `isUnavailable` are always `false`, and `userReaction` isn't populated.
+</Note>
+
+```typescript
+const { data, pagination } = await sublay.users.fetchCommentsByUserId({
+  userId: "usr_abc123",
+  limit: 20,
+  include: ["entity"],
+});
+
+const next = await sublay.users.fetchCommentsByUserId({
+  userId: "usr_abc123",
+  limit: 20,
+  include: ["entity"],
+  cursor: pagination.nextCursor!,
+});
+```
+
+<ParamField body="userId" type="string" required>
+  The Sublay user ID whose comments to fetch.
+</ParamField>
+
+<ParamField body="entityId" type="string">
+  Only comments on this entity.
+</ParamField>
+
+<ParamField body="sourceId" type="string">
+  Only comments on entities with this `sourceId`.
+</ParamField>
+
+<ParamField body="blockedFilter" type='"exclude" | "include-outbound-blocked"'>
+  Accepted for parity with the REST endpoint, but has no effect here: a service-key request has no viewer to apply blocks for.
+</ParamField>
+
+<ParamField body="limit" type="number">
+  Comments per page. Server default `10`, max `100`.
+</ParamField>
+
+<ParamField body="cursor" type="string">
+  `pagination.nextCursor` from the previous response. Omit for the first page. Send the same sort as the request that returned it.
+</ParamField>
+
+<ParamField body="sortBy" type='"createdAt" | "top" | "controversial"'>
+  Server default `"createdAt"`. `"top"` ranks by the raw count of `sortByReaction`.
+</ParamField>
+
+<ParamField body="sortDir" type='"asc" | "desc"'>
+  Applies to every sort. Server default `"desc"`.
+</ParamField>
+
+<ParamField body="sortByReaction" type="ReactionType">
+  With `sortBy: "top"` only. Server default `"upvote"`.
+</ParamField>
+
+<ParamField body="include" type="CommentIncludeParam">
+  Related data to populate: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
+</ParamField>
+
+<SpaceReputationParams variant="context" field="body" />
+
+**Returns** — `Promise<CursorPaginatedResponse<Comment>>` — `{ data, pagination: { nextCursor, hasMore } }`
+
+---
+
 ### fetchFollowersByUserId
 
 Returns a paginated list of users following the specified user.

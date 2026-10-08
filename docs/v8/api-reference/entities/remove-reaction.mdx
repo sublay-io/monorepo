@@ -18,6 +18,10 @@ Removes the authenticated user's reaction from an entity. The entity's `reaction
   The UUID of the entity to remove the reaction from.
 </ParamField>
 
+## Blocks
+
+When the `moderation` bundle is installed and the entity's author has blocked the user, the request returns `404 entity/not-found` — identical to a missing entity — and nothing changes. The user's own block on the author doesn't stop them removing their reaction.
+
 ## Response
 
 Returns the updated [Entity](/v8/data-models/entity) object with the new `reactionCounts`.
@@ -26,6 +30,8 @@ Returns the updated [Entity](/v8/data-models/entity) object with the new `reacti
 
 <AccordionGroup>
   <Accordion title="Not Found — 404">
+    Returned when the entity doesn't exist, or its author has blocked the user (see [Blocks](#blocks)).
+
     ```json
     { "error": "Entity not found.", "code": "entity/not-found" }
     ```

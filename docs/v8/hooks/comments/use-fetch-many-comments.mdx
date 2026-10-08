@@ -1,6 +1,6 @@
 ---
 title: "Fetch many comments"
-description: "Fetch a paginated list of comments with filters"
+description: "Fetch one level of a comment thread, cursor-paginated, with optional nested replies"
 icon: "plug"
 ---
 
@@ -8,74 +8,125 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 ## Overview
 
-`useFetchManyComments` returns a function that fetches a paginated list of comments. This is the underlying fetch function used by `useEntityComments` and `useReplies`. Use it directly when you need a custom comment list outside of those hooks.
+`useFetchManyComments` returns a function that fetches one level of a comment thread ([`GET /comments`](/v8/api-reference/comments/fetch-many-comments)): an entity's top-level comments (`entityId`) or a comment's direct replies (`parentId`). It's the fetch function behind `useEntityComments` and `useReplies`. Use it directly when you need full control over a thread request.
+
+For a user's comments across entities, use [`useFetchCommentsByUserId`](/v8/hooks/comments/use-fetch-comments-by-user-id).
 
 ## Usage Example
 
 ```tsx
-import { useFetchManyComments } from "@sublay/react-js";
-import { useState, useEffect } from "react";
+import { useFetchManyComments, type Comment } from "@sublay/react-js";
+import { useEffect, useState } from "react";
 
-function UserComments({ userId }: { userId: string }) {
+function TopComments({ entityId }: { entityId: string }) {
   const fetchComments = useFetchManyComments();
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchComments({ userId, page: 1, limit: 10 }).then((res) =>
-      setComments(res.data)
-    );
-  }, [userId]);
+    fetchComments({
+      entityId,
+      sortBy: "top",
+      limit: 10,
+      include: "user",
+      replyDepth: 1, // also bring each comment's first replies
+      replyLimit: 2,
+    }).then((res) => {
+      setComments(res.data);
+      setCursor(res.pagination.nextCursor);
+    });
+  }, [entityId]);
+
+  const loadMore = async () => {
+    if (!cursor) return;
+    const res = await fetchComments({ entityId, sortBy: "top", limit: 10, cursor, include: "user" });
+    setComments((prev) => [...prev, ...res.data]);
+    setCursor(res.pagination.nextCursor);
+  };
 
   return (
-    <ul>
-      {comments.map((c) => <li key={c.id}>{c.content}</li>)}
-    </ul>
+    <>
+      <ul>{comments.map((c) => <li key={c.id}>{c.content}</li>)}</ul>
+      {cursor && <button onClick={loadMore}>Load more</button>}
+    </>
   );
 }
 ```
 
 ## Parameters
 
-<ParamField path="page" type="number" required>
-  Page number (1-indexed). Must be greater than 0.
-</ParamField>
+One of `entityId` or `parentId` is required.
 
 <ParamField path="entityId" type="string">
-  Filter to comments on a specific entity.
-</ParamField>
-
-<ParamField path="userId" type="string">
-  Filter to comments by a specific user.
+  Fetch this entity's top-level comments.
 </ParamField>
 
 <ParamField path="parentId" type="string">
-  Filter to replies of a specific parent comment.
-</ParamField>
-
-<ParamField path="sortBy" type="string">
-  Sort order: `"createdAt"` or `"top"`. `"new"`/`"old"` are deprecated aliases for `"createdAt"` (removed in v8). A `sortDir` (`"asc"`/`"desc"`) controls `"createdAt"` direction.
+  Fetch this comment's direct replies.
 </ParamField>
 
 <ParamField path="limit" type="number">
-  Results per page. Must be greater than 0.
+  How many comments at the level being fetched. Server default `10`, max `100`.
 </ParamField>
 
-<ParamField path="sourceId" type="string">
-  Filter to comments within a specific source.
+<ParamField path="cursor" type="string | null">
+  `pagination.nextCursor` from the previous response. Omit for the first page. Send the same sort as the request that returned it.
 </ParamField>
 
-<ParamField path="include" type="string | string[]">
-  Populate related data. Accepted values: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`. On a comment feed, `"parent"` is accepted but not resolved — `parentComment` is populated only by the two single-comment reads.
+<ParamField path="sortBy" type="CommentsSortByOptions">
+  `"createdAt"`, `"top"` (raw count of `sortByReaction`) or `"controversial"`. Server default `"createdAt"`. `"new"` / `"old"` are deprecated aliases for `"createdAt"`.
+</ParamField>
+
+<ParamField path="sortDir" type='"asc" | "desc"'>
+  Applies to every sort. Server default `"desc"`.
+</ParamField>
+
+<ParamField path="sortByReaction" type="ReactionType">
+  With `sortBy: "top"` only: the reaction to rank by. Server default `"upvote"`.
+</ParamField>
+
+<ParamField path="replyDepth" type="number">
+  Levels of replies to nest under each returned comment (`0`–`5`). Server default `0`.
+</ParamField>
+
+<ParamField path="replyLimit" type="number">
+  Replies per comment in the nested levels (at least `1`). Server default `3`.
+</ParamField>
+
+<ParamField path="replySortBy" type="CommentReplySortByOptions">
+  Sort for the nested levels: `"createdAt"`, `"top"` or `"controversial"`. Defaults to `sortBy`.
+</ParamField>
+
+<ParamField path="replySortDir" type='"asc" | "desc"'>
+  Sort direction for the nested levels. Defaults to `sortDir`.
+</ParamField>
+
+<ParamField path="replySortByReaction" type="ReactionType">
+  The reaction the nested levels rank by, when their sort is `"top"`.
+</ParamField>
+
+<ParamField path="include" type='"user" | "grants" | ("user" | "grants")[]'>
+  Related data to populate, at every level.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="path" />
 
+A request can return at most 500 comments, nested replies included — see [Request size limit](/v8/api-reference/comments/fetch-many-comments#request-size-limit).
+
 ## Returns
 
+A `Promise<CursorPaginatedResponse<Comment>>`:
+
 <ResponseField name="data" type="Comment[]">
-  Comments for the current page. When `spaceReputation` is requested, each embedded author carries an added `spaceReputation` number. See [Reputation](/v8/data-models/reputation).
+  The comments at the requested level. With `replyDepth` above `0`, each carries nested `replies` (`{ data, pagination }`). When `spaceReputation` is requested, each embedded author carries an added `spaceReputation` number. See [Reputation](/v8/data-models/reputation).
+</ResponseField>
+
+<ResponseField name="pagination.nextCursor" type="string | null">
+  Pass as `cursor` to get the next page. `null` when there's nothing more.
 </ResponseField>
 
 <ResponseField name="pagination.hasMore" type="boolean">
-  Whether there are more pages to load.
+  Whether more comments exist after this page.
 </ResponseField>
+
+See [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments) for placeholders, block flags and how to continue nested replies.

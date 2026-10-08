@@ -145,56 +145,84 @@ await sublay.comments.deleteComment({ commentId: "cmt_abc123" });
 
 ### fetchManyComments
 
-Fetches a paginated list of comments, filterable by entity, user, or parent.
+Fetches one level of a comment thread, cursor-paginated: an entity's top-level comments (`entityId`) or a comment's direct replies (`parentId`). One of the two is required. Optionally nests a few levels of replies inside each returned comment. See [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments) for the full contract — placeholders, block flags and the request size limit.
 
 ```typescript
 const { data, pagination } = await sublay.comments.fetchManyComments({
   entityId: "ent_xyz789",
   sortBy: "top",
-  page: 1,
   limit: 20,
+  include: "user",
+  replyDepth: 2, // also bring 2 levels of replies…
+  replyLimit: 3, // …up to 3 per comment
+});
+
+// Next page
+const next = await sublay.comments.fetchManyComments({
+  entityId: "ent_xyz789",
+  sortBy: "top",
+  limit: 20,
+  cursor: pagination.nextCursor!,
 });
 ```
 
-<ParamField body="entityId" type="string">
-  Filter to comments on a specific entity.
-</ParamField>
+For a user's comments across entities, use [`users.fetchCommentsByUserId`](/v8/js-sdk/users#fetchcommentsbyuserid).
 
-<ParamField body="userId" type="string">
-  Filter to comments authored by a given user.
+<ParamField body="entityId" type="string">
+  Fetch this entity's top-level comments. Required unless `parentId` is passed.
 </ParamField>
 
 <ParamField body="parentId" type="string">
-  Filter to replies of a specific parent comment.
-</ParamField>
-
-<ParamField body="page" type="number">
-  Page number (1-indexed).
+  Fetch this comment's direct replies. Required unless `entityId` is passed.
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page.
+  How many comments at the level being fetched. Server default `10`, max `100`.
 </ParamField>
 
-<ParamField body="sortBy" type="string">
-  Sort order: `"createdAt"` (newest first; honors `sortDir`), `"top"`, or `"controversial"`. `"new"` and `"old"` are deprecated aliases for `"createdAt"` (removed in v8) — the server still accepts them but responds with a deprecation header.
+<ParamField body="cursor" type="string">
+  `pagination.nextCursor` from the previous response. Omit for the first page. Send the same `sortBy`, `sortDir` and `sortByReaction` as the request that returned it.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="sortBy" type='"createdAt" | "top" | "controversial"'>
+  Sort for the level being fetched. `"top"` ranks by the raw count of `sortByReaction`. Server default `"createdAt"`. `"new"` / `"old"` are deprecated aliases for `"createdAt"` — the server still accepts them but responds with a deprecation header.
 </ParamField>
 
-<ParamField body="sourceId" type="string">
-  Filter by source ID.
+<ParamField body="sortDir" type='"asc" | "desc"'>
+  Applies to every sort. Server default `"desc"`.
 </ParamField>
 
-<ParamField body="blockedFilter" type='"exclude" | "include-outbound-blocked"'>
-  How to treat comments authored by users the viewer is [block-edged](/v8/sdk/moderation/overview#blocking) with. `"exclude"` (default) hides them; `"include-outbound-blocked"` re-includes only the viewer's own outbound-blocked authors — never content from users who blocked the viewer. No effect without the `moderation` bundle.
+<ParamField body="sortByReaction" type="ReactionType">
+  With `sortBy: "top"` only: the reaction to rank by. Server default `"upvote"`.
+</ParamField>
+
+<ParamField body="replyDepth" type="number">
+  Levels of replies to nest under each returned comment (`0`–`5`). Server default `0`.
+</ParamField>
+
+<ParamField body="replyLimit" type="number">
+  Replies per comment in the nested levels (at least `1`). Server default `3`.
+</ParamField>
+
+<ParamField body="replySortBy" type='"createdAt" | "top" | "controversial"'>
+  Sort for the nested levels. Defaults to `sortBy`.
+</ParamField>
+
+<ParamField body="replySortDir" type='"asc" | "desc"'>
+  Sort direction for the nested levels. Defaults to `sortDir`.
+</ParamField>
+
+<ParamField body="replySortByReaction" type="ReactionType">
+  The reaction the nested levels rank by, when their sort is `"top"`.
+</ParamField>
+
+<ParamField body="include" type='"user" | "grants" | ("user" | "grants")[]'>
+  Related data to populate, at every level.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />
 
-**Returns** — `Promise<PaginatedResponse<Comment>>`
+**Returns** — `Promise<CursorPaginatedResponse<Comment>>` — `{ data, pagination: { nextCursor, hasMore } }`. With `replyDepth` above `0`, each comment carries nested `replies` in the same shape.
 
 ---
 

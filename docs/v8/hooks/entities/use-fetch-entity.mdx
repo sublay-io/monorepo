@@ -23,7 +23,7 @@ function EntityLoader({ entityId }: { entityId: string }) {
   const fetchEntity = useFetchEntity();
 
   const load = async () => {
-    const entity = await fetchEntity({ entityId, include: ["user", "topComment"] });
+    const entity = await fetchEntity({ entityId, include: ["user", "topComments"], topCommentsLimit: 3 });
     console.log(entity);
   };
 
@@ -37,8 +37,16 @@ function EntityLoader({ entityId }: { entityId: string }) {
   The Sublay entity ID to fetch.
 </ParamField>
 
-<ParamField path="include" type="string | string[]">
-  Optional. Populate related fields. Accepted values: `"user"`, `"space"`, `"topComment"`, `"saved"`, `"files"`, `"grants"`.
+<ParamField path="include" type="string | EntityInclude[]">
+  Optional. Populate related fields. Accepted values: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`.
+</ParamField>
+
+<ParamField path="topCommentsLimit" type="number">
+  With `"topComments"` included: how many top comments per entity. Server default `1`, maximum `5`. Sending it without `"topComments"` in `include` is rejected (`400`).
+</ParamField>
+
+<ParamField path="topCommentsSortByReaction" type="ReactionType">
+  With `"topComments"` included: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Sending it without `"topComments"` in `include` is rejected (`400`).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="path" />

@@ -17,6 +17,8 @@ Sublay's Search & AI features use vector embeddings to power natural language se
 
 Search returns the most semantically similar records to a given query. Results include a `similarity` score alongside the matched record.
 
+Search and Ask only use content the signed-in user can see: content by users they are block-edged with (in either direction), and comments on an entity whose author has blocked them, are left out of results, sources and answers.
+
 ## AI Q&A
 
 `useAskContent` lets users ask natural language questions and receive synthesized answers generated from your project's content. The response streams token by token via SSE (Server-Sent Events) and includes source citations.

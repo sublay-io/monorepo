@@ -118,8 +118,16 @@ function EntityFeed() {
   Filter by **effective** NSFW status (`entity.nsfw OR its space's nsfwEffective`). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW entities; `"only"` returns only effective-NSFW entities. On projects without the spaces bundle it applies against the entity's own `nsfw` flag alone. See [Entity NSFW flagging](/v8/data-models/entity#nsfw-flagging).
 </ParamField>
 
-<ParamField path="include" type="string | string[]">
-  Populate related fields. Accepted values: `"user"`, `"space"`, `"topComment"`, `"saved"`, `"files"`, `"grants"`.
+<ParamField path="include" type="string | EntityInclude[]">
+  Populate related fields. Accepted values: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`.
+</ParamField>
+
+<ParamField path="topCommentsLimit" type="number">
+  With `"topComments"` included: how many top comments per entity. Server default `1`, maximum `5`. Sending it without `"topComments"` in `include` is rejected (`400`).
+</ParamField>
+
+<ParamField path="topCommentsSortByReaction" type="ReactionType">
+  With `"topComments"` included: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Sending it without `"topComments"` in `include` is rejected (`400`).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="path" />

@@ -32,13 +32,15 @@ function ArticlePage({ articleId }: { articleId: string }) {
 
 ## What the Provider Manages
 
-- **Loading comments** — fetches the first page on mount and provides `loadMore` for pagination
-- **Comment tree** — maintains a `entityCommentsTree` with comments and their replies organized as a map
-- **New comments** — tracks freshly submitted comments separately from paginated ones
-- **Highlighted comment** — fetches and highlights a specific comment (e.g., from a deep link)
+- **Loading comments** — fetches the first page of top-level comments on mount and provides `loadMore` / `hasMore` for the next ones (cursor-paginated, so new comments never shift what you get)
+- **Nested replies** — optionally brings a few levels of replies with every page (`replyDepth`, `replyLimit`); [`useReplies`](/v8/hooks/comments/use-replies) loads more for any comment, continuing from what's already loaded
+- **One copy of each comment** — every loaded comment is kept once, so an edit or delete shows up everywhere it's rendered; read any loaded comment with `getComment(id)`
+- **New comments** — tracks freshly submitted comments separately from fetched ones, so they don't jump around
+- **Highlighted comment** — fetches and shows a specific comment (e.g., from a deep link)
 - **Reply state** — tracks which comment is being replied to and shows/hides the reply banner
 - **CRUD actions** — `createComment`, `updateComment`, `deleteComment` with optimistic updates
-- **Sort** — `sortBy`/`setSortBy` for switching between `"createdAt"`, `"top"`, and `"controversial"` (`"new"`/`"old"` are deprecated aliases for `"createdAt"`), plus `sortDir`/`setSortDir` (`"asc"`/`"desc"`) for the `"createdAt"` direction
+- **Sort** — `sortBy`/`setSortBy` for switching between `"createdAt"`, `"top"` (raw count of `sortByReaction`, default upvotes) and `"controversial"`, plus `sortDir`/`setSortDir` (`"asc"`/`"desc"`), which applies to every sort
+- **Errors** — a failed load lands in `error`; `loadMore` never throws
 
 ## In This Section
 
@@ -57,7 +59,7 @@ If you'd rather not wire up your own comment UI, Sublay provides two production-
     A classic threaded comment section with nested replies, reactions, and sorting. Ideal for blogs, docs, and long-form content.
   </Card>
   <Card title="Social Comments" href="/v8/components/components/social/overview">
-    A flat social-style comment feed with inline replies and a familiar social media feel. Great for feeds, posts, and community content.
+    A flat social-style comment feed with inline replies and a familiar social media feel. Great for feeds and short-form content.
   </Card>
 </CardGroup>
 

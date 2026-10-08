@@ -1,15 +1,15 @@
 ---
 title: "Use entity comments"
-description: "Manage a paginated, sorted comment tree for an entity"
+description: "Load and page through an entity's top-level comments, with optional nested replies"
 icon: "cube"
 ---
 
 ## Overview
 
-`useEntityComments` is a lower-level hook that fetches and manages a paginated comment tree for a given entity ID. It is used internally by `CommentSectionProvider`. Use it directly when you need comment tree management without the full provider.
+`useEntityComments` is a lower-level hook that loads an entity's top-level comments, cursor-paginated, with optional nested replies. It is used internally by `CommentSectionProvider`. Use it directly when you need the comment list without the rest of the provider (reply state, comment creation, highlighted comments).
 
 <Note>
-  For most use cases, use `CommentSectionProvider` + `useCommentSection` instead. See [Comment Section](/v8/sdk/comments/comment-section).
+  For most use cases, use `CommentSectionProvider` + `useCommentSection` instead. See [Comment Section](/v8/sdk/comments/comment-section). Replies loaded through [`useReplies`](/v8/hooks/comments/use-replies) require the provider.
 </Note>
 
 ## Usage Example
@@ -17,13 +17,22 @@ icon: "cube"
 ```tsx
 import { useEntityComments } from "@sublay/react-js";
 
-function CommentTree({ entityId }: { entityId: string }) {
-  const { comments, loading, hasMore, loadMore } = useEntityComments({ entityId });
+function CommentList({ entityId }: { entityId: string }) {
+  const { comments, loading, error, hasMore, loadMore } = useEntityComments({
+    entityId,
+    defaultSortBy: "top",
+  });
+
+  if (error) return <p>Couldn't load comments.</p>;
 
   return (
     <>
       {comments.map((c) => <div key={c.id}>{c.content}</div>)}
-      {hasMore && <button onClick={loadMore}>Load more</button>}
+      {hasMore && (
+        <button onClick={() => loadMore()} disabled={loading}>
+          Load more
+        </button>
+      )}
     </>
   );
 }
@@ -32,75 +41,101 @@ function CommentTree({ entityId }: { entityId: string }) {
 ## Props
 
 <ParamField path="entityId" type="string | null | undefined" required>
-  The entity ID to fetch comments for.
+  The entity whose comments to load. Nothing is fetched until it's set.
 </ParamField>
 
 <ParamField path="limit" type="number">
-  Comments per page. Default: `10`.
+  Top-level comments per page. Default: `10`.
 </ParamField>
 
-<ParamField path="defaultSortBy" type="string">
-  Initial sort: `"createdAt"`, `"top"`, or `"controversial"`. Default: `"createdAt"`. `"new"`/`"old"` are deprecated aliases for `"createdAt"` (removed in v8).
+<ParamField path="defaultSortBy" type="CommentsSortByOptions">
+  Initial sort: `"createdAt"`, `"top"` or `"controversial"`. Default: `"createdAt"`. Changeable at runtime with `setSortBy`. `"new"` / `"old"` are deprecated aliases for `"createdAt"`.
 </ParamField>
 
 <ParamField path="defaultSortDir" type='"asc" | "desc"'>
-  Initial sort direction for `sortBy: "createdAt"`. Default: `"desc"` (newest first).
+  Initial sort direction; applies to every sort. Default: `"desc"`. Changeable with `setSortDir`.
 </ParamField>
 
-<ParamField path="include" type="string | string[]">
-  Populate related data. Accepted values: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`. On a comment feed, `"parent"` is accepted but not resolved — `parentComment` is populated only by the two single-comment reads.
+<ParamField path="defaultSortByReaction" type="ReactionType">
+  The reaction `"top"` ranks by (raw count). Server default: `"upvote"`. Changeable with `setSortByReaction`.
 </ParamField>
+
+<ParamField path="replyDepth" type="number">
+  Levels of replies to nest under every top-level comment, on every page (`0`–`5`). Default: `0` — replies load on demand through `useReplies`.
+</ParamField>
+
+<ParamField path="replyLimit" type="number">
+  Replies per comment in the nested levels. Default: `3`.
+</ParamField>
+
+<ParamField path="replySortBy" type="CommentReplySortByOptions">
+  Sort for replies: `"createdAt"`, `"top"` or `"controversial"`. Defaults to the current sort. Not changeable at runtime.
+</ParamField>
+
+<ParamField path="replySortDir" type='"asc" | "desc"'>
+  Sort direction for replies. Defaults to the current sort direction. Not changeable at runtime.
+</ParamField>
+
+<ParamField path="replySortByReaction" type="ReactionType">
+  The reaction replies rank by when their sort is `"top"`. Defaults to the current `sortByReaction` when the section is also sorted by `"top"`, else `"upvote"`. Not changeable at runtime.
+</ParamField>
+
+<ParamField path="include" type='"user" | "grants" | ("user" | "grants")[]'>
+  Related data to populate, at every level. Default: `"user"`.
+</ParamField>
+
+A page can return at most 500 comments, nested replies included (see [Request size limit](/v8/api-reference/comments/fetch-many-comments#request-size-limit)). The hook sends `limit`, `replyDepth` and `replyLimit` as given; a combination over the limit fails with an error in `error`, and a development build logs which values to lower.
 
 ## Return Values
 
-<ResponseField name="entityCommentsTree" type="EntityCommentsTree">
-  Flat map of all comments and their replies, keyed by comment ID.
-</ResponseField>
-
 <ResponseField name="comments" type="Comment[]">
-  Paginated root-level comments (not newly added ones).
+  Loaded top-level comments, in sort order (not including ones added this session).
 </ResponseField>
 
 <ResponseField name="newComments" type="Comment[]">
-  Newly added root comments from this session, sorted newest-first.
+  Top-level comments added this session, newest first.
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
-  `true` during fetches.
+  `true` while a page is loading.
+</ResponseField>
+
+<ResponseField name="error" type="Error | null">
+  The last failure loading the list. Cleared by the next successful load.
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">
-  `true` when more pages are available.
+  `true` when more top-level comments are available.
+</ResponseField>
+
+<ResponseField name="loadMore" type="() => Promise<void>">
+  Loads the next page of top-level comments. Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
+</ResponseField>
+
+<ResponseField name="getComment" type="(commentId: string) => Comment | undefined">
+  A loaded comment by ID — top-level or a reply — without its nested `replies`.
 </ResponseField>
 
 <ResponseField name="sortBy" type="CommentsSortByOptions | null">
-  Current sort order.
+  Current sort.
 </ResponseField>
 
 <ResponseField name="setSortBy" type="(newSortBy: CommentsSortByOptions) => void">
-  Changes sort order and resets to page 1.
+  Changes the sort and reloads from the first page.
 </ResponseField>
 
 <ResponseField name="sortDir" type='"asc" | "desc"'>
-  Current sort direction for `sortBy: "createdAt"`.
+  Current sort direction.
 </ResponseField>
 
 <ResponseField name="setSortDir" type='(newSortDir: "asc" | "desc") => void'>
-  Changes sort direction and resets to page 1.
+  Changes the sort direction and reloads from the first page.
 </ResponseField>
 
-<ResponseField name="loadMore" type="() => void">
-  Loads the next page.
+<ResponseField name="sortByReaction" type="ReactionType | undefined">
+  The reaction `"top"` ranks by. Only sent with `sortBy: "top"`.
 </ResponseField>
 
-<ResponseField name="addCommentsToTree" type="(comments?: Comment[], newlyAdded?: boolean) => void">
-  Inserts comments into the tree. Pass `newlyAdded: true` for freshly submitted comments.
-</ResponseField>
-
-<ResponseField name="removeCommentFromTree" type="({ commentId }) => void">
-  Removes a comment from the tree.
-</ResponseField>
-
-<ResponseField name="markCommentAsDeleted" type="({ commentId }) => void">
-  Marks a comment as deleted (Reddit-style placeholder) without removing it from the tree.
+<ResponseField name="setSortByReaction" type="(newReaction: ReactionType | undefined) => void">
+  Changes the ranking reaction and reloads from the first page.
 </ResponseField>

@@ -169,7 +169,7 @@ Triggered when a comment reaches a milestone count for a specific reaction type.
 | `commentContent` | `string \| null` | Comment content preview. |
 | `reactionType` | `string` | The reaction type that hit the milestone. |
 | `milestoneCount` | `number` | The milestone count reached. |
-| `lastThreeUsers` | `MilestoneUser[]` | The three most recent reactors. |
+| `lastThreeUsers` | `MilestoneUser[]` | Up to three of the most recent reactors, newest first. Reactors who are block-edged with the comment's author (in either direction) are skipped, so the list can hold fewer than three even when the count is higher. The milestone count itself includes every reaction. |
 
 ### `comment-reaction-milestone-total`
 
@@ -187,7 +187,7 @@ Triggered when a comment reaches a milestone for total reactions across all type
 | `commentContent` | `string \| null` | Comment content preview. |
 | `milestoneCount` | `number` | The total reaction milestone reached. |
 | `reactionCounts` | `Record<string, number>` | Breakdown of counts by reaction type. |
-| `lastThreeUsers` | `MilestoneUser[]` | The three most recent reactors. |
+| `lastThreeUsers` | `MilestoneUser[]` | Up to three of the most recent reactors, newest first. Reactors who are block-edged with the comment's author (in either direction) are skipped, so the list can hold fewer than three even when the count is higher. The milestone count itself includes every reaction. |
 
 ### `new-follow`
 

@@ -56,19 +56,51 @@ import { CommentSectionProvider } from "@sublay/react-js";
 </ParamField>
 
 <ParamField path="limit" type="number">
-  Comments per page. Default: `15`.
+  Top-level comments per page. Default: `15`.
 </ParamField>
 
 <ParamField path="defaultSortBy" type="string">
-  Initial sort order: `"top"` (default), `"createdAt"`, or `"controversial"`. `"new"`/`"old"` are deprecated aliases for `"createdAt"` (removed in v8).
+  Initial sort order: `"top"` (default), `"createdAt"`, or `"controversial"`. Changeable at runtime with `setSortBy`. `"new"`/`"old"` are deprecated aliases for `"createdAt"`.
 </ParamField>
 
 <ParamField path="defaultSortDir" type='"asc" | "desc"'>
-  Initial sort direction for `sortBy: "createdAt"`. Default: `"desc"` (newest first).
+  Initial sort direction; applies to every sort. Default: `"desc"`. Changeable with `setSortDir`.
 </ParamField>
 
+<ParamField path="defaultSortByReaction" type="ReactionType">
+  The reaction `"top"` ranks by — the raw count of that reaction. Server default: `"upvote"`. Changeable with `setSortByReaction`.
+</ParamField>
+
+<ParamField path="replyDepth" type="number">
+  Levels of replies to bring with every page of top-level comments (`0`–`5`). Default: `0` — replies load on demand through [`useReplies`](/v8/hooks/comments/use-replies). See [Nested replies](#nested-replies).
+</ParamField>
+
+<ParamField path="replyLimit" type="number">
+  Replies per comment in the nested levels. Default: `3`.
+</ParamField>
+
+<ParamField path="replySortBy" type='"createdAt" | "top" | "controversial"'>
+  Sort for replies — both the nested ones and those loaded through `useReplies`. Defaults to the current section sort.
+</ParamField>
+
+<ParamField path="replySortDir" type='"asc" | "desc"'>
+  Sort direction for replies. Defaults to the current section sort direction.
+</ParamField>
+
+<ParamField path="replySortByReaction" type="ReactionType">
+  The reaction replies rank by when their sort is `"top"`. Defaults to the section's `sortByReaction` when the section is also sorted by `"top"`, else `"upvote"`.
+</ParamField>
+
+<ParamField path="include" type='"user" | "grants" | ("user" | "grants")[]'>
+  Related data to populate on every comment, at every level. Default: `"user"`.
+</ParamField>
+
+<Note>
+  The `reply*` props are fixed for the provider's lifetime — changing one reloads the section like any other prop change. Only the section's own sort (`setSortBy`, `setSortDir`, `setSortByReaction`) changes at runtime.
+</Note>
+
 <ParamField path="highlightedCommentId" type="string">
-  If provided, fetches this comment and its parent and injects it into the tree. Useful for deep-linking to a specific comment.
+  If provided, fetches this comment (and its parent, for a reply) and adds it to the section. Useful for deep-linking to a specific comment. A deleted or removed comment is highlighted as its [placeholder](/v8/data-models/comment#placeholders). If the comment doesn't exist, or is on an entity whose author has blocked the user, `highlightedComment` stays `null` and the section loads normally.
 </ParamField>
 
 <ParamField path="callbacks" type="Record<string, function>">
@@ -81,6 +113,68 @@ import { CommentSectionProvider } from "@sublay/react-js";
 <ParamField path="mentionTriggers" type="{ user?: string; space?: string }">
   Override the trigger characters for mentions. Defaults: `{ user: "@", space: "#" }`.
 </ParamField>
+
+## Nested Replies
+
+By default a section loads top-level comments only, and each comment's replies load on demand. Set `replyDepth` to bring a few levels of replies with every page, so a threaded view renders its first screen with one request:
+
+```tsx
+import { CommentSectionProvider, useCommentSection, useReplies } from "@sublay/react-js";
+
+<CommentSectionProvider
+  entityId={entity.id}
+  defaultSortBy="top"
+  limit={10}      // top-level comments per page
+  replyDepth={2}  // also bring 2 levels of replies
+  replyLimit={3}  // up to 3 replies per comment in those levels
+>
+  <CommentList />
+</CommentSectionProvider>;
+
+function CommentList() {
+  const { comments, newComments, hasMore, loadMore } = useCommentSection();
+  return (
+    <>
+      {[...newComments, ...comments].map((c) => <CommentThread key={c.id} comment={c} />)}
+      {hasMore && <button onClick={() => loadMore()}>More comments</button>}
+    </>
+  );
+}
+
+function CommentThread({ comment }) {
+  const { replies, newReplies, hasMore, loadMore, loading } = useReplies({
+    commentId: comment.id,
+    limit: 10, // direct replies per "load more"
+  });
+
+  return (
+    <div>
+      <CommentBody comment={comment} />
+      {[...newReplies, ...replies].map((r) => <CommentThread key={r.id} comment={r} />)}
+      {hasMore && (
+        <button onClick={() => loadMore()} disabled={loading}>
+          {replies.length ? "Load more replies" : "View replies"}
+        </button>
+      )}
+    </div>
+  );
+}
+```
+
+The same `CommentThread` works without `replyDepth`: every comment then starts with no replies loaded, and the first click fetches them. `useReplies` continues from whatever is already loaded and nests on a comment's first load — see [`useReplies`](/v8/hooks/comments/use-replies) for the details.
+
+Each page can return at most 500 comments, nested replies included (`limit × (1 + replyLimit + … + replyLimit^replyDepth)`). The section sends its props as given; a combination over the limit lands in `error`, and a development build logs which values to lower.
+
+Show counts from `repliesCount` (for example "12 replies") and drive "load more" buttons from `hasMore`.
+
+### Blocked authors
+
+When the `moderation` bundle is installed, comments carry two flags you should render (see [Blocked authors](/v8/data-models/comment#blocked-authors)):
+
+- **`isUnavailable`** — show a neutral placeholder row with **no** reply or reaction controls (the server refuses both). Check it before deleted/removed markers.
+- **`isAuthorBlocked`** — the user blocked this author; the full comment is there. Collapse it with a "show anyway" option, or hide it — replying and reacting still work.
+
+When the entity's author has blocked the user, the entity itself is not found, so the section has nothing to load.
 
 ## Accessing State with `useCommentSection`
 
@@ -129,28 +223,32 @@ function CommentList() {
   Comments submitted in this session. Displayed separately from paginated results, sorted newest-first.
 </ResponseField>
 
-<ResponseField name="entityCommentsTree" type="EntityCommentsTree">
-  The full comment tree as a flat map keyed by comment ID. Used for building threaded reply UIs.
-</ResponseField>
-
 <ResponseField name="highlightedComment" type="{ comment: Comment; parentComment: Comment | null } | null">
   The highlighted comment (and its parent, if any) when `highlightedCommentId` is set.
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
-  `true` while the initial comment load is in progress.
+  `true` while a page of top-level comments is loading.
+</ResponseField>
+
+<ResponseField name="error" type="Error | null">
+  The last failure loading the comment list. Cleared by the next successful load. A missing highlighted comment doesn't set it.
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">
-  `true` when more pages are available.
+  `true` when more top-level comments are available.
 </ResponseField>
 
 <ResponseField name="submittingComment" type="boolean">
   `true` while a `createComment` call is in flight.
 </ResponseField>
 
-<ResponseField name="loadMore" type="() => void">
-  Loads the next page of comments.
+<ResponseField name="loadMore" type="() => Promise<void>">
+  Loads the next page of top-level comments (with the section's `replyDepth`). Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
+</ResponseField>
+
+<ResponseField name="getComment" type="(commentId: string) => Comment | undefined">
+  A loaded comment by ID — top-level or a reply — without its nested `replies`.
 </ResponseField>
 
 <ResponseField name="sortBy" type="CommentsSortByOptions | null">
@@ -158,19 +256,27 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="setSortBy" type="(newSortBy: CommentsSortByOptions) => void">
-  Changes the sort order and resets to page 1.
+  Changes the sort order and reloads from the first page.
 </ResponseField>
 
 <ResponseField name="sortDir" type='"asc" | "desc"'>
-  Current sort direction for `sortBy: "createdAt"`.
+  Current sort direction; applies to every sort.
 </ResponseField>
 
 <ResponseField name="setSortDir" type='(newSortDir: "asc" | "desc") => void'>
-  Changes the sort direction and resets to page 1.
+  Changes the sort direction and reloads from the first page.
+</ResponseField>
+
+<ResponseField name="sortByReaction" type="ReactionType | undefined">
+  The reaction `"top"` ranks by. Only sent with `sortBy: "top"`.
+</ResponseField>
+
+<ResponseField name="setSortByReaction" type="(newReaction: ReactionType | undefined) => void">
+  Changes the ranking reaction.
 </ResponseField>
 
 <ResponseField name="createComment" type="(props) => Promise<Comment | undefined>">
-  Submits a new comment. Applies an optimistic placeholder immediately. Accepts:
+  Submits a new comment. Shows it immediately (optimistically) and adds 1 to the parent comment's `repliesCount` and the entity's `commentsCount`, rolling back if the request fails. Accepts:
   - `parentId` — reply to a specific comment ID
   - `content` — text content
   - `gif` — GIF data object
@@ -183,7 +289,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="deleteComment" type="(props: { commentId: string }) => Promise<void>">
-  Marks a comment as deleted (Reddit-style placeholder). The comment remains in the tree with its content hidden.
+  Deletes a comment. It stays in place as a [placeholder](/v8/data-models/comment#placeholders), so the replies under it remain; `repliesCount` and `commentsCount` don't change, since the server keeps counting it.
 </ResponseField>
 
 <ResponseField name="selectedComment" type="Comment | null">

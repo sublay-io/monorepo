@@ -11,10 +11,9 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 `useFetchComment` returns a function that fetches a single comment by ID.
 
 <Note>
-  If the comment author is block-edged with the signed-in caller, in either
-  direction, this returns `404` with `comment/not-found` — identical to a
-  comment that does not exist. An embedded `parentComment` is nulled under the
-  same rule. Requires the `moderation` bundle.
+  With the `moderation` bundle installed, the comment comes back the way a thread shows it: in full with `isAuthorBlocked: true` when the signed-in user blocked its author, or as a [placeholder](/v8/data-models/comment#placeholders) with `isUnavailable: true` when the author blocked them. An embedded `parentComment` follows the same rules.
+
+  When the **entity's** author has blocked the signed-in user, the request fails with `404 comment/not-found`, identical to a comment that doesn't exist — except for the user's own comments, which still load (with `entity` and `parentComment` set to `null` when requested) so they can be found and deleted. Replying to, reacting to and editing those are refused.
 </Note>
 
 ## Usage Example

@@ -28,6 +28,29 @@ Visual indicators: indentation, threading lines connecting replies to parents, a
 
 ---
 
+### Loading Replies
+
+The section loads its first screen in a single request: 10 top-level comments, each with up to 3 replies, 2 levels deep.
+
+- **More replies** — when a comment has more replies than are shown, a "N more replies" button loads the next ones in place.
+- **Continue this thread** — comments below the second level show a "Continue this thread" button that loads their replies right there, again with a few levels of nesting. Indentation stops growing after 6 levels.
+- **Load more comments** — a button under the list loads the next top-level comments.
+
+Reply counts come from each comment's `repliesCount`; whether a "more" button shows is driven by `hasMore`. To change how much loads up front, edit the `limit`, `replyDepth` and `replyLimit` props passed to `CommentSectionProvider` in `hooks/use-threaded-comments.tsx`.
+
+---
+
+### Blocked Users
+
+When the `moderation` bundle is installed, comments involving a block render as compact rows instead of disappearing, so the replies under them stay in place:
+
+- **"This comment is unavailable"** — the comment's author blocked the user. No author, content, reply or reaction controls are shown. If the user had reacted before, they can still remove their reaction.
+- **"Comment from a user you blocked"** — the user blocked this author. The row starts collapsed with a **Show anyway** button; once shown, the comment can be replied to and reacted to as usual.
+
+Edit the row text in `single-comment.tsx`. See [Comment → Blocked authors](/v8/data-models/comment#blocked-authors) for the underlying flags.
+
+---
+
 ### Upvote/Downvote System
 
 Reddit-style voting with visible vote scores.

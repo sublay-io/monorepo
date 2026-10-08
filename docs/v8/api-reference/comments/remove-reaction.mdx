@@ -14,9 +14,15 @@ Removes the authenticated user's reaction from a comment. The comment's `reactio
   The UUID of the comment to remove the reaction from.
 </ParamField>
 
+## Blocks
+
+Removing your own reaction is undoing your own action, so a block doesn't stop it: as long as the comment is visible to you — in full, or as a placeholder — your reaction is removed. This includes a comment whose author blocked you and a moderator-removed comment.
+
+When the comment isn't visible to you at all — it sits on an entity whose author has blocked you — the request returns `404 comment/not-found` and nothing changes. The exception is your **own** comment on such an entity: it stays visible to you, so removing your reaction from it works.
+
 ## Response
 
-Returns the updated [Comment](/v8/data-models/comment) object with the new `reactionCounts`.
+Returns the [Comment](/v8/data-models/comment) as you'd see it after the change — in full, flagged with `isAuthorBlocked`, or as a [placeholder](/v8/data-models/comment#placeholders) — with the updated `reactionCounts`. If you had no reaction on the comment, the comment is returned unchanged.
 
 ## Error Responses
 

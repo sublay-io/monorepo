@@ -124,8 +124,16 @@ const { data, pagination } = await sublay.collections.fetchCollectionEntities({
   Sort direction: `"asc"` or `"desc"`.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComment"`, `"files"`, `"grants"`.
+<ParamField body="include" type="CollectionEntityIncludeParam">
+  Associations to populate: `"user"`, `"space"`, `"topComments"`, `"files"`, `"grants"` (a single value or an array). `"saved"` isn't accepted — every returned entity already has `isSaved: true`. On an entity whose author has blocked the user, `topComments` is `[]`.
+</ParamField>
+
+<ParamField body="topCommentsLimit" type="number">
+  With `include` containing `"topComments"`: how many top comments per entity. Server default `1`, maximum `5`. Rejected (`400`) without `"topComments"` in `include`.
+</ParamField>
+
+<ParamField body="topCommentsSortByReaction" type="ReactionType">
+  With `include` containing `"topComments"`: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Rejected (`400`) without `"topComments"` in `include`.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Entity>>`

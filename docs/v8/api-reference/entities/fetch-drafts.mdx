@@ -37,7 +37,7 @@ Returns a paginated list of draft entities belonging to the authenticated user. 
   - `files` — uploaded file/image attachments
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) for the entity
 
-  <Note>`topComment` and `saved` are not supported for drafts.</Note>
+  Values are case-insensitive. Drafts have no comments and aren't saved, so `topComments` and `saved` aren't accepted here: any other value returns `400 entity/invalid-query`.
 </ParamField>
 
 ## Response

@@ -1,71 +1,114 @@
 ---
 title: "Use replies"
-description: "Fetch and paginate replies for a specific comment"
+description: "Load and page through a comment's replies inside a comment section"
 icon: "cube"
 ---
 
 ## Overview
 
-`useReplies` loads replies for a specific comment from the `entityCommentsTree` managed by the nearest `CommentSectionProvider`. It fetches a page of replies when the `page` state increases above `0`.
+`useReplies` gives you a comment's replies inside the nearest `CommentSectionProvider`, and a `loadMore` function that continues from whatever is already loaded — including replies the section brought in nested with the first page.
+
+It never fetches on its own: call `loadMore()` (for example from a "View replies" button).
 
 <Note>
-  Must be used inside a `CommentSectionProvider`. Replies are merged into the shared `entityCommentsTree`.
+  Must be used inside a `CommentSectionProvider`. See [Comment Section](/v8/sdk/comments/comment-section).
 </Note>
 
 ## Usage Example
 
 ```tsx
-import { useReplies } from "@sublay/react-js";
+import { useReplies, type Comment } from "@sublay/react-js";
 
-function CommentItem({ commentId }: { commentId: string }) {
-  const { replies, newReplies, loading, setPage } = useReplies({
-    commentId,
-    sortBy: "createdAt",
+function CommentThread({ comment }: { comment: Comment }) {
+  const { replies, newReplies, hasMore, loadMore, loading } = useReplies({
+    commentId: comment.id,
+    limit: 10, // direct replies per load
   });
 
   return (
     <div>
-      <button onClick={() => setPage((p) => p + 1)}>Load replies</button>
-      {[...newReplies, ...replies].map((r) => (
-        <div key={r.id}>{r.content}</div>
+      <CommentBody comment={comment} />
+      {[...newReplies, ...replies].map((reply) => (
+        <CommentThread key={reply.id} comment={reply} />
       ))}
+      {hasMore && (
+        <button onClick={() => loadMore()} disabled={loading}>
+          {replies.length ? "Load more replies" : "View replies"}
+        </button>
+      )}
     </div>
   );
 }
 ```
 
+The same component works whether or not the section nests replies: with the provider's `replyDepth` above `0`, comments arrive with their first replies already loaded; with the default `replyDepth` of `0`, every comment starts with nothing loaded and the first click fetches its replies.
+
+## What a load fetches
+
+The **first** load of a comment's replies nests, using the section's `replyDepth` and `replyLimit`. **Later** loads fetch plain pages. Every load continues after the replies already shown — including ones the section pre-loaded.
+
+With the provider at `replyDepth={2} replyLimit={3}` and `useReplies({ limit: 10 })`:
+
+| Before the click | The click loads |
+|---|---|
+| Nothing loaded (the comment was at the last nested level) | 10 replies, each with up to 3 of their own, 2 levels down |
+| Nothing loaded, and the section's `replyDepth` is `0` | 10 replies, no nesting |
+| 3 replies pre-loaded by the section | the next 10 after those 3, no nesting |
+| Already clicked before | the next 10, no nesting |
+
+You can override the rule for a thread or for a single click:
+
+```ts
+useReplies({ commentId, limit: 10, replyDepth: 1 }); // this thread's first-load depth
+loadMore();                    // default rule
+loadMore({ replyDepth: 2 });   // nest on this click
+loadMore({ limit: 25 });       // e.g. a "show all" button
+```
+
+Replies are always sorted by the section's reply sort (the provider's `replySortBy` / `replySortDir` / `replySortByReaction`, which default to the section's sort), so loading more continues in the same order as the pre-loaded replies.
+
+A request can return at most 500 comments (see [Request size limit](/v8/api-reference/comments/fetch-many-comments#request-size-limit)). If the **default** first-load nesting would go over it, `useReplies` lowers the depth until it fits and logs a warning in development. A `replyDepth` you pass explicitly is sent as-is.
+
 ## Props
 
 <ParamField path="commentId" type="string" required>
-  The ID of the comment to load replies for.
+  The ID of the comment whose replies to load.
 </ParamField>
 
-<ParamField path="sortBy" type="CommentsSortByOptions" required>
-  Sort order for replies: `"createdAt"` or `"top"`. `"new"`/`"old"` are deprecated aliases for `"createdAt"` (removed in v8).
+<ParamField path="limit" type="number">
+  How many direct replies each load fetches. Default: `10`. Can be overridden per call with `loadMore({ limit })`.
 </ParamField>
 
-<ParamField path="sortDir" type='"asc" | "desc"'>
-  Sort direction for `sortBy: "createdAt"`. Default: `"desc"` (newest first).
+<ParamField path="replyDepth" type="number">
+  Levels of replies to nest on this comment's **first** load (`0`–`5`). Defaults to the section's `replyDepth`. Later loads don't nest unless you pass `loadMore({ replyDepth })`.
 </ParamField>
 
 ## Return Values
 
-<ResponseField name="replies" type="(Comment & { new: boolean })[]">
-  Paginated replies (not newly submitted in this session).
+<ResponseField name="comment" type="Comment | undefined">
+  The comment itself, from the section, once it's loaded.
 </ResponseField>
 
-<ResponseField name="newReplies" type="(Comment & { new: boolean })[]">
-  Replies submitted in this session, sorted newest-first.
+<ResponseField name="replies" type="Comment[]">
+  Its loaded replies, in order. Replies the user posted this session are kept out of this list (they're in `newReplies`), even if a later load returns them.
+</ResponseField>
+
+<ResponseField name="newReplies" type="Comment[]">
+  Replies the user posted this session, newest first. They stay where they are rather than jumping into `replies`.
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
-  `true` while replies are being fetched.
+  `true` while a load is in flight.
 </ResponseField>
 
-<ResponseField name="page" type="number">
-  Current page number. Starts at `0` (no replies loaded). Increment to load replies.
+<ResponseField name="error" type="Error | null">
+  The last failure loading replies. Cleared by the next successful load.
 </ResponseField>
 
-<ResponseField name="setPage" type="Dispatch<SetStateAction<number>>">
-  Increment to trigger loading the next page of replies.
+<ResponseField name="hasMore" type="boolean">
+  Whether there are replies to load. Before the comment's replies were ever loaded, this is `true` when its `repliesCount` is more than the user's own new replies under it — and always `true` for the parent of a highlighted comment, whose other replies haven't loaded yet. After that, it's the server's exact `hasMore`.
+</ResponseField>
+
+<ResponseField name="loadMore" type="(options?: { replyDepth?: number; limit?: number }) => Promise<void>">
+  Loads the next replies. Does nothing while a load is in flight or when `hasMore` is `false`, and never throws — failures land in `error`.
 </ResponseField>

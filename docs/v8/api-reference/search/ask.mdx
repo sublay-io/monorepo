@@ -67,6 +67,8 @@ data: [{"sourceType": "entity", "similarity": 0.87, "record": {...}}, ...]
 
 Each source object follows the same shape as the [Search Content](/v8/api-reference/search/search-content) response — `sourceType`, `similarity`, and a fully populated `record`. An empty array is sent when no relevant context was found.
 
+The answer is generated only from content the signed-in user can see: content by users they are block-edged with (in either direction), and comments on an entity whose author has blocked them, are never used as context or returned as sources.
+
 **`done`** — signals the stream is finished:
 ```
 event: done

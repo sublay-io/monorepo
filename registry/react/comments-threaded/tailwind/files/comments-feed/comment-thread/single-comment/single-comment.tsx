@@ -4,6 +4,7 @@ import {
   UserMention,
   getUserName,
   useCommentSection,
+  useReactionToggle,
   useUser,
 } from "@sublay/react-js";
 import {
@@ -28,6 +29,28 @@ interface SingleCommentProps {
   onToggleCollapse: () => void;
 }
 
+// The viewer's own reaction on a comment they can't otherwise interact with
+// (its author blocked them): undoing it is still allowed.
+function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
+  const { currentReaction, toggleReaction } = useReactionToggle({
+    targetType: "comment",
+    targetId: comment.id,
+    initialReaction: comment.userReaction,
+    initialReactionCounts: comment.reactionCounts,
+  });
+
+  if (!currentReaction) return null;
+
+  return (
+    <button
+      onClick={() => toggleReaction({ reactionType: currentReaction })}
+      className="text-xs not-italic font-medium text-gray-500 dark:text-gray-400 px-2 py-1 -ml-2 rounded bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-500"
+    >
+      Remove your vote
+    </button>
+  );
+}
+
 function SingleComment({
   comment: commentFromSection,
   depth,
@@ -41,6 +64,15 @@ function SingleComment({
   const { callbacks, highlightedComment } = useCommentSection();
   const [comment] = useState(commentFromSection);
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const [showBlockedComment, setShowBlockedComment] = useState(false);
+
+  // isUnavailable wins over every other marker (the author blocked the
+  // viewer): a neutral row, no reply/react. A comment by someone the viewer
+  // blocked starts collapsed, and can be shown (then replied to / reacted to).
+  const isUnavailable = !!comment.isUnavailable;
+  const isBlockedCollapsed =
+    !isUnavailable && !!comment.isAuthorBlocked && !showBlockedComment;
+  const isPlaceholderRow = isUnavailable || isBlockedCollapsed;
 
   const maxDepth = 6; // Limit visual nesting depth
   const actualDepth = Math.min(depth, maxDepth);
@@ -79,23 +111,27 @@ function SingleComment({
             className="flex-shrink-0 mr-3 relative mt-1"
             // 🎨 CUSTOMIZATION: Spacing
           >
-            <div
-              className="relative z-10 cursor-pointer"
-              onClick={() => {
-                if (user?.id === comment.user?.id) {
-                  callbacks?.currentUserClickCallback?.();
-                } else {
-                  callbacks?.otherUserClickCallback?.(comment.user?.id ?? "", comment.user?.foreignId);
-                }
-              }}
-            >
-              <UserAvatar
-                user={comment.user ?? {}}
-                // 🎨 CUSTOMIZATION: Avatar styling (Default: 24px)
-                borderRadius={24}
-                size={24}
-              />
-            </div>
+            {isPlaceholderRow ? (
+              <div className="relative z-10 w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />
+            ) : (
+              <div
+                className="relative z-10 cursor-pointer"
+                onClick={() => {
+                  if (user?.id === comment.user?.id) {
+                    callbacks?.currentUserClickCallback?.();
+                  } else {
+                    callbacks?.otherUserClickCallback?.(comment.user?.id ?? "", comment.user?.foreignId);
+                  }
+                }}
+              >
+                <UserAvatar
+                  user={comment.user ?? {}}
+                  // 🎨 CUSTOMIZATION: Avatar styling (Default: 24px)
+                  borderRadius={24}
+                  size={24}
+                />
+              </div>
+            )}
             {/* Vertical line extending down from this comment's avatar when it has replies */}
             {hasReplies && !isCollapsed && (
               <div
@@ -111,6 +147,32 @@ function SingleComment({
           </div>
 
           {/* Comment content area */}
+          {isPlaceholderRow ? (
+            <div className="flex-1 min-w-0 flex items-center gap-2 min-h-7 text-xs italic text-gray-500 dark:text-gray-400">
+              {isUnavailable ? (
+                <>
+                  <span>This comment is unavailable</span>
+                  <RemoveOwnReactionButton comment={comment} />
+                </>
+              ) : (
+                <>
+                  <span>Comment from a user you blocked</span>
+                  <button
+                    onClick={() => setShowBlockedComment(true)}
+                    className="text-xs not-italic font-medium text-blue-600 dark:text-blue-400 bg-transparent border-none p-0 cursor-pointer hover:underline"
+                  >
+                    Show anyway
+                  </button>
+                </>
+              )}
+              {hasReplies && (
+                <ToggleRepliesVisibilty
+                  isCollapsed={isCollapsed}
+                  onToggleCollapse={onToggleCollapse}
+                />
+              )}
+            </div>
+          ) : (
           <div className="flex-1 min-w-0">
             <div
               className="flex items-center justify-between mb-1"
@@ -187,7 +249,7 @@ function SingleComment({
                   // 🎨 CUSTOMIZATION: Actions layout
                 >
                   <ReplyButtonAndInfo
-                    hasReplies={hasReplies}
+                    hasReplies={replyCount > 0}
                     replyCount={replyCount}
                     setShowReplyForm={setShowReplyForm}
                   />
@@ -210,6 +272,7 @@ function SingleComment({
               </>
             )}
           </div>
+          )}
         </div>
       </div>
     </div>

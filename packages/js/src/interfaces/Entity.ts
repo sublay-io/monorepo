@@ -4,14 +4,7 @@ import { User } from "./User";
 import { Space } from "./Space";
 import { ReactionCounts, ReactionType } from "./Reaction";
 import { File } from "./File";
-
-export interface TopComment {
-  id: string;
-  user: User;
-  upvotesCount: number;
-  content: string;
-  createdAt: string;
-}
+import { Comment } from "./Comment";
 
 export interface Entity {
   id: string;
@@ -33,7 +26,7 @@ export interface Entity {
   downvotes: string[]; // Legacy v6 — v7 uses reactionCounts
   reactionCounts: ReactionCounts;
   userReaction?: ReactionType | null; // Present when authenticated
-  repliesCount: number;
+  commentsCount: number; // All of the entity's comments, at any depth
   views: number;
   score: number;
   scoreUpdatedAt: string;
@@ -44,7 +37,9 @@ export interface Entity {
   metadata: Record<string, any>;
   nsfw: boolean; // The entity's own NSFW flag
   nsfwEffective: boolean; // Computed live: entity.nsfw OR the entity's space's effective NSFW
-  topComment: TopComment | null;
+  // Populated when include contains "topComments": the best top-level
+  // comments (real content only). `[]` when none qualify.
+  topComments?: Comment[];
   isSaved?: boolean; // Populated when include contains "saved"
   /**
    * Reputation-grant summary. Opt-in — present exactly when the read requested
@@ -62,4 +57,33 @@ export interface Entity {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+}
+
+/** `include` values the entity fetches (by id, short id, foreign id, and lists) accept. */
+export type EntityInclude =
+  | "user"
+  | "space"
+  | "topComments"
+  | "saved"
+  | "files"
+  | "grants";
+
+/** `include` values the collection-entities fetch accepts (no `saved`). */
+export type CollectionEntityInclude = Exclude<EntityInclude, "saved">;
+export type CollectionEntityIncludeArray = CollectionEntityInclude[];
+export type CollectionEntityIncludeParam =
+  | CollectionEntityInclude
+  | CollectionEntityIncludeArray;
+
+/** `include` values the drafts fetch accepts. */
+export type DraftInclude = "user" | "space" | "files" | "grants";
+export type DraftIncludeArray = DraftInclude[];
+export type DraftIncludeParam = DraftInclude | DraftIncludeArray;
+
+/** Options for `include=topComments` (rejected without that include). */
+export interface TopCommentsParams {
+  /** How many top comments per entity (default 1, max 5). */
+  topCommentsLimit?: number;
+  /** Which reaction's raw count ranks them (default "upvote"). */
+  topCommentsSortByReaction?: ReactionType;
 }

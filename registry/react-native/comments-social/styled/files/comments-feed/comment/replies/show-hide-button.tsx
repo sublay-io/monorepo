@@ -6,14 +6,16 @@ const ShowHideButton = ({
   totalRepliesCount,
   loadedRepliesCount,
   page,
-  setPage,
+  hasMore,
+  onLoadMore,
   areRepliesVisible,
   setAreRepliesVisible,
 }: {
   totalRepliesCount: number;
   loadedRepliesCount: number;
   page: number;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
+  hasMore: boolean;
+  onLoadMore: () => void;
   areRepliesVisible: boolean;
   setAreRepliesVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
@@ -47,16 +49,16 @@ const ShowHideButton = ({
       break;
 
     // This case is if the replies are visible and there are more replies to load
-    case areRepliesVisible && totalRepliesCount > loadedRepliesCount:
+    case areRepliesVisible && hasMore:
       action = ["load-more"];
       text = viewMoreRepliesText.replace(
         "$count",
-        (totalRepliesCount - loadedRepliesCount).toString()
+        Math.max(0, totalRepliesCount - loadedRepliesCount).toString()
       );
       break;
 
     // This case is if the replies are visible and all of them have been loaded
-    case areRepliesVisible && totalRepliesCount <= loadedRepliesCount:
+    case areRepliesVisible && !hasMore:
       action = ["hide"];
       text = hideRepliesText;
       break;
@@ -69,7 +71,7 @@ const ShowHideButton = ({
       onPress={() => {
         if (action.includes("show")) setAreRepliesVisible(true);
         if (action.includes("hide")) setAreRepliesVisible(false);
-        if (action.includes("load-more")) setPage((p) => p + 1);
+        if (action.includes("load-more") && hasMore) onLoadMore();
       }}
       style={{
         ...resetButton,

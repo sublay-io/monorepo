@@ -1,11 +1,17 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
-import { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
+import {
+  Entity,
+  EntityIncludeParam,
+  TopCommentsParams,
+} from "../../interfaces/models/Entity";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
 
-export interface FetchEntityProps extends SpaceReputationContextParams {
+export interface FetchEntityProps
+  extends SpaceReputationContextParams,
+    TopCommentsParams {
   entityId: string;
   include?: EntityIncludeParam;
 }
@@ -15,7 +21,7 @@ function useFetchEntity(): (props: FetchEntityProps) => Promise<Entity> {
   const { projectId } = useProject();
 
   const fetchEntity = useCallback(
-    async ({ entityId, include, spaceReputation, spaceReputationId, spaceReputationDescendants }: FetchEntityProps) => {
+    async ({ entityId, include, topCommentsLimit, topCommentsSortByReaction, spaceReputation, spaceReputationId, spaceReputationDescendants }: FetchEntityProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -32,6 +38,9 @@ function useFetchEntity(): (props: FetchEntityProps) => Promise<Entity> {
           spaceReputationDescendants,
         }),
       };
+
+      if (topCommentsLimit !== undefined) params.topCommentsLimit = topCommentsLimit;
+      if (topCommentsSortByReaction) params.topCommentsSortByReaction = topCommentsSortByReaction;
 
       const response = await axios.get(`/${projectId}/entities/${entityId}`, {
         params,

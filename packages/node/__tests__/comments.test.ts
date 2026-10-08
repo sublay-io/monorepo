@@ -73,11 +73,53 @@ describe("node-sdk comments — request shaping", () => {
     expect(projectInstance.delete).toHaveBeenCalledWith("/comments/c1");
   });
 
-  it("fetchManyComments hits /comments with the full body as params", async () => {
+  it("fetchManyComments sends only thread params, with cursor and nesting", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchManyComments(client, { entityId: "e1", sortBy: "top" });
+    await fetchManyComments(client, {
+      entityId: "e1",
+      cursor: "abc",
+      limit: 20,
+      sortBy: "top",
+      sortDir: "asc",
+      sortByReaction: "love",
+      replyDepth: 2,
+      replyLimit: 3,
+      replySortBy: "createdAt",
+      replySortDir: "desc",
+      replySortByReaction: "like",
+      include: ["user", "grants"],
+      spaceReputationId: "none",
+    });
     expect(projectInstance.get).toHaveBeenCalledWith("/comments", {
-      params: { entityId: "e1", sortBy: "top" },
+      params: {
+        entityId: "e1",
+        cursor: "abc",
+        limit: 20,
+        sortBy: "top",
+        sortDir: "asc",
+        sortByReaction: "love",
+        replyDepth: 2,
+        replyLimit: 3,
+        replySortBy: "createdAt",
+        replySortDir: "desc",
+        replySortByReaction: "like",
+        include: "user,grants",
+        spaceReputationId: "none",
+      },
+    });
+  });
+
+  it("fetchManyComments never forwards params the thread endpoint rejects", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchManyComments(client, {
+      parentId: "c0",
+      page: 2,
+      userId: "u1",
+      sourceId: "s1",
+      blockedFilter: "exclude",
+    } as any);
+    expect(projectInstance.get).toHaveBeenCalledWith("/comments", {
+      params: { parentId: "c0" },
     });
   });
 
@@ -156,11 +198,21 @@ describe("node-sdk comments — response mapping", () => {
     await expect(deleteComment(client, { commentId: "c1" })).resolves.toBeUndefined();
   });
 
-  it("fetchManyComments returns the full PaginatedResponse envelope", async () => {
+  it("fetchManyComments returns the cursor envelope (nested replies included)", async () => {
     const { client, projectInstance } = makeClient();
-    const envelope = { data: [{ id: "c1" }], pagination: { page: 1, limit: 10, total: 1 } };
+    const envelope = {
+      data: [
+        {
+          id: "c1",
+          isAuthorBlocked: false,
+          isUnavailable: false,
+          replies: { data: [{ id: "r1" }], pagination: { nextCursor: "n", hasMore: true } },
+        },
+      ],
+      pagination: { nextCursor: null, hasMore: false },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
-    await expect(fetchManyComments(client, {})).resolves.toEqual(envelope);
+    await expect(fetchManyComments(client, { entityId: "e1" })).resolves.toEqual(envelope);
   });
 
   it("addReaction returns response.data", async () => {

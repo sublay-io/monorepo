@@ -39,8 +39,11 @@ const initialState: CollectionsState = {
   entitiesByCollectionId: {},
 };
 
-// Create the slice
-export const collectionsSlice = createSlice({
+// Create the slice. Not exported: `Entity` and `Comment` reference each other
+// (`Entity.topComments` / `Comment.entity`), and the declaration emit can't
+// name immer's draft type for that cycle. The reducer and actions are exported
+// below.
+const collectionsSlice = createSlice({
   name: "collections",
   initialState,
   reducers: {

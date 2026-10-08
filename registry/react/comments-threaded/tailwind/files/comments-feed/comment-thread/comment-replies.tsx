@@ -8,8 +8,8 @@ interface CommentRepliesProps {
   loading: boolean;
   visibleReplies: CommentType[];
   hiddenRepliesCount: number;
-  showAllReplies: boolean;
-  onShowAllReplies: () => void;
+  hasMore: boolean;
+  onLoadMore: () => void;
   onDeleteComment?: (commentId: string) => void;
   onReportComment?: (commentId: string) => void;
   CommentThreadComponent: React.ComponentType<CommentThreadProps>;
@@ -21,16 +21,24 @@ function CommentReplies({
   loading,
   visibleReplies,
   hiddenRepliesCount,
-  showAllReplies,
-  onShowAllReplies,
+  hasMore,
+  onLoadMore,
   onDeleteComment,
   onReportComment,
   CommentThreadComponent,
 }: CommentRepliesProps) {
-  // Don't render anything if collapsed or no replies
-  if (isCollapsed || visibleReplies.length === 0) {
+  // Don't render anything if collapsed, or if there are no replies to show or load
+  if (isCollapsed || (visibleReplies.length === 0 && !hasMore)) {
     return null;
   }
+
+  // At the depth boundary nothing is loaded yet: the replies load right here.
+  const loadMoreLabel =
+    visibleReplies.length === 0
+      ? "Continue this thread"
+      : hiddenRepliesCount > 0
+      ? `${hiddenRepliesCount} more ${hiddenRepliesCount === 1 ? "reply" : "replies"}`
+      : "More replies";
 
   return (
     <div>
@@ -46,10 +54,12 @@ function CommentReplies({
       ))}
 
       {/* Load more replies button */}
-      {hiddenRepliesCount > 0 && !showAllReplies && (
-        <div className="mt-3 ml-1">
+      {hasMore && (
+        // Indented to the level the replies load at (same 24px-per-level cap as single comments)
+        <div className="mt-3" style={{ marginLeft: `${Math.min(depth + 1, 6) * 24 + 4}px` }}>
           <button
-            onClick={onShowAllReplies}
+            onClick={onLoadMore}
+            disabled={loading}
             className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-500 font-medium transition-all duration-150 px-2 py-1 rounded-full bg-transparent border-none cursor-pointer hover:text-blue-700 dark:hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950"
           >
             <svg
@@ -63,8 +73,7 @@ function CommentReplies({
                 clipRule="evenodd"
               />
             </svg>
-            {hiddenRepliesCount} more{" "}
-            {hiddenRepliesCount === 1 ? "reply" : "replies"}
+            {loading ? "Loading..." : loadMoreLabel}
           </button>
         </div>
       )}

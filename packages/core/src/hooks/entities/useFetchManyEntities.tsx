@@ -1,7 +1,11 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
-import { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
+import {
+  Entity,
+  EntityIncludeParam,
+  TopCommentsParams,
+} from "../../interfaces/models/Entity";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 import { EntityListSortByOptions, SortByReaction, SortDirection, SortType } from "../../interfaces/EntityListSortByOptions";
 import { TimeFrame } from "../../interfaces/TimeFrame";
@@ -50,7 +54,9 @@ const serializeObject = (obj: any, prefix: string): Record<string, any> => {
   return params;
 };
 
-interface FetchManyEntitiesParams extends SpaceReputationContextParams {
+interface FetchManyEntitiesParams
+  extends SpaceReputationContextParams,
+    TopCommentsParams {
   page?: number;
   limit?: number;
   sortBy?: EntityListSortByOptions;
@@ -114,6 +120,12 @@ function useFetchManyEntities(): (params?: FetchManyEntitiesParams) => Promise<P
         queryParams.include = Array.isArray(params.include)
           ? params.include.join(',')
           : params.include;
+      }
+      if (params?.topCommentsLimit !== undefined) {
+        queryParams.topCommentsLimit = params.topCommentsLimit;
+      }
+      if (params?.topCommentsSortByReaction) {
+        queryParams.topCommentsSortByReaction = params.topCommentsSortByReaction;
       }
 
       // Serialize complex filter objects into bracket notation

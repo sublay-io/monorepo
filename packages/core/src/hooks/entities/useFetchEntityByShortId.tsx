@@ -1,9 +1,13 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
-import { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
+import {
+  Entity,
+  EntityIncludeParam,
+  TopCommentsParams,
+} from "../../interfaces/models/Entity";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 
-export interface FetchEntityByShortIdProps {
+export interface FetchEntityByShortIdProps extends TopCommentsParams {
   shortId: string;
   include?: EntityIncludeParam;
 }
@@ -13,7 +17,7 @@ function useFetchEntityByShortId(): (props: FetchEntityByShortIdProps) => Promis
   const { projectId } = useProject();
 
   const fetchEntityByShortId = useCallback(
-    async ({ shortId, include }: FetchEntityByShortIdProps) => {
+    async ({ shortId, include, topCommentsLimit, topCommentsSortByReaction }: FetchEntityByShortIdProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -26,6 +30,8 @@ function useFetchEntityByShortId(): (props: FetchEntityByShortIdProps) => Promis
         params: {
           shortId,
           include: Array.isArray(include) ? include.join(",") : include,
+          ...(topCommentsLimit !== undefined ? { topCommentsLimit } : {}),
+          ...(topCommentsSortByReaction ? { topCommentsSortByReaction } : {}),
         },
       });
 

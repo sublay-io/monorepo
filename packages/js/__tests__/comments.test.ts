@@ -84,31 +84,54 @@ describe("js-sdk comments — request shaping", () => {
     expect(projectInstance.delete).toHaveBeenCalledWith("/comments/c1");
   });
 
-  it("fetchManyComments gets /comments with the full query as params (no implicit actor)", async () => {
-    const { client, projectInstance } = makeClient();
-    const query = {
-      entityId: "e1",
-      parentId: "c0",
-      page: 1,
-      limit: 20,
-      sortBy: "top" as const,
-    };
-    await fetchManyComments(client, query);
-    expect(projectInstance.get).toHaveBeenCalledWith("/comments", {
-      params: query,
-    });
-  });
-
-  it("fetchManyComments forwards blockedFilter into the query params", async () => {
+  it("fetchManyComments sends only thread params, with cursor and nesting", async () => {
     const { client, projectInstance } = makeClient();
     await fetchManyComments(client, {
       entityId: "e1",
-      blockedFilter: "include-outbound-blocked",
+      cursor: "abc",
+      limit: 20,
+      sortBy: "top",
+      sortDir: "asc",
+      sortByReaction: "love",
+      replyDepth: 2,
+      replyLimit: 3,
+      replySortBy: "createdAt",
+      replySortDir: "desc",
+      replySortByReaction: "like",
+      include: ["user", "grants"],
+      spaceReputationId: "none",
     });
-    const [, config] = projectInstance.get.mock.calls[0];
-    expect(config.params).toEqual(
-      expect.objectContaining({ blockedFilter: "include-outbound-blocked" })
-    );
+    expect(projectInstance.get).toHaveBeenCalledWith("/comments", {
+      params: {
+        entityId: "e1",
+        cursor: "abc",
+        limit: 20,
+        sortBy: "top",
+        sortDir: "asc",
+        sortByReaction: "love",
+        replyDepth: 2,
+        replyLimit: 3,
+        replySortBy: "createdAt",
+        replySortDir: "desc",
+        replySortByReaction: "like",
+        include: "user,grants",
+        spaceReputationId: "none",
+      },
+    });
+  });
+
+  it("fetchManyComments never forwards params the thread endpoint rejects", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchManyComments(client, {
+      parentId: "c0",
+      page: 2,
+      userId: "u1",
+      sourceId: "s1",
+      blockedFilter: "exclude",
+    } as any);
+    expect(projectInstance.get).toHaveBeenCalledWith("/comments", {
+      params: { parentId: "c0" },
+    });
   });
 
   it("addReaction posts only reactionType to /comments/:commentId/reactions (no userId)", async () => {
@@ -209,23 +232,21 @@ describe("js-sdk comments — response mapping", () => {
     expect(result).toBeUndefined();
   });
 
-  it("fetchManyComments returns the full PaginatedResponse envelope", async () => {
+  it("fetchManyComments returns the cursor envelope (nested replies included)", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
-      data: [{ id: "c1", content: "x" }],
-      pagination: {
-        page: 1,
-        pageSize: 20,
-        totalPages: 1,
-        totalItems: 1,
-        hasMore: false,
-      },
+      data: [
+        {
+          id: "c1",
+          isAuthorBlocked: false,
+          isUnavailable: false,
+          replies: { data: [{ id: "r1" }], pagination: { nextCursor: "n", hasMore: true } },
+        },
+      ],
+      pagination: { nextCursor: null, hasMore: false },
     };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
-
-    const result = await fetchManyComments(client, { entityId: "e1" });
-
-    expect(result).toEqual(envelope);
+    await expect(fetchManyComments(client, { entityId: "e1" })).resolves.toEqual(envelope);
   });
 
   it("addReaction returns the full populated Comment", async () => {

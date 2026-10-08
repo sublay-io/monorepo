@@ -82,6 +82,17 @@ const Comment = React.memo(
     // math with it. Falls back to 1 (square) if it's missing or unparsable.
     const gifAspectRatio = Number(comment.gif?.aspectRatio) || 1;
 
+    const [showBlockedComment, setShowBlockedComment] = useState(false);
+
+    // isUnavailable wins over every other marker (the author blocked the
+    // viewer): a neutral row with no reply/react — only removing the viewer's
+    // own reaction stays possible. A comment by someone the viewer blocked
+    // starts collapsed, and can be shown (then replied to / reacted to).
+    const isUnavailable = !!comment.isUnavailable;
+    const isBlockedCollapsed =
+      !isUnavailable && !!comment.isAuthorBlocked && !showBlockedComment;
+    const isPlaceholderRow = isUnavailable || isBlockedCollapsed;
+
     return (
       <div
         className={cn(
@@ -90,6 +101,38 @@ const Comment = React.memo(
           "bg-blue-100 dark:bg-blue-900"
         )}
       >
+        {isPlaceholderRow ? (
+          <div
+            className="pr-4 flex flex-row items-center gap-3"
+            style={{ paddingLeft: 16 + extraLeftPadding }}
+          >
+            <div className="w-8 h-8 rounded-full shrink-0 bg-gray-200 dark:bg-gray-700" />
+            <span className="text-[13px] italic text-gray-500 dark:text-gray-400">
+              {isUnavailable
+                ? "This comment is unavailable"
+                : "Comment from a user you blocked"}
+            </span>
+            {isUnavailable ? (
+              currentReaction && (
+                <button
+                  onClick={() => toggleReaction({ reactionType: currentReaction })}
+                  style={resetButton}
+                  className="text-xs font-semibold text-gray-500 dark:text-gray-400"
+                >
+                  Remove your reaction
+                </button>
+              )
+            ) : (
+              <button
+                onClick={() => setShowBlockedComment(true)}
+                style={resetButton}
+                className="text-xs font-semibold text-gray-900 dark:text-gray-50"
+              >
+                Show anyway
+              </button>
+            )}
+          </div>
+        ) : (
         <div
           className="pr-4"
           style={{
@@ -232,6 +275,7 @@ const Comment = React.memo(
             </div>
           </div>
         </div>
+        )}
         {!comment.parentId && <Replies commentId={comment.id} />}
       </div>
     );

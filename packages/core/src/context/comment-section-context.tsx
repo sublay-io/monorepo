@@ -1,9 +1,11 @@
 import React, { createContext, ReactNode } from "react";
 
-import useCommentSectionData, {
+import {
+  useCommentSectionDataInternal,
   UseCommentSectionDataProps,
   UseCommentSectionDataValues,
 } from "../hooks/comments/useCommentSectionData";
+import { CommentSectionInternalContext } from "../hooks/comments/useEntityComments";
 
 export interface CommentSectionProviderProps
   extends UseCommentSectionDataProps {
@@ -20,11 +22,13 @@ export const CommentSectionProvider: React.FC<CommentSectionProviderProps> = ({
   children,
   ...restOfProps
 }: CommentSectionProviderProps) => {
-  const data = useCommentSectionData(restOfProps);
+  const { values, internals } = useCommentSectionDataInternal(restOfProps);
 
   return (
-    <CommentSectionContext.Provider value={data}>
-      {children}
+    <CommentSectionContext.Provider value={values}>
+      <CommentSectionInternalContext.Provider value={internals}>
+        {children}
+      </CommentSectionInternalContext.Provider>
     </CommentSectionContext.Provider>
   );
 };

@@ -1,8 +1,12 @@
 import { SublayHttpClient } from "../../core/client";
-import { Entity } from "../../interfaces/Entity";
+import {
+  CollectionEntityIncludeParam,
+  Entity,
+  TopCommentsParams,
+} from "../../interfaces/Entity";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
-export interface FetchCollectionEntitiesProps {
+export interface FetchCollectionEntitiesProps extends TopCommentsParams {
   collectionId: string;
   userId: string;
   page?: number;
@@ -19,15 +23,21 @@ export interface FetchCollectionEntitiesProps {
     | "angry"
     | "funny";
   sortDir?: "asc" | "desc";
-  /** Comma-separated list of associations to populate, e.g. "user". */
-  include?: string;
+  /** Associations to populate (no "saved": every item in a collection is saved). */
+  include?: CollectionEntityIncludeParam;
 }
 
 export async function fetchCollectionEntities(
   client: SublayHttpClient,
   data: FetchCollectionEntitiesProps
 ): Promise<PaginatedResponse<Entity>> {
-  const { collectionId, ...params } = data;
+  const { collectionId, include, ...rest } = data;
+  const params = {
+    ...rest,
+    ...(include !== undefined
+      ? { include: Array.isArray(include) ? include.join(",") : include }
+      : {}),
+  };
   const response = await client.projectInstance.get<PaginatedResponse<Entity>>(
     `/collections/${collectionId}/entities`,
     { params }

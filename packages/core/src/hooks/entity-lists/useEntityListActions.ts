@@ -16,6 +16,7 @@ import {
 import { handleError as handleErrorUtil } from "../../utils/handleError";
 import useProject from "../projects/useProject";
 import type { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
+import type { ReactionType } from "../../interfaces/models/Reaction";
 import type { EntityListSortByOptions, SortByReaction, SortDirection, SortType } from "../../interfaces/EntityListSortByOptions";
 import type { TimeFrame } from "../../interfaces/TimeFrame";
 import type { LocationFilters } from "../../interfaces/entity-filters/LocationFilters";
@@ -54,6 +55,8 @@ interface FetchEntitiesOptions {
   spaceId?: string | null;
   limit: number;
   include?: EntityIncludeParam | null;
+  topCommentsLimit?: number | null;
+  topCommentsSortByReaction?: ReactionType | null;
   /**
    * Primary form. Flattened to `spaceReputationId`/`spaceReputationDescendants`
    * before it reaches the serializer.
@@ -153,6 +156,8 @@ export function useEntityListActions(): UseEntityListActionsValues {
           attachmentsFilters: options.attachmentsFilters,
           nsfwFilter: options.nsfwFilter,
           include: options.include,
+          topCommentsLimit: options.topCommentsLimit,
+          topCommentsSortByReaction: options.topCommentsSortByReaction,
           spaceReputationId: reputationParams.spaceReputationId,
           spaceReputationDescendants: reputationParams.spaceReputationDescendants,
         }).unwrap();

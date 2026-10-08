@@ -5,6 +5,7 @@ import {
   UserMention,
   getUserName,
   useCommentSection,
+  useReactionToggle,
   useUser,
 } from "@sublay/react-native";
 import {
@@ -30,6 +31,35 @@ interface SingleCommentProps {
   onToggleCollapse: () => void;
 }
 
+// The viewer's own reaction on a comment they can't otherwise interact with
+// (its author blocked them): undoing it is still allowed.
+function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
+  const { theme } = useUIState();
+  const { currentReaction, toggleReaction } = useReactionToggle({
+    targetType: "comment",
+    targetId: comment.id,
+    initialReaction: comment.userReaction,
+    initialReactionCounts: comment.reactionCounts,
+  });
+
+  if (!currentReaction) return null;
+
+  return (
+    <Pressable
+      onPress={() => toggleReaction({ reactionType: currentReaction })}
+      className="px-2 py-1"
+    >
+      <Text
+        className={`text-xs font-medium ${
+          theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+        }`}
+      >
+        Remove your vote
+      </Text>
+    </Pressable>
+  );
+}
+
 function SingleComment({
   comment: commentFromSection,
   depth,
@@ -44,6 +74,15 @@ function SingleComment({
   const { theme } = useUIState();
   const [comment] = useState(commentFromSection);
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const [showBlockedComment, setShowBlockedComment] = useState(false);
+
+  // isUnavailable wins over every other marker (the author blocked the
+  // viewer): a neutral row, no reply/react. A comment by someone the viewer
+  // blocked starts collapsed, and can be shown (then replied to / reacted to).
+  const isUnavailable = !!comment.isUnavailable;
+  const isBlockedCollapsed =
+    !isUnavailable && !!comment.isAuthorBlocked && !showBlockedComment;
+  const isPlaceholderRow = isUnavailable || isBlockedCollapsed;
 
   // Dynamically get the correct Image component
   const { ImageComponent, isExpo } = getImageComponent();
@@ -101,22 +140,30 @@ function SingleComment({
         <View className="flex-row">
           {/* Avatar with threading line connection */}
           <View className="mr-3 relative mt-1">
-            <Pressable
-              className="relative z-10"
-              onPress={() => {
-                if (user?.id === comment.user?.id) {
-                  callbacks?.currentUserClickCallback?.();
-                } else {
-                  callbacks?.otherUserClickCallback?.(comment.user?.id ?? "", comment.user?.foreignId);
-                }
-              }}
-            >
-              <UserAvatar
-                user={comment.user ?? {}}
-                borderRadius={24}
-                size={24}
+            {isPlaceholderRow ? (
+              <View
+                className={`relative z-10 w-6 h-6 rounded-full ${
+                  theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                }`}
               />
-            </Pressable>
+            ) : (
+              <Pressable
+                className="relative z-10"
+                onPress={() => {
+                  if (user?.id === comment.user?.id) {
+                    callbacks?.currentUserClickCallback?.();
+                  } else {
+                    callbacks?.otherUserClickCallback?.(comment.user?.id ?? "", comment.user?.foreignId);
+                  }
+                }}
+              >
+                <UserAvatar
+                  user={comment.user ?? {}}
+                  borderRadius={24}
+                  size={24}
+                />
+              </Pressable>
+            )}
             {/* Vertical line extending down from this comment's avatar when it has replies */}
             {hasReplies && !isCollapsed && (
               <View
@@ -134,6 +181,47 @@ function SingleComment({
           </View>
 
           {/* Comment content area */}
+          {isPlaceholderRow ? (
+            <View className="flex-1 flex-row items-center gap-2 min-h-7">
+              {isUnavailable ? (
+                <>
+                  <Text
+                    className={`text-xs italic ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}
+                  >
+                    This comment is unavailable
+                  </Text>
+                  <RemoveOwnReactionButton comment={comment} />
+                </>
+              ) : (
+                <>
+                  <Text
+                    className={`text-xs italic ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}
+                  >
+                    Comment from a user you blocked
+                  </Text>
+                  <Pressable onPress={() => setShowBlockedComment(true)}>
+                    <Text
+                      className={`text-xs font-medium ${
+                        theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+                      }`}
+                    >
+                      Show anyway
+                    </Text>
+                  </Pressable>
+                </>
+              )}
+              {hasReplies && (
+                <ToggleRepliesVisibility
+                  isCollapsed={isCollapsed}
+                  onToggleCollapse={onToggleCollapse}
+                />
+              )}
+            </View>
+          ) : (
           <View className="flex-1">
             <View className="flex-row items-center justify-between mb-1">
               <View className="flex-row items-center gap-2">
@@ -213,7 +301,7 @@ function SingleComment({
 
                 <View className="flex-row items-center justify-between">
                   <ReplyButtonAndInfo
-                    hasReplies={hasReplies}
+                    hasReplies={replyCount > 0}
                     replyCount={replyCount}
                     setShowReplyForm={setShowReplyForm}
                   />
@@ -236,6 +324,7 @@ function SingleComment({
               </>
             )}
           </View>
+          )}
         </View>
       </View>
     </View>

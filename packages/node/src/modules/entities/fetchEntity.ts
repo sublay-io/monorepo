@@ -1,9 +1,11 @@
 import { SublayHttpClient } from "../../core/client";
-import { Entity } from "../../interfaces/Entity";
+import { Entity, TopCommentsParams } from "../../interfaces/Entity";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
-export interface FetchEntityProps extends SpaceReputationContextParams {
+export interface FetchEntityProps
+  extends SpaceReputationContextParams,
+    TopCommentsParams {
   entityId: string;
   include?: string;
 }

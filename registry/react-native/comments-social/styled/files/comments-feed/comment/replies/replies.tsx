@@ -6,14 +6,19 @@ import Comment from "../comment";
 import ShowHideButton from "./show-hide-button";
 
 function Replies({ commentId }: { commentId: string }) {
-  const { sortBy, sortDir, entityCommentsTree, highlightedComment } =
-    useCommentSection();
+  const { highlightedComment } = useCommentSection();
 
-  const { replies, newReplies, page, setPage, loading } = useReplies({
-    commentId,
-    sortBy: sortBy!,
-    sortDir,
-  });
+  // Replies load on click, 5 at a time (no nesting in this component). The
+  // parent comment comes from useReplies too.
+  const { comment, replies, newReplies, loading, hasMore, loadMore } =
+    useReplies({ commentId, limit: 5 });
+
+  // How many times replies were requested (0 = never expanded).
+  const [page, setPage] = useState(0);
+  const handleLoadMore = () => {
+    setPage((p) => p + 1);
+    loadMore();
+  };
 
   const [areRepliesVisible, setAreRepliesVisible] = useState(false);
 
@@ -21,7 +26,6 @@ function Replies({ commentId }: { commentId: string }) {
   const repliesGap = 8;
   const repliesPaddingTop = 8;
 
-  const comment = entityCommentsTree![commentId]?.comment;
 
   const filteredReplies = useMemo(() => {
     return replies.filter((c) => c.id !== highlightedComment?.comment.id);
@@ -57,7 +61,7 @@ function Replies({ commentId }: { commentId: string }) {
     (areRepliesVisible && filteredReplies.length > 0) ||
     loading;
 
-  if ((!comment || comment.repliesCount === 0) && newReplies.length === 0)
+  if (!comment || (comment.repliesCount === 0 && newReplies.length === 0))
     return null;
 
   return (
@@ -94,7 +98,7 @@ function Replies({ commentId }: { commentId: string }) {
             {
               length: Math.min(
                 5,
-                comment.repliesCount - filteredReplies.length
+                comment.repliesCount - newReplies.length - filteredReplies.length
               ),
             },
             (_, index) => index + 1
@@ -108,13 +112,17 @@ function Replies({ commentId }: { commentId: string }) {
       )}
 
       <ShowHideButton
+        // repliesCount includes the viewer's own new replies (shown above), so
+        // they're subtracted along with the highlighted reply.
         totalRepliesCount={
           comment.repliesCount -
+          newReplies.length -
           (highlightedComment?.parentComment?.id === commentId ? 1 : 0)
         }
         loadedRepliesCount={filteredReplies.length}
         page={page}
-        setPage={setPage}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
         areRepliesVisible={areRepliesVisible}
         setAreRepliesVisible={setAreRepliesVisible}
       />

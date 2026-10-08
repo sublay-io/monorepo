@@ -4,14 +4,7 @@ import { Space } from "./Space";
 import { ReactionCounts, ReactionType } from "./Reaction";
 import { File } from "./File";
 import { GrantSummary } from "./ReputationGrant";
-
-export interface TopComment {
-  id: string;
-  user: User;
-  upvotesCount: number;
-  content: string;
-  createdAt: string;
-}
+import { Comment } from "./Comment";
 
 // Alias for backward compatibility - EntityFile is now just File
 export type EntityFile = File;
@@ -36,7 +29,7 @@ export interface Entity {
   downvotes: string[]; // An array of ids of users that downvoted the entity (v6 legacy - v7 uses reactionCounts)
   reactionCounts: ReactionCounts; // v7 reaction system - counts for all 8 reaction types
   userReaction?: ReactionType | null; // v7 - current user's reaction (populated when authenticated)
-  repliesCount: number; // A number representing how many comments and replies the entity has
+  commentsCount: number; // How many comments the entity has, at any depth (user-deleted, removed and block-edged comments included — the same number for every viewer)
   // sharesCount: number;
   views: number; // A number representing a count of how many views the entity received
   score: number; // A "hotness" score of ths entity. Automatically generated based on activity
@@ -48,7 +41,10 @@ export interface Entity {
   metadata: Record<string, any>; // JSON object that could contain any other data about the entity which is relevant to the project. Limited to 10KB size.
   nsfw: boolean; // The entity's own NSFW flag
   nsfwEffective: boolean; // Computed live: entity.nsfw OR the entity's space's effective NSFW
-  topComment: TopComment | null; // Optional field for top comment. As long as there is at least one comment it will be populated
+  // Populated when include contains "topComments": the entity's best top-level
+  // comments (real content only), ranked by `topCommentsSortByReaction`.
+  // `[]` when none qualify.
+  topComments?: Comment[];
   isSaved?: boolean; // Optional field populated when include contains "saved" - indicates if current user saved this entity
   grants?: GrantSummary; // Optional - reputation-grant summary, populated when include contains "grants". Zero-filled (never omitted) on projects without the grants table.
   createdAt: string; // Use camelCase for `created_at`
@@ -62,12 +58,36 @@ export interface Entity {
   moderationReason: string | null;
 }
 
+/** `include` values the entity fetches (by id, short id, foreign id, and lists) accept. */
 export type EntityInclude =
   | "space"
   | "user"
-  | "topComment"
+  | "topComments"
   | "saved"
   | "files"
   | "grants";
 export type EntityIncludeArray = EntityInclude[];
 export type EntityIncludeParam = string | EntityIncludeArray;
+
+/** `include` values the collection-entities fetch accepts (every item is saved, so no `saved`). */
+export type CollectionEntityInclude = Exclude<EntityInclude, "saved">;
+export type CollectionEntityIncludeArray = CollectionEntityInclude[];
+export type CollectionEntityIncludeParam =
+  | CollectionEntityInclude
+  | CollectionEntityIncludeArray;
+
+/** `include` values the drafts fetch accepts. */
+export type DraftInclude = "user" | "space" | "files" | "grants";
+export type DraftIncludeArray = DraftInclude[];
+export type DraftIncludeParam = DraftInclude | DraftIncludeArray;
+
+/**
+ * Options for `include=topComments` (sending either without that include is
+ * rejected by the server).
+ */
+export interface TopCommentsParams {
+  /** How many top comments per entity (default 1, max 5). */
+  topCommentsLimit?: number;
+  /** Which reaction's raw count ranks them (default `"upvote"`). */
+  topCommentsSortByReaction?: ReactionType;
+}

@@ -11,6 +11,7 @@ export { fetchFollowingByUserId } from "./fetchFollowingByUserId";
 export { fetchFollowingCountByUserId } from "./fetchFollowingCountByUserId";
 export { fetchConnectionsByUserId } from "./fetchConnectionsByUserId";
 export { fetchConnectionsCountByUserId } from "./fetchConnectionsCountByUserId";
+export { fetchCommentsByUserId } from "./fetchCommentsByUserId";
 export { createFollow } from "./createFollow";
 export { deleteFollow } from "./deleteFollow";
 export { fetchFollowStatus } from "./fetchFollowStatus";

@@ -82,6 +82,17 @@ const Comment = React.memo(
     // math with it. Falls back to 1 (square) if it's missing or unparsable.
     const gifAspectRatio = Number(comment.gif?.aspectRatio) || 1;
 
+    const [showBlockedComment, setShowBlockedComment] = useState(false);
+
+    // isUnavailable wins over every other marker (the author blocked the
+    // viewer): a neutral row with no reply/react — only removing the viewer's
+    // own reaction stays possible. A comment by someone the viewer blocked
+    // starts collapsed, and can be shown (then replied to / reacted to).
+    const isUnavailable = !!comment.isUnavailable;
+    const isBlockedCollapsed =
+      !isUnavailable && !!comment.isAuthorBlocked && !showBlockedComment;
+    const isPlaceholderRow = isUnavailable || isBlockedCollapsed;
+
     return (
       <div
         style={{
@@ -94,6 +105,66 @@ const Comment = React.memo(
               : "transparent",
         }}
       >
+        {isPlaceholderRow ? (
+          <div
+            style={{
+              paddingRight: 16,
+              paddingLeft: 16 + extraLeftPadding,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 32,
+                flexShrink: 0,
+                backgroundColor: theme === 'dark' ? '#374151' : '#E5E7EB',
+              }}
+            />
+            <span
+              style={{
+                fontSize: 13,
+                fontStyle: "italic",
+                color: theme === 'dark' ? '#9CA3AF' : '#737373',
+              }}
+            >
+              {isUnavailable
+                ? "This comment is unavailable"
+                : "Comment from a user you blocked"}
+            </span>
+            {isUnavailable ? (
+              currentReaction && (
+                <button
+                  onClick={() => toggleReaction({ reactionType: currentReaction })}
+                  style={{
+                    ...resetButton,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                  }}
+                >
+                  Remove your reaction
+                </button>
+              )
+            ) : (
+              <button
+                onClick={() => setShowBlockedComment(true)}
+                style={{
+                  ...resetButton,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: theme === 'dark' ? '#F9FAFB' : '#000',
+                }}
+              >
+                Show anyway
+              </button>
+            )}
+          </div>
+        ) : (
         <div
           style={{
             paddingRight: 16,
@@ -284,6 +355,7 @@ const Comment = React.memo(
             </div>
           </div>
         </div>
+        )}
         {!comment.parentId && <Replies commentId={comment.id} />}
       </div>
     );

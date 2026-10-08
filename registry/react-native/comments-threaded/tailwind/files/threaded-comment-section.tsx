@@ -6,7 +6,7 @@
  * Installation: npx @sublay/cli add comments-threaded
  *
  * Required dependencies:
- * - @sublay/core ^7.0.0
+ * - @sublay/react-native ^8.0.0-beta.0
  * - @sublay/ui-core-react-native ^7.0.0
  * - @gorhom/bottom-sheet
  * - nativewind ^4.0.0

@@ -10,6 +10,7 @@ import {
   fetchConnectionsByUserId,
   fetchConnectionsCountByUserId,
   fetchFollowStatus,
+  fetchCommentsByUserId,
   fetchFollowersByUserId,
   fetchFollowersCountByUserId,
   fetchFollowingByUserId,
@@ -627,5 +628,48 @@ describe("js-sdk users — response mapping", () => {
     const result = await fetchBlockedUsers(client, { page: 1 });
 
     expect(result).toEqual(envelope);
+  });
+});
+
+describe("users.fetchCommentsByUserId — request shaping", () => {
+  it("strips userId into the path, forwards history params and joins include", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchCommentsByUserId(client, {
+      userId: "u1",
+      entityId: "e1",
+      sourceId: "s1",
+      blockedFilter: "include-outbound-blocked",
+      sortBy: "top",
+      sortDir: "asc",
+      sortByReaction: "love",
+      limit: 5,
+      cursor: "c",
+      include: ["user", "parent"],
+      spaceReputation: { spaceId: "sp1" },
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/users/u1/comments", {
+      params: {
+        entityId: "e1",
+        sourceId: "s1",
+        blockedFilter: "include-outbound-blocked",
+        sortBy: "top",
+        sortDir: "asc",
+        sortByReaction: "love",
+        limit: 5,
+        cursor: "c",
+        include: "user,parent",
+        spaceReputationId: "sp1",
+      },
+    });
+  });
+
+  it("returns the cursor envelope", async () => {
+    const { client, projectInstance } = makeClient();
+    const envelope = {
+      data: [{ id: "c1", entity: null, parentComment: null }],
+      pagination: { nextCursor: "n", hasMore: true },
+    };
+    projectInstance.get.mockResolvedValueOnce({ data: envelope });
+    await expect(fetchCommentsByUserId(client, { userId: "u1" })).resolves.toEqual(envelope);
   });
 });

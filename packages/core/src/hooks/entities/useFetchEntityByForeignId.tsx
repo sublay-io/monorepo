@@ -1,9 +1,13 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
-import { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
+import {
+  Entity,
+  EntityIncludeParam,
+  TopCommentsParams,
+} from "../../interfaces/models/Entity";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 
-export interface FetchEntityByForeignIdProps {
+export interface FetchEntityByForeignIdProps extends TopCommentsParams {
   foreignId: string;
   createIfNotFound?: boolean;
   include?: EntityIncludeParam;
@@ -14,7 +18,7 @@ function useFetchEntityByForeignId(): (props: FetchEntityByForeignIdProps) => Pr
   const { projectId } = useProject();
 
   const fetchEntityByForeignId = useCallback(
-    async ({ foreignId, createIfNotFound, include }: FetchEntityByForeignIdProps) => {
+    async ({ foreignId, createIfNotFound, include, topCommentsLimit, topCommentsSortByReaction }: FetchEntityByForeignIdProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -28,6 +32,8 @@ function useFetchEntityByForeignId(): (props: FetchEntityByForeignIdProps) => Pr
           foreignId,
           createIfNotFound,
           include: Array.isArray(include) ? include.join(",") : include,
+          ...(topCommentsLimit !== undefined ? { topCommentsLimit } : {}),
+          ...(topCommentsSortByReaction ? { topCommentsSortByReaction } : {}),
         },
       });
 

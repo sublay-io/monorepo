@@ -1,7 +1,7 @@
 import { SublayHttpClient } from "../../core/client";
-import { Entity } from "../../interfaces/Entity";
+import { Entity, TopCommentsParams } from "../../interfaces/Entity";
 
-export interface FetchEntityByForeignIdProps {
+export interface FetchEntityByForeignIdProps extends TopCommentsParams {
   foreignId: string;
   createIfNotFound?: boolean;
   include?: string;

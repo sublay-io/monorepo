@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { Entity } from "../../interfaces/Entity";
+import { DraftIncludeParam, Entity } from "../../interfaces/Entity";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface FetchDraftsProps {
@@ -7,7 +7,7 @@ export interface FetchDraftsProps {
   limit?: number;
   sourceId?: string;
   spaceId?: string;
-  include?: string;
+  include?: DraftIncludeParam;
 }
 
 export async function fetchDrafts(
@@ -16,7 +16,14 @@ export async function fetchDrafts(
 ): Promise<PaginatedResponse<Entity>> {
   const response = await client.projectInstance.get<PaginatedResponse<Entity>>(
     "/entities/drafts",
-    { params: data }
+    {
+      params: {
+        ...data,
+        include: Array.isArray(data.include)
+          ? data.include.join(",")
+          : data.include,
+      },
+    }
   );
   return response.data;
 }

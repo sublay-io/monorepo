@@ -108,11 +108,11 @@ const client = await SublayClient.init({
 
 **Intentionally NOT bound**: `oauth` only (a browser redirect flow). The directory exists under `src/modules/` but is not exposed on `SublayClient`; do not document it.
 
-### 1. Entities Module (16 functions)
+### 1. Entities Module (15 functions)
 
 Core content objects (posts, articles, products, listings, etc.).
 
-`createEntity`, `fetchEntity`, `fetchEntityByForeignId`, `fetchEntityByShortId`, `fetchManyEntities`, `updateEntity`, `incrementEntityViews`, `deleteEntity`, `fetchDrafts`, `publishDraft`, `fetchTopComment`, `addReaction`, `removeReaction`, `fetchReactions`, `getUserReaction`, `isEntitySaved`
+`createEntity`, `fetchEntity`, `fetchEntityByForeignId`, `fetchEntityByShortId`, `fetchManyEntities`, `updateEntity`, `incrementEntityViews`, `deleteEntity`, `fetchDrafts`, `publishDraft`, `addReaction`, `removeReaction`, `fetchReactions`, `getUserReaction`, `isEntitySaved`
 
 `fetchManyEntities` supports rich filtering via object-shaped filters: `keywordsFilters`, `metadataFilters` (`includes`/`includesAny`/`doesNotInclude`/`exists`/`doesNotExist`), `titleFilters`, `contentFilters`, `attachmentsFilters`, `locationFilters`; plus `sortBy` (new/hot/top/controversial or `metadata.<prop>`), `sortDir`, `sortType`, `sortByReaction`, `timeFrame`, `userId`/`followedOnly`, `include`, pagination.
 
@@ -128,13 +128,15 @@ Event lifecycle, RSVPs, hosts, and invites.
 
 `createComment`, `fetchComment`, `fetchCommentByForeignId`, `updateComment`, `deleteComment`, `fetchManyComments`, `addReaction`, `removeReaction`, `fetchReactions`, `getUserReaction`
 
-Threaded replies (`parentId`), quote-replies (`referencedCommentId`), GIFs, mentions, reactions, foreign IDs, soft deletes. `fetchManyComments` sorts by `sortBy` (new/old/top/controversial).
+Threaded replies (`parentId`), quote-replies (`referencedCommentId`), GIFs, mentions, reactions, foreign IDs, soft deletes. `fetchManyComments` is the thread fetch (`entityId` → top-level comments, `parentId` → a comment's replies; cursor-paged, opt-in nested replies via `replyDepth`/`replyLimit`); a user's comment history is `users.fetchCommentsByUserId`.
 
-### 4. Users Module (18 functions)
+### 4. Users Module (19 functions)
 
 Read/update profiles and query + act on the follow/connection graph.
 
 Profiles: `fetchUserById`, `fetchUserByForeignId`, `fetchUserByUsername`, `fetchUserSuggestions`, `checkUsernameAvailability`, `updateUser`
+
+Comment history: `fetchCommentsByUserId` (`GET /users/:userId/comments`, cursor-paged)
 
 Graph queries (by target user ID): `fetchFollowersByUserId`, `fetchFollowersCountByUserId`, `fetchFollowingByUserId`, `fetchFollowingCountByUserId`, `fetchConnectionsByUserId`, `fetchConnectionsCountByUserId`
 

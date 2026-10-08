@@ -44,12 +44,22 @@ Returns a paginated list of entities saved in the specified collection. The coll
   Comma-separated list of associations to include:
   - `user` — the author's user profile
   - `space` — the space the entity belongs to
-  - `topComment` — the highest-voted comment
+  - `topComments` — the entity's best top-level comments, as full [Comment](/v8/data-models/comment) objects (see [Top comments](/v8/data-models/entity#top-comments))
   - `files` — uploaded file/image attachments
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) for the entity
 
-  `saved` is not needed here: every entity returned by this endpoint already has `isSaved: true`.
+  `saved` isn't accepted here (`400 collection/invalid-query`): every entity returned by this endpoint already has `isSaved: true`.
 </ParamField>
+
+<ParamField query="topCommentsLimit" type="number" default="1">
+  With `include=topComments`: how many top comments per entity. Maximum `5` — larger values are treated as `5`.
+</ParamField>
+
+<ParamField query="topCommentsSortByReaction" type="string" default="upvote">
+  With `include=topComments`: the reaction whose raw count ranks the top comments (ties newest first). One of `upvote`, `downvote`, `like`, `love`, `wow`, `sad`, `angry`, `funny`.
+</ParamField>
+
+`include` values are case-insensitive. An unknown value returns `400 collection/invalid-query`, as does sending `topCommentsLimit` or `topCommentsSortByReaction` without `include=topComments`. `topComments` lists real content only — deleted, removed and block-edged comments are left out — and is `[]` when nothing qualifies. A collection keeps an entity saved before its author blocked the requesting user; on such an entity `topComments` is always `[]`.
 
 ## Response
 
@@ -72,6 +82,24 @@ Returns a paginated list of entities saved in the specified collection. The coll
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid include — 400">
+    Returned with code `collection/invalid-query` for an unknown `include` value, or when `topCommentsLimit` / `topCommentsSortByReaction` is sent without `include=topComments`.
+
+    ```json
+    { "error": "include: Unknown include `comments`. Allowed: user, space, topComments, files, grants.", "code": "collection/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="Renamed include — 400">
+    `include=topComment` is rejected with a pointer to its replacement.
+
+    ```json
+    {
+      "error": "`include=topComment` was renamed to `topComments` (with `topCommentsLimit` / `topCommentsSortByReaction`).",
+      "code": "collection/unsupported-param",
+      "param": "include"
+    }
+    ```
+  </Accordion>
   <Accordion title="Invalid Query — 400">
     Returned when a query parameter is invalid, including `sortByReaction` sent without `sortBy=top`.
     ```json

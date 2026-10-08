@@ -41,3 +41,12 @@ function RemoveReactionButton({ entityId }: { entityId: string }) {
 <ResponseField name="Entity | Comment" type="Entity | Comment">
   The updated entity or comment with the reaction removed (`userReaction: null` and decremented counts).
 </ResponseField>
+
+## Blocks
+
+Removing a reaction is undoing the user's own action, so it works across a block as long as the target is visible to the user:
+
+- **Comment:** the reaction is removed whenever the comment is visible to the user — in full, flagged `isAuthorBlocked`, or as a placeholder (for example when its author blocked them). The returned comment is shaped the way the user sees it. If the comment is on an entity whose author blocked the user, the call fails with `404 comment/not-found` and nothing changes — unless it's the user's own comment, which stays visible to them, so the reaction is removed.
+- **Entity:** if the entity's author blocked the user, the call fails with `404 entity/not-found` and nothing changes.
+
+See [Remove Comment Reaction](/v8/api-reference/comments/remove-reaction) and [Remove Entity Reaction](/v8/api-reference/entities/remove-reaction).

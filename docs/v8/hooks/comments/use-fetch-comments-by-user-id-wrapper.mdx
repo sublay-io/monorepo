@@ -1,0 +1,135 @@
+---
+title: "Use user comments"
+description: "Stateful, cursor-paginated list of a user's comments with sorting"
+icon: "cube"
+---
+
+## Overview
+
+`useFetchCommentsByUserIdWrapper` is a stateful wrapper around [`useFetchCommentsByUserId`](/v8/hooks/comments/use-fetch-comments-by-user-id) that manages the list, the cursor and the sort for a user's comment history — for example, the comments tab of a profile page.
+
+The hook doesn't fetch until `userId` is set. Changing the sort, or any prop, resets the list and fetches from the start. See [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id) for which comments the list contains.
+
+## Usage Example
+
+```tsx
+import { useFetchCommentsByUserIdWrapper } from "@sublay/react-js";
+
+function ProfileComments({ userId }: { userId: string }) {
+  const { comments, loading, error, hasMore, sortBy, setSortBy, loadMore } =
+    useFetchCommentsByUserIdWrapper({
+      userId,
+      limit: 10,
+      include: ["entity"],
+    });
+
+  return (
+    <div>
+      <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)}>
+        <option value="createdAt">Newest</option>
+        <option value="top">Top</option>
+      </select>
+      <ul>
+        {comments.map((comment) => (
+          <li key={comment.id}>
+            {comment.content}
+            {comment.entity && <span> — on {comment.entity.title}</span>}
+          </li>
+        ))}
+      </ul>
+      {error && <p>Couldn't load comments.</p>}
+      {hasMore && (
+        <button onClick={() => loadMore()} disabled={loading}>
+          Load more
+        </button>
+      )}
+    </div>
+  );
+}
+```
+
+## Parameters
+
+<ParamField body="userId" type="string | null | undefined" required>
+  The user whose comments to list.
+</ParamField>
+
+<ParamField body="entityId" type="string | null" optional>
+  Only comments on this entity.
+</ParamField>
+
+<ParamField body="sourceId" type="string | null" optional>
+  Only comments on entities with this `sourceId`.
+</ParamField>
+
+<ParamField body="blockedFilter" type='"exclude" | "include-outbound-blocked" | null' optional>
+  Server default `"exclude"`. `"include-outbound-blocked"` re-includes comments by users the signed-in user blocked, marked `isAuthorBlocked: true`.
+</ParamField>
+
+<ParamField body="limit" type="number" optional>
+  Comments per page. Default: `10`.
+</ParamField>
+
+<ParamField body="include" type="CommentIncludeParam" optional>
+  Related data to populate: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
+</ParamField>
+
+<ParamField body="defaultSortBy" type="CommentsSortByOptions" optional>
+  Initial sort: `"createdAt"`, `"top"` or `"controversial"`. Default: `"createdAt"`.
+</ParamField>
+
+<ParamField body="defaultSortDir" type='"asc" | "desc"' optional>
+  Initial sort direction; applies to every sort. Default: `"desc"`.
+</ParamField>
+
+<ParamField body="defaultSortByReaction" type="ReactionType" optional>
+  With `sortBy: "top"`: the reaction to rank by. Server default: `"upvote"`.
+</ParamField>
+
+The opt-in space-reputation params (`spaceReputation`, `spaceReputationId`, `spaceReputationDescendants`) are accepted too — see [Reputation](/v8/data-models/reputation).
+
+## Returns
+
+<ResponseField name="comments" type="Comment[]">
+  The fetched comments. Each `loadMore` appends the next page; a comment already in the list isn't added twice.
+</ResponseField>
+
+<ResponseField name="loading" type="boolean">
+  `true` while a page is loading.
+</ResponseField>
+
+<ResponseField name="error" type="Error | null">
+  The last failure. Cleared by the next successful load.
+</ResponseField>
+
+<ResponseField name="hasMore" type="boolean">
+  `true` when more comments are available.
+</ResponseField>
+
+<ResponseField name="loadMore" type="() => Promise<void>">
+  Loads the next page. Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
+</ResponseField>
+
+<ResponseField name="sortBy" type="CommentsSortByOptions">
+  Current sort.
+</ResponseField>
+
+<ResponseField name="setSortBy" type="(sortBy: CommentsSortByOptions) => void">
+  Changes the sort and reloads from the start.
+</ResponseField>
+
+<ResponseField name="sortDir" type='"asc" | "desc"'>
+  Current sort direction.
+</ResponseField>
+
+<ResponseField name="setSortDir" type='(sortDir: "asc" | "desc") => void'>
+  Changes the sort direction and reloads from the start.
+</ResponseField>
+
+<ResponseField name="sortByReaction" type="ReactionType | undefined">
+  The reaction `"top"` ranks by. Only sent with `sortBy: "top"`.
+</ResponseField>
+
+<ResponseField name="setSortByReaction" type="(reaction: ReactionType | undefined) => void">
+  Changes the ranking reaction and reloads from the start.
+</ResponseField>

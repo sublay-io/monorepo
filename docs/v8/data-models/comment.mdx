@@ -13,30 +13,34 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `foreignId` | `string \| null` | Your system's ID for this comment, if applicable. |
 | `projectId` | `string` | The project this comment belongs to. |
 | `entityId` | `string` | The entity this comment belongs to. |
-| `entity` | `Entity` | Populated when `include` contains `"entity"` or `"space"`. |
-| `userId` | `string` | The ID of the user who posted this comment. |
-| `user` | `User` | The comment author. Populated when `include` contains `"user"`. |
+| `entity` | `Entity \| null` | Populated when `include` contains `"entity"` or `"space"`. `null` on [your own comment on an unavailable entity](/v8/api-reference/users/fetch-comments-by-user-id#your-own-comments-on-an-unavailable-entity). |
+| `userId` | `string \| null` | The ID of the user who posted this comment. `null` on [placeholders](#placeholders). |
+| `user` | `User \| null` | The comment author. Populated when `include` contains `"user"`. `null` on placeholders. |
 | `parentId` | `string \| null` | ID of the parent comment if this is a reply. `null` for top-level comments. |
-| `parentComment` | `Comment` | The parent comment object. Populated when `include` contains `"parent"`. |
-| `content` | `string \| null` | Text content of the comment. |
-| `gif` | `GifData \| null` | Attached GIF, if any. |
-| `mentions` | `Mention[]` | Array of user mentions embedded in the comment. |
+| `parentComment` | `Comment \| null` | The parent comment, under the same placeholder and block rules as any comment. Populated when `include` contains `"parent"` (user history and single-comment fetches). `null` for top-level comments, and on your own comment on an unavailable entity. |
+| `content` | `string \| null` | Text content of the comment. `null` on placeholders. |
+| `gif` | `GifData \| null` | Attached GIF, if any. `null` on placeholders. |
+| `mentions` | `Mention[]` | Array of user mentions embedded in the comment. `[]` on placeholders. |
+| `attachments` | `Record<string, any>[]` | Generic attachment objects. `[]` on placeholders. |
 | `upvotes` | `string[]` | Legacy v6 field — array of user IDs that upvoted. Use `reactionCounts` in v8. |
 | `downvotes` | `string[]` | Legacy v6 field — array of user IDs that downvoted. Use `reactionCounts` in v8. |
 | `reactionCounts` | `ReactionCounts` | Counts for all 8 reaction types. See [Reaction](/v8/data-models/reaction). |
 | `userReaction` | `ReactionType \| null` | The current user's reaction, populated when authenticated. |
-| `repliesCount` | `number` | Number of direct replies to this comment. |
+| `repliesCount` | `number` | Number of direct replies to this comment, for display. See [What `repliesCount` counts](#what-repliescount-counts). |
 | `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
-| `metadata` | `Record<string, any>` | Custom key-value data (max 10 KB). |
+| `metadata` | `Record<string, any> \| null` | Custom key-value data (max 1 MB). `null` on placeholders. |
 | `moderationStatus` | `"approved" \| "removed" \| null` | Space moderation status. |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
 | `moderatedById` | `string \| null` | ID of the moderator. |
 | `moderatedByType` | `"client" \| "user" \| null` | Whether a client (admin) or user performed moderation. |
 | `moderationReason` | `string \| null` | Reason provided for moderation. |
-| `userDeletedAt` | `Date \| null` | Set when a user soft-deletes their own comment. Content is replaced with a placeholder but the comment record remains (Reddit-style behavior). |
+| `userDeletedAt` | `Date \| null` | Set when the author deletes their own comment. The comment stays in threads as a [placeholder](#placeholders), so the replies under it remain. |
 | `createdAt` | `Date` | When the comment was created. |
 | `updatedAt` | `Date` | When the comment was last updated. |
 | `deletedAt` | `Date \| null` | Hard-delete timestamp. `null` for active comments. |
+| `isAuthorBlocked` | `boolean` | `true` when the requesting user blocked this comment's author and the comment is returned in full. See [Blocked authors](#blocked-authors). |
+| `isUnavailable` | `boolean` | `true` when the comment exists but can't be shown to the requesting user; it is returned as a placeholder. See [Blocked authors](#blocked-authors). |
+| `replies` | `{ data: Comment[]; pagination: { nextCursor: string \| null; hasMore: boolean } }` | Nested replies. Present only on [thread fetches](/v8/api-reference/comments/fetch-many-comments#nested-replies) with `replyDepth` above `0`, and absent on comments at the last nested level. |
 
 ## Nested Types
 
@@ -55,15 +59,54 @@ All six fields are required when a GIF is attached.
 
 ## Includes
 
-Pass an `include` array to populate optional fields:
+Pass `include` to populate optional fields. What each endpoint accepts:
 
-| Include value | Populates |
-|--------------|-----------|
-| `"user"` | `user` — the comment author |
-| `"entity"` | `entity` — the parent entity |
-| `"space"` | `entity` with its associated space populated |
-| `"parent"` | `parentComment` — the parent comment, for replies |
-| `"grants"` | `grants` — the reputation-grant summary |
+| Include value | Populates | Thread fetch | User history and single-comment fetches |
+|--------------|-----------|:---:|:---:|
+| `"user"` | `user` — the comment author | ✓ | ✓ |
+| `"grants"` | `grants` — the reputation-grant summary | ✓ | ✓ |
+| `"entity"` | `entity` — the entity the comment is on | | ✓ |
+| `"space"` | `entity` with its associated space populated | | ✓ |
+| `"parent"` | `parentComment` — the parent comment, for replies | | ✓ |
+
+On a thread fetch, `include` applies at every nested level.
+
+## Placeholders
+
+A comment that can't be shown in full stays in place as a **placeholder**, so the replies under it — other people's conversation — aren't lost. There are three kinds, and each keeps a marker so your app can tell them apart:
+
+| Kind | Marker | Who sees the full comment |
+|------|--------|---------------------------|
+| Deleted by its author | `userDeletedAt` is set | Nobody |
+| Removed by a moderator | `moderationStatus: "removed"` | Its author |
+| Unavailable to this user | `isUnavailable: true` | — |
+
+On a placeholder, `userId`, `user`, `content`, `gif` and `metadata` are `null`, and `mentions` and `attachments` are `[]`. Everything else is kept: `id`, `entityId`, `parentId`, `foreignId`, timestamps, `reactionCounts`, `repliesCount` and the markers.
+
+Markers can combine — for example, a deleted comment whose author blocked the requesting user carries both `userDeletedAt` and `isUnavailable: true`. Render `isUnavailable` first: show the neutral unavailable row, without reply or reaction controls.
+
+Nothing is written into `content`; render your own wording for each kind.
+
+## Blocked authors
+
+When the requesting user is signed in and the `moderation` bundle is installed, comments returned by thread, user-history, single-comment, `topComments` and add/remove-reaction responses carry two flags (both `false` by default):
+
+| The requesting user and the comment's author | The comment is returned as | Flags |
+|---|---|---|
+| The requesting user blocked the author | the full comment | `isAuthorBlocked: true` |
+| The author blocked the requesting user, or both blocked each other | a placeholder | `isUnavailable: true`, `isAuthorBlocked: false` |
+| No block | usual | both `false` |
+
+- **`isAuthorBlocked`** reflects only the requesting user's own preference. Your app decides how to render it — collapse it, offer "show anyway", or hide it. The user can still reply to and react to it.
+- **`isUnavailable`** is neutral: the comment exists, but can't be shown to this user, and the reason isn't disclosed. Replying to or reacting to it is refused, so hide those controls.
+
+Other responses that return a comment — create comment, update comment and search — don't include these flags.
+
+## What `repliesCount` counts
+
+`repliesCount` is the number of a comment's direct replies, and it counts **everything the thread contains**: deleted, removed and unavailable replies included, since they stay in the thread as placeholders. It's the same number for every user, and it matches what paging through the comment's replies returns. Use it for display ("12 replies"), and use `pagination.hasMore` to decide whether to show a "load more" button.
+
+An entity's [`commentsCount`](/v8/data-models/entity) counts its comments at every depth by the same rule.
 
 ## See Also
 
@@ -71,4 +114,5 @@ Pass an `include` array to populate optional fields:
 - [Entity](/v8/data-models/entity)
 - [ReputationGrant](/v8/data-models/reputation-grant)
 - [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments)
+- [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id)
 - [useEntityComments hook](/v8/hooks/comments/use-entity-comments)

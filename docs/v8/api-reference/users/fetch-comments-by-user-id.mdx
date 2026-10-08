@@ -1,0 +1,160 @@
+---
+title: "Fetch Comments by User"
+api: "GET /v8/:projectId/users/:userId/comments"
+description: "Get a user's comment history — their comments at any depth, cursor-paginated"
+---
+
+import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
+
+<Note>
+  **Requires the `comments` bundle.** A project without the comments bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
+</Note>
+
+Returns a user's comments as one flat list — top-level comments and replies alike, across every entity — cursor-paginated. Use it for profile pages and activity views. To render a discussion, use [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments) instead.
+
+Authentication is optional. An unknown `userId` returns an empty page.
+
+**What's in the list:**
+
+- **Deleted comments** are left out.
+- **Moderator-removed comments** are left out of other people's history. In the caller's **own** history they are included in full, marked `moderationStatus: "removed"`.
+- **Blocks:** comments by a user the caller is [block-edged](/v8/sdk/moderation/overview#blocking) with are left out by default (see `blockedFilter`). Comments on an entity whose author has blocked the caller are left out too — except the caller's own (see [Your own comments on an unavailable entity](#your-own-comments-on-an-unavailable-entity)).
+
+## Path Parameters
+
+<ParamField path="userId" type="string" required>
+  The Sublay user ID (UUID) of the user whose comments to list.
+</ParamField>
+
+## Query Parameters
+
+### Filtering
+
+<ParamField query="entityId" type="string">
+  Only comments on this entity.
+</ParamField>
+
+<ParamField query="sourceId" type="string">
+  Only comments on entities with this `sourceId`. Applied whether or not `include` contains `entity`. On a project without the `entities` bundle, a request with `sourceId` returns an empty page.
+</ParamField>
+
+<ParamField query="blockedFilter" type="string" default="exclude">
+  How comments by users the caller is block-edged with are treated. `"exclude"` (default) leaves them out. `"include-outbound-blocked"` re-includes comments by users the caller **themselves** blocked — returned in full and marked `isAuthorBlocked: true` — and never surfaces content from users who blocked the caller. Has no effect when the `moderation` bundle is not installed.
+</ParamField>
+
+### Pagination
+
+<ParamField query="limit" type="number" default="10">
+  Comments per batch. Values above `100` are treated as `100`.
+</ParamField>
+
+<ParamField query="cursor" type="string">
+  Leave it out on the first request, then pass `pagination.nextCursor` from the previous response. Must be sent with the same `sortBy`, `sortDir` and `sortByReaction` it was created under. Cursors work as on the thread endpoint — see [Cursors](/v8/api-reference/comments/fetch-many-comments#cursors).
+</ParamField>
+
+### Sorting
+
+<ParamField query="sortBy" type="string" default="createdAt">
+  `createdAt`, `top` (raw count of `sortByReaction`) or `controversial` — the same meanings as on [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments#sorting). `new` and `old` are deprecated aliases for `createdAt` and receive a `Deprecation` response header.
+</ParamField>
+
+<ParamField query="sortDir" type="string" default="desc">
+  `asc` or `desc`. Applies to every sort.
+</ParamField>
+
+<ParamField query="sortByReaction" type="string" default="upvote">
+  With `sortBy=top` only: the reaction to rank by (`upvote`, `downvote`, `like`, `love`, `wow`, `sad`, `angry`, `funny`). Sending it with any other `sortBy` returns `400`.
+</ParamField>
+
+### Optional associations
+
+<ParamField query="include" type="string">
+  Comma-separated list of associations to include in each comment:
+  - `user` — the comment author, with avatar and banner file URLs
+  - `entity` — the entity the comment is on
+  - `space` — the entity's space (also includes `entity`)
+  - `parent` — `parentComment`, for replies
+  - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)
+
+  Values are lowercase and matched exactly — `User` is rejected as unknown.
+</ParamField>
+
+### Space-scoped reputation
+
+This endpoint accepts the opt-in reputation params, resolved against each comment's space. They add a `spaceReputation` field to each populated author `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation).
+
+<SpaceReputationParams variant="context" field="query" />
+
+## Response
+
+```json
+{
+  "data": [ ...Comment[] ],
+  "pagination": { "nextCursor": "eyJ2Ijox…", "hasMore": true }
+}
+```
+
+<ResponseField name="data" type="Comment[]">
+  The user's comments, in sort order. Each item is a [Comment](/v8/data-models/comment), with `isAuthorBlocked` and `isUnavailable` flags. No comment carries nested `replies`.
+</ResponseField>
+
+<ResponseField name="pagination.nextCursor" type="string | null">
+  Pass this as `cursor` to get the next batch. `null` when there's nothing more.
+</ResponseField>
+
+<ResponseField name="pagination.hasMore" type="boolean">
+  Whether more comments exist after this batch. Exact.
+</ResponseField>
+
+An embedded `parentComment` follows the same rules as everywhere else: a deleted or removed parent is a [placeholder](/v8/data-models/comment#placeholders), and a parent whose author blocked the caller is a placeholder with `isUnavailable: true`.
+
+### Your own comments on an unavailable entity
+
+When the caller lists their **own** history, their comments on an entity whose author has blocked them stay in the list, so they can still find and delete them. On those comments, everything belonging to the entity's author is blanked: `entity` (which carries `space`) and `parentComment` are `null` when requested.
+
+These comments are **read-and-delete only**: replying under them, reacting to them, and editing them are refused (`404`). They aren't marked by a dedicated field; you can recognise them by `entity` / `parentComment` being `null` when you requested them.
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Unsupported parameter — 400">
+    `page` isn't supported — comments use cursor pagination.
+
+    ```json
+    {
+      "error": "`page` isn't supported on this endpoint. Comments use cursor pagination: leave `cursor` out on the first request, then pass `pagination.nextCursor` from the previous response to get the next batch.",
+      "code": "comment/unsupported-param",
+      "param": "page"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Invalid user ID — 400">
+    Returned with code `comment/invalid-params` when `userId` isn't a valid UUID.
+  </Accordion>
+  <Accordion title="Invalid query — 400">
+    Returned with code `comment/invalid-query` for invalid values — for example an unknown `include` value or `sortByReaction` without `sortBy=top`.
+  </Accordion>
+  <Accordion title="Invalid cursor — 400">
+    ```json
+    {
+      "error": "Invalid `cursor`. Pass `pagination.nextCursor` from a previous response unchanged, or leave `cursor` out to start from the beginning.",
+      "code": "comment/invalid-cursor"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Cursor from a different sort — 400">
+    ```json
+    {
+      "error": "This `cursor` was created under a different sort. Send the same `sortBy`, `sortDir` and `sortByReaction` as the request that returned it, or leave `cursor` out to start from the beginning.",
+      "code": "comment/cursor-sort-mismatch"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## See Also
+
+- [`useFetchCommentsByUserIdWrapper` hook](/v8/hooks/comments/use-fetch-comments-by-user-id-wrapper)
+- [`useFetchCommentsByUserId` hook](/v8/hooks/comments/use-fetch-comments-by-user-id)
+- [Comment data model](/v8/data-models/comment)
+- [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments)

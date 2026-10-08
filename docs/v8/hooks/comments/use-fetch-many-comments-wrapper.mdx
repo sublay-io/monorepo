@@ -1,49 +1,48 @@
 ---
 title: "Use comments"
-description: "Stateful, paginated comment list with sorting"
+description: "Stateful, cursor-paginated comment thread list with sorting"
 icon: "cube"
 ---
 
 ## Overview
 
-`useFetchManyCommentsWrapper` is a stateful wrapper around [`useFetchManyComments`](/v8/hooks/comments/use-fetch-many-comments) that manages pagination, sort state, and the comment list for you. Use it when you need a custom paginated comment list outside of `CommentSectionProvider` — for example, a user profile page showing all comments a user has made, or a custom thread viewer.
+`useFetchManyCommentsWrapper` is a stateful wrapper around [`useFetchManyComments`](/v8/hooks/comments/use-fetch-many-comments) that manages the list, the cursor and the sort for you. It lists one level of a thread: an entity's top-level comments (`entityId`) or a comment's direct replies (`parentId`). Use it for a custom thread view outside `CommentSectionProvider`.
 
-Changing `sortBy` resets the list and re-fetches from page 1. At least one of `entityId`, `userId`, or `parentId` must be provided — the hook will not fetch otherwise.
+The hook doesn't fetch until `entityId` or `parentId` is set. Changing the sort, or any prop, resets the list and fetches from the start.
+
+Nested replies (`replyDepth` above `0`) come back inside each comment's `replies` exactly as the server delivers them — the hook doesn't track them. For per-comment "load more replies", use `CommentSectionProvider` with [`useReplies`](/v8/hooks/comments/use-replies).
+
+For a user's comments across entities, use [`useFetchCommentsByUserIdWrapper`](/v8/hooks/comments/use-fetch-comments-by-user-id-wrapper).
 
 ## Usage Example
 
 ```tsx
 import { useFetchManyCommentsWrapper } from "@sublay/react-js";
 
-function UserComments({ userId }: { userId: string }) {
-  const {
-    comments,
-    loading,
-    hasMore,
-    sortBy,
-    setSortBy,
-    loadMore,
-  } = useFetchManyCommentsWrapper({
-    userId,
-    limit: 10,
-    defaultSortBy: "createdAt",
-    include: ["entity"],
-  });
+function ReplyList({ commentId }: { commentId: string }) {
+  const { comments, loading, error, hasMore, sortBy, setSortBy, loadMore } =
+    useFetchManyCommentsWrapper({
+      parentId: commentId,
+      limit: 10,
+      defaultSortBy: "createdAt",
+      defaultSortDir: "asc",
+      include: "user",
+    });
 
   return (
     <div>
-      <select value={sortBy ?? ""} onChange={(e) => setSortBy(e.target.value as any)}>
-        <option value="createdAt">Newest</option>
+      <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)}>
+        <option value="createdAt">Oldest</option>
         <option value="top">Top</option>
-        <option value="controversial">Controversial</option>
       </select>
       <ul>
         {comments.map((comment) => (
           <li key={comment.id}>{comment.content}</li>
         ))}
       </ul>
+      {error && <p>Couldn't load replies.</p>}
       {hasMore && (
-        <button onClick={loadMore} disabled={loading}>
+        <button onClick={() => loadMore()} disabled={loading}>
           Load more
         </button>
       )}
@@ -55,67 +54,95 @@ function UserComments({ userId }: { userId: string }) {
 ## Parameters
 
 <ParamField body="entityId" type="string | null" optional>
-  Filter to comments on a specific entity.
-</ParamField>
-
-<ParamField body="userId" type="string | null" optional>
-  Filter to comments by a specific user.
+  List this entity's top-level comments.
 </ParamField>
 
 <ParamField body="parentId" type="string | null" optional>
-  Filter to replies of a specific parent comment.
-</ParamField>
-
-<ParamField body="sourceId" type="string | null" optional>
-  Filter to comments within a specific source.
+  List this comment's direct replies. With both set, `parentId` decides the level and `entityId` must match the parent's entity — otherwise the list is empty.
 </ParamField>
 
 <ParamField body="limit" type="number" optional>
-  Number of comments per page. Default: `10`.
+  Comments per page. Default: `10`.
 </ParamField>
 
-<ParamField body="defaultSortBy" type='"createdAt" | "top" | "controversial"' optional>
-  Initial sort order. Default: `"createdAt"`. `"new"`/`"old"` are deprecated aliases for `"createdAt"` (removed in v8).
+<ParamField body="defaultSortBy" type="CommentsSortByOptions" optional>
+  Initial sort: `"createdAt"`, `"top"` or `"controversial"`. Default: `"createdAt"`. `"new"` / `"old"` are deprecated aliases for `"createdAt"`.
 </ParamField>
 
 <ParamField body="defaultSortDir" type='"asc" | "desc"' optional>
-  Initial sort direction for `sortBy: "createdAt"`. Default: `"desc"` (newest first).
+  Initial sort direction; applies to every sort. Default: `"desc"`.
 </ParamField>
 
-<ParamField body="include" type="CommentIncludeParam" optional>
-  Populate related data. Accepted values: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`. On a comment feed, `"parent"` is accepted but not resolved — `parentComment` is populated only by the two single-comment reads.
+<ParamField body="defaultSortByReaction" type="ReactionType" optional>
+  With `sortBy: "top"`: the reaction to rank by (raw count). Server default: `"upvote"`.
+</ParamField>
+
+<ParamField body="include" type='"user" | "grants" | ("user" | "grants")[]' optional>
+  Related data to populate, at every level.
+</ParamField>
+
+<ParamField body="replyDepth" type="number" optional>
+  Levels of replies to nest under each comment (`0`–`5`). Server default: `0`.
+</ParamField>
+
+<ParamField body="replyLimit" type="number" optional>
+  Replies per comment in the nested levels. Server default: `3`.
+</ParamField>
+
+<ParamField body="replySortBy" type="CommentReplySortByOptions" optional>
+  Sort for the nested levels. Defaults to the current sort.
+</ParamField>
+
+<ParamField body="replySortDir" type='"asc" | "desc"' optional>
+  Sort direction for the nested levels. Defaults to the current direction.
+</ParamField>
+
+<ParamField body="replySortByReaction" type="ReactionType" optional>
+  The reaction the nested levels rank by, when their sort is `"top"`.
 </ParamField>
 
 ## Returns
 
 <ResponseField name="comments" type="Comment[]">
-  The current list of fetched comments. Appended to on each `loadMore` call.
+  The fetched comments. Each `loadMore` appends the next page; a comment already in the list isn't added twice.
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
-  `true` while fetching the initial page or loading more.
+  `true` while a page is loading.
+</ResponseField>
+
+<ResponseField name="error" type="Error | null">
+  The last failure. Cleared by the next successful load.
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">
-  `true` if additional pages are available.
+  `true` when more comments are available.
 </ResponseField>
 
-<ResponseField name="sortBy" type="CommentsSortByOptions | null">
-  Current sort order.
+<ResponseField name="loadMore" type="() => Promise<void>">
+  Loads the next page. Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
+</ResponseField>
+
+<ResponseField name="sortBy" type="CommentsSortByOptions">
+  Current sort.
 </ResponseField>
 
 <ResponseField name="setSortBy" type="(sortBy: CommentsSortByOptions) => void">
-  Change the sort order. Resets the comment list and re-fetches from page 1.
+  Changes the sort and reloads from the start.
 </ResponseField>
 
 <ResponseField name="sortDir" type='"asc" | "desc"'>
-  Current sort direction for `sortBy: "createdAt"`.
+  Current sort direction.
 </ResponseField>
 
 <ResponseField name="setSortDir" type='(sortDir: "asc" | "desc") => void'>
-  Change the sort direction. Resets the comment list and re-fetches from page 1.
+  Changes the sort direction and reloads from the start.
 </ResponseField>
 
-<ResponseField name="loadMore" type="() => void">
-  Load the next page of comments. Appends to the existing list.
+<ResponseField name="sortByReaction" type="ReactionType | undefined">
+  The reaction `"top"` ranks by. Only sent with `sortBy: "top"`.
+</ResponseField>
+
+<ResponseField name="setSortByReaction" type="(reaction: ReactionType | undefined) => void">
+  Changes the ranking reaction and reloads from the start.
 </ResponseField>

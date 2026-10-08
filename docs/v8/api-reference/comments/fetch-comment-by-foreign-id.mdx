@@ -6,13 +6,6 @@ description: "Get a comment by its foreign ID"
 
 Returns a single comment matching the given `foreignId` within the project. Useful for looking up comments using your own application's identifiers.
 
-<Note>
-  If the comment author is block-edged with the signed-in caller, in either
-  direction, this returns `404` with `comment/not-found` — identical to a
-  comment that does not exist. An embedded `parentComment` is nulled under the
-  same rule. Requires the `moderation` bundle.
-</Note>
-
 ## Query Parameters
 
 <ParamField query="foreignId" type="string" required>
@@ -25,7 +18,20 @@ Returns a single comment matching the given `foreignId` within the project. Usef
 
 ## Response
 
-Returns a [Comment](/v8/data-models/comment) object. If the comment has been removed (user-deleted or moderation-removed) and the viewer is not the author, identifying fields (`userId`, `user`, `content`, `gif`, `mentions`, `attachments`) are nulled out as a Reddit-style placeholder.
+Returns a [Comment](/v8/data-models/comment) object, with `isAuthorBlocked` and `isUnavailable` flags. A deleted comment, or a moderator-removed one viewed by anyone but its author, is returned as a [placeholder](/v8/data-models/comment#placeholders) — the author and content are blanked, and the comment's `id`, `parentId`, timestamps and counts are kept.
+
+## Blocks
+
+When the caller is signed in and the `moderation` bundle is installed, the comment comes back the same way a thread shows it:
+
+- **The caller blocked the author** — the full comment, with `isAuthorBlocked: true`.
+- **The author blocked the caller** (or both blocked each other) — a [placeholder](/v8/data-models/comment#placeholders) with `isUnavailable: true`.
+- **The entity's author blocked the caller** — `404 comment/not-found`, identical to a comment that doesn't exist. This applies to every comment on that entity, except the caller's own.
+
+An embedded `parentComment` follows the same placeholder and flag rules.
+
+**Your own comment on an unavailable entity:** when the entity's author has blocked the caller, the caller can still open their **own** comments there, so they can find and delete them. `entity` (which carries `space`) and `parentComment` are `null` on those comments when requested. They are read-and-delete only: replying under them, reacting to them, and editing them are refused (`404`).
+
 
 ## Error Responses
 

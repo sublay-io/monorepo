@@ -48,19 +48,19 @@ For browsing lists of entities, use `EntityListProvider` + `useEntityList`. See 
 
 ## The `include` Parameter
 
-All fetch hooks accept an optional `include` parameter that populates related data:
+The entity fetch hooks accept an optional `include` parameter that populates related data. Each endpoint accepts only the values it supports — drafts don't take `"topComments"` or `"saved"`, collection entities don't take `"saved"` — and an unknown value is rejected with `400`:
 
 | Value | What it adds |
 |-------|-------------|
 | `"user"` | The entity author's `User` object |
 | `"space"` | The associated `Space` object |
-| `"topComment"` | The top-voted comment on this entity |
+| `"topComments"` | The entity's best top-level comments, as full `Comment` objects. Tune with `topCommentsLimit` (default `1`, max `5`) and `topCommentsSortByReaction` (default `"upvote"`). See [Top comments](/v8/data-models/entity#top-comments). |
 | `"saved"` | `isSaved: boolean` for the current authenticated user |
 | `"files"` | System-managed `File` objects attached to this entity |
 | `"grants"` | The entity's [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) — `{ total, count, viewerTotal }` |
 
 ```tsx
-const entity = await fetchEntity({ entityId, include: ["user", "topComment"] });
+const entity = await fetchEntity({ entityId, include: ["user", "topComments"], topCommentsLimit: 3 });
 ```
 
 ## Entity Data Model

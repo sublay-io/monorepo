@@ -369,7 +369,9 @@
                   "v8/hooks/comments/use-fetch-comment",
                   "v8/hooks/comments/use-fetch-comment-by-foreign-id",
                   "v8/hooks/comments/use-fetch-many-comments",
-                  "v8/hooks/comments/use-fetch-many-comments-wrapper"
+                  "v8/hooks/comments/use-fetch-many-comments-wrapper",
+                  "v8/hooks/comments/use-fetch-comments-by-user-id",
+                  "v8/hooks/comments/use-fetch-comments-by-user-id-wrapper"
                 ]
               },
               {
@@ -586,6 +588,7 @@
                   "v8/api-reference/users/fetch-user-by-foreign-id",
                   "v8/api-reference/users/fetch-user-by-username",
                   "v8/api-reference/users/fetch-user-suggestions",
+                  "v8/api-reference/users/fetch-comments-by-user-id",
                   "v8/api-reference/users/check-username-availability",
                   "v8/api-reference/users/update-user",
                   "v8/api-reference/users/delete-user"
@@ -654,7 +657,6 @@
                   "v8/api-reference/entities/fetch-many-entities",
                   "v8/api-reference/entities/fetch-drafts",
                   "v8/api-reference/entities/publish-entity",
-                  "v8/api-reference/entities/fetch-top-comment",
                   "v8/api-reference/entities/update-entity",
                   "v8/api-reference/entities/increment-entity-views",
                   "v8/api-reference/entities/delete-entity",

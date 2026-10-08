@@ -1,0 +1,98 @@
+---
+title: "Fetch comments by user"
+description: "Fetch a page of a user's comment history"
+icon: "plug"
+---
+
+import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
+
+## Overview
+
+`useFetchCommentsByUserId` returns a function that fetches one page of a user's comments ([`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id)) — top-level comments and replies alike, across entities, cursor-paginated. For a stateful list with "load more", use [`useFetchCommentsByUserIdWrapper`](/v8/hooks/comments/use-fetch-comments-by-user-id-wrapper).
+
+What the list contains:
+
+- Deleted comments are left out. Moderator-removed comments are left out of other people's history, and included in full (marked `moderationStatus: "removed"`) in the signed-in user's own.
+- Comments by users the signed-in user is block-edged with are left out by default (`blockedFilter`).
+- Comments on an entity whose author has blocked the signed-in user are left out — except their own, which stay visible so they can be found and deleted. On those, `entity` and `parentComment` are `null` when requested, and replying, reacting and editing are refused.
+
+## Usage Example
+
+```tsx
+import { useFetchCommentsByUserId } from "@sublay/react-js";
+
+function LatestComments({ userId }: { userId: string }) {
+  const fetchCommentsByUserId = useFetchCommentsByUserId();
+
+  const load = async () => {
+    const { data, pagination } = await fetchCommentsByUserId({
+      userId,
+      limit: 5,
+      include: ["entity"],
+    });
+    console.log(data, pagination.nextCursor);
+  };
+
+  return <button onClick={load}>Load</button>;
+}
+```
+
+## Parameters
+
+<ParamField path="userId" type="string" required>
+  The user whose comments to fetch.
+</ParamField>
+
+<ParamField path="entityId" type="string | null">
+  Only comments on this entity.
+</ParamField>
+
+<ParamField path="sourceId" type="string | null">
+  Only comments on entities with this `sourceId`.
+</ParamField>
+
+<ParamField path="blockedFilter" type='"exclude" | "include-outbound-blocked" | null'>
+  Server default `"exclude"`: comments by block-edged users are left out. `"include-outbound-blocked"` re-includes comments by users the signed-in user blocked, marked `isAuthorBlocked: true`.
+</ParamField>
+
+<ParamField path="limit" type="number">
+  Comments per page. Server default `10`, max `100`.
+</ParamField>
+
+<ParamField path="cursor" type="string | null">
+  `pagination.nextCursor` from the previous response. Omit for the first page. Send the same sort as the request that returned it.
+</ParamField>
+
+<ParamField path="sortBy" type="CommentsSortByOptions">
+  `"createdAt"`, `"top"` (raw count of `sortByReaction`) or `"controversial"`. Server default `"createdAt"`.
+</ParamField>
+
+<ParamField path="sortDir" type='"asc" | "desc"'>
+  Applies to every sort. Server default `"desc"`.
+</ParamField>
+
+<ParamField path="sortByReaction" type="ReactionType">
+  With `sortBy: "top"` only. Server default `"upvote"`.
+</ParamField>
+
+<ParamField path="include" type="CommentIncludeParam">
+  Related data to populate: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
+</ParamField>
+
+<SpaceReputationParams variant="context" field="path" />
+
+## Returns
+
+A `Promise<CursorPaginatedResponse<Comment>>`:
+
+<ResponseField name="data" type="Comment[]">
+  The user's comments for this page. See [Comment](/v8/data-models/comment).
+</ResponseField>
+
+<ResponseField name="pagination.nextCursor" type="string | null">
+  Pass as `cursor` to get the next page. `null` when there's nothing more.
+</ResponseField>
+
+<ResponseField name="pagination.hasMore" type="boolean">
+  Whether more comments exist after this page.
+</ResponseField>

@@ -38,6 +38,25 @@ Positive-only engagement with heart icons.
 
 ---
 
+### Loading Replies
+
+Replies load on demand: a "View more replies (N)" button ("View N more replies" on React Native) under each comment loads them in place, then the next batch while there are more, and "Hide replies" collapses them once all are loaded. The count subtracts the replies the user just posted, which are already shown.
+
+Top-level comments load 10 at a time — with a **Load more comments** button on web, and as the list scrolls on React Native.
+
+---
+
+### Blocked Users
+
+When the `moderation` bundle is installed, comments involving a block render as compact rows instead of disappearing, so the replies under them stay in place:
+
+- **"This comment is unavailable"** — the comment's author blocked the user. No author, content, reply or reaction controls are shown. If the user had reacted before, they can still remove their reaction.
+- **"Comment from a user you blocked"** — the user blocked this author. The row starts collapsed with a **Show anyway** button; once shown, the comment can be replied to and reacted to as usual.
+
+Edit the row text in `comment.tsx`. See [Comment → Blocked authors](/v8/data-models/comment#blocked-authors) for the underlying flags.
+
+---
+
 ### Sorting
 
 Built-in Top/New/Old sorting that users can switch on the fly.

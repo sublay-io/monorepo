@@ -96,7 +96,15 @@ const entity = await sublay.entities.fetchEntity({ entityId: "ent_xyz789" });
 </ParamField>
 
 <ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+</ParamField>
+
+<ParamField body="topCommentsLimit" type="number">
+  With `include` containing `"topComments"`: how many top comments per entity. Server default `1`, maximum `5`. Rejected (`400`) without `"topComments"` in `include`.
+</ParamField>
+
+<ParamField body="topCommentsSortByReaction" type="ReactionType">
+  With `include` containing `"topComments"`: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Rejected (`400`) without `"topComments"` in `include`.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />
@@ -125,7 +133,15 @@ const entity = await sublay.entities.fetchEntityByForeignId({
 </ParamField>
 
 <ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+</ParamField>
+
+<ParamField body="topCommentsLimit" type="number">
+  With `include` containing `"topComments"`: how many top comments per entity. Server default `1`, maximum `5`. Rejected (`400`) without `"topComments"` in `include`.
+</ParamField>
+
+<ParamField body="topCommentsSortByReaction" type="ReactionType">
+  With `include` containing `"topComments"`: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Rejected (`400`) without `"topComments"` in `include`.
 </ParamField>
 
 **Returns** — `Promise<Entity>`
@@ -145,7 +161,15 @@ const entity = await sublay.entities.fetchEntityByShortId({ shortId: "abc12" });
 </ParamField>
 
 <ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+</ParamField>
+
+<ParamField body="topCommentsLimit" type="number">
+  With `include` containing `"topComments"`: how many top comments per entity. Server default `1`, maximum `5`. Rejected (`400`) without `"topComments"` in `include`.
+</ParamField>
+
+<ParamField body="topCommentsSortByReaction" type="ReactionType">
+  With `include` containing `"topComments"`: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Rejected (`400`) without `"topComments"` in `include`.
 </ParamField>
 
 **Returns** — `Promise<Entity>`
@@ -199,7 +223,15 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 </ParamField>
 
 <ParamField body="include" type="string">
-  Comma-separated list of associations to populate (e.g. `"user"`).
+  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+</ParamField>
+
+<ParamField body="topCommentsLimit" type="number">
+  With `include` containing `"topComments"`: how many top comments per entity. Server default `1`, maximum `5`. Rejected (`400`) without `"topComments"` in `include`.
+</ParamField>
+
+<ParamField body="topCommentsSortByReaction" type="ReactionType">
+  With `include` containing `"topComments"`: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Rejected (`400`) without `"topComments"` in `include`.
 </ParamField>
 
 <ParamField body="timeFrame" type="string">
@@ -347,8 +379,8 @@ const { data, pagination } = await sublay.entities.fetchDrafts({
   Filter drafts to a specific space.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="DraftIncludeParam">
+  Associations to populate: `"user"`, `"space"`, `"files"`, `"grants"` (a single value or an array).
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Entity>>`
@@ -368,24 +400,6 @@ const entity = await sublay.entities.publishDraft({ entityId: "ent_xyz789" });
 </ParamField>
 
 **Returns** — `Promise<Entity>`
-
----
-
-### fetchTopComment
-
-Fetches the highest-scored (top) comment on an entity. Returns `null` if the entity has no comments.
-
-```typescript
-const topComment = await sublay.entities.fetchTopComment({
-  entityId: "ent_xyz789",
-});
-```
-
-<ParamField body="entityId" type="string" required>
-  The Sublay entity ID.
-</ParamField>
-
-**Returns** — `Promise<TopComment | null>`
 
 ---
 
@@ -427,6 +441,8 @@ const entity = await sublay.entities.removeReaction({
 </ParamField>
 
 **Returns** — `Promise<Entity>`
+
+If the entity's author has blocked the user, this fails with `404 entity/not-found` and nothing changes.
 
 ---
 

@@ -24,9 +24,21 @@ Adds a reaction of the specified type to a comment. If the user already has a re
   Override which user the reaction is attributed to. **Service or master key only.**
 </ParamField>
 
+## Blocks
+
+When the `moderation` bundle is installed:
+
+- **If the reacting user blocked the comment's author**, the reaction is allowed — the block is their own choice. The author gets no reaction notification for it; if the reaction completes a milestone, the milestone notification is still sent, with the reacting user left out of its `lastThreeUsers`.
+- **If the comment's author blocked the reacting user** (or both blocked each other), the request returns `404 comment/not-found`. These comments are marked [`isUnavailable`](/v8/data-models/comment#blocked-authors) in threads.
+- **If the author of the comment's entity blocked the reacting user**, the request returns `404 comment/not-found` — for every comment on that entity, the reacting user's own included.
+
+A refused reaction looks exactly like a missing comment and changes nothing.
+
+Reacting to a moderator-removed comment returns `404 comment/not-found`.
+
 ## Response
 
-Returns the updated [Comment](/v8/data-models/comment) object with the new `reactionCounts` map.
+Returns the updated [Comment](/v8/data-models/comment) object with the new `reactionCounts` map, shaped for the reacting user (with `isAuthorBlocked` and `isUnavailable` flags), the same way [Fetch Comment](/v8/api-reference/comments/fetch-comment) returns it.
 
 ## Error Responses
 

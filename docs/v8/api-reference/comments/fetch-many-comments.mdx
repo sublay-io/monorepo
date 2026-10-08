@@ -1,93 +1,286 @@
 ---
 title: "Fetch Many Comments"
 api: "GET /v8/:projectId/comments"
-description: "Get a paginated, sorted list of comments"
+description: "Get a comment thread: an entity's top-level comments, or a comment's replies, with optional nested replies"
 ---
 
 import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
 
-Returns a paginated list of comments. Used for both top-level comment threads (filter by `entityId`) and reply threads (filter by `parentId`). Also used for user profile comment history (filter by `userId`).
+Returns one level of a comment thread, cursor-paginated:
 
-Deleted comments in thread view appear as stripped placeholders to preserve tree structure (Reddit-style). Authors viewing their own comments always see full data.
+- **`entityId`** → the entity's **top-level** comments.
+- **`parentId`** → that comment's **direct replies**.
+
+One of the two is required. You can send both: `parentId` decides the level, and `entityId` must match the parent's entity (otherwise the page is empty).
+
+Each request can also bring a few levels of replies nested inside every returned comment (`replyDepth`, `replyLimit`), each with its own "load more" cursor — so a threaded view can render its first screen with a single request.
+
+To list a user's comments across entities, use [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id) instead.
+
+Authentication is optional. When the caller is signed in, comments by users they are [block-edged](/v8/sdk/moderation/overview#blocking) with are marked or shown as placeholders (see [Blocked authors](#blocked-authors)).
+
+<Tip>
+  For previews (for example, the best comment under an entity in a feed), use `include=topComments` on the entity fetch instead — it returns real content only. Thread fetches include placeholders.
+</Tip>
 
 ## Query Parameters
 
+### Thread
+
 <ParamField query="entityId" type="string">
-  Filter comments by entity. Returns all comments (top-level and replies) for this entity.
+  Return this entity's top-level comments. Required unless `parentId` is sent.
 </ParamField>
 
 <ParamField query="parentId" type="string">
-  Filter to replies of a specific comment. Used to fetch a reply thread.
+  Return the direct replies of this comment. Required unless `entityId` is sent.
 </ParamField>
 
-<ParamField query="userId" type="string">
-  Filter to comments by a specific user. When this matches the authenticated user's ID, soft-deleted comments are included with full data.
+### Pagination
+
+<ParamField query="limit" type="number" default="10">
+  How many comments to return **at the level being fetched** (top-level comments for `entityId`, direct replies for `parentId`). Values above `100` are treated as `100`.
 </ParamField>
 
-<ParamField query="sourceId" type="string">
-  Filter by the `sourceId` of the entity. Only effective when `include` contains `entity`.
+<ParamField query="cursor" type="string">
+  Continue after the last comment of a previous response. Leave it out on the first request, then pass `pagination.nextCursor` from the previous response. The cursor must be used with the same `sortBy`, `sortDir` and `sortByReaction` it was created under. See [Cursors](#cursors).
 </ParamField>
 
-<ParamField query="blockedFilter" type="string" default="exclude">
-  Controls how comments authored by users the viewer is [block-edged](/v8/sdk/moderation/overview#blocking) with are treated. `"exclude"` (default) hides those comments. `"include-outbound-blocked"` re-includes comments authored **only** by users the viewer themselves blocked (their own "view anyway" choice); it never surfaces content from users who blocked the viewer. Counts reflect what the viewer sees (computed post-filter). Has no effect when the `moderation` bundle is not installed.
-</ParamField>
+### Sorting
 
 <ParamField query="sortBy" type="string" default="createdAt">
-  Sort order. One of:
-  - `createdAt` — chronological by creation time (honors `sortDir`; newest first by default)
-  - `top` — by net upvotes (upvotes minus downvotes)
-  - `controversial` — high total votes with a close up/down split (comments with no votes sort last)
+  Sort for the level being fetched. One of:
+  - `createdAt` — by creation time.
+  - `top` — by the raw count of one reaction (`sortByReaction`, default `upvote`). Nothing is subtracted — a comment with 10 upvotes and 8 downvotes ranks above one with 5 upvotes.
+  - `controversial` — many up/down votes with a close split. Comments with no up/down votes sort last (under `desc`).
+
+  Ties are broken by creation time, then by ID, in the same direction — so ties are newest-first under `desc` and oldest-first under `asc`.
 </ParamField>
 
-<ParamField query="sortDir" type="string" default="DESC">
-  Sort direction for `sortBy=createdAt`. `ASC` or `DESC`.
+<ParamField query="sortDir" type="string" default="desc">
+  `asc` or `desc`. Applies to every sort, including `top` and `controversial`.
+</ParamField>
+
+<ParamField query="sortByReaction" type="string" default="upvote">
+  With `sortBy=top` only: the reaction to rank by. One of `upvote`, `downvote`, `like`, `love`, `wow`, `sad`, `angry`, `funny`. Sending it with any other `sortBy` returns `400`.
 </ParamField>
 
 <Note>
-  `new` and `old` are deprecated aliases (removed in v8). `new` === `createdAt`
-  with `sortDir=desc`; `old` === `createdAt` with `sortDir=asc`. They still work
-  identically, but requests using them receive a non-blocking `Deprecation`
-  response header — switch to `createdAt` (+ `sortDir`).
+  `new` and `old` are deprecated `sortBy` aliases: `new` is `createdAt` with the requested `sortDir`, `old` is `createdAt` ascending. They still work, but responses carry a non-blocking `Deprecation` header — use `createdAt` with `sortDir` instead. They aren't accepted for `replySortBy`.
 </Note>
 
-<ParamField query="page" type="number" default="1">
-  Page number (1-indexed).
+### Nested replies
+
+<ParamField query="replyDepth" type="number" default="0">
+  How many levels of replies to nest under each returned comment, from `0` (none) to `5`.
 </ParamField>
 
-<ParamField query="limit" type="number" default="10">
-  Number of comments per page. Maximum `100`.
+<ParamField query="replyLimit" type="number" default="3">
+  How many replies per comment **in the nested levels only**. Must be at least `1` — to nest nothing, use `replyDepth=0`. Values above `100` are treated as `100`.
 </ParamField>
+
+<ParamField query="replySortBy" type="string">
+  Sort for the nested levels: `createdAt`, `top` or `controversial`. Defaults to the level's `sortBy`.
+</ParamField>
+
+<ParamField query="replySortDir" type="string">
+  `asc` or `desc` for the nested levels. Defaults to the level's `sortDir`.
+</ParamField>
+
+<ParamField query="replySortByReaction" type="string">
+  The reaction the nested levels rank by. Only accepted when the nested sort is `top` (`replySortBy=top`, or `sortBy=top` without `replySortBy`) — otherwise `400`. Defaults to `sortByReaction` when the level is also sorted by `top`, else `upvote`. When `replySortBy` is omitted, all three reply-sort params follow the level's sort.
+</ParamField>
+
+The params come in pairs: `limit` and `sortBy`/`sortDir`/`sortByReaction` describe the level you're asking for; `replyLimit` and `replySortBy`/`replySortDir`/`replySortByReaction` describe what's nested underneath. A `parentId` request is a request for replies, so to get replies oldest-first there, send `sortBy=createdAt&sortDir=asc`.
+
+#### Request size limit
+
+Before running any query, the server computes the most comments a request could return:
+
+```
+limit × (1 + replyLimit + replyLimit² + … + replyLimit^replyDepth)
+```
+
+using the values after `limit` and `replyLimit` are capped at 100. Requests above **500** are rejected with `400 comment/reply-budget-exceeded` — they are never silently trimmed. For example, `limit=10&replyDepth=2&replyLimit=3` can return up to 10 × 13 = 130 comments, while `limit=10&replyDepth=5&replyLimit=2` (10 × 63 = 630) is rejected.
+
+### Optional associations
 
 <ParamField query="include" type="string">
-  Comma-separated list of associations to include. Valid values: `user`, `entity`, `space`, `grants` (the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary). Note `parent` is accepted by validation on this endpoint but is only resolved on the single-comment reads.)
+  Comma-separated list of associations to include, applied at every level (nested replies included):
+  - `user` — the comment author, with avatar and banner file URLs
+  - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)
 
-  <Note>
-    Requesting `space` automatically includes `entity` as well, since space membership is resolved via the entity.
-    Requesting `user` also includes the user's avatar and banner file URLs.
-  </Note>
+  Values are lowercase and matched exactly — `User` is rejected as unknown.
+
+  Every comment in a thread belongs to the entity you asked for, so `entity`, `space` and `parent` aren't available here (see [Unsupported parameters](#unsupported-parameters)).
 </ParamField>
 
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each populated author `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each populated author `user` (at every level), alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
 
 <SpaceReputationParams variant="context" field="query" />
 
 ## Response
 
-Returns a paginated response:
-
 ```json
 {
-  "data": [ ...Comment[] ],
-  "pagination": {
-    "page": 1,
-    "limit": 10,
-    "total": 54,
-    "totalPages": 6,
-    "hasMore": true
-  }
+  "data": [
+    {
+      "id": "c1",
+      "parentId": null,
+      "repliesCount": 7,
+      "isAuthorBlocked": false,
+      "isUnavailable": false,
+      "replies": {
+        "data": [
+          {
+            "id": "r1",
+            "parentId": "c1",
+            "repliesCount": 2,
+            "isAuthorBlocked": false,
+            "isUnavailable": false,
+            "replies": {
+              "data": [{ "id": "r1a", "parentId": "r1", "repliesCount": 0, "…": "…" }],
+              "pagination": { "nextCursor": null, "hasMore": false }
+            }
+          }
+        ],
+        "pagination": { "nextCursor": "eyJ2Ijox…", "hasMore": true }
+      }
+    }
+  ],
+  "pagination": { "nextCursor": "eyJ2Ijox…", "hasMore": true }
 }
 ```
 
-Each item is a [Comment](/v8/data-models/comment). In thread view (no `userId` filter), removed comments appear as stripped placeholders: `userId`, `user`, `content`, `gif`, `mentions`, and `attachments` are nulled out. Structural fields such as `id`, `parentId`, `entityId`, `reactionCounts`, `repliesCount`, `createdAt`, `updatedAt`, `metadata`, and `foreignId` are retained so the tree can be rendered. This applies to both user-deleted comments (always stripped) and moderation-removed comments (stripped for non-authors; the author sees full data).
+<ResponseField name="data" type="Comment[]">
+  The comments at the requested level, in sort order. Each item is a [Comment](/v8/data-models/comment).
+</ResponseField>
+
+<ResponseField name="pagination.nextCursor" type="string | null">
+  Pass this as `cursor` to get the next batch. `null` when there's nothing more.
+</ResponseField>
+
+<ResponseField name="pagination.hasMore" type="boolean">
+  Whether more comments exist after this batch. Exact — use it (not `repliesCount`) to decide whether to show a "load more" button.
+</ResponseField>
+
+### Nested replies
+
+With `replyDepth` above `0`, each comment carries a `replies` field with the **same envelope** as the top level: `{ data, pagination }`. A nested `replies.pagination.nextCursor` continues that comment's replies — see [Cursors](#cursors).
+
+- Comments at the last nested level have **no `replies` field** — their replies weren't fetched. `replies: { data: [] }` means they were fetched and there are none.
+- With `replyDepth=0` (the default), no comment carries `replies`.
+- Placeholders and flagged comments get nested replies like any other comment, so other people's replies under them stay in place.
+
+### Counts
+
+`repliesCount` is the number of direct replies a comment has, for display. It counts every reply the thread contains — including deleted, removed and unavailable ones, which appear as placeholders — so it's the same number for every viewer and always matches what paging through the replies returns. Drive buttons from `hasMore`.
+
+### Deleted and removed comments
+
+Deleted and moderator-removed comments stay in the thread as **placeholders**, so the replies under them aren't lost. A placeholder keeps its position, `id`, `parentId`, timestamps, `reactionCounts` and `repliesCount`, with the author and content blanked. A moderator-removed comment is shown in full to its own author. See [Placeholders](/v8/data-models/comment#placeholders).
+
+### Blocked authors
+
+Every comment carries two flags, `isAuthorBlocked` and `isUnavailable`. Both are always present, and always `false` when the caller isn't signed in or the `moderation` bundle isn't installed. Otherwise:
+
+| The caller and the comment's author | The comment is returned | Flags |
+|---|---|---|
+| The caller blocked the author | in full | `isAuthorBlocked: true` — your app decides whether to collapse it, offer "show anyway", or hide it |
+| The author blocked the caller (or both blocked each other) | as a placeholder | `isUnavailable: true` |
+| No block | as usual | both `false` |
+
+`isUnavailable` is deliberately neutral: it means the comment exists but can't be shown to this caller, without saying why. Replying to or reacting to an `isUnavailable` comment is refused, so hide those controls.
+
+When the **entity's** author has blocked the caller, the whole thread is unavailable to them: a request with that `entityId`, or with the `parentId` of any comment on that entity, returns an empty page — exactly what an entity that doesn't exist returns.
+
+## Cursors
+
+A cursor is an opaque string. It records the sort it was created under and the last comment you received, and the next request continues right after that comment. Comments posted in the meantime don't shift what you get.
+
+- Send the same `sortBy`, `sortDir` and `sortByReaction` with a cursor as the request that returned it. A different sort returns `400 comment/cursor-sort-mismatch`; to change the sort, start over without a cursor.
+- A cursor doesn't record which entity or comment it came from. Sending it with a different `entityId` or `parentId` just continues from the same sort position there.
+- **Continuing nested replies:** a `replies.pagination.nextCursor` was created under the **reply** sort. Continue it with a `parentId` request for that comment, sending the reply sort as `sortBy` / `sortDir` / `sortByReaction`:
+
+  ```
+  GET /v8/:projectId/comments?parentId=c1&cursor=<replies.pagination.nextCursor>&sortBy=<replySortBy>&sortDir=<replySortDir>
+  ```
+
+  The SDK's [`useReplies`](/v8/hooks/comments/use-replies) does this for you.
+- **Vote-ranked sorts can shift:** under `top` and `controversial`, a comment whose votes change between two requests can move past the cursor — it may be skipped (it shows up on refresh) or appear twice (de-duplicate by `id`). `createdAt` is exact.
+
+## Unsupported parameters
+
+These parameters return `400` with code `comment/unsupported-param`, a `param` field naming the parameter, and an `error` message pointing to the replacement:
+
+| Sent | Use instead |
+|---|---|
+| `page` | Cursor pagination: leave `cursor` out on the first request, then pass `pagination.nextCursor`. |
+| `userId` | [`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id). |
+| `blockedFilter` | Threads always include comments by users the caller blocked, marked `isAuthorBlocked: true`. `blockedFilter` is available on [`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id). |
+| `sourceId` | A thread already belongs to one entity. To filter a user's comments by source, use [`GET /users/:userId/comments?sourceId=…`](/v8/api-reference/users/fetch-comments-by-user-id). |
+| `include=entity`, `include=space` | Every comment in a thread belongs to the entity you requested. Supported values: `user`, `grants`. |
+| `include=parent` | Top-level comments have no parent, and replies all share the one you requested. Available on [`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id) and the single-comment fetches. |
+
+Other unknown query parameters are ignored.
+
+## Error Responses
+
+Checks run in this order; the first failing check is returned.
+
+<AccordionGroup>
+  <Accordion title="Unsupported parameter — 400">
+    ```json
+    {
+      "error": "`page` isn't supported on this endpoint. Comments use cursor pagination: leave `cursor` out on the first request, then pass `pagination.nextCursor` from the previous response to get the next batch.",
+      "code": "comment/unsupported-param",
+      "param": "page"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Invalid query — 400">
+    Returned with code `comment/invalid-query` for invalid values — for example an unknown `include` value, `sortByReaction` without `sortBy=top`, `replySortByReaction` when the nested sort isn't `top`, `replyDepth` above `5`, or `replyLimit` below `1`.
+  </Accordion>
+  <Accordion title="Missing filter — 400">
+    ```json
+    {
+      "error": "`entityId` or `parentId` is required. To list a user's comments, use `GET /users/:userId/comments`.",
+      "code": "comment/missing-filter"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Request too large — 400">
+    ```json
+    {
+      "error": "This request could return up to 630 comments (max 500). Lower `limit`, `replyLimit` or `replyDepth`.",
+      "code": "comment/reply-budget-exceeded",
+      "maxRows": 500,
+      "requestedRows": 630
+    }
+    ```
+  </Accordion>
+  <Accordion title="Invalid cursor — 400">
+    ```json
+    {
+      "error": "Invalid `cursor`. Pass `pagination.nextCursor` from a previous response unchanged, or leave `cursor` out to start from the beginning.",
+      "code": "comment/invalid-cursor"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Cursor from a different sort — 400">
+    ```json
+    {
+      "error": "This `cursor` was created under a different sort. Send the same `sortBy`, `sortDir` and `sortByReaction` as the request that returned it, or leave `cursor` out to start from the beginning.",
+      "code": "comment/cursor-sort-mismatch"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## See Also
+
+- [Comment data model](/v8/data-models/comment)
+- [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id)
+- [`useReplies`](/v8/hooks/comments/use-replies) and [Comment Section](/v8/sdk/comments/comment-section)
+- [`useFetchManyComments`](/v8/hooks/comments/use-fetch-many-comments)

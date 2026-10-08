@@ -24,11 +24,21 @@ Returns an entity matching the given `foreignId` within the project. Optionally 
   Comma-separated list of associations to include:
   - `user` — the author's user profile
   - `space` — the space the entity belongs to
-  - `topComment` — the highest-voted comment
+  - `topComments` — the entity's best top-level comments, as full [Comment](/v8/data-models/comment) objects (see [Top comments](/v8/data-models/entity#top-comments))
   - `saved` — whether the authenticated user has saved this entity
   - `files` — uploaded file/image attachments
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) for the entity
 </ParamField>
+
+<ParamField query="topCommentsLimit" type="number" default="1">
+  With `include=topComments`: how many top comments per entity. Maximum `5` — larger values are treated as `5`.
+</ParamField>
+
+<ParamField query="topCommentsSortByReaction" type="string" default="upvote">
+  With `include=topComments`: the reaction whose raw count ranks the top comments (ties newest first). One of `upvote`, `downvote`, `like`, `love`, `wow`, `sad`, `angry`, `funny`.
+</ParamField>
+
+`include` values are case-insensitive. An unknown value returns `400 entity/invalid-query`, as does sending `topCommentsLimit` or `topCommentsSortByReaction` without `include=topComments`. `topComments` lists real content only — deleted, removed and block-edged comments are left out — and is `[]` when nothing qualifies.
 
 ## Response
 
@@ -41,6 +51,24 @@ Returns an [Entity](/v8/data-models/entity) object.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid include — 400">
+    Returned with code `entity/invalid-query` for an unknown `include` value, or when `topCommentsLimit` / `topCommentsSortByReaction` is sent without `include=topComments`.
+
+    ```json
+    { "error": "include: Unknown include `comments`. Allowed: user, space, topComments, saved, files, grants.", "code": "entity/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="Renamed include — 400">
+    `include=topComment` is rejected with a pointer to its replacement.
+
+    ```json
+    {
+      "error": "`include=topComment` was renamed to `topComments` (with `topCommentsLimit` / `topCommentsSortByReaction`).",
+      "code": "entity/unsupported-param",
+      "param": "include"
+    }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Entity not found", "code": "entity/not-found" }

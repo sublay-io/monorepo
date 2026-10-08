@@ -56,8 +56,8 @@ function DraftsList() {
   Filter drafts by space.
 </ParamField>
 
-<ParamField path="include" type="string | string[]">
-  Populate related fields. Accepted values: `"user"`, `"space"`, `"files"`, `"grants"`. `"topComment"` and `"saved"` are not resolved for drafts.
+<ParamField path="include" type="DraftIncludeParam">
+  Populate related fields. Accepted values: `"user"`, `"space"`, `"files"`, `"grants"` (typed as `DraftIncludeParam`). Any other value is rejected by the server with `400 entity/invalid-query`.
 </ParamField>
 
 ## Returns

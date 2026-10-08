@@ -32,13 +32,13 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `downvotes` | `string[]` | Legacy v6 field — array of user IDs that downvoted. Use `reactionCounts` instead. |
 | `reactionCounts` | `ReactionCounts` | Counts for all 8 reaction types. See [Reaction](/v8/data-models/reaction). |
 | `userReaction` | `ReactionType \| null` | The current user's reaction. Only present when the user is authenticated and has reacted to this entity. |
-| `repliesCount` | `number` | Total number of comments and replies on this entity. |
+| `commentsCount` | `number` | How many comments the entity has, at any depth. Counts everything its thread contains — deleted, removed and unavailable comments included, since they stay in the thread as [placeholders](/v8/data-models/comment#placeholders) — so it's the same number for every user. |
 | `views` | `number` | View count. Auto-incremented on every fetch. Can also be incremented manually via the service-key-only `PATCH /entities/:entityId/increment-views` endpoint. |
 | `score` | `number` | Computed "hotness" score based on engagement activity. |
 | `scoreUpdatedAt` | `Date` | When the score was last recalculated. |
 | `location` | `GeoPoint \| null` | Optional geo-location stored as a GeoJSON point. |
 | `metadata` | `Record<string, any>` | Custom key-value data (max 10 KB). |
-| `topComment` | `TopComment \| null` | The highest-voted comment. Populated when `include` contains `"topComment"`. |
+| `topComments` | `Comment[]` | The entity's best top-level comments, as full [Comment](/v8/data-models/comment) objects. Populated when `include` contains `"topComments"`; `[]` when none qualify. See [Top comments](#top-comments). |
 | `isSaved` | `boolean` | Whether the current user has saved this entity to a collection. Populated when `include` contains `"saved"`. |
 | `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
 | `isDraft` | `boolean \| null` | Whether this entity is in draft state. |
@@ -54,18 +54,6 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `deletedAt` | `Date \| null` | Soft-delete timestamp. `null` for active entities. |
 
 ## Nested Types
-
-### TopComment
-
-Included when the entity has at least one comment.
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | `string` | Comment identifier. |
-| `user` | `User` | The comment author. |
-| `upvotesCount` | `number` | Number of upvotes on this comment. |
-| `content` | `string` | Comment text content. |
-| `createdAt` | `string` | ISO timestamp string. |
 
 ### GeoPoint
 
@@ -95,18 +83,34 @@ To filter a list by effective NSFW, pass `nsfwFilter` to [Fetch many entities](/
   Sublay only **labels** (`nsfw`) and **filters** (`nsfwFilter`) content. It does **not** blur, age-gate, add interstitials, or store a per-viewer "show mature content" preference — how NSFW-flagged content is presented is entirely the consuming app's responsibility.
 </Note>
 
+## Top comments
+
+`include=topComments` adds a preview of the entity's best comments — for example, the top comment under each entity in a feed, or a few rotating ones.
+
+- Each item is a full [Comment](/v8/data-models/comment), with its author (`user`) always included.
+- Only **top-level** comments, ranked by the raw count of one reaction (`topCommentsSortByReaction`, default `upvote`), ties newest first.
+- `topCommentsLimit` sets how many per entity: default `1`, maximum `5` (larger values are treated as `5`).
+- **Real content only:** deleted and moderator-removed comments are left out (for everyone, the author included), and so are comments whose author is block-edged with the requesting user, in either direction. So `isAuthorBlocked` and `isUnavailable` are always `false` here.
+- `[]` when no comment qualifies, on a project without the `comments` bundle, and on an entity whose author has blocked the requesting user (for example, one they saved to a collection before the block).
+
+Sending `topCommentsLimit` or `topCommentsSortByReaction` without `include=topComments` returns `400`.
+
+To render a full discussion — including placeholders, so replies stay in place — use [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments).
+
 ## Includes
 
-Pass an `include` array to populate optional fields:
+Pass `include` to populate optional fields. Each endpoint accepts its own list; an unknown value returns `400`.
 
-| Include value | Populates |
-|--------------|-----------|
-| `"user"` | `user` — the entity author |
-| `"space"` | `space` — the associated space |
-| `"topComment"` | `topComment` — top-voted comment |
-| `"saved"` | `isSaved` — whether current user saved this entity |
-| `"files"` | `files` — managed file records |
-| `"grants"` | `grants` — the reputation-grant summary |
+| Include value | Populates | Entity fetches and lists | Collection entities | Drafts |
+|--------------|-----------|:---:|:---:|:---:|
+| `"user"` | `user` — the entity author | ✓ | ✓ | ✓ |
+| `"space"` | `space` — the associated space | ✓ | ✓ | ✓ |
+| `"topComments"` | `topComments` — the best top-level comments | ✓ | ✓ | |
+| `"saved"` | `isSaved` — whether current user saved this entity | ✓ | | |
+| `"files"` | `files` — managed file records | ✓ | ✓ | ✓ |
+| `"grants"` | `grants` — the reputation-grant summary | ✓ | ✓ | ✓ |
+
+"Entity fetches and lists" are [Fetch Entity](/v8/api-reference/entities/fetch-entity), [by foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id), [by short ID](/v8/api-reference/entities/fetch-entity-by-short-id) and [Fetch Many Entities](/v8/api-reference/entities/fetch-many-entities). On collection entities every item is already saved (`isSaved: true`).
 
 ## See Also
 

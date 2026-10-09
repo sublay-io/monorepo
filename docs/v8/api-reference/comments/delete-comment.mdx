@@ -16,6 +16,10 @@ All deletes are soft-deletes: the comment's content, gif, mentions, and attachme
   The UUID of the comment to delete.
 </ParamField>
 
+## Blocks
+
+A comment on an entity whose author has blocked the caller is hidden from them, so when the caller isn't the comment's author, the delete is refused with `404 comment/not-found` — the same response as a missing comment. This check runs before the others, so such a caller gets `comment/not-found` rather than `comment/already-deleted` or a `403`. A comment's author can always delete their own comment, and requests made with a service or master key aren't subject to this check. It applies only when the `moderation` bundle is installed.
+
 ## Response
 
 Returns `204 No Content` on success.
@@ -24,6 +28,8 @@ Returns `204 No Content` on success.
 
 <AccordionGroup>
   <Accordion title="Not Found — 404">
+    Returned when the comment doesn't exist, or when the caller isn't the comment's author and the author of the comment's entity has blocked them (see [Blocks](#blocks)).
+
     ```json
     { "error": "Comment not found", "code": "comment/not-found" }
     ```
@@ -34,6 +40,8 @@ Returns `204 No Content` on success.
     ```
   </Accordion>
   <Accordion title="Forbidden — 403">
+    Returned when the caller isn't the comment's author and isn't using a service or master key.
+
     ```json
     { "error": "You do not have permission to delete this comment.", "code": "comment/not-authorized" }
     ```

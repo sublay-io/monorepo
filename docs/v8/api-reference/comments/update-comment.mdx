@@ -30,6 +30,8 @@ Both fields are individually optional, but **at least one must be provided**.
 
 Editing changes content in someone else's space, so when the `moderation` bundle is installed, editing is refused with `404 comment/not-found` when the author of the comment's entity, or the author of the comment it replies to, has blocked the comment's author. Deleting the comment is still allowed. Requests made with a master key aren't subject to this check.
 
+A comment on an entity whose author has blocked the caller is hidden from them, so when the caller isn't the comment's author, the edit is refused with `404 comment/not-found` — the same response as a missing comment, not a `403`. This check also applies only when the `moderation` bundle is installed, and requests made with a service or master key aren't subject to it.
+
 ## Response
 
 Returns the updated [Comment](/v8/data-models/comment) object.
@@ -45,13 +47,15 @@ Returns the updated [Comment](/v8/data-models/comment) object.
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
-    Returned when the comment doesn't exist, or when a block refuses the edit (see [Blocks](#blocks)).
+    Returned when the comment doesn't exist, or when a block refuses the edit — including when the caller isn't the comment's author and the author of the comment's entity has blocked them (see [Blocks](#blocks)).
 
     ```json
     { "error": "Comment not found", "code": "comment/not-found" }
     ```
   </Accordion>
   <Accordion title="Forbidden — 403">
+    Returned when the caller isn't the comment's author and isn't using a service or master key.
+
     ```json
     { "error": "You do not have permission to update this comment.", "code": "comment/forbidden" }
     ```

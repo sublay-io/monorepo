@@ -48,7 +48,7 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
 </ParamField>
 
 <ParamField body="foreignId" type="string">
-  Your application's identifier for this comment.
+  Your application's identifier for this comment. Must be unique across the project's comments — a `foreignId` already in use returns `409 comment/foreign-id-taken`.
 </ParamField>
 
 <ParamField body="mentions" type="object[]">
@@ -103,5 +103,12 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
   </Accordion>
   <Accordion title="No Content — 400">
     Returned when none of `content`, `gif`, or `attachments` is provided.
+  </Accordion>
+  <Accordion title="Foreign ID Taken — 409">
+    Returned when another comment already uses the supplied `foreignId`.
+
+    ```json
+    { "error": "A comment with this foreignId already exists.", "code": "comment/foreign-id-taken" }
+    ```
   </Accordion>
 </AccordionGroup>

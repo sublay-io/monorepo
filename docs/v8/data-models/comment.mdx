@@ -37,7 +37,7 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `userDeletedAt` | `Date \| null` | Set when the author deletes their own comment. The comment stays in threads as a [placeholder](#placeholders), so the replies under it remain. |
 | `createdAt` | `Date` | When the comment was created. |
 | `updatedAt` | `Date` | When the comment was last updated. |
-| `deletedAt` | `Date \| null` | Hard-delete timestamp. `null` for active comments. |
+| `deletedAt` | `Date \| null` | Legacy field; always `null` in responses. A user-deleted comment is marked by `userDeletedAt`. |
 | `isAuthorBlocked` | `boolean` | `true` when the requesting user blocked this comment's author and the comment is returned in full. See [Blocked authors](#blocked-authors). |
 | `isUnavailable` | `boolean` | `true` when the comment exists but can't be shown to the requesting user; it is returned as a placeholder. See [Blocked authors](#blocked-authors). |
 | `replies` | `{ data: Comment[]; pagination: { nextCursor: string \| null; hasMore: boolean } }` | Nested replies. Present only on [thread fetches](/v8/api-reference/comments/fetch-many-comments#nested-replies) with `replyDepth` above `0`, and absent on comments at the last nested level. |

@@ -98,10 +98,16 @@ export interface CommentSectionInternals {
   reputation: SpaceReputationContextParams;
   /**
    * Applied to the empty store on every reset — keeps a deep-linked
-   * (highlighted) comment in place across sort changes.
+   * (highlighted) comment in place across sort changes. Gets the store being
+   * reset too, so it can carry over the latest copy of what it seeds.
    */
-  seedRef: { current: ((store: CommentStore) => CommentStore) | null };
+  seedRef: { current: CommentStoreSeed | null };
 }
+
+export type CommentStoreSeed = (
+  empty: CommentStore,
+  previous: CommentStore,
+) => CommentStore;
 
 export const CommentSectionInternalContext =
   createContext<CommentSectionInternals | null>(null);
@@ -168,15 +174,14 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
   const hasMoreRef = useRef(true);
   const cursorRef = useRef<string | null>(null);
   const generationRef = useRef(0);
-  const seedRef = useRef<((store: CommentStore) => CommentStore) | null>(null);
+  const seedRef = useRef<CommentStoreSeed | null>(null);
 
+  // The reaction only matters to `top`; keyed on the effective value so
+  // changing it under another sort doesn't reset the section.
+  const effectiveSortByReaction = sortBy === "top" ? sortByReaction : undefined;
   const sectionSort: CommentSortTrio = useMemo(
-    () => ({
-      sortBy,
-      sortDir,
-      sortByReaction: sortBy === "top" ? sortByReaction : undefined,
-    }),
-    [sortBy, sortDir, sortByReaction],
+    () => ({ sortBy, sortDir, sortByReaction: effectiveSortByReaction }),
+    [sortBy, sortDir, effectiveSortByReaction],
   );
 
   const replySort = useMemo(
@@ -227,7 +232,8 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
       setHasMore(true);
       setError(null);
       const empty = emptyCommentStore();
-      setStore(seedRef.current ? seedRef.current(empty) : empty);
+      const seed = seedRef.current;
+      setStore((previous) => (seed ? seed(empty, previous) : empty));
     }
     try {
       const response = await requestRef.current!();

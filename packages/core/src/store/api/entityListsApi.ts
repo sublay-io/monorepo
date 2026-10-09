@@ -1,4 +1,5 @@
 import { baseApi } from "./baseApi";
+import { sendableTopCommentsParams } from "../../utils/topCommentsParams";
 import type { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 import type { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
 import type { ReactionType } from "../../interfaces/models/Reaction";
@@ -210,8 +211,8 @@ export const entityListsApi = baseApi.injectEndpoints({
             include: include
               ? Array.isArray(include) ? include.join(',') : include
               : undefined,
-            topCommentsLimit: topCommentsLimit ?? undefined,
-            topCommentsSortByReaction: topCommentsSortByReaction ?? undefined,
+            // Only with include=topComments (the server 400s them otherwise).
+            ...sendableTopCommentsParams(include, topCommentsLimit, topCommentsSortByReaction),
           }),
         };
       },

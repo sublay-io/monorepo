@@ -272,4 +272,39 @@ describe("useEntityComments", () => {
       "replySortByReaction",
     );
   });
+
+  it("changing sortByReaction while not sorting by top neither refetches nor drops loaded replies", async () => {
+    const reply = makeComment({ id: "r1", parentId: "c1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useEntityComments({ entityId: "entity-1", defaultSortBy: "createdAt", replyDepth: 1 }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse(
+            "get",
+            makePage([makeComment({ id: "c1", repliesCount: 1, replies: makePage([reply], null) })], null),
+          ),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.getComment("r1")).toBeDefined();
+
+    act(() => {
+      result.current.setSortByReaction("like");
+    });
+    await new Promise((r) => setTimeout(r, 30));
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+    expect(result.current.getComment("r1")).toBeDefined();
+    expect(result.current.sortByReaction).toBe("like");
+
+    // It applies once the sort is top.
+    axiosPrivate.mockResponse("get", makePage([], null));
+    act(() => {
+      result.current.setSortBy("top");
+    });
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(2));
+    expect(axiosPrivate.calls("get")[1].config?.params).toMatchObject({
+      sortBy: "top",
+      sortByReaction: "like",
+    });
+  });
 });

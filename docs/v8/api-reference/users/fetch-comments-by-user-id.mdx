@@ -81,7 +81,7 @@ An unknown `userId` returns an empty page.
   - `user` — the comment author, with avatar and banner file URLs
   - `entity` — the entity the comment is on
   - `space` — the entity's space (also includes `entity`)
-  - `parent` — `parentComment`, for replies
+  - `parent` — `parentComment`, for replies; `null` when the parent no longer exists or is on another entity
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)
 
   Values are lowercase and matched exactly — `User` is rejected as unknown.

@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { sendableTopCommentsParams } from "../../utils/topCommentsParams";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import {
@@ -121,12 +122,15 @@ function useFetchManyEntities(): (params?: FetchManyEntitiesParams) => Promise<P
           ? params.include.join(',')
           : params.include;
       }
-      if (params?.topCommentsLimit !== undefined) {
-        queryParams.topCommentsLimit = params.topCommentsLimit;
-      }
-      if (params?.topCommentsSortByReaction) {
-        queryParams.topCommentsSortByReaction = params.topCommentsSortByReaction;
-      }
+      // Only with include=topComments (the server 400s them otherwise).
+      Object.assign(
+        queryParams,
+        sendableTopCommentsParams(
+          params?.include,
+          params?.topCommentsLimit,
+          params?.topCommentsSortByReaction
+        )
+      );
 
       // Serialize complex filter objects into bracket notation
       if (params?.keywordsFilters) {

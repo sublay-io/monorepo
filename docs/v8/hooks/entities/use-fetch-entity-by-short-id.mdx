@@ -42,11 +42,11 @@ function SharePage() {
 </ParamField>
 
 <ParamField path="topCommentsLimit" type="number">
-  With `"topComments"` included: how many top comments per entity. Server default `1`, maximum `5`. Sending it without `"topComments"` in `include` is rejected (`400`).
+  With `"topComments"` included: how many top comments per entity. Server default `1`, maximum `5`. Not sent when `include` doesn't contain `"topComments"`.
 </ParamField>
 
 <ParamField path="topCommentsSortByReaction" type="ReactionType">
-  With `"topComments"` included: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Sending it without `"topComments"` in `include` is rejected (`400`).
+  With `"topComments"` included: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Not sent when `include` doesn't contain `"topComments"`.
 </ParamField>
 
 ## Returns

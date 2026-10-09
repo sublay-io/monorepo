@@ -120,10 +120,10 @@ function SocialCommentSectionInner({
     sortBy: CommentsSortByOptions;
     sortDir?: "asc" | "desc";
   }> = [
-    { label: "Top", sortBy: "top" },
+    { label: "Top", sortBy: "top", sortDir: "desc" },
     { label: "New", sortBy: "createdAt", sortDir: "desc" },
     { label: "Old", sortBy: "createdAt", sortDir: "asc" },
-    { label: "Controversial", sortBy: "controversial" },
+    { label: "Controversial", sortBy: "controversial", sortDir: "desc" },
   ];
 
   const renderSortButtons = () => {

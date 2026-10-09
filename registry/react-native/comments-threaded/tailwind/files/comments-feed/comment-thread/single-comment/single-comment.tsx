@@ -94,6 +94,12 @@ function SingleComment({
         ? "[removed]"
         : null;
 
+  // The viewer's own moderator-removed comment comes back in full (only its
+  // author sees it). Voting on it is refused by the server, so there are no
+  // vote buttons; reply and delete stay.
+  const isOwnRemoved =
+    !tombstone && comment.moderationStatus === "removed" && !!comment.userId;
+
   // Dynamically get the correct Image component
   const { ImageComponent, isExpo } = getImageComponent();
 
@@ -336,12 +342,14 @@ function SingleComment({
                     setShowReplyForm={setShowReplyForm}
                   />
                   {/* Vote buttons inline with reply options */}
-                  <View>
-                    <VoteButtons
-                      comment={comment}
-                      size="small"
-                    />
-                  </View>
+                  {!isOwnRemoved && (
+                    <View>
+                      <VoteButtons
+                        comment={comment}
+                        size="small"
+                      />
+                    </View>
+                  )}
                 </View>
 
                 {/* Reply form */}

@@ -120,6 +120,9 @@ export function useCursorCommentList({
     }
   }, []);
 
+  // The reaction only matters to `top`; changing it under another sort
+  // doesn't reset the list.
+  const effectiveSortByReaction = sortBy === "top" ? sortByReaction : undefined;
   useEffect(() => {
     if (!enabled) {
       // Drop any in-flight response for the previous target.
@@ -127,7 +130,7 @@ export function useCursorCommentList({
       return;
     }
     runFetch(true);
-  }, [enabled, resetKey, sortBy, sortDir, sortByReaction, runFetch]);
+  }, [enabled, resetKey, sortBy, sortDir, effectiveSortByReaction, runFetch]);
 
   const enabledRef = useRef(enabled);
   enabledRef.current = enabled;

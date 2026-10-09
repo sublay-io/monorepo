@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { sendableTopCommentsParams } from "../../utils/topCommentsParams";
 import useProject from "../projects/useProject";
 import {
   Entity,
@@ -30,8 +31,8 @@ function useFetchEntityByShortId(): (props: FetchEntityByShortIdProps) => Promis
         params: {
           shortId,
           include: Array.isArray(include) ? include.join(",") : include,
-          ...(topCommentsLimit !== undefined ? { topCommentsLimit } : {}),
-          ...(topCommentsSortByReaction ? { topCommentsSortByReaction } : {}),
+          // Only with include=topComments (the server 400s them otherwise).
+          ...sendableTopCommentsParams(include, topCommentsLimit, topCommentsSortByReaction),
         },
       });
 

@@ -124,6 +124,12 @@ const Comment = React.memo(
           ? "[removed]"
           : null;
 
+    // The viewer's own moderator-removed comment comes back in full (only its
+    // author sees it). Reacting to it is refused by the server, so there's no
+    // reaction control; reply and delete stay.
+    const isOwnRemoved =
+      !tombstone && comment.moderationStatus === "removed" && !!comment.userId;
+
     const imageStyle = {
       width: gifAspectRatio > 1 ? 200 : 200 * gifAspectRatio,
       height: gifAspectRatio < 1 ? 200 : 200 / gifAspectRatio,
@@ -365,7 +371,7 @@ const Comment = React.memo(
               </View>
               )}
             </View>
-            {!tombstone && (
+            {!tombstone && !isOwnRemoved && (
             <View style={styles.likesContainer}>
               <HeartButton
                 userUpvoted={userUpvotedComment}

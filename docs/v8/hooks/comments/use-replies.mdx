@@ -106,7 +106,7 @@ A request can return at most 500 comments (see [Request size limit](/v8/api-refe
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">
-  Whether there are replies to load. Before the comment's replies were ever loaded, this is `true` when its `repliesCount` is more than the user's own new replies under it — and always `true` for the parent of a highlighted comment, whose other replies haven't loaded yet. After that, it's the server's exact `hasMore`.
+  Whether there are replies to load. Before the comment's replies were ever loaded, this is `true` when its `repliesCount` is more than the replies already shown under it — the user's own new replies and, for the parent of a highlighted comment, the highlighted reply. After that, it's the server's exact `hasMore`.
 </ResponseField>
 
 <ResponseField name="loadMore" type="(options?: { replyDepth?: number; limit?: number }) => Promise<void>">

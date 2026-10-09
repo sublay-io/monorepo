@@ -224,7 +224,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="highlightedComment" type="{ comment: Comment; parentComment: Comment | null } | null">
-  The highlighted comment (and its parent, if any) when `highlightedCommentId` is set.
+  The highlighted comment (and its parent, if any) when `highlightedCommentId` is set. Both are read from the section, so an edit or delete shows here at once. `null` again when `highlightedCommentId` is cleared or the section moves to another entity.
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
@@ -272,7 +272,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="setSortByReaction" type="(newReaction: ReactionType | undefined) => void">
-  Changes the ranking reaction.
+  Changes the ranking reaction. While `sortBy` is `"top"` this reloads the section; under any other sort the value is kept for later and nothing reloads.
 </ResponseField>
 
 <ResponseField name="createComment" type="(props) => Promise<Comment | undefined>">

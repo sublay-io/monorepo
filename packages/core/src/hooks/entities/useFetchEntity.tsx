@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { sendableTopCommentsParams } from "../../utils/topCommentsParams";
 import useProject from "../projects/useProject";
 import {
   Entity,
@@ -39,8 +40,11 @@ function useFetchEntity(): (props: FetchEntityProps) => Promise<Entity> {
         }),
       };
 
-      if (topCommentsLimit !== undefined) params.topCommentsLimit = topCommentsLimit;
-      if (topCommentsSortByReaction) params.topCommentsSortByReaction = topCommentsSortByReaction;
+      // Only with include=topComments (the server 400s them otherwise).
+      Object.assign(
+        params,
+        sendableTopCommentsParams(include, topCommentsLimit, topCommentsSortByReaction)
+      );
 
       const response = await axios.get(`/${projectId}/entities/${entityId}`, {
         params,

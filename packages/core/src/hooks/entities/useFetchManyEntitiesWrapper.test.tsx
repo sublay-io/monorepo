@@ -146,4 +146,26 @@ describe("useFetchManyEntitiesWrapper", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.entities).toEqual([]);
   });
+
+  it("sends blockedFilter on load-more pages as well as page 1", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useFetchManyEntitiesWrapper({ blockedFilter: "include-outbound-blocked" }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "entity-1" })], true)),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "entity-2" })], false));
+    act(() => {
+      result.current.loadMore();
+    });
+    await waitFor(() => expect(result.current.hasMore).toBe(false));
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(2);
+    expect(calls[0].config?.params).toMatchObject({ page: 1, blockedFilter: "include-outbound-blocked" });
+    expect(calls[1].config?.params).toMatchObject({ page: 2, blockedFilter: "include-outbound-blocked" });
+  });
 });

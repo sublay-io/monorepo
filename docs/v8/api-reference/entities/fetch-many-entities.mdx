@@ -140,7 +140,7 @@ Returns a paginated list of entities for the project. Supports rich filtering by
 ### Optional Associations
 
 <ParamField query="include" type="string">
-  Comma-separated list of associations to include in each entity:
+  Associations to include in each entity. Pass it as one comma-separated value (`include=user,space`) or as repeated params (`include=user&include=space`). Values:
   - `user` — the author's user profile
   - `space` — the space the entity belongs to
   - `topComments` — the entity's best top-level comments, as full [Comment](/v8/data-models/comment) objects (see [Top comments](/v8/data-models/entity#top-comments))

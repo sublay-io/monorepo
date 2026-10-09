@@ -166,9 +166,11 @@ export function applyRepliesPage(
 
 /**
  * Insert a deep-linked comment: the parent first, then the target. The parent
- * lists the target as a child, and — unless its replies were already loaded —
- * stays "not loaded, has more", so its first "load replies" fetches normally
- * and de-duplication keeps the target from appearing twice.
+ * lists the target as a child and — unless its replies were already loaded —
+ * stays "not loaded", so it has more to load exactly when its `repliesCount`
+ * exceeds what it already shows (see `nodeRepliesHasMore`); its first "load
+ * replies" fetches normally and de-duplication keeps the target from
+ * appearing twice.
  */
 export function insertHighlightedComment(
   store: CommentStore,
@@ -178,18 +180,6 @@ export function insertHighlightedComment(
   let next = store;
   if (parent) next = insertComments(next, [stripNestedReplies(parent)]);
   next = insertComments(next, [stripNestedReplies(target)]);
-  if (parent) {
-    const parentNode = next.nodes[parent.id];
-    if (parentNode && !parentNode.repliesLoaded) {
-      next = {
-        ...next,
-        nodes: {
-          ...next.nodes,
-          [parent.id]: { ...parentNode, repliesHasMore: true },
-        },
-      };
-    }
-  }
   return next;
 }
 
@@ -259,23 +249,23 @@ export function markCommentDeleted(store: CommentStore, commentId: string): Comm
   }));
 }
 
-/** The viewer's own new (this-session) replies directly under a comment. */
-function ownNewChildCount(store: CommentStore, node: CommentNode): number {
-  return node.childIds.filter((id) => store.nodes[id]?.new).length;
+/** Replies already shown under a comment whose replies were never fetched. */
+function shownChildCount(store: CommentStore, node: CommentNode): number {
+  return node.childIds.filter((id) => store.nodes[id]).length;
 }
 
 /**
  * Whether "load more replies" has anything to fetch. A comment whose replies
- * were never fetched has more when `repliesCount` exceeds the viewer's own new
- * replies under it (so a comment whose only reply is your own doesn't show
- * "View replies").
+ * were never fetched has more when `repliesCount` exceeds the replies it
+ * already shows — the viewer's own new replies and, for a highlighted
+ * comment's parent, the highlighted reply (so a comment whose only reply is
+ * your own, or the highlighted one, doesn't show "View replies").
  */
 export function nodeRepliesHasMore(store: CommentStore, commentId: string): boolean {
   const node = store.nodes[commentId];
   if (!node) return false;
   if (node.repliesLoaded) return node.repliesHasMore;
-  if (node.repliesHasMore) return true; // highlighted parent
-  return (node.comment.repliesCount ?? 0) > ownNewChildCount(store, node);
+  return (node.comment.repliesCount ?? 0) > shownChildCount(store, node);
 }
 
 const byCreatedAtDesc = (a: Comment, b: Comment) =>

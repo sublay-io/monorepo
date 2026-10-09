@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Comment,
   CommentInclude,
@@ -20,6 +20,7 @@ import useAddReaction from "../reactions/useAddReaction";
 import { ReactionType } from "../../interfaces/models/Reaction";
 import {
   CommentSectionInternals,
+  CommentStoreSeed,
   useEntityCommentsInternal,
 } from "./useEntityComments";
 import {
@@ -210,7 +211,7 @@ export function useCommentSectionDataInternal(
     loadMore,
     getComment,
   } = entityComments;
-  const { setStore, seedRef } = internals;
+  const { store, setStore, seedRef } = internals;
 
   const createComment = useCreateComment();
   const deleteComment = useDeleteComment();
@@ -221,11 +222,61 @@ export function useCommentSectionDataInternal(
   const fetchEntityByForeignId = useFetchEntityByForeignId();
   const fetchEntityByShortId = useFetchEntityByShortId();
 
-  const [highlightedComment, setHighlightedComment] = useState<{
+  const fetchingCommentIdRef = useRef<string | null>(null);
+
+  // A highlight belongs to one highlighted id on one entity. When the id
+  // changes, or the section switches to another entity, the epoch moves on:
+  // the old highlight stops being shown, stops being seeded into resets, and
+  // a late response for it is dropped. Done during render so the section's
+  // reset (an effect) already runs without the old seed.
+  const currentEntityId = entity?.id ?? null;
+  const highlightTrackRef = useRef({
+    epoch: 0,
+    highlightId: highlightedCommentId ?? null,
+    entityId: currentEntityId,
+  });
+  {
+    const track = highlightTrackRef.current;
+    const highlightChanged = track.highlightId !== (highlightedCommentId ?? null);
+    const entitySwitched =
+      track.entityId !== null && track.entityId !== currentEntityId;
+    if (highlightChanged || entitySwitched) {
+      highlightTrackRef.current = {
+        epoch: track.epoch + 1,
+        highlightId: highlightedCommentId ?? null,
+        entityId: currentEntityId,
+      };
+      seedRef.current = null;
+      fetchingCommentIdRef.current = null;
+    } else if (track.entityId === null && currentEntityId !== null) {
+      // The entity resolving for the first time isn't a switch.
+      track.entityId = currentEntityId;
+    }
+  }
+  const highlightEpoch = highlightTrackRef.current.epoch;
+  // The entity the section shows now, for checking a highlight response.
+  const sectionEntityIdRef = useRef<string | null>(null);
+  sectionEntityIdRef.current = entity?.id ?? entityId ?? null;
+
+  // What the highlight fetch returned; the rendered copy comes from the store
+  // (below), so edits, deletes and refreshes reach it.
+  const [highlightSnapshot, setHighlightSnapshot] = useState<{
+    epoch: number;
     comment: Comment;
     parentComment: Comment | null;
   } | null>(null);
-  const fetchingCommentIdRef = useRef<string | null>(null);
+  const highlightedComment = useMemo(() => {
+    if (!highlightSnapshot || highlightSnapshot.epoch !== highlightEpoch) {
+      return null;
+    }
+    const { comment, parentComment } = highlightSnapshot;
+    return {
+      comment: store.nodes[comment.id]?.comment ?? comment,
+      parentComment: parentComment
+        ? (store.nodes[parentComment.id]?.comment ?? parentComment)
+        : null,
+    };
+  }, [highlightSnapshot, highlightEpoch, store]);
   // The highlighted comment is fetched with the section's include plus
   // `parent` (needed to seed the store). Keyed by string so an inline array
   // prop doesn't change identity every render.
@@ -372,28 +423,61 @@ export function useCommentSectionDataInternal(
 
       const newParentId = tempNewComment.parentId;
       // D24: a new comment is counted at once (its parent's repliesCount and
-      // the entity's commentsCount); a failed create rolls both back.
-      const bumpCounts = (delta: 1 | -1) => {
+      // the entity's commentsCount). The parent or the entity can be
+      // re-delivered while the create is in flight, replacing the bumped
+      // count with the server's. So on settle: if the count is still the one
+      // we set, a success keeps it and a failure takes it back; if it was
+      // re-delivered (from before this comment existed), a success adds the
+      // comment and a failure leaves it alone.
+      let bumpedRepliesCount: number | null = null;
+      let bumpedCommentsCount: number | null = null;
+      const settleCount = (
+        current: number,
+        bumped: number | null,
+        succeeded: boolean,
+      ): number => {
+        const stillBumped = current === bumped;
+        if (succeeded) return stillBumped ? current : current + 1;
+        return stillBumped ? Math.max(0, current - 1) : current;
+      };
+      const bumpCounts = () => {
         if (newParentId) {
           setStore((prev) =>
-            patchComment(prev, newParentId, (parent) => ({
-              ...parent,
-              repliesCount: Math.max(0, (parent.repliesCount ?? 0) + delta),
-            })),
+            patchComment(prev, newParentId, (parent) => {
+              bumpedRepliesCount = (parent.repliesCount ?? 0) + 1;
+              return { ...parent, repliesCount: bumpedRepliesCount };
+            }),
           );
         }
         setContextEntity?.((prevEntity) => {
           if (!prevEntity) return prevEntity;
-          return {
-            ...prevEntity,
-            commentsCount: Math.max(0, (prevEntity.commentsCount ?? 0) + delta),
-          };
+          bumpedCommentsCount = (prevEntity.commentsCount ?? 0) + 1;
+          return { ...prevEntity, commentsCount: bumpedCommentsCount };
+        });
+      };
+      const settleCounts = (succeeded: boolean) => {
+        if (newParentId) {
+          setStore((prev) => {
+            const parent = prev.nodes[newParentId]?.comment;
+            if (!parent) return prev;
+            const current = parent.repliesCount ?? 0;
+            const next = settleCount(current, bumpedRepliesCount, succeeded);
+            if (next === current) return prev;
+            return patchComment(prev, newParentId, (c) => ({ ...c, repliesCount: next }));
+          });
+        }
+        setContextEntity?.((prevEntity) => {
+          if (!prevEntity) return prevEntity;
+          const current = prevEntity.commentsCount ?? 0;
+          const next = settleCount(current, bumpedCommentsCount, succeeded);
+          if (next === current) return prevEntity;
+          return { ...prevEntity, commentsCount: next };
         });
       };
 
       try {
         setStore((prev) => insertComments(prev, [tempNewComment], { newlyAdded: true }));
-        bumpCounts(1);
+        bumpCounts();
         const newCommentData = await createComment({
           entityId: entity.id,
           parentCommentId: parentId ?? repliedToComment?.id ?? null,
@@ -402,6 +486,7 @@ export function useCommentSectionDataInternal(
           mentions: filteredMentions,
         });
 
+        settleCounts(true);
         if (newCommentData) {
           setStore((prev) => removeComment(prev, TEMP_ID));
 
@@ -431,10 +516,19 @@ export function useCommentSectionDataInternal(
               reactionType: autoReaction,
             })
               .then((updatedComment) => {
+                // The reaction response isn't a full comment (no `user`), so
+                // only the reaction fields are taken from it.
+                const reacted = updatedComment as Partial<Comment> | undefined;
+                if (!reacted) return;
                 setStore((prev) =>
-                  insertComments(prev, [updatedComment as Comment], {
-                    newlyAdded: true,
-                  }),
+                  patchComment(prev, newCommentData.id, (current) => ({
+                    ...current,
+                    userReaction:
+                      reacted.userReaction !== undefined
+                        ? reacted.userReaction
+                        : current.userReaction,
+                    reactionCounts: reacted.reactionCounts ?? current.reactionCounts,
+                  })),
                 );
               })
               .catch(() => {});
@@ -448,7 +542,7 @@ export function useCommentSectionDataInternal(
       } catch (err: unknown) {
         // TODO: currently we remove the temp comment from the store but don't offer the user any option to retry. It's as if they've never sent anything and all they typed is gone. We need to add a flag for comment in the store that says it failed so we can give the user a try again button
         setStore((prev) => removeComment(prev, TEMP_ID));
-        bumpCounts(-1);
+        settleCounts(false);
         handleError(err, "Failed to submit a new comment: ");
         return undefined;
       } finally {
@@ -511,6 +605,7 @@ export function useCommentSectionDataInternal(
   );
 
   useEffect(() => {
+    const epoch = highlightEpoch;
     const handleFetchSingleComment = async () => {
       if (fetchingCommentIdRef.current === highlightedCommentId) {
         return; // Skip if already fetching for this comment ID
@@ -524,23 +619,42 @@ export function useCommentSectionDataInternal(
           include: highlightIncludeKey.split(",") as CommentInclude[],
         });
 
+        // The highlight (or the entity) changed while this was in flight.
+        if (highlightTrackRef.current.epoch !== epoch) return;
+
         if (!targetComment) {
           console.error("Highlighted comment not found");
           return;
         }
 
+        // A comment on another entity isn't this section's to highlight.
+        const sectionEntityId = sectionEntityIdRef.current;
+        if (
+          sectionEntityId &&
+          targetComment.entityId &&
+          targetComment.entityId !== sectionEntityId
+        ) {
+          return;
+        }
+
         const parentComment = targetComment.parentComment ?? null;
 
-        setHighlightedComment({
-          comment: targetComment,
-          parentComment: parentComment,
-        });
+        setHighlightSnapshot({ epoch, comment: targetComment, parentComment });
 
-        // Parent first, then the target (kept across sort resets).
-        const seed = (store: Parameters<typeof insertHighlightedComment>[0]) =>
-          insertHighlightedComment(store, targetComment, parentComment);
+        // Parent first, then the target. Kept across sort resets, carrying
+        // the latest stored copies (an edit or delete survives the reset).
+        const seed: CommentStoreSeed = (empty, previous) =>
+          insertHighlightedComment(
+            empty,
+            previous.nodes[targetComment.id]?.comment ?? targetComment,
+            parentComment
+              ? (previous.nodes[parentComment.id]?.comment ?? parentComment)
+              : null,
+          );
         seedRef.current = seed;
-        setStore(seed);
+        setStore((prev) =>
+          insertHighlightedComment(prev, targetComment, parentComment),
+        );
       } catch (err) {
         // A missing highlight (deleted, nonexistent, hidden) isn't a section
         // failure: the section loads normally and `error` is untouched.
@@ -551,7 +665,7 @@ export function useCommentSectionDataInternal(
     if (highlightedCommentId) {
       handleFetchSingleComment();
     }
-  }, [highlightedCommentId, highlightIncludeKey, fetchComment, setStore, seedRef]);
+  }, [highlightedCommentId, highlightEpoch, highlightIncludeKey, fetchComment, setStore, seedRef]);
 
   useEffect(() => {
     const handleFetchEntity = async () => {

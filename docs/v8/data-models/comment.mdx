@@ -17,7 +17,7 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `userId` | `string \| null` | The ID of the user who posted this comment. `null` on [placeholders](#placeholders). |
 | `user` | `User \| null` | The comment author. Populated when `include` contains `"user"`. `null` on placeholders. |
 | `parentId` | `string \| null` | ID of the parent comment if this is a reply. `null` for top-level comments. |
-| `parentComment` | `Comment \| null` | The parent comment, under the same placeholder and block rules as any comment. Populated when `include` contains `"parent"` (user history and single-comment fetches). `null` for top-level comments, and on your own comment on an unavailable entity. |
+| `parentComment` | `Comment \| null` | The parent comment, under the same placeholder and block rules as any comment. Populated when `include` contains `"parent"` (user history and single-comment fetches). `null` for top-level comments, when the parent no longer exists or is on another entity, and on your own comment on an unavailable entity. |
 | `content` | `string \| null` | Text content of the comment. `null` on placeholders. |
 | `gif` | `GifData \| null` | Attached GIF, if any. `null` on placeholders. |
 | `mentions` | `Mention[]` | Array of user mentions embedded in the comment. `[]` on placeholders. |

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Comment,
+  CommentInclude,
   CommentThreadIncludeParam,
   GifData,
 } from "../../interfaces/models/Comment";
@@ -225,6 +226,12 @@ export function useCommentSectionDataInternal(
     parentComment: Comment | null;
   } | null>(null);
   const fetchingCommentIdRef = useRef<string | null>(null);
+  // The highlighted comment is fetched with the section's include plus
+  // `parent` (needed to seed the store). Keyed by string so an inline array
+  // prop doesn't change identity every render.
+  const highlightIncludeKey = Array.from(
+    new Set([...(Array.isArray(include) ? include : [include]), "parent"]),
+  ).join(",");
   const fetchedStatus = useRef<Record<string, boolean>>({}); // Track status by unique key
 
   const submittingComment = useRef(false);
@@ -514,7 +521,7 @@ export function useCommentSectionDataInternal(
       try {
         const targetComment = await fetchComment({
           commentId: highlightedCommentId!,
-          include: ["user", "parent"],
+          include: highlightIncludeKey.split(",") as CommentInclude[],
         });
 
         if (!targetComment) {
@@ -544,7 +551,7 @@ export function useCommentSectionDataInternal(
     if (highlightedCommentId) {
       handleFetchSingleComment();
     }
-  }, [highlightedCommentId, fetchComment, setStore, seedRef]);
+  }, [highlightedCommentId, highlightIncludeKey, fetchComment, setStore, seedRef]);
 
   useEffect(() => {
     const handleFetchEntity = async () => {

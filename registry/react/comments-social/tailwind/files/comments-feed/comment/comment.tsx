@@ -45,7 +45,7 @@ const Comment = React.memo(
 
     const [hovered, setHovered] = useState(false); // State to track hover
 
-    const [comment] = useState(commentFromSection);
+    const comment = commentFromSection;
     const { currentReaction, reactionCounts, toggleReaction } = useReactionToggle({
       targetType: "comment",
       targetId: comment.id,
@@ -92,6 +92,16 @@ const Comment = React.memo(
     const isBlockedCollapsed =
       !isUnavailable && !!comment.isAuthorBlocked && !showBlockedComment;
     const isPlaceholderRow = isUnavailable || isBlockedCollapsed;
+    // Reddit-style tombstone, after isUnavailable: a user-deleted comment, or a
+    // moderator-removed one served as a placeholder (its author gets it in
+    // full, with content, and sees it normally). Replies stay visible.
+    const tombstone = isUnavailable
+      ? null
+      : comment.userDeletedAt
+        ? "[deleted]"
+        : comment.moderationStatus === "removed" && !comment.userId
+          ? "[removed]"
+          : null;
 
     return (
       <div
@@ -144,6 +154,9 @@ const Comment = React.memo(
           <div
             className="flex flex-row items-start gap-3"
           >
+            {tombstone ? (
+              <div className="w-8 h-8 rounded-full shrink-0 bg-gray-200 dark:bg-gray-700" />
+            ) : (
             <div
               onClick={() => {
                 if (comment.user?.id === user?.id) {
@@ -163,12 +176,18 @@ const Comment = React.memo(
                 size={32}
               />
             </div>
+            )}
             <div
               className="flex-1 flex flex-col gap-2"
             >
               <div
                 className="flex flex-row items-baseline gap-1 mt-0.5"
               >
+                {tombstone ? (
+                  <span className="font-bold text-[13px] text-gray-500 dark:text-gray-400">
+                    {tombstone}
+                  </span>
+                ) : (
                 <div
                   onClick={() => {
                     if (comment.user?.id === user?.id) {
@@ -185,6 +204,7 @@ const Comment = React.memo(
                 >
                   {getUserName(comment.user ?? {}, "username")}
                 </div>
+                )}
                 {/* 🎨 CUSTOMIZATION: Timestamp typography */}
                 <span className="text-xs text-gray-500 dark:text-gray-400">
                   <FromNow
@@ -196,7 +216,15 @@ const Comment = React.memo(
                 </span>
               </div>
 
-              {comment.content && (
+              {tombstone && (
+                <p
+                  style={resetP}
+                  className="text-sm italic text-gray-500 dark:text-gray-400"
+                >
+                  {tombstone}
+                </p>
+              )}
+              {!tombstone && comment.content && (
                 <p
                   style={resetP}
                   className="text-sm text-gray-900 dark:text-gray-200"
@@ -212,7 +240,7 @@ const Comment = React.memo(
                   )}
                 </p>
               )}
-              {comment.gif && (
+              {!tombstone && comment.gif && (
                 <img
                   src={comment.gif.gifUrl}
                   alt={comment.gif.altText}
@@ -224,6 +252,7 @@ const Comment = React.memo(
                 />
               )}
 
+              {!tombstone && (
               <div
                 style={resetDiv}
                 className="flex flex-row items-center gap-2"
@@ -252,7 +281,9 @@ const Comment = React.memo(
                   </button>
                 )}
               </div>
+              )}
             </div>
+            {!tombstone && (
             <div
               className="flex flex-col items-center"
             >
@@ -273,6 +304,7 @@ const Comment = React.memo(
                 {reactionCounts.like || 0}
               </div>
             </div>
+            )}
           </div>
         </div>
         )}

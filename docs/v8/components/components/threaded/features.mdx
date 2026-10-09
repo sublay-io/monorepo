@@ -51,6 +51,14 @@ Edit the row text in `single-comment.tsx`. See [Comment → Blocked authors](/v8
 
 ---
 
+### Deleted & Removed Comments
+
+A comment its author deleted shows `[deleted]` in place of the author name and the text; a comment a moderator removed shows `[removed]`. The row has no reply, reaction or menu controls, and the replies under it stay in place. The author of a removed comment still sees it in full. A comment whose author blocked the user shows as **"This comment is unavailable"** instead, even when it is also deleted or removed.
+
+Edit the row text in `single-comment.tsx`. See [Comment → Placeholders](/v8/data-models/comment#placeholders) for the underlying fields.
+
+---
+
 ### Upvote/Downvote System
 
 Reddit-style voting with visible vote scores.
@@ -124,7 +132,7 @@ Comment authors can edit or delete their own comments.
 
 **Edit:** Click "Edit" from the action menu, modify text inline, save or cancel. An "edited" indicator is shown.
 
-**Delete:** Click "Delete" from the action menu, confirm. Soft delete — the comment shows `[deleted]` to preserve thread structure.
+**Delete:** Click "Delete" from the action menu, confirm. The comment shows as `[deleted]`, keeping its replies in place.
 
 ---
 

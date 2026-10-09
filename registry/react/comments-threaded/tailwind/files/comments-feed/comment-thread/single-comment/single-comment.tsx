@@ -62,7 +62,7 @@ function SingleComment({
 }: SingleCommentProps) {
   const { user } = useUser();
   const { callbacks, highlightedComment } = useCommentSection();
-  const [comment] = useState(commentFromSection);
+  const comment = commentFromSection;
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [showBlockedComment, setShowBlockedComment] = useState(false);
 
@@ -73,6 +73,16 @@ function SingleComment({
   const isBlockedCollapsed =
     !isUnavailable && !!comment.isAuthorBlocked && !showBlockedComment;
   const isPlaceholderRow = isUnavailable || isBlockedCollapsed;
+  // Reddit-style tombstone, after isUnavailable: a user-deleted comment, or a
+  // moderator-removed one served as a placeholder (its author gets it in full,
+  // with content, and sees it normally). Replies underneath stay visible.
+  const tombstone = isUnavailable
+    ? null
+    : comment.userDeletedAt
+      ? "[deleted]"
+      : comment.moderationStatus === "removed" && !comment.userId
+        ? "[removed]"
+        : null;
 
   const maxDepth = 6; // Limit visual nesting depth
   const actualDepth = Math.min(depth, maxDepth);
@@ -111,7 +121,7 @@ function SingleComment({
             className="flex-shrink-0 mr-3 relative mt-1"
             // 🎨 CUSTOMIZATION: Spacing
           >
-            {isPlaceholderRow ? (
+            {isPlaceholderRow || tombstone ? (
               <div className="relative z-10 w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />
             ) : (
               <div
@@ -182,6 +192,11 @@ function SingleComment({
                 className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
                 // 🎨 CUSTOMIZATION: Typography and spacing
               >
+                {tombstone ? (
+                  <span className="font-medium text-xs text-gray-500 dark:text-gray-400">
+                    {tombstone}
+                  </span>
+                ) : (
                 <span
                   className="font-medium text-xs text-gray-700 dark:text-gray-300 cursor-pointer hover:underline"
                   // 🎨 CUSTOMIZATION: Author name styling
@@ -195,6 +210,7 @@ function SingleComment({
                 >
                   {getUserName(comment.user ?? {})}
                 </span>
+                )}
                 <span className="text-gray-500 dark:text-gray-400">•</span>
                 <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
                 {isCollapsed && hasReplies && (
@@ -209,10 +225,16 @@ function SingleComment({
                   />
                 )}
               </div>
-              <ActionMenu comment={comment} />
+              {!tombstone && <ActionMenu comment={comment} />}
             </div>
 
-            {!isCollapsed && (
+            {!isCollapsed && tombstone && (
+              <p className="text-xs italic text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
+                {tombstone}
+              </p>
+            )}
+
+            {!isCollapsed && !tombstone && (
               <>
                 {comment.content && (
                   <p

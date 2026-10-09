@@ -136,7 +136,7 @@ Read/update profiles and query + act on the follow/connection graph.
 
 Profiles: `fetchUserById`, `fetchUserByForeignId`, `fetchUserByUsername`, `fetchUserSuggestions`, `checkUsernameAvailability`, `updateUser`
 
-Comment history: `fetchCommentsByUserId` (`GET /users/:userId/comments`, cursor-paged)
+Comment history: `fetchCommentsByUserId` (`GET /users/:userId/comments`, cursor-paged; optional `actingUserId` reads it as that user, omitted = anonymous)
 
 Graph queries (by target user ID): `fetchFollowersByUserId`, `fetchFollowersCountByUserId`, `fetchFollowingByUserId`, `fetchFollowingCountByUserId`, `fetchConnectionsByUserId`, `fetchConnectionsCountByUserId`
 

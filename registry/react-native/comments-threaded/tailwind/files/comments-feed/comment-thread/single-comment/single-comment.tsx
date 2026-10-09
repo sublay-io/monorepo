@@ -72,7 +72,7 @@ function SingleComment({
   const { user } = useUser();
   const { callbacks, highlightedComment } = useCommentSection();
   const { theme } = useUIState();
-  const [comment] = useState(commentFromSection);
+  const comment = commentFromSection;
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [showBlockedComment, setShowBlockedComment] = useState(false);
 
@@ -83,6 +83,16 @@ function SingleComment({
   const isBlockedCollapsed =
     !isUnavailable && !!comment.isAuthorBlocked && !showBlockedComment;
   const isPlaceholderRow = isUnavailable || isBlockedCollapsed;
+  // Reddit-style tombstone, after isUnavailable: a user-deleted comment, or a
+  // moderator-removed one served as a placeholder (its author gets it in full,
+  // with content, and sees it normally). Replies underneath stay visible.
+  const tombstone = isUnavailable
+    ? null
+    : comment.userDeletedAt
+      ? "[deleted]"
+      : comment.moderationStatus === "removed" && !comment.userId
+        ? "[removed]"
+        : null;
 
   // Dynamically get the correct Image component
   const { ImageComponent, isExpo } = getImageComponent();
@@ -140,7 +150,7 @@ function SingleComment({
         <View className="flex-row">
           {/* Avatar with threading line connection */}
           <View className="mr-3 relative mt-1">
-            {isPlaceholderRow ? (
+            {isPlaceholderRow || tombstone ? (
               <View
                 className={`relative z-10 w-6 h-6 rounded-full ${
                   theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
@@ -225,6 +235,15 @@ function SingleComment({
           <View className="flex-1">
             <View className="flex-row items-center justify-between mb-1">
               <View className="flex-row items-center gap-2">
+                {tombstone ? (
+                  <Text
+                    className={`font-medium text-xs ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}
+                  >
+                    {tombstone}
+                  </Text>
+                ) : (
                 <Pressable
                   onPress={() => {
                     if (user?.id === comment.user?.id) {
@@ -242,6 +261,7 @@ function SingleComment({
                     {getUserName(comment.user ?? {})}
                   </Text>
                 </Pressable>
+                )}
                 <Text
                   className={`text-xs ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
@@ -272,10 +292,20 @@ function SingleComment({
                   />
                 )}
               </View>
-              <ActionMenu comment={comment} />
+              {!tombstone && <ActionMenu comment={comment} />}
             </View>
 
-            {!isCollapsed && (
+            {!isCollapsed && tombstone && (
+              <Text
+                className={`text-xs italic mb-3 leading-relaxed ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                }`}
+              >
+                {tombstone}
+              </Text>
+            )}
+
+            {!isCollapsed && !tombstone && (
               <>
                 {comment.content && (
                   <Text

@@ -254,6 +254,29 @@ describe("useCommentSectionData", () => {
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/comments/comment-1");
+    // Default section include ("user") plus `parent`.
+    expect(call.config?.params).toMatchObject({ include: "user,parent" });
+  });
+
+  it("fetches the highlighted comment with the section's include plus parent, de-duplicated", async () => {
+    const targetComment = makeComment({ id: "comment-1" });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () =>
+        useCommentSectionData({
+          highlightedCommentId: "comment-1",
+          include: ["user", "grants"],
+        }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", targetComment),
+      },
+    );
+
+    await waitFor(() => expect(result.current.highlightedComment).not.toBeNull());
+    const [call] = axiosPrivate.calls("get");
+    expect(call.url).toBe("/test-project/comments/comment-1");
+    expect(call.config?.params).toMatchObject({ include: "user,grants,parent" });
   });
 
   it("does not set the section error when the highlighted comment isn't found, and loads normally", async () => {

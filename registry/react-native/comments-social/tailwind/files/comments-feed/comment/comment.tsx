@@ -47,7 +47,7 @@ const Comment = React.memo(
     const heartIconEmptyColor = theme === 'dark' ? '#9CA3AF' : '#8E8E8E';
     const heartIconFullColor = theme === 'dark' ? '#F87171' : '#DC2626';
 
-    const [comment] = useState(commentFromSection);
+    const comment = commentFromSection;
     const { currentReaction, reactionCounts, toggleReaction } = useReactionToggle({
       targetType: "comment",
       targetId: comment.id,
@@ -95,6 +95,16 @@ const Comment = React.memo(
     const isBlockedCollapsed =
       !isUnavailable && !!comment.isAuthorBlocked && !showBlockedComment;
     const isPlaceholderRow = isUnavailable || isBlockedCollapsed;
+    // Reddit-style tombstone, after isUnavailable: a user-deleted comment, or a
+    // moderator-removed one served as a placeholder (its author gets it in
+    // full, with content, and sees it normally). Replies stay visible.
+    const tombstone = isUnavailable
+      ? null
+      : comment.userDeletedAt
+        ? "[deleted]"
+        : comment.moderationStatus === "removed" && !comment.userId
+          ? "[removed]"
+          : null;
 
     const imageStyle = {
       width: gifAspectRatio > 1 ? 200 : 200 * gifAspectRatio,
@@ -173,7 +183,7 @@ const Comment = React.memo(
           </View>
         ) : (
         <Pressable
-          onLongPress={() => {
+          onLongPress={tombstone ? undefined : () => {
             Vibration.vibrate(50);
             if (isOwner) {
               openCommentOptionsSheetOwner!(comment);
@@ -186,6 +196,13 @@ const Comment = React.memo(
           style={{ paddingLeft: 16 + extraLeftPadding }}
         >
           <View className="flex-row items-start gap-2">
+            {tombstone ? (
+              <View
+                className={`w-8 h-8 rounded-full ${
+                  theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                }`}
+              />
+            ) : (
             <Pressable
               onPress={() => {
                 if (comment.user?.id === user?.id) {
@@ -204,8 +221,18 @@ const Comment = React.memo(
                 size={authorAvatarSize}
               />
             </Pressable>
+            )}
             <View className="flex-1 flex-col gap-1">
               <View className="flex-row items-baseline gap-1 mt-0.5">
+                {tombstone ? (
+                  <Text
+                    className={`text-[13px] font-bold ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+                    }`}
+                  >
+                    {tombstone}
+                  </Text>
+                ) : (
                 <Pressable
                   onPress={() => {
                     if (comment.user?.id === user?.id) {
@@ -226,6 +253,7 @@ const Comment = React.memo(
                     {getUserName(comment.user ?? {}, "username")}
                   </Text>
                 </Pressable>
+                )}
                 <FromNow
                   time={comment.createdAt}
                   fontSize={12}
@@ -233,7 +261,16 @@ const Comment = React.memo(
                 />
               </View>
 
-              {comment.content && (
+              {tombstone && (
+                <Text
+                  className={`text-[13px] italic ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+                  }`}
+                >
+                  {tombstone}
+                </Text>
+              )}
+              {!tombstone && comment.content && (
                 <Text
                   className={`text-[13px] ${
                     theme === 'dark' ? 'text-gray-50' : 'text-black'
@@ -250,10 +287,11 @@ const Comment = React.memo(
                   )}
                 </Text>
               )}
-              {comment.gif?.gifUrl && (
+              {!tombstone && comment.gif?.gifUrl && (
                 <ImageComponent style={imageStyle} {...imageProps} />
               )}
 
+              {!tombstone && (
               <View className="flex-row items-center gap-3">
                 <TouchableOpacity
                   onPress={() =>
@@ -271,7 +309,9 @@ const Comment = React.memo(
                   </Text>
                 </TouchableOpacity>
               </View>
+              )}
             </View>
+            {!tombstone && (
             <View className="flex-col items-center">
               <HeartButton
                 userUpvoted={userUpvotedComment}
@@ -291,6 +331,7 @@ const Comment = React.memo(
                 {reactionCounts.like || 0}
               </Text>
             </View>
+            )}
           </View>
         </Pressable>
         )}

@@ -13,6 +13,11 @@ function Replies({ commentId }: { commentId: string }) {
   const { comment, replies, newReplies, loading, hasMore, loadMore } =
     useReplies({ commentId, limit: 5 });
 
+  // Reply on a reply goes to this top-level comment, which the server refuses
+  // once it's deleted or removed — so its replies show no Reply button then.
+  const parentClosed =
+    !!comment?.userDeletedAt || comment?.moderationStatus === "removed";
+
   // How many times replies were requested (0 = never expanded).
   const [page, setPage] = useState(0);
   const handleLoadMore = () => {
@@ -35,7 +40,11 @@ function Replies({ commentId }: { commentId: string }) {
     <FlatList
       data={newReplies}
       renderItem={({ item }) => (
-        <Comment comment={item} extraLeftPadding={42} />
+        <Comment
+          comment={item}
+          extraLeftPadding={42}
+          parentClosed={parentClosed}
+        />
       )}
       keyExtractor={(item) => item.id}
       ItemSeparatorComponent={() => <View style={{ height: repliesGap }} />}
@@ -47,7 +56,11 @@ function Replies({ commentId }: { commentId: string }) {
     <FlatList
       data={filteredReplies}
       renderItem={({ item }) => (
-        <Comment comment={item} extraLeftPadding={42} />
+        <Comment
+          comment={item}
+          extraLeftPadding={42}
+          parentClosed={parentClosed}
+        />
       )}
       keyExtractor={(item) => item.id}
       ItemSeparatorComponent={() => <View style={{ height: repliesGap }} />}
@@ -83,6 +96,7 @@ function Replies({ commentId }: { commentId: string }) {
               <Comment
                 comment={highlightedComment.comment}
                 extraLeftPadding={42}
+                parentClosed={parentClosed}
               />
             )}
 

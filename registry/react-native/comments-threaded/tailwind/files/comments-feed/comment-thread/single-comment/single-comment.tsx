@@ -95,10 +95,13 @@ function SingleComment({
         : null;
 
   // The viewer's own moderator-removed comment comes back in full (only its
-  // author sees it). Voting on it is refused by the server, so there are no
-  // vote buttons; reply and delete stay.
+  // author sees it, with a note saying so). The server refuses votes on it and
+  // direct replies to it, so there are no vote buttons or Reply; delete stays.
   const isOwnRemoved =
     !tombstone && comment.moderationStatus === "removed" && !!comment.userId;
+  const ownRemovedLabel = `Removed by a moderator${
+    comment.moderationReason ? `: ${comment.moderationReason}` : ""
+  } · only you can see this`;
 
   // Dynamically get the correct Image component
   const { ImageComponent, isExpo } = getImageComponent();
@@ -335,11 +338,22 @@ function SingleComment({
                   <ImageComponent style={imageStyle} {...imageProps} />
                 )}
 
+                {isOwnRemoved && (
+                  <Text
+                    className={`text-xs mb-3 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}
+                  >
+                    {ownRemovedLabel}
+                  </Text>
+                )}
+
                 <View className="flex-row items-center justify-between">
                   <ReplyButtonAndInfo
                     hasReplies={replyCount > 0}
                     replyCount={replyCount}
                     setShowReplyForm={setShowReplyForm}
+                    canReply={!isOwnRemoved}
                   />
                   {/* Vote buttons inline with reply options */}
                   {!isOwnRemoved && (
@@ -353,7 +367,7 @@ function SingleComment({
                 </View>
 
                 {/* Reply form */}
-                {showReplyForm && (
+                {showReplyForm && !isOwnRemoved && (
                   <NewReplyForm
                     comment={comment}
                     setShowReplyForm={setShowReplyForm}

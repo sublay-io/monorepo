@@ -27,9 +27,13 @@ const Comment = React.memo(
   ({
     comment: commentFromSection,
     extraLeftPadding = 0,
+    parentClosed = false,
   }: {
     comment: CommentType;
     extraLeftPadding?: number;
+    // True on a reply whose top-level comment is deleted or removed. Reply on
+    // a reply goes to that top-level comment, which the server refuses.
+    parentClosed?: boolean;
   }) => {
     const { user } = useUser();
     const {
@@ -104,10 +108,15 @@ const Comment = React.memo(
           : null;
 
     // The viewer's own moderator-removed comment comes back in full (only its
-    // author sees it). Reacting to it is refused by the server, so there's no
-    // reaction control; reply and delete stay.
+    // author sees it, with a note saying so). The server refuses reactions on
+    // it and direct replies to it, so there's no reaction control or Reply;
+    // delete stays.
     const isOwnRemoved =
       !tombstone && comment.moderationStatus === "removed" && !!comment.userId;
+    const ownRemovedLabel = `Removed by a moderator${
+      comment.moderationReason ? `: ${comment.moderationReason}` : ""
+    } · only you can see this`;
+    const canReply = !isOwnRemoved && !parentClosed;
 
     return (
       <div
@@ -258,11 +267,21 @@ const Comment = React.memo(
                 />
               )}
 
+              {isOwnRemoved && (
+                <p
+                  style={resetP}
+                  className="text-xs text-gray-500 dark:text-gray-400"
+                >
+                  {ownRemovedLabel}
+                </p>
+              )}
+
               {!tombstone && (
               <div
                 style={resetDiv}
                 className="flex flex-row items-center gap-2"
               >
+                {canReply && (
                 <button
                   onClick={() =>
                     comment.parentId
@@ -274,6 +293,7 @@ const Comment = React.memo(
                 >
                   Reply
                 </button>
+                )}
                 {hovered && ( // Conditionally render the EllipsisIcon button
                   <button
                     onClick={() =>

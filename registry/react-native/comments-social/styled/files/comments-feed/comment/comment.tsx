@@ -30,9 +30,13 @@ const Comment = React.memo(
   ({
     comment: commentFromSection,
     extraLeftPadding = 0,
+    parentClosed = false,
   }: {
     comment: CommentType;
     extraLeftPadding?: number;
+    // True on a reply whose top-level comment is deleted or removed. Reply on
+    // a reply goes to that top-level comment, which the server refuses.
+    parentClosed?: boolean;
   }) => {
     // Dynamically get the correct Image component and whether it is expo-image.
     const { ImageComponent, isExpo } = getImageComponent();
@@ -125,10 +129,15 @@ const Comment = React.memo(
           : null;
 
     // The viewer's own moderator-removed comment comes back in full (only its
-    // author sees it). Reacting to it is refused by the server, so there's no
-    // reaction control; reply and delete stay.
+    // author sees it, with a note saying so). The server refuses reactions on
+    // it and direct replies to it, so there's no reaction control or Reply;
+    // delete stays.
     const isOwnRemoved =
       !tombstone && comment.moderationStatus === "removed" && !!comment.userId;
+    const ownRemovedLabel = `Removed by a moderator${
+      comment.moderationReason ? `: ${comment.moderationReason}` : ""
+    } · only you can see this`;
+    const canReply = !isOwnRemoved && !parentClosed;
 
     const imageStyle = {
       width: gifAspectRatio > 1 ? 200 : 200 * gifAspectRatio,
@@ -348,7 +357,18 @@ const Comment = React.memo(
                 <ImageComponent style={imageStyle} {...imageProps} />
               )}
 
-              {!tombstone && (
+              {isOwnRemoved && (
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                  }}
+                >
+                  {ownRemovedLabel}
+                </Text>
+              )}
+
+              {!tombstone && canReply && (
               <View style={[styles.actionsContainer, { gap: actionsItemGap }]}>
                 <TouchableOpacity
                   onPress={() =>

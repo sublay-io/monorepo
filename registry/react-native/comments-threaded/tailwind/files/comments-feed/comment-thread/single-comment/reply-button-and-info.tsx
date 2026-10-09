@@ -6,15 +6,19 @@ function ReplyButtonAndInfo({
   hasReplies,
   replyCount,
   setShowReplyForm,
+  canReply = true,
 }: {
   hasReplies: boolean;
   replyCount: number;
   setShowReplyForm: React.Dispatch<React.SetStateAction<boolean>>;
+  // false hides the Reply button (the reply count still shows).
+  canReply?: boolean;
 }) {
   const { theme } = useUIState();
 
   return (
     <View className="flex-row items-center gap-4">
+      {canReply && (
       <TouchableOpacity
         onPress={() => setShowReplyForm((prev) => !prev)}
         className={`px-2 py-1 -ml-2 rounded ${
@@ -29,6 +33,7 @@ function ReplyButtonAndInfo({
           Reply
         </Text>
       </TouchableOpacity>
+      )}
       {hasReplies && (
         <Text
           className={`text-xs ${

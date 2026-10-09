@@ -87,6 +87,8 @@ Markers can combine — for example, a deleted comment whose author blocked the 
 
 Nothing is written into `content`; render your own wording for each kind.
 
+A deleted or removed comment can't take new direct replies — including a removed comment its author sees in full — so hide the reply control on it. The replies already under it can still be replied to. See [Deleted and removed parents](/v8/api-reference/comments/create-comment#deleted-and-removed-parents).
+
 A placeholder's moderation fields follow [Moderation fields](#moderation-fields): `moderationStatus` is always kept, and `moderationReason`, `moderatedById` and `moderatedByType` are filled only for the requesters listed there.
 
 ## Moderation fields

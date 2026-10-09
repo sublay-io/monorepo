@@ -41,6 +41,8 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
 
 <ParamField body="parentId" type="string">
   The UUID of the parent comment. When provided, this comment is treated as a reply to that comment. The parent comment must be on the entity given in `entityId` — otherwise the request returns `404 comment/entity-not-found`. The parent comment's author receives a reply notification.
+
+  The parent comment can't be one its author deleted (`403 comment/parent-deleted`) or one a moderator removed (`403 comment/parent-removed`) — see [Deleted and removed parents](#deleted-and-removed-parents).
 </ParamField>
 
 <ParamField body="referencedCommentId" type="string">
@@ -82,6 +84,15 @@ When the `moderation` bundle is installed, three people are checked: the entity'
 
 A comment marked [`isUnavailable`](/v8/data-models/comment#blocked-authors) can't be replied to. Commenting can also be refused when the entity's author has blocked the commenting user, which no comment flag shows.
 
+## Deleted and removed parents
+
+A comment its author deleted, or a moderator removed, can't be replied to:
+
+- **Deleted by its author** — the request is refused with `403 comment/parent-deleted`.
+- **Removed by a moderator** — the request is refused with `403 comment/parent-removed`. This applies to everyone, including the removed comment's author, who still sees it in full.
+
+The rule covers the direct parent only. Replies that already sit under a deleted or removed comment can still be replied to.
+
 ## Response
 
 Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, populated with the author's user profile.
@@ -103,6 +114,20 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
   </Accordion>
   <Accordion title="No Content — 400">
     Returned when none of `content`, `gif`, or `attachments` is provided.
+  </Accordion>
+  <Accordion title="Parent Deleted — 403">
+    Returned when `parentId` is a comment its author deleted (see [Deleted and removed parents](#deleted-and-removed-parents)).
+
+    ```json
+    { "error": "This comment was deleted and can't be replied to.", "code": "comment/parent-deleted" }
+    ```
+  </Accordion>
+  <Accordion title="Parent Removed — 403">
+    Returned when `parentId` is a comment a moderator removed — for every requester, including that comment's author (see [Deleted and removed parents](#deleted-and-removed-parents)).
+
+    ```json
+    { "error": "This comment was removed and can't be replied to.", "code": "comment/parent-removed" }
+    ```
   </Accordion>
   <Accordion title="Foreign ID Taken — 409">
     Returned when another comment already uses the supplied `foreignId`.

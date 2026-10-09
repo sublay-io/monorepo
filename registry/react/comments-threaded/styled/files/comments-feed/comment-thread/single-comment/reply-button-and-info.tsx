@@ -5,10 +5,13 @@ function ReplyButtonAndInfo({
   hasReplies,
   replyCount,
   setShowReplyForm,
+  canReply = true,
 }: {
   hasReplies: boolean;
   replyCount: number;
   setShowReplyForm: React.Dispatch<React.SetStateAction<boolean>>;
+  // false hides the Reply button (the reply count still shows).
+  canReply?: boolean;
 }) {
   const { theme } = useUIState();
 
@@ -23,6 +26,7 @@ function ReplyButtonAndInfo({
         fontSize: "12px",
       }}
     >
+      {canReply && (
       <button
         onClick={() => setShowReplyForm((prev) => !prev)}
         style={{
@@ -49,6 +53,7 @@ function ReplyButtonAndInfo({
       >
         Reply
       </button>
+      )}
       {hasReplies && (
         <span
           style={{

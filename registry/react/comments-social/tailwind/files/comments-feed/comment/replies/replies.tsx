@@ -13,6 +13,11 @@ export function Replies({ commentId }: { commentId: string }) {
   const { comment, replies, newReplies, loading, hasMore, loadMore } =
     useReplies({ commentId, limit: 5 });
 
+  // Reply on a reply goes to this top-level comment, which the server refuses
+  // once it's deleted or removed — so its replies show no Reply button then.
+  const parentClosed =
+    !!comment?.userDeletedAt || comment?.moderationStatus === "removed";
+
   // How many times replies were requested (0 = never expanded).
   const [page, setPage] = useState(0);
   const handleLoadMore = () => {
@@ -28,11 +33,21 @@ export function Replies({ commentId }: { commentId: string }) {
   }, [replies, highlightedComment]);
 
   const newRepliesList = newReplies.map((reply) => (
-    <Comment comment={reply} extraLeftPadding={42} key={reply.id} />
+    <Comment
+      comment={reply}
+      extraLeftPadding={42}
+      parentClosed={parentClosed}
+      key={reply.id}
+    />
   ));
 
   const oldRepliesList = filteredReplies.map((reply) => (
-    <Comment comment={reply} extraLeftPadding={42} key={reply.id} />
+    <Comment
+      comment={reply}
+      extraLeftPadding={42}
+      parentClosed={parentClosed}
+      key={reply.id}
+    />
   ));
 
   const someRepliesShow =
@@ -65,6 +80,7 @@ export function Replies({ commentId }: { commentId: string }) {
               <Comment
                 comment={highlightedComment.comment}
                 extraLeftPadding={42}
+                parentClosed={parentClosed}
               />
             )}
 

@@ -29,11 +29,11 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `repliesCount` | `number` | Number of direct replies to this comment, for display. See [What `repliesCount` counts](#what-repliescount-counts). |
 | `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
 | `metadata` | `Record<string, any> \| null` | Custom key-value data (max 1 MB). `null` on placeholders. |
-| `moderationStatus` | `"approved" \| "removed" \| null` | Space moderation status. |
+| `moderationStatus` | `"approved" \| "removed" \| null` | Space moderation status. Visible to everyone. |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
-| `moderatedById` | `string \| null` | ID of the moderator. |
-| `moderatedByType` | `"client" \| "user" \| null` | Whether a client (admin) or user performed moderation. |
-| `moderationReason` | `string \| null` | Reason provided for moderation. |
+| `moderatedById` | `string \| null` | ID of the moderator. Visible only to moderators and keys — see [Moderation fields](#moderation-fields); `null` for everyone else. |
+| `moderatedByType` | `"client" \| "user" \| null` | Whether a client (admin) or user performed moderation. Visible only to moderators and keys — see [Moderation fields](#moderation-fields); `null` for everyone else. |
+| `moderationReason` | `string \| null` | Reason provided for moderation. Visible only to moderators, keys and the comment's author — see [Moderation fields](#moderation-fields); `null` for everyone else. |
 | `userDeletedAt` | `Date \| null` | Set when the author deletes their own comment. The comment stays in threads as a [placeholder](#placeholders), so the replies under it remain. |
 | `createdAt` | `Date` | When the comment was created. |
 | `updatedAt` | `Date` | When the comment was last updated. |
@@ -86,6 +86,22 @@ On a placeholder, `userId`, `user`, `content`, `gif` and `metadata` are `null`, 
 Markers can combine — for example, a deleted comment whose author blocked the requesting user carries both `userDeletedAt` and `isUnavailable: true`. Render `isUnavailable` first: show the neutral unavailable row, without reply or reaction controls.
 
 Nothing is written into `content`; render your own wording for each kind.
+
+A placeholder's moderation fields follow [Moderation fields](#moderation-fields): `moderationStatus` is always kept, and `moderationReason`, `moderatedById` and `moderatedByType` are filled only for the requesters listed there.
+
+## Moderation fields
+
+`moderationStatus` is returned to everyone. The other three moderation fields are returned only to some requesters, on every comment response; everyone else gets `null`:
+
+| Requester | `moderationReason` | `moderatedById`, `moderatedByType` |
+|---|---|---|
+| An active admin or moderator of the comment's space | ✓ | ✓ |
+| A user whose project [`role`](/v8/data-models/user) is `admin` or `moderator` | ✓ | ✓ |
+| A request made with a service or master key | ✓ | ✓ |
+| The comment's author | ✓ | — |
+| Anyone else, including signed-out requests | — | — |
+
+A comment on an entity with no space has no space moderators: only project-role admins and moderators, keys and the comment's author qualify.
 
 ## Blocked authors
 

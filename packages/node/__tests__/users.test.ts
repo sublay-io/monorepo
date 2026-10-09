@@ -447,6 +447,22 @@ describe("users.fetchCommentsByUserId — request shaping", () => {
     });
   });
 
+  it("forwards actingUserId as a query param, userId stays in the path", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchCommentsByUserId(client, { userId: "u1", actingUserId: "viewer1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/users/u1/comments", {
+      params: { actingUserId: "viewer1" },
+    });
+  });
+
+  it("sends no actingUserId when omitted (anonymous read)", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchCommentsByUserId(client, { userId: "u1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/users/u1/comments", {
+      params: {},
+    });
+  });
+
   it("returns the cursor envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {

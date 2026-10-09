@@ -74,7 +74,7 @@ function SingleComment({
   const { user } = useUser();
   const { callbacks, highlightedComment } = useCommentSection();
   const { theme } = useUIState();
-  const [comment] = useState(commentFromSection);
+  const comment = commentFromSection;
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [showBlockedComment, setShowBlockedComment] = useState(false);
 
@@ -85,6 +85,16 @@ function SingleComment({
   const isBlockedCollapsed =
     !isUnavailable && !!comment.isAuthorBlocked && !showBlockedComment;
   const isPlaceholderRow = isUnavailable || isBlockedCollapsed;
+  // Reddit-style tombstone, after isUnavailable: a user-deleted comment, or a
+  // moderator-removed one served as a placeholder (its author gets it in full,
+  // with content, and sees it normally). Replies underneath stay visible.
+  const tombstone = isUnavailable
+    ? null
+    : comment.userDeletedAt
+      ? "[deleted]"
+      : comment.moderationStatus === "removed" && !comment.userId
+        ? "[removed]"
+        : null;
 
   const maxDepth = 6; // Limit visual nesting depth
   const actualDepth = Math.min(depth, maxDepth);
@@ -133,7 +143,7 @@ function SingleComment({
               marginTop: "4px",
             }}
           >
-            {isPlaceholderRow ? (
+            {isPlaceholderRow || tombstone ? (
               <div
                 style={{
                   position: "relative",
@@ -250,6 +260,17 @@ function SingleComment({
                   color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
                 }}
               >
+                {tombstone ? (
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      fontSize: "12px",
+                      color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
+                    }}
+                  >
+                    {tombstone}
+                  </span>
+                ) : (
                 <span
                   style={{
                     // 🎨 CUSTOMIZATION: Typography - Author (Default: medium)
@@ -276,6 +297,7 @@ function SingleComment({
                 >
                   {getUserName(comment.user ?? {})}
                 </span>
+                )}
                 <span style={{ color: theme === 'dark' ? "#9CA3AF" : "#6B7280" }}>•</span>
                 <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
                 {isCollapsed && hasReplies && (
@@ -290,10 +312,24 @@ function SingleComment({
                   />
                 )}
               </div>
-              <ActionMenu comment={comment} />
+              {!tombstone && <ActionMenu comment={comment} />}
             </div>
 
-            {!isCollapsed && (
+            {!isCollapsed && tombstone && (
+              <p
+                style={{
+                  fontSize: "12px",
+                  fontStyle: "italic",
+                  color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
+                  marginBottom: "12px",
+                  lineHeight: "1.625",
+                }}
+              >
+                {tombstone}
+              </p>
+            )}
+
+            {!isCollapsed && !tombstone && (
               <>
                 {comment.content && (
                   <p

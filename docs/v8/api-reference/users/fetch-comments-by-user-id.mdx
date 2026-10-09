@@ -12,7 +12,9 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 Returns a user's comments as one flat list — top-level comments and replies alike, across every entity — cursor-paginated. Use it for profile pages and activity views. To render a discussion, use [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments) instead.
 
-Authentication is optional. An unknown `userId` returns an empty page.
+Authentication is optional. The history is read as the **caller**: the signed-in user, or — with a service or master key — the user named in `actingUserId`. Without one (no user token, or a key without `actingUserId`) the request is anonymous: deleted and moderator-removed comments are left out, no block rule applies, `isAuthorBlocked` and `isUnavailable` are always `false`, and `userReaction` isn't populated.
+
+An unknown `userId` returns an empty page.
 
 **What's in the list:**
 
@@ -27,6 +29,12 @@ Authentication is optional. An unknown `userId` returns an empty page.
 </ParamField>
 
 ## Query Parameters
+
+### Acting user
+
+<ParamField query="actingUserId" type="string">
+  The user to read the history as. Only accepted with a **service or master key** — a user token always reads as itself, and naming a different user returns `403`. With it, the rules below (own removed comments, blocks, `blockedFilter`, the `isAuthorBlocked` / `isUnavailable` flags and `userReaction`) apply from that user's perspective.
+</ParamField>
 
 ### Filtering
 
@@ -147,6 +155,16 @@ These comments are **read-and-delete only**: replying under them, reacting to th
     {
       "error": "This `cursor` was created under a different sort. Send the same `sortBy`, `sortDir` and `sortByReaction` as the request that returned it, or leave `cursor` out to start from the beginning.",
       "code": "comment/cursor-sort-mismatch"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Acting as another user — 403">
+    Returned when a request authenticated with a user token sends an `actingUserId` other than that user's own ID.
+
+    ```json
+    {
+      "error": "Unauthorized",
+      "code": "comment/unauthorized"
     }
     ```
   </Accordion>

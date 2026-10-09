@@ -83,11 +83,11 @@ function UserFeed({ userId }: { userId: string }) {
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number" optional>
-  With `"topComments"` included: how many top comments per entity. Server default `1`, maximum `5`. Sending it without `"topComments"` in `include` is rejected (`400`).
+  With `"topComments"` included: how many top comments per entity. Server default `1`, maximum `5`. Not sent when `include` doesn't contain `"topComments"`.
 </ParamField>
 
 <ParamField body="topCommentsSortByReaction" type="ReactionType" optional>
-  With `"topComments"` included: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Sending it without `"topComments"` in `include` is rejected (`400`).
+  With `"topComments"` included: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Not sent when `include` doesn't contain `"topComments"`.
 </ParamField>
 
 <ParamField body="defaultSortBy" type="EntityListSortByOptions" optional>

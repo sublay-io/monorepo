@@ -137,5 +137,5 @@ A page can return at most 500 comments, nested replies included (see [Request si
 </ResponseField>
 
 <ResponseField name="setSortByReaction" type="(newReaction: ReactionType | undefined) => void">
-  Changes the ranking reaction and reloads from the first page.
+  Changes the ranking reaction. While `sortBy` is `"top"` this reloads from the first page; under any other sort the value is kept for later and nothing reloads.
 </ResponseField>

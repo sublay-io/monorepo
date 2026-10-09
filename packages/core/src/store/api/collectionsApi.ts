@@ -1,4 +1,5 @@
 import { baseApi } from "./baseApi";
+import { sendableTopCommentsParams } from "../../utils/topCommentsParams";
 import type { Collection } from "../../interfaces/models/Collection";
 import type {
   CollectionEntityIncludeParam,
@@ -129,8 +130,8 @@ export const collectionsApi = baseApi.injectEndpoints({
           sortByReaction: sortBy === "top" ? sortByReaction : undefined,
           sortDir,
           include: Array.isArray(include) ? include.join(',') : include,
-          topCommentsLimit,
-          topCommentsSortByReaction,
+          // Only with include=topComments (the server 400s them otherwise).
+          ...sendableTopCommentsParams(include, topCommentsLimit, topCommentsSortByReaction),
         },
       }),
       providesTags: (result, error, { collectionId }) => [

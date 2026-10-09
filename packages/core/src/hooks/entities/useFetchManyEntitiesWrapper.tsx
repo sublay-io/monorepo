@@ -220,6 +220,7 @@ function useFetchManyEntitiesWrapper(
           locationFilters,
           metadataFilters,
           nsfwFilter,
+          blockedFilter,
           ...reputation,
         });
 

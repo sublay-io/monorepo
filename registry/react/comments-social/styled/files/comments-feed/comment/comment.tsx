@@ -103,6 +103,12 @@ const Comment = React.memo(
           ? "[removed]"
           : null;
 
+    // The viewer's own moderator-removed comment comes back in full (only its
+    // author sees it). Reacting to it is refused by the server, so there's no
+    // reaction control; reply and delete stay.
+    const isOwnRemoved =
+      !tombstone && comment.moderationStatus === "removed" && !!comment.userId;
+
     return (
       <div
         style={{
@@ -372,7 +378,7 @@ const Comment = React.memo(
               </div>
               )}
             </div>
-            {!tombstone && (
+            {!tombstone && !isOwnRemoved && (
             <div
               style={{
                 display: "flex",

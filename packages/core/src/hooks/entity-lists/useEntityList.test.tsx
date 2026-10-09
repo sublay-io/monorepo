@@ -243,4 +243,98 @@ describe("useEntityList", () => {
     await waitFor(() => expect(result.current.infusedEntities).toHaveLength(1));
     expect(result.current.infusedEntities[0].infusion).toEqual({ extra: "details" });
   });
+
+  it("drops topComments params once include no longer asks for topComments (fetch and loadMore)", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e1" }], false));
+    const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+    act(() =>
+      result.current.fetchEntities({}, undefined, {
+        include: ["topComments"],
+        topCommentsLimit: 3,
+        topCommentsSortByReaction: "like",
+      }),
+    );
+    await waitFor(() => expect(fetchHandle.calls()).toHaveLength(1));
+    const first = new URL(fetchHandle.calls()[0].url).searchParams;
+    expect(first.get("topCommentsLimit")).toBe("3");
+    expect(first.get("topCommentsSortByReaction")).toBe("like");
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e1" }], true));
+    act(() => result.current.fetchEntities({}, undefined, { include: ["user"] }));
+    await waitFor(() => expect(fetchHandle.calls()).toHaveLength(2));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+    const second = new URL(fetchHandle.calls()[1].url).searchParams;
+    expect(second.get("include")).toBe("user");
+    expect(second.has("topCommentsLimit")).toBe(false);
+    expect(second.has("topCommentsSortByReaction")).toBe(false);
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e2" }], false));
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    await waitFor(() => expect(fetchHandle.calls()).toHaveLength(3));
+    const third = new URL(fetchHandle.calls()[2].url).searchParams;
+    expect(third.get("page")).toBe("2");
+    expect(third.has("topCommentsLimit")).toBe(false);
+    expect(third.has("topCommentsSortByReaction")).toBe(false);
+  });
+
+  async function fetchTwiceThenLoadMore(
+    firstConfig: Record<string, unknown>,
+    secondConfig: Record<string, unknown>,
+  ) {
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e1" }], false));
+    const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+    act(() => result.current.fetchEntities({}, undefined, firstConfig as any));
+    await waitFor(() => expect(fetchHandle.calls()).toHaveLength(1));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e1" }], true));
+    act(() => result.current.fetchEntities({}, undefined, secondConfig as any));
+    await waitFor(() => expect(fetchHandle.calls()).toHaveLength(2));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e2" }], false));
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    await waitFor(() => expect(fetchHandle.calls()).toHaveLength(3));
+    return fetchHandle.calls().map((c) => new URL(c.url).searchParams);
+  }
+
+  it("each fetchEntities call sets the whole config: an omitted spaceId isn't kept for loadMore", async () => {
+    const [first, second, third] = await fetchTwiceThenLoadMore({ spaceId: "s1" }, {});
+    // No space filter: absent, or the explicit `null` the list sends (the
+    // server treats `spaceId=null` as unfiltered).
+    expect(first.get("spaceId")).toBe("s1");
+    expect(second.get("spaceId") ?? "null").toBe("null");
+    expect(third.get("page")).toBe("2");
+    expect(third.get("spaceId") ?? "null").toBe("null");
+  });
+
+  it("an omitted spaceReputationId isn't kept for loadMore", async () => {
+    const [first, , third] = await fetchTwiceThenLoadMore(
+      { spaceReputationId: "context", spaceReputationDescendants: true },
+      {},
+    );
+    expect(first.get("spaceReputationId")).toBe("context");
+    expect(third.has("spaceReputationId")).toBe(false);
+    expect(third.has("spaceReputationDescendants")).toBe(false);
+  });
+
+  it("an omitted topCommentsLimit isn't kept for loadMore even while include still has topComments", async () => {
+    const [first, second, third] = await fetchTwiceThenLoadMore(
+      { include: ["topComments"], topCommentsLimit: 3, topCommentsSortByReaction: "like" },
+      { include: ["topComments"] },
+    );
+    expect(first.get("topCommentsLimit")).toBe("3");
+    expect(second.has("topCommentsLimit")).toBe(false);
+    expect(third.get("include")).toBe("topComments");
+    expect(third.has("topCommentsLimit")).toBe(false);
+    expect(third.has("topCommentsSortByReaction")).toBe(false);
+  });
 });

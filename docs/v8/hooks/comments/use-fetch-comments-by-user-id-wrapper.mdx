@@ -131,5 +131,5 @@ The opt-in space-reputation params (`spaceReputation`, `spaceReputationId`, `spa
 </ResponseField>
 
 <ResponseField name="setSortByReaction" type="(reaction: ReactionType | undefined) => void">
-  Changes the ranking reaction and reloads from the start.
+  Changes the ranking reaction. While `sortBy` is `"top"` this reloads from the start; under any other sort the value is kept for later and nothing reloads.
 </ResponseField>

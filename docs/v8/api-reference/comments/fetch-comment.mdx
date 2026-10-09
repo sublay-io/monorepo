@@ -17,7 +17,7 @@ Returns a single comment by its Sublay UUID.
 ## Query Parameters
 
 <ParamField query="include" type="string">
-  Comma-separated list of associations to include. Valid values: `user`, `entity`, `space`, `parent`, `grants` (the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)).
+  Comma-separated list of associations to include. Valid values: `user`, `entity`, `space`, `parent`, `grants` (the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). With `parent`, `parentComment` is `null` when the parent no longer exists or is on another entity.
 </ParamField>
 
 ### Space-scoped reputation

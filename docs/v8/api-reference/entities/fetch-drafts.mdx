@@ -31,7 +31,7 @@ Returns a paginated list of draft entities belonging to the authenticated user. 
 </ParamField>
 
 <ParamField query="include" type="string">
-  Comma-separated list of associations to include:
+  Associations to include. Pass it as one comma-separated value (`include=user,space`) or as repeated params (`include=user&include=space`). Values:
   - `user` — the author's user profile
   - `space` — the space the entity belongs to
   - `files` — uploaded file/image attachments

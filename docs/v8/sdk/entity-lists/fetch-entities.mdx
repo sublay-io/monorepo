@@ -82,8 +82,10 @@ fetchEntities(
 | `sourceId` | `string` | Filter to a specific source section |
 | `spaceId` | `string` | Filter to a specific space |
 | `include` | `string \| EntityInclude[]` | Populate related data: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"` |
-| `topCommentsLimit` | `number` | With `"topComments"` included: top comments per entity. Server default `1`, max `5` |
-| `topCommentsSortByReaction` | `ReactionType` | With `"topComments"` included: the reaction whose raw count ranks them. Server default `"upvote"` |
+| `topCommentsLimit` | `number` | With `"topComments"` included: top comments per entity. Server default `1`, max `5`. Not sent when `include` doesn't contain `"topComments"` |
+| `topCommentsSortByReaction` | `ReactionType` | With `"topComments"` included: the reaction whose raw count ranks them. Server default `"upvote"`. Not sent when `include` doesn't contain `"topComments"` |
+
+Each `fetchEntities` call sets the whole list config: a field you leave out goes back to its default (`limit` 10, the others unset) rather than keeping the value from the previous call, and `loadMore` uses the config of the last `fetchEntities` call.
 
 ### Fetch options
 

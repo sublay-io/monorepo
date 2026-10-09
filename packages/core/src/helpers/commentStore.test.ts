@@ -156,6 +156,21 @@ describe("commentStore", () => {
     expect(store.nodes.p.childIds).toEqual(["t", "x"]);
   });
 
+  it("a highlighted parent whose only reply is the target has nothing more to load", () => {
+    const parent = makeComment({ id: "p", repliesCount: 1 });
+    const target = makeComment({ id: "t", parentId: "p" });
+    let store = insertHighlightedComment(emptyCommentStore(), target, parent);
+    expect(nodeRepliesHasMore(store, "p")).toBe(false);
+
+    // The viewer's own new reply (+1, D24) is already shown too.
+    store = patchComment(store, "p", (c) => ({ ...c, repliesCount: 2 }));
+    store = insertComments(store, [makeComment({ id: "mine", parentId: "p" })], { newlyAdded: true });
+    expect(nodeRepliesHasMore(store, "p")).toBe(false);
+
+    store = patchComment(store, "p", (c) => ({ ...c, repliesCount: 3 }));
+    expect(nodeRepliesHasMore(store, "p")).toBe(true);
+  });
+
   it("a highlighted comment whose parent sits deeper is kept even though the parent is detached", () => {
     const parent = makeComment({ id: "p", parentId: "grandparent" });
     const target = makeComment({ id: "t", parentId: "p" });

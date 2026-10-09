@@ -47,7 +47,10 @@ function renderWithEntity(entity: Entity) {
   }
 
   const rendered = renderHook(
-    () => ({ section: useCommentSectionData({}), entity: useEntity().entity }),
+    () => {
+      const { entity, setEntity } = useEntity();
+      return { section: useCommentSectionData({}), entity, setEntity };
+    },
     { wrapper: Wrapper },
   );
   return { ...rendered, axiosPrivate };
@@ -78,5 +81,35 @@ describe("useCommentSectionData — entity commentsCount (D24)", () => {
       await result.current.section.deleteComment({ commentId: id });
     });
     expect(result.current.entity?.commentsCount).toBe(6);
+  });
+
+  it("re-delivered mid-create: success ends one above it, failure leaves it", async () => {
+    const entity = makeEntity({ id: "entity-1", commentsCount: 5 });
+    const { result, axiosPrivate } = renderWithEntity(entity);
+    await waitFor(() => expect(result.current.section.loading).toBe(false));
+
+    for (const outcome of ["success", "failure"] as const) {
+      let settle!: { resolve: (v: unknown) => void; reject: (e: unknown) => void };
+      (axiosPrivate.instance.post as unknown as { mockImplementationOnce: (f: () => Promise<unknown>) => void }).mockImplementationOnce(
+        () => new Promise((resolve, reject) => { settle = { resolve, reject }; }),
+      );
+      const before = result.current.entity?.commentsCount ?? 0;
+      let pending!: Promise<unknown>;
+      act(() => {
+        pending = result.current.section.createComment({ content: "hello" });
+      });
+      expect(result.current.entity?.commentsCount).toBe(before + 1);
+      // The entity is re-fetched while the create is in flight (server: 5).
+      act(() => result.current.setEntity!({ ...entity, commentsCount: 5 }));
+      await act(async () => {
+        if (outcome === "success") {
+          settle.resolve({ data: makeComment({ id: "11111111-1111-4111-8111-111111111111" }), status: 201 });
+        } else {
+          settle.reject(Object.assign(new Error("boom"), { response: { status: 500 } }));
+        }
+        await pending;
+      });
+      expect(result.current.entity?.commentsCount).toBe(outcome === "success" ? 6 : 5);
+    }
   });
 });

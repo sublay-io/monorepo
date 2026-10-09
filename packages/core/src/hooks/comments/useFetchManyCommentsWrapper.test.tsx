@@ -184,4 +184,21 @@ describe("useFetchManyCommentsWrapper", () => {
       "replySortByReaction",
     );
   });
+
+  it("changing sortByReaction while not sorting by top doesn't refetch", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useFetchManyCommentsWrapper({ entityId: "entity-1" }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeComment({ id: "c1" })], null)),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    act(() => {
+      result.current.setSortByReaction("like");
+    });
+    await new Promise((r) => setTimeout(r, 30));
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+    expect(result.current.comments.map((c) => c.id)).toEqual(["c1"]);
+  });
 });

@@ -4,13 +4,13 @@ import { resetButton } from "@sublay/ui-core-react-js";
 
 export function SortByButton({
   priority,
-  sortDir,
+  sortDir = "desc",
   activeView,
   nonActiveView,
 }: {
   priority: CommentsSortByOptions;
-  // Direction for the `createdAt` sort (the New/Old toggle). Ignored by
-  // non-directional sorts like `top`/`controversial`.
+  // The direction this option sorts in. The section's direction applies to
+  // every sort, so each option sets its own (defaults to "desc").
   sortDir?: "asc" | "desc";
   activeView: ReactNode;
   nonActiveView: ReactNode;
@@ -22,15 +22,13 @@ export function SortByButton({
     setSortDir,
   } = useCommentSection();
 
-  // For the directional `createdAt` sort, a button is active only when both the
-  // sort and the direction match; other sorts ignore direction.
-  const isActive =
-    sortBy === priority &&
-    (priority !== "createdAt" || !sortDir || currentSortDir === sortDir);
+  // Active only when both the sort and its direction match (New and Old share
+  // `createdAt` and differ only in direction).
+  const isActive = sortBy === priority && currentSortDir === sortDir;
 
   const handleClick = () => {
     setSortBy!(priority);
-    if (sortDir) setSortDir!(sortDir);
+    setSortDir!(sortDir);
   };
 
   return (

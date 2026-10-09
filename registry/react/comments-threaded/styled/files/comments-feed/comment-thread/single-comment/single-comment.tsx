@@ -96,6 +96,12 @@ function SingleComment({
         ? "[removed]"
         : null;
 
+  // The viewer's own moderator-removed comment comes back in full (only its
+  // author sees it). Voting on it is refused by the server, so there are no
+  // vote buttons; reply and delete stay.
+  const isOwnRemoved =
+    !tombstone && comment.moderationStatus === "removed" && !!comment.userId;
+
   const maxDepth = 6; // Limit visual nesting depth
   const actualDepth = Math.min(depth, maxDepth);
 
@@ -384,12 +390,14 @@ function SingleComment({
                     setShowReplyForm={setShowReplyForm}
                   />
                   {/* Vote buttons inline with reply options */}
-                  <div style={{ flexShrink: 0 }}>
-                    <VoteButtons
-                      comment={comment}
-                      size="small"
-                    />
-                  </div>
+                  {!isOwnRemoved && (
+                    <div style={{ flexShrink: 0 }}>
+                      <VoteButtons
+                        comment={comment}
+                        size="small"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Reply form */}

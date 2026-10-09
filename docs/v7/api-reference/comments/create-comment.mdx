@@ -40,7 +40,7 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
 </ParamField>
 
 <ParamField body="parentId" type="string">
-  The UUID of the parent comment. When provided, this comment is treated as a reply to that comment. The parent comment's author receives a reply notification.
+  The UUID of the parent comment. When provided, this comment is treated as a reply to that comment. The parent comment's author receives a reply notification. The parent must belong to the same `entityId`; otherwise the request returns `404 comment/entity-not-found`.
 </ParamField>
 
 <ParamField body="referencedCommentId" type="string">
@@ -81,6 +81,8 @@ Returns `201 Created` with the new [Comment](/v7/data-models/comment) object, po
 
 <AccordionGroup>
   <Accordion title="Entity Not Found — 404">
+    Returned when the entity doesn't exist, or when `parentId` doesn't exist or belongs to a different entity.
+
     ```json
     { "error": "Entity not found", "code": "comment/entity-not-found" }
     ```

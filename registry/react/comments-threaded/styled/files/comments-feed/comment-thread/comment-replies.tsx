@@ -2,6 +2,17 @@ import React from "react";
 import { Comment as CommentType } from "@sublay/react-js";
 import { CommentThreadProps } from "./comment-thread";
 import useUIState from "../../../hooks/use-ui-state";
+import IndentationThreadingLines, {
+  INDENT,
+  MAX_INDENT_DEPTH,
+} from "./single-comment/indentation-threading-lines";
+
+// 🎨 CUSTOMIZATION: "More replies" row - space above it (Default: 12px)
+const LOAD_MORE_PADDING_TOP = 12;
+// 🎨 CUSTOMIZATION: "More replies" row - height (Default: 24px)
+const LOAD_MORE_HEIGHT = 24;
+// 🎨 CUSTOMIZATION: "More replies" row - space between the elbow and the button (Default: 4px)
+const LOAD_MORE_OFFSET_LEFT = 4;
 
 interface CommentRepliesProps {
   depth: number;
@@ -47,23 +58,16 @@ function CommentReplies({
       : "More replies";
 
   return (
-    <div
-    // style={{ marginTop: "8px" }}
-    >
-      {/* {loading && (
-        <div
-          style={{ fontSize: "12px", color: "#6B7280", marginBottom: "8px" }}
-        >
-          Loading replies...
-        </div>
-      )} */}
+    // Replies sit one level in from their parent, until the indentation cap
+    <div style={{ marginLeft: depth < MAX_INDENT_DEPTH ? `${INDENT}px` : 0 }}>
 
       {visibleReplies.map((reply: CommentType, index: number) => (
         <CommentThreadComponent
           key={reply.id}
           comment={reply}
           depth={depth + 1}
-          isLastReply={index === visibleReplies.length - 1}
+          // The load-more row below, when there is one, is the last row on the line
+          isLastReply={index === visibleReplies.length - 1 && !hasMore}
           onDeleteComment={onDeleteComment}
           onReportComment={onReportComment}
         />
@@ -71,8 +75,25 @@ function CommentReplies({
 
       {/* Load more replies button (or a retry after a failed load) */}
       {hasMore && (
-        // Indented to the level the replies load at (same 24px-per-level cap as single comments)
-        <div style={{ marginTop: "12px", marginLeft: `${Math.min(depth + 1, 6) * 24 + 4}px` }}>
+        // Always the last row under its parent. Past the indentation cap it
+        // still steps in one level, so it reads as a branch off the column.
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            boxSizing: "content-box",
+            minHeight: `${LOAD_MORE_HEIGHT}px`,
+            paddingTop: `${LOAD_MORE_PADDING_TOP}px`,
+            paddingLeft: `${LOAD_MORE_OFFSET_LEFT}px`,
+            marginLeft: depth < MAX_INDENT_DEPTH ? 0 : `${INDENT}px`,
+          }}
+        >
+          <IndentationThreadingLines
+            isLastReply
+            joinAt={LOAD_MORE_PADDING_TOP + LOAD_MORE_HEIGHT / 2}
+            reach={LOAD_MORE_OFFSET_LEFT}
+          />
           {failed && !loading ? (
             <div
               style={{

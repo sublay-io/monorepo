@@ -1,57 +1,156 @@
 import useUIState from "../../../../hooks/use-ui-state";
 
-function IndentationThreadingLines({ isLastReply }: { isLastReply: boolean }) {
+// 🎨 CUSTOMIZATION: Thread geometry. Every connector line is derived from
+// these values, so changing one keeps the joins intact.
+
+// 🎨 CUSTOMIZATION: Avatar size (Default: 24px)
+export const AVATAR_SIZE = 24;
+// 🎨 CUSTOMIZATION: Indentation per reply level (Default: 24px).
+// Keep it larger than half the avatar, or the elbows have no room.
+export const INDENT = 24;
+// 🎨 CUSTOMIZATION: Levels that indent; deeper replies stay in one column (Default: 6)
+export const MAX_INDENT_DEPTH = 6;
+// 🎨 CUSTOMIZATION: Vertical padding of a comment row (Default: 8px)
+export const ROW_PADDING_Y = 8;
+// 🎨 CUSTOMIZATION: Space between the top of a row's content and its avatar (Default: 4px)
+export const AVATAR_OFFSET_TOP = 4;
+// 🎨 CUSTOMIZATION: Gap between the avatar and the comment content (Default: 12px)
+export const AVATAR_GAP = 12;
+// 🎨 CUSTOMIZATION: Threading line thickness (Default: 1px)
+export const LINE_WIDTH = 1;
+// 🎨 CUSTOMIZATION: Roundness of the elbow into each reply (Default: 12px)
+export const ELBOW_RADIUS = 12;
+
+// Left edge of the vertical line, measured from the left edge of the comment
+// it hangs from: centred under that comment's avatar.
+export const RAIL_X = Math.floor((AVATAR_SIZE - LINE_WIDTH) / 2);
+// Top and vertical centre of a comment's avatar, measured from the top of its row.
+export const AVATAR_TOP = ROW_PADDING_Y + AVATAR_OFFSET_TOP;
+export const AVATAR_CENTER_Y = AVATAR_TOP + AVATAR_SIZE / 2;
+
+function useLineColor() {
   const { theme } = useUIState();
+  // 🎨 CUSTOMIZATION: Threading line color (Default: gray-300)
+  return theme === "dark" ? "#6B7280" : "#D1D5DB";
+}
+
+/**
+ * The line from under a comment's avatar to the bottom of its row, where the
+ * lines of the rows below take over. Rendered inside the comment's row.
+ */
+export function ThreadStem() {
+  const color = useLineColor();
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        boxSizing: "border-box",
+        left: `${RAIL_X}px`,
+        top: `${AVATAR_TOP + AVATAR_SIZE}px`,
+        bottom: 0,
+        borderLeft: `${LINE_WIDTH}px solid ${color}`,
+        pointerEvents: "none",
+      }}
+    />
+  );
+}
+
+interface IndentationThreadingLinesProps {
+  /** Nothing hangs from the parent's line below this row. */
+  isLastReply: boolean;
+  /**
+   * The row sits one level in from its parent (the default). False past the
+   * indentation cap, where replies stay in their parent's column.
+   */
+  indented?: boolean;
+  /** Where the elbow meets the row, measured from the top of the row. */
+  joinAt?: number;
+  /** How far past the row's left edge the elbow runs. */
+  reach?: number;
+}
+
+/**
+ * Connects one row to its parent. Rendered inside the row's wrapper, which
+ * must be `position: relative` and span the row plus everything nested under
+ * it. Wrappers stack with no space between them, so their line segments add
+ * up to one unbroken line at any content height.
+ */
+function IndentationThreadingLines({
+  isLastReply,
+  indented = true,
+  joinAt = AVATAR_CENTER_Y,
+  reach = 0,
+}: IndentationThreadingLinesProps) {
+  const color = useLineColor();
+  const border = `${LINE_WIDTH}px solid ${color}`;
+
+  // Past the indentation cap: a straight line through the column, from the
+  // row above into this avatar and, if more rows follow, on past it.
+  if (!indented) {
+    return (
+      <>
+        <div
+          style={{
+            position: "absolute",
+            boxSizing: "border-box",
+            left: `${RAIL_X}px`,
+            top: 0,
+            height: `${AVATAR_TOP}px`,
+            borderLeft: border,
+            pointerEvents: "none",
+          }}
+        />
+        {!isLastReply && (
+          <div
+            style={{
+              position: "absolute",
+              boxSizing: "border-box",
+              left: `${RAIL_X}px`,
+              top: `${AVATAR_TOP + AVATAR_SIZE}px`,
+              bottom: 0,
+              borderLeft: border,
+              pointerEvents: "none",
+            }}
+          />
+        )}
+      </>
+    );
+  }
 
   return (
     <>
-      {/* Vertical line from parent thread continuing down - only if not the last reply */}
+      {/* The parent's line carrying on to the rows below */}
       {!isLastReply && (
         <div
           style={{
             position: "absolute",
-            width: "1px",
-            // 🎨 CUSTOMIZATION: Threading line color (Default: gray-300)
-            backgroundColor: theme === 'dark' ? "#6B7280" : "#D1D5DB",
-            zIndex: 0,
-            left: "-12px",
-            top: "0px",
-            height: "100%",
+            boxSizing: "border-box",
+            left: `${RAIL_X - INDENT}px`,
+            top: 0,
+            bottom: 0,
+            borderLeft: border,
+            pointerEvents: "none",
           }}
-        ></div>
+        />
       )}
 
-      {/* Vertical line from parent thread to this comment's branch point */}
+      {/* The parent's line down to this row, turning into it: one shape, so
+          the vertical part and the curve can't come apart */}
       <div
         style={{
           position: "absolute",
-          top: "-8px",
-          width: "1px",
-          height: "18px",
-          // 🎨 CUSTOMIZATION: Threading line color (Default: gray-300)
-          backgroundColor: theme === 'dark' ? "#6B7280" : "#D1D5DB",
-          zIndex: 0,
-          left: "-12px",
+          boxSizing: "border-box",
+          left: `${RAIL_X - INDENT}px`,
+          top: 0,
+          width: `${INDENT - RAIL_X + reach}px`,
+          height: `${Math.ceil(joinAt + LINE_WIDTH / 2)}px`,
+          borderLeft: border,
+          borderBottom: border,
+          borderBottomLeftRadius: `${ELBOW_RADIUS}px`,
+          pointerEvents: "none",
         }}
-      ></div>
-
-      {/* Curved branch connecting parent line to child avatar */}
-      <div
-        style={{
-          position: "absolute",
-          top: "10px",
-          width: "12px",
-          height: "16px",
-          // 🎨 CUSTOMIZATION: Threading line color (Default: gray-300)
-          borderLeft: theme === 'dark' ? "1.5px solid #6B7280" : "1.5px solid #D1D5DB",
-          borderBottom: theme === 'dark' ? "1.5px solid #6B7280" : "1.5px solid #D1D5DB",
-          borderTop: "1.5px solid transparent",
-          borderRight: "1.5px solid transparent",
-          borderBottomLeftRadius: "12px",
-          zIndex: 0,
-          left: "-12px",
-        }}
-      ></div>
+      />
     </>
   );
 }

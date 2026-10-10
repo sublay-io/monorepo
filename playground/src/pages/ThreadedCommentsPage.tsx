@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import ThreadedCommentSectionStyled from "../../../registry/react/comments-threaded/styled/files/threaded-comment-section";
 import ThreadedCommentSectionTailwind from "../../../registry/react/comments-threaded/tailwind/files/threaded-comment-section";
 import { EntityProvider } from "@sublay/react-js";
+import {
+  HighlightControl,
+  useHighlightedCommentId,
+} from "../components/HighlightControl";
 
 type StyleVariant = "styled" | "tailwind";
 
@@ -10,6 +14,7 @@ const FOREIGN_ID = "playground-threaded-comments";
 export default function ThreadedCommentsPage() {
   const [variant, setVariant] = useState<StyleVariant>("styled");
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { highlightedCommentId, applied, apply } = useHighlightedCommentId();
 
   return (
     <div>
@@ -28,6 +33,8 @@ export default function ThreadedCommentsPage() {
         <ThemeToggle value={theme} onChange={setTheme} />
       </div>
 
+      <HighlightControl applied={applied} onApply={apply} />
+
       <div
         style={{
           maxWidth: 700,
@@ -42,12 +49,14 @@ export default function ThreadedCommentsPage() {
             <ThreadedCommentSectionStyled
               foreignId={FOREIGN_ID}
               isVisible={true}
+              highlightedCommentId={highlightedCommentId}
               theme={theme}
             />
           ) : (
             <ThreadedCommentSectionTailwind
               foreignId={FOREIGN_ID}
               isVisible={true}
+              highlightedCommentId={highlightedCommentId}
             />
           )}
         </EntityProvider>

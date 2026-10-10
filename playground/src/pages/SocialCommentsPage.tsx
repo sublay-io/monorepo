@@ -2,6 +2,10 @@ import { useState } from "react";
 import SocialCommentSectionStyled from "../../../registry/react/comments-social/styled/files/social-comment-section";
 import SocialCommentSectionTailwind from "../../../registry/react/comments-social/tailwind/files/social-comment-section";
 import { EntityProvider } from "@sublay/react-js";
+import {
+  HighlightControl,
+  useHighlightedCommentId,
+} from "../components/HighlightControl";
 
 type StyleVariant = "styled" | "tailwind";
 
@@ -10,6 +14,7 @@ const FOREIGN_ID = "playground-social-comments";
 export default function SocialCommentsPage() {
   const [variant, setVariant] = useState<StyleVariant>("styled");
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { highlightedCommentId, applied, apply } = useHighlightedCommentId();
 
   return (
     <div>
@@ -28,6 +33,8 @@ export default function SocialCommentsPage() {
         <ThemeToggle value={theme} onChange={setTheme} />
       </div>
 
+      <HighlightControl applied={applied} onApply={apply} />
+
       <div
         style={{
           maxWidth: 600,
@@ -42,12 +49,14 @@ export default function SocialCommentsPage() {
             <SocialCommentSectionStyled
               foreignId={FOREIGN_ID}
               isVisible={true}
+              highlightedCommentId={highlightedCommentId}
               theme={theme}
             />
           ) : (
             <SocialCommentSectionTailwind
               foreignId={FOREIGN_ID}
               isVisible={true}
+              highlightedCommentId={highlightedCommentId}
             />
           )}
         </EntityProvider>

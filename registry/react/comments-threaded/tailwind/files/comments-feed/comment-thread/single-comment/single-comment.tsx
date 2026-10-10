@@ -20,6 +20,7 @@ import IndentationThreadingLines, {
   AVATAR_OFFSET_TOP,
   AVATAR_SIZE,
   INDENT,
+  MAX_INDENT_DEPTH,
   ROW_PADDING_Y,
   ThreadStem,
 } from "./indentation-threading-lines";
@@ -28,6 +29,7 @@ import { cn } from "@/lib/utils";
 
 interface SingleCommentProps {
   comment: CommentType;
+  depth: number;
   hasReplies: boolean;
   isCollapsed: boolean;
   replyCount: number;
@@ -64,6 +66,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
 
 function SingleComment({
   comment: commentFromSection,
+  depth,
   hasReplies,
   isCollapsed,
   replyCount,
@@ -103,6 +106,10 @@ function SingleComment({
     comment.moderationReason ? `: ${comment.moderationReason}` : ""
   } · only you can see this`;
 
+  // How far this row sits in from the left edge of its thread. The highlight
+  // reaches back across it, so a highlighted reply is coloured edge to edge.
+  const indentationPx = Math.min(depth, MAX_INDENT_DEPTH) * INDENT;
+
   // The reply form is a row of its own under the comment, first on the line
   // its replies hang from.
   const showForm =
@@ -122,14 +129,20 @@ function SingleComment({
 
   return (
     <>
-    <div className={cn("relative", highlightClass)}>
-      {/* Line from this comment's avatar down to the rows listed under it */}
-      {(showReplies || showForm) && <ThreadStem />}
-
+    <div
+      className={cn(highlightClass)}
+      style={{
+        marginLeft: `-${indentationPx}px`,
+        paddingLeft: `${indentationPx}px`,
+      }}
+    >
       <div
-        className="rounded-md transition-colors duration-150"
+        className="relative rounded-md transition-colors duration-150"
         style={{ padding: `${ROW_PADDING_Y}px 0` }}
       >
+        {/* Line from this comment's avatar down to the rows listed under it */}
+        {(showReplies || showForm) && <ThreadStem />}
+
         <div className="flex">
           {/* Avatar positioned for threading line connection with top margin */}
           <div
@@ -313,7 +326,11 @@ function SingleComment({
     {showForm && (
       <div
         className={cn(highlightClass)}
-        style={{ marginTop: `-${ROW_PADDING_Y}px` }}
+        style={{
+          marginTop: `-${ROW_PADDING_Y}px`,
+          marginLeft: `-${indentationPx}px`,
+          paddingLeft: `${indentationPx}px`,
+        }}
       >
         <div
           className="relative"

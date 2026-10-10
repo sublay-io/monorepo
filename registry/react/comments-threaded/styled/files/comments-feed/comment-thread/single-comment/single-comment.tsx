@@ -20,6 +20,7 @@ import IndentationThreadingLines, {
   AVATAR_OFFSET_TOP,
   AVATAR_SIZE,
   INDENT,
+  MAX_INDENT_DEPTH,
   ROW_PADDING_Y,
   ThreadStem,
 } from "./indentation-threading-lines";
@@ -28,6 +29,7 @@ import useUIState from "../../../../hooks/use-ui-state";
 
 interface SingleCommentProps {
   comment: CommentType;
+  depth: number;
   hasReplies: boolean;
   isCollapsed: boolean;
   replyCount: number;
@@ -75,6 +77,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
 
 function SingleComment({
   comment: commentFromSection,
+  depth,
   hasReplies,
   isCollapsed,
   replyCount,
@@ -115,6 +118,10 @@ function SingleComment({
     comment.moderationReason ? `: ${comment.moderationReason}` : ""
   } · only you can see this`;
 
+  // How far this row sits in from the left edge of its thread. The highlight
+  // reaches back across it, so a highlighted reply is coloured edge to edge.
+  const indentationPx = Math.min(depth, MAX_INDENT_DEPTH) * INDENT;
+
   // The reply form is a row of its own under the comment, first on the line
   // its replies hang from.
   const showForm =
@@ -137,20 +144,22 @@ function SingleComment({
     <>
     <div
       style={{
-        position: "relative",
+        marginLeft: `-${indentationPx}px`,
+        paddingLeft: `${indentationPx}px`,
         backgroundColor: highlightColor,
       }}
     >
-      {/* Line from this comment's avatar down to the rows listed under it */}
-      {(showReplies || showForm) && <ThreadStem />}
-
       <div
         style={{
+          position: "relative",
           padding: `${ROW_PADDING_Y}px 0`,
           borderRadius: "6px",
           transition: "colors 150ms ease-in-out",
         }}
       >
+        {/* Line from this comment's avatar down to the rows listed under it */}
+        {(showReplies || showForm) && <ThreadStem />}
+
         <div style={{ display: "flex" }}>
           {/* Avatar positioned for threading line connection with top margin */}
           <div
@@ -422,6 +431,8 @@ function SingleComment({
       <div
         style={{
           marginTop: `-${ROW_PADDING_Y}px`,
+          marginLeft: `-${indentationPx}px`,
+          paddingLeft: `${indentationPx}px`,
           backgroundColor: highlightColor,
         }}
       >

@@ -132,13 +132,14 @@ function SingleComment({
     !isOwnRemoved;
 
   const isHighlighted = highlightedComment?.comment.id === comment.id;
-  // 🎨 CUSTOMIZATION: Highlighted comment background (Default: blue-100)
+  // 🎨 CUSTOMIZATION: Highlighted comment background: a neutral step away
+  // from the section background (Default: gray-100)
   const highlightColor = isHighlighted
-    ? (theme === 'dark' ? "#1E40AF" : "#dbeafe")
+    ? (theme === 'dark' ? "#2B3544" : "#F3F4F6")
     : "transparent";
-  // 🎨 CUSTOMIZATION: Highlight on the indentation beside it (Default: blue-50)
+  // 🎨 CUSTOMIZATION: Highlight color on the indentation beside it (Default: blue-100)
   const highlightGutterColor = isHighlighted
-    ? (theme === 'dark' ? "#172554" : "#EFF6FF")
+    ? (theme === 'dark' ? "#1E3A8A" : "#DBEAFE")
     : "transparent";
 
   // The API sends aspectRatio as a string (e.g. "1.5"), so coerce before doing

@@ -120,10 +120,11 @@ function SingleComment({
     !isOwnRemoved;
 
   const isHighlighted = highlightedComment?.comment.id === comment.id;
-  // 🎨 CUSTOMIZATION: Highlighted comment background
-  const highlightClass = isHighlighted && "bg-blue-100 dark:bg-blue-800";
-  // 🎨 CUSTOMIZATION: Highlight on the indentation beside it
-  const highlightGutterClass = isHighlighted && "bg-blue-50 dark:bg-blue-950";
+  // 🎨 CUSTOMIZATION: Highlighted comment background: a neutral step away
+  // from the section background
+  const highlightClass = isHighlighted && "bg-gray-100 dark:bg-[#2B3544]";
+  // 🎨 CUSTOMIZATION: Highlight color on the indentation beside it
+  const highlightGutterClass = isHighlighted && "bg-blue-100 dark:bg-blue-900";
 
   // The API sends aspectRatio as a string (e.g. "1.5"), so coerce before doing
   // math with it. Falls back to 1 (square) if it's missing or unparsable.

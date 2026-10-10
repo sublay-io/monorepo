@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
-import { Comment as CommentType, useReplies } from "@sublay/react-js";
+import {
+  Comment as CommentType,
+  useCommentSection,
+  useReplies,
+} from "@sublay/react-js";
 import SingleComment from "./single-comment";
 import CommentReplies from "./comment-replies";
 import IndentationThreadingLines, {
@@ -20,6 +24,7 @@ function CommentThread({
   isLastReply = false,
 }: CommentThreadProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { highlightedComment } = useCommentSection();
 
   // Replies the section already brought in (nested) are here from the start;
   // "load more" / "continue this thread" fetch the rest on demand.
@@ -75,6 +80,7 @@ function CommentThread({
         <IndentationThreadingLines
           isLastReply={isLastReply}
           indented={depth <= MAX_INDENT_DEPTH}
+          highlighted={highlightedComment?.comment.id === comment.id}
         />
       )}
     </div>

@@ -68,6 +68,8 @@ interface IndentationThreadingLinesProps {
   joinAt?: number;
   /** How far past the row's left edge the elbow runs. */
   reach?: number;
+  /** The row is the highlighted comment: its connector takes the accent color. */
+  highlighted?: boolean;
 }
 
 /**
@@ -81,9 +83,15 @@ function IndentationThreadingLines({
   indented = true,
   joinAt = AVATAR_CENTER_Y,
   reach = 0,
+  highlighted = false,
 }: IndentationThreadingLinesProps) {
+  const { theme } = useUIState();
   const color = useLineColor();
   const border = `${LINE_WIDTH}px solid ${color}`;
+  // 🎨 CUSTOMIZATION: Connector into the highlighted comment (Default: blue-500)
+  const accent = theme === "dark" ? "#60A5FA" : "#3B82F6";
+  // The piece that leads into this row; the line carrying on past it stays neutral
+  const ownBorder = highlighted ? `${LINE_WIDTH}px solid ${accent}` : border;
 
   // Past the indentation cap: a straight line through the column, from the
   // row above into this avatar and, if more rows follow, on past it.
@@ -97,7 +105,7 @@ function IndentationThreadingLines({
             left: `${RAIL_X}px`,
             top: 0,
             height: `${AVATAR_TOP}px`,
-            borderLeft: border,
+            borderLeft: ownBorder,
             pointerEvents: "none",
           }}
         />
@@ -145,8 +153,8 @@ function IndentationThreadingLines({
           top: 0,
           width: `${INDENT - RAIL_X + reach}px`,
           height: `${Math.ceil(joinAt + LINE_WIDTH / 2)}px`,
-          borderLeft: border,
-          borderBottom: border,
+          borderLeft: ownBorder,
+          borderBottom: ownBorder,
           borderBottomLeftRadius: `${ELBOW_RADIUS}px`,
           pointerEvents: "none",
         }}

@@ -119,9 +119,11 @@ function SingleComment({
     !tombstone &&
     !isOwnRemoved;
 
-  const highlightClass =
-    highlightedComment?.comment.id === comment.id &&
-    "bg-blue-100 dark:bg-blue-900";
+  const isHighlighted = highlightedComment?.comment.id === comment.id;
+  // 🎨 CUSTOMIZATION: Highlighted comment background
+  const highlightClass = isHighlighted && "bg-blue-100 dark:bg-blue-800";
+  // 🎨 CUSTOMIZATION: Highlight on the indentation beside it
+  const highlightGutterClass = isHighlighted && "bg-blue-50 dark:bg-blue-950";
 
   // The API sends aspectRatio as a string (e.g. "1.5"), so coerce before doing
   // math with it. Falls back to 1 (square) if it's missing or unparsable.
@@ -130,14 +132,14 @@ function SingleComment({
   return (
     <>
     <div
-      className={cn(highlightClass)}
+      className={cn(highlightGutterClass)}
       style={{
         marginLeft: `-${indentationPx}px`,
         paddingLeft: `${indentationPx}px`,
       }}
     >
       <div
-        className="relative rounded-md transition-colors duration-150"
+        className={cn("relative transition-colors duration-150", highlightClass)}
         style={{ padding: `${ROW_PADDING_Y}px 0` }}
       >
         {/* Line from this comment's avatar down to the rows listed under it */}
@@ -325,13 +327,14 @@ function SingleComment({
         the row's bottom padding so it sits right under the reply button */}
     {showForm && (
       <div
-        className={cn(highlightClass)}
+        className={cn(highlightGutterClass)}
         style={{
           marginTop: `-${ROW_PADDING_Y}px`,
           marginLeft: `-${indentationPx}px`,
           paddingLeft: `${indentationPx}px`,
         }}
       >
+        <div className={cn(highlightClass)}>
         <div
           className="relative"
           style={{
@@ -346,6 +349,7 @@ function SingleComment({
             reach={AVATAR_SIZE + AVATAR_GAP - INDENT}
           />
           <NewReplyForm comment={comment} setShowReplyForm={setShowReplyForm} />
+        </div>
         </div>
       </div>
     )}

@@ -76,11 +76,25 @@ Reddit-style voting with visible vote scores.
 
 Clear visual hierarchy with indentation and connection lines.
 
-- Each reply level indented by 16px (customizable)
-- Threading lines show parent-child relationships
-- Collapsible threads to hide long chains
+- Each reply level is indented by 24px, up to 6 levels; deeper replies stay in one column
+- One continuous line runs from under a comment's avatar down to its last reply, with a rounded elbow into each reply's avatar
+- The "N more replies" / "Continue this thread" row and the inline reply form hang from the same line
+- Collapsing a thread removes its lines along with its replies
 
-Edit `indentation-threading-lines.tsx` to adjust spacing, colors, or line styles.
+The geometry is a set of named values at the top of `indentation-threading-lines.tsx`. Every line is derived from them, so changing one keeps the joins intact:
+
+| Value | Default | Controls |
+|-------|---------|----------|
+| `AVATAR_SIZE` | `24` | Avatar size |
+| `INDENT` | `24` | Indentation per reply level (keep it larger than half the avatar) |
+| `MAX_INDENT_DEPTH` | `6` | Levels that indent |
+| `ROW_PADDING_Y` | `8` | Vertical padding of a comment row |
+| `AVATAR_OFFSET_TOP` | `4` | Space between the top of a row's content and its avatar |
+| `AVATAR_GAP` | `12` | Gap between the avatar and the comment content |
+| `LINE_WIDTH` | `1` | Line thickness |
+| `ELBOW_RADIUS` | `12` | Roundness of the elbow |
+
+The line color is set in the same file.
 
 ---
 

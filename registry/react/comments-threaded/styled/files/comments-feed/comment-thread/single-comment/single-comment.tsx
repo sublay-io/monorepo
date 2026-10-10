@@ -15,19 +15,30 @@ import VoteButtons from "./vote-buttons";
 import ActionMenu from "../action-menu";
 import NewReplyForm from "../new-reply-form";
 import ToggleRepliesVisibilty from "./toggle-replies-visibility";
-import IndentationThreadingLines from "./indentation-threading-lines";
+import IndentationThreadingLines, {
+  AVATAR_GAP,
+  AVATAR_OFFSET_TOP,
+  AVATAR_SIZE,
+  INDENT,
+  ROW_PADDING_Y,
+  ThreadStem,
+} from "./indentation-threading-lines";
 import ReplyButtonAndInfo from "./reply-button-and-info";
 import useUIState from "../../../../hooks/use-ui-state";
 
 interface SingleCommentProps {
   comment: CommentType;
-  depth: number;
   hasReplies: boolean;
   isCollapsed: boolean;
   replyCount: number;
-  isLastReply?: boolean;
+  /** Replies (or the row that loads them) are listed under this comment. */
+  showReplies: boolean;
   onToggleCollapse: () => void;
 }
+
+// 🎨 CUSTOMIZATION: Where the threading line meets the reply form, measured
+// from the top of the form's row (Default: 32px, level with its first line)
+const REPLY_FORM_JOIN_Y = 32;
 
 // The viewer's own reaction on a comment they can't otherwise interact with
 // (its author blocked them): undoing it is still allowed.
@@ -64,11 +75,10 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
 
 function SingleComment({
   comment: commentFromSection,
-  depth,
   hasReplies,
   isCollapsed,
   replyCount,
-  isLastReply = false,
+  showReplies,
   onToggleCollapse,
 }: SingleCommentProps) {
   const { user } = useUser();
@@ -105,37 +115,38 @@ function SingleComment({
     comment.moderationReason ? `: ${comment.moderationReason}` : ""
   } · only you can see this`;
 
-  const maxDepth = 6; // Limit visual nesting depth
-  const actualDepth = Math.min(depth, maxDepth);
+  // The reply form is a row of its own under the comment, first on the line
+  // its replies hang from.
+  const showForm =
+    showReplyForm &&
+    !isPlaceholderRow &&
+    !isCollapsed &&
+    !tombstone &&
+    !isOwnRemoved;
 
-  // Calculate progressive indentation using inline styles for reliability
-  const indentationPx = actualDepth * 24; // 24px per level (same as ml-10 = 2.5rem = 40px)
+  const highlightColor =
+    highlightedComment?.comment.id === comment.id
+      ? (theme === 'dark' ? "#1E40AF" : "#dbeafe")
+      : "transparent";
 
   // The API sends aspectRatio as a string (e.g. "1.5"), so coerce before doing
   // math with it. Falls back to 1 (square) if it's missing or unparsable.
   const gifAspectRatio = Number(comment.gif?.aspectRatio) || 1;
 
   return (
+    <>
     <div
       style={{
         position: "relative",
-        // marginBottom: "8px",
-        marginLeft: `${indentationPx}px`,
-        backgroundColor:
-          highlightedComment?.comment.id === comment.id
-            ? (theme === 'dark' ? "#1E40AF" : "#dbeafe")
-            : "transparent",
+        backgroundColor: highlightColor,
       }}
     >
-      {/* Threading lines - positioned behind avatars, relative to indentation */}
-      {actualDepth > 0 && (
-        <IndentationThreadingLines isLastReply={isLastReply} />
-      )}
+      {/* Line from this comment's avatar down to the rows listed under it */}
+      {(showReplies || showForm) && <ThreadStem />}
 
       <div
         style={{
-          // 🎨 CUSTOMIZATION: Spacing (Default: 8px)
-          padding: "8px 0",
+          padding: `${ROW_PADDING_Y}px 0`,
           borderRadius: "6px",
           transition: "colors 150ms ease-in-out",
         }}
@@ -145,11 +156,9 @@ function SingleComment({
           <div
             style={{
               flexShrink: 0,
-              // 🎨 CUSTOMIZATION: Spacing (Default: 12px)
-              marginRight: "12px",
+              marginRight: `${AVATAR_GAP}px`,
               position: "relative",
-              // 🎨 CUSTOMIZATION: Spacing (Default: 4px, derived from 8/2)
-              marginTop: "4px",
+              marginTop: `${AVATAR_OFFSET_TOP}px`,
             }}
           >
             {isPlaceholderRow || tombstone ? (
@@ -157,9 +166,9 @@ function SingleComment({
                 style={{
                   position: "relative",
                   zIndex: 10,
-                  width: "24px",
-                  height: "24px",
-                  borderRadius: "24px",
+                  width: `${AVATAR_SIZE}px`,
+                  height: `${AVATAR_SIZE}px`,
+                  borderRadius: `${AVATAR_SIZE}px`,
                   backgroundColor: theme === 'dark' ? "#374151" : "#E5E7EB",
                 }}
               />
@@ -176,26 +185,10 @@ function SingleComment({
               >
                 <UserAvatar
                   user={comment.user ?? {}}
-                  // 🎨 CUSTOMIZATION: Avatar styling (Default: 24px)
-                  borderRadius={24}
-                  size={24}
+                  borderRadius={AVATAR_SIZE}
+                  size={AVATAR_SIZE}
                 />
               </div>
-            )}
-            {/* Vertical line extending down from this comment's avatar when it has replies */}
-            {hasReplies && !isCollapsed && (
-              <div
-                style={{
-                  position: "absolute",
-                  left: "50%",
-                  top: "20px",
-                  width: "1px",
-                  // 🎨 CUSTOMIZATION: Threading lines (Default: gray-300)
-                  backgroundColor: theme === 'dark' ? "#6B7280" : "#D1D5DB",
-                  zIndex: 0,
-                  height: "calc(100% + 10px)",
-                }}
-              ></div>
             )}
           </div>
 
@@ -415,14 +408,6 @@ function SingleComment({
                     </div>
                   )}
                 </div>
-
-                {/* Reply form */}
-                {showReplyForm && !isOwnRemoved && (
-                  <NewReplyForm
-                    comment={comment}
-                    setShowReplyForm={setShowReplyForm}
-                  />
-                )}
               </>
             )}
           </div>
@@ -430,6 +415,34 @@ function SingleComment({
         </div>
       </div>
     </div>
+
+    {/* Reply form: lined up with the comment's content, and pulled up into
+        the row's bottom padding so it sits right under the reply button */}
+    {showForm && (
+      <div
+        style={{
+          marginTop: `-${ROW_PADDING_Y}px`,
+          backgroundColor: highlightColor,
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            marginLeft: `${INDENT}px`,
+            paddingLeft: `${AVATAR_SIZE + AVATAR_GAP - INDENT}px`,
+            paddingBottom: `${ROW_PADDING_Y}px`,
+          }}
+        >
+          <IndentationThreadingLines
+            isLastReply={!showReplies}
+            joinAt={REPLY_FORM_JOIN_Y}
+            reach={AVATAR_SIZE + AVATAR_GAP - INDENT}
+          />
+          <NewReplyForm comment={comment} setShowReplyForm={setShowReplyForm} />
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 

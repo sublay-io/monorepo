@@ -13,7 +13,7 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `foreignId` | `string \| null` | Your system's ID for this comment, if applicable. |
 | `entityId` | `string` | The entity this comment belongs to. |
 | `spaceId` | `string \| null` | The space of the comment's entity. `null` when the entity isn't in a space. |
-| `entity` | `Entity \| null` | Populated when `include` contains `"entity"` or `"space"`. `null` on [your own comment on an unavailable entity](/v8/api-reference/users/fetch-comments-by-user-id#your-own-comments-on-an-unavailable-entity). |
+| `entity` | `Entity \| null` | Populated when `include` contains `"entity"` or `"space"`. `null` when the entity isn't available to the caller — for example, removed by a moderator, or on [your own comment on an entity whose author blocked you](/v8/api-reference/users/fetch-comments-by-user-id#your-own-comments-on-an-unavailable-entity). The comment is still returned, and `null` doesn't say why. |
 | `userId` | `string \| null` | The ID of the user who posted this comment. `null` on [placeholders](#placeholders). |
 | `user` | `User \| null` | The comment author. Populated when `include` contains `"user"`. `null` on placeholders. |
 | `parentId` | `string \| null` | ID of the parent comment if this is a reply. `null` for top-level comments. |

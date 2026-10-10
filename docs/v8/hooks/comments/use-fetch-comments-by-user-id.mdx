@@ -15,6 +15,7 @@ What the list contains:
 - Deleted comments are left out. Moderator-removed comments are left out of other people's history, and included in full (marked `moderationStatus: "removed"`) in the signed-in user's own.
 - Comments by users the signed-in user is block-edged with are left out by default (`blockedFilter`).
 - Comments on an entity whose author has blocked the signed-in user are left out — except their own, which stay visible so they can be found and deleted. On those, `entity` and `parentComment` are `null` when requested, and replying, reacting and editing are refused.
+- `include` never changes which comments are returned. `entity` is `null` when the entity isn't available to the signed-in user (for example, removed by a moderator) — the comment is still returned, and `null` doesn't say why.
 
 ## Usage Example
 

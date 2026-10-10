@@ -13,7 +13,7 @@ Returns a single comment matching the given `foreignId` within the project. Usef
 </ParamField>
 
 <ParamField query="include" type="string">
-  Comma-separated list of associations to include. Valid values: `user`, `entity`, `space`, `parent`, `grants` (the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). With `parent`, `parentComment` is `null` when the parent no longer exists or is on another entity.
+  Comma-separated list of associations to include. Valid values: `user`, `entity`, `space`, `parent`, `grants` (the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). With `entity` or `space`, `entity` is `null` when the entity isn't available to the caller (for example, removed by a moderator) — the comment is still returned, and there is no space. With `parent`, `parentComment` is `null` when the parent no longer exists or is on another entity.
 </ParamField>
 
 ## Response
@@ -30,7 +30,7 @@ When the caller is signed in and the `moderation` bundle is installed, the comme
 
 An embedded `parentComment` follows the same placeholder and flag rules.
 
-**Your own comment on an unavailable entity:** when the entity's author has blocked the caller, the caller can still open their **own** comments there, so they can find and delete them. `entity` (which carries `space`) and `parentComment` are `null` on those comments when requested. They are read-and-delete only: replying under them, reacting to them, and editing them are refused (`404`).
+**Your own comment on an unavailable entity:** when the entity's author has blocked the caller, the caller can still open their **own** comments there, so they can find and delete them. `entity` (which carries `space`) and `parentComment` are `null` on those comments when requested. They are read-and-delete only: replying under them, reacting to them, and editing them are refused (`404`). They aren't marked by a dedicated field: `entity: null` only means the entity isn't available to the caller, and doesn't say why.
 
 
 ## Error Responses

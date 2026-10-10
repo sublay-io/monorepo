@@ -79,10 +79,12 @@ An unknown `userId` returns an empty page.
 <ParamField query="include" type="string">
   Comma-separated list of associations to include in each comment:
   - `user` — the comment author, with the avatar file URLs
-  - `entity` — the entity the comment is on
-  - `space` — the entity's space (also includes `entity`)
+  - `entity` — the entity the comment is on; `null` when the entity isn't available to the caller (for example, removed by a moderator) — the comment is still returned
+  - `space` — the entity's space (also includes `entity`); when `entity` is `null` there is no space
   - `parent` — `parentComment`, for replies; `null` when the parent no longer exists or is on another entity
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)
+
+  `include` never changes which comments are returned.
 </ParamField>
 
 ### Space-scoped reputation
@@ -118,7 +120,7 @@ An embedded `parentComment` follows the same rules as everywhere else: a deleted
 
 When the caller lists their **own** history, their comments on an entity whose author has blocked them stay in the list, so they can still find and delete them. On those comments, everything belonging to the entity's author is blanked: `entity` (which carries `space`) and `parentComment` are `null` when requested.
 
-These comments are **read-and-delete only**: replying under them, reacting to them, and editing them are refused (`404`). They aren't marked by a dedicated field; you can recognise them by `entity` / `parentComment` being `null` when you requested them.
+These comments are **read-and-delete only**: replying under them, reacting to them, and editing them are refused (`404`). They aren't marked by a dedicated field. `entity: null` only means the entity isn't available to the caller — it doesn't say why, so it doesn't identify these comments.
 
 ## Error Responses
 

@@ -6,6 +6,7 @@ const ShowHideButton = ({
   loadedRepliesCount,
   page,
   hasMore,
+  failed,
   onLoadMore,
   areRepliesVisible,
   setAreRepliesVisible,
@@ -14,6 +15,8 @@ const ShowHideButton = ({
   loadedRepliesCount: number;
   page: number;
   hasMore: boolean;
+  /** The last replies load failed: show a retry instead. */
+  failed: boolean;
   onLoadMore: () => void;
   areRepliesVisible: boolean;
   setAreRepliesVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -63,6 +66,33 @@ const ShowHideButton = ({
   }
 
   if (totalRepliesCount === 0) return null;
+
+  const mutedTextClass = theme === 'dark' ? 'text-gray-400' : 'text-neutral-500';
+
+  if (failed && hasMore) {
+    return (
+      <View className="pt-2 pl-[58px] pr-4 flex-row items-center gap-3">
+        <View
+          className={`h-px w-6 mt-0.5 ${
+            theme === 'dark' ? 'bg-gray-400' : 'bg-neutral-500'
+          }`}
+        />
+        <View className="flex-row items-center">
+          <Text className={`text-xs ${mutedTextClass}`}>Couldn't load more · </Text>
+          <TouchableOpacity
+            onPress={() => {
+              setAreRepliesVisible(true);
+              onLoadMore();
+            }}
+          >
+            <Text className={`text-xs font-semibold ${mutedTextClass}`}>
+              Try again
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <TouchableOpacity

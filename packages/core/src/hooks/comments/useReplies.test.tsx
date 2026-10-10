@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
 import { resetAxiosMocks } from "../../test-utils";
@@ -262,6 +262,68 @@ describe("useReplies", () => {
     });
     expect(result.current.replies.error).toBeInstanceOf(Error);
     expect(result.current.replies.loading).toBe(false);
+    expect(result.current.replies.hasMore).toBe(true);
+  });
+
+  it("retries a failed first replies load with loadMore; error clears when the retry starts", async () => {
+    const { result, axiosPrivate } = renderReplies({
+      topLevel: [makeComment({ id: C1, repliesCount: 3 })],
+      providerProps: { replyDepth: 1, replyLimit: 2 },
+    });
+    await settled(result);
+
+    axiosPrivate.mockError("get", 500, { message: "boom" });
+    await act(async () => {
+      await result.current.replies.loadMore();
+    });
+    expect(result.current.replies.error).toBeInstanceOf(Error);
+    expect(result.current.replies.hasMore).toBe(true);
+
+    let resolveRetry!: (value: unknown) => void;
+    vi.mocked(axiosPrivate.instance.get).mockReturnValueOnce(
+      new Promise((r) => {
+        resolveRetry = r;
+      }) as never,
+    );
+    let pending!: Promise<void>;
+    act(() => {
+      pending = result.current.replies.loadMore();
+    });
+    await waitFor(() => expect(result.current.replies.loading).toBe(true));
+    expect(result.current.replies.error).toBeNull();
+
+    await act(async () => {
+      resolveRetry({ data: makePage([makeComment({ id: R1, parentId: C1 })], null) });
+      await pending;
+    });
+    expect(result.current.replies.error).toBeNull();
+    expect(result.current.replies.replies.map((r) => r.id)).toEqual([R1]);
+    expect(result.current.replies.hasMore).toBe(false);
+    // Still the first load: same cursor, same nesting as the failed attempt.
+    const [failed, retried] = axiosPrivate.calls("get").slice(1);
+    expect(retried.config?.params).toEqual(failed.config?.params);
+    expect(retried.config?.params).toMatchObject({ replyDepth: 1, replyLimit: 2 });
+  });
+
+  it("clears error when the section resets (sort change)", async () => {
+    const { result, axiosPrivate } = renderReplies({
+      topLevel: [makeComment({ id: C1, repliesCount: 3 })],
+    });
+    await settled(result);
+
+    axiosPrivate.mockError("get", 500, { message: "boom" });
+    await act(async () => {
+      await result.current.replies.loadMore();
+    });
+    expect(result.current.replies.error).toBeInstanceOf(Error);
+
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: C1, repliesCount: 3 })], null));
+    act(() => {
+      result.current.section.setSortBy!("createdAt");
+    });
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(3));
+    await settled(result);
+    expect(result.current.replies.error).toBeNull();
     expect(result.current.replies.hasMore).toBe(true);
   });
 

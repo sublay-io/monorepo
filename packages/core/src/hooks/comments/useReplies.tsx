@@ -41,13 +41,17 @@ export interface UseRepliesValues {
   /** Replies the viewer posted this session, newest first (kept out of `replies`). */
   newReplies: Comment[];
   loading: boolean;
-  /** The last failure loading replies (cleared by the next successful load). */
+  /**
+   * The last failure loading replies. Cleared when the next load starts or the
+   * section resets (e.g. a sort change); `loadMore()` retries it.
+   */
   error: Error | null;
   /** Whether "load more replies" has anything to fetch. */
   hasMore: boolean;
   /**
-   * Load the next replies, continuing after the ones already loaded. Does
-   * nothing while loading or when there's nothing more; never throws.
+   * Load the next replies, continuing after the ones already loaded, or retry
+   * the load that failed. Does nothing while loading or when there's nothing
+   * more; never throws (failures land in `error`).
    */
   loadMore: (options?: LoadMoreRepliesOptions) => Promise<void>;
 }
@@ -71,7 +75,16 @@ function useReplies({
   const fetchManyComments = useFetchManyComments();
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  // Tagged with the section generation it happened in: a section reset (sort
+  // change) makes an older failure stale, so it no longer shows.
+  const [failure, setFailure] = useState<{
+    error: Error;
+    generation: number;
+  } | null>(null);
+  const error =
+    failure && failure.generation === internals?.generationRef.current
+      ? failure.error
+      : null;
   const loadingRef = useRef(false);
 
   const store = internals?.store;
@@ -122,6 +135,7 @@ function useReplies({
       const generation = ctx.generationRef.current;
       loadingRef.current = true;
       setLoading(true);
+      setFailure(null);
       try {
         // Replies are the level being fetched, so the section's reply sort is
         // sent as the level sort; nested levels inherit it on the server.
@@ -138,10 +152,10 @@ function useReplies({
         });
         if (generation !== ctx.generationRef.current) return;
         ctx.setStore((prev) => applyRepliesPage(prev, commentId, response));
-        setError(null);
+        setFailure(null);
       } catch (err) {
         if (generation !== ctx.generationRef.current) return;
-        setError(toError(err));
+        setFailure({ error: toError(err), generation });
         handleError(err, "Failed to fetch replies:");
       } finally {
         loadingRef.current = false;

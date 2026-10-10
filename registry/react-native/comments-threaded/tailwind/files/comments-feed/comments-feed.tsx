@@ -12,6 +12,7 @@ const CommentsFeed = React.memo(
       comments,
       newComments,
       loading,
+      error,
       hasMore,
       loadMore,
       highlightedComment,
@@ -85,29 +86,59 @@ const CommentsFeed = React.memo(
 
     const showLoadedComments = mergedComments.length > 0;
     const showFetchingSkeletons = loading && mergedComments.length === 0;
-    const showNoComments = !loading && mergedComments.length === 0;
+    // A failed load shows a retry; `loadMore()` re-sends the request that failed.
+    const showLoadError = !loading && !!error && mergedComments.length === 0;
+    const showNoComments = !loading && !error && mergedComments.length === 0;
+    const showLoadMoreError = !loading && !!error;
+    const mutedTextClass = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+    const linkTextClass = theme === 'dark' ? 'text-blue-500' : 'text-blue-600';
 
     return (
       <View className="flex-1">
         {showLoadedComments && <LoadedComments data={mergedComments} />}
         {showLoadedComments && hasMore && (
           <View className="items-center py-2">
-            <TouchableOpacity
-              onPress={() => loadMore?.()}
-              disabled={loading}
-              className="px-3 py-1 rounded-full"
-            >
-              <Text
-                className={`text-xs font-medium ${
-                  theme === 'dark' ? 'text-blue-500' : 'text-blue-600'
-                }`}
+            {showLoadMoreError ? (
+              <View className="flex-row items-center px-3 py-1">
+                <Text className={`text-xs ${mutedTextClass}`}>
+                  Couldn't load more ·{" "}
+                </Text>
+                <TouchableOpacity onPress={() => loadMore?.()}>
+                  <Text className={`text-xs font-medium ${linkTextClass}`}>
+                    Try again
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                onPress={() => loadMore?.()}
+                disabled={loading}
+                className="px-3 py-1 rounded-full"
               >
-                {loading ? "Loading..." : "Load more comments"}
+                <Text
+                  className={`text-xs font-medium ${
+                    theme === 'dark' ? 'text-blue-500' : 'text-blue-600'
+                  }`}
+                >
+                  {loading ? "Loading..." : "Load more comments"}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+        {showFetchingSkeletons && <FetchingCommentsSkeletons />}
+        {showLoadError && (
+          <View className="items-center py-2">
+            <Text className={`text-sm mb-1 ${mutedTextClass}`}>
+              Couldn't load comments
+            </Text>
+            <TouchableOpacity onPress={() => loadMore?.()}>
+              <Text className={`text-xs font-medium ${linkTextClass}`}>
+                Try again
               </Text>
             </TouchableOpacity>
           </View>
         )}
-        {showFetchingSkeletons && <FetchingCommentsSkeletons />}
         {showNoComments && (customNoCommentsView ?? <NoCommentsPlaceHolder />)}
       </View>
     );

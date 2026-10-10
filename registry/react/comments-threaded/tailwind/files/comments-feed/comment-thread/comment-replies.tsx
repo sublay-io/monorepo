@@ -6,6 +6,8 @@ interface CommentRepliesProps {
   depth: number;
   isCollapsed: boolean;
   loading: boolean;
+  /** The last replies load failed: show a retry in place of the button. */
+  failed: boolean;
   visibleReplies: CommentType[];
   hiddenRepliesCount: number;
   hasMore: boolean;
@@ -19,6 +21,7 @@ function CommentReplies({
   depth,
   isCollapsed,
   loading,
+  failed,
   visibleReplies,
   hiddenRepliesCount,
   hasMore,
@@ -53,28 +56,40 @@ function CommentReplies({
         />
       ))}
 
-      {/* Load more replies button */}
+      {/* Load more replies button (or a retry after a failed load) */}
       {hasMore && (
         // Indented to the level the replies load at (same 24px-per-level cap as single comments)
         <div className="mt-3" style={{ marginLeft: `${Math.min(depth + 1, 6) * 24 + 4}px` }}>
-          <button
-            onClick={onLoadMore}
-            disabled={loading}
-            className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-500 font-medium transition-all duration-150 px-2 py-1 rounded-full bg-transparent border-none cursor-pointer hover:text-blue-700 dark:hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950"
-          >
-            <svg
-              className="w-3 h-3"
-              fill="currentColor"
-              viewBox="0 0 20 20"
+          {failed && !loading ? (
+            <div className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1">
+              Couldn't load more ·{" "}
+              <button
+                onClick={onLoadMore}
+                className="text-xs font-medium text-blue-600 dark:text-blue-500 p-0 bg-transparent border-none cursor-pointer hover:underline"
+              >
+                Try again
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onLoadMore}
+              disabled={loading}
+              className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-500 font-medium transition-all duration-150 px-2 py-1 rounded-full bg-transparent border-none cursor-pointer hover:text-blue-700 dark:hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950"
             >
-              <path
-                fillRule="evenodd"
-                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-            {loading ? "Loading..." : loadMoreLabel}
-          </button>
+              <svg
+                className="w-3 h-3"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {loading ? "Loading..." : loadMoreLabel}
+            </button>
+          )}
         </div>
       )}
     </div>

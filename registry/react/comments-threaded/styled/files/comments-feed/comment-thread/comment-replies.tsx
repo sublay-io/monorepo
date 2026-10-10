@@ -7,6 +7,8 @@ interface CommentRepliesProps {
   depth: number;
   isCollapsed: boolean;
   loading: boolean;
+  /** The last replies load failed: show a retry in place of the button. */
+  failed: boolean;
   visibleReplies: CommentType[];
   hiddenRepliesCount: number;
   hasMore: boolean;
@@ -20,6 +22,7 @@ function CommentReplies({
   depth,
   isCollapsed,
   loading,
+  failed,
   visibleReplies,
   hiddenRepliesCount,
   hasMore,
@@ -66,49 +69,75 @@ function CommentReplies({
         />
       ))}
 
-      {/* Load more replies button */}
+      {/* Load more replies button (or a retry after a failed load) */}
       {hasMore && (
         // Indented to the level the replies load at (same 24px-per-level cap as single comments)
         <div style={{ marginTop: "12px", marginLeft: `${Math.min(depth + 1, 6) * 24 + 4}px` }}>
-          <button
-            onClick={onLoadMore}
-            disabled={loading}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "12px",
-              color: theme === 'dark' ? "#3B82F6" : "#2563EB",
-              fontWeight: "500",
-              transition: "all 150ms ease-in-out",
-              padding: "4px 8px",
-              borderRadius: "9999px",
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = theme === 'dark' ? "#2563EB" : "#1D4ED8";
-              e.currentTarget.style.backgroundColor = theme === 'dark' ? "#1E3A8A" : "#EFF6FF";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = theme === 'dark' ? "#3B82F6" : "#2563EB";
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
-          >
-            <svg
-              style={{ width: "12px", height: "12px" }}
-              fill="currentColor"
-              viewBox="0 0 20 20"
+          {failed && !loading ? (
+            <div
+              style={{
+                fontSize: "12px",
+                color: theme === "dark" ? "#9CA3AF" : "#6B7280",
+                padding: "4px 8px",
+              }}
             >
-              <path
-                fillRule="evenodd"
-                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-            {loading ? "Loading..." : loadMoreLabel}
-          </button>
+              Couldn't load more ·{" "}
+              <button
+                onClick={onLoadMore}
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  color: theme === "dark" ? "#3B82F6" : "#2563EB",
+                  padding: 0,
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Try again
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onLoadMore}
+              disabled={loading}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: "12px",
+                color: theme === 'dark' ? "#3B82F6" : "#2563EB",
+                fontWeight: "500",
+                transition: "all 150ms ease-in-out",
+                padding: "4px 8px",
+                borderRadius: "9999px",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = theme === 'dark' ? "#2563EB" : "#1D4ED8";
+                e.currentTarget.style.backgroundColor = theme === 'dark' ? "#1E3A8A" : "#EFF6FF";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = theme === 'dark' ? "#3B82F6" : "#2563EB";
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
+            >
+              <svg
+                style={{ width: "12px", height: "12px" }}
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {loading ? "Loading..." : loadMoreLabel}
+            </button>
+          )}
         </div>
       )}
     </div>

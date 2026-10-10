@@ -26,9 +26,11 @@ export const RAIL_X = Math.floor((AVATAR_SIZE - LINE_WIDTH) / 2);
 export const AVATAR_TOP = ROW_PADDING_Y + AVATAR_OFFSET_TOP;
 export const AVATAR_CENTER_Y = AVATAR_TOP + AVATAR_SIZE / 2;
 
+const LINE_BASE = "absolute box-border pointer-events-none border-0 border-solid";
 // 🎨 CUSTOMIZATION: Threading line color (Default: gray-300)
-const LINE_CLASS =
-  "absolute box-border pointer-events-none border-0 border-solid border-gray-300 dark:border-gray-500";
+const LINE_CLASS = `${LINE_BASE} border-gray-300 dark:border-gray-500`;
+// 🎨 CUSTOMIZATION: Connector into the highlighted comment (Default: blue-500)
+const ACCENT_LINE_CLASS = `${LINE_BASE} border-blue-500 dark:border-blue-400`;
 
 /**
  * The line from under a comment's avatar to the bottom of its row, where the
@@ -60,6 +62,8 @@ interface IndentationThreadingLinesProps {
   joinAt?: number;
   /** How far past the row's left edge the elbow runs. */
   reach?: number;
+  /** The row is the highlighted comment: its connector takes the accent color. */
+  highlighted?: boolean;
 }
 
 /**
@@ -73,14 +77,18 @@ function IndentationThreadingLines({
   indented = true,
   joinAt = AVATAR_CENTER_Y,
   reach = 0,
+  highlighted = false,
 }: IndentationThreadingLinesProps) {
+  // The piece that leads into this row; the line carrying on past it stays neutral
+  const ownLineClass = highlighted ? ACCENT_LINE_CLASS : LINE_CLASS;
+
   // Past the indentation cap: a straight line through the column, from the
   // row above into this avatar and, if more rows follow, on past it.
   if (!indented) {
     return (
       <>
         <div
-          className={LINE_CLASS}
+          className={ownLineClass}
           style={{
             left: `${RAIL_X}px`,
             top: 0,
@@ -121,7 +129,7 @@ function IndentationThreadingLines({
       {/* The parent's line down to this row, turning into it: one shape, so
           the vertical part and the curve can't come apart */}
       <div
-        className={LINE_CLASS}
+        className={ownLineClass}
         style={{
           left: `${RAIL_X - INDENT}px`,
           top: 0,

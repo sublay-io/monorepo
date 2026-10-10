@@ -26,7 +26,8 @@
  * - bg-gray-50 dark:bg-gray-700 (secondary background, hover states)
  * - bg-blue-50 dark:bg-blue-950 (blue hover backgrounds)
  * - bg-red-50 dark:bg-red-950 (red hover backgrounds)
- * - bg-blue-100 dark:bg-blue-900 (highlighted comment background)
+ * - bg-gray-100 dark:bg-[#2B3544] (highlighted comment background)
+ * - bg-blue-100 dark:bg-blue-900 (indentation beside a highlighted comment)
  *
  * TEXT:
  * - text-gray-900 dark:text-gray-50 (primary text)

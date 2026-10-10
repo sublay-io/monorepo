@@ -21,6 +21,7 @@ import {
   useCommentSection,
   useUserMentions,
   useProject,
+  type CommentCreateError,
 } from "@sublay/react-native";
 import {
   resetButton,
@@ -35,6 +36,7 @@ import {
 import ReplyBanner from "../reply-banner/reply-banner";
 import MentionSuggestions from "../mention-suggestions/mention-suggestions";
 import useUIState from "../../hooks/use-ui-state";
+import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
 
 function NewCommentForm({
   ref,
@@ -48,8 +50,18 @@ function NewCommentForm({
   const giphyApiKey = project?.integrations.find((int) => int.name === "giphy")
     ?.data.apiKey;
 
-  const { pushMention, createComment, submittingComment, callbacks } =
+  const { pushMention, createComment, submittingComment, callbacks, createError } =
     useCommentSection();
+
+  // A failed post (a comment or a reply: both are sent from this form) shows
+  // a message above the input, until the text is edited or something is sent
+  // again (the section clears `createError` then).
+  const [dismissedCreateError, setDismissedCreateError] =
+    useState<CommentCreateError | null>(null);
+  const createErrorMessage =
+    createError && createError !== dismissedCreateError
+      ? getCommentCreateErrorMessage(createError)
+      : null;
 
   const [isGiphyVisible, setIsGiphyVisible] = useState(false);
 
@@ -239,6 +251,21 @@ function NewCommentForm({
             backgroundColor,
           }}
         >
+          {createErrorMessage ? (
+            <Text
+              accessibilityRole="alert"
+              style={{
+                // 🎨 CUSTOMIZATION: Failed-post message styling
+                fontSize: 12,
+                paddingHorizontal: 16,
+                paddingTop: 8,
+                paddingBottom: 4,
+                color: theme === 'dark' ? '#9CA3AF' : '#737373',
+              }}
+            >
+              {createErrorMessage}
+            </Text>
+          ) : null}
           <EmojiSuggestions
             onEmojiClick={(emoji) => {
               setContent((c) => c + emoji);
@@ -271,6 +298,9 @@ function NewCommentForm({
               placeholder={placeholderText}
               value={content}
               onChangeText={(text) => {
+                if (createError && text !== content) {
+                  setDismissedCreateError(createError);
+                }
                 setContent(text);
                 handleTextChange(text);
               }}

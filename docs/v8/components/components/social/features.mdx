@@ -129,6 +129,16 @@ When a load fails, the component shows a retry instead of a wrong or stuck state
 
 **Try again** calls the same `loadMore()` that failed, which re-sends the failed request. Edit the text in `comments-feed.tsx` (and `comments-footer-component.tsx` on React Native) and `comment/replies/show-hide-button.tsx`.
 
+When posting a comment or a reply fails, a short muted message appears by the comment form — under the input on web, above it on React Native:
+
+- **Replying to a comment that was deleted in the meantime** — "This comment was deleted, so you can't reply to it."
+- **Replying to a comment a moderator removed in the meantime** — "This comment was removed, so you can't reply to it."
+- **Any other failure** — "Couldn't post your comment. Try again."
+
+The text you typed stays in the input, and the message goes away when you edit the text or send again. In the first two cases the comment also turns into its `[deleted]` / `[removed]` row (or, for its author, the removed-note row), which has no Reply. The "Replying to …" banner stays, as after any failed reply; close it to post the text as a top-level comment instead.
+
+The messages live in `utils/comment-create-error.ts` and are rendered in `new-comment-form.tsx`, from the section's [`createError`](/v8/sdk/comments/comment-section#usecommentsection-return-values).
+
 ---
 
 ### Real-Time Updates

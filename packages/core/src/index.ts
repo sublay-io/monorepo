@@ -553,6 +553,7 @@ export {
   useFetchCommentsByUserId,
   useFetchCommentsByUserIdWrapper,
   type CommentSectionCreateCommentProps,
+  type CommentCreateError,
   type CommentSectionUpdateCommentProps,
   type CommentSectionDeleteCommentProps,
   type CreateCommentProps,

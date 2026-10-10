@@ -14,6 +14,7 @@ import { User } from "../../interfaces/models/User";
 import useCreateComment from "./useCreateComment";
 import { Mention } from "../../interfaces/models/Mention";
 import { handleError } from "../../utils/handleError";
+import { SUSPENDED_ERROR_CODE, isSuspendedError } from "../../errors/SuspendedError";
 import useDeleteComment from "./useDeleteComment";
 import useUpdateComment from "./useUpdateComment";
 import useAddReaction from "../reactions/useAddReaction";
@@ -27,6 +28,7 @@ import {
   insertComments,
   insertHighlightedComment,
   markCommentDeleted,
+  markCommentRemoved,
   patchComment,
   removeComment,
 } from "../../helpers/commentStore";
@@ -89,6 +91,19 @@ export interface CommentSectionCreateCommentProps {
   autoReaction?: ReactionType;
 }
 
+/**
+ * Why creating a comment failed. `code` and `message` come from the server's
+ * error response and `status` is its HTTP status; all three are `undefined`
+ * when no response arrived (a network error). `parentId` is the comment that
+ * was being replied to, or `null` for a top-level comment.
+ */
+export interface CommentCreateError {
+  code?: string;
+  message?: string;
+  status?: number;
+  parentId: string | null;
+}
+
 export interface CommentSectionUpdateCommentProps {
   commentId: string;
   content: string;
@@ -121,6 +136,12 @@ export interface UseCommentSectionDataValues {
   error: Error | null;
   hasMore: boolean;
   submittingComment: boolean;
+  /**
+   * The last failure creating a comment through `createComment`. Set when a
+   * create fails; cleared when the next create starts. The same details are
+   * passed to `callbacks.commentCreateFailedCallback`.
+   */
+  createError: CommentCreateError | null;
   /**
    * Fetch the next page of top-level comments, or retry the one that failed.
    * Does nothing while loading or when there's nothing more; never throws
@@ -322,6 +343,7 @@ export function useCommentSectionDataInternal(
 
   const submittingComment = useRef(false);
   const [submittingCommentState, setSubmittingCommentState] = useState(false); // required to trigger rerenders
+  const [createError, setCreateError] = useState<CommentCreateError | null>(null);
 
   const [pushMention, setPushMention] = useState<null | User>(null);
   // const previousPushMention = useRef<null | User>(null);
@@ -395,6 +417,7 @@ export function useCommentSectionDataInternal(
 
       submittingComment.current = true;
       setSubmittingCommentState(true);
+      setCreateError(null);
 
       // Filter mentions to include only those whose trigger + identifier appears in the content
       const filteredMentions = content
@@ -589,6 +612,41 @@ export function useCommentSectionDataInternal(
         // TODO: currently we remove the temp comment from the store but don't offer the user any option to retry. It's as if they've never sent anything and all they typed is gone. We need to add a flag for comment in the store that says it failed so we can give the user a try again button
         setStore((prev) => removeComment(prev, TEMP_ID));
         settleCounts(false);
+
+        const response = (err as { response?: { status?: unknown; data?: unknown } } | null)
+          ?.response;
+        const body = (response?.data ?? null) as { code?: unknown; error?: unknown } | null;
+        // A write refused because the user is suspended arrives as a
+        // `SuspendedError` (the response interceptor converts the 403), which
+        // has no `response`: its details are on the error itself.
+        const failure: CommentCreateError = isSuspendedError(err)
+          ? {
+              code: SUSPENDED_ERROR_CODE,
+              message: err.message,
+              status: 403,
+              parentId: newParentId,
+            }
+          : {
+              code: typeof body?.code === "string" ? body.code : undefined,
+              message: typeof body?.error === "string" ? body.error : undefined,
+              status: typeof response?.status === "number" ? response.status : undefined,
+              parentId: newParentId,
+            };
+        // The server refuses a direct reply to a deleted or removed comment.
+        // The section's copy of that comment was loaded before it was deleted
+        // or removed, so it becomes the placeholder the server would return
+        // now.
+        if (newParentId && failure.code === "comment/parent-deleted") {
+          setStore((prev) =>
+            prev.nodes[newParentId]?.comment.userDeletedAt
+              ? prev
+              : markCommentDeleted(prev, newParentId),
+          );
+        } else if (newParentId && failure.code === "comment/parent-removed") {
+          setStore((prev) => markCommentRemoved(prev, newParentId, user.id));
+        }
+        setCreateError(failure);
+
         // Put the reply target (and its banner) back, unless another one was
         // picked in the meantime. `pushMention` stays cleared: the mention is
         // already in the text the form still holds, and pushing it again
@@ -604,6 +662,11 @@ export function useCommentSectionDataInternal(
           setShowReplyBanner(replyBannerBefore && !!bannerUser);
         }
         handleError(err, "Failed to submit a new comment: ");
+        try {
+          callbacks?.commentCreateFailedCallback?.(failure);
+        } catch (callbackErr) {
+          handleError(callbackErr, "commentCreateFailedCallback threw: ");
+        }
         return undefined;
       } finally {
         submittingComment.current = false;
@@ -800,6 +863,7 @@ export function useCommentSectionDataInternal(
     error,
     hasMore,
     submittingComment: submittingCommentState,
+    createError,
 
     loadMore,
     sortBy,

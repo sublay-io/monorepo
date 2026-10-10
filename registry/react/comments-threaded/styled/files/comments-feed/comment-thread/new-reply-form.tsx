@@ -9,14 +9,24 @@ import useUIState from "../../../hooks/use-ui-state";
 function NewReplyForm({
   comment,
   setShowReplyForm,
+  replyContent,
+  setReplyContent,
+  errorMessage,
+  onDismissError,
 }: {
   comment: CommentType;
   setShowReplyForm: React.Dispatch<React.SetStateAction<boolean>>;
+  // The text lives in the comment row: the form closes while a reply is being
+  // sent, and comes back with the text if sending fails.
+  replyContent: string;
+  setReplyContent: React.Dispatch<React.SetStateAction<string>>;
+  /** Why the last reply to this comment wasn't posted, if it wasn't. */
+  errorMessage: string | null;
+  onDismissError: () => void;
 }) {
   const { theme } = useUIState();
   const { user } = useUser();
 
-  const [replyContent, setReplyContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { createComment, callbacks } = useCommentSection();
@@ -69,6 +79,7 @@ function NewReplyForm({
   const handleCancelReply = () => {
     setShowReplyForm(false);
     setReplyContent("");
+    onDismissError();
   };
 
   const [spinRotation, setSpinRotation] = useState(0);
@@ -123,7 +134,10 @@ function NewReplyForm({
       >
         <textarea
           value={replyContent}
-          onChange={(e) => setReplyContent(e.target.value)}
+          onChange={(e) => {
+            setReplyContent(e.target.value);
+            onDismissError();
+          }}
           // 🎨 CUSTOMIZATION: Reply form styling (Default placeholder)
           placeholder="Add your reply..."
           style={{
@@ -271,6 +285,20 @@ function NewReplyForm({
           </button>
         </div>
       </div>
+      {errorMessage && (
+        <p
+          role="alert"
+          style={{
+            // 🎨 CUSTOMIZATION: Failed-reply message styling
+            margin: "6px 0 0",
+            padding: "0 8px",
+            fontSize: "12px",
+            color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
+          }}
+        >
+          {errorMessage}
+        </p>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import {
   useCommentSection,
   useReactionToggle,
   useUser,
+  type CommentCreateError,
 } from "@sublay/react-native";
 import {
   parseContentWithMentions,
@@ -27,6 +28,7 @@ import IndentationThreadingLines, {
   ThreadStem,
 } from "./indentation-threading-lines";
 import ReplyButtonAndInfo from "./reply-button-and-info";
+import { getCommentCreateErrorMessage } from "../../../../utils/comment-create-error";
 import useUIState from "../../../../hooks/use-ui-state";
 
 interface SingleCommentProps {
@@ -86,10 +88,24 @@ function SingleComment({
   onToggleCollapse,
 }: SingleCommentProps) {
   const { user } = useUser();
-  const { callbacks, highlightedComment } = useCommentSection();
+  const { callbacks, highlightedComment, createError } = useCommentSection();
   const { theme } = useUIState();
   const comment = commentFromSection;
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
+  // A reply to this comment that wasn't posted: the message shows under the
+  // reply form, until the text is edited or something is sent again (the
+  // section clears `createError` then). If the reply was refused because this
+  // comment was deleted or removed in the meantime, the row has already turned
+  // into its placeholder (no reply form), so the message shows on the row.
+  const [dismissedReplyError, setDismissedReplyError] =
+    useState<CommentCreateError | null>(null);
+  const replyErrorMessage =
+    createError &&
+    createError.parentId === comment.id &&
+    createError !== dismissedReplyError
+      ? getCommentCreateErrorMessage(createError)
+      : null;
   const [showBlockedComment, setShowBlockedComment] = useState(false);
 
   // isUnavailable wins over every other marker (the author blocked the
@@ -334,6 +350,17 @@ function SingleComment({
               </Text>
             )}
 
+            {!isCollapsed && tombstone && replyErrorMessage ? (
+              <Text
+                accessibilityRole="alert"
+                className={`text-xs mb-3 ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                }`}
+              >
+                {replyErrorMessage}
+              </Text>
+            ) : null}
+
             {!isCollapsed && !tombstone && (
               <>
                 {comment.content && (
@@ -367,6 +394,17 @@ function SingleComment({
                     {ownRemovedLabel}
                   </Text>
                 )}
+
+                {isOwnRemoved && replyErrorMessage ? (
+                  <Text
+                    accessibilityRole="alert"
+                    className={`text-xs mb-3 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}
+                  >
+                    {replyErrorMessage}
+                  </Text>
+                ) : null}
 
                 <View className="flex-row items-center justify-between">
                   <ReplyButtonAndInfo
@@ -413,7 +451,16 @@ function SingleComment({
               paddingBottom: ROW_PADDING_Y,
             }}
           >
-            <NewReplyForm comment={comment} setShowReplyForm={setShowReplyForm} />
+            <NewReplyForm
+              comment={comment}
+              setShowReplyForm={setShowReplyForm}
+              replyContent={replyContent}
+              setReplyContent={setReplyContent}
+              errorMessage={replyErrorMessage}
+              onDismissError={() => {
+                if (replyErrorMessage) setDismissedReplyError(createError ?? null);
+              }}
+            />
             <IndentationThreadingLines
               isLastReply={!showReplies && !columnContinues}
               joinAt={REPLY_FORM_JOIN_Y}

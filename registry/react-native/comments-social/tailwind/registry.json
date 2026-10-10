@@ -126,6 +126,11 @@
       "description": "Utilities for prop comparison and memoization"
     },
     {
+      "path": "utils/comment-create-error.ts",
+      "type": "util",
+      "description": "Messages shown when posting a comment fails"
+    },
+    {
       "path": "context/ui-state-context.tsx",
       "type": "context",
       "description": "Context for UI state (bottom sheets and theme)"

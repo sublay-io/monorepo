@@ -11,6 +11,7 @@ import {
   useUserMentions,
   useUser,
   useProject,
+  type CommentCreateError,
 } from "@sublay/react-js";
 import {
   resetButton,
@@ -24,6 +25,7 @@ import {
 
 import ReplyBanner from "./reply-banner";
 import MentionSuggestions from "./mention-suggestions";
+import { getCommentCreateErrorMessage } from "../utils/comment-create-error";
 
 function NewCommentForm() {
   const { user } = useUser();
@@ -31,8 +33,18 @@ function NewCommentForm() {
   const giphyApiKey = project?.integrations.find((int) => int.name === "giphy")
     ?.data.apiKey;
 
-  const { pushMention, createComment, submittingComment, callbacks } =
+  const { pushMention, createComment, submittingComment, callbacks, createError } =
     useCommentSection();
+
+  // A failed post (a comment or a reply: both are sent from this form) shows
+  // a message under the input, until the text is edited or something is sent
+  // again (the section clears `createError` then).
+  const [dismissedCreateError, setDismissedCreateError] =
+    useState<CommentCreateError | null>(null);
+  const createErrorMessage =
+    createError && createError !== dismissedCreateError
+      ? getCommentCreateErrorMessage(createError)
+      : null;
 
   const [isGiphyVisible, setIsGiphyVisible] = useState(false);
 
@@ -238,7 +250,10 @@ function NewCommentForm() {
               rows={1}
               ref={textAreaRef}
               placeholder="Add a comment..."
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => {
+                setContent(e.target.value);
+                if (createError) setDismissedCreateError(createError);
+              }}
               required
               style={resetTextInput}
               className="w-full text-sm text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800"
@@ -265,6 +280,15 @@ function NewCommentForm() {
               </button>
             )}
           </div>
+          {createErrorMessage && (
+            <p
+              role="alert"
+              className="m-0 px-4 pb-2 text-xs text-gray-500 dark:text-gray-400"
+              // 🎨 CUSTOMIZATION: Failed-post message styling
+            >
+              {createErrorMessage}
+            </p>
+          )}
         </div>
       </div>
     </>

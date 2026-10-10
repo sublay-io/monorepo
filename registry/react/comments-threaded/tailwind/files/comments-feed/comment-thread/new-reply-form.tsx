@@ -9,13 +9,23 @@ import { cn } from "@/lib/utils";
 function NewReplyForm({
   comment,
   setShowReplyForm,
+  replyContent,
+  setReplyContent,
+  errorMessage,
+  onDismissError,
 }: {
   comment: CommentType;
   setShowReplyForm: React.Dispatch<React.SetStateAction<boolean>>;
+  // The text lives in the comment row: the form closes while a reply is being
+  // sent, and comes back with the text if sending fails.
+  replyContent: string;
+  setReplyContent: React.Dispatch<React.SetStateAction<string>>;
+  /** Why the last reply to this comment wasn't posted, if it wasn't. */
+  errorMessage: string | null;
+  onDismissError: () => void;
 }) {
   const { user } = useUser();
 
-  const [replyContent, setReplyContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { createComment, callbacks } = useCommentSection();
@@ -68,6 +78,7 @@ function NewReplyForm({
   const handleCancelReply = () => {
     setShowReplyForm(false);
     setReplyContent("");
+    onDismissError();
   };
 
   const [spinRotation, setSpinRotation] = useState(0);
@@ -105,7 +116,10 @@ function NewReplyForm({
       >
         <textarea
           value={replyContent}
-          onChange={(e) => setReplyContent(e.target.value)}
+          onChange={(e) => {
+            setReplyContent(e.target.value);
+            onDismissError();
+          }}
           // 🎨 CUSTOMIZATION: Reply form placeholder
           placeholder="Add your reply..."
           className={cn(
@@ -182,6 +196,15 @@ function NewReplyForm({
           </button>
         </div>
       </div>
+      {errorMessage && (
+        <p
+          role="alert"
+          className="mt-1.5 px-2 text-xs text-gray-500 dark:text-gray-400"
+          // 🎨 CUSTOMIZATION: Failed-reply message styling
+        >
+          {errorMessage}
+        </p>
+      )}
     </div>
   );
 }

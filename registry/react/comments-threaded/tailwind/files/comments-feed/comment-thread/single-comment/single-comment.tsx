@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Comment as CommentType,
+  type CommentCreateError,
   UserMention,
   getUserName,
   useCommentSection,
@@ -25,6 +26,7 @@ import IndentationThreadingLines, {
   ThreadStem,
 } from "./indentation-threading-lines";
 import ReplyButtonAndInfo from "./reply-button-and-info";
+import { getCommentCreateErrorMessage } from "../../../../utils/comment-create-error";
 import { cn } from "@/lib/utils";
 
 interface SingleCommentProps {
@@ -74,9 +76,23 @@ function SingleComment({
   onToggleCollapse,
 }: SingleCommentProps) {
   const { user } = useUser();
-  const { callbacks, highlightedComment } = useCommentSection();
+  const { callbacks, highlightedComment, createError } = useCommentSection();
   const comment = commentFromSection;
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
+  // A reply to this comment that wasn't posted: the message shows under the
+  // reply form, until the text is edited or something is sent again (the
+  // section clears `createError` then). If the reply was refused because this
+  // comment was deleted or removed in the meantime, the row has already turned
+  // into its placeholder (no reply form), so the message shows on the row.
+  const [dismissedReplyError, setDismissedReplyError] =
+    useState<CommentCreateError | null>(null);
+  const replyErrorMessage =
+    createError &&
+    createError.parentId === comment.id &&
+    createError !== dismissedReplyError
+      ? getCommentCreateErrorMessage(createError)
+      : null;
   const [showBlockedComment, setShowBlockedComment] = useState(false);
 
   // isUnavailable wins over every other marker (the author blocked the
@@ -258,6 +274,15 @@ function SingleComment({
               </p>
             )}
 
+            {!isCollapsed && tombstone && replyErrorMessage && (
+              <p
+                role="alert"
+                className="text-xs text-gray-500 dark:text-gray-400 mb-3"
+              >
+                {replyErrorMessage}
+              </p>
+            )}
+
             {!isCollapsed && !tombstone && (
               <>
                 {comment.content && (
@@ -293,6 +318,15 @@ function SingleComment({
                 {isOwnRemoved && (
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                     {ownRemovedLabel}
+                  </p>
+                )}
+
+                {isOwnRemoved && replyErrorMessage && (
+                  <p
+                    role="alert"
+                    className="text-xs text-gray-500 dark:text-gray-400 mb-3"
+                  >
+                    {replyErrorMessage}
                   </p>
                 )}
 
@@ -350,7 +384,16 @@ function SingleComment({
             joinAt={REPLY_FORM_JOIN_Y}
             reach={AVATAR_SIZE + AVATAR_GAP - INDENT}
           />
-          <NewReplyForm comment={comment} setShowReplyForm={setShowReplyForm} />
+          <NewReplyForm
+            comment={comment}
+            setShowReplyForm={setShowReplyForm}
+            replyContent={replyContent}
+            setReplyContent={setReplyContent}
+            errorMessage={replyErrorMessage}
+            onDismissError={() => {
+              if (replyErrorMessage) setDismissedReplyError(createError ?? null);
+            }}
+          />
         </div>
         </div>
       </div>

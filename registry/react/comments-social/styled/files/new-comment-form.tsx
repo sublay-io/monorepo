@@ -11,6 +11,7 @@ import {
   useUserMentions,
   useUser,
   useProject,
+  type CommentCreateError,
 } from "@sublay/react-js";
 import {
   resetButton,
@@ -24,6 +25,7 @@ import {
 
 import ReplyBanner from "./reply-banner";
 import MentionSuggestions from "./mention-suggestions";
+import { getCommentCreateErrorMessage } from "../utils/comment-create-error";
 import useUIState from "../hooks/use-ui-state";
 
 function NewCommentForm() {
@@ -32,8 +34,18 @@ function NewCommentForm() {
   const giphyApiKey = project?.integrations.find((int) => int.name === "giphy")
     ?.data.apiKey;
 
-  const { pushMention, createComment, submittingComment, callbacks } =
+  const { pushMention, createComment, submittingComment, callbacks, createError } =
     useCommentSection();
+
+  // A failed post (a comment or a reply: both are sent from this form) shows
+  // a message under the input, until the text is edited or something is sent
+  // again (the section clears `createError` then).
+  const [dismissedCreateError, setDismissedCreateError] =
+    useState<CommentCreateError | null>(null);
+  const createErrorMessage =
+    createError && createError !== dismissedCreateError
+      ? getCommentCreateErrorMessage(createError)
+      : null;
   const { theme } = useUIState();
 
   const [isGiphyVisible, setIsGiphyVisible] = useState(false);
@@ -254,7 +266,10 @@ function NewCommentForm() {
               rows={1}
               ref={textAreaRef}
               placeholder="Add a comment..."
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => {
+                setContent(e.target.value);
+                if (createError) setDismissedCreateError(createError);
+              }}
               required
               style={{
                 ...resetTextInput,
@@ -303,6 +318,20 @@ function NewCommentForm() {
               </button>
             )}
           </div>
+          {createErrorMessage && (
+            <p
+              role="alert"
+              style={{
+                // 🎨 CUSTOMIZATION: Failed-post message styling
+                margin: 0,
+                padding: "0 16px 8px",
+                fontSize: 12,
+                color: theme === 'dark' ? '#9CA3AF' : '#737373',
+              }}
+            >
+              {createErrorMessage}
+            </p>
+          )}
         </div>
       </div>
     </>

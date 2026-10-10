@@ -113,7 +113,8 @@ function SocialCommentSectionInner({
 }) {
 
   // 🔧 CUSTOMIZE: Sort options for comments
-  // "New" and "Old" are both the `createdAt` sort, differing only by direction.
+  // "Top" ranks by likes (the heart); "New" and "Old" are both the
+  // `createdAt` sort, differing only by direction.
   // Remove or reorder these options as needed.
   const sortOptions: Array<{
     label: string;
@@ -123,7 +124,6 @@ function SocialCommentSectionInner({
     { label: "Top", sortBy: "top", sortDir: "desc" },
     { label: "New", sortBy: "createdAt", sortDir: "desc" },
     { label: "Old", sortBy: "createdAt", sortDir: "asc" },
-    { label: "Controversial", sortBy: "controversial", sortDir: "desc" },
   ];
 
   const renderSortButtons = () => {

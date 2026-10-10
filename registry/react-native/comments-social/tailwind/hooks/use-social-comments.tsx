@@ -85,6 +85,9 @@ function useSocialComments({
         createIfNotFound={createIfNotFound}
         callbacks={callbacks as Record<string, (...args: any[]) => void>}
         defaultSortBy={defaultSortBy || "top"}
+        // The heart is the `like` reaction, so "Top" ranks by likes. The
+        // reaction only applies while the sort is `top` and replies inherit it.
+        defaultSortByReaction="like"
         limit={limit || 10}
         highlightedCommentId={highlightedCommentId}
       >

@@ -158,7 +158,8 @@ function NewReplyForm({
               fontSize: "12px",
               color: theme === 'dark' ? "#9CA3AF" : "#4B5563",
               borderRadius: "4px",
-              transition: "colors 150ms ease-in-out",
+              transition:
+                "color 150ms ease-in-out, background-color 150ms ease-in-out, border-color 150ms ease-in-out",
               background: "transparent",
               border: "none",
               cursor: "pointer",

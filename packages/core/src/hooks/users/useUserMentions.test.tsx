@@ -120,6 +120,34 @@ describe("useUserMentions", () => {
     );
   });
 
+  it("setMentions puts a saved mentions list back after a reset", () => {
+    const { result } = renderHookWithAxios(
+      (props: UseUserMentionsProps) => useUserMentions(props),
+      {
+        initialProps: {
+          content: "",
+          setContent: vi.fn(),
+          focus: vi.fn(),
+          cursorPosition: 0,
+          isSelectionActive: false,
+        },
+      },
+    );
+
+    act(() => {
+      result.current.addMention(makeUser({ id: "user-a", username: "alice" }));
+      result.current.addMention(makeUser({ id: "user-b", username: "bob" }));
+    });
+    const saved = result.current.mentions;
+    expect(saved).toHaveLength(2);
+
+    act(() => result.current.resetMentions());
+    expect(result.current.mentions).toEqual([]);
+
+    act(() => result.current.setMentions(saved));
+    expect(result.current.mentions).toEqual(saved);
+  });
+
   it("resetMentions clears all mention state", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(
       (props: UseUserMentionsProps) => useUserMentions(props),

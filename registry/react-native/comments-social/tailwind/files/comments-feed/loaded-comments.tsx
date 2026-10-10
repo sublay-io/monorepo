@@ -5,7 +5,7 @@ import { Comment } from "./comment";
 import CommentsFooterComponent from "./comments-footer-component";
 
 const LoadedComments = ({ data }: { data: CommentType[] }) => {
-  const { loadMore, highlightedComment } = useCommentSection();
+  const { loadMore, error, highlightedComment } = useCommentSection();
 
   // CUSTOMIZATION: Comments gap (spacing between comments)
   const commentsGap = 8;
@@ -29,7 +29,9 @@ const LoadedComments = ({ data }: { data: CommentType[] }) => {
       className="flex-1"
       contentContainerStyle={{ paddingBottom: 24 }}
       keyboardShouldPersistTaps="always"
-      onEndReached={() => data.length > 0 && loadMore!()}
+      // After a failed load only the "Try again" row retries: reaching the
+      // end again must not re-send the request on its own.
+      onEndReached={() => data.length > 0 && !error && loadMore!()}
       onEndReachedThreshold={0}
       ListFooterComponent={<CommentsFooterComponent />}
     />

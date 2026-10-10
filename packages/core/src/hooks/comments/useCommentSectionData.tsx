@@ -283,8 +283,25 @@ export function useCommentSectionDataInternal(
   >(null);
   const highlightedCommentLoading =
     !!highlightedCommentId && highlightSettledEpoch !== highlightEpoch;
+  // A highlight fetched before the entity was known (the section was given a
+  // `foreignId` / `shortId`) couldn't be checked against it then. Once the
+  // entity is known, a highlight on another entity is dropped: not shown and
+  // not seeded into resets. The seed is cleared here, during render, so the
+  // reset the section runs for the newly known entity (an effect) starts from
+  // an empty store, without this highlight's nodes.
+  const highlightOnOtherEntity =
+    !!highlightSnapshot &&
+    highlightSnapshot.epoch === highlightEpoch &&
+    !!currentEntityId &&
+    !!highlightSnapshot.comment.entityId &&
+    highlightSnapshot.comment.entityId !== currentEntityId;
+  if (highlightOnOtherEntity) seedRef.current = null;
   const highlightedComment = useMemo(() => {
-    if (!highlightSnapshot || highlightSnapshot.epoch !== highlightEpoch) {
+    if (
+      !highlightSnapshot ||
+      highlightSnapshot.epoch !== highlightEpoch ||
+      highlightOnOtherEntity
+    ) {
       return null;
     }
     const { comment, parentComment } = highlightSnapshot;
@@ -294,7 +311,7 @@ export function useCommentSectionDataInternal(
         ? (store.nodes[parentComment.id]?.comment ?? parentComment)
         : null,
     };
-  }, [highlightSnapshot, highlightEpoch, store]);
+  }, [highlightSnapshot, highlightEpoch, highlightOnOtherEntity, store]);
   // The highlighted comment is fetched with the section's include plus
   // `parent` (needed to seed the store). Keyed by string so an inline array
   // prop doesn't change identity every render.
@@ -316,6 +333,9 @@ export function useCommentSectionDataInternal(
     setShowReplyBanner(newState);
   }, []);
   const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
+  // The latest reply target, for a create that settles after it changed.
+  const replyTargetRef = useRef(repliedToComment);
+  replyTargetRef.current = repliedToComment;
 
   // const handleSetPushMention = (user: User | null) => {
   //   if(!user?.username)
@@ -391,10 +411,11 @@ export function useCommentSectionDataInternal(
       const tempNewComment: Comment = {
         id: TEMP_ID,
         foreignId: null,
-        projectId: "TEMP_PROJECT_ID",
         userId: user.id,
         parentId: parentId ?? repliedToComment?.id ?? null,
+        referencedCommentId: null,
         entityId: entity.id,
+        spaceId: entity.spaceId ?? null,
         content: content ?? null,
         gif: gif ?? null,
         mentions: filteredMentions,
@@ -435,7 +456,14 @@ export function useCommentSectionDataInternal(
         moderationReason: null,
       };
 
+      // The reply target is cleared while the request is in flight, and put
+      // back if it fails (below), so sending again is still a reply to the
+      // same comment.
+      const replyTargetBefore = repliedToComment;
+      const replyBannerBefore = showReplyBanner;
+      const pushMentionBefore = pushMention;
       setRepliedToComment(null);
+      replyTargetRef.current = null;
       setShowReplyBanner(false);
       setPushMention(null);
 
@@ -561,6 +589,20 @@ export function useCommentSectionDataInternal(
         // TODO: currently we remove the temp comment from the store but don't offer the user any option to retry. It's as if they've never sent anything and all they typed is gone. We need to add a flag for comment in the store that says it failed so we can give the user a try again button
         setStore((prev) => removeComment(prev, TEMP_ID));
         settleCounts(false);
+        // Put the reply target (and its banner) back, unless another one was
+        // picked in the meantime. `pushMention` stays cleared: the mention is
+        // already in the text the form still holds, and pushing it again
+        // would write it a second time.
+        // The banner named the pushed mention when there was one, else the
+        // target's author; the restored target carries that same user, and
+        // the banner only comes back when there is someone to name.
+        if (replyTargetBefore && replyTargetRef.current === null) {
+          const bannerUser = pushMentionBefore ?? replyTargetBefore.user ?? null;
+          setRepliedToComment(
+            bannerUser ? { ...replyTargetBefore, user: bannerUser } : replyTargetBefore,
+          );
+          setShowReplyBanner(replyBannerBefore && !!bannerUser);
+        }
         handleError(err, "Failed to submit a new comment: ");
         return undefined;
       } finally {
@@ -576,6 +618,8 @@ export function useCommentSectionDataInternal(
       createComment,
       addReaction,
       repliedToComment,
+      showReplyBanner,
+      pushMention,
       callbacks,
     ],
   );

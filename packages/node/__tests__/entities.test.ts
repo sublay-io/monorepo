@@ -254,20 +254,22 @@ describe("node-sdk entities — response mapping", () => {
     await expect(publishDraft(client, { entityId: "e1" })).resolves.toEqual(entity);
   });
 
-  it("addReaction returns response.data", async () => {
+  it("addReaction returns the updated entity (response.data)", async () => {
     const { client, projectInstance } = makeClient();
-    const reaction = { id: "r1", reactionType: "like" };
-    projectInstance.post.mockResolvedValueOnce({ data: reaction });
+    const entity = { id: "e1", userReaction: "like", reactionCounts: { like: 1 } };
+    projectInstance.post.mockResolvedValueOnce({ data: entity });
     await expect(
       addReaction(client, { entityId: "e1", reactionType: "like", userId: "u1" }),
-    ).resolves.toEqual(reaction);
+    ).resolves.toEqual(entity);
   });
 
-  it("removeReaction resolves to undefined", async () => {
-    const { client } = makeClient();
+  it("removeReaction returns the updated entity (response.data)", async () => {
+    const { client, projectInstance } = makeClient();
+    const entity = { id: "e1", userReaction: null, reactionCounts: { like: 0 } };
+    projectInstance.delete.mockResolvedValueOnce({ data: entity });
     await expect(
       removeReaction(client, { entityId: "e1", userId: "u1" }),
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual(entity);
   });
 
   it("fetchReactions returns the full PaginatedResponse envelope", async () => {

@@ -160,7 +160,7 @@ function SingleComment({
           position: "relative",
           backgroundColor: highlightColor,
           padding: `${ROW_PADDING_Y}px 0`,
-          transition: "colors 150ms ease-in-out",
+          transition: "background-color 150ms ease-in-out",
         }}
       >
         {/* Line from this comment's avatar down to the rows listed under it */}

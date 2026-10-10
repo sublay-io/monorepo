@@ -87,6 +87,7 @@ function NewCommentForm({
     handleMentionClick,
     mentions,
     addMention,
+    setMentions,
     resetMentions,
   } = useUserMentions({
     content,
@@ -120,9 +121,11 @@ function NewCommentForm({
       if (result === undefined) {
         // SDK handled the failure and removed the optimistic comment; restore form
         setContent(tempContent);
+        setMentions(tempMentions);
       }
     } catch (err) {
       setContent(tempContent);
+      setMentions(tempMentions);
       handleError(err, "Creating comment failed: ");
     }
   }, [createComment, content, mentions, resetMentions, callbacks, user]);

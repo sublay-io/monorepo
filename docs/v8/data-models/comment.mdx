@@ -11,13 +11,14 @@ A comment represents a user-authored response to an entity. Comments support nes
 |----------|------|-------------|
 | `id` | `string` | Unique comment identifier (UUID). |
 | `foreignId` | `string \| null` | Your system's ID for this comment, if applicable. |
-| `projectId` | `string` | The project this comment belongs to. |
 | `entityId` | `string` | The entity this comment belongs to. |
+| `spaceId` | `string \| null` | The space of the comment's entity. `null` when the entity isn't in a space. |
 | `entity` | `Entity \| null` | Populated when `include` contains `"entity"` or `"space"`. `null` on [your own comment on an unavailable entity](/v8/api-reference/users/fetch-comments-by-user-id#your-own-comments-on-an-unavailable-entity). |
 | `userId` | `string \| null` | The ID of the user who posted this comment. `null` on [placeholders](#placeholders). |
 | `user` | `User \| null` | The comment author. Populated when `include` contains `"user"`. `null` on placeholders. |
 | `parentId` | `string \| null` | ID of the parent comment if this is a reply. `null` for top-level comments. |
 | `parentComment` | `Comment \| null` | The parent comment, under the same placeholder and block rules as any comment. Populated when `include` contains `"parent"` (user history and single-comment fetches). `null` for top-level comments, when the parent no longer exists or is on another entity, and on your own comment on an unavailable entity. |
+| `referencedCommentId` | `string \| null` | ID of the comment this one quotes, set with `referencedCommentId` when the comment is created. `null` when it quotes none, or the quoted comment no longer exists. |
 | `content` | `string \| null` | Text content of the comment. `null` on placeholders. |
 | `gif` | `GifData \| null` | Attached GIF, if any. `null` on placeholders. |
 | `mentions` | `Mention[]` | Array of user mentions embedded in the comment. `[]` on placeholders. |

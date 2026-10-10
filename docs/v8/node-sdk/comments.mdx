@@ -71,6 +71,8 @@ const comment = await sublay.comments.createComment({
 
 **Returns** — `Promise<Comment>`
 
+When the server refuses the comment, the call rejects with its error — among them `403 comment/parent-deleted` and `403 comment/parent-removed` for a reply to a deleted or removed comment, and `409 comment/foreign-id-taken` for a `foreignId` already in use. See [Create Comment → Error Responses](/v8/api-reference/comments/create-comment#error-responses) for the full list.
+
 ---
 
 ### fetchComment
@@ -248,7 +250,7 @@ For a user's comments across entities, use [`users.fetchCommentsByUserId`](/v8/n
 Adds a reaction from a user to a comment.
 
 ```typescript
-const reaction = await sublay.comments.addReaction({
+const comment = await sublay.comments.addReaction({
   commentId: "cmt_abc123",
   userId: "usr_abc123",
   reactionType: "like",
@@ -267,7 +269,7 @@ const reaction = await sublay.comments.addReaction({
   One of: `"upvote"`, `"downvote"`, `"like"`, `"love"`, `"wow"`, `"sad"`, `"angry"`, `"funny"`.
 </ParamField>
 
-**Returns** — `Promise<Reaction>`
+**Returns** — `Promise<Comment>` — the updated comment, as the reacting user sees it: `userReaction` and `reactionCounts` reflect the new reaction.
 
 ---
 
@@ -276,7 +278,7 @@ const reaction = await sublay.comments.addReaction({
 Removes a user's existing reaction from a comment.
 
 ```typescript
-await sublay.comments.removeReaction({
+const comment = await sublay.comments.removeReaction({
   commentId: "cmt_abc123",
   userId: "usr_abc123",
 });
@@ -290,7 +292,7 @@ await sublay.comments.removeReaction({
   The Sublay user ID whose reaction to remove.
 </ParamField>
 
-**Returns** — `Promise<void>`
+**Returns** — `Promise<Comment>` — the updated comment, as that user sees it. When the user has no reaction on the comment, the comment comes back unchanged.
 
 ---
 
@@ -353,4 +355,4 @@ const { reactionType } = await sublay.comments.getUserReaction({
   The Sublay user ID to check.
 </ParamField>
 
-**Returns** — `Promise<{ reactionType: ReactionType | null }>`
+**Returns** — `Promise<{ reactionType: ReactionType | null }>`. Rejects with `404 comment/not-found` when the comment doesn't exist, or is on an entity whose author has blocked the user (the user's own comments excepted).

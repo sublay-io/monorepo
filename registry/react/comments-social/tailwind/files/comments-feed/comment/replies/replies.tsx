@@ -14,9 +14,12 @@ export function Replies({ commentId }: { commentId: string }) {
     useReplies({ commentId, limit: 5 });
 
   // Reply on a reply goes to this top-level comment, which the server refuses
-  // once it's deleted or removed — so its replies show no Reply button then.
+  // once it's deleted, removed or unavailable to the viewer — so its replies
+  // show no Reply button then.
   const parentClosed =
-    !!comment?.userDeletedAt || comment?.moderationStatus === "removed";
+    !!comment?.userDeletedAt ||
+    comment?.moderationStatus === "removed" ||
+    !!comment?.isUnavailable;
 
   // How many times replies were requested (0 = never expanded).
   const [page, setPage] = useState(0);

@@ -18,9 +18,9 @@ export interface GifData {
 
 export interface Comment {
   id: string;
-  projectId: string;
   foreignId: string | null;
   entityId: string;
+  spaceId: string | null; // The space of the comment's entity, if any
   // Populated when include contains "entity" or "space". `null` on your own
   // comment on a post you can't see (its author blocked you).
   entity?: Entity | null;
@@ -30,6 +30,7 @@ export interface Comment {
   // Populated when include contains "parent". `null` when the comment has no
   // parent, or the parent can't be shown to the viewer.
   parentComment?: Comment | null;
+  referencedCommentId: string | null; // The comment this one quotes, if any
   content: string | null;
   gif: GifData | null;
   mentions: Mention[];

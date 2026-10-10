@@ -14,6 +14,12 @@ Removes the authenticated user's reaction from a comment. The comment's `reactio
   The UUID of the comment to remove the reaction from.
 </ParamField>
 
+## Body Parameters
+
+<ParamField body="userId" type="string">
+  Override which user's reaction is removed. **Service or master key only.**
+</ParamField>
+
 ## Blocks
 
 Removing your own reaction is undoing your own action, so a block doesn't stop it: as long as the comment is visible to you — in full, or as a placeholder — your reaction is removed. This includes a comment whose author blocked you and a moderator-removed comment.

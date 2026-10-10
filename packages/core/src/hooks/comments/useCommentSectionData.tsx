@@ -114,13 +114,17 @@ export interface UseCommentSectionDataValues {
    */
   highlightedCommentLoading: boolean;
   loading: boolean;
-  /** The last failure loading the comment list (cleared by the next successful load). */
+  /**
+   * The last failure loading the comment list. Cleared when the next load
+   * starts. `loadMore()` retries a failed load, including a failed first page.
+   */
   error: Error | null;
   hasMore: boolean;
   submittingComment: boolean;
   /**
-   * Fetch the next page of top-level comments. Does nothing while loading or
-   * when there's nothing more; never throws (failures land in `error`).
+   * Fetch the next page of top-level comments, or retry the one that failed.
+   * Does nothing while loading or when there's nothing more; never throws
+   * (failures land in `error`).
    */
   loadMore: () => Promise<void>;
   sortBy: CommentsSortByOptions | null;

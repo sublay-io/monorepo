@@ -61,7 +61,10 @@ export interface UseEntityCommentsValues {
   comments: Comment[];
   newComments: Comment[];
   loading: boolean;
-  /** The last failure loading the list (cleared by the next successful load). */
+  /**
+   * The last failure loading the list. Cleared when the next load starts.
+   * `loadMore()` retries a failed load, including a failed first page.
+   */
   error: Error | null;
   hasMore: boolean;
   sortBy: CommentsSortByOptions | null;
@@ -73,8 +76,9 @@ export interface UseEntityCommentsValues {
   sortByReaction: ReactionType | undefined;
   setSortByReaction: (newReaction: ReactionType | undefined) => void;
   /**
-   * Fetch the next page of top-level comments. Does nothing while loading or
-   * when there's nothing more; never throws (failures land in `error`).
+   * Fetch the next page of top-level comments, or retry the one that failed.
+   * Does nothing while loading or when there's nothing more; never throws
+   * (failures land in `error`).
    */
   loadMore: () => Promise<void>;
   /** A loaded comment by id (without nested `replies`). */
@@ -226,11 +230,12 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
     const generation = reset ? ++generationRef.current : generationRef.current;
     loadingRef.current = true;
     setLoading(true);
+    // A new attempt (reset or retry) starts clean.
+    setError(null);
     if (reset) {
       cursorRef.current = null;
       hasMoreRef.current = true;
       setHasMore(true);
-      setError(null);
       const empty = emptyCommentStore();
       const seed = seedRef.current;
       setStore((previous) => (seed ? seed(empty, previous) : empty));

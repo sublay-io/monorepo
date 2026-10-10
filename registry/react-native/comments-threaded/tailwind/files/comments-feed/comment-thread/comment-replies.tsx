@@ -8,6 +8,8 @@ interface CommentRepliesProps {
   depth: number;
   isCollapsed: boolean;
   loading: boolean;
+  /** The last replies load failed: show a retry in place of the button. */
+  failed: boolean;
   visibleReplies: CommentType[];
   hiddenRepliesCount: number;
   hasMore: boolean;
@@ -21,6 +23,7 @@ function CommentReplies({
   depth,
   isCollapsed,
   loading,
+  failed,
   visibleReplies,
   hiddenRepliesCount,
   hasMore,
@@ -57,32 +60,53 @@ function CommentReplies({
         />
       ))}
 
-      {/* Load more replies button */}
+      {/* Load more replies button (or a retry after a failed load) */}
       {hasMore && (
         // Indented to the level the replies load at (same 24px-per-level cap as single comments)
         <View className="mt-3" style={{ marginLeft: Math.min(depth + 1, 6) * 24 + 4 }}>
-          <TouchableOpacity
-            onPress={onLoadMore}
-            disabled={loading}
-            className={`flex-row items-center gap-2 px-2 py-1 rounded-full ${
-              theme === 'dark' ? 'active:bg-blue-950' : 'active:bg-blue-50'
-            }`}
-          >
-            <Text
-              className={`text-xs ${
-                theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+          {failed && !loading ? (
+            <View className="flex-row items-center px-2 py-1">
+              <Text
+                className={`text-xs ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                }`}
+              >
+                Couldn't load more ·{" "}
+              </Text>
+              <TouchableOpacity onPress={onLoadMore}>
+                <Text
+                  className={`text-xs font-medium ${
+                    theme === 'dark' ? 'text-blue-500' : 'text-blue-600'
+                  }`}
+                >
+                  Try again
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity
+              onPress={onLoadMore}
+              disabled={loading}
+              className={`flex-row items-center gap-2 px-2 py-1 rounded-full ${
+                theme === 'dark' ? 'active:bg-blue-950' : 'active:bg-blue-50'
               }`}
             >
-              +
-            </Text>
-            <Text
-              className={`text-xs font-medium ${
-                theme === 'dark' ? 'text-blue-500' : 'text-blue-600'
-              }`}
-            >
-              {loading ? "Loading..." : loadMoreLabel}
-            </Text>
-          </TouchableOpacity>
+              <Text
+                className={`text-xs ${
+                  theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+                }`}
+              >
+                +
+              </Text>
+              <Text
+                className={`text-xs font-medium ${
+                  theme === 'dark' ? 'text-blue-500' : 'text-blue-600'
+                }`}
+              >
+                {loading ? "Loading..." : loadMoreLabel}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </View>

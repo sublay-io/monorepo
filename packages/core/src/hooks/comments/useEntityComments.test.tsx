@@ -208,6 +208,42 @@ describe("useEntityComments", () => {
     expect(axiosPrivate.calls("get")[2].config?.params).toMatchObject({ cursor: "c2" });
   });
 
+  it("retries a failed first page with loadMore and clears error when the retry starts", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useEntityComments({ entityId: "entity-1" }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockError("get", 500, { message: "Internal error" }),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.comments).toEqual([]);
+    expect(result.current.hasMore).toBe(true);
+
+    const retry = deferred<{ data: CursorPaginatedResponse<Comment> }>();
+    vi.mocked(axiosPrivate.instance.get).mockReturnValueOnce(retry.promise as never);
+    let pending!: Promise<void>;
+    act(() => {
+      pending = result.current.loadMore();
+    });
+    // Cleared as soon as the retry starts.
+    await waitFor(() => expect(result.current.loading).toBe(true));
+    expect(result.current.error).toBeNull();
+
+    const comment = makeComment({ id: "comment-1" });
+    await act(async () => {
+      retry.resolve({ data: makePage([comment], null) });
+      await pending;
+    });
+    expect(result.current.error).toBeNull();
+    expect(result.current.comments).toEqual([comment]);
+    expect(result.current.hasMore).toBe(false);
+    // The retry asked for the first page again.
+    expect(axiosPrivate.calls("get")).toHaveLength(2);
+    expect(axiosPrivate.calls("get")[1].config?.params?.cursor ?? null).toBeNull();
+  });
+
   it("drops a response from before a sort change", async () => {
     const slow = deferred<{ data: CursorPaginatedResponse<Comment> }>();
     const { result, axiosPrivate } = renderHookWithAxios(

@@ -117,6 +117,18 @@ Friendly placeholder when no comments exist. Customize `no-comments-placeholder.
 
 ---
 
+### Error States
+
+When a load fails, the component shows a retry instead of a wrong or stuck state:
+
+- **First load fails** — "Couldn't load comments" with a **Try again** button, in place of the empty state.
+- **Loading more top-level comments fails** — "Couldn't load more · Try again" in place of the **Load more comments** button on web, and at the bottom of the list on React Native.
+- **Loading replies fails** — the same "Couldn't load more · Try again" in place of the "View more replies" button.
+
+**Try again** calls the same `loadMore()` that failed, which re-sends the failed request. Edit the text in `comments-feed.tsx` (and `comments-footer-component.tsx` on React Native) and `comment/replies/show-hide-button.tsx`.
+
+---
+
 ### Real-Time Updates
 
 Comments automatically update when other users post. No configuration required — powered by `@sublay/react-js` subscriptions.
@@ -163,6 +175,7 @@ Enable a GIF picker via the [Sublay Dashboard](https://dash.sublay.io). Add a Gi
 | Reporting | ✅ | ✅ (reasons, modal styling) |
 | Loading states | ✅ | ✅ (skeleton design) |
 | Empty states | ✅ | ✅ (messaging, design) |
+| Error states with retry | ✅ | ✅ (messaging, design) |
 | Real-time updates | ✅ | ❌ (handled by core SDK) |
 | Dark mode | ✅ | ✅ |
 | GIF support | ✅ | ❌ (enabled in dashboard) |

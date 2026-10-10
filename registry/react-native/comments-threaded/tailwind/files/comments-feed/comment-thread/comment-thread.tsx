@@ -21,7 +21,7 @@ function CommentThread({
 
   // Replies the section already brought in (nested) are here from the start;
   // "load more" / "continue this thread" fetch the rest on demand.
-  const { replies, newReplies, loading, hasMore, loadMore } = useReplies({
+  const { replies, newReplies, loading, error, hasMore, loadMore } = useReplies({
     commentId: comment.id,
   });
 
@@ -56,6 +56,7 @@ function CommentThread({
         depth={depth}
         isCollapsed={isCollapsed}
         loading={loading}
+        failed={!!error}
         visibleReplies={allReplies}
         hiddenRepliesCount={hiddenRepliesCount}
         hasMore={hasMore}

@@ -10,7 +10,7 @@ export function Replies({ commentId }: { commentId: string }) {
 
   // Replies load on click, 5 at a time (no nesting in this component). The
   // parent comment comes from useReplies too.
-  const { comment, replies, newReplies, loading, hasMore, loadMore } =
+  const { comment, replies, newReplies, loading, error, hasMore, loadMore } =
     useReplies({ commentId, limit: 5 });
 
   // Reply on a reply goes to this top-level comment, which the server refuses
@@ -112,6 +112,7 @@ export function Replies({ commentId }: { commentId: string }) {
         loadedRepliesCount={filteredReplies.length}
         page={page}
         hasMore={hasMore}
+        failed={!!error && !loading}
         onLoadMore={handleLoadMore}
         areRepliesVisible={areRepliesVisible}
         setAreRepliesVisible={setAreRepliesVisible}

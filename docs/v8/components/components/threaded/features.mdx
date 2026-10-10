@@ -161,9 +161,21 @@ Skeleton loaders while fetching comments. Realistic skeleton UI mimics comment s
 
 Friendly placeholder when no comments exist yet.
 
-**Default message:** "No comments yet. Be the first to comment!"
+**Default message:** "No comments yet" with "Start the conversation." under it.
 
 Customize `no-comments-placeholder.tsx` to change messaging or add illustrations.
+
+---
+
+### Error States
+
+When a load fails, the component shows a retry instead of a wrong or stuck state:
+
+- **First load fails** — "Couldn't load comments" with a **Try again** button, in place of the empty state.
+- **"Load more comments" fails** — "Couldn't load more · Try again" in place of the button.
+- **"N more replies" or "Continue this thread" fails** — the same "Couldn't load more · Try again" in place of that button, including inside the focused thread view.
+
+**Try again** calls the same `loadMore()` that failed, which re-sends the failed request. Edit the text in `comments-feed.tsx` and `comment-thread/comment-replies.tsx`.
 
 ---
 
@@ -215,6 +227,7 @@ Enable a GIF picker in comment forms via the [Sublay Dashboard](https://dash.sub
 | Reporting | ✅ | ✅ (report reasons, modal styling) |
 | Loading states | ✅ | ✅ (skeleton design) |
 | Empty states | ✅ | ✅ (messaging, design) |
+| Error states with retry | ✅ | ✅ (messaging, design) |
 | Real-time updates | ✅ | ❌ (handled by core SDK) |
 | Dark mode | ✅ | ✅ (all colors customizable) |
 | GIF support | ✅ | ❌ (enabled in dashboard) |

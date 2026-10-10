@@ -7,6 +7,7 @@ const ShowHideButton = ({
   loadedRepliesCount,
   page,
   hasMore,
+  failed,
   onLoadMore,
   areRepliesVisible,
   setAreRepliesVisible,
@@ -16,6 +17,8 @@ const ShowHideButton = ({
   loadedRepliesCount: number;
   page: number;
   hasMore: boolean;
+  /** The last replies load failed: show a retry instead. */
+  failed: boolean;
   onLoadMore: () => void;
   areRepliesVisible: boolean;
   setAreRepliesVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -63,6 +66,37 @@ const ShowHideButton = ({
   }
 
   if (totalRepliesCount === 0) return null;
+
+  const mutedColor = theme === 'dark' ? '#9CA3AF' : '#737373';
+
+  if (failed && hasMore) {
+    return (
+      <div
+        style={{
+          paddingTop: 8,
+          paddingLeft: 56,
+          paddingRight: 16,
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        <div style={{ height: 1, width: 24, marginTop: "2px", backgroundColor: mutedColor }} />
+        <span style={{ fontSize: 12, color: mutedColor }}>
+          Couldn't load more ·{" "}
+          <button
+            onClick={() => {
+              setAreRepliesVisible(true);
+              onLoadMore();
+            }}
+            style={{ ...resetButton, fontSize: 12, fontWeight: 600, color: mutedColor }}
+          >
+            Try again
+          </button>
+        </span>
+      </div>
+    );
+  }
 
   return (
     <button

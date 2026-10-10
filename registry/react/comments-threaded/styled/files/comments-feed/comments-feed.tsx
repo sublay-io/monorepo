@@ -11,6 +11,7 @@ const CommentsFeed = React.memo(
       comments,
       newComments,
       loading,
+      error,
       hasMore,
       loadMore,
       highlightedComment,
@@ -87,32 +88,65 @@ const CommentsFeed = React.memo(
 
     const showLoadedComments = mergedComments.length > 0;
     const showFetchingSkeletons = loading && mergedComments.length === 0;
-    const showNoComments = !loading && mergedComments.length === 0;
+    // A failed load shows a retry; `loadMore()` re-sends the request that failed.
+    const showLoadError = !loading && !!error && mergedComments.length === 0;
+    const showNoComments = !loading && !error && mergedComments.length === 0;
+    const showLoadMoreError = !loading && !!error;
+    const mutedColor = theme === "dark" ? "#9CA3AF" : "#6B7280";
+    const linkColor = theme === "dark" ? "#3B82F6" : "#2563EB";
+    const tryAgainStyle: React.CSSProperties = {
+      fontSize: "12px",
+      fontWeight: 500,
+      color: linkColor,
+      padding: 0,
+      background: "transparent",
+      border: "none",
+      cursor: "pointer",
+    };
 
     return (
       <div style={{ flex: 1 }}>
         {showLoadedComments && <LoadedComments data={mergedComments} />}
         {showLoadedComments && hasMore && (
           <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
-            <button
-              onClick={() => loadMore?.()}
-              disabled={loading}
-              style={{
-                fontSize: "12px",
-                fontWeight: 500,
-                color: theme === 'dark' ? "#3B82F6" : "#2563EB",
-                padding: "4px 12px",
-                borderRadius: "9999px",
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
-              {loading ? "Loading..." : "Load more comments"}
-            </button>
+            {showLoadMoreError ? (
+              <div style={{ fontSize: "12px", color: mutedColor, padding: "4px 12px" }}>
+                Couldn't load more ·{" "}
+                <button onClick={() => loadMore?.()} style={tryAgainStyle}>
+                  Try again
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => loadMore?.()}
+                disabled={loading}
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  color: theme === 'dark' ? "#3B82F6" : "#2563EB",
+                  padding: "4px 12px",
+                  borderRadius: "9999px",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                {loading ? "Loading..." : "Load more comments"}
+              </button>
+            )}
           </div>
         )}
         {showFetchingSkeletons && <FetchingCommentsSkeletons />}
+        {showLoadError && (
+          <div style={{ textAlign: "center", padding: "8px 0" }}>
+            <p style={{ fontSize: "14px", color: mutedColor, margin: "0 0 4px 0" }}>
+              Couldn't load comments
+            </p>
+            <button onClick={() => loadMore?.()} style={tryAgainStyle}>
+              Try again
+            </button>
+          </div>
+        )}
         {showNoComments && (customNoCommentsView ?? <NoCommentsPlaceHolder />)}
       </div>
     );

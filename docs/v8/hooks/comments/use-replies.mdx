@@ -102,7 +102,7 @@ A request can return at most 500 comments (see [Request size limit](/v8/api-refe
 </ResponseField>
 
 <ResponseField name="error" type="Error | null">
-  The last failure loading replies. Cleared by the next successful load.
+  The last failure loading replies. Cleared when the next load starts or the section resets (for example on a sort change). Call `loadMore()` to retry — `hasMore` stays `true` after a failure, and the retry asks for the same replies again (including the nesting of a first load).
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">
@@ -110,5 +110,5 @@ A request can return at most 500 comments (see [Request size limit](/v8/api-refe
 </ResponseField>
 
 <ResponseField name="loadMore" type="(options?: { replyDepth?: number; limit?: number }) => Promise<void>">
-  Loads the next replies. Does nothing while a load is in flight or when `hasMore` is `false`, and never throws — failures land in `error`.
+  Loads the next replies, or retries the load that failed. Does nothing while a load is in flight or when `hasMore` is `false`, and never throws — failures land in `error`.
 </ResponseField>

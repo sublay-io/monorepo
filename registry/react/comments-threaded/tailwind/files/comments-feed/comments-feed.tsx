@@ -10,6 +10,7 @@ const CommentsFeed = React.memo(
       comments,
       newComments,
       loading,
+      error,
       hasMore,
       loadMore,
       highlightedComment,
@@ -76,23 +77,47 @@ const CommentsFeed = React.memo(
 
     const showLoadedComments = mergedComments.length > 0;
     const showFetchingSkeletons = loading && mergedComments.length === 0;
-    const showNoComments = !loading && mergedComments.length === 0;
+    // A failed load shows a retry; `loadMore()` re-sends the request that failed.
+    const showLoadError = !loading && !!error && mergedComments.length === 0;
+    const showNoComments = !loading && !error && mergedComments.length === 0;
+    const showLoadMoreError = !loading && !!error;
+    const tryAgainClassName =
+      "text-xs font-medium text-blue-600 dark:text-blue-500 p-0 bg-transparent border-none cursor-pointer hover:underline";
 
     return (
       <div className="flex-1">
         {showLoadedComments && <LoadedComments data={mergedComments} />}
         {showLoadedComments && hasMore && (
           <div className="flex justify-center py-2">
-            <button
-              onClick={() => loadMore?.()}
-              disabled={loading}
-              className="text-xs font-medium text-blue-600 dark:text-blue-500 px-3 py-1 rounded-full bg-transparent border-none cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950"
-            >
-              {loading ? "Loading..." : "Load more comments"}
-            </button>
+            {showLoadMoreError ? (
+              <div className="text-xs text-gray-500 dark:text-gray-400 px-3 py-1">
+                Couldn't load more ·{" "}
+                <button onClick={() => loadMore?.()} className={tryAgainClassName}>
+                  Try again
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => loadMore?.()}
+                disabled={loading}
+                className="text-xs font-medium text-blue-600 dark:text-blue-500 px-3 py-1 rounded-full bg-transparent border-none cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950"
+              >
+                {loading ? "Loading..." : "Load more comments"}
+              </button>
+            )}
           </div>
         )}
         {showFetchingSkeletons && <FetchingCommentsSkeletons />}
+        {showLoadError && (
+          <div className="text-center py-2">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+              Couldn't load comments
+            </p>
+            <button onClick={() => loadMore?.()} className={tryAgainClassName}>
+              Try again
+            </button>
+          </div>
+        )}
         {showNoComments && (customNoCommentsView ?? <NoCommentsPlaceHolder />)}
       </div>
     );

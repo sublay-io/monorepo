@@ -236,7 +236,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="error" type="Error | null">
-  The last failure loading the comment list. Cleared by the next successful load. A missing highlighted comment doesn't set it.
+  The last failure loading the comment list. Cleared when the next load starts. Call `loadMore()` to retry — `hasMore` stays `true` after a failure, and the retry asks for the same page again, including a first page that failed. A missing highlighted comment doesn't set it.
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">
@@ -248,7 +248,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="loadMore" type="() => Promise<void>">
-  Loads the next page of top-level comments (with the section's `replyDepth`). Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
+  Loads the next page of top-level comments (with the section's `replyDepth`), or retries the page that failed. Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
 </ResponseField>
 
 <ResponseField name="getComment" type="(commentId: string) => Comment | undefined">

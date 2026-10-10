@@ -1,49 +1,147 @@
 import { View } from "react-native";
 import useUIState from "../../../../hooks/use-ui-state";
 
-function IndentationThreadingLines({ isLastReply }: { isLastReply: boolean }) {
+// 🎨 CUSTOMIZATION: Thread geometry. Every connector line is derived from
+// these values, so changing one keeps the joins intact.
+
+// 🎨 CUSTOMIZATION: Avatar size (Default: 24)
+export const AVATAR_SIZE = 24;
+// 🎨 CUSTOMIZATION: Indentation per reply level (Default: 24).
+// Keep it larger than half the avatar, or the elbows have no room.
+export const INDENT = 24;
+// 🎨 CUSTOMIZATION: Levels that indent; deeper replies stay in one column (Default: 6)
+export const MAX_INDENT_DEPTH = 6;
+// 🎨 CUSTOMIZATION: Vertical padding of a comment row (Default: 8)
+export const ROW_PADDING_Y = 8;
+// 🎨 CUSTOMIZATION: Space between the top of a row's content and its avatar (Default: 4)
+export const AVATAR_OFFSET_TOP = 4;
+// 🎨 CUSTOMIZATION: Gap between the avatar and the comment content (Default: 12)
+export const AVATAR_GAP = 12;
+// 🎨 CUSTOMIZATION: Threading line thickness (Default: 1)
+export const LINE_WIDTH = 1;
+// 🎨 CUSTOMIZATION: Roundness of the elbow into each reply (Default: 12)
+export const ELBOW_RADIUS = 12;
+
+// Left edge of the vertical line, measured from the left edge of the comment
+// it hangs from: centred under that comment's avatar.
+export const RAIL_X = Math.floor((AVATAR_SIZE - LINE_WIDTH) / 2);
+// Top and vertical centre of a comment's avatar, measured from the top of its row.
+export const AVATAR_TOP = ROW_PADDING_Y + AVATAR_OFFSET_TOP;
+export const AVATAR_CENTER_Y = AVATAR_TOP + AVATAR_SIZE / 2;
+
+function useLineClasses() {
   const { theme } = useUIState();
-  const lineColor = theme === 'dark' ? 'bg-gray-500' : 'bg-gray-300';
+  return {
+    // 🎨 CUSTOMIZATION: Threading line color (Default: gray-300)
+    line: theme === 'dark' ? 'border-gray-500' : 'border-gray-300',
+    // 🎨 CUSTOMIZATION: Connector into the highlighted comment (Default: blue-500)
+    accent: theme === 'dark' ? 'border-blue-400' : 'border-blue-500',
+  };
+}
+
+/**
+ * The line from under a comment's avatar to the bottom of its row, where the
+ * lines of the rows below take over. Rendered inside the comment's row.
+ */
+export function ThreadStem() {
+  const { line } = useLineClasses();
+
+  return (
+    <View
+      pointerEvents="none"
+      className={`absolute ${line}`}
+      style={{
+        left: RAIL_X,
+        top: AVATAR_TOP + AVATAR_SIZE,
+        bottom: 0,
+        width: LINE_WIDTH,
+        borderLeftWidth: LINE_WIDTH,
+      }}
+    />
+  );
+}
+
+interface IndentationThreadingLinesProps {
+  /** Nothing hangs from the parent's line below this row. */
+  isLastReply: boolean;
+  /**
+   * The row sits one level in from its parent (the default). False past the
+   * indentation cap, where replies stay in their parent's column.
+   */
+  indented?: boolean;
+  /** Where the elbow meets the row, measured from the top of the row. */
+  joinAt?: number;
+  /** How far past the row's left edge the elbow runs. */
+  reach?: number;
+  /** The row is the highlighted comment: its connector takes the accent color. */
+  highlighted?: boolean;
+}
+
+/**
+ * Connects one row to its parent. Rendered last inside the row's wrapper,
+ * which spans the row plus everything nested under it. Wrappers stack with no
+ * space between them, so their line segments add up to one unbroken line at
+ * any content height.
+ */
+function IndentationThreadingLines({
+  isLastReply,
+  indented = true,
+  joinAt = AVATAR_CENTER_Y,
+  reach = 0,
+  highlighted = false,
+}: IndentationThreadingLinesProps) {
+  const { line, accent } = useLineClasses();
+  // The piece that leads into this row; the line carrying on past it stays neutral
+  const ownLine = highlighted ? accent : line;
+
+  // Past the indentation cap: a straight line through the column, from the
+  // row above into this avatar. Each row's own stem carries it on below.
+  if (!indented) {
+    return (
+      <View
+        pointerEvents="none"
+        className={`absolute ${ownLine}`}
+        style={{
+          left: RAIL_X,
+          top: 0,
+          height: AVATAR_TOP,
+          width: LINE_WIDTH,
+          borderLeftWidth: LINE_WIDTH,
+        }}
+      />
+    );
+  }
 
   return (
     <>
-      {/* Vertical line from parent thread continuing down - only if not the last reply */}
+      {/* The parent's line carrying on to the rows below */}
       {!isLastReply && (
         <View
-          className={`absolute w-px z-0 h-full ${lineColor}`}
+          pointerEvents="none"
+          className={`absolute ${line}`}
           style={{
-            left: -12,
+            left: RAIL_X - INDENT,
             top: 0,
+            bottom: 0,
+            width: LINE_WIDTH,
+            borderLeftWidth: LINE_WIDTH,
           }}
         />
       )}
 
-      {/* Vertical line from parent thread to this comment's branch point */}
+      {/* The parent's line down to this row, turning into it: one shape, so
+          the vertical part and the curve can't come apart */}
       <View
-        className={`absolute w-px z-0 ${lineColor}`}
+        pointerEvents="none"
+        className={`absolute ${ownLine}`}
         style={{
-          top: -8,
-          height: 18,
-          left: -12,
-        }}
-      />
-
-      {/* Curved branch connecting parent line to child avatar */}
-      <View
-        className={`absolute z-0 rounded-bl-xl ${
-          theme === 'dark' ? 'border-gray-500' : 'border-gray-300'
-        }`}
-        style={{
-          top: 10,
-          width: 12,
-          height: 16,
-          left: -12,
-          borderLeftWidth: 1.5,
-          borderBottomWidth: 1.5,
-          borderTopWidth: 1.5,
-          borderTopColor: 'transparent',
-          borderRightWidth: 1.5,
-          borderRightColor: 'transparent',
+          left: RAIL_X - INDENT,
+          top: 0,
+          width: INDENT - RAIL_X + reach,
+          height: Math.ceil(joinAt + LINE_WIDTH / 2),
+          borderLeftWidth: LINE_WIDTH,
+          borderBottomWidth: LINE_WIDTH,
+          borderBottomLeftRadius: ELBOW_RADIUS,
         }}
       />
     </>

@@ -23,7 +23,9 @@
  * BACKGROUNDS:
  * - bg-white / dark:bg-gray-800 (main background)
  * - bg-gray-50 / dark:bg-gray-700 (secondary background, vote buttons)
- * - bg-blue-100 / dark:bg-blue-900 (highlighted comment background)
+ * - bg-gray-100 / dark:bg-[#2B3544] (highlighted comment background)
+ * - bg-blue-100 / dark:bg-blue-900 (indentation beside a highlighted comment)
+ * - bg-gray-200 / dark:bg-gray-600 (vote buttons on a highlighted comment)
  *
  * TEXT:
  * - text-gray-900 / dark:text-gray-50 (primary text)

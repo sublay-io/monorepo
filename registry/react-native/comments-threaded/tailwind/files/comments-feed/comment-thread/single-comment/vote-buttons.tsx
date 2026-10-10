@@ -10,11 +10,14 @@ import useUIState from "../../../../hooks/use-ui-state";
 interface VoteButtonsProps {
   comment: CommentType;
   size?: "small" | "normal";
+  /** The comment is the highlighted one: the pill steps away from its background. */
+  highlighted?: boolean;
 }
 
 function VoteButtons({
   comment,
   size = "small",
+  highlighted = false,
 }: VoteButtonsProps) {
   const { user } = useUser();
   const { callbacks } = useCommentSection();
@@ -45,8 +48,11 @@ function VoteButtons({
 
   return (
     <View
+      // One step stronger on the highlighted comment, whose background is gray-100
       className={`flex-row items-center rounded-full gap-1 ${containerPadding} ${
-        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
+        highlighted
+          ? theme === 'dark' ? 'bg-gray-600' : 'bg-gray-200'
+          : theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
       }`}
     >
       {/* Upvote Button */}

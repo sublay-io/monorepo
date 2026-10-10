@@ -3,9 +3,22 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { Comment as CommentType } from "@sublay/react-native";
 import { CommentThreadProps } from "./comment-thread";
 import useUIState from "../../../hooks/use-ui-state";
+import IndentationThreadingLines, {
+  INDENT,
+  MAX_INDENT_DEPTH,
+} from "./single-comment/indentation-threading-lines";
+
+// 🎨 CUSTOMIZATION: "More replies" row - space above it (Default: 12)
+const LOAD_MORE_PADDING_TOP = 12;
+// 🎨 CUSTOMIZATION: "More replies" row - height (Default: 24)
+const LOAD_MORE_HEIGHT = 24;
+// 🎨 CUSTOMIZATION: "More replies" row - space between the elbow and the button (Default: 4)
+const LOAD_MORE_OFFSET_LEFT = 4;
 
 interface CommentRepliesProps {
   depth: number;
+  /** Past the indentation cap, the parent's column carries on below these replies. */
+  columnContinues: boolean;
   isCollapsed: boolean;
   loading: boolean;
   /** The last replies load failed: show a retry in place of the button. */
@@ -21,6 +34,7 @@ interface CommentRepliesProps {
 
 function CommentReplies({
   depth,
+  columnContinues,
   isCollapsed,
   loading,
   failed,
@@ -48,13 +62,16 @@ function CommentReplies({
       : "More replies";
 
   return (
-    <View>
+    // Replies sit one level in from their parent, until the indentation cap
+    <View style={{ marginLeft: depth < MAX_INDENT_DEPTH ? INDENT : 0 }}>
       {visibleReplies.map((reply: CommentType, index: number) => (
         <CommentThreadComponent
           key={reply.id}
           comment={reply}
           depth={depth + 1}
-          isLastReply={index === visibleReplies.length - 1}
+          // The load-more row below, when there is one, is the last row on the line
+          isLastReply={index === visibleReplies.length - 1 && !hasMore}
+          parentColumnContinues={columnContinues}
           onDeleteComment={onDeleteComment}
           onReportComment={onReportComment}
         />
@@ -62,8 +79,22 @@ function CommentReplies({
 
       {/* Load more replies button (or a retry after a failed load) */}
       {hasMore && (
-        // Indented to the level the replies load at (same 24px-per-level cap as single comments)
-        <View className="mt-3" style={{ marginLeft: Math.min(depth + 1, 6) * 24 + 4 }}>
+        // The last row under its parent. Past the indentation cap it still
+        // steps in one level, so it reads as a branch off the column.
+        <View
+          className="flex-row items-center"
+          style={{
+            minHeight: LOAD_MORE_PADDING_TOP + LOAD_MORE_HEIGHT,
+            paddingTop: LOAD_MORE_PADDING_TOP,
+            paddingLeft: LOAD_MORE_OFFSET_LEFT,
+            marginLeft: depth < MAX_INDENT_DEPTH ? 0 : INDENT,
+          }}
+        >
+          <IndentationThreadingLines
+            isLastReply={!columnContinues}
+            joinAt={LOAD_MORE_PADDING_TOP + LOAD_MORE_HEIGHT / 2}
+            reach={LOAD_MORE_OFFSET_LEFT}
+          />
           {failed && !loading ? (
             <View className="flex-row items-center px-2 py-1">
               <Text

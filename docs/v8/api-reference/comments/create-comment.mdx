@@ -52,7 +52,7 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
 </ParamField>
 
 <ParamField body="foreignId" type="string">
-  Your application's identifier for this comment. Must be unique across the project's comments — a `foreignId` already in use returns `409 comment/foreign-id-taken`.
+  Your application's identifier for this comment. Must be unique across the project's comments — a `foreignId` already in use returns `409 comment/foreign-id-taken`. A `foreignId` stays reserved after its comment is deleted: the deleted comment remains in its thread as a placeholder and is still found by that `foreignId`.
 </ParamField>
 
 <ParamField body="mentions" type="object[]">

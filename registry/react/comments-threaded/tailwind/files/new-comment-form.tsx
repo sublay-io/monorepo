@@ -5,12 +5,14 @@ import {
   useUserMentions,
   useProject,
   handleError,
+  type CommentCreateError,
 } from "@sublay/react-js";
 import {
   useTextareaCursorIndicator,
   GiphyContainer,
 } from "@sublay/ui-core-react-js";
 import MentionSuggestions from "./mention-suggestions";
+import { getCommentCreateErrorMessage } from "../utils/comment-create-error";
 import { cn } from "@/lib/utils";
 
 function NewCommentForm() {
@@ -23,7 +25,19 @@ function NewCommentForm() {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGiphyVisible, setIsGiphyVisible] = useState(false);
-  const { createComment, callbacks } = useCommentSection();
+  const { createComment, callbacks, createError } = useCommentSection();
+
+  // A failed post shows a message under the form, until the text is edited or
+  // something is sent again (the section clears `createError` then). Replies
+  // have their own form, which shows its own failures.
+  const [dismissedCreateError, setDismissedCreateError] =
+    useState<CommentCreateError | null>(null);
+  const createErrorMessage =
+    createError &&
+    createError.parentId === null &&
+    createError !== dismissedCreateError
+      ? getCommentCreateErrorMessage(createError)
+      : null;
 
   const hasContent = content.trim().length > 0;
 
@@ -200,7 +214,10 @@ function NewCommentForm() {
         >
           <textarea
             ref={textAreaRef}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => {
+              setContent(e.target.value);
+              if (createError) setDismissedCreateError(createError);
+            }}
             // 🎨 CUSTOMIZATION: Comment form styling (Default placeholder)
             placeholder="Add your reply..."
             className={cn(
@@ -267,6 +284,15 @@ function NewCommentForm() {
             </button>
           )}
         </div>
+        {createErrorMessage && (
+          <p
+            role="alert"
+            className="mt-1.5 px-2 text-xs text-gray-500 dark:text-gray-400"
+            // 🎨 CUSTOMIZATION: Failed-post message styling
+          >
+            {createErrorMessage}
+          </p>
+        )}
       </form>
     </>
   );

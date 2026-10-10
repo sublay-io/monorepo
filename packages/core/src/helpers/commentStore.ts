@@ -249,6 +249,34 @@ export function markCommentDeleted(store: CommentStore, commentId: string): Comm
   }));
 }
 
+/**
+ * A comment a moderator removed, as the server returns it: its author gets it
+ * in full, marked removed; everyone else gets the placeholder, with the same
+ * fields blanked as a deleted comment (§3.7).
+ */
+export function markCommentRemoved(
+  store: CommentStore,
+  commentId: string,
+  viewerId: string | null | undefined,
+): CommentStore {
+  return patchComment(store, commentId, (comment) => {
+    if (viewerId && comment.userId === viewerId) {
+      return { ...comment, moderationStatus: "removed" };
+    }
+    return {
+      ...comment,
+      moderationStatus: "removed",
+      userId: null,
+      user: null,
+      content: null,
+      gif: null,
+      metadata: null,
+      mentions: [],
+      attachments: [],
+    };
+  });
+}
+
 /** Replies already shown under a comment whose replies were never fetched. */
 function shownChildCount(store: CommentStore, node: CommentNode): number {
   return node.childIds.filter((id) => store.nodes[id]).length;

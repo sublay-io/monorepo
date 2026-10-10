@@ -17,14 +17,24 @@ import useUIState from "../../../hooks/use-ui-state";
 function NewReplyForm({
   comment,
   setShowReplyForm,
+  replyContent,
+  setReplyContent,
+  errorMessage,
+  onDismissError,
 }: {
   comment: CommentType;
   setShowReplyForm: React.Dispatch<React.SetStateAction<boolean>>;
+  // The text lives in the comment row: the form closes while a reply is being
+  // sent, and comes back with the text if sending fails.
+  replyContent: string;
+  setReplyContent: React.Dispatch<React.SetStateAction<string>>;
+  /** Why the last reply to this comment wasn't posted, if it wasn't. */
+  errorMessage: string | null;
+  onDismissError: () => void;
 }) {
   const { user } = useUser();
   const { theme } = useUIState();
 
-  const [replyContent, setReplyContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { createComment, callbacks } = useCommentSection();
@@ -78,6 +88,7 @@ function NewReplyForm({
   const handleCancelReply = () => {
     setShowReplyForm(false);
     setReplyContent("");
+    onDismissError();
   };
 
   const hasContent = replyContent.trim().length > 0;
@@ -97,7 +108,10 @@ function NewReplyForm({
       >
         <TextInput
           value={replyContent}
-          onChangeText={setReplyContent}
+          onChangeText={(text) => {
+            if (text !== replyContent) onDismissError();
+            setReplyContent(text);
+          }}
           placeholder="Add your reply..."
           multiline
           numberOfLines={2}
@@ -162,6 +176,16 @@ function NewReplyForm({
           </TouchableOpacity>
         </View>
       </View>
+      {errorMessage ? (
+        <Text
+          accessibilityRole="alert"
+          className={`text-xs mt-1.5 px-2 ${
+            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+          }`}
+        >
+          {errorMessage}
+        </Text>
+      ) : null}
     </View>
   );
 }

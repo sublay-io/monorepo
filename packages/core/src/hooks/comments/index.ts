@@ -2,6 +2,7 @@ export { default as useCommentSection } from "./useCommentSection";
 export { default as useCommentSectionData } from "./useCommentSectionData";
 export type {
   CommentSectionCreateCommentProps,
+  CommentCreateError,
   CommentSectionUpdateCommentProps,
   CommentSectionDeleteCommentProps,
   MentionTriggers,

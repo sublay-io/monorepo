@@ -108,6 +108,7 @@ import { CommentSectionProvider } from "@sublay/react-js";
   - `loginRequiredCallback()` — called when a non-authenticated user tries to comment
   - `usernameRequiredCallback()` — called when the user has no username set
   - `commentTooShortCallback()` — called when the submitted comment is too short
+  - `commentCreateFailedCallback({ code?, message?, status?, parentId })` — called when `createComment` sent a comment and the request failed. `code` and `message` come from the server's error response and `status` is its HTTP status — including `user/suspended` with `403` when the user is suspended; all three are `undefined` only when no response arrived (a network error). `parentId` is the comment being replied to, or `null` for a top-level comment. The same details are in [`createError`](#usecommentsection-return-values).
 </ParamField>
 
 <ParamField path="mentionTriggers" type="{ user?: string; space?: string }">
@@ -247,6 +248,22 @@ function CommentList() {
   `true` while a `createComment` call is in flight.
 </ResponseField>
 
+<ResponseField name="createError" type="CommentCreateError | null">
+  The last failure creating a comment through `createComment`: `{ code?: string; message?: string; status?: number; parentId: string | null }`. `code` and `message` come from the server's error response (see [Create Comment → Error Responses](/v8/api-reference/comments/create-comment#error-responses)) and `status` is its HTTP status; all three are `undefined` only when no response arrived (a network error). A comment refused because the user is suspended has `code: "user/suspended"` and `status: 403`. `parentId` is the comment that was being replied to, or `null` for a top-level comment. Set when a create fails and cleared when the next create starts. A create stopped before it is sent — no signed-in user, no username, a comment that is too short — doesn't change it.
+
+  ```tsx
+  const { createError } = useCommentSection();
+
+  {createError && (
+    <p>
+      {createError.code === "comment/parent-deleted"
+        ? "This comment was deleted, so you can't reply to it."
+        : "Couldn't post your comment. Try again."}
+    </p>
+  )}
+  ```
+</ResponseField>
+
 <ResponseField name="loadMore" type="() => Promise<void>">
   Loads the next page of top-level comments (with the section's `replyDepth`), or retries the page that failed. Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
 </ResponseField>
@@ -286,6 +303,10 @@ function CommentList() {
   - `gif` — GIF data object
   - `mentions` — array of `Mention` objects
   - `autoReaction` — automatically react with this reaction type after creating (e.g. `"upvote"`)
+
+  Never throws. When the request fails it resolves to `undefined`, sets `createError` and calls `callbacks.commentCreateFailedCallback`.
+
+  The server refuses a direct reply to a comment that was deleted (`comment/parent-deleted`) or removed by a moderator (`comment/parent-removed`). When a reply fails with one of these codes, the section also updates its copy of that parent to the [placeholder](/v8/data-models/comment#placeholders) the server returns for it: a deleted comment gets `userDeletedAt` and its blanked fields; a removed comment gets `moderationStatus: "removed"` and the same blanked fields, or keeps its content when the user is its author.
 </ResponseField>
 
 <ResponseField name="updateComment" type="(props: { commentId: string; content: string }) => Promise<void>">

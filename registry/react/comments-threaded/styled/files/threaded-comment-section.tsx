@@ -23,7 +23,9 @@
  * - #F3F4F6 → #374151 (secondary background, hover states)
  * - #EFF6FF → #1E3A8A (blue hover backgrounds)
  * - #FEF2F2 → #7F1D1D (red hover backgrounds)
- * - #dbeafe → #1E40AF (highlighted comment background)
+ * - #F3F4F6 → #2B3544 (highlighted comment background)
+ * - #DBEAFE → #1E3A8A (indentation beside the highlighted comment)
+ * - #3B82F6 → #60A5FA (connector line into the highlighted comment)
  *
  * TEXT:
  * - #111827 → #F9FAFB (primary text)

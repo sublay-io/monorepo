@@ -50,6 +50,7 @@ function CommentThread({
     <div style={{ position: "relative" }}>
       <SingleComment
         comment={comment}
+        depth={depth}
         hasReplies={hasReplies}
         isCollapsed={isCollapsed}
         replyCount={replyCount}

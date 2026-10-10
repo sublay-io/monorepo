@@ -42,7 +42,7 @@ Authentication is optional. When the caller is signed in, comments by users they
 </ParamField>
 
 <ParamField query="cursor" type="string">
-  Continue after the last comment of a previous response. Leave it out on the first request, then pass `pagination.nextCursor` from the previous response. The cursor must be used with the same `sortBy`, `sortDir` and `sortByReaction` it was created under. See [Cursors](#cursors).
+  Continue after the last comment of a previous response. Leave it out on the first request (an empty `cursor` is treated the same way), then pass `pagination.nextCursor` from the previous response. The cursor must be used with the same `sortBy`, `sortDir` and `sortByReaction` it was created under. See [Cursors](#cursors).
 </ParamField>
 
 ### Sorting
@@ -106,10 +106,8 @@ using the values after `limit` and `replyLimit` are capped at 100. Requests abov
 
 <ParamField query="include" type="string">
   Comma-separated list of associations to include, applied at every level (nested replies included):
-  - `user` — the comment author, with avatar and banner file URLs
+  - `user` — the comment author, with the avatar file URLs
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)
-
-  Values are lowercase and matched exactly — `User` is rejected as unknown.
 
   Every comment in a thread belongs to the entity you asked for, so `entity`, `space` and `parent` aren't available here (see [Unsupported parameters](#unsupported-parameters)).
 </ParamField>

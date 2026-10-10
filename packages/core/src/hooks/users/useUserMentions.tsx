@@ -27,6 +27,8 @@ export interface UseUserMentionsValues {
   handleMentionClick: (user: User) => void;
   mentions: Mention[];
   addMention: (user: User) => void;
+  /** Replace the mentions list, e.g. to put back one saved before a reset. */
+  setMentions: (mentions: Mention[]) => void;
   resetMentions: () => void;
 }
 
@@ -180,6 +182,7 @@ const useUserMentions = ({
     handleMentionClick,
     mentions,
     addMention,
+    setMentions,
     resetMentions,
   };
 };

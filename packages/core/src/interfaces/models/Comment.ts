@@ -18,9 +18,9 @@ export interface GifData {
 
 export interface Comment {
   id: string; // Sequelize auto-generates this
-  projectId: string; // Required
   foreignId: string | null;
   entityId: string; // Required
+  spaceId: string | null; // The space of the comment's entity, if any
   // Optional - included when include contains "entity" or "space". `null`
   // on your own comment on a post you can't see (its author blocked you).
   entity?: Entity | null;
@@ -31,6 +31,7 @@ export interface Comment {
   // Optional - included when include contains "parent". `null` when the
   // comment has no parent, or the parent can't be shown to you.
   parentComment?: Comment | null;
+  referencedCommentId: string | null; // The comment this one quotes, if any
   content: string | null; // Required
   gif: GifData | null;
   mentions: Mention[];

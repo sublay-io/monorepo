@@ -14,6 +14,10 @@ export interface CommentListSort {
 export interface CursorCommentListValues {
   comments: Comment[];
   loading: boolean;
+  /**
+   * The last failure loading the list. Cleared when the next load starts.
+   * `loadMore()` retries a failed load, including a failed first page.
+   */
   error: Error | null;
   hasMore: boolean;
   sortBy: CommentsSortByOptions;
@@ -24,8 +28,9 @@ export interface CursorCommentListValues {
   sortByReaction: ReactionType | undefined;
   setSortByReaction: (newReaction: ReactionType | undefined) => void;
   /**
-   * Fetch the next page. Does nothing while a page is loading or when there's
-   * nothing more; never throws (failures land in `error`).
+   * Fetch the next page, or retry the one that failed. Does nothing while a
+   * page is loading or when there's nothing more; never throws (failures land
+   * in `error`).
    */
   loadMore: () => Promise<void>;
 }
@@ -85,12 +90,14 @@ export function useCursorCommentList({
     const generation = reset ? ++generationRef.current : generationRef.current;
     loadingRef.current = true;
     setLoading(true);
+    // Every load (a reset, the next page, a retry) starts without the last
+    // failure.
+    setError(null);
     if (reset) {
       cursorRef.current = null;
       hasMoreRef.current = true;
       setHasMore(true);
       setComments([]);
-      setError(null);
     }
     try {
       const response = await fetchPageRef.current(

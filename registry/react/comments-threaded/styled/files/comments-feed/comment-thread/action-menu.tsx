@@ -22,7 +22,8 @@ function ActionMenu({ comment }: ActionMenuProps) {
         style={{
           padding: "2px",
           color: theme === 'dark' ? "#6B7280" : "#9CA3AF",
-          transition: "colors 150ms ease-in-out",
+          transition:
+            "color 150ms ease-in-out, background-color 150ms ease-in-out, border-color 150ms ease-in-out",
           borderRadius: "4px",
           background: "transparent",
           border: "none",

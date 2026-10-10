@@ -82,7 +82,8 @@ function VoteButtons({
         style={{
           padding: "4px",
           borderRadius: "50%",
-          transition: "colors 150ms ease-in-out",
+          transition:
+            "color 150ms ease-in-out, background-color 150ms ease-in-out, border-color 150ms ease-in-out",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -162,7 +163,8 @@ function VoteButtons({
         style={{
           padding: "4px",
           borderRadius: "50%",
-          transition: "colors 150ms ease-in-out",
+          transition:
+            "color 150ms ease-in-out, background-color 150ms ease-in-out, border-color 150ms ease-in-out",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

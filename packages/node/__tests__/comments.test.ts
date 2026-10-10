@@ -215,20 +215,22 @@ describe("node-sdk comments — response mapping", () => {
     await expect(fetchManyComments(client, { entityId: "e1" })).resolves.toEqual(envelope);
   });
 
-  it("addReaction returns response.data", async () => {
+  it("addReaction returns the updated comment (response.data)", async () => {
     const { client, projectInstance } = makeClient();
-    const reaction = { id: "r1", reactionType: "like" };
-    projectInstance.post.mockResolvedValueOnce({ data: reaction });
+    const comment = { id: "c1", userReaction: "like", reactionCounts: { like: 1 } };
+    projectInstance.post.mockResolvedValueOnce({ data: comment });
     await expect(
       addReaction(client, { commentId: "c1", reactionType: "like", userId: "u1" }),
-    ).resolves.toEqual(reaction);
+    ).resolves.toEqual(comment);
   });
 
-  it("removeReaction resolves to undefined", async () => {
-    const { client } = makeClient();
+  it("removeReaction returns the updated comment (response.data)", async () => {
+    const { client, projectInstance } = makeClient();
+    const comment = { id: "c1", userReaction: null, reactionCounts: { like: 0 } };
+    projectInstance.delete.mockResolvedValueOnce({ data: comment });
     await expect(
       removeReaction(client, { commentId: "c1", userId: "u1" }),
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual(comment);
   });
 
   it("fetchReactions returns the full PaginatedResponse envelope", async () => {

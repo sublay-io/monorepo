@@ -73,3 +73,5 @@ function PostComment({ entityId }: { entityId: string }) {
 <ResponseField name="Comment" type="Comment">
   The newly created comment. See [Comment data model](/v8/data-models/comment).
 </ResponseField>
+
+When the server refuses the comment, the call rejects with its error — among them `403 comment/parent-deleted` and `403 comment/parent-removed` for a reply to a deleted or removed comment, and `409 comment/foreign-id-taken` for a `foreignId` already in use. See [Create Comment → Error Responses](/v8/api-reference/comments/create-comment#error-responses) for the full list.

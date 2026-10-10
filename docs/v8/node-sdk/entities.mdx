@@ -453,7 +453,7 @@ const entity = await sublay.entities.publishDraft({ entityId: "ent_xyz789" });
 Adds a reaction from a user to an entity.
 
 ```typescript
-const reaction = await sublay.entities.addReaction({
+const entity = await sublay.entities.addReaction({
   entityId: "ent_xyz789",
   userId: "usr_abc123",
   reactionType: "like",
@@ -472,7 +472,7 @@ const reaction = await sublay.entities.addReaction({
   One of: `"upvote"`, `"downvote"`, `"like"`, `"love"`, `"wow"`, `"sad"`, `"angry"`, `"funny"`.
 </ParamField>
 
-**Returns** — `Promise<Reaction>`
+**Returns** — `Promise<Entity>` — the updated entity, as the reacting user sees it: `userReaction` and `reactionCounts` reflect the new reaction.
 
 ---
 
@@ -481,7 +481,7 @@ const reaction = await sublay.entities.addReaction({
 Removes a user's existing reaction from an entity.
 
 ```typescript
-await sublay.entities.removeReaction({
+const entity = await sublay.entities.removeReaction({
   entityId: "ent_xyz789",
   userId: "usr_abc123",
 });
@@ -495,7 +495,7 @@ await sublay.entities.removeReaction({
   The Sublay user ID whose reaction to remove.
 </ParamField>
 
-**Returns** — `Promise<void>`
+**Returns** — `Promise<Entity>` — the updated entity, as that user sees it. When the user has no reaction on the entity, the entity comes back unchanged.
 
 If the entity's author has blocked the user, this fails with `404 entity/not-found` and nothing changes.
 

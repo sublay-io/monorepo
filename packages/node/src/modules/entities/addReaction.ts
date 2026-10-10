@@ -1,5 +1,6 @@
 import { SublayHttpClient } from "../../core/client";
-import { Reaction, ReactionType } from "../../interfaces/Reaction";
+import { ReactionType } from "../../interfaces/Reaction";
+import { Entity } from "../../interfaces/Entity";
 
 export interface AddEntityReactionProps {
   entityId: string;
@@ -10,9 +11,10 @@ export interface AddEntityReactionProps {
 export async function addReaction(
   client: SublayHttpClient,
   data: AddEntityReactionProps
-): Promise<Reaction> {
+): Promise<Entity> {
   const { entityId, reactionType, userId } = data;
-  const response = await client.projectInstance.post<Reaction>(
+  // The server returns the updated entity, as `userId` sees it.
+  const response = await client.projectInstance.post<Entity>(
     `/entities/${entityId}/reactions`,
     { reactionType, userId }
   );

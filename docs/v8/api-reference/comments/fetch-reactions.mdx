@@ -75,6 +75,8 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
 
 <AccordionGroup>
   <Accordion title="Not Found — 404">
+    Returned when the comment doesn't exist, a moderator removed it, or it is on an entity whose author has blocked the caller (the caller's own comments excepted).
+
     ```json
     { "error": "Comment not found.", "code": "comment/not-found" }
     ```

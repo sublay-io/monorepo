@@ -165,11 +165,12 @@ export function makeReaction(overrides: Partial<Reaction> = {}): Reaction {
 export function makeComment(overrides: Partial<Comment> = {}): Comment {
   return {
     id: "comment-1",
-    projectId: "test-project",
     foreignId: null,
     entityId: "entity-1",
+    spaceId: null,
     userId: "user-1",
     parentId: null,
+    referencedCommentId: null,
     content: "hello",
     gif: null,
     mentions: [],

@@ -1,7 +1,8 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks } from "../../test-utils";
+import { axiosPrivate as axiosPrivateInstance } from "../../config/axios";
 import useFetchManyCommentsWrapper from "./useFetchManyCommentsWrapper";
 import { makeComment } from "./testHelpers";
 import type { CursorPaginatedResponse } from "../../interfaces/PaginatedResponse";
@@ -9,6 +10,7 @@ import type { Comment } from "../../interfaces/models/Comment";
 
 afterEach(() => {
   resetAxiosMocks();
+  vi.restoreAllMocks();
 });
 
 function makePage(
@@ -134,6 +136,53 @@ describe("useFetchManyCommentsWrapper", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.comments).toEqual([]);
     expect(result.current.error).toBeInstanceOf(Error);
+  });
+
+  it("clears error when the retry starts, and keeps what was loaded", async () => {
+    const firstComment = makeComment({ id: "comment-1" });
+    const secondComment = makeComment({ id: "comment-2" });
+    const respond = (data: unknown) =>
+      Promise.resolve({ data, status: 200, statusText: "OK", headers: {}, config: {} } as any);
+    let releaseRetry!: () => void;
+    const retryGate = new Promise<void>((r) => (releaseRetry = r));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const get = vi
+      .spyOn(axiosPrivateInstance, "get")
+      .mockImplementationOnce(() => respond(makePage([firstComment], "cursor-2")))
+      .mockImplementationOnce(() => Promise.reject(new Error("boom")))
+      .mockImplementationOnce(() =>
+        retryGate.then(() => respond(makePage([secondComment], null))),
+      );
+
+    const { result } = renderHookWithAxios(() =>
+      useFetchManyCommentsWrapper({ entityId: "entity-1" }),
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.error).toBeNull();
+
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.comments).toEqual([firstComment]);
+
+    // The retry is in flight: the old failure is gone.
+    let retry!: Promise<void>;
+    act(() => {
+      retry = result.current.loadMore();
+    });
+    await waitFor(() => expect(result.current.loading).toBe(true));
+    expect(result.current.error).toBeNull();
+    expect(result.current.comments).toEqual([firstComment]);
+
+    releaseRetry();
+    await act(async () => {
+      await retry;
+    });
+    expect(result.current.error).toBeNull();
+    expect(result.current.comments).toEqual([firstComment, secondComment]);
+    // The retry re-sent the page that failed.
+    expect(get.mock.calls[2][1]?.params).toMatchObject({ cursor: "cursor-2" });
   });
 
   it("resets to the first page when the sort changes", async () => {

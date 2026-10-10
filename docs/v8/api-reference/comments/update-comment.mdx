@@ -26,6 +26,10 @@ Both fields are individually optional, but **at least one must be provided**.
   Arbitrary JSON metadata, up to 1 MB. **Replaces** the stored metadata wholesale rather than merging into it.
 </ParamField>
 
+## Deleted and removed comments
+
+A comment its author deleted, and a comment a moderator removed, can't be edited: the request returns `404 comment/not-found`. This includes the author of a moderator-removed comment, who still sees it in full.
+
 ## Blocks
 
 Editing changes content in someone else's space, so when the `moderation` bundle is installed, editing is refused with `404 comment/not-found` when the author of the comment's entity, or the author of the comment it replies to, has blocked the comment's author. Deleting the comment is still allowed. Requests made with a master key aren't subject to this check.
@@ -34,7 +38,7 @@ A comment on an entity whose author has blocked the caller is hidden from them, 
 
 ## Response
 
-Returns the updated [Comment](/v8/data-models/comment) object.
+Returns the updated [Comment](/v8/data-models/comment) object in full, as the caller sees it.
 
 ## Error Responses
 
@@ -47,7 +51,7 @@ Returns the updated [Comment](/v8/data-models/comment) object.
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
-    Returned when the comment doesn't exist, or when a block refuses the edit — including when the caller isn't the comment's author and the author of the comment's entity has blocked them (see [Blocks](#blocks)).
+    Returned when the comment doesn't exist, when its author deleted it or a moderator removed it (see [Deleted and removed comments](#deleted-and-removed-comments)), or when a block refuses the edit — including when the caller isn't the comment's author and the author of the comment's entity has blocked them (see [Blocks](#blocks)).
 
     ```json
     { "error": "Comment not found", "code": "comment/not-found" }

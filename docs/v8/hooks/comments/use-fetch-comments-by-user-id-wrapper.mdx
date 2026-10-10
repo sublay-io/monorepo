@@ -99,7 +99,7 @@ The opt-in space-reputation params (`spaceReputation`, `spaceReputationId`, `spa
 </ResponseField>
 
 <ResponseField name="error" type="Error | null">
-  The last failure. Cleared by the next successful load.
+  The last failure loading the list. Cleared when the next load starts. Call `loadMore()` to retry — `hasMore` stays `true` after a failure, and the retry asks for the same page again, including a first page that failed.
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">
@@ -107,7 +107,7 @@ The opt-in space-reputation params (`spaceReputation`, `spaceReputationId`, `spa
 </ResponseField>
 
 <ResponseField name="loadMore" type="() => Promise<void>">
-  Loads the next page. Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
+  Loads the next page, or retries the page that failed. Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
 </ResponseField>
 
 <ResponseField name="sortBy" type="CommentsSortByOptions">

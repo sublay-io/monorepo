@@ -1,4 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
+import { Entity } from "../../interfaces/Entity";
 
 export interface RemoveEntityReactionProps {
   entityId: string;
@@ -8,7 +9,12 @@ export interface RemoveEntityReactionProps {
 export async function removeReaction(
   client: SublayHttpClient,
   data: RemoveEntityReactionProps
-): Promise<void> {
+): Promise<Entity> {
   const { entityId, userId } = data;
-  await client.projectInstance.delete(`/entities/${entityId}/reactions`, { data: { userId } });
+  // The server returns the updated entity, as `userId` sees it.
+  const response = await client.projectInstance.delete<Entity>(
+    `/entities/${entityId}/reactions`,
+    { data: { userId } }
+  );
+  return response.data;
 }

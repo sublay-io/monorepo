@@ -100,7 +100,7 @@ import { CommentSectionProvider } from "@sublay/react-js";
 </Note>
 
 <ParamField path="highlightedCommentId" type="string">
-  If provided, fetches this comment (and its parent, for a reply) and adds it to the section. Useful for deep-linking to a specific comment. A deleted or removed comment is highlighted as its [placeholder](/v8/data-models/comment#placeholders). If the comment doesn't exist, or is on an entity whose author has blocked the user, `highlightedComment` stays `null` and the section loads normally.
+  If provided, fetches this comment (and its parent, for a reply) and adds it to the section. Useful for deep-linking to a specific comment. A deleted or removed comment is highlighted as its [placeholder](/v8/data-models/comment#placeholders). If the comment doesn't exist, is on an entity whose author has blocked the user, or belongs to a different entity than the section's, `highlightedComment` stays `null` and the section loads normally.
 </ParamField>
 
 <ParamField path="callbacks" type="Record<string, function>">
@@ -305,7 +305,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="repliedToComment" type="Partial<Comment> | null">
-  The comment currently being replied to.
+  The comment currently being replied to. `createComment` uses it as the parent when no `parentId` is passed, and clears it (with the reply banner and `pushMention`) when it sends. If the request fails, `repliedToComment` is put back, so sending again is still a reply to the same comment. Its `user` is then the user the banner named — the pushed mention when there was one, otherwise the comment's author — and `showReplyBanner` is put back when there is such a user. `pushMention` stays cleared.
 </ResponseField>
 
 <ResponseField name="setRepliedToComment" type="(comment: Comment | null) => void">

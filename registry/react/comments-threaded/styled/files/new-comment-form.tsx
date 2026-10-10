@@ -39,6 +39,7 @@ function NewCommentForm() {
     handleMentionClick,
     mentions,
     addMention,
+    setMentions,
     resetMentions,
   } = useUserMentions({
     content: textAreaRef.current?.value || "",
@@ -93,11 +94,13 @@ function NewCommentForm() {
           // SDK handled the failure and removed the optimistic comment; restore textarea
           textArea.value = tempContent;
           setContent(tempContent);
+          setMentions(tempMentions);
         }
       } catch (error) {
         console.error("Error creating comment:", error);
         textArea.value = tempContent;
         setContent(tempContent);
+        setMentions(tempMentions);
       } finally {
         setIsSubmitting(false);
       }

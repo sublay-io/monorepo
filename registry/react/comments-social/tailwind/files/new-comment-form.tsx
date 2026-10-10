@@ -50,6 +50,7 @@ function NewCommentForm() {
     handleMentionClick,
     mentions,
     addMention,
+    setMentions,
     resetMentions,
   } = useUserMentions({
     content: textAreaRef.current?.value || "",
@@ -90,10 +91,12 @@ function NewCommentForm() {
         // SDK handled the failure and removed the optimistic comment; restore textarea
         textArea.value = tempContent;
         setContent(tempContent);
+        setMentions(tempMentions);
       }
     } catch (err) {
       textArea.value = tempContent;
       setContent(tempContent);
+      setMentions(tempMentions);
       handleError(err, "Creating comment failed: ");
     }
   }, [createComment, mentions, resetMentions, callbacks, user]);

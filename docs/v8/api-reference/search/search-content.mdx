@@ -63,11 +63,13 @@ Returns an array of result objects ordered by similarity (highest first):
 Each result includes:
 - `sourceType` — one of `"entity"`, `"comment"`, or `"message"`, indicating which type of record was matched.
 - `similarity` — cosine similarity score between the query and the matched content.
-- `record` — the fully populated entity, comment, or chat message object. Entity records carry `commentsCount`.
+- `record` — the fully populated entity, comment, or chat message object. Entity records carry `commentsCount`. A record's `user` is the author's public [User](/v8/data-models/user) — no email or other private fields.
 
 ### What's left out
 
-Results are filtered for the signed-in user (with the `moderation` bundle installed):
+Comments their author deleted are never returned.
+
+Results are also filtered for the signed-in user (with the `moderation` bundle installed):
 
 - Content by users they are block-edged with, in either direction, is left out.
 - Comments on an entity whose author has blocked them are left out — their own comments there included.

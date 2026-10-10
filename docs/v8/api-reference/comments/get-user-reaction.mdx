@@ -25,3 +25,15 @@ or, if the user has no reaction:
 ```json
 { "reactionType": null }
 ```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Not Found — 404">
+    Returned when the comment doesn't exist, or is on an entity whose author has blocked the user (the user's own comments excepted).
+
+    ```json
+    { "error": "Comment not found.", "code": "comment/not-found" }
+    ```
+  </Accordion>
+</AccordionGroup>

@@ -127,6 +127,10 @@ function CommentInput() {
   Manually adds a user to the `mentions` list. Used internally by `handleMentionClick`.
 </ResponseField>
 
+<ResponseField name="setMentions" type="(mentions: Mention[]) => void">
+  Replaces the `mentions` list. Use it to put back a list you saved before `resetMentions` — for example when a submit fails and the text is restored.
+</ResponseField>
+
 <ResponseField name="resetMentions" type="() => void">
   Clears the `mentions` list and resets all mention state. Call this after the content is submitted.
 </ResponseField>

@@ -2,6 +2,9 @@ import { useMemo, useState } from "react";
 import { Comment as CommentType, useReplies } from "@sublay/react-js";
 import SingleComment from "./single-comment";
 import CommentReplies from "./comment-replies";
+import IndentationThreadingLines, {
+  MAX_INDENT_DEPTH,
+} from "./single-comment/indentation-threading-lines";
 
 export interface CommentThreadProps {
   comment: CommentType;
@@ -38,16 +41,19 @@ function CommentThread({
   };
 
   const hasReplies = allReplies.length > 0;
+  // Whether anything is listed under this comment: replies, or the row that loads them.
+  const showReplies = !isCollapsed && (hasReplies || hasMore);
 
   return (
-    <>
+    // The wrapper spans the comment and everything nested under it, which is
+    // what the threading lines measure themselves against.
+    <div className="relative">
       <SingleComment
         comment={comment}
-        depth={depth}
         hasReplies={hasReplies}
         isCollapsed={isCollapsed}
         replyCount={replyCount}
-        isLastReply={isLastReply}
+        showReplies={showReplies}
         onToggleCollapse={handleToggleCollapse}
       />
 
@@ -62,7 +68,15 @@ function CommentThread({
         onLoadMore={() => loadMore()}
         CommentThreadComponent={CommentThread}
       />
-    </>
+
+      {/* Threading lines connecting this comment to its parent */}
+      {depth > 0 && (
+        <IndentationThreadingLines
+          isLastReply={isLastReply}
+          indented={depth <= MAX_INDENT_DEPTH}
+        />
+      )}
+    </div>
   );
 }
 

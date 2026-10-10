@@ -11,7 +11,7 @@ icon: "plug"
 <Note>
   With the `moderation` bundle installed, the comment comes back the way a thread shows it: in full with `isAuthorBlocked: true` when the signed-in user blocked its author, or as a [placeholder](/v8/data-models/comment#placeholders) with `isUnavailable: true` when the author blocked them. An embedded `parentComment` follows the same rules.
 
-  When the **entity's** author has blocked the signed-in user, the request fails with `404 comment/not-found`, identical to a comment that doesn't exist — except for the user's own comments, which still load (with `entity` and `parentComment` set to `null` when requested) so they can be found and deleted. Replying to, reacting to and editing those are refused.
+  When the **entity's** author has blocked the signed-in user, the request fails with `404 comment/not-found`, identical to a comment that doesn't exist — except for the user's own comments, which still load (with `entity` and `parentComment` set to `null` when requested) so they can be found and deleted. Replying to, reacting to and editing those are refused. `entity: null` only means the entity isn't available to the signed-in user (for example, removed by a moderator) — the comment is still returned, and `null` doesn't say why.
 </Note>
 
 ## Usage Example

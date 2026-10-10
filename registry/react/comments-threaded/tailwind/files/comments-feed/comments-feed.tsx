@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo } from "react";
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useCommentSection } from "@sublay/react-js";
 import LoadedComments from "./loaded-comments";
 import FetchingCommentsSkeletons from "./fetching-comments-skeletons";
@@ -6,31 +6,77 @@ import NoCommentsPlaceHolder from "./no-comments-placeholder";
 
 const CommentsFeed = React.memo(
   ({ children: customNoCommentsView }: { children?: ReactNode }) => {
-    const { comments, newComments, loading, hasMore, loadMore, highlightedComment } =
-      useCommentSection();
+    const {
+      comments,
+      newComments,
+      loading,
+      hasMore,
+      loadMore,
+      highlightedComment,
+      highlightedCommentLoading,
+    } = useCommentSection();
 
-    const mergedComments = useMemo(() => {
-      let combinedComments = [...(newComments ?? []), ...(comments ?? [])];
+    // Whether the viewer left the focused thread for the full view. Reset
+    // whenever the highlighted comment changes (including X → none → X), so a
+    // fresh deep link always opens focused.
+    const [showAll, setShowAll] = useState(false);
+    const highlightedId = highlightedComment?.comment.id ?? null;
+    const [prevHighlightedId, setPrevHighlightedId] = useState(highlightedId);
+    if (highlightedId !== prevHighlightedId) {
+      setPrevHighlightedId(highlightedId);
+      setShowAll(false);
+    }
 
-      if (highlightedComment) {
-        const { comment, parentComment } = highlightedComment;
-        combinedComments = combinedComments.filter(
-          (item) => item.id !== comment.id && item.id !== parentComment?.id
-        );
+    // Deep link: only the highlighted comment's thread — its parent (or the
+    // comment itself when it's top-level), with the normal replies under it.
+    const focused = highlightedComment && !showAll ? highlightedComment : null;
+
+    // A new top-level comment posted from the focused view switches to the
+    // full view, so the viewer sees it. Replies stay in the focused thread.
+    const newCommentsCount = newComments?.length ?? 0;
+    const prevNewCommentsCount = useRef(newCommentsCount);
+    useEffect(() => {
+      if (focused && newCommentsCount > prevNewCommentsCount.current) {
+        setShowAll(true);
       }
+      prevNewCommentsCount.current = newCommentsCount;
+    }, [newCommentsCount, focused]);
 
-      return combinedComments;
-    }, [comments, newComments, highlightedComment]);
+    const mergedComments = useMemo(
+      () => [...(newComments ?? []), ...(comments ?? [])],
+      [comments, newComments]
+    );
 
-    const showLoadedComments = mergedComments.length > 0 || highlightedComment;
+    // While the highlighted comment loads, show the loading state rather than
+    // the full list, so the section doesn't switch from the list to the
+    // focused thread once it arrives.
+    if (highlightedCommentLoading) {
+      return (
+        <div className="flex-1">
+          <FetchingCommentsSkeletons />
+        </div>
+      );
+    }
 
-    const showFetchingSkeletons =
-      loading && mergedComments.length === 0 && !highlightedComment;
+    if (focused) {
+      return (
+        <div className="flex-1">
+          <div className="pb-2">
+            <button
+              onClick={() => setShowAll(true)}
+              className="text-xs font-medium text-blue-600 dark:text-blue-500 px-2 py-1 rounded-full bg-transparent border-none cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950"
+            >
+              View all comments
+            </button>
+          </div>
+          <LoadedComments data={[focused.parentComment ?? focused.comment]} />
+        </div>
+      );
+    }
 
-    // If fetching is done and no comments;
-    // Also, because we filter the highlighted comment when it is showing, then we need to make sure this isn't the case here, and show no comments when actually there is one comment - the highlighted one
-    const showNoComments =
-      !loading && mergedComments.length === 0 && !highlightedComment;
+    const showLoadedComments = mergedComments.length > 0;
+    const showFetchingSkeletons = loading && mergedComments.length === 0;
+    const showNoComments = !loading && mergedComments.length === 0;
 
     return (
       <div className="flex-1">

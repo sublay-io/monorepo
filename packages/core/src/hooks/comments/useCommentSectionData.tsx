@@ -107,6 +107,12 @@ export interface UseCommentSectionDataValues {
     comment: Comment;
     parentComment: Comment | null;
   } | null;
+  /**
+   * `true` while the comment named by `highlightedCommentId` is being
+   * fetched — until it's found, not found, or the fetch fails. `false` when
+   * there's no `highlightedCommentId`.
+   */
+  highlightedCommentLoading: boolean;
   loading: boolean;
   /** The last failure loading the comment list (cleared by the next successful load). */
   error: Error | null;
@@ -265,6 +271,14 @@ export function useCommentSectionDataInternal(
     comment: Comment;
     parentComment: Comment | null;
   } | null>(null);
+  // The epoch whose highlight fetch has finished (found, not found or
+  // failed). Derived against the current epoch, so a new highlighted id or an
+  // entity switch is "loading" again until its own fetch settles.
+  const [highlightSettledEpoch, setHighlightSettledEpoch] = useState<
+    number | null
+  >(null);
+  const highlightedCommentLoading =
+    !!highlightedCommentId && highlightSettledEpoch !== highlightEpoch;
   const highlightedComment = useMemo(() => {
     if (!highlightSnapshot || highlightSnapshot.epoch !== highlightEpoch) {
       return null;
@@ -659,6 +673,11 @@ export function useCommentSectionDataInternal(
         // A missing highlight (deleted, nonexistent, hidden) isn't a section
         // failure: the section loads normally and `error` is untouched.
         handleError(err, "Fetching single comment failed");
+      } finally {
+        // Only the current highlight's fetch settles the loading state.
+        if (highlightTrackRef.current.epoch === epoch) {
+          setHighlightSettledEpoch(epoch);
+        }
       }
     };
 
@@ -727,6 +746,7 @@ export function useCommentSectionDataInternal(
     comments,
     newComments,
     highlightedComment,
+    highlightedCommentLoading,
 
     loading,
     error,

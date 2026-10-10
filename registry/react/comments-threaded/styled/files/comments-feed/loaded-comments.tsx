@@ -1,11 +1,9 @@
-import { Comment as CommentType, useCommentSection } from "@sublay/react-js";
+import { Comment as CommentType } from "@sublay/react-js";
 import { resetDiv } from "@sublay/ui-core-react-js";
 
 import CommentThread from "./comment-thread";
 
 function LoadedComments({ data }: { data: CommentType[] }) {
-  const { highlightedComment } = useCommentSection();
-
   return (
     <div
       style={{
@@ -14,14 +12,6 @@ function LoadedComments({ data }: { data: CommentType[] }) {
         gap: "8px",
       }}
     >
-      {highlightedComment ? (
-        <CommentThread
-          comment={
-            highlightedComment.parentComment ?? highlightedComment.comment
-          }
-          depth={0}
-        />
-      ) : null}
       {data?.map((c) => (
         <CommentThread comment={c} depth={0} key={c.id} />
       ))}

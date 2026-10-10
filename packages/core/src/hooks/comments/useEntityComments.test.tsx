@@ -161,6 +161,39 @@ describe("useEntityComments", () => {
     );
   });
 
+  it("keeps the default sortByReaction across a switch away from top and back", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () =>
+        useEntityComments({
+          entityId: "entity-1",
+          defaultSortBy: "top",
+          defaultSortByReaction: "like",
+        }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([], null)),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    axiosPrivate.mockResponse("get", makePage([], null));
+    act(() => {
+      result.current.setSortBy("createdAt");
+    });
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(2));
+
+    axiosPrivate.mockResponse("get", makePage([], null));
+    act(() => {
+      result.current.setSortBy("top");
+    });
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(3));
+
+    const params = axiosPrivate.calls("get").map((c) => c.config?.params);
+    expect(params[0]).toMatchObject({ sortBy: "top", sortByReaction: "like" });
+    expect(params[1]).not.toHaveProperty("sortByReaction");
+    expect(params[2]).toMatchObject({ sortBy: "top", sortByReaction: "like" });
+  });
+
   it("loadMore is a no-op while loading or when there's nothing more", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useEntityComments({ entityId: "entity-1" }),

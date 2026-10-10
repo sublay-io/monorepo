@@ -76,10 +76,10 @@ The heart icon and like count. Edit to:
 
 ### `sort-by-button.tsx` — Sort Control
 
-The Top/New/Old sort switcher. Edit to:
-- Rename sort options
-- Remove sort options you don't need
-- Change button styles
+A single button of the Top/New/Old sort switcher. Edit to:
+- Change how the active and inactive states render
+
+The list of options — their labels and which sort each one applies — is `sortOptions` in `social-comment-section.tsx`.
 
 ---
 
@@ -121,8 +121,14 @@ Contains all comment logic and the key behavioral callbacks you'll want to custo
 
 ```tsx
 // Edit: components/social/social-comment-section.tsx
-const sortOptions = ['top', 'new'];  // Remove 'old' option
+const sortOptions = [
+  { label: "Top", sortBy: "top", sortDir: "desc" },      // ranked by likes
+  { label: "New", sortBy: "createdAt", sortDir: "desc" },
+  // { label: "Old", sortBy: "createdAt", sortDir: "asc" },  // removed
+];
 ```
+
+`top` ranks by the `like` reaction, set by `defaultSortByReaction="like"` on the `CommentSectionProvider` in `use-social-comments.tsx`.
 
 ### Customize Empty State
 

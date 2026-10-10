@@ -130,7 +130,7 @@ Ensures event listeners are only active when the component is visible, improving
 
 **Type:** `string | undefined | null`
 
-ID of a specific comment to highlight when the section loads. The component scrolls to it and applies a highlight that fades after a few seconds.
+ID of a specific comment to highlight when the section loads. The section opens focused on that comment's thread — its parent (if it has one) with the highlighted comment marked under it, and their replies — with a **View all comments** button that switches to the full comment section. If the comment doesn't exist, the full comment section shows. See [Highlighted Comments](/v8/components/components/threaded/features#highlighted-comments).
 
 ```tsx
 <ThreadedCommentSection
@@ -243,7 +243,7 @@ function BlogPost({ post }) {
 }
 
 // URL: /blog/my-post?commentId=comment_abc123
-// → highlights comment_abc123 on load
+// → opens focused on comment_abc123's thread, with "View all comments" above it
 ```
 
 ---

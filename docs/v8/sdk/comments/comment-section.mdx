@@ -227,6 +227,10 @@ function CommentList() {
   The highlighted comment (and its parent, if any) when `highlightedCommentId` is set. Both are read from the section, so an edit or delete shows here at once. `null` again when `highlightedCommentId` is cleared or the section moves to another entity.
 </ResponseField>
 
+<ResponseField name="highlightedCommentLoading" type="boolean">
+  `true` while the comment named by `highlightedCommentId` is being fetched, until it's found, not found, or the fetch fails. `true` again when `highlightedCommentId` changes or the section moves to another entity, until that fetch finishes. `false` when `highlightedCommentId` isn't set. Use it to tell "still loading" apart from "not found" (`highlightedComment` is `null` in both).
+</ResponseField>
+
 <ResponseField name="loading" type="boolean">
   `true` while a page of top-level comments is loading.
 </ResponseField>

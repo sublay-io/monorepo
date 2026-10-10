@@ -89,7 +89,7 @@ Controls whether the comment section is visible. Useful when rendering inside a 
 
 **Type:** `string | undefined | null`
 
-ID of a specific comment to highlight on load. The component scrolls to it and applies a highlight that fades after a few seconds.
+ID of a specific comment to highlight on load. Once it loads, the component shows it at the top of the list with a highlight background color: a top-level comment on its own, or a reply under its parent comment, visible even while the parent's other replies are collapsed. The rest of the comments follow below, without repeating it. If the comment doesn't exist, the list shows as usual.
 
 ```tsx
 <SocialCommentSection

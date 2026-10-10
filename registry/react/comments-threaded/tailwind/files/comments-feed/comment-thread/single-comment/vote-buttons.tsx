@@ -9,11 +9,14 @@ import { cn } from "@/lib/utils";
 interface VoteButtonsProps {
   comment: CommentType;
   size?: "small" | "normal";
+  /** The comment is the highlighted one: the pill steps away from its background. */
+  highlighted?: boolean;
 }
 
 function VoteButtons({
   comment,
   size = "small",
+  highlighted = false,
 }: VoteButtonsProps) {
   const { user } = useUser();
   const { callbacks } = useCommentSection();
@@ -47,7 +50,10 @@ function VoteButtons({
       className={cn(
         // 🎨 CUSTOMIZATION: Vote button container styling
         "inline-flex items-center",
-        "bg-gray-50 dark:bg-gray-700",
+        // One step stronger on the highlighted comment, whose background is gray-100
+        highlighted
+          ? "bg-gray-200 dark:bg-gray-600"
+          : "bg-gray-50 dark:bg-gray-700",
         "rounded-full",
         paddingClass,
         "gap-1"

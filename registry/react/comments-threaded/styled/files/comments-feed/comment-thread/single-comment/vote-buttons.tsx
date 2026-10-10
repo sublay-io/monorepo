@@ -9,11 +9,14 @@ import useUIState from "../../../../hooks/use-ui-state";
 interface VoteButtonsProps {
   comment: CommentType;
   size?: "small" | "normal";
+  /** The comment is the highlighted one: the pill steps away from its background. */
+  highlighted?: boolean;
 }
 
 function VoteButtons({
   comment,
   size = "small",
+  highlighted = false,
 }: VoteButtonsProps) {
   const { theme } = useUIState();
   const { user } = useUser();
@@ -52,8 +55,11 @@ function VoteButtons({
       style={{
         display: "inline-flex",
         alignItems: "center",
-        // 🎨 CUSTOMIZATION: Vote button styling (Default: gray-100)
-        backgroundColor: theme === 'dark' ? "#374151" : "#F3F4F6",
+        // 🎨 CUSTOMIZATION: Vote button styling (Default: gray-100; gray-200 on
+        // the highlighted comment, whose background is gray-100)
+        backgroundColor: highlighted
+          ? (theme === 'dark' ? "#4B5563" : "#E5E7EB")
+          : (theme === 'dark' ? "#374151" : "#F3F4F6"),
         borderRadius: "9999px",
         padding: padding,
         gap: "4px",

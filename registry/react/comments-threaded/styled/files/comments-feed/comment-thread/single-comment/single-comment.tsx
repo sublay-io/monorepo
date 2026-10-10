@@ -419,6 +419,7 @@ function SingleComment({
                       <VoteButtons
                         comment={comment}
                         size="small"
+                        highlighted={isHighlighted}
                       />
                     </div>
                   )}

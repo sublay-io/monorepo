@@ -131,10 +131,15 @@ function SingleComment({
     !tombstone &&
     !isOwnRemoved;
 
-  const highlightColor =
-    highlightedComment?.comment.id === comment.id
-      ? (theme === 'dark' ? "#1E40AF" : "#dbeafe")
-      : "transparent";
+  const isHighlighted = highlightedComment?.comment.id === comment.id;
+  // 🎨 CUSTOMIZATION: Highlighted comment background (Default: blue-100)
+  const highlightColor = isHighlighted
+    ? (theme === 'dark' ? "#1E40AF" : "#dbeafe")
+    : "transparent";
+  // 🎨 CUSTOMIZATION: Highlight on the indentation beside it (Default: blue-50)
+  const highlightGutterColor = isHighlighted
+    ? (theme === 'dark' ? "#172554" : "#EFF6FF")
+    : "transparent";
 
   // The API sends aspectRatio as a string (e.g. "1.5"), so coerce before doing
   // math with it. Falls back to 1 (square) if it's missing or unparsable.
@@ -146,14 +151,14 @@ function SingleComment({
       style={{
         marginLeft: `-${indentationPx}px`,
         paddingLeft: `${indentationPx}px`,
-        backgroundColor: highlightColor,
+        backgroundColor: highlightGutterColor,
       }}
     >
       <div
         style={{
           position: "relative",
+          backgroundColor: highlightColor,
           padding: `${ROW_PADDING_Y}px 0`,
-          borderRadius: "6px",
           transition: "colors 150ms ease-in-out",
         }}
       >
@@ -433,9 +438,10 @@ function SingleComment({
           marginTop: `-${ROW_PADDING_Y}px`,
           marginLeft: `-${indentationPx}px`,
           paddingLeft: `${indentationPx}px`,
-          backgroundColor: highlightColor,
+          backgroundColor: highlightGutterColor,
         }}
       >
+        <div style={{ backgroundColor: highlightColor }}>
         <div
           style={{
             position: "relative",
@@ -450,6 +456,7 @@ function SingleComment({
             reach={AVATAR_SIZE + AVATAR_GAP - INDENT}
           />
           <NewReplyForm comment={comment} setShowReplyForm={setShowReplyForm} />
+        </div>
         </div>
       </div>
     )}

@@ -199,7 +199,7 @@ function SocialCommentSection({
   theme = 'light',
   children,
 }: SocialCommentSectionProps) {
-  const { CommentSectionProvider } = useSocialComments({
+  const { CommentSectionProvider, providerProps } = useSocialComments({
     entity: entity ?? undefined,
     entityId,
     foreignId,
@@ -209,7 +209,7 @@ function SocialCommentSection({
   });
 
   return (
-    <CommentSectionProvider>
+    <CommentSectionProvider {...providerProps}>
       <SocialCommentSectionInner isVisible={isVisible}>
         {children}
       </SocialCommentSectionInner>

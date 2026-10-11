@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import ThreadedCommentSectionStyled from "../../../registry/react/comments-threaded/styled/files/threaded-comment-section";
 import ThreadedCommentSectionTailwind from "../../../registry/react/comments-threaded/tailwind/files/threaded-comment-section";
-import { EntityProvider } from "@sublay/react-js";
 import {
   HighlightControl,
   useHighlightedCommentId,
 } from "../components/HighlightControl";
+import {
+  EntitySource,
+  EntitySourceToggle,
+  useEntitySourceMode,
+} from "../components/EntitySourceControl";
 
 type StyleVariant = "styled" | "tailwind";
 
@@ -15,6 +19,8 @@ export default function ThreadedCommentsPage() {
   const [variant, setVariant] = useState<StyleVariant>("styled");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const { highlightedCommentId, applied, apply } = useHighlightedCommentId();
+  const { mode: entitySource, setMode: setEntitySource } =
+    useEntitySourceMode();
 
   return (
     <div>
@@ -30,6 +36,7 @@ export default function ThreadedCommentsPage() {
           comments-threaded
         </h2>
         <VariantToggle value={variant} onChange={setVariant} />
+        <EntitySourceToggle value={entitySource} onChange={setEntitySource} />
         <ThemeToggle value={theme} onChange={setTheme} />
       </div>
 
@@ -44,22 +51,24 @@ export default function ThreadedCommentsPage() {
         }}
         className={theme === "dark" ? "dark" : ""}
       >
-        <EntityProvider foreignId={FOREIGN_ID} createIfNotFound>
-          {variant === "styled" ? (
-            <ThreadedCommentSectionStyled
-              foreignId={FOREIGN_ID}
-              isVisible={true}
-              highlightedCommentId={highlightedCommentId}
-              theme={theme}
-            />
-          ) : (
-            <ThreadedCommentSectionTailwind
-              foreignId={FOREIGN_ID}
-              isVisible={true}
-              highlightedCommentId={highlightedCommentId}
-            />
-          )}
-        </EntityProvider>
+        <EntitySource mode={entitySource} foreignId={FOREIGN_ID}>
+          {(entityProps) =>
+            variant === "styled" ? (
+              <ThreadedCommentSectionStyled
+                {...entityProps}
+                isVisible={true}
+                highlightedCommentId={highlightedCommentId}
+                theme={theme}
+              />
+            ) : (
+              <ThreadedCommentSectionTailwind
+                {...entityProps}
+                isVisible={true}
+                highlightedCommentId={highlightedCommentId}
+              />
+            )
+          }
+        </EntitySource>
       </div>
     </div>
   );

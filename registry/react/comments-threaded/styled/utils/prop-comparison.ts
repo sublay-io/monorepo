@@ -89,7 +89,7 @@ export function warnPropChanges(
     const prevValue = prevProps[propName];
     const nextValue = nextProps[propName];
 
-    if (prevValue !== nextValue && !deepEqual(prevValue, nextValue)) {
+    if (prevValue !== nextValue && deepEqual(prevValue, nextValue)) {
       console.warn(
         `[${componentName}] Prop '${propName}' changed but has the same content. ` +
           `Consider memoizing this prop to prevent unnecessary re-renders.`,

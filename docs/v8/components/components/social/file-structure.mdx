@@ -93,6 +93,18 @@ Contains all comment logic and the key behavioral callbacks you'll want to custo
 - `currentUserClickCallback` — Called when a user clicks their own profile
 - `otherUserClickCallback(userId, foreignId)` — Called when a user clicks another user's profile
 
+The hook returns `{ CommentSectionProvider, providerProps, CommentsFeed, NewCommentForm }`. The React Native variants also return `SortByButton`. `providerProps` holds everything the provider is given: the entity, the highlighted comment, the callbacks and the loading settings (`limit`, `defaultSortByReaction`). ``social-comment-section.tsx`` spreads it onto the provider:
+
+```tsx
+const { CommentSectionProvider, providerProps } = useSocialComments({ entityId });
+
+<CommentSectionProvider {...providerProps}>
+  {/* feed and form */}
+</CommentSectionProvider>
+```
+
+To pass the provider something new, add it to `providerProps`.
+
 ---
 
 ## Key Differences from Threaded Comments
@@ -129,7 +141,7 @@ const sortOptions = [
 ];
 ```
 
-`top` ranks by the `like` reaction, set by `defaultSortByReaction="like"` on the `CommentSectionProvider` in `use-social-comments.tsx`.
+`top` ranks by the `like` reaction, set by `defaultSortByReaction: "like"` in `providerProps` in `use-social-comments.tsx`.
 
 ### Customize Empty State
 

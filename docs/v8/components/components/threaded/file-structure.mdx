@@ -114,6 +114,18 @@ Contains all comment data logic and callbacks. This is where you customize behav
 - `usernameRequiredCallback` — Called when a user without a username tries to comment
 - `otherUserClickCallback` — Called when a user clicks on another user's name/avatar
 
+The hook returns `{ CommentSectionProvider, providerProps, CommentsFeed, NewCommentForm }`. `providerProps` holds everything the provider is given: the entity, the highlighted comment, the callbacks and the loading settings (`limit`, `replyDepth`, `replyLimit`). ``threaded-comment-section.tsx`` spreads it onto the provider:
+
+```tsx
+const { CommentSectionProvider, providerProps } = useThreadedComments({ entityId });
+
+<CommentSectionProvider {...providerProps}>
+  {/* feed and form */}
+</CommentSectionProvider>
+```
+
+To pass the provider something new, add it to `providerProps`.
+
 ---
 
 ## Common Customizations

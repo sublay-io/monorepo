@@ -4,7 +4,7 @@ api: "POST /v7/:projectId/comments/:commentId/reactions"
 description: "Add or update a reaction on a comment"
 ---
 
-Adds a reaction of the specified type to a comment. If the user already has a reaction on this comment, it is replaced with the new type. The comment's `reactionCounts` map is updated accordingly.
+Adds a reaction of the specified type to a comment. If the user already has a reaction on this comment, it is replaced with the new type. The comment's `reactionCounts` map is updated accordingly. Sending the reaction the user already has changes nothing: the response is the same `200` with the comment, counts stay as they are, and no notification is sent.
 
 **Authentication required.**
 

@@ -1,4 +1,5 @@
 import { Entity } from "./Entity";
+import { Space } from "./Space";
 import { Mention } from "./Mention";
 import { User } from "./User";
 import { ReactionCounts, ReactionType } from "./Reaction";
@@ -16,14 +17,37 @@ export interface GifData {
   aspectRatio: string;
 }
 
+/**
+ * The entity attached to a comment by `include=entity` / `include=space`: the
+ * stored entity record only. The computed and associated fields an entity
+ * fetch adds (`commentsCount`, `userReaction`, `nsfwEffective`, `user`,
+ * `files`, `topComments`, `isSaved`, `grants`) are not included.
+ */
+export type CommentEntity = Omit<
+  Entity,
+  | "commentsCount"
+  | "userReaction"
+  | "nsfwEffective"
+  | "user"
+  | "files"
+  | "topComments"
+  | "isSaved"
+  | "grants"
+  | "space"
+> & {
+  // Present only when include contains "space". `null` when the entity isn't
+  // in a space. Carries no avatar/banner file objects.
+  space?: Omit<Space, "avatarFile" | "bannerFile"> | null;
+};
+
 export interface Comment {
   id: string; // Sequelize auto-generates this
   foreignId: string | null;
   entityId: string; // Required
   spaceId: string | null; // The space of the comment's entity, if any
   // Optional - included when include contains "entity" or "space". `null`
-  // on your own comment on a post you can't see (its author blocked you).
-  entity?: Entity | null;
+  // on your own comment on an entity you can't see (its author blocked you).
+  entity?: CommentEntity | null;
   // `null` on placeholders (user-deleted, removed for others, unavailable).
   userId: string | null;
   user?: User | null; // Optional - included when include contains "user"; `null` on placeholders

@@ -13,7 +13,7 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `foreignId` | `string \| null` | Your system's ID for this comment, if applicable. |
 | `entityId` | `string` | The entity this comment belongs to. |
 | `spaceId` | `string \| null` | The space of the comment's entity. `null` when the entity isn't in a space. |
-| `entity` | `Entity \| null` | Populated when `include` contains `"entity"` or `"space"`. `null` when the entity isn't available to the caller — for example, removed by a moderator, or on [your own comment on an entity whose author blocked you](/v8/api-reference/users/fetch-comments-by-user-id#your-own-comments-on-an-unavailable-entity). The comment is still returned, and `null` doesn't say why. |
+| `entity` | `CommentEntity \| null` | The entity the comment is on, as its stored record — see [The included entity](#the-included-entity) for which fields it carries. Populated when `include` contains `"entity"` or `"space"`. `null` when the entity isn't available to the caller — for example, removed by a moderator, or on [your own comment on an entity whose author blocked you](/v8/api-reference/users/fetch-comments-by-user-id#your-own-comments-on-an-unavailable-entity). The comment is still returned, and `null` doesn't say why. |
 | `userId` | `string \| null` | The ID of the user who posted this comment. `null` on [placeholders](#placeholders). |
 | `user` | `User \| null` | The comment author. Populated when `include` contains `"user"`. `null` on placeholders. |
 | `parentId` | `string \| null` | ID of the parent comment if this is a reply. `null` for top-level comments. |
@@ -67,10 +67,29 @@ Pass `include` to populate optional fields. What each endpoint accepts:
 | `"user"` | `user` — the comment author | ✓ | ✓ |
 | `"grants"` | `grants` — the reputation-grant summary | ✓ | ✓ |
 | `"entity"` | `entity` — the entity the comment is on | | ✓ |
-| `"space"` | `entity` with its associated space populated | | ✓ |
+| `"space"` | `entity` with its `space` populated | | ✓ |
 | `"parent"` | `parentComment` — the parent comment, for replies | | ✓ |
 
 On a thread fetch, `include` applies at every nested level.
+
+### The included entity
+
+`entity` is the entity's stored record. It carries every stored [Entity](/v8/data-models/entity) field — `id`, `shortId`, `foreignId`, `sourceId`, `spaceId`, `userId`, `title`, `content`, `mentions`, `attachments`, `keywords`, `reactionCounts`, `views`, `score`, `scoreUpdatedAt`, `location`, `metadata`, `nsfw`, the moderation fields, `isDraft` and the timestamps.
+
+The fields an entity fetch computes or joins are **not included**:
+
+| Not included | What to use instead |
+|-------|-------------|
+| `commentsCount` | Fetch the entity. |
+| `userReaction` | Fetch the entity. |
+| `nsfwEffective` | `entity.nsfw`, combined with `entity.space.nsfwEffective` when `include` contains `"space"`. |
+| `user` | `entity.userId`, or fetch the entity with `include=user`. |
+| `files` | Fetch the entity with `include=files`. |
+| `topComments` | Fetch the entity with `include=topComments`. |
+| `isSaved` | Fetch the entity with `include=saved`. |
+| `grants` | Fetch the entity with `include=grants`. The comment's own `grants` is unaffected. |
+
+`entity.space` is present only when `include` contains `"space"`, and is `null` when the entity isn't in a space. It is the [Space](/v8/data-models/space) record with `membersCount` and `childSpacesCount` (and `isMember` for a signed-in caller), without the `avatarFile` and `bannerFile` objects.
 
 ## Placeholders
 

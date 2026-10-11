@@ -17,7 +17,7 @@ Returns a single comment by its Sublay UUID.
 ## Query Parameters
 
 <ParamField query="include" type="string">
-  Comma-separated list of associations to include. Valid values: `user`, `entity`, `space`, `parent`, `grants` (the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). With `entity` or `space`, `entity` is `null` when the entity isn't available to the caller (for example, removed by a moderator) — the comment is still returned, and there is no space. With `parent`, `parentComment` is `null` when the parent no longer exists or is on another entity.
+  Comma-separated list of associations to include. Valid values: `user`, `entity`, `space`, `parent`, `grants` (the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). With `entity` or `space`, `entity` is `null` when the entity isn't available to the caller (for example, removed by a moderator) — the comment is still returned, and there is no space. The included `entity` is the entity's stored record, without the fields an entity fetch computes or joins (such as `commentsCount`, `userReaction` and `nsfwEffective`) — see [The included entity](/v8/data-models/comment#the-included-entity). With `parent`, `parentComment` is `null` when the parent no longer exists or is on another entity.
 </ParamField>
 
 ### Space-scoped reputation

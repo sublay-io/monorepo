@@ -158,6 +158,7 @@ export type {
 } from "./interfaces/Event";
 export type {
   Comment,
+  CommentEntity,
   GifData,
   CommentInclude,
   CommentIncludeArray,

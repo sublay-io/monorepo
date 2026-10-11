@@ -120,6 +120,7 @@ export type {
 } from "./interfaces/IPaginatedResponse";
 export type {
   Comment,
+  CommentEntity,
   GifData,
   CommentInclude,
   CommentIncludeArray,

@@ -79,8 +79,8 @@ An unknown `userId` returns an empty page.
 <ParamField query="include" type="string">
   Comma-separated list of associations to include in each comment:
   - `user` — the comment author, with the avatar file URLs
-  - `entity` — the entity the comment is on; `null` when the entity isn't available to the caller (for example, removed by a moderator) — the comment is still returned
-  - `space` — the entity's space (also includes `entity`); when `entity` is `null` there is no space
+  - `entity` — the entity the comment is on, as its stored record: the fields an entity fetch computes or joins (such as `commentsCount`, `userReaction` and `nsfwEffective`) are not included — see [The included entity](/v8/data-models/comment#the-included-entity); `null` when the entity isn't available to the caller (for example, removed by a moderator) — the comment is still returned
+  - `space` — the entity's space, as `entity.space` (also includes `entity`); when `entity` is `null` there is no space
   - `parent` — `parentComment`, for replies; `null` when the parent no longer exists or is on another entity
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)
 

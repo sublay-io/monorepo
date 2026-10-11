@@ -817,6 +817,7 @@ export type {
 } from "./interfaces/models/Table";
 export type {
   Comment,
+  CommentEntity,
   GifData,
   CommentInclude,
   CommentIncludeArray,

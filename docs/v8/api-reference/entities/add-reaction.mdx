@@ -8,7 +8,7 @@ description: "Add or update a reaction on an entity"
   **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
 </Note>
 
-Adds a reaction of the specified type to an entity. If the user already has a reaction on this entity, it is replaced with the new type. The entity's `reactionCounts` map is updated accordingly.
+Adds a reaction of the specified type to an entity. If the user already has a reaction on this entity, it is replaced with the new type. The entity's `reactionCounts` map is updated accordingly. Sending the reaction the user already has changes nothing: the response is the same `200` with the entity, counts stay as they are, and no notification is sent.
 
 **Authentication required.**
 

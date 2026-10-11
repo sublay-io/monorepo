@@ -1,11 +1,15 @@
 import { useState } from "react";
 import SocialCommentSectionStyled from "../../../registry/react/comments-social/styled/files/social-comment-section";
 import SocialCommentSectionTailwind from "../../../registry/react/comments-social/tailwind/files/social-comment-section";
-import { EntityProvider } from "@sublay/react-js";
 import {
   HighlightControl,
   useHighlightedCommentId,
 } from "../components/HighlightControl";
+import {
+  EntitySource,
+  EntitySourceToggle,
+  useEntitySourceMode,
+} from "../components/EntitySourceControl";
 
 type StyleVariant = "styled" | "tailwind";
 
@@ -15,6 +19,8 @@ export default function SocialCommentsPage() {
   const [variant, setVariant] = useState<StyleVariant>("styled");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const { highlightedCommentId, applied, apply } = useHighlightedCommentId();
+  const { mode: entitySource, setMode: setEntitySource } =
+    useEntitySourceMode();
 
   return (
     <div>
@@ -30,6 +36,7 @@ export default function SocialCommentsPage() {
           comments-social
         </h2>
         <VariantToggle value={variant} onChange={setVariant} />
+        <EntitySourceToggle value={entitySource} onChange={setEntitySource} />
         <ThemeToggle value={theme} onChange={setTheme} />
       </div>
 
@@ -44,22 +51,24 @@ export default function SocialCommentsPage() {
         }}
         className={theme === "dark" ? "dark" : ""}
       >
-        <EntityProvider foreignId={FOREIGN_ID} createIfNotFound>
-          {variant === "styled" ? (
-            <SocialCommentSectionStyled
-              foreignId={FOREIGN_ID}
-              isVisible={true}
-              highlightedCommentId={highlightedCommentId}
-              theme={theme}
-            />
-          ) : (
-            <SocialCommentSectionTailwind
-              foreignId={FOREIGN_ID}
-              isVisible={true}
-              highlightedCommentId={highlightedCommentId}
-            />
-          )}
-        </EntityProvider>
+        <EntitySource mode={entitySource} foreignId={FOREIGN_ID}>
+          {(entityProps) =>
+            variant === "styled" ? (
+              <SocialCommentSectionStyled
+                {...entityProps}
+                isVisible={true}
+                highlightedCommentId={highlightedCommentId}
+                theme={theme}
+              />
+            ) : (
+              <SocialCommentSectionTailwind
+                {...entityProps}
+                isVisible={true}
+                highlightedCommentId={highlightedCommentId}
+              />
+            )
+          }
+        </EntitySource>
       </div>
     </div>
   );

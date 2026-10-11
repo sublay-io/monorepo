@@ -33,6 +33,14 @@ import { CommentSectionProvider } from "@sublay/react-js";
 </CommentSectionProvider>
 ```
 
+### Which entity the section uses
+
+The section can be handed an entity in two ways: the `entity` prop, or, when there's no `entity` prop, the entity of an [`EntityProvider`](/v8/sdk/entities/provider-and-hook) it's rendered inside.
+
+- **It follows that entity as it changes.** A new object for the same entity, such as one with an updated `commentsCount`, updates the `entity` returned by `useCommentSection` and nothing else: the loaded comments, replies and sort stay as they are and nothing is fetched again. Only a different entity `id` resets the section and loads that entity's comments.
+- **An id prop decides which entity is wanted.** With `entityId`, `foreignId` or `shortId` set, a handed entity is used only if it is that entity. One that doesn't match is ignored, and the section fetches the entity the id names.
+- **A handed entity that goes away is kept.** If the `entity` prop or the `EntityProvider` entity becomes `undefined`, the section keeps showing the last entity it had until it's given another.
+
 ## Provider Props Reference
 
 <ParamField path="entityId" type="string">
@@ -48,7 +56,7 @@ import { CommentSectionProvider } from "@sublay/react-js";
 </ParamField>
 
 <ParamField path="entity" type="Entity">
-  A pre-fetched entity object. Skips the entity fetch.
+  A pre-fetched entity object. Skips the entity fetch. The section follows it as it changes: see [Which entity the section uses](#which-entity-the-section-uses).
 </ParamField>
 
 <ParamField path="createIfNotFound" type="boolean">

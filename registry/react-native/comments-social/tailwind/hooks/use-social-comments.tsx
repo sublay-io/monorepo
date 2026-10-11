@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from "react";
+import { ComponentProps, ReactNode, useMemo } from "react";
 import {
   CommentsSortByOptions,
   CommentSectionProvider,
@@ -13,6 +13,38 @@ import SortByButton from "../files/sort-by-button/sort-by-button";
 import CommentOptionsSheet from "../files/sheets/comment-options-sheet";
 import CommentOptionsSheetOwner from "../files/sheets/comment-options-sheet-owner";
 import ReportCommentSheet from "../files/sheets/report-comment-sheet";
+
+type SocialCommentSectionProviderProps = Omit<
+  ComponentProps<typeof CommentSectionProvider>,
+  "children"
+> & {
+  theme?: "light" | "dark";
+};
+
+// The provider the section renders inside. It is defined here, outside the
+// hook, so it is the same component on every render: a component created
+// inside the hook would be a new component type whenever it was created
+// again, and React would unmount the whole section (loaded comments,
+// expanded replies, reply drafts). Everything that can change reaches it as
+// props, built by the hook below as `providerProps`.
+function SocialCommentSectionProvider({
+  children,
+  theme,
+  ...sectionProps
+}: SocialCommentSectionProviderProps & { children: ReactNode }) {
+  return (
+    <CommentSectionProvider {...sectionProps}>
+      <UIStateProvider theme={theme}>
+        <>
+          {children}
+          <CommentOptionsSheet />
+          <CommentOptionsSheetOwner />
+          <ReportCommentSheet />
+        </>
+      </UIStateProvider>
+    </CommentSectionProvider>
+  );
+}
 
 function useSocialComments({
   entity,
@@ -75,51 +107,48 @@ function useSocialComments({
     },
   }), []);
 
-  const MemoizedCommentSectionProvider = useMemo(() => {
-    return ({ children }: { children: ReactNode }) => (
-      <CommentSectionProvider
-        entity={entity}
-        entityId={entityId}
-        foreignId={foreignId}
-        shortId={shortId}
-        createIfNotFound={createIfNotFound}
-        callbacks={callbacks as Record<string, (...args: any[]) => void>}
-        defaultSortBy={defaultSortBy || "top"}
-        // The heart is the `like` reaction, so "Top" ranks by likes. The
-        // reaction only applies while the sort is `top` and replies inherit it.
-        defaultSortByReaction="like"
-        limit={limit || 10}
-        highlightedCommentId={highlightedCommentId}
-      >
-        <UIStateProvider theme={theme}>
-          <>
-            {children}
-            <CommentOptionsSheet />
-            <CommentOptionsSheetOwner />
-            <ReportCommentSheet />
-          </>
-        </UIStateProvider>
-      </CommentSectionProvider>
-    );
-  }, [
-    entity,
-    entityId,
-    foreignId,
-    shortId,
-    createIfNotFound,
-    callbacks,
-    defaultSortBy,
-    limit,
-    highlightedCommentId,
-    theme,
-  ]);
+  // The props for `CommentSectionProvider` (returned below). Spread them onto
+  // it: `<CommentSectionProvider {...providerProps}>`.
+  const providerProps: SocialCommentSectionProviderProps = useMemo(
+    () => ({
+      entity,
+      entityId,
+      foreignId,
+      shortId,
+      createIfNotFound,
+      callbacks: callbacks as Record<string, (...args: any[]) => void>,
+      highlightedCommentId,
+      theme,
+      defaultSortBy: defaultSortBy || "top",
+      // The heart is the `like` reaction, so "Top" ranks by likes. The
+      // reaction only applies while the sort is `top` and replies inherit it.
+      defaultSortByReaction: "like",
+      limit: limit || 10,
+    }),
+    [
+      entity,
+      entityId,
+      foreignId,
+      shortId,
+      createIfNotFound,
+      callbacks,
+      defaultSortBy,
+      limit,
+      highlightedCommentId,
+      theme,
+    ]
+  );
 
-  return useMemo(() => ({
-    CommentSectionProvider: MemoizedCommentSectionProvider,
-    CommentsFeed,
-    NewCommentForm,
-    SortByButton,
-  }), [MemoizedCommentSectionProvider]);
+  return useMemo(
+    () => ({
+      CommentSectionProvider: SocialCommentSectionProvider,
+      providerProps,
+      CommentsFeed,
+      NewCommentForm,
+      SortByButton,
+    }),
+    [providerProps]
+  );
 }
 
 export default useSocialComments;

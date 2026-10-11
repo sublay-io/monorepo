@@ -144,7 +144,7 @@ function ThreadedCommentSection({
   theme = 'light',
   children,
 }: ThreadedCommentSectionProps) {
-  const { CommentSectionProvider } = useThreadedComments({
+  const { CommentSectionProvider, providerProps } = useThreadedComments({
     entity: entity ?? undefined,
     entityId,
     foreignId,
@@ -154,7 +154,7 @@ function ThreadedCommentSection({
   });
 
   return (
-    <CommentSectionProvider>
+    <CommentSectionProvider {...providerProps}>
       <ThreadedCommentSectionInner isVisible={isVisible}>
         {children}
       </ThreadedCommentSectionInner>

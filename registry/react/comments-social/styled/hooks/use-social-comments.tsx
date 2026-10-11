@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from "react";
+import { ComponentProps, ReactNode, useMemo } from "react";
 import {
   CommentSectionProvider,
   Entity,
@@ -8,6 +8,37 @@ import NewCommentForm from "../files/new-comment-form";
 import CommentMenuModal from "../files/modals/comment-menu-modal/comment-menu-modal";
 import CommentMenuModalOwner from "../files/modals/comment-menu-modal-owner/comment-menu-modal-owner";
 import { UIStateProvider } from "../context/ui-state-context";
+
+type SocialCommentSectionProviderProps = Omit<
+  ComponentProps<typeof CommentSectionProvider>,
+  "children"
+> & {
+  theme?: "light" | "dark";
+};
+
+// The provider the section renders inside. It is defined here, outside the
+// hook, so it is the same component on every render: a component created
+// inside the hook would be a new component type whenever it was created
+// again, and React would unmount the whole section (loaded comments,
+// expanded replies, reply drafts). Everything that can change reaches it as
+// props, built by the hook below as `providerProps`.
+function SocialCommentSectionProvider({
+  children,
+  theme,
+  ...sectionProps
+}: SocialCommentSectionProviderProps & { children: ReactNode }) {
+  return (
+    <CommentSectionProvider {...sectionProps}>
+      <UIStateProvider theme={theme}>
+        <>
+          {children}
+          <CommentMenuModal />
+          <CommentMenuModalOwner />
+        </>
+      </UIStateProvider>
+    </CommentSectionProvider>
+  );
+}
 
 function useSocialComments({
   entity,
@@ -66,47 +97,45 @@ function useSocialComments({
       console.log(`Navigate to user ${userId} profile`, { foreignId });
     },
   }), []);
-  const MemoizedCommentSectionProvider = useMemo(() => {
-    return ({ children }: { children: ReactNode }) => (
-      <CommentSectionProvider
-        entity={entity}
-        entityId={entityId}
-        foreignId={foreignId}
-        shortId={shortId}
-        createIfNotFound={createIfNotFound}
-        callbacks={callbacks as Record<string, (...args: any[]) => void>}
-        defaultSortBy="top"
-        // The heart is the `like` reaction, so "Top" ranks by likes. The
-        // reaction only applies while the sort is `top` and replies inherit it.
-        defaultSortByReaction="like"
-        limit={10}
-        highlightedCommentId={highlightedCommentId}
-      >
-        <UIStateProvider theme={theme}>
-          <>
-            {children}
-            <CommentMenuModal />
-            <CommentMenuModalOwner />
-          </>
-        </UIStateProvider>
-      </CommentSectionProvider>
-    );
-  }, [
-    entity,
-    entityId,
-    foreignId,
-    shortId,
-    createIfNotFound,
-    callbacks,
-    theme,
-    highlightedCommentId
-  ]);
+  // The props for `CommentSectionProvider` (returned below). Spread them onto
+  // it: `<CommentSectionProvider {...providerProps}>`.
+  const providerProps: SocialCommentSectionProviderProps = useMemo(
+    () => ({
+      entity,
+      entityId,
+      foreignId,
+      shortId,
+      createIfNotFound,
+      callbacks: callbacks as Record<string, (...args: any[]) => void>,
+      theme,
+      highlightedCommentId,
+      defaultSortBy: "top",
+      // The heart is the `like` reaction, so "Top" ranks by likes. The
+      // reaction only applies while the sort is `top` and replies inherit it.
+      defaultSortByReaction: "like",
+      limit: 10,
+    }),
+    [
+      entity,
+      entityId,
+      foreignId,
+      shortId,
+      createIfNotFound,
+      callbacks,
+      theme,
+      highlightedCommentId,
+    ]
+  );
 
-  return useMemo(() => ({
-    CommentSectionProvider: MemoizedCommentSectionProvider,
-    CommentsFeed,
-    NewCommentForm,
-  }), [MemoizedCommentSectionProvider]);
+  return useMemo(
+    () => ({
+      CommentSectionProvider: SocialCommentSectionProvider,
+      providerProps,
+      CommentsFeed,
+      NewCommentForm,
+    }),
+    [providerProps]
+  );
 }
 
 export default useSocialComments;

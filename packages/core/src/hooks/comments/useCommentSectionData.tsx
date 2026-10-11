@@ -208,9 +208,40 @@ export function useCommentSectionDataInternal(
 
   const { entity: entityFromContext, setEntity: setContextEntity } =
     useEntity();
-  const [entity, setEntity] = useState<Entity | null | undefined>(
-    entityProp ?? entityFromContext,
+  // The entity handed to the section: the `entity` prop, else the one in
+  // `EntityProvider`'s context. It's used when it is the entity the section
+  // was asked for (no id props, or the id prop names it); otherwise the
+  // section fetches its own by `entityId` / `foreignId` / `shortId` (below).
+  const suppliedEntity = entityProp ?? entityFromContext;
+  const usableSuppliedEntity =
+    suppliedEntity &&
+    (entityId
+      ? suppliedEntity.id === entityId
+      : foreignId
+        ? suppliedEntity.foreignId === foreignId
+        : shortId
+          ? suppliedEntity.shortId === shortId
+          : true)
+      ? suppliedEntity
+      : undefined;
+  // Stable while its content is the same, so an object created again on every
+  // render (an inline `entity={{ ... }}`) isn't a change.
+  const followedEntity = useStableObject(usableSuppliedEntity);
+  // The section's own copy: the entity it fetched, or the last one it
+  // followed (kept if the supplied entity goes away).
+  const [ownEntity, setEntity] = useState<Entity | null | undefined>(
+    followedEntity,
   );
+  const followedEntityRef = useRef(followedEntity);
+  useEffect(() => {
+    followedEntityRef.current = followedEntity;
+    if (followedEntity) setEntity(followedEntity);
+  }, [followedEntity]);
+  // A supplied entity is followed as it changes. A new object for the same
+  // entity, such as an updated `commentsCount`, only replaces the entity the
+  // section exposes: the list, the store and the highlight are keyed on the
+  // entity's id, so they reset only when the id changes.
+  const entity = followedEntity ?? ownEntity;
 
   const { user } = useUser();
 
@@ -339,7 +370,10 @@ export function useCommentSectionDataInternal(
   const highlightIncludeKey = Array.from(
     new Set([...(Array.isArray(include) ? include : [include]), "parent"]),
   ).join(",");
-  const fetchedStatus = useRef<Record<string, boolean>>({}); // Track status by unique key
+  // The entity the section last asked the server for (its id props, as a
+  // key). One request per wanted entity: asking again for the same one is
+  // skipped, and a response for one the section has moved on from is dropped.
+  const requestedEntityKeyRef = useRef<string | null>(null);
 
   const submittingComment = useRef(false);
   const [submittingCommentState, setSubmittingCommentState] = useState(false); // required to trigger rerenders
@@ -809,9 +843,9 @@ export function useCommentSectionDataInternal(
 
       const uniqueKey = `${entityId ?? ""}-${foreignId ?? ""}-${shortId ?? ""}`;
 
-      if (fetchedStatus.current[uniqueKey]) return;
+      if (requestedEntityKeyRef.current === uniqueKey) return;
 
-      fetchedStatus.current[uniqueKey] = true;
+      requestedEntityKeyRef.current = uniqueKey;
 
       try {
         let fetchedEntity: Entity | null = null;
@@ -830,7 +864,12 @@ export function useCommentSectionDataInternal(
           });
         }
 
-        if (fetchedEntity) {
+        // The section wants another entity by now.
+        if (requestedEntityKeyRef.current !== uniqueKey) return;
+
+        // A supplied entity that arrived while this was in flight is the
+        // one the section follows; this (older) copy doesn't replace it.
+        if (fetchedEntity && !followedEntityRef.current) {
           setEntity(fetchedEntity);
         }
       } catch (err) {

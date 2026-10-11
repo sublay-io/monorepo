@@ -44,6 +44,10 @@ Both comment pages have a "Highlight comment id" input. Apply passes the id to t
 
 To get an id, copy one from the Network tab (the `GET /comments` response).
 
+## Passing the entity
+
+Both comment pages have a "Pass foreignId" / "Pass entity object" switch. Either way the section sits inside an `EntityProvider`. With "Pass entity object" the component gets `entity={entity}` from `useEntity()` instead of the `foreignId`; that object is replaced whenever the entity changes (posting a comment updates its `commentsCount`). The choice is kept in the URL as `?entity=object`.
+
 ## States to eyeball
 
 Check each in both the styled and tailwind variants, light and dark.
@@ -57,6 +61,7 @@ Threaded and social:
 - [ ] `[removed]` with the "Removed by a moderator" note — remove a comment from the dashboard's moderation page, then reload.
 - [ ] Focused deep-link view — apply a highlight id for a deeply nested comment; the focused thread shows with the comment highlighted, and "View all comments" returns to the full list.
 - [ ] Error and retry — set devtools to Offline, trigger a load (reload, load more, expand replies), confirm the error state, go back online and retry.
+- [ ] Entity object — switch to "Pass entity object", expand a reply thread, type a reply without sending it, then post a top-level comment. The thread stays expanded, the draft stays, and the list isn't fetched again.
 - [ ] Blocked / unavailable rows — needs two users and a block created through the API: user A comments, user B blocks A, then view the thread as B.
 
 Social only:

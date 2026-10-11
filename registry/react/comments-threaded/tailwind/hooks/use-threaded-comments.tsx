@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from "react";
+import { ComponentProps, ReactNode, useMemo } from "react";
 import {
   CommentSectionProvider,
   Entity,
@@ -8,6 +8,34 @@ import NewCommentForm from "../files/new-comment-form";
 import CommentMenuModal from "../files/modals/comment-menu-modal/comment-menu-modal";
 import CommentMenuModalOwner from "../files/modals/comment-menu-modal-owner/comment-menu-modal-owner";
 import { UIStateProvider } from "../context/ui-state-context";
+
+type ThreadedCommentSectionProviderProps = Omit<
+  ComponentProps<typeof CommentSectionProvider>,
+  "children"
+>;
+
+// The provider the section renders inside. It is defined here, outside the
+// hook, so it is the same component on every render: a component created
+// inside the hook would be a new component type whenever it was created
+// again, and React would unmount the whole section (loaded comments,
+// expanded replies, reply drafts). Everything that can change reaches it as
+// props, built by the hook below as `providerProps`.
+function ThreadedCommentSectionProvider({
+  children,
+  ...sectionProps
+}: ThreadedCommentSectionProviderProps & { children: ReactNode }) {
+  return (
+    <CommentSectionProvider {...sectionProps}>
+      <UIStateProvider>
+        <>
+          {children}
+          <CommentMenuModal />
+          <CommentMenuModalOwner />
+        </>
+      </UIStateProvider>
+    </CommentSectionProvider>
+  );
+}
 
 function useThreadedComments({
   entity,
@@ -76,48 +104,45 @@ function useThreadedComments({
     }),
     []
   );
-  const MemoizedCommentSectionProvider = useMemo(() => {
-    return ({ children }: { children: ReactNode }) => (
-      <CommentSectionProvider
-        entity={entity}
-        entityId={entityId}
-        foreignId={foreignId}
-        shortId={shortId}
-        createIfNotFound={createIfNotFound}
-        callbacks={callbacks as Record<string, (...args: any[]) => void>}
-        defaultSortBy="top"
-        limit={10}
-        // 🔧 CUSTOMIZE: Replies brought with each page of comments — 2 levels,
-        // up to 3 per comment — so the first paint is a single request. Deeper
-        // replies load on demand ("Continue this thread").
-        replyDepth={2}
-        replyLimit={3}
-        highlightedCommentId={highlightedCommentId}
-      >
-        <UIStateProvider>
-          <>
-            {children}
-            <CommentMenuModal />
-            <CommentMenuModalOwner />
-          </>
-        </UIStateProvider>
-      </CommentSectionProvider>
-    );
-  }, [
-    entity,
-    entityId,
-    foreignId,
-    shortId,
-    createIfNotFound,
-    callbacks,
-    highlightedCommentId
-  ]);
+  // The props for `CommentSectionProvider` (returned below). Spread them onto
+  // it: `<CommentSectionProvider {...providerProps}>`.
+  const providerProps: ThreadedCommentSectionProviderProps = useMemo(
+    () => ({
+      entity,
+      entityId,
+      foreignId,
+      shortId,
+      createIfNotFound,
+      callbacks: callbacks as Record<string, (...args: any[]) => void>,
+      highlightedCommentId,
+      defaultSortBy: "top",
+      limit: 10,
+      // 🔧 CUSTOMIZE: Replies brought with each page of comments — 2 levels,
+      // up to 3 per comment — so the first paint is a single request. Deeper
+      // replies load on demand ("Continue this thread").
+      replyDepth: 2,
+      replyLimit: 3,
+    }),
+    [
+      entity,
+      entityId,
+      foreignId,
+      shortId,
+      createIfNotFound,
+      callbacks,
+      highlightedCommentId,
+    ]
+  );
 
-  return useMemo(() => ({
-    CommentSectionProvider: MemoizedCommentSectionProvider,
-    CommentsFeed,
-    NewCommentForm,
-  }), [MemoizedCommentSectionProvider]);
+  return useMemo(
+    () => ({
+      CommentSectionProvider: ThreadedCommentSectionProvider,
+      providerProps,
+      CommentsFeed,
+      NewCommentForm,
+    }),
+    [providerProps]
+  );
 }
 
 export default useThreadedComments;

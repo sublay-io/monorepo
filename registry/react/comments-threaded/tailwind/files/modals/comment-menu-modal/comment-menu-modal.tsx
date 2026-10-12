@@ -18,7 +18,7 @@ function CommentMenuModal() {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-[520px] self-center py-2"
+        className="bg-white dark:bg-neutral-800 rounded-lg w-full max-w-[520px] self-center py-2"
       >
         {view === "main" && (
           <MainContent clickReport={() => setView("report")} />

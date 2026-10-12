@@ -20,7 +20,7 @@ function ReplyButtonAndInfo({
       {canReply && (
       <button
         onClick={() => setShowReplyForm((prev) => !prev)}
-        className="text-gray-500 dark:text-gray-400 font-medium px-2 py-1 rounded -ml-2 transition-all duration-150 bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950"
+        className="text-gray-500 dark:text-neutral-400 font-medium px-2 py-1 rounded -ml-2 transition-all duration-150 bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950"
         // 🎨 CUSTOMIZATION: Reply button styling
       >
         Reply
@@ -28,7 +28,7 @@ function ReplyButtonAndInfo({
       )}
       {hasReplies && (
         <span
-          className="text-gray-500 dark:text-gray-400"
+          className="text-gray-500 dark:text-neutral-400"
           // 🎨 CUSTOMIZATION: Reply count styling
         >
           {replyCount} {replyCount === 1 ? "reply" : "replies"}

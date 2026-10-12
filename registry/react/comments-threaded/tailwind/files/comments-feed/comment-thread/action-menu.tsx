@@ -17,7 +17,7 @@ function ActionMenu({ comment }: ActionMenuProps) {
             ? openCommentOptionsModalOwner?.(comment)
             : openCommentOptionsModal?.(comment)
         }
-        className="p-0.5 text-gray-400 dark:text-gray-500 transition-colors duration-150 rounded bg-transparent border-none cursor-pointer hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+        className="p-0.5 text-gray-400 dark:text-neutral-500 transition-colors duration-150 rounded bg-transparent border-none cursor-pointer hover:text-gray-600 dark:hover:text-neutral-400 hover:bg-gray-50 dark:hover:bg-neutral-700"
         title="More options"
       >
         <svg

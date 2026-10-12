@@ -213,14 +213,14 @@ function NewCommentForm() {
           className={cn(
             // 🎨 CUSTOMIZATION: Comment form styling
             "flex items-end",
-            "bg-white dark:bg-gray-800",
+            "bg-white dark:bg-neutral-800",
             "rounded-2xl",
             "p-2",
             "transition-all duration-300",
             "shadow-sm",
             hasContent
               ? "border border-blue-300 dark:border-blue-800 shadow-md"
-              : "border border-gray-200 dark:border-gray-600 hover:shadow-md"
+              : "border border-gray-200 dark:border-neutral-600 hover:shadow-md"
           )}
         >
           <textarea
@@ -235,7 +235,7 @@ function NewCommentForm() {
               // 🎨 CUSTOMIZATION: Comment form styling
               "flex-1 p-2",
               "bg-transparent",
-              "text-gray-900 dark:text-gray-50",
+              "text-gray-900 dark:text-neutral-50",
               "text-xs leading-relaxed",
               "outline-none resize-none border-none"
             )}
@@ -251,7 +251,7 @@ function NewCommentForm() {
                 "flex-shrink-0 p-2",
                 "border-none outline-none",
                 "font-normal text-xs",
-                "text-gray-500 dark:text-gray-50",
+                "text-gray-500 dark:text-neutral-50",
                 "cursor-pointer bg-transparent"
               )}
             >
@@ -271,7 +271,7 @@ function NewCommentForm() {
                 "focus-visible:ring-2 focus-visible:ring-blue-400 dark:focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                 hasContent && !isSubmitting
                   ? "bg-blue-600 dark:bg-blue-500 text-white cursor-pointer hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-md"
-                  : "bg-gray-200 dark:bg-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  : "bg-gray-200 dark:bg-neutral-600 text-gray-400 dark:text-neutral-500 cursor-not-allowed"
               )}
             >
               <svg
@@ -298,7 +298,7 @@ function NewCommentForm() {
         {createErrorMessage && (
           <p
             role="alert"
-            className="mt-1.5 px-2 text-xs text-gray-500 dark:text-gray-400"
+            className="mt-1.5 px-2 text-xs text-gray-500 dark:text-neutral-400"
             // 🎨 CUSTOMIZATION: Failed-post message styling
           >
             {createErrorMessage}

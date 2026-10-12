@@ -28,7 +28,7 @@ export const AVATAR_CENTER_Y = AVATAR_TOP + AVATAR_SIZE / 2;
 
 const LINE_BASE = "absolute box-border pointer-events-none border-0 border-solid";
 // 🎨 CUSTOMIZATION: Threading line color (Default: gray-300)
-const LINE_CLASS = `${LINE_BASE} border-gray-300 dark:border-gray-500`;
+const LINE_CLASS = `${LINE_BASE} border-gray-300 dark:border-neutral-500`;
 // 🎨 CUSTOMIZATION: Connector into the highlighted comment (Default: blue-500)
 const ACCENT_LINE_CLASS = `${LINE_BASE} border-blue-500 dark:border-blue-400`;
 

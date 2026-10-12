@@ -13,10 +13,10 @@ function MainContent({ clickReport }: { clickReport: () => void }) {
           Report
         </button>
       </li>
-      <div className="h-px w-full bg-gray-200 dark:bg-gray-600" />
+      <div className="h-px w-full bg-gray-200 dark:bg-neutral-600" />
       <li className="flex justify-center justify-self-center">
         <button
-          className="text-gray-700 dark:text-gray-300 px-6 py-2 bg-transparent border-none cursor-pointer"
+          className="text-gray-700 dark:text-neutral-300 px-6 py-2 bg-transparent border-none cursor-pointer"
           // 🎨 CUSTOMIZATION: Cancel button styling
           onClick={closeCommentOptionsModal}
         >

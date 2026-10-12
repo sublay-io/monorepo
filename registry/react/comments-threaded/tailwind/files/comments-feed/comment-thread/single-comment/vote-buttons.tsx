@@ -52,8 +52,8 @@ function VoteButtons({
         "inline-flex items-center",
         // One step stronger on the highlighted comment, whose background is gray-100
         highlighted
-          ? "bg-gray-200 dark:bg-gray-600"
-          : "bg-gray-50 dark:bg-gray-700",
+          ? "bg-gray-200 dark:bg-neutral-600"
+          : "bg-gray-50 dark:bg-neutral-700",
         "rounded-full",
         paddingClass,
         "gap-1"
@@ -81,7 +81,7 @@ function VoteButtons({
           "border-none cursor-pointer",
           userVote === "up"
             ? "bg-blue-500 dark:bg-blue-400 text-white"
-            : "bg-transparent text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950"
+            : "bg-transparent text-gray-500 dark:text-neutral-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950"
         )}
         title="Upvote"
       >
@@ -110,7 +110,7 @@ function VoteButtons({
             ? "text-blue-500 dark:text-blue-400"
             : netScore < 0
             ? "text-red-500 dark:text-red-400"
-            : "text-gray-700 dark:text-gray-300"
+            : "text-gray-700 dark:text-neutral-300"
         )}
       >
         {netScore}
@@ -138,7 +138,7 @@ function VoteButtons({
           "border-none cursor-pointer",
           userVote === "down"
             ? "bg-red-500 dark:bg-red-400 text-white"
-            : "bg-transparent text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
+            : "bg-transparent text-gray-500 dark:text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
         )}
         title="Downvote"
       >

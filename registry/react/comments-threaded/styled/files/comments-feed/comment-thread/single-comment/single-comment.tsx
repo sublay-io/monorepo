@@ -212,6 +212,7 @@ function SingleComment({
                 }}
               >
                 <UserAvatar
+theme={theme}
                   user={comment.user ?? {}}
                   borderRadius={AVATAR_SIZE}
                   size={AVATAR_SIZE}

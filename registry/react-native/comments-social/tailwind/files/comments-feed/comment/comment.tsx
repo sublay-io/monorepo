@@ -228,6 +228,7 @@ const Comment = React.memo(
               }}
             >
               <UserAvatar
+theme={theme}
                 user={comment.user ?? {}}
                 borderRadius={authorAvatarSize}
                 size={authorAvatarSize}

@@ -1,4 +1,5 @@
 import { View, Image, StyleSheet } from "react-native";
+import { type UITheme, uiColors } from "./theme";
 
 interface UserProps {
   id?: string;
@@ -10,10 +11,12 @@ const UserAvatar = ({
   user,
   size = 32,
   borderRadius,
+  theme = "light",
 }: {
   user: UserProps | null | undefined;
   size?: number | undefined;
   borderRadius?: number | undefined;
+  theme?: UITheme; // colors to draw with (default: light)
 }) => {
   if (!user) return null;
 
@@ -29,6 +32,7 @@ const UserAvatar = ({
           width: size,
           height: size,
           borderRadius: borderRadius || size / 2,
+          borderColor: uiColors[theme].divider,
         },
       ]}
     >
@@ -51,7 +55,6 @@ const styles = StyleSheet.create({
   avatarContainer: {
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#E6E6E6",
     flexShrink: 0,
   },
   image: {

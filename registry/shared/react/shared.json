@@ -126,7 +126,8 @@
       ],
       "requires": [
         "get-user-avatar",
-        "reset-styles"
+        "reset-styles",
+        "theme"
       ],
       "dependencies": []
     }

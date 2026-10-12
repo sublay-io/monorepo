@@ -270,6 +270,7 @@ function NewCommentForm({
             {/* 🎨 CUSTOMIZATION: Form layout (Default: true - show avatar, 32px size) */}
             {user && true ? (
               <UserAvatar
+theme={theme}
                 user={user}
                 size={32}
                 borderRadius={32}

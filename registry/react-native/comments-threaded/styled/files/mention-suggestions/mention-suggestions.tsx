@@ -84,7 +84,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                 opacity: pressed ? 0.2 : 1,
               })}
             >
-              <UserAvatar user={item} size={32} />
+              <UserAvatar theme={theme} user={item} size={32} />
               <View
                 style={{
                   flexDirection: 'column',

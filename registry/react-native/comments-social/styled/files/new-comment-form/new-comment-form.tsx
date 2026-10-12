@@ -301,6 +301,7 @@ function NewCommentForm({
         >
           {user && withAvatar && (
             <UserAvatar
+theme={theme}
               user={user}
               size={authorAvatarSize}
               borderRadius={authorAvatarSize}

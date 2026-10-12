@@ -11,9 +11,14 @@ import {
   getComponentLocation,
   getRemoteRegistryBase,
   getRemoteUrl,
+  getSharedManifestPath,
+  fetchSharedManifest,
+  parseSharedManifest,
   resolveRegistrySource,
+  resolveSharedPieces,
   validateRef,
 } from "./registry";
+import type { SharedManifest } from "./registry";
 import type { SublayConfig } from "../commands/init";
 
 const MAIN_BASE =
@@ -285,5 +290,175 @@ describe("fetchRegistry / fetchFile", () => {
     await expect(
       fetchFile(source, "react/widget/styled", "files/widget.tsx")
     ).rejects.toThrow(/Could not fetch files\/widget\.tsx .*ECONNREFUSED/);
+  });
+});
+
+describe("shared pieces", () => {
+  const labels = {
+    componentManifest: "react/widget/styled/registry.json",
+    sharedManifest: "shared/react/shared.json",
+  };
+
+  const piece = (requires: string[] = [], dependencies: string[] = [], name = "") => ({
+    files: [`${name || "file"}.tsx`],
+    requires,
+    dependencies,
+  });
+
+  const manifest: SharedManifest = {
+    platform: "react",
+    pieces: {
+      "giphy-container": piece(["magnifying-glass-icon", "reset-styles"], ["@giphy/react-components@^10.1.1"]),
+      "magnifying-glass-icon": piece(),
+      "user-avatar": piece(["get-user-avatar", "reset-styles"]),
+      "get-user-avatar": piece(["reset-styles"]),
+      "reset-styles": piece(),
+      "from-now": piece([], ["moment@^2"]),
+    },
+  };
+
+  const names = (list: { name: string }[]) => list.map((item) => item.name);
+
+  it("puts the shared manifest under the platform's shared folder", () => {
+    expect(getSharedManifestPath("react")).toBe("shared/react/shared.json");
+    expect(getSharedManifestPath("react-native")).toBe("shared/react-native/shared.json");
+  });
+
+  it("returns nothing for an empty list", () => {
+    expect(resolveSharedPieces([], manifest, labels)).toEqual([]);
+  });
+
+  it("follows requirements transitively, requirements first", () => {
+    expect(names(resolveSharedPieces(["user-avatar"], manifest, labels))).toEqual([
+      "reset-styles",
+      "get-user-avatar",
+      "user-avatar",
+    ]);
+  });
+
+  it("installs each piece once however many pieces need it", () => {
+    const resolved = names(
+      resolveSharedPieces(
+        ["giphy-container", "user-avatar", "reset-styles", "giphy-container"],
+        manifest,
+        labels
+      )
+    );
+    expect(resolved).toEqual([
+      "magnifying-glass-icon",
+      "reset-styles",
+      "giphy-container",
+      "get-user-avatar",
+      "user-avatar",
+    ]);
+    expect(new Set(resolved).size).toBe(resolved.length);
+  });
+
+  it("carries each piece's files and packages", () => {
+    const [fromNow] = resolveSharedPieces(["from-now"], manifest, labels);
+    expect(fromNow).toEqual({
+      name: "from-now",
+      files: ["file.tsx"],
+      requires: [],
+      dependencies: ["moment@^2"],
+    });
+  });
+
+  it("fails on an unknown piece, naming the piece and both manifests", () => {
+    expect(() => resolveSharedPieces(["nope"], manifest, labels)).toThrow(
+      'Shared piece "nope", listed in react/widget/styled/registry.json, is not defined in shared/react/shared.json.'
+    );
+  });
+
+  it("fails on a requirement that does not resolve, naming both pieces", () => {
+    const broken: SharedManifest = {
+      platform: "react",
+      pieces: { modal: piece(["missing-icon"]) },
+    };
+    expect(() => resolveSharedPieces(["modal"], broken, labels)).toThrow(
+      'Shared piece "modal" requires "missing-icon", which is not defined in shared/react/shared.json.'
+    );
+  });
+
+  it("does not treat an inherited object key as a piece", () => {
+    expect(() => resolveSharedPieces(["constructor"], manifest, labels)).toThrow(RegistryError);
+  });
+
+  it("terminates on a requirement cycle and installs each piece once", () => {
+    const cyclic: SharedManifest = {
+      platform: "react",
+      pieces: { a: piece(["b"]), b: piece(["c"]), c: piece(["a"]) },
+    };
+    expect(names(resolveSharedPieces(["a"], cyclic, labels)).sort()).toEqual(["a", "b", "c"]);
+  });
+
+  describe("parseSharedManifest", () => {
+    it("accepts the documented shape", () => {
+      expect(parseSharedManifest(manifest, "shared/react/shared.json")).toEqual(manifest);
+    });
+
+    it("treats missing requires and dependencies as empty", () => {
+      const parsed = parseSharedManifest(
+        { platform: "react", pieces: { modal: { files: ["modal.tsx"] } } },
+        "shared/react/shared.json"
+      );
+      expect(parsed.pieces.modal).toEqual({
+        files: ["modal.tsx"],
+        requires: [],
+        dependencies: [],
+      });
+    });
+
+    it.each([
+      ["a non-object", []],
+      ["missing pieces", { platform: "react" }],
+      ["a piece without files", { pieces: { modal: { files: [] } } }],
+      ["a piece whose requires is not a list", { pieces: { modal: { files: ["m.tsx"], requires: "x" } } }],
+      ["a piece whose dependencies are not strings", { pieces: { modal: { files: ["m.tsx"], dependencies: [1] } } }],
+    ])("rejects %s, naming the manifest", (_label, raw) => {
+      expect(() => parseSharedManifest(raw, "shared/react/shared.json")).toThrow(
+        /shared\/react\/shared\.json is malformed/
+      );
+    });
+  });
+
+  describe("fetchSharedManifest", () => {
+    let requested: string[];
+
+    beforeEach(() => {
+      requested = [];
+      vi.stubGlobal("fetch", async (url: string) => {
+        requested.push(url);
+        if (url.endsWith("/v8/registry/shared/react-native/shared.json")) {
+          return {
+            ok: true,
+            status: 200,
+            statusText: "OK",
+            text: async () => JSON.stringify({ platform: "react-native", pieces: {} }),
+          };
+        }
+        return { ok: false, status: 404, statusText: "Not Found" };
+      });
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it("reads the platform's manifest from the chosen ref", async () => {
+      const source = resolveRegistrySource("v8", {});
+      const fetched = await fetchSharedManifest("react-native", source);
+      expect(fetched).toEqual({ platform: "react-native", pieces: {} });
+      expect(requested).toEqual([
+        "https://raw.githubusercontent.com/sublay-io/monorepo/v8/registry/shared/react-native/shared.json",
+      ]);
+    });
+
+    it("fails naming the manifest when it cannot be fetched", async () => {
+      const source = resolveRegistrySource("v8", {});
+      await expect(fetchSharedManifest("react", source)).rejects.toThrow(
+        /Could not fetch the shared manifest shared\/react\/shared\.json/
+      );
+    });
   });
 });

@@ -17,12 +17,64 @@ export interface Registry {
   description: string;
   dependencies: string[];
   files: RegistryFile[];
+  /**
+   * Names of the shared pieces this component's files import (see
+   * SharedManifest). Absent or empty: the component uses none.
+   */
+  shared?: string[];
   registryUrl: string;
   exports: {
     mainComponent: string;
     mainFile: string;
     typeExports?: string[];
   };
+}
+
+/**
+ * Shared pieces: small files (a GIF picker, an avatar, a date helper) that
+ * several components use. They live once per platform in the registry and are
+ * copied into each component that lists them.
+ *
+ * The format, which registry content and the integrity script both follow:
+ *
+ *   registry/shared/<platform>/shared.json     <platform>: react | react-native
+ *                                              (Expo uses react-native)
+ *   {
+ *     "platform": "react",
+ *     "pieces": {
+ *       "giphy-container": {
+ *         "files": ["giphy-container.tsx"],
+ *         "requires": ["magnifying-glass-icon"],
+ *         "dependencies": ["@giphy/react-components@^10.1.1"]
+ *       }
+ *     }
+ *   }
+ *
+ * - `files`: paths relative to registry/shared/<platform>/. One piece is one
+ *   file named after the piece (`<piece>.tsx` / `.ts`).
+ * - `requires`: other pieces in the same manifest this one imports. May be
+ *   empty. Installing a piece installs everything it requires, transitively.
+ * - `dependencies`: third-party packages as `name@range`. May be empty.
+ *
+ * A component file imports a piece as `~shared/<platform>/<piece>`, and its
+ * registry.json lists the piece name under `shared`. Shared files import each
+ * other with relative paths (`./<piece>`). On install the files are written to
+ * `<componentDir>/shared/<file>` and the alias is rewritten to a relative path.
+ */
+export interface SharedPiece {
+  files: string[];
+  requires: string[];
+  dependencies: string[];
+}
+
+export interface SharedManifest {
+  platform: string;
+  pieces: Record<string, SharedPiece>;
+}
+
+/** A shared piece picked for an install, with its name. */
+export interface ResolvedSharedPiece extends SharedPiece {
+  name: string;
 }
 
 const __filename = fileURLToPath(import.meta.url);
@@ -290,4 +342,142 @@ export async function fetchFile(
   }
 
   return result.content;
+}
+
+/** A platform's shared manifest, relative to the registry root. */
+export function getSharedManifestPath(platform: string): string {
+  return `shared/${platform}/shared.json`;
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+/**
+ * Check the shape of a shared manifest read from the registry. `requires` and
+ * `dependencies` may be left out of a piece and are then empty.
+ */
+export function parseSharedManifest(raw: unknown, label: string): SharedManifest {
+  const invalid = (detail: string) =>
+    new RegistryError(`The shared manifest ${label} is malformed: ${detail}.`);
+
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    throw invalid('it must be an object');
+  }
+
+  const { platform, pieces } = raw as Record<string, unknown>;
+
+  if (typeof pieces !== 'object' || pieces === null || Array.isArray(pieces)) {
+    throw invalid('"pieces" must be an object keyed by piece name');
+  }
+
+  const parsed: Record<string, SharedPiece> = {};
+
+  for (const [name, value] of Object.entries(pieces as Record<string, unknown>)) {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      throw invalid(`piece "${name}" must be an object`);
+    }
+
+    const { files, requires = [], dependencies = [] } = value as Record<string, unknown>;
+
+    if (!isStringArray(files) || files.length === 0) {
+      throw invalid(`piece "${name}" must list at least one file`);
+    }
+    if (!isStringArray(requires)) {
+      throw invalid(`piece "${name}" has a "requires" that is not a list of piece names`);
+    }
+    if (!isStringArray(dependencies)) {
+      throw invalid(`piece "${name}" has a "dependencies" that is not a list of packages`);
+    }
+
+    parsed[name] = { files, requires, dependencies };
+  }
+
+  return {
+    platform: typeof platform === 'string' ? platform : '',
+    pieces: parsed,
+  };
+}
+
+/**
+ * Fetch a platform's shared manifest through the same local-first / remote /
+ * `--ref` path as everything else.
+ */
+export async function fetchSharedManifest(
+  platform: string,
+  source: RegistrySource
+): Promise<SharedManifest> {
+  const manifestPath = getSharedManifestPath(platform);
+  const result = await readRegistryPath(source, manifestPath);
+
+  if (!result.ok) {
+    throw new RegistryError(
+      `Could not fetch the shared manifest ${manifestPath} from ${result.url}: ${result.reason}`
+    );
+  }
+
+  let raw: unknown;
+  try {
+    raw = JSON.parse(result.content);
+  } catch {
+    throw new RegistryError(`The shared manifest ${manifestPath} is not valid JSON.`);
+  }
+
+  return parseSharedManifest(raw, manifestPath);
+}
+
+/**
+ * The pieces to install for a component: the ones it lists plus everything
+ * they require, transitively, each once, in a stable order (a piece comes
+ * after the pieces it requires). Throws a RegistryError naming the piece and
+ * the manifest when a listed piece or a requirement is not defined.
+ *
+ * A requirement cycle is not an error here — each piece is still installed
+ * once. The registry integrity script is what refuses cycles.
+ */
+export function resolveSharedPieces(
+  names: string[],
+  manifest: SharedManifest,
+  labels: { componentManifest: string; sharedManifest: string }
+): ResolvedSharedPiece[] {
+  const resolved: ResolvedSharedPiece[] = [];
+  const visited = new Set<string>();
+
+  const visit = (name: string, requiredBy: string | null) => {
+    if (visited.has(name)) {
+      return;
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(manifest.pieces, name)) {
+      throw new RegistryError(
+        requiredBy === null
+          ? `Shared piece "${name}", listed in ${labels.componentManifest}, is not defined in ${labels.sharedManifest}.`
+          : `Shared piece "${requiredBy}" requires "${name}", which is not defined in ${labels.sharedManifest}.`
+      );
+    }
+
+    visited.add(name);
+    const piece = manifest.pieces[name];
+
+    for (const requirement of piece.requires) {
+      visit(requirement, name);
+    }
+
+    resolved.push({ name, ...piece });
+  };
+
+  for (const name of names) {
+    visit(name, null);
+  }
+
+  return resolved;
+}
+
+/** Fetch one file of a platform's shared folder. */
+export async function fetchSharedFile(
+  source: RegistrySource,
+  platform: string,
+  filePath: string
+): Promise<string> {
+  return fetchFile(source, `shared/${platform}`, filePath);
 }

@@ -6,13 +6,19 @@ import { SublayConfig } from "./init.js";
 import {
   fetchRegistry,
   fetchFile,
+  fetchSharedFile,
+  fetchSharedManifest,
   getComponentLocation,
+  getRegistryPlatform,
+  getSharedManifestPath,
   resolveRegistrySource,
+  resolveSharedPieces,
   Registry,
   RegistryError,
   RegistrySource,
+  ResolvedSharedPiece,
 } from "../utils/registry.js";
-import { transformImports } from "../utils/transform.js";
+import { findSharedAliasImports, transformImports } from "../utils/transform.js";
 import { checkComponentDependencies } from "../utils/dependencies.js";
 import { stripTypes, convertFileExtension } from "../utils/strip-types.js";
 
@@ -110,23 +116,65 @@ export async function add(componentName: string, options: AddOptions = {}) {
       );
     }
 
-    spinner.text = "Downloading files...";
+    // Shared pieces the component lists, plus whatever those require.
+    const platform = getRegistryPlatform(config);
+    const location = getComponentLocation(componentName, config);
+    const componentManifestLabel = `${location}/registry.json`;
+    const sharedManifestLabel = getSharedManifestPath(platform);
+    const sharedNames = readSharedNames(registry, componentManifestLabel);
+    let sharedPieces: ResolvedSharedPiece[] = [];
+
+    if (sharedNames.length > 0) {
+      const sharedManifest = await fetchSharedManifest(platform, source);
+      sharedPieces = resolveSharedPieces(sharedNames, sharedManifest, {
+        componentManifest: componentManifestLabel,
+        sharedManifest: sharedManifestLabel,
+      });
+    }
+
+    spinner.text =
+      sharedPieces.length > 0
+        ? `Downloading files and ${sharedPieces.length} shared piece(s)...`
+        : "Downloading files...";
 
     // Fetch and transform every file before writing any of them: a file that
     // cannot be fetched fails the whole command and leaves the project
     // untouched, rather than installing a component with a hole in it.
-    const location = getComponentLocation(componentName, config);
-    const componentFiles = registry.files.filter(
+    const installedPieces = new Set(sharedPieces.map((piece) => piece.name));
+    const downloads: Array<{ registryPath: string; shared: boolean }> = [
+      ...registry.files.map((file) => ({ registryPath: file.path, shared: false })),
+      ...sharedPieces.flatMap((piece) =>
+        piece.files.map((file) => ({ registryPath: file, shared: true }))
+      ),
+    ].filter(
       // Skip development files
-      (file) => !shouldExcludeFile(file.path)
+      (download) => !shouldExcludeFile(download.registryPath)
     );
 
     const pendingFiles = await mapWithConcurrency(
-      componentFiles,
+      downloads,
       FETCH_CONCURRENCY,
-      async (file): Promise<PendingFile> => {
-        const fileContent = await fetchFile(source, location, file.path);
-        return prepareFile(file.path, fileContent, config, componentName);
+      async ({ registryPath, shared }): Promise<PendingFile> => {
+        const fileContent = shared
+          ? await fetchSharedFile(source, platform, registryPath)
+          : await fetchFile(source, location, registryPath);
+
+        // Every shared piece a file imports has to be one that is being
+        // installed, or the import is rewritten to a file that is not there.
+        for (const used of findSharedAliasImports(fileContent)) {
+          if (used.platform !== platform || !installedPieces.has(used.piece)) {
+            throw new RegistryError(
+              `${registryPath} imports the shared piece "${used.platform}/${used.piece}", which ${componentManifestLabel} does not list under "shared" for ${sharedManifestLabel}.`
+            );
+          }
+        }
+
+        return prepareFile(
+          shared ? `shared/${registryPath}` : registryPath,
+          fileContent,
+          config,
+          componentName
+        );
       }
     );
 
@@ -163,6 +211,17 @@ export async function add(componentName: string, options: AddOptions = {}) {
         )}`
       )
     );
+    if (sharedPieces.length > 0) {
+      console.log(
+        chalk.dim(
+          `🧩 Shared pieces in ${path.join(
+            config.paths.components,
+            componentName,
+            "shared"
+          )}: ${sharedPieces.map((piece) => piece.name).join(", ")}`
+        )
+      );
+    }
 
     // Check dependencies
     await checkComponentDependencies(registry.dependencies);
@@ -217,20 +276,55 @@ async function prepareFile(
   config: SublayConfig,
   componentName: string
 ): Promise<PendingFile> {
-  // Transform imports to match user's project
-  let transformed = transformImports(fileContent, config);
+  const componentDir = path.join(config.paths.components, componentName);
 
   // Strip TypeScript types if project is JavaScript
-  let finalFilePath = filePath;
-  if (!config.typescript && (filePath.endsWith('.ts') || filePath.endsWith('.tsx'))) {
-    transformed = await stripTypes(transformed, filePath);
-    finalFilePath = convertFileExtension(filePath);
+  const needsTypeStrip =
+    !config.typescript && (filePath.endsWith('.ts') || filePath.endsWith('.tsx'));
+  const finalFilePath = needsTypeStrip ? convertFileExtension(filePath) : filePath;
+
+  const targetPath = getTargetPath(finalFilePath, config, componentName);
+  const installedPath = path
+    .relative(componentDir, targetPath)
+    .split(path.sep)
+    .join('/');
+
+  // Registry paths come from a manifest; none may land outside the component.
+  if (
+    installedPath === '..' ||
+    installedPath.startsWith('../') ||
+    path.isAbsolute(installedPath)
+  ) {
+    throw new RegistryError(
+      `${filePath} would be installed outside ${componentDir}; refusing to write it.`
+    );
   }
 
-  return {
-    targetPath: getTargetPath(finalFilePath, config, componentName),
-    content: transformed,
-  };
+  // Transform imports to match user's project
+  let transformed = transformImports(fileContent, config, { installedPath });
+
+  if (needsTypeStrip) {
+    transformed = await stripTypes(transformed, filePath);
+  }
+
+  return { targetPath, content: transformed };
+}
+
+/** The manifest's `shared` list. Absent means the component uses no shared pieces. */
+function readSharedNames(registry: Registry, manifestLabel: string): string[] {
+  const { shared } = registry;
+
+  if (shared === undefined || shared === null) {
+    return [];
+  }
+
+  if (!Array.isArray(shared) || shared.some((name) => typeof name !== 'string')) {
+    throw new RegistryError(
+      `"shared" in ${manifestLabel} must be a list of shared piece names.`
+    );
+  }
+
+  return shared;
 }
 
 /** Like Promise.all over `items.map(task)`, but at most `limit` tasks run at once. */
@@ -364,6 +458,11 @@ export function getTargetPath(
   }
   if (filePath.startsWith("context/")) {
     return path.join(componentDir, "context", path.basename(filePath));
+  }
+
+  // Shared pieces go into the component's own 'shared/' folder
+  if (filePath.startsWith("shared/")) {
+    return path.join(componentDir, "shared", filePath.substring(7));
   }
 
   // Component files from 'files/' go into 'components/' subdirectory

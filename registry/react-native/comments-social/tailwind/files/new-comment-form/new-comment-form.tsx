@@ -225,7 +225,7 @@ function NewCommentForm({
       ) : null}
       <View
         className={`relative overflow-visible ${
-          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+          theme === 'dark' ? 'bg-neutral-800' : 'bg-white'
         }`}
       >
         <View className="w-full relative overflow-visible">
@@ -239,27 +239,37 @@ function NewCommentForm({
         </View>
         <View
           className={`relative z-20 ${
-            theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+            theme === 'dark' ? 'bg-neutral-800' : 'bg-white'
           }`}
         >
           {createErrorMessage ? (
             <Text
               accessibilityRole="alert"
               className={`text-xs px-4 pt-2 pb-1 ${
-                theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+                theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
               }`}
             >
               {createErrorMessage}
             </Text>
           ) : null}
-          <EmojiSuggestions
-            onEmojiClick={(emoji) => {
-              setContent((c) => c + emoji);
-            }}
-          />
+          <View>
+            <EmojiSuggestions
+              onEmojiClick={(emoji) => {
+                setContent((c) => c + emoji);
+              }}
+            />
+            {/* The emoji bar draws its own light divider: in dark mode, cover it
+                and leave the themed border of the row below */}
+            {theme === 'dark' && (
+              <View
+                pointerEvents="none"
+                className="absolute left-0 right-0 bottom-0 h-px bg-neutral-800"
+              />
+            )}
+          </View>
           <View
             className={`flex-row items-center justify-end gap-2 py-2 pl-2 pr-4 border-t ${
-              theme === 'dark' ? 'border-gray-600' : 'border-gray-200'
+              theme === 'dark' ? 'border-neutral-600' : 'border-gray-200'
             }`}
           >
             {user && withAvatar && (
@@ -286,9 +296,9 @@ function NewCommentForm({
               onSubmitEditing={() => handleCreateComment()}
               blurOnSubmit={false}
               className={`flex-1 mx-2 text-sm bg-transparent border-0 p-0 m-0 ${
-                theme === 'dark' ? 'text-gray-200' : 'text-black'
+                theme === 'dark' ? 'text-neutral-200' : 'text-black'
               }`}
-              placeholderTextColor={theme === 'dark' ? '#9CA3AF' : '#6B7280'}
+              placeholderTextColor={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
             />
 
             {content.length === 0 && giphyApiKey ? (

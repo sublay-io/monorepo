@@ -66,7 +66,7 @@ function NewCommentForm({
   const [isGiphyVisible, setIsGiphyVisible] = useState(false);
 
   // 🎨 CUSTOMIZATION: Form styling defaults
-  const backgroundColor = theme === 'dark' ? '#1F2937' : '#fff';
+  const backgroundColor = theme === 'dark' ? '#262626' : '#fff';
   const withAvatar = true;
   const itemsGap = 8;
   const verticalPadding = 8;
@@ -75,8 +75,8 @@ function NewCommentForm({
   const authorAvatarSize = 32;
   const placeholderText = "Add a comment...";
   const textareaTextSize = 14;
-  const textareaTextColor = theme === 'dark' ? '#E5E7EB' : '#000';
-  const textareaBackgroundColor = theme === 'dark' ? '#1F2937' : '#fff';
+  const textareaTextColor = theme === 'dark' ? '#E5E5E5' : '#000';
+  const textareaBackgroundColor = theme === 'dark' ? '#262626' : '#fff';
   const postButtonText = "Post";
   const postButtonFontSize = 14;
   const postButtonFontColor = theme === 'dark' ? '#60A5FA' : '#0A99F6';
@@ -274,17 +274,34 @@ function NewCommentForm({
                 paddingHorizontal: 16,
                 paddingTop: 8,
                 paddingBottom: 4,
-                color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                color: theme === 'dark' ? '#A3A3A3' : '#737373',
               }}
             >
               {createErrorMessage}
             </Text>
           ) : null}
-          <EmojiSuggestions
-            onEmojiClick={(emoji) => {
-              setContent((c) => c + emoji);
-            }}
-          />
+          <View>
+            <EmojiSuggestions
+              onEmojiClick={(emoji) => {
+                setContent((c) => c + emoji);
+              }}
+            />
+            {/* The emoji bar draws its own light divider: in dark mode, cover it
+                and leave the themed border of the row below */}
+            {theme === 'dark' && (
+              <View
+                pointerEvents="none"
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 1,
+                  backgroundColor: "#262626",
+                }}
+              />
+            )}
+          </View>
           <View
             style={{
               flexDirection: "row",
@@ -295,7 +312,7 @@ function NewCommentForm({
               paddingBottom: verticalPadding,
               paddingLeft,
               paddingRight,
-              borderTopColor: theme === 'dark' ? "#4B5563" : "#e7e7e7",
+              borderTopColor: theme === 'dark' ? "#525252" : "#e7e7e7",
               borderTopWidth: 1,
             }}
           >

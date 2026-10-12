@@ -8,7 +8,7 @@ const CommentsFooterComponent = () => {
 
   // A failed page shows a retry; `loadMore()` re-sends the request that failed.
   if (hasMore && !loading && error) {
-    const mutedTextClass = theme === 'dark' ? 'text-gray-400' : 'text-neutral-500';
+    const mutedTextClass = theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500';
     return (
       <View className="p-3 flex-row justify-center items-center">
         <Text className={`text-xs ${mutedTextClass}`}>Couldn't load more · </Text>
@@ -25,7 +25,7 @@ const CommentsFooterComponent = () => {
     hasMore &&
     loading && (
       <View className="p-3 justify-center items-center">
-        <ActivityIndicator color={theme === 'dark' ? '#F9FAFB' : undefined} />
+        <ActivityIndicator color={theme === 'dark' ? '#FAFAFA' : undefined} />
       </View>
     )
   );

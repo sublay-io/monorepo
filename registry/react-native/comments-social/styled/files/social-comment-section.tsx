@@ -132,24 +132,24 @@ function SocialCommentSectionInner({
   const buttonStyles = {
     active: {
       // 🎨 CUSTOMIZATION: Sort button active styles
-      backgroundColor: theme === 'dark' ? '#1F2937' : 'black',
+      backgroundColor: theme === 'dark' ? '#262626' : 'black',
       paddingVertical: 4,
       paddingHorizontal: 8,
       borderRadius: 6,
     },
     textActive: {
-      color: theme === 'dark' ? '#F9FAFB' : 'white',
+      color: theme === 'dark' ? '#FAFAFA' : 'white',
       fontSize: 12,
     },
     inactive: {
       // 🎨 CUSTOMIZATION: Sort button inactive styles
-      backgroundColor: theme === 'dark' ? '#4B5563' : '#e5e7eb',
+      backgroundColor: theme === 'dark' ? '#525252' : '#e5e7eb',
       paddingVertical: 4,
       paddingHorizontal: 8,
       borderRadius: 6,
     },
     textInactive: {
-      color: theme === 'dark' ? '#F9FAFB' : 'black',
+      color: theme === 'dark' ? '#FAFAFA' : 'black',
       fontSize: 12,
     },
   };
@@ -202,7 +202,7 @@ function SocialCommentSectionInner({
         style={{
           flex: 1,
           // 🎨 CUSTOMIZATION: Feed background
-          backgroundColor: theme === 'dark' ? "#1F2937" : "#ffffff",
+          backgroundColor: theme === 'dark' ? "#262626" : "#ffffff",
         }}
       >
         <CommentsFeed>{children}</CommentsFeed>
@@ -212,7 +212,7 @@ function SocialCommentSectionInner({
         style={{
           // 🎨 CUSTOMIZATION: Form border color
           borderTopWidth: 1,
-          borderTopColor: theme === 'dark' ? "#4B5563" : "#e5e7eb",
+          borderTopColor: theme === 'dark' ? "#525252" : "#e5e7eb",
         }}
       >
         {isVisible && <NewCommentForm />}

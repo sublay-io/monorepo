@@ -23,13 +23,13 @@ const ReplyBanner = () => {
   return (
     <View
       className={`absolute left-0 right-0 bottom-0 z-10 overflow-hidden p-3 h-auto ${
-        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+        theme === 'dark' ? 'bg-neutral-700' : 'bg-gray-200'
       }`}
     >
       <View className="flex-row items-center justify-between">
         <Text
           className={`text-xs ${
-            theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+            theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
           }`}
         >
           Replying to {repliedToUser}
@@ -42,7 +42,7 @@ const ReplyBanner = () => {
         >
           <Text
             className={`text-base ${
-              theme === 'dark' ? 'text-gray-50' : 'text-black'
+              theme === 'dark' ? 'text-neutral-50' : 'text-black'
             }`}
           >
             &times;

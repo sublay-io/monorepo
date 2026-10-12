@@ -82,10 +82,10 @@ const ReportCommentSheet = () => {
         }
       }}
       backgroundStyle={{
-        backgroundColor: theme === 'dark' ? '#1F2937' : '#18181B',
+        backgroundColor: theme === 'dark' ? '#262626' : '#18181B',
       }}
       handleIndicatorStyle={{
-        backgroundColor: theme === 'dark' ? '#F9FAFB' : '#fff',
+        backgroundColor: theme === 'dark' ? '#FAFAFA' : '#fff',
       }}
     >
       <BottomSheetView
@@ -106,18 +106,18 @@ const ReportCommentSheet = () => {
           >
             <FlagIcon
               size={24}
-              color={theme === 'dark' ? '#F9FAFB' : '#e5e7eb'}
+              color={theme === 'dark' ? '#FAFAFA' : '#e5e7eb'}
             />
             <Text style={{
               fontSize: 24,
-              color: theme === 'dark' ? '#F9FAFB' : '#e5e7eb',
+              color: theme === 'dark' ? '#FAFAFA' : '#e5e7eb',
             }}>
               Submit a report
             </Text>
           </View>
           <Text
             style={{
-              color: theme === 'dark' ? '#F9FAFB' : '#e5e7eb',
+              color: theme === 'dark' ? '#FAFAFA' : '#e5e7eb',
               marginTop: 24,
             }}
           >
@@ -139,20 +139,20 @@ const ReportCommentSheet = () => {
                 key={index}
                 style={{
                   borderWidth: 1,
-                  borderColor: theme === 'dark' ? '#4B5563' : '#e5e7eb',
+                  borderColor: theme === 'dark' ? '#525252' : '#e5e7eb',
                   paddingHorizontal: 16,
                   paddingVertical: 10,
                   borderRadius: 12,
                   backgroundColor: key === reason
-                    ? (theme === 'dark' ? '#374151' : '#f9fafb')
+                    ? (theme === 'dark' ? '#404040' : '#f9fafb')
                     : "transparent",
                 }}
               >
                 <Text
                   style={{
                     color: key === reason
-                      ? (theme === 'dark' ? '#F9FAFB' : '#1f2937')
-                      : (theme === 'dark' ? '#9CA3AF' : '#e5e7eb'),
+                      ? (theme === 'dark' ? '#FAFAFA' : '#1f2937')
+                      : (theme === 'dark' ? '#A3A3A3' : '#e5e7eb'),
                   }}
                 >
                   {value}

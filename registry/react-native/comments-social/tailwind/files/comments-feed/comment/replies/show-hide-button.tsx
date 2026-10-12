@@ -67,14 +67,14 @@ const ShowHideButton = ({
 
   if (totalRepliesCount === 0) return null;
 
-  const mutedTextClass = theme === 'dark' ? 'text-gray-400' : 'text-neutral-500';
+  const mutedTextClass = theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500';
 
   if (failed && hasMore) {
     return (
       <View className="pt-2 pl-[58px] pr-4 flex-row items-center gap-3">
         <View
           className={`h-px w-6 mt-0.5 ${
-            theme === 'dark' ? 'bg-gray-400' : 'bg-neutral-500'
+            theme === 'dark' ? 'bg-neutral-400' : 'bg-neutral-500'
           }`}
         />
         <View className="flex-row items-center">
@@ -105,12 +105,12 @@ const ShowHideButton = ({
     >
       <View
         className={`h-px w-6 mt-0.5 ${
-          theme === 'dark' ? 'bg-gray-400' : 'bg-neutral-500'
+          theme === 'dark' ? 'bg-neutral-400' : 'bg-neutral-500'
         }`}
       />
       <Text
         className={`text-xs font-semibold ${
-          theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+          theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
         }`}
       >
         {text}

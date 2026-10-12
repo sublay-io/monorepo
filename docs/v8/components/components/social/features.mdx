@@ -123,7 +123,7 @@ Friendly placeholder when no comments exist. Customize `no-comments-placeholder.
 When a load fails, the component shows a retry instead of a wrong or stuck state:
 
 - **First load fails** — "Couldn't load comments" with a **Try again** button, in place of the empty state.
-- **The entity can't be loaded** — the same "Couldn't load comments" with **Try again**. This is the case when the section looks the entity up from `entityId`, `foreignId` or `shortId` and the lookup fails or finds nothing.
+- **The entity can't be loaded** — the same "Couldn't load comments" with **Try again**. This is the case when the section looks the entity up from `entityId`, `foreignId` or `shortId` and the lookup fails or finds nothing. A `foreignId` that has no entity yet finds nothing unless the section is given [`createIfNotFound`](/v8/components/components/social/props-api#createifnotfound).
 - **Loading more top-level comments fails** — "Couldn't load more · Try again" in place of the **Load more comments** button on web, and at the bottom of the list on React Native.
 - **Loading replies fails** — the same "Couldn't load more · Try again" in place of the "View more replies" button.
 

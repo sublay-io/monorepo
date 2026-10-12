@@ -6,7 +6,7 @@ icon: "sliders"
 
 # Social Comments Props
 
-The `SocialCommentSection` component follows the same **minimal props philosophy** as all Sublay components. It works with just `entityId` and offers optional props for specific needs.
+The `SocialCommentSection` component follows the same **minimal props philosophy** as all Sublay components. It works with a single prop that identifies the entity and offers optional props for specific needs.
 
 ---
 
@@ -27,6 +27,9 @@ interface SocialCommentSectionProps {
   entityId?: string | undefined | null;
   foreignId?: string | undefined | null;
   shortId?: string | undefined | null;
+
+  // With foreignId: create the entity if it doesn't exist yet
+  createIfNotFound?: boolean;
 
   // Optional features
   isVisible?: boolean;
@@ -50,12 +53,12 @@ A complete Entity object. Use when you already have it from `useFetchEntity` or 
 ### `entityId`
 **Type:** `string | undefined | null`
 
-The internal Sublay ID for the entity.
+The Sublay entity's own `id` (a UUID), as returned by the SDK and the API.
 
 ### `foreignId`
 **Type:** `string | undefined | null`
 
-Your external/custom ID for the entity. The component finds or creates the Sublay entity automatically. This is the most common option.
+Your external/custom ID for the entity. The component finds the Sublay entity that has this `foreignId`. It creates one only when [`createIfNotFound`](#createifnotfound) is also set.
 
 ### `shortId`
 **Type:** `string | undefined | null`
@@ -65,6 +68,24 @@ A short, human-readable identifier if you've set one on the entity.
 <Note>
 **You only need ONE of these props.** Use whichever fits your data model best.
 </Note>
+
+---
+
+### `createIfNotFound`
+
+**Type:** `boolean` — **Default:** `false`
+
+Used with `foreignId`. When set, the entity is created the first time the section is shown if no entity with that `foreignId` exists yet.
+
+```tsx
+<SocialCommentSection foreignId="photo_123" createIfNotFound />
+```
+
+Without it, the section only finds an existing entity. When there is none, it shows its ["Couldn't load comments" state](/v8/components/components/social/features#error-states) instead of the comments.
+
+It has no effect with `entity`, `entityId` or `shortId`.
+
+The other examples on this page pass `foreignId` alone, for an entity that already exists.
 
 ---
 
@@ -78,7 +99,7 @@ Controls whether the comment section is visible. Useful when rendering inside a 
 
 ```tsx
 <SocialCommentSection
-  entityId="photo_123"
+  foreignId="photo_123"
   isVisible={showComments}
 />
 ```
@@ -93,7 +114,7 @@ ID of a specific comment to highlight on load. Once it loads, the component show
 
 ```tsx
 <SocialCommentSection
-  entityId="photo_123"
+  foreignId="photo_123"
   highlightedCommentId="comment_456"
 />
 ```
@@ -138,7 +159,7 @@ ID of a specific comment to highlight on load. Once it loads, the component show
 Optional content rendered within the comment section.
 
 ```tsx
-<SocialCommentSection entityId="photo_123">
+<SocialCommentSection foreignId="photo_123">
   <div className="text-center text-gray-400 text-sm my-2">
     Share your thoughts!
   </div>
@@ -152,7 +173,7 @@ Optional content rendered within the comment section.
 ### Minimal
 
 ```tsx
-<SocialCommentSection foreignId="photo_123" />
+<SocialCommentSection foreignId="photo_123" createIfNotFound />
 ```
 
 ---

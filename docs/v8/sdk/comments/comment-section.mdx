@@ -12,13 +12,13 @@ Identify the target entity with one of four mutually exclusive props:
 ```tsx
 import { CommentSectionProvider } from "@sublay/react-js";
 
-// By foreign ID (most common — links to your own content)
+// By foreign ID (your own system's ID for the content)
 <CommentSectionProvider foreignId="your-article-id" createIfNotFound>
   <CommentList />
 </CommentSectionProvider>
 
-// By Sublay entity ID
-<CommentSectionProvider entityId="ent_abc123">
+// By Sublay entity ID (the entity's own `id`, a UUID)
+<CommentSectionProvider entityId="0b9d5a3e-6c1f-4f7a-9d2e-8a4c1b7e5f30">
   <CommentList />
 </CommentSectionProvider>
 
@@ -48,7 +48,7 @@ The section can be handed an entity in two ways: the `entity` prop, or, when the
 </ParamField>
 
 <ParamField path="foreignId" type="string">
-  Your system's ID for the entity.
+  Your system's ID for the entity. The section finds the entity that has it; it creates one only with `createIfNotFound`.
 </ParamField>
 
 <ParamField path="shortId" type="string">
@@ -60,7 +60,7 @@ The section can be handed an entity in two ways: the `entity` prop, or, when the
 </ParamField>
 
 <ParamField path="createIfNotFound" type="boolean">
-  Only valid with `foreignId`. Auto-creates the entity if it doesn't exist yet.
+  Used with `foreignId`. Default: `false`. When `true`, the entity is created the first time the section loads if no entity with that `foreignId` exists yet. Without it, the section only finds an existing entity: when there is none, `error` is set and no comments load.
 </ParamField>
 
 <ParamField path="limit" type="number">

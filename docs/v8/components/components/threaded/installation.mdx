@@ -164,7 +164,7 @@ function BlogPost({ post }) {
     <div>
       <h1>{post.title}</h1>
       <article>{post.content}</article>
-      <ThreadedCommentSection entityId={post.id} />
+      <ThreadedCommentSection foreignId={post.id} createIfNotFound />
     </div>
   );
 }

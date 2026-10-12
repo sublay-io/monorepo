@@ -39,7 +39,7 @@ You get **source code**, not packages. You **own** your components and can modif
     ```tsx
     import { ThreadedCommentSection } from './components/comments-threaded';
 
-    <ThreadedCommentSection entityId="my-post-123" />
+    <ThreadedCommentSection foreignId="my-post-123" createIfNotFound />
     ```
     The component works out of the box. Want to customize? Edit the source files directly.
   </Step>
@@ -184,7 +184,7 @@ The CLI checks for these and offers to install them automatically.
 
 The Sublay CLI follows these principles:
 
-1. **Minimal Props** — Components work with just `entityId`. No complex configuration required.
+1. **Minimal Props** — Components work with a single prop that identifies the entity. No complex configuration required.
 2. **Sensible Defaults** — Beautiful, accessible styling out of the box.
 3. **Edit, Don't Configure** — Customize by editing source code, not passing config objects.
 4. **Progressive Disclosure** — Ignore implementation details until you need to customize.

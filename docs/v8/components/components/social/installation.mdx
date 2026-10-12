@@ -151,7 +151,7 @@ function Post({ post }) {
     <div>
       <img src={post.image} alt={post.caption} />
       <p>{post.caption}</p>
-      <SocialCommentSection entityId={post.id} />
+      <SocialCommentSection foreignId={post.id} createIfNotFound />
     </div>
   );
 }

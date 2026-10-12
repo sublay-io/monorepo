@@ -130,6 +130,9 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+        // Shared registry pieces: component files import them as
+        // ~shared/<platform>/<piece> (rewritten to a relative path at install).
+        "~shared": path.resolve(__dirname, "../registry/shared"),
       },
     },
     // Dep pre-bundling skips plugin transforms. Linked workspace packages are

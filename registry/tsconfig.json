@@ -13,7 +13,8 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["react"],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "~shared/*": ["./shared/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],

@@ -17,7 +17,8 @@
     "noFallthroughCasesInSwitch": true,
     "types": ["vite/client"],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "~shared/*": ["../registry/shared/*"]
     }
   },
   "include": ["src", "../registry/react"]

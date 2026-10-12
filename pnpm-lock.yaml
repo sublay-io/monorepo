@@ -422,9 +422,6 @@ importers:
       '@sublay/react-js':
         specifier: workspace:*
         version: link:../packages/react-js
-      '@sublay/ui-core-react-js':
-        specifier: workspace:*
-        version: link:../packages/ui-core-react-js
       framer-motion:
         specifier: ^12.38.0
         version: 12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -498,12 +495,6 @@ importers:
       '@sublay/react-native':
         specifier: workspace:*
         version: link:../packages/react-native
-      '@sublay/ui-core-react-js':
-        specifier: workspace:*
-        version: link:../packages/ui-core-react-js
-      '@sublay/ui-core-react-native':
-        specifier: workspace:*
-        version: link:../packages/ui-core-react-native
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14

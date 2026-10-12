@@ -14,8 +14,6 @@
     "@sublay/expo": "workspace:*",
     "@sublay/react-js": "workspace:*",
     "@sublay/react-native": "workspace:*",
-    "@sublay/ui-core-react-js": "workspace:*",
-    "@sublay/ui-core-react-native": "workspace:*",
     "@types/react": "^19.2.14",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",

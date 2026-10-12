@@ -12,7 +12,7 @@ const SDK_DIST = path.resolve(__dirname, "../packages") + path.sep;
 
 // The dist folders of the SDK packages the playground loads (the same
 // packages as optimizeDeps.exclude below).
-const SDK_DIST_DIRS = ["core", "react-js", "ui-core-react-js"].map((name) =>
+const SDK_DIST_DIRS = ["core", "react-js"].map((name) =>
   path.resolve(__dirname, "../packages", name, "dist"),
 );
 
@@ -139,7 +139,7 @@ export default defineConfig(({ mode }) => {
     // not pre-bundled by default; excluding them explicitly keeps it that way
     // (including @sublay/core, which is only a transitive dependency here).
     optimizeDeps: {
-      exclude: ["@sublay/core", "@sublay/react-js", "@sublay/ui-core-react-js"],
+      exclude: ["@sublay/core", "@sublay/react-js"],
     },
   };
 });

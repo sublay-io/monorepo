@@ -6,7 +6,7 @@ icon: "folder-tree"
 
 # Social Comments File Structure
 
-25 files organized for simplicity and clarity. The trees below list every file.
+41 files (40 for the Tailwind variant on React Native and Expo) organized for simplicity and clarity: the component's own 25 files, and the shared pieces it is built from in `shared/`. The trees below list every file.
 
 ---
 
@@ -49,8 +49,25 @@ icon: "folder-tree"
     ├── utils/
     │   ├── prop-comparison.ts                    # Memoization helpers
     │   └── comment-create-error.ts               # Messages shown when posting fails
-    └── context/
-        └── ui-state-context.tsx                  # Modal & theme context
+    ├── context/
+    │   └── ui-state-context.tsx                  # Modal & theme context
+    └── shared/
+        ├── ellipsis-icon.tsx                     # Three-dots icon
+        ├── emoji-suggestions.tsx                 # Emoji bar above the input
+        ├── flag-icon.tsx                         # Report icon
+        ├── from-now.tsx                          # Relative time ("5 minutes ago")
+        ├── get-user-avatar.ts                    # Generated avatar for users without one
+        ├── giphy-container.tsx                   # GIF picker
+        ├── heart-full-icon.tsx                   # Filled heart icon
+        ├── heart-icon.tsx                        # Outline heart icon
+        ├── magnifying-glass-icon.tsx             # Search icon of the GIF picker
+        ├── modal.tsx                             # Modal dialog
+        ├── parse-content-with-mentions.tsx       # Makes @mentions clickable
+        ├── reset-styles.ts                       # Style resets
+        ├── skeleton.tsx                          # Loading skeletons
+        ├── theme.ts                              # Light and dark colors of these files
+        ├── use-textarea-cursor-indicator.tsx     # Cursor position in the textarea
+        └── user-avatar.tsx                       # User avatar
     ```
   </Tab>
   <Tab title="React Native / Expo">
@@ -91,8 +108,25 @@ icon: "folder-tree"
     ├── utils/
     │   ├── prop-comparison.ts                   # Memoization helpers
     │   └── comment-create-error.ts              # Messages shown when posting fails
-    └── context/
-        └── ui-state-context.tsx                 # Modal & theme context
+    ├── context/
+    │   └── ui-state-context.tsx                 # Modal & theme context
+    └── shared/
+        ├── custom-button.tsx                    # Button
+        ├── emoji-suggestions.tsx                # Emoji bar above the input
+        ├── flag-icon.tsx                        # Report icon
+        ├── from-now.tsx                         # Relative time ("5 minutes ago")
+        ├── get-image-component.tsx              # expo-image when installed, else Image
+        ├── giphy-container.tsx                  # GIF picker
+        ├── heart-full-icon.tsx                  # Filled heart icon
+        ├── heart-icon.tsx                       # Outline heart icon
+        ├── magnifying-glass-icon.tsx            # Search icon of the GIF picker
+        ├── parse-content-with-mentions.tsx      # Makes @mentions clickable
+        ├── reset-styles.ts                      # Style resets (inline styles variant only)
+        ├── skeleton.tsx                         # Loading skeletons
+        ├── theme.ts                             # Light and dark colors of these files
+        ├── trash-icon.tsx                       # Delete icon
+        ├── use-text-input-cursor-indicator.tsx  # Cursor position in the input
+        └── user-avatar.tsx                      # User avatar
     ```
   </Tab>
 </Tabs>
@@ -155,6 +189,17 @@ const { CommentSectionProvider, providerProps } = useSocialComments({ entityId }
 ```
 
 To pass the provider something new, add it to `providerProps`.
+
+---
+
+### `shared/` — Shared Pieces
+
+Presentational pieces the component is built from: the GIF picker, the user avatar, loading skeletons, mention parsing, icons, the emoji bar, relative timestamps and a few helpers. They are installed into the component's own folder and are yours to edit like every other file. Each installed component has its own copy, so editing one component's `shared/` folder does not affect another.
+
+`theme.ts` holds the light and dark colors these pieces draw with (GIF picker surface and controls, skeletons, the emoji bar divider, mention text). Edit it to change them.
+
+- **Inline styles variant, and every React Native / Expo variant:** the component passes its `theme` to the pieces.
+- **Tailwind variant on web:** the pieces read CSS custom properties (`--sublay-ui-surface`, `--sublay-ui-control`, `--sublay-ui-muted`, `--sublay-ui-text`, `--sublay-ui-divider`, `--sublay-ui-skeleton`, `--sublay-ui-mention`). The root element in `social-comment-section.tsx` sets them to the dark values under `dark:`. If you build your own layout from `CommentsFeed` and `NewCommentForm`, keep those classes on an element that wraps both.
 
 ---
 

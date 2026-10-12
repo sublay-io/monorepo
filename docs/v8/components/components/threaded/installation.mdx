@@ -20,21 +20,23 @@ Add Reddit-style threaded comments to your project with a single command.
     Creates your `sublay.json` configuration file.
   </Step>
 
-  <Step title="Install Dependencies">
+  <Step title="Install the Sublay SDK">
     **React (Web):**
     ```bash
-    npm install @sublay/react-js @sublay/ui-core-react-js
+    npm install @sublay/react-js
     ```
 
     **React Native:**
     ```bash
-    npm install @sublay/react-native @sublay/ui-core-react-native
+    npm install @sublay/react-native
     ```
 
     **Expo:**
     ```bash
-    npm install @sublay/expo @sublay/ui-core-react-native
+    npm install @sublay/expo
     ```
+
+    The component's other packages are listed under [Required Dependencies](/v8/components/components/threaded/overview#required-dependencies). `add` offers to install any that are missing.
   </Step>
 </Steps>
 
@@ -45,8 +47,10 @@ See the [CLI Setup Guide](/v8/components/installation/cli-setup) for details.
 ## Installation Command
 
 ```bash
-npx @sublay/cli add comments-threaded
+npx @sublay/cli add comments-threaded --ref v8
 ```
+
+`--ref v8` reads the component from the `v8` branch of the registry, where the v8 components live.
 
 ---
 
@@ -55,7 +59,7 @@ npx @sublay/cli add comments-threaded
 The CLI will:
 
 1. **Fetch the component** from the registry based on your `sublay.json` platform and style settings
-2. **Copy the component's files** (28 on web, 27 on React Native and Expo) into your project at `{componentsPath}/comments-threaded/`
+2. **Copy the component's files** (39 on web, 38 on React Native and Expo) into your project at `{componentsPath}/comments-threaded/`: the component's own files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
 3. **Transform imports** to work with your project structure
 4. **Create `index.ts`** barrel export for clean imports
 5. **Display usage examples** and required dependencies
@@ -102,8 +106,20 @@ The CLI will:
     ├── utils/
     │   ├── prop-comparison.ts                           # Memoization helpers
     │   └── comment-create-error.ts                      # Messages shown when posting fails
-    └── context/
-        └── ui-state-context.tsx                         # Modal & theme context
+    ├── context/
+    │   └── ui-state-context.tsx                         # Modal & theme context
+    └── shared/
+        ├── flag-icon.tsx                                # Report icon
+        ├── get-user-avatar.ts                           # Generated avatar for users without one
+        ├── giphy-container.tsx                          # GIF picker
+        ├── magnifying-glass-icon.tsx                    # Search icon of the GIF picker
+        ├── modal.tsx                                    # Modal dialog
+        ├── parse-content-with-mentions.tsx              # Makes @mentions clickable
+        ├── reset-styles.ts                              # Style resets
+        ├── skeleton.tsx                                 # Loading skeletons
+        ├── theme.ts                                     # Light and dark colors of these files
+        ├── use-textarea-cursor-indicator.tsx            # Cursor position in the textarea
+        └── user-avatar.tsx                              # User avatar
     ```
   </Tab>
   <Tab title="React Native / Expo">
@@ -144,8 +160,20 @@ The CLI will:
     ├── utils/
     │   ├── prop-comparison.ts                           # Memoization helpers
     │   └── comment-create-error.ts                      # Messages shown when posting fails
-    └── context/
-        └── ui-state-context.tsx                         # Modal & theme context
+    ├── context/
+    │   └── ui-state-context.tsx                         # Modal & theme context
+    └── shared/
+        ├── custom-button.tsx                            # Button
+        ├── flag-icon.tsx                                # Report icon
+        ├── get-image-component.tsx                      # expo-image when installed, else Image
+        ├── giphy-container.tsx                          # GIF picker
+        ├── magnifying-glass-icon.tsx                    # Search icon of the GIF picker
+        ├── parse-content-with-mentions.tsx              # Makes @mentions clickable
+        ├── skeleton.tsx                                 # Loading skeletons
+        ├── theme.ts                                     # Light and dark colors of these files
+        ├── trash-icon.tsx                               # Delete icon
+        ├── use-text-input-cursor-indicator.tsx          # Cursor position in the input
+        └── user-avatar.tsx                              # User avatar
     ```
   </Tab>
 </Tabs>
@@ -198,7 +226,7 @@ To switch between Tailwind and Inline Styles after installation:
 
   <Step title="Re-install">
     ```bash
-    npx @sublay/cli add comments-threaded
+    npx @sublay/cli add comments-threaded --ref v8
     ```
   </Step>
 </Steps>
@@ -242,7 +270,7 @@ This replaces your component files. Back up any customizations first.
 
     ```bash
     git status src/components/comments-threaded
-    npx @sublay/cli add comments-threaded
+    npx @sublay/cli add comments-threaded --ref v8
     ```
   </Accordion>
 </AccordionGroup>

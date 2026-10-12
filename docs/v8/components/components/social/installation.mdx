@@ -20,21 +20,23 @@ Add Instagram-style social comments to your project with a single command.
     Creates your `sublay.json` configuration file. Select your platform and styling preference.
   </Step>
 
-  <Step title="Install Dependencies">
+  <Step title="Install the Sublay SDK">
     **React (Web):**
     ```bash
-    npm install @sublay/react-js @sublay/ui-core-react-js
+    npm install @sublay/react-js
     ```
 
     **React Native:**
     ```bash
-    npm install @sublay/react-native @sublay/ui-core-react-native
+    npm install @sublay/react-native
     ```
 
     **Expo:**
     ```bash
-    npm install @sublay/expo @sublay/ui-core-react-native
+    npm install @sublay/expo
     ```
+
+    The component's other packages are listed under [Required Dependencies](/v8/components/components/social/overview#required-dependencies). `add` offers to install any that are missing.
   </Step>
 </Steps>
 
@@ -45,14 +47,16 @@ See the [CLI Setup Guide](/v8/components/installation/cli-setup) for details.
 ## Installation Command
 
 ```bash
-npx @sublay/cli add comments-social
+npx @sublay/cli add comments-social --ref v8
 ```
+
+`--ref v8` reads the component from the `v8` branch of the registry, where the v8 components live.
 
 ---
 
 ## What Gets Installed
 
-The CLI copies 25 files into your project:
+The CLI copies 41 files into your project (40 for the Tailwind variant on React Native and Expo): the component's own 25 files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
 
 <Tabs>
   <Tab title="React (Web)">
@@ -91,8 +95,25 @@ The CLI copies 25 files into your project:
     ├── utils/
     │   ├── prop-comparison.ts                    # Memoization helpers
     │   └── comment-create-error.ts               # Messages shown when posting fails
-    └── context/
-        └── ui-state-context.tsx                  # Modal & theme context
+    ├── context/
+    │   └── ui-state-context.tsx                  # Modal & theme context
+    └── shared/
+        ├── ellipsis-icon.tsx                     # Three-dots icon
+        ├── emoji-suggestions.tsx                 # Emoji bar above the input
+        ├── flag-icon.tsx                         # Report icon
+        ├── from-now.tsx                          # Relative time ("5 minutes ago")
+        ├── get-user-avatar.ts                    # Generated avatar for users without one
+        ├── giphy-container.tsx                   # GIF picker
+        ├── heart-full-icon.tsx                   # Filled heart icon
+        ├── heart-icon.tsx                        # Outline heart icon
+        ├── magnifying-glass-icon.tsx             # Search icon of the GIF picker
+        ├── modal.tsx                             # Modal dialog
+        ├── parse-content-with-mentions.tsx       # Makes @mentions clickable
+        ├── reset-styles.ts                       # Style resets
+        ├── skeleton.tsx                          # Loading skeletons
+        ├── theme.ts                              # Light and dark colors of these files
+        ├── use-textarea-cursor-indicator.tsx     # Cursor position in the textarea
+        └── user-avatar.tsx                       # User avatar
     ```
   </Tab>
   <Tab title="React Native / Expo">
@@ -133,8 +154,25 @@ The CLI copies 25 files into your project:
     ├── utils/
     │   ├── prop-comparison.ts                   # Memoization helpers
     │   └── comment-create-error.ts              # Messages shown when posting fails
-    └── context/
-        └── ui-state-context.tsx                 # Modal & theme context
+    ├── context/
+    │   └── ui-state-context.tsx                 # Modal & theme context
+    └── shared/
+        ├── custom-button.tsx                    # Button
+        ├── emoji-suggestions.tsx                # Emoji bar above the input
+        ├── flag-icon.tsx                        # Report icon
+        ├── from-now.tsx                         # Relative time ("5 minutes ago")
+        ├── get-image-component.tsx              # expo-image when installed, else Image
+        ├── giphy-container.tsx                  # GIF picker
+        ├── heart-full-icon.tsx                  # Filled heart icon
+        ├── heart-icon.tsx                       # Outline heart icon
+        ├── magnifying-glass-icon.tsx            # Search icon of the GIF picker
+        ├── parse-content-with-mentions.tsx      # Makes @mentions clickable
+        ├── reset-styles.ts                      # Style resets (inline styles variant only)
+        ├── skeleton.tsx                         # Loading skeletons
+        ├── theme.ts                             # Light and dark colors of these files
+        ├── trash-icon.tsx                       # Delete icon
+        ├── use-text-input-cursor-indicator.tsx  # Cursor position in the input
+        └── user-avatar.tsx                      # User avatar
     ```
   </Tab>
 </Tabs>
@@ -191,7 +229,7 @@ Make sure your app is wrapped with `<SublayProvider>`. See the [Quick Start Guid
 
   <Step title="Re-install">
     ```bash
-    npx @sublay/cli add comments-social
+    npx @sublay/cli add comments-social --ref v8
     ```
   </Step>
 </Steps>

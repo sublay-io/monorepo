@@ -28,11 +28,11 @@ You get **source code**, not packages. You **own** your components and can modif
 
   <Step title="Add Components">
     ```bash
-    npx @sublay/cli add comments-threaded
+    npx @sublay/cli add comments-threaded --ref v8
     # or
-    npx @sublay/cli add comments-social
+    npx @sublay/cli add comments-social --ref v8
     ```
-    Components are copied directly into your `src/components/` directory as editable source files.
+    Components are copied directly into your `src/components/` directory as editable source files. `--ref v8` reads the component from the `v8` branch of the registry, where the v8 components live.
   </Step>
 
   <Step title="Use & Customize">
@@ -107,19 +107,20 @@ Choose your variant during `init` — you can switch by re-running `add` command
 
 ## What Gets Installed
 
-When you add a component, approximately **25 TypeScript/TSX files** are copied into your project:
+When you add a comment component, about **40 TypeScript/TSX files** are copied into your project (39 for threaded comments and 41 for social comments on web):
 
 ```
 src/components/comments-threaded/
 ├── index.ts                    # Entry point
-├── components/                 # All UI components (~20 files)
+├── components/                 # All UI components (22 files)
 │   ├── threaded-comment-section.tsx
 │   ├── new-comment-form.tsx
 │   ├── comments-feed/
 │   └── modals/
 ├── hooks/                      # React hooks
 ├── utils/                      # Utilities
-└── context/                    # React context
+├── context/                    # React context
+└── shared/                     # Shared pieces: GIF picker, avatar, skeletons, icons (11 files)
 ```
 
 Every file is:
@@ -132,27 +133,26 @@ Every file is:
 
 ## Required Dependencies
 
-Components depend on Sublay's core libraries for data fetching, real-time updates, authentication, and more.
+Components depend on Sublay's core libraries for data fetching, real-time updates, authentication, and more. The files in a component's `shared/` folder add a few third-party packages.
 
 **For React (Web):**
-```json
-{
-  "dependencies": {
-    "@sublay/react-js": "^7.0.0",
-    "@sublay/ui-core-react-js": "^7.0.0"
-  }
-}
-```
+
+| Package | Used for |
+|---------|----------|
+| `@sublay/react-js` `^8.0.0-beta.0` | Data, authentication, real-time updates |
+| `@giphy/js-fetch-api` `^5.7.0`, `@giphy/react-components` `^10.1.1` | The GIF picker |
+| `moment` `^2` | Relative timestamps (social comments only) |
 
 **For React Native / Expo:**
-```json
-{
-  "dependencies": {
-    "@sublay/react-native": "^7.0.0",
-    "@sublay/ui-core-react-native": "^7.0.0"
-  }
-}
-```
+
+| Package | Used for |
+|---------|----------|
+| `@sublay/react-native` `^8.0.0-beta.0` (`@sublay/expo` on Expo) | Data, authentication, real-time updates |
+| `@gorhom/bottom-sheet` `^5.0.0`, `react-native-reanimated` `^3.16.0` | The comment menu and report sheets |
+| `react-native-gesture-handler` `^2.31.1` | The sheets and the GIF picker |
+| `react-native-svg` `^15` | Icons |
+| `moment` `^2` | Relative timestamps (social comments only) |
+| `nativewind` `^4.0.0` | Tailwind variant only |
 
 The CLI checks for these and offers to install them automatically.
 

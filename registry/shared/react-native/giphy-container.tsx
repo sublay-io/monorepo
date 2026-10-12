@@ -416,7 +416,13 @@ export default function GiphyContainer({
           >
             {renderMasonryColumns()}
             {loadingMore && (
-              <Text style={{ textAlign: "center", marginVertical: 16 }}>
+              <Text
+                style={{
+                  textAlign: "center",
+                  marginVertical: 16,
+                  color: colors.text,
+                }}
+              >
                 Loading more...
               </Text>
             )}

@@ -9,7 +9,7 @@ function Skeleton({
     <>
       <style>
         {`
-      @keyframes pulse {
+      @keyframes sublay-pulse {
         0% { opacity: 1; }
         50% { opacity: 0.3; }
         100% { opacity: 1; }
@@ -18,7 +18,7 @@ function Skeleton({
       </style>
       <div
         style={{
-          animation: "pulse 1.5s ease-in-out infinite",
+          animation: "sublay-pulse 1.5s ease-in-out infinite",
           width: "100%",
           height: 16,
           borderRadius: 8,

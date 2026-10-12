@@ -2,9 +2,16 @@ import { CommentSkeleton } from "~shared/react/skeleton";
 
 function FetchingCommentsSkeletons() {
   return (
-    <div className="grid gap-2 pb-6 px-4">
+    // Sized and spaced like the comment rows they stand in for
+    <div className="grid gap-11 pt-3 pb-6">
       {[1, 2, 3].map((i) => (
-        <CommentSkeleton key={i} />
+        <CommentSkeleton
+          avatarSize={24}
+          gap={12}
+          lineGap={12}
+          paddingLeft={0}
+          key={i}
+        />
       ))}
     </div>
   );

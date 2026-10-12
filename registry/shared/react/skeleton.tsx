@@ -30,27 +30,43 @@ function Skeleton({
   );
 }
 
+// The layout values mirror a real comment row, so the skeleton sits where the
+// content will appear. Pass the values of the component it stands in for.
 function CommentSkeleton({
+  avatarSize = 32,
+  gap = 12,
+  lineGap = 8,
+  paddingLeft = 16,
   extraLeftPadding = 0,
   theme = "light",
 }: {
-  extraLeftPadding?: number;
+  avatarSize?: number; // Avatar diameter
+  gap?: number; // Space between the avatar and the text lines
+  lineGap?: number; // Space between the text lines
+  paddingLeft?: number; // Space before the avatar
+  extraLeftPadding?: number; // Added to paddingLeft (for nested rows)
   theme?: UITheme;
 }) {
   return (
     <div
       style={{
         display: "flex",
-        gap: "8px",
+        gap,
         width: "100%",
-        paddingLeft: 16 + extraLeftPadding,
+        boxSizing: "border-box",
+        paddingLeft: paddingLeft + extraLeftPadding,
       }}
     >
       <Skeleton
         theme={theme}
-        style={{ height: 32, width: 32, borderRadius: "50%" }}
+        style={{
+          height: avatarSize,
+          width: avatarSize,
+          borderRadius: "50%",
+          flexShrink: 0,
+        }}
       />
-      <div style={{ display: "grid", gap: "8px", flex: 1 }}>
+      <div style={{ display: "grid", gap: lineGap, flex: 1, alignContent: "start" }}>
         <Skeleton theme={theme} style={{ width: "30%", height: 12 }} />
         <Skeleton theme={theme} style={{ height: 12 }} />
         <Skeleton theme={theme} style={{ width: "15%", height: 12 }} />

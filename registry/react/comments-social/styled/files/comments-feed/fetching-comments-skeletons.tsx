@@ -12,15 +12,16 @@ function FetchingCommentsSkeletons() {
         display: "flex",
         flexDirection: "column",
         // 🎨 CUSTOMIZATION: Feed background and gap (Default: white, 8px gap)
-        gap: 8,
+        // Sized and spaced like the comment rows they stand in for
+        gap: 28,
         backgroundColor: theme === 'dark' ? '#262626' : '#fff',
+        paddingTop: 8,
         paddingBottom: 24,
-        paddingRight: 16,
-        paddingLeft: 16,
+        paddingRight: 42,
       }}
     >
       {[1, 2, 3].map((i) => (
-        <CommentSkeleton theme={theme} key={i} />
+        <CommentSkeleton theme={theme} lineGap={18} key={i} />
       ))}
     </div>
   );

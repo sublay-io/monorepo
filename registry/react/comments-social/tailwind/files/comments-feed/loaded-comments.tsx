@@ -9,7 +9,7 @@ function LoadedComments({ data }: { data: CommentType[] }) {
   return (
     <div
       style={resetDiv}
-      className="grid gap-2 bg-white dark:bg-gray-800"
+      className="grid gap-2 bg-white dark:bg-neutral-800"
     >
       {highlightedComment ? (
         <Comment

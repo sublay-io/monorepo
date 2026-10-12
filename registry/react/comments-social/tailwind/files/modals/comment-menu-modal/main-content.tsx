@@ -20,11 +20,11 @@ function MainContent({ clickReport }: { clickReport: () => void }) {
           Report
         </button>
       </li>
-      <div className="h-px w-full bg-gray-200 dark:bg-gray-600" />
+      <div className="h-px w-full bg-gray-200 dark:bg-neutral-600" />
       <li className="flex justify-center justify-self-center">
         <button
           style={resetButton}
-          className="text-gray-900 dark:text-gray-50 px-6 py-2"
+          className="text-gray-900 dark:text-neutral-50 px-6 py-2"
           onClick={closeCommentMenuModal}
         >
           Cancel

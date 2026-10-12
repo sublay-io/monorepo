@@ -31,20 +31,20 @@
  * TAILWIND CLASSES USED:
  *
  * BACKGROUNDS:
- * - bg-white dark:bg-gray-800 (main background)
- * - bg-gray-50 dark:bg-gray-700 (secondary background, hover states)
- * - bg-gray-200 dark:bg-gray-600 (sort buttons inactive, dividers)
- * - bg-black dark:bg-gray-800 (sort buttons active)
+ * - bg-white dark:bg-neutral-800 (main background)
+ * - bg-gray-50 dark:bg-neutral-700 (secondary background, hover states)
+ * - bg-gray-200 dark:bg-neutral-600 (sort buttons inactive, dividers)
+ * - bg-black dark:bg-neutral-800 (sort buttons active)
  *
  * TEXT:
- * - text-gray-900 dark:text-gray-50 (primary text - author names, headings)
- * - text-gray-900 dark:text-gray-200 (comment body)
- * - text-gray-500 dark:text-gray-400 (secondary text - timestamps, reply button)
- * - text-gray-600 dark:text-gray-400 (tertiary text - likes count)
- * - text-white dark:text-gray-50 (sort button active text)
+ * - text-gray-900 dark:text-neutral-50 (primary text - author names, headings)
+ * - text-gray-900 dark:text-neutral-200 (comment body)
+ * - text-gray-500 dark:text-neutral-400 (secondary text - timestamps, reply button)
+ * - text-gray-600 dark:text-neutral-400 (tertiary text - likes count)
+ * - text-white dark:text-neutral-50 (sort button active text)
  *
  * BORDERS:
- * - border-gray-200 dark:border-gray-600 (borders, dividers)
+ * - border-gray-200 dark:border-neutral-600 (borders, dividers)
  *
  * BLUES (post button, links):
  * - text-blue-600 dark:text-blue-400 (primary blue - post button)
@@ -146,7 +146,7 @@ function SocialCommentSectionInner({
             </div>
           }
           nonActiveView={
-            <div className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded-md text-gray-900 dark:text-gray-50 text-xs">
+            <div className="bg-gray-200 dark:bg-neutral-600 px-2 py-1 rounded-md text-gray-900 dark:text-neutral-50 text-xs">
               {label}
             </div>
           }
@@ -159,19 +159,19 @@ function SocialCommentSectionInner({
     <div className="h-full flex flex-col">
       {sortOptions.length > 0 && (
         <div
-          className="flex px-6 py-3 items-center gap-1 justify-end bg-white dark:bg-gray-800"
+          className="flex px-6 py-3 items-center gap-1 justify-end bg-white dark:bg-neutral-800"
         >
           {renderSortButtons()}
         </div>
       )}
 
       <div
-        className="flex-1 overflow-y-auto bg-white dark:bg-gray-800"
+        className="flex-1 overflow-y-auto bg-white dark:bg-neutral-800"
       >
         <CommentsFeed>{children}</CommentsFeed>
       </div>
 
-      <div className="border-t border-gray-200 dark:border-gray-600">
+      <div className="border-t border-gray-200 dark:border-neutral-600">
         {isVisible && <NewCommentForm />}
       </div>
     </div>

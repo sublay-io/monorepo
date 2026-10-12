@@ -25,7 +25,7 @@ function CommentMenuModal() {
         onClick={(e) => e.stopPropagation()}
         style={resetDiv}
         className={cn(
-          "bg-white dark:bg-gray-800",
+          "bg-white dark:bg-neutral-800",
           "rounded-lg",
           "w-full max-w-[520px]",
           "self-center",

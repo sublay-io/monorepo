@@ -32,7 +32,7 @@ function MainContent({ clickReport }: { clickReport: () => void }) {
           Report
         </button>
       </li>
-      <div style={{ height: 1, width: "100%", backgroundColor: theme === 'dark' ? "#4B5563" : "#e7e7e7" }} />
+      <div style={{ height: 1, width: "100%", backgroundColor: theme === 'dark' ? "#525252" : "#e7e7e7" }} />
       <li
         style={{
           display: "flex",
@@ -43,7 +43,7 @@ function MainContent({ clickReport }: { clickReport: () => void }) {
         <button
           style={{
             ...resetButton,
-            color: theme === 'dark' ? "#D1D5DB" : "#374151", // 🎨 CUSTOMIZATION: Cancel button text color
+            color: theme === 'dark' ? "#D4D4D4" : "#374151", // 🎨 CUSTOMIZATION: Cancel button text color
             paddingLeft: 24,
             paddingRight: 24,
             paddingTop: 8,

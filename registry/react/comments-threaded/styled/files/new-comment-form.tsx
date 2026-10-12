@@ -215,9 +215,9 @@ function NewCommentForm() {
             display: "flex",
             alignItems: "flex-end",
             // 🎨 CUSTOMIZATION: Comment form styling (Default: white)
-            backgroundColor: theme === 'dark' ? "#1F2937" : "#FFFFFF",
+            backgroundColor: theme === 'dark' ? "#262626" : "#FFFFFF",
             borderRadius: "16px",
-            border: `1px solid ${hasContent ? (theme === 'dark' ? "#1E40AF" : "#BFDBFE") : (theme === 'dark' ? "#4B5563" : "#E5E7EB")}`,
+            border: `1px solid ${hasContent ? (theme === 'dark' ? "#1E40AF" : "#BFDBFE") : (theme === 'dark' ? "#525252" : "#E5E7EB")}`,
             boxShadow: hasContent
               ? "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
               : "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
@@ -253,7 +253,7 @@ function NewCommentForm() {
               // 🎨 CUSTOMIZATION: Comment form styling (Default: transparent)
               backgroundColor: "transparent",
               // 🎨 CUSTOMIZATION: Comment form styling (Default: gray-900)
-              color: theme === 'dark' ? "#F9FAFB" : "#111827",
+              color: theme === 'dark' ? "#FAFAFA" : "#111827",
               // 🎨 CUSTOMIZATION: Comment form styling (Default: 12px)
               fontSize: "12px",
               lineHeight: "1.625",
@@ -279,7 +279,7 @@ function NewCommentForm() {
                 // 🎨 CUSTOMIZATION: Comment form styling (Default: 12px)
                 fontSize: "12px",
                 // 🎨 CUSTOMIZATION: Comment form styling (Default: gray-500)
-                color: theme === 'dark' ? "#F9FAFB" : "#6B7280",
+                color: theme === 'dark' ? "#FAFAFA" : "#6B7280",
                 cursor: "pointer",
                 backgroundColor: "transparent",
               }}
@@ -296,8 +296,8 @@ function NewCommentForm() {
                 padding: "8px",
                 borderRadius: "50%",
                 backgroundColor:
-                  hasContent && !isSubmitting ? (theme === 'dark' ? "#3B82F6" : "#2563EB") : (theme === 'dark' ? "#4B5563" : "#E5E7EB"),
-                color: hasContent && !isSubmitting ? "#FFFFFF" : (theme === 'dark' ? "#6B7280" : "#9CA3AF"),
+                  hasContent && !isSubmitting ? (theme === 'dark' ? "#2563EB" : "#2563EB") : (theme === 'dark' ? "#525252" : "#E5E7EB"),
+                color: hasContent && !isSubmitting ? "#FFFFFF" : (theme === 'dark' ? "#737373" : "#9CA3AF"),
                 boxShadow:
                   "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
                 transition: "all 200ms ease-in-out",
@@ -307,14 +307,14 @@ function NewCommentForm() {
               }}
               onMouseEnter={(e) => {
                 if (hasContent && !isSubmitting) {
-                  e.currentTarget.style.backgroundColor = theme === 'dark' ? "#2563EB" : "#1D4ED8";
+                  e.currentTarget.style.backgroundColor = theme === 'dark' ? "#3B82F6" : "#1D4ED8";
                   e.currentTarget.style.boxShadow =
                     "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
                 }
               }}
               onMouseLeave={(e) => {
                 if (hasContent && !isSubmitting) {
-                  e.currentTarget.style.backgroundColor = theme === 'dark' ? "#3B82F6" : "#2563EB";
+                  e.currentTarget.style.backgroundColor = theme === 'dark' ? "#2563EB" : "#2563EB";
                   e.currentTarget.style.boxShadow =
                     "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)";
                 }
@@ -368,7 +368,7 @@ function NewCommentForm() {
               margin: "6px 0 0",
               padding: "0 8px",
               fontSize: "12px",
-              color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
+              color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
             }}
           >
             {createErrorMessage}

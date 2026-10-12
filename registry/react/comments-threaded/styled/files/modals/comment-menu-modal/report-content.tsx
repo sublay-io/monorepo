@@ -52,9 +52,9 @@ function ReportContent({ resetView }: { resetView: () => void }) {
     <div style={{ padding: 24, width: "100%" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
         <FlagIcon size={24} color={theme === 'dark' ? "#FFFFFF" : "#000"} />
-        <span style={{ fontSize: "24px", color: theme === 'dark' ? "#F9FAFB" : "#111827" }}>Submit a report</span>
+        <span style={{ fontSize: "24px", color: theme === 'dark' ? "#FAFAFA" : "#111827" }}>Submit a report</span>
       </div>
-      <p style={{ marginTop: "24px", color: theme === 'dark' ? "#D1D5DB" : "#374151" }}>
+      <p style={{ marginTop: "24px", color: theme === 'dark' ? "#D4D4D4" : "#374151" }}>
         Thank you for looking out for our community. Let us know what is
         happening, and we'll look into it.
       </p>
@@ -74,9 +74,9 @@ function ReportContent({ resetView }: { resetView: () => void }) {
             style={{
               padding: "4px 8px",
               borderRadius: "6px",
-              backgroundColor: key === reason ? (theme === 'dark' ? "#FFFFFF" : "#000") : (theme === 'dark' ? "#4B5563" : "#e5e7eb"),
+              backgroundColor: key === reason ? (theme === 'dark' ? "#FFFFFF" : "#000") : (theme === 'dark' ? "#525252" : "#e5e7eb"),
               cursor: "pointer",
-              color: key === reason ? (theme === 'dark' ? "#000" : "#fff") : (theme === 'dark' ? "#9CA3AF" : "#9d9d9e"),
+              color: key === reason ? (theme === 'dark' ? "#000" : "#fff") : (theme === 'dark' ? "#A3A3A3" : "#9d9d9e"),
               fontSize: 14,
             }}
           >
@@ -99,8 +99,8 @@ function ReportContent({ resetView }: { resetView: () => void }) {
           fontWeight: "500",
           lineHeight: "1.25",
           borderRadius: "0.375rem",
-          backgroundColor: buttonActive ? (theme === 'dark' ? "#FFFFFF" : "#000") : (theme === 'dark' ? "#4B5563" : "#e5e7eb"),
-          color: buttonActive ? (theme === 'dark' ? "#000" : "#ffffff") : (theme === 'dark' ? "#6B7280" : "#9d9d9e"),
+          backgroundColor: buttonActive ? (theme === 'dark' ? "#FFFFFF" : "#000") : (theme === 'dark' ? "#525252" : "#e5e7eb"),
+          color: buttonActive ? (theme === 'dark' ? "#000" : "#ffffff") : (theme === 'dark' ? "#737373" : "#9d9d9e"),
           cursor: buttonActive ? "pointer" : "not-allowed",
           transition:
             "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",

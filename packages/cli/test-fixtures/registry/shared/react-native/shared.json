@@ -1,0 +1,10 @@
+{
+  "platform": "react-native",
+  "pieces": {
+    "from-now": {
+      "files": ["from-now.tsx"],
+      "requires": [],
+      "dependencies": ["moment@^2", "@sublay/react-native@^7.0.0"]
+    }
+  }
+}

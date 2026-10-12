@@ -1,0 +1,35 @@
+{
+  "platform": "react",
+  "pieces": {
+    "user-avatar": {
+      "files": ["user-avatar.tsx"],
+      "requires": ["get-user-avatar", "reset-styles"],
+      "dependencies": []
+    },
+    "get-user-avatar": {
+      "files": ["get-user-avatar.ts"],
+      "requires": [],
+      "dependencies": []
+    },
+    "reset-styles": {
+      "files": ["reset-styles.ts"],
+      "requires": [],
+      "dependencies": []
+    },
+    "from-now": {
+      "files": ["from-now.tsx"],
+      "requires": [],
+      "dependencies": ["moment@^2", "@giphy/js-fetch-api@^5.7.0"]
+    },
+    "unused": {
+      "files": ["unused.ts"],
+      "requires": [],
+      "dependencies": ["left-pad@^1.3.0"]
+    },
+    "orphan": {
+      "files": ["orphan.ts"],
+      "requires": ["missing-piece"],
+      "dependencies": []
+    }
+  }
+}

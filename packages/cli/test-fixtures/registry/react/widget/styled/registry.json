@@ -1,0 +1,17 @@
+{
+  "name": "widget",
+  "platform": "react",
+  "style": "styled",
+  "version": "1.0.0",
+  "description": "Fixture component that uses shared pieces",
+  "dependencies": ["@sublay/react-js@^7.0.0", "moment@^2.30.0"],
+  "files": [
+    { "path": "files/widget.tsx", "type": "component", "description": "Main component" },
+    { "path": "files/parts/row/row.tsx", "type": "component", "description": "Nested component" },
+    { "path": "hooks/use-widget.ts", "type": "hook", "description": "Hook" },
+    { "path": "utils/format.ts", "type": "util", "description": "Helper" }
+  ],
+  "shared": ["user-avatar", "from-now"],
+  "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react/widget/styled",
+  "exports": { "mainComponent": "Widget", "mainFile": "widget" }
+}

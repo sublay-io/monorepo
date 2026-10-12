@@ -41,7 +41,7 @@ function MainContent({ clickReport }: { clickReport: () => void }) {
         height: 1,
         width: "100%",
         // 🎨 CUSTOMIZATION: Divider color
-        backgroundColor: theme === 'dark' ? '#4B5563' : '#e7e7e7'
+        backgroundColor: theme === 'dark' ? '#525252' : '#e7e7e7'
       }} />
       <li
         style={{
@@ -54,7 +54,7 @@ function MainContent({ clickReport }: { clickReport: () => void }) {
           style={{
             ...resetButton,
             // 🎨 CUSTOMIZATION: Cancel button color
-            color: theme === 'dark' ? '#F9FAFB' : '#000',
+            color: theme === 'dark' ? '#FAFAFA' : '#000',
             paddingLeft: 24,
             paddingRight: 24,
             paddingTop: 8,

@@ -26,7 +26,7 @@ function CommentMenuModal() {
         style={{
           ...resetDiv,
           // 🎨 CUSTOMIZATION: Modal background
-          backgroundColor: theme === 'dark' ? '#1F2937' : 'white',
+          backgroundColor: theme === 'dark' ? '#262626' : 'white',
           borderRadius: 8,
           width: "100%",
           maxWidth: 520,

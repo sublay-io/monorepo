@@ -138,10 +138,10 @@ function SocialCommentSectionInner({
     },
     inactive: {
       // 🎨 CUSTOMIZATION: Sort button inactive styles
-      backgroundColor: theme === 'dark' ? '#4B5563' : '#e5e7eb',
+      backgroundColor: theme === 'dark' ? '#525252' : '#e5e7eb',
       padding: "4px 8px",
       borderRadius: "6px",
-      color: theme === 'dark' ? '#F9FAFB' : '#000000',
+      color: theme === 'dark' ? '#FAFAFA' : '#000000',
       fontSize: "12px",
     },
   };
@@ -174,7 +174,7 @@ function SocialCommentSectionInner({
             alignItems: "center",
             gap: "4px",
             justifyContent: "flex-end",
-            backgroundColor: theme === 'dark' ? "#1F2937" : "white",
+            backgroundColor: theme === 'dark' ? "#262626" : "white",
           }}
         >
           {renderSortButtons()}
@@ -186,7 +186,7 @@ function SocialCommentSectionInner({
           flex: 1,
           overflowY: "auto",
           // 🎨 CUSTOMIZATION: Feed background (Default: white)
-          backgroundColor: theme === 'dark' ? "#1F2937" : "white",
+          backgroundColor: theme === 'dark' ? "#262626" : "white",
         }}
       >
         <CommentsFeed>{children}</CommentsFeed>
@@ -194,7 +194,7 @@ function SocialCommentSectionInner({
 
       <div style={{
         // 🎨 CUSTOMIZATION: Form border color
-        borderTop: theme === 'dark' ? "1px solid #4B5563" : "1px solid #e5e7eb"
+        borderTop: theme === 'dark' ? "1px solid #525252" : "1px solid #e5e7eb"
       }}>
         {isVisible && <NewCommentForm />}
       </div>

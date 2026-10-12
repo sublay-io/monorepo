@@ -45,7 +45,7 @@ const CommentsFeed = React.memo(
     const showLoadError =
       !loading && !!error && mergedComments.length === 0 && !highlightedComment;
     const showLoadMoreError = !loading && !!error;
-    const mutedColor = theme === 'dark' ? '#9CA3AF' : '#737373';
+    const mutedColor = theme === 'dark' ? '#A3A3A3' : '#737373';
     const tryAgainStyle: React.CSSProperties = {
       fontSize: 12,
       fontWeight: 600,
@@ -75,7 +75,7 @@ const CommentsFeed = React.memo(
                 style={{
                   fontSize: 12,
                   fontWeight: 600,
-                  color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                  color: theme === 'dark' ? '#A3A3A3' : '#737373',
                   background: "transparent",
                   border: "none",
                   cursor: "pointer",

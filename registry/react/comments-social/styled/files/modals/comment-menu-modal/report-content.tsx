@@ -51,17 +51,17 @@ function ReportContent({ resetView }: { resetView: () => void }) {
   return (
     <div style={{ padding: 24, width: "100%" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-        <FlagIcon size={24} color={theme === 'dark' ? '#F9FAFB' : '#000'} />
+        <FlagIcon size={24} color={theme === 'dark' ? '#FAFAFA' : '#000'} />
         <span style={{
           fontSize: "24px",
           // 🎨 CUSTOMIZATION: Title color
-          color: theme === 'dark' ? '#F9FAFB' : '#000'
+          color: theme === 'dark' ? '#FAFAFA' : '#000'
         }}>Submit a report</span>
       </div>
       <p style={{
         marginTop: "24px",
         // 🎨 CUSTOMIZATION: Body text color
-        color: theme === 'dark' ? '#E5E7EB' : '#000'
+        color: theme === 'dark' ? '#E5E5E5' : '#000'
       }}>
         Thank you for looking out for our community. Let us know what is
         happening, and we'll look into it.
@@ -84,12 +84,12 @@ function ReportContent({ resetView }: { resetView: () => void }) {
               borderRadius: "6px",
               // 🎨 CUSTOMIZATION: Reason button colors
               backgroundColor: key === reason
-                ? (theme === 'dark' ? '#F9FAFB' : '#000')
-                : (theme === 'dark' ? '#4B5563' : '#e5e7eb'),
+                ? (theme === 'dark' ? '#FAFAFA' : '#000')
+                : (theme === 'dark' ? '#525252' : '#e5e7eb'),
               cursor: "pointer",
               color: key === reason
                 ? (theme === 'dark' ? '#000' : '#fff')
-                : (theme === 'dark' ? '#D1D5DB' : '#9d9d9e'),
+                : (theme === 'dark' ? '#D4D4D4' : '#9d9d9e'),
               fontSize: 14,
             }}
           >
@@ -114,11 +114,11 @@ function ReportContent({ resetView }: { resetView: () => void }) {
           borderRadius: "0.375rem",
           // 🎨 CUSTOMIZATION: Submit button colors
           backgroundColor: buttonActive
-            ? (theme === 'dark' ? '#F9FAFB' : '#000')
-            : (theme === 'dark' ? '#4B5563' : '#e5e7eb'),
+            ? (theme === 'dark' ? '#FAFAFA' : '#000')
+            : (theme === 'dark' ? '#525252' : '#e5e7eb'),
           color: buttonActive
             ? (theme === 'dark' ? '#000' : '#ffffff')
-            : (theme === 'dark' ? '#6B7280' : '#9d9d9e'),
+            : (theme === 'dark' ? '#737373' : '#9d9d9e'),
           cursor: buttonActive ? "pointer" : "not-allowed",
           opacity: submitting ? 0.7 : 1,
           border: "none",

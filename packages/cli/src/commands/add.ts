@@ -19,7 +19,10 @@ import {
   ResolvedSharedPiece,
 } from "../utils/registry.js";
 import { findSharedAliasImports, transformImports } from "../utils/transform.js";
-import { checkComponentDependencies } from "../utils/dependencies.js";
+import {
+  checkComponentDependencies,
+  mergeDependencies,
+} from "../utils/dependencies.js";
 import { stripTypes, convertFileExtension } from "../utils/strip-types.js";
 
 export interface AddOptions {
@@ -108,13 +111,9 @@ export async function add(componentName: string, options: AddOptions = {}) {
     const registry = await fetchRegistry(componentName, config, source);
 
     // Expo projects use @sublay/expo instead of @sublay/react-native
-    if (config.platform === 'expo') {
-      registry.dependencies = registry.dependencies.map((dep) =>
-        dep.startsWith('@sublay/react-native')
-          ? dep.replace('@sublay/react-native', '@sublay/expo')
-          : dep
-      );
-    }
+    registry.dependencies = registry.dependencies.map((dep) =>
+      renameForPlatform(dep, config)
+    );
 
     // Shared pieces the component lists, plus whatever those require.
     const platform = getRegistryPlatform(config);
@@ -131,6 +130,14 @@ export async function add(componentName: string, options: AddOptions = {}) {
         sharedManifest: sharedManifestLabel,
       });
     }
+
+    // One spec per package: the component's range wins over a piece's.
+    const dependencies = mergeDependencies(
+      registry.dependencies,
+      sharedPieces
+        .flatMap((piece) => piece.dependencies)
+        .map((dep) => renameForPlatform(dep, config))
+    );
 
     spinner.text =
       sharedPieces.length > 0
@@ -223,8 +230,8 @@ export async function add(componentName: string, options: AddOptions = {}) {
       );
     }
 
-    // Check dependencies
-    await checkComponentDependencies(registry.dependencies);
+    // Check dependencies: the component's own plus what its shared pieces need
+    await checkComponentDependencies(dependencies);
 
     // Show usage example
     const componentInfo = getComponentInfo(registry);
@@ -248,7 +255,7 @@ export async function add(componentName: string, options: AddOptions = {}) {
     }
 
     // Some dependencies need app-level wiring the installer cannot do for you.
-    printAppSetupNotes(registry.dependencies);
+    printAppSetupNotes(dependencies);
 
     console.log();
   } catch (error) {
@@ -308,6 +315,13 @@ async function prepareFile(
   }
 
   return { targetPath, content: transformed };
+}
+
+/** Expo projects use @sublay/expo instead of @sublay/react-native. */
+function renameForPlatform(dep: string, config: SublayConfig): string {
+  return config.platform === 'expo' && dep.startsWith('@sublay/react-native')
+    ? dep.replace('@sublay/react-native', '@sublay/expo')
+    : dep;
 }
 
 /** The manifest's `shared` list. Absent means the component uses no shared pieces. */

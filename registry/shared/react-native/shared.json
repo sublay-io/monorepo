@@ -42,6 +42,13 @@
       "requires": [],
       "dependencies": []
     },
+    "get-user-avatar": {
+      "files": [
+        "get-user-avatar.ts"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
     "giphy-container": {
       "files": [
         "giphy-container.tsx"
@@ -135,9 +142,12 @@
         "user-avatar.tsx"
       ],
       "requires": [
+        "get-user-avatar",
         "theme"
       ],
-      "dependencies": []
+      "dependencies": [
+        "react-native-svg@^15"
+      ]
     }
   }
 }

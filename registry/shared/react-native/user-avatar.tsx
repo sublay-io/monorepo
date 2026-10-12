@@ -1,4 +1,10 @@
 import { View, Image, StyleSheet } from "react-native";
+import Svg, { Circle, Polygon, Rect } from "react-native-svg";
+import {
+  getUserAvatar,
+  USER_AVATAR_VIEW_BOX_SIZE,
+  type UserAvatarShape,
+} from "./get-user-avatar";
 import { type UITheme, uiColors } from "./theme";
 
 interface UserProps {
@@ -7,6 +13,66 @@ interface UserProps {
   name?: string | null | undefined;
   username?: string | null | undefined;
 }
+
+const renderShape = (shape: UserAvatarShape, index: number) => {
+  switch (shape.type) {
+    case "circle":
+      return (
+        <Circle
+          key={index}
+          cx={shape.cx}
+          cy={shape.cy}
+          r={shape.r}
+          fill={shape.fill}
+          fillOpacity={shape.fillOpacity}
+        />
+      );
+    case "rect":
+      return (
+        <Rect
+          key={index}
+          x={shape.x}
+          y={shape.y}
+          width={shape.width}
+          height={shape.height}
+          rx={shape.rx}
+          fill={shape.fill}
+          fillOpacity={shape.fillOpacity}
+        />
+      );
+    case "polygon":
+      return (
+        <Polygon
+          key={index}
+          points={shape.points.map(([x, y]) => `${x},${y}`).join(" ")}
+          fill={shape.fill}
+          fillOpacity={shape.fillOpacity}
+        />
+      );
+  }
+};
+
+// The default avatar for a user without an avatar image, generated on the
+// device from the user's id (see get-user-avatar.ts). It fills its parent.
+const GeneratedAvatar = ({ id }: { id: string | undefined }) => {
+  const { background, shapes } = getUserAvatar(id);
+
+  return (
+    <Svg
+      width="100%"
+      height="100%"
+      viewBox={`0 0 ${USER_AVATAR_VIEW_BOX_SIZE} ${USER_AVATAR_VIEW_BOX_SIZE}`}
+    >
+      <Rect
+        width={USER_AVATAR_VIEW_BOX_SIZE}
+        height={USER_AVATAR_VIEW_BOX_SIZE}
+        fill={background}
+      />
+      {shapes.map(renderShape)}
+    </Svg>
+  );
+};
+
 const UserAvatar = ({
   user,
   size = 32,
@@ -20,10 +86,6 @@ const UserAvatar = ({
 }) => {
   if (!user) return null;
 
-  const userImg = user.avatar
-    ? user.avatar
-    : `https://api.dicebear.com/9.x/thumbs/png?seed=${user.id}`;
-
   return (
     <View
       style={[
@@ -36,17 +98,21 @@ const UserAvatar = ({
         },
       ]}
     >
-      <Image
-        source={{
-          uri: userImg,
-        }}
-        style={[
-          styles.image,
-          {
-            borderRadius: borderRadius || size / 2,
-          },
-        ]}
-      />
+      {user.avatar ? (
+        <Image
+          source={{
+            uri: user.avatar,
+          }}
+          style={[
+            styles.image,
+            {
+              borderRadius: borderRadius || size / 2,
+            },
+          ]}
+        />
+      ) : (
+        <GeneratedAvatar id={user.id} />
+      )}
     </View>
   );
 };

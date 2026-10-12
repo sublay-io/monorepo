@@ -62,7 +62,7 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  A free-form JSON object for any custom data your application needs alongside the comment. Up to 10 KB (10,240 bytes) as JSON — a larger object returns `400 comment/invalid-body`. {/* metadata-limit */}
+  A free-form JSON object for any custom data your application needs alongside the comment. Up to 10 KB (10,240 bytes) as JSON — a larger object returns `400 comment/invalid-body`.
 </ParamField>
 
 <ParamField body="userId" type="string">
@@ -139,7 +139,7 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     - `gif` is missing one of its six fields, or one has the wrong type;
     - a `mentions` item doesn't match one of the two shapes;
     - `foreignId` is an empty string or longer than 255 characters;
-    - `metadata` isn't an object, or is larger than 10 KB; {/* metadata-limit */}
+    - `metadata` isn't an object, or is larger than 10 KB;
     - `createdAt` or `updatedAt` isn't a UTC ISO 8601 datetime ending in `Z`.
 
     ```json

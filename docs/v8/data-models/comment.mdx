@@ -29,7 +29,7 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `userReaction` | `ReactionType \| null` | The current user's reaction, populated when authenticated. |
 | `repliesCount` | `number` | Number of direct replies to this comment, for display. See [What `repliesCount` counts](#what-repliescount-counts). |
 | `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
-| `metadata` | `Record<string, any> \| null` | Custom key-value data, up to 10 KB (10,240 bytes) as JSON. {/* metadata-limit */} `null` on placeholders. |
+| `metadata` | `Record<string, any> \| null` | Custom key-value data, up to 10 KB (10,240 bytes) as JSON. `null` on placeholders. |
 | `moderationStatus` | `"approved" \| "removed" \| null` | Space moderation status. Visible to everyone. |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
 | `moderatedById` | `string \| null` | ID of the moderator. Visible only to moderators and keys — see [Moderation fields](#moderation-fields); `null` for everyone else. |

@@ -23,7 +23,7 @@ Both fields are individually optional, but **at least one must be provided**.
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  Arbitrary JSON metadata, up to 10 KB (10,240 bytes) as JSON. {/* metadata-limit */} **Replaces** the stored metadata wholesale rather than merging into it.
+  Arbitrary JSON metadata, up to 10 KB (10,240 bytes) as JSON. **Replaces** the stored metadata wholesale rather than merging into it.
 </ParamField>
 
 ## Deleted and removed comments
@@ -54,7 +54,7 @@ Returns the updated [Comment](/v8/data-models/comment) object in full, as the ca
     ```
   </Accordion>
   <Accordion title="Invalid Body — 400">
-    Returned when neither `content` nor `metadata` is supplied, when `content` is an empty string or only whitespace, when `metadata` isn't an object, or when `metadata` is larger than 10 KB. {/* metadata-limit */}
+    Returned when neither `content` nor `metadata` is supplied, when `content` is an empty string or only whitespace, when `metadata` isn't an object, or when `metadata` is larger than 10 KB.
 
     ```json
     { "error": "Either content or metadata must be provided", "code": "comment/invalid-body" }

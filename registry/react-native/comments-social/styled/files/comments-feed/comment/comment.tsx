@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { cloneElement, useState } from "react";
 import {
   View,
   Text,
@@ -52,22 +52,22 @@ const Comment = React.memo(
     const authorAvatarSize = 32;
     const authorFontSize = 13;
     const authorFontWeight = '700' as const;
-    const authorFontColor = theme === 'dark' ? '#F9FAFB' : '#000';
+    const authorFontColor = theme === 'dark' ? '#FAFAFA' : '#000';
     const fromNowFontSize = 12;
-    const fromNowFontColor = theme === 'dark' ? '#9CA3AF' : '#737373';
+    const fromNowFontColor = theme === 'dark' ? '#A3A3A3' : '#737373';
     const commentBodyFontSize = 13;
-    const commentBodyFontColor = theme === 'dark' ? '#F9FAFB' : '#000';
+    const commentBodyFontColor = theme === 'dark' ? '#FAFAFA' : '#000';
     const actionsItemGap = 12;
     const replyButtonFontSize = 12;
     const replyButtonFontWeight = '600' as const;
-    const replyButtonFontColor = theme === 'dark' ? '#9CA3AF' : '#737373';
+    const replyButtonFontColor = theme === 'dark' ? '#A3A3A3' : '#737373';
     const heartIconSize = 14;
-    const heartIconEmptyColor = theme === 'dark' ? '#9CA3AF' : '#8E8E8E';
+    const heartIconEmptyColor = theme === 'dark' ? '#A3A3A3' : '#8E8E8E';
     const heartIconFullColor = theme === 'dark' ? '#F87171' : '#DC2626';
     const heartIconPaddingBottom = 2;
     const likesCountFontSize = 11;
     const likesCountFontWeight = '600' as const;
-    const likesCountFontColor = theme === 'dark' ? '#9CA3AF' : '#8E8E8E';
+    const likesCountFontColor = theme === 'dark' ? '#A3A3A3' : '#8E8E8E';
 
     const { currentReaction, reactionCounts, toggleReaction } = useReactionToggle({
       targetType: "comment",
@@ -163,7 +163,7 @@ const Comment = React.memo(
           // 🎨 CUSTOMIZATION: Highlighted comment background
           backgroundColor:
             highlightedComment?.comment.id === comment.id
-              ? (theme === 'dark' ? "#1E40AF" : "#dbeafe")
+              ? (theme === 'dark' ? "#333333" : "#dbeafe")
               : "transparent",
         }}
       >
@@ -182,14 +182,14 @@ const Comment = React.memo(
                 width: 32,
                 height: 32,
                 borderRadius: 32,
-                backgroundColor: theme === 'dark' ? '#374151' : '#E5E7EB',
+                backgroundColor: theme === 'dark' ? '#404040' : '#E5E7EB',
               }}
             />
             <Text
               style={{
                 fontSize: 13,
                 fontStyle: "italic",
-                color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                color: theme === 'dark' ? '#A3A3A3' : '#737373',
               }}
             >
               {isUnavailable
@@ -205,7 +205,7 @@ const Comment = React.memo(
                     style={{
                       fontSize: 12,
                       fontWeight: "600",
-                      color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                      color: theme === 'dark' ? '#A3A3A3' : '#737373',
                     }}
                   >
                     Remove your reaction
@@ -218,7 +218,7 @@ const Comment = React.memo(
                   style={{
                     fontSize: 12,
                     fontWeight: "600",
-                    color: theme === 'dark' ? '#F9FAFB' : '#000',
+                    color: theme === 'dark' ? '#FAFAFA' : '#000',
                   }}
                 >
                   Show anyway
@@ -251,7 +251,7 @@ const Comment = React.memo(
                   width: authorAvatarSize,
                   height: authorAvatarSize,
                   borderRadius: authorAvatarSize,
-                  backgroundColor: theme === 'dark' ? '#374151' : '#E5E7EB',
+                  backgroundColor: theme === 'dark' ? '#404040' : '#E5E7EB',
                 }}
               />
             ) : (
@@ -281,7 +281,7 @@ const Comment = React.memo(
                     style={{
                       fontWeight: authorFontWeight,
                       fontSize: authorFontSize,
-                      color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                      color: theme === 'dark' ? '#A3A3A3' : '#737373',
                     }}
                   >
                     {tombstone}
@@ -325,7 +325,7 @@ const Comment = React.memo(
                   style={{
                     fontSize: commentBodyFontSize,
                     fontStyle: "italic",
-                    color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                    color: theme === 'dark' ? '#A3A3A3' : '#737373',
                   }}
                 >
                   {tombstone}
@@ -349,6 +349,14 @@ const Comment = React.memo(
                     user?.id,
                     callbacks?.currentUserClickCallback,
                     callbacks?.otherUserClickCallback
+                  ).map((part) =>
+                    // Mentions come back with a fixed color: restyle them to follow the theme
+                    typeof part === "string"
+                      ? part
+                      : cloneElement(part, {
+                          // 🎨 CUSTOMIZATION: Mention color (Default: blue-800)
+                          style: { color: theme === 'dark' ? "#60A5FA" : "#1E40AF" },
+                        })
                   )}
                 </Text>
               )}
@@ -360,7 +368,7 @@ const Comment = React.memo(
                 <Text
                   style={{
                     fontSize: 12,
-                    color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                    color: theme === 'dark' ? '#A3A3A3' : '#737373',
                   }}
                 >
                   {ownRemovedLabel}

@@ -25,7 +25,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
     <View
       className={`h-auto max-h-[200px] absolute bottom-0 left-0 right-0 z-10 overflow-hidden p-4 border-t ${
         theme === 'dark'
-          ? 'bg-gray-800 border-gray-600'
+          ? 'bg-neutral-800 border-neutral-600'
           : 'bg-white border-gray-200'
       }`}
     >
@@ -51,7 +51,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
               <View className="justify-evenly ml-2">
                 <Text
                   className={`text-sm font-medium ${
-                    theme === 'dark' ? 'text-gray-50' : 'text-black'
+                    theme === 'dark' ? 'text-neutral-50' : 'text-black'
                   }`}
                 >
                   {item.username}
@@ -59,7 +59,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                 {item.name && (
                   <Text
                     className={`text-sm font-normal ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >
                     {item.name}

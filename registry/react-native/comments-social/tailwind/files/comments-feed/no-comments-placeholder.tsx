@@ -8,14 +8,14 @@ function NoCommentsPlaceHolder() {
     <View>
       <Text
         className={`text-center text-lg font-bold mb-2 ${
-          theme === 'dark' ? 'text-gray-50' : 'text-black'
+          theme === 'dark' ? 'text-neutral-50' : 'text-black'
         }`}
       >
         No comments yet
       </Text>
       <Text
         className={`text-center text-xs mt-0 ${
-          theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+          theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
         }`}
       >
         Start the conversation.

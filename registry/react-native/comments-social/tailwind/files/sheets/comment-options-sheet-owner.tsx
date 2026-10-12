@@ -69,20 +69,20 @@ const CommentOptionsSheetOwner = () => {
         }
       }}
       backgroundStyle={{
-        backgroundColor: theme === 'dark' ? '#1F2937' : '#18181B',
+        backgroundColor: theme === 'dark' ? '#262626' : '#18181B',
       }}
       handleIndicatorStyle={{
-        backgroundColor: theme === 'dark' ? '#F9FAFB' : '#fff',
+        backgroundColor: theme === 'dark' ? '#FAFAFA' : '#fff',
       }}
       handleComponent={() => (
         <View
           className={`px-8 py-4 flex-row border-b ${
-            theme === 'dark' ? 'border-gray-600' : 'border-zinc-700'
+            theme === 'dark' ? 'border-neutral-600' : 'border-zinc-700'
           }`}
         >
           <Text
             className={`uppercase text-sm ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+              theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
             }`}
           >
             comment options

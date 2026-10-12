@@ -30,7 +30,7 @@ const ReplyBanner = () => {
         zIndex: 10,
         overflow: "hidden",
         // 🎨 CUSTOMIZATION: Reply banner background
-        backgroundColor: theme === 'dark' ? "#374151" : "#e7e7e7",
+        backgroundColor: theme === 'dark' ? "#404040" : "#e7e7e7",
         padding: 12,
         height: "auto",
       }}
@@ -44,7 +44,7 @@ const ReplyBanner = () => {
       >
         <Text style={{
           // 🎨 CUSTOMIZATION: Reply banner text color
-          color: theme === 'dark' ? "#9CA3AF" : "#787878",
+          color: theme === 'dark' ? "#A3A3A3" : "#787878",
           fontSize: 12
         }}>
           Replying to {repliedToUser}
@@ -58,7 +58,7 @@ const ReplyBanner = () => {
           <Text style={{
             fontSize: 16,
             // 🎨 CUSTOMIZATION: Close button color
-            color: theme === 'dark' ? "#F9FAFB" : "#000"
+            color: theme === 'dark' ? "#FAFAFA" : "#000"
           }}>&times;</Text>
         </TouchableOpacity>
       </View>

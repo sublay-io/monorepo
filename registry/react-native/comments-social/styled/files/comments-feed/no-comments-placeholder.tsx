@@ -13,7 +13,7 @@ function NoCommentsPlaceHolder() {
           fontWeight: '700',
           marginBottom: 8,
           // 🎨 CUSTOMIZATION: Heading color
-          color: theme === 'dark' ? '#F9FAFB' : '#000',
+          color: theme === 'dark' ? '#FAFAFA' : '#000',
         }}
       >
         No comments yet
@@ -24,7 +24,7 @@ function NoCommentsPlaceHolder() {
           fontSize: 12,
           marginTop: 0,
           // 🎨 CUSTOMIZATION: Subtext color
-          color: theme === 'dark' ? '#9CA3AF' : '#8e8e8e',
+          color: theme === 'dark' ? '#A3A3A3' : '#8e8e8e',
         }}
       >
         Start the conversation.

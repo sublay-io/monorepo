@@ -33,8 +33,8 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
         zIndex: 10,
         overflow: "hidden",
         // 🎨 CUSTOMIZATION: Mention suggestions background
-        backgroundColor: theme === 'dark' ? "#1F2937" : "white",
-        borderTopColor: theme === 'dark' ? "#4B5563" : "#e7e7e7",
+        backgroundColor: theme === 'dark' ? "#262626" : "white",
+        borderTopColor: theme === 'dark' ? "#525252" : "#e7e7e7",
         borderTopWidth: 1,
         padding: 16,
       }}
@@ -67,7 +67,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                   fontSize: 14,
                   fontWeight: "500",
                   // 🎨 CUSTOMIZATION: Username color
-                  color: theme === 'dark' ? "#F9FAFB" : "#000",
+                  color: theme === 'dark' ? "#FAFAFA" : "#000",
                 }}>
                   {item.username}
                 </Text>
@@ -77,7 +77,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                       fontSize: 14,
                       fontWeight: "400",
                       // 🎨 CUSTOMIZATION: Name color
-                      color: theme === 'dark' ? "#9CA3AF" : "gray",
+                      color: theme === 'dark' ? "#A3A3A3" : "gray",
                     }}
                   >
                     {item.name}

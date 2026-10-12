@@ -40,7 +40,7 @@ const CommentsFeed = ({
   // A failed load shows a retry; `loadMore()` re-sends the request that failed.
   const showLoadError =
     !loading && !!error && mergedComments.length === 0 && !highlightedComment;
-  const mutedColor = theme === 'dark' ? '#9CA3AF' : '#737373';
+  const mutedColor = theme === 'dark' ? '#A3A3A3' : '#737373';
 
   return (
     <View style={{ flex: 1 }}>

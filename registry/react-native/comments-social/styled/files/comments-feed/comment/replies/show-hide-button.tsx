@@ -69,7 +69,7 @@ const ShowHideButton = ({
 
   if (totalRepliesCount === 0) return null;
 
-  const mutedColor = theme === 'dark' ? '#9CA3AF' : '#737373';
+  const mutedColor = theme === 'dark' ? '#A3A3A3' : '#737373';
 
   if (failed && hasMore) {
     return (
@@ -123,14 +123,14 @@ const ShowHideButton = ({
           width: 24,
           marginTop: 2,
           // 🎨 CUSTOMIZATION: Line color
-          backgroundColor: theme === 'dark' ? '#9CA3AF' : '#737373',
+          backgroundColor: theme === 'dark' ? '#A3A3A3' : '#737373',
         }}
       />
       <Text style={{
         fontSize: 12,
         fontWeight: '600',
         // 🎨 CUSTOMIZATION: Text color
-        color: theme === 'dark' ? '#9CA3AF' : '#737373',
+        color: theme === 'dark' ? '#A3A3A3' : '#737373',
       }}>
         {text}
       </Text>

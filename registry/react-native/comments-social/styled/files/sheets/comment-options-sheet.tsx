@@ -45,10 +45,10 @@ const CommentOptionsSheet = () => {
         }
       }}
       backgroundStyle={{
-        backgroundColor: theme === 'dark' ? '#1F2937' : '#18181B',
+        backgroundColor: theme === 'dark' ? '#262626' : '#18181B',
       }}
       handleIndicatorStyle={{
-        backgroundColor: theme === 'dark' ? '#F9FAFB' : '#fff',
+        backgroundColor: theme === 'dark' ? '#FAFAFA' : '#fff',
       }}
       handleComponent={() => (
         <View
@@ -57,13 +57,13 @@ const CommentOptionsSheet = () => {
             paddingVertical: 16,
             flexDirection: "row",
             borderBottomWidth: 1,
-            borderColor: theme === 'dark' ? '#4B5563' : '#3f3f46',
+            borderColor: theme === 'dark' ? '#525252' : '#3f3f46',
           }}
         >
           <Text
             style={{
               textTransform: "uppercase",
-              color: theme === 'dark' ? '#9CA3AF' : '#6b7280',
+              color: theme === 'dark' ? '#A3A3A3' : '#6b7280',
               fontSize: 14,
             }}
           >
@@ -92,13 +92,13 @@ const CommentOptionsSheet = () => {
         >
           <FlagIcon
             size={20}
-            color={theme === 'dark' ? '#F9FAFB' : '#9ca3af'}
+            color={theme === 'dark' ? '#FAFAFA' : '#9ca3af'}
           />
           <Text
             style={{
               fontSize: 16,
               flex: 1,
-              color: theme === 'dark' ? '#F9FAFB' : '#9ca3af',
+              color: theme === 'dark' ? '#FAFAFA' : '#9ca3af',
             }}
           >
             Report

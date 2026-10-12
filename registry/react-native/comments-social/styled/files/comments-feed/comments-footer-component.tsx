@@ -8,7 +8,7 @@ const CommentsFooterComponent = () => {
 
   // A failed page shows a retry; `loadMore()` re-sends the request that failed.
   if (hasMore && !loading && error) {
-    const mutedColor = theme === 'dark' ? '#9CA3AF' : '#737373';
+    const mutedColor = theme === 'dark' ? '#A3A3A3' : '#737373';
     return (
       <View
         style={{
@@ -38,7 +38,7 @@ const CommentsFooterComponent = () => {
           alignItems: "center",
         }}
       >
-        <ActivityIndicator color={theme === 'dark' ? '#F9FAFB' : undefined} />
+        <ActivityIndicator color={theme === 'dark' ? '#FAFAFA' : undefined} />
       </View>
     )
   );

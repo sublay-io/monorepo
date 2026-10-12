@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { cloneElement, useState } from "react";
 import {
   View,
   Text,
@@ -48,7 +48,7 @@ const Comment = React.memo(
     // CUSTOMIZATION: Comment styling defaults
     const authorAvatarSize = 32;
     const heartIconSize = 14;
-    const heartIconEmptyColor = theme === 'dark' ? '#9CA3AF' : '#8E8E8E';
+    const heartIconEmptyColor = theme === 'dark' ? '#A3A3A3' : '#8E8E8E';
     const heartIconFullColor = theme === 'dark' ? '#F87171' : '#DC2626';
 
     const { currentReaction, reactionCounts, toggleReaction } = useReactionToggle({
@@ -145,7 +145,7 @@ const Comment = React.memo(
         className={`py-2 ${
           isHighlighted
             ? theme === 'dark'
-              ? 'bg-blue-800'
+              ? 'bg-[#333333]'
               : 'bg-blue-100'
             : 'bg-transparent'
         }`}
@@ -157,12 +157,12 @@ const Comment = React.memo(
           >
             <View
               className={`w-8 h-8 rounded-full ${
-                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                theme === 'dark' ? 'bg-neutral-700' : 'bg-gray-200'
               }`}
             />
             <Text
               className={`text-[13px] italic ${
-                theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+                theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
               }`}
             >
               {isUnavailable
@@ -176,7 +176,7 @@ const Comment = React.memo(
                 >
                   <Text
                     className={`text-xs font-semibold ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+                      theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
                     }`}
                   >
                     Remove your reaction
@@ -187,7 +187,7 @@ const Comment = React.memo(
               <Pressable onPress={() => setShowBlockedComment(true)}>
                 <Text
                   className={`text-xs font-semibold ${
-                    theme === 'dark' ? 'text-gray-50' : 'text-black'
+                    theme === 'dark' ? 'text-neutral-50' : 'text-black'
                   }`}
                 >
                   Show anyway
@@ -213,7 +213,7 @@ const Comment = React.memo(
             {tombstone ? (
               <View
                 className={`w-8 h-8 rounded-full ${
-                  theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                  theme === 'dark' ? 'bg-neutral-700' : 'bg-gray-200'
                 }`}
               />
             ) : (
@@ -241,7 +241,7 @@ const Comment = React.memo(
                 {tombstone ? (
                   <Text
                     className={`text-[13px] font-bold ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+                      theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
                     }`}
                   >
                     {tombstone}
@@ -261,7 +261,7 @@ const Comment = React.memo(
                 >
                   <Text
                     className={`text-[13px] font-bold ${
-                      theme === 'dark' ? 'text-gray-50' : 'text-black'
+                      theme === 'dark' ? 'text-neutral-50' : 'text-black'
                     }`}
                   >
                     {getUserName(comment.user ?? {}, "username")}
@@ -271,14 +271,14 @@ const Comment = React.memo(
                 <FromNow
                   time={comment.createdAt}
                   fontSize={12}
-                  color={theme === 'dark' ? '#9CA3AF' : '#737373'}
+                  color={theme === 'dark' ? '#A3A3A3' : '#737373'}
                 />
               </View>
 
               {tombstone && (
                 <Text
                   className={`text-[13px] italic ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+                    theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
                   }`}
                 >
                   {tombstone}
@@ -287,7 +287,7 @@ const Comment = React.memo(
               {!tombstone && comment.content && (
                 <Text
                   className={`text-[13px] ${
-                    theme === 'dark' ? 'text-gray-50' : 'text-black'
+                    theme === 'dark' ? 'text-neutral-50' : 'text-black'
                   }`}
                 >
                   {parseContentWithMentions(
@@ -298,6 +298,14 @@ const Comment = React.memo(
                     user?.id,
                     callbacks?.currentUserClickCallback,
                     callbacks?.otherUserClickCallback
+                  ).map((part) =>
+                    // Mentions come back with a fixed color: restyle them to follow the theme
+                    typeof part === "string"
+                      ? part
+                      : cloneElement(part, {
+                          // 🎨 CUSTOMIZATION: Mention color (Default: blue-800)
+                          style: { color: theme === 'dark' ? "#60A5FA" : "#1E40AF" },
+                        })
                   )}
                 </Text>
               )}
@@ -308,7 +316,7 @@ const Comment = React.memo(
               {isOwnRemoved && (
                 <Text
                   className={`text-xs ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+                    theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
                   }`}
                 >
                   {ownRemovedLabel}
@@ -326,7 +334,7 @@ const Comment = React.memo(
                 >
                   <Text
                     className={`text-xs font-semibold ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+                      theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
                     }`}
                   >
                     Reply
@@ -349,7 +357,7 @@ const Comment = React.memo(
               />
               <Text
                 className={`text-[11px] font-semibold ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-neutral-500'
+                  theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
                 }`}
               >
                 {reactionCounts.like || 0}

@@ -22,18 +22,18 @@
  * Tailwind dark mode classes are used for conditional styling.
  *
  * BACKGROUNDS:
- * - bg-white / dark:bg-gray-800 (main background)
- * - bg-gray-100 / dark:bg-gray-700 (secondary background, hover states)
- * - bg-gray-200 / dark:bg-gray-600 (sort buttons inactive)
- * - bg-black / dark:bg-gray-800 (sort buttons active background)
+ * - bg-white / dark:bg-neutral-800 (main background)
+ * - bg-gray-100 / dark:bg-neutral-700 (secondary background, hover states)
+ * - bg-gray-200 / dark:bg-neutral-600 (sort buttons inactive)
+ * - bg-black / dark:bg-neutral-800 (sort buttons active background)
  *
  * TEXT:
- * - text-black / dark:text-gray-50 (primary text - author names, comment body)
- * - text-neutral-500 / dark:text-gray-400 (secondary text - timestamps, reply button)
- * - text-white / dark:text-gray-50 (sort button active text)
+ * - text-black / dark:text-neutral-50 (primary text - author names, comment body)
+ * - text-neutral-500 / dark:text-neutral-400 (secondary text - timestamps, reply button)
+ * - text-white / dark:text-neutral-50 (sort button active text)
  *
  * BORDERS:
- * - border-gray-200 / dark:border-gray-600 (borders, dividers)
+ * - border-gray-200 / dark:border-neutral-600 (borders, dividers)
  *
  * BLUES (post button, links):
  * - text-sky-500 / dark:text-blue-400 (primary blue - post button)
@@ -139,11 +139,11 @@ function SocialCommentSectionInner({
           activeView={
             <TouchableOpacity
               className={`py-1 px-2 rounded-md ${isFirst ? '' : 'ml-1'} ${
-                theme === 'dark' ? 'bg-gray-800' : 'bg-black'
+                theme === 'dark' ? 'bg-neutral-800' : 'bg-black'
               }`}
             >
               <Text className={`text-xs ${
-                theme === 'dark' ? 'text-gray-50' : 'text-white'
+                theme === 'dark' ? 'text-neutral-50' : 'text-white'
               }`}>
                 {label}
               </Text>
@@ -152,11 +152,11 @@ function SocialCommentSectionInner({
           nonActiveView={
             <TouchableOpacity
               className={`py-1 px-2 rounded-md ${isFirst ? '' : 'ml-1'} ${
-                theme === 'dark' ? 'bg-gray-600' : 'bg-gray-200'
+                theme === 'dark' ? 'bg-neutral-600' : 'bg-gray-200'
               }`}
             >
               <Text className={`text-xs ${
-                theme === 'dark' ? 'text-gray-50' : 'text-black'
+                theme === 'dark' ? 'text-neutral-50' : 'text-black'
               }`}>
                 {label}
               </Text>
@@ -176,14 +176,14 @@ function SocialCommentSectionInner({
       )}
 
       <ScrollView
-        className={`flex-1 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}
+        className={`flex-1 ${theme === 'dark' ? 'bg-neutral-800' : 'bg-white'}`}
       >
         <CommentsFeed>{children}</CommentsFeed>
       </ScrollView>
 
       <View
         className={`border-t ${
-          theme === 'dark' ? 'border-gray-600' : 'border-gray-200'
+          theme === 'dark' ? 'border-neutral-600' : 'border-gray-200'
         }`}
       >
         {isVisible && <NewCommentForm />}

@@ -82,10 +82,10 @@ const ReportCommentSheet = () => {
         }
       }}
       backgroundStyle={{
-        backgroundColor: theme === 'dark' ? '#1F2937' : '#18181B',
+        backgroundColor: theme === 'dark' ? '#262626' : '#18181B',
       }}
       handleIndicatorStyle={{
-        backgroundColor: theme === 'dark' ? '#F9FAFB' : '#fff',
+        backgroundColor: theme === 'dark' ? '#FAFAFA' : '#fff',
       }}
     >
       <BottomSheetView className="p-7 flex-1 h-full justify-between">
@@ -93,11 +93,11 @@ const ReportCommentSheet = () => {
           <View className="flex-row items-center gap-4">
             <FlagIcon
               size={24}
-              color={theme === 'dark' ? '#F9FAFB' : '#e5e7eb'}
+              color={theme === 'dark' ? '#FAFAFA' : '#e5e7eb'}
             />
             <Text
               className={`text-2xl ${
-                theme === 'dark' ? 'text-gray-50' : 'text-gray-200'
+                theme === 'dark' ? 'text-neutral-50' : 'text-gray-200'
               }`}
             >
               Submit a report
@@ -105,7 +105,7 @@ const ReportCommentSheet = () => {
           </View>
           <Text
             className={`mt-6 ${
-              theme === 'dark' ? 'text-gray-50' : 'text-gray-200'
+              theme === 'dark' ? 'text-neutral-50' : 'text-gray-200'
             }`}
           >
             Thank you for looking out for our community. Let us know what is
@@ -121,12 +121,12 @@ const ReportCommentSheet = () => {
                   key={index}
                   className={`border px-4 py-2.5 rounded-xl ${
                     theme === 'dark'
-                      ? 'border-gray-600'
+                      ? 'border-neutral-600'
                       : 'border-gray-200'
                   } ${
                     isSelected
                       ? theme === 'dark'
-                        ? 'bg-gray-700'
+                        ? 'bg-neutral-700'
                         : 'bg-gray-50'
                       : 'bg-transparent'
                   }`}
@@ -135,10 +135,10 @@ const ReportCommentSheet = () => {
                     className={
                       isSelected
                         ? theme === 'dark'
-                          ? 'text-gray-50'
+                          ? 'text-neutral-50'
                           : 'text-gray-800'
                         : theme === 'dark'
-                          ? 'text-gray-400'
+                          ? 'text-neutral-400'
                           : 'text-gray-200'
                     }
                   >

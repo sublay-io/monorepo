@@ -141,7 +141,7 @@ function NewReplyForm({
               "border-none outline-none",
               "focus-visible:ring-2 focus-visible:ring-blue-400 dark:focus-visible:ring-blue-500 focus-visible:ring-offset-2",
               hasContent
-                ? "bg-blue-600 dark:bg-blue-500 text-white cursor-pointer hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-md"
+                ? "bg-blue-600 dark:bg-blue-600 text-white cursor-pointer hover:bg-blue-700 dark:hover:bg-blue-500 hover:shadow-md"
                 : "bg-gray-200 dark:bg-neutral-600 text-gray-400 dark:text-neutral-500 cursor-not-allowed"
             )}
           >

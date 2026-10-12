@@ -81,7 +81,7 @@ function VoteButtons({
           "border-none cursor-pointer",
           userVote === "up"
             ? "bg-blue-500 dark:bg-blue-400 text-white"
-            : "bg-transparent text-gray-500 dark:text-neutral-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950"
+            : "bg-transparent text-gray-500 dark:text-neutral-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-400/10"
         )}
         title="Upvote"
       >

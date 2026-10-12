@@ -59,7 +59,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
   return (
     <button
       onClick={() => toggleReaction({ reactionType: currentReaction })}
-      className="text-xs not-italic font-medium text-gray-500 dark:text-neutral-400 px-2 py-1 -ml-2 rounded bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-500"
+      className="text-xs not-italic font-medium text-gray-500 dark:text-neutral-400 px-2 py-1 -ml-2 rounded bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-300"
     >
       Remove your vote
     </button>
@@ -139,7 +139,7 @@ function SingleComment({
   // from the section background
   const highlightClass = isHighlighted && "bg-gray-100 dark:bg-[#333333]";
   // 🎨 CUSTOMIZATION: Highlight color on the indentation beside it
-  const highlightGutterClass = isHighlighted && "bg-blue-100 dark:bg-blue-900";
+  const highlightGutterClass = isHighlighted && "bg-blue-100 dark:bg-blue-950";
 
   // The API sends aspectRatio as a string (e.g. "1.5"), so coerce before doing
   // math with it. Falls back to 1 (square) if it's missing or unparsable.

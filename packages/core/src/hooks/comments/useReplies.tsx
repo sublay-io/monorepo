@@ -74,18 +74,26 @@ function useReplies({
   const internals = useContext(CommentSectionInternalContext);
   const fetchManyComments = useFetchManyComments();
 
-  const [loading, setLoading] = useState(false);
-  // Tagged with the section generation it happened in: a section reset (sort
-  // change) makes an older failure stale, so it no longer shows.
-  const [failure, setFailure] = useState<{
-    error: Error;
-    generation: number;
-  } | null>(null);
+  // Loading and failure belong to a comment, not to this hook instance: an
+  // instance moved to another comment (a recycled row) starts clean there,
+  // and a load still in flight for the comment it left neither shows as this
+  // one's loading nor blocks its `loadMore`.
+  const [loadingIds, setLoadingIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  // Each failure is tagged with the section generation it happened in: a
+  // section reset (sort change) makes an older failure stale, so it no longer
+  // shows.
+  const [failures, setFailures] = useState<
+    Record<string, { error: Error; generation: number }>
+  >({});
+  const loading = loadingIds.has(commentId);
+  const failure = failures[commentId];
   const error =
     failure && failure.generation === internals?.generationRef.current
       ? failure.error
       : null;
-  const loadingRef = useRef(false);
+  const inFlightRef = useRef<Set<string>>(new Set());
 
   const store = internals?.store;
   const node = store?.nodes[commentId];
@@ -105,7 +113,7 @@ function useReplies({
     async (options: LoadMoreRepliesOptions = {}) => {
       const { internals: ctx, hasMore: more, replyDepthProp: depthProp, limit: defaultLimit } =
         latest.current;
-      if (!ctx || loadingRef.current || !more) return;
+      if (!ctx || inFlightRef.current.has(commentId) || !more) return;
       if (!commentId || !isUUID(commentId)) return;
       const current = ctx.store.nodes[commentId];
       if (!current) return;
@@ -133,9 +141,15 @@ function useReplies({
       }
 
       const generation = ctx.generationRef.current;
-      loadingRef.current = true;
-      setLoading(true);
-      setFailure(null);
+      const clearFailure = () =>
+        setFailures((prev) => {
+          if (!(commentId in prev)) return prev;
+          const { [commentId]: _cleared, ...rest } = prev;
+          return rest;
+        });
+      inFlightRef.current.add(commentId);
+      setLoadingIds((prev) => new Set(prev).add(commentId));
+      clearFailure();
       try {
         // Replies are the level being fetched, so the section's reply sort is
         // sent as the level sort; nested levels inherit it on the server.
@@ -151,15 +165,25 @@ function useReplies({
           ...ctx.reputation,
         });
         if (generation !== ctx.generationRef.current) return;
+        // Stored under the comment it was fetched for, whichever comment
+        // this instance shows by now.
         ctx.setStore((prev) => applyRepliesPage(prev, commentId, response));
-        setFailure(null);
+        clearFailure();
       } catch (err) {
         if (generation !== ctx.generationRef.current) return;
-        setFailure({ error: toError(err), generation });
+        setFailures((prev) => ({
+          ...prev,
+          [commentId]: { error: toError(err), generation },
+        }));
         handleError(err, "Failed to fetch replies:");
       } finally {
-        loadingRef.current = false;
-        setLoading(false);
+        inFlightRef.current.delete(commentId);
+        setLoadingIds((prev) => {
+          if (!prev.has(commentId)) return prev;
+          const next = new Set(prev);
+          next.delete(commentId);
+          return next;
+        });
       }
     },
     [commentId, fetchManyComments],

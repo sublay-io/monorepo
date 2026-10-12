@@ -370,3 +370,117 @@ describe("useReplies", () => {
     });
   });
 });
+
+describe("useReplies — one instance moved to another comment", () => {
+  const A1 = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1";
+  const A2 = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2";
+
+  function renderSwitchable() {
+    const current = { commentId: A1 };
+    const entity = makeEntity({ id: "entity-1" });
+    const rendered = renderWithCommentSection(
+      () => ({
+        replies: useReplies({ commentId: current.commentId }),
+        section: useCommentSection(),
+      }),
+      {
+        providerProps: { entity },
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse(
+            "get",
+            makePage(
+              [
+                makeComment({ id: A1, repliesCount: 2 }),
+                makeComment({ id: A2, repliesCount: 2 }),
+              ],
+              null,
+            ),
+          ),
+      },
+    );
+    return { ...rendered, current };
+  }
+
+  it("a load in flight for the old comment isn't the new comment's loading, and doesn't block its loadMore", async () => {
+    const { result, rerender, current, axiosPrivate } = renderSwitchable();
+    await settled(result);
+
+    let settleA1!: { resolve: (v: unknown) => void; reject: (e: unknown) => void };
+    (axiosPrivate.instance.get as unknown as {
+      mockImplementationOnce: (f: () => Promise<unknown>) => void;
+    }).mockImplementationOnce(
+      () => new Promise((resolve, reject) => { settleA1 = { resolve, reject }; }),
+    );
+    let pendingA1!: Promise<void>;
+    act(() => {
+      pendingA1 = result.current.replies.loadMore();
+    });
+    expect(result.current.replies.loading).toBe(true);
+
+    current.commentId = A2;
+    rerender();
+    expect(result.current.replies.comment?.id).toBe(A2);
+    expect(result.current.replies.loading).toBe(false);
+
+    const R2 = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2";
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: R2, parentId: A2 })], null));
+    await act(async () => {
+      await result.current.replies.loadMore();
+    });
+    expect(result.current.replies.replies.map((c) => c.id)).toEqual([R2]);
+    expect(result.current.replies.loading).toBe(false);
+
+    // The old comment's load fails late: not this comment's error.
+    await act(async () => {
+      settleA1.reject(Object.assign(new Error("boom"), { response: { status: 500 } }));
+      await pendingA1;
+    });
+    expect(result.current.replies.error).toBeNull();
+    expect(result.current.replies.loading).toBe(false);
+    expect(result.current.replies.replies.map((c) => c.id)).toEqual([R2]);
+  });
+
+  it("the old comment's error isn't shown for the new comment, and comes back with it", async () => {
+    const { result, rerender, current, axiosPrivate } = renderSwitchable();
+    await settled(result);
+
+    axiosPrivate.mockError("get", 500, {});
+    await act(async () => {
+      await result.current.replies.loadMore();
+    });
+    expect(result.current.replies.error).toBeInstanceOf(Error);
+
+    current.commentId = A2;
+    rerender();
+    expect(result.current.replies.error).toBeNull();
+  });
+
+  it("a late page for the old comment still lands under that comment in the store", async () => {
+    const { result, rerender, current, axiosPrivate } = renderSwitchable();
+    await settled(result);
+
+    let resolveA1!: (v: unknown) => void;
+    (axiosPrivate.instance.get as unknown as {
+      mockImplementationOnce: (f: () => Promise<unknown>) => void;
+    }).mockImplementationOnce(() => new Promise((resolve) => { resolveA1 = resolve; }));
+    let pendingA1!: Promise<void>;
+    act(() => {
+      pendingA1 = result.current.replies.loadMore();
+    });
+    current.commentId = A2;
+    rerender();
+
+    const R1a = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1";
+    await act(async () => {
+      resolveA1({ data: makePage([makeComment({ id: R1a, parentId: A1 })], null), status: 200 });
+      await pendingA1;
+    });
+    expect(result.current.replies.replies).toEqual([]);
+    expect(result.current.replies.loading).toBe(false);
+
+    current.commentId = A1;
+    rerender();
+    expect(result.current.replies.replies.map((c) => c.id)).toEqual([R1a]);
+    expect(result.current.replies.hasMore).toBe(false);
+  });
+});

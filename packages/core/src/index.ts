@@ -50,6 +50,8 @@ export {
   type ConversationProviderProps,
   type MessageThreadContextValue,
   type MessageThreadProviderProps,
+  type CommentSectionProviderProps,
+  type CommentSectionContextValues,
 } from "./context";
 
 // Integration mode exports (for users with their own Redux store)
@@ -554,6 +556,8 @@ export {
   useFetchCommentsByUserIdWrapper,
   type CommentSectionCreateCommentProps,
   type CommentCreateError,
+  type UseCommentSectionDataProps,
+  type UseCommentSectionDataValues,
   type CommentSectionUpdateCommentProps,
   type CommentSectionDeleteCommentProps,
   type CreateCommentProps,

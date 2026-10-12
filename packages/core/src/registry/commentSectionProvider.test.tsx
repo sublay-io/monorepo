@@ -20,11 +20,15 @@ import type { Entity } from "../interfaces/models/Entity";
 // the real `CommentSectionProvider` and check that a change to what the
 // section is given reaches the section and never unmounts what's inside it.
 //
-// The hooks are loaded by path at run time so this package's typecheck
-// doesn't reach into the registry, and the UI files they import are replaced
-// with empty components (they need packages this one doesn't depend on).
+// The last test renders each variant's real section component, to check a
+// prop given to the component reaches the entity lookup request.
+//
+// The hooks and sections are loaded by path at run time so this package's
+// typecheck doesn't reach into the registry, and the UI files they import are
+// replaced with empty components (they need packages this one doesn't depend
+// on).
 // `@sublay/react-js` / `@sublay/react-native` resolve to this package's
-// source: see vitest.config.ts.
+// source, and `react-native` to a stub: see vitest.config.ts.
 
 const REGISTRY = new URL("../../../../registry", import.meta.url).pathname.replace(/\/$/, "");
 
@@ -45,40 +49,61 @@ const NATIVE_FILES = [
 const VARIANTS: {
   dir: string;
   hook: string;
+  /** The section component's file, under `files/`. */
+  section: string;
   files: string[];
+  /** Mocked files with named exports instead of a default one. */
+  namedFiles?: Record<string, string>;
   native?: boolean;
   /** The tailwind web variants take their theme from a `dark` class, not a prop. */
   noThemeProp?: boolean;
 }[] = [
-  { dir: "react/comments-threaded/styled", hook: "use-threaded-comments", files: WEB_FILES },
+  {
+    dir: "react/comments-threaded/styled",
+    hook: "use-threaded-comments",
+    section: "threaded-comment-section",
+    files: WEB_FILES,
+  },
   {
     dir: "react/comments-threaded/tailwind",
     hook: "use-threaded-comments",
+    section: "threaded-comment-section",
     files: WEB_FILES,
     noThemeProp: true,
   },
-  { dir: "react/comments-social/styled", hook: "use-social-comments", files: WEB_FILES },
+  {
+    dir: "react/comments-social/styled",
+    hook: "use-social-comments",
+    section: "social-comment-section",
+    files: WEB_FILES,
+    namedFiles: { "files/sort-by-button": "SortByButton" },
+  },
   {
     dir: "react/comments-social/tailwind",
     hook: "use-social-comments",
+    section: "social-comment-section",
+    namedFiles: { "files/sort-by-button": "SortByButton" },
     files: WEB_FILES,
     noThemeProp: true,
   },
   {
     dir: "react-native/comments-threaded/tailwind",
     hook: "use-threaded-comments",
+    section: "threaded-comment-section",
     files: NATIVE_FILES,
     native: true,
   },
   {
     dir: "react-native/comments-social/styled",
     hook: "use-social-comments",
+    section: "social-comment-section",
     files: [...NATIVE_FILES, "files/sort-by-button/sort-by-button"],
     native: true,
   },
   {
     dir: "react-native/comments-social/tailwind",
     hook: "use-social-comments",
+    section: "social-comment-section",
     files: [...NATIVE_FILES, "files/sort-by-button/sort-by-button"],
     native: true,
   },
@@ -98,8 +123,16 @@ type SectionHook = (props: SectionHookProps) => {
   providerProps: Record<string, unknown>;
 };
 type ThemeContext = React.Context<{ theme?: "light" | "dark" }>;
+type SectionComponent = React.ComponentType<
+  SectionHookProps & { createIfNotFound?: boolean }
+>;
 
-type LoadedVariant = { useSection: SectionHook; ThemeContext: ThemeContext };
+type LoadedVariant = {
+  useSection: SectionHook;
+  ThemeContext: ThemeContext;
+  /** The variant's section component (its default export). */
+  loadSection: () => Promise<SectionComponent>;
+};
 const loaded = new Map<string, Promise<LoadedVariant>>();
 
 /** Each variant's modules are mocked and imported once. */
@@ -115,6 +148,9 @@ async function importVariant(
   for (const file of variant.files) {
     vi.doMock(`${base}/${file}.tsx`, () => ({ default: () => null }));
   }
+  for (const [file, name] of Object.entries(variant.namedFiles ?? {})) {
+    vi.doMock(`${base}/${file}.tsx`, () => ({ [name]: () => null }));
+  }
   let ThemeContext: ThemeContext;
   if (variant.native) {
     // The native UI state context imports the bottom-sheet package, so it's
@@ -122,6 +158,7 @@ async function importVariant(
     const NativeThemeContext: ThemeContext = createContext({});
     ThemeContext = NativeThemeContext;
     vi.doMock(`${base}/context/ui-state-context.tsx`, () => ({
+      UIStateContext: NativeThemeContext,
       UIStateProvider: ({
         children,
         theme,
@@ -139,7 +176,10 @@ async function importVariant(
     ThemeContext = ui.UIStateContext;
   }
   const mod = await import(/* @vite-ignore */ `${base}/hooks/${variant.hook}.tsx`);
-  return { useSection: mod.default as SectionHook, ThemeContext };
+  const loadSection = async () =>
+    (await import(/* @vite-ignore */ `${base}/files/${variant.section}.tsx`))
+      .default as SectionComponent;
+  return { useSection: mod.default as SectionHook, ThemeContext, loadSection };
 }
 
 const A1 = "11111111-1111-4111-8111-111111111111";
@@ -159,6 +199,15 @@ function mockApi() {
     if (url.endsWith("/entities/entity-A")) {
       return ok(makeEntity({ id: "entity-A", commentsCount: 2 }));
     }
+    if (url.endsWith("/entities/by-foreign-id")) {
+      // Like the server: found only once it has been created.
+      if (!config?.params?.createIfNotFound) {
+        return Promise.reject({ response: { status: 404, data: { code: "entity/not-found" } } });
+      }
+      return ok(
+        makeEntity({ id: "entity-A", foreignId: config.params.foreignId, commentsCount: 1 }),
+      );
+    }
     if (url.endsWith("/comments")) {
       const entityId = config?.params?.entityId;
       return ok(
@@ -172,6 +221,11 @@ function mockApi() {
   );
   return {
     listCalls: () => get.mock.calls.filter((c) => String(c[0]).endsWith("/comments")),
+    /** The `params` of each entity lookup by `foreignId`, in order. */
+    lookups: () =>
+      get.mock.calls
+        .filter((c) => String(c[0]).endsWith("/entities/by-foreign-id"))
+        .map((c) => (c[1] as { params: Record<string, unknown> }).params),
   };
 }
 
@@ -391,5 +445,32 @@ describe.each(VARIANTS)("registry $dir — $hook", (variant) => {
     expect(view.getByTestId("ids").textContent).toContain(A1);
     expect(view.getByTestId("ids").textContent).toContain(NEW);
     expect(listCalls()).toHaveLength(1);
+  });
+
+  it("sends `createIfNotFound` with the entity lookup only when the section component is given it", async () => {
+    const { loadSection } = await loadHook(variant);
+    const Section = await loadSection();
+    const { lookups, listCalls } = mockApi();
+    const Providers = makeProviders();
+
+    // Without the prop the section only looks the entity up.
+    const view = render(<Section foreignId="article-1" />, { wrapper: Providers });
+    await waitFor(() => expect(lookups()).toHaveLength(1));
+    expect(lookups()[0].foreignId).toBe("article-1");
+    expect(lookups()[0].createIfNotFound).toBeUndefined();
+    await new Promise((r) => setTimeout(r, 30));
+    expect(listCalls()).toHaveLength(0);
+
+    // Turning it on reaches the mounted section: a new lookup that creates.
+    view.rerender(<Section foreignId="article-1" createIfNotFound />);
+    await waitFor(() => expect(lookups()).toHaveLength(2));
+    expect(lookups()[1]).toMatchObject({ foreignId: "article-1", createIfNotFound: true });
+    await waitFor(() => expect(listCalls()).toHaveLength(1));
+    view.unmount();
+
+    // Given from the start.
+    render(<Section foreignId="article-2" createIfNotFound />, { wrapper: Providers });
+    await waitFor(() => expect(lookups()).toHaveLength(3));
+    expect(lookups()[2]).toMatchObject({ foreignId: "article-2", createIfNotFound: true });
   });
 });

@@ -77,12 +77,14 @@ export function EntitySourceToggle({
 }
 
 export type EntitySourceProps =
-  | { foreignId: string }
+  | { foreignId: string; createIfNotFound: true }
   | { entity: Entity | null | undefined };
 
 /**
  * Wraps the section in `EntityProvider` and hands it the props for the chosen
- * mode: the `foreignId`, or the entity object from `useEntity()`. That object
+ * mode: the `foreignId` (with `createIfNotFound`, so the section creates the
+ * test entity itself when it's the first to ask for it), or the entity object
+ * from `useEntity()`. That object
  * is replaced whenever the entity changes (posting a comment updates its
  * `commentsCount`), which is what the "entity" mode is here to exercise.
  */
@@ -114,5 +116,11 @@ function EntitySourceInner({
   children: (props: EntitySourceProps) => ReactNode;
 }) {
   const { entity } = useEntity();
-  return <>{children(mode === "entity" ? { entity } : { foreignId })}</>;
+  return (
+    <>
+      {children(
+        mode === "entity" ? { entity } : { foreignId, createIfNotFound: true },
+      )}
+    </>
+  );
 }

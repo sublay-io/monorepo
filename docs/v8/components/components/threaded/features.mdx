@@ -184,7 +184,7 @@ Customize `no-comments-placeholder.tsx` to change messaging or add illustrations
 When a load fails, the component shows a retry instead of a wrong or stuck state:
 
 - **First load fails** — "Couldn't load comments" with a **Try again** button, in place of the empty state.
-- **The entity can't be loaded** — the same "Couldn't load comments" with **Try again**. This is the case when the section looks the entity up from `entityId`, `foreignId` or `shortId` and the lookup fails or finds nothing.
+- **The entity can't be loaded** — the same "Couldn't load comments" with **Try again**. This is the case when the section looks the entity up from `entityId`, `foreignId` or `shortId` and the lookup fails or finds nothing. A `foreignId` that has no entity yet finds nothing unless the section is given [`createIfNotFound`](/v8/components/components/threaded/props-api#createifnotfound).
 - **"Load more comments" fails** — "Couldn't load more · Try again" in place of the button.
 - **"N more replies" or "Continue this thread" fails** — the same "Couldn't load more · Try again" in place of that button, including inside the focused thread view.
 

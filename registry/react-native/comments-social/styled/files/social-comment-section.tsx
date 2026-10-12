@@ -58,6 +58,12 @@ interface SocialCommentSectionProps {
   entityId?: string | undefined | null;
   foreignId?: string | undefined | null;
   shortId?: string | undefined | null;
+  /**
+   * With `foreignId`: create the entity the first time the section is shown
+   * if none exists yet. Off by default — the section then only finds an
+   * existing entity.
+   */
+  createIfNotFound?: boolean;
   isVisible?: boolean;
   highlightedCommentId?: string | undefined | null;
   theme?: 'light' | 'dark';
@@ -79,6 +85,7 @@ const arePropsEqual = (
     prevProps.entityId !== nextProps.entityId ||
     prevProps.foreignId !== nextProps.foreignId ||
     prevProps.shortId !== nextProps.shortId ||
+    prevProps.createIfNotFound !== nextProps.createIfNotFound ||
     prevProps.isVisible !== nextProps.isVisible ||
     prevProps.highlightedCommentId !== nextProps.highlightedCommentId ||
     prevProps.theme !== nextProps.theme
@@ -219,6 +226,7 @@ function SocialCommentSection({
   entityId,
   foreignId,
   shortId,
+  createIfNotFound,
   isVisible = true,
   highlightedCommentId,
   theme = 'light',
@@ -229,6 +237,7 @@ function SocialCommentSection({
     entityId,
     foreignId,
     shortId,
+    createIfNotFound,
     theme,
     highlightedCommentId,
   });

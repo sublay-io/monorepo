@@ -6,7 +6,7 @@ icon: "sliders"
 
 # Threaded Comments Props
 
-The `ThreadedCommentSection` component follows a **minimal props philosophy**. It works with just `entityId` and offers optional props for specific needs.
+The `ThreadedCommentSection` component follows a **minimal props philosophy**. It works with a single prop that identifies the entity and offers optional props for specific needs.
 
 ---
 
@@ -27,6 +27,9 @@ interface ThreadedCommentSectionProps {
   entityId?: string | undefined | null;
   foreignId?: string | undefined | null;
   shortId?: string | undefined | null;
+
+  // With foreignId: create the entity if it doesn't exist yet
+  createIfNotFound?: boolean;
 
   // Optional features
   isVisible?: boolean;
@@ -51,7 +54,7 @@ A complete Entity object.
 ```tsx
 <ThreadedCommentSection
   entity={{
-    id: "entity_123",
+    id: "0b9d5a3e-6c1f-4f7a-9d2e-8a4c1b7e5f30",
     projectId: "proj_456",
     foreignId: "post-789",
     // ... other entity fields
@@ -67,11 +70,13 @@ A complete Entity object.
 
 **Type:** `string | undefined | null`
 
-The internal Sublay ID for the entity.
+The Sublay entity's own `id` (a UUID), as returned by the SDK and the API.
 
 ```tsx
-<ThreadedCommentSection entityId="entity_123" />
+<ThreadedCommentSection entityId="0b9d5a3e-6c1f-4f7a-9d2e-8a4c1b7e5f30" />
 ```
+
+**Use when:** You have the entity's Sublay ID but not the entity object.
 
 ---
 
@@ -79,13 +84,13 @@ The internal Sublay ID for the entity.
 
 **Type:** `string | undefined | null`
 
-Your external/custom ID for the entity. The component will find or create the Sublay entity automatically.
+Your external/custom ID for the entity. The component finds the Sublay entity that has this `foreignId`. It creates one only when [`createIfNotFound`](#createifnotfound) is also set.
 
 ```tsx
 <ThreadedCommentSection foreignId="blog-post-789" />
 ```
 
-**Use when:** You're using your own IDs and haven't fetched the Sublay entity yet. This is the most common option.
+**Use when:** You identify the entity by an ID from your own system.
 
 ---
 
@@ -99,9 +104,29 @@ A short, human-readable identifier (if you've set one on the entity).
 <ThreadedCommentSection shortId="my-first-post" />
 ```
 
+**Use when:** You have the entity's short ID, for example from a URL.
+
 <Note>
 **You only need ONE of these props.** Use whichever fits your data model best.
 </Note>
+
+---
+
+### `createIfNotFound`
+
+**Type:** `boolean` — **Default:** `false`
+
+Used with `foreignId`. When set, the entity is created the first time the section is shown if no entity with that `foreignId` exists yet.
+
+```tsx
+<ThreadedCommentSection foreignId="blog-post-789" createIfNotFound />
+```
+
+Without it, the section only finds an existing entity. When there is none, it shows its ["Couldn't load comments" state](/v8/components/components/threaded/features#error-states) instead of the comments.
+
+It has no effect with `entity`, `entityId` or `shortId`.
+
+The other examples on this page pass `foreignId` alone, for an entity that already exists.
 
 ---
 
@@ -117,7 +142,7 @@ Controls whether the comment section is visible. Useful when rendering inside a 
 const [showComments, setShowComments] = useState(false);
 
 <ThreadedCommentSection
-  entityId="post_123"
+  foreignId="post_123"
   isVisible={showComments}
 />
 ```
@@ -134,7 +159,7 @@ ID of a specific comment to highlight when the section loads. The section opens 
 
 ```tsx
 <ThreadedCommentSection
-  entityId="post_123"
+  foreignId="post_123"
   highlightedCommentId="comment_456"
 />
 ```
@@ -151,7 +176,7 @@ ID of a specific comment to highlight when the section loads. The section opens 
 
 ```tsx
 <ThreadedCommentSection
-  entityId="post_123"
+  foreignId="post_123"
   theme={isDark ? 'dark' : 'light'}
 />
 ```
@@ -170,7 +195,7 @@ ID of a specific comment to highlight when the section loads. The section opens 
 
     ```tsx
     <html className={isDark ? 'dark' : ''}>
-      <ThreadedCommentSection entityId="post_123" />
+      <ThreadedCommentSection foreignId="post_123" />
     </html>
     ```
 
@@ -187,7 +212,7 @@ ID of a specific comment to highlight when the section loads. The section opens 
 Optional content rendered within the comment feed area.
 
 ```tsx
-<ThreadedCommentSection entityId="post_123">
+<ThreadedCommentSection foreignId="post_123">
   <div className="text-center text-gray-500 my-4">
     Join the discussion!
   </div>
@@ -201,7 +226,7 @@ Optional content rendered within the comment feed area.
 ### Minimal Usage
 
 ```tsx
-<ThreadedCommentSection foreignId="blog-post-123" />
+<ThreadedCommentSection foreignId="blog-post-123" createIfNotFound />
 ```
 
 ---

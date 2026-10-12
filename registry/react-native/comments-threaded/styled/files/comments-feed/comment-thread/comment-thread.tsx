@@ -29,7 +29,7 @@ function CommentThread({
   parentColumnContinues = false,
 }: CommentThreadProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { highlightedComment } = useCommentSection();
+  const { highlightedComment, repliedToComment } = useCommentSection();
 
   // Replies the section already brought in (nested) are here from the start;
   // "load more" / "continue this thread" fetch the rest on demand.
@@ -94,7 +94,11 @@ function CommentThread({
         <IndentationThreadingLines
           isLastReply={isLastReply}
           indented={depth <= MAX_INDENT_DEPTH}
-          highlighted={highlightedComment?.comment.id === comment.id}
+          // The deep-linked comment, or the one being replied to
+          highlighted={
+            highlightedComment?.comment.id === comment.id ||
+            repliedToComment?.id === comment.id
+          }
         />
       )}
     </View>

@@ -1,4 +1,5 @@
 import React, { createContext, useState, useRef, useMemo, useCallback } from "react";
+import { Keyboard, TextInput } from "react-native";
 import { Comment as CommentType } from "@sublay/react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
@@ -7,6 +8,11 @@ type UIStateContext = {
   commentOptionsSheetRef: React.RefObject<BottomSheetMethods | null>;
   reportCommentSheetRef: React.RefObject<BottomSheetMethods | null>;
   commentOptionsSheetOwnerRef: React.RefObject<BottomSheetMethods | null>;
+
+  // The section's main input (the comment form attaches it), and a way to
+  // focus it from anywhere in the section: a comment's Reply button does.
+  commentInputRef: React.RefObject<TextInput | null>;
+  focusCommentInput: () => void;
 
   openCommentOptionsSheet: (newComment?: CommentType) => void;
   closeCommentOptionsSheet: () => void;
@@ -38,6 +44,16 @@ export const UIStateProvider = ({
   const commentOptionsSheetRef = useRef<BottomSheet>(null);
   const reportCommentSheetRef = useRef<BottomSheet>(null);
   const commentOptionsSheetOwnerRef = useRef<BottomSheet>(null);
+  const commentInputRef = useRef<TextInput>(null);
+
+  const focusCommentInput = useCallback(() => {
+    const input = commentInputRef.current;
+    if (!input) return;
+    // Still focused with the keyboard closed (Android's back button closes
+    // the keyboard without blurring): focusing again would not reopen it.
+    if (input.isFocused() && !Keyboard.isVisible()) input.blur();
+    input.focus();
+  }, []);
 
   const [optionsComment, setOptionsComment] = useState<CommentType | null>(
     null
@@ -78,6 +94,9 @@ export const UIStateProvider = ({
     reportCommentSheetRef,
     commentOptionsSheetOwnerRef,
 
+    commentInputRef,
+    focusCommentInput,
+
     openCommentOptionsSheet,
     closeCommentOptionsSheet,
     openReportCommentSheet,
@@ -92,6 +111,7 @@ export const UIStateProvider = ({
 
     theme,
   }), [
+    focusCommentInput,
     openCommentOptionsSheet,
     closeCommentOptionsSheet,
     openReportCommentSheet,

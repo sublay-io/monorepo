@@ -23,6 +23,7 @@ import useTextInputCursorIndicator from "~shared/react-native/use-text-input-cur
 import GiphyContainer from "~shared/react-native/giphy-container";
 
 import MentionSuggestions from "../mention-suggestions/mention-suggestions";
+import ReplyBanner from "../reply-banner/reply-banner";
 import useUIState from "../../hooks/use-ui-state";
 import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
 
@@ -43,28 +44,37 @@ function NewCommentForm({
 }) {
   const { user } = useUser();
   const { project } = useProject();
-  const { theme } = useUIState();
+  const { theme, commentInputRef } = useUIState();
 
   const giphyApiKey = project?.integrations.find((int) => int.name === "giphy")
     ?.data.apiKey;
 
   const { createComment, callbacks, createError } = useCommentSection();
 
-  // A failed post shows a message above the input, until the text is edited
-  // or something is sent again (the section clears `createError` then).
-  // Replies have their own form, which shows its own failures.
+  // This form posts top-level comments and, while a comment is the reply
+  // target (its Reply button was tapped; see reply-banner.tsx), replies to
+  // it. The section's `createComment` reads the target itself: it sends the
+  // target's id as the new comment's parent, clears the target while the
+  // request is in flight, and puts it back if the request fails. So nothing
+  // here passes a parent, and a failed reply comes back as a reply.
+
+  // A failed post (a comment or a reply) shows a message above the input,
+  // until the text is edited or something is sent again (the section clears
+  // `createError` then).
   const [dismissedCreateError, setDismissedCreateError] =
     useState<CommentCreateError | null>(null);
   const createErrorMessage =
     createError &&
-    createError.parentId === null &&
     createError !== dismissedCreateError
       ? getCommentCreateErrorMessage(createError)
       : null;
 
   const [isGiphyVisible, setIsGiphyVisible] = useState(false);
 
-  const textAreaRef = useRef<TextInput>(null);
+  // The section's shared input ref when there is one, so a comment's Reply
+  // button can focus this input (see focusCommentInput in ui-state-context).
+  const ownInputRef = useRef<TextInput>(null);
+  const textAreaRef = commentInputRef ?? ownInputRef;
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -250,6 +260,8 @@ function NewCommentForm({
             {createErrorMessage}
           </Text>
         ) : null}
+        {/* Shown while a comment is being replied to */}
+        <ReplyBanner />
         <View
           style={{
             flexDirection: 'row',

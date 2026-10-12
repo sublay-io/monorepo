@@ -5,12 +5,13 @@ import useUIState from "../../../../hooks/use-ui-state";
 function ReplyButtonAndInfo({
   hasReplies,
   replyCount,
-  setShowReplyForm,
+  onReplyPress,
   canReply = true,
 }: {
   hasReplies: boolean;
   replyCount: number;
-  setShowReplyForm: React.Dispatch<React.SetStateAction<boolean>>;
+  // Makes the comment the reply target, or cancels it if it already is.
+  onReplyPress: () => void;
   // false hides the Reply button (the reply count still shows).
   canReply?: boolean;
 }) {
@@ -26,7 +27,7 @@ function ReplyButtonAndInfo({
     >
       {canReply && (
       <Pressable
-        onPress={() => setShowReplyForm((prev) => !prev)}
+        onPress={onReplyPress}
         style={({ pressed }) => ({
           paddingHorizontal: 8,
           paddingVertical: 4,

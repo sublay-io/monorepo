@@ -1,8 +1,6 @@
-import {
-  HeartFullIcon,
-  HeartIcon,
-  resetButton,
-} from "@sublay/ui-core-react-js";
+import HeartFullIcon from "~shared/react/heart-full-icon";
+import HeartIcon from "~shared/react/heart-icon";
+import { resetButton } from "~shared/react/reset-styles";
 
 const HeartButton = ({
   userUpvoted,

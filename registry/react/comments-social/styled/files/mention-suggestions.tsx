@@ -1,5 +1,6 @@
 import { User } from "@sublay/react-js";
-import { UserAvatar, UserMentionSkeleton } from "@sublay/ui-core-react-js";
+import UserAvatar from "~shared/react/user-avatar";
+import { UserMentionSkeleton } from "~shared/react/skeleton";
 import useUIState from "../hooks/use-ui-state";
 
 function MentionSuggestions({
@@ -40,7 +41,7 @@ function MentionSuggestions({
     >
       <ul style={{ display: "grid", gap: 8 }}>
         {isLoadingMentions
-          ? [1, 2, 3].map((i) => <UserMentionSkeleton key={i} />)
+          ? [1, 2, 3].map((i) => <UserMentionSkeleton theme={theme} key={i} />)
           : mentionSuggestions.length > 0
           ? mentionSuggestions.map((user) => (
               <li

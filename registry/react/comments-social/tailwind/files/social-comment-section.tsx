@@ -8,7 +8,9 @@
  *
  * Required dependencies:
  * - @sublay/react-js ^8.0.0-beta.0
- * - @sublay/ui-core-react-js ^7.0.0
+ * - moment ^2 (used by the shared pieces in shared/)
+ * - @giphy/js-fetch-api ^5.7.0 (used by the shared pieces in shared/)
+ * - @giphy/react-components ^10.1.1 (used by the shared pieces in shared/)
  * - Tailwind CSS configured with dark mode support
  *
  * @see https://docs.sublay.io/v8/components/components/social/overview
@@ -111,6 +113,20 @@ const arePropsEqual = (
   return true;
 };
 
+// 🎨 CUSTOMIZATION: Dark-mode colors of the shared pieces (GIF picker, loading
+// skeletons, emoji bar divider, mentions). The pieces in `shared/` read these
+// CSS custom properties, so they follow the `dark` class like the rest of the
+// section. Keep these classes on an element that wraps the feed and the form.
+const sharedDarkColors = [
+  "dark:[--sublay-ui-surface:#262626]",
+  "dark:[--sublay-ui-control:#404040]",
+  "dark:[--sublay-ui-muted:#a3a3a3]",
+  "dark:[--sublay-ui-text:#fafafa]",
+  "dark:[--sublay-ui-divider:#525252]",
+  "dark:[--sublay-ui-skeleton:#404040]",
+  "dark:[--sublay-ui-mention:#60a5fa]",
+].join(" ");
+
 function SocialCommentSectionInner({
   isVisible,
   children,
@@ -156,7 +172,7 @@ function SocialCommentSectionInner({
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className={`h-full flex flex-col ${sharedDarkColors}`}>
       {sortOptions.length > 0 && (
         <div
           className="flex px-6 py-3 items-center gap-1 justify-end bg-white dark:bg-neutral-800"

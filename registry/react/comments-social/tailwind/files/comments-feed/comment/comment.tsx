@@ -1,4 +1,4 @@
-import React, { cloneElement, useState } from "react";
+import React, { useState } from "react";
 import {
   Comment as CommentType,
   UserMention,
@@ -8,15 +8,11 @@ import {
   useCommentSection,
 } from "@sublay/react-js";
 
-import {
-  UserAvatar,
-  FromNow,
-  resetButton,
-  resetDiv,
-  resetP,
-  EllipsisIcon,
-  parseContentWithMentions,
-} from "@sublay/ui-core-react-js";
+import UserAvatar from "~shared/react/user-avatar";
+import FromNow from "~shared/react/from-now";
+import { resetButton, resetDiv, resetP } from "~shared/react/reset-styles";
+import EllipsisIcon from "~shared/react/ellipsis-icon";
+import { parseContentWithMentions } from "~shared/react/parse-content-with-mentions";
 
 import { cn } from "@/lib/utils";
 import Replies from "./replies";
@@ -251,15 +247,6 @@ const Comment = React.memo(
                     user?.id,
                     callbacks?.currentUserClickCallback,
                     callbacks?.otherUserClickCallback
-                  ).map((part) =>
-                    // Mentions come back with a fixed color: restyle them to follow the theme
-                    typeof part === "string"
-                      ? part
-                      : cloneElement(part, {
-                          // 🎨 CUSTOMIZATION: Mention color
-                          className: "text-blue-800 dark:text-blue-400",
-                          style: { cursor: "pointer" },
-                        })
                   )}
                 </p>
               )}

@@ -1,4 +1,4 @@
-import { cloneElement, useState } from "react";
+import { useState } from "react";
 import {
   Comment as CommentType,
   type CommentCreateError,
@@ -8,10 +8,8 @@ import {
   useReactionToggle,
   useUser,
 } from "@sublay/react-js";
-import {
-  parseContentWithMentions,
-  UserAvatar,
-} from "@sublay/ui-core-react-js";
+import { parseContentWithMentions } from "~shared/react/parse-content-with-mentions";
+import UserAvatar from "~shared/react/user-avatar";
 import VoteButtons from "./vote-buttons";
 import ActionMenu from "../action-menu";
 import NewReplyForm from "../new-reply-form";
@@ -297,15 +295,6 @@ function SingleComment({
                       user?.id,
                       callbacks?.currentUserClickCallback,
                       callbacks?.otherUserClickCallback
-                    ).map((part) =>
-                      // Mentions come back with a fixed color: restyle them to follow the theme
-                      typeof part === "string"
-                        ? part
-                        : cloneElement(part, {
-                            // 🎨 CUSTOMIZATION: Mention color
-                            className: "text-blue-800 dark:text-blue-400",
-                            style: { cursor: "pointer" },
-                          })
                     )}
                   </p>
                 )}

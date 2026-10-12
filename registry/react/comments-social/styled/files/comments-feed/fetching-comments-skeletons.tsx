@@ -1,4 +1,5 @@
-import { resetDiv, CommentSkeleton } from "@sublay/ui-core-react-js";
+import { resetDiv } from "~shared/react/reset-styles";
+import { CommentSkeleton } from "~shared/react/skeleton";
 import useUIState from "../../hooks/use-ui-state";
 
 function FetchingCommentsSkeletons() {
@@ -19,7 +20,7 @@ function FetchingCommentsSkeletons() {
       }}
     >
       {[1, 2, 3].map((i) => (
-        <CommentSkeleton key={i} />
+        <CommentSkeleton theme={theme} key={i} />
       ))}
     </div>
   );

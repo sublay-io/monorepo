@@ -7,7 +7,8 @@
  *
  * Required dependencies:
  * - @sublay/react-js ^8.0.0-beta.0
- * - @sublay/ui-core-react-js ^7.0.0
+ * - @giphy/js-fetch-api ^5.7.0 (used by the shared pieces in shared/)
+ * - @giphy/react-components ^10.1.1 (used by the shared pieces in shared/)
  *
  * @see https://docs.sublay.io/v8/components/components/threaded/overview
  *

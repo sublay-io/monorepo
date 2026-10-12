@@ -1,5 +1,5 @@
 import { Comment as CommentType, useCommentSection } from "@sublay/react-js";
-import { resetDiv } from "@sublay/ui-core-react-js";
+import { resetDiv } from "~shared/react/reset-styles";
 
 import Comment from "./comment";
 

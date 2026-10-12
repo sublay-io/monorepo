@@ -1,4 +1,4 @@
-import { resetUl } from "@sublay/ui-core-react-js";
+import { resetUl } from "~shared/react/reset-styles";
 import useUIState from "../../../hooks/use-ui-state";
 
 function MainContent({ clickReport }: { clickReport: () => void }) {

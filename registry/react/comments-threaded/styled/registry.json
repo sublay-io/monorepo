@@ -7,8 +7,17 @@
   "author": "Sublay",
   "license": "Apache-2.0",
   "dependencies": [
-    "@sublay/react-js@^8.0.0-beta.0",
-    "@sublay/ui-core-react-js@^7.0.0"
+    "@sublay/react-js@^8.0.0-beta.0"
+  ],
+  "shared": [
+    "flag-icon",
+    "giphy-container",
+    "modal",
+    "parse-content-with-mentions",
+    "reset-styles",
+    "skeleton",
+    "use-textarea-cursor-indicator",
+    "user-avatar"
   ],
   "files": [
     {

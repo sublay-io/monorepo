@@ -7,10 +7,8 @@ import {
   handleError,
   type CommentCreateError,
 } from "@sublay/react-js";
-import {
-  useTextareaCursorIndicator,
-  GiphyContainer,
-} from "@sublay/ui-core-react-js";
+import useTextareaCursorIndicator from "~shared/react/use-textarea-cursor-indicator";
+import GiphyContainer from "~shared/react/giphy-container";
 import MentionSuggestions from "./mention-suggestions";
 import { getCommentCreateErrorMessage } from "../utils/comment-create-error";
 import useUIState from "../hooks/use-ui-state";
@@ -201,6 +199,7 @@ function NewCommentForm() {
           onClickBack={() => setIsGiphyVisible(false)}
           onSelectGif={(selected) => handleCreateGif(selected)}
           visible={isGiphyVisible}
+          theme={theme}
         />
       ) : null}
       <form onSubmit={handleSubmit} style={{ position: "relative" }}>

@@ -26,8 +26,18 @@ import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
 
 function NewCommentForm({
   ref,
+  gifPickerFullScreen = false,
+  containerClassName,
 }: {
   ref?: React.Ref<{ focus: () => void }>;
+  // Where the GIF picker opens. false: it covers the view this form is
+  // rendered in (in the section, the whole comment section). true: it covers
+  // the whole screen.
+  gifPickerFullScreen?: boolean;
+  // Wraps the form in a View with these classes. The section passes its
+  // border here instead of wrapping the form itself: the GIF picker fills the
+  // view the form is rendered in, and that has to be the section's root view.
+  containerClassName?: string;
 }) {
   const { user } = useUser();
   const { project } = useProject();
@@ -193,134 +203,144 @@ function NewCommentForm({
     },
   }));
 
+  const form = (
+    <View
+      className={`relative overflow-visible ${
+        theme === 'dark' ? 'bg-neutral-800' : 'bg-white'
+      }`}
+    >
+      <View className="w-full relative overflow-visible">
+        <MentionSuggestions
+          isMentionActive={isMentionActive}
+          isLoadingMentions={loading}
+          mentionSuggestions={mentionSuggestions}
+          handleMentionClick={handleMentionClick}
+        />
+      </View>
+      <View
+        className={`relative z-20 ${
+          theme === 'dark' ? 'bg-neutral-800' : 'bg-white'
+        }`}
+      >
+        {createErrorMessage ? (
+          <Text
+            accessibilityRole="alert"
+            className={`text-xs px-4 pb-1.5 ${
+              theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
+            }`}
+          >
+            {createErrorMessage}
+          </Text>
+        ) : null}
+        <View
+          className={`flex-row items-end p-2 mx-2 mb-2 rounded-2xl ${
+            hasContent
+              ? theme === 'dark'
+                ? 'border border-blue-800'
+                : 'border border-blue-300'
+              : theme === 'dark'
+                ? 'border border-neutral-600'
+                : 'border border-gray-200'
+          }`}
+        >
+          <TextInput
+            ref={textAreaRef}
+            multiline
+            numberOfLines={2}
+            placeholder="Add your reply..."
+            value={content}
+            onChangeText={(text) => {
+              if (createError && text !== content) {
+                setDismissedCreateError(createError);
+              }
+              setContent(text);
+              handleTextChange(text);
+            }}
+            onSelectionChange={handleSelectionChange}
+            onKeyPress={handleKeyPress}
+            blurOnSubmit={false}
+            className={`flex-1 p-2 text-xs bg-transparent ${
+              theme === 'dark' ? 'text-neutral-50' : 'text-gray-900'
+            }`}
+            placeholderTextColor={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
+            style={{ textAlignVertical: 'top' }}
+          />
+          {!hasContent && giphyApiKey ? (
+            <TouchableOpacity
+              onPress={() => setIsGiphyVisible(true)}
+              disabled={isSubmitting}
+              className="p-2"
+            >
+              <Text
+                className={`text-xs font-normal ${
+                  theme === 'dark' ? 'text-neutral-50' : 'text-gray-500'
+                }`}
+              >
+                GIF
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={handleCreateComment}
+              disabled={!hasContent || isSubmitting}
+              className={`p-2 rounded-full ${
+                hasContent && !isSubmitting
+                  ? theme === 'dark'
+                    ? 'bg-blue-600'
+                    : 'bg-blue-600'
+                  : theme === 'dark'
+                    ? 'bg-neutral-600'
+                    : 'bg-gray-200'
+              }`}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator
+                  size="small"
+                  color={theme === 'dark' ? '#FAFAFA' : '#FFFFFF'}
+                  style={{ width: 12, height: 12 }}
+                />
+              ) : (
+                <View
+                  style={{ width: 12, height: 12, alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <Text
+                    className={`text-xs ${
+                      hasContent
+                        ? 'text-white'
+                        : theme === 'dark'
+                          ? 'text-neutral-500'
+                          : 'text-gray-400'
+                    }`}
+                  >
+                    ↑
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    </View>
+  );
+
   return (
     <>
+      {/* Fills the view this form is rendered in (see gifPickerFullScreen) */}
       {giphyApiKey ? (
         <GiphyContainer
           giphyApiKey={giphyApiKey}
           onClickBack={() => setIsGiphyVisible(false)}
           onSelectGif={(selected) => handleCreateGif(selected)}
           visible={isGiphyVisible}
+          fullScreen={gifPickerFullScreen}
           theme={theme}
         />
       ) : null}
-      <View
-        className={`relative overflow-visible ${
-          theme === 'dark' ? 'bg-neutral-800' : 'bg-white'
-        }`}
-      >
-        <View className="w-full relative overflow-visible">
-          <MentionSuggestions
-            isMentionActive={isMentionActive}
-            isLoadingMentions={loading}
-            mentionSuggestions={mentionSuggestions}
-            handleMentionClick={handleMentionClick}
-          />
-        </View>
-        <View
-          className={`relative z-20 ${
-            theme === 'dark' ? 'bg-neutral-800' : 'bg-white'
-          }`}
-        >
-          {createErrorMessage ? (
-            <Text
-              accessibilityRole="alert"
-              className={`text-xs px-4 pb-1.5 ${
-                theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
-              }`}
-            >
-              {createErrorMessage}
-            </Text>
-          ) : null}
-          <View
-            className={`flex-row items-end p-2 mx-2 mb-2 rounded-2xl ${
-              hasContent
-                ? theme === 'dark'
-                  ? 'border border-blue-800'
-                  : 'border border-blue-300'
-                : theme === 'dark'
-                  ? 'border border-neutral-600'
-                  : 'border border-gray-200'
-            }`}
-          >
-            <TextInput
-              ref={textAreaRef}
-              multiline
-              numberOfLines={2}
-              placeholder="Add your reply..."
-              value={content}
-              onChangeText={(text) => {
-                if (createError && text !== content) {
-                  setDismissedCreateError(createError);
-                }
-                setContent(text);
-                handleTextChange(text);
-              }}
-              onSelectionChange={handleSelectionChange}
-              onKeyPress={handleKeyPress}
-              blurOnSubmit={false}
-              className={`flex-1 p-2 text-xs bg-transparent ${
-                theme === 'dark' ? 'text-neutral-50' : 'text-gray-900'
-              }`}
-              placeholderTextColor={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
-              style={{ textAlignVertical: 'top' }}
-            />
-            {!hasContent && giphyApiKey ? (
-              <TouchableOpacity
-                onPress={() => setIsGiphyVisible(true)}
-                disabled={isSubmitting}
-                className="p-2"
-              >
-                <Text
-                  className={`text-xs font-normal ${
-                    theme === 'dark' ? 'text-neutral-50' : 'text-gray-500'
-                  }`}
-                >
-                  GIF
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                onPress={handleCreateComment}
-                disabled={!hasContent || isSubmitting}
-                className={`p-2 rounded-full ${
-                  hasContent && !isSubmitting
-                    ? theme === 'dark'
-                      ? 'bg-blue-600'
-                      : 'bg-blue-600'
-                    : theme === 'dark'
-                      ? 'bg-neutral-600'
-                      : 'bg-gray-200'
-                }`}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={theme === 'dark' ? '#FAFAFA' : '#FFFFFF'}
-                    style={{ width: 12, height: 12 }}
-                  />
-                ) : (
-                  <View
-                    style={{ width: 12, height: 12, alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    <Text
-                      className={`text-xs ${
-                        hasContent
-                          ? 'text-white'
-                          : theme === 'dark'
-                            ? 'text-neutral-500'
-                            : 'text-gray-400'
-                      }`}
-                    >
-                      ↑
-                    </Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      </View>
+      {containerClassName ? (
+        <View className={containerClassName}>{form}</View>
+      ) : (
+        form
+      )}
     </>
   );
 }

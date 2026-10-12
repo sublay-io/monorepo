@@ -1,4 +1,141 @@
 {
   "platform": "react-native",
-  "pieces": {}
+  "pieces": {
+    "custom-button": {
+      "files": [
+        "custom-button.tsx"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "emoji-suggestions": {
+      "files": [
+        "emoji-suggestions.tsx"
+      ],
+      "requires": [
+        "theme"
+      ],
+      "dependencies": []
+    },
+    "flag-icon": {
+      "files": [
+        "flag-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": [
+        "react-native-svg@^15"
+      ]
+    },
+    "from-now": {
+      "files": [
+        "from-now.tsx"
+      ],
+      "requires": [],
+      "dependencies": [
+        "moment@^2"
+      ]
+    },
+    "get-image-component": {
+      "files": [
+        "get-image-component.tsx"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "giphy-container": {
+      "files": [
+        "giphy-container.tsx"
+      ],
+      "requires": [
+        "get-image-component",
+        "magnifying-glass-icon",
+        "theme"
+      ],
+      "dependencies": [
+        "react-native-gesture-handler@^2"
+      ]
+    },
+    "heart-full-icon": {
+      "files": [
+        "heart-full-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": [
+        "react-native-svg@^15"
+      ]
+    },
+    "heart-icon": {
+      "files": [
+        "heart-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": [
+        "react-native-svg@^15"
+      ]
+    },
+    "magnifying-glass-icon": {
+      "files": [
+        "magnifying-glass-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": [
+        "react-native-svg@^15"
+      ]
+    },
+    "parse-content-with-mentions": {
+      "files": [
+        "parse-content-with-mentions.tsx"
+      ],
+      "requires": [
+        "theme"
+      ],
+      "dependencies": []
+    },
+    "reset-styles": {
+      "files": [
+        "reset-styles.ts"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "skeleton": {
+      "files": [
+        "skeleton.tsx"
+      ],
+      "requires": [
+        "theme"
+      ],
+      "dependencies": []
+    },
+    "theme": {
+      "files": [
+        "theme.ts"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "trash-icon": {
+      "files": [
+        "trash-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": [
+        "react-native-svg@^15"
+      ]
+    },
+    "use-text-input-cursor-indicator": {
+      "files": [
+        "use-text-input-cursor-indicator.tsx"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "user-avatar": {
+      "files": [
+        "user-avatar.tsx"
+      ],
+      "requires": [],
+      "dependencies": []
+    }
+  }
 }

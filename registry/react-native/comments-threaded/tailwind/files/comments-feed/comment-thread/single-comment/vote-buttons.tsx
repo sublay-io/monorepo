@@ -51,8 +51,8 @@ function VoteButtons({
       // One step stronger on the highlighted comment, whose background is gray-100
       className={`flex-row items-center rounded-full gap-1 ${containerPadding} ${
         highlighted
-          ? theme === 'dark' ? 'bg-gray-600' : 'bg-gray-200'
-          : theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
+          ? theme === 'dark' ? 'bg-neutral-600' : 'bg-gray-200'
+          : theme === 'dark' ? 'bg-neutral-700' : 'bg-gray-50'
       }`}
     >
       {/* Upvote Button */}
@@ -82,7 +82,7 @@ function VoteButtons({
             userVote === "up"
               ? 'text-white'
               : theme === 'dark'
-                ? 'text-gray-400'
+                ? 'text-neutral-400'
                 : 'text-gray-500'
           }
         >
@@ -104,7 +104,7 @@ function VoteButtons({
                 ? 'text-red-400'
                 : 'text-red-500'
               : theme === 'dark'
-                ? 'text-gray-300'
+                ? 'text-neutral-300'
                 : 'text-gray-700'
         }`}
       >
@@ -138,7 +138,7 @@ function VoteButtons({
             userVote === "down"
               ? 'text-white'
               : theme === 'dark'
-                ? 'text-gray-400'
+                ? 'text-neutral-400'
                 : 'text-gray-500'
           }
         >

@@ -45,20 +45,20 @@ const CommentOptionsSheet = () => {
         }
       }}
       backgroundStyle={{
-        backgroundColor: theme === 'dark' ? '#1F2937' : '#FFFFFF',
+        backgroundColor: theme === 'dark' ? '#262626' : '#FFFFFF',
       }}
       handleIndicatorStyle={{
-        backgroundColor: theme === 'dark' ? '#9CA3AF' : '#D1D5DB',
+        backgroundColor: theme === 'dark' ? '#A3A3A3' : '#D1D5DB',
       }}
       handleComponent={() => (
         <View
           className={`px-8 py-4 flex-row border-b ${
-            theme === 'dark' ? 'border-gray-600' : 'border-gray-200'
+            theme === 'dark' ? 'border-neutral-600' : 'border-gray-200'
           }`}
         >
           <Text
             className={`uppercase text-sm ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+              theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
             }`}
           >
             comment options
@@ -77,11 +77,11 @@ const CommentOptionsSheet = () => {
         >
           <FlagIcon
             size={20}
-            color={theme === 'dark' ? '#F9FAFB' : '#6B7280'}
+            color={theme === 'dark' ? '#FAFAFA' : '#6B7280'}
           />
           <Text
             className={`text-base flex-1 ${
-              theme === 'dark' ? 'text-gray-50' : 'text-gray-700'
+              theme === 'dark' ? 'text-neutral-50' : 'text-gray-700'
             }`}
           >
             Report

@@ -207,7 +207,7 @@ function NewCommentForm({
       ) : null}
       <View
         className={`relative overflow-visible ${
-          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+          theme === 'dark' ? 'bg-neutral-800' : 'bg-white'
         }`}
       >
         <View className="w-full relative overflow-visible">
@@ -220,14 +220,14 @@ function NewCommentForm({
         </View>
         <View
           className={`relative z-20 ${
-            theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+            theme === 'dark' ? 'bg-neutral-800' : 'bg-white'
           }`}
         >
           {createErrorMessage ? (
             <Text
               accessibilityRole="alert"
               className={`text-xs px-4 pb-1.5 ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
               }`}
             >
               {createErrorMessage}
@@ -240,7 +240,7 @@ function NewCommentForm({
                   ? 'border border-blue-800'
                   : 'border border-blue-300'
                 : theme === 'dark'
-                  ? 'border border-gray-600'
+                  ? 'border border-neutral-600'
                   : 'border border-gray-200'
             }`}
           >
@@ -261,9 +261,9 @@ function NewCommentForm({
               onKeyPress={handleKeyPress}
               blurOnSubmit={false}
               className={`flex-1 p-2 text-xs bg-transparent ${
-                theme === 'dark' ? 'text-gray-50' : 'text-gray-900'
+                theme === 'dark' ? 'text-neutral-50' : 'text-gray-900'
               }`}
-              placeholderTextColor={theme === 'dark' ? '#9CA3AF' : '#6B7280'}
+              placeholderTextColor={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
               style={{ textAlignVertical: 'top' }}
             />
             {!hasContent && giphyApiKey ? (
@@ -274,7 +274,7 @@ function NewCommentForm({
               >
                 <Text
                   className={`text-xs font-normal ${
-                    theme === 'dark' ? 'text-gray-50' : 'text-gray-500'
+                    theme === 'dark' ? 'text-neutral-50' : 'text-gray-500'
                   }`}
                 >
                   GIF
@@ -287,17 +287,17 @@ function NewCommentForm({
                 className={`p-2 rounded-full ${
                   hasContent && !isSubmitting
                     ? theme === 'dark'
-                      ? 'bg-blue-500'
+                      ? 'bg-blue-600'
                       : 'bg-blue-600'
                     : theme === 'dark'
-                      ? 'bg-gray-600'
+                      ? 'bg-neutral-600'
                       : 'bg-gray-200'
                 }`}
               >
                 {isSubmitting ? (
                   <ActivityIndicator
                     size="small"
-                    color={theme === 'dark' ? '#F9FAFB' : '#FFFFFF'}
+                    color={theme === 'dark' ? '#FAFAFA' : '#FFFFFF'}
                     style={{ width: 12, height: 12 }}
                   />
                 ) : (
@@ -309,7 +309,7 @@ function NewCommentForm({
                         hasContent
                           ? 'text-white'
                           : theme === 'dark'
-                            ? 'text-gray-500'
+                            ? 'text-neutral-500'
                             : 'text-gray-400'
                       }`}
                     >

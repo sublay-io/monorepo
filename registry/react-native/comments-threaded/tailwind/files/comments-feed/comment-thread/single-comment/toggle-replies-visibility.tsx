@@ -14,18 +14,18 @@ function ToggleRepliesVisibility({
     <TouchableOpacity
       onPress={onToggleCollapse}
       className={`ml-1 w-4 h-4 items-center justify-center rounded-sm ${
-        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
+        theme === 'dark' ? 'bg-neutral-700' : 'bg-gray-50'
       } ${
         isCollapsed
           ? theme === 'dark'
-            ? 'border border-gray-500'
+            ? 'border border-neutral-500'
             : 'border border-gray-300'
           : ''
       }`}
     >
       <Text
         className={`text-sm font-bold ${
-          theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+          theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
         }`}
       >
         {isCollapsed ? "+" : "−"}

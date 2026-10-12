@@ -72,7 +72,7 @@ const CommentsFeed = React.memo(
             >
               <Text
                 className={`text-xs font-medium ${
-                  theme === 'dark' ? 'text-blue-500' : 'text-blue-600'
+                  theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                 }`}
               >
                 View all comments
@@ -90,8 +90,8 @@ const CommentsFeed = React.memo(
     const showLoadError = !loading && !!error && mergedComments.length === 0;
     const showNoComments = !loading && !error && mergedComments.length === 0;
     const showLoadMoreError = !loading && !!error;
-    const mutedTextClass = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
-    const linkTextClass = theme === 'dark' ? 'text-blue-500' : 'text-blue-600';
+    const mutedTextClass = theme === 'dark' ? 'text-neutral-400' : 'text-gray-500';
+    const linkTextClass = theme === 'dark' ? 'text-blue-400' : 'text-blue-600';
 
     return (
       <View className="flex-1">
@@ -117,7 +117,7 @@ const CommentsFeed = React.memo(
               >
                 <Text
                   className={`text-xs font-medium ${
-                    theme === 'dark' ? 'text-blue-500' : 'text-blue-600'
+                    theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                   }`}
                 >
                   {loading ? "Loading..." : "Load more comments"}

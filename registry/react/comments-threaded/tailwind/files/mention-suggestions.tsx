@@ -20,7 +20,7 @@ function MentionSuggestions({
 
   return (
     <div
-      className="absolute bottom-full left-0 right-0 z-50 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-lg max-h-[200px] overflow-y-auto mb-2"
+      className="absolute bottom-full left-0 right-0 z-50 bg-white dark:bg-neutral-800 rounded-xl border border-gray-200 dark:border-neutral-600 shadow-lg max-h-[200px] overflow-y-auto mb-2"
     >
       <div className="p-3">
         {isLoadingMentions ? (
@@ -41,15 +41,15 @@ function MentionSuggestions({
                   }
                   handleMentionClick(user);
                 }}
-                className="cursor-pointer flex items-center gap-3 p-2 rounded-lg transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="cursor-pointer flex items-center gap-3 p-2 rounded-lg transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-neutral-700"
               >
                 <UserAvatar user={user} size={32} />
                 <div className="flex flex-col gap-0.5">
-                  <div className="text-sm font-medium text-gray-900 dark:text-gray-50">
+                  <div className="text-sm font-medium text-gray-900 dark:text-neutral-50">
                     @{user.username}
                   </div>
                   {user.name && (
-                    <div className="text-xs font-normal text-gray-500 dark:text-gray-400">
+                    <div className="text-xs font-normal text-gray-500 dark:text-neutral-400">
                       {user.name}
                     </div>
                   )}
@@ -58,7 +58,7 @@ function MentionSuggestions({
             ))}
           </div>
         ) : (
-          <div className="py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
+          <div className="py-4 text-center text-gray-500 dark:text-neutral-400 text-sm">
             No users found
           </div>
         )}

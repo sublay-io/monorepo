@@ -82,7 +82,7 @@ function CommentReplies({
             reach={LOAD_MORE_OFFSET_LEFT}
           />
           {failed && !loading ? (
-            <div className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1">
+            <div className="text-xs text-gray-500 dark:text-neutral-400 px-2 py-1">
               Couldn't load more ·{" "}
               <button
                 onClick={onLoadMore}

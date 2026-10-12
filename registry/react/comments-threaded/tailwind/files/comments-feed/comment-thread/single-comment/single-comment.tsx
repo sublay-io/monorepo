@@ -59,7 +59,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
   return (
     <button
       onClick={() => toggleReaction({ reactionType: currentReaction })}
-      className="text-xs not-italic font-medium text-gray-500 dark:text-gray-400 px-2 py-1 -ml-2 rounded bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-500"
+      className="text-xs not-italic font-medium text-gray-500 dark:text-neutral-400 px-2 py-1 -ml-2 rounded bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-500"
     >
       Remove your vote
     </button>
@@ -137,7 +137,7 @@ function SingleComment({
   const isHighlighted = highlightedComment?.comment.id === comment.id;
   // 🎨 CUSTOMIZATION: Highlighted comment background: a neutral step away
   // from the section background
-  const highlightClass = isHighlighted && "bg-gray-100 dark:bg-[#2B3544]";
+  const highlightClass = isHighlighted && "bg-gray-100 dark:bg-[#333333]";
   // 🎨 CUSTOMIZATION: Highlight color on the indentation beside it
   const highlightGutterClass = isHighlighted && "bg-blue-100 dark:bg-blue-900";
 
@@ -172,7 +172,7 @@ function SingleComment({
           >
             {isPlaceholderRow || tombstone ? (
               <div
-                className="relative z-10 rounded-full bg-gray-200 dark:bg-gray-700"
+                className="relative z-10 rounded-full bg-gray-200 dark:bg-neutral-700"
                 style={{ width: `${AVATAR_SIZE}px`, height: `${AVATAR_SIZE}px` }}
               />
             ) : (
@@ -197,7 +197,7 @@ function SingleComment({
 
           {/* Comment content area */}
           {isPlaceholderRow ? (
-            <div className="flex-1 min-w-0 flex items-center gap-2 min-h-7 text-xs italic text-gray-500 dark:text-gray-400">
+            <div className="flex-1 min-w-0 flex items-center gap-2 min-h-7 text-xs italic text-gray-500 dark:text-neutral-400">
               {isUnavailable ? (
                 <>
                   <span>This comment is unavailable</span>
@@ -228,16 +228,16 @@ function SingleComment({
               // 🎨 CUSTOMIZATION: Spacing
             >
               <div
-                className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
+                className="flex items-center gap-2 text-xs text-gray-500 dark:text-neutral-400"
                 // 🎨 CUSTOMIZATION: Typography and spacing
               >
                 {tombstone ? (
-                  <span className="font-medium text-xs text-gray-500 dark:text-gray-400">
+                  <span className="font-medium text-xs text-gray-500 dark:text-neutral-400">
                     {tombstone}
                   </span>
                 ) : (
                 <span
-                  className="font-medium text-xs text-gray-700 dark:text-gray-300 cursor-pointer hover:underline"
+                  className="font-medium text-xs text-gray-700 dark:text-neutral-300 cursor-pointer hover:underline"
                   // 🎨 CUSTOMIZATION: Author name styling
                   onClick={() => {
                     if (user?.id === comment.user?.id) {
@@ -250,7 +250,7 @@ function SingleComment({
                   {getUserName(comment.user ?? {})}
                 </span>
                 )}
-                <span className="text-gray-500 dark:text-gray-400">•</span>
+                <span className="text-gray-500 dark:text-neutral-400">•</span>
                 <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
                 {isCollapsed && hasReplies && (
                   <span className="text-blue-500 dark:text-blue-400 text-xs">
@@ -268,7 +268,7 @@ function SingleComment({
             </div>
 
             {!isCollapsed && tombstone && (
-              <p className="text-xs italic text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
+              <p className="text-xs italic text-gray-500 dark:text-neutral-400 mb-3 leading-relaxed">
                 {tombstone}
               </p>
             )}
@@ -276,7 +276,7 @@ function SingleComment({
             {!isCollapsed && tombstone && replyErrorMessage && (
               <p
                 role="alert"
-                className="text-xs text-gray-500 dark:text-gray-400 mb-3"
+                className="text-xs text-gray-500 dark:text-neutral-400 mb-3"
               >
                 {replyErrorMessage}
               </p>
@@ -286,7 +286,7 @@ function SingleComment({
               <>
                 {comment.content && (
                   <p
-                    className="text-xs text-gray-800 dark:text-gray-200 mb-3 leading-relaxed"
+                    className="text-xs text-gray-800 dark:text-neutral-200 mb-3 leading-relaxed"
                     // 🎨 CUSTOMIZATION: Comment body typography
                   >
                     {parseContentWithMentions(
@@ -315,7 +315,7 @@ function SingleComment({
                 )}
 
                 {isOwnRemoved && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                  <p className="text-xs text-gray-500 dark:text-neutral-400 mb-3">
                     {ownRemovedLabel}
                   </p>
                 )}
@@ -323,7 +323,7 @@ function SingleComment({
                 {isOwnRemoved && replyErrorMessage && (
                   <p
                     role="alert"
-                    className="text-xs text-gray-500 dark:text-gray-400 mb-3"
+                    className="text-xs text-gray-500 dark:text-neutral-400 mb-3"
                   >
                     {replyErrorMessage}
                   </p>

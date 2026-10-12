@@ -90,7 +90,7 @@ const CommentsFeed = React.memo(
         {showLoadedComments && hasMore && (
           <div className="flex justify-center py-2">
             {showLoadMoreError ? (
-              <div className="text-xs text-gray-500 dark:text-gray-400 px-3 py-1">
+              <div className="text-xs text-gray-500 dark:text-neutral-400 px-3 py-1">
                 Couldn't load more ·{" "}
                 <button onClick={() => loadMore?.()} className={tryAgainClassName}>
                   Try again
@@ -110,7 +110,7 @@ const CommentsFeed = React.memo(
         {showFetchingSkeletons && <FetchingCommentsSkeletons />}
         {showLoadError && (
           <div className="text-center py-2">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+            <p className="text-sm text-gray-500 dark:text-neutral-400 mb-1">
               Couldn't load comments
             </p>
             <button onClick={() => loadMore?.()} className={tryAgainClassName}>

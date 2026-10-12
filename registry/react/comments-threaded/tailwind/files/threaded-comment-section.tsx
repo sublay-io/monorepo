@@ -22,24 +22,24 @@
  * All colors use standard Tailwind palette (gray-50 through gray-900, blue-500, red-500, etc.)
  *
  * BACKGROUNDS:
- * - bg-white dark:bg-gray-800 (main background)
- * - bg-gray-50 dark:bg-gray-700 (secondary background, hover states)
+ * - bg-white dark:bg-neutral-800 (main background)
+ * - bg-gray-50 dark:bg-neutral-700 (secondary background, hover states)
  * - bg-blue-50 dark:bg-blue-950 (blue hover backgrounds)
  * - bg-red-50 dark:bg-red-950 (red hover backgrounds)
- * - bg-gray-100 dark:bg-[#2B3544] (highlighted comment background)
+ * - bg-gray-100 dark:bg-[#333333] (highlighted comment background)
  * - bg-blue-100 dark:bg-blue-900 (indentation beside a highlighted comment)
  *
  * TEXT:
- * - text-gray-900 dark:text-gray-50 (primary text)
- * - text-gray-800 dark:text-gray-200 (body text)
- * - text-gray-700 dark:text-gray-300 (author names, secondary text)
- * - text-gray-600 dark:text-gray-400 (hover text)
- * - text-gray-500 dark:text-gray-400 (timestamps, tertiary text)
- * - text-gray-400 dark:text-gray-500 (disabled states)
+ * - text-gray-900 dark:text-neutral-50 (primary text)
+ * - text-gray-800 dark:text-neutral-200 (body text)
+ * - text-gray-700 dark:text-neutral-300 (author names, secondary text)
+ * - text-gray-600 dark:text-neutral-400 (hover text)
+ * - text-gray-500 dark:text-neutral-400 (timestamps, tertiary text)
+ * - text-gray-400 dark:text-neutral-500 (disabled states)
  *
  * BORDERS:
- * - border-gray-200 dark:border-gray-600 (primary borders)
- * - border-gray-300 dark:border-gray-500 (threading lines, secondary borders)
+ * - border-gray-200 dark:border-neutral-600 (primary borders)
+ * - border-gray-300 dark:border-neutral-500 (threading lines, secondary borders)
  *
  * BLUES (links, actions, upvotes):
  * - text-blue-600 dark:text-blue-400 (primary blue)
@@ -120,7 +120,7 @@ function ThreadedCommentSectionInner({
       <div
         className={
           // 🎨 CUSTOMIZATION: Layout styling
-          "flex-1 overflow-y-auto bg-white dark:bg-gray-800 py-2"
+          "flex-1 overflow-y-auto bg-white dark:bg-neutral-800 py-2"
         }
       >
         <CommentsFeed>{children}</CommentsFeed>
@@ -129,7 +129,7 @@ function ThreadedCommentSectionInner({
       <div
         className={
           // 🎨 CUSTOMIZATION: Layout styling
-          "border-t border-gray-200 dark:border-gray-600 pt-2"
+          "border-t border-gray-200 dark:border-neutral-600 pt-2"
         }
       >
         {isVisible && <NewCommentForm />}

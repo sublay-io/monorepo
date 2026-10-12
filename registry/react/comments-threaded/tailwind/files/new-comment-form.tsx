@@ -51,7 +51,6 @@ function NewCommentForm() {
     mentionSuggestions,
     handleMentionClick,
     mentions,
-    addMention,
     setMentions,
     resetMentions,
   } = useUserMentions({
@@ -150,18 +149,30 @@ function NewCommentForm() {
       const textArea = textAreaRef.current;
       if (!textArea) throw new Error("Can not find textarea");
 
+      const tempContent = textArea.value;
+      const tempMentions = mentions;
+
       textArea.value = "";
       setContent("");
       resetMentions();
       setIsGiphyVisible(false);
 
       try {
-        await createComment!({ gif, mentions });
+        const result = await createComment?.({ gif, mentions: tempMentions });
+        if (result === undefined) {
+          // Nothing was posted: put the text and mentions back
+          textArea.value = tempContent;
+          setContent(tempContent);
+          setMentions(tempMentions);
+        }
       } catch (err) {
         handleError(err, "Creating comment failed: ");
+        textArea.value = tempContent;
+        setContent(tempContent);
+        setMentions(tempMentions);
       }
     },
-    [createComment, mentions, resetMentions, user, callbacks]
+    [createComment, mentions, resetMentions, setMentions, user, callbacks]
   );
 
   // Add keyboard event handler for Enter key
@@ -240,7 +251,7 @@ function NewCommentForm() {
                 "flex-shrink-0 p-2",
                 "border-none outline-none",
                 "font-normal text-xs",
-                "text-gray-50 dark:text-gray-50",
+                "text-gray-500 dark:text-gray-50",
                 "cursor-pointer bg-transparent"
               )}
             >

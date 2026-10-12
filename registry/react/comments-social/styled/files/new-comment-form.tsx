@@ -77,6 +77,14 @@ function NewCommentForm() {
   });
 
   const handleCreateComment = useCallback(async () => {
+    const textArea = textAreaRef.current;
+    if (!textArea) throw new Error("Can not find textarea");
+
+    if (textArea.value.trim().length === 0) {
+      callbacks?.commentTooShortCallback?.();
+      return;
+    }
+
     // Even though createComment checks for user and triggers the loginRequiredCallback - we will regard it as backup and check here too before clearing the textarea for better UX
     if (!user) {
       callbacks?.loginRequiredCallback?.();
@@ -87,9 +95,6 @@ function NewCommentForm() {
       callbacks.usernameRequiredCallback();
       return;
     }
-
-    const textArea = textAreaRef.current;
-    if (!textArea) throw new Error("Can not find textarea");
 
     const tempContent = textArea.value;
     const tempMentions = mentions;
@@ -132,17 +137,30 @@ function NewCommentForm() {
       const textArea = textAreaRef.current;
       if (!textArea) throw new Error("Can not find textarea");
 
+      const tempContent = textArea.value;
+      const tempMentions = mentions;
+
       textArea.value = "";
+      setContent("");
       resetMentions();
       setIsGiphyVisible(false);
 
       try {
-        await createComment!({ gif, mentions });
+        const result = await createComment?.({ gif, mentions: tempMentions });
+        if (result === undefined) {
+          // Nothing was posted: put the text and mentions back
+          textArea.value = tempContent;
+          setContent(tempContent);
+          setMentions(tempMentions);
+        }
       } catch (err) {
         handleError(err, "Creating comment failed: ");
+        textArea.value = tempContent;
+        setContent(tempContent);
+        setMentions(tempMentions);
       }
     },
-    [createComment, mentions, resetMentions, callbacks, user]
+    [createComment, mentions, resetMentions, setMentions, callbacks, user]
   );
 
   useEffect(() => {
@@ -150,11 +168,8 @@ function NewCommentForm() {
     const textArea = textAreaRef.current;
     if (!textArea) throw new Error("Can't find textarea");
 
-    // if (pushMention.id === previousPushMention?.id) return;
-
     if (!pushMention.username) {
-      
-        callbacks?.userCantBeMentionedCallback?.();
+      callbacks?.userCantBeMentionedCallback?.();
       return;
     }
 
@@ -191,10 +206,6 @@ function NewCommentForm() {
       )}px`; // Set the new height based on the content or use the base height if smaller
     }
   };
-
-  // useEffect(() => {
-  //   adjustTextareaHeight();
-  // }, []);
 
   useLayoutEffect(() => {
     const timeout = setTimeout(() => adjustTextareaHeight(), 500);

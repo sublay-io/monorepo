@@ -64,7 +64,7 @@
     {
       "path": "files/comments-feed/comment-thread/action-menu.tsx",
       "type": "component",
-      "description": "Comment action menu (edit, delete, report)"
+      "description": "Comment action menu (delete, report)"
     },
     {
       "path": "files/comments-feed/comment-thread/new-reply-form.tsx",
@@ -150,7 +150,6 @@
   "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react/comments-threaded/styled",
   "exports": {
     "mainComponent": "ThreadedCommentSection",
-    "mainFile": "threaded-comment-section",
-    "typeExports": ["ThreadedStyleCallbacks"]
+    "mainFile": "threaded-comment-section"
   }
 }

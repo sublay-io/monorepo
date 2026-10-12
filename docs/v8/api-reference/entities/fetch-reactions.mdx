@@ -23,11 +23,11 @@ Authentication is optional — the endpoint works without a token. When the call
 ## Query Parameters
 
 <ParamField query="page" type="number" default="1">
-  Page number (1-indexed).
+  Page number (1-indexed). A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 entity/invalid-query`.
 </ParamField>
 
 <ParamField query="limit" type="number" default="20">
-  Number of reactions per page. Maximum `100`.
+  Number of reactions per page. A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 entity/invalid-query`. Maximum `100` — larger values are treated as `100`.
 </ParamField>
 
 <ParamField query="reactionType" type="string">
@@ -62,14 +62,15 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
         "avatar": "https://...",
         "reputation": 120
       },
-      "createdAt": "2025-01-01T00:00:00Z"
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z"
     }
   ],
   "pagination": {
     "page": 1,
-    "limit": 20,
-    "total": 42,
+    "pageSize": 20,
     "totalPages": 3,
+    "totalItems": 42,
     "hasMore": true
   }
 }
@@ -78,6 +79,13 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Query — 400">
+    Returned when `page` or `limit` is below `1` or not a whole number, `reactionType` isn't one of the eight types, or `sortDir` isn't `ASC` or `DESC`.
+
+    ```json
+    { "error": "page: Page must be a positive integer", "code": "entity/invalid-query" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Entity not found.", "code": "entity/not-found" }

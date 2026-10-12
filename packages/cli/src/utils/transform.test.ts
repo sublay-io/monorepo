@@ -96,4 +96,32 @@ describe("transformImports — expo package rewrite", () => {
 
     expect(transformImports(source, makeConfig("react-native"))).toBe(source);
   });
+
+  it("names @sublay/expo in the file header's dependency list on expo", () => {
+    const source = [
+      "/**",
+      " * Required dependencies:",
+      " * - @sublay/react-native ^8.0.0-beta.0",
+      " * - @sublay/ui-core-react-native ^7.0.0",
+      " * - @gorhom/bottom-sheet",
+      " */",
+    ].join("\n");
+
+    expect(transformImports(source, makeConfig("expo"))).toBe(
+      [
+        "/**",
+        " * Required dependencies:",
+        " * - @sublay/expo ^8.0.0-beta.0",
+        " * - @sublay/ui-core-react-native ^7.0.0",
+        " * - @gorhom/bottom-sheet",
+        " */",
+      ].join("\n")
+    );
+  });
+
+  it("leaves the header's dependency list alone on the react-native platform", () => {
+    const source = " * - @sublay/react-native ^8.0.0-beta.0";
+
+    expect(transformImports(source, makeConfig("react-native"))).toBe(source);
+  });
 });

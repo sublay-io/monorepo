@@ -6,46 +6,96 @@ icon: "folder-tree"
 
 # Social Comments File Structure
 
-Approximately 23 files organized for simplicity and clarity.
+25 files organized for simplicity and clarity. The trees below list every file.
 
 ---
 
 ## Directory Tree
 
-```
-src/components/comments-social/
-├── index.ts                              # Barrel export (entry point)
-├── components/
-│   ├── social-comment-section.tsx        # Main component
-│   ├── new-comment-form.tsx              # Comment/reply input
-│   ├── reply-banner.tsx                  # Shows who you're replying to
-│   ├── mention-suggestions.tsx           # @ mention autocomplete
-│   ├── sort-by-button.tsx               # Top/New/Old sort control
-│   ├── comments-feed/
-│   │   ├── comments-feed.tsx             # Feed container
-│   │   ├── loaded-comments.tsx           # Comment list
-│   │   ├── fetching-comments-skeletons.tsx
-│   │   ├── no-comments-placeholder.tsx
-│   │   └── comment/
-│   │       ├── comment.tsx              # Individual comment + replies
-│   │       ├── heart-button.tsx         # Like button with count
-│   │       └── replies.tsx              # Reply list
-│   └── modals/
-│       ├── report-comment-modal/
-│       │   ├── report-comment-modal.tsx
-│       │   ├── modal-background.tsx
-│       │   └── report-modal-content.tsx
-│       └── delete-comment-modal/
-│           └── delete-comment-modal.tsx
-├── hooks/
-│   ├── use-social-comments.tsx           # Main comment logic and callbacks
-│   └── use-ui-state.tsx                  # UI state (modals, active reply)
-├── utils/
-│   ├── prop-comparison.ts               # Memoization helpers
-│   └── comment-create-error.ts          # Messages shown when posting fails
-└── context/
-    └── ui-state-context.tsx             # Provides UI state to components
-```
+<Tabs>
+  <Tab title="React (Web)">
+    ```
+    src/components/comments-social/
+    ├── index.ts                                  # Barrel export (entry point)
+    ├── components/
+    │   ├── social-comment-section.tsx            # Main component
+    │   ├── new-comment-form.tsx                  # Comment form
+    │   ├── reply-banner.tsx                      # Shows who you're replying to
+    │   ├── mention-suggestions.tsx               # @ mention autocomplete
+    │   ├── sort-by-button.tsx                    # Top/New/Old sort control
+    │   ├── comments-feed/
+    │   │   ├── comments-feed.tsx                 # Feed container
+    │   │   ├── loaded-comments.tsx               # Renders the comment list
+    │   │   ├── fetching-comments-skeletons.tsx   # Loading state
+    │   │   ├── no-comments-placeholder.tsx       # Empty state
+    │   │   └── comment/
+    │   │       ├── comment.tsx                   # Individual comment
+    │   │       ├── heart-button.tsx              # Like button with count
+    │   │       ├── index.ts                      # Barrel export
+    │   │       └── replies/
+    │   │           ├── replies.tsx               # Reply list
+    │   │           ├── show-hide-button.tsx      # View / hide replies row
+    │   │           └── index.ts                  # Barrel export
+    │   └── modals/
+    │       ├── comment-menu-modal/
+    │       │   ├── comment-menu-modal.tsx        # Menu for other users' comments
+    │       │   ├── main-content.tsx              # Menu options
+    │       │   └── report-content.tsx            # Report form
+    │       └── comment-menu-modal-owner/
+    │           └── comment-menu-modal-owner.tsx  # Menu for your own comments
+    ├── hooks/
+    │   ├── use-social-comments.tsx               # Provider props and callbacks
+    │   └── use-ui-state.tsx                      # Reads the UI state context
+    ├── utils/
+    │   ├── prop-comparison.ts                    # Memoization helpers
+    │   └── comment-create-error.ts               # Messages shown when posting fails
+    └── context/
+        └── ui-state-context.tsx                  # Modal & theme context
+    ```
+  </Tab>
+  <Tab title="React Native / Expo">
+    ```
+    src/components/comments-social/
+    ├── index.ts                                 # Barrel export (entry point)
+    ├── components/
+    │   ├── social-comment-section.tsx           # Main component
+    │   ├── sort-by-button/
+    │   │   └── sort-by-button.tsx               # Top/New/Old sort control
+    │   ├── new-comment-form/
+    │   │   └── new-comment-form.tsx             # Comment form
+    │   ├── reply-banner/
+    │   │   └── reply-banner.tsx                 # Shows who you're replying to
+    │   ├── mention-suggestions/
+    │   │   └── mention-suggestions.tsx          # @ mention autocomplete
+    │   ├── comments-feed/
+    │   │   ├── comments-feed.tsx                # Feed container
+    │   │   ├── loaded-comments.tsx              # Renders the comment list
+    │   │   ├── fetching-comments-skeletons.tsx  # Loading state
+    │   │   ├── no-comments-placeholder.tsx      # Empty state
+    │   │   ├── comments-footer-component.tsx    # Loading / retry row under the list
+    │   │   └── comment/
+    │   │       ├── comment.tsx                  # Individual comment
+    │   │       ├── heart-button.tsx             # Like button with count
+    │   │       ├── index.ts                     # Barrel export
+    │   │       └── replies/
+    │   │           ├── replies.tsx              # Reply list
+    │   │           ├── show-hide-button.tsx     # View / hide replies row
+    │   │           └── index.ts                 # Barrel export
+    │   └── sheets/
+    │       ├── comment-options-sheet.tsx        # Menu for other users' comments
+    │       ├── comment-options-sheet-owner.tsx  # Menu for your own comments
+    │       └── report-comment-sheet.tsx         # Report form
+    ├── hooks/
+    │   ├── use-social-comments.tsx              # Provider props and callbacks
+    │   └── use-ui-state.tsx                     # Reads the UI state context
+    ├── utils/
+    │   ├── prop-comparison.ts                   # Memoization helpers
+    │   └── comment-create-error.ts              # Messages shown when posting fails
+    └── context/
+        └── ui-state-context.tsx                 # Modal & theme context
+    ```
+  </Tab>
+</Tabs>
 
 ---
 
@@ -90,6 +140,7 @@ Contains all comment logic and the key behavioral callbacks you'll want to custo
 
 - `loginRequiredCallback` — Called when an unauthenticated user tries to comment
 - `usernameRequiredCallback` — Called when a user without a username tries to comment
+- `commentTooShortCallback` — Called when a user tries to post an empty comment or reply
 - `currentUserClickCallback` — Called when a user clicks their own profile
 - `otherUserClickCallback(userId, foreignId)` — Called when a user clicks another user's profile
 
@@ -124,7 +175,7 @@ To pass the provider something new, add it to `providerProps`.
 ### Change Heart Color
 
 ```tsx
-// Edit: components/social/comments-feed/comment/heart-button.tsx
+// Edit: components/comments-feed/comment/heart-button.tsx
 <span style={{ color: '#EC4899' }}>  {/* Pink heart */}
   ❤️
 </span>
@@ -133,7 +184,7 @@ To pass the provider something new, add it to `providerProps`.
 ### Modify Sort Options
 
 ```tsx
-// Edit: components/social/social-comment-section.tsx
+// Edit: components/social-comment-section.tsx
 const sortOptions = [
   { label: "Top", sortBy: "top", sortDir: "desc" },      // ranked by likes
   { label: "New", sortBy: "createdAt", sortDir: "desc" },
@@ -146,7 +197,7 @@ const sortOptions = [
 ### Customize Empty State
 
 ```tsx
-// Edit: components/social/comments-feed/no-comments-placeholder.tsx
+// Edit: components/comments-feed/no-comments-placeholder.tsx
 <p>No comments yet. Be the first! 🎉</p>
 ```
 

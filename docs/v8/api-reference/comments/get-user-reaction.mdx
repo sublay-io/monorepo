@@ -14,6 +14,12 @@ Returns the authenticated user's current reaction on the specified comment, or `
   The UUID of the comment.
 </ParamField>
 
+## Query Parameters
+
+<ParamField query="userId" type="string">
+  The user whose reaction to return. **Service or master key only**, and required with one — a key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. A user token always reads its own reaction: naming a different user returns `403 comment/unauthorized`.
+</ParamField>
+
 ## Response
 
 ```json
@@ -29,6 +35,27 @@ or, if the user has no reaction:
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Params — 400">
+    Returned when `commentId` isn't a valid UUID.
+
+    ```json
+    { "error": "commentId: Invalid UUID format", "code": "comment/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Acting as another user — 403">
+    Returned when a request authenticated with a user token sends a `userId` other than that user's own ID.
+
+    ```json
+    { "error": "Unauthorized", "code": "comment/unauthorized" }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    Returned when a service or master key sends no `userId`.
+
+    ```json
+    { "error": "Missing user ID", "code": "comment/missing-user-id" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     Returned when the comment doesn't exist, or is on an entity whose author has blocked the user (the user's own comments excepted).
 

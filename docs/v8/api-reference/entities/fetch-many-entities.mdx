@@ -17,11 +17,11 @@ Returns a paginated list of entities for the project. Supports rich filtering by
 ### Pagination
 
 <ParamField query="page" type="number" default="1">
-  Page number (1-indexed).
+  Page number (1-indexed). A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 entity/invalid-query`.
 </ParamField>
 
 <ParamField query="limit" type="number" default="10">
-  Number of entities per page. Maximum `100`.
+  Number of entities per page. A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 entity/invalid-query`. Maximum `100` — larger values are treated as `100`.
 </ParamField>
 
 ### Sorting
@@ -150,7 +150,7 @@ Returns a paginated list of entities for the project. Supports rich filtering by
 </ParamField>
 
 <ParamField query="topCommentsLimit" type="number" default="1">
-  With `include=topComments`: how many top comments per entity. Maximum `5` — larger values are treated as `5`.
+  With `include=topComments`: how many top comments per entity. A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 entity/invalid-query`. Maximum `5` — larger values are treated as `5`.
 </ParamField>
 
 <ParamField query="topCommentsSortByReaction" type="string" default="upvote">
@@ -174,9 +174,9 @@ Returns a paginated response object:
   "data": [ ...Entity[] ],
   "pagination": {
     "page": 1,
-    "limit": 10,
-    "total": 42,
+    "pageSize": 10,
     "totalPages": 5,
+    "totalItems": 42,
     "hasMore": true
   }
 }
@@ -191,8 +191,15 @@ Each item in `data` is an [Entity](/v8/data-models/entity) object. File URLs are
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Query — 400">
+    Returned when `page` or `limit` is below `1` or not a whole number.
+
+    ```json
+    { "error": "page: Page must be a positive integer", "code": "entity/invalid-query" }
+    ```
+  </Accordion>
   <Accordion title="Invalid include — 400">
-    Returned with code `entity/invalid-query` for an unknown `include` value, or when `topCommentsLimit` / `topCommentsSortByReaction` is sent without `include=topComments`.
+    Returned with code `entity/invalid-query` for an unknown `include` value, when `topCommentsLimit` is below `1` or not a whole number, or when `topCommentsLimit` / `topCommentsSortByReaction` is sent without `include=topComments`.
 
     ```json
     { "error": "include: Unknown include `comments`. Allowed: user, space, topComments, saved, files, grants.", "code": "entity/invalid-query" }

@@ -6,7 +6,6 @@ import {
 } from "@sublay/react-native";
 import { UIStateProvider } from "../context/ui-state-context";
 
-// Components will be imported after they're created
 import CommentsFeed from "../files/comments-feed/comments-feed";
 import NewCommentForm from "../files/new-comment-form/new-comment-form";
 import SortByButton from "../files/sort-by-button/sort-by-button";
@@ -82,6 +81,12 @@ function useSocialComments({
       // CUSTOMIZE: Handle username requirement
       // Example: navigation.navigate('ProfileSetup')
       console.log("Username required");
+    },
+
+    // Called when a user tries to submit an empty comment or reply
+    commentTooShortCallback: () => {
+      // 🔧 CUSTOMIZE: Handle empty comment validation
+      console.log("Comment cannot be empty");
     },
 
     // Called when trying to mention a user who doesn't have a username

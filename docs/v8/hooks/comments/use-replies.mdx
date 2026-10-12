@@ -98,11 +98,11 @@ A request can return at most 500 comments (see [Request size limit](/v8/api-refe
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
-  `true` while a load is in flight.
+  `true` while a load of this `commentId`'s replies is in flight. It belongs to the `commentId` passed: a load still running for another comment doesn't show here.
 </ResponseField>
 
 <ResponseField name="error" type="Error | null">
-  The last failure loading replies. Cleared when the next load starts or the section resets (for example on a sort change). Call `loadMore()` to retry — `hasMore` stays `true` after a failure, and the retry asks for the same replies again (including the nesting of a first load).
+  The last failure loading this `commentId`'s replies; a failure for another comment doesn't show here. Cleared when the next load starts or the section resets (for example on a sort change). Call `loadMore()` to retry — `hasMore` stays `true` after a failure, and the retry asks for the same replies again (including the nesting of a first load).
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">

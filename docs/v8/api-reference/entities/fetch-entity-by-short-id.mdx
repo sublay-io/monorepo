@@ -27,7 +27,7 @@ Returns a single entity matching the given `shortId`. Short IDs are compact, URL
 </ParamField>
 
 <ParamField query="topCommentsLimit" type="number" default="1">
-  With `include=topComments`: how many top comments per entity. Maximum `5` — larger values are treated as `5`.
+  With `include=topComments`: how many top comments per entity. A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 entity/invalid-query`. Maximum `5` — larger values are treated as `5`.
 </ParamField>
 
 <ParamField query="topCommentsSortByReaction" type="string" default="upvote">
@@ -44,7 +44,7 @@ Returns an [Entity](/v8/data-models/entity) object.
 
 <AccordionGroup>
   <Accordion title="Invalid include — 400">
-    Returned with code `entity/invalid-query` for an unknown `include` value, or when `topCommentsLimit` / `topCommentsSortByReaction` is sent without `include=topComments`.
+    Returned with code `entity/invalid-query` for an unknown `include` value, when `topCommentsLimit` is below `1` or not a whole number, or when `topCommentsLimit` / `topCommentsSortByReaction` is sent without `include=topComments`.
 
     ```json
     { "error": "include: Unknown include `comments`. Allowed: user, space, topComments, saved, files, grants.", "code": "entity/invalid-query" }

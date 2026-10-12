@@ -21,6 +21,12 @@ export function transformImports(content: string, config: SublayConfig): string 
       /from\s+["']@sublay\/react-native["']/g,
       'from "@sublay/expo"'
     );
+    // The file header lists the packages the component needs
+    // (" * - @sublay/react-native ^8.0.0"); name the one that is imported.
+    transformed = transformed.replace(
+      /^(\s*\*\s+-\s+)@sublay\/react-native(?=\s|$)/gm,
+      '$1@sublay/expo'
+    );
   }
 
   // Optionally transform based on user's alias configuration

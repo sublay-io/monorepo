@@ -11,7 +11,7 @@
  * - @sublay/ui-core-react-native ^7.0.0
  * - @gorhom/bottom-sheet
  *
- * @see https://docs.sublay.io/components/comments-social
+ * @see https://docs.sublay.io/v8/components/components/social/overview
  *
  * ====================
  * THEME COLOR PALETTE
@@ -47,6 +47,9 @@ import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { CommentsSortByOptions, Entity } from "@sublay/react-native";
 import useSocialComments from "../hooks/use-social-comments";
+import SortByButton from "./sort-by-button/sort-by-button";
+import CommentsFeed from "./comments-feed/comments-feed";
+import NewCommentForm from "./new-comment-form/new-comment-form";
 import { deepEqual, warnPropChanges } from "../utils/prop-comparison";
 import useUIState from "../hooks/use-ui-state";
 
@@ -118,13 +121,6 @@ function SocialCommentSectionInner({
     { label: "New", sortBy: "createdAt", sortDir: "desc" },
     { label: "Old", sortBy: "createdAt", sortDir: "asc" },
   ];
-
-  const { SortByButton, CommentsFeed, NewCommentForm } = useSocialComments({
-    entity: undefined,
-    entityId: undefined,
-    foreignId: undefined,
-    shortId: undefined,
-  });
 
   const buttonStyles = {
     active: {

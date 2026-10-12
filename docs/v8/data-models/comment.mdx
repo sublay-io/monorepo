@@ -29,7 +29,7 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `userReaction` | `ReactionType \| null` | The current user's reaction, populated when authenticated. |
 | `repliesCount` | `number` | Number of direct replies to this comment, for display. See [What `repliesCount` counts](#what-repliescount-counts). |
 | `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
-| `metadata` | `Record<string, any> \| null` | Custom key-value data (max 1 MB). `null` on placeholders. |
+| `metadata` | `Record<string, any> \| null` | Custom key-value data, up to 10 KB (10,240 bytes) as JSON. {/* metadata-limit */} `null` on placeholders. |
 | `moderationStatus` | `"approved" \| "removed" \| null` | Space moderation status. Visible to everyone. |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
 | `moderatedById` | `string \| null` | ID of the moderator. Visible only to moderators and keys — see [Moderation fields](#moderation-fields); `null` for everyone else. |
@@ -39,6 +39,7 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `createdAt` | `Date` | When the comment was created. |
 | `updatedAt` | `Date` | When the comment was last updated. |
 | `deletedAt` | `Date \| null` | Legacy field; always `null` in responses. A user-deleted comment is marked by `userDeletedAt`. |
+| `parentDeletedAt` | `Date \| null` | Legacy field; always `null` in responses. |
 | `isAuthorBlocked` | `boolean` | `true` when the requesting user blocked this comment's author and the comment is returned in full. See [Blocked authors](#blocked-authors). |
 | `isUnavailable` | `boolean` | `true` when the comment exists but can't be shown to the requesting user; it is returned as a placeholder. See [Blocked authors](#blocked-authors). |
 | `replies` | `{ data: Comment[]; pagination: { nextCursor: string \| null; hasMore: boolean } }` | Nested replies. Present only on [thread fetches](/v8/api-reference/comments/fetch-many-comments#nested-replies) with `replyDepth` above `0`, and absent on comments at the last nested level. |
@@ -74,7 +75,7 @@ On a thread fetch, `include` applies at every nested level.
 
 ### The included entity
 
-`entity` is the entity's stored record. It carries every stored [Entity](/v8/data-models/entity) field — `id`, `shortId`, `foreignId`, `sourceId`, `spaceId`, `userId`, `title`, `content`, `mentions`, `attachments`, `keywords`, `reactionCounts`, `views`, `score`, `scoreUpdatedAt`, `location`, `metadata`, `nsfw`, the moderation fields, `isDraft` and the timestamps.
+`entity` is the entity's stored record. It carries every stored [Entity](/v8/data-models/entity) field — `id`, `shortId`, `foreignId`, `sourceId`, `spaceId`, `userId`, `title`, `content`, `mentions`, `attachments`, `keywords`, `upvotes`, `downvotes`, `reactionCounts`, `sharesCount`, `views`, `score`, `scoreUpdatedAt`, `location`, `metadata`, `nsfw`, the moderation fields, `isDraft`, `createdAt`, `updatedAt` and `deletedAt`.
 
 The fields an entity fetch computes or joins are **not included**:
 
@@ -127,7 +128,7 @@ A comment on an entity with no space has no space moderators: only project-role 
 
 ## Blocked authors
 
-When the requesting user is signed in and the `moderation` bundle is installed, comments returned by thread, user-history, single-comment, `topComments` and add/remove-reaction responses carry two flags (both `false` by default):
+When the requesting user is signed in and the `moderation` bundle is installed, comments returned by thread, user-history, single-comment, `topComments`, update-comment and add/remove-reaction responses carry two flags (both `false` by default):
 
 | The requesting user and the comment's author | The comment is returned as | Flags |
 |---|---|---|
@@ -138,7 +139,7 @@ When the requesting user is signed in and the `moderation` bundle is installed, 
 - **`isAuthorBlocked`** reflects only the requesting user's own preference. Your app decides how to render it — collapse it, offer "show anyway", or hide it. The user can still reply to and react to it.
 - **`isUnavailable`** is neutral: the comment exists, but can't be shown to this user, and the reason isn't disclosed. Replying to or reacting to it is refused, so hide those controls.
 
-Other responses that return a comment — create comment, update comment and search — don't include these flags.
+The other responses that return a comment — create comment and search — don't include these flags.
 
 ## What `repliesCount` counts
 

@@ -15,11 +15,11 @@ Returns a paginated list of draft entities belonging to the authenticated user. 
 ## Query Parameters
 
 <ParamField query="page" type="number" default="1">
-  Page number (1-indexed).
+  Page number (1-indexed). A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 entity/invalid-query`.
 </ParamField>
 
 <ParamField query="limit" type="number" default="10">
-  Number of drafts per page. Maximum `100`.
+  Number of drafts per page. A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 entity/invalid-query`. Maximum `100` — larger values are treated as `100`.
 </ParamField>
 
 <ParamField query="sourceId" type="string">
@@ -49,9 +49,9 @@ Returns a paginated response:
   "data": [ ...Entity[] ],
   "pagination": {
     "page": 1,
-    "limit": 10,
-    "total": 3,
+    "pageSize": 10,
     "totalPages": 1,
+    "totalItems": 3,
     "hasMore": false
   }
 }
@@ -62,6 +62,13 @@ Each item is an [Entity](/v8/data-models/entity) with `isDraft: true`. Results a
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Query — 400">
+    Returned when `page` or `limit` is below `1` or not a whole number, or `include` contains a value that isn't accepted here.
+
+    ```json
+    { "error": "page: Page must be a positive integer", "code": "entity/invalid-query" }
+    ```
+  </Accordion>
   <Accordion title="Unauthorized — 401">
     Returned when no user is authenticated.
   </Accordion>

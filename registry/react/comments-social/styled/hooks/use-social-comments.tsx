@@ -75,6 +75,12 @@ function useSocialComments({
       console.log("Username required");
     },
 
+    // Called when a user tries to submit an empty comment or reply
+    commentTooShortCallback: () => {
+      // 🔧 CUSTOMIZE: Handle empty comment validation
+      alert("Comment cannot be empty");
+    },
+
     // Called when trying to mention a user who doesn't have a username
     userCantBeMentionedCallback: () => {
       // 🔧 CUSTOMIZE: Handle mention validation

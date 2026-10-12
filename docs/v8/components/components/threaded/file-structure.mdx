@@ -6,51 +6,99 @@ icon: "folder-tree"
 
 # File Structure
 
-When you install threaded comments, approximately 25 TypeScript/TSX files are copied into your project in a clear, navigable structure.
+When you install threaded comments, 28 TypeScript/TSX files (27 on React Native and Expo) are copied into your project in a clear, navigable structure. The trees below list every file.
 
 ---
 
 ## Directory Tree
 
-```
-src/components/comments-threaded/
-├── index.ts                              # Barrel export (entry point)
-├── components/                           # UI components (~20 files)
-│   ├── threaded-comment-section.tsx     # Main component
-│   ├── new-comment-form.tsx             # Top-level comment form
-│   ├── mention-suggestions.tsx          # @ mention autocomplete
-│   ├── comments-feed/
-│   │   ├── comments-feed.tsx            # Feed container
-│   │   ├── loaded-comments.tsx          # Renders comment list
-│   │   ├── fetching-comments-skeletons.tsx
-│   │   ├── no-comments-placeholder.tsx
-│   │   └── comment-thread/
-│   │       ├── comment-thread.tsx       # Thread with replies
-│   │       ├── comment-replies.tsx      # Reply list
-│   │       ├── action-menu.tsx          # Edit/delete/report menu
-│   │       ├── new-reply-form.tsx       # Reply form
-│   │       └── single-comment/
-│   │           ├── single-comment.tsx   # Individual comment
-│   │           ├── vote-buttons.tsx     # Upvote/downvote
-│   │           ├── reply-button-and-info.tsx
-│   │           ├── toggle-replies-visibility.tsx
-│   │           └── indentation-threading-lines.tsx
-│   └── modals/
-│       ├── comment-menu-modal/          # Report modal (3 files)
-│       │   ├── comment-menu-modal.tsx
-│       │   ├── modal-background.tsx
-│       │   └── report-modal-content.tsx
-│       └── comment-menu-modal-owner/    # Owner actions
-│           └── comment-menu-modal-owner.tsx
-├── hooks/
-│   ├── use-threaded-comments.tsx        # Main comment logic
-│   └── use-ui-state.tsx                 # UI state management
-├── utils/
-│   ├── prop-comparison.ts               # Memoization helpers
-│   └── comment-create-error.ts          # Messages shown when posting fails
-└── context/
-    └── ui-state-context.tsx             # Modal & theme context
-```
+<Tabs>
+  <Tab title="React (Web)">
+    ```
+    src/components/comments-threaded/
+    ├── index.ts                                         # Barrel export (entry point)
+    ├── components/
+    │   ├── threaded-comment-section.tsx                 # Main component
+    │   ├── new-comment-form.tsx                         # Comment form
+    │   ├── mention-suggestions.tsx                      # @ mention autocomplete
+    │   ├── comments-feed/
+    │   │   ├── comments-feed.tsx                        # Feed container
+    │   │   ├── loaded-comments.tsx                      # Renders the comment list
+    │   │   ├── fetching-comments-skeletons.tsx          # Loading state
+    │   │   ├── no-comments-placeholder.tsx              # Empty state
+    │   │   └── comment-thread/
+    │   │       ├── index.ts                             # Barrel export
+    │   │       ├── comment-thread.tsx                   # Thread with replies
+    │   │       ├── comment-replies.tsx                  # Reply list
+    │   │       ├── action-menu.tsx                      # Opens the comment menu
+    │   │       ├── new-reply-form.tsx                   # Reply form
+    │   │       └── single-comment/
+    │   │           ├── index.ts                         # Barrel export
+    │   │           ├── single-comment.tsx               # Individual comment
+    │   │           ├── vote-buttons.tsx                 # Upvote/downvote
+    │   │           ├── reply-button-and-info.tsx        # Reply button
+    │   │           ├── toggle-replies-visibility.tsx    # Collapse/expand a thread
+    │   │           └── indentation-threading-lines.tsx  # Threading lines
+    │   └── modals/
+    │       ├── comment-menu-modal/
+    │       │   ├── comment-menu-modal.tsx               # Menu for other users' comments
+    │       │   ├── main-content.tsx                     # Menu options
+    │       │   └── report-content.tsx                   # Report form
+    │       └── comment-menu-modal-owner/
+    │           └── comment-menu-modal-owner.tsx         # Menu for your own comments
+    ├── hooks/
+    │   ├── use-threaded-comments.tsx                    # Provider props and callbacks
+    │   └── use-ui-state.tsx                             # Reads the UI state context
+    ├── utils/
+    │   ├── prop-comparison.ts                           # Memoization helpers
+    │   └── comment-create-error.ts                      # Messages shown when posting fails
+    └── context/
+        └── ui-state-context.tsx                         # Modal & theme context
+    ```
+  </Tab>
+  <Tab title="React Native / Expo">
+    ```
+    src/components/comments-threaded/
+    ├── index.ts                                         # Barrel export (entry point)
+    ├── components/
+    │   ├── threaded-comment-section.tsx                 # Main component
+    │   ├── new-comment-form/
+    │   │   └── new-comment-form.tsx                     # Comment form
+    │   ├── mention-suggestions/
+    │   │   └── mention-suggestions.tsx                  # @ mention autocomplete
+    │   ├── comments-feed/
+    │   │   ├── comments-feed.tsx                        # Feed container
+    │   │   ├── loaded-comments.tsx                      # Renders the comment list
+    │   │   ├── fetching-comments-skeletons.tsx          # Loading state
+    │   │   ├── no-comments-placeholder.tsx              # Empty state
+    │   │   └── comment-thread/
+    │   │       ├── index.ts                             # Barrel export
+    │   │       ├── comment-thread.tsx                   # Thread with replies
+    │   │       ├── comment-replies.tsx                  # Reply list
+    │   │       ├── action-menu.tsx                      # Opens the comment menu
+    │   │       ├── new-reply-form.tsx                   # Reply form
+    │   │       └── single-comment/
+    │   │           ├── index.ts                         # Barrel export
+    │   │           ├── single-comment.tsx               # Individual comment
+    │   │           ├── vote-buttons.tsx                 # Upvote/downvote
+    │   │           ├── reply-button-and-info.tsx        # Reply button
+    │   │           ├── toggle-replies-visibility.tsx    # Collapse/expand a thread
+    │   │           └── indentation-threading-lines.tsx  # Threading lines
+    │   └── sheets/
+    │       ├── comment-options-sheet.tsx                # Menu for other users' comments
+    │       ├── comment-options-sheet-owner.tsx          # Menu for your own comments
+    │       └── report-comment-sheet.tsx                 # Report form
+    ├── hooks/
+    │   ├── use-threaded-comments.tsx                    # Provider props and callbacks
+    │   └── use-ui-state.tsx                             # Reads the UI state context
+    ├── utils/
+    │   ├── prop-comparison.ts                           # Memoization helpers
+    │   └── comment-create-error.ts                      # Messages shown when posting fails
+    └── context/
+        └── ui-state-context.tsx                         # Modal & theme context
+    ```
+  </Tab>
+</Tabs>
 
 ---
 
@@ -112,6 +160,7 @@ Upvote and downvote buttons with score display. Edit this to:
 Contains all comment data logic and callbacks. This is where you customize behavior like:
 - `loginRequiredCallback` — Called when an unauthenticated user tries to comment
 - `usernameRequiredCallback` — Called when a user without a username tries to comment
+- `commentTooShortCallback` — Called when a user tries to post an empty comment or reply
 - `otherUserClickCallback` — Called when a user clicks on another user's name/avatar
 
 The hook returns `{ CommentSectionProvider, providerProps, CommentsFeed, NewCommentForm }`. `providerProps` holds everything the provider is given: the entity, the highlighted comment, the callbacks and the loading settings (`limit`, `replyDepth`, `replyLimit`). ``threaded-comment-section.tsx`` spreads it onto the provider:
@@ -198,7 +247,8 @@ return (
 | `/hooks/` | React hooks for state and logic |
 | `/utils/` | Helper functions |
 | `/context/` | React context providers |
-| `/modals/` | Modal dialogs (report, actions) |
+| `/components/modals/` | Comment menu and report dialogs (web) |
+| `/components/sheets/` | Comment menu and report bottom sheets (React Native, Expo) |
 
 ---
 

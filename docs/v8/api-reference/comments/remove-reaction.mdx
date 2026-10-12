@@ -17,7 +17,7 @@ Removes the authenticated user's reaction from a comment. The comment's `reactio
 ## Body Parameters
 
 <ParamField body="userId" type="string">
-  Override which user's reaction is removed. **Service or master key only.**
+  The user whose reaction is removed. **Service or master key only**, and required with one — a key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. A user token always acts as itself: naming a different user returns `403 comment/unauthorized`.
 </ParamField>
 
 ## Blocks
@@ -33,6 +33,27 @@ Returns the [Comment](/v8/data-models/comment) as you'd see it after the change 
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Params — 400">
+    Returned when `commentId` isn't a valid UUID.
+
+    ```json
+    { "error": "commentId: Invalid UUID format", "code": "comment/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Acting as another user — 403">
+    Returned when a request authenticated with a user token sends a `userId` other than that user's own ID.
+
+    ```json
+    { "error": "Unauthorized", "code": "comment/unauthorized" }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    Returned when a service or master key sends no `userId`.
+
+    ```json
+    { "error": "Missing user ID", "code": "comment/missing-user-id" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Comment not found.", "code": "comment/not-found" }

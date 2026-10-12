@@ -27,6 +27,13 @@ Returns `204 No Content` on success.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Params — 400">
+    Returned when `commentId` isn't a valid UUID.
+
+    ```json
+    { "error": "commentId: Invalid UUID format", "code": "comment/invalid-params" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     Returned when the comment doesn't exist, or when the caller isn't the comment's author and the author of the comment's entity has blocked them (see [Blocks](#blocks)).
 

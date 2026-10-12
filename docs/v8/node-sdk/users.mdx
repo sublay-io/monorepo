@@ -237,7 +237,7 @@ const next = await sublay.users.fetchCommentsByUserId({
   userId: "usr_abc123",
   limit: 20,
   include: ["entity"],
-  cursor: pagination.nextCursor!,
+  cursor: pagination.nextCursor,
 });
 ```
 
@@ -265,8 +265,8 @@ const next = await sublay.users.fetchCommentsByUserId({
   Comments per page. Server default `10`, max `100`.
 </ParamField>
 
-<ParamField body="cursor" type="string">
-  `pagination.nextCursor` from the previous response. Omit for the first page. Send the same sort as the request that returned it.
+<ParamField body="cursor" type="string | null">
+  `pagination.nextCursor` from the previous response, passed as returned. Omit it, or pass `null`, for the first page. Send the same sort as the request that returned it.
 </ParamField>
 
 <ParamField body="sortBy" type='"createdAt" | "top" | "controversial"'>

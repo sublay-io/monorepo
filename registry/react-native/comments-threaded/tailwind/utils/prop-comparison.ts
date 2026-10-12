@@ -2,34 +2,6 @@
 import { isDevelopment } from "@sublay/react-native";
 
 /**
- * Performs shallow equality check for objects
- */
-export function shallowEqual(obj1: any, obj2: any): boolean {
-  if (obj1 === obj2) {
-    return true;
-  }
-
-  if (!obj1 || !obj2 || typeof obj1 !== "object" || typeof obj2 !== "object") {
-    return false;
-  }
-
-  const keys1 = Object.keys(obj1);
-  const keys2 = Object.keys(obj2);
-
-  if (keys1.length !== keys2.length) {
-    return false;
-  }
-
-  for (const key of keys1) {
-    if (!(key in obj2) || obj1[key] !== obj2[key]) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/**
  * Performs deep equality check for nested objects and arrays
  */
 export function deepEqual(obj1: any, obj2: any): boolean {

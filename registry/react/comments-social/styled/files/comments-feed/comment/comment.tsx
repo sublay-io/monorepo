@@ -24,7 +24,7 @@ import useUIState from "../../../hooks/use-ui-state";
 
 const Comment = React.memo(
   ({
-    comment: commentFromSection,
+    comment,
     extraLeftPadding = 0,
     parentClosed = false,
   }: {
@@ -49,7 +49,6 @@ const Comment = React.memo(
 
     const [hovered, setHovered] = useState(false); // State to track hover
 
-    const comment = commentFromSection;
     const { currentReaction, reactionCounts, toggleReaction } = useReactionToggle({
       targetType: "comment",
       targetId: comment.id,

@@ -33,6 +33,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `reactionCounts` | `ReactionCounts` | Counts for all 8 reaction types. See [Reaction](/v8/data-models/reaction). |
 | `userReaction` | `ReactionType \| null` | The current user's reaction. Only present when the user is authenticated and has reacted to this entity. |
 | `commentsCount` | `number` | How many comments the entity has, at any depth. Counts everything its thread contains — deleted, removed and unavailable comments included, since they stay in the thread as [placeholders](/v8/data-models/comment#placeholders) — so it's the same number for every user. |
+| `sharesCount` | `number` | Share counter stored on the entity. `0` by default. |
 | `views` | `number` | View count. Auto-incremented on every fetch. Can also be incremented manually via the service-key-only `PATCH /entities/:entityId/increment-views` endpoint. |
 | `score` | `number` | Computed "hotness" score based on engagement activity. |
 | `scoreUpdatedAt` | `Date` | When the score was last recalculated. |
@@ -89,7 +90,7 @@ To filter a list by effective NSFW, pass `nsfwFilter` to [Fetch many entities](/
 
 - Each item is a full [Comment](/v8/data-models/comment), with its author (`user`) always included.
 - Only **top-level** comments, ranked by the raw count of one reaction (`topCommentsSortByReaction`, default `upvote`), ties newest first.
-- `topCommentsLimit` sets how many per entity: default `1`, maximum `5` (larger values are treated as `5`).
+- `topCommentsLimit` sets how many per entity: a whole number of at least `1`, default `1`, maximum `5` (larger values are treated as `5`). `0`, a negative number or a non-integer value returns `400`.
 - **Real content only:** deleted and moderator-removed comments are left out (for everyone, the author included), and so are comments whose author is block-edged with the requesting user, in either direction. So `isAuthorBlocked` and `isUnavailable` are always `false` here.
 - `[]` when no comment qualifies, on a project without the `comments` bundle, and on an entity whose author has blocked the requesting user (for example, one they saved to a collection before the block).
 

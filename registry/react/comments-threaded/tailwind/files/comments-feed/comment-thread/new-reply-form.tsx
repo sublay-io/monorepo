@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   useCommentSection,
   useUser,
@@ -26,13 +25,9 @@ function NewReplyForm({
 }) {
   const { user } = useUser();
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const { createComment, callbacks } = useCommentSection();
 
   const handleReply = async () => {
-    if (isSubmitting) return;
-
     if (!replyContent.trim()) {
       callbacks?.commentTooShortCallback?.();
       return;
@@ -53,7 +48,6 @@ function NewReplyForm({
     // Clear optimistically before the API call
     setReplyContent("");
     setShowReplyForm(false);
-    setIsSubmitting(true);
 
     try {
       const result = await createComment?.({
@@ -70,8 +64,6 @@ function NewReplyForm({
       console.error("Error creating reply:", error);
       setReplyContent(tempContent);
       setShowReplyForm(true);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -80,18 +72,6 @@ function NewReplyForm({
     setReplyContent("");
     onDismissError();
   };
-
-  const [spinRotation, setSpinRotation] = useState(0);
-
-  // Spinner animation effect
-  useEffect(() => {
-    if (isSubmitting) {
-      const interval = setInterval(() => {
-        setSpinRotation((prev) => (prev + 10) % 360);
-      }, 16); // ~60fps
-      return () => clearInterval(interval);
-    }
-  }, [isSubmitting]);
 
   const hasContent = replyContent.trim().length > 0;
 
@@ -146,13 +126,12 @@ function NewReplyForm({
               "hover:text-gray-800 dark:hover:text-gray-200",
               "hover:bg-gray-50 dark:hover:bg-gray-700"
             )}
-            disabled={isSubmitting}
           >
             Cancel
           </button>
           <button
             onClick={handleReply}
-            disabled={!hasContent || isSubmitting}
+            disabled={!hasContent}
             className={cn(
               // 🎨 CUSTOMIZATION: Submit button styling
               "flex-shrink-0 p-1.5",
@@ -161,38 +140,29 @@ function NewReplyForm({
               "transition-all duration-200",
               "border-none outline-none",
               "focus-visible:ring-2 focus-visible:ring-blue-400 dark:focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-              hasContent && !isSubmitting
+              hasContent
                 ? "bg-blue-600 dark:bg-blue-500 text-white cursor-pointer hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-md"
                 : "bg-gray-200 dark:bg-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed"
             )}
           >
-            {isSubmitting ? (
-              <div
-                className="h-3 w-3 border border-gray-50 dark:border-gray-50 border-t-transparent rounded-full transition-transform duration-100 linear"
-                style={{
-                  transform: `rotate(${spinRotation}deg)`,
-                }}
-              ></div>
-            ) : (
-              <svg
-                className={cn(
-                  // 🎨 CUSTOMIZATION: Submit icon styling
-                  "h-3 w-3",
-                  "transition-transform duration-200",
-                  hasContent && "hover:scale-110"
-                )}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 10l7-7m0 0l7 7m-7-7v18"
-                />
-              </svg>
-            )}
+            <svg
+              className={cn(
+                // 🎨 CUSTOMIZATION: Submit icon styling
+                "h-3 w-3",
+                "transition-transform duration-200",
+                hasContent && "hover:scale-110"
+              )}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 10l7-7m0 0l7 7m-7-7v18"
+              />
+            </svg>
           </button>
         </div>
       </div>

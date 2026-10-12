@@ -115,7 +115,7 @@ The section can be handed an entity in two ways: the `entity` prop, or, when the
   Optional callback functions for handling UI interactions:
   - `loginRequiredCallback()` — called when a non-authenticated user tries to comment
   - `usernameRequiredCallback()` — called when the user has no username set
-  - `commentTooShortCallback()` — called when the submitted comment is too short
+  - `commentTooShortCallback()` — optional. Called when the submitted comment is too short; without it the comment is just not posted
   - `commentCreateFailedCallback({ code?, message?, status?, parentId })` — called when `createComment` sent a comment and the request failed. `code` and `message` come from the server's error response and `status` is its HTTP status — including `user/suspended` with `403` when the user is suspended; all three are `undefined` only when no response arrived (a network error). `parentId` is the comment being replied to, or `null` for a top-level comment. The same details are in [`createError`](#usecommentsection-return-values).
 </ParamField>
 
@@ -221,7 +221,7 @@ function CommentList() {
 ## `useCommentSection` Return Values
 
 <ResponseField name="entity" type="Entity | null | undefined">
-  The entity these comments belong to.
+  The entity the section is on. `undefined` until it is known: while the section looks it up from `entityId`, `foreignId` or `shortId`, and when that lookup failed (see `error`). Its `commentsCount` includes a comment that is being posted through `createComment`.
 </ResponseField>
 
 <ResponseField name="comments" type="Comment[]">
@@ -241,11 +241,11 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
-  `true` while a page of top-level comments is loading.
+  `true` while a page of top-level comments is loading, and while the section is looking up its entity. `false` when the entity lookup failed. When the section moves to another entity, `comments` is empty and `loading` is `true` from the first render with that entity.
 </ResponseField>
 
 <ResponseField name="error" type="Error | null">
-  The last failure loading the comment list. Cleared when the next load starts. Call `loadMore()` to retry — `hasMore` stays `true` after a failure, and the retry asks for the same page again, including a first page that failed. A missing highlighted comment doesn't set it.
+  The last failure loading the section: the comment list, or the entity itself when the section looks it up from `entityId`, `foreignId` or `shortId` and it can't be fetched or isn't found. Cleared when the next load starts. Call `loadMore()` to retry — `hasMore` stays `true` after a failure, and the retry asks for the same page again, including a first page that failed. After a failed entity lookup, `loadMore()` looks the entity up again. A missing highlighted comment doesn't set it.
 </ResponseField>
 
 <ResponseField name="hasMore" type="boolean">
@@ -257,7 +257,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="createError" type="CommentCreateError | null">
-  The last failure creating a comment through `createComment`: `{ code?: string; message?: string; status?: number; parentId: string | null }`. `code` and `message` come from the server's error response (see [Create Comment → Error Responses](/v8/api-reference/comments/create-comment#error-responses)) and `status` is its HTTP status; all three are `undefined` only when no response arrived (a network error). A comment refused because the user is suspended has `code: "user/suspended"` and `status: 403`. `parentId` is the comment that was being replied to, or `null` for a top-level comment. Set when a create fails and cleared when the next create starts. A create stopped before it is sent — no signed-in user, no username, a comment that is too short — doesn't change it.
+  The last failure creating a comment through `createComment`: `{ code?: string; message?: string; status?: number; parentId: string | null }`. `code` and `message` come from the server's error response (see [Create Comment → Error Responses](/v8/api-reference/comments/create-comment#error-responses)) and `status` is its HTTP status; all three are `undefined` only when no response arrived (a network error). A comment refused because the user is suspended has `code: "user/suspended"` and `status: 403`. `parentId` is the comment that was being replied to, or `null` for a top-level comment. Set when a create fails; cleared when the next create starts and when the section moves to another entity. A create stopped before it is sent — no signed-in user, no username, a comment that is too short — doesn't change it.
 
   ```tsx
   const { createError } = useCommentSection();
@@ -273,14 +273,14 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="loadMore" type="() => Promise<void>">
-  Loads the next page of top-level comments (with the section's `replyDepth`), or retries the page that failed. Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
+  Loads the next page of top-level comments (with the section's `replyDepth`), or retries the page that failed. When the entity lookup failed, it retries that lookup first; the comments then load on their own once the entity is found. Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
 </ResponseField>
 
 <ResponseField name="getComment" type="(commentId: string) => Comment | undefined">
   A loaded comment by ID — top-level or a reply — without its nested `replies`.
 </ResponseField>
 
-<ResponseField name="sortBy" type="CommentsSortByOptions | null">
+<ResponseField name="sortBy" type="CommentsSortByOptions">
   Current sort: `"createdAt"`, `"top"`, or `"controversial"`. (`"new"`/`"old"` are deprecated aliases for `"createdAt"`.)
 </ResponseField>
 
@@ -312,7 +312,14 @@ function CommentList() {
   - `mentions` — array of `Mention` objects
   - `autoReaction` — automatically react with this reaction type after creating (e.g. `"upvote"`)
 
-  Never throws. When the request fails it resolves to `undefined`, sets `createError` and calls `callbacks.commentCreateFailedCallback`.
+  Never throws. It resolves to the created comment, or to `undefined` when nothing was posted: no signed-in user, no username (when `usernameRequiredCallback` is set), a comment that is too short, no entity yet, another create still in flight, or a request that failed. When the request fails it also sets `createError` and calls `callbacks.commentCreateFailedCallback`.
+
+  Where the `commentsCount` + 1 goes depends on where the section's entity comes from:
+  - **An `EntityProvider` entity** — when it is the section's entity, the provider's entity is updated, so the rest of the page sees the count too.
+  - **An entity the section fetched** (`entityId`, `foreignId` or `shortId`) — the section's own copy is updated.
+  - **An `entity` prop** — the object you pass is not modified. The count shows on the `entity` that `useCommentSection` returns. Once the comment is posted, it stays until the entity you pass changes its `commentsCount` — up or down — or you pass a different entity; from then on the section shows the count you pass.
+
+  If the section moves to another entity before the request finishes, the created comment is still returned, but nothing is added to the new entity's comments or count.
 
   The server refuses a direct reply to a comment that was deleted (`comment/parent-deleted`) or removed by a moderator (`comment/parent-removed`). When a reply fails with one of these codes, the section also updates its copy of that parent to the [placeholder](/v8/data-models/comment#placeholders) the server returns for it: a deleted comment gets `userDeletedAt` and its blanked fields; a removed comment gets `moderationStatus: "removed"` and the same blanked fields, or keeps its content when the user is its author.
 </ResponseField>
@@ -326,7 +333,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="selectedComment" type="Comment | null">
-  Currently selected/focused comment. Managed via `setSelectedComment`.
+  Currently selected/focused comment. Managed via `setSelectedComment`. Cleared when the section moves to another entity.
 </ResponseField>
 
 <ResponseField name="setSelectedComment" type="(comment: Comment | null) => void">
@@ -334,7 +341,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="repliedToComment" type="Partial<Comment> | null">
-  The comment currently being replied to. `createComment` uses it as the parent when no `parentId` is passed, and clears it (with the reply banner and `pushMention`) when it sends. If the request fails, `repliedToComment` is put back, so sending again is still a reply to the same comment. Its `user` is then the user the banner named — the pushed mention when there was one, otherwise the comment's author — and `showReplyBanner` is put back when there is such a user. `pushMention` stays cleared.
+  The comment currently being replied to. `createComment` uses it as the parent when no `parentId` is passed, and clears it (with the reply banner and `pushMention`) when it sends. If the request fails, `repliedToComment` is put back, so sending again is still a reply to the same comment. Its `user` is then the user the banner named — the pushed mention when there was one, otherwise the comment's author — and `showReplyBanner` is put back when there is such a user. `pushMention` stays cleared. `repliedToComment` is also cleared when the section moves to another entity.
 </ResponseField>
 
 <ResponseField name="setRepliedToComment" type="(comment: Comment | null) => void">
@@ -342,7 +349,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="showReplyBanner" type="boolean">
-  Whether to show a reply indicator UI banner.
+  Whether to show a reply indicator UI banner. Set back to `false` when the section moves to another entity.
 </ResponseField>
 
 <ResponseField name="setShowReplyBanner" type="({ newState }: { newState: boolean }) => void">
@@ -350,7 +357,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="pushMention" type="User | null">
-  A user to auto-insert as a mention in the next comment. Set by `handleShallowReply`.
+  A user to auto-insert as a mention in the next comment. Set by `handleShallowReply`. Cleared when the section moves to another entity.
 </ResponseField>
 
 <ResponseField name="handleDeepReply" type="(comment: Comment) => void">
@@ -358,5 +365,18 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="handleShallowReply" type="(comment: Comment) => void">
-  Sets the reply target for a shallow reply (reply appears at root level with an `@mention`).
+  Reply at the same level as `comment`: the reply target becomes `comment`'s own parent, and `comment`'s author is set as `pushMention`. For a top-level comment there is no parent, so the reply is top-level too.
 </ResponseField>
+
+## Types
+
+The provider's props and the hook's return value are exported as types, for wrapping the provider or passing the section's values around:
+
+```tsx
+import type {
+  CommentSectionProviderProps, // props of CommentSectionProvider
+  CommentSectionContextValues, // what useCommentSection returns
+  UseCommentSectionDataProps, // the provider's props without `children`
+  UseCommentSectionDataValues, // the section's values
+} from "@sublay/react-js";
+```

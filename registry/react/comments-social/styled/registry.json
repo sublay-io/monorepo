@@ -57,11 +57,6 @@
       "description": "Empty state when no comments exist"
     },
     {
-      "path": "files/comments-feed/comments-footer-component.tsx",
-      "type": "component",
-      "description": "Footer with load more spinner"
-    },
-    {
       "path": "files/comments-feed/comment/comment.tsx",
       "type": "component",
       "description": "Individual comment with author, body, heart button"
@@ -140,7 +135,6 @@
   "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react/comments-social/styled",
   "exports": {
     "mainComponent": "SocialCommentSection",
-    "mainFile": "social-comment-section",
-    "typeExports": ["SocialStyleCallbacks"]
+    "mainFile": "social-comment-section"
   }
 }

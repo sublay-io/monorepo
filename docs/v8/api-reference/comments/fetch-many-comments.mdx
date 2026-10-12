@@ -38,7 +38,7 @@ Authentication is optional. When the caller is signed in, comments by users they
 ### Pagination
 
 <ParamField query="limit" type="number" default="10">
-  How many comments to return **at the level being fetched** (top-level comments for `entityId`, direct replies for `parentId`). Values above `100` are treated as `100`.
+  How many comments to return **at the level being fetched** (top-level comments for `entityId`, direct replies for `parentId`). A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 comment/invalid-query`. Values above `100` are treated as `100`.
 </ParamField>
 
 <ParamField query="cursor" type="string">
@@ -228,6 +228,17 @@ Other unknown query parameters are ignored.
 Checks run in this order; the first failing check is returned.
 
 <AccordionGroup>
+  <Accordion title="Comments bundle not installed — 403">
+    Returned on a project without the `comments` bundle, ahead of the checks below. The body has no `error` field: it carries the `code`, the missing tables, and a link to the project's Database page in the dashboard, where the bundle is installed. See [Bundles](/v8/bundles).
+
+    ```json
+    {
+      "code": "database/tables-not-available",
+      "missingTables": ["Comments"],
+      "dashboardUrl": "https://<dashboard>/<projectId>/database"
+    }
+    ```
+  </Accordion>
   <Accordion title="Unsupported parameter — 400">
     ```json
     {
@@ -238,7 +249,7 @@ Checks run in this order; the first failing check is returned.
     ```
   </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `comment/invalid-query` for invalid values — for example an unknown `include` value, `sortByReaction` without `sortBy=top`, `replySortByReaction` when the nested sort isn't `top`, `replyDepth` above `5`, or `replyLimit` below `1`.
+    Returned with code `comment/invalid-query` for invalid values — for example an unknown `include` value, `sortByReaction` without `sortBy=top`, `replySortByReaction` when the nested sort isn't `top`, `limit` below `1` or not a whole number, `replyDepth` above `5`, or `replyLimit` below `1`.
   </Accordion>
   <Accordion title="Missing filter — 400">
     ```json

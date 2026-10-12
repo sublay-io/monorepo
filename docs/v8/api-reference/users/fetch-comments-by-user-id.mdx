@@ -33,7 +33,7 @@ An unknown `userId` returns an empty page.
 ### Acting user
 
 <ParamField query="actingUserId" type="string">
-  The user to read the history as. Only accepted with a **service or master key** — a user token always reads as itself, and naming a different user returns `403`. With it, the rules below (own removed comments, blocks, `blockedFilter`, the `isAuthorBlocked` / `isUnavailable` flags and `userReaction`) apply from that user's perspective.
+  The user to read the history as. Takes effect only with a **service or master key**. A user token always reads as itself: naming its own ID changes nothing, and naming a different user returns `403 comment/unauthorized`. On a request with neither a key nor a user token it is ignored, and the request stays anonymous. With a key, the rules below (own removed comments, blocks, `blockedFilter`, the `isAuthorBlocked` / `isUnavailable` flags and `userReaction`) apply from that user's perspective.
 </ParamField>
 
 ### Filtering
@@ -53,7 +53,7 @@ An unknown `userId` returns an empty page.
 ### Pagination
 
 <ParamField query="limit" type="number" default="10">
-  Comments per batch. Values above `100` are treated as `100`.
+  Comments per batch. A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 comment/invalid-query`. Values above `100` are treated as `100`.
 </ParamField>
 
 <ParamField query="cursor" type="string">
@@ -140,7 +140,7 @@ These comments are **read-and-delete only**: replying under them, reacting to th
     Returned with code `comment/invalid-params` when `userId` isn't a valid UUID.
   </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `comment/invalid-query` for invalid values — for example an unknown `include` value or `sortByReaction` without `sortBy=top`.
+    Returned with code `comment/invalid-query` for invalid values — for example an unknown `include` value, `limit` below `1` or not a whole number, or `sortByReaction` without `sortBy=top`.
   </Accordion>
   <Accordion title="Invalid cursor — 400">
     ```json

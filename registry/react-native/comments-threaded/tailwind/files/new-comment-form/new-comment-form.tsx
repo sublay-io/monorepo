@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useImperativeHandle, useRef, useState } from "react";
 import {
   Text,
   TextInput,
@@ -25,7 +18,6 @@ import {
   type CommentCreateError,
 } from "@sublay/react-native";
 import {
-  UserAvatar,
   useTextInputCursorIndicator,
   GiphyContainer,
 } from "@sublay/ui-core-react-native";
@@ -46,8 +38,7 @@ function NewCommentForm({
   const giphyApiKey = project?.integrations.find((int) => int.name === "giphy")
     ?.data.apiKey;
 
-  const { createComment, submittingComment, callbacks, createError } =
-    useCommentSection();
+  const { createComment, callbacks, createError } = useCommentSection();
 
   // A failed post shows a message above the input, until the text is edited
   // or something is sent again (the section clears `createError` then).
@@ -80,7 +71,6 @@ function NewCommentForm({
     mentionSuggestions,
     handleMentionClick,
     mentions,
-    addMention,
     setMentions,
     resetMentions,
   } = useUserMentions({
@@ -166,17 +156,27 @@ function NewCommentForm({
         return;
       }
 
+      const tempContent = content;
+      const tempMentions = mentions;
+
       setContent("");
       resetMentions();
       setIsGiphyVisible(false);
 
       try {
-        await createComment!({ gif, mentions });
+        const result = await createComment?.({ gif, mentions: tempMentions });
+        if (result === undefined) {
+          // Nothing was posted: put the text and mentions back
+          setContent(tempContent);
+          setMentions(tempMentions);
+        }
       } catch (err) {
         handleError(err, "Creating comment failed: ");
+        setContent(tempContent);
+        setMentions(tempMentions);
       }
     },
-    [createComment, mentions, resetMentions, user, callbacks]
+    [createComment, content, mentions, resetMentions, setMentions, user, callbacks]
   );
 
   const handleKeyPress = useCallback(
@@ -274,7 +274,7 @@ function NewCommentForm({
               >
                 <Text
                   className={`text-xs font-normal ${
-                    theme === 'dark' ? 'text-gray-50' : 'text-gray-50'
+                    theme === 'dark' ? 'text-gray-50' : 'text-gray-500'
                   }`}
                 >
                   GIF

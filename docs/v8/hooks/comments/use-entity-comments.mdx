@@ -101,11 +101,11 @@ A page can return at most 500 comments, nested replies included (see [Request si
 </ResponseField>
 
 <ResponseField name="newComments" type="Comment[]">
-  Top-level comments added this session, newest first.
+  Always empty when the hook is used on its own: it has no way to add a comment. Inside `CommentSectionProvider` the same field holds the top-level comments posted this session (see [`useCommentSection`](/v8/sdk/comments/comment-section#usecommentsection-return-values)).
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
-  `true` while a page is loading.
+  `true` while a page is loading, and while `entityId` isn't set. When `entityId` changes, `comments` is empty and `loading` is `true` from the first render with the new id.
 </ResponseField>
 
 <ResponseField name="error" type="Error | null">
@@ -124,7 +124,7 @@ A page can return at most 500 comments, nested replies included (see [Request si
   A loaded comment by ID — top-level or a reply — without its nested `replies`.
 </ResponseField>
 
-<ResponseField name="sortBy" type="CommentsSortByOptions | null">
+<ResponseField name="sortBy" type="CommentsSortByOptions">
   Current sort.
 </ResponseField>
 

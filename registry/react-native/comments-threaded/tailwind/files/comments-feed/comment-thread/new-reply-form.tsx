@@ -1,10 +1,8 @@
-import { useState } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator,
   Keyboard,
 } from "react-native";
 import {
@@ -35,13 +33,9 @@ function NewReplyForm({
   const { user } = useUser();
   const { theme } = useUIState();
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const { createComment, callbacks } = useCommentSection();
 
   const handleReply = async () => {
-    if (isSubmitting) return;
-
     if (!replyContent.trim()) {
       callbacks?.commentTooShortCallback?.();
       return;
@@ -62,7 +56,6 @@ function NewReplyForm({
     // Clear optimistically before the API call
     setReplyContent("");
     setShowReplyForm(false);
-    setIsSubmitting(true);
     Keyboard.dismiss();
 
     try {
@@ -80,8 +73,6 @@ function NewReplyForm({
       console.error("Error creating reply:", error);
       setReplyContent(tempContent);
       setShowReplyForm(true);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -124,7 +115,6 @@ function NewReplyForm({
         <View className="flex-row gap-1 ml-1">
           <TouchableOpacity
             onPress={handleCancelReply}
-            disabled={isSubmitting}
             className={`px-2 py-1 rounded ${
               theme === 'dark' ? 'active:bg-gray-700' : 'active:bg-gray-50'
             }`}
@@ -139,9 +129,9 @@ function NewReplyForm({
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleReply}
-            disabled={!hasContent || isSubmitting}
+            disabled={!hasContent}
             className={`p-1.5 rounded-full ${
-              hasContent && !isSubmitting
+              hasContent
                 ? theme === 'dark'
                   ? 'bg-blue-500'
                   : 'bg-blue-600'
@@ -150,29 +140,21 @@ function NewReplyForm({
                   : 'bg-gray-200'
             }`}
           >
-            {isSubmitting ? (
-              <ActivityIndicator
-                size="small"
-                color={theme === 'dark' ? '#F9FAFB' : '#FFFFFF'}
-                style={{ width: 12, height: 12 }}
-              />
-            ) : (
-              <View
-                style={{ width: 12, height: 12, alignItems: 'center', justifyContent: 'center' }}
+            <View
+              style={{ width: 12, height: 12, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Text
+                className={`text-xs ${
+                  hasContent
+                    ? 'text-white'
+                    : theme === 'dark'
+                      ? 'text-gray-500'
+                      : 'text-gray-400'
+                }`}
               >
-                <Text
-                  className={`text-xs ${
-                    hasContent
-                      ? 'text-white'
-                      : theme === 'dark'
-                        ? 'text-gray-500'
-                        : 'text-gray-400'
-                  }`}
-                >
-                  ↑
-                </Text>
-              </View>
-            )}
+                ↑
+              </Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>

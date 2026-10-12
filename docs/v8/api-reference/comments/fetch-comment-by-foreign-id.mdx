@@ -36,6 +36,17 @@ An embedded `parentComment` follows the same placeholder and flag rules.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Query — 400">
+    Returned when `foreignId` is missing or empty, or when `include` contains a value that isn't supported.
+
+    ```json
+    { "error": "foreignId: Invalid input: expected string, received undefined", "code": "comment/invalid-query" }
+    ```
+
+    ```json
+    { "error": "include: Include must contain valid options: user, entity, space, parent, grants", "code": "comment/invalid-query" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Comment not found", "code": "comment/not-found" }

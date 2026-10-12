@@ -27,8 +27,6 @@ interface CommentRepliesProps {
   hiddenRepliesCount: number;
   hasMore: boolean;
   onLoadMore: () => void;
-  onDeleteComment?: (commentId: string) => void;
-  onReportComment?: (commentId: string) => void;
   CommentThreadComponent: React.ComponentType<CommentThreadProps>;
 }
 
@@ -42,8 +40,6 @@ function CommentReplies({
   hiddenRepliesCount,
   hasMore,
   onLoadMore,
-  onDeleteComment,
-  onReportComment,
   CommentThreadComponent,
 }: CommentRepliesProps) {
   const { theme } = useUIState();
@@ -72,8 +68,6 @@ function CommentReplies({
           // The load-more row below, when there is one, is the last row on the line
           isLastReply={index === visibleReplies.length - 1 && !hasMore}
           parentColumnContinues={columnContinues}
-          onDeleteComment={onDeleteComment}
-          onReportComment={onReportComment}
         />
       ))}
 

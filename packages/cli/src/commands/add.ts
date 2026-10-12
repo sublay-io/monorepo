@@ -3,15 +3,51 @@ import path from "path";
 import chalk from "chalk";
 import ora from "ora";
 import { SublayConfig } from "./init.js";
-import { fetchRegistry, fetchFile, Registry } from "../utils/registry.js";
+import {
+  fetchRegistry,
+  fetchFile,
+  getComponentLocation,
+  resolveRegistrySource,
+  Registry,
+  RegistryError,
+  RegistrySource,
+} from "../utils/registry.js";
 import { transformImports } from "../utils/transform.js";
 import { checkComponentDependencies } from "../utils/dependencies.js";
 import { stripTypes, convertFileExtension } from "../utils/strip-types.js";
 
-export async function add(componentName: string) {
+export interface AddOptions {
+  /** Branch to read the registry from instead of the default. */
+  ref?: string;
+}
+
+/** A file fetched and transformed in memory, waiting to be written. */
+interface PendingFile {
+  /** Path relative to the project root. */
+  targetPath: string;
+  content: string;
+}
+
+// How many registry files are requested at once.
+const FETCH_CONCURRENCY = 8;
+
+export async function add(componentName: string, options: AddOptions = {}) {
   const spinner = ora("Initializing...").start();
 
   try {
+    // Settle where the registry is read from before touching anything: an
+    // unusable --ref is rejected here, ahead of any request.
+    let source: RegistrySource;
+    try {
+      source = resolveRegistrySource(options.ref);
+    } catch (error) {
+      if (error instanceof RegistryError) {
+        spinner.fail(error.message);
+        process.exit(1);
+      }
+      throw error;
+    }
+
     // Read configuration
     const configPath = path.join(process.cwd(), "sublay.json");
 
@@ -63,12 +99,7 @@ export async function add(componentName: string) {
     spinner.text = `Fetching ${componentName}...`;
 
     // Fetch registry metadata
-    const registry = await fetchRegistry(componentName, config);
-
-    if (!registry) {
-      spinner.fail(`Component "${componentName}" not found`);
-      process.exit(1);
-    }
+    const registry = await fetchRegistry(componentName, config, source);
 
     // Expo projects use @sublay/expo instead of @sublay/react-native
     if (config.platform === 'expo') {
@@ -81,51 +112,35 @@ export async function add(componentName: string) {
 
     spinner.text = "Downloading files...";
 
-    // Download and install each file
+    // Fetch and transform every file before writing any of them: a file that
+    // cannot be fetched fails the whole command and leaves the project
+    // untouched, rather than installing a component with a hole in it.
+    const location = getComponentLocation(componentName, config);
+    const componentFiles = registry.files.filter(
+      // Skip development files
+      (file) => !shouldExcludeFile(file.path)
+    );
+
+    const pendingFiles = await mapWithConcurrency(
+      componentFiles,
+      FETCH_CONCURRENCY,
+      async (file): Promise<PendingFile> => {
+        const fileContent = await fetchFile(source, location, file.path);
+        return prepareFile(file.path, fileContent, config, componentName);
+      }
+    );
+
+    // Write the files
     let filesInstalled = 0;
 
-    for (const file of registry.files) {
-      // Skip development files
-      if (shouldExcludeFile(file.path)) {
-        continue;
-      }
-
-      const fileContent = await fetchFile(registry.registryUrl, file.path);
-
-      if (!fileContent) {
-        console.log(chalk.yellow(`\n⚠️  Could not fetch ${file.path}`));
-        continue;
-      }
-
-      // Transform imports to match user's project
-      let transformed = transformImports(fileContent, config);
-
-      // Strip TypeScript types if project is JavaScript
-      let finalFilePath = file.path;
-      if (!config.typescript && (file.path.endsWith('.ts') || file.path.endsWith('.tsx'))) {
-        transformed = await stripTypes(transformed, file.path);
-        finalFilePath = convertFileExtension(file.path);
-      }
-
-      // Determine target path
-      const targetPath = getTargetPath(finalFilePath, config, componentName);
-      const fullPath = path.join(process.cwd(), targetPath);
-
-      //       // Add @internal JSDoc comment for component files to discourage direct imports
-      //       if (file.path.startsWith('files/') || file.path.startsWith('hooks/')) {
-      //         const internalComment = `/**
-      //  * @internal
-      //  * Import from the barrel export instead:
-      //  * import { ${toPascalCase(path.basename(file.path, path.extname(file.path)))} } from '@/components/${componentName}'
-      //  */\n\n`;
-      //         transformed = internalComment + transformed;
-      //       }
+    for (const file of pendingFiles) {
+      const fullPath = path.join(process.cwd(), file.targetPath);
 
       // Ensure directory exists
       await fs.ensureDir(path.dirname(fullPath));
 
       // Write file
-      await fs.writeFile(fullPath, transformed, "utf-8");
+      await fs.writeFile(fullPath, file.content, "utf-8");
       filesInstalled++;
     }
 
@@ -178,10 +193,67 @@ export async function add(componentName: string) {
 
     console.log();
   } catch (error) {
+    if (error instanceof RegistryError) {
+      // An expected failure (missing branch, component or file): the message
+      // already says what is missing, so no stack trace.
+      spinner.fail(error.message);
+      console.error(chalk.dim("\nNothing was written to your project."));
+      process.exit(1);
+    }
     spinner.fail("Failed to add component");
     console.error(chalk.red("\n❌ Error:"), error);
     process.exit(1);
   }
+}
+
+/**
+ * Turn one fetched registry file into what gets written: imports rewritten for
+ * the installed layout, types stripped for JavaScript projects, and its place
+ * in the project worked out.
+ */
+async function prepareFile(
+  filePath: string,
+  fileContent: string,
+  config: SublayConfig,
+  componentName: string
+): Promise<PendingFile> {
+  // Transform imports to match user's project
+  let transformed = transformImports(fileContent, config);
+
+  // Strip TypeScript types if project is JavaScript
+  let finalFilePath = filePath;
+  if (!config.typescript && (filePath.endsWith('.ts') || filePath.endsWith('.tsx'))) {
+    transformed = await stripTypes(transformed, filePath);
+    finalFilePath = convertFileExtension(filePath);
+  }
+
+  return {
+    targetPath: getTargetPath(finalFilePath, config, componentName),
+    content: transformed,
+  };
+}
+
+/** Like Promise.all over `items.map(task)`, but at most `limit` tasks run at once. */
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  task: (item: T) => Promise<R>
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+
+  const worker = async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await task(items[index]);
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, worker)
+  );
+
+  return results;
 }
 
 /**
@@ -275,7 +347,7 @@ function printAppSetupNotes(dependencies: string[]): void {
   console.log(chalk.dim('\n  Setup guides: https://docs.sublay.io'));
 }
 
-function getTargetPath(
+export function getTargetPath(
   filePath: string,
   config: SublayConfig,
   componentName: string

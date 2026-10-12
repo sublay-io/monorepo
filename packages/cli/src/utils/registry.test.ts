@@ -1,0 +1,289 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import fs from "fs-extra";
+import os from "os";
+import path from "path";
+
+import {
+  DEFAULT_REGISTRY_REF,
+  RegistryError,
+  fetchFile,
+  fetchRegistry,
+  getComponentLocation,
+  getRemoteRegistryBase,
+  getRemoteUrl,
+  resolveRegistrySource,
+  validateRef,
+} from "./registry";
+import type { SublayConfig } from "../commands/init";
+
+const MAIN_BASE =
+  "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry";
+
+const baseConfig: SublayConfig = {
+  platform: "react",
+  style: "styled",
+  typescript: true,
+  paths: { components: "src/components" },
+  aliases: { "@/components": "@/components" },
+};
+
+describe("validateRef", () => {
+  it.each(["main", "v8", "v8-shared-registry", "release_1.2", "feature/shared-pieces", "a/b/c"])(
+    "accepts %s",
+    (ref) => {
+      expect(validateRef(ref)).toBeNull();
+    }
+  );
+
+  it.each([
+    ["an empty ref", ""],
+    ["a space", "my branch"],
+    ["a query string", "v8?x=1"],
+    ["a fragment", "v8#x"],
+    ["a percent escape", "v8%2F.."],
+    ["a backslash", "a\\b"],
+    ["a colon", "https://evil.example"],
+    ["a lone .. segment", ".."],
+    ["a .. segment in the middle", "a/../b"],
+    ["a trailing .. segment", "a/.."],
+    ["a leading slash", "/v8"],
+    ["a trailing slash", "v8/"],
+    ["an empty segment", "a//b"],
+  ])("rejects %s", (_label, ref) => {
+    expect(validateRef(ref)).toEqual(expect.any(String));
+  });
+});
+
+describe("getRemoteRegistryBase", () => {
+  it("is the main registry for the default ref", () => {
+    expect(DEFAULT_REGISTRY_REF).toBe("main");
+    expect(getRemoteRegistryBase(undefined, {})).toBe(MAIN_BASE);
+    expect(getRemoteRegistryBase("main", {})).toBe(MAIN_BASE);
+  });
+
+  it("swaps the ref segment for another branch", () => {
+    expect(getRemoteRegistryBase("v8", {})).toBe(
+      "https://raw.githubusercontent.com/sublay-io/monorepo/v8/registry"
+    );
+  });
+
+  it("keeps a branch name containing a slash as it is", () => {
+    expect(getRemoteRegistryBase("feature/shared-pieces", {})).toBe(
+      "https://raw.githubusercontent.com/sublay-io/monorepo/feature/shared-pieces/registry"
+    );
+  });
+
+  it("derives from the base URL override the same way", () => {
+    const env = { SUBLAY_REGISTRY_BASE_URL: "http://127.0.0.1:9/o/r/main/registry/" };
+    expect(getRemoteRegistryBase("main", env)).toBe("http://127.0.0.1:9/o/r/main/registry");
+    expect(getRemoteRegistryBase("v8", env)).toBe("http://127.0.0.1:9/o/r/v8/registry");
+  });
+
+  it("refuses a base URL override without the main/registry suffix", () => {
+    expect(() =>
+      getRemoteRegistryBase("v8", { SUBLAY_REGISTRY_BASE_URL: "http://127.0.0.1:9/x" })
+    ).toThrow(RegistryError);
+  });
+});
+
+describe("resolveRegistrySource", () => {
+  it("reads the local registry first and main remotely when no ref is given", () => {
+    const source = resolveRegistrySource(undefined, {});
+    expect(source.ref).toBe("main");
+    expect(source.explicitRef).toBe(false);
+    expect(source.localRoot).toEqual(expect.any(String));
+    expect(source.remoteBase).toBe(MAIN_BASE);
+  });
+
+  it("honours the local path override", () => {
+    const source = resolveRegistrySource(undefined, {
+      SUBLAY_REGISTRY_LOCAL_PATH: "/tmp/fixture-registry",
+    });
+    expect(source.localRoot).toBe("/tmp/fixture-registry");
+  });
+
+  it("skips the local registry when a ref is given, even with the override set", () => {
+    const source = resolveRegistrySource("v8", {
+      SUBLAY_REGISTRY_LOCAL_PATH: "/tmp/fixture-registry",
+    });
+    expect(source.ref).toBe("v8");
+    expect(source.explicitRef).toBe(true);
+    expect(source.localRoot).toBeNull();
+    expect(source.remoteBase).toBe(
+      "https://raw.githubusercontent.com/sublay-io/monorepo/v8/registry"
+    );
+  });
+
+  it("throws on an invalid ref", () => {
+    expect(() => resolveRegistrySource("a/../b", {})).toThrow(RegistryError);
+    expect(() => resolveRegistrySource("", {})).toThrow(RegistryError);
+  });
+});
+
+describe("URL construction", () => {
+  it("builds a component location from platform, component and style", () => {
+    expect(getComponentLocation("comments-social", baseConfig)).toBe(
+      "react/comments-social/styled"
+    );
+    expect(
+      getComponentLocation("comments-threaded", {
+        ...baseConfig,
+        platform: "react-native",
+        style: "tailwind",
+      })
+    ).toBe("react-native/comments-threaded/tailwind");
+  });
+
+  it("maps expo to the react-native registry", () => {
+    expect(
+      getComponentLocation("comments-social", { ...baseConfig, platform: "expo" })
+    ).toBe("react-native/comments-social/styled");
+  });
+
+  it("builds file URLs from the ref, not from a manifest's registryUrl", () => {
+    const source = resolveRegistrySource("feature/x", {});
+    expect(getRemoteUrl(source, "react/comments-social/styled/files/a.tsx")).toBe(
+      "https://raw.githubusercontent.com/sublay-io/monorepo/feature/x/registry/react/comments-social/styled/files/a.tsx"
+    );
+  });
+});
+
+describe("fetchRegistry / fetchFile", () => {
+  let localRoot: string;
+  let requested: string[];
+  /** URL -> body, or a status code for a failure. */
+  let remote: Record<string, string | number>;
+
+  const manifest = {
+    name: "widget",
+    dependencies: [],
+    files: [{ path: "files/widget.tsx", type: "component", description: "" }],
+    // Deliberately names main: downloads must not follow it.
+    registryUrl: `${MAIN_BASE}/react/widget/styled`,
+    exports: { mainComponent: "Widget", mainFile: "widget" },
+  };
+
+  beforeEach(async () => {
+    localRoot = await fs.mkdtemp(path.join(os.tmpdir(), "sublay-registry-unit-"));
+    requested = [];
+    remote = {};
+    vi.stubGlobal("fetch", async (url: string) => {
+      requested.push(url);
+      const hit = remote[url];
+      if (hit === undefined || typeof hit === "number") {
+        const status = typeof hit === "number" ? hit : 404;
+        return { ok: false, status, statusText: status === 404 ? "Not Found" : "Error" };
+      }
+      return { ok: true, status: 200, statusText: "OK", text: async () => hit };
+    });
+  });
+
+  afterEach(async () => {
+    vi.unstubAllGlobals();
+    await fs.remove(localRoot);
+  });
+
+  const env = () => ({ SUBLAY_REGISTRY_LOCAL_PATH: localRoot });
+
+  it("requests the main URLs when no ref is given and nothing is local", async () => {
+    remote[`${MAIN_BASE}/react/widget/styled/registry.json`] = JSON.stringify(manifest);
+    remote[`${MAIN_BASE}/react/widget/styled/files/widget.tsx`] = "export {}";
+
+    const source = resolveRegistrySource(undefined, env());
+    const registry = await fetchRegistry("widget", baseConfig, source);
+    const content = await fetchFile(source, "react/widget/styled", registry.files[0].path);
+
+    expect(content).toBe("export {}");
+    expect(requested).toEqual([
+      `${MAIN_BASE}/react/widget/styled/registry.json`,
+      `${MAIN_BASE}/react/widget/styled/files/widget.tsx`,
+    ]);
+  });
+
+  it("reads the local registry without any request when it has the component", async () => {
+    const dir = path.join(localRoot, "react", "widget", "styled");
+    await fs.outputJson(path.join(dir, "registry.json"), manifest);
+    await fs.outputFile(path.join(dir, "files", "widget.tsx"), "local");
+
+    const source = resolveRegistrySource(undefined, env());
+    const registry = await fetchRegistry("widget", baseConfig, source);
+
+    expect(registry.exports.mainComponent).toBe("Widget");
+    expect(await fetchFile(source, "react/widget/styled", "files/widget.tsx")).toBe("local");
+    expect(requested).toEqual([]);
+  });
+
+  it("requests everything from the chosen ref and does not read the local registry", async () => {
+    const dir = path.join(localRoot, "react", "widget", "styled");
+    await fs.outputJson(path.join(dir, "registry.json"), manifest);
+    await fs.outputFile(path.join(dir, "files", "widget.tsx"), "local");
+
+    const refBase = "https://raw.githubusercontent.com/sublay-io/monorepo/feature/x/registry";
+    remote[`${refBase}/react/widget/styled/registry.json`] = JSON.stringify(manifest);
+    remote[`${refBase}/react/widget/styled/files/widget.tsx`] = "from the branch";
+
+    const source = resolveRegistrySource("feature/x", env());
+    const registry = await fetchRegistry("widget", baseConfig, source);
+    const content = await fetchFile(source, "react/widget/styled", registry.files[0].path);
+
+    expect(content).toBe("from the branch");
+    expect(requested).toEqual([
+      `${refBase}/react/widget/styled/registry.json`,
+      `${refBase}/react/widget/styled/files/widget.tsx`,
+    ]);
+  });
+
+  it("names the component when the branch exists but the component does not", async () => {
+    const refBase = "https://raw.githubusercontent.com/sublay-io/monorepo/v8/registry";
+    remote[`${refBase}/package.json`] = "{}";
+
+    const source = resolveRegistrySource("v8", env());
+    await expect(fetchRegistry("nope", baseConfig, source)).rejects.toThrow(
+      'Component "nope" with style "styled" not found on branch "v8".'
+    );
+    expect(requested).toEqual([
+      `${refBase}/react/nope/styled/registry.json`,
+      `${refBase}/package.json`,
+    ]);
+  });
+
+  it("names the branch when the branch does not exist", async () => {
+    const source = resolveRegistrySource("no-such-branch", env());
+    await expect(fetchRegistry("widget", baseConfig, source)).rejects.toThrow(
+      'Branch "no-such-branch" not found'
+    );
+  });
+
+  it("reports a missing component on the default ref without a probe", async () => {
+    const source = resolveRegistrySource(undefined, env());
+    await expect(fetchRegistry("nope", baseConfig, source)).rejects.toThrow(
+      'Component "nope" with style "styled" not found in registry.'
+    );
+    expect(requested).toEqual([`${MAIN_BASE}/react/nope/styled/registry.json`]);
+  });
+
+  it("reports a server error as a failed fetch, not as a missing component", async () => {
+    remote[`${MAIN_BASE}/react/widget/styled/registry.json`] = 500;
+    const source = resolveRegistrySource(undefined, env());
+    await expect(fetchRegistry("widget", baseConfig, source)).rejects.toThrow(
+      /Failed to fetch registry from .*registry\.json: 500/
+    );
+  });
+
+  it("throws naming the file when a file cannot be fetched", async () => {
+    const source = resolveRegistrySource("v8", env());
+    const failure = fetchFile(source, "react/widget/styled", "files/widget.tsx");
+    await expect(failure).rejects.toThrow(RegistryError);
+    await expect(failure).rejects.toThrow(/Could not fetch files\/widget\.tsx from .*: 404/);
+  });
+
+  it("throws naming the file when the request itself fails", async () => {
+    vi.stubGlobal("fetch", async () => {
+      throw new Error("connect ECONNREFUSED");
+    });
+    const source = resolveRegistrySource("v8", env());
+    await expect(
+      fetchFile(source, "react/widget/styled", "files/widget.tsx")
+    ).rejects.toThrow(/Could not fetch files\/widget\.tsx .*ECONNREFUSED/);
+  });
+});

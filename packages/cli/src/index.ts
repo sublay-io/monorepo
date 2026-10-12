@@ -25,6 +25,12 @@ program
 program
   .command('add <component>')
   .description('Add a component to your project')
-  .action(add);
+  .option(
+    '--ref <branch>',
+    'read the component from this branch of the registry instead of the default'
+  )
+  .action((component: string, options: { ref?: string }) =>
+    add(component, { ref: options.ref })
+  );
 
 program.parse();

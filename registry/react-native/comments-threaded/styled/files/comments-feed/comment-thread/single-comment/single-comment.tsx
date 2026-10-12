@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import {
   Comment as CommentType,
@@ -147,14 +147,10 @@ function SingleComment({
     focusCommentInput?.();
   };
 
-  // A comment that can no longer be replied to (deleted, removed or made
-  // unavailable while it was the reply target) stops being the target.
-  const cannotBeRepliedTo = isUnavailable || !!tombstone || isOwnRemoved;
-  useEffect(() => {
-    if (!isReplyTarget || !cannotBeRepliedTo) return;
-    setRepliedToComment?.(null);
-    setShowReplyBanner?.({ newState: false });
-  }, [isReplyTarget, cannotBeRepliedTo, setRepliedToComment, setShowReplyBanner]);
+  // The reply target is only ever cleared by the user (Reply again, or the
+  // bar's cancel). If the comment is deleted or removed meanwhile, the bar
+  // stays and sending fails with a message, so a reply is never posted
+  // somewhere the user did not choose.
 
   // One highlight at a time: while a reply is being written, the comment
   // being replied to; otherwise the deep-linked comment.

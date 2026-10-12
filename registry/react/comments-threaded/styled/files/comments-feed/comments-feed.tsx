@@ -70,7 +70,7 @@ const CommentsFeed = React.memo(
               style={{
                 fontSize: "12px",
                 fontWeight: 500,
-                color: theme === "dark" ? "#3B82F6" : "#2563EB",
+                color: theme === "dark" ? "#60A5FA" : "#2563EB",
                 padding: "4px 8px",
                 borderRadius: "9999px",
                 background: "transparent",
@@ -92,8 +92,8 @@ const CommentsFeed = React.memo(
     const showLoadError = !loading && !!error && mergedComments.length === 0;
     const showNoComments = !loading && !error && mergedComments.length === 0;
     const showLoadMoreError = !loading && !!error;
-    const mutedColor = theme === "dark" ? "#9CA3AF" : "#6B7280";
-    const linkColor = theme === "dark" ? "#3B82F6" : "#2563EB";
+    const mutedColor = theme === "dark" ? "#A3A3A3" : "#6B7280";
+    const linkColor = theme === "dark" ? "#60A5FA" : "#2563EB";
     const tryAgainStyle: React.CSSProperties = {
       fontSize: "12px",
       fontWeight: 500,
@@ -123,7 +123,7 @@ const CommentsFeed = React.memo(
                 style={{
                   fontSize: "12px",
                   fontWeight: 500,
-                  color: theme === 'dark' ? "#3B82F6" : "#2563EB",
+                  color: theme === 'dark' ? "#60A5FA" : "#2563EB",
                   padding: "4px 12px",
                   borderRadius: "9999px",
                   background: "transparent",

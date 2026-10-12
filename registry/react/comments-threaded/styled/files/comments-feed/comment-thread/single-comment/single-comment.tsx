@@ -62,7 +62,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
       onClick={() => toggleReaction({ reactionType: currentReaction })}
       style={{
         fontSize: "12px",
-        color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
+        color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
         fontWeight: 500,
         padding: "4px 8px",
         marginLeft: "-8px",
@@ -150,11 +150,11 @@ function SingleComment({
   // 🎨 CUSTOMIZATION: Highlighted comment background: a neutral step away
   // from the section background (Default: gray-100)
   const highlightColor = isHighlighted
-    ? (theme === 'dark' ? "#2B3544" : "#F3F4F6")
+    ? (theme === 'dark' ? "#333333" : "#F3F4F6")
     : "transparent";
   // 🎨 CUSTOMIZATION: Highlight color on the indentation beside it (Default: blue-100)
   const highlightGutterColor = isHighlighted
-    ? (theme === 'dark' ? "#1E3A8A" : "#DBEAFE")
+    ? (theme === 'dark' ? "#172554" : "#DBEAFE")
     : "transparent";
 
   // The API sends aspectRatio as a string (e.g. "1.5"), so coerce before doing
@@ -199,7 +199,7 @@ function SingleComment({
                   width: `${AVATAR_SIZE}px`,
                   height: `${AVATAR_SIZE}px`,
                   borderRadius: `${AVATAR_SIZE}px`,
-                  backgroundColor: theme === 'dark' ? "#374151" : "#E5E7EB",
+                  backgroundColor: theme === 'dark' ? "#404040" : "#E5E7EB",
                 }}
               />
             ) : (
@@ -234,7 +234,7 @@ function SingleComment({
                 minHeight: "28px",
                 fontSize: "12px",
                 fontStyle: "italic",
-                color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
+                color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
               }}
             >
               {isUnavailable ? (
@@ -289,7 +289,7 @@ function SingleComment({
                   // 🎨 CUSTOMIZATION: Typography - Timestamp (Default: 12px)
                   fontSize: "12px",
                   // 🎨 CUSTOMIZATION: Typography - Timestamp (Default: gray-500)
-                  color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
+                  color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                 }}
               >
                 {tombstone ? (
@@ -297,7 +297,7 @@ function SingleComment({
                     style={{
                       fontWeight: 500,
                       fontSize: "12px",
-                      color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
+                      color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                     }}
                   >
                     {tombstone}
@@ -310,7 +310,7 @@ function SingleComment({
                     // 🎨 CUSTOMIZATION: Typography - Author (Default: 12px)
                     fontSize: "12px",
                     // 🎨 CUSTOMIZATION: Typography - Author (Default: gray-700)
-                    color: theme === 'dark' ? "#D1D5DB" : "#374151",
+                    color: theme === 'dark' ? "#D4D4D4" : "#374151",
                     cursor: "pointer",
                   }}
                   onClick={() => {
@@ -330,7 +330,7 @@ function SingleComment({
                   {getUserName(comment.user ?? {})}
                 </span>
                 )}
-                <span style={{ color: theme === 'dark' ? "#9CA3AF" : "#6B7280" }}>•</span>
+                <span style={{ color: theme === 'dark' ? "#A3A3A3" : "#6B7280" }}>•</span>
                 <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
                 {isCollapsed && hasReplies && (
                   <span style={{ color: theme === 'dark' ? "#60A5FA" : "#3B82F6", fontSize: "12px" }}>
@@ -352,7 +352,7 @@ function SingleComment({
                 style={{
                   fontSize: "12px",
                   fontStyle: "italic",
-                  color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
+                  color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                   marginBottom: "12px",
                   lineHeight: "1.625",
                 }}
@@ -366,7 +366,7 @@ function SingleComment({
                 role="alert"
                 style={{
                   fontSize: "12px",
-                  color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
+                  color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                   marginBottom: "12px",
                 }}
               >
@@ -382,7 +382,7 @@ function SingleComment({
                       // 🎨 CUSTOMIZATION: Typography - Comment body (Default: 12px)
                       fontSize: "12px",
                       // 🎨 CUSTOMIZATION: Typography - Comment body (Default: gray-800)
-                      color: theme === 'dark' ? "#E5E7EB" : "#1F2937",
+                      color: theme === 'dark' ? "#E5E5E5" : "#1F2937",
                       // 🎨 CUSTOMIZATION: Spacing (Default: 12px)
                       marginBottom: "12px",
                       lineHeight: "1.625",
@@ -420,7 +420,7 @@ function SingleComment({
                   <p
                     style={{
                       fontSize: "12px",
-                      color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
+                      color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                       marginBottom: "12px",
                     }}
                   >
@@ -433,7 +433,7 @@ function SingleComment({
                     role="alert"
                     style={{
                       fontSize: "12px",
-                      color: theme === 'dark' ? "#9CA3AF" : "#6B7280",
+                      color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                       marginBottom: "12px",
                     }}
                   >

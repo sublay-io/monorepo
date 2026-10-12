@@ -58,8 +58,8 @@ function VoteButtons({
         // 🎨 CUSTOMIZATION: Vote button styling (Default: gray-100; gray-200 on
         // the highlighted comment, whose background is gray-100)
         backgroundColor: highlighted
-          ? (theme === 'dark' ? "#4B5563" : "#E5E7EB")
-          : (theme === 'dark' ? "#374151" : "#F3F4F6"),
+          ? (theme === 'dark' ? "#525252" : "#E5E7EB")
+          : (theme === 'dark' ? "#404040" : "#F3F4F6"),
         borderRadius: "9999px",
         padding: padding,
         gap: "4px",
@@ -90,7 +90,7 @@ function VoteButtons({
           // 🎨 CUSTOMIZATION: Vote button styling (Default: blue-500)
           backgroundColor: userVote === "up" ? (theme === 'dark' ? "#60A5FA" : "#3B82F6") : "transparent",
           // 🎨 CUSTOMIZATION: Vote button styling (Default: gray-500 when neutral)
-          color: userVote === "up" ? "#FFFFFF" : (theme === 'dark' ? "#9CA3AF" : "#6B7280"),
+          color: userVote === "up" ? "#FFFFFF" : (theme === 'dark' ? "#A3A3A3" : "#6B7280"),
           border: "none",
           cursor: "pointer",
         }}
@@ -99,13 +99,13 @@ function VoteButtons({
             // 🎨 CUSTOMIZATION: Vote button styling (Default: blue-500)
             e.currentTarget.style.color = theme === 'dark' ? "#60A5FA" : "#3B82F6";
             // 🎨 CUSTOMIZATION: Vote button styling (Default: blue-50)
-            e.currentTarget.style.backgroundColor = theme === 'dark' ? "#1E3A8A" : "#EFF6FF";
+            e.currentTarget.style.backgroundColor = theme === 'dark' ? "rgba(96, 165, 250, 0.1)" : "#EFF6FF";
           }
         }}
         onMouseLeave={(e) => {
           if (userVote !== "up") {
             // 🎨 CUSTOMIZATION: Vote button styling (Default: gray-500)
-            e.currentTarget.style.color = theme === 'dark' ? "#9CA3AF" : "#6B7280";
+            e.currentTarget.style.color = theme === 'dark' ? "#A3A3A3" : "#6B7280";
             e.currentTarget.style.backgroundColor = "transparent";
           }
         }}
@@ -140,7 +140,7 @@ function VoteButtons({
               ? (theme === 'dark' ? "#60A5FA" : "#3B82F6")
               : netScore < 0
               ? (theme === 'dark' ? "#F87171" : "#EF4444")
-              : (theme === 'dark' ? "#D1D5DB" : "#374151"),
+              : (theme === 'dark' ? "#D4D4D4" : "#374151"),
         }}
       >
         {netScore}
@@ -171,7 +171,7 @@ function VoteButtons({
           // 🎨 CUSTOMIZATION: Vote button styling (Default: red-500)
           backgroundColor: userVote === "down" ? (theme === 'dark' ? "#F87171" : "#EF4444") : "transparent",
           // 🎨 CUSTOMIZATION: Vote button styling (Default: gray-500 when neutral)
-          color: userVote === "down" ? "#FFFFFF" : (theme === 'dark' ? "#9CA3AF" : "#6B7280"),
+          color: userVote === "down" ? "#FFFFFF" : (theme === 'dark' ? "#A3A3A3" : "#6B7280"),
           border: "none",
           cursor: "pointer",
         }}
@@ -186,7 +186,7 @@ function VoteButtons({
         onMouseLeave={(e) => {
           if (userVote !== "down") {
             // 🎨 CUSTOMIZATION: Vote button styling (Default: gray-500)
-            e.currentTarget.style.color = theme === 'dark' ? "#9CA3AF" : "#6B7280";
+            e.currentTarget.style.color = theme === 'dark' ? "#A3A3A3" : "#6B7280";
             e.currentTarget.style.backgroundColor = "transparent";
           }
         }}

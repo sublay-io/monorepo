@@ -129,7 +129,7 @@ function ThreadedCommentSectionInner({
           flex: 1,
           overflowY: "auto",
           // 🎨 CUSTOMIZATION: Layout styling (Default: white)
-          backgroundColor: theme === 'dark' ? "#1F2937" : "#fff",
+          backgroundColor: theme === 'dark' ? "#262626" : "#fff",
           // 🎨 CUSTOMIZATION: Layout styling (Default: 8px)
           paddingTop: "8px",
           paddingBottom: "8px",
@@ -140,7 +140,7 @@ function ThreadedCommentSectionInner({
 
       <div
         style={{
-          borderTop: theme === 'dark' ? "1px solid #4B5563" : "1px solid #e5e7eb",
+          borderTop: theme === 'dark' ? "1px solid #525252" : "1px solid #e5e7eb",
           // 🎨 CUSTOMIZATION: Layout styling (Default: 8px)
           paddingTop: "8px",
         }}

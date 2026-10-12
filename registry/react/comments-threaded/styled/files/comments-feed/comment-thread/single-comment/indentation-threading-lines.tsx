@@ -31,7 +31,7 @@ export const AVATAR_CENTER_Y = AVATAR_TOP + AVATAR_SIZE / 2;
 function useLineColor() {
   const { theme } = useUIState();
   // 🎨 CUSTOMIZATION: Threading line color (Default: gray-300)
-  return theme === "dark" ? "#6B7280" : "#D1D5DB";
+  return theme === "dark" ? "#737373" : "#D1D5DB";
 }
 
 /**

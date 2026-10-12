@@ -92,7 +92,7 @@ function CommentReplies({
             <div
               style={{
                 fontSize: "12px",
-                color: theme === "dark" ? "#9CA3AF" : "#6B7280",
+                color: theme === "dark" ? "#A3A3A3" : "#6B7280",
                 padding: "4px 8px",
               }}
             >
@@ -102,7 +102,7 @@ function CommentReplies({
                 style={{
                   fontSize: "12px",
                   fontWeight: 500,
-                  color: theme === "dark" ? "#3B82F6" : "#2563EB",
+                  color: theme === "dark" ? "#60A5FA" : "#2563EB",
                   padding: 0,
                   background: "transparent",
                   border: "none",
@@ -121,7 +121,7 @@ function CommentReplies({
                 alignItems: "center",
                 gap: "8px",
                 fontSize: "12px",
-                color: theme === 'dark' ? "#3B82F6" : "#2563EB",
+                color: theme === 'dark' ? "#60A5FA" : "#2563EB",
                 fontWeight: "500",
                 transition: "all 150ms ease-in-out",
                 padding: "4px 8px",
@@ -131,11 +131,11 @@ function CommentReplies({
                 cursor: "pointer",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = theme === 'dark' ? "#2563EB" : "#1D4ED8";
-                e.currentTarget.style.backgroundColor = theme === 'dark' ? "#1E3A8A" : "#EFF6FF";
+                e.currentTarget.style.color = theme === 'dark' ? "#93C5FD" : "#1D4ED8";
+                e.currentTarget.style.backgroundColor = theme === 'dark' ? "rgba(96, 165, 250, 0.1)" : "#EFF6FF";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = theme === 'dark' ? "#3B82F6" : "#2563EB";
+                e.currentTarget.style.color = theme === 'dark' ? "#60A5FA" : "#2563EB";
                 e.currentTarget.style.backgroundColor = "transparent";
               }}
             >

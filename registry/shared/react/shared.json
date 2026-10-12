@@ -1,4 +1,134 @@
 {
   "platform": "react",
-  "pieces": {}
+  "pieces": {
+    "ellipsis-icon": {
+      "files": [
+        "ellipsis-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "emoji-suggestions": {
+      "files": [
+        "emoji-suggestions.tsx"
+      ],
+      "requires": [
+        "theme"
+      ],
+      "dependencies": []
+    },
+    "flag-icon": {
+      "files": [
+        "flag-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "from-now": {
+      "files": [
+        "from-now.tsx"
+      ],
+      "requires": [],
+      "dependencies": [
+        "moment@^2"
+      ]
+    },
+    "get-user-avatar": {
+      "files": [
+        "get-user-avatar.ts"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "giphy-container": {
+      "files": [
+        "giphy-container.tsx"
+      ],
+      "requires": [
+        "magnifying-glass-icon",
+        "theme"
+      ],
+      "dependencies": [
+        "@giphy/js-fetch-api@^5.7.0",
+        "@giphy/react-components@^10.1.1"
+      ]
+    },
+    "heart-full-icon": {
+      "files": [
+        "heart-full-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "heart-icon": {
+      "files": [
+        "heart-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "magnifying-glass-icon": {
+      "files": [
+        "magnifying-glass-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "modal": {
+      "files": [
+        "modal.tsx"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "parse-content-with-mentions": {
+      "files": [
+        "parse-content-with-mentions.tsx"
+      ],
+      "requires": [
+        "theme"
+      ],
+      "dependencies": []
+    },
+    "reset-styles": {
+      "files": [
+        "reset-styles.ts"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "skeleton": {
+      "files": [
+        "skeleton.tsx"
+      ],
+      "requires": [
+        "theme"
+      ],
+      "dependencies": []
+    },
+    "theme": {
+      "files": [
+        "theme.ts"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "use-textarea-cursor-indicator": {
+      "files": [
+        "use-textarea-cursor-indicator.tsx"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
+    "user-avatar": {
+      "files": [
+        "user-avatar.tsx"
+      ],
+      "requires": [
+        "get-user-avatar",
+        "reset-styles"
+      ],
+      "dependencies": []
+    }
+  }
 }

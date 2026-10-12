@@ -129,7 +129,7 @@ function ThreadedCommentSectionInner({
       <div
         className={
           // 🎨 CUSTOMIZATION: Layout styling
-          "border-t border-gray-200 dark:border-neutral-600 pt-2"
+          "border-t border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 pt-2"
         }
       >
         {isVisible && <NewCommentForm />}

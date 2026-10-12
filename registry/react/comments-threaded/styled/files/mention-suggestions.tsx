@@ -74,7 +74,7 @@ function MentionSuggestions({
                   e.currentTarget.style.backgroundColor = "transparent";
                 }}
               >
-                <UserAvatar user={user} size={32} />
+                <UserAvatar theme={theme} user={user} size={32} />
                 <div
                   style={{
                     display: "flex",

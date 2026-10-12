@@ -64,7 +64,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                 theme === 'dark' ? 'active:bg-neutral-700' : 'active:bg-gray-50'
               }`}
             >
-              <UserAvatar user={item} size={32} />
+              <UserAvatar theme={theme} user={item} size={32} />
               <View className="flex-col gap-0.5">
                 <Text
                   className={`text-sm font-medium ${

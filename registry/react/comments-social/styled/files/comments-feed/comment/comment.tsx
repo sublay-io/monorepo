@@ -227,6 +227,7 @@ const Comment = React.memo(
             >
               {/* 🎨 CUSTOMIZATION: Avatar size (Default: 32px) */}
               <UserAvatar
+theme={theme}
                 user={comment.user ?? {}}
                 borderRadius={32}
                 size={32}

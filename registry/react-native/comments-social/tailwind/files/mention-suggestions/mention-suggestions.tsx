@@ -48,7 +48,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
               onPress={() => handleMentionClick(item)}
               className="flex-row items-center py-2"
             >
-              <UserAvatar user={item} />
+              <UserAvatar theme={theme} user={item} />
               <View className="justify-evenly ml-2">
                 <Text
                   className={`text-sm font-medium ${

@@ -1,5 +1,6 @@
 import { resetImg } from "./reset-styles";
 import { getUserAvatar } from "./get-user-avatar";
+import { type UITheme, uiColor } from "./theme";
 
 interface UserProps {
   id?: string;
@@ -12,10 +13,12 @@ function UserAvatar({
   user,
   size = 32,
   borderRadius,
+  theme = "light",
 }: {
   user: UserProps | undefined;
   size?: number | undefined;
   borderRadius?: number | undefined;
+  theme?: UITheme; // Colors to draw with (default: light)
 }) {
   if (!user) return null;
   return (
@@ -25,8 +28,10 @@ function UserAvatar({
         width: size,
         height: size,
         borderRadius: borderRadius || size,
-        borderWidth: 1,
-        borderColor: "#E6E6E6",
+        // The ring is drawn inside the avatar's size, whatever the host
+        // project's CSS reset does
+        boxSizing: "border-box",
+        border: `1px solid ${uiColor("divider", theme)}`,
         display: "inline-block",
         flexShrink: 0,
       }}

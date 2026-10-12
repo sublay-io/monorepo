@@ -54,7 +54,7 @@ function MentionSuggestions({
                   gap: 8,
                 }}
               >
-                <UserAvatar user={user} />
+                <UserAvatar theme={theme} user={user} />
                 <div
                   style={{
                     display: "grid",

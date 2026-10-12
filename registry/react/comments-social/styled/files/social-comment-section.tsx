@@ -163,7 +163,15 @@ function SocialCommentSectionInner({
   };
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    // Positioned, so the GIF picker covers the comment section and no more
+    <div
+      style={{
+        position: "relative",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {sortOptions.length > 0 && (
         <div
           style={{

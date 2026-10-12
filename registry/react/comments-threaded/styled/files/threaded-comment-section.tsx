@@ -124,7 +124,15 @@ function ThreadedCommentSectionInner({
   const { theme } = useUIState();
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    // Positioned, so the GIF picker covers the comment section and no more
+    <div
+      style={{
+        position: "relative",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <div
         style={{
           flex: 1,

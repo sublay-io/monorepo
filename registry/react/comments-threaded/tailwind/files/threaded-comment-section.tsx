@@ -131,7 +131,8 @@ function ThreadedCommentSectionInner({
   children?: React.ReactNode;
 }) {
   return (
-    <div className={`h-full flex flex-col ${sharedDarkColors}`}>
+    // Positioned, so the GIF picker covers the comment section and no more
+    <div className={`relative h-full flex flex-col ${sharedDarkColors}`}>
       <div
         className={
           // 🎨 CUSTOMIZATION: Layout styling

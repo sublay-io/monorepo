@@ -10,6 +10,7 @@ function GiphyContainer({
   giphyApiKey,
   visible,
   theme = "light",
+  fullScreen = false,
 }: {
   onClickBack: () => void;
   onSelectGif: (selectedGif: {
@@ -25,6 +26,8 @@ function GiphyContainer({
   giphyApiKey: string;
   visible: boolean; // Determines if the component is visible or not
   theme?: UITheme; // Colors to draw with (default: light)
+  // Cover the whole viewport instead of the nearest positioned ancestor (default: false)
+  fullScreen?: boolean;
 }) {
   const gridParentRef = useRef<HTMLDivElement>(null);
   const [parentWidth, setParentWidth] = useState<number>(0);
@@ -125,11 +128,19 @@ function GiphyContainer({
   return (
     <div
       style={{
-        position: "absolute",
-        inset: 0,
+        // Full screen: pinned to the viewport. Otherwise: anchored to the
+        // bottom of the nearest positioned ancestor (the comment section),
+        // covering it up to most of the viewport's height, so the search
+        // field stays in view when the section is taller than the screen.
+        position: fullScreen ? "fixed" : "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        top: fullScreen ? 0 : "auto",
         opacity: visible ? 1 : 0, // Opacity based on visibility
         backgroundColor: uiColor("surface", theme),
         height: "100%",
+        maxHeight: fullScreen ? undefined : "80vh",
         width: "100%",
         display: "grid",
         gridTemplateRows: "auto 1fr",

@@ -31,7 +31,7 @@ function ReplyBanner() {
         overflow: "hidden",
         transition: "height 0.3s ease, top 0.3s ease",
         // 🎨 CUSTOMIZATION: Reply banner background (Default: light gray)
-        backgroundColor: theme === 'dark' ? '#374151' : '#e7e7e7',
+        backgroundColor: theme === 'dark' ? '#404040' : '#e7e7e7',
         paddingLeft: 12,
         paddingRight: 12,
         paddingTop: 8,
@@ -48,7 +48,7 @@ function ReplyBanner() {
       >
         <span style={{
           // 🎨 CUSTOMIZATION: Reply banner text color
-          color: theme === 'dark' ? '#9CA3AF' : '#787878',
+          color: theme === 'dark' ? '#A3A3A3' : '#787878',
           fontSize: 12
         }}>
           Replying to {repliedToUser}
@@ -58,7 +58,11 @@ function ReplyBanner() {
             setRepliedToComment!(null);
             setShowReplyBanner!({ newState: false });
           }}
-          style={{ ...resetButton, fontSize: 16 }}
+          style={{
+            ...resetButton,
+            fontSize: 16,
+            color: theme === 'dark' ? '#D4D4D4' : undefined,
+          }}
         >
           &times;
         </button>

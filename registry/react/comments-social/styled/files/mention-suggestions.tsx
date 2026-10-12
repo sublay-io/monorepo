@@ -31,8 +31,8 @@ function MentionSuggestions({
         overflowY: "auto",
         transition: "height 0.15s ease, top 0.3s ease",
         // 🎨 CUSTOMIZATION: Mention suggestions background
-        backgroundColor: theme === 'dark' ? '#1F2937' : 'white',
-        borderTopColor: theme === 'dark' ? '#4B5563' : '#e7e7e7',
+        backgroundColor: theme === 'dark' ? '#262626' : 'white',
+        borderTopColor: theme === 'dark' ? '#525252' : '#e7e7e7',
         borderTopWidth: "1px",
         borderTopStyle: "solid",
         padding: 16,
@@ -64,7 +64,7 @@ function MentionSuggestions({
                     fontSize: 14,
                     fontWeight: 500,
                     // 🎨 CUSTOMIZATION: Username text color
-                    color: theme === 'dark' ? '#F9FAFB' : '#000'
+                    color: theme === 'dark' ? '#FAFAFA' : '#000'
                   }}>
                     {user.username}
                   </div>
@@ -74,7 +74,7 @@ function MentionSuggestions({
                         fontSize: 14,
                         fontWeight: 400,
                         // 🎨 CUSTOMIZATION: Name text color
-                        color: theme === 'dark' ? '#9CA3AF' : 'gray'
+                        color: theme === 'dark' ? '#A3A3A3' : 'gray'
                       }}
                     >
                       {user.name}

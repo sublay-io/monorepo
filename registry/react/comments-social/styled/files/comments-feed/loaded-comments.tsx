@@ -15,7 +15,7 @@ function LoadedComments({ data }: { data: CommentType[] }) {
         display: "grid",
         // 🎨 CUSTOMIZATION: Feed background and gap (Default: white, 8px gap)
         gap: 8,
-        backgroundColor: theme === 'dark' ? '#1F2937' : '#fff',
+        backgroundColor: theme === 'dark' ? '#262626' : '#fff',
       }}
     >
       {highlightedComment ? (

@@ -227,7 +227,7 @@ function NewCommentForm() {
           ...resetDiv,
           position: "relative",
           // 🎨 CUSTOMIZATION: Form background color (Default: white)
-          backgroundColor: theme === 'dark' ? '#1F2937' : '#fff',
+          backgroundColor: theme === 'dark' ? '#262626' : '#fff',
         }}
       >
         <div style={{ width: "100%", position: "relative" }}>
@@ -239,7 +239,7 @@ function NewCommentForm() {
             handleMentionClick={handleMentionClick}
           />
         </div>
-        <div style={{ position: "relative", zIndex: 20, backgroundColor: theme === 'dark' ? '#1F2937' : '#fff' }}>
+        <div style={{ position: "relative", zIndex: 20, backgroundColor: theme === 'dark' ? '#262626' : '#fff' }}>
           {/* 🔧 CUSTOMIZE: Remove this component if you don't want emoji picker */}
           <EmojiSuggestions
             onEmojiClick={(emoji) => {
@@ -287,8 +287,8 @@ function NewCommentForm() {
                 width: "100%",
                 // 🎨 CUSTOMIZATION: Textarea styling
                 fontSize: 14,
-                color: theme === 'dark' ? '#E5E7EB' : '#000',
-                backgroundColor: theme === 'dark' ? '#1F2937' : '#fff',
+                color: theme === 'dark' ? '#E5E5E5' : '#000',
+                backgroundColor: theme === 'dark' ? '#262626' : '#fff',
               }}
             />
             {content.length === 0 && giphyApiKey ? (
@@ -337,7 +337,7 @@ function NewCommentForm() {
                 margin: 0,
                 padding: "0 16px 8px",
                 fontSize: 12,
-                color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                color: theme === 'dark' ? '#A3A3A3' : '#737373',
               }}
             >
               {createErrorMessage}

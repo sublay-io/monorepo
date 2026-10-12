@@ -20,7 +20,7 @@ function NoCommentsPlaceHolder() {
           fontWeight: 700,
           marginBottom: 8,
           // 🎨 CUSTOMIZATION: Title text color
-          color: theme === 'dark' ? '#F9FAFB' : '#000',
+          color: theme === 'dark' ? '#FAFAFA' : '#000',
         }}
       >
         No comments yet
@@ -30,7 +30,7 @@ function NoCommentsPlaceHolder() {
           textAlign: "center",
           fontSize: 12,
           // 🎨 CUSTOMIZATION: Subtitle text color
-          color: theme === 'dark' ? '#9CA3AF' : '#8e8e8e',
+          color: theme === 'dark' ? '#A3A3A3' : '#8e8e8e',
           marginTop: 0,
         }}
       >

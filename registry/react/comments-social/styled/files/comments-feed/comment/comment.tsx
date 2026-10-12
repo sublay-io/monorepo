@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { cloneElement, useState } from "react";
 import {
   Comment as CommentType,
   UserMention,
@@ -125,7 +125,7 @@ const Comment = React.memo(
           paddingBottom: 8,
           backgroundColor:
             highlightedComment?.comment.id === comment.id
-              ? (theme === 'dark' ? "#1E40AF" : "#dbeafe")
+              ? (theme === 'dark' ? "#333333" : "#dbeafe")
               : "transparent",
         }}
       >
@@ -146,14 +146,14 @@ const Comment = React.memo(
                 height: 32,
                 borderRadius: 32,
                 flexShrink: 0,
-                backgroundColor: theme === 'dark' ? '#374151' : '#E5E7EB',
+                backgroundColor: theme === 'dark' ? '#404040' : '#E5E7EB',
               }}
             />
             <span
               style={{
                 fontSize: 13,
                 fontStyle: "italic",
-                color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                color: theme === 'dark' ? '#A3A3A3' : '#737373',
               }}
             >
               {isUnavailable
@@ -168,7 +168,7 @@ const Comment = React.memo(
                     ...resetButton,
                     fontSize: 12,
                     fontWeight: 600,
-                    color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                    color: theme === 'dark' ? '#A3A3A3' : '#737373',
                   }}
                 >
                   Remove your reaction
@@ -181,7 +181,7 @@ const Comment = React.memo(
                   ...resetButton,
                   fontSize: 12,
                   fontWeight: 600,
-                  color: theme === 'dark' ? '#F9FAFB' : '#000',
+                  color: theme === 'dark' ? '#FAFAFA' : '#000',
                 }}
               >
                 Show anyway
@@ -213,7 +213,7 @@ const Comment = React.memo(
                   height: 32,
                   borderRadius: 32,
                   flexShrink: 0,
-                  backgroundColor: theme === 'dark' ? '#374151' : '#E5E7EB',
+                  backgroundColor: theme === 'dark' ? '#404040' : '#E5E7EB',
                 }}
               />
             ) : (
@@ -259,7 +259,7 @@ const Comment = React.memo(
                     style={{
                       fontWeight: 700,
                       fontSize: 13,
-                      color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                      color: theme === 'dark' ? '#A3A3A3' : '#737373',
                     }}
                   >
                     {tombstone}
@@ -281,7 +281,7 @@ const Comment = React.memo(
                     // 🎨 CUSTOMIZATION: Author name typography
                     fontWeight: 700,
                     fontSize: 13,
-                    color: theme === 'dark' ? '#F9FAFB' : '#000',
+                    color: theme === 'dark' ? '#FAFAFA' : '#000',
                   }}
                 >
                   {getUserName(comment.user ?? {}, "username")}
@@ -291,7 +291,7 @@ const Comment = React.memo(
                 <FromNow
                   time={comment.createdAt}
                   fontSize={12}
-                  color={theme === 'dark' ? '#9CA3AF' : '#737373'}
+                  color={theme === 'dark' ? '#A3A3A3' : '#737373'}
                   justNowText="Just now"
                 />
               </div>
@@ -302,7 +302,7 @@ const Comment = React.memo(
                     ...resetP,
                     fontSize: 14,
                     fontStyle: "italic",
-                    color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                    color: theme === 'dark' ? '#A3A3A3' : '#737373',
                   }}
                 >
                   {tombstone}
@@ -314,7 +314,7 @@ const Comment = React.memo(
                     ...resetP,
                     // 🎨 CUSTOMIZATION: Comment body typography
                     fontSize: 14,
-                    color: theme === 'dark' ? '#E5E7EB' : '#000',
+                    color: theme === 'dark' ? '#E5E5E5' : '#000',
                   }}
                 >
                   {parseContentWithMentions(
@@ -325,6 +325,17 @@ const Comment = React.memo(
                     user?.id,
                     callbacks?.currentUserClickCallback,
                     callbacks?.otherUserClickCallback
+                  ).map((part) =>
+                    // Mentions come back with a fixed color: restyle them to follow the theme
+                    typeof part === "string"
+                      ? part
+                      : cloneElement(part, {
+                          style: {
+                            cursor: "pointer",
+                            // 🎨 CUSTOMIZATION: Mention color (Default: blue-800)
+                            color: theme === 'dark' ? "#60A5FA" : "#1E40AF",
+                          },
+                        })
                   )}
                 </p>
               )}
@@ -348,7 +359,7 @@ const Comment = React.memo(
                   style={{
                     ...resetP,
                     fontSize: 12,
-                    color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                    color: theme === 'dark' ? '#A3A3A3' : '#737373',
                   }}
                 >
                   {ownRemovedLabel}
@@ -375,7 +386,7 @@ const Comment = React.memo(
                   }
                   style={{
                     ...resetButton,
-                    color: theme === 'dark' ? '#9CA3AF' : '#737373',
+                    color: theme === 'dark' ? '#A3A3A3' : '#737373',
                     fontSize: 12,
                     fontWeight: 600,
                   }}
@@ -414,7 +425,7 @@ const Comment = React.memo(
                 handleUpvote={handleUpvoteComment}
                 handleRemoveUpvote={handleRemoveCommentUpvote}
                 iconSize={14}
-                emptyColor={theme === 'dark' ? '#9CA3AF' : '#8E8E8E'}
+                emptyColor={theme === 'dark' ? '#A3A3A3' : '#8E8E8E'}
                 fullColor={theme === 'dark' ? '#F87171' : '#DC2626'}
                 padding={4}
                 paddingBottom={4}
@@ -423,7 +434,7 @@ const Comment = React.memo(
                 style={{
                   // 🎨 CUSTOMIZATION: Likes count typography
                   fontSize: 12,
-                  color: theme === 'dark' ? '#9CA3AF' : '#8E8E8E',
+                  color: theme === 'dark' ? '#A3A3A3' : '#8E8E8E',
                   fontWeight: 400,
                 }}
               >

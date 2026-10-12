@@ -142,6 +142,18 @@ Move `<SortByButton />` to the top of the section instead of inline with the fee
 
 ---
 
+## GIF Picker Placement
+
+On React, the GIF picker opens over the comment section: it is anchored to the bottom of the section and covers it up to 80% of the screen's height. To make it cover the whole screen instead, set the flag at the top of `components/new-comment-form.tsx`:
+
+```tsx
+// 🔧 CUSTOMIZE: Where the GIF picker opens. false: it covers the comment
+// section. true: it covers the whole screen.
+const GIF_PICKER_FULL_SCREEN = true;
+```
+
+The picker is contained by the section's outer element, which is positioned (`relative`). If you compose your own layout from the feed and the form, wrap them in a positioned element, or the picker will cover the nearest positioned ancestor instead.
+
 ## Component Hierarchy
 
 Understanding the component tree helps you know which file to edit:

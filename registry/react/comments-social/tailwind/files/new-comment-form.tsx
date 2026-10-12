@@ -23,6 +23,10 @@ import ReplyBanner from "./reply-banner";
 import MentionSuggestions from "./mention-suggestions";
 import { getCommentCreateErrorMessage } from "../utils/comment-create-error";
 
+// 🔧 CUSTOMIZE: Where the GIF picker opens. false: it covers the comment
+// section. true: it covers the whole screen.
+const GIF_PICKER_FULL_SCREEN = false;
+
 function NewCommentForm() {
   const { user } = useUser();
   const { project } = useProject();
@@ -214,6 +218,7 @@ function NewCommentForm() {
           onClickBack={() => setIsGiphyVisible(false)}
           onSelectGif={(selected) => handleCreateGif(selected)}
           visible={isGiphyVisible}
+          fullScreen={GIF_PICKER_FULL_SCREEN}
         />
       ) : null}
       <div

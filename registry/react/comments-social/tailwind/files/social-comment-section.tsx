@@ -172,7 +172,8 @@ function SocialCommentSectionInner({
   };
 
   return (
-    <div className={`h-full flex flex-col ${sharedDarkColors}`}>
+    // Positioned, so the GIF picker covers the comment section and no more
+    <div className={`relative h-full flex flex-col ${sharedDarkColors}`}>
       {sortOptions.length > 0 && (
         <div
           className="flex px-6 py-3 items-center gap-1 justify-end bg-white dark:bg-neutral-800"

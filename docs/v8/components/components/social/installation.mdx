@@ -56,7 +56,7 @@ npx @sublay/cli add comments-social --ref v8
 
 ## What Gets Installed
 
-The CLI copies 41 files into your project (40 for the Tailwind variant on React Native and Expo): the component's own 25 files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
+The CLI copies 41 files into your project (42 for the inline styles variant on React Native and Expo): the component's own 25 files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
 
 <Tabs>
   <Tab title="React (Web)">
@@ -162,6 +162,7 @@ The CLI copies 41 files into your project (40 for the Tailwind variant on React 
         ├── flag-icon.tsx                        # Report icon
         ├── from-now.tsx                         # Relative time ("5 minutes ago")
         ├── get-image-component.tsx              # expo-image when installed, else Image
+        ├── get-user-avatar.ts                   # Generated avatar for users without one
         ├── giphy-container.tsx                  # GIF picker
         ├── heart-full-icon.tsx                  # Filled heart icon
         ├── heart-icon.tsx                       # Outline heart icon

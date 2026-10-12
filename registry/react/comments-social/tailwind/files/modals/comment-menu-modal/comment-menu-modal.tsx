@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal, resetDiv } from "@sublay/ui-core-react-js";
+import { Modal } from "@sublay/ui-core-react-js";
 import { cn } from "@/lib/utils";
 import useUIState from "../../../hooks/use-ui-state";
 import MainContent from "./main-content";
@@ -23,7 +23,6 @@ function CommentMenuModal() {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={resetDiv}
         className={cn(
           "bg-white dark:bg-neutral-800",
           "rounded-lg",

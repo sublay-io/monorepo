@@ -130,7 +130,9 @@ The CLI will:
     ├── components/
     │   ├── threaded-comment-section.tsx                 # Main component
     │   ├── new-comment-form/
-    │   │   └── new-comment-form.tsx                     # Comment form
+    │   │   └── new-comment-form.tsx                     # Comment form (replies are written here too)
+    │   ├── reply-banner/
+    │   │   └── reply-banner.tsx                         # "Replying to" bar above the input
     │   ├── mention-suggestions/
     │   │   └── mention-suggestions.tsx                  # @ mention autocomplete
     │   ├── comments-feed/
@@ -143,7 +145,6 @@ The CLI will:
     │   │       ├── comment-thread.tsx                   # Thread with replies
     │   │       ├── comment-replies.tsx                  # Reply list
     │   │       ├── action-menu.tsx                      # Opens the comment menu
-    │   │       ├── new-reply-form.tsx                   # Reply form
     │   │       └── single-comment/
     │   │           ├── index.ts                         # Barrel export
     │   │           ├── single-comment.tsx               # Individual comment

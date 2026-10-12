@@ -33,7 +33,12 @@
     {
       "path": "files/new-comment-form/new-comment-form.tsx",
       "type": "component",
-      "description": "Form for creating new top-level comments"
+      "description": "Form for new comments and for replies to the comment being replied to"
+    },
+    {
+      "path": "files/reply-banner/reply-banner.tsx",
+      "type": "component",
+      "description": "\"Replying to\" bar shown above the input while replying to a comment"
     },
     {
       "path": "files/mention-suggestions/mention-suggestions.tsx",
@@ -79,11 +84,6 @@
       "path": "files/comments-feed/comment-thread/action-menu.tsx",
       "type": "component",
       "description": "Comment action menu trigger (opens bottom sheet)"
-    },
-    {
-      "path": "files/comments-feed/comment-thread/new-reply-form.tsx",
-      "type": "component",
-      "description": "Form for replying to comments"
     },
     {
       "path": "files/comments-feed/comment-thread/single-comment/index.ts",

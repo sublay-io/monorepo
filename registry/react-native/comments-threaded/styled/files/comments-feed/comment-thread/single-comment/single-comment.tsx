@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import {
   Comment as CommentType,
@@ -7,16 +7,14 @@ import {
   useCommentSection,
   useReactionToggle,
   useUser,
-  type CommentCreateError,
 } from "@sublay/react-native";
 import { parseContentWithMentions } from "~shared/react-native/parse-content-with-mentions";
 import UserAvatar from "~shared/react-native/user-avatar";
 import { getImageComponent } from "~shared/react-native/get-image-component";
 import VoteButtons from "./vote-buttons";
 import ActionMenu from "../action-menu";
-import NewReplyForm from "../new-reply-form";
 import ToggleRepliesVisibility from "./toggle-replies-visibility";
-import IndentationThreadingLines, {
+import {
   AVATAR_GAP,
   AVATAR_OFFSET_TOP,
   AVATAR_SIZE,
@@ -26,7 +24,6 @@ import IndentationThreadingLines, {
   ThreadStem,
 } from "./indentation-threading-lines";
 import ReplyButtonAndInfo from "./reply-button-and-info";
-import { getCommentCreateErrorMessage } from "../../../../utils/comment-create-error";
 import useUIState from "../../../../hooks/use-ui-state";
 
 interface SingleCommentProps {
@@ -41,10 +38,6 @@ interface SingleCommentProps {
   columnContinues: boolean;
   onToggleCollapse: () => void;
 }
-
-// 🎨 CUSTOMIZATION: Where the threading line meets the reply form, measured
-// from the top of the form's row (Default: 30, level with its first line)
-const REPLY_FORM_JOIN_Y = 30;
 
 // The viewer's own reaction on a comment they can't otherwise interact with
 // (its author blocked them): undoing it is still allowed.
@@ -92,23 +85,15 @@ function SingleComment({
   onToggleCollapse,
 }: SingleCommentProps) {
   const { user } = useUser();
-  const { callbacks, highlightedComment, createError } = useCommentSection();
-  const { theme } = useUIState();
-  const [showReplyForm, setShowReplyForm] = useState(false);
-  const [replyContent, setReplyContent] = useState("");
-  // A reply to this comment that wasn't posted: the message shows under the
-  // reply form, until the text is edited or something is sent again (the
-  // section clears `createError` then). If the reply was refused because this
-  // comment was deleted or removed in the meantime, the row has already turned
-  // into its placeholder (no reply form), so the message shows on the row.
-  const [dismissedReplyError, setDismissedReplyError] =
-    useState<CommentCreateError | null>(null);
-  const replyErrorMessage =
-    createError &&
-    createError.parentId === comment.id &&
-    createError !== dismissedReplyError
-      ? getCommentCreateErrorMessage(createError)
-      : null;
+  const {
+    callbacks,
+    highlightedComment,
+    repliedToComment,
+    setRepliedToComment,
+    setShowReplyBanner,
+    handleDeepReply,
+  } = useCommentSection();
+  const { theme, focusCommentInput } = useUIState();
   const [showBlockedComment, setShowBlockedComment] = useState(false);
 
   // isUnavailable wins over every other marker (the author blocked the
@@ -145,16 +130,36 @@ function SingleComment({
   // reaches back across it, so a highlighted reply is coloured edge to edge.
   const indentationPx = Math.min(depth, MAX_INDENT_DEPTH) * INDENT;
 
-  // The reply form is a row of its own under the comment, first on the line
-  // its replies hang from.
-  const showForm =
-    showReplyForm &&
-    !isPlaceholderRow &&
-    !isCollapsed &&
-    !tombstone &&
-    !isOwnRemoved;
+  // Replies are written in the section's main input. Reply makes this comment
+  // the reply target (the reply is nested under exactly this comment) and
+  // opens the keyboard; Reply again on the same comment cancels it.
+  const isReplyTarget = repliedToComment?.id === comment.id;
+  const clearReplyTarget = () => {
+    setRepliedToComment?.(null);
+    setShowReplyBanner?.({ newState: false });
+  };
+  const handleReplyPress = () => {
+    if (isReplyTarget) {
+      clearReplyTarget();
+      return;
+    }
+    handleDeepReply?.(comment);
+    focusCommentInput?.();
+  };
 
-  const isHighlighted = highlightedComment?.comment.id === comment.id;
+  // A comment that can no longer be replied to (deleted, removed or made
+  // unavailable while it was the reply target) stops being the target.
+  const cannotBeRepliedTo = isUnavailable || !!tombstone || isOwnRemoved;
+  useEffect(() => {
+    if (!isReplyTarget || !cannotBeRepliedTo) return;
+    setRepliedToComment?.(null);
+    setShowReplyBanner?.({ newState: false });
+  }, [isReplyTarget, cannotBeRepliedTo, setRepliedToComment, setShowReplyBanner]);
+
+  // The deep-linked comment, and the comment being replied to, are both
+  // drawn highlighted.
+  const isHighlighted =
+    highlightedComment?.comment.id === comment.id || isReplyTarget;
   // 🎨 CUSTOMIZATION: Highlighted comment background: a neutral step away
   // from the section background
   const highlightColor = isHighlighted
@@ -193,7 +198,6 @@ function SingleComment({
       };
 
   return (
-    <>
     <View
       style={{
         backgroundColor: highlightGutterColor,
@@ -208,7 +212,7 @@ function SingleComment({
         }}
       >
         {/* Line from this comment's avatar down to the rows listed under it */}
-        {(showReplies || showForm || columnContinues) && <ThreadStem />}
+        {(showReplies || columnContinues) && <ThreadStem />}
 
         <View style={{ flexDirection: 'row' }}>
           {/* Avatar with threading line connection */}
@@ -417,20 +421,6 @@ theme={theme}
               </Text>
             )}
 
-            {!isCollapsed && tombstone && replyErrorMessage ? (
-              <Text
-                accessibilityRole="alert"
-                style={{
-                  fontSize: 12,
-                  lineHeight: 16,
-                  marginBottom: 12,
-                  color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
-                }}
-              >
-                {replyErrorMessage}
-              </Text>
-            ) : null}
-
             {!isCollapsed && !tombstone && (
               <>
                 {comment.content && (
@@ -473,20 +463,6 @@ theme={theme}
                   </Text>
                 )}
 
-                {isOwnRemoved && replyErrorMessage ? (
-                  <Text
-                    accessibilityRole="alert"
-                    style={{
-                      fontSize: 12,
-                      lineHeight: 16,
-                      marginBottom: 12,
-                      color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
-                    }}
-                  >
-                    {replyErrorMessage}
-                  </Text>
-                ) : null}
-
                 <View
                   style={{
                     flexDirection: 'row',
@@ -497,7 +473,7 @@ theme={theme}
                   <ReplyButtonAndInfo
                     hasReplies={replyCount > 0}
                     replyCount={replyCount}
-                    setShowReplyForm={setShowReplyForm}
+                    onReplyPress={handleReplyPress}
                     canReply={!isOwnRemoved}
                   />
                   {/* Vote buttons inline with reply options */}
@@ -518,46 +494,6 @@ theme={theme}
         </View>
       </View>
     </View>
-
-    {/* Reply form: lined up with the comment's content, and pulled up into
-        the row's bottom padding so it sits right under the reply button */}
-    {showForm && (
-      <View
-        style={{
-          backgroundColor: highlightGutterColor,
-          marginTop: -ROW_PADDING_Y,
-          marginLeft: -indentationPx,
-          paddingLeft: indentationPx,
-        }}
-      >
-        <View style={{ backgroundColor: highlightColor }}>
-          <View
-            style={{
-              marginLeft: INDENT,
-              paddingLeft: AVATAR_SIZE + AVATAR_GAP - INDENT,
-              paddingBottom: ROW_PADDING_Y,
-            }}
-          >
-            <NewReplyForm
-              comment={comment}
-              setShowReplyForm={setShowReplyForm}
-              replyContent={replyContent}
-              setReplyContent={setReplyContent}
-              errorMessage={replyErrorMessage}
-              onDismissError={() => {
-                if (replyErrorMessage) setDismissedReplyError(createError ?? null);
-              }}
-            />
-            <IndentationThreadingLines
-              isLastReply={!showReplies && !columnContinues}
-              joinAt={REPLY_FORM_JOIN_Y}
-              reach={AVATAR_SIZE + AVATAR_GAP - INDENT}
-            />
-          </View>
-        </View>
-      </View>
-    )}
-    </>
   );
 }
 

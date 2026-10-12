@@ -28,6 +28,19 @@ Visual indicators: indentation, threading lines connecting replies to parents, a
 
 ---
 
+### Replying
+
+Every comment has a **Reply** button. A reply is nested under the exact comment it answers, at any depth. Where the reply is written depends on the platform:
+
+- **React (Web)** — Reply opens a reply box under the comment. Cancel closes it.
+- **React Native and Expo** — replies are written in the main input at the bottom of the section. Reply makes that comment the one being replied to and focuses the input, so the keyboard opens. A **"Replying to"** bar appears above the input, with the author's avatar and name and a cancel button on the right. The comment being replied to is marked in the list the same way as a [highlighted comment](#highlighted-comments). Tapping Reply on the same comment again, or the bar's cancel button, cancels the reply, and the input posts top-level comments again. Tapping Reply on another comment switches to that comment.
+
+On React Native and Expo, text and GIFs sent while the bar is showing are posted as replies to that comment, and the bar goes away once the reply is posted. @ mention suggestions work in the input as usual; the author being replied to is not mentioned automatically.
+
+The bar lives in `reply-banner/reply-banner.tsx`. The Reply button's behavior is `handleReplyPress` in `single-comment.tsx`, and `focusCommentInput` in `context/ui-state-context.tsx` focuses the input.
+
+---
+
 ### Loading Replies
 
 The section loads its first screen in a single request: 10 top-level comments, each with up to 3 replies, 2 levels deep.
@@ -78,7 +91,7 @@ Clear visual hierarchy with indentation and connection lines.
 
 - Each reply level is indented by 24px, up to 6 levels; deeper replies stay in one column
 - One continuous line runs from under a comment's avatar down to its last reply, with a rounded elbow into each reply's avatar
-- The "N more replies" / "Continue this thread" row and the inline reply form hang from the same line
+- The "N more replies" / "Continue this thread" row hangs from the same line, and so does the reply box on React
 - Collapsing a thread removes its lines along with its replies
 
 The geometry is a set of named values at the top of `indentation-threading-lines.tsx`. Every line is derived from them, so changing one keeps the joins intact:
@@ -190,15 +203,17 @@ When a load fails, the component shows a retry instead of a wrong or stuck state
 
 **Try again** calls the same `loadMore()` that failed, which re-sends the failed request. When the entity couldn't be loaded, it looks the entity up again first, and the comments load once it is found. Edit the text in `comments-feed.tsx` and `comment-thread/comment-replies.tsx`.
 
-When posting fails, a short muted message appears by the form that was used — under the comment form, or under the inline reply form (above the comment form's input on React Native):
+When posting fails, a short muted message appears by the form that was used. On React that is under the comment form, or under the reply box. On React Native and Expo, where comments and replies are both written in the main input, it is above that input:
 
 - **Replying to a comment that was deleted in the meantime** — "This comment was deleted, so you can't reply to it."
 - **Replying to a comment a moderator removed in the meantime** — "This comment was removed, so you can't reply to it."
 - **Any other failure** — "Couldn't post your comment. Try again."
 
-The text you typed stays in the form, and the message goes away when you edit the text or send again. A GIF that fails to post keeps the text and mentions in the form too. In the first two cases the comment turns into its `[deleted]` / `[removed]` row (or, for its author, the removed-note row), which has no Reply, so the reply form closes and the message shows on that row until the next comment is sent.
+The text you typed stays in the form, and the message goes away when you edit the text or send again. A GIF that fails to post keeps the text and mentions in the form too. On React Native and Expo a reply that fails to post also keeps its "Replying to" bar, so sending again is still a reply to the same comment.
 
-The messages live in `utils/comment-create-error.ts`; they are rendered in `new-comment-form.tsx`, `comment-thread/new-reply-form.tsx` and `single-comment.tsx`, from the section's [`createError`](/v8/sdk/comments/comment-section#usecommentsection-return-values).
+In the first two cases the comment turns into its `[deleted]` / `[removed]` row (or, for its author, the removed-note row), which has no Reply. On React the reply box closes and the message shows on that row until the next comment is sent. On React Native and Expo the "Replying to" bar goes away, the message shows above the input, and the text stays in the input, which posts top-level comments again.
+
+The messages live in `utils/comment-create-error.ts` and come from the section's [`createError`](/v8/sdk/comments/comment-section#usecommentsection-return-values). On React they are rendered in `new-comment-form.tsx`, `comment-thread/new-reply-form.tsx` and `single-comment.tsx`; on React Native and Expo, in `new-comment-form.tsx`.
 
 ---
 

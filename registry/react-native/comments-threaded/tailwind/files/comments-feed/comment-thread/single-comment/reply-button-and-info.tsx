@@ -5,12 +5,13 @@ import useUIState from "../../../../hooks/use-ui-state";
 function ReplyButtonAndInfo({
   hasReplies,
   replyCount,
-  setShowReplyForm,
+  onReplyPress,
   canReply = true,
 }: {
   hasReplies: boolean;
   replyCount: number;
-  setShowReplyForm: React.Dispatch<React.SetStateAction<boolean>>;
+  // Makes the comment the reply target, or cancels it if it already is.
+  onReplyPress: () => void;
   // false hides the Reply button (the reply count still shows).
   canReply?: boolean;
 }) {
@@ -20,7 +21,7 @@ function ReplyButtonAndInfo({
     <View className="flex-row items-center gap-4">
       {canReply && (
       <TouchableOpacity
-        onPress={() => setShowReplyForm((prev) => !prev)}
+        onPress={onReplyPress}
         className={`px-2 py-1 -ml-2 rounded ${
           theme === 'dark' ? 'active:bg-blue-400/10' : 'active:bg-blue-50'
         }`}

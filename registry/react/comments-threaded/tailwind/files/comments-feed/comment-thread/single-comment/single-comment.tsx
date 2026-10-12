@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { cloneElement, useState } from "react";
 import {
   Comment as CommentType,
   type CommentCreateError,
@@ -297,6 +297,15 @@ function SingleComment({
                       user?.id,
                       callbacks?.currentUserClickCallback,
                       callbacks?.otherUserClickCallback
+                    ).map((part) =>
+                      // Mentions come back with a fixed color: restyle them to follow the theme
+                      typeof part === "string"
+                        ? part
+                        : cloneElement(part, {
+                            // 🎨 CUSTOMIZATION: Mention color
+                            className: "text-blue-800 dark:text-blue-400",
+                            style: { cursor: "pointer" },
+                          })
                     )}
                   </p>
                 )}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { cloneElement, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import {
   Comment as CommentType,
@@ -376,6 +376,14 @@ function SingleComment({
                       user?.id,
                       callbacks?.currentUserClickCallback,
                       callbacks?.otherUserClickCallback
+                    ).map((part) =>
+                      // Mentions come back with a fixed color: restyle them to follow the theme
+                      typeof part === "string"
+                        ? part
+                        : cloneElement(part, {
+                            // 🎨 CUSTOMIZATION: Mention color (Default: blue-800)
+                            style: { color: theme === 'dark' ? "#60A5FA" : "#1E40AF" },
+                          })
                     )}
                   </Text>
                 )}

@@ -241,14 +241,31 @@ function NewCommentForm() {
         </div>
         <div style={{ position: "relative", zIndex: 20, backgroundColor: theme === 'dark' ? '#262626' : '#fff' }}>
           {/* 🔧 CUSTOMIZE: Remove this component if you don't want emoji picker */}
-          <EmojiSuggestions
-            onEmojiClick={(emoji) => {
-              const textArea = textAreaRef.current;
-              if (!textArea) throw new Error("Can't find textarea");
-              textArea.value += emoji;
-              setContent((c) => c + emoji);
-            }}
-          />
+          <div style={{ position: "relative" }}>
+            <EmojiSuggestions
+              onEmojiClick={(emoji) => {
+                const textArea = textAreaRef.current;
+                if (!textArea) throw new Error("Can't find textarea");
+                textArea.value += emoji;
+                setContent((c) => c + emoji);
+              }}
+            />
+            {/* The emoji bar draws its own light divider: in dark mode, cover it
+                with one that matches the border above the bar */}
+            {theme === 'dark' && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 1,
+                  backgroundColor: "#525252",
+                  pointerEvents: "none",
+                }}
+              />
+            )}
+          </div>
           <div
             style={{
               display: "flex",

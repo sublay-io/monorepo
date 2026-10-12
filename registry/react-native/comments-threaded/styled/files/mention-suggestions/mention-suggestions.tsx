@@ -53,8 +53,16 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
         <FlatList
           data={[1, 2, 3]}
           keyExtractor={(item) => `loading-${item}`}
-          renderItem={() => <UserMentionSkeleton theme={theme} />}
-          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+          renderItem={() => (
+            <UserMentionSkeleton
+              theme={theme}
+              avatarSize={32}
+              gap={12}
+              paddingVertical={8}
+              paddingHorizontal={8}
+            />
+          )}
+          ItemSeparatorComponent={() => <View style={{ height: 4 }} />}
           keyboardShouldPersistTaps="always"
         />
       ) : mentionSuggestions.length > 0 ? (

@@ -5,16 +5,17 @@ import useUIState from "../../hooks/use-ui-state";
 const FetchingCommentsSkeletons = () => {
   const { theme } = useUIState();
   return (
+    // Sized and spaced like the comment rows they stand in for
     <FlatList
       data={[1, 2, 3]}
       renderItem={() => <CommentSkeleton theme={theme} />}
       keyExtractor={(item) => item.toString()}
-      ItemSeparatorComponent={() => <View className="h-2" />}
+      ItemSeparatorComponent={() => <View className="h-7" />}
       className="flex-1"
       contentContainerStyle={{
+        paddingTop: 8,
         paddingBottom: 24,
-        paddingRight: 16,
-        paddingLeft: 16,
+        paddingRight: 46,
       }}
       keyboardShouldPersistTaps="always"
     />

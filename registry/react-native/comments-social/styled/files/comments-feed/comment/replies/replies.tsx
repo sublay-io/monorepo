@@ -122,10 +122,19 @@ function Replies({ commentId }: { commentId: string }) {
             },
             (_, index) => index + 1
           )}
-          renderItem={() => <CommentSkeleton theme={theme} />}
+          // Indented, sized and spaced like the replies they stand in for
+          renderItem={() => (
+            <CommentSkeleton theme={theme} extraLeftPadding={42} />
+          )}
           keyExtractor={(item) => String(item)}
-          ItemSeparatorComponent={() => <View style={{ height: repliesGap }} />}
-          style={{ paddingLeft: 42, paddingRight: 16 }}
+          ItemSeparatorComponent={() => <View style={{ height: 28 }} />}
+          style={{
+            // The first reply's own top padding, plus the gap after the
+            // replies already listed
+            paddingTop: areRepliesVisible && filteredReplies.length > 0 ? 16 : 8,
+            paddingBottom: 12,
+            paddingRight: 46,
+          }}
           keyboardShouldPersistTaps="always"
         />
       )}

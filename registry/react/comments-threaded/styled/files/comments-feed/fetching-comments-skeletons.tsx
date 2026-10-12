@@ -9,14 +9,21 @@ function FetchingCommentsSkeletons() {
       style={{
         ...resetDiv,
         display: "grid",
-        gap: "8px",
+        // Sized and spaced like the comment rows they stand in for
+        gap: "44px",
+        paddingTop: 12,
         paddingBottom: 24,
-        paddingRight: 16,
-        paddingLeft: 16,
       }}
     >
       {[1, 2, 3].map((i) => (
-        <CommentSkeleton theme={theme} key={i} />
+        <CommentSkeleton
+          theme={theme}
+          avatarSize={24}
+          gap={12}
+          lineGap={12}
+          paddingLeft={0}
+          key={i}
+        />
       ))}
     </div>
   );

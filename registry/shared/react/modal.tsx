@@ -34,7 +34,7 @@ const Modal: React.FC<ModalProps> = ({ show, onClose, children }) => {
     const styleSheet = document.createElement("style");
     styleSheet.type = "text/css";
     styleSheet.innerText = `
-      @keyframes fadeIn {
+      @keyframes sublay-fade-in {
         from {
           background: rgba(0, 0, 0, 0);
         }
@@ -42,7 +42,7 @@ const Modal: React.FC<ModalProps> = ({ show, onClose, children }) => {
           background: rgba(0, 0, 0, 0.5);
         }
       }
-      @keyframes fadeOut {
+      @keyframes sublay-fade-out {
         from {
           background: rgba(0, 0, 0, 0.5);
         }
@@ -74,7 +74,7 @@ const Modal: React.FC<ModalProps> = ({ show, onClose, children }) => {
     justifyContent: "center",
     alignItems: "stretch",
     zIndex: 1000,
-    animation: show ? "fadeIn 0.5s forwards" : "fadeOut 0.5s forwards", // Apply fadeIn or fadeOut
+    animation: show ? "sublay-fade-in 0.5s forwards" : "sublay-fade-out 0.5s forwards", // Fade in or out
     visibility: show ? "visible" : "hidden",
   };
 

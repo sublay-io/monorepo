@@ -181,7 +181,7 @@ function GiphyContainer({
         >
           {/* The icon takes its color from this wrapper: a CSS variable does
               not work in an SVG presentation attribute. */}
-          <div className="pt-1" style={{ color: uiColor("muted", theme) }}>
+          <div style={{ paddingTop: 4, color: uiColor("muted", theme) }}>
             <MagnifyingGlassIcon width={14} color="currentColor" />
           </div>
 

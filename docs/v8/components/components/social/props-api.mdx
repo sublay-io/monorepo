@@ -34,7 +34,7 @@ interface SocialCommentSectionProps {
   // Optional features
   isVisible?: boolean;
   highlightedCommentId?: string | undefined | null;
-  gifPickerFullScreen?: boolean;   // React (web) only
+  gifPickerFullScreen?: boolean;
   theme?: 'light' | 'dark';   // Only for inline styles variant
   children?: React.ReactNode;
 }
@@ -126,7 +126,7 @@ ID of a specific comment to highlight on load. Once it loads, the component show
 
 **Type:** `boolean` — **Default:** `false`
 
-**React (web) only.** Where the GIF picker opens. By default it covers the comment section: the comment list and the form. When set, it covers the whole screen.
+Where the GIF picker opens, on React, React Native and Expo. By default it covers the comment section: the comment list and the form. When set, it covers the whole screen. On React Native and Expo the full-screen picker opens in a `Modal`, so it covers the screen wherever the section sits in your app, and Android's back button closes it.
 
 ```tsx
 <SocialCommentSection

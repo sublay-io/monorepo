@@ -66,6 +66,11 @@ interface ThreadedCommentSectionProps {
    */
   createIfNotFound?: boolean;
   isVisible?: boolean;
+  /**
+   * Where the GIF picker opens. Off by default: it covers the comment
+   * section. On: it covers the whole screen.
+   */
+  gifPickerFullScreen?: boolean;
   highlightedCommentId?: string | undefined | null;
   theme?: 'light' | 'dark';
   children?: React.ReactNode;
@@ -88,6 +93,7 @@ const arePropsEqual = (
     prevProps.shortId !== nextProps.shortId ||
     prevProps.createIfNotFound !== nextProps.createIfNotFound ||
     prevProps.isVisible !== nextProps.isVisible ||
+    prevProps.gifPickerFullScreen !== nextProps.gifPickerFullScreen ||
     prevProps.highlightedCommentId !== nextProps.highlightedCommentId ||
     prevProps.theme !== nextProps.theme
   ) {
@@ -109,14 +115,25 @@ const arePropsEqual = (
 
 function ThreadedCommentSectionInner({
   isVisible,
+  gifPickerFullScreen,
   children,
 }: {
   isVisible: boolean;
+  gifPickerFullScreen: boolean;
   children?: React.ReactNode;
 }) {
   const { theme } = useUIState();
 
+  const formContainerClassName = `border-t pt-2 ${
+    theme === 'dark'
+      ? 'border-neutral-600 bg-neutral-800'
+      : 'border-gray-200 bg-white'
+  }`;
+
   return (
+    // The GIF picker fills the view it is rendered in, and the form renders
+    // it. So the form is a direct child of this root view, with no wrapper
+    // around it: the picker then covers exactly the comment section.
     <View className="flex-1">
       <ScrollView
         className={`flex-1 py-2 ${theme === 'dark' ? 'bg-neutral-800' : 'bg-white'}`}
@@ -125,15 +142,14 @@ function ThreadedCommentSectionInner({
         <CommentsFeed>{children}</CommentsFeed>
       </ScrollView>
 
-      <View
-        className={`border-t pt-2 ${
-          theme === 'dark'
-            ? 'border-neutral-600 bg-neutral-800'
-            : 'border-gray-200 bg-white'
-        }`}
-      >
-        {isVisible && <NewCommentForm />}
-      </View>
+      {isVisible ? (
+        <NewCommentForm
+          gifPickerFullScreen={gifPickerFullScreen}
+          containerClassName={formContainerClassName}
+        />
+      ) : (
+        <View className={formContainerClassName} />
+      )}
     </View>
   );
 }
@@ -145,6 +161,7 @@ function ThreadedCommentSection({
   shortId,
   createIfNotFound,
   isVisible = true,
+  gifPickerFullScreen = false,
   highlightedCommentId,
   theme = 'light',
   children,
@@ -161,7 +178,10 @@ function ThreadedCommentSection({
 
   return (
     <CommentSectionProvider {...providerProps}>
-      <ThreadedCommentSectionInner isVisible={isVisible}>
+      <ThreadedCommentSectionInner
+        isVisible={isVisible}
+        gifPickerFullScreen={gifPickerFullScreen}
+      >
         {children}
       </ThreadedCommentSectionInner>
     </CommentSectionProvider>

@@ -64,6 +64,11 @@ interface SocialCommentSectionProps {
    */
   createIfNotFound?: boolean;
   isVisible?: boolean;
+  /**
+   * Where the GIF picker opens. Off by default: it covers the comment
+   * section. On: it covers the whole screen.
+   */
+  gifPickerFullScreen?: boolean;
   highlightedCommentId?: string | undefined | null;
   theme?: 'light' | 'dark';
   children?: React.ReactNode;
@@ -86,6 +91,7 @@ const arePropsEqual = (
     prevProps.shortId !== nextProps.shortId ||
     prevProps.createIfNotFound !== nextProps.createIfNotFound ||
     prevProps.isVisible !== nextProps.isVisible ||
+    prevProps.gifPickerFullScreen !== nextProps.gifPickerFullScreen ||
     prevProps.highlightedCommentId !== nextProps.highlightedCommentId ||
     prevProps.theme !== nextProps.theme
   ) {
@@ -107,9 +113,11 @@ const arePropsEqual = (
 
 function SocialCommentSectionInner({
   isVisible,
+  gifPickerFullScreen,
   children,
 }: {
   isVisible: boolean;
+  gifPickerFullScreen: boolean;
   children?: React.ReactNode;
 }) {
   const { theme } = useUIState();
@@ -168,7 +176,14 @@ function SocialCommentSectionInner({
     });
   };
 
+  const formContainerClassName = `border-t ${
+    theme === 'dark' ? 'border-neutral-600' : 'border-gray-200'
+  }`;
+
   return (
+    // The GIF picker fills the view it is rendered in, and the form renders
+    // it. So the form is a direct child of this root view, with no wrapper
+    // around it: the picker then covers exactly the comment section.
     <View className="flex-1">
       {sortOptions.length > 0 && (
         <View className="flex-row px-6 py-3 items-center justify-end">
@@ -182,13 +197,14 @@ function SocialCommentSectionInner({
         <CommentsFeed>{children}</CommentsFeed>
       </ScrollView>
 
-      <View
-        className={`border-t ${
-          theme === 'dark' ? 'border-neutral-600' : 'border-gray-200'
-        }`}
-      >
-        {isVisible && <NewCommentForm />}
-      </View>
+      {isVisible ? (
+        <NewCommentForm
+          gifPickerFullScreen={gifPickerFullScreen}
+          containerClassName={formContainerClassName}
+        />
+      ) : (
+        <View className={formContainerClassName} />
+      )}
     </View>
   );
 }
@@ -200,6 +216,7 @@ function SocialCommentSection({
   shortId,
   createIfNotFound,
   isVisible = true,
+  gifPickerFullScreen = false,
   highlightedCommentId,
   theme = 'light',
   children,
@@ -216,7 +233,10 @@ function SocialCommentSection({
 
   return (
     <CommentSectionProvider {...providerProps}>
-      <SocialCommentSectionInner isVisible={isVisible}>
+      <SocialCommentSectionInner
+        isVisible={isVisible}
+        gifPickerFullScreen={gifPickerFullScreen}
+      >
         {children}
       </SocialCommentSectionInner>
     </CommentSectionProvider>

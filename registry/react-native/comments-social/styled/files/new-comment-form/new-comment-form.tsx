@@ -14,6 +14,8 @@ import {
   Keyboard,
   TextInputKeyPressEventData,
   NativeSyntheticEvent,
+  StyleProp,
+  ViewStyle,
 } from "react-native";
 import {
   handleError,
@@ -36,8 +38,18 @@ import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
 
 function NewCommentForm({
   ref,
+  gifPickerFullScreen = false,
+  containerStyle,
 }: {
   ref?: React.Ref<{ focus: () => void }>;
+  // Where the GIF picker opens. false: it covers the view this form is
+  // rendered in (in the section, the whole comment section). true: it covers
+  // the whole screen.
+  gifPickerFullScreen?: boolean;
+  // Wraps the form in a View with this style. The section passes its border
+  // here instead of wrapping the form itself: the GIF picker fills the view
+  // the form is rendered in, and that has to be the section's root view.
+  containerStyle?: StyleProp<ViewStyle>;
 }) {
   const { user } = useUser();
   const { project } = useProject();
@@ -224,148 +236,154 @@ function NewCommentForm({
     },
   }));
 
+  const form = (
+    <View
+      style={{
+        ...resetView,
+        position: "relative",
+        overflow: "visible",
+        backgroundColor,
+      }}
+    >
+      <View
+        style={{ width: "100%", position: "relative", overflow: "visible" }}
+      >
+        <ReplyBanner />
+        <MentionSuggestions
+          isMentionActive={isMentionActive}
+          isLoadingMentions={loading}
+          mentionSuggestions={mentionSuggestions}
+          handleMentionClick={handleMentionClick}
+        />
+      </View>
+      <View
+        style={{
+          ...resetView,
+          position: "relative",
+          zIndex: 20,
+          backgroundColor,
+        }}
+      >
+        {createErrorMessage ? (
+          <Text
+            accessibilityRole="alert"
+            style={{
+              // 🎨 CUSTOMIZATION: Failed-post message styling
+              fontSize: 12,
+              paddingHorizontal: 16,
+              paddingTop: 8,
+              paddingBottom: 4,
+              color: theme === 'dark' ? '#A3A3A3' : '#737373',
+            }}
+          >
+            {createErrorMessage}
+          </Text>
+        ) : null}
+        <EmojiSuggestions
+          onEmojiClick={(emoji) => {
+            setContent((c) => c + emoji);
+          }}
+          theme={theme}
+        />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            gap: itemsGap,
+            paddingTop: verticalPadding,
+            paddingBottom: verticalPadding,
+            paddingLeft,
+            paddingRight,
+            borderTopColor: theme === 'dark' ? "#525252" : "#e7e7e7",
+            borderTopWidth: 1,
+          }}
+        >
+          {user && withAvatar && (
+            <UserAvatar
+              user={user}
+              size={authorAvatarSize}
+              borderRadius={authorAvatarSize}
+            />
+          )}
+          <TextInput
+            ref={textAreaRef}
+            numberOfLines={1}
+            placeholder={placeholderText}
+            value={content}
+            onChangeText={(text) => {
+              if (createError && text !== content) {
+                setDismissedCreateError(createError);
+              }
+              setContent(text);
+              handleTextChange(text);
+            }}
+            onSelectionChange={handleSelectionChange}
+            onKeyPress={handleKeyPress}
+            onSubmitEditing={() => handleCreateComment()}
+            blurOnSubmit={false}
+            style={{
+              ...resetTextInput,
+              flex: 1,
+              marginHorizontal: 8,
+              fontSize: textareaTextSize,
+              backgroundColor: textareaBackgroundColor,
+              color: textareaTextColor,
+            }}
+          />
+
+          {content.length === 0 && giphyApiKey ? (
+            <TouchableOpacity
+              onPress={() => setIsGiphyVisible(true)}
+              disabled={submittingComment}
+              style={{ ...resetButton }}
+            >
+              <Text
+                style={{
+                  fontWeight: postButtonFontWeight,
+                  fontSize: postButtonFontSize,
+                  color: postButtonFontColor,
+                }}
+              >
+                GIF
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={handleCreateComment}
+              disabled={submittingComment}
+              style={{ ...resetButton }}
+            >
+              <Text
+                style={{
+                  fontWeight: postButtonFontWeight,
+                  fontSize: postButtonFontSize,
+                  color: postButtonFontColor,
+                }}
+              >
+                {postButtonText}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    </View>
+  );
+
   return (
     <>
+      {/* Fills the view this form is rendered in (see gifPickerFullScreen) */}
       {giphyApiKey ? (
         <GiphyContainer
           giphyApiKey={giphyApiKey}
           onClickBack={() => setIsGiphyVisible(false)}
           onSelectGif={(selected) => handleCreateGif(selected)}
           visible={isGiphyVisible}
+          fullScreen={gifPickerFullScreen}
           theme={theme}
         />
       ) : null}
-      <View
-        style={{
-          ...resetView,
-          position: "relative",
-          overflow: "visible",
-          backgroundColor,
-        }}
-      >
-        <View
-          style={{ width: "100%", position: "relative", overflow: "visible" }}
-        >
-          <ReplyBanner />
-          <MentionSuggestions
-            isMentionActive={isMentionActive}
-            isLoadingMentions={loading}
-            mentionSuggestions={mentionSuggestions}
-            handleMentionClick={handleMentionClick}
-          />
-        </View>
-        <View
-          style={{
-            ...resetView,
-            position: "relative",
-            zIndex: 20,
-            backgroundColor,
-          }}
-        >
-          {createErrorMessage ? (
-            <Text
-              accessibilityRole="alert"
-              style={{
-                // 🎨 CUSTOMIZATION: Failed-post message styling
-                fontSize: 12,
-                paddingHorizontal: 16,
-                paddingTop: 8,
-                paddingBottom: 4,
-                color: theme === 'dark' ? '#A3A3A3' : '#737373',
-              }}
-            >
-              {createErrorMessage}
-            </Text>
-          ) : null}
-          <EmojiSuggestions
-            onEmojiClick={(emoji) => {
-              setContent((c) => c + emoji);
-            }}
-            theme={theme}
-          />
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              gap: itemsGap,
-              paddingTop: verticalPadding,
-              paddingBottom: verticalPadding,
-              paddingLeft,
-              paddingRight,
-              borderTopColor: theme === 'dark' ? "#525252" : "#e7e7e7",
-              borderTopWidth: 1,
-            }}
-          >
-            {user && withAvatar && (
-              <UserAvatar
-                user={user}
-                size={authorAvatarSize}
-                borderRadius={authorAvatarSize}
-              />
-            )}
-            <TextInput
-              ref={textAreaRef}
-              numberOfLines={1}
-              placeholder={placeholderText}
-              value={content}
-              onChangeText={(text) => {
-                if (createError && text !== content) {
-                  setDismissedCreateError(createError);
-                }
-                setContent(text);
-                handleTextChange(text);
-              }}
-              onSelectionChange={handleSelectionChange}
-              onKeyPress={handleKeyPress}
-              onSubmitEditing={() => handleCreateComment()}
-              blurOnSubmit={false}
-              style={{
-                ...resetTextInput,
-                flex: 1,
-                marginHorizontal: 8,
-                fontSize: textareaTextSize,
-                backgroundColor: textareaBackgroundColor,
-                color: textareaTextColor,
-              }}
-            />
-
-            {content.length === 0 && giphyApiKey ? (
-              <TouchableOpacity
-                onPress={() => setIsGiphyVisible(true)}
-                disabled={submittingComment}
-                style={{ ...resetButton }}
-              >
-                <Text
-                  style={{
-                    fontWeight: postButtonFontWeight,
-                    fontSize: postButtonFontSize,
-                    color: postButtonFontColor,
-                  }}
-                >
-                  GIF
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                onPress={handleCreateComment}
-                disabled={submittingComment}
-                style={{ ...resetButton }}
-              >
-                <Text
-                  style={{
-                    fontWeight: postButtonFontWeight,
-                    fontSize: postButtonFontSize,
-                    color: postButtonFontColor,
-                  }}
-                >
-                  {postButtonText}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      </View>
+      {containerStyle ? <View style={containerStyle}>{form}</View> : form}
     </>
   );
 }

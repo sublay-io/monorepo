@@ -9,8 +9,13 @@ import {
   LayoutChangeEvent,
   TouchableWithoutFeedback,
   Keyboard,
+  Modal,
+  SafeAreaView,
 } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import {
+  GestureHandlerRootView,
+  ScrollView,
+} from "react-native-gesture-handler";
 import MagnifyingGlassIcon from "./magnifying-glass-icon";
 import { getImageComponent } from "./get-image-component";
 import { type UITheme, uiColors } from "./theme";
@@ -53,6 +58,9 @@ interface GiphyContainerProps {
     aspectRatio: string;
   }) => void;
   visible: boolean; // determines if this screen should be shown or hidden
+  // Where the picker opens. false (default): it fills the view it is rendered
+  // in. true: it opens in a Modal and covers the whole screen.
+  fullScreen?: boolean;
   theme?: UITheme; // colors to draw with (default: light)
 }
 
@@ -64,6 +72,7 @@ export default function GiphyContainer({
   onClickBack,
   onSelectGif,
   visible,
+  fullScreen = false,
   theme = "light",
 }: GiphyContainerProps) {
   const colors = uiColors[theme];
@@ -326,7 +335,9 @@ export default function GiphyContainer({
     );
   };
 
-  return (
+  // The picker itself. It fills the view it is rendered in: every View is a
+  // positioning context in React Native, so that is its direct parent.
+  const picker = (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <Animated.View
         style={{
@@ -436,5 +447,37 @@ export default function GiphyContainer({
         )}
       </Animated.View>
     </TouchableWithoutFeedback>
+  );
+
+  // Contained: the picker covers its parent view (the comment section).
+  if (!fullScreen) return picker;
+
+  // Full screen: a Modal is its own native window, so the picker covers the
+  // whole screen wherever the comment section sits in the app.
+  return (
+    <Modal
+      visible={visible}
+      transparent={false}
+      // 🔧 CUSTOMIZE: How the full-screen picker appears ("none" | "slide" | "fade")
+      animationType="slide"
+      // Android's back button closes the picker
+      onRequestClose={onClickBack}
+    >
+      {/* A Modal is outside the app's gesture handler root, and the grid
+          below scrolls with a gesture handler ScrollView */}
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        {/* Keeps the back button and the search field clear of the notch and
+            the home indicator (iOS).
+            🔧 CUSTOMIZE: If your app has react-native-safe-area-context, use
+            its SafeAreaView here: it also applies insets on Android, and
+            React Native is deprecating its own SafeAreaView. */}
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.surface }}>
+          {/* The picker is absolutely positioned, which ignores its parent's
+              padding (the safe area insets), so it gets a view of its own to
+              fill */}
+          <View style={{ flex: 1 }}>{picker}</View>
+        </SafeAreaView>
+      </GestureHandlerRootView>
+    </Modal>
   );
 }

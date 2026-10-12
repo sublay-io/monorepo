@@ -144,13 +144,15 @@ Move `<SortByButton />` to the top of the section instead of inline with the fee
 
 ## GIF Picker Placement
 
-On React, the GIF picker opens over the comment section and covers all of it: the comment list and the form. To make it cover the whole screen instead, pass `gifPickerFullScreen` to the section:
+The GIF picker opens over the comment section and covers all of it: the comment list and the form. To make it cover the whole screen instead, pass `gifPickerFullScreen` to the section:
 
 ```tsx
 <ThreadedCommentSection foreignId="post_123" gifPickerFullScreen />
 ```
 
-`SocialCommentSection` takes the same prop. The default is `false`.
+`SocialCommentSection` takes the same prop. The default is `false`. It works the same on React, React Native and Expo.
+
+### React
 
 The picker fills the section's outer element, which is positioned (`relative`), so it is as tall as the section. Give the section a bounded height (it fills its parent and scrolls the comment list inside) to keep the picker's search field on screen in a long thread.
 
@@ -161,6 +163,23 @@ If you compose your own layout from the feed and the form, wrap them in a positi
   <CommentsFeed />
   <NewCommentForm gifPickerFullScreen={false} />
 </div>
+```
+
+### React Native and Expo
+
+The picker fills the view it is rendered in, and the form renders it. In the section, the form is a direct child of the section's root view, so the picker covers the whole section. The section's border around the form is passed to the form as `containerStyle` (`containerClassName` in the Tailwind variant) rather than wrapped around it, because a wrapping view would become the area the picker covers.
+
+With `gifPickerFullScreen`, the picker opens in a React Native `Modal`: it covers the whole screen wherever the section sits in your app (inside a bottom sheet, for example), and Android's back button closes it. Its content is inset from the notch and the home indicator with React Native's `SafeAreaView`, which applies insets on iOS only. If your app uses `react-native-safe-area-context`, swap in its `SafeAreaView` in `giphy-container.tsx` to get insets on Android too.
+
+If you compose your own layout, render the form as a direct child of the view the picker should cover. The prop goes on the form:
+
+```tsx
+<View style={{ flex: 1 }}>
+  <ScrollView style={{ flex: 1 }}>
+    <CommentsFeed />
+  </ScrollView>
+  <NewCommentForm gifPickerFullScreen={false} />
+</View>
 ```
 
 ---

@@ -35,8 +35,18 @@ import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
 
 function NewCommentForm({
   ref,
+  gifPickerFullScreen = false,
+  containerClassName,
 }: {
   ref?: React.Ref<{ focus: () => void }>;
+  // Where the GIF picker opens. false: it covers the view this form is
+  // rendered in (in the section, the whole comment section). true: it covers
+  // the whole screen.
+  gifPickerFullScreen?: boolean;
+  // Wraps the form in a View with these classes. The section passes its
+  // border here instead of wrapping the form itself: the GIF picker fills the
+  // view the form is rendered in, and that has to be the section's root view.
+  containerClassName?: string;
 }) {
   const { user } = useUser();
   const { project } = useProject();
@@ -211,118 +221,128 @@ function NewCommentForm({
     },
   }));
 
+  const form = (
+    <View
+      className={`relative overflow-visible ${
+        theme === 'dark' ? 'bg-neutral-800' : 'bg-white'
+      }`}
+    >
+      <View className="w-full relative overflow-visible">
+        <ReplyBanner />
+        <MentionSuggestions
+          isMentionActive={isMentionActive}
+          isLoadingMentions={loading}
+          mentionSuggestions={mentionSuggestions}
+          handleMentionClick={handleMentionClick}
+        />
+      </View>
+      <View
+        className={`relative z-20 ${
+          theme === 'dark' ? 'bg-neutral-800' : 'bg-white'
+        }`}
+      >
+        {createErrorMessage ? (
+          <Text
+            accessibilityRole="alert"
+            className={`text-xs px-4 pt-2 pb-1 ${
+              theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
+            }`}
+          >
+            {createErrorMessage}
+          </Text>
+        ) : null}
+        <EmojiSuggestions
+          onEmojiClick={(emoji) => {
+            setContent((c) => c + emoji);
+          }}
+          theme={theme}
+        />
+        <View
+          className={`flex-row items-center justify-end gap-2 py-2 pl-2 pr-4 border-t ${
+            theme === 'dark' ? 'border-neutral-600' : 'border-gray-200'
+          }`}
+        >
+          {user && withAvatar && (
+            <UserAvatar
+              user={user}
+              size={authorAvatarSize}
+              borderRadius={authorAvatarSize}
+            />
+          )}
+          <TextInput
+            ref={textAreaRef}
+            numberOfLines={1}
+            placeholder={placeholderText}
+            value={content}
+            onChangeText={(text) => {
+              if (createError && text !== content) {
+                setDismissedCreateError(createError);
+              }
+              setContent(text);
+              handleTextChange(text);
+            }}
+            onSelectionChange={handleSelectionChange}
+            onKeyPress={handleKeyPress}
+            onSubmitEditing={() => handleCreateComment()}
+            blurOnSubmit={false}
+            className={`flex-1 mx-2 text-sm bg-transparent border-0 p-0 m-0 ${
+              theme === 'dark' ? 'text-neutral-200' : 'text-black'
+            }`}
+            placeholderTextColor={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
+          />
+
+          {content.length === 0 && giphyApiKey ? (
+            <TouchableOpacity
+              onPress={() => setIsGiphyVisible(true)}
+              disabled={submittingComment}
+              className="bg-transparent border-0 p-0 m-0"
+            >
+              <Text
+                className={`font-semibold text-sm ${
+                  theme === 'dark' ? 'text-blue-400' : 'text-sky-500'
+                }`}
+              >
+                GIF
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={handleCreateComment}
+              disabled={submittingComment}
+              className="bg-transparent border-0 p-0 m-0"
+            >
+              <Text
+                className={`font-semibold text-sm ${
+                  theme === 'dark' ? 'text-blue-400' : 'text-sky-500'
+                }`}
+              >
+                Post
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    </View>
+  );
+
   return (
     <>
+      {/* Fills the view this form is rendered in (see gifPickerFullScreen) */}
       {giphyApiKey ? (
         <GiphyContainer
           giphyApiKey={giphyApiKey}
           onClickBack={() => setIsGiphyVisible(false)}
           onSelectGif={(selected) => handleCreateGif(selected)}
           visible={isGiphyVisible}
+          fullScreen={gifPickerFullScreen}
           theme={theme}
         />
       ) : null}
-      <View
-        className={`relative overflow-visible ${
-          theme === 'dark' ? 'bg-neutral-800' : 'bg-white'
-        }`}
-      >
-        <View className="w-full relative overflow-visible">
-          <ReplyBanner />
-          <MentionSuggestions
-            isMentionActive={isMentionActive}
-            isLoadingMentions={loading}
-            mentionSuggestions={mentionSuggestions}
-            handleMentionClick={handleMentionClick}
-          />
-        </View>
-        <View
-          className={`relative z-20 ${
-            theme === 'dark' ? 'bg-neutral-800' : 'bg-white'
-          }`}
-        >
-          {createErrorMessage ? (
-            <Text
-              accessibilityRole="alert"
-              className={`text-xs px-4 pt-2 pb-1 ${
-                theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
-              }`}
-            >
-              {createErrorMessage}
-            </Text>
-          ) : null}
-          <EmojiSuggestions
-            onEmojiClick={(emoji) => {
-              setContent((c) => c + emoji);
-            }}
-            theme={theme}
-          />
-          <View
-            className={`flex-row items-center justify-end gap-2 py-2 pl-2 pr-4 border-t ${
-              theme === 'dark' ? 'border-neutral-600' : 'border-gray-200'
-            }`}
-          >
-            {user && withAvatar && (
-              <UserAvatar
-                user={user}
-                size={authorAvatarSize}
-                borderRadius={authorAvatarSize}
-              />
-            )}
-            <TextInput
-              ref={textAreaRef}
-              numberOfLines={1}
-              placeholder={placeholderText}
-              value={content}
-              onChangeText={(text) => {
-                if (createError && text !== content) {
-                  setDismissedCreateError(createError);
-                }
-                setContent(text);
-                handleTextChange(text);
-              }}
-              onSelectionChange={handleSelectionChange}
-              onKeyPress={handleKeyPress}
-              onSubmitEditing={() => handleCreateComment()}
-              blurOnSubmit={false}
-              className={`flex-1 mx-2 text-sm bg-transparent border-0 p-0 m-0 ${
-                theme === 'dark' ? 'text-neutral-200' : 'text-black'
-              }`}
-              placeholderTextColor={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
-            />
-
-            {content.length === 0 && giphyApiKey ? (
-              <TouchableOpacity
-                onPress={() => setIsGiphyVisible(true)}
-                disabled={submittingComment}
-                className="bg-transparent border-0 p-0 m-0"
-              >
-                <Text
-                  className={`font-semibold text-sm ${
-                    theme === 'dark' ? 'text-blue-400' : 'text-sky-500'
-                  }`}
-                >
-                  GIF
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                onPress={handleCreateComment}
-                disabled={submittingComment}
-                className="bg-transparent border-0 p-0 m-0"
-              >
-                <Text
-                  className={`font-semibold text-sm ${
-                    theme === 'dark' ? 'text-blue-400' : 'text-sky-500'
-                  }`}
-                >
-                  Post
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      </View>
+      {containerClassName ? (
+        <View className={containerClassName}>{form}</View>
+      ) : (
+        form
+      )}
     </>
   );
 }

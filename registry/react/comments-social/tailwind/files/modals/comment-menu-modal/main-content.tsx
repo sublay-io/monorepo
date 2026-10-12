@@ -1,4 +1,4 @@
-import { resetButton, resetUl } from "@sublay/ui-core-react-js";
+import { resetUl } from "@sublay/ui-core-react-js";
 import useUIState from "../../../hooks/use-ui-state";
 
 function MainContent({ clickReport }: { clickReport: () => void }) {
@@ -13,8 +13,7 @@ function MainContent({ clickReport }: { clickReport: () => void }) {
     >
       <li className="flex justify-center justify-self-center">
         <button
-          style={resetButton}
-          className="font-semibold text-red-600 dark:text-red-400 px-6 py-2"
+          className="font-semibold text-red-600 dark:text-red-400 px-6 py-2 bg-transparent border-none outline-none cursor-pointer"
           onClick={clickReport}
         >
           Report
@@ -23,8 +22,7 @@ function MainContent({ clickReport }: { clickReport: () => void }) {
       <div className="h-px w-full bg-gray-200 dark:bg-neutral-600" />
       <li className="flex justify-center justify-self-center">
         <button
-          style={resetButton}
-          className="text-gray-900 dark:text-neutral-50 px-6 py-2"
+          className="text-gray-900 dark:text-neutral-50 px-6 py-2 bg-transparent border-none outline-none cursor-pointer"
           onClick={closeCommentMenuModal}
         >
           Cancel

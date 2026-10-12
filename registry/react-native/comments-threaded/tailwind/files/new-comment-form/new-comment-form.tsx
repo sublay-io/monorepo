@@ -259,7 +259,7 @@ function NewCommentForm({
             ref={textAreaRef}
             multiline
             numberOfLines={2}
-            placeholder="Add your reply..."
+            placeholder="Join the conversation"
             value={content}
             onChangeText={(text) => {
               if (createError && text !== content) {

@@ -94,10 +94,12 @@ function CommentThread({
         <IndentationThreadingLines
           isLastReply={isLastReply}
           indented={depth <= MAX_INDENT_DEPTH}
-          // The deep-linked comment, or the one being replied to
+          // The comment being replied to while a reply is being written,
+          // otherwise the deep-linked comment
           highlighted={
-            highlightedComment?.comment.id === comment.id ||
-            repliedToComment?.id === comment.id
+            repliedToComment?.id
+              ? repliedToComment.id === comment.id
+              : highlightedComment?.comment.id === comment.id
           }
         />
       )}

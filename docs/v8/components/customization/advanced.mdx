@@ -33,15 +33,20 @@ const { data } = useComments({
 
 ### Customize Reply Depth Limit
 
+The Reply button of each comment is rendered by `ReplyButtonAndInfo`, and its `canReply` prop hides the button. Each comment knows its own `depth` (0 for a top-level comment):
+
 ```tsx
-// File: comment-thread.tsx
+// File: components/comments-feed/comment-thread/single-comment/single-comment.tsx
 
-const MAX_DEPTH = 3;  // Only allow 3 levels of nesting
+const MAX_REPLY_DEPTH = 3;  // Comments at this depth can't be replied to
 
-{depth < MAX_DEPTH && (
-  <NewReplyForm parentId={comment.id} />
-)}
+<ReplyButtonAndInfo
+  // ...
+  canReply={!isOwnRemoved && depth < MAX_REPLY_DEPTH}
+/>
 ```
+
+Replies already posted deeper than the limit are still shown.
 
 ---
 

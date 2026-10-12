@@ -150,10 +150,11 @@ function SingleComment({
     setShowReplyBanner?.({ newState: false });
   }, [isReplyTarget, cannotBeRepliedTo, setRepliedToComment, setShowReplyBanner]);
 
-  // The deep-linked comment, and the comment being replied to, are both
-  // drawn highlighted.
-  const isHighlighted =
-    highlightedComment?.comment.id === comment.id || isReplyTarget;
+  // One highlight at a time: while a reply is being written, the comment
+  // being replied to; otherwise the deep-linked comment.
+  const isHighlighted = repliedToComment?.id
+    ? isReplyTarget
+    : highlightedComment?.comment.id === comment.id;
   // 🎨 CUSTOMIZATION: Highlighted comment background: a neutral step away
   // from the section background
   const highlightClass = isHighlighted

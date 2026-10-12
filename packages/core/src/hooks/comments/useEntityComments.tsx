@@ -59,6 +59,11 @@ export interface UseEntityCommentsProps extends SpaceReputationContextParams {
 
 export interface UseEntityCommentsValues {
   comments: Comment[];
+  /**
+   * Top-level comments the viewer posted this session, newest first. Only a
+   * comment section adds to it (through its `createComment`); from
+   * `useEntityComments` on its own it is always empty.
+   */
   newComments: Comment[];
   loading: boolean;
   /**
@@ -67,7 +72,7 @@ export interface UseEntityCommentsValues {
    */
   error: Error | null;
   hasMore: boolean;
-  sortBy: CommentsSortByOptions | null;
+  sortBy: CommentsSortByOptions;
   setSortBy: (newSortBy: CommentsSortByOptions) => void;
   /** Applies to every sort. */
   sortDir: "asc" | "desc";
@@ -94,7 +99,6 @@ export interface CommentSectionInternals {
   setStore: Dispatch<SetStateAction<CommentStore>>;
   /** Bumped on every reset; responses from an older generation are dropped. */
   generationRef: { current: number };
-  entityId: string | null | undefined;
   replyDepth: number;
   replyLimit: number;
   replySort: CommentSortTrio;
@@ -169,10 +173,25 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
     defaultSortByReaction,
   );
 
-  const [store, setStore] = useState<CommentStore>(emptyCommentStore);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [hasMore, setHasMore] = useState(true);
+  const [loadedStore, setStore] = useState<CommentStore>(emptyCommentStore);
+  // The entity the store (and `loading` / `error` / `hasMore`) was last reset
+  // for. The reset itself runs in an effect, so on the render where the
+  // entity changes they still describe the previous entity: until the tag
+  // matches, the hook shows what a section that hasn't loaded yet shows.
+  const [storeEntityId, setStoreEntityId] = useState<string | null>(
+    entityId ?? null,
+  );
+  const [loadedLoading, setLoading] = useState(true);
+  const [loadedError, setError] = useState<Error | null>(null);
+  const [loadedHasMore, setHasMore] = useState(true);
+  const storeIsCurrent = !!entityId && storeEntityId === entityId;
+  const store = useMemo(
+    () => (storeIsCurrent ? loadedStore : emptyCommentStore()),
+    [storeIsCurrent, loadedStore],
+  );
+  const loading = storeIsCurrent ? loadedLoading : true;
+  const error = storeIsCurrent ? loadedError : null;
+  const hasMore = storeIsCurrent ? loadedHasMore : true;
 
   const loadingRef = useRef(false);
   const hasMoreRef = useRef(true);
@@ -263,7 +282,14 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
   }, []);
 
   useEffect(() => {
-    if (!entityId) return;
+    if (!entityId) {
+      // No entity to list (yet, or any more): a response still in flight for
+      // the previous one is dropped.
+      generationRef.current++;
+      loadingRef.current = false;
+      return;
+    }
+    setStoreEntityId(entityId);
     runFetch(true);
   }, [
     entityId,
@@ -302,7 +328,6 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
       store,
       setStore,
       generationRef,
-      entityId,
       replyDepth,
       replyLimit,
       replySort,
@@ -310,7 +335,7 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
       reputation,
       seedRef,
     }),
-    [store, entityId, replyDepth, replyLimit, replySort, includeKey, reputation], // eslint-disable-line react-hooks/exhaustive-deps
+    [store, replyDepth, replyLimit, replySort, includeKey, reputation], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   return {

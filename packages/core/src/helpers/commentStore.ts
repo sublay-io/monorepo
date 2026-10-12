@@ -20,7 +20,6 @@ export interface CommentNode {
   childIds: string[];
   /** Posted by the viewer during this session. */
   new: boolean;
-  failed?: boolean;
   /** Where "load more replies" continues. */
   repliesCursor: string | null;
   /** `false` = this comment's replies were never fetched. */
@@ -43,17 +42,29 @@ export function stripNestedReplies(comment: Comment): Comment {
   return rest as Comment;
 }
 
-function appendUnique(ids: string[], id: string): string[] {
-  return ids.includes(id) ? ids : [...ids, id];
-}
-
 interface UpsertOptions {
   newlyAdded?: boolean;
 }
 
 /**
- * Insert or refresh one comment (no recursion into `replies` — the caller
- * flattens). Rules:
+ * A store being built by one `insertComments` batch. `nodes` is a copy made
+ * once for the batch and written in place; the root list and each parent's
+ * child list are copied the first time the batch adds to them, with a Set
+ * beside each for de-duplication. The store the batch started from is never
+ * written to.
+ */
+interface StoreDraft {
+  nodes: Record<string, CommentNode>;
+  rootIds: string[];
+  /** Set once `rootIds` is this batch's own copy. */
+  rootIdSet: Set<string> | null;
+  /** Parents whose `childIds` array is this batch's own copy. */
+  childIdSets: Map<string, Set<string>>;
+}
+
+/**
+ * Insert or refresh one comment in the draft (no recursion into `replies` —
+ * the caller flattens). Rules:
  * - a re-arriving comment refreshes `comment` only; its replies cursor,
  *   loaded flag and hasMore never move backwards. Exception: a node whose
  *   replies were never loaded adopts the incoming nested cursor/hasMore.
@@ -63,13 +74,13 @@ interface UpsertOptions {
  *   subtree root.
  */
 function upsertOne(
-  store: CommentStore,
+  draft: StoreDraft,
   incoming: Comment,
   options: UpsertOptions,
-): CommentStore {
+): void {
   const nested = incoming.replies;
   const comment = stripNestedReplies(incoming);
-  const existing = store.nodes[comment.id];
+  const existing = draft.nodes[comment.id];
 
   let node: CommentNode;
   if (existing) {
@@ -93,28 +104,41 @@ function upsertOne(
       repliesHasMore: nested ? nested.pagination.hasMore : false,
     };
   }
-
-  const nodes = { ...store.nodes, [comment.id]: node };
-  let rootIds = store.rootIds;
+  draft.nodes[comment.id] = node;
+  // A refreshed node keeps the child list (and its Set) the batch already
+  // copied for it, so nothing to do for `childIdSets` here.
 
   if (comment.parentId) {
-    const parent = nodes[comment.parentId];
-    if (parent && !parent.childIds.includes(comment.id)) {
-      nodes[comment.parentId] = {
-        ...parent,
-        childIds: [...parent.childIds, comment.id],
-      };
+    const parent = draft.nodes[comment.parentId];
+    if (!parent) return;
+    let childIdSet = draft.childIdSets.get(comment.parentId);
+    if (!childIdSet) {
+      if (parent.childIds.includes(comment.id)) return;
+      // First addition under this parent in the batch: copy its list once.
+      const childIds = [...parent.childIds];
+      childIdSet = new Set(childIds);
+      draft.childIdSets.set(comment.parentId, childIdSet);
+      draft.nodes[comment.parentId] = { ...parent, childIds };
     }
+    if (childIdSet.has(comment.id)) return;
+    childIdSet.add(comment.id);
+    draft.nodes[comment.parentId].childIds.push(comment.id);
   } else {
-    rootIds = appendUnique(rootIds, comment.id);
+    if (!draft.rootIdSet) {
+      if (draft.rootIds.includes(comment.id)) return;
+      draft.rootIds = [...draft.rootIds];
+      draft.rootIdSet = new Set(draft.rootIds);
+    }
+    if (draft.rootIdSet.has(comment.id)) return;
+    draft.rootIdSet.add(comment.id);
+    draft.rootIds.push(comment.id);
   }
-
-  return { nodes, rootIds };
 }
 
 /**
  * Insert comments in order, flattening each one's nested `replies`
- * parent-first (so every nested reply finds its parent already stored).
+ * parent-first (so every nested reply finds its parent already stored). The
+ * store is copied once for the whole batch, not once per comment.
  */
 export function insertComments(
   store: CommentStore,
@@ -122,15 +146,20 @@ export function insertComments(
   options: UpsertOptions = {},
 ): CommentStore {
   if (!comments || comments.length === 0) return store;
-  let next = store;
+  const draft: StoreDraft = {
+    nodes: { ...store.nodes },
+    rootIds: store.rootIds,
+    rootIdSet: null,
+    childIdSets: new Map(),
+  };
   const walk = (list: Comment[]) => {
     for (const comment of list) {
-      next = upsertOne(next, comment, options);
+      upsertOne(draft, comment, options);
       if (comment.replies?.data?.length) walk(comment.replies.data);
     }
   };
   walk(comments);
-  return next;
+  return { nodes: draft.nodes, rootIds: draft.rootIds };
 }
 
 /**

@@ -13,8 +13,11 @@ import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 interface FetchManyCommentsBaseProps extends SpaceReputationContextParams {
   /** How many comments at the level being fetched (server default 10, max 100). */
   limit?: number;
-  /** `pagination.nextCursor` from the previous response; omit for the first page. */
-  cursor?: string;
+  /**
+   * `pagination.nextCursor` from the previous response, passed as returned;
+   * omit it (or pass `null`) for the first page.
+   */
+  cursor?: string | null;
   /** Sort for the level being fetched (server default "createdAt"). */
   sortBy?: CommentsSortBy;
   /** Applies to every sort (server default "desc"). */
@@ -71,7 +74,7 @@ export async function fetchManyComments(
     entityId,
     parentId,
     limit,
-    cursor,
+    cursor: cursor ?? undefined,
     sortBy,
     sortDir,
     sortByReaction,

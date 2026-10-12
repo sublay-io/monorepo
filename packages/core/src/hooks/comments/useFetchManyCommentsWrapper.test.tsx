@@ -251,3 +251,49 @@ describe("useFetchManyCommentsWrapper", () => {
     expect(result.current.comments.map((c) => c.id)).toEqual(["c1"]);
   });
 });
+
+describe("useFetchManyCommentsWrapper — the target going away", () => {
+  it("clears the previous target's comments when entityId/parentId are removed", async () => {
+    const { result, rerender } = renderHookWithAxios(
+      (p: { entityId: string | null }) => useFetchManyCommentsWrapper(p),
+      {
+        initialProps: { entityId: "entity-1" as string | null },
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeComment({ id: "comment-1" })], "next")),
+      },
+    );
+    await waitFor(() => expect(result.current.comments).toHaveLength(1));
+
+    rerender({ entityId: null });
+    await waitFor(() => expect(result.current.comments).toEqual([]));
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeNull();
+  });
+
+  it("doesn't leave loading stuck when the target is removed mid-load, and drops the late response", async () => {
+    let resolveGet!: (v: unknown) => void;
+    const { result, rerender } = renderHookWithAxios(
+      (p: { entityId: string | null }) => useFetchManyCommentsWrapper(p),
+      {
+        initialProps: { entityId: "entity-1" as string | null },
+        beforeRender: () => {
+          vi.spyOn(axiosPrivateInstance, "get").mockImplementationOnce(
+            () => new Promise((resolve) => { resolveGet = resolve; }) as never,
+          );
+        },
+      },
+    );
+    await waitFor(() => expect(resolveGet).toBeTypeOf("function"));
+    expect(result.current.loading).toBe(true);
+
+    rerender({ entityId: null });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      resolveGet({ data: makePage([makeComment({ id: "late" })], null), status: 200 });
+      await new Promise((r) => setTimeout(r, 20));
+    });
+    expect(result.current.comments).toEqual([]);
+    expect(result.current.loading).toBe(false);
+  });
+});

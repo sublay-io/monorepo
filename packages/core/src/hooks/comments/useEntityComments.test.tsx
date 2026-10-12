@@ -377,3 +377,41 @@ describe("useEntityComments", () => {
     });
   });
 });
+
+describe("useEntityComments — the entity changing", () => {
+  it("never shows the previous entity's comments under the new entityId, and drops them when it is removed", async () => {
+    const seen: { entityId: string | null; ids: string[]; loading: boolean }[] = [];
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (p: { entityId: string | null }) => {
+        const values = useEntityComments(p);
+        seen.push({
+          entityId: p.entityId,
+          ids: values.comments.map((c) => c.id),
+          loading: values.loading,
+        });
+        return values;
+      },
+      {
+        initialProps: { entityId: "entity-A" as string | null },
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeComment({ id: "a1" })], null)),
+      },
+    );
+    await waitFor(() => expect(result.current.comments.map((c) => c.id)).toEqual(["a1"]));
+    expect(result.current.newComments).toEqual([]);
+
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: "b1" })], null));
+    rerender({ entityId: "entity-B" });
+    expect(result.current.comments).toEqual([]);
+    expect(result.current.loading).toBe(true);
+    expect(result.current.getComment("a1")).toBeUndefined();
+    await waitFor(() => expect(result.current.comments.map((c) => c.id)).toEqual(["b1"]));
+    for (const render of seen) {
+      if (render.entityId === "entity-B") expect(render.ids).not.toContain("a1");
+    }
+
+    rerender({ entityId: null });
+    expect(result.current.comments).toEqual([]);
+    expect(result.current.getComment("b1")).toBeUndefined();
+  });
+});

@@ -310,3 +310,21 @@ describe("js-sdk comments — response mapping", () => {
     expect(result).toEqual({ reactionType: "love" });
   });
 });
+
+describe("js-sdk comments — cursor accepts `pagination.nextCursor` as returned", () => {
+  it("fetchManyComments takes a `string | null` cursor and omits null", async () => {
+    const { client, projectInstance } = makeClient();
+    // What a paging loop holds: the previous response's `nextCursor`.
+    const nextCursor: string | null = null as string | null;
+    await fetchManyComments(client, { entityId: "e1", cursor: nextCursor });
+    expect(projectInstance.get).toHaveBeenCalledWith("/comments", {
+      params: { entityId: "e1" },
+    });
+
+    const later: string | null = "abc" as string | null;
+    await fetchManyComments(client, { entityId: "e1", cursor: later });
+    expect(projectInstance.get).toHaveBeenLastCalledWith("/comments", {
+      params: { entityId: "e1", cursor: "abc" },
+    });
+  });
+});

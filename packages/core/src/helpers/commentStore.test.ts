@@ -232,3 +232,86 @@ describe("commentStore", () => {
     expect(newComments.map((c) => c.id)).toEqual(["n2", "n1"]);
   });
 });
+
+describe("commentStore — insert cost (one copy per batch, not per comment)", () => {
+  // A nested page at the server's row budget: 4 top-level comments, each with
+  // 2 levels of replies (4 + 4*10 + 4*10*11 ≈ 484 rows; padded to 494).
+  const nestedPage = (prefix: string): { comments: Comment[]; rows: number } => {
+    let rows = 0;
+    const level = (parentId: string | null, depth: number, width: number): Comment[] =>
+      Array.from({ length: width }, (_, i) => {
+        const id = `${parentId ?? prefix}-${i}`;
+        rows += 1;
+        const children = depth > 0 ? level(id, depth - 1, depth === 2 ? 10 : 11) : [];
+        return makeComment({
+          id,
+          parentId,
+          ...(depth > 0 ? { replies: page(children, null) } : {}),
+        });
+      });
+    const comments = level(null, 2, 4);
+    for (let i = 0; rows < 494; i++) {
+      comments.push(makeComment({ id: `${prefix}-pad-${i}` }));
+      rows += 1;
+    }
+    return { comments, rows };
+  };
+
+  it("inserting a 494-row nested page into a 5,000-comment store takes well under 50 ms", () => {
+    const existing = Array.from({ length: 5000 }, (_, i) => makeComment({ id: `old-${i}` }));
+    const base = insertComments(emptyCommentStore(), existing);
+    const { comments, rows } = nestedPage("new");
+    expect(rows).toBe(494);
+
+    // Best of a few runs, so a GC pause or a cold JIT doesn't fail the guard.
+    let best = Infinity;
+    let result = base;
+    for (let run = 0; run < 5; run++) {
+      const start = performance.now();
+      result = insertComments(base, comments);
+      best = Math.min(best, performance.now() - start);
+    }
+    expect(best).toBeLessThan(50);
+
+    expect(Object.keys(result.nodes)).toHaveLength(5494);
+    expect(result.rootIds).toHaveLength(5000 + comments.length);
+    expect(result.nodes["new-0"].childIds).toHaveLength(10);
+    expect(result.nodes["new-0-0"].childIds).toHaveLength(11);
+  });
+
+  it("never mutates the store it was given, and leaves untouched nodes identical", () => {
+    const parent = makeComment({ id: "p" });
+    const other = makeComment({ id: "o" });
+    const base = insertComments(emptyCommentStore(), [parent, other]);
+    const frozenRoots = [...base.rootIds];
+    const parentNode = base.nodes.p;
+    const parentChildIds = parentNode.childIds;
+
+    const next = insertComments(base, [
+      makeComment({ id: "r1", parentId: "p" }),
+      makeComment({ id: "r2", parentId: "p" }),
+      makeComment({ id: "r1", parentId: "p", content: "again" }),
+      makeComment({ id: "n" }),
+    ]);
+
+    expect(base.rootIds).toEqual(frozenRoots);
+    expect(base.nodes.p).toBe(parentNode);
+    expect(base.nodes.p.childIds).toBe(parentChildIds);
+    expect(parentChildIds).toEqual([]);
+    expect(Object.keys(base.nodes)).toEqual(["p", "o"]);
+
+    expect(next).not.toBe(base);
+    expect(next.nodes.o).toBe(base.nodes.o);
+    expect(next.nodes.p.childIds).toEqual(["r1", "r2"]);
+    expect(next.nodes.r1.comment.content).toBe("again");
+    expect(next.rootIds).toEqual(["p", "o", "n"]);
+
+    // A second batch must copy the child list again rather than reuse the
+    // previous batch's array.
+    const third = insertComments(next, [makeComment({ id: "r3", parentId: "p" })]);
+    expect(next.nodes.p.childIds).toEqual(["r1", "r2"]);
+    expect(third.nodes.p.childIds).toEqual(["r1", "r2", "r3"]);
+    // Only replies arrived: the root list is the same array.
+    expect(third.rootIds).toBe(next.rootIds);
+  });
+});

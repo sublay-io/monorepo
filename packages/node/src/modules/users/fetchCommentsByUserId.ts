@@ -36,8 +36,11 @@ export interface FetchCommentsByUserIdProps extends SpaceReputationContextParams
   sortByReaction?: ReactionType;
   /** Server default 10, max 100. */
   limit?: number;
-  /** `pagination.nextCursor` from the previous response; omit for the first page. */
-  cursor?: string;
+  /**
+   * `pagination.nextCursor` from the previous response, passed as returned;
+   * omit it (or pass `null`) for the first page.
+   */
+  cursor?: string | null;
   include?: CommentIncludeParam;
 }
 
@@ -49,6 +52,7 @@ export async function fetchCommentsByUserId(
   const {
     userId,
     include,
+    cursor,
     spaceReputation,
     spaceReputationId,
     spaceReputationDescendants,
@@ -56,6 +60,8 @@ export async function fetchCommentsByUserId(
   } = data;
   const params = {
     ...rest,
+    // A `null` cursor (the last page's `nextCursor`) is not sent.
+    ...(cursor != null ? { cursor } : {}),
     ...(include !== undefined
       ? { include: Array.isArray(include) ? include.join(",") : include }
       : {}),

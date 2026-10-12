@@ -130,12 +130,27 @@ export function useCursorCommentList({
   // The reaction only matters to `top`; changing it under another sort
   // doesn't reset the list.
   const effectiveSortByReaction = sortBy === "top" ? sortByReaction : undefined;
+  const hadTargetRef = useRef(false);
   useEffect(() => {
     if (!enabled) {
       // Drop any in-flight response for the previous target.
       generationRef.current++;
+      // The target went away: its list and state go with it, and a load
+      // that was in flight (now dropped) doesn't leave `loading` stuck.
+      // Before there has been a target, `loading` stays as it started.
+      if (hadTargetRef.current) {
+        hadTargetRef.current = false;
+        loadingRef.current = false;
+        cursorRef.current = null;
+        hasMoreRef.current = true;
+        setComments([]);
+        setLoading(false);
+        setError(null);
+        setHasMore(true);
+      }
       return;
     }
+    hadTargetRef.current = true;
     runFetch(true);
   }, [enabled, resetKey, sortBy, sortDir, effectiveSortByReaction, runFetch]);
 

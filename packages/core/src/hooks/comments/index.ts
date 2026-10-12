@@ -6,6 +6,8 @@ export type {
   CommentSectionUpdateCommentProps,
   CommentSectionDeleteCommentProps,
   MentionTriggers,
+  UseCommentSectionDataProps,
+  UseCommentSectionDataValues,
 } from "./useCommentSectionData";
 export { default as useCreateComment } from "./useCreateComment";
 export type { CreateCommentProps } from "./useCreateComment";

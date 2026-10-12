@@ -473,3 +473,20 @@ describe("users.fetchCommentsByUserId — request shaping", () => {
     await expect(fetchCommentsByUserId(client, { userId: "u1" })).resolves.toEqual(envelope);
   });
 });
+
+describe("users.fetchCommentsByUserId — cursor accepts `pagination.nextCursor` as returned", () => {
+  it("takes a `string | null` cursor and omits null", async () => {
+    const { client, projectInstance } = makeClient();
+    const nextCursor: string | null = null as string | null;
+    await fetchCommentsByUserId(client, { userId: "u1", limit: 5, cursor: nextCursor });
+    expect(projectInstance.get).toHaveBeenCalledWith("/users/u1/comments", {
+      params: { limit: 5 },
+    });
+
+    const later: string | null = "abc" as string | null;
+    await fetchCommentsByUserId(client, { userId: "u1", cursor: later });
+    expect(projectInstance.get).toHaveBeenLastCalledWith("/users/u1/comments", {
+      params: { cursor: "abc" },
+    });
+  });
+});

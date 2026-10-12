@@ -23,12 +23,10 @@ import {
   useProject,
   type CommentCreateError,
 } from "@sublay/react-native";
-import {
-  UserAvatar,
-  useTextInputCursorIndicator,
-  EmojiSuggestions,
-  GiphyContainer,
-} from "@sublay/ui-core-react-native";
+import UserAvatar from "~shared/react-native/user-avatar";
+import useTextInputCursorIndicator from "~shared/react-native/use-text-input-cursor-indicator";
+import EmojiSuggestions from "~shared/react-native/emoji-suggestions";
+import GiphyContainer from "~shared/react-native/giphy-container";
 
 import ReplyBanner from "../reply-banner/reply-banner";
 import MentionSuggestions from "../mention-suggestions/mention-suggestions";
@@ -221,6 +219,7 @@ function NewCommentForm({
           onClickBack={() => setIsGiphyVisible(false)}
           onSelectGif={(selected) => handleCreateGif(selected)}
           visible={isGiphyVisible}
+          theme={theme}
         />
       ) : null}
       <View
@@ -252,21 +251,12 @@ function NewCommentForm({
               {createErrorMessage}
             </Text>
           ) : null}
-          <View>
-            <EmojiSuggestions
-              onEmojiClick={(emoji) => {
-                setContent((c) => c + emoji);
-              }}
-            />
-            {/* The emoji bar draws its own light divider: in dark mode, cover it
-                and leave the themed border of the row below */}
-            {theme === 'dark' && (
-              <View
-                pointerEvents="none"
-                className="absolute left-0 right-0 bottom-0 h-px bg-neutral-800"
-              />
-            )}
-          </View>
+          <EmojiSuggestions
+            onEmojiClick={(emoji) => {
+              setContent((c) => c + emoji);
+            }}
+            theme={theme}
+          />
           <View
             className={`flex-row items-center justify-end gap-2 py-2 pl-2 pr-4 border-t ${
               theme === 'dark' ? 'border-neutral-600' : 'border-gray-200'

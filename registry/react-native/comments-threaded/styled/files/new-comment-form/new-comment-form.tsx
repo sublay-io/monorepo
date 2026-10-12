@@ -17,10 +17,8 @@ import {
   useProject,
   type CommentCreateError,
 } from "@sublay/react-native";
-import {
-  useTextInputCursorIndicator,
-  GiphyContainer,
-} from "@sublay/ui-core-react-native";
+import useTextInputCursorIndicator from "~shared/react-native/use-text-input-cursor-indicator";
+import GiphyContainer from "~shared/react-native/giphy-container";
 
 import MentionSuggestions from "../mention-suggestions/mention-suggestions";
 import useUIState from "../../hooks/use-ui-state";
@@ -203,6 +201,7 @@ function NewCommentForm({
           onClickBack={() => setIsGiphyVisible(false)}
           onSelectGif={(selected) => handleCreateGif(selected)}
           visible={isGiphyVisible}
+          theme={theme}
         />
       ) : null}
       <View

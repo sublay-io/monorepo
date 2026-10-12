@@ -23,15 +23,11 @@ import {
   useProject,
   type CommentCreateError,
 } from "@sublay/react-native";
-import {
-  resetButton,
-  resetTextInput,
-  resetView,
-  UserAvatar,
-  useTextInputCursorIndicator,
-  EmojiSuggestions,
-  GiphyContainer,
-} from "@sublay/ui-core-react-native";
+import { resetButton, resetTextInput, resetView } from "~shared/react-native/reset-styles";
+import UserAvatar from "~shared/react-native/user-avatar";
+import useTextInputCursorIndicator from "~shared/react-native/use-text-input-cursor-indicator";
+import EmojiSuggestions from "~shared/react-native/emoji-suggestions";
+import GiphyContainer from "~shared/react-native/giphy-container";
 
 import ReplyBanner from "../reply-banner/reply-banner";
 import MentionSuggestions from "../mention-suggestions/mention-suggestions";
@@ -236,6 +232,7 @@ function NewCommentForm({
           onClickBack={() => setIsGiphyVisible(false)}
           onSelectGif={(selected) => handleCreateGif(selected)}
           visible={isGiphyVisible}
+          theme={theme}
         />
       ) : null}
       <View
@@ -280,28 +277,12 @@ function NewCommentForm({
               {createErrorMessage}
             </Text>
           ) : null}
-          <View>
-            <EmojiSuggestions
-              onEmojiClick={(emoji) => {
-                setContent((c) => c + emoji);
-              }}
-            />
-            {/* The emoji bar draws its own light divider: in dark mode, cover it
-                and leave the themed border of the row below */}
-            {theme === 'dark' && (
-              <View
-                pointerEvents="none"
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: 1,
-                  backgroundColor: "#262626",
-                }}
-              />
-            )}
-          </View>
+          <EmojiSuggestions
+            onEmojiClick={(emoji) => {
+              setContent((c) => c + emoji);
+            }}
+            theme={theme}
+          />
           <View
             style={{
               flexDirection: "row",

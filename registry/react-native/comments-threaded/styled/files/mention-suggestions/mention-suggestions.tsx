@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text, Pressable, FlatList } from "react-native";
 import { User, useCommentSection } from "@sublay/react-native";
-import { UserAvatar, UserMentionSkeleton } from "@sublay/ui-core-react-native";
+import UserAvatar from "~shared/react-native/user-avatar";
+import { UserMentionSkeleton } from "~shared/react-native/skeleton";
 import useUIState from "../../hooks/use-ui-state";
 
 interface MentionSuggestionsProps {
@@ -52,7 +53,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
         <FlatList
           data={[1, 2, 3]}
           keyExtractor={(item) => `loading-${item}`}
-          renderItem={() => <UserMentionSkeleton />}
+          renderItem={() => <UserMentionSkeleton theme={theme} />}
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           keyboardShouldPersistTaps="always"
         />

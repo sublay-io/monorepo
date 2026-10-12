@@ -235,14 +235,17 @@ function NewCommentForm() {
         </div>
         <div className="relative z-20 bg-white dark:bg-neutral-800">
           {/* 🔧 CUSTOMIZE: Remove this component if you don't want emoji picker */}
-          <EmojiSuggestions
-            onEmojiClick={(emoji) => {
-              const textArea = textAreaRef.current;
-              if (!textArea) throw new Error("Can't find textarea");
-              textArea.value += emoji;
-              setContent((c) => c + emoji);
-            }}
-          />
+          {/* The emoji bar draws its own light divider: in dark mode, match the border above it */}
+          <div className="dark:[&>div]:!border-neutral-600">
+            <EmojiSuggestions
+              onEmojiClick={(emoji) => {
+                const textArea = textAreaRef.current;
+                if (!textArea) throw new Error("Can't find textarea");
+                textArea.value += emoji;
+                setContent((c) => c + emoji);
+              }}
+            />
+          </div>
           <div
             className="flex items-center justify-end gap-2 py-2 pl-2 pr-4"
           >

@@ -36,7 +36,7 @@ function ReplyBanner() {
             setShowReplyBanner!({ newState: false });
           }}
           style={resetButton}
-          className="text-base"
+          className="text-base dark:text-neutral-300"
         >
           &times;
         </button>

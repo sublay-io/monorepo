@@ -52,7 +52,6 @@ function NewCommentForm() {
     mentionSuggestions,
     handleMentionClick,
     mentions,
-    addMention,
     setMentions,
     resetMentions,
   } = useUserMentions({
@@ -70,7 +69,6 @@ function NewCommentForm() {
 
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
-      console.log("Before");
       e?.preventDefault();
 
       const textArea = textAreaRef.current;
@@ -86,20 +84,18 @@ function NewCommentForm() {
         return;
       }
 
-  if (!user.username && callbacks?.usernameRequiredCallback) {
-      callbacks.usernameRequiredCallback();
-      return;
-    }
+      if (!user.username && callbacks?.usernameRequiredCallback) {
+        callbacks.usernameRequiredCallback();
+        return;
+      }
 
       const tempContent = textArea.value.trim();
       const tempMentions = mentions;
 
-      console.log("Before 2");
       // Clear optimistically before the API call
       textArea.value = "";
       setContent("");
       resetMentions();
-      console.log("After");
       setIsSubmitting(true);
 
       try {
@@ -145,14 +141,17 @@ function NewCommentForm() {
         return;
       }
 
-        if (!user.username && callbacks?.usernameRequiredCallback) {
-      callbacks.usernameRequiredCallback();
-      setIsGiphyVisible(false);
-      return;
-    }
+      if (!user.username && callbacks?.usernameRequiredCallback) {
+        callbacks.usernameRequiredCallback();
+        setIsGiphyVisible(false);
+        return;
+      }
 
       const textArea = textAreaRef.current;
       if (!textArea) throw new Error("Can not find textarea");
+
+      const tempContent = textArea.value;
+      const tempMentions = mentions;
 
       textArea.value = "";
       setContent("");
@@ -160,12 +159,21 @@ function NewCommentForm() {
       setIsGiphyVisible(false);
 
       try {
-        await createComment!({ gif, mentions });
+        const result = await createComment?.({ gif, mentions: tempMentions });
+        if (result === undefined) {
+          // Nothing was posted: put the text and mentions back
+          textArea.value = tempContent;
+          setContent(tempContent);
+          setMentions(tempMentions);
+        }
       } catch (err) {
         handleError(err, "Creating comment failed: ");
+        textArea.value = tempContent;
+        setContent(tempContent);
+        setMentions(tempMentions);
       }
     },
-    [createComment, mentions, resetMentions, user, callbacks]
+    [createComment, mentions, resetMentions, setMentions, user, callbacks]
   );
 
   // Add keyboard event handler for Enter key
@@ -270,8 +278,8 @@ function NewCommentForm() {
                 fontWeight: 400,
                 // 🎨 CUSTOMIZATION: Comment form styling (Default: 12px)
                 fontSize: "12px",
-                // 🎨 CUSTOMIZATION: Comment form styling (Default: white)
-                color: theme === 'dark' ? "#F9FAFB" : "#FFFFFF",
+                // 🎨 CUSTOMIZATION: Comment form styling (Default: gray-500)
+                color: theme === 'dark' ? "#F9FAFB" : "#6B7280",
                 cursor: "pointer",
                 backgroundColor: "transparent",
               }}

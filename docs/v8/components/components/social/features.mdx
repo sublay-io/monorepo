@@ -88,12 +88,11 @@ Tag users with `@username`.
 
 ---
 
-### Edit & Delete
+### Delete
 
-Comment authors can edit or delete their own comments.
+Comment authors can delete their own comments.
 
-- **Edit:** Inline text editing, shows "edited" indicator
-- **Delete:** Confirmation modal; the comment shows as `[deleted]`, keeping its replies in place
+- **Delete:** "Remove" in the comment menu ("Delete" on React Native), then a confirmation; the comment shows as `[deleted]`, keeping its replies in place
 
 ---
 
@@ -124,10 +123,11 @@ Friendly placeholder when no comments exist. Customize `no-comments-placeholder.
 When a load fails, the component shows a retry instead of a wrong or stuck state:
 
 - **First load fails** — "Couldn't load comments" with a **Try again** button, in place of the empty state.
+- **The entity can't be loaded** — the same "Couldn't load comments" with **Try again**. This is the case when the section looks the entity up from `entityId`, `foreignId` or `shortId` and the lookup fails or finds nothing.
 - **Loading more top-level comments fails** — "Couldn't load more · Try again" in place of the **Load more comments** button on web, and at the bottom of the list on React Native.
 - **Loading replies fails** — the same "Couldn't load more · Try again" in place of the "View more replies" button.
 
-**Try again** calls the same `loadMore()` that failed, which re-sends the failed request. Edit the text in `comments-feed.tsx` (and `comments-footer-component.tsx` on React Native) and `comment/replies/show-hide-button.tsx`.
+**Try again** calls the same `loadMore()` that failed, which re-sends the failed request. When the entity couldn't be loaded, it looks the entity up again first, and the comments load once it is found. Edit the text in `comments-feed.tsx` (and `comments-footer-component.tsx` on React Native) and `comment/replies/show-hide-button.tsx`.
 
 When posting a comment or a reply fails, a short muted message appears by the comment form — under the input on web, above it on React Native:
 
@@ -135,7 +135,7 @@ When posting a comment or a reply fails, a short muted message appears by the co
 - **Replying to a comment a moderator removed in the meantime** — "This comment was removed, so you can't reply to it."
 - **Any other failure** — "Couldn't post your comment. Try again."
 
-The text you typed stays in the input, and the message goes away when you edit the text or send again. In the first two cases the comment also turns into its `[deleted]` / `[removed]` row (or, for its author, the removed-note row), which has no Reply. The "Replying to …" banner stays, as after any failed reply; close it to post the text as a top-level comment instead.
+The text you typed stays in the input, and the message goes away when you edit the text or send again. A GIF that fails to post keeps the text and mentions in the input too. In the first two cases the comment also turns into its `[deleted]` / `[removed]` row (or, for its author, the removed-note row), which has no Reply. The "Replying to …" banner stays, as after any failed reply; close it to post the text as a top-level comment instead.
 
 The messages live in `utils/comment-create-error.ts` and are rendered in `new-comment-form.tsx`, from the section's [`createError`](/v8/sdk/comments/comment-section#usecommentsection-return-values).
 
@@ -182,7 +182,6 @@ Enable a GIF picker via the [Sublay Dashboard](https://dash.sublay.io). Add a Gi
 | Heart/like system | ✅ | ✅ (icon, color, animation) |
 | Sorting (Top/New/Old) | ✅ | ✅ (remove options, rename) |
 | @ Mentions | ✅ | ✅ (autocomplete styling) |
-| Edit comments | ✅ | ✅ |
 | Delete comments | ✅ | ✅ (confirmation UI) |
 | Reporting | ✅ | ✅ (reasons, modal styling) |
 | Loading states | ✅ | ✅ (skeleton design) |

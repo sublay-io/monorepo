@@ -52,7 +52,7 @@ Returns a paginated list of entities saved in the specified collection. The coll
 </ParamField>
 
 <ParamField query="topCommentsLimit" type="number" default="1">
-  With `include=topComments`: how many top comments per entity. Maximum `5` — larger values are treated as `5`.
+  With `include=topComments`: how many top comments per entity. A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 collection/invalid-query`. Maximum `5` — larger values are treated as `5`.
 </ParamField>
 
 <ParamField query="topCommentsSortByReaction" type="string" default="upvote">
@@ -72,7 +72,7 @@ Returns a paginated list of entities saved in the specified collection. The coll
 
   <Expandable>
     <ResponseField name="page" type="number">Current page.</ResponseField>
-    <ResponseField name="limit" type="number">Page size.</ResponseField>
+    <ResponseField name="pageSize" type="number">Page size.</ResponseField>
     <ResponseField name="totalPages" type="number">Total number of pages.</ResponseField>
     <ResponseField name="totalItems" type="number">Number of saved entities the list can return. Entities deleted, removed by moderation, or turned back into drafts after being saved are not counted.</ResponseField>
     <ResponseField name="hasMore" type="boolean">`true` if more pages exist.</ResponseField>
@@ -83,7 +83,7 @@ Returns a paginated list of entities saved in the specified collection. The coll
 
 <AccordionGroup>
   <Accordion title="Invalid include — 400">
-    Returned with code `collection/invalid-query` for an unknown `include` value, or when `topCommentsLimit` / `topCommentsSortByReaction` is sent without `include=topComments`.
+    Returned with code `collection/invalid-query` for an unknown `include` value, when `topCommentsLimit` is below `1` or not a whole number, or when `topCommentsLimit` / `topCommentsSortByReaction` is sent without `include=topComments`.
 
     ```json
     { "error": "include: Unknown include `comments`. Allowed: user, space, topComments, files, grants.", "code": "collection/invalid-query" }

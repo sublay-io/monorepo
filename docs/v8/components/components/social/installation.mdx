@@ -52,37 +52,92 @@ npx @sublay/cli add comments-social
 
 ## What Gets Installed
 
-The CLI copies approximately 23 files into your project:
+The CLI copies 25 files into your project:
 
-```
-src/components/comments-social/
-├── index.ts                              # Barrel export (entry point)
-├── components/                           # UI components (~18 files)
-│   ├── social-comment-section.tsx        # Main component
-│   ├── new-comment-form.tsx              # Comment input form
-│   ├── reply-banner.tsx                  # Reply indicator
-│   ├── mention-suggestions.tsx           # @ mention autocomplete
-│   ├── sort-by-button.tsx               # Top/New/Old sorting
-│   ├── comments-feed/
-│   │   ├── comments-feed.tsx             # Feed container
-│   │   ├── loaded-comments.tsx           # Comment list
-│   │   ├── fetching-comments-skeletons.tsx
-│   │   ├── no-comments-placeholder.tsx
-│   │   └── comment/
-│   │       ├── comment.tsx              # Individual comment
-│   │       ├── heart-button.tsx         # Like button
-│   │       └── replies.tsx
-│   └── modals/
-│       ├── report-comment-modal/        # Report modal
-│       └── delete-comment-modal/        # Delete confirmation
-├── hooks/
-│   ├── use-social-comments.tsx          # Main comment logic
-│   └── use-ui-state.tsx                 # UI state management
-├── utils/
-│   └── prop-comparison.ts
-└── context/
-    └── ui-state-context.tsx
-```
+<Tabs>
+  <Tab title="React (Web)">
+    ```
+    src/components/comments-social/
+    ├── index.ts                                  # Barrel export (entry point)
+    ├── components/
+    │   ├── social-comment-section.tsx            # Main component
+    │   ├── new-comment-form.tsx                  # Comment form
+    │   ├── reply-banner.tsx                      # Shows who you're replying to
+    │   ├── mention-suggestions.tsx               # @ mention autocomplete
+    │   ├── sort-by-button.tsx                    # Top/New/Old sort control
+    │   ├── comments-feed/
+    │   │   ├── comments-feed.tsx                 # Feed container
+    │   │   ├── loaded-comments.tsx               # Renders the comment list
+    │   │   ├── fetching-comments-skeletons.tsx   # Loading state
+    │   │   ├── no-comments-placeholder.tsx       # Empty state
+    │   │   └── comment/
+    │   │       ├── comment.tsx                   # Individual comment
+    │   │       ├── heart-button.tsx              # Like button with count
+    │   │       ├── index.ts                      # Barrel export
+    │   │       └── replies/
+    │   │           ├── replies.tsx               # Reply list
+    │   │           ├── show-hide-button.tsx      # View / hide replies row
+    │   │           └── index.ts                  # Barrel export
+    │   └── modals/
+    │       ├── comment-menu-modal/
+    │       │   ├── comment-menu-modal.tsx        # Menu for other users' comments
+    │       │   ├── main-content.tsx              # Menu options
+    │       │   └── report-content.tsx            # Report form
+    │       └── comment-menu-modal-owner/
+    │           └── comment-menu-modal-owner.tsx  # Menu for your own comments
+    ├── hooks/
+    │   ├── use-social-comments.tsx               # Provider props and callbacks
+    │   └── use-ui-state.tsx                      # Reads the UI state context
+    ├── utils/
+    │   ├── prop-comparison.ts                    # Memoization helpers
+    │   └── comment-create-error.ts               # Messages shown when posting fails
+    └── context/
+        └── ui-state-context.tsx                  # Modal & theme context
+    ```
+  </Tab>
+  <Tab title="React Native / Expo">
+    ```
+    src/components/comments-social/
+    ├── index.ts                                 # Barrel export (entry point)
+    ├── components/
+    │   ├── social-comment-section.tsx           # Main component
+    │   ├── sort-by-button/
+    │   │   └── sort-by-button.tsx               # Top/New/Old sort control
+    │   ├── new-comment-form/
+    │   │   └── new-comment-form.tsx             # Comment form
+    │   ├── reply-banner/
+    │   │   └── reply-banner.tsx                 # Shows who you're replying to
+    │   ├── mention-suggestions/
+    │   │   └── mention-suggestions.tsx          # @ mention autocomplete
+    │   ├── comments-feed/
+    │   │   ├── comments-feed.tsx                # Feed container
+    │   │   ├── loaded-comments.tsx              # Renders the comment list
+    │   │   ├── fetching-comments-skeletons.tsx  # Loading state
+    │   │   ├── no-comments-placeholder.tsx      # Empty state
+    │   │   ├── comments-footer-component.tsx    # Loading / retry row under the list
+    │   │   └── comment/
+    │   │       ├── comment.tsx                  # Individual comment
+    │   │       ├── heart-button.tsx             # Like button with count
+    │   │       ├── index.ts                     # Barrel export
+    │   │       └── replies/
+    │   │           ├── replies.tsx              # Reply list
+    │   │           ├── show-hide-button.tsx     # View / hide replies row
+    │   │           └── index.ts                 # Barrel export
+    │   └── sheets/
+    │       ├── comment-options-sheet.tsx        # Menu for other users' comments
+    │       ├── comment-options-sheet-owner.tsx  # Menu for your own comments
+    │       └── report-comment-sheet.tsx         # Report form
+    ├── hooks/
+    │   ├── use-social-comments.tsx              # Provider props and callbacks
+    │   └── use-ui-state.tsx                     # Reads the UI state context
+    ├── utils/
+    │   ├── prop-comparison.ts                   # Memoization helpers
+    │   └── comment-create-error.ts              # Messages shown when posting fails
+    └── context/
+        └── ui-state-context.tsx                 # Modal & theme context
+    ```
+  </Tab>
+</Tabs>
 
 ---
 

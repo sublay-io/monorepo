@@ -28,7 +28,7 @@ import useUIState from "../../../hooks/use-ui-state";
 
 const Comment = React.memo(
   ({
-    comment: commentFromSection,
+    comment,
     extraLeftPadding = 0,
     parentClosed = false,
   }: {
@@ -69,7 +69,6 @@ const Comment = React.memo(
     const likesCountFontWeight = '600' as const;
     const likesCountFontColor = theme === 'dark' ? '#9CA3AF' : '#8E8E8E';
 
-    const comment = commentFromSection;
     const { currentReaction, reactionCounts, toggleReaction } = useReactionToggle({
       targetType: "comment",
       targetId: comment.id,
@@ -457,11 +456,6 @@ const styles = StyleSheet.create({
   },
   replyButton: {
     // Custom styles if needed
-  },
-  menuButton: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
   },
   likesContainer: {
     display: "flex",

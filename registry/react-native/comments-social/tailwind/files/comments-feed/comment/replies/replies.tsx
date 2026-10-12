@@ -30,10 +30,6 @@ function Replies({ commentId }: { commentId: string }) {
 
   const [areRepliesVisible, setAreRepliesVisible] = useState(false);
 
-  // CUSTOMIZATION: Replies styling defaults
-  const repliesGap = 8;
-
-
   const filteredReplies = useMemo(() => {
     return replies.filter((c) => c.id !== highlightedComment?.comment.id);
   }, [replies, highlightedComment]);

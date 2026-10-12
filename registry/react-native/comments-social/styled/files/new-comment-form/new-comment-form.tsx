@@ -110,6 +110,11 @@ function NewCommentForm({
   });
 
   const handleCreateComment = useCallback(async () => {
+    if (content.trim().length === 0) {
+      callbacks?.commentTooShortCallback?.();
+      return;
+    }
+
     if (!user) {
       callbacks?.loginRequiredCallback?.();
       return;
@@ -151,17 +156,27 @@ function NewCommentForm({
       altText: string;
       aspectRatio: string;
     }) => {
+      const tempContent = content;
+      const tempMentions = mentions;
+
       setContent("");
       resetMentions();
       setIsGiphyVisible(false);
 
       try {
-        await createComment!({ gif, mentions });
+        const result = await createComment?.({ gif, mentions: tempMentions });
+        if (result === undefined) {
+          // Nothing was posted: put the text and mentions back
+          setContent(tempContent);
+          setMentions(tempMentions);
+        }
       } catch (err) {
         handleError(err, "Creating comment failed: ");
+        setContent(tempContent);
+        setMentions(tempMentions);
       }
     },
-    [createComment, mentions, resetMentions, callbacks, user]
+    [createComment, content, mentions, resetMentions, setMentions]
   );
 
   useEffect(() => {
@@ -170,8 +185,7 @@ function NewCommentForm({
     if (!textArea) throw new Error("Can't find textarea");
 
     if (!pushMention.username) {
-
-        callbacks?.userCantBeMentionedCallback?.();
+      callbacks?.userCantBeMentionedCallback?.();
       return;
     }
 
@@ -192,7 +206,7 @@ function NewCommentForm({
   const adjustTextareaHeight = () => {
     const textArea = textAreaRef.current;
     if (textArea) {
-      textArea.measure((fx, fy, width, height, px, py) => {
+      textArea.measure((_fx, _fy, _width, height) => {
         const baseHeight = 20;
         const newHeight = Math.max(baseHeight, Math.min(100, height));
         textArea.setNativeProps({

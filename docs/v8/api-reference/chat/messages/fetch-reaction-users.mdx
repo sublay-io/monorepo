@@ -59,8 +59,9 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
 <ResponseField name="pagination" type="object">
   <Expandable title="properties">
     <ResponseField name="page" type="number">Current page.</ResponseField>
-    <ResponseField name="limit" type="number">Items per page.</ResponseField>
-    <ResponseField name="total" type="number">Total number of reactions for this emoji.</ResponseField>
+    <ResponseField name="pageSize" type="number">Items per page.</ResponseField>
+    <ResponseField name="totalPages" type="number">Total number of pages.</ResponseField>
+    <ResponseField name="totalItems" type="number">Total number of reactions for this emoji.</ResponseField>
     <ResponseField name="hasMore" type="boolean">Whether more pages exist.</ResponseField>
   </Expandable>
 </ResponseField>

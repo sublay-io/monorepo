@@ -14,8 +14,6 @@ export interface CommentThreadProps {
   comment: CommentType;
   depth: number;
   isLastReply?: boolean;
-  onDeleteComment?: (commentId: string) => void;
-  onReportComment?: (commentId: string) => void;
 }
 
 function CommentThread({

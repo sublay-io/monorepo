@@ -11,7 +11,7 @@
  * - @gorhom/bottom-sheet
  * - nativewind ^4.0.0
  *
- * @see https://docs.sublay.io/components/comments-threaded
+ * @see https://docs.sublay.io/v8/components/components/threaded/overview
  *
  * ====================
  * THEME COLOR PALETTE
@@ -49,6 +49,8 @@ import React from "react";
 import { View, ScrollView } from "react-native";
 import { Entity } from "@sublay/react-native";
 import useThreadedComments from "../hooks/use-threaded-comments";
+import CommentsFeed from "./comments-feed/comments-feed";
+import NewCommentForm from "./new-comment-form/new-comment-form";
 import { deepEqual, warnPropChanges } from "../utils/prop-comparison";
 import useUIState from "../hooks/use-ui-state";
 
@@ -106,13 +108,6 @@ function ThreadedCommentSectionInner({
   children?: React.ReactNode;
 }) {
   const { theme } = useUIState();
-
-  const { CommentsFeed, NewCommentForm } = useThreadedComments({
-    entity: undefined,
-    entityId: undefined,
-    foreignId: undefined,
-    shortId: undefined,
-  });
 
   return (
     <View className="flex-1">

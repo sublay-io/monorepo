@@ -10,7 +10,7 @@
  * - @sublay/react-js ^8.0.0-beta.0
  * - @sublay/ui-core-react-js ^7.0.0
  *
- * @see https://docs.sublay.io/components/comments-social
+ * @see https://docs.sublay.io/v8/components/components/social/overview
  *
  * ====================
  * THEME COLOR PALETTE

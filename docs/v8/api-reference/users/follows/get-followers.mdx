@@ -57,16 +57,25 @@ On success, returns HTTP `200` with a paginated response:
   </Expandable>
 </ResponseField>
 
-<ResponseField name="totalCount" type="number">
-  Total number of followers.
-</ResponseField>
-
-<ResponseField name="page" type="number">
-  Current page number.
-</ResponseField>
-
-<ResponseField name="limit" type="number">
-  Page size used for this response.
+<ResponseField name="pagination" type="object">
+  Pagination metadata.
+  <Expandable title="properties">
+    <ResponseField name="page" type="number">
+      Current page number.
+    </ResponseField>
+    <ResponseField name="pageSize" type="number">
+      Page size used for this response.
+    </ResponseField>
+    <ResponseField name="totalPages" type="number">
+      Total number of pages.
+    </ResponseField>
+    <ResponseField name="totalItems" type="number">
+      Total number of followers.
+    </ResponseField>
+    <ResponseField name="hasMore" type="boolean">
+      Whether more pages exist after this one.
+    </ResponseField>
+  </Expandable>
 </ResponseField>
 
 ## See Also

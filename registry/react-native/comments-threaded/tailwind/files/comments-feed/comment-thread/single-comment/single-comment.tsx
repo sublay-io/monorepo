@@ -78,7 +78,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
 }
 
 function SingleComment({
-  comment: commentFromSection,
+  comment,
   depth,
   hasReplies,
   isCollapsed,
@@ -90,7 +90,6 @@ function SingleComment({
   const { user } = useUser();
   const { callbacks, highlightedComment, createError } = useCommentSection();
   const { theme } = useUIState();
-  const comment = commentFromSection;
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   // A reply to this comment that wasn't posted: the message shows under the

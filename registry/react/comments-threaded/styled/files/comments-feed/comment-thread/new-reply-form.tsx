@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   useCommentSection,
   useUser,
@@ -27,13 +26,9 @@ function NewReplyForm({
   const { theme } = useUIState();
   const { user } = useUser();
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const { createComment, callbacks } = useCommentSection();
 
   const handleReply = async () => {
-    if (isSubmitting) return;
-
     if (!replyContent.trim()) {
       callbacks?.commentTooShortCallback?.();
       return;
@@ -54,7 +49,6 @@ function NewReplyForm({
     // Clear optimistically before the API call
     setReplyContent("");
     setShowReplyForm(false);
-    setIsSubmitting(true);
 
     try {
       const result = await createComment?.({
@@ -71,8 +65,6 @@ function NewReplyForm({
       console.error("Error creating reply:", error);
       setReplyContent(tempContent);
       setShowReplyForm(true);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -81,18 +73,6 @@ function NewReplyForm({
     setReplyContent("");
     onDismissError();
   };
-
-  const [spinRotation, setSpinRotation] = useState(0);
-
-  // Spinner animation effect
-  useEffect(() => {
-    if (isSubmitting) {
-      const interval = setInterval(() => {
-        setSpinRotation((prev) => (prev + 10) % 360);
-      }, 16); // ~60fps
-      return () => clearInterval(interval);
-    }
-  }, [isSubmitting]);
 
   return (
     <div
@@ -186,45 +166,41 @@ function NewReplyForm({
               e.currentTarget.style.color = theme === 'dark' ? "#9CA3AF" : "#4B5563";
               e.currentTarget.style.backgroundColor = "transparent";
             }}
-            disabled={isSubmitting}
           >
             Cancel
           </button>
           <button
             onClick={handleReply}
-            disabled={!replyContent.trim() || isSubmitting}
+            disabled={!replyContent.trim()}
             style={{
               flexShrink: 0,
               // 🎨 CUSTOMIZATION: Reply form styling (Default: 6px, derived from 8-2)
               padding: "6px",
               borderRadius: "50%",
               backgroundColor:
-                replyContent.trim().length > 0 && !isSubmitting
+                replyContent.trim().length > 0
                   ? (theme === 'dark' ? "#3B82F6" : "#2563EB")
                   : (theme === 'dark' ? "#4B5563" : "#E5E7EB"),
               color:
-                replyContent.trim().length > 0 && !isSubmitting
+                replyContent.trim().length > 0
                   ? "#FFFFFF"
                   : (theme === 'dark' ? "#6B7280" : "#9CA3AF"),
               boxShadow:
                 "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
               transition: "all 200ms ease-in-out",
               border: "none",
-              cursor:
-                !replyContent.trim() || isSubmitting
-                  ? "not-allowed"
-                  : "pointer",
+              cursor: !replyContent.trim() ? "not-allowed" : "pointer",
               outline: "none",
             }}
             onMouseEnter={(e) => {
-              if (replyContent.trim().length > 0 && !isSubmitting) {
+              if (replyContent.trim().length > 0) {
                 e.currentTarget.style.backgroundColor = theme === 'dark' ? "#2563EB" : "#1D4ED8";
                 e.currentTarget.style.boxShadow =
                   "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
               }
             }}
             onMouseLeave={(e) => {
-              if (replyContent.trim().length > 0 && !isSubmitting) {
+              if (replyContent.trim().length > 0) {
                 e.currentTarget.style.backgroundColor = theme === 'dark' ? "#3B82F6" : "#2563EB";
                 e.currentTarget.style.boxShadow =
                   "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)";
@@ -239,49 +215,35 @@ function NewReplyForm({
               e.currentTarget.style.outlineOffset = "0";
             }}
           >
-            {isSubmitting ? (
-              <div
-                style={{
-                  height: "12px",
-                  width: "12px",
-                  border: theme === 'dark' ? "1px solid #F9FAFB" : "1px solid #FFFFFF",
-                  borderTopColor: "transparent",
-                  borderRadius: "50%",
-                  transform: `rotate(${spinRotation}deg)`,
-                  transition: "transform 0.1s linear",
-                }}
-              ></div>
-            ) : (
-              <svg
-                style={{
-                  // 🎨 CUSTOMIZATION: Reply form styling (Default: 12px)
-                  height: "12px",
-                  width: "12px",
-                  transition: "transform 200ms ease-in-out",
-                  transform: "scale(1)",
-                }}
-                onMouseEnter={(e) => {
-                  if (replyContent.trim().length > 0) {
-                    e.currentTarget.style.transform = "scale(1.1)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (replyContent.trim().length > 0) {
-                    e.currentTarget.style.transform = "scale(1)";
-                  }
-                }}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 10l7-7m0 0l7 7m-7-7v18"
-                />
-              </svg>
-            )}
+            <svg
+              style={{
+                // 🎨 CUSTOMIZATION: Reply form styling (Default: 12px)
+                height: "12px",
+                width: "12px",
+                transition: "transform 200ms ease-in-out",
+                transform: "scale(1)",
+              }}
+              onMouseEnter={(e) => {
+                if (replyContent.trim().length > 0) {
+                  e.currentTarget.style.transform = "scale(1.1)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (replyContent.trim().length > 0) {
+                  e.currentTarget.style.transform = "scale(1)";
+                }
+              }}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 10l7-7m0 0l7 7m-7-7v18"
+              />
+            </svg>
           </button>
         </div>
       </div>

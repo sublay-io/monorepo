@@ -20,8 +20,6 @@ export interface CommentThreadProps {
    * parent's replies (to its next sibling or its load-more row).
    */
   parentColumnContinues?: boolean;
-  onDeleteComment?: (commentId: string) => void;
-  onReportComment?: (commentId: string) => void;
 }
 
 function CommentThread({

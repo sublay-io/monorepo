@@ -27,7 +27,7 @@ import useUIState from "../../../hooks/use-ui-state";
 
 const Comment = React.memo(
   ({
-    comment: commentFromSection,
+    comment,
     extraLeftPadding = 0,
     parentClosed = false,
   }: {
@@ -51,7 +51,6 @@ const Comment = React.memo(
     const heartIconEmptyColor = theme === 'dark' ? '#9CA3AF' : '#8E8E8E';
     const heartIconFullColor = theme === 'dark' ? '#F87171' : '#DC2626';
 
-    const comment = commentFromSection;
     const { currentReaction, reactionCounts, toggleReaction } = useReactionToggle({
       targetType: "comment",
       targetId: comment.id,

@@ -11,7 +11,7 @@
  * - @sublay/ui-core-react-js ^7.0.0
  * - Tailwind CSS configured with dark mode support
  *
- * @see https://docs.sublay.io/components/comments-social
+ * @see https://docs.sublay.io/v8/components/components/social/overview
  *
  * ========================
  * TAILWIND CONFIGURATION

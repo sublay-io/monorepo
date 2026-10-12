@@ -95,7 +95,7 @@ The opt-in space-reputation params (`spaceReputation`, `spaceReputationId`, `spa
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
-  `true` while a page is loading.
+  `true` while a page is loading, and before `userId` is first set. When `userId` is removed after it was set, the list is cleared and `loading` is `false`.
 </ResponseField>
 
 <ResponseField name="error" type="Error | null">

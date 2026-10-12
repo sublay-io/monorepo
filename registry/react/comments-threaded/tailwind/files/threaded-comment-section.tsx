@@ -12,7 +12,7 @@
  * Requires Tailwind CSS with dark mode enabled in tailwind.config.js:
  * - darkMode: 'class' or darkMode: 'media'
  *
- * @see https://docs.sublay.io/components/comments-threaded
+ * @see https://docs.sublay.io/v8/components/components/threaded/overview
  *
  * ====================
  * TAILWIND COLOR CLASSES

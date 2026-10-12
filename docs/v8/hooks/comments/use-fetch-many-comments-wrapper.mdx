@@ -108,7 +108,7 @@ function ReplyList({ commentId }: { commentId: string }) {
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
-  `true` while a page is loading.
+  `true` while a page is loading, and before `entityId` or `parentId` is first set. When both are removed after one was set, the list is cleared and `loading` is `false`.
 </ResponseField>
 
 <ResponseField name="error" type="Error | null">

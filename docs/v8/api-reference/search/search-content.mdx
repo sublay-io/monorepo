@@ -10,7 +10,7 @@ Performs vector-similarity search over project content (entities, comments, and 
 
 **Requires a paid plan with semantic search enabled.**
 
-**Requires an authenticated user.** Send the user's access token as `Authorization: Bearer <token>` — missing token → `401`, invalid/expired token → `403` (refresh and retry).
+**Authentication required.** Send a user's access token as `Authorization: Bearer <token>` — missing token → `401`, invalid/expired token → `403` (refresh and retry). A service or master key is accepted too; such a request has no signed-in user, so the per-user filtering under [What's left out](#whats-left-out) doesn't apply to it.
 
 ## Body Parameters
 
@@ -35,7 +35,7 @@ Performs vector-similarity search over project content (entities, comments, and 
 </ParamField>
 
 <ParamField body="limit" type="number" default="20">
-  Maximum number of results to return. Maximum `50`.
+  Maximum number of results to return. A whole number from `1` to `50`, sent as a JSON number. A value outside that range is rejected with `400 search/invalid-body` — a `limit` above `50` isn't lowered to `50`.
 </ParamField>
 
 ## Query Parameters
@@ -67,7 +67,7 @@ Each result includes:
 
 ### What's left out
 
-Comments their author deleted are never returned.
+Comments their author deleted are never returned. Comments a moderator removed are never returned either — to anyone, including the removed comment's author and requests made with a service or master key.
 
 Results are also filtered for the signed-in user (with the `moderation` bundle installed):
 
@@ -79,7 +79,14 @@ Results are also filtered for the signed-in user (with the `moderation` bundle i
 
 <AccordionGroup>
   <Accordion title="Authentication Required — 401 / 403">
-    The endpoint requires an authenticated user. A missing token returns a bare `401`; an invalid or expired token returns a bare `403` — refresh the access token and retry.
+    The endpoint requires a user token or a service or master key. A missing token returns a bare `401`; an invalid or expired token returns a bare `403` — refresh the access token and retry.
+  </Accordion>
+  <Accordion title="Invalid Body — 400">
+    Returned when the body fails validation: `query` is missing or empty, `limit` isn't a whole number from `1` to `50`, `sourceTypes` contains a value other than `entity`, `comment` or `message`, `spaceId` or `conversationId` isn't a UUID, or `includeChildSpaces` isn't a boolean.
+
+    ```json
+    { "error": "limit: Too big: expected number to be <=50", "code": "search/invalid-body" }
+    ```
   </Accordion>
   <Accordion title="Plan Required — 403">
     ```json

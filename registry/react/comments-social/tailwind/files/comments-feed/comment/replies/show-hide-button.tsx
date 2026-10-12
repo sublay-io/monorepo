@@ -1,7 +1,6 @@
 import { resetButton } from "@sublay/ui-core-react-js";
 
 const ShowHideButton = ({
-  //   text,
   totalRepliesCount,
   loadedRepliesCount,
   page,
@@ -11,7 +10,6 @@ const ShowHideButton = ({
   areRepliesVisible,
   setAreRepliesVisible,
 }: {
-  //   text: string;
   totalRepliesCount: number;
   loadedRepliesCount: number;
   page: number;
@@ -37,7 +35,7 @@ const ShowHideButton = ({
       );
       break;
 
-    // This case is if the replies have been shown previously but are now hidden (user had o oad all before hidding)
+    // This case is if the replies have been shown previously but are now hidden (user had to load all before hiding)
     case !areRepliesVisible && page > 0:
       action = ["show"];
       text = "View more replies ($count)".replace(

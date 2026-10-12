@@ -38,6 +38,8 @@ The project id and private key must belong to a project that exists on the serve
 
 How it works: the SDK hardcodes `https://api.sublay.io/v8`. A small plugin in `vite.config.ts` rewrites that literal (and the bare origin used for the socket connection) in the workspace SDK `dist` files as Vite serves or bundles them. It covers REST calls, the chat socket and the OAuth base, in both `pnpm dev` and `pnpm build`. Nothing under `packages/` changes.
 
+The override never falls back to production silently. With `VITE_API_BASE_URL` set, `pnpm dev` and `pnpm build` stop with an error if the production URL isn't found in the SDK `dist` files (the SDK isn't built, or its base URL moved), and `pnpm build` also stops if it rewrote no module.
+
 ## Highlighting a comment
 
 Both comment pages have a "Highlight comment id" input. Apply passes the id to the component as `highlightedCommentId`; Clear removes it. The id is kept in the URL as `?highlight=<id>`, so a reload or a pasted link opens the same deep-link view.

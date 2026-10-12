@@ -19,11 +19,11 @@ Updates a comment's content, its metadata, or both. Only the comment's author, o
 Both fields are individually optional, but **at least one must be provided**.
 
 <ParamField body="content" type="string">
-  The new text content for the comment. Cannot be empty. Omit to leave the existing content untouched.
+  The new text content for the comment. Leading and trailing whitespace is trimmed. Cannot be empty or only whitespace. Omit to leave the existing content untouched.
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  Arbitrary JSON metadata, up to 1 MB. **Replaces** the stored metadata wholesale rather than merging into it.
+  Arbitrary JSON metadata, up to 10 KB (10,240 bytes) as JSON. {/* metadata-limit */} **Replaces** the stored metadata wholesale rather than merging into it.
 </ParamField>
 
 ## Deleted and removed comments
@@ -43,11 +43,28 @@ Returns the updated [Comment](/v8/data-models/comment) object in full, as the ca
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Missing token — 401">
+    No `Authorization` header was sent. The body is `text/plain` (`Unauthorized`), not JSON. An expired or invalid token returns `403` instead — see [Authentication](/v8/api-reference/authentication).
+  </Accordion>
+  <Accordion title="Invalid Params — 400">
+    Returned when `commentId` isn't a valid UUID.
+
+    ```json
+    { "error": "commentId: Invalid UUID format", "code": "comment/invalid-params" }
+    ```
+  </Accordion>
   <Accordion title="Invalid Body — 400">
-    Returned when neither `content` nor `metadata` is supplied, when `content` is an empty string, or when `metadata` exceeds 1 MB.
+    Returned when neither `content` nor `metadata` is supplied, when `content` is an empty string or only whitespace, when `metadata` isn't an object, or when `metadata` is larger than 10 KB. {/* metadata-limit */}
 
     ```json
     { "error": "Either content or metadata must be provided", "code": "comment/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Rejected by Webhook — 400">
+    Returned when your project's `comment.updated` [validation webhook](/v8/webhooks#validation-events-blocking) doesn't approve the edit. Nothing is changed. `error` is the `message` your webhook responded with, when it sent one.
+
+    ```json
+    { "error": "Validation rejected", "code": "comment/webhook-validation-failed" }
     ```
   </Accordion>
   <Accordion title="Not Found — 404">

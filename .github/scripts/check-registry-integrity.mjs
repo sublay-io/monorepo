@@ -6,7 +6,7 @@
 // `sublay add` user the moment it merges. Building @sublay/cli proves nothing
 // about it: the CLI reads this metadata at runtime.
 //
-// Six invariants are enforced here, all of which fail at runtime rather than
+// Seven invariants are enforced here, all of which fail at runtime rather than
 // build time and are therefore invisible to every other step in the job:
 //
 //   1. registryUrl points at the component's own directory under
@@ -40,7 +40,14 @@
 //      so a base pointing at a feature branch either 404s or silently serves
 //      unreviewed component source to everyone running `sublay add`.
 //
-// A seventh check runs only on a push to main in CI: it actually fetches one
+//   7. Every name in exports.typeExports is really exported by the main file.
+//      `sublay add` prints a usage snippet that imports the first of them
+//      next to the main component (`import { X, type Y } from ...`), and the
+//      generated barrel re-exports the main file with `export *` — so a name
+//      the main file does not export is an import that fails to compile
+//      (TS2305) in the very first thing the CLI tells the user to paste.
+//
+// One more check runs only on a push to main in CI: it actually fetches one
 // real registry.json over the network and requires a 200. Everything above is
 // internal consistency; only main is actually served to users, and only there
 // is a live URL meaningful (on this branch, before merge, the raw URL 404s by
@@ -317,8 +324,41 @@ if (registryFiles.length === 0) {
   process.exit(1);
 }
 
+/**
+ * Whether `source` exports `name` — as a declaration
+ * (`export type|interface|enum|class|function|const X`) or in an export list
+ * (`export { X }`, `export type { X }`, `export { Y as X }`).
+ *
+ * A regex is enough here for the same reason as above: this is a build-time
+ * check over our own files. Comments are stripped first so a commented-out
+ * export does not count.
+ */
+function sourceExportsName(source, name) {
+  const code = source
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/.*$/gm, '$1');
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  const declaration = new RegExp(
+    `\\bexport\\s+(?:declare\\s+)?(?:abstract\\s+)?` +
+      `(?:type|interface|enum|class|function|const|let|var)\\s+${escaped}\\b`
+  );
+  if (declaration.test(code)) return true;
+
+  for (const list of code.matchAll(/\bexport\s+(?:type\s+)?\{([^}]*)\}/g)) {
+    const exported = list[1].split(',').map((part) => {
+      const pieces = part.trim().replace(/^type\s+/, '').split(/\s+as\s+/);
+      return pieces[pieces.length - 1].trim();
+    });
+    if (exported.includes(name)) return true;
+  }
+
+  return false;
+}
+
 let checkedFileEntries = 0;
 let checkedMainFiles = 0;
+let checkedTypeExports = 0;
 /** @type {{registryUrl: string, mainFilePath: string}[]} */
 const remoteProbes = [];
 
@@ -441,6 +481,46 @@ for (const registryFile of registryFiles) {
           registryUrl: manifest.registryUrl,
           mainFilePath: matched,
         });
+
+        // 7. Every declared type export must exist in the main file.
+        const { typeExports } = exportsBlock;
+        if (typeExports !== undefined) {
+          if (!Array.isArray(typeExports)) {
+            fail(
+              registryFile,
+              `exports.typeExports must be an array of strings, got ${typeof typeExports}`
+            );
+          } else {
+            const mainFileOnDisk = path.join(dir, matched);
+            const mainSource = fs.existsSync(mainFileOnDisk)
+              ? fs.readFileSync(mainFileOnDisk, 'utf8')
+              : null;
+            typeExports.forEach((typeName, index) => {
+              if (typeof typeName !== 'string' || typeName.trim().length === 0) {
+                fail(
+                  registryFile,
+                  `exports.typeExports[${index}] must be a non-empty string, got ${JSON.stringify(
+                    typeName
+                  )}`
+                );
+                return;
+              }
+              // A missing main file is already reported by invariant 3.
+              if (mainSource === null) return;
+              checkedTypeExports += 1;
+              if (!sourceExportsName(mainSource, typeName)) {
+                fail(
+                  registryFile,
+                  `exports.typeExports[${index}] "${typeName}" is not exported by ${matched}\n` +
+                    '    `sublay add` prints `import { ' +
+                    `${exportsBlock.mainComponent}, type ${typeName} }` +
+                    '` as the usage snippet, which does not compile unless ' +
+                    'the main file exports that name'
+                );
+              }
+            });
+          }
+        }
       }
     }
   }
@@ -457,7 +537,8 @@ if (errors.length > 0) {
     '\nEvery registry.json must set registryUrl to its own directory under\n' +
       `${REMOTE_REGISTRY_BASE} (read from packages/cli/src/utils/registry.ts),\n` +
       'every files[].path must exist on disk relative to that registry.json,\n' +
-      'and exports.mainComponent/mainFile must name something files[] installs.\n' +
+      'exports.mainComponent/mainFile must name something files[] installs,\n' +
+      'and every exports.typeExports name must be exported by the main file.\n' +
       'The registry is served off the default branch, so these break\n' +
       '`sublay add` for every user as soon as they merge.'
   );
@@ -467,7 +548,7 @@ if (errors.length > 0) {
 console.log(
   `Registry integrity check passed: ${registryFiles.length} registry.json ` +
     `file(s), ${checkedFileEntries} file entr(ies), ${checkedMainFiles} ` +
-    `main file(s) verified against REMOTE_REGISTRY_BASE ${REMOTE_REGISTRY_BASE} ` +
+    `main file(s), ${checkedTypeExports} type export(s) verified against REMOTE_REGISTRY_BASE ${REMOTE_REGISTRY_BASE} ` +
     `(repo ${REPO_SLUG}, cross-checked against packages/cli/package.json; ` +
     `ref ${REGISTRY_REF}).`
 );

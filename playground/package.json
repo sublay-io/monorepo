@@ -11,7 +11,6 @@
     "@giphy/js-fetch-api": "^5.7.0",
     "@giphy/react-components": "^10.1.1",
     "@sublay/react-js": "workspace:*",
-    "@sublay/ui-core-react-js": "workspace:*",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
     "moment": "^2.30.1",

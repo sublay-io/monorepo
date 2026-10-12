@@ -8,7 +8,6 @@ A manual Vite harness for eyeballing the registry components (`../registry/react
    ```
    pnpm install
    pnpm react:build-all
-   pnpm --filter @sublay/ui-core-react-js run build
    ```
 2. `cp .env.example .env` and fill it in:
    - `VITE_PROJECT_ID` — the Sublay project to read from and write to.

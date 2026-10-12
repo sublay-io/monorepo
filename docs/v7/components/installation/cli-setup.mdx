@@ -157,6 +157,42 @@ npm install @sublay/expo
 These packages are **required**. Components use them for data fetching, authentication, real-time updates, and core functionality.
 </Warning>
 
+If your project already has one of these packages at a version below the one a component needs, `add` lists it as needing an upgrade and offers to install the required version.
+
+---
+
+## Command Reference
+
+### `init`
+
+```bash
+npx @sublay/cli init
+```
+
+Creates `sublay.json` in the current directory. It asks its questions interactively and takes no options.
+
+### `add <component>`
+
+```bash
+npx @sublay/cli add comments-threaded
+```
+
+Copies a component into the `paths.components` directory from `sublay.json`, using the platform and style configured there, then checks the component's dependencies against your `package.json`.
+
+| Option | Description |
+|--------|-------------|
+| `--ref <branch>` | Read the component from this branch of the [Sublay repository](https://github.com/sublay-io/monorepo) instead of the default branch, `main`. |
+
+```bash
+npx @sublay/cli add comments-threaded --ref my-branch
+```
+
+`--ref` applies to that one command and is not saved to `sublay.json`. A branch name may contain letters, digits, `.`, `_`, `-` and `/`. A commit pushed to a branch can take a few minutes to be served.
+
+A component installed from another branch can require different package versions than the one on `main`; the dependency check after the install lists what that branch's component needs.
+
+`add` downloads every file before it writes any. If the branch or the component does not exist, or a file cannot be downloaded, the command names what is missing, exits with code 1, and leaves your project unchanged.
+
 ---
 
 ## Troubleshooting

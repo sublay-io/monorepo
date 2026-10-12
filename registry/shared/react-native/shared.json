@@ -98,6 +98,13 @@
       ],
       "dependencies": []
     },
+    "pick-avatar-source": {
+      "files": [
+        "pick-avatar-source.ts"
+      ],
+      "requires": [],
+      "dependencies": []
+    },
     "reset-styles": {
       "files": [
         "reset-styles.ts"
@@ -143,6 +150,7 @@
       ],
       "requires": [
         "get-user-avatar",
+        "pick-avatar-source",
         "theme"
       ],
       "dependencies": [

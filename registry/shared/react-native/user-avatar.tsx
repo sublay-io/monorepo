@@ -1,15 +1,17 @@
-import { View, Image, StyleSheet } from "react-native";
+import { View, Image, PixelRatio, StyleSheet } from "react-native";
 import Svg, { Circle, Polygon, Rect } from "react-native-svg";
 import {
   getUserAvatar,
   USER_AVATAR_VIEW_BOX_SIZE,
   type UserAvatarShape,
 } from "./get-user-avatar";
+import { type AvatarFile, pickAvatarSource } from "./pick-avatar-source";
 import { type UITheme, uiColors } from "./theme";
 
 interface UserProps {
   id?: string;
   avatar?: string | null | undefined;
+  avatarFile?: AvatarFile | null | undefined; // Avatar uploaded through Sublay
   name?: string | null | undefined;
   username?: string | null | undefined;
 }
@@ -86,6 +88,9 @@ const UserAvatar = ({
 }) => {
   if (!user) return null;
 
+  // The uploaded avatar file, then the `avatar` URL, then a generated avatar
+  const source = pickAvatarSource(user, size, PixelRatio.get());
+
   return (
     <View
       style={[
@@ -98,10 +103,10 @@ const UserAvatar = ({
         },
       ]}
     >
-      {user.avatar ? (
+      {source ? (
         <Image
           source={{
-            uri: user.avatar,
+            uri: source,
           }}
           style={[
             styles.image,

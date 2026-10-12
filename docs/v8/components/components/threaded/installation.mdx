@@ -59,7 +59,7 @@ npx @sublay/cli add comments-threaded --ref v8
 The CLI will:
 
 1. **Fetch the component** from the registry based on your `sublay.json` platform and style settings
-2. **Copy the component's 39 files** into your project at `{componentsPath}/comments-threaded/`: the component's own files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
+2. **Copy the component's 40 files** into your project at `{componentsPath}/comments-threaded/`: the component's own files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
 3. **Transform imports** to work with your project structure
 4. **Create `index.ts`** barrel export for clean imports
 5. **Display usage examples** and required dependencies
@@ -115,6 +115,7 @@ The CLI will:
         ├── magnifying-glass-icon.tsx                    # Search icon of the GIF picker
         ├── modal.tsx                                    # Modal dialog
         ├── parse-content-with-mentions.tsx              # Makes @mentions clickable
+        ├── pick-avatar-source.ts                        # Picks which avatar image to show
         ├── reset-styles.ts                              # Style resets
         ├── skeleton.tsx                                 # Loading skeletons
         ├── theme.ts                                     # Light and dark colors of these files
@@ -170,6 +171,7 @@ The CLI will:
         ├── giphy-container.tsx                          # GIF picker
         ├── magnifying-glass-icon.tsx                    # Search icon of the GIF picker
         ├── parse-content-with-mentions.tsx              # Makes @mentions clickable
+        ├── pick-avatar-source.ts                        # Picks which avatar image to show
         ├── skeleton.tsx                                 # Loading skeletons
         ├── theme.ts                                     # Light and dark colors of these files
         ├── trash-icon.tsx                               # Delete icon

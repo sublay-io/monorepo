@@ -141,6 +141,7 @@ function ThreadedCommentSectionInner({
       <div
         style={{
           borderTop: theme === 'dark' ? "1px solid #525252" : "1px solid #e5e7eb",
+          backgroundColor: theme === 'dark' ? "#262626" : "#fff",
           // 🎨 CUSTOMIZATION: Layout styling (Default: 8px)
           paddingTop: "8px",
         }}

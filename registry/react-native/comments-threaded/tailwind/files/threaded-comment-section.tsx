@@ -127,7 +127,9 @@ function ThreadedCommentSectionInner({
 
       <View
         className={`border-t pt-2 ${
-          theme === 'dark' ? 'border-neutral-600' : 'border-gray-200'
+          theme === 'dark'
+            ? 'border-neutral-600 bg-neutral-800'
+            : 'border-gray-200 bg-white'
         }`}
       >
         {isVisible && <NewCommentForm />}

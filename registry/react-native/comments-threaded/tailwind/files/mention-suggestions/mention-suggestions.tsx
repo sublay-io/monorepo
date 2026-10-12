@@ -26,7 +26,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
     <View
       className={`h-auto max-h-[200px] absolute bottom-0 left-0 right-0 z-10 overflow-hidden p-3 rounded-xl border mb-2 mx-2 ${
         theme === 'dark'
-          ? 'bg-gray-800 border-gray-600'
+          ? 'bg-neutral-800 border-neutral-600'
           : 'bg-white border-gray-200'
       }`}
       style={{
@@ -60,14 +60,14 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                 handleMentionClick(item);
               }}
               className={`flex-row items-center gap-3 p-2 rounded-lg ${
-                theme === 'dark' ? 'active:bg-gray-700' : 'active:bg-gray-50'
+                theme === 'dark' ? 'active:bg-neutral-700' : 'active:bg-gray-50'
               }`}
             >
               <UserAvatar user={item} size={32} />
               <View className="flex-col gap-0.5">
                 <Text
                   className={`text-sm font-medium ${
-                    theme === 'dark' ? 'text-gray-50' : 'text-gray-900'
+                    theme === 'dark' ? 'text-neutral-50' : 'text-gray-900'
                   }`}
                 >
                   @{item.username}
@@ -75,7 +75,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                 {item.name && (
                   <Text
                     className={`text-xs font-normal ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >
                     {item.name}
@@ -90,7 +90,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
         <View className="py-4 items-center justify-center">
           <Text
             className={`text-sm ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+              theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
             }`}
           >
             No users found

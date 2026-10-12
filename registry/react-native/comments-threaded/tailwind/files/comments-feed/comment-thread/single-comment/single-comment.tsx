@@ -68,7 +68,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
     >
       <Text
         className={`text-xs font-medium ${
-          theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+          theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
         }`}
       >
         Remove your vote
@@ -155,13 +155,13 @@ function SingleComment({
   // from the section background
   const highlightClass = isHighlighted
     ? theme === 'dark'
-      ? 'bg-[#2B3544]'
+      ? 'bg-[#333333]'
       : 'bg-gray-100'
     : '';
   // 🎨 CUSTOMIZATION: Highlight color on the indentation beside it
   const highlightGutterClass = isHighlighted
     ? theme === 'dark'
-      ? 'bg-blue-900'
+      ? 'bg-blue-950'
       : 'bg-blue-100'
     : '';
 
@@ -210,7 +210,7 @@ function SingleComment({
             {isPlaceholderRow || tombstone ? (
               <View
                 className={`relative z-10 rounded-full ${
-                  theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                  theme === 'dark' ? 'bg-neutral-700' : 'bg-gray-200'
                 }`}
                 style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
               />
@@ -241,7 +241,7 @@ function SingleComment({
                 <>
                   <Text
                     className={`text-xs italic ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >
                     This comment is unavailable
@@ -252,7 +252,7 @@ function SingleComment({
                 <>
                   <Text
                     className={`text-xs italic ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >
                     Comment from a user you blocked
@@ -282,7 +282,7 @@ function SingleComment({
                 {tombstone ? (
                   <Text
                     className={`font-medium text-xs ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >
                     {tombstone}
@@ -299,7 +299,7 @@ function SingleComment({
                 >
                   <Text
                     className={`font-medium text-xs ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      theme === 'dark' ? 'text-neutral-300' : 'text-gray-700'
                     }`}
                   >
                     {getUserName(comment.user ?? {})}
@@ -308,14 +308,14 @@ function SingleComment({
                 )}
                 <Text
                   className={`text-xs ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                   }`}
                 >
                   •
                 </Text>
                 <Text
                   className={`text-xs ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                   }`}
                 >
                   {new Date(comment.createdAt).toLocaleDateString()}
@@ -342,7 +342,7 @@ function SingleComment({
             {!isCollapsed && tombstone && (
               <Text
                 className={`text-xs italic mb-3 leading-relaxed ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                  theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                 }`}
               >
                 {tombstone}
@@ -353,7 +353,7 @@ function SingleComment({
               <Text
                 accessibilityRole="alert"
                 className={`text-xs mb-3 ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                  theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                 }`}
               >
                 {replyErrorMessage}
@@ -365,7 +365,7 @@ function SingleComment({
                 {comment.content && (
                   <Text
                     className={`text-xs mb-3 leading-relaxed ${
-                      theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+                      theme === 'dark' ? 'text-neutral-200' : 'text-gray-800'
                     }`}
                   >
                     {parseContentWithMentions(
@@ -387,7 +387,7 @@ function SingleComment({
                 {isOwnRemoved && (
                   <Text
                     className={`text-xs mb-3 ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >
                     {ownRemovedLabel}
@@ -398,7 +398,7 @@ function SingleComment({
                   <Text
                     accessibilityRole="alert"
                     className={`text-xs mb-3 ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                      theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >
                     {replyErrorMessage}

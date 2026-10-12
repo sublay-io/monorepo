@@ -19,12 +19,12 @@ function ActionMenu({ comment }: ActionMenuProps) {
             : openCommentOptionsSheet?.(comment)
         }
         className={`p-1 rounded ${
-          theme === 'dark' ? 'active:bg-gray-700' : 'active:bg-gray-50'
+          theme === 'dark' ? 'active:bg-neutral-700' : 'active:bg-gray-50'
         }`}
       >
         <Text
           className={`text-xs ${
-            theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+            theme === 'dark' ? 'text-neutral-500' : 'text-gray-400'
           }`}
         >
           •••

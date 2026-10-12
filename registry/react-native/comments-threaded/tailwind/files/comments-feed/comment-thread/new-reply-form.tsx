@@ -93,9 +93,9 @@ function NewReplyForm({
               ? 'border border-blue-900'
               : 'border border-blue-300'
             : theme === 'dark'
-              ? 'border border-gray-600'
+              ? 'border border-neutral-600'
               : 'border border-gray-200'
-        } ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}
+        } ${theme === 'dark' ? 'bg-neutral-800' : 'bg-white'}`}
       >
         <TextInput
           value={replyContent}
@@ -107,21 +107,21 @@ function NewReplyForm({
           multiline
           numberOfLines={2}
           className={`flex-1 py-1.5 px-2 text-xs bg-transparent ${
-            theme === 'dark' ? 'text-gray-50' : 'text-gray-900'
+            theme === 'dark' ? 'text-neutral-50' : 'text-gray-900'
           }`}
-          placeholderTextColor={theme === 'dark' ? '#9CA3AF' : '#6B7280'}
+          placeholderTextColor={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
           style={{ textAlignVertical: 'top' }}
         />
         <View className="flex-row gap-1 ml-1">
           <TouchableOpacity
             onPress={handleCancelReply}
             className={`px-2 py-1 rounded ${
-              theme === 'dark' ? 'active:bg-gray-700' : 'active:bg-gray-50'
+              theme === 'dark' ? 'active:bg-neutral-700' : 'active:bg-gray-50'
             }`}
           >
             <Text
               className={`text-xs ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                theme === 'dark' ? 'text-neutral-400' : 'text-gray-600'
               }`}
             >
               Cancel
@@ -133,10 +133,10 @@ function NewReplyForm({
             className={`p-1.5 rounded-full ${
               hasContent
                 ? theme === 'dark'
-                  ? 'bg-blue-500'
+                  ? 'bg-blue-600'
                   : 'bg-blue-600'
                 : theme === 'dark'
-                  ? 'bg-gray-600'
+                  ? 'bg-neutral-600'
                   : 'bg-gray-200'
             }`}
           >
@@ -148,7 +148,7 @@ function NewReplyForm({
                   hasContent
                     ? 'text-white'
                     : theme === 'dark'
-                      ? 'text-gray-500'
+                      ? 'text-neutral-500'
                       : 'text-gray-400'
                 }`}
               >
@@ -162,7 +162,7 @@ function NewReplyForm({
         <Text
           accessibilityRole="alert"
           className={`text-xs mt-1.5 px-2 ${
-            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+            theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
           }`}
         >
           {errorMessage}

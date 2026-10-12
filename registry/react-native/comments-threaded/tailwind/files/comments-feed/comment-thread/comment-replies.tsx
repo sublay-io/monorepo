@@ -93,7 +93,7 @@ function CommentReplies({
             <View className="flex-row items-center px-2 py-1">
               <Text
                 className={`text-xs ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                  theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                 }`}
               >
                 Couldn't load more ·{" "}
@@ -101,7 +101,7 @@ function CommentReplies({
               <TouchableOpacity onPress={onLoadMore}>
                 <Text
                   className={`text-xs font-medium ${
-                    theme === 'dark' ? 'text-blue-500' : 'text-blue-600'
+                    theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                   }`}
                 >
                   Try again
@@ -113,7 +113,7 @@ function CommentReplies({
               onPress={onLoadMore}
               disabled={loading}
               className={`flex-row items-center gap-2 px-2 py-1 rounded-full ${
-                theme === 'dark' ? 'active:bg-blue-950' : 'active:bg-blue-50'
+                theme === 'dark' ? 'active:bg-blue-400/10' : 'active:bg-blue-50'
               }`}
             >
               <Text
@@ -125,7 +125,7 @@ function CommentReplies({
               </Text>
               <Text
                 className={`text-xs font-medium ${
-                  theme === 'dark' ? 'text-blue-500' : 'text-blue-600'
+                  theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                 }`}
               >
                 {loading ? "Loading..." : loadMoreLabel}

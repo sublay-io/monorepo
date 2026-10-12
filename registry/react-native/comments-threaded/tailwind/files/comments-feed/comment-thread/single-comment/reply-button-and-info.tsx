@@ -22,12 +22,12 @@ function ReplyButtonAndInfo({
       <TouchableOpacity
         onPress={() => setShowReplyForm((prev) => !prev)}
         className={`px-2 py-1 -ml-2 rounded ${
-          theme === 'dark' ? 'active:bg-blue-950' : 'active:bg-blue-50'
+          theme === 'dark' ? 'active:bg-blue-400/10' : 'active:bg-blue-50'
         }`}
       >
         <Text
           className={`text-xs font-medium ${
-            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+            theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
           }`}
         >
           Reply
@@ -37,7 +37,7 @@ function ReplyButtonAndInfo({
       {hasReplies && (
         <Text
           className={`text-xs ${
-            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+            theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
           }`}
         >
           {replyCount} {replyCount === 1 ? "reply" : "replies"}

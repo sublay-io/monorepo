@@ -21,21 +21,21 @@
  * Tailwind dark mode classes are used for conditional styling.
  *
  * BACKGROUNDS:
- * - bg-white / dark:bg-gray-800 (main background)
- * - bg-gray-50 / dark:bg-gray-700 (secondary background, vote buttons)
- * - bg-gray-100 / dark:bg-[#2B3544] (highlighted comment background)
- * - bg-blue-100 / dark:bg-blue-900 (indentation beside a highlighted comment)
- * - bg-gray-200 / dark:bg-gray-600 (vote buttons on a highlighted comment)
+ * - bg-white / dark:bg-neutral-800 (main background)
+ * - bg-gray-50 / dark:bg-neutral-700 (secondary background, vote buttons)
+ * - bg-gray-100 / dark:bg-[#333333] (highlighted comment background)
+ * - bg-blue-100 / dark:bg-blue-950 (indentation beside a highlighted comment)
+ * - bg-gray-200 / dark:bg-neutral-600 (vote buttons on a highlighted comment)
  *
  * TEXT:
- * - text-gray-900 / dark:text-gray-50 (primary text)
- * - text-gray-800 / dark:text-gray-200 (body text)
- * - text-gray-700 / dark:text-gray-300 (author names, secondary text)
- * - text-gray-500 / dark:text-gray-400 (timestamps, tertiary text)
+ * - text-gray-900 / dark:text-neutral-50 (primary text)
+ * - text-gray-800 / dark:text-neutral-200 (body text)
+ * - text-gray-700 / dark:text-neutral-300 (author names, secondary text)
+ * - text-gray-500 / dark:text-neutral-400 (timestamps, tertiary text)
  *
  * BORDERS:
- * - border-gray-200 / dark:border-gray-600 (primary borders)
- * - border-gray-300 / dark:border-gray-500 (threading lines)
+ * - border-gray-200 / dark:border-neutral-600 (primary borders)
+ * - border-gray-300 / dark:border-neutral-500 (threading lines)
  *
  * BLUES (links, actions, upvotes):
  * - text-blue-600 / dark:text-blue-400 (primary blue)
@@ -119,7 +119,7 @@ function ThreadedCommentSectionInner({
   return (
     <View className="flex-1">
       <ScrollView
-        className={`flex-1 py-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}
+        className={`flex-1 py-2 ${theme === 'dark' ? 'bg-neutral-800' : 'bg-white'}`}
         keyboardShouldPersistTaps="handled"
       >
         <CommentsFeed>{children}</CommentsFeed>
@@ -127,7 +127,7 @@ function ThreadedCommentSectionInner({
 
       <View
         className={`border-t pt-2 ${
-          theme === 'dark' ? 'border-gray-600' : 'border-gray-200'
+          theme === 'dark' ? 'border-neutral-600' : 'border-gray-200'
         }`}
       >
         {isVisible && <NewCommentForm />}

@@ -86,10 +86,10 @@ const ReportCommentSheet = () => {
         }
       }}
       backgroundStyle={{
-        backgroundColor: theme === 'dark' ? '#1F2937' : '#FFFFFF',
+        backgroundColor: theme === 'dark' ? '#262626' : '#FFFFFF',
       }}
       handleIndicatorStyle={{
-        backgroundColor: theme === 'dark' ? '#9CA3AF' : '#D1D5DB',
+        backgroundColor: theme === 'dark' ? '#A3A3A3' : '#D1D5DB',
       }}
     >
       <BottomSheetView className="p-7 flex-1 h-full justify-between">
@@ -97,11 +97,11 @@ const ReportCommentSheet = () => {
           <View className="flex-row items-center gap-4">
             <FlagIcon
               size={24}
-              color={theme === 'dark' ? '#F9FAFB' : '#1F2937'}
+              color={theme === 'dark' ? '#FAFAFA' : '#1F2937'}
             />
             <Text
               className={`text-2xl ${
-                theme === 'dark' ? 'text-gray-50' : 'text-gray-900'
+                theme === 'dark' ? 'text-neutral-50' : 'text-gray-900'
               }`}
             >
               Submit a report
@@ -109,7 +109,7 @@ const ReportCommentSheet = () => {
           </View>
           <Text
             className={`mt-6 ${
-              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              theme === 'dark' ? 'text-neutral-300' : 'text-gray-700'
             }`}
           >
             Thank you for looking out for our community. Let us know what is
@@ -129,7 +129,7 @@ const ReportCommentSheet = () => {
                         ? 'bg-white'
                         : 'bg-gray-900'
                       : theme === 'dark'
-                        ? 'bg-gray-600'
+                        ? 'bg-neutral-600'
                         : 'bg-gray-200'
                   }`}
                 >
@@ -137,10 +137,10 @@ const ReportCommentSheet = () => {
                     className={`text-sm ${
                       isSelected
                         ? theme === 'dark'
-                          ? 'text-gray-900'
+                          ? 'text-neutral-900'
                           : 'text-white'
                         : theme === 'dark'
-                          ? 'text-gray-400'
+                          ? 'text-neutral-400'
                           : 'text-gray-500'
                     }`}
                   >

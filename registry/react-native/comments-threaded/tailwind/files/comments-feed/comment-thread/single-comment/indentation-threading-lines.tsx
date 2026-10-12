@@ -33,7 +33,7 @@ function useLineClasses() {
   const { theme } = useUIState();
   return {
     // 🎨 CUSTOMIZATION: Threading line color (Default: gray-300)
-    line: theme === 'dark' ? 'border-gray-500' : 'border-gray-300',
+    line: theme === 'dark' ? 'border-neutral-500' : 'border-gray-300',
     // 🎨 CUSTOMIZATION: Connector into the highlighted comment (Default: blue-500)
     accent: theme === 'dark' ? 'border-blue-400' : 'border-blue-500',
   };

@@ -138,6 +138,30 @@ All components automatically switch to dark colors.
 
 ---
 
+## Shared Pieces
+
+The GIF picker, loading skeletons, mention text and (in social comments) the emoji bar divider are drawn by the files in the component's `shared/` folder. Their light and dark colors are in `shared/theme.ts`.
+
+- **Inline styles variant, and every React Native / Expo variant:** the component passes its `theme` to these pieces. Edit the colors in `shared/theme.ts`.
+- **Tailwind variant on web:** the pieces read CSS custom properties, and the root element of the comment section sets them under `dark:`:
+
+```tsx
+// components/threaded-comment-section.tsx (or social-comment-section.tsx)
+const sharedDarkColors = [
+  "dark:[--sublay-ui-surface:#262626]",   // GIF picker background
+  "dark:[--sublay-ui-control:#404040]",   // GIF picker back button and search field
+  "dark:[--sublay-ui-muted:#a3a3a3]",     // GIF picker icons
+  "dark:[--sublay-ui-text:#fafafa]",      // GIF picker search text
+  "dark:[--sublay-ui-divider:#525252]",   // Emoji bar divider
+  "dark:[--sublay-ui-skeleton:#404040]",  // Loading skeletons
+  "dark:[--sublay-ui-mention:#60a5fa]",   // Mention text
+].join(" ");
+```
+
+Change a value there to change the dark color. Light colors are the fallbacks in `shared/theme.ts`. To override a light color from CSS, set the same property without the `dark:` prefix.
+
+---
+
 ## Common Customizations
 
 ### Change Primary Brand Color

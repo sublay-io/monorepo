@@ -235,8 +235,10 @@ Available components: Threaded comments ✅, Social comments ✅
 
 ```bash
 rm -rf src/components/comments-threaded
-npx @sublay/cli add comments-threaded
+npx @sublay/cli add comments-threaded --ref v8
 ```
+
+`--ref v8` reads the component from the `v8` branch of the registry, where the v8 components live. The ref is given on each `add` command. It is not stored in `sublay.json`.
 
 **Option 2 — Re-initialize:** Delete `sublay.json` and run `init` again.
 

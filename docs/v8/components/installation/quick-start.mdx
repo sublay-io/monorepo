@@ -96,7 +96,7 @@ The CLI will prompt you to install these automatically if they're missing.
 <Tabs>
   <Tab title="Threaded Comments">
     ```bash
-    npx @sublay/cli add comments-threaded
+    npx @sublay/cli add comments-threaded --ref v8
     ```
 
     Reddit-style discussions with unlimited nesting, upvote/downvote, threading lines, and collapsible threads.
@@ -104,14 +104,16 @@ The CLI will prompt you to install these automatically if they're missing.
 
   <Tab title="Social Comments">
     ```bash
-    npx @sublay/cli add comments-social
+    npx @sublay/cli add comments-social --ref v8
     ```
 
     Instagram-style comments with single-level nesting, heart/like system, and Top/New/Old sorting.
   </Tab>
 </Tabs>
 
-The CLI copies ~25 source files into your project and shows a usage example.
+`--ref v8` reads the component from the `v8` branch of the registry, where the v8 components live.
+
+The CLI copies about 40 source files into your project and shows a usage example. It also checks your `package.json` for the third-party packages the component needs (the Giphy packages for the GIF picker, for example) and offers to install the ones that are missing.
 
 ---
 
@@ -300,17 +302,18 @@ That's it! You now have a fully functional comment system.
 ```
 src/components/comments-threaded/
 ├── index.ts
-├── components/          # ~20 UI component files
+├── components/          # 22 UI component files
 │   ├── threaded-comment-section.tsx
 │   ├── new-comment-form.tsx
 │   ├── comments-feed/
 │   └── modals/
 ├── hooks/
 ├── utils/
-└── context/
+├── context/
+└── shared/              # Shared pieces: GIF picker, avatar, skeletons, icons
 ```
 
-All files are editable TypeScript/TSX, documented with inline comments, and committed to your repo.
+All files are editable TypeScript/TSX, documented with inline comments, and committed to your repo. That includes the files in `shared/`, the presentational pieces the component is built from.
 
 ---
 

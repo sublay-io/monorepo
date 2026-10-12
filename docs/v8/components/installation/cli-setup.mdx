@@ -54,7 +54,7 @@ Then use without `npx`:
 
 ```bash
 sublay init
-sublay add comments-threaded
+sublay add comments-threaded --ref v8
 ```
 
 <Note>
@@ -134,9 +134,32 @@ See [Configuration](/v8/components/installation/configuration) for a full refere
 
 ---
 
+## Adding Components
+
+```bash
+npx @sublay/cli add <component> --ref v8
+```
+
+| Option | Description |
+|--------|-------------|
+| `--ref <branch>` | The branch of the component registry to read from. Without it, `add` reads the default branch. The v8 components are on the `v8` branch, so every `add` command in this documentation uses `--ref v8`. |
+
+`add` reads `sublay.json`, then:
+
+1. **Downloads the component** for your platform and style from the chosen branch.
+2. **Downloads the shared pieces** the component is built from (the GIF picker, avatar, skeletons, icons and similar) into a `shared/` folder inside the component's own folder.
+3. **Writes the files** to `{paths.components}/<component>/`, with imports adjusted to the installed layout. If any file fails to download, nothing is written.
+4. **Checks your `package.json`** for the packages the component and its shared pieces need, and offers to install the missing ones.
+
+A branch name may contain letters, digits, `.`, `_`, `-` and `/`. If the branch or the component does not exist on it, `add` stops with a message naming the one that is missing and writes nothing.
+
+Every installed file is yours to edit, the files in `shared/` included. Each component gets its own `shared/` folder.
+
+---
+
 ## Installing Dependencies
 
-The CLI checks for required peer dependencies and prompts to install them if missing.
+`add` checks for the packages a component needs and prompts to install them if missing. The Sublay SDK for your platform is always one of them:
 
 **React (Web):**
 ```bash

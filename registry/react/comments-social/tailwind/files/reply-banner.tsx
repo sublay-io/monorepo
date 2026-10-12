@@ -22,12 +22,12 @@ function ReplyBanner() {
       style={{
         bottom: showReplyBanner ? 0 : -60,
       }}
-      className="h-auto absolute left-0 right-0 z-10 overflow-hidden transition-all duration-300 bg-gray-200 dark:bg-gray-700 px-3 py-2"
+      className="h-auto absolute left-0 right-0 z-10 overflow-hidden transition-all duration-300 bg-gray-200 dark:bg-neutral-700 px-3 py-2"
     >
       <div
         className="flex items-center justify-between h-full"
       >
-        <span className="text-gray-600 dark:text-gray-400 text-xs">
+        <span className="text-gray-600 dark:text-neutral-400 text-xs">
           Replying to {repliedToUser}
         </span>
         <button

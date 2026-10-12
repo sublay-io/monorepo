@@ -222,7 +222,7 @@ function NewCommentForm() {
       ) : null}
       <div
         style={resetDiv}
-        className="relative bg-white dark:bg-gray-800"
+        className="relative bg-white dark:bg-neutral-800"
       >
         <div className="w-full relative">
           <ReplyBanner />
@@ -233,7 +233,7 @@ function NewCommentForm() {
             handleMentionClick={handleMentionClick}
           />
         </div>
-        <div className="relative z-20 bg-white dark:bg-gray-800">
+        <div className="relative z-20 bg-white dark:bg-neutral-800">
           {/* 🔧 CUSTOMIZE: Remove this component if you don't want emoji picker */}
           <EmojiSuggestions
             onEmojiClick={(emoji) => {
@@ -267,7 +267,7 @@ function NewCommentForm() {
               }}
               required
               style={resetTextInput}
-              className="w-full text-sm text-gray-900 dark:text-gray-200 bg-white dark:bg-gray-800"
+              className="w-full text-sm text-gray-900 dark:text-neutral-200 bg-white dark:bg-neutral-800"
             />
             {content.length === 0 && giphyApiKey ? (
               <button
@@ -294,7 +294,7 @@ function NewCommentForm() {
           {createErrorMessage && (
             <p
               role="alert"
-              className="m-0 px-4 pb-2 text-xs text-gray-500 dark:text-gray-400"
+              className="m-0 px-4 pb-2 text-xs text-gray-500 dark:text-neutral-400"
               // 🎨 CUSTOMIZATION: Failed-post message styling
             >
               {createErrorMessage}

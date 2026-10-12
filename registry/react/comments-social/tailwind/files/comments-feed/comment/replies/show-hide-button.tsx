@@ -69,8 +69,8 @@ const ShowHideButton = ({
         style={{ paddingTop: 8, paddingLeft: 56, paddingRight: 16 }}
         className="flex items-center gap-3"
       >
-        <div className="h-px w-6 mt-0.5 bg-gray-600 dark:bg-gray-400" />
-        <span className="text-xs text-gray-600 dark:text-gray-400">
+        <div className="h-px w-6 mt-0.5 bg-gray-600 dark:bg-neutral-400" />
+        <span className="text-xs text-gray-600 dark:text-neutral-400">
           Couldn't load more ·{" "}
           <button
             onClick={() => {
@@ -78,7 +78,7 @@ const ShowHideButton = ({
               onLoadMore();
             }}
             style={resetButton}
-            className="text-xs font-semibold text-gray-600 dark:text-gray-400"
+            className="text-xs font-semibold text-gray-600 dark:text-neutral-400"
           >
             Try again
           </button>
@@ -99,10 +99,10 @@ const ShowHideButton = ({
     >
       {/* Button line */}
       <div
-        className="h-px w-6 mt-0.5 bg-gray-600 dark:bg-gray-400"
+        className="h-px w-6 mt-0.5 bg-gray-600 dark:bg-neutral-400"
       />
       {/* Button text */}
-      <span className="text-xs text-gray-600 dark:text-gray-400 font-semibold">
+      <span className="text-xs text-gray-600 dark:text-neutral-400 font-semibold">
         {text}
       </span>
     </button>

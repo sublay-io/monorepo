@@ -122,7 +122,7 @@ const Comment = React.memo(
         className={cn(
           "w-full py-2",
           highlightedComment?.comment.id === comment.id &&
-          "bg-blue-100 dark:bg-blue-900"
+          "bg-blue-100 dark:bg-[#333333]"
         )}
       >
         {isPlaceholderRow ? (
@@ -130,8 +130,8 @@ const Comment = React.memo(
             className="pr-4 flex flex-row items-center gap-3"
             style={{ paddingLeft: 16 + extraLeftPadding }}
           >
-            <div className="w-8 h-8 rounded-full shrink-0 bg-gray-200 dark:bg-gray-700" />
-            <span className="text-[13px] italic text-gray-500 dark:text-gray-400">
+            <div className="w-8 h-8 rounded-full shrink-0 bg-gray-200 dark:bg-neutral-700" />
+            <span className="text-[13px] italic text-gray-500 dark:text-neutral-400">
               {isUnavailable
                 ? "This comment is unavailable"
                 : "Comment from a user you blocked"}
@@ -141,7 +141,7 @@ const Comment = React.memo(
                 <button
                   onClick={() => toggleReaction({ reactionType: currentReaction })}
                   style={resetButton}
-                  className="text-xs font-semibold text-gray-500 dark:text-gray-400"
+                  className="text-xs font-semibold text-gray-500 dark:text-neutral-400"
                 >
                   Remove your reaction
                 </button>
@@ -150,7 +150,7 @@ const Comment = React.memo(
               <button
                 onClick={() => setShowBlockedComment(true)}
                 style={resetButton}
-                className="text-xs font-semibold text-gray-900 dark:text-gray-50"
+                className="text-xs font-semibold text-gray-900 dark:text-neutral-50"
               >
                 Show anyway
               </button>
@@ -169,7 +169,7 @@ const Comment = React.memo(
             className="flex flex-row items-start gap-3"
           >
             {tombstone ? (
-              <div className="w-8 h-8 rounded-full shrink-0 bg-gray-200 dark:bg-gray-700" />
+              <div className="w-8 h-8 rounded-full shrink-0 bg-gray-200 dark:bg-neutral-700" />
             ) : (
             <div
               onClick={() => {
@@ -198,7 +198,7 @@ const Comment = React.memo(
                 className="flex flex-row items-baseline gap-1 mt-0.5"
               >
                 {tombstone ? (
-                  <span className="font-bold text-[13px] text-gray-500 dark:text-gray-400">
+                  <span className="font-bold text-[13px] text-gray-500 dark:text-neutral-400">
                     {tombstone}
                   </span>
                 ) : (
@@ -214,13 +214,13 @@ const Comment = React.memo(
                     }
                   }}
                   style={resetP}
-                  className="font-bold text-[13px] text-gray-900 dark:text-gray-50"
+                  className="font-bold text-[13px] text-gray-900 dark:text-neutral-50"
                 >
                   {getUserName(comment.user ?? {}, "username")}
                 </div>
                 )}
                 {/* 🎨 CUSTOMIZATION: Timestamp typography */}
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-gray-500 dark:text-neutral-400">
                   <FromNow
                     time={comment.createdAt}
                     fontSize={12}
@@ -233,7 +233,7 @@ const Comment = React.memo(
               {tombstone && (
                 <p
                   style={resetP}
-                  className="text-sm italic text-gray-500 dark:text-gray-400"
+                  className="text-sm italic text-gray-500 dark:text-neutral-400"
                 >
                   {tombstone}
                 </p>
@@ -241,7 +241,7 @@ const Comment = React.memo(
               {!tombstone && comment.content && (
                 <p
                   style={resetP}
-                  className="text-sm text-gray-900 dark:text-gray-200"
+                  className="text-sm text-gray-900 dark:text-neutral-200"
                 >
                   {parseContentWithMentions(
                     comment.content,
@@ -269,7 +269,7 @@ const Comment = React.memo(
               {isOwnRemoved && (
                 <p
                   style={resetP}
-                  className="text-xs text-gray-500 dark:text-gray-400"
+                  className="text-xs text-gray-500 dark:text-neutral-400"
                 >
                   {ownRemovedLabel}
                 </p>
@@ -288,7 +288,7 @@ const Comment = React.memo(
                       : handleDeepReply!(comment)
                   }
                   style={resetButton}
-                  className="text-xs font-semibold text-gray-500 dark:text-gray-400"
+                  className="text-xs font-semibold text-gray-500 dark:text-neutral-400"
                 >
                   Reply
                 </button>
@@ -324,7 +324,7 @@ const Comment = React.memo(
                 paddingBottom={4}
               />
               <div
-                className="text-xs text-gray-500 dark:text-gray-400 font-normal"
+                className="text-xs text-gray-500 dark:text-neutral-400 font-normal"
               >
                 {reactionCounts.like || 0}
               </div>

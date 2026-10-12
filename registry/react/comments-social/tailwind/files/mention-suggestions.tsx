@@ -18,7 +18,7 @@ function MentionSuggestions({
       style={{
         maxHeight: 200,
       }}
-      className="h-auto absolute bottom-0 left-0 right-0 z-10 overflow-hidden overflow-y-auto transition-all duration-150 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600 p-4"
+      className="h-auto absolute bottom-0 left-0 right-0 z-10 overflow-hidden overflow-y-auto transition-all duration-150 bg-white dark:bg-neutral-800 border-t border-gray-200 dark:border-neutral-600 p-4"
     >
       <ul className="grid gap-2">
         {isLoadingMentions
@@ -34,12 +34,12 @@ function MentionSuggestions({
                 <div
                   className="grid justify-evenly"
                 >
-                  <div className="text-sm font-medium text-gray-900 dark:text-gray-50">
+                  <div className="text-sm font-medium text-gray-900 dark:text-neutral-50">
                     {user.username}
                   </div>
                   {user.name && (
                     <div
-                      className="text-sm font-normal text-gray-500 dark:text-gray-400"
+                      className="text-sm font-normal text-gray-500 dark:text-neutral-400"
                     >
                       {user.name}
                     </div>

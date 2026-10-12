@@ -44,7 +44,7 @@ const CommentsFeed = React.memo(
       !loading && !!error && mergedComments.length === 0 && !highlightedComment;
     const showLoadMoreError = !loading && !!error;
     const tryAgainClassName =
-      "text-xs font-semibold text-gray-500 dark:text-gray-400 p-0 bg-transparent border-none cursor-pointer";
+      "text-xs font-semibold text-gray-500 dark:text-neutral-400 p-0 bg-transparent border-none cursor-pointer";
 
     return (
       <div style={{ flex: 1 }}>
@@ -52,7 +52,7 @@ const CommentsFeed = React.memo(
         {showLoadedComments && hasMore && (
           <div className="flex justify-center py-2">
             {showLoadMoreError ? (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
+              <span className="text-xs text-gray-500 dark:text-neutral-400">
                 Couldn't load more ·{" "}
                 <button onClick={() => loadMore?.()} className={tryAgainClassName}>
                   Try again
@@ -62,7 +62,7 @@ const CommentsFeed = React.memo(
               <button
                 onClick={() => loadMore?.()}
                 disabled={loading}
-                className="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-transparent border-none cursor-pointer"
+                className="text-xs font-semibold text-gray-500 dark:text-neutral-400 bg-transparent border-none cursor-pointer"
               >
                 {loading ? "Loading..." : "Load more comments"}
               </button>
@@ -72,7 +72,7 @@ const CommentsFeed = React.memo(
         {showFetchingSkeletons && <FetchingCommentsSkeletons />}
         {showLoadError && (
           <div className="text-center py-2">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+            <p className="text-sm text-gray-500 dark:text-neutral-400 mb-1">
               Couldn't load comments
             </p>
             <button onClick={() => loadMore?.()} className={tryAgainClassName}>

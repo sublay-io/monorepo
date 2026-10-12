@@ -1,8 +1,6 @@
 import { TouchableOpacity, Vibration } from "react-native";
-import {
-  HeartIcon,
-  HeartFullIcon,
-} from "@sublay/ui-core-react-native";
+import HeartIcon from "~shared/react-native/heart-icon";
+import HeartFullIcon from "~shared/react-native/heart-full-icon";
 
 const HeartButton = ({
   userUpvoted,

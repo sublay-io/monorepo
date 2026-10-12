@@ -7,7 +7,7 @@
  *
  * Required dependencies:
  * - @sublay/react-native ^8.0.0-beta.0
- * - @sublay/ui-core-react-native ^7.0.0
+ * - react-native-svg ^15 (used by the shared pieces in shared/)
  * - @gorhom/bottom-sheet
  * - nativewind ^4.0.0
  *

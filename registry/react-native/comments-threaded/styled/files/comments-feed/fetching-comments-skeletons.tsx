@@ -1,7 +1,9 @@
 import { View } from "react-native";
-import { CommentSkeleton } from "@sublay/ui-core-react-native";
+import { CommentSkeleton } from "~shared/react-native/skeleton";
+import useUIState from "../../hooks/use-ui-state";
 
 function FetchingCommentsSkeletons() {
+  const { theme } = useUIState();
   return (
     <View
       style={{
@@ -12,7 +14,7 @@ function FetchingCommentsSkeletons() {
       }}
     >
       {[1, 2, 3].map((i) => (
-        <CommentSkeleton key={i} />
+        <CommentSkeleton theme={theme} key={i} />
       ))}
     </View>
   );

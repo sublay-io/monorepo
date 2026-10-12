@@ -1,4 +1,4 @@
-import { cloneElement, useState } from "react";
+import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import {
   Comment as CommentType,
@@ -9,11 +9,9 @@ import {
   useUser,
   type CommentCreateError,
 } from "@sublay/react-native";
-import {
-  parseContentWithMentions,
-  UserAvatar,
-  getImageComponent,
-} from "@sublay/ui-core-react-native";
+import { parseContentWithMentions } from "~shared/react-native/parse-content-with-mentions";
+import UserAvatar from "~shared/react-native/user-avatar";
+import { getImageComponent } from "~shared/react-native/get-image-component";
 import VoteButtons from "./vote-buttons";
 import ActionMenu from "../action-menu";
 import NewReplyForm from "../new-reply-form";
@@ -451,15 +449,8 @@ function SingleComment({
                         .map((m) => ({ id: m.id, foreignId: m.foreignId ?? undefined, username: m.username })),
                       user?.id,
                       callbacks?.currentUserClickCallback,
-                      callbacks?.otherUserClickCallback
-                    ).map((part) =>
-                      // Mentions come back with a fixed color: restyle them to follow the theme
-                      typeof part === "string"
-                        ? part
-                        : cloneElement(part, {
-                            // 🎨 CUSTOMIZATION: Mention color (Default: blue-800)
-                            style: { color: theme === 'dark' ? "#60A5FA" : "#1E40AF" },
-                          })
+                      callbacks?.otherUserClickCallback,
+                      theme
                     )}
                   </Text>
                 )}

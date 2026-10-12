@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { FlatList, View } from "react-native";
 import { useReplies, useCommentSection } from "@sublay/react-native";
-import { CommentSkeleton } from "@sublay/ui-core-react-native";
+import { CommentSkeleton } from "~shared/react-native/skeleton";
+import useUIState from "../../../../hooks/use-ui-state";
 import Comment from "../comment";
 import ShowHideButton from "./show-hide-button";
 
 function Replies({ commentId }: { commentId: string }) {
+  const { theme } = useUIState();
   const { highlightedComment } = useCommentSection();
 
   // Replies load on click, 5 at a time (no nesting in this component). The
@@ -120,7 +122,7 @@ function Replies({ commentId }: { commentId: string }) {
             },
             (_, index) => index + 1
           )}
-          renderItem={() => <CommentSkeleton />}
+          renderItem={() => <CommentSkeleton theme={theme} />}
           keyExtractor={(item) => String(item)}
           ItemSeparatorComponent={() => <View style={{ height: repliesGap }} />}
           style={{ paddingLeft: 42, paddingRight: 16 }}

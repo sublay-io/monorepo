@@ -54,11 +54,39 @@ function Skeleton({
   );
 }
 
-function CommentSkeleton({ theme = "light" }: { theme?: UITheme }) {
+// The layout values mirror a real comment row, so the skeleton sits where the
+// content will appear. Pass the values of the component it stands in for.
+function CommentSkeleton({
+  avatarSize = 32,
+  gap = 8,
+  lineGap = 8,
+  paddingLeft = 16,
+  extraLeftPadding = 0,
+  theme = "light",
+}: {
+  avatarSize?: number; // Avatar diameter
+  gap?: number; // Space between the avatar and the text lines
+  lineGap?: number; // Space between the text lines
+  paddingLeft?: number; // Space before the avatar
+  extraLeftPadding?: number; // Added to paddingLeft (for nested rows)
+  theme?: UITheme;
+}) {
   return (
-    <View style={styles.commentContainer}>
-      <Skeleton theme={theme} style={styles.avatarSkeleton} />
-      <View style={styles.textSkeletonContainer}>
+    <View
+      style={[
+        styles.commentContainer,
+        { gap, paddingLeft: paddingLeft + extraLeftPadding },
+      ]}
+    >
+      <Skeleton
+        theme={theme}
+        style={{
+          height: avatarSize,
+          width: avatarSize,
+          borderRadius: avatarSize / 2,
+        }}
+      />
+      <View style={[styles.textSkeletonContainer, { gap: lineGap }]}>
         <Skeleton
           theme={theme}
           style={{ ...styles.textSkeleton, width: "30%" }}
@@ -73,12 +101,41 @@ function CommentSkeleton({ theme = "light" }: { theme?: UITheme }) {
   );
 }
 
-function UserMentionSkeleton({ theme = "light" }: { theme?: UITheme }) {
+// Laid out like a mention-suggestion row. Pass the values of the row it
+// stands in for.
+function UserMentionSkeleton({
+  avatarSize = 32,
+  gap = 8,
+  paddingVertical = 8,
+  paddingHorizontal = 0,
+  theme = "light",
+}: {
+  avatarSize?: number; // Avatar diameter
+  gap?: number; // Space between the avatar and the text line
+  paddingVertical?: number; // Row padding above and below
+  paddingHorizontal?: number; // Row padding left and right
+  theme?: UITheme;
+}) {
   return (
-    <View style={styles.mentionContainer}>
-      <Skeleton theme={theme} style={styles.mentionAvatarSkeleton} />
+    <View
+      style={[
+        styles.mentionContainer,
+        { gap, paddingVertical, paddingHorizontal },
+      ]}
+    >
+      <Skeleton
+        theme={theme}
+        style={{
+          height: avatarSize,
+          width: avatarSize,
+          borderRadius: avatarSize / 2,
+        }}
+      />
       <View style={{ flex: 1 }}>
-        <Skeleton theme={theme} style={styles.textSkeleton} />
+        <Skeleton
+          theme={theme}
+          style={{ ...styles.textSkeleton, width: "40%" }}
+        />
       </View>
     </View>
   );
@@ -93,33 +150,22 @@ const styles = StyleSheet.create({
   commentContainer: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 8,
     width: "100%",
-  },
-  avatarSkeleton: {
-    height: 50,
-    width: 50,
-    borderRadius: 25,
   },
   textSkeletonContainer: {
     flex: 1,
-    gap: 8,
+    // The name line of a comment row starts just below the top of the avatar
+    marginTop: 2,
   },
   textSkeleton: {
     width: "100%",
-    height: 16,
-    borderRadius: 8,
+    height: 12,
+    borderRadius: 6,
   },
   mentionContainer: {
     flexDirection: "row",
-    gap: 8,
     width: "100%",
     alignItems: "center",
-  },
-  mentionAvatarSkeleton: {
-    height: 35,
-    width: 35,
-    borderRadius: 17.5,
   },
 });
 

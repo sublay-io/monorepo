@@ -4,8 +4,8 @@ import useUIState from "../../hooks/use-ui-state";
 
 const FetchingCommentsSkeletons = () => {
   const { theme } = useUIState();
-  // 🎨 CUSTOMIZATION: Comments gap (spacing between skeletons)
-  const commentsGap = 8;
+  // Sized and spaced like the comment rows they stand in for
+  const commentsGap = 28;
 
   return (
     <FlatList
@@ -15,9 +15,9 @@ const FetchingCommentsSkeletons = () => {
       ItemSeparatorComponent={() => <View style={{ height: commentsGap }} />}
       style={{ flex: 1 }}
       contentContainerStyle={{
+        paddingTop: 8,
         paddingBottom: 24,
-        paddingRight: 16,
-        paddingLeft: 16,
+        paddingRight: 46,
       }}
       keyboardShouldPersistTaps="always"
     />

@@ -45,7 +45,6 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
           data={[1, 2, 3]} // Just a placeholder array for loading skeletons
           keyExtractor={(item) => `loading-${item}`}
           renderItem={() => <UserMentionSkeleton theme={theme} />}
-          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
           keyboardShouldPersistTaps="always"
         />
       ) : (

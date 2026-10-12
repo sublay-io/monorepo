@@ -35,7 +35,6 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
           data={[1, 2, 3]}
           keyExtractor={(item) => `loading-${item}`}
           renderItem={() => <UserMentionSkeleton theme={theme} />}
-          ItemSeparatorComponent={() => <View className="h-2.5" />}
           keyboardShouldPersistTaps="always"
         />
       ) : (

@@ -1,4 +1,4 @@
-import { CommentSkeleton } from "@sublay/ui-core-react-js";
+import { CommentSkeleton } from "~shared/react/skeleton";
 
 function FetchingCommentsSkeletons() {
   return (

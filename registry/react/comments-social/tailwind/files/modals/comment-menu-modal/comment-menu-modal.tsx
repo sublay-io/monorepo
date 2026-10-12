@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal } from "@sublay/ui-core-react-js";
+import Modal from "~shared/react/modal";
 import { cn } from "@/lib/utils";
 import useUIState from "../../../hooks/use-ui-state";
 import MainContent from "./main-content";

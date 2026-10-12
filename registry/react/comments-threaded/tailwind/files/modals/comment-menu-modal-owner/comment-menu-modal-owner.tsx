@@ -1,5 +1,5 @@
 import { useCommentSection } from "@sublay/react-js";
-import { Modal } from "@sublay/ui-core-react-js";
+import Modal from "~shared/react/modal";
 import useUIState from "../../../hooks/use-ui-state";
 
 function CommentMenuModalOwner() {

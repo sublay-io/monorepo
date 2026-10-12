@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useReplies, useCommentSection } from "@sublay/react-js";
-import { CommentSkeleton } from "@sublay/ui-core-react-js";
+import { CommentSkeleton } from "~shared/react/skeleton";
 
 import Comment from "../comment";
 import ShowHideButton from "./show-hide-button";

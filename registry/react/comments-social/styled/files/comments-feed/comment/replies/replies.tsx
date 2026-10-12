@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { useReplies, useCommentSection } from "@sublay/react-js";
-import { CommentSkeleton } from "@sublay/ui-core-react-js";
+import { CommentSkeleton } from "~shared/react/skeleton";
+import useUIState from "../../../../hooks/use-ui-state";
 
 import Comment from "../comment";
 import ShowHideButton from "./show-hide-button";
 
 export function Replies({ commentId }: { commentId: string }) {
+  const { theme } = useUIState();
   const { highlightedComment } = useCommentSection();
 
   // Replies load on click, 5 at a time (no nesting in this component). The
@@ -100,7 +102,7 @@ export function Replies({ commentId }: { commentId: string }) {
                 ),
               },
               (_, index) => index + 1
-            ).map((i) => <CommentSkeleton extraLeftPadding={42} key={i} />)}
+            ).map((i) => <CommentSkeleton theme={theme} extraLeftPadding={42} key={i} />)}
         </div>
       )}
 

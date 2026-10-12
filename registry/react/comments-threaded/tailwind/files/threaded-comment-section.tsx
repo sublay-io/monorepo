@@ -7,7 +7,8 @@
  *
  * Required dependencies:
  * - @sublay/react-js ^8.0.0-beta.0
- * - @sublay/ui-core-react-js ^7.0.0
+ * - @giphy/js-fetch-api ^5.7.0 (used by the shared pieces in shared/)
+ * - @giphy/react-components ^10.1.1 (used by the shared pieces in shared/)
  *
  * Requires Tailwind CSS with dark mode enabled in tailwind.config.js:
  * - darkMode: 'class' or darkMode: 'media'
@@ -108,6 +109,20 @@ const arePropsEqual = (
   return true;
 };
 
+// 🎨 CUSTOMIZATION: Dark-mode colors of the shared pieces (GIF picker, loading
+// skeletons, emoji bar divider, mentions). The pieces in `shared/` read these
+// CSS custom properties, so they follow the `dark` class like the rest of the
+// section. Keep these classes on an element that wraps the feed and the form.
+const sharedDarkColors = [
+  "dark:[--sublay-ui-surface:#262626]",
+  "dark:[--sublay-ui-control:#404040]",
+  "dark:[--sublay-ui-muted:#a3a3a3]",
+  "dark:[--sublay-ui-text:#fafafa]",
+  "dark:[--sublay-ui-divider:#525252]",
+  "dark:[--sublay-ui-skeleton:#404040]",
+  "dark:[--sublay-ui-mention:#60a5fa]",
+].join(" ");
+
 function ThreadedCommentSectionInner({
   isVisible,
   children,
@@ -116,7 +131,7 @@ function ThreadedCommentSectionInner({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="h-full flex flex-col">
+    <div className={`h-full flex flex-col ${sharedDarkColors}`}>
       <div
         className={
           // 🎨 CUSTOMIZATION: Layout styling

@@ -13,15 +13,11 @@ import {
   useProject,
   type CommentCreateError,
 } from "@sublay/react-js";
-import {
-  resetButton,
-  resetDiv,
-  resetTextInput,
-  UserAvatar,
-  GiphyContainer,
-  EmojiSuggestions,
-  useTextareaCursorIndicator,
-} from "@sublay/ui-core-react-js";
+import { resetButton, resetDiv, resetTextInput } from "~shared/react/reset-styles";
+import UserAvatar from "~shared/react/user-avatar";
+import GiphyContainer from "~shared/react/giphy-container";
+import EmojiSuggestions from "~shared/react/emoji-suggestions";
+import useTextareaCursorIndicator from "~shared/react/use-textarea-cursor-indicator";
 
 import ReplyBanner from "./reply-banner";
 import MentionSuggestions from "./mention-suggestions";
@@ -220,6 +216,7 @@ function NewCommentForm() {
           onClickBack={() => setIsGiphyVisible(false)}
           onSelectGif={(selected) => handleCreateGif(selected)}
           visible={isGiphyVisible}
+          theme={theme}
         />
       ) : null}
       <div
@@ -241,31 +238,15 @@ function NewCommentForm() {
         </div>
         <div style={{ position: "relative", zIndex: 20, backgroundColor: theme === 'dark' ? '#262626' : '#fff' }}>
           {/* 🔧 CUSTOMIZE: Remove this component if you don't want emoji picker */}
-          <div style={{ position: "relative" }}>
-            <EmojiSuggestions
-              onEmojiClick={(emoji) => {
-                const textArea = textAreaRef.current;
-                if (!textArea) throw new Error("Can't find textarea");
-                textArea.value += emoji;
-                setContent((c) => c + emoji);
-              }}
-            />
-            {/* The emoji bar draws its own light divider: in dark mode, cover it
-                with one that matches the border above the bar */}
-            {theme === 'dark' && (
-              <div
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: 1,
-                  backgroundColor: "#525252",
-                  pointerEvents: "none",
-                }}
-              />
-            )}
-          </div>
+          <EmojiSuggestions
+            onEmojiClick={(emoji) => {
+              const textArea = textAreaRef.current;
+              if (!textArea) throw new Error("Can't find textarea");
+              textArea.value += emoji;
+              setContent((c) => c + emoji);
+            }}
+            theme={theme}
+          />
           <div
             style={{
               display: "flex",

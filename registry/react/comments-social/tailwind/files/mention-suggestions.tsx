@@ -1,5 +1,6 @@
 import { User } from "@sublay/react-js";
-import { UserAvatar, UserMentionSkeleton } from "@sublay/ui-core-react-js";
+import UserAvatar from "~shared/react/user-avatar";
+import { UserMentionSkeleton } from "~shared/react/skeleton";
 
 function MentionSuggestions({
   isMentionActive,

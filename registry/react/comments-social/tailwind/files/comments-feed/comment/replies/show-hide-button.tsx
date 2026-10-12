@@ -1,4 +1,4 @@
-import { resetButton } from "@sublay/ui-core-react-js";
+import { resetButton } from "~shared/react/reset-styles";
 
 const ShowHideButton = ({
   totalRepliesCount,

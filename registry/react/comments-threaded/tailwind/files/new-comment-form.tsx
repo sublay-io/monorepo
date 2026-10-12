@@ -7,10 +7,8 @@ import {
   handleError,
   type CommentCreateError,
 } from "@sublay/react-js";
-import {
-  useTextareaCursorIndicator,
-  GiphyContainer,
-} from "@sublay/ui-core-react-js";
+import useTextareaCursorIndicator from "~shared/react/use-textarea-cursor-indicator";
+import GiphyContainer from "~shared/react/giphy-container";
 import MentionSuggestions from "./mention-suggestions";
 import { getCommentCreateErrorMessage } from "../utils/comment-create-error";
 import { cn } from "@/lib/utils";

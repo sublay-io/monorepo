@@ -1,5 +1,6 @@
 import { User, useCommentSection } from "@sublay/react-js";
-import { UserAvatar, UserMentionSkeleton } from "@sublay/ui-core-react-js";
+import UserAvatar from "~shared/react/user-avatar";
+import { UserMentionSkeleton } from "~shared/react/skeleton";
 import useUIState from "../hooks/use-ui-state";
 
 interface MentionSuggestionsProps {
@@ -42,7 +43,7 @@ function MentionSuggestions({
         {isLoadingMentions ? (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {[1, 2, 3].map((i) => (
-              <UserMentionSkeleton key={i} />
+              <UserMentionSkeleton theme={theme} key={i} />
             ))}
           </div>
         ) : mentionSuggestions.length > 0 ? (

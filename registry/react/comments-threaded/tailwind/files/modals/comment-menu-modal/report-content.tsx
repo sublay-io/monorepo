@@ -7,7 +7,7 @@ import {
   useCreateReport,
   useUser,
 } from "@sublay/react-js";
-import { FlagIcon } from "@sublay/ui-core-react-js";
+import FlagIcon from "~shared/react/flag-icon";
 import useUIState from "../../../hooks/use-ui-state";
 import { cn } from "@/lib/utils";
 

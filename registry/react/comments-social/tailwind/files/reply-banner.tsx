@@ -1,5 +1,5 @@
 import { useCommentSection, getUserName } from "@sublay/react-js";
-import { resetButton } from "@sublay/ui-core-react-js";
+import { resetButton } from "~shared/react/reset-styles";
 
 function ReplyBanner() {
   const {

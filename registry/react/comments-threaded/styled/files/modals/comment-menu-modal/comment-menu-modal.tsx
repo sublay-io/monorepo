@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Modal, resetDiv } from "@sublay/ui-core-react-js";
+import Modal from "~shared/react/modal";
+import { resetDiv } from "~shared/react/reset-styles";
 import useUIState from "../../../hooks/use-ui-state";
 import MainContent from "./main-content";
 import ReportContent from "./report-content";

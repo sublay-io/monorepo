@@ -13,15 +13,11 @@ import {
   useProject,
   type CommentCreateError,
 } from "@sublay/react-js";
-import {
-  resetButton,
-  resetDiv,
-  resetTextInput,
-  UserAvatar,
-  GiphyContainer,
-  EmojiSuggestions,
-  useTextareaCursorIndicator,
-} from "@sublay/ui-core-react-js";
+import { resetButton, resetDiv, resetTextInput } from "~shared/react/reset-styles";
+import UserAvatar from "~shared/react/user-avatar";
+import GiphyContainer from "~shared/react/giphy-container";
+import EmojiSuggestions from "~shared/react/emoji-suggestions";
+import useTextareaCursorIndicator from "~shared/react/use-textarea-cursor-indicator";
 
 import ReplyBanner from "./reply-banner";
 import MentionSuggestions from "./mention-suggestions";
@@ -235,17 +231,14 @@ function NewCommentForm() {
         </div>
         <div className="relative z-20 bg-white dark:bg-neutral-800">
           {/* 🔧 CUSTOMIZE: Remove this component if you don't want emoji picker */}
-          {/* The emoji bar draws its own light divider: in dark mode, match the border above it */}
-          <div className="dark:[&>div]:!border-neutral-600">
-            <EmojiSuggestions
-              onEmojiClick={(emoji) => {
-                const textArea = textAreaRef.current;
-                if (!textArea) throw new Error("Can't find textarea");
-                textArea.value += emoji;
-                setContent((c) => c + emoji);
-              }}
-            />
-          </div>
+          <EmojiSuggestions
+            onEmojiClick={(emoji) => {
+              const textArea = textAreaRef.current;
+              if (!textArea) throw new Error("Can't find textarea");
+              textArea.value += emoji;
+              setContent((c) => c + emoji);
+            }}
+          />
           <div
             className="flex items-center justify-end gap-2 py-2 pl-2 pr-4"
           >

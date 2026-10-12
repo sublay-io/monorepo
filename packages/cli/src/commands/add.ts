@@ -13,6 +13,7 @@ import {
   getSharedManifestPath,
   resolveRegistrySource,
   resolveSharedPieces,
+  validateComponentName,
   Registry,
   RegistryError,
   RegistrySource,
@@ -48,6 +49,11 @@ export async function add(componentName: string, options: AddOptions = {}) {
     // unusable --ref is rejected here, ahead of any request.
     let source: RegistrySource;
     try {
+      // The component name is part of every path and URL built below.
+      const nameProblem = validateComponentName(componentName);
+      if (nameProblem) {
+        throw new RegistryError(nameProblem);
+      }
       source = resolveRegistrySource(options.ref);
     } catch (error) {
       if (error instanceof RegistryError) {

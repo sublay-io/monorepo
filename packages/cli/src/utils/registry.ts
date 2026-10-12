@@ -141,6 +141,20 @@ export function validateRef(ref: string): string | null {
 }
 
 /**
+ * Check the `<component>` argument of `add`. Returns null when it is usable,
+ * otherwise the reason it is not. The name becomes a path segment of the
+ * registry lookup, the download URL and the install directory, so only
+ * kebab-case names — which is what every component in the registry has — are
+ * accepted.
+ */
+export function validateComponentName(name: string): string | null {
+  if (typeof name !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) {
+    return `Invalid component name "${name}": a component name may only contain lowercase letters, digits and hyphens (for example "comments-threaded").`;
+  }
+  return null;
+}
+
+/**
  * The remote registry base for a ref: REMOTE_REGISTRY_BASE with its ref
  * segment swapped. For the default ref this is REMOTE_REGISTRY_BASE itself.
  */
@@ -218,6 +232,10 @@ export function getComponentLocation(
   componentName: string,
   config: SublayConfig
 ): string {
+  const problem = validateComponentName(componentName);
+  if (problem) {
+    throw new RegistryError(problem);
+  }
   return `${getRegistryPlatform(config)}/${componentName}/${config.style}`;
 }
 

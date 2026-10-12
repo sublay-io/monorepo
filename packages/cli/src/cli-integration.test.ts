@@ -358,6 +358,45 @@ describe("sublay add — shared pieces", () => {
     );
   });
 
+  for (const typescript of [true, false]) {
+    it(`writes an empty registry file as an empty file (typescript: ${typescript})`, async () => {
+      await writeProject(workDir, { typescript });
+
+      const result = await runCli(["add", "empty-file"], workDir, local);
+      const output = result.stdout + result.stderr;
+
+      expect(result.code).toBe(0);
+      expect(output).not.toMatch(/Babel|Failed to|\bat .*\.js:\d+/);
+
+      const dir = path.join(workDir, "src", "components", "empty-file");
+      const ext = typescript ? "ts" : "js";
+      expect(await listFiles(dir)).toEqual([
+        `components/widget.${ext}x`,
+        `index.${ext}`,
+        `utils/placeholder.${ext}`,
+      ]);
+      expect(await fs.readFile(path.join(dir, "utils", `placeholder.${ext}`), "utf-8")).toBe("");
+    });
+  }
+
+  it.each([
+    "../../../../x/y/main/registry/react/widget",
+    "..",
+    "react/widget",
+    "Widget",
+    "widget_one",
+  ])("rejects the component name %j and writes nothing", async (name) => {
+    await writeProject(workDir);
+
+    const result = await runCli(["add", name], workDir, local);
+    const output = result.stdout + result.stderr;
+
+    expect(result.code).toBe(1);
+    expect(output).toContain(`Invalid component name "${name}"`);
+    expect(output).not.toMatch(/\bat .*\.js:\d+/);
+    expect(await listFiles(workDir)).toEqual(["package.json", "sublay.json"]);
+  });
+
   const broken: Array<{ component: string; label: string; message: RegExp }> = [
     {
       component: "unknown-piece",
@@ -589,6 +628,21 @@ describe("sublay add — --ref", () => {
     expect(await fs.pathExists(path.join(workDir, "src"))).toBe(false);
   });
 
+  it.each(["../../../../x/y/main/registry/react/widget", "../widget", "a/b"])(
+    "rejects the component name %j with --ref without making a request",
+    async (name) => {
+      await writeProject(workDir);
+
+      const result = await runCli(["add", name, "--ref", "v8"], workDir, remote());
+      const output = result.stdout + result.stderr;
+
+      expect(result.code).toBe(1);
+      expect(output).toContain(`Invalid component name "${name}"`);
+      expect(requests).toEqual([]);
+      expect(await listFiles(workDir)).toEqual(["package.json", "sublay.json"]);
+    }
+  );
+
   it.each(["a/../b", "v8?x", "my branch", "..", "/v8"])(
     "rejects the ref %j without making a request",
     async (ref) => {
@@ -678,6 +732,12 @@ describe("sublay add — every component in the repo registry", () => {
 
   it("finds the repo registry", () => {
     expect(variants.length).toBeGreaterThan(0);
+  });
+
+  it("has only component names the add command accepts", () => {
+    for (const { component } of variants) {
+      expect(component, component).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+    }
   });
 
   for (const { platform, component, style, manifest } of variants) {

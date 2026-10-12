@@ -16,6 +16,7 @@ import {
   parseSharedManifest,
   resolveRegistrySource,
   resolveSharedPieces,
+  validateComponentName,
   validateRef,
 } from "./registry";
 import type { SharedManifest } from "./registry";
@@ -56,6 +57,57 @@ describe("validateRef", () => {
     ["an empty segment", "a//b"],
   ])("rejects %s", (_label, ref) => {
     expect(validateRef(ref)).toEqual(expect.any(String));
+  });
+});
+
+describe("validateComponentName", () => {
+  it.each(["comments-threaded", "comments-social", "notifications-control", "widget", "feed2", "a-1-b"])(
+    "accepts %s",
+    (name) => {
+      expect(validateComponentName(name)).toBeNull();
+    }
+  );
+
+  it.each([
+    ["an empty name", ""],
+    ["a path traversal", "../../../../x/y/main/registry/react/widget"],
+    ["a parent segment", ".."],
+    ["a slash", "comments/threaded"],
+    ["a backslash", "comments\\threaded"],
+    ["a dot", "comments.threaded"],
+    ["uppercase", "Comments-Threaded"],
+    ["an underscore", "comments_threaded"],
+    ["a space", "comments threaded"],
+    ["a leading hyphen", "-comments"],
+    ["a trailing hyphen", "comments-"],
+    ["a double hyphen", "comments--threaded"],
+    ["a query string", "widget?x=1"],
+    ["a percent escape", "widget%2F.."],
+  ])("rejects %s, naming the argument", (_label, name) => {
+    expect(validateComponentName(name)).toContain(`Invalid component name "${name}"`);
+  });
+
+  it("is enforced when a registry location is built", () => {
+    expect(() =>
+      getComponentLocation("../../../../x/y/main/registry/react/widget", baseConfig)
+    ).toThrow(RegistryError);
+  });
+
+  it("makes no request for an invalid name", async () => {
+    const requested: string[] = [];
+    vi.stubGlobal("fetch", async (url: string) => {
+      requested.push(url);
+      return { ok: false, status: 404, statusText: "Not Found" };
+    });
+    try {
+      const source = resolveRegistrySource("v8", {});
+      await expect(
+        fetchRegistry("../../../../x/y/main/registry/react/widget", baseConfig, source)
+      ).rejects.toThrow(/Invalid component name/);
+      expect(requested).toEqual([]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
 

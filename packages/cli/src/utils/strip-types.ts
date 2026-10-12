@@ -29,7 +29,9 @@ export async function stripTypes(code: string, filePath: string): Promise<string
       retainLines: true         // Try to keep line numbers similar
     });
 
-    if (!result || !result.code) {
+    // An empty string is a valid result: an empty file strips to nothing and
+    // is written as an empty .js/.jsx file.
+    if (!result || typeof result.code !== 'string') {
       throw new Error('Babel transformation returned no code');
     }
 

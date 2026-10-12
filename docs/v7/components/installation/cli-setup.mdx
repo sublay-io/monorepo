@@ -179,6 +179,8 @@ npx @sublay/cli add comments-threaded
 
 Copies a component into the `paths.components` directory from `sublay.json`, using the platform and style configured there, then checks the component's dependencies against your `package.json`.
 
+A component name contains only lowercase letters, digits and hyphens, such as `comments-threaded`. Any other value is rejected before anything is downloaded or written.
+
 | Option | Description |
 |--------|-------------|
 | `--ref <branch>` | Read the component from this branch of the [Sublay repository](https://github.com/sublay-io/monorepo) instead of the default branch, `main`. |

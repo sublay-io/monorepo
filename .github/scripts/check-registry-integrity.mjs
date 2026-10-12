@@ -10,8 +10,9 @@
 // build time and are therefore invisible to every other step in the job:
 //
 //   1. registryUrl points at the component's own directory under
-//      REMOTE_REGISTRY_BASE. fetchFile() joins this with each files[].path, so
-//      a stale or mistyped value 404s on download.
+//      REMOTE_REGISTRY_BASE. The CLI builds its download URLs from the ref
+//      plus platform/component/style rather than from this field, so it is an
+//      identity field: it has to name the directory the manifest sits in.
 //   2. exports.mainComponent is a non-empty string. `sublay add` writes it
 //      verbatim into the generated barrel's export statement.
 //   3. Every files[].path resolves to a real file next to the registry.json
@@ -36,9 +37,11 @@
 //      all nine registry.json files, which is exactly what a careless
 //      find-and-replace produces — stays internally consistent and passes
 //      every check above. It would also break the served URL for every user:
-//      the registry is fetched off the default branch with no version gate,
-//      so a base pointing at a feature branch either 404s or silently serves
-//      unreviewed component source to everyone running `sublay add`.
+//      a plain `sublay add` reads the default ref with no version gate, so a
+//      base pointing at a feature branch either 404s or silently serves
+//      unreviewed component source to everyone who did not ask for a branch.
+//      (`sublay add --ref <branch>` reads another branch on request; the base
+//      for it is derived from this literal, which stays at `main`.)
 //
 //   7. Every name in exports.typeExports is really exported by the main file.
 //      `sublay add` prints a usage snippet that imports the first of them
@@ -46,6 +49,33 @@
 //      generated barrel re-exports the main file with `export *` — so a name
 //      the main file does not export is an import that fails to compile
 //      (TS2305) in the very first thing the CLI tells the user to paste.
+//
+// Shared pieces (registry/shared/<platform>/shared.json) add a second set of
+// rules, numbered S1-S6 where they are enforced below. A component manifest
+// may list shared pieces under `shared`; `sublay add` copies them, and
+// everything they require, into the component's own shared/ folder and
+// rewrites `~shared/<platform>/<piece>` imports to relative paths. Each rule
+// is something that otherwise only fails in a user's build:
+//
+//   S1. Each platform's shared.json is valid: `platform` is the folder name
+//       and every piece has `files`, `requires` and `dependencies` of the
+//       right shape.
+//   S2. Every file a piece lists exists, and one of them is named after the
+//       piece (`<piece>.tsx|ts|jsx|js`) — that is the file the rewritten
+//       import resolves to.
+//   S3. Every `requires` entry names a piece in the same manifest, and the
+//       requirements have no cycle.
+//   S4. No shared file imports the `~shared/` alias or a path outside its own
+//       folder, and every relative import of another piece's file is mirrored
+//       in `requires` — shared files are installed side by side, with no
+//       import rewriting between them.
+//   S5. Every name in a component manifest's `shared` list is a piece in that
+//       platform's shared.json.
+//   S6. Every `~shared/<platform>/<piece>` import in a component's files is
+//       covered by the transitive closure of its manifest's `shared` list.
+//
+// The shared manifest is deliberately not named registry.json, and the walk
+// for component manifests skips registry/shared/.
 //
 // One more check runs only on a push to main in CI: it actually fetches one
 // real registry.json over the network and requires a 200. Everything above is
@@ -55,6 +85,10 @@
 // entirely for local and pull_request runs so it can never fail spuriously.
 //
 // Node built-ins only, so it can run before (or without) an install.
+//
+// SUBLAY_REGISTRY_ROOT points the check at another registry directory. It is
+// for this script's own tests (check-registry-integrity.test.mjs), which run
+// it against fixture registries; the live reachability check is skipped then.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -62,7 +96,12 @@ import { fileURLToPath } from 'node:url';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..', '..');
-const registryRoot = path.join(repoRoot, 'registry');
+const registryRootOverride = process.env.SUBLAY_REGISTRY_ROOT;
+const registryRoot = registryRootOverride
+  ? path.resolve(registryRootOverride)
+  : path.join(repoRoot, 'registry');
+// What reported paths are relative to: the repo, or the fixture's parent.
+const displayRoot = registryRootOverride ? path.dirname(registryRoot) : repoRoot;
 const registrySourceFile = path.join(
   repoRoot,
   'packages',
@@ -81,12 +120,12 @@ const MAIN_FILE_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js'];
 /**
  * Read REMOTE_REGISTRY_BASE out of the CLI source rather than duplicating it.
  *
- * The CLI is the only consumer of these registryUrl values: fetchRegistry()
- * looks a component up under REMOTE_REGISTRY_BASE, then fetchFile() downloads
- * that component's files from the registryUrl baked into the metadata it just
- * read. The two have to name the same repo, so the check has to compare the
- * JSON against the constant that actually ships — a hardcoded copy here would
- * happily agree with the JSON while both disagreed with the CLI (an org
+ * The CLI downloads a component's manifest and files from
+ * REMOTE_REGISTRY_BASE (or the same base with another ref, for `--ref`), and
+ * every registry.json records the matching URL of its own directory in
+ * registryUrl. The two have to name the same repo, so the check has to compare
+ * the JSON against the constant that actually ships — a hardcoded copy here
+ * would happily agree with the JSON while both disagreed with the CLI (an org
  * rename being the obvious way in).
  *
  * A regex is enough: this is a build-time check, not production code, and the
@@ -229,10 +268,11 @@ function assertRegistryBaseMatchesCliRepository() {
 
 const REPO_SLUG = assertRegistryBaseMatchesCliRepository();
 
-// The branch the registry is served from. Not configurable on purpose: the
-// CLI has no version gate and no ref option, so whatever ref this URL names
-// is what every `sublay add` on every published CLI version downloads. That
-// has to be the repo's default branch.
+// The branch the registry is served from by default. Not configurable on
+// purpose: the CLI has no version gate, so whatever ref this URL names is what
+// every `sublay add` without `--ref`, on every published CLI version,
+// downloads. That has to be the repo's default branch. `--ref <branch>` is a
+// per-command choice and derives its base from this one.
 const EXPECTED_REGISTRY_REF = 'main';
 
 /**
@@ -271,9 +311,9 @@ function assertRegistryBaseUsesDefaultBranch() {
         )}): ${REMOTE_REGISTRY_BASE}\n` +
         `  ref segment: ${ref}\n` +
         `  expected:    ${EXPECTED_REGISTRY_REF}\n\n` +
-        'The CLI fetches the registry off the default branch with no version ' +
-        'gate and no way to override the ref, so every published CLI version ' +
-        'reads whatever this names. Every registry.json is self-consistent ' +
+        'The CLI fetches the registry off this ref with no version gate ' +
+        'whenever `sublay add` is run without `--ref`, so every published CLI ' +
+        'version reads whatever this names by default. Every registry.json is self-consistent ' +
         'with a wrong ref — the org/repo cross-check above discards the ref ' +
         'entirely — so nothing else here catches it, and `sublay add` breaks ' +
         'for every user.'
@@ -286,12 +326,19 @@ function assertRegistryBaseUsesDefaultBranch() {
 
 const REGISTRY_REF = assertRegistryBaseUsesDefaultBranch();
 
-/** Recursively collect every registry.json under registry/, skipping node_modules. */
+const sharedRoot = path.join(registryRoot, 'shared');
+
+/**
+ * Recursively collect every registry.json under registry/, skipping
+ * node_modules and registry/shared/ (shared pieces are described by
+ * shared.json, not by component manifests).
+ */
 function findRegistryFiles(dir) {
   const found = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (entry.name === 'node_modules') continue;
     const full = path.join(dir, entry.name);
+    if (full === sharedRoot) continue;
     if (entry.isDirectory()) {
       found.push(...findRegistryFiles(full));
     } else if (entry.name === 'registry.json') {
@@ -304,7 +351,7 @@ function findRegistryFiles(dir) {
 const errors = [];
 /** @param {string} file @param {string} message */
 function fail(file, message) {
-  errors.push(`${path.relative(repoRoot, file)}: ${message}`);
+  errors.push(`${path.relative(displayRoot, file)}: ${message}`);
 }
 
 if (!fs.existsSync(registryRoot)) {
@@ -361,6 +408,9 @@ let checkedMainFiles = 0;
 let checkedTypeExports = 0;
 /** @type {{registryUrl: string, mainFilePath: string}[]} */
 const remoteProbes = [];
+// Collected for the shared-piece rules, which run after this loop.
+/** @type {{registryFile: string, dir: string, platform: string, shared: unknown, filePaths: string[]}[]} */
+const componentVariants = [];
 
 for (const registryFile of registryFiles) {
   const dir = path.dirname(registryFile);
@@ -436,9 +486,19 @@ for (const registryFile of registryFiles) {
       fail(
         registryFile,
         `files[${index}].path "${entry.path}" does not resolve to a file ` +
-          `(looked for ${path.relative(repoRoot, target)})`
+          `(looked for ${path.relative(displayRoot, target)})`
       );
     }
+  });
+
+  componentVariants.push({
+    registryFile,
+    dir,
+    platform: relativeDir.split('/')[0],
+    shared: manifest.shared,
+    filePaths: manifest.files
+      .filter((entry) => entry && typeof entry.path === 'string')
+      .map((entry) => entry.path),
   });
 
   // 4. exports.mainFile must name one of those files[] entries.
@@ -526,6 +586,351 @@ for (const registryFile of registryFiles) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Shared pieces (rules S1-S6, described at the top of this file).
+// ---------------------------------------------------------------------------
+
+const PIECE_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const SOURCE_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js'];
+
+// The specifier of every import in a source file, in the `from '...'`,
+// side-effect `import '...'`, dynamic `import('...')` and `require('...')`
+// forms. The same forms the CLI rewrites (packages/cli/src/utils/transform.ts).
+const IMPORT_SPECIFIER = /\b(?:from|import|require)\s*\(?\s*(['"])([^'"\n]+)\1/g;
+const SHARED_ALIAS_PREFIX = '~shared/';
+
+/** @param {string} source @returns {string[]} */
+function findImportSpecifiers(source) {
+  return Array.from(source.matchAll(IMPORT_SPECIFIER), (match) => match[2]);
+}
+
+function isStringArray(value) {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+/** A registry dependency spec must carry a range: `name@range`. */
+function isDependencySpec(spec) {
+  return /^(?:@[^/@\s]+\/)?[^/@\s]+@\S+$/.test(spec);
+}
+
+/**
+ * @typedef {{files: string[], requires: string[]}} Piece
+ * @type {Map<string, {file: string, dir: string, pieces: Map<string, Piece>}>}
+ */
+const sharedManifests = new Map();
+let checkedSharedPieces = 0;
+let checkedSharedImports = 0;
+
+if (fs.existsSync(sharedRoot)) {
+  const platforms = fs
+    .readdirSync(sharedRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name !== 'node_modules')
+    .map((entry) => entry.name)
+    .sort();
+
+  for (const platform of platforms) {
+    const sharedDir = path.join(sharedRoot, platform);
+    const sharedFile = path.join(sharedDir, 'shared.json');
+
+    // S1. The manifest exists and has the documented shape.
+    if (!fs.existsSync(sharedFile)) {
+      fail(sharedFile, 'is missing: every folder under registry/shared/ needs a shared.json');
+      continue;
+    }
+
+    let sharedManifest;
+    try {
+      sharedManifest = JSON.parse(fs.readFileSync(sharedFile, 'utf8'));
+    } catch (err) {
+      fail(sharedFile, `is not valid JSON (${err.message})`);
+      continue;
+    }
+
+    if (
+      typeof sharedManifest !== 'object' ||
+      sharedManifest === null ||
+      Array.isArray(sharedManifest)
+    ) {
+      fail(sharedFile, 'must be an object with "platform" and "pieces"');
+      continue;
+    }
+
+    if (sharedManifest.platform !== platform) {
+      fail(
+        sharedFile,
+        `"platform" must be the folder name "${platform}", got ${
+          sharedManifest.platform === undefined
+            ? '(missing)'
+            : JSON.stringify(sharedManifest.platform)
+        }`
+      );
+    }
+
+    const rawPieces = sharedManifest.pieces;
+    if (typeof rawPieces !== 'object' || rawPieces === null || Array.isArray(rawPieces)) {
+      fail(sharedFile, '"pieces" must be an object keyed by piece name');
+      continue;
+    }
+
+    /** @type {Map<string, Piece>} */
+    const pieces = new Map();
+    sharedManifests.set(platform, { file: sharedFile, dir: sharedDir, pieces });
+
+    for (const [name, piece] of Object.entries(rawPieces)) {
+      checkedSharedPieces += 1;
+
+      if (!PIECE_NAME.test(name)) {
+        fail(sharedFile, `piece "${name}" must have a kebab-case name`);
+      }
+
+      if (typeof piece !== 'object' || piece === null || Array.isArray(piece)) {
+        fail(sharedFile, `piece "${name}" must be an object`);
+        continue;
+      }
+
+      const files = isStringArray(piece.files) ? piece.files : [];
+      const requires = isStringArray(piece.requires) ? piece.requires : [];
+      pieces.set(name, { files, requires });
+
+      if (!isStringArray(piece.files) || piece.files.length === 0) {
+        fail(sharedFile, `piece "${name}" must list at least one file in "files"`);
+      }
+      if (!isStringArray(piece.requires)) {
+        fail(
+          sharedFile,
+          `piece "${name}" needs "requires": a list of piece names (empty when it requires none)`
+        );
+      }
+      if (!isStringArray(piece.dependencies)) {
+        fail(
+          sharedFile,
+          `piece "${name}" needs "dependencies": a list of packages as name@range (empty when it needs none)`
+        );
+      } else {
+        for (const spec of piece.dependencies) {
+          if (!isDependencySpec(spec)) {
+            fail(
+              sharedFile,
+              `piece "${name}" has a dependency ${JSON.stringify(spec)} that is not of the form name@range`
+            );
+          }
+        }
+      }
+
+      // S2. Every listed file exists, and one is named after the piece.
+      for (const file of files) {
+        const target = path.join(sharedDir, file);
+        const inside = !path.relative(sharedDir, target).startsWith('..');
+        if (!inside || path.isAbsolute(file)) {
+          fail(sharedFile, `piece "${name}" lists "${file}", which is outside ${platform}'s shared folder`);
+        } else if (!fs.existsSync(target) || !fs.statSync(target).isFile()) {
+          fail(
+            sharedFile,
+            `piece "${name}" lists "${file}", which does not resolve to a file ` +
+              `(looked for ${path.relative(displayRoot, target)})`
+          );
+        }
+      }
+
+      const ownFiles = SOURCE_EXTENSIONS.map((ext) => `${name}${ext}`);
+      if (files.length > 0 && !files.some((file) => ownFiles.includes(file))) {
+        fail(
+          sharedFile,
+          `piece "${name}" has no file named after it\n` +
+            `    looked for: ${ownFiles.join(', ')}\n` +
+            `    \`sublay add\` rewrites '~shared/${platform}/${name}' to a relative ` +
+            `import of 'shared/${name}', which only resolves if one of those is installed`
+        );
+      }
+    }
+
+    // S3. Requirements name real pieces...
+    for (const [name, piece] of pieces) {
+      for (const requirement of piece.requires) {
+        if (!pieces.has(requirement)) {
+          fail(
+            sharedFile,
+            `piece "${name}" requires "${requirement}", which is not a piece in this manifest`
+          );
+        }
+      }
+    }
+
+    // ...and have no cycle. Each cycle is reported once, from the first piece
+    // (in manifest order) that reaches it.
+    const state = new Map(); // name -> 'visiting' | 'done'
+    const reportedCycles = new Set();
+    const walk = (name, trail) => {
+      if (state.get(name) === 'done') return;
+      if (state.get(name) === 'visiting') {
+        const cycle = trail.slice(trail.indexOf(name));
+        const key = [...cycle].sort().join(' ');
+        if (!reportedCycles.has(key)) {
+          reportedCycles.add(key);
+          fail(
+            sharedFile,
+            `requirement cycle between shared pieces: ${[...cycle, name].join(' -> ')}`
+          );
+        }
+        return;
+      }
+      state.set(name, 'visiting');
+      for (const requirement of pieces.get(name).requires) {
+        if (pieces.has(requirement)) walk(requirement, [...trail, name]);
+      }
+      state.set(name, 'done');
+    };
+    for (const name of pieces.keys()) walk(name, []);
+
+    // S4. What shared files import.
+    /** @type {Map<string, string[]>} file (relative to sharedDir) -> owning pieces */
+    const owners = new Map();
+    for (const [name, piece] of pieces) {
+      for (const file of piece.files) {
+        const key = path.normalize(file);
+        owners.set(key, [...(owners.get(key) ?? []), name]);
+      }
+    }
+
+    const resolveSharedImport = (fromFile, specifier) => {
+      const base = path.normalize(path.join(path.dirname(fromFile), specifier));
+      const candidates = [
+        base,
+        ...SOURCE_EXTENSIONS.map((ext) => `${base}${ext}`),
+        ...SOURCE_EXTENSIONS.map((ext) => path.join(base, `index${ext}`)),
+      ];
+      return { base, match: candidates.find((candidate) => owners.has(candidate)) };
+    };
+
+    for (const [name, piece] of pieces) {
+      for (const file of piece.files) {
+        const target = path.join(sharedDir, file);
+        if (!fs.existsSync(target) || !fs.statSync(target).isFile()) continue;
+
+        for (const specifier of findImportSpecifiers(fs.readFileSync(target, 'utf8'))) {
+          if (specifier.startsWith(SHARED_ALIAS_PREFIX)) {
+            fail(
+              target,
+              `imports "${specifier}": a shared file imports other pieces with a ` +
+                "relative path ('./<piece>'), not the ~shared alias — the alias is " +
+                'only rewritten in component files'
+            );
+            continue;
+          }
+
+          if (!specifier.startsWith('.')) continue;
+          checkedSharedImports += 1;
+
+          const { base, match } = resolveSharedImport(file, specifier);
+          if (base.startsWith('..')) {
+            fail(
+              target,
+              `imports "${specifier}", which is outside ${platform}'s shared folder — ` +
+                'a shared file can only import packages and other shared files'
+            );
+            continue;
+          }
+
+          if (match === undefined) {
+            fail(
+              target,
+              `imports "${specifier}", which is not a file of any piece in ${path.relative(
+                displayRoot,
+                sharedFile
+              )} — it would not be installed`
+            );
+            continue;
+          }
+
+          const importedPieces = owners.get(match);
+          if (importedPieces.includes(name)) continue;
+          if (!importedPieces.some((owner) => piece.requires.includes(owner))) {
+            fail(
+              sharedFile,
+              `piece "${name}" imports "${specifier}" in ${file} but does not list ` +
+                `"${importedPieces[0]}" in "requires" — \`sublay add\` would not install it`
+            );
+          }
+        }
+      }
+    }
+  }
+}
+
+/** The pieces reached from `names` through `requires`, unknown names skipped. */
+function sharedClosure(names, pieces) {
+  const closure = new Set();
+  const visit = (name) => {
+    if (closure.has(name) || !pieces.has(name)) return;
+    closure.add(name);
+    pieces.get(name).requires.forEach(visit);
+  };
+  names.forEach(visit);
+  return closure;
+}
+
+let checkedSharedLists = 0;
+
+for (const variant of componentVariants) {
+  const { registryFile, dir, platform, shared, filePaths } = variant;
+  const platformShared = sharedManifests.get(platform);
+  const sharedManifestLabel = `shared/${platform}/shared.json`;
+
+  // S5. Every listed name is a piece of this platform.
+  let listed = [];
+  if (shared !== undefined) {
+    if (!isStringArray(shared)) {
+      fail(registryFile, '"shared" must be an array of shared piece names');
+    } else {
+      listed = shared;
+      checkedSharedLists += 1;
+      for (const name of shared) {
+        if (!platformShared || !platformShared.pieces.has(name)) {
+          fail(
+            registryFile,
+            `shared piece "${name}" is not defined in ${sharedManifestLabel}`
+          );
+        }
+      }
+    }
+  }
+
+  // S6. Every alias import in the variant's files is covered by that list.
+  const covered = platformShared
+    ? sharedClosure(listed, platformShared.pieces)
+    : new Set();
+
+  for (const filePath of filePaths) {
+    const target = path.join(dir, filePath);
+    if (!fs.existsSync(target) || !fs.statSync(target).isFile()) continue;
+
+    for (const specifier of findImportSpecifiers(fs.readFileSync(target, 'utf8'))) {
+      if (!specifier.startsWith(SHARED_ALIAS_PREFIX)) continue;
+      checkedSharedImports += 1;
+
+      const [aliasPlatform, ...rest] = specifier
+        .slice(SHARED_ALIAS_PREFIX.length)
+        .split('/');
+      const piece = rest.join('/');
+
+      if (aliasPlatform !== platform) {
+        fail(
+          registryFile,
+          `${filePath} imports "${specifier}", a shared piece of another platform ` +
+            `(this component is ${platform})`
+        );
+      } else if (!covered.has(piece)) {
+        fail(
+          registryFile,
+          `${filePath} imports "${specifier}", but "${piece}" is not covered by this ` +
+            `manifest's "shared" list (directly or through a listed piece's requirements ` +
+            `in ${sharedManifestLabel}) — \`sublay add\` would not install it`
+        );
+      }
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error(
     `Registry integrity check FAILED with ${errors.length} problem(s):\n`
@@ -539,6 +944,9 @@ if (errors.length > 0) {
       'every files[].path must exist on disk relative to that registry.json,\n' +
       'exports.mainComponent/mainFile must name something files[] installs,\n' +
       'and every exports.typeExports name must be exported by the main file.\n' +
+      'Shared pieces (registry/shared/<platform>/shared.json) must list files\n' +
+      'that exist and requirements that resolve, and every ~shared/ import in a\n' +
+      'component must be covered by its manifest\'s "shared" list.\n' +
       'The registry is served off the default branch, so these break\n' +
       '`sublay add` for every user as soon as they merge.'
   );
@@ -550,7 +958,9 @@ console.log(
     `file(s), ${checkedFileEntries} file entr(ies), ${checkedMainFiles} ` +
     `main file(s), ${checkedTypeExports} type export(s) verified against REMOTE_REGISTRY_BASE ${REMOTE_REGISTRY_BASE} ` +
     `(repo ${REPO_SLUG}, cross-checked against packages/cli/package.json; ` +
-    `ref ${REGISTRY_REF}).`
+    `ref ${REGISTRY_REF}). Shared pieces: ${sharedManifests.size} shared.json ` +
+    `file(s), ${checkedSharedPieces} piece(s), ${checkedSharedLists} component ` +
+    `"shared" list(s), ${checkedSharedImports} import(s) checked.`
 );
 
 // ---------------------------------------------------------------------------
@@ -573,7 +983,12 @@ const isPushToMain =
   process.env.GITHUB_EVENT_NAME === 'push' &&
   process.env.GITHUB_REF === 'refs/heads/main';
 
-if (!isCI || !isPushToMain) {
+if (registryRootOverride) {
+  console.log(
+    'Skipping live registry reachability check (SUBLAY_REGISTRY_ROOT is set; ' +
+      'a fixture registry is not served from anywhere).'
+  );
+} else if (!isCI || !isPushToMain) {
   console.log(
     'Skipping live registry reachability check (runs only on a GitHub Actions ' +
       'push build of main; the registry is served from main, so the URLs are ' +

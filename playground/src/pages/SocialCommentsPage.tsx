@@ -13,11 +13,14 @@ import {
 
 type StyleVariant = "styled" | "tailwind";
 
+const SECTION_HEIGHT = 640;
+
 const FOREIGN_ID = "playground-social-comments";
 
 export default function SocialCommentsPage() {
   const [variant, setVariant] = useState<StyleVariant>("styled");
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [gifPickerFullScreen, setGifPickerFullScreen] = useState(false);
   const { highlightedCommentId, applied, apply } = useHighlightedCommentId();
   const { mode: entitySource, setMode: setEntitySource } =
     useEntitySourceMode();
@@ -28,6 +31,7 @@ export default function SocialCommentsPage() {
         style={{
           display: "flex",
           alignItems: "center",
+          flexWrap: "wrap",
           gap: 8,
           marginBottom: 16,
         }}
@@ -37,13 +41,20 @@ export default function SocialCommentsPage() {
         </h2>
         <VariantToggle value={variant} onChange={setVariant} />
         <EntitySourceToggle value={entitySource} onChange={setEntitySource} />
+        <GifPickerToggle
+          value={gifPickerFullScreen}
+          onChange={setGifPickerFullScreen}
+        />
         <ThemeToggle value={theme} onChange={setTheme} />
       </div>
 
       <HighlightControl applied={applied} onApply={apply} />
 
+      {/* A fixed height, as in a real embed: the section fills it and the
+          comment list scrolls inside. */}
       <div
         style={{
+          height: SECTION_HEIGHT,
           maxWidth: 600,
           border: "1px solid #e5e7eb",
           borderRadius: 8,
@@ -58,6 +69,7 @@ export default function SocialCommentsPage() {
                 {...entityProps}
                 isVisible={true}
                 highlightedCommentId={highlightedCommentId}
+                gifPickerFullScreen={gifPickerFullScreen}
                 theme={theme}
               />
             ) : (
@@ -65,6 +77,7 @@ export default function SocialCommentsPage() {
                 {...entityProps}
                 isVisible={true}
                 highlightedCommentId={highlightedCommentId}
+                gifPickerFullScreen={gifPickerFullScreen}
               />
             )
           }
@@ -108,6 +121,51 @@ function VariantToggle({
           }}
         >
           {v}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function GifPickerToggle({
+  value,
+  onChange,
+}: {
+  value: boolean;
+  onChange: (fullScreen: boolean) => void;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        background: "#f3f4f6",
+        borderRadius: 6,
+        padding: 2,
+      }}
+    >
+      <span style={{ padding: "0 6px", fontSize: 13, color: "#6b7280" }}>
+        GIF picker:
+      </span>
+      {([false, true] as const).map((fullScreen) => (
+        <button
+          key={String(fullScreen)}
+          onClick={() => onChange(fullScreen)}
+          style={{
+            padding: "3px 10px",
+            borderRadius: 5,
+            border: "none",
+            background: value === fullScreen ? "#fff" : "transparent",
+            boxShadow:
+              value === fullScreen ? "0 1px 2px rgba(0,0,0,.1)" : "none",
+            color: value === fullScreen ? "#111" : "#6b7280",
+            cursor: "pointer",
+            fontSize: 13,
+            fontWeight: value === fullScreen ? 600 : 400,
+          }}
+        >
+          {fullScreen ? "full screen" : "section"}
         </button>
       ))}
     </div>

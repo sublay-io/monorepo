@@ -74,6 +74,11 @@ interface SocialCommentSectionProps {
    */
   createIfNotFound?: boolean;
   isVisible?: boolean;
+  /**
+   * Where the GIF picker opens. Off by default: it covers the comment
+   * section. On: it covers the whole screen.
+   */
+  gifPickerFullScreen?: boolean;
   highlightedCommentId?: string | undefined | null;
   children?: React.ReactNode;
 }
@@ -95,6 +100,7 @@ const arePropsEqual = (
     prevProps.shortId !== nextProps.shortId ||
     prevProps.createIfNotFound !== nextProps.createIfNotFound ||
     prevProps.isVisible !== nextProps.isVisible ||
+    prevProps.gifPickerFullScreen !== nextProps.gifPickerFullScreen ||
     prevProps.highlightedCommentId !== nextProps.highlightedCommentId
   ) {
     return false;
@@ -129,9 +135,11 @@ const sharedDarkColors = [
 
 function SocialCommentSectionInner({
   isVisible,
+  gifPickerFullScreen,
   children,
 }: {
   isVisible: boolean;
+  gifPickerFullScreen: boolean;
   children?: React.ReactNode;
 }) {
 
@@ -172,7 +180,7 @@ function SocialCommentSectionInner({
   };
 
   return (
-    // Positioned, so the GIF picker covers the comment section and no more
+    // Positioned, so the GIF picker covers exactly the comment section
     <div className={`relative h-full flex flex-col ${sharedDarkColors}`}>
       {sortOptions.length > 0 && (
         <div
@@ -189,7 +197,9 @@ function SocialCommentSectionInner({
       </div>
 
       <div className="border-t border-gray-200 dark:border-neutral-600">
-        {isVisible && <NewCommentForm />}
+        {isVisible && (
+          <NewCommentForm gifPickerFullScreen={gifPickerFullScreen} />
+        )}
       </div>
     </div>
   );
@@ -202,6 +212,7 @@ function SocialCommentSection({
   shortId,
   createIfNotFound,
   isVisible = true,
+  gifPickerFullScreen = false,
   highlightedCommentId,
   children,
 }: SocialCommentSectionProps) {
@@ -218,6 +229,7 @@ function SocialCommentSection({
     <CommentSectionProvider {...providerProps}>
       <SocialCommentSectionInner
         isVisible={isVisible}
+        gifPickerFullScreen={gifPickerFullScreen}
       >
         {children}
       </SocialCommentSectionInner>

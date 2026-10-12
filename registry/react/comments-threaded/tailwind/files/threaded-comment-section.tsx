@@ -70,6 +70,11 @@ interface ThreadedCommentSectionProps {
    */
   createIfNotFound?: boolean;
   isVisible?: boolean;
+  /**
+   * Where the GIF picker opens. Off by default: it covers the comment
+   * section. On: it covers the whole screen.
+   */
+  gifPickerFullScreen?: boolean;
   highlightedCommentId?: string | undefined | null;
   children?: React.ReactNode;
 }
@@ -91,6 +96,7 @@ const arePropsEqual = (
     prevProps.shortId !== nextProps.shortId ||
     prevProps.createIfNotFound !== nextProps.createIfNotFound ||
     prevProps.isVisible !== nextProps.isVisible ||
+    prevProps.gifPickerFullScreen !== nextProps.gifPickerFullScreen ||
     prevProps.highlightedCommentId !== nextProps.highlightedCommentId
   ) {
     return false;
@@ -125,13 +131,15 @@ const sharedDarkColors = [
 
 function ThreadedCommentSectionInner({
   isVisible,
+  gifPickerFullScreen,
   children,
 }: {
   isVisible: boolean;
+  gifPickerFullScreen: boolean;
   children?: React.ReactNode;
 }) {
   return (
-    // Positioned, so the GIF picker covers the comment section and no more
+    // Positioned, so the GIF picker covers exactly the comment section
     <div className={`relative h-full flex flex-col ${sharedDarkColors}`}>
       <div
         className={
@@ -148,7 +156,9 @@ function ThreadedCommentSectionInner({
           "border-t border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 pt-2"
         }
       >
-        {isVisible && <NewCommentForm />}
+        {isVisible && (
+          <NewCommentForm gifPickerFullScreen={gifPickerFullScreen} />
+        )}
       </div>
     </div>
   );
@@ -161,6 +171,7 @@ function ThreadedCommentSection({
   shortId,
   createIfNotFound,
   isVisible = true,
+  gifPickerFullScreen = false,
   highlightedCommentId,
   children,
 }: ThreadedCommentSectionProps) {
@@ -175,7 +186,10 @@ function ThreadedCommentSection({
 
   return (
     <CommentSectionProvider {...providerProps}>
-      <ThreadedCommentSectionInner isVisible={isVisible}>
+      <ThreadedCommentSectionInner
+        isVisible={isVisible}
+        gifPickerFullScreen={gifPickerFullScreen}
+      >
         {children}
       </ThreadedCommentSectionInner>
     </CommentSectionProvider>

@@ -6,7 +6,7 @@ icon: "folder-tree"
 
 # File Structure
 
-When you install threaded comments, 39 TypeScript/TSX files are copied into your project in a clear, navigable structure: the component's own files, and the shared pieces it is built from in `shared/`. The trees below list every file.
+When you install threaded comments, 40 TypeScript/TSX files are copied into your project in a clear, navigable structure: the component's own files, and the shared pieces it is built from in `shared/`. The trees below list every file.
 
 ---
 
@@ -61,6 +61,7 @@ When you install threaded comments, 39 TypeScript/TSX files are copied into your
         ├── magnifying-glass-icon.tsx                    # Search icon of the GIF picker
         ├── modal.tsx                                    # Modal dialog
         ├── parse-content-with-mentions.tsx              # Makes @mentions clickable
+        ├── pick-avatar-source.ts                        # Picks which avatar image to show
         ├── reset-styles.ts                              # Style resets
         ├── skeleton.tsx                                 # Loading skeletons
         ├── theme.ts                                     # Light and dark colors of these files
@@ -116,6 +117,7 @@ When you install threaded comments, 39 TypeScript/TSX files are copied into your
         ├── giphy-container.tsx                          # GIF picker
         ├── magnifying-glass-icon.tsx                    # Search icon of the GIF picker
         ├── parse-content-with-mentions.tsx              # Makes @mentions clickable
+        ├── pick-avatar-source.ts                        # Picks which avatar image to show
         ├── skeleton.tsx                                 # Loading skeletons
         ├── theme.ts                                     # Light and dark colors of these files
         ├── trash-icon.tsx                               # Delete icon
@@ -205,6 +207,8 @@ To pass the provider something new, add it to `providerProps`.
 ### `shared/` — Shared Pieces
 
 Presentational pieces the component is built from: the GIF picker, the user avatar, loading skeletons, mention parsing, icons and a few helpers. They are installed into the component's own folder and are yours to edit like every other file. Each installed component has its own copy, so editing one component's `shared/` folder does not affect another.
+
+`user-avatar.tsx` shows the first of these a user has: the avatar file uploaded through Sublay, then the `avatar` URL, then a generated avatar. An uploaded avatar is stored in several sizes, and `pick-avatar-source.ts` picks the smallest one that is still sharp at the size the avatar is displayed at on the device's screen.
 
 `theme.ts` holds the light and dark colors these pieces draw with (GIF picker surface and controls, skeletons, mention text). Edit it to change them.
 

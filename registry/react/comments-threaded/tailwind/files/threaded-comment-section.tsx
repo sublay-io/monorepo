@@ -24,10 +24,10 @@
  * BACKGROUNDS:
  * - bg-white dark:bg-neutral-800 (main background)
  * - bg-gray-50 dark:bg-neutral-700 (secondary background, hover states)
- * - bg-blue-50 dark:bg-blue-950 (blue hover backgrounds)
+ * - bg-blue-50 dark:bg-blue-400/10 (blue hover backgrounds)
  * - bg-red-50 dark:bg-red-950 (red hover backgrounds)
  * - bg-gray-100 dark:bg-[#333333] (highlighted comment background)
- * - bg-blue-100 dark:bg-blue-900 (indentation beside a highlighted comment)
+ * - bg-blue-100 dark:bg-blue-950 (indentation beside a highlighted comment)
  *
  * TEXT:
  * - text-gray-900 dark:text-neutral-50 (primary text)
@@ -43,8 +43,8 @@
  *
  * BLUES (links, actions, upvotes):
  * - text-blue-600 dark:text-blue-400 (primary blue)
- * - bg-blue-600 dark:bg-blue-500 (buttons)
- * - hover:bg-blue-700 dark:hover:bg-blue-600 (button hover)
+ * - bg-blue-600 dark:bg-blue-600 (buttons)
+ * - hover:bg-blue-700 dark:hover:bg-blue-500 (button hover)
  *
  * REDS (downvotes, destructive actions):
  * - text-red-600 dark:text-red-400 (primary red)

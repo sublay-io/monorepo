@@ -65,7 +65,7 @@ const CommentsFeed = React.memo(
           <div className="pb-2">
             <button
               onClick={() => setShowAll(true)}
-              className="text-xs font-medium text-blue-600 dark:text-blue-500 px-2 py-1 rounded-full bg-transparent border-none cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950"
+              className="text-xs font-medium text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full bg-transparent border-none cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-400/10"
             >
               View all comments
             </button>
@@ -82,7 +82,7 @@ const CommentsFeed = React.memo(
     const showNoComments = !loading && !error && mergedComments.length === 0;
     const showLoadMoreError = !loading && !!error;
     const tryAgainClassName =
-      "text-xs font-medium text-blue-600 dark:text-blue-500 p-0 bg-transparent border-none cursor-pointer hover:underline";
+      "text-xs font-medium text-blue-600 dark:text-blue-400 p-0 bg-transparent border-none cursor-pointer hover:underline";
 
     return (
       <div className="flex-1">
@@ -100,7 +100,7 @@ const CommentsFeed = React.memo(
               <button
                 onClick={() => loadMore?.()}
                 disabled={loading}
-                className="text-xs font-medium text-blue-600 dark:text-blue-500 px-3 py-1 rounded-full bg-transparent border-none cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950"
+                className="text-xs font-medium text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full bg-transparent border-none cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-400/10"
               >
                 {loading ? "Loading..." : "Load more comments"}
               </button>

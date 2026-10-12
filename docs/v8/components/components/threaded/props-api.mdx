@@ -34,6 +34,7 @@ interface ThreadedCommentSectionProps {
   // Optional features
   isVisible?: boolean;
   highlightedCommentId?: string | undefined | null;
+  gifPickerFullScreen?: boolean;   // React (web) only
   theme?: 'light' | 'dark';   // Only for inline styles variant
   children?: React.ReactNode;
 }
@@ -165,6 +166,23 @@ ID of a specific comment to highlight when the section loads. The section opens 
 ```
 
 **Use cases:** Deep-linking from notifications, jumping to a comment via URL param.
+
+---
+
+### `gifPickerFullScreen`
+
+**Type:** `boolean` — **Default:** `false`
+
+**React (web) only.** Where the GIF picker opens. By default it covers the comment section: the comment list and the form. When set, it covers the whole screen.
+
+```tsx
+<ThreadedCommentSection
+  foreignId="post_123"
+  gifPickerFullScreen
+/>
+```
+
+See [GIF Picker Placement](/v8/components/customization/layout-structure#gif-picker-placement) for custom layouts.
 
 ---
 

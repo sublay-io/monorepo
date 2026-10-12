@@ -13,11 +13,13 @@ import MentionSuggestions from "./mention-suggestions";
 import { getCommentCreateErrorMessage } from "../utils/comment-create-error";
 import { cn } from "@/lib/utils";
 
-// 🔧 CUSTOMIZE: Where the GIF picker opens. false: it covers the comment
-// section. true: it covers the whole screen.
-const GIF_PICKER_FULL_SCREEN = false;
-
-function NewCommentForm() {
+function NewCommentForm({
+  gifPickerFullScreen = false,
+}: {
+  // Where the GIF picker opens. false: it covers the comment section.
+  // true: it covers the whole screen.
+  gifPickerFullScreen?: boolean;
+}) {
   const { user } = useUser();
   const { project } = useProject();
   const giphyApiKey = project?.integrations.find((int) => int.name === "giphy")
@@ -202,7 +204,7 @@ function NewCommentForm() {
           onClickBack={() => setIsGiphyVisible(false)}
           onSelectGif={(selected) => handleCreateGif(selected)}
           visible={isGiphyVisible}
-          fullScreen={GIF_PICKER_FULL_SCREEN}
+          fullScreen={gifPickerFullScreen}
         />
       ) : null}
       <form onSubmit={handleSubmit} className="relative">

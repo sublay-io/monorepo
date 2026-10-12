@@ -47,7 +47,7 @@ function GiphyContainer({
     };
   }, [query]);
 
-  // Update parent width on mount and resize
+  // Update parent width on mount, on resize and when the placement changes
   useEffect(() => {
     const updateWidth = () => {
       if (gridParentRef.current) {
@@ -61,7 +61,7 @@ function GiphyContainer({
     return () => {
       window.removeEventListener("resize", updateWidth);
     };
-  }, []);
+  }, [fullScreen]);
 
   // Conditionally fetch Gifs only when visible
   const fetchGifs = useCallback(
@@ -128,19 +128,13 @@ function GiphyContainer({
   return (
     <div
       style={{
-        // Full screen: pinned to the viewport. Otherwise: anchored to the
-        // bottom of the nearest positioned ancestor (the comment section),
-        // covering it up to most of the viewport's height, so the search
-        // field stays in view when the section is taller than the screen.
+        // Full screen: pinned to the viewport. Otherwise: fills the nearest
+        // positioned ancestor (the comment section), covering all of it.
         position: fullScreen ? "fixed" : "absolute",
-        left: 0,
-        right: 0,
-        bottom: 0,
-        top: fullScreen ? 0 : "auto",
+        inset: 0,
         opacity: visible ? 1 : 0, // Opacity based on visibility
         backgroundColor: uiColor("surface", theme),
         height: "100%",
-        maxHeight: fullScreen ? undefined : "80vh",
         width: "100%",
         display: "grid",
         gridTemplateRows: "auto 1fr",

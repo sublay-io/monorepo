@@ -49,6 +49,10 @@ To get an id, copy one from the Network tab (the `GET /comments` response).
 
 Both comment pages have a "Pass foreignId" / "Pass entity object" switch. Either way the section sits inside an `EntityProvider`. With "Pass entity object" the component gets `entity={entity}` from `useEntity()` instead of the `foreignId`; that object is replaced whenever the entity changes (posting a comment updates its `commentsCount`). The choice is kept in the URL as `?entity=object`.
 
+## GIF picker placement
+
+Both comment pages have a "GIF picker: section / full screen" switch. It is passed to the component as `gifPickerFullScreen`: "section" opens the picker over the comment section, "full screen" over the whole page. The section sits in a fixed-height box, as in a real embed, so the comment list scrolls inside it.
+
 ## States to eyeball
 
 Check each in both the styled and tailwind variants, light and dark.

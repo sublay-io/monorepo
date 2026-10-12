@@ -134,7 +134,6 @@
   "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react-native/comments-social/tailwind",
   "exports": {
     "mainComponent": "SocialCommentSection",
-    "mainFile": "social-comment-section",
-    "typeExports": ["SocialStyleCallbacks"]
+    "mainFile": "social-comment-section"
   }
 }

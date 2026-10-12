@@ -145,7 +145,6 @@
   "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react/comments-threaded/styled",
   "exports": {
     "mainComponent": "ThreadedCommentSection",
-    "mainFile": "threaded-comment-section",
-    "typeExports": ["ThreadedStyleCallbacks"]
+    "mainFile": "threaded-comment-section"
   }
 }

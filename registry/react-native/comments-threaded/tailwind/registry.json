@@ -144,7 +144,6 @@
   "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react-native/comments-threaded/tailwind",
   "exports": {
     "mainComponent": "ThreadedCommentSection",
-    "mainFile": "threaded-comment-section",
-    "typeExports": ["ThreadedStyleCallbacks"]
+    "mainFile": "threaded-comment-section"
   }
 }

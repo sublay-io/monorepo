@@ -258,7 +258,7 @@ function NewCommentForm({
           theme={theme}
         />
         <View
-          className={`flex-row items-center justify-end gap-2 py-2 pl-2 pr-4 border-t ${
+          className={`flex-row items-center justify-end gap-2 py-2 ps-2 pe-4 border-t ${
             theme === 'dark' ? 'border-neutral-600' : 'border-gray-200'
           }`}
         >

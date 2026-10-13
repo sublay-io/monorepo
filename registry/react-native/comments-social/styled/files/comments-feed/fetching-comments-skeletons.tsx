@@ -17,7 +17,7 @@ const FetchingCommentsSkeletons = () => {
       contentContainerStyle={{
         paddingTop: 8,
         paddingBottom: 24,
-        paddingRight: 46,
+        paddingEnd: 46,
       }}
       keyboardShouldPersistTaps="always"
     />

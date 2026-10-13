@@ -247,7 +247,7 @@ function NewCommentForm({
             }}
           />
           <div
-            className="flex items-center justify-end gap-2 py-2 pl-2 pr-4"
+            className="flex items-center justify-end gap-2 py-2 ps-2 pe-4"
           >
             {/* 🎨 CUSTOMIZATION: Form layout (Default: true - show avatar, 32px size) */}
             {user && true ? (
@@ -263,6 +263,9 @@ function NewCommentForm({
               id="sublay-social-textarea"
               rows={1}
               ref={textAreaRef}
+              // Typed text reads in its own direction; while empty, the
+              // placeholder follows the page
+              dir={content ? "auto" : undefined}
               placeholder="Add a comment..."
               onChange={(e) => {
                 setContent(e.target.value);

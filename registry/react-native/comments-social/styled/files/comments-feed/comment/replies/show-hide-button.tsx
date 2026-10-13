@@ -76,8 +76,8 @@ const ShowHideButton = ({
       <View
         style={{
           paddingTop: viewRepliesPaddingTop,
-          paddingLeft: 58,
-          paddingRight: 16,
+          paddingStart: 58,
+          paddingEnd: 16,
           flexDirection: "row",
           alignItems: "center",
           gap: 12,
@@ -110,8 +110,8 @@ const ShowHideButton = ({
       style={{
         ...resetButton,
         paddingTop: viewRepliesPaddingTop,
-        paddingLeft: 58,
-        paddingRight: 16,
+        paddingStart: 58,
+        paddingEnd: 16,
         flexDirection: "row",
         alignItems: "center",
         gap: 12,

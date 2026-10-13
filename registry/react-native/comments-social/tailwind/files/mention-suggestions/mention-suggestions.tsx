@@ -48,7 +48,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
               className="flex-row items-center py-2"
             >
               <UserAvatar theme={theme} user={item} />
-              <View className="justify-evenly ml-2">
+              <View className="justify-evenly ms-2">
                 <Text
                   className={`text-sm font-medium ${
                     theme === 'dark' ? 'text-neutral-50' : 'text-black'

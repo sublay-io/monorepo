@@ -166,7 +166,7 @@ function SocialCommentSectionInner({
   const renderSortButtons = () => {
     return sortOptions.map(({ label, sortBy, sortDir }, index) => {
       const isFirst = index === 0;
-      const marginStyle = isFirst ? {} : { marginLeft: 4 };
+      const marginStyle = isFirst ? {} : { marginStart: 4 };
 
       return (
         <SortByButton
@@ -204,8 +204,8 @@ function SocialCommentSectionInner({
           style={{
             flexDirection: "row",
             // 🎨 CUSTOMIZATION: Header padding (Default: 24px horizontal, 12px vertical)
-            paddingLeft: 24,
-            paddingRight: 24,
+            paddingStart: 24,
+            paddingEnd: 24,
             paddingTop: 12,
             paddingBottom: 12,
             alignItems: "center",

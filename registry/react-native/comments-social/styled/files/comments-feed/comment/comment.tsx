@@ -168,8 +168,8 @@ const Comment = React.memo(
         {isPlaceholderRow ? (
           <View
             style={{
-              paddingRight: 16,
-              paddingLeft: 16 + extraLeftPadding,
+              paddingEnd: 16,
+              paddingStart: 16 + extraLeftPadding,
               flexDirection: "row",
               alignItems: "center",
               gap: 12,
@@ -238,8 +238,8 @@ const Comment = React.memo(
           }}
           style={{
             ...styles.container,
-            paddingRight: 16,
-            paddingLeft: 16 + extraLeftPadding,
+            paddingEnd: 16,
+            paddingStart: 16 + extraLeftPadding,
           }}
         >
           <View style={[styles.commentHeader, { gap: horizontalItemsGap }]}>

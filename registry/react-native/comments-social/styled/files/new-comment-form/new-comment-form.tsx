@@ -293,8 +293,8 @@ function NewCommentForm({
             gap: itemsGap,
             paddingTop: verticalPadding,
             paddingBottom: verticalPadding,
-            paddingLeft,
-            paddingRight,
+            paddingStart: paddingLeft,
+            paddingEnd: paddingRight,
             borderTopColor: theme === 'dark' ? "#525252" : "#e7e7e7",
             borderTopWidth: 1,
           }}

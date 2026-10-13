@@ -10,7 +10,31 @@ import {
 type StyleVariant = "styled" | "tailwind";
 type Theme = "light" | "dark";
 type Direction = "ltr" | "rtl";
-type Language = "en" | "he";
+
+// Every language the comment components are translated into: English plus
+// one file per language in a component's locales folder.
+const LANGUAGES = [
+  "en",
+  ...Object.keys(
+    import.meta.glob(
+      "../../../registry/react/comments-social/styled/locales/*.ts"
+    )
+  )
+    .map((file) => file.slice(file.lastIndexOf("/") + 1, -".ts".length))
+    .filter((code) => code !== "check")
+    .sort(),
+];
+
+const RTL_LANGUAGES = ["ar", "he"];
+
+/** A language's own name for itself, e.g. "עברית". */
+function languageName(code: string): string {
+  try {
+    return new Intl.DisplayNames([code], { type: "language" }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
 
 // A fixed height, as in a real embed: the section fills it and the comment
 // list scrolls inside.
@@ -22,7 +46,7 @@ type SectionProps = EntitySourceProps & {
   gifPickerFullScreen: boolean;
 };
 
-function currentLanguage(): Language {
+function currentLanguage(): string {
   let stored: string | null = null;
   try {
     stored = window.localStorage.getItem("playground-lang");
@@ -31,12 +55,12 @@ function currentLanguage(): Language {
   }
   const lang =
     new URLSearchParams(window.location.search).get("lang") ?? stored;
-  return lang === "he" ? "he" : "en";
+  return lang && LANGUAGES.includes(lang) ? lang : "en";
 }
 
 // The language is chosen when a component's strings module loads (see
 // sublayLanguageSwitch in vite.config.ts), so changing it reloads the page.
-function setLanguage(language: Language) {
+function setLanguage(language: string) {
   try {
     window.localStorage.setItem("playground-lang", language);
   } catch {
@@ -69,7 +93,7 @@ export default function CommentsPlayground({
   const [dir, setDir] = useState<Direction>(() => {
     const fromUrl = new URLSearchParams(window.location.search).get("dir");
     if (fromUrl === "rtl" || fromUrl === "ltr") return fromUrl;
-    return language === "he" ? "rtl" : "ltr";
+    return RTL_LANGUAGES.includes(language) ? "rtl" : "ltr";
   });
   const [gifPickerFullScreen, setGifPickerFullScreen] = useState(false);
   const { highlightedCommentId, applied, apply } = useHighlightedCommentId();
@@ -155,14 +179,24 @@ export default function CommentsPlayground({
             />
           </Field>
           <Field label="Language" hint="Reloads the page.">
-            <Segmented
+            <select
               value={language}
-              onChange={setLanguage}
-              options={[
-                { value: "en", label: "English" },
-                { value: "he", label: "עברית" },
-              ]}
-            />
+              onChange={(e) => setLanguage(e.target.value)}
+              style={{
+                padding: "4px 8px",
+                borderRadius: 6,
+                border: "1px solid #d1d5db",
+                background: "#fff",
+                color: "#111",
+                fontSize: 13,
+              }}
+            >
+              {LANGUAGES.map((code) => (
+                <option key={code} value={code}>
+                  {languageName(code)} ({code})
+                </option>
+              ))}
+            </select>
           </Field>
           <Field label="Direction">
             <Segmented

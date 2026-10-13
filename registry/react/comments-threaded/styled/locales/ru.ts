@@ -1,0 +1,92 @@
+import type { ReportReasonKey } from "@sublay/react-js";
+
+// Russian nouns take one of three forms, depending on the number.
+const plural = (count: number, one: string, few: string, many: string) => {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+  return many;
+};
+
+// 🌐 Every piece of text the comment section shows. Edit the values here to
+// reword or translate it. Entries that depend on a number or a name are
+// functions, so each language can use its own plural forms and word order.
+const strings = {
+  // Inputs
+  commentPlaceholder: "Присоединяйтесь к обсуждению",
+  replyPlaceholder: "Напишите ответ...",
+  cancel: "Отмена",
+
+  // Comment list
+  noCommentsTitle: "Комментариев пока нет",
+  noCommentsSubtitle: "Начните обсуждение.",
+  viewAllComments: "Показать все комментарии",
+  loadMoreComments: "Загрузить ещё комментарии",
+  loading: "Загрузка...",
+  loadCommentsFailed: "Не удалось загрузить комментарии",
+  loadMoreFailed: "Не удалось загрузить ещё",
+  tryAgain: "Повторить",
+
+  // A comment
+  reply: "Ответить",
+  replyCount: (count: number) =>
+    plural(count, `${count} ответ`, `${count} ответа`, `${count} ответов`),
+  moreReplyCount: (count: number) =>
+    plural(count, `ещё ${count} ответ`, `ещё ${count} ответа`, `ещё ${count} ответов`),
+  moreReplies: "Ещё ответы",
+  continueThread: "Продолжить ветку",
+  expandThread: "Развернуть ветку",
+  collapseThread: "Свернуть ветку",
+  moreOptions: "Ещё",
+  upvote: "Голос «за»",
+  downvote: "Голос «против»",
+  removeYourVote: "Убрать свой голос",
+
+  // Comments that can't be shown
+  deleted: "[удалено]",
+  removed: "[скрыто]",
+  unavailable: "Этот комментарий недоступен",
+  blockedAuthor: "Комментарий пользователя, которого вы заблокировали",
+  showAnyway: "Всё равно показать",
+  removedByModerator: (reason?: string | null) =>
+    `Скрыто модератором${reason ? `: ${reason}` : ""} · видно только вам`,
+
+  // Mentions
+  noUsersFound: "Пользователи не найдены",
+
+  // Menus
+  report: "Пожаловаться",
+  remove: "Удалить",
+  confirmDelete: "Удалить этот комментарий?",
+
+  // Report dialog
+  reportTitle: "Отправить жалобу",
+  reportIntro:
+    "Спасибо, что заботитесь о нашем сообществе. Расскажите, что происходит, и мы разберёмся.",
+  reportReasons: {
+    spam: "Это спам",
+    inappropriateContent: "Неприемлемое содержание",
+    harassment: "Травля или оскорбления",
+    misinformation: "Распространение ложной информации",
+    hateSpeech: "Язык вражды или символы ненависти",
+    violence: "Призывы к насилию или опасному поведению",
+    illegalActivity: "Призывы к незаконным действиям",
+    selfHarm: "Призывы к самоповреждению или суициду",
+    other: "Другое",
+  } satisfies Record<ReportReasonKey, string>,
+  submitReport: "Отправить жалобу",
+  submittingReport: "Отправка...",
+
+  // Messages
+  loginRequired: "Войдите, чтобы выполнить это действие",
+  usernameRequired: "Укажите имя пользователя, прежде чем участвовать в обсуждении",
+  commentEmpty: "Комментарий не может быть пустым",
+  userNotMentionable:
+    "Этого пользователя нельзя упомянуть: у него нет имени пользователя",
+  parentDeleted: "Этот комментарий удалён, поэтому ответить на него нельзя.",
+  parentRemoved: "Этот комментарий скрыт, поэтому ответить на него нельзя.",
+  postFailed: "Не удалось опубликовать комментарий. Попробуйте ещё раз.",
+};
+
+export default strings;

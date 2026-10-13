@@ -132,9 +132,9 @@ function sublayLanguageSwitch(): Plugin {
         `import en from ${JSON.stringify(`${file}?original`)};`,
         ...languages.map(
           (lang) =>
-            `import ${lang} from ${JSON.stringify(path.join(dir, `${lang}.ts`))};`,
+            `import lang_${lang} from ${JSON.stringify(path.join(dir, `${lang}.ts`))};`,
         ),
-        `const all = { en, ${languages.join(", ")} };`,
+        `const all = { en, ${languages.map((lang) => `${lang}: lang_${lang}`).join(", ")} };`,
         `let lang = new URLSearchParams(window.location.search).get("lang");`,
         `try { lang = lang || window.localStorage.getItem("playground-lang"); } catch {}`,
         `export default all[lang] || en;`,

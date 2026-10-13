@@ -162,7 +162,22 @@
     }
   ],
   "languages": {
-    "he": "locales/he.ts"
+    "ar": "locales/ar.ts",
+    "de": "locales/de.ts",
+    "es": "locales/es.ts",
+    "fr": "locales/fr.ts",
+    "he": "locales/he.ts",
+    "hi": "locales/hi.ts",
+    "id": "locales/id.ts",
+    "it": "locales/it.ts",
+    "ja": "locales/ja.ts",
+    "ko": "locales/ko.ts",
+    "nl": "locales/nl.ts",
+    "pl": "locales/pl.ts",
+    "pt": "locales/pt.ts",
+    "ru": "locales/ru.ts",
+    "tr": "locales/tr.ts",
+    "zh": "locales/zh.ts"
   },
   "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react-native/comments-threaded/tailwind",
   "exports": {

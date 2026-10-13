@@ -1096,6 +1096,7 @@
                   "v8/components/customization/overview",
                   "v8/components/customization/colors-theming",
                   "v8/components/customization/layout-structure",
+                  "v8/components/customization/languages-rtl",
                   "v8/components/customization/styling-variants",
                   "v8/components/customization/adding-features",
                   "v8/components/customization/advanced"

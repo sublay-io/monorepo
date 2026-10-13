@@ -22,8 +22,8 @@ function ReplyButtonAndInfo({
         alignItems: "center",
         // 🎨 CUSTOMIZATION: Reply button styling (Default: 16px)
         gap: "16px",
-        // 🎨 CUSTOMIZATION: Reply button styling (Default: 12px)
-        fontSize: "12px",
+        // 🎨 CUSTOMIZATION: Reply button styling (Default: 13px)
+        fontSize: "13px",
       }}
     >
       {canReply && (

@@ -21,6 +21,7 @@ import IndentationThreadingLines, {
   INDENT,
   MAX_INDENT_DEPTH,
   ROW_PADDING_Y,
+  SECTION_PADDING_X,
   ThreadStem,
 } from "./indentation-threading-lines";
 import ReplyButtonAndInfo from "./reply-button-and-info";
@@ -59,7 +60,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
     <button
       onClick={() => toggleReaction({ reactionType: currentReaction })}
       style={{
-        fontSize: "12px",
+        fontSize: "13px",
         color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
         fontWeight: 500,
         padding: "4px 8px",
@@ -134,6 +135,8 @@ function SingleComment({
   // How far this row sits in from the left edge of its thread. The highlight
   // reaches back across it, so a highlighted reply is coloured edge to edge.
   const indentationPx = Math.min(depth, MAX_INDENT_DEPTH) * INDENT;
+  // ...and on across the section's own side padding, to its edges.
+  const highlightReachLeft = indentationPx + SECTION_PADDING_X;
 
   // The reply form is a row of its own under the comment, first on the line
   // its replies hang from.
@@ -163,8 +166,9 @@ function SingleComment({
     <>
     <div
       style={{
-        marginLeft: `-${indentationPx}px`,
-        paddingLeft: `${indentationPx}px`,
+        marginLeft: `-${highlightReachLeft}px`,
+        marginRight: `-${SECTION_PADDING_X}px`,
+        paddingLeft: `${highlightReachLeft}px`,
         backgroundColor: highlightGutterColor,
       }}
     >
@@ -172,7 +176,9 @@ function SingleComment({
         style={{
           position: "relative",
           backgroundColor: highlightColor,
-          padding: `${ROW_PADDING_Y}px 0`,
+          // The right padding is the section's own, carried here so the
+          // comment's highlight (not the strip's color) fills it
+          padding: `${ROW_PADDING_Y}px ${SECTION_PADDING_X}px ${ROW_PADDING_Y}px 0`,
           transition: "background-color 150ms ease-in-out",
         }}
       >
@@ -231,7 +237,7 @@ theme={theme}
                 alignItems: "center",
                 gap: "8px",
                 minHeight: "28px",
-                fontSize: "12px",
+                fontSize: "13px",
                 fontStyle: "italic",
                 color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
               }}
@@ -247,7 +253,7 @@ theme={theme}
                   <button
                     onClick={() => setShowBlockedComment(true)}
                     style={{
-                      fontSize: "12px",
+                      fontSize: "13px",
                       fontStyle: "normal",
                       fontWeight: 500,
                       color: theme === 'dark' ? "#60A5FA" : "#2563EB",
@@ -285,8 +291,8 @@ theme={theme}
                   alignItems: "center",
                   // 🎨 CUSTOMIZATION: Spacing (Default: 8px)
                   gap: "8px",
-                  // 🎨 CUSTOMIZATION: Typography - Timestamp (Default: 12px)
-                  fontSize: "12px",
+                  // 🎨 CUSTOMIZATION: Typography - Timestamp (Default: 13px)
+                  fontSize: "13px",
                   // 🎨 CUSTOMIZATION: Typography - Timestamp (Default: gray-500)
                   color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                 }}
@@ -295,7 +301,7 @@ theme={theme}
                   <span
                     style={{
                       fontWeight: 500,
-                      fontSize: "12px",
+                      fontSize: "13px",
                       color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                     }}
                   >
@@ -306,8 +312,8 @@ theme={theme}
                   style={{
                     // 🎨 CUSTOMIZATION: Typography - Author (Default: medium)
                     fontWeight: 500,
-                    // 🎨 CUSTOMIZATION: Typography - Author (Default: 12px)
-                    fontSize: "12px",
+                    // 🎨 CUSTOMIZATION: Typography - Author (Default: 13px)
+                    fontSize: "13px",
                     // 🎨 CUSTOMIZATION: Typography - Author (Default: gray-700)
                     color: theme === 'dark' ? "#D4D4D4" : "#374151",
                     cursor: "pointer",
@@ -332,7 +338,7 @@ theme={theme}
                 <span style={{ color: theme === 'dark' ? "#A3A3A3" : "#6B7280" }}>•</span>
                 <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
                 {isCollapsed && hasReplies && (
-                  <span style={{ color: theme === 'dark' ? "#60A5FA" : "#3B82F6", fontSize: "12px" }}>
+                  <span style={{ color: theme === 'dark' ? "#60A5FA" : "#3B82F6", fontSize: "13px" }}>
                     ({replyCount} {replyCount === 1 ? "reply" : "replies"})
                   </span>
                 )}
@@ -349,7 +355,7 @@ theme={theme}
             {!isCollapsed && tombstone && (
               <p
                 style={{
-                  fontSize: "12px",
+                  fontSize: "13px",
                   fontStyle: "italic",
                   color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                   marginBottom: "12px",
@@ -364,7 +370,7 @@ theme={theme}
               <p
                 role="alert"
                 style={{
-                  fontSize: "12px",
+                  fontSize: "13px",
                   color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                   marginBottom: "12px",
                 }}
@@ -378,11 +384,11 @@ theme={theme}
                 {comment.content && (
                   <p
                     style={{
-                      // 🎨 CUSTOMIZATION: Typography - Comment body (Default: 12px)
-                      fontSize: "12px",
+                      // 🎨 CUSTOMIZATION: Typography - Comment body (Default: 13px)
+                      fontSize: "13px",
                       // 🎨 CUSTOMIZATION: Typography - Comment body (Default: gray-800)
                       color: theme === 'dark' ? "#E5E5E5" : "#1F2937",
-                      // 🎨 CUSTOMIZATION: Spacing (Default: 12px)
+                      // 🎨 CUSTOMIZATION: Spacing (Default: 13px)
                       marginBottom: "12px",
                       lineHeight: "1.625",
                     }}
@@ -410,7 +416,7 @@ theme={theme}
                       borderRadius: "0.25rem",
                       overflow: "hidden",
                       objectFit: "cover",
-                      // 🎨 CUSTOMIZATION: Spacing (Default: 12px)
+                      // 🎨 CUSTOMIZATION: Spacing (Default: 13px)
                       marginBottom: "12px",
                     }}
                   />
@@ -419,7 +425,7 @@ theme={theme}
                 {isOwnRemoved && (
                   <p
                     style={{
-                      fontSize: "12px",
+                      fontSize: "13px",
                       color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                       marginBottom: "12px",
                     }}
@@ -432,7 +438,7 @@ theme={theme}
                   <p
                     role="alert"
                     style={{
-                      fontSize: "12px",
+                      fontSize: "13px",
                       color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                       marginBottom: "12px",
                     }}
@@ -479,12 +485,18 @@ theme={theme}
       <div
         style={{
           marginTop: `-${ROW_PADDING_Y}px`,
-          marginLeft: `-${indentationPx}px`,
-          paddingLeft: `${indentationPx}px`,
+          marginLeft: `-${highlightReachLeft}px`,
+        marginRight: `-${SECTION_PADDING_X}px`,
+          paddingLeft: `${highlightReachLeft}px`,
           backgroundColor: highlightGutterColor,
         }}
       >
-        <div style={{ backgroundColor: highlightColor }}>
+        <div
+          style={{
+            backgroundColor: highlightColor,
+            paddingRight: `${SECTION_PADDING_X}px`,
+          }}
+        >
         <div
           style={{
             position: "relative",

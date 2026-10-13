@@ -7,7 +7,7 @@ import IndentationThreadingLines, {
   MAX_INDENT_DEPTH,
 } from "./single-comment/indentation-threading-lines";
 
-// 🎨 CUSTOMIZATION: "More replies" row - space above it (Default: 12px)
+// 🎨 CUSTOMIZATION: "More replies" row - space above it (Default: 13px)
 const LOAD_MORE_PADDING_TOP = 12;
 // 🎨 CUSTOMIZATION: "More replies" row - height (Default: 24px)
 const LOAD_MORE_HEIGHT = 24;
@@ -91,7 +91,7 @@ function CommentReplies({
           {failed && !loading ? (
             <div
               style={{
-                fontSize: "12px",
+                fontSize: "13px",
                 color: theme === "dark" ? "#A3A3A3" : "#6B7280",
                 padding: "4px 8px",
               }}
@@ -100,7 +100,7 @@ function CommentReplies({
               <button
                 onClick={onLoadMore}
                 style={{
-                  fontSize: "12px",
+                  fontSize: "13px",
                   fontWeight: 500,
                   color: theme === "dark" ? "#60A5FA" : "#2563EB",
                   padding: 0,
@@ -120,7 +120,7 @@ function CommentReplies({
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                fontSize: "12px",
+                fontSize: "13px",
                 color: theme === 'dark' ? "#60A5FA" : "#2563EB",
                 fontWeight: "500",
                 transition: "all 150ms ease-in-out",

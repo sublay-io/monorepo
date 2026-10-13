@@ -10,7 +10,7 @@ function FetchingCommentsSkeletons() {
         ...resetDiv,
         display: "grid",
         // Sized and spaced like the comment rows they stand in for
-        gap: "44px",
+        gap: "45px",
         paddingTop: 12,
         paddingBottom: 24,
       }}

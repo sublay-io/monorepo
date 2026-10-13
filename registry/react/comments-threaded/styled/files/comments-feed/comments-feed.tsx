@@ -68,7 +68,7 @@ const CommentsFeed = React.memo(
             <button
               onClick={() => setShowAll(true)}
               style={{
-                fontSize: "12px",
+                fontSize: "13px",
                 fontWeight: 500,
                 color: theme === "dark" ? "#60A5FA" : "#2563EB",
                 padding: "4px 8px",
@@ -95,7 +95,7 @@ const CommentsFeed = React.memo(
     const mutedColor = theme === "dark" ? "#A3A3A3" : "#6B7280";
     const linkColor = theme === "dark" ? "#60A5FA" : "#2563EB";
     const tryAgainStyle: React.CSSProperties = {
-      fontSize: "12px",
+      fontSize: "13px",
       fontWeight: 500,
       color: linkColor,
       padding: 0,
@@ -110,7 +110,7 @@ const CommentsFeed = React.memo(
         {showLoadedComments && hasMore && (
           <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
             {showLoadMoreError ? (
-              <div style={{ fontSize: "12px", color: mutedColor, padding: "4px 12px" }}>
+              <div style={{ fontSize: "13px", color: mutedColor, padding: "4px 12px" }}>
                 Couldn't load more ·{" "}
                 <button onClick={() => loadMore?.()} style={tryAgainStyle}>
                   Try again
@@ -121,7 +121,7 @@ const CommentsFeed = React.memo(
                 onClick={() => loadMore?.()}
                 disabled={loading}
                 style={{
-                  fontSize: "12px",
+                  fontSize: "13px",
                   fontWeight: 500,
                   color: theme === 'dark' ? "#60A5FA" : "#2563EB",
                   padding: "4px 12px",

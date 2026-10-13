@@ -21,6 +21,7 @@ import {
   INDENT,
   MAX_INDENT_DEPTH,
   ROW_PADDING_Y,
+  SECTION_PADDING_X,
   ThreadStem,
 } from "./indentation-threading-lines";
 import ReplyButtonAndInfo from "./reply-button-and-info";
@@ -58,7 +59,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
       className="px-2 py-1"
     >
       <Text
-        className={`text-xs font-medium ${
+        className={`text-[13px] leading-[18px] font-medium ${
           theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
         }`}
       >
@@ -123,6 +124,8 @@ function SingleComment({
   // How far this row sits in from the left edge of its thread. The highlight
   // reaches back across it, so a highlighted reply is coloured edge to edge.
   const indentationPx = Math.min(depth, MAX_INDENT_DEPTH) * INDENT;
+  // ...and on across the section's own side padding, to its edges.
+  const highlightReachLeft = indentationPx + SECTION_PADDING_X;
 
   // Replies are written in the section's main input. Reply makes this comment
   // the reply target (the reply is nested under exactly this comment) and
@@ -192,11 +195,20 @@ function SingleComment({
     <View
       className={highlightGutterClass}
       style={{
-        marginLeft: -indentationPx,
-        paddingLeft: indentationPx,
+        marginLeft: -highlightReachLeft,
+        marginRight: -SECTION_PADDING_X,
+        paddingLeft: highlightReachLeft,
       }}
     >
-      <View className={highlightClass} style={{ paddingVertical: ROW_PADDING_Y }}>
+      <View
+        className={highlightClass}
+        style={{
+          paddingVertical: ROW_PADDING_Y,
+          // The right padding is the section's own, carried here so the
+          // comment's highlight (not the strip's color) fills it
+          paddingRight: SECTION_PADDING_X,
+        }}
+      >
         {/* Line from this comment's avatar down to the rows listed under it */}
         {(showReplies || columnContinues) && <ThreadStem />}
 
@@ -240,7 +252,7 @@ theme={theme}
               {isUnavailable ? (
                 <>
                   <Text
-                    className={`text-xs italic ${
+                    className={`text-[13px] leading-[18px] italic ${
                       theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >
@@ -251,7 +263,7 @@ theme={theme}
               ) : (
                 <>
                   <Text
-                    className={`text-xs italic ${
+                    className={`text-[13px] leading-[18px] italic ${
                       theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >
@@ -259,7 +271,7 @@ theme={theme}
                   </Text>
                   <Pressable onPress={() => setShowBlockedComment(true)}>
                     <Text
-                      className={`text-xs font-medium ${
+                      className={`text-[13px] leading-[18px] font-medium ${
                         theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                       }`}
                     >
@@ -281,7 +293,7 @@ theme={theme}
               <View className="flex-row items-center gap-2">
                 {tombstone ? (
                   <Text
-                    className={`font-medium text-xs ${
+                    className={`font-medium text-[13px] leading-[18px] ${
                       theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >
@@ -298,7 +310,7 @@ theme={theme}
                   }}
                 >
                   <Text
-                    className={`font-medium text-xs ${
+                    className={`font-medium text-[13px] leading-[18px] ${
                       theme === 'dark' ? 'text-neutral-300' : 'text-gray-700'
                     }`}
                   >
@@ -307,14 +319,14 @@ theme={theme}
                 </Pressable>
                 )}
                 <Text
-                  className={`text-xs ${
+                  className={`text-[13px] leading-[18px] ${
                     theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                   }`}
                 >
                   •
                 </Text>
                 <Text
-                  className={`text-xs ${
+                  className={`text-[13px] leading-[18px] ${
                     theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                   }`}
                 >
@@ -322,7 +334,7 @@ theme={theme}
                 </Text>
                 {isCollapsed && hasReplies && (
                   <Text
-                    className={`text-xs ${
+                    className={`text-[13px] leading-[18px] ${
                       theme === 'dark' ? 'text-blue-400' : 'text-blue-500'
                     }`}
                   >
@@ -341,7 +353,7 @@ theme={theme}
 
             {!isCollapsed && tombstone && (
               <Text
-                className={`text-xs italic mb-3 leading-relaxed ${
+                className={`text-[13px] leading-[21px] italic mb-3 ${
                   theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                 }`}
               >
@@ -353,7 +365,7 @@ theme={theme}
               <>
                 {comment.content && (
                   <Text
-                    className={`text-xs mb-3 leading-relaxed ${
+                    className={`text-[13px] leading-[21px] mb-3 ${
                       theme === 'dark' ? 'text-neutral-200' : 'text-gray-800'
                     }`}
                   >
@@ -376,7 +388,7 @@ theme={theme}
 
                 {isOwnRemoved && (
                   <Text
-                    className={`text-xs mb-3 ${
+                    className={`text-[13px] leading-[18px] mb-3 ${
                       theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >

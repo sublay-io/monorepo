@@ -42,8 +42,8 @@ function ReplyButtonAndInfo({
       >
         <Text
           style={{
-            fontSize: 12,
-            lineHeight: 16,
+            fontSize: 13,
+            lineHeight: 18,
             fontWeight: '500',
             color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
           }}
@@ -55,8 +55,8 @@ function ReplyButtonAndInfo({
       {hasReplies && (
         <Text
           style={{
-            fontSize: 12,
-            lineHeight: 16,
+            fontSize: 13,
+            lineHeight: 18,
             color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
           }}
         >

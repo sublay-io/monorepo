@@ -105,8 +105,8 @@ function VoteButtons({
           fontWeight: '500',
           textAlign: 'center',
           minWidth: 20,
-          fontSize: size === "small" ? 12 : 14,
-          lineHeight: size === "small" ? 16 : 20,
+          fontSize: size === "small" ? 13 : 14,
+          lineHeight: size === "small" ? 18 : 20,
           // 🎨 CUSTOMIZATION: Score color (positive / negative / zero)
           color:
             netScore > 0

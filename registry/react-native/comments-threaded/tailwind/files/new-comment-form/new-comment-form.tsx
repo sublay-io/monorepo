@@ -23,6 +23,7 @@ import GiphyContainer from "~shared/react-native/giphy-container";
 import MentionSuggestions from "../mention-suggestions/mention-suggestions";
 import ReplyBanner from "../reply-banner/reply-banner";
 import useUIState from "../../hooks/use-ui-state";
+import { SECTION_PADDING_X } from "../comments-feed/comment-thread/single-comment/indentation-threading-lines";
 import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
 
 function NewCommentForm({
@@ -235,9 +236,10 @@ function NewCommentForm({
         {createErrorMessage ? (
           <Text
             accessibilityRole="alert"
-            className={`text-xs px-4 pb-1.5 ${
+            className={`text-[13px] leading-[18px] pb-1.5 ${
               theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
             }`}
+            style={{ paddingHorizontal: SECTION_PADDING_X }}
           >
             {createErrorMessage}
           </Text>
@@ -245,7 +247,7 @@ function NewCommentForm({
         {/* Shown while a comment is being replied to */}
         <ReplyBanner />
         <View
-          className={`flex-row items-end p-2 mx-2 mb-2 rounded-2xl ${
+          className={`flex-row items-end p-2 mb-2 rounded-2xl ${
             hasContent
               ? theme === 'dark'
                 ? 'border border-blue-800'
@@ -254,6 +256,8 @@ function NewCommentForm({
                 ? 'border border-neutral-600'
                 : 'border border-gray-200'
           }`}
+          // In line with the comments above
+          style={{ marginHorizontal: SECTION_PADDING_X }}
         >
           <TextInput
             ref={textAreaRef}
@@ -271,7 +275,7 @@ function NewCommentForm({
             onSelectionChange={handleSelectionChange}
             onKeyPress={handleKeyPress}
             blurOnSubmit={false}
-            className={`flex-1 p-2 text-xs bg-transparent ${
+            className={`flex-1 p-2 text-sm bg-transparent ${
               theme === 'dark' ? 'text-neutral-50' : 'text-gray-900'
             }`}
             placeholderTextColor={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
@@ -284,7 +288,7 @@ function NewCommentForm({
               className="p-2"
             >
               <Text
-                className={`text-xs font-normal ${
+                className={`text-[13px] leading-[18px] font-normal ${
                   theme === 'dark' ? 'text-neutral-50' : 'text-gray-500'
                 }`}
               >

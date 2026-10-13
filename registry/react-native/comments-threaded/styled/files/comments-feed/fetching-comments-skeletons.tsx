@@ -13,7 +13,7 @@ function FetchingCommentsSkeletons() {
     <View
       style={{
         // Sized and spaced like the comment rows they stand in for
-        gap: 38,
+        gap: 39,
         paddingTop: AVATAR_TOP,
         paddingBottom: 24,
       }}

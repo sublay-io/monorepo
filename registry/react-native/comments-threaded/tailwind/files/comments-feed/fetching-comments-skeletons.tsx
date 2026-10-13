@@ -11,7 +11,7 @@ function FetchingCommentsSkeletons() {
   const { theme } = useUIState();
   return (
     // Sized and spaced like the comment rows they stand in for
-    <View className="gap-[38px] pb-6" style={{ paddingTop: AVATAR_TOP }}>
+    <View className="gap-[39px] pb-6" style={{ paddingTop: AVATAR_TOP }}>
       {[1, 2, 3].map((i) => (
         <CommentSkeleton
           theme={theme}

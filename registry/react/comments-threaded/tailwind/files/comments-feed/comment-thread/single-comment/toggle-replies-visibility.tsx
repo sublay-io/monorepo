@@ -11,7 +11,7 @@ function ToggleRepliesVisibilty({
     <button
       onClick={onToggleCollapse}
       className={cn(
-        "ml-1 w-4 h-4",
+        "ms-1 w-4 h-4",
         "flex items-center justify-center",
         "text-gray-500 dark:text-neutral-400",
         "bg-gray-50 dark:bg-neutral-700",

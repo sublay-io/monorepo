@@ -230,6 +230,9 @@ function NewCommentForm({
         >
           <textarea
             ref={textAreaRef}
+            // Typed text reads in its own direction; while empty, the
+            // placeholder follows the page
+            dir={content ? "auto" : undefined}
             onChange={(e) => {
               setContent(e.target.value);
               if (createError) setDismissedCreateError(createError);

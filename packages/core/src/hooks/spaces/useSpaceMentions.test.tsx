@@ -52,6 +52,60 @@ describe("useSpaceMentions", () => {
     expect(result.current.isSpaceMentionActive).toBe(false);
   });
 
+  it("stays closed after a suggestion is picked, until the user types or moves the cursor", async () => {
+    const base = {
+      setContent: vi.fn(),
+      focus: vi.fn(),
+      isSelectionActive: false,
+      debounceDelay: 10,
+    };
+
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseSpaceMentionsProps) => useSpaceMentions(props),
+      { initialProps: { ...base, content: "hello #des", cursorPosition: 10 } },
+    );
+
+    const suggestions = [makeSpace({ slug: "design" })];
+    axiosPrivate.mockResponse("get", { data: suggestions, pagination: { page: 1, pageSize: 5, totalPages: 1, totalItems: 1, hasMore: false } });
+    await waitFor(() => expect(result.current.spaceMentionSuggestions).toEqual(suggestions));
+
+    act(() => {
+      result.current.handleSpaceMentionClick(suggestions[0]);
+    });
+    expect(result.current.isSpaceMentionActive).toBe(false);
+
+    // The caller applies the new text. Its cursor position is still the old
+    // one (the text changed without an input event), so the word before the
+    // cursor reads "#des" again.
+    rerender({ ...base, content: "hello #design ", cursorPosition: 10 });
+    expect(result.current.isSpaceMentionActive).toBe(false);
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    expect(result.current.isSpaceMentionActive).toBe(false);
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+
+    // The user goes on typing a second mention: detection is back.
+    rerender({ ...base, content: "hello #design #mus", cursorPosition: 18 });
+    expect(result.current.isSpaceMentionActive).toBe(true);
+  });
+
+  it("activates for a trigger at the start of a new line", () => {
+    const { result } = renderHookWithAxios(
+      (props: UseSpaceMentionsProps) => useSpaceMentions(props),
+      {
+        initialProps: {
+          content: "hello\n#des",
+          setContent: vi.fn(),
+          focus: vi.fn(),
+          cursorPosition: 10,
+          isSelectionActive: false,
+          debounceDelay: 10,
+        },
+      },
+    );
+
+    expect(result.current.isSpaceMentionActive).toBe(true);
+  });
+
   it("does not activate mention state when there is no trigger before the cursor", () => {
     const { result, axiosPrivate } = renderHookWithAxios(
       (props: UseSpaceMentionsProps) => useSpaceMentions(props),

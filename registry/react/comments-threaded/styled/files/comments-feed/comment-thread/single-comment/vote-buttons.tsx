@@ -5,6 +5,7 @@ import {
   useReactionToggle,
 } from "@sublay/react-js";
 import useUIState from "../../../../hooks/use-ui-state";
+import strings from "../../../../utils/strings";
 
 interface VoteButtonsProps {
   comment: CommentType;
@@ -109,7 +110,7 @@ function VoteButtons({
             e.currentTarget.style.backgroundColor = "transparent";
           }
         }}
-        title="Upvote"
+        title={strings.upvote}
       >
         <svg
           style={iconSize}
@@ -190,7 +191,7 @@ function VoteButtons({
             e.currentTarget.style.backgroundColor = "transparent";
           }
         }}
-        title="Downvote"
+        title={strings.downvote}
       >
         <svg
           style={iconSize}

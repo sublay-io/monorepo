@@ -1,5 +1,6 @@
 import React from "react";
 import useUIState from "../../../../hooks/use-ui-state";
+import strings from "../../../../utils/strings";
 
 function ReplyButtonAndInfo({
   hasReplies,
@@ -51,7 +52,7 @@ function ReplyButtonAndInfo({
           e.currentTarget.style.backgroundColor = "transparent";
         }}
       >
-        Reply
+        {strings.reply}
       </button>
       )}
       {hasReplies && (
@@ -61,7 +62,7 @@ function ReplyButtonAndInfo({
             color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
           }}
         >
-          {replyCount} {replyCount === 1 ? "reply" : "replies"}
+          {strings.replyCount(replyCount)}
         </span>
       )}
     </div>

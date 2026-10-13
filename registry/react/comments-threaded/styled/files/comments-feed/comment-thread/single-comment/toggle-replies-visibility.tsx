@@ -1,4 +1,5 @@
 import useUIState from "../../../../hooks/use-ui-state";
+import strings from "../../../../utils/strings";
 
 function ToggleRepliesVisibilty({
   isCollapsed,
@@ -36,7 +37,7 @@ function ToggleRepliesVisibilty({
         e.currentTarget.style.color = theme === 'dark' ? "#A3A3A3" : "#6B7280";
         e.currentTarget.style.backgroundColor = theme === 'dark' ? "#404040" : "#F3F4F6";
       }}
-      title={isCollapsed ? "Expand thread" : "Collapse thread"}
+      title={isCollapsed ? strings.expandThread : strings.collapseThread}
     >
       {isCollapsed ? "+" : "−"}
     </button>

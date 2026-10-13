@@ -2,6 +2,7 @@ import { useCommentSection } from "@sublay/react-js";
 import Modal from "~shared/react/modal";
 import { resetButton, resetDiv, resetUl } from "~shared/react/reset-styles";
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 function CommentMenuModalOwner() {
   const {
@@ -15,7 +16,7 @@ function CommentMenuModalOwner() {
 
   const handleDeleteComment = async () => {
     const userConfirmed = window.confirm(
-      "Are you sure you want to delete this comment?"
+      strings.confirmDelete
     );
     if (userConfirmed && optionsComment) {
       closeCommentOptionsModalOwner?.();
@@ -68,7 +69,7 @@ function CommentMenuModalOwner() {
               }}
               onClick={handleDeleteComment}
             >
-              Remove
+              {strings.remove}
             </button>
           </li>
           <div
@@ -92,7 +93,7 @@ function CommentMenuModalOwner() {
               }}
               onClick={closeCommentOptionsModalOwner}
             >
-              Cancel
+              {strings.cancel}
             </button>
           </li>
         </ul>

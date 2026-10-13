@@ -104,6 +104,45 @@ function sublayApiBaseOverride(apiBase: string): Plugin {
   };
 }
 
+// The registry, as Vite sees it.
+const REGISTRY_DIR = path.resolve(__dirname, "../registry") + path.sep;
+
+/**
+ * Playground-only: a component's text comes from its utils/strings.ts, and
+ * the CLI swaps in another language's file at install time. Here the
+ * strings module is replaced by one that picks the language the playground's
+ * toggle stored (or `?lang=` in the URL), so the other languages can be seen
+ * without installing anything. A page reload applies a change.
+ */
+function sublayLanguageSwitch(): Plugin {
+  return {
+    name: "sublay-language-switch",
+    enforce: "pre",
+    load(id) {
+      const [file, query] = id.split("?");
+      if (query || !file.startsWith(REGISTRY_DIR)) return null;
+      if (!file.endsWith(`${path.sep}utils${path.sep}strings.ts`)) return null;
+      const dir = path.resolve(path.dirname(file), "../locales");
+      if (!fs.existsSync(dir)) return null;
+      const languages = fs
+        .readdirSync(dir)
+        .filter((name) => name.endsWith(".ts") && name !== "check.ts")
+        .map((name) => name.slice(0, -3));
+      return [
+        `import en from ${JSON.stringify(`${file}?original`)};`,
+        ...languages.map(
+          (lang) =>
+            `import ${lang} from ${JSON.stringify(path.join(dir, `${lang}.ts`))};`,
+        ),
+        `const all = { en, ${languages.join(", ")} };`,
+        `let lang = new URLSearchParams(window.location.search).get("lang");`,
+        `try { lang = lang || window.localStorage.getItem("playground-lang"); } catch {}`,
+        `export default all[lang] || en;`,
+      ].join("\n");
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   // Reads .env files and VITE_-prefixed shell variables (shell wins).
   const env = loadEnv(mode, __dirname, "VITE_");
@@ -126,7 +165,11 @@ export default defineConfig(({ mode }) => {
   );
 
   return {
-    plugins: [...(apiBase ? [sublayApiBaseOverride(apiBase)] : []), react()],
+    plugins: [
+      ...(apiBase ? [sublayApiBaseOverride(apiBase)] : []),
+      sublayLanguageSwitch(),
+      react(),
+    ],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),

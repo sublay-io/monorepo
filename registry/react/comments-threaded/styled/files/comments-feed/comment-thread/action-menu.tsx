@@ -1,5 +1,6 @@
 import { useUser, Comment as CommentType } from "@sublay/react-js";
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 interface ActionMenuProps {
   comment: CommentType;
@@ -37,7 +38,7 @@ function ActionMenu({ comment }: ActionMenuProps) {
           e.currentTarget.style.color = theme === 'dark' ? "#737373" : "#9CA3AF";
           e.currentTarget.style.backgroundColor = "transparent";
         }}
-        title="More options"
+        title={strings.moreOptions}
       >
         <svg
           style={{ width: "12px", height: "12px" }}

@@ -25,6 +25,7 @@ import GiphyContainer from "~shared/react-native/giphy-container";
 import MentionSuggestions from "../mention-suggestions/mention-suggestions";
 import ReplyBanner from "../reply-banner/reply-banner";
 import useUIState from "../../hooks/use-ui-state";
+import { SECTION_PADDING_X } from "../comments-feed/comment-thread/single-comment/indentation-threading-lines";
 import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
 
 function NewCommentForm({
@@ -250,9 +251,9 @@ function NewCommentForm({
             accessibilityRole="alert"
             style={{
               // 🎨 CUSTOMIZATION: Failed-post message styling
-              fontSize: 12,
-              lineHeight: 16,
-              paddingHorizontal: 16,
+              fontSize: 13,
+              lineHeight: 18,
+              paddingHorizontal: SECTION_PADDING_X,
               paddingBottom: 6,
               color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
             }}
@@ -267,7 +268,8 @@ function NewCommentForm({
             flexDirection: 'row',
             alignItems: 'flex-end',
             padding: 8,
-            marginHorizontal: 8,
+            // In line with the comments above
+            marginHorizontal: SECTION_PADDING_X,
             marginBottom: 8,
             borderRadius: 16,
             borderWidth: 1,
@@ -297,8 +299,9 @@ function NewCommentForm({
             style={{
               flex: 1,
               padding: 8,
-              fontSize: 12,
-              lineHeight: 16,
+              // 🎨 CUSTOMIZATION: Input text size (Default: 14)
+              fontSize: 14,
+              lineHeight: 20,
               backgroundColor: 'transparent',
               // 🎨 CUSTOMIZATION: Input text color
               color: theme === 'dark' ? '#FAFAFA' : '#111827',
@@ -315,8 +318,8 @@ function NewCommentForm({
             >
               <Text
                 style={{
-                  fontSize: 12,
-                  lineHeight: 16,
+                  fontSize: 13,
+                  lineHeight: 18,
                   fontWeight: '400',
                   color: theme === 'dark' ? '#FAFAFA' : '#6B7280',
                 }}

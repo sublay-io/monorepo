@@ -14,7 +14,7 @@ function NoCommentsPlaceHolder() {
         No comments yet
       </Text>
       <Text
-        className={`text-center text-xs mt-0 ${
+        className={`text-center text-[13px] leading-[18px] mt-0 ${
           theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
         }`}
       >

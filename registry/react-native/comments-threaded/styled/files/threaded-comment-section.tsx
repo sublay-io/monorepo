@@ -52,6 +52,7 @@ import CommentsFeed from "./comments-feed/comments-feed";
 import NewCommentForm from "./new-comment-form/new-comment-form";
 import { deepEqual, warnPropChanges } from "../utils/prop-comparison";
 import useUIState from "../hooks/use-ui-state";
+import { SECTION_PADDING_X } from "./comments-feed/comment-thread/single-comment/indentation-threading-lines";
 
 interface ThreadedCommentSectionProps {
   entity?: Entity | undefined | null;
@@ -143,6 +144,9 @@ function ThreadedCommentSectionInner({
           // 🎨 CUSTOMIZATION: Feed background
           backgroundColor: theme === 'dark' ? '#262626' : '#FFFFFF',
         }}
+        // The side padding is on the content, not on the scroll view, so a
+        // highlighted comment can reach back across it to the section's edges
+        contentContainerStyle={{ paddingHorizontal: SECTION_PADDING_X }}
         keyboardShouldPersistTaps="handled"
       >
         <CommentsFeed>{children}</CommentsFeed>

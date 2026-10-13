@@ -93,7 +93,7 @@ function VoteButtons({
       {/* Score */}
       <Text
         className={`font-medium text-center min-w-[20px] ${
-          size === "small" ? "text-xs" : "text-sm"
+          size === "small" ? "text-[13px] leading-[18px]" : "text-sm"
         } ${
           netScore > 0
             ? theme === 'dark'

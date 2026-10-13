@@ -22,8 +22,8 @@ function NoCommentsPlaceHolder() {
       <Text
         style={{
           textAlign: 'center',
-          fontSize: 12,
-          lineHeight: 16,
+          fontSize: 13,
+          lineHeight: 18,
           marginTop: 0,
           // 🎨 CUSTOMIZATION: Subtext color
           color: theme === 'dark' ? '#A3A3A3' : '#6B7280',

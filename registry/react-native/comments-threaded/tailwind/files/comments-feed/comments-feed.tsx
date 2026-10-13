@@ -71,7 +71,7 @@ const CommentsFeed = React.memo(
               className="px-2 py-1 rounded-full"
             >
               <Text
-                className={`text-xs font-medium ${
+                className={`text-[13px] leading-[18px] font-medium ${
                   theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                 }`}
               >
@@ -100,11 +100,11 @@ const CommentsFeed = React.memo(
           <View className="items-center py-2">
             {showLoadMoreError ? (
               <View className="flex-row items-center px-3 py-1">
-                <Text className={`text-xs ${mutedTextClass}`}>
+                <Text className={`text-[13px] leading-[18px] ${mutedTextClass}`}>
                   Couldn't load more ·{" "}
                 </Text>
                 <TouchableOpacity onPress={() => loadMore?.()}>
-                  <Text className={`text-xs font-medium ${linkTextClass}`}>
+                  <Text className={`text-[13px] leading-[18px] font-medium ${linkTextClass}`}>
                     Try again
                   </Text>
                 </TouchableOpacity>
@@ -116,7 +116,7 @@ const CommentsFeed = React.memo(
                 className="px-3 py-1 rounded-full"
               >
                 <Text
-                  className={`text-xs font-medium ${
+                  className={`text-[13px] leading-[18px] font-medium ${
                     theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                   }`}
                 >
@@ -133,7 +133,7 @@ const CommentsFeed = React.memo(
               Couldn't load comments
             </Text>
             <TouchableOpacity onPress={() => loadMore?.()}>
-              <Text className={`text-xs font-medium ${linkTextClass}`}>
+              <Text className={`text-[13px] leading-[18px] font-medium ${linkTextClass}`}>
                 Try again
               </Text>
             </TouchableOpacity>

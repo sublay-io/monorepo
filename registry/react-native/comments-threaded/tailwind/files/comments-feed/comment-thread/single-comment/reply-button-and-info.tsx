@@ -29,7 +29,7 @@ function ReplyButtonAndInfo({
         }`}
       >
         <Text
-          className={`text-xs font-medium ${
+          className={`text-[13px] leading-[18px] font-medium ${
             theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
           }`}
         >
@@ -39,7 +39,7 @@ function ReplyButtonAndInfo({
       )}
       {hasReplies && (
         <Text
-          className={`text-xs ${
+          className={`text-[13px] leading-[18px] ${
             theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
           }`}
         >

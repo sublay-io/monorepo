@@ -10,7 +10,8 @@ import IndentationThreadingLines, {
 
 // 🎨 CUSTOMIZATION: "More replies" row - space above it (Default: 12)
 const LOAD_MORE_PADDING_TOP = 12;
-// 🎨 CUSTOMIZATION: "More replies" row - height (Default: 24)
+// 🎨 CUSTOMIZATION: "More replies" row - height (Default: 24).
+// The row's text has a line height of 16, plus 4 of padding above and below.
 const LOAD_MORE_HEIGHT = 24;
 // 🎨 CUSTOMIZATION: "More replies" row - space between the elbow and the button (Default: 4)
 const LOAD_MORE_OFFSET_LEFT = 4;
@@ -92,7 +93,7 @@ function CommentReplies({
           {failed && !loading ? (
             <View className="flex-row items-center px-2 py-1">
               <Text
-                className={`text-xs ${
+                className={`text-[13px] leading-4 ${
                   theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                 }`}
               >
@@ -100,7 +101,7 @@ function CommentReplies({
               </Text>
               <TouchableOpacity onPress={onLoadMore}>
                 <Text
-                  className={`text-xs font-medium ${
+                  className={`text-[13px] leading-4 font-medium ${
                     theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                   }`}
                 >
@@ -119,14 +120,14 @@ function CommentReplies({
               }`}
             >
               <Text
-                className={`text-xs ${
+                className={`text-[13px] leading-4 ${
                   theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                 }`}
               >
                 +
               </Text>
               <Text
-                className={`text-xs font-medium ${
+                className={`text-[13px] leading-4 font-medium ${
                   theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                 }`}
               >

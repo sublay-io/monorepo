@@ -2,6 +2,7 @@ import { View, Text, Pressable } from "react-native";
 import { useCommentSection, getUserName } from "@sublay/react-native";
 import UserAvatar from "~shared/react-native/user-avatar";
 import useUIState from "../../hooks/use-ui-state";
+import { SECTION_PADDING_X } from "../comments-feed/comment-thread/single-comment/indentation-threading-lines";
 
 // 🎨 CUSTOMIZATION: Size of the avatar in the bar (Default: 20)
 const REPLY_BANNER_AVATAR_SIZE = 20;
@@ -24,14 +25,14 @@ function ReplyBanner() {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
-        paddingHorizontal: 16,
+        paddingHorizontal: SECTION_PADDING_X,
         paddingBottom: 8,
       }}
     >
       <Text
         style={{
-          fontSize: 12,
-          lineHeight: 16,
+          fontSize: 13,
+          lineHeight: 18,
           // 🎨 CUSTOMIZATION: "Replying to" label color
           color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
         }}
@@ -48,8 +49,8 @@ function ReplyBanner() {
         numberOfLines={1}
         style={{
           flexShrink: 1,
-          fontSize: 12,
-          lineHeight: 16,
+          fontSize: 13,
+          lineHeight: 18,
           fontWeight: '600',
           // 🎨 CUSTOMIZATION: Author name color
           color: theme === 'dark' ? '#E5E5E5' : '#1F2937',

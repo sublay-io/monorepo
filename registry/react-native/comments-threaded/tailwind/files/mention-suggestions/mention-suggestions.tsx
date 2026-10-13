@@ -4,6 +4,7 @@ import { User, useCommentSection } from "@sublay/react-native";
 import UserAvatar from "~shared/react-native/user-avatar";
 import { UserMentionSkeleton } from "~shared/react-native/skeleton";
 import useUIState from "../../hooks/use-ui-state";
+import { SECTION_PADDING_X } from "../comments-feed/comment-thread/single-comment/indentation-threading-lines";
 
 interface MentionSuggestionsProps {
   isMentionActive: boolean;
@@ -25,12 +26,14 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
 
   return (
     <View
-      className={`h-auto max-h-[200px] absolute bottom-0 left-0 right-0 z-10 overflow-hidden p-3 rounded-xl border mb-2 mx-2 ${
+      className={`h-auto max-h-[200px] absolute bottom-0 left-0 right-0 z-10 overflow-hidden p-3 rounded-xl border mb-2 ${
         theme === 'dark'
           ? 'bg-neutral-800 border-neutral-600'
           : 'bg-white border-gray-200'
       }`}
       style={{
+        // In line with the input below
+        marginHorizontal: SECTION_PADDING_X,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -85,7 +88,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                 </Text>
                 {item.name && (
                   <Text
-                    className={`text-xs font-normal ${
+                    className={`text-[13px] leading-[18px] font-normal ${
                       theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >

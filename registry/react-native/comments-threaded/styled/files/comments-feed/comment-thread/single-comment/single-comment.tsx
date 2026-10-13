@@ -21,6 +21,7 @@ import {
   INDENT,
   MAX_INDENT_DEPTH,
   ROW_PADDING_Y,
+  SECTION_PADDING_X,
   ThreadStem,
 } from "./indentation-threading-lines";
 import ReplyButtonAndInfo from "./reply-button-and-info";
@@ -62,8 +63,8 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
     >
       <Text
         style={{
-          fontSize: 12,
-          lineHeight: 16,
+          fontSize: 13,
+          lineHeight: 18,
           fontWeight: '500',
           color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
         }}
@@ -129,6 +130,8 @@ function SingleComment({
   // How far this row sits in from the left edge of its thread. The highlight
   // reaches back across it, so a highlighted reply is coloured edge to edge.
   const indentationPx = Math.min(depth, MAX_INDENT_DEPTH) * INDENT;
+  // ...and on across the section's own side padding, to its edges.
+  const highlightReachLeft = indentationPx + SECTION_PADDING_X;
 
   // Replies are written in the section's main input. Reply makes this comment
   // the reply target (the reply is nested under exactly this comment) and
@@ -198,14 +201,18 @@ function SingleComment({
     <View
       style={{
         backgroundColor: highlightGutterColor,
-        marginLeft: -indentationPx,
-        paddingLeft: indentationPx,
+        marginLeft: -highlightReachLeft,
+        marginRight: -SECTION_PADDING_X,
+        paddingLeft: highlightReachLeft,
       }}
     >
       <View
         style={{
           backgroundColor: highlightColor,
           paddingVertical: ROW_PADDING_Y,
+          // The right padding is the section's own, carried here so the
+          // comment's highlight (not the strip's color) fills it
+          paddingRight: SECTION_PADDING_X,
         }}
       >
         {/* Line from this comment's avatar down to the rows listed under it */}
@@ -271,8 +278,8 @@ theme={theme}
                 <>
                   <Text
                     style={{
-                      fontSize: 12,
-                      lineHeight: 16,
+                      fontSize: 13,
+                      lineHeight: 18,
                       fontStyle: 'italic',
                       color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
                     }}
@@ -285,8 +292,8 @@ theme={theme}
                 <>
                   <Text
                     style={{
-                      fontSize: 12,
-                      lineHeight: 16,
+                      fontSize: 13,
+                      lineHeight: 18,
                       fontStyle: 'italic',
                       color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
                     }}
@@ -296,8 +303,8 @@ theme={theme}
                   <Pressable onPress={() => setShowBlockedComment(true)}>
                     <Text
                       style={{
-                        fontSize: 12,
-                        lineHeight: 16,
+                        fontSize: 13,
+                        lineHeight: 18,
                         fontWeight: '500',
                         color: theme === 'dark' ? '#60A5FA' : '#2563EB',
                       }}
@@ -335,8 +342,8 @@ theme={theme}
                   <Text
                     style={{
                       fontWeight: '500',
-                      fontSize: 12,
-                      lineHeight: 16,
+                      fontSize: 13,
+                      lineHeight: 18,
                       color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
                     }}
                   >
@@ -355,8 +362,8 @@ theme={theme}
                   <Text
                     style={{
                       fontWeight: '500',
-                      fontSize: 12,
-                      lineHeight: 16,
+                      fontSize: 13,
+                      lineHeight: 18,
                       // 🎨 CUSTOMIZATION: Author name color
                       color: theme === 'dark' ? '#D4D4D4' : '#374151',
                     }}
@@ -367,8 +374,8 @@ theme={theme}
                 )}
                 <Text
                   style={{
-                    fontSize: 12,
-                    lineHeight: 16,
+                    fontSize: 13,
+                    lineHeight: 18,
                     color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
                   }}
                 >
@@ -376,8 +383,8 @@ theme={theme}
                 </Text>
                 <Text
                   style={{
-                    fontSize: 12,
-                    lineHeight: 16,
+                    fontSize: 13,
+                    lineHeight: 18,
                     color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
                   }}
                 >
@@ -386,8 +393,8 @@ theme={theme}
                 {isCollapsed && hasReplies && (
                   <Text
                     style={{
-                      fontSize: 12,
-                      lineHeight: 16,
+                      fontSize: 13,
+                      lineHeight: 18,
                       color: theme === 'dark' ? '#60A5FA' : '#3B82F6',
                     }}
                   >
@@ -407,8 +414,8 @@ theme={theme}
             {!isCollapsed && tombstone && (
               <Text
                 style={{
-                  fontSize: 12,
-                  lineHeight: 19.5,
+                  fontSize: 13,
+                  lineHeight: 21,
                   fontStyle: 'italic',
                   marginBottom: 12,
                   color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
@@ -423,8 +430,8 @@ theme={theme}
                 {comment.content && (
                   <Text
                     style={{
-                      fontSize: 12,
-                      lineHeight: 19.5,
+                      fontSize: 13,
+                      lineHeight: 21,
                       marginBottom: 12,
                       // 🎨 CUSTOMIZATION: Comment body color
                       color: theme === 'dark' ? '#E5E5E5' : '#1F2937',
@@ -450,8 +457,8 @@ theme={theme}
                 {isOwnRemoved && (
                   <Text
                     style={{
-                      fontSize: 12,
-                      lineHeight: 16,
+                      fontSize: 13,
+                      lineHeight: 18,
                       marginBottom: 12,
                       color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
                     }}

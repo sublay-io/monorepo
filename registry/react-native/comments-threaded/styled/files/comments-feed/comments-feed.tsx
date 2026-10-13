@@ -81,8 +81,8 @@ const CommentsFeed = React.memo(
             >
               <Text
                 style={{
-                  fontSize: 12,
-                  lineHeight: 16,
+                  fontSize: 13,
+                  lineHeight: 18,
                   fontWeight: '500',
                   color: theme === 'dark' ? '#60A5FA' : '#2563EB',
                 }}
@@ -127,8 +127,8 @@ const CommentsFeed = React.memo(
               >
                 <Text
                   style={{
-                    fontSize: 12,
-                    lineHeight: 16,
+                    fontSize: 13,
+                    lineHeight: 18,
                     color: mutedTextColor,
                   }}
                 >
@@ -137,8 +137,8 @@ const CommentsFeed = React.memo(
                 <TouchableOpacity onPress={() => loadMore?.()}>
                   <Text
                     style={{
-                      fontSize: 12,
-                      lineHeight: 16,
+                      fontSize: 13,
+                      lineHeight: 18,
                       fontWeight: '500',
                       color: linkTextColor,
                     }}
@@ -159,8 +159,8 @@ const CommentsFeed = React.memo(
               >
                 <Text
                   style={{
-                    fontSize: 12,
-                    lineHeight: 16,
+                    fontSize: 13,
+                    lineHeight: 18,
                     fontWeight: '500',
                     color: theme === 'dark' ? '#60A5FA' : '#2563EB',
                   }}
@@ -192,8 +192,8 @@ const CommentsFeed = React.memo(
             <TouchableOpacity onPress={() => loadMore?.()}>
               <Text
                 style={{
-                  fontSize: 12,
-                  lineHeight: 16,
+                  fontSize: 13,
+                  lineHeight: 18,
                   fontWeight: '500',
                   color: linkTextColor,
                 }}

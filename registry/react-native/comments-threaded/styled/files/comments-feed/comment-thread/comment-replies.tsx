@@ -10,7 +10,8 @@ import IndentationThreadingLines, {
 
 // 🎨 CUSTOMIZATION: "More replies" row - space above it (Default: 12)
 const LOAD_MORE_PADDING_TOP = 12;
-// 🎨 CUSTOMIZATION: "More replies" row - height (Default: 24)
+// 🎨 CUSTOMIZATION: "More replies" row - height (Default: 24).
+// The row's text has a line height of 16, plus 4 of padding above and below.
 const LOAD_MORE_HEIGHT = 24;
 // 🎨 CUSTOMIZATION: "More replies" row - space between the elbow and the button (Default: 4)
 const LOAD_MORE_OFFSET_LEFT = 4;
@@ -101,7 +102,7 @@ function CommentReplies({
             >
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 13,
                   lineHeight: 16,
                   color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
                 }}
@@ -111,7 +112,7 @@ function CommentReplies({
               <TouchableOpacity onPress={onLoadMore}>
                 <Text
                   style={{
-                    fontSize: 12,
+                    fontSize: 13,
                     lineHeight: 16,
                     fontWeight: '500',
                     color: theme === 'dark' ? '#60A5FA' : '#2563EB',
@@ -141,7 +142,7 @@ function CommentReplies({
             >
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 13,
                   lineHeight: 16,
                   color: theme === 'dark' ? '#60A5FA' : '#2563EB',
                 }}
@@ -150,7 +151,7 @@ function CommentReplies({
               </Text>
               <Text
                 style={{
-                  fontSize: 12,
+                  fontSize: 13,
                   lineHeight: 16,
                   fontWeight: '500',
                   color: theme === 'dark' ? '#60A5FA' : '#2563EB',

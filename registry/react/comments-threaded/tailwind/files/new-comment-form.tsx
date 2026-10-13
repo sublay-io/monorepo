@@ -241,7 +241,7 @@ function NewCommentForm({
               "flex-1 p-2",
               "bg-transparent",
               "text-gray-900 dark:text-neutral-50",
-              "text-xs leading-relaxed",
+              "text-sm leading-relaxed",
               "outline-none resize-none border-none"
             )}
             rows={2}
@@ -255,7 +255,7 @@ function NewCommentForm({
                 // 🎨 CUSTOMIZATION: Comment form styling
                 "flex-shrink-0 p-2",
                 "border-none outline-none",
-                "font-normal text-xs",
+                "font-normal text-[13px]",
                 "text-gray-500 dark:text-neutral-50",
                 "cursor-pointer bg-transparent"
               )}
@@ -303,7 +303,7 @@ function NewCommentForm({
         {createErrorMessage && (
           <p
             role="alert"
-            className="mt-1.5 px-2 text-xs text-gray-500 dark:text-neutral-400"
+            className="mt-1.5 px-2 text-[13px] text-gray-500 dark:text-neutral-400"
             // 🎨 CUSTOMIZATION: Failed-post message styling
           >
             {createErrorMessage}

@@ -42,7 +42,7 @@ function VoteButtons({
 
   // 🎨 CUSTOMIZATION: Vote button sizing
   const iconClass = size === "small" ? "w-3 h-3" : "w-4 h-4";
-  const textClass = size === "small" ? "text-xs" : "text-sm";
+  const textClass = size === "small" ? "text-[13px]" : "text-sm";
   const paddingClass = size === "small" ? "px-2 py-1" : "px-3 py-1.5";
 
   return (

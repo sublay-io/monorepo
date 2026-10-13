@@ -21,6 +21,7 @@ import IndentationThreadingLines, {
   INDENT,
   MAX_INDENT_DEPTH,
   ROW_PADDING_Y,
+  SECTION_PADDING_X,
   ThreadStem,
 } from "./indentation-threading-lines";
 import ReplyButtonAndInfo from "./reply-button-and-info";
@@ -57,7 +58,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
   return (
     <button
       onClick={() => toggleReaction({ reactionType: currentReaction })}
-      className="text-xs not-italic font-medium text-gray-500 dark:text-neutral-400 px-2 py-1 -ml-2 rounded bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-300"
+      className="text-[13px] not-italic font-medium text-gray-500 dark:text-neutral-400 px-2 py-1 -ml-2 rounded bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-300"
     >
       Remove your vote
     </button>
@@ -122,6 +123,8 @@ function SingleComment({
   // How far this row sits in from the left edge of its thread. The highlight
   // reaches back across it, so a highlighted reply is coloured edge to edge.
   const indentationPx = Math.min(depth, MAX_INDENT_DEPTH) * INDENT;
+  // ...and on across the section's own side padding, to its edges.
+  const highlightReachLeft = indentationPx + SECTION_PADDING_X;
 
   // The reply form is a row of its own under the comment, first on the line
   // its replies hang from.
@@ -148,13 +151,18 @@ function SingleComment({
     <div
       className={cn(highlightGutterClass)}
       style={{
-        marginLeft: `-${indentationPx}px`,
-        paddingLeft: `${indentationPx}px`,
+        marginLeft: `-${highlightReachLeft}px`,
+        marginRight: `-${SECTION_PADDING_X}px`,
+        paddingLeft: `${highlightReachLeft}px`,
       }}
     >
       <div
         className={cn("relative transition-colors duration-150", highlightClass)}
-        style={{ padding: `${ROW_PADDING_Y}px 0` }}
+        // The right padding is the section's own, carried here so the
+        // comment's highlight (not the strip's color) fills it
+        style={{
+          padding: `${ROW_PADDING_Y}px ${SECTION_PADDING_X}px ${ROW_PADDING_Y}px 0`,
+        }}
       >
         {/* Line from this comment's avatar down to the rows listed under it */}
         {(showReplies || showForm) && <ThreadStem />}
@@ -195,7 +203,7 @@ function SingleComment({
 
           {/* Comment content area */}
           {isPlaceholderRow ? (
-            <div className="flex-1 min-w-0 flex items-center gap-2 min-h-7 text-xs italic text-gray-500 dark:text-neutral-400">
+            <div className="flex-1 min-w-0 flex items-center gap-2 min-h-7 text-[13px] italic text-gray-500 dark:text-neutral-400">
               {isUnavailable ? (
                 <>
                   <span>This comment is unavailable</span>
@@ -206,7 +214,7 @@ function SingleComment({
                   <span>Comment from a user you blocked</span>
                   <button
                     onClick={() => setShowBlockedComment(true)}
-                    className="text-xs not-italic font-medium text-blue-600 dark:text-blue-400 bg-transparent border-none p-0 cursor-pointer hover:underline"
+                    className="text-[13px] not-italic font-medium text-blue-600 dark:text-blue-400 bg-transparent border-none p-0 cursor-pointer hover:underline"
                   >
                     Show anyway
                   </button>
@@ -226,16 +234,16 @@ function SingleComment({
               // 🎨 CUSTOMIZATION: Spacing
             >
               <div
-                className="flex items-center gap-2 text-xs text-gray-500 dark:text-neutral-400"
+                className="flex items-center gap-2 text-[13px] text-gray-500 dark:text-neutral-400"
                 // 🎨 CUSTOMIZATION: Typography and spacing
               >
                 {tombstone ? (
-                  <span className="font-medium text-xs text-gray-500 dark:text-neutral-400">
+                  <span className="font-medium text-[13px] text-gray-500 dark:text-neutral-400">
                     {tombstone}
                   </span>
                 ) : (
                 <span
-                  className="font-medium text-xs text-gray-700 dark:text-neutral-300 cursor-pointer hover:underline"
+                  className="font-medium text-[13px] text-gray-700 dark:text-neutral-300 cursor-pointer hover:underline"
                   // 🎨 CUSTOMIZATION: Author name styling
                   onClick={() => {
                     if (user?.id === comment.user?.id) {
@@ -251,7 +259,7 @@ function SingleComment({
                 <span className="text-gray-500 dark:text-neutral-400">•</span>
                 <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
                 {isCollapsed && hasReplies && (
-                  <span className="text-blue-500 dark:text-blue-400 text-xs">
+                  <span className="text-blue-500 dark:text-blue-400 text-[13px]">
                     ({replyCount} {replyCount === 1 ? "reply" : "replies"})
                   </span>
                 )}
@@ -266,7 +274,7 @@ function SingleComment({
             </div>
 
             {!isCollapsed && tombstone && (
-              <p className="text-xs italic text-gray-500 dark:text-neutral-400 mb-3 leading-relaxed">
+              <p className="text-[13px] italic text-gray-500 dark:text-neutral-400 mb-3 leading-relaxed">
                 {tombstone}
               </p>
             )}
@@ -274,7 +282,7 @@ function SingleComment({
             {!isCollapsed && tombstone && replyErrorMessage && (
               <p
                 role="alert"
-                className="text-xs text-gray-500 dark:text-neutral-400 mb-3"
+                className="text-[13px] text-gray-500 dark:text-neutral-400 mb-3"
               >
                 {replyErrorMessage}
               </p>
@@ -284,7 +292,7 @@ function SingleComment({
               <>
                 {comment.content && (
                   <p
-                    className="text-xs text-gray-800 dark:text-neutral-200 mb-3 leading-relaxed"
+                    className="text-[13px] text-gray-800 dark:text-neutral-200 mb-3 leading-relaxed"
                     // 🎨 CUSTOMIZATION: Comment body typography
                   >
                     {parseContentWithMentions(
@@ -313,7 +321,7 @@ function SingleComment({
                 )}
 
                 {isOwnRemoved && (
-                  <p className="text-xs text-gray-500 dark:text-neutral-400 mb-3">
+                  <p className="text-[13px] text-gray-500 dark:text-neutral-400 mb-3">
                     {ownRemovedLabel}
                   </p>
                 )}
@@ -321,7 +329,7 @@ function SingleComment({
                 {isOwnRemoved && replyErrorMessage && (
                   <p
                     role="alert"
-                    className="text-xs text-gray-500 dark:text-neutral-400 mb-3"
+                    className="text-[13px] text-gray-500 dark:text-neutral-400 mb-3"
                   >
                     {replyErrorMessage}
                   </p>
@@ -363,11 +371,15 @@ function SingleComment({
         className={cn(highlightGutterClass)}
         style={{
           marginTop: `-${ROW_PADDING_Y}px`,
-          marginLeft: `-${indentationPx}px`,
-          paddingLeft: `${indentationPx}px`,
+          marginLeft: `-${highlightReachLeft}px`,
+        marginRight: `-${SECTION_PADDING_X}px`,
+          paddingLeft: `${highlightReachLeft}px`,
         }}
       >
-        <div className={cn(highlightClass)}>
+        <div
+          className={cn(highlightClass)}
+          style={{ paddingRight: `${SECTION_PADDING_X}px` }}
+        >
         <div
           className="relative"
           style={{

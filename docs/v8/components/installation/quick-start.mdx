@@ -4,6 +4,8 @@ description: "Get comment components running in under 5 minutes"
 icon: "rocket"
 ---
 
+import { AddCommandBuilder } from "/snippets/v8/add-command-builder.jsx";
+
 # Quick Start Guide
 
 This guide will have you up and running with Sublay comment components in under 5 minutes.
@@ -93,23 +95,15 @@ The CLI will prompt you to install these automatically if they're missing.
 
 ## Step 3: Add a Component
 
-<Tabs>
-  <Tab title="Threaded Comments">
-    ```bash
-    npx @sublay/cli add comments-threaded --ref v8
-    ```
+Pick a component and a language to get the command:
 
-    Reddit-style discussions with unlimited nesting, upvote/downvote, threading lines, and collapsible threads.
-  </Tab>
+<AddCommandBuilder />
 
-  <Tab title="Social Comments">
-    ```bash
-    npx @sublay/cli add comments-social --ref v8
-    ```
+- **Threaded comments** — Reddit-style discussions with unlimited nesting, upvote/downvote, threading lines, and collapsible threads.
+- **Social comments** — Instagram-style comments with single-level nesting, heart/like system, and Top/New/Old sorting.
+- **Notifications** — a notification bell with a dropdown of the user's notifications.
 
-    Instagram-style comments with single-level nesting, heart/like system, and Top/New/Old sorting.
-  </Tab>
-</Tabs>
+The language applies to the comment components; see [Languages & Right-to-Left](/v8/components/customization/languages-rtl).
 
 `--ref v8` reads the component from the `v8` branch of the registry, where the v8 components live.
 

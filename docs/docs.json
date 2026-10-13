@@ -12,6 +12,7 @@
     "versions": [
       {
         "version": "8.0.0",
+        "tag": "Beta",
         "tabs": [
           {
             "tab": "Overview",

@@ -187,6 +187,14 @@ function NewReplyForm({
           // mention suggestions re-renders on every keystroke, which would
           // put the previous value back before onChange has read the new one
           defaultValue={replyContent}
+          // Enter posts the reply; Shift+Enter adds a line break, as in the
+          // main input
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey) {
+              e.preventDefault();
+              handleReply();
+            }
+          }}
           onChange={(e) => {
             setReplyContent(e.target.value);
             onDismissError();

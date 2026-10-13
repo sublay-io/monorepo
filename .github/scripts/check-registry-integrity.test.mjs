@@ -376,3 +376,44 @@ test('fails on a malformed shared manifest', () => {
   missing['shared/react/shared.json'] = undefined;
   assertFails(check(missing), /shared\/react\/shared\.json: is missing/);
 });
+
+/** The valid registry, with the widget given a strings file and a Hebrew version. */
+function registryWithLanguages() {
+  const registry = validRegistry();
+  const manifest = registry['react/widget/styled/registry.json'];
+  manifest.files.push({ path: 'utils/strings.ts', type: 'util', description: 'Text' });
+  manifest.languages = { he: 'locales/he.ts' };
+  registry['react/widget/styled/utils/strings.ts'] = 'export default {};';
+  registry['react/widget/styled/locales/he.ts'] = 'export default {};';
+  return registry;
+}
+
+test('passes on a component with languages', () => {
+  const result = check(registryWithLanguages());
+  assert.equal(result.code, 0, result.output);
+});
+
+test('fails on a language whose file is missing', () => {
+  const registry = registryWithLanguages();
+  registry['react/widget/styled/locales/he.ts'] = undefined;
+  assertFails(check(registry), /languages\.he "locales\/he\.ts" does not resolve to a file/);
+});
+
+test('fails on a language file outside the component', () => {
+  const registry = registryWithLanguages();
+  registry['react/widget/styled/registry.json'].languages.he = '../../../shared/react/reset-styles.ts';
+  assertFails(check(registry), /languages\.he .* does not resolve to a file of this component/);
+});
+
+test('fails on languages without a strings file', () => {
+  const registry = registryWithLanguages();
+  const manifest = registry['react/widget/styled/registry.json'];
+  manifest.files = manifest.files.filter((file) => file.path !== 'utils/strings.ts');
+  assertFails(check(registry), /"languages" needs utils\/strings\.ts in files\[\]/);
+});
+
+test('fails on languages that is not an object', () => {
+  const registry = registryWithLanguages();
+  registry['react/widget/styled/registry.json'].languages = ['he'];
+  assertFails(check(registry), /"languages" must be an object/);
+});

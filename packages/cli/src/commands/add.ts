@@ -29,7 +29,13 @@ import { stripTypes, convertFileExtension } from "../utils/strip-types.js";
 export interface AddOptions {
   /** Branch to read the registry from instead of the default. */
   ref?: string;
+  /** Language to install the component's text in instead of English. */
+  lang?: string;
 }
+
+// The file that holds a component's text, and the language it is written in.
+export const STRINGS_FILE = "utils/strings.ts";
+export const DEFAULT_LANGUAGE = "en";
 
 /** A file fetched and transformed in memory, waiting to be written. */
 interface PendingFile {
@@ -121,6 +127,9 @@ export async function add(componentName: string, options: AddOptions = {}) {
       renameForPlatform(dep, config)
     );
 
+    // With --lang, the strings file is taken from that language's file.
+    const languageFile = resolveLanguageFile(registry, options.lang, componentName);
+
     // Shared pieces the component lists, plus whatever those require.
     const platform = getRegistryPlatform(config);
     const location = getComponentLocation(componentName, config);
@@ -170,7 +179,13 @@ export async function add(componentName: string, options: AddOptions = {}) {
       async ({ registryPath, shared }): Promise<PendingFile> => {
         const fileContent = shared
           ? await fetchSharedFile(source, platform, registryPath)
-          : await fetchFile(source, location, registryPath);
+          : await fetchFile(
+              source,
+              location,
+              languageFile && registryPath === STRINGS_FILE
+                ? languageFile
+                : registryPath
+            );
 
         // Every shared piece a file imports has to be one that is being
         // installed, or the import is rewritten to a file that is not there.
@@ -328,6 +343,54 @@ function renameForPlatform(dep: string, config: SublayConfig): string {
   return config.platform === 'expo' && dep.startsWith('@sublay/react-native')
     ? dep.replace('@sublay/react-native', '@sublay/expo')
     : dep;
+}
+
+/**
+ * The registry file that replaces the component's strings file for `lang`,
+ * or null when the component is installed as it is (no `--lang`, or English).
+ */
+export function resolveLanguageFile(
+  registry: Pick<Registry, "files" | "languages">,
+  lang: string | undefined,
+  componentName: string
+): string | null {
+  if (lang === undefined || lang === DEFAULT_LANGUAGE) {
+    return null;
+  }
+
+  const languages =
+    registry.languages && typeof registry.languages === "object"
+      ? registry.languages
+      : {};
+  const available = [DEFAULT_LANGUAGE, ...Object.keys(languages)].join(", ");
+  const languageFile = Object.prototype.hasOwnProperty.call(languages, lang)
+    ? languages[lang]
+    : undefined;
+
+  if (languageFile === undefined) {
+    throw new RegistryError(
+      `${componentName} is not available in "${lang}". Available languages: ${available}.`
+    );
+  }
+
+  // The path is requested from the registry as it is written in the manifest.
+  if (
+    typeof languageFile !== "string" ||
+    !/^[A-Za-z0-9_][A-Za-z0-9._/-]*$/.test(languageFile) ||
+    languageFile.split("/").includes("..")
+  ) {
+    throw new RegistryError(
+      `The "${lang}" entry under "languages" for ${componentName} is not a usable file path.`
+    );
+  }
+
+  if (!registry.files.some((file) => file.path === STRINGS_FILE)) {
+    throw new RegistryError(
+      `${componentName} lists languages but has no ${STRINGS_FILE} to put them in.`
+    );
+  }
+
+  return languageFile;
 }
 
 /** The manifest's `shared` list. Absent means the component uses no shared pieces. */

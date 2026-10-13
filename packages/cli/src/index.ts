@@ -29,8 +29,12 @@ program
     '--ref <branch>',
     'read the component from this branch of the registry instead of the default'
   )
-  .action((component: string, options: { ref?: string }) =>
-    add(component, { ref: options.ref })
+  .option(
+    '--lang <code>',
+    "install the component's text in this language instead of English (for example: he)"
+  )
+  .action((component: string, options: { ref?: string; lang?: string }) =>
+    add(component, { ref: options.ref, lang: options.lang })
   );
 
 program.parse();

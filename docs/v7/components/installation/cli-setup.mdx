@@ -184,6 +184,7 @@ A component name contains only lowercase letters, digits and hyphens, such as `c
 | Option | Description |
 |--------|-------------|
 | `--ref <branch>` | Read the component from this branch of the [Sublay repository](https://github.com/sublay-io/monorepo) instead of the default branch, `main`. |
+| `--lang <code>` | Install the component's text in this language instead of English, for example `--lang he`. If the component has no translation for the code, `add` lists the languages it has and installs nothing. |
 
 ```bash
 npx @sublay/cli add comments-threaded --ref my-branch

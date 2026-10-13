@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import path from "path";
 
-import { getTargetPath } from "./add";
+import { getTargetPath, resolveLanguageFile } from "./add";
 import type { SublayConfig } from "./init";
 
 const config: SublayConfig = {
@@ -41,5 +41,56 @@ describe("getTargetPath", () => {
     expect(getTargetPath("context/ui-state.tsx", config, "comments-social")).toBe(
       inComponent("context", "ui-state.tsx")
     );
+  });
+});
+
+describe("resolveLanguageFile", () => {
+  const stringsFile = { path: "utils/strings.ts", type: "util", description: "" };
+  const registry = {
+    files: [stringsFile],
+    languages: { he: "locales/he.ts" },
+  };
+
+  it("installs the component as it is without --lang, or in English", () => {
+    expect(resolveLanguageFile(registry, undefined, "comments-social")).toBeNull();
+    expect(resolveLanguageFile(registry, "en", "comments-social")).toBeNull();
+    expect(resolveLanguageFile({ files: [] }, "en", "notifications-control")).toBeNull();
+  });
+
+  it("returns the file of a language the component has", () => {
+    expect(resolveLanguageFile(registry, "he", "comments-social")).toBe("locales/he.ts");
+  });
+
+  it("names the available languages when the one asked for is missing", () => {
+    expect(() => resolveLanguageFile(registry, "fr", "comments-social")).toThrow(
+      'comments-social is not available in "fr". Available languages: en, he.'
+    );
+    expect(() =>
+      resolveLanguageFile({ files: [stringsFile] }, "he", "notifications-control")
+    ).toThrow("Available languages: en.");
+  });
+
+  it("does not treat inherited object keys as languages", () => {
+    expect(() => resolveLanguageFile(registry, "toString", "comments-social")).toThrow(
+      "is not available"
+    );
+  });
+
+  it("rejects a language file outside the component", () => {
+    for (const bad of ["../../secrets.ts", "/etc/passwd", "locales/../../x.ts"]) {
+      expect(() =>
+        resolveLanguageFile(
+          { files: [stringsFile], languages: { he: bad } },
+          "he",
+          "comments-social"
+        )
+      ).toThrow("not a usable file path");
+    }
+  });
+
+  it("needs a strings file to put the language in", () => {
+    expect(() =>
+      resolveLanguageFile({ files: [], languages: { he: "locales/he.ts" } }, "he", "x")
+    ).toThrow("has no utils/strings.ts");
   });
 });

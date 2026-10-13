@@ -22,6 +22,11 @@ export interface Registry {
    * SharedManifest). Absent or empty: the component uses none.
    */
   shared?: string[];
+  /**
+   * Translations of the component's strings file: language code to the path
+   * of that language's file, relative to the component. Absent: English only.
+   */
+  languages?: Record<string, string>;
   registryUrl: string;
   exports: {
     mainComponent: string;

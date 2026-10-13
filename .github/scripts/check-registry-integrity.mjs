@@ -491,6 +491,40 @@ for (const registryFile of registryFiles) {
     }
   });
 
+  // L1. "languages" maps a language code to a file of this component that
+  // `sublay add --lang` installs in place of utils/strings.ts.
+  if (manifest.languages !== undefined) {
+    const { languages } = manifest;
+    if (!languages || typeof languages !== 'object' || Array.isArray(languages)) {
+      fail(registryFile, '"languages" must be an object of language code to file path');
+    } else {
+      const listsStringsFile = manifest.files.some(
+        (entry) => entry && entry.path === 'utils/strings.ts'
+      );
+      if (!listsStringsFile) {
+        fail(
+          registryFile,
+          '"languages" needs utils/strings.ts in files[]: that is the file a language replaces'
+        );
+      }
+      for (const [code, languagePath] of Object.entries(languages)) {
+        const target =
+          typeof languagePath === 'string' ? path.join(dir, languagePath) : null;
+        if (
+          !target ||
+          path.relative(dir, target).startsWith('..') ||
+          !fs.existsSync(target) ||
+          !fs.statSync(target).isFile()
+        ) {
+          fail(
+            registryFile,
+            `languages.${code} "${languagePath}" does not resolve to a file of this component`
+          );
+        }
+      }
+    }
+  }
+
   componentVariants.push({
     registryFile,
     dir,

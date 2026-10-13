@@ -94,7 +94,7 @@ function MentionSuggestions({
                   {user.name && (
                     <div
                       style={{
-                        fontSize: "12px",
+                        fontSize: "13px",
                         fontWeight: "400",
                         color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
                       }}

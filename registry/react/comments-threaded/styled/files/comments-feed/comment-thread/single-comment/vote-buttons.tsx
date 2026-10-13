@@ -47,7 +47,7 @@ function VoteButtons({
       ? { width: "12px", height: "12px" }
       : { width: "16px", height: "16px" };
   // 🎨 CUSTOMIZATION: Score display styling (Default: 12px for small, 14px for normal)
-  const textSize = size === "small" ? "12px" : "14px";
+  const textSize = size === "small" ? "13px" : "14px";
   const padding = size === "small" ? "4px 8px" : "6px 12px";
 
   return (

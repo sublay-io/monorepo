@@ -260,8 +260,8 @@ function NewCommentForm({
               backgroundColor: "transparent",
               // 🎨 CUSTOMIZATION: Comment form styling (Default: gray-900)
               color: theme === 'dark' ? "#FAFAFA" : "#111827",
-              // 🎨 CUSTOMIZATION: Comment form styling (Default: 12px)
-              fontSize: "12px",
+              // 🎨 CUSTOMIZATION: Comment form styling (Default: 14px)
+              fontSize: "14px",
               lineHeight: "1.625",
               outline: "none",
               resize: "none",
@@ -282,8 +282,8 @@ function NewCommentForm({
                 outline: "none",
                 // 🎨 CUSTOMIZATION: Comment form styling (Default: regular)
                 fontWeight: 400,
-                // 🎨 CUSTOMIZATION: Comment form styling (Default: 12px)
-                fontSize: "12px",
+                // 🎨 CUSTOMIZATION: Comment form styling (Default: 13px)
+                fontSize: "13px",
                 // 🎨 CUSTOMIZATION: Comment form styling (Default: gray-500)
                 color: theme === 'dark' ? "#FAFAFA" : "#6B7280",
                 cursor: "pointer",
@@ -336,7 +336,7 @@ function NewCommentForm({
             >
               <svg
                 style={{
-                  // 🎨 CUSTOMIZATION: Comment form styling (Default: 12px)
+                  // 🎨 CUSTOMIZATION: Comment form styling (Default: 13px)
                   height: "12px",
                   width: "12px",
                   transition: "transform 200ms ease-in-out",
@@ -373,7 +373,7 @@ function NewCommentForm({
               // 🎨 CUSTOMIZATION: Failed-post message styling
               margin: "6px 0 0",
               padding: "0 8px",
-              fontSize: "12px",
+              fontSize: "13px",
               color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
             }}
           >

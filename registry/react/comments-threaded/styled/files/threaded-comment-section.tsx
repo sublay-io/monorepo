@@ -60,6 +60,7 @@ import CommentsFeed from "./comments-feed/comments-feed";
 import NewCommentForm from "./new-comment-form";
 import { deepEqual, warnPropChanges } from "../utils/prop-comparison";
 import useUIState from "../hooks/use-ui-state";
+import { SECTION_PADDING_X } from "./comments-feed/comment-thread/single-comment/indentation-threading-lines";
 
 interface ThreadedCommentSectionProps {
   entity?: Entity | undefined | null;
@@ -150,6 +151,8 @@ function ThreadedCommentSectionInner({
           // 🎨 CUSTOMIZATION: Layout styling (Default: 8px)
           paddingTop: "8px",
           paddingBottom: "8px",
+          paddingLeft: `${SECTION_PADDING_X}px`,
+          paddingRight: `${SECTION_PADDING_X}px`,
         }}
       >
         <CommentsFeed>{children}</CommentsFeed>
@@ -159,8 +162,8 @@ function ThreadedCommentSectionInner({
         style={{
           borderTop: theme === 'dark' ? "1px solid #525252" : "1px solid #e5e7eb",
           backgroundColor: theme === 'dark' ? "#262626" : "#fff",
-          // 🎨 CUSTOMIZATION: Layout styling (Default: 8px)
-          paddingTop: "8px",
+          // 🎨 CUSTOMIZATION: Layout styling (Default: 8px 16px 12px)
+          padding: `8px ${SECTION_PADDING_X}px 12px`,
         }}
       >
         {isVisible && (

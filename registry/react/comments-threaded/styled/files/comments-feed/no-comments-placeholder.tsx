@@ -19,7 +19,7 @@ function NoCommentsPlaceHolder() {
       <p
         style={{
           textAlign: "center",
-          fontSize: 12,
+          fontSize: 13,
           color: theme === 'dark' ? "#A3A3A3" : "#8e8e8e",
           marginTop: 0,
         }}

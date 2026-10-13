@@ -63,8 +63,8 @@ function CommentMenuModalOwner() {
                 fontWeight: 600,
                 // 🎨 CUSTOMIZATION: Delete button color (red for danger)
                 color: theme === 'dark' ? '#F87171' : '#DC2626',
-                paddingLeft: 24,
-                paddingRight: 24,
+                paddingInlineStart: 24,
+                paddingInlineEnd: 24,
                 paddingTop: 8,
                 paddingBottom: 8,
               }}
@@ -93,8 +93,8 @@ function CommentMenuModalOwner() {
                 ...resetButton,
                 // 🎨 CUSTOMIZATION: Cancel button color
                 color: theme === 'dark' ? '#FAFAFA' : '#000',
-                paddingLeft: 24,
-                paddingRight: 24,
+                paddingInlineStart: 24,
+                paddingInlineEnd: 24,
                 paddingTop: 8,
                 paddingBottom: 8,
               }}

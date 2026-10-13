@@ -185,8 +185,8 @@ function SocialCommentSectionInner({
           style={{
             display: "flex",
             // 🎨 CUSTOMIZATION: Header padding (Default: 24px horizontal, 12px vertical)
-            paddingLeft: "24px",
-            paddingRight: "24px",
+            paddingInlineStart: "24px",
+            paddingInlineEnd: "24px",
             paddingTop: "12px",
             paddingBottom: "12px",
             alignItems: "center",

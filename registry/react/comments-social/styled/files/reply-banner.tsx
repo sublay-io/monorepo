@@ -32,8 +32,8 @@ function ReplyBanner() {
         transition: "height 0.3s ease, top 0.3s ease",
         // 🎨 CUSTOMIZATION: Reply banner background (Default: light gray)
         backgroundColor: theme === 'dark' ? '#404040' : '#e7e7e7',
-        paddingLeft: 12,
-        paddingRight: 12,
+        paddingInlineStart: 12,
+        paddingInlineEnd: 12,
         paddingTop: 8,
         paddingBottom: 8,
       }}

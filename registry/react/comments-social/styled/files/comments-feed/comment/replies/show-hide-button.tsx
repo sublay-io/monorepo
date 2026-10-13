@@ -72,8 +72,8 @@ const ShowHideButton = ({
       <div
         style={{
           paddingTop: 8,
-          paddingLeft: 56,
-          paddingRight: 16,
+          paddingInlineStart: 56,
+          paddingInlineEnd: 16,
           display: "flex",
           alignItems: "center",
           gap: 12,
@@ -107,8 +107,8 @@ const ShowHideButton = ({
         ...resetButton,
         // 🎨 CUSTOMIZATION: Show/hide button styling (Default: 8px top padding)
         paddingTop: 8,
-        paddingLeft: 56,
-        paddingRight: 16,
+        paddingInlineStart: 56,
+        paddingInlineEnd: 16,
         display: "flex",
         alignItems: "center",
         gap: 12,

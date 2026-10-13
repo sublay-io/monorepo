@@ -447,6 +447,18 @@ export function parseSharedManifest(raw: unknown, label: string): SharedManifest
     if (!isStringArray(files) || files.length === 0) {
       throw invalid(`piece "${name}" must list at least one file`);
     }
+    // A file is requested from, and written under, the shared folder by the
+    // path as it is listed: it has to be relative and stay inside that folder.
+    const outside = files.find(
+      (file) =>
+        !/^[A-Za-z0-9_][A-Za-z0-9._/-]*$/.test(file) ||
+        file.split('/').includes('..')
+    );
+    if (outside !== undefined) {
+      throw invalid(
+        `piece "${name}" lists "${outside}", which is not a path inside the shared folder`
+      );
+    }
     if (!isStringArray(requires)) {
       throw invalid(`piece "${name}" has a "requires" that is not a list of piece names`);
     }

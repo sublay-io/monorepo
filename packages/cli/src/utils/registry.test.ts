@@ -466,6 +466,9 @@ describe("shared pieces", () => {
       ["a non-object", []],
       ["missing pieces", { platform: "react" }],
       ["a piece without files", { pieces: { modal: { files: [] } } }],
+      ["a file above the shared folder", { pieces: { modal: { files: ["../components/foo.tsx"] } } }],
+      ["a file that climbs out part-way", { pieces: { modal: { files: ["a/../../foo.tsx"] } } }],
+      ["an absolute file path", { pieces: { modal: { files: ["/etc/passwd"] } } }],
       ["a piece whose requires is not a list", { pieces: { modal: { files: ["m.tsx"], requires: "x" } } }],
       ["a piece whose dependencies are not strings", { pieces: { modal: { files: ["m.tsx"], dependencies: [1] } } }],
     ])("rejects %s, naming the manifest", (_label, raw) => {

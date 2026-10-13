@@ -20,7 +20,7 @@ function ReplyButtonAndInfo({
       {canReply && (
       <button
         onClick={() => setShowReplyForm((prev) => !prev)}
-        className="text-gray-500 dark:text-neutral-400 font-medium px-2 py-1 rounded -ml-2 transition-all duration-150 bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-400/10"
+        className="text-gray-500 dark:text-neutral-400 font-medium px-2 py-1 rounded -ms-2 transition-all duration-150 bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-400/10"
         // 🎨 CUSTOMIZATION: Reply button styling
       >
         Reply

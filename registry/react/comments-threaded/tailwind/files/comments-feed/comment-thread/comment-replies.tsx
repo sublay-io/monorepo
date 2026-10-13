@@ -11,7 +11,7 @@ const LOAD_MORE_PADDING_TOP = 12;
 // 🎨 CUSTOMIZATION: "More replies" row - height (Default: 24px)
 const LOAD_MORE_HEIGHT = 24;
 // 🎨 CUSTOMIZATION: "More replies" row - space between the elbow and the button (Default: 4px)
-const LOAD_MORE_OFFSET_LEFT = 4;
+const LOAD_MORE_OFFSET_START = 4;
 
 interface CommentRepliesProps {
   depth: number;
@@ -52,7 +52,7 @@ function CommentReplies({
 
   return (
     // Replies sit one level in from their parent, until the indentation cap
-    <div style={{ marginLeft: depth < MAX_INDENT_DEPTH ? `${INDENT}px` : 0 }}>
+    <div style={{ marginInlineStart: depth < MAX_INDENT_DEPTH ? `${INDENT}px` : 0 }}>
       {visibleReplies.map((reply: CommentType, index: number) => (
         <CommentThreadComponent
           key={reply.id}
@@ -72,14 +72,14 @@ function CommentReplies({
           style={{
             minHeight: `${LOAD_MORE_HEIGHT}px`,
             paddingTop: `${LOAD_MORE_PADDING_TOP}px`,
-            paddingLeft: `${LOAD_MORE_OFFSET_LEFT}px`,
-            marginLeft: depth < MAX_INDENT_DEPTH ? 0 : `${INDENT}px`,
+            paddingInlineStart: `${LOAD_MORE_OFFSET_START}px`,
+            marginInlineStart: depth < MAX_INDENT_DEPTH ? 0 : `${INDENT}px`,
           }}
         >
           <IndentationThreadingLines
             isLastReply
             joinAt={LOAD_MORE_PADDING_TOP + LOAD_MORE_HEIGHT / 2}
-            reach={LOAD_MORE_OFFSET_LEFT}
+            reach={LOAD_MORE_OFFSET_START}
           />
           {failed && !loading ? (
             <div className="text-[13px] text-gray-500 dark:text-neutral-400 px-2 py-1">

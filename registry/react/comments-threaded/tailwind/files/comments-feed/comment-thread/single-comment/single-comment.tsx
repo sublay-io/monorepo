@@ -59,7 +59,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
   return (
     <button
       onClick={() => toggleReaction({ reactionType: currentReaction })}
-      className="text-[13px] not-italic font-medium text-gray-500 dark:text-neutral-400 px-2 py-1 -ml-2 rounded bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-300"
+      className="text-[13px] not-italic font-medium text-gray-500 dark:text-neutral-400 px-2 py-1 -ms-2 rounded bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-300"
     >
       Remove your vote
     </button>
@@ -122,11 +122,11 @@ function SingleComment({
     comment.moderationReason ? `: ${comment.moderationReason}` : ""
   } · only you can see this`;
 
-  // How far this row sits in from the left edge of its thread. The highlight
+  // How far this row sits in from the start edge of its thread. The highlight
   // reaches back across it, so a highlighted reply is coloured edge to edge.
   const indentationPx = Math.min(depth, MAX_INDENT_DEPTH) * INDENT;
   // ...and on across the section's own side padding, to its edges.
-  const highlightReachLeft = indentationPx + SECTION_PADDING_X;
+  const highlightReachStart = indentationPx + SECTION_PADDING_X;
 
   // The reply form is a row of its own under the comment, first on the line
   // its replies hang from.
@@ -153,17 +153,18 @@ function SingleComment({
     <div
       className={cn(highlightGutterClass)}
       style={{
-        marginLeft: `-${highlightReachLeft}px`,
-        marginRight: `-${SECTION_PADDING_X}px`,
-        paddingLeft: `${highlightReachLeft}px`,
+        marginInlineStart: `-${highlightReachStart}px`,
+        marginInlineEnd: `-${SECTION_PADDING_X}px`,
+        paddingInlineStart: `${highlightReachStart}px`,
       }}
     >
       <div
         className={cn("relative transition-colors duration-150", highlightClass)}
-        // The right padding is the section's own, carried here so the
+        // The end padding is the section's own, carried here so the
         // comment's highlight (not the strip's color) fills it
         style={{
-          padding: `${ROW_PADDING_Y}px ${SECTION_PADDING_X}px ${ROW_PADDING_Y}px 0`,
+          paddingBlock: `${ROW_PADDING_Y}px`,
+          paddingInlineEnd: `${SECTION_PADDING_X}px`,
         }}
       >
         {/* Line from this comment's avatar down to the rows listed under it */}
@@ -174,7 +175,7 @@ function SingleComment({
           <div
             className="flex-shrink-0 relative"
             style={{
-              marginRight: `${AVATAR_GAP}px`,
+              marginInlineEnd: `${AVATAR_GAP}px`,
               marginTop: `${AVATAR_OFFSET_TOP}px`,
             }}
           >
@@ -294,6 +295,9 @@ function SingleComment({
               <>
                 {comment.content && (
                   <p
+                    // A comment reads in the direction of its own text, whatever the
+                    // direction of the page
+                    dir="auto"
                     className="text-[13px] text-gray-800 dark:text-neutral-200 mb-3 leading-relaxed"
                     // 🎨 CUSTOMIZATION: Comment body typography
                   >
@@ -373,20 +377,20 @@ function SingleComment({
         className={cn(highlightGutterClass)}
         style={{
           marginTop: `-${ROW_PADDING_Y}px`,
-          marginLeft: `-${highlightReachLeft}px`,
-        marginRight: `-${SECTION_PADDING_X}px`,
-          paddingLeft: `${highlightReachLeft}px`,
+          marginInlineStart: `-${highlightReachStart}px`,
+        marginInlineEnd: `-${SECTION_PADDING_X}px`,
+          paddingInlineStart: `${highlightReachStart}px`,
         }}
       >
         <div
           className={cn(highlightClass)}
-          style={{ paddingRight: `${SECTION_PADDING_X}px` }}
+          style={{ paddingInlineEnd: `${SECTION_PADDING_X}px` }}
         >
         <div
           className="relative"
           style={{
-            marginLeft: `${INDENT}px`,
-            paddingLeft: `${AVATAR_SIZE + AVATAR_GAP - INDENT}px`,
+            marginInlineStart: `${INDENT}px`,
+            paddingInlineStart: `${AVATAR_SIZE + AVATAR_GAP - INDENT}px`,
             paddingBottom: `${ROW_PADDING_Y}px`,
           }}
         >

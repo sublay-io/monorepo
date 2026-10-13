@@ -1,8 +1,13 @@
+import { useEffect, useRef, useState } from "react";
 import {
   useCommentSection,
   useUser,
+  useUserMentions,
   Comment as CommentType,
+  type Mention,
 } from "@sublay/react-js";
+import useTextareaCursorIndicator from "~shared/react/use-textarea-cursor-indicator";
+import MentionSuggestions from "../../mention-suggestions";
 import useUIState from "../../../hooks/use-ui-state";
 
 function NewReplyForm({
@@ -12,6 +17,8 @@ function NewReplyForm({
   setReplyContent,
   errorMessage,
   onDismissError,
+  replyMentions,
+  setReplyMentions,
 }: {
   comment: CommentType;
   setShowReplyForm: React.Dispatch<React.SetStateAction<boolean>>;
@@ -19,6 +26,9 @@ function NewReplyForm({
   // sent, and comes back with the text if sending fails.
   replyContent: string;
   setReplyContent: React.Dispatch<React.SetStateAction<string>>;
+  // The users mentioned in the text, kept in the comment row with it.
+  replyMentions: Mention[];
+  setReplyMentions: React.Dispatch<React.SetStateAction<Mention[]>>;
   /** Why the last reply to this comment wasn't posted, if it wasn't. */
   errorMessage: string | null;
   onDismissError: () => void;
@@ -27,6 +37,48 @@ function NewReplyForm({
   const { user } = useUser();
 
   const { createComment, callbacks } = useCommentSection();
+
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const { cursorPosition, isSelectionActive } = useTextareaCursorIndicator({
+    textAreaRef,
+  });
+
+  // Mentions are only added by picking a suggestion after typing "@": the
+  // author being replied to is not mentioned automatically.
+  const {
+    isMentionActive,
+    loading,
+    mentionSuggestions,
+    handleMentionClick,
+    mentions,
+    setMentions,
+    resetMentions,
+  } = useUserMentions({
+    content: replyContent,
+    setContent: (value: string) => {
+      if (textAreaRef.current) {
+        textAreaRef.current.value = value;
+        setReplyContent(value);
+      }
+    },
+    focus: () => textAreaRef.current?.focus(),
+    cursorPosition,
+    isSelectionActive,
+  });
+
+  // The form is unmounted whenever it closes, so the mentions are kept in the
+  // comment row next to the text: taken from there when the form opens, and
+  // written back as they change.
+  const [mentionsLoaded, setMentionsLoaded] = useState(false);
+  useEffect(() => {
+    setMentions(replyMentions);
+    setMentionsLoaded(true);
+    // Only when the form opens
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (mentionsLoaded) setReplyMentions(mentions);
+  }, [mentionsLoaded, mentions, setReplyMentions]);
 
   const handleReply = async () => {
     if (!replyContent.trim()) {
@@ -45,25 +97,30 @@ function NewReplyForm({
     }
 
     const tempContent = replyContent.trim();
+    const tempMentions = mentions;
 
     // Clear optimistically before the API call
     setReplyContent("");
+    resetMentions();
+    setReplyMentions([]);
     setShowReplyForm(false);
 
     try {
       const result = await createComment?.({
         content: tempContent,
         parentId: comment.id,
-        mentions: [],
+        mentions: tempMentions,
       });
       if (result === undefined) {
         // SDK handled the failure and removed the optimistic comment; restore form
         setReplyContent(tempContent);
+        setReplyMentions(tempMentions);
         setShowReplyForm(true);
       }
     } catch (error) {
       console.error("Error creating reply:", error);
       setReplyContent(tempContent);
+      setReplyMentions(tempMentions);
       setShowReplyForm(true);
     }
   };
@@ -71,6 +128,8 @@ function NewReplyForm({
   const handleCancelReply = () => {
     setShowReplyForm(false);
     setReplyContent("");
+    resetMentions();
+    setReplyMentions([]);
     onDismissError();
   };
 
@@ -81,6 +140,16 @@ function NewReplyForm({
         marginTop: "8px",
       }}
     >
+      {/* The suggestions open under the box, so they don't cover the comment
+          being replied to */}
+      <div style={{ position: "relative" }}>
+        <MentionSuggestions
+          isMentionActive={isMentionActive}
+          isLoadingMentions={loading}
+          mentionSuggestions={mentionSuggestions}
+          handleMentionClick={handleMentionClick}
+          placement="below"
+        />
       <div
         style={{
           display: "flex",
@@ -113,7 +182,11 @@ function NewReplyForm({
         }}
       >
         <textarea
-          value={replyContent}
+          ref={textAreaRef}
+          // Not a controlled input: the cursor tracking that drives the
+          // mention suggestions re-renders on every keystroke, which would
+          // put the previous value back before onChange has read the new one
+          defaultValue={replyContent}
           onChange={(e) => {
             setReplyContent(e.target.value);
             onDismissError();
@@ -246,6 +319,7 @@ function NewReplyForm({
             </svg>
           </button>
         </div>
+      </div>
       </div>
       {errorMessage && (
         <p

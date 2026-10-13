@@ -32,7 +32,7 @@ Visual indicators: indentation, threading lines connecting replies to parents, a
 
 Every comment has a **Reply** button. A reply is nested under the exact comment it answers, at any depth. Where the reply is written depends on the platform:
 
-- **React (Web)** — Reply opens a reply box under the comment. Cancel closes it.
+- **React (Web)** — Reply opens a reply box under the comment. Cancel closes it. @ mention suggestions work in the reply box as they do in the main input, and open below the box so they don't cover the comment being replied to. The author being replied to is not mentioned automatically.
 - **React Native and Expo** — replies are written in the main input at the bottom of the section. Reply makes that comment the one being replied to and focuses the input, so the keyboard opens. A **"Replying to"** bar appears above the input, with the author's avatar and name and a cancel button on the right. The comment being replied to is marked in the list the same way as a [highlighted comment](#highlighted-comments). Tapping Reply on the same comment again, or the bar's cancel button, cancels the reply, and the input posts top-level comments again. Tapping Reply on another comment switches to that comment.
 
 On React Native and Expo, text and GIFs sent while the bar is showing are posted as replies to that comment, and the bar goes away once the reply is posted. @ mention suggestions work in the input as usual; the author being replied to is not mentioned automatically.
@@ -215,7 +215,7 @@ When posting fails, a short muted message appears by the form that was used. On 
 - **Replying to a comment a moderator removed in the meantime** — "This comment was removed, so you can't reply to it."
 - **Any other failure** — "Couldn't post your comment. Try again."
 
-The text you typed stays in the form, and the message goes away when you edit the text or send again. A GIF that fails to post keeps the text and mentions in the form too. On React Native and Expo a reply that fails to post also keeps its "Replying to" bar, so sending again is still a reply to the same comment.
+The text you typed and its mentions stay in the form, and the message goes away when you edit the text or send again. A GIF that fails to post keeps the text and mentions in the form too. On React Native and Expo a reply that fails to post also keeps its "Replying to" bar, so sending again is still a reply to the same comment.
 
 In the first two cases the comment turns into its `[deleted]` / `[removed]` row (or, for its author, the removed-note row), which has no Reply. On React the reply box closes and the message shows on that row until the next comment is sent. On React Native and Expo the "Replying to" bar goes away, the message shows above the input, and the text stays in the input, which posts top-level comments again.
 

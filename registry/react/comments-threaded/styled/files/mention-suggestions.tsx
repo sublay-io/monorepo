@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { User, useCommentSection } from "@sublay/react-js";
 import UserAvatar from "~shared/react/user-avatar";
 import { UserMentionSkeleton } from "~shared/react/skeleton";
@@ -8,6 +9,10 @@ interface MentionSuggestionsProps {
   isLoadingMentions: boolean;
   mentionSuggestions: User[];
   handleMentionClick: (user: User) => void;
+  // Which side of the form the list opens on. "above" suits a form at the
+  // bottom of the section; "below" suits one with content right above it,
+  // like the reply form under the comment it replies to.
+  placement?: "above" | "below";
 }
 
 function MentionSuggestions({
@@ -15,17 +20,31 @@ function MentionSuggestions({
   isLoadingMentions,
   mentionSuggestions,
   handleMentionClick,
+  placement = "above",
 }: MentionSuggestionsProps) {
   const { theme } = useUIState();
   const { callbacks } = useCommentSection();
+
+  // Opening below can put the list past the bottom edge of the scrolling
+  // comments feed (a reply box near the bottom): bring it into view.
+  const listRef = useRef<HTMLDivElement>(null);
+  const suggestionCount = mentionSuggestions.length;
+  useEffect(() => {
+    if (placement === "below" && isMentionActive) {
+      listRef.current?.scrollIntoView({ block: "nearest" });
+    }
+  }, [placement, isMentionActive, isLoadingMentions, suggestionCount]);
 
   if (!isMentionActive) return null;
 
   return (
     <div
+      ref={listRef}
       style={{
         position: "absolute",
-        bottom: "100%",
+        ...(placement === "below"
+          ? { top: "100%", marginTop: "8px", scrollMarginBottom: "8px" }
+          : { bottom: "100%", marginBottom: "8px" }),
         left: 0,
         right: 0,
         zIndex: 50,
@@ -36,7 +55,6 @@ function MentionSuggestions({
           "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
         maxHeight: "200px",
         overflowY: "auto",
-        marginBottom: "8px",
       }}
     >
       <div style={{ padding: "12px" }}>

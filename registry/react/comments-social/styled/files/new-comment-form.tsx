@@ -263,8 +263,8 @@ function NewCommentForm({
               gap: 8,
               paddingTop: 8,
               paddingBottom: 8,
-              paddingLeft: 8,
-              paddingRight: 16,
+              paddingInlineStart: 8,
+              paddingInlineEnd: 16,
             }}
           >
             {/* 🎨 CUSTOMIZATION: Form layout (Default: true - show avatar, 32px size) */}
@@ -282,6 +282,9 @@ theme={theme}
               id="sublay-social-textarea"
               rows={1}
               ref={textAreaRef}
+              // Typed text reads in its own direction; while empty, the
+              // placeholder follows the page
+              dir={content ? "auto" : undefined}
               placeholder="Add a comment..."
               onChange={(e) => {
                 setContent(e.target.value);

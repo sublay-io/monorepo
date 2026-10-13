@@ -17,7 +17,7 @@ function FetchingCommentsSkeletons() {
         backgroundColor: theme === 'dark' ? '#262626' : '#fff',
         paddingTop: 8,
         paddingBottom: 24,
-        paddingRight: 42,
+        paddingInlineEnd: 42,
       }}
     >
       {[1, 2, 3].map((i) => (

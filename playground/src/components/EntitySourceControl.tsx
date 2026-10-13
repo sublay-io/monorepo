@@ -31,51 +31,6 @@ export function useEntitySourceMode() {
   return { mode, setMode };
 }
 
-const LABELS: Record<EntitySourceMode, string> = {
-  foreignId: "Pass foreignId",
-  entity: "Pass entity object",
-};
-
-export function EntitySourceToggle({
-  value,
-  onChange,
-}: {
-  value: EntitySourceMode;
-  onChange: (mode: EntitySourceMode) => void;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        gap: 2,
-        background: "#f3f4f6",
-        borderRadius: 6,
-        padding: 2,
-      }}
-    >
-      {(["foreignId", "entity"] as const).map((mode) => (
-        <button
-          key={mode}
-          onClick={() => onChange(mode)}
-          style={{
-            padding: "3px 10px",
-            borderRadius: 5,
-            border: "none",
-            background: value === mode ? "#fff" : "transparent",
-            boxShadow: value === mode ? "0 1px 2px rgba(0,0,0,.1)" : "none",
-            color: value === mode ? "#111" : "#6b7280",
-            cursor: "pointer",
-            fontSize: 13,
-            fontWeight: value === mode ? 600 : 400,
-          }}
-        >
-          {LABELS[mode]}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 export type EntitySourceProps =
   | { foreignId: string; createIfNotFound: true }
   | { entity: Entity | null | undefined };

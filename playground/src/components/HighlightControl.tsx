@@ -1,4 +1,5 @@
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
+import { buttonStyle } from "./Controls";
 
 const PARAM = "highlight";
 
@@ -37,37 +38,31 @@ export function HighlightControl({
   const [draft, setDraft] = useState(applied);
 
   return (
-    <div style={{ marginBottom: 16 }}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          onApply(draft);
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onApply(draft);
+      }}
+      style={{ display: "grid", gap: 8 }}
+    >
+      <input
+        aria-label="Comment id to highlight"
+        type="text"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        placeholder="comment id"
+        spellCheck={false}
+        style={{
+          padding: "4px 8px",
+          borderRadius: 6,
+          border: "1px solid #d1d5db",
+          fontSize: 13,
+          fontFamily: "monospace",
+          minWidth: 0,
         }}
-        style={{ display: "flex", alignItems: "center", gap: 8 }}
-      >
-        <label
-          htmlFor="highlight-comment-id"
-          style={{ fontSize: 13, color: "#374151" }}
-        >
-          Highlight comment id
-        </label>
-        <input
-          id="highlight-comment-id"
-          type="text"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="comment id"
-          spellCheck={false}
-          style={{
-            width: 300,
-            padding: "4px 8px",
-            borderRadius: 6,
-            border: "1px solid #d1d5db",
-            fontSize: 13,
-            fontFamily: "monospace",
-          }}
-        />
-        <button type="submit" style={btnStyle}>
+      />
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <button type="submit" style={buttonStyle}>
           Apply
         </button>
         <button
@@ -76,27 +71,17 @@ export function HighlightControl({
             setDraft("");
             onApply("");
           }}
-          style={btnStyle}
+          style={buttonStyle}
         >
           Clear
         </button>
         {applied && (
           <span style={{ fontSize: 12, color: "#15803d" }}>active</span>
         )}
-      </form>
-      <div style={{ marginTop: 4, fontSize: 12, color: "#6b7280" }}>
-        Tip: copy a comment id from the Network tab (GET /comments response)
       </div>
-    </div>
+      <div style={{ fontSize: 12, color: "#9ca3af" }}>
+        Copy an id from the Network tab (GET /comments response).
+      </div>
+    </form>
   );
 }
-
-const btnStyle: CSSProperties = {
-  padding: "4px 12px",
-  borderRadius: 6,
-  border: "1px solid #d1d5db",
-  background: "#fff",
-  color: "#374151",
-  cursor: "pointer",
-  fontSize: 13,
-};

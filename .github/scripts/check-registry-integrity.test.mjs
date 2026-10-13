@@ -405,6 +405,12 @@ test('fails on a language file outside the component', () => {
   assertFails(check(registry), /languages\.he .* does not resolve to a file of this component/);
 });
 
+test('fails on an absolute language path', () => {
+  const registry = registryWithLanguages();
+  registry['react/widget/styled/registry.json'].languages.he = '/locales/he.ts';
+  assertFails(check(registry), /languages\.he .* does not resolve to a file of this component/);
+});
+
 test('fails on languages without a strings file', () => {
   const registry = registryWithLanguages();
   const manifest = registry['react/widget/styled/registry.json'];

@@ -15,6 +15,7 @@ import {
   fetchSharedManifest,
   parseSharedManifest,
   resolveRegistrySource,
+  pinRegistrySource,
   resolveSharedPieces,
   validateComponentName,
   validateRef,
@@ -512,5 +513,59 @@ describe("shared pieces", () => {
         /Could not fetch the shared manifest shared\/react\/shared\.json/
       );
     });
+  });
+});
+
+describe("pinRegistrySource", () => {
+  const pinConfig: SublayConfig = {
+    platform: "react",
+    style: "styled",
+    typescript: true,
+    paths: { components: "src/components" },
+    aliases: { "@/components": "./src/components" },
+  };
+  let localRoot: string;
+
+  beforeEach(async () => {
+    localRoot = await fs.mkdtemp(path.join(os.tmpdir(), "sublay-pin-"));
+    await fs.outputFile(
+      path.join(localRoot, "react", "widget", "styled", "registry.json"),
+      "{}"
+    );
+  });
+
+  afterEach(async () => {
+    vi.unstubAllGlobals();
+    await fs.remove(localRoot);
+  });
+
+  const localSource = () =>
+    resolveRegistrySource(undefined, { SUBLAY_REGISTRY_LOCAL_PATH: localRoot });
+
+  it("stays on the local registry when it holds the component's manifest", async () => {
+    const pinned = await pinRegistrySource(localSource(), "widget", pinConfig);
+    expect(pinned.localRoot).toBe(localRoot);
+    expect(pinned.localOnly).toBe(true);
+  });
+
+  it("goes fully remote when the local registry lacks the component", async () => {
+    const pinned = await pinRegistrySource(localSource(), "other", pinConfig);
+    expect(pinned.localRoot).toBeNull();
+  });
+
+  it("leaves a --ref source alone", async () => {
+    const source = resolveRegistrySource("v8", {});
+    expect(await pinRegistrySource(source, "widget", pinConfig)).toBe(source);
+  });
+
+  it("does not fetch a file the local registry is missing from the remote", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const pinned = await pinRegistrySource(localSource(), "widget", pinConfig);
+
+    await expect(
+      fetchFile(pinned, "react/widget/styled", "files/missing.tsx")
+    ).rejects.toThrow();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

@@ -508,11 +508,16 @@ for (const registryFile of registryFiles) {
         );
       }
       for (const [code, languagePath] of Object.entries(languages)) {
-        const target =
-          typeof languagePath === 'string' ? path.join(dir, languagePath) : null;
+        // Judged on the value as written, by the same rule as the CLI
+        // (resolveLanguageFile): it is requested from the registry as is, so
+        // it must be relative and stay inside the component.
+        const usable =
+          typeof languagePath === 'string' &&
+          /^[A-Za-z0-9_][A-Za-z0-9._/-]*$/.test(languagePath) &&
+          !languagePath.split('/').includes('..');
+        const target = usable ? path.join(dir, languagePath) : null;
         if (
           !target ||
-          path.relative(dir, target).startsWith('..') ||
           !fs.existsSync(target) ||
           !fs.statSync(target).isFile()
         ) {

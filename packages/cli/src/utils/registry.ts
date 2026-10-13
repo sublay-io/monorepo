@@ -191,6 +191,11 @@ export interface RegistrySource {
   explicitRef: boolean;
   /** Local registry directory tried before the remote, or null to skip it. */
   localRoot: string | null;
+  /**
+   * True once a run has settled on the local registry: a path that is not
+   * there is missing, not fetched from the remote (see pinRegistrySource).
+   */
+  localOnly?: boolean;
   /** Remote base for `ref`, no trailing slash. */
   remoteBase: string;
 }
@@ -266,6 +271,14 @@ async function readRegistryPath(
     if (await fs.pathExists(localPath)) {
       return { ok: true, content: await fs.readFile(localPath, 'utf-8') };
     }
+    if (source.localOnly) {
+      return {
+        ok: false,
+        url: localPath,
+        status: 404,
+        reason: 'not found in the local registry',
+      };
+    }
   }
 
   const url = getRemoteUrl(source, registryPath);
@@ -290,6 +303,34 @@ async function readRegistryPath(
       reason: error instanceof Error ? error.message : String(error),
     };
   }
+}
+
+/**
+ * Settle where one `add` run reads from, so a manifest, its files and its
+ * shared pieces all come from the same place. The local registry is used
+ * only when it holds the component's manifest, and then for everything;
+ * otherwise everything comes from the remote. Without this, a checkout that
+ * lacks one file (or one component) would mix local files with remote ones.
+ */
+export async function pinRegistrySource(
+  source: RegistrySource,
+  componentName: string,
+  config: SublayConfig
+): Promise<RegistrySource> {
+  if (!source.localRoot) {
+    return source;
+  }
+
+  const location = getComponentLocation(componentName, config);
+  const manifestPath = path.join(
+    source.localRoot,
+    ...location.split('/'),
+    'registry.json'
+  );
+
+  return (await fs.pathExists(manifestPath))
+    ? { ...source, localOnly: true }
+    : { ...source, localRoot: null };
 }
 
 /**

@@ -6,6 +6,7 @@ import { SublayConfig } from "./init.js";
 import {
   fetchRegistry,
   fetchFile,
+  pinRegistrySource,
   fetchSharedFile,
   fetchSharedManifest,
   getComponentLocation,
@@ -120,6 +121,8 @@ export async function add(componentName: string, options: AddOptions = {}) {
     spinner.text = `Fetching ${componentName}...`;
 
     // Fetch registry metadata
+    // One place for the whole run: local registry or remote, never a mix.
+    source = await pinRegistrySource(source, componentName, config);
     const registry = await fetchRegistry(componentName, config, source);
 
     // Expo projects use @sublay/expo instead of @sublay/react-native

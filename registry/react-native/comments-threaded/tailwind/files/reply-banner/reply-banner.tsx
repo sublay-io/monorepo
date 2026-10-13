@@ -56,7 +56,7 @@ function ReplyBanner() {
         accessibilityRole="button"
         accessibilityLabel="Cancel reply"
         hitSlop={8}
-        className={`ml-auto w-5 h-5 items-center justify-center rounded-full active:opacity-50 ${
+        className={`ms-auto w-5 h-5 items-center justify-center rounded-full active:opacity-50 ${
           theme === 'dark' ? 'bg-neutral-700' : 'bg-gray-100'
         }`}
       >

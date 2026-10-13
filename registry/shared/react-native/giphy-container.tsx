@@ -10,6 +10,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Modal,
+  I18nManager,
   SafeAreaView,
 } from "react-native";
 import {
@@ -372,7 +373,8 @@ export default function GiphyContainer({
             onPress={onClickBack}
           >
             <Text style={{ color: colors.muted, fontSize: 22, lineHeight: 22 }}>
-              ←
+              {/* Points back toward the start of the line */}
+              {I18nManager.isRTL ? "→" : "←"}
             </Text>
           </TouchableOpacity>
           <View

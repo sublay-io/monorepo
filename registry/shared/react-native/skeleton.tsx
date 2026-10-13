@@ -75,7 +75,7 @@ function CommentSkeleton({
     <View
       style={[
         styles.commentContainer,
-        { gap, paddingLeft: paddingLeft + extraLeftPadding },
+        { gap, paddingStart: paddingLeft + extraLeftPadding },
       ]}
     >
       <Skeleton

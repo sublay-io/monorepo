@@ -31,7 +31,7 @@ function ReplyButtonAndInfo({
         style={({ pressed }) => ({
           paddingHorizontal: 8,
           paddingVertical: 4,
-          marginLeft: -8,
+          marginStart: -8,
           borderRadius: 4,
           // 🎨 CUSTOMIZATION: Press feedback
           backgroundColor: pressed

@@ -67,7 +67,7 @@ function ReplyBanner() {
         accessibilityLabel="Cancel reply"
         hitSlop={8}
         style={({ pressed }) => ({
-          marginLeft: 'auto',
+          marginStart: 'auto',
           width: 20,
           height: 20,
           alignItems: 'center',

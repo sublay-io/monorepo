@@ -127,11 +127,11 @@ function SingleComment({
   // Dynamically get the correct Image component
   const { ImageComponent, isExpo } = getImageComponent();
 
-  // How far this row sits in from the left edge of its thread. The highlight
+  // How far this row sits in from the start edge of its thread. The highlight
   // reaches back across it, so a highlighted reply is coloured edge to edge.
   const indentationPx = Math.min(depth, MAX_INDENT_DEPTH) * INDENT;
   // ...and on across the section's own side padding, to its edges.
-  const highlightReachLeft = indentationPx + SECTION_PADDING_X;
+  const highlightReachStart = indentationPx + SECTION_PADDING_X;
 
   // Replies are written in the section's main input. Reply makes this comment
   // the reply target (the reply is nested under exactly this comment) and
@@ -201,18 +201,18 @@ function SingleComment({
     <View
       style={{
         backgroundColor: highlightGutterColor,
-        marginLeft: -highlightReachLeft,
-        marginRight: -SECTION_PADDING_X,
-        paddingLeft: highlightReachLeft,
+        marginStart: -highlightReachStart,
+        marginEnd: -SECTION_PADDING_X,
+        paddingStart: highlightReachStart,
       }}
     >
       <View
         style={{
           backgroundColor: highlightColor,
           paddingVertical: ROW_PADDING_Y,
-          // The right padding is the section's own, carried here so the
+          // The end padding is the section's own, carried here so the
           // comment's highlight (not the strip's color) fills it
-          paddingRight: SECTION_PADDING_X,
+          paddingEnd: SECTION_PADDING_X,
         }}
       >
         {/* Line from this comment's avatar down to the rows listed under it */}
@@ -223,7 +223,7 @@ function SingleComment({
           <View
             style={{
               position: 'relative',
-              marginRight: AVATAR_GAP,
+              marginEnd: AVATAR_GAP,
               marginTop: AVATAR_OFFSET_TOP,
             }}
           >

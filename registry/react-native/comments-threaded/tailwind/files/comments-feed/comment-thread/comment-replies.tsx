@@ -110,6 +110,8 @@ function CommentReplies({
             </View>
           ) : (
             <TouchableOpacity
+              // Dim only a little, so the pressed tint shows
+              activeOpacity={0.6}
               onPress={onLoadMore}
               disabled={loading}
               className={`flex-row items-center gap-2 px-2 py-1 rounded-full ${

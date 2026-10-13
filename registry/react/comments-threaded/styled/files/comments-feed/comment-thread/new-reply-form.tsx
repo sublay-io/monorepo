@@ -89,7 +89,7 @@ function NewReplyForm({
           backgroundColor: theme === 'dark' ? "#262626" : "#FFFFFF",
           borderRadius: "16px",
           border: `1px solid ${
-            replyContent.trim().length > 0 ? (theme === 'dark' ? "#1E3A8A" : "#BFDBFE") : (theme === 'dark' ? "#525252" : "#E5E7EB")
+            replyContent.trim().length > 0 ? (theme === 'dark' ? "#1E40AF" : "#BFDBFE") : (theme === 'dark' ? "#525252" : "#E5E7EB")
           }`,
           boxShadow:
             replyContent.trim().length > 0

@@ -90,7 +90,7 @@ function NewReplyForm({
           "transition-all duration-300",
           "shadow-sm",
           hasContent
-            ? "border border-blue-300 dark:border-blue-900 shadow-md"
+            ? "border border-blue-300 dark:border-blue-800 shadow-md"
             : "border border-gray-200 dark:border-neutral-600 hover:shadow-md"
         )}
       >

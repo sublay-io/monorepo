@@ -339,11 +339,20 @@ function NewCommentForm({
               }}
             >
               {isSubmitting ? (
-                <ActivityIndicator
-                  size="small"
-                  color={theme === 'dark' ? '#FAFAFA' : '#FFFFFF'}
-                  style={{ width: 12, height: 12 }}
-                />
+                <View
+                  style={{
+                    width: 12,
+                    height: 12,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <ActivityIndicator
+                    size="small"
+                    color={theme === 'dark' ? '#FAFAFA' : '#FFFFFF'}
+                    style={{ transform: [{ scale: 0.6 }] }}
+                  />
+                </View>
               ) : (
                 <View
                   style={{ width: 12, height: 12, alignItems: 'center', justifyContent: 'center' }}

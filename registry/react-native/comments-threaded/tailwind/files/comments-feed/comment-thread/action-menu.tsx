@@ -13,6 +13,8 @@ function ActionMenu({ comment }: ActionMenuProps) {
   return (
     <View className="relative">
       <TouchableOpacity
+        // Dim only a little, so the pressed tint shows
+        activeOpacity={0.6}
         onPress={() =>
           user && user.id === comment.userId
             ? openCommentOptionsSheetOwner?.(comment)

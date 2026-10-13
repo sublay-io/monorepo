@@ -37,7 +37,7 @@ function ReplyButtonAndInfo({
           backgroundColor: pressed
             ? theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : '#EFF6FF'
             : 'transparent',
-          opacity: pressed ? 0.2 : 1,
+          opacity: pressed ? 0.6 : 1,
         })}
       >
         <Text

@@ -251,7 +251,7 @@ function NewCommentForm({
               if (createError) setDismissedCreateError(createError);
             }}
             // 🎨 CUSTOMIZATION: Comment form styling (Default placeholder)
-            placeholder="Add your reply..."
+            placeholder="Join the conversation"
             style={{
               flex: 1,
               // 🎨 CUSTOMIZATION: Comment form styling (Default: 8px)

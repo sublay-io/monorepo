@@ -21,7 +21,22 @@ npx @sublay/cli add comments-threaded --ref v8 --lang he
 | Code | Language |
 |------|----------|
 | *(none)* | English |
+| `ar` | Arabic |
+| `de` | German |
+| `es` | Spanish |
+| `fr` | French |
 | `he` | Hebrew |
+| `hi` | Hindi |
+| `id` | Indonesian |
+| `it` | Italian |
+| `ja` | Japanese |
+| `ko` | Korean |
+| `nl` | Dutch |
+| `pl` | Polish |
+| `pt` | Portuguese |
+| `ru` | Russian |
+| `tr` | Turkish |
+| `zh` | Chinese (Simplified) |
 
 The component is the same in every language. `--lang` only decides which text goes into its strings file. If the component has no translation for the code you pass, `add` lists the languages it has and installs nothing.
 
@@ -43,7 +58,7 @@ const strings = {
 export default strings;
 ```
 
-Entries that depend on a number or a name are functions, so a language can use its own plural forms and word order. Hebrew, for example, has its own form for two:
+Entries that depend on a number or a name are functions, so a language can use its own plural forms and word order. Hebrew, for example, has its own form for two, and the Russian, Polish and Arabic files carry a small helper for their several plural forms:
 
 ```ts
 replyCount: (count: number) =>
@@ -71,6 +86,8 @@ The sections lay themselves out from the start of the line to its end instead of
 ```
 
 **React Native / Expo** — the section follows the layout direction of the app, which React Native takes from `I18nManager`.
+
+Arabic and Hebrew are right-to-left languages.
 
 Direction and language are independent. A right-to-left app gets a right-to-left section whatever language its strings are in, and installing with `--lang he` does not change the direction of your app.
 

@@ -5,7 +5,6 @@ import CommentsPlayground from "../components/CommentsPlayground";
 export default function ThreadedCommentsPage() {
   return (
     <CommentsPlayground
-      name="comments-threaded"
       foreignId="playground-threaded-comments"
       maxWidth={700}
       Styled={ThreadedCommentSectionStyled}

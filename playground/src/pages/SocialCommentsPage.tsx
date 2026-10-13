@@ -5,7 +5,6 @@ import CommentsPlayground from "../components/CommentsPlayground";
 export default function SocialCommentsPage() {
   return (
     <CommentsPlayground
-      name="comments-social"
       foreignId="playground-social-comments"
       maxWidth={600}
       Styled={SocialCommentSectionStyled}

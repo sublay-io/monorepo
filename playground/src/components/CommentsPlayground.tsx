@@ -53,13 +53,11 @@ function setLanguage(language: Language) {
  * and threaded pages, which differ only in the components they show.
  */
 export default function CommentsPlayground({
-  name,
   foreignId,
   maxWidth,
   Styled,
   Tailwind,
 }: {
-  name: string;
   foreignId: string;
   maxWidth: number;
   Styled: ComponentType<SectionProps & { theme: Theme }>;
@@ -88,9 +86,6 @@ export default function CommentsPlayground({
       }}
     >
       <div style={{ flex: "1 1 420px", minWidth: 0, maxWidth }}>
-        <h2 style={{ margin: "0 0 12px", fontSize: 16, fontWeight: 600 }}>
-          {name}
-        </h2>
         <div
           style={{
             height: SECTION_HEIGHT,

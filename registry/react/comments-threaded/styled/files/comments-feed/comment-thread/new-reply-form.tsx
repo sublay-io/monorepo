@@ -183,6 +183,9 @@ function NewReplyForm({
       >
         <textarea
           ref={textAreaRef}
+          // Typed text reads in its own direction; while empty, the
+          // placeholder follows the page
+          dir={replyContent ? "auto" : undefined}
           // Not a controlled input: the cursor tracking that drives the
           // mention suggestions re-renders on every keystroke, which would
           // put the previous value back before onChange has read the new one
@@ -222,7 +225,7 @@ function NewReplyForm({
           style={{
             display: "flex",
             gap: "4px",
-            marginLeft: "4px",
+            marginInlineStart: "4px",
           }}
         >
           <button

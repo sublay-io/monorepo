@@ -25,6 +25,7 @@ import ReplyBanner from "../reply-banner/reply-banner";
 import useUIState from "../../hooks/use-ui-state";
 import { SECTION_PADDING_X } from "../comments-feed/comment-thread/single-comment/indentation-threading-lines";
 import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
+import strings from "../../utils/strings";
 
 function NewCommentForm({
   ref,
@@ -274,7 +275,7 @@ function NewCommentForm({
             // Return adds a line break; the send button posts
             multiline
             numberOfLines={2}
-            placeholder="Join the conversation"
+            placeholder={strings.commentPlaceholder}
             value={content}
             onChangeText={(text) => {
               if (createError && text !== content) {

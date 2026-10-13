@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import useUIState from "../../../../hooks/use-ui-state";
+import strings from "../../../../utils/strings";
 
 function ReplyButtonAndInfo({
   hasReplies,
@@ -33,7 +34,7 @@ function ReplyButtonAndInfo({
             theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
           }`}
         >
-          Reply
+          {strings.reply}
         </Text>
       </TouchableOpacity>
       )}
@@ -43,7 +44,7 @@ function ReplyButtonAndInfo({
             theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
           }`}
         >
-          {replyCount} {replyCount === 1 ? "reply" : "replies"}
+          {strings.replyCount(replyCount)}
         </Text>
       )}
     </View>

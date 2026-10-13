@@ -5,6 +5,7 @@ import {
   useReactionToggle,
 } from "@sublay/react-js";
 import { cn } from "@/lib/utils";
+import strings from "../../../../utils/strings";
 
 interface VoteButtonsProps {
   comment: CommentType;
@@ -83,7 +84,7 @@ function VoteButtons({
             ? "bg-blue-500 dark:bg-blue-400 text-white"
             : "bg-transparent text-gray-500 dark:text-neutral-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-400/10"
         )}
-        title="Upvote"
+        title={strings.upvote}
       >
         <svg
           className={iconClass}
@@ -140,7 +141,7 @@ function VoteButtons({
             ? "bg-red-500 dark:bg-red-400 text-white"
             : "bg-transparent text-gray-500 dark:text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
         )}
-        title="Downvote"
+        title={strings.downvote}
       >
         <svg
           className={iconClass}

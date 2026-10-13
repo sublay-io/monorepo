@@ -3,6 +3,7 @@ import { User, useCommentSection } from "@sublay/react-js";
 import UserAvatar from "~shared/react/user-avatar";
 import { UserMentionSkeleton } from "~shared/react/skeleton";
 import { cn } from "@/lib/utils";
+import strings from "../utils/strings";
 
 interface MentionSuggestionsProps {
   isMentionActive: boolean;
@@ -81,7 +82,7 @@ function MentionSuggestions({
           </div>
         ) : (
           <div className="py-4 text-center text-gray-500 dark:text-neutral-400 text-sm">
-            No users found
+            {strings.noUsersFound}
           </div>
         )}
       </div>

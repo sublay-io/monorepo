@@ -26,6 +26,7 @@ import {
 } from "./indentation-threading-lines";
 import ReplyButtonAndInfo from "./reply-button-and-info";
 import useUIState from "../../../../hooks/use-ui-state";
+import strings from "../../../../utils/strings";
 
 interface SingleCommentProps {
   comment: CommentType;
@@ -63,7 +64,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
           theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
         }`}
       >
-        Remove your vote
+        {strings.removeYourVote}
       </Text>
     </Pressable>
   );
@@ -104,9 +105,9 @@ function SingleComment({
   const tombstone = isUnavailable
     ? null
     : comment.userDeletedAt
-      ? "[deleted]"
+      ? strings.deleted
       : comment.moderationStatus === "removed" && !comment.userId
-        ? "[removed]"
+        ? strings.removed
         : null;
 
   // The viewer's own moderator-removed comment comes back in full (only its
@@ -114,9 +115,7 @@ function SingleComment({
   // direct replies to it, so there are no vote buttons or Reply; delete stays.
   const isOwnRemoved =
     !tombstone && comment.moderationStatus === "removed" && !!comment.userId;
-  const ownRemovedLabel = `Removed by a moderator${
-    comment.moderationReason ? `: ${comment.moderationReason}` : ""
-  } · only you can see this`;
+  const ownRemovedLabel = strings.removedByModerator(comment.moderationReason);
 
   // Dynamically get the correct Image component
   const { ImageComponent, isExpo } = getImageComponent();
@@ -256,7 +255,7 @@ theme={theme}
                       theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >
-                    This comment is unavailable
+                    {strings.unavailable}
                   </Text>
                   <RemoveOwnReactionButton comment={comment} />
                 </>
@@ -267,7 +266,7 @@ theme={theme}
                       theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                     }`}
                   >
-                    Comment from a user you blocked
+                    {strings.blockedAuthor}
                   </Text>
                   <Pressable onPress={() => setShowBlockedComment(true)}>
                     <Text
@@ -275,7 +274,7 @@ theme={theme}
                         theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                       }`}
                     >
-                      Show anyway
+                      {strings.showAnyway}
                     </Text>
                   </Pressable>
                 </>
@@ -338,7 +337,7 @@ theme={theme}
                       theme === 'dark' ? 'text-blue-400' : 'text-blue-500'
                     }`}
                   >
-                    ({replyCount} {replyCount === 1 ? "reply" : "replies"})
+                    ({strings.replyCount(replyCount)})
                   </Text>
                 )}
                 {hasReplies && (

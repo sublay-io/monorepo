@@ -28,6 +28,7 @@ import IndentationThreadingLines, {
 import ReplyButtonAndInfo from "./reply-button-and-info";
 import { getCommentCreateErrorMessage } from "../../../../utils/comment-create-error";
 import { cn } from "@/lib/utils";
+import strings from "../../../../utils/strings";
 
 interface SingleCommentProps {
   comment: CommentType;
@@ -61,7 +62,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
       onClick={() => toggleReaction({ reactionType: currentReaction })}
       className="text-[13px] not-italic font-medium text-gray-500 dark:text-neutral-400 px-2 py-1 -ms-2 rounded bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-300"
     >
-      Remove your vote
+      {strings.removeYourVote}
     </button>
   );
 }
@@ -108,9 +109,9 @@ function SingleComment({
   const tombstone = isUnavailable
     ? null
     : comment.userDeletedAt
-      ? "[deleted]"
+      ? strings.deleted
       : comment.moderationStatus === "removed" && !comment.userId
-        ? "[removed]"
+        ? strings.removed
         : null;
 
   // The viewer's own moderator-removed comment comes back in full (only its
@@ -118,9 +119,7 @@ function SingleComment({
   // direct replies to it, so there are no vote buttons or Reply; delete stays.
   const isOwnRemoved =
     !tombstone && comment.moderationStatus === "removed" && !!comment.userId;
-  const ownRemovedLabel = `Removed by a moderator${
-    comment.moderationReason ? `: ${comment.moderationReason}` : ""
-  } · only you can see this`;
+  const ownRemovedLabel = strings.removedByModerator(comment.moderationReason);
 
   // How far this row sits in from the start edge of its thread. The highlight
   // reaches back across it, so a highlighted reply is coloured edge to edge.
@@ -209,17 +208,17 @@ function SingleComment({
             <div className="flex-1 min-w-0 flex items-center gap-2 min-h-7 text-[13px] italic text-gray-500 dark:text-neutral-400">
               {isUnavailable ? (
                 <>
-                  <span>This comment is unavailable</span>
+                  <span>{strings.unavailable}</span>
                   <RemoveOwnReactionButton comment={comment} />
                 </>
               ) : (
                 <>
-                  <span>Comment from a user you blocked</span>
+                  <span>{strings.blockedAuthor}</span>
                   <button
                     onClick={() => setShowBlockedComment(true)}
                     className="text-[13px] not-italic font-medium text-blue-600 dark:text-blue-400 bg-transparent border-none p-0 cursor-pointer hover:underline"
                   >
-                    Show anyway
+                    {strings.showAnyway}
                   </button>
                 </>
               )}
@@ -263,7 +262,7 @@ function SingleComment({
                 <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
                 {isCollapsed && hasReplies && (
                   <span className="text-blue-500 dark:text-blue-400 text-[13px]">
-                    ({replyCount} {replyCount === 1 ? "reply" : "replies"})
+                    ({strings.replyCount(replyCount)})
                   </span>
                 )}
                 {hasReplies && (

@@ -8,6 +8,7 @@ import NewCommentForm from "../files/new-comment-form";
 import CommentMenuModal from "../files/modals/comment-menu-modal/comment-menu-modal";
 import CommentMenuModalOwner from "../files/modals/comment-menu-modal-owner/comment-menu-modal-owner";
 import { UIStateProvider } from "../context/ui-state-context";
+import strings from "../utils/strings";
 
 type ThreadedCommentSectionProviderProps = Omit<
   ComponentProps<typeof CommentSectionProvider>,
@@ -61,26 +62,26 @@ function useThreadedComments({
       loginRequiredCallback: () => {
         // 🔧 CUSTOMIZE: Handle login requirement
         // Example: router.push('/login?redirect=' + window.location.pathname)
-        alert("Please login to perform this action");
+        alert(strings.loginRequired);
       },
 
       // Called when a user with no username tries to interact with comments
       usernameRequiredCallback: () => {
         // 🔧 CUSTOMIZE: Handle username requirement
         // Example: router.push('/profile/setup')
-        alert("Please set a username before interacting with comments");
+        alert(strings.usernameRequired);
       },
 
       // Called when a user tries to submit an empty comment or reply
       commentTooShortCallback: () => {
         // 🔧 CUSTOMIZE: Handle empty comment validation
-        alert("Comment cannot be empty");
+        alert(strings.commentEmpty);
       },
 
       // Called when trying to mention a user who doesn't have a username
       userCantBeMentionedCallback: () => {
         // 🔧 CUSTOMIZE: Handle invalid mention attempt
-        alert("This user cannot be mentioned (no username set)");
+        alert(strings.userNotMentionable);
       },
 
       // Called when the current user clicks on their own avatar or name

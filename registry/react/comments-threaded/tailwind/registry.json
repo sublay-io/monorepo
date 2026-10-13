@@ -150,11 +150,19 @@
       "description": "Messages shown when posting a comment fails"
     },
     {
+      "path": "utils/strings.ts",
+      "type": "util",
+      "description": "Every piece of text the component shows (English)"
+    },
+    {
       "path": "context/ui-state-context.tsx",
       "type": "context",
       "description": "Context for UI state (modals and theme)"
     }
   ],
+  "languages": {
+    "he": "locales/he.ts"
+  },
   "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react/comments-threaded/tailwind",
   "exports": {
     "mainComponent": "ThreadedCommentSection",

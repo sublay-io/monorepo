@@ -3,7 +3,6 @@ import { useCallback, useMemo, useState } from "react";
 import {
   handleError,
   ReportReasonKey,
-  reportReasons,
   useUser,
   useCommentSection,
   useCreateReport,
@@ -17,6 +16,7 @@ import BottomSheet, {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import useUIState from "../../hooks/use-ui-state";
+import strings from "../../utils/strings";
 
 const ReportCommentSheet = () => {
   const { user } = useUser();
@@ -120,7 +120,7 @@ const ReportCommentSheet = () => {
                 color: theme === 'dark' ? '#FAFAFA' : '#111827',
               }}
             >
-              Submit a report
+              {strings.reportTitle}
             </Text>
           </View>
           <Text
@@ -129,8 +129,7 @@ const ReportCommentSheet = () => {
               color: theme === 'dark' ? '#D4D4D4' : '#374151',
             }}
           >
-            Thank you for looking out for our community. Let us know what is
-            happening, and we'll look into it.
+            {strings.reportIntro}
           </Text>
 
           <View
@@ -141,7 +140,7 @@ const ReportCommentSheet = () => {
               marginTop: 24,
             }}
           >
-            {Object.entries(reportReasons).map(([key, value], index) => {
+            {Object.entries(strings.reportReasons).map(([key, value], index) => {
               const isSelected = key === reason;
               return (
                 <Pressable
@@ -174,8 +173,8 @@ const ReportCommentSheet = () => {
           </View>
         </View>
         <CustomButton
-          text="Submit Report"
-          activeText="Submitting.."
+          text={strings.submitReport}
+          activeText={strings.submittingReport}
           onPress={handleSubmitReport}
           disabled={!buttonActive}
           submitting={submitting}

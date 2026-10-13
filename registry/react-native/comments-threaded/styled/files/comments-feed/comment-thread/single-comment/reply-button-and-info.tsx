@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
 import useUIState from "../../../../hooks/use-ui-state";
+import strings from "../../../../utils/strings";
 
 function ReplyButtonAndInfo({
   hasReplies,
@@ -48,7 +49,7 @@ function ReplyButtonAndInfo({
             color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
           }}
         >
-          Reply
+          {strings.reply}
         </Text>
       </Pressable>
       )}
@@ -60,7 +61,7 @@ function ReplyButtonAndInfo({
             color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
           }}
         >
-          {replyCount} {replyCount === 1 ? "reply" : "replies"}
+          {strings.replyCount(replyCount)}
         </Text>
       )}
     </View>

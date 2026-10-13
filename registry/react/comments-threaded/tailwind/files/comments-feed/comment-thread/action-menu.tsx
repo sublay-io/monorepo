@@ -1,5 +1,6 @@
 import { useUser, Comment as CommentType } from "@sublay/react-js";
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 interface ActionMenuProps {
   comment: CommentType;
@@ -18,7 +19,7 @@ function ActionMenu({ comment }: ActionMenuProps) {
             : openCommentOptionsModal?.(comment)
         }
         className="p-0.5 text-gray-400 dark:text-neutral-500 transition-colors duration-150 rounded bg-transparent border-none cursor-pointer hover:text-gray-600 dark:hover:text-neutral-400 hover:bg-gray-50 dark:hover:bg-neutral-700"
-        title="More options"
+        title={strings.moreOptions}
       >
         <svg
           className="w-3 h-3"

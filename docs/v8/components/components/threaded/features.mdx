@@ -39,6 +39,11 @@ On React Native and Expo, text and GIFs sent while the bar is showing are posted
 
 The bar lives in `reply-banner/reply-banner.tsx`. The Reply button's behavior is `handleReplyPress` in `single-comment.tsx`, and `focusCommentInput` in `context/ui-state-context.tsx` focuses the input.
 
+### Sending a Comment
+
+- **React (Web)** — Enter posts the comment; Shift+Enter adds a line break.
+- **React Native and Expo** — the send button posts the comment. Return adds a line break.
+
 ---
 
 ### Loading Replies

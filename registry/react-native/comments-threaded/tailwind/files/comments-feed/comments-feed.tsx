@@ -5,6 +5,7 @@ import LoadedComments from "./loaded-comments";
 import FetchingCommentsSkeletons from "./fetching-comments-skeletons";
 import NoCommentsPlaceHolder from "./no-comments-placeholder";
 import useUIState from "../../hooks/use-ui-state";
+import strings from "../../utils/strings";
 
 const CommentsFeed = React.memo(
   ({ children: customNoCommentsView }: { children?: ReactNode }) => {
@@ -75,7 +76,7 @@ const CommentsFeed = React.memo(
                   theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                 }`}
               >
-                View all comments
+                {strings.viewAllComments}
               </Text>
             </TouchableOpacity>
           </View>
@@ -101,11 +102,11 @@ const CommentsFeed = React.memo(
             {showLoadMoreError ? (
               <View className="flex-row items-center px-3 py-1">
                 <Text className={`text-[13px] leading-[18px] ${mutedTextClass}`}>
-                  Couldn't load more ·{" "}
+                  {strings.loadMoreFailed} ·{" "}
                 </Text>
                 <TouchableOpacity onPress={() => loadMore?.()}>
                   <Text className={`text-[13px] leading-[18px] font-medium ${linkTextClass}`}>
-                    Try again
+                    {strings.tryAgain}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -120,7 +121,7 @@ const CommentsFeed = React.memo(
                     theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                   }`}
                 >
-                  {loading ? "Loading..." : "Load more comments"}
+                  {loading ? strings.loading : strings.loadMoreComments}
                 </Text>
               </TouchableOpacity>
             )}
@@ -130,11 +131,11 @@ const CommentsFeed = React.memo(
         {showLoadError && (
           <View className="items-center py-2">
             <Text className={`text-sm mb-1 ${mutedTextClass}`}>
-              Couldn't load comments
+              {strings.loadCommentsFailed}
             </Text>
             <TouchableOpacity onPress={() => loadMore?.()}>
               <Text className={`text-[13px] leading-[18px] font-medium ${linkTextClass}`}>
-                Try again
+                {strings.tryAgain}
               </Text>
             </TouchableOpacity>
           </View>

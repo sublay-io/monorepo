@@ -1,4 +1,5 @@
 import React from "react";
+import strings from "../../../../utils/strings";
 
 function ReplyButtonAndInfo({
   hasReplies,
@@ -23,7 +24,7 @@ function ReplyButtonAndInfo({
         className="text-gray-500 dark:text-neutral-400 font-medium px-2 py-1 rounded -ms-2 transition-all duration-150 bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-400/10"
         // 🎨 CUSTOMIZATION: Reply button styling
       >
-        Reply
+        {strings.reply}
       </button>
       )}
       {hasReplies && (
@@ -31,7 +32,7 @@ function ReplyButtonAndInfo({
           className="text-gray-500 dark:text-neutral-400"
           // 🎨 CUSTOMIZATION: Reply count styling
         >
-          {replyCount} {replyCount === 1 ? "reply" : "replies"}
+          {strings.replyCount(replyCount)}
         </span>
       )}
     </div>

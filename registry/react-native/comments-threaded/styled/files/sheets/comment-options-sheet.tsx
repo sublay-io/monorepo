@@ -7,6 +7,7 @@ import BottomSheet, {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import useUIState from "../../hooks/use-ui-state";
+import strings from "../../utils/strings";
 
 const CommentOptionsSheet = () => {
   const {
@@ -99,7 +100,7 @@ const CommentOptionsSheet = () => {
               color: theme === 'dark' ? '#FAFAFA' : '#374151',
             }}
           >
-            Report
+            {strings.report}
           </Text>
         </Pressable>
       </BottomSheetView>

@@ -1,4 +1,5 @@
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 function MainContent({ clickReport }: { clickReport: () => void }) {
   const { closeCommentOptionsModal } = useUIState();
@@ -10,7 +11,7 @@ function MainContent({ clickReport }: { clickReport: () => void }) {
           // 🎨 CUSTOMIZATION: Report button styling
           onClick={clickReport}
         >
-          Report
+          {strings.report}
         </button>
       </li>
       <div className="h-px w-full bg-gray-200 dark:bg-neutral-600" />
@@ -20,7 +21,7 @@ function MainContent({ clickReport }: { clickReport: () => void }) {
           // 🎨 CUSTOMIZATION: Cancel button styling
           onClick={closeCommentOptionsModal}
         >
-          Cancel
+          {strings.cancel}
         </button>
       </li>
     </ul>

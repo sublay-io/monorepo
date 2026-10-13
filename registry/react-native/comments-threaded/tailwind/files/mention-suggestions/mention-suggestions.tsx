@@ -5,6 +5,7 @@ import UserAvatar from "~shared/react-native/user-avatar";
 import { UserMentionSkeleton } from "~shared/react-native/skeleton";
 import useUIState from "../../hooks/use-ui-state";
 import { SECTION_PADDING_X } from "../comments-feed/comment-thread/single-comment/indentation-threading-lines";
+import strings from "../../utils/strings";
 
 interface MentionSuggestionsProps {
   isMentionActive: boolean;
@@ -107,7 +108,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
               theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
             }`}
           >
-            No users found
+            {strings.noUsersFound}
           </Text>
         </View>
       )}

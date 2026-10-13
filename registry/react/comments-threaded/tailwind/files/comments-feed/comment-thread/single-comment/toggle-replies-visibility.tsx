@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import strings from "../../../../utils/strings";
 
 function ToggleRepliesVisibilty({
   isCollapsed,
@@ -23,7 +24,7 @@ function ToggleRepliesVisibilty({
         "hover:bg-gray-200 dark:hover:bg-neutral-600",
         isCollapsed && "border border-gray-300 dark:border-neutral-500"
       )}
-      title={isCollapsed ? "Expand thread" : "Collapse thread"}
+      title={isCollapsed ? strings.expandThread : strings.collapseThread}
     >
       {isCollapsed ? "+" : "−"}
     </button>

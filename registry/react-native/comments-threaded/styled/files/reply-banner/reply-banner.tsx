@@ -3,6 +3,7 @@ import { useCommentSection, getUserName } from "@sublay/react-native";
 import UserAvatar from "~shared/react-native/user-avatar";
 import useUIState from "../../hooks/use-ui-state";
 import { SECTION_PADDING_X } from "../comments-feed/comment-thread/single-comment/indentation-threading-lines";
+import strings from "../../utils/strings";
 
 // 🎨 CUSTOMIZATION: Size of the avatar in the bar (Default: 20)
 const REPLY_BANNER_AVATAR_SIZE = 20;
@@ -37,7 +38,7 @@ function ReplyBanner() {
           color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
         }}
       >
-        Replying to
+        {strings.replyingTo}
       </Text>
       <UserAvatar
         theme={theme}
@@ -64,7 +65,7 @@ function ReplyBanner() {
           setShowReplyBanner?.({ newState: false });
         }}
         accessibilityRole="button"
-        accessibilityLabel="Cancel reply"
+        accessibilityLabel={strings.cancelReply}
         hitSlop={8}
         style={({ pressed }) => ({
           marginStart: 'auto',

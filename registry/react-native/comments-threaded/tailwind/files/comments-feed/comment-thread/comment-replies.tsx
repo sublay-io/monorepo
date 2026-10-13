@@ -7,6 +7,7 @@ import IndentationThreadingLines, {
   INDENT,
   MAX_INDENT_DEPTH,
 } from "./single-comment/indentation-threading-lines";
+import strings from "../../../utils/strings";
 
 // 🎨 CUSTOMIZATION: "More replies" row - space above it (Default: 12)
 const LOAD_MORE_PADDING_TOP = 12;
@@ -53,10 +54,10 @@ function CommentReplies({
   // At the depth boundary nothing is loaded yet: the replies load right here.
   const loadMoreLabel =
     visibleReplies.length === 0
-      ? "Continue this thread"
+      ? strings.continueThread
       : hiddenRepliesCount > 0
-      ? `${hiddenRepliesCount} more ${hiddenRepliesCount === 1 ? "reply" : "replies"}`
-      : "More replies";
+      ? strings.moreReplyCount(hiddenRepliesCount)
+      : strings.moreReplies;
 
   return (
     // Replies sit one level in from their parent, until the indentation cap
@@ -97,7 +98,7 @@ function CommentReplies({
                   theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                 }`}
               >
-                Couldn't load more ·{" "}
+                {strings.loadMoreFailed} ·{" "}
               </Text>
               <TouchableOpacity onPress={onLoadMore}>
                 <Text
@@ -105,7 +106,7 @@ function CommentReplies({
                     theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                   }`}
                 >
-                  Try again
+                  {strings.tryAgain}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -131,7 +132,7 @@ function CommentReplies({
                   theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
                 }`}
               >
-                {loading ? "Loading..." : loadMoreLabel}
+                {loading ? strings.loading : loadMoreLabel}
               </Text>
             </TouchableOpacity>
           )}

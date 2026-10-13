@@ -14,7 +14,7 @@ const LOAD_MORE_PADDING_TOP = 12;
 // The row's text has a line height of 16, plus 4 of padding above and below.
 const LOAD_MORE_HEIGHT = 24;
 // 🎨 CUSTOMIZATION: "More replies" row - space between the elbow and the button (Default: 4)
-const LOAD_MORE_OFFSET_LEFT = 4;
+const LOAD_MORE_OFFSET_START = 4;
 
 interface CommentRepliesProps {
   depth: number;
@@ -60,7 +60,7 @@ function CommentReplies({
 
   return (
     // Replies sit one level in from their parent, until the indentation cap
-    <View style={{ marginLeft: depth < MAX_INDENT_DEPTH ? INDENT : 0 }}>
+    <View style={{ marginStart: depth < MAX_INDENT_DEPTH ? INDENT : 0 }}>
       {visibleReplies.map((reply: CommentType, index: number) => (
         <CommentThreadComponent
           key={reply.id}
@@ -81,14 +81,14 @@ function CommentReplies({
           style={{
             minHeight: LOAD_MORE_PADDING_TOP + LOAD_MORE_HEIGHT,
             paddingTop: LOAD_MORE_PADDING_TOP,
-            paddingLeft: LOAD_MORE_OFFSET_LEFT,
-            marginLeft: depth < MAX_INDENT_DEPTH ? 0 : INDENT,
+            paddingStart: LOAD_MORE_OFFSET_START,
+            marginStart: depth < MAX_INDENT_DEPTH ? 0 : INDENT,
           }}
         >
           <IndentationThreadingLines
             isLastReply={!columnContinues}
             joinAt={LOAD_MORE_PADDING_TOP + LOAD_MORE_HEIGHT / 2}
-            reach={LOAD_MORE_OFFSET_LEFT}
+            reach={LOAD_MORE_OFFSET_START}
           />
           {failed && !loading ? (
             <View className="flex-row items-center px-2 py-1">

@@ -13,7 +13,7 @@ function ToggleRepliesVisibility({
   return (
     <TouchableOpacity
       onPress={onToggleCollapse}
-      className={`ml-1 w-4 h-4 items-center justify-center rounded-sm ${
+      className={`ms-1 w-4 h-4 items-center justify-center rounded-sm ${
         theme === 'dark' ? 'bg-neutral-700' : 'bg-gray-50'
       } ${
         isCollapsed

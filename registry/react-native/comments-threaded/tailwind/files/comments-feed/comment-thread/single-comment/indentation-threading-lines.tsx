@@ -17,7 +17,7 @@ export const ROW_PADDING_Y = 8;
 export const AVATAR_OFFSET_TOP = 4;
 // 🎨 CUSTOMIZATION: Gap between the avatar and the comment content (Default: 12)
 export const AVATAR_GAP = 12;
-// 🎨 CUSTOMIZATION: Space between the comments and the left and right edges
+// 🎨 CUSTOMIZATION: Space between the comments and the edges on both sides
 // of the section (Default: 16). The highlight of a comment reaches across it.
 export const SECTION_PADDING_X = 16;
 // 🎨 CUSTOMIZATION: Threading line thickness (Default: 1)
@@ -25,7 +25,7 @@ export const LINE_WIDTH = 1;
 // 🎨 CUSTOMIZATION: Roundness of the elbow into each reply (Default: 12)
 export const ELBOW_RADIUS = 12;
 
-// Left edge of the vertical line, measured from the left edge of the comment
+// Start edge of the vertical line, measured from the start edge of the comment
 // it hangs from: centred under that comment's avatar.
 export const RAIL_X = Math.floor((AVATAR_SIZE - LINE_WIDTH) / 2);
 // Top and vertical centre of a comment's avatar, measured from the top of its row.
@@ -54,11 +54,11 @@ export function ThreadStem() {
       pointerEvents="none"
       className={`absolute ${line}`}
       style={{
-        left: RAIL_X,
+        start: RAIL_X,
         top: AVATAR_TOP + AVATAR_SIZE,
         bottom: 0,
         width: LINE_WIDTH,
-        borderLeftWidth: LINE_WIDTH,
+        borderStartWidth: LINE_WIDTH,
       }}
     />
   );
@@ -74,7 +74,7 @@ interface IndentationThreadingLinesProps {
   indented?: boolean;
   /** Where the elbow meets the row, measured from the top of the row. */
   joinAt?: number;
-  /** How far past the row's left edge the elbow runs. */
+  /** How far past the row's start edge the elbow runs. */
   reach?: number;
   /** The row is the highlighted comment: its connector takes the accent color. */
   highlighted?: boolean;
@@ -105,11 +105,11 @@ function IndentationThreadingLines({
         pointerEvents="none"
         className={`absolute ${ownLine}`}
         style={{
-          left: RAIL_X,
+          start: RAIL_X,
           top: 0,
           height: AVATAR_TOP,
           width: LINE_WIDTH,
-          borderLeftWidth: LINE_WIDTH,
+          borderStartWidth: LINE_WIDTH,
         }}
       />
     );
@@ -123,11 +123,11 @@ function IndentationThreadingLines({
           pointerEvents="none"
           className={`absolute ${line}`}
           style={{
-            left: RAIL_X - INDENT,
+            start: RAIL_X - INDENT,
             top: 0,
             bottom: 0,
             width: LINE_WIDTH,
-            borderLeftWidth: LINE_WIDTH,
+            borderStartWidth: LINE_WIDTH,
           }}
         />
       )}
@@ -138,13 +138,13 @@ function IndentationThreadingLines({
         pointerEvents="none"
         className={`absolute ${ownLine}`}
         style={{
-          left: RAIL_X - INDENT,
+          start: RAIL_X - INDENT,
           top: 0,
           width: INDENT - RAIL_X + reach,
           height: Math.ceil(joinAt + LINE_WIDTH / 2),
-          borderLeftWidth: LINE_WIDTH,
+          borderStartWidth: LINE_WIDTH,
           borderBottomWidth: LINE_WIDTH,
-          borderBottomLeftRadius: ELBOW_RADIUS,
+          borderBottomStartRadius: ELBOW_RADIUS,
         }}
       />
     </>

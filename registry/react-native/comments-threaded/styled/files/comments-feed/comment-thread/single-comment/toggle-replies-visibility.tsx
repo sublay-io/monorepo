@@ -14,7 +14,7 @@ function ToggleRepliesVisibility({
     <TouchableOpacity
       onPress={onToggleCollapse}
       style={{
-        marginLeft: 4,
+        marginStart: 4,
         width: 16,
         height: 16,
         alignItems: 'center',

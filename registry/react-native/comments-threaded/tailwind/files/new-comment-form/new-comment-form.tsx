@@ -5,8 +5,6 @@ import {
   TouchableOpacity,
   View,
   Keyboard,
-  TextInputKeyPressEventData,
-  NativeSyntheticEvent,
   ActivityIndicator,
 } from "react-native";
 import {
@@ -198,14 +196,6 @@ function NewCommentForm({
     [createComment, content, mentions, resetMentions, setMentions, user, callbacks]
   );
 
-  const handleKeyPress = useCallback(
-    (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      if (event.nativeEvent.key === "Enter") {
-        handleCreateComment();
-      }
-    },
-    [handleCreateComment]
-  );
 
   // Expose the focus method to the parent through the forwarded ref
   useImperativeHandle(ref, () => ({
@@ -261,6 +251,7 @@ function NewCommentForm({
         >
           <TextInput
             ref={textAreaRef}
+            // Return adds a line break; the send button posts
             multiline
             numberOfLines={2}
             placeholder="Join the conversation"
@@ -273,8 +264,6 @@ function NewCommentForm({
               handleTextChange(text);
             }}
             onSelectionChange={handleSelectionChange}
-            onKeyPress={handleKeyPress}
-            blurOnSubmit={false}
             className={`flex-1 p-2 text-sm bg-transparent ${
               theme === 'dark' ? 'text-neutral-50' : 'text-gray-900'
             }`}

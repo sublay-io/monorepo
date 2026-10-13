@@ -116,7 +116,7 @@ function CommentInput() {
 </ResponseField>
 
 <ResponseField name="handleMentionClick" type="(user: User) => void">
-  Call this when the user selects a suggestion. Replaces the trigger text in `content` with the user's username, adds the user to `mentions`, and closes the suggestion list.
+  Call this when the user selects a suggestion. Replaces the trigger text in `content` with the user's username, adds the user to `mentions`, and closes the suggestion list. The suggestions then stay closed until the text or the cursor position changes.
 </ResponseField>
 
 <ResponseField name="mentions" type="Mention[]">

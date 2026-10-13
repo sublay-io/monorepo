@@ -1,0 +1,14 @@
+{
+  "name": "unknown-piece",
+  "platform": "react",
+  "style": "styled",
+  "version": "1.0.0",
+  "description": "Broken fixture",
+  "dependencies": [],
+  "files": [
+    { "path": "files/widget.tsx", "type": "component", "description": "Main component" }
+  ],
+  "shared": ["nope"],
+  "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react/unknown-piece/styled",
+  "exports": { "mainComponent": "Widget", "mainFile": "widget" }
+}

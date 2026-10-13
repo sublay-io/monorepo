@@ -1,0 +1,14 @@
+{
+  "name": "widget",
+  "platform": "react-native",
+  "style": "styled",
+  "version": "1.0.0",
+  "description": "Fixture React Native component that uses a shared piece",
+  "dependencies": ["@sublay/react-native@^7.0.0"],
+  "files": [
+    { "path": "files/widget.tsx", "type": "component", "description": "Main component" }
+  ],
+  "shared": ["from-now"],
+  "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react-native/widget/styled",
+  "exports": { "mainComponent": "Widget", "mainFile": "widget" }
+}

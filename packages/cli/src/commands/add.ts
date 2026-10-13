@@ -3,15 +3,73 @@ import path from "path";
 import chalk from "chalk";
 import ora from "ora";
 import { SublayConfig } from "./init.js";
-import { fetchRegistry, fetchFile, Registry } from "../utils/registry.js";
-import { transformImports } from "../utils/transform.js";
-import { checkComponentDependencies } from "../utils/dependencies.js";
+import {
+  fetchRegistry,
+  fetchFile,
+  pinRegistrySource,
+  fetchSharedFile,
+  fetchSharedManifest,
+  getComponentLocation,
+  getRegistryPlatform,
+  getSharedManifestPath,
+  resolveRegistrySource,
+  resolveSharedPieces,
+  validateComponentName,
+  Registry,
+  RegistryError,
+  RegistrySource,
+  ResolvedSharedPiece,
+} from "../utils/registry.js";
+import { findSharedAliasImports, transformImports } from "../utils/transform.js";
+import {
+  checkComponentDependencies,
+  mergeDependencies,
+} from "../utils/dependencies.js";
 import { stripTypes, convertFileExtension } from "../utils/strip-types.js";
 
-export async function add(componentName: string) {
+export interface AddOptions {
+  /** Branch to read the registry from instead of the default. */
+  ref?: string;
+  /** Language to install the component's text in instead of English. */
+  lang?: string;
+}
+
+// The file that holds a component's text, and the language it is written in.
+export const STRINGS_FILE = "utils/strings.ts";
+export const DEFAULT_LANGUAGE = "en";
+
+/** A file fetched and transformed in memory, waiting to be written. */
+interface PendingFile {
+  /** Path relative to the project root. */
+  targetPath: string;
+  content: string;
+}
+
+// How many registry files are requested at once.
+const FETCH_CONCURRENCY = 8;
+
+export async function add(componentName: string, options: AddOptions = {}) {
   const spinner = ora("Initializing...").start();
 
   try {
+    // Settle where the registry is read from before touching anything: an
+    // unusable --ref is rejected here, ahead of any request.
+    let source: RegistrySource;
+    try {
+      // The component name is part of every path and URL built below.
+      const nameProblem = validateComponentName(componentName);
+      if (nameProblem) {
+        throw new RegistryError(nameProblem);
+      }
+      source = resolveRegistrySource(options.ref);
+    } catch (error) {
+      if (error instanceof RegistryError) {
+        spinner.fail(error.message);
+        process.exit(1);
+      }
+      throw error;
+    }
+
     // Read configuration
     const configPath = path.join(process.cwd(), "sublay.json");
 
@@ -63,69 +121,105 @@ export async function add(componentName: string) {
     spinner.text = `Fetching ${componentName}...`;
 
     // Fetch registry metadata
-    const registry = await fetchRegistry(componentName, config);
-
-    if (!registry) {
-      spinner.fail(`Component "${componentName}" not found`);
-      process.exit(1);
-    }
+    // One place for the whole run: local registry or remote, never a mix.
+    source = await pinRegistrySource(source, componentName, config);
+    const registry = await fetchRegistry(componentName, config, source);
 
     // Expo projects use @sublay/expo instead of @sublay/react-native
-    if (config.platform === 'expo') {
-      registry.dependencies = registry.dependencies.map((dep) =>
-        dep.startsWith('@sublay/react-native')
-          ? dep.replace('@sublay/react-native', '@sublay/expo')
-          : dep
-      );
+    registry.dependencies = registry.dependencies.map((dep) =>
+      renameForPlatform(dep, config)
+    );
+
+    // With --lang, the strings file is taken from that language's file.
+    const languageFile = resolveLanguageFile(registry, options.lang, componentName);
+
+    // Shared pieces the component lists, plus whatever those require.
+    const platform = getRegistryPlatform(config);
+    const location = getComponentLocation(componentName, config);
+    const componentManifestLabel = `${location}/registry.json`;
+    const sharedManifestLabel = getSharedManifestPath(platform);
+    const sharedNames = readSharedNames(registry, componentManifestLabel);
+    let sharedPieces: ResolvedSharedPiece[] = [];
+
+    if (sharedNames.length > 0) {
+      const sharedManifest = await fetchSharedManifest(platform, source);
+      sharedPieces = resolveSharedPieces(sharedNames, sharedManifest, {
+        componentManifest: componentManifestLabel,
+        sharedManifest: sharedManifestLabel,
+      });
     }
 
-    spinner.text = "Downloading files...";
+    // One spec per package: the component's range wins over a piece's.
+    const dependencies = mergeDependencies(
+      registry.dependencies,
+      sharedPieces
+        .flatMap((piece) => piece.dependencies)
+        .map((dep) => renameForPlatform(dep, config))
+    );
 
-    // Download and install each file
+    spinner.text =
+      sharedPieces.length > 0
+        ? `Downloading files and ${sharedPieces.length} shared piece(s)...`
+        : "Downloading files...";
+
+    // Fetch and transform every file before writing any of them: a file that
+    // cannot be fetched fails the whole command and leaves the project
+    // untouched, rather than installing a component with a hole in it.
+    const installedPieces = new Set(sharedPieces.map((piece) => piece.name));
+    const downloads: Array<{ registryPath: string; shared: boolean }> = [
+      ...registry.files.map((file) => ({ registryPath: file.path, shared: false })),
+      ...sharedPieces.flatMap((piece) =>
+        piece.files.map((file) => ({ registryPath: file, shared: true }))
+      ),
+    ].filter(
+      // Skip development files
+      (download) => !shouldExcludeFile(download.registryPath)
+    );
+
+    const pendingFiles = await mapWithConcurrency(
+      downloads,
+      FETCH_CONCURRENCY,
+      async ({ registryPath, shared }): Promise<PendingFile> => {
+        const fileContent = shared
+          ? await fetchSharedFile(source, platform, registryPath)
+          : await fetchFile(
+              source,
+              location,
+              languageFile && registryPath === STRINGS_FILE
+                ? languageFile
+                : registryPath
+            );
+
+        // Every shared piece a file imports has to be one that is being
+        // installed, or the import is rewritten to a file that is not there.
+        for (const used of findSharedAliasImports(fileContent)) {
+          if (used.platform !== platform || !installedPieces.has(used.piece)) {
+            throw new RegistryError(
+              `${registryPath} imports the shared piece "${used.platform}/${used.piece}", which ${componentManifestLabel} does not list under "shared" for ${sharedManifestLabel}.`
+            );
+          }
+        }
+
+        return prepareFile(
+          shared ? `shared/${registryPath}` : registryPath,
+          fileContent,
+          config,
+          componentName
+        );
+      }
+    );
+
+    // Write the files
     let filesInstalled = 0;
 
-    for (const file of registry.files) {
-      // Skip development files
-      if (shouldExcludeFile(file.path)) {
-        continue;
-      }
-
-      const fileContent = await fetchFile(registry.registryUrl, file.path);
-
-      if (!fileContent) {
-        console.log(chalk.yellow(`\n⚠️  Could not fetch ${file.path}`));
-        continue;
-      }
-
-      // Transform imports to match user's project
-      let transformed = transformImports(fileContent, config);
-
-      // Strip TypeScript types if project is JavaScript
-      let finalFilePath = file.path;
-      if (!config.typescript && (file.path.endsWith('.ts') || file.path.endsWith('.tsx'))) {
-        transformed = await stripTypes(transformed, file.path);
-        finalFilePath = convertFileExtension(file.path);
-      }
-
-      // Determine target path
-      const targetPath = getTargetPath(finalFilePath, config, componentName);
-      const fullPath = path.join(process.cwd(), targetPath);
-
-      //       // Add @internal JSDoc comment for component files to discourage direct imports
-      //       if (file.path.startsWith('files/') || file.path.startsWith('hooks/')) {
-      //         const internalComment = `/**
-      //  * @internal
-      //  * Import from the barrel export instead:
-      //  * import { ${toPascalCase(path.basename(file.path, path.extname(file.path)))} } from '@/components/${componentName}'
-      //  */\n\n`;
-      //         transformed = internalComment + transformed;
-      //       }
+    for (const file of pendingFiles) {
+      const fullPath = path.join(process.cwd(), file.targetPath);
 
       // Ensure directory exists
       await fs.ensureDir(path.dirname(fullPath));
 
       // Write file
-      await fs.writeFile(fullPath, transformed, "utf-8");
+      await fs.writeFile(fullPath, file.content, "utf-8");
       filesInstalled++;
     }
 
@@ -148,9 +242,20 @@ export async function add(componentName: string) {
         )}`
       )
     );
+    if (sharedPieces.length > 0) {
+      console.log(
+        chalk.dim(
+          `🧩 Shared pieces in ${path.join(
+            config.paths.components,
+            componentName,
+            "shared"
+          )}: ${sharedPieces.map((piece) => piece.name).join(", ")}`
+        )
+      );
+    }
 
-    // Check dependencies
-    await checkComponentDependencies(registry.dependencies);
+    // Check dependencies: the component's own plus what its shared pieces need
+    await checkComponentDependencies(dependencies);
 
     // Show usage example
     const componentInfo = getComponentInfo(registry);
@@ -174,14 +279,161 @@ export async function add(componentName: string) {
     }
 
     // Some dependencies need app-level wiring the installer cannot do for you.
-    printAppSetupNotes(registry.dependencies);
+    printAppSetupNotes(dependencies);
 
     console.log();
   } catch (error) {
+    if (error instanceof RegistryError) {
+      // An expected failure (missing branch, component or file): the message
+      // already says what is missing, so no stack trace.
+      spinner.fail(error.message);
+      console.error(chalk.dim("\nNothing was written to your project."));
+      process.exit(1);
+    }
     spinner.fail("Failed to add component");
     console.error(chalk.red("\n❌ Error:"), error);
     process.exit(1);
   }
+}
+
+/**
+ * Turn one fetched registry file into what gets written: imports rewritten for
+ * the installed layout, types stripped for JavaScript projects, and its place
+ * in the project worked out.
+ */
+async function prepareFile(
+  filePath: string,
+  fileContent: string,
+  config: SublayConfig,
+  componentName: string
+): Promise<PendingFile> {
+  const componentDir = path.join(config.paths.components, componentName);
+
+  // Strip TypeScript types if project is JavaScript
+  const needsTypeStrip =
+    !config.typescript && (filePath.endsWith('.ts') || filePath.endsWith('.tsx'));
+  const finalFilePath = needsTypeStrip ? convertFileExtension(filePath) : filePath;
+
+  const targetPath = getTargetPath(finalFilePath, config, componentName);
+  const installedPath = path
+    .relative(componentDir, targetPath)
+    .split(path.sep)
+    .join('/');
+
+  // Registry paths come from a manifest; none may land outside the component.
+  if (
+    installedPath === '..' ||
+    installedPath.startsWith('../') ||
+    path.isAbsolute(installedPath)
+  ) {
+    throw new RegistryError(
+      `${filePath} would be installed outside ${componentDir}; refusing to write it.`
+    );
+  }
+
+  // Transform imports to match user's project
+  let transformed = transformImports(fileContent, config, { installedPath });
+
+  if (needsTypeStrip) {
+    transformed = await stripTypes(transformed, filePath);
+  }
+
+  return { targetPath, content: transformed };
+}
+
+/** Expo projects use @sublay/expo instead of @sublay/react-native. */
+function renameForPlatform(dep: string, config: SublayConfig): string {
+  return config.platform === 'expo' && dep.startsWith('@sublay/react-native')
+    ? dep.replace('@sublay/react-native', '@sublay/expo')
+    : dep;
+}
+
+/**
+ * The registry file that replaces the component's strings file for `lang`,
+ * or null when the component is installed as it is (no `--lang`, or English).
+ */
+export function resolveLanguageFile(
+  registry: Pick<Registry, "files" | "languages">,
+  lang: string | undefined,
+  componentName: string
+): string | null {
+  if (lang === undefined || lang === DEFAULT_LANGUAGE) {
+    return null;
+  }
+
+  const languages =
+    registry.languages && typeof registry.languages === "object"
+      ? registry.languages
+      : {};
+  const available = [DEFAULT_LANGUAGE, ...Object.keys(languages)].join(", ");
+  const languageFile = Object.prototype.hasOwnProperty.call(languages, lang)
+    ? languages[lang]
+    : undefined;
+
+  if (languageFile === undefined) {
+    throw new RegistryError(
+      `${componentName} is not available in "${lang}". Available languages: ${available}.`
+    );
+  }
+
+  // The path is requested from the registry as it is written in the manifest.
+  if (
+    typeof languageFile !== "string" ||
+    !/^[A-Za-z0-9_][A-Za-z0-9._/-]*$/.test(languageFile) ||
+    languageFile.split("/").includes("..")
+  ) {
+    throw new RegistryError(
+      `The "${lang}" entry under "languages" for ${componentName} is not a usable file path.`
+    );
+  }
+
+  if (!registry.files.some((file) => file.path === STRINGS_FILE)) {
+    throw new RegistryError(
+      `${componentName} lists languages but has no ${STRINGS_FILE} to put them in.`
+    );
+  }
+
+  return languageFile;
+}
+
+/** The manifest's `shared` list. Absent means the component uses no shared pieces. */
+function readSharedNames(registry: Registry, manifestLabel: string): string[] {
+  const { shared } = registry;
+
+  if (shared === undefined || shared === null) {
+    return [];
+  }
+
+  if (!Array.isArray(shared) || shared.some((name) => typeof name !== 'string')) {
+    throw new RegistryError(
+      `"shared" in ${manifestLabel} must be a list of shared piece names.`
+    );
+  }
+
+  return shared;
+}
+
+/** Like Promise.all over `items.map(task)`, but at most `limit` tasks run at once. */
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  task: (item: T) => Promise<R>
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+
+  const worker = async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await task(items[index]);
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, worker)
+  );
+
+  return results;
 }
 
 /**
@@ -275,7 +527,7 @@ function printAppSetupNotes(dependencies: string[]): void {
   console.log(chalk.dim('\n  Setup guides: https://docs.sublay.io'));
 }
 
-function getTargetPath(
+export function getTargetPath(
   filePath: string,
   config: SublayConfig,
   componentName: string
@@ -292,6 +544,11 @@ function getTargetPath(
   }
   if (filePath.startsWith("context/")) {
     return path.join(componentDir, "context", path.basename(filePath));
+  }
+
+  // Shared pieces go into the component's own 'shared/' folder
+  if (filePath.startsWith("shared/")) {
+    return path.join(componentDir, "shared", filePath.substring(7));
   }
 
   // Component files from 'files/' go into 'components/' subdirectory

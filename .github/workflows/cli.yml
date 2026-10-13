@@ -164,6 +164,14 @@ jobs:
       - name: Check registry integrity
         run: node .github/scripts/check-registry-integrity.mjs
 
+      - name: Test registry integrity script
+        # The script above is the only gate on registry metadata, so its own
+        # rules are tested: this runs it as a child process against fixture
+        # registries (a valid one with shared pieces, then one broken rule per
+        # case) and checks the exit code and message. Node's built-in runner,
+        # no dependencies — it also runs before install.
+        run: node --test .github/scripts/check-registry-integrity.test.mjs
+
       - name: Install dependencies
         # --ignore-scripts so this job doesn't build the eight workspace
         # packages that declare a `prepare` script — none of which is
@@ -217,6 +225,12 @@ jobs:
         # every user and only fails in their build. See this file's header
         # for why this was previously (wrongly) believed to be impossible.
         run: pnpm --filter @sublay/registry run typecheck
+
+      - name: Run registry test suites
+        # Tests for the registry's shared pieces (registry/shared/). --if-present
+        # because the registry only has a `test` script where it has shared
+        # pieces with tests; without one this step does nothing.
+        run: pnpm --filter @sublay/registry --if-present run test
 
       - name: Build playground
         # playground is this group's dev harness and resolves

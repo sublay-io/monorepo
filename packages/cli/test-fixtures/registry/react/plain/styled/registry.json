@@ -1,0 +1,14 @@
+{
+  "name": "plain",
+  "platform": "react",
+  "style": "styled",
+  "version": "1.0.0",
+  "description": "Fixture component without shared pieces",
+  "dependencies": ["@sublay/react-js@^7.0.0"],
+  "files": [
+    { "path": "files/plain.tsx", "type": "component", "description": "Main component" },
+    { "path": "hooks/use-plain.ts", "type": "hook", "description": "Hook" }
+  ],
+  "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react/plain/styled",
+  "exports": { "mainComponent": "Plain", "mainFile": "plain" }
+}

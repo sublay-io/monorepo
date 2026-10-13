@@ -1,0 +1,14 @@
+{
+  "name": "empty-file",
+  "platform": "react",
+  "style": "styled",
+  "version": "1.0.0",
+  "description": "Fixture component with a zero-byte file",
+  "dependencies": [],
+  "files": [
+    { "path": "files/widget.tsx", "type": "component", "description": "Main component" },
+    { "path": "utils/placeholder.ts", "type": "util", "description": "Empty file" }
+  ],
+  "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react/empty-file/styled",
+  "exports": { "mainComponent": "Widget", "mainFile": "widget" }
+}

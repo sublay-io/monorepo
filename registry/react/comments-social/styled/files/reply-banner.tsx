@@ -1,6 +1,7 @@
 import { useCommentSection, getUserName } from "@sublay/react-js";
 import { resetButton } from "~shared/react/reset-styles";
 import useUIState from "../hooks/use-ui-state";
+import strings from "../utils/strings";
 
 function ReplyBanner() {
   const {
@@ -51,7 +52,7 @@ function ReplyBanner() {
           color: theme === 'dark' ? '#A3A3A3' : '#787878',
           fontSize: 12
         }}>
-          Replying to {repliedToUser}
+          {strings.replyingTo(repliedToUser)}
         </span>
         <button
           onClick={() => {

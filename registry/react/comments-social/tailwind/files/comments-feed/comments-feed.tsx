@@ -3,6 +3,7 @@ import { useCommentSection } from "@sublay/react-js";
 import LoadedComments from "./loaded-comments";
 import FetchingCommentsSkeletons from "./fetching-comments-skeletons";
 import NoCommentsPlaceHolder from "./no-comments-placeholder";
+import strings from "../../utils/strings";
 
 const CommentsFeed = React.memo(
   ({ children: customNoCommentsView }: { children?: ReactNode }) => {
@@ -53,9 +54,9 @@ const CommentsFeed = React.memo(
           <div className="flex justify-center py-2">
             {showLoadMoreError ? (
               <span className="text-xs text-gray-500 dark:text-neutral-400">
-                Couldn't load more ·{" "}
+                {strings.loadMoreFailed} ·{" "}
                 <button onClick={() => loadMore?.()} className={tryAgainClassName}>
-                  Try again
+                  {strings.tryAgain}
                 </button>
               </span>
             ) : (
@@ -64,7 +65,7 @@ const CommentsFeed = React.memo(
                 disabled={loading}
                 className="text-xs font-semibold text-gray-500 dark:text-neutral-400 bg-transparent border-none cursor-pointer"
               >
-                {loading ? "Loading..." : "Load more comments"}
+                {loading ? strings.loading : strings.loadMoreComments}
               </button>
             )}
           </div>
@@ -73,10 +74,10 @@ const CommentsFeed = React.memo(
         {showLoadError && (
           <div className="text-center py-2">
             <p className="text-sm text-gray-500 dark:text-neutral-400 mb-1">
-              Couldn't load comments
+              {strings.loadCommentsFailed}
             </p>
             <button onClick={() => loadMore?.()} className={tryAgainClassName}>
-              Try again
+              {strings.tryAgain}
             </button>
           </div>
         )}

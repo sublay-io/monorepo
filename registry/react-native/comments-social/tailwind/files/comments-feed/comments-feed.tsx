@@ -5,6 +5,7 @@ import NoCommentsPlaceHolder from "./no-comments-placeholder";
 import FetchingCommentsSkeletons from "./fetching-comments-skeletons";
 import LoadedComments from "./loaded-comments";
 import useUIState from "../../hooks/use-ui-state";
+import strings from "../../utils/strings";
 
 const CommentsFeed = ({
   children: customNoCommentsView,
@@ -49,11 +50,11 @@ const CommentsFeed = ({
       {showLoadError && (
         <View className="items-center py-2">
           <Text className={`text-sm mb-1 ${mutedTextClass}`}>
-            Couldn't load comments
+            {strings.loadCommentsFailed}
           </Text>
           <TouchableOpacity onPress={() => loadMore?.()}>
             <Text className={`text-xs font-semibold ${mutedTextClass}`}>
-              Try again
+              {strings.tryAgain}
             </Text>
           </TouchableOpacity>
         </View>

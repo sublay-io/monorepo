@@ -35,6 +35,7 @@ import ReplyBanner from "../reply-banner/reply-banner";
 import MentionSuggestions from "../mention-suggestions/mention-suggestions";
 import useUIState from "../../hooks/use-ui-state";
 import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
+import strings from "../../utils/strings";
 
 function NewCommentForm({
   ref,
@@ -81,11 +82,11 @@ function NewCommentForm({
   const paddingLeft = 8;
   const paddingRight = 16;
   const authorAvatarSize = 32;
-  const placeholderText = "Add a comment...";
+  const placeholderText = strings.commentPlaceholder;
   const textareaTextSize = 14;
   const textareaTextColor = theme === 'dark' ? '#E5E5E5' : '#000';
   const textareaBackgroundColor = theme === 'dark' ? '#262626' : '#fff';
-  const postButtonText = "Post";
+  const postButtonText = strings.post;
   const postButtonFontSize = 14;
   const postButtonFontColor = theme === 'dark' ? '#60A5FA' : '#0A99F6';
   const postButtonFontWeight = '600' as const;

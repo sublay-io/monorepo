@@ -5,6 +5,7 @@ import NoCommentsPlaceHolder from "./no-comments-placeholder";
 import FetchingCommentsSkeletons from "./fetching-comments-skeletons";
 import LoadedComments from "./loaded-comments";
 import useUIState from "../../hooks/use-ui-state";
+import strings from "../../utils/strings";
 
 const CommentsFeed = ({
   children: customNoCommentsView,
@@ -49,11 +50,11 @@ const CommentsFeed = ({
       {showLoadError && (
         <View style={{ alignItems: "center", paddingVertical: 8 }}>
           <Text style={{ fontSize: 14, color: mutedColor, marginBottom: 4 }}>
-            Couldn't load comments
+            {strings.loadCommentsFailed}
           </Text>
           <TouchableOpacity onPress={() => loadMore?.()}>
             <Text style={{ fontSize: 12, fontWeight: '600', color: mutedColor }}>
-              Try again
+              {strings.tryAgain}
             </Text>
           </TouchableOpacity>
         </View>

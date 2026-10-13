@@ -32,6 +32,7 @@ import ReplyBanner from "../reply-banner/reply-banner";
 import MentionSuggestions from "../mention-suggestions/mention-suggestions";
 import useUIState from "../../hooks/use-ui-state";
 import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
+import strings from "../../utils/strings";
 
 function NewCommentForm({
   ref,
@@ -73,7 +74,7 @@ function NewCommentForm({
   // CUSTOMIZATION: Form styling defaults
   const withAvatar = true;
   const authorAvatarSize = 32;
-  const placeholderText = "Add a comment...";
+  const placeholderText = strings.commentPlaceholder;
 
   const textAreaRef = useRef<TextInput>(null);
   const [content, setContent] = useState("");
@@ -317,7 +318,7 @@ theme={theme}
                   theme === 'dark' ? 'text-blue-400' : 'text-sky-500'
                 }`}
               >
-                Post
+                {strings.post}
               </Text>
             </TouchableOpacity>
           )}

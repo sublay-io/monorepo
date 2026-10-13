@@ -23,6 +23,7 @@ import { getImageComponent } from "~shared/react-native/get-image-component";
 import { Replies } from "./replies";
 import HeartButton from "./heart-button";
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 const Comment = React.memo(
   ({
@@ -120,9 +121,9 @@ const Comment = React.memo(
     const tombstone = isUnavailable
       ? null
       : comment.userDeletedAt
-        ? "[deleted]"
+        ? strings.deleted
         : comment.moderationStatus === "removed" && !comment.userId
-          ? "[removed]"
+          ? strings.removed
           : null;
 
     // The viewer's own moderator-removed comment comes back in full (only its
@@ -131,9 +132,7 @@ const Comment = React.memo(
     // delete stays.
     const isOwnRemoved =
       !tombstone && comment.moderationStatus === "removed" && !!comment.userId;
-    const ownRemovedLabel = `Removed by a moderator${
-      comment.moderationReason ? `: ${comment.moderationReason}` : ""
-    } · only you can see this`;
+    const ownRemovedLabel = strings.removedByModerator(comment.moderationReason);
     const canReply = !isOwnRemoved && !parentClosed;
 
     const imageStyle = {
@@ -191,8 +190,8 @@ const Comment = React.memo(
               }}
             >
               {isUnavailable
-                ? "This comment is unavailable"
-                : "Comment from a user you blocked"}
+                ? strings.unavailable
+                : strings.blockedAuthor}
             </Text>
             {isUnavailable ? (
               currentReaction && (
@@ -206,7 +205,7 @@ const Comment = React.memo(
                       color: theme === 'dark' ? '#A3A3A3' : '#737373',
                     }}
                   >
-                    Remove your reaction
+                    {strings.removeYourReaction}
                   </Text>
                 </TouchableOpacity>
               )
@@ -219,7 +218,7 @@ const Comment = React.memo(
                     color: theme === 'dark' ? '#FAFAFA' : '#000',
                   }}
                 >
-                  Show anyway
+                  {strings.showAnyway}
                 </Text>
               </TouchableOpacity>
             )}
@@ -314,6 +313,7 @@ theme={theme}
                 )}
                 <FromNow
                   time={comment.createdAt}
+                  strings={strings.timeAgo}
                   fontSize={fromNowFontSize}
                   color={fromNowFontColor}
                 />
@@ -384,7 +384,7 @@ theme={theme}
                       fontWeight: replyButtonFontWeight,
                     }}
                   >
-                    Reply
+                    {strings.reply}
                   </Text>
                 </TouchableOpacity>
               </View>

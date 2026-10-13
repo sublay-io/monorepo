@@ -1,4 +1,5 @@
 import useUIState from "../../hooks/use-ui-state";
+import strings from "../../utils/strings";
 
 function NoCommentsPlaceHolder() {
   const { theme } = useUIState();
@@ -23,7 +24,7 @@ function NoCommentsPlaceHolder() {
           color: theme === 'dark' ? '#FAFAFA' : '#000',
         }}
       >
-        No comments yet
+        {strings.noCommentsTitle}
       </p>
       <p
         style={{
@@ -34,7 +35,7 @@ function NoCommentsPlaceHolder() {
           marginTop: 0,
         }}
       >
-        Start the conversation.
+        {strings.noCommentsSubtitle}
       </p>
     </div>
   );

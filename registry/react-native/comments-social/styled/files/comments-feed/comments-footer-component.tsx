@@ -1,6 +1,7 @@
 import { View, ActivityIndicator, Text, TouchableOpacity } from "react-native";
 import { useCommentSection } from "@sublay/react-native";
 import useUIState from "../../hooks/use-ui-state";
+import strings from "../../utils/strings";
 
 const CommentsFooterComponent = () => {
   const { hasMore, loading, error, loadMore } = useCommentSection();
@@ -18,10 +19,10 @@ const CommentsFooterComponent = () => {
           alignItems: "center",
         }}
       >
-        <Text style={{ fontSize: 12, color: mutedColor }}>Couldn't load more · </Text>
+        <Text style={{ fontSize: 12, color: mutedColor }}>{strings.loadMoreFailed} · </Text>
         <TouchableOpacity onPress={() => loadMore?.()}>
           <Text style={{ fontSize: 12, fontWeight: '600', color: mutedColor }}>
-            Try again
+            {strings.tryAgain}
           </Text>
         </TouchableOpacity>
       </View>

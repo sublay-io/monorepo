@@ -1,4 +1,3 @@
-import moment from "moment";
 import { Text } from "react-native";
 
 export type FontWeight =
@@ -21,62 +20,43 @@ export type FontWeight =
   | "800"
   | "900";
 
-function formatTime(time: Date | string, justNowText: string): string {
-  const now = new Date();
-  const then = new Date(time);
-  const seconds = Math.floor((now.getTime() - then.getTime()) / 1000);
+// The wording for each step, supplied by the component's strings file so
+// every language can use its own plural forms and word order.
+export interface TimeAgoStrings {
+  justNow: string;
+  minutes: (count: number) => string;
+  hours: (count: number) => string;
+  days: (count: number) => string;
+  months: (count: number) => string;
+  years: (count: number) => string;
+}
 
-  let timeString = "";
+function formatTime(time: Date | string, strings: TimeAgoStrings): string {
+  const seconds = Math.floor((Date.now() - new Date(time).getTime()) / 1000);
 
-  if (seconds < 20) {
-    timeString = justNowText;
-  } else if (seconds < 60) {
-    timeString = `${seconds}s`;
-  } else if (seconds < 3600) {
-    timeString = `${Math.floor(seconds / 60)}m`;
-  } else if (seconds < 86400) {
-    timeString = `${Math.floor(seconds / 3600)}h`;
-  } else if (seconds < 2592000) {
-    // 30 days
-    timeString = `${Math.floor(seconds / 86400)}d`;
-  } else if (seconds < 31536000) {
-    // 365 days
-    timeString = `${Math.floor(seconds / 2592000)}mo`;
-  } else {
-    timeString = `${Math.floor(seconds / 31536000)}y`;
-  }
-
-  return timeString;
+  if (seconds < 60) return strings.justNow;
+  if (seconds < 3600) return strings.minutes(Math.floor(seconds / 60));
+  if (seconds < 86400) return strings.hours(Math.floor(seconds / 3600));
+  // 30 days
+  if (seconds < 2592000) return strings.days(Math.floor(seconds / 86400));
+  // 365 days
+  if (seconds < 31536000) return strings.months(Math.floor(seconds / 2592000));
+  return strings.years(Math.floor(seconds / 31536000));
 }
 
 function FromNow({
   time,
+  strings,
   fontSize = 12,
   fontWeight = 400,
   color = "#737373",
-  lean,
-  justNowText = "Just now",
 }: {
   time: Date | string;
+  strings: TimeAgoStrings;
   fontSize?: number;
   fontWeight?: number;
   color?: string;
-  lean?: boolean;
-  justNowText?: string;
 }) {
-  if (lean) {
-    return (
-      <Text
-        style={{
-          fontSize,
-          fontWeight: fontWeight as FontWeight,
-          color,
-        }}
-      >
-        {formatTime(time, justNowText)}
-      </Text>
-    );
-  }
   return (
     <Text
       style={{
@@ -85,7 +65,7 @@ function FromNow({
         color,
       }}
     >
-      {moment(new Date(time)).fromNow()}
+      {formatTime(time, strings)}
     </Text>
   );
 }

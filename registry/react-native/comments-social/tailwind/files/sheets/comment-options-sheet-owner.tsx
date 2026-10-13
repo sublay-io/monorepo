@@ -8,6 +8,7 @@ import BottomSheet, {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import useUIState from "../../hooks/use-ui-state";
+import strings from "../../utils/strings";
 
 const CommentOptionsSheetOwner = () => {
   const { deleteComment } = useCommentSection();
@@ -23,18 +24,18 @@ const CommentOptionsSheetOwner = () => {
 
   const handleDeleteComment = () => {
     Alert.alert(
-      "Delete comment",
-      "Are you sure you want to proceed?",
+      strings.deleteCommentTitle,
+      strings.confirmDelete,
       [
         {
-          text: "Cancel",
+          text: strings.cancel,
           style: "cancel",
           onPress: () => {
             closeCommentOptionsSheetOwner?.();
           },
         },
         {
-          text: "OK",
+          text: strings.delete,
           onPress: () => {
             deleteComment?.({ commentId: optionsComment!.id });
             closeCommentOptionsSheetOwner?.();
@@ -104,7 +105,7 @@ const CommentOptionsSheetOwner = () => {
               theme === 'dark' ? 'text-red-400' : 'text-red-600'
             }`}
           >
-            Delete
+            {strings.delete}
           </Text>
         </Pressable>
       </BottomSheetView>

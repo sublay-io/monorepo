@@ -29,9 +29,7 @@
         "from-now.tsx"
       ],
       "requires": [],
-      "dependencies": [
-        "moment@^2"
-      ]
+      "dependencies": []
     },
     "get-user-avatar": {
       "files": [

@@ -1,5 +1,6 @@
 import { useCommentSection, getUserName } from "@sublay/react-js";
 import { resetButton } from "~shared/react/reset-styles";
+import strings from "../utils/strings";
 
 function ReplyBanner() {
   const {
@@ -28,7 +29,7 @@ function ReplyBanner() {
         className="flex items-center justify-between h-full"
       >
         <span className="text-gray-600 dark:text-neutral-400 text-xs">
-          Replying to {repliedToUser}
+          {strings.replyingTo(repliedToUser)}
         </span>
         <button
           onClick={() => {

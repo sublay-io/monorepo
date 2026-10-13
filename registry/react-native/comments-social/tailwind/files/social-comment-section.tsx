@@ -51,6 +51,7 @@ import CommentsFeed from "./comments-feed/comments-feed";
 import NewCommentForm from "./new-comment-form/new-comment-form";
 import { deepEqual, warnPropChanges } from "../utils/prop-comparison";
 import useUIState from "../hooks/use-ui-state";
+import strings from "../utils/strings";
 
 interface SocialCommentSectionProps {
   entity?: Entity | undefined | null;
@@ -131,9 +132,9 @@ function SocialCommentSectionInner({
     sortBy: CommentsSortByOptions;
     sortDir?: "asc" | "desc";
   }> = [
-    { label: "Top", sortBy: "top", sortDir: "desc" },
-    { label: "New", sortBy: "createdAt", sortDir: "desc" },
-    { label: "Old", sortBy: "createdAt", sortDir: "asc" },
+    { label: strings.sortTop, sortBy: "top", sortDir: "desc" },
+    { label: strings.sortNew, sortBy: "createdAt", sortDir: "desc" },
+    { label: strings.sortOld, sortBy: "createdAt", sortDir: "asc" },
   ];
 
   const renderSortButtons = () => {

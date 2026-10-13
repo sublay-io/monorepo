@@ -4,6 +4,8 @@ description: "Install the comment sections in another language and use them in r
 icon: "language"
 ---
 
+import { AddCommandBuilder } from "/snippets/v8/add-command-builder.jsx";
+
 # Languages & Right-to-Left
 
 The comment sections keep all their text in one file, and their layout follows the reading direction of your app. Both apply to the social and threaded comments, in every style variant, on React, React Native and Expo.
@@ -12,11 +14,9 @@ The comment sections keep all their text in one file, and their layout follows t
 
 ## Installing in another language
 
-Pass `--lang` to `add`:
+Pass `--lang` to `add`. Pick a component and a language to get the command:
 
-```bash
-npx @sublay/cli add comments-threaded --ref v8 --lang he
-```
+<AddCommandBuilder />
 
 | Code | Language |
 |------|----------|

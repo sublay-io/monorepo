@@ -7,7 +7,7 @@ import { AppNotification } from "@sublay/react-js";
 
 // Add CSS animations as a style tag
 const styles = `
-  @keyframes pulse {
+  @keyframes sublay-notification-pulse {
     0%, 100% {
       opacity: 1;
     }
@@ -83,7 +83,7 @@ function NotificationSkeleton({ isDarkTheme }: { isDarkTheme: boolean }) {
           backgroundColor: colors.muted,
           borderRadius: "50%",
           flexShrink: 0,
-          animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+          animation: "sublay-notification-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         }}
       />
       <div
@@ -100,7 +100,7 @@ function NotificationSkeleton({ isDarkTheme }: { isDarkTheme: boolean }) {
             backgroundColor: colors.muted,
             borderRadius: "4px",
             width: "75%",
-            animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+            animation: "sublay-notification-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
           }}
         />
         <div
@@ -109,7 +109,7 @@ function NotificationSkeleton({ isDarkTheme }: { isDarkTheme: boolean }) {
             backgroundColor: colors.muted,
             borderRadius: "4px",
             width: "50%",
-            animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+            animation: "sublay-notification-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
           }}
         />
         <div
@@ -118,7 +118,7 @@ function NotificationSkeleton({ isDarkTheme }: { isDarkTheme: boolean }) {
             backgroundColor: colors.muted,
             borderRadius: "4px",
             width: "25%",
-            animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+            animation: "sublay-notification-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
           }}
         />
       </div>
@@ -130,7 +130,7 @@ function NotificationSkeleton({ isDarkTheme }: { isDarkTheme: boolean }) {
           borderRadius: "50%",
           flexShrink: 0,
           marginTop: "2px",
-          animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+          animation: "sublay-notification-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         }}
       />
     </div>

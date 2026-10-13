@@ -89,7 +89,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                 backgroundColor: pressed
                   ? theme === 'dark' ? '#404040' : '#F9FAFB'
                   : 'transparent',
-                opacity: pressed ? 0.2 : 1,
+                opacity: pressed ? 0.6 : 1,
               })}
             >
               <UserAvatar theme={theme} user={item} size={32} />

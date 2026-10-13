@@ -25,7 +25,7 @@ function ActionMenu({ comment }: ActionMenuProps) {
           backgroundColor: pressed
             ? theme === 'dark' ? '#404040' : '#F9FAFB'
             : 'transparent',
-          opacity: pressed ? 0.2 : 1,
+          opacity: pressed ? 0.6 : 1,
         })}
       >
         <Text

@@ -61,6 +61,8 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
           keyboardShouldPersistTaps="always"
           renderItem={({ item }) => (
             <TouchableOpacity
+              // Dim only a little, so the pressed tint shows
+              activeOpacity={0.6}
               onPress={() => {
                 if (!item.username) {
                   callbacks?.userCantBeMentionedCallback?.();

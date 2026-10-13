@@ -21,6 +21,8 @@ function ReplyButtonAndInfo({
     <View className="flex-row items-center gap-4">
       {canReply && (
       <TouchableOpacity
+        // Dim only a little, so the pressed tint shows
+        activeOpacity={0.6}
         onPress={onReplyPress}
         className={`px-2 py-1 -ml-2 rounded ${
           theme === 'dark' ? 'active:bg-blue-400/10' : 'active:bg-blue-50'

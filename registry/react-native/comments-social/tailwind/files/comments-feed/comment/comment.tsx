@@ -150,8 +150,8 @@ const Comment = React.memo(
       >
         {isPlaceholderRow ? (
           <View
-            className="w-full pr-4 flex-row items-center gap-3"
-            style={{ paddingLeft: 16 + extraLeftPadding }}
+            className="w-full pe-4 flex-row items-center gap-3"
+            style={{ paddingStart: 16 + extraLeftPadding }}
           >
             <View
               className={`w-8 h-8 rounded-full ${
@@ -204,8 +204,8 @@ const Comment = React.memo(
             }
             Keyboard.dismiss();
           }}
-          className="w-full pr-4"
-          style={{ paddingLeft: 16 + extraLeftPadding }}
+          className="w-full pe-4"
+          style={{ paddingStart: 16 + extraLeftPadding }}
         >
           <View className="flex-row items-start gap-2">
             {tombstone ? (

@@ -123,8 +123,8 @@ const Comment = React.memo(
       >
         {isPlaceholderRow ? (
           <div
-            className="pr-4 flex flex-row items-center gap-3"
-            style={{ paddingLeft: 16 + extraLeftPadding }}
+            className="pe-4 flex flex-row items-center gap-3"
+            style={{ paddingInlineStart: 16 + extraLeftPadding }}
           >
             <div className="w-8 h-8 rounded-full shrink-0 bg-gray-200 dark:bg-neutral-700" />
             <span className="text-[13px] italic text-gray-500 dark:text-neutral-400">
@@ -154,9 +154,9 @@ const Comment = React.memo(
           </div>
         ) : (
         <div
-          className="pr-4"
+          className="pe-4"
           style={{
-            paddingLeft: 16 + extraLeftPadding,
+            paddingInlineStart: 16 + extraLeftPadding,
           }}
           onMouseEnter={() => setHovered(true)} // Set hovered true
           onMouseLeave={() => setHovered(false)} // Set hovered false
@@ -236,6 +236,9 @@ const Comment = React.memo(
               )}
               {!tombstone && comment.content && (
                 <p
+                  // A comment reads in the direction of its own text, whatever the
+                  // direction of the page
+                  dir="auto"
                   style={resetP}
                   className="text-sm text-gray-900 dark:text-neutral-200"
                 >

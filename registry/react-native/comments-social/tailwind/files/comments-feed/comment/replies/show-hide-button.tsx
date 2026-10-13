@@ -71,7 +71,7 @@ const ShowHideButton = ({
 
   if (failed && hasMore) {
     return (
-      <View className="pt-2 pl-[58px] pr-4 flex-row items-center gap-3">
+      <View className="pt-2 ps-[58px] pe-4 flex-row items-center gap-3">
         <View
           className={`h-px w-6 mt-0.5 ${
             theme === 'dark' ? 'bg-neutral-400' : 'bg-neutral-500'
@@ -101,7 +101,7 @@ const ShowHideButton = ({
         if (action.includes("hide")) setAreRepliesVisible(false);
         if (action.includes("load-more") && hasMore) onLoadMore();
       }}
-      className="bg-transparent border-0 p-0 m-0 pt-2 pl-[58px] pr-4 flex-row items-center gap-3"
+      className="bg-transparent border-0 p-0 m-0 pt-2 ps-[58px] pe-4 flex-row items-center gap-3"
     >
       <View
         className={`h-px w-6 mt-0.5 ${

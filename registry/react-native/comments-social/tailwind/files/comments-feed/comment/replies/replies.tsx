@@ -122,7 +122,7 @@ function Replies({ commentId }: { commentId: string }) {
             // replies already listed
             paddingTop: areRepliesVisible && filteredReplies.length > 0 ? 16 : 8,
             paddingBottom: 12,
-            paddingRight: 46,
+            paddingEnd: 46,
           }}
           keyboardShouldPersistTaps="always"
         />

@@ -66,7 +66,7 @@ const ShowHideButton = ({
   if (failed && hasMore) {
     return (
       <div
-        style={{ paddingTop: 8, paddingLeft: 56, paddingRight: 16 }}
+        style={{ paddingTop: 8, paddingInlineStart: 56, paddingInlineEnd: 16 }}
         className="flex items-center gap-3"
       >
         <div className="h-px w-6 mt-0.5 bg-gray-600 dark:bg-neutral-400" />
@@ -94,7 +94,7 @@ const ShowHideButton = ({
         if (action.includes("hide")) setAreRepliesVisible(false);
         if (action.includes("load-more") && hasMore) onLoadMore();
       }}
-      style={{ ...resetButton, paddingTop: 8, paddingLeft: 56, paddingRight: 16 }}
+      style={{ ...resetButton, paddingTop: 8, paddingInlineStart: 56, paddingInlineEnd: 16 }}
       className="flex items-center gap-3"
     >
       {/* Button line */}

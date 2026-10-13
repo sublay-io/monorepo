@@ -62,7 +62,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
               }}
             >
               <UserAvatar theme={theme} user={item} />
-              <View style={{ justifyContent: "space-evenly", marginLeft: 8 }}>
+              <View style={{ justifyContent: "space-evenly", marginStart: 8 }}>
                 <Text style={{
                   fontSize: 14,
                   fontWeight: "500",

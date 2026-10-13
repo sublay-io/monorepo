@@ -21,7 +21,8 @@ export default function SocialCommentsPage() {
   const [variant, setVariant] = useState<StyleVariant>("styled");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [dir, setDir] = useState<"ltr" | "rtl">(() =>
-    new URLSearchParams(window.location.search).get("dir") === "rtl"
+    (new URLSearchParams(window.location.search).get("dir") ??
+      (currentLanguage() === "he" ? "rtl" : "ltr")) === "rtl"
       ? "rtl"
       : "ltr"
   );
@@ -50,6 +51,7 @@ export default function SocialCommentsPage() {
           value={gifPickerFullScreen}
           onChange={setGifPickerFullScreen}
         />
+        <LanguageToggle />
         <DirectionToggle value={dir} onChange={setDir} />
         <ThemeToggle value={theme} onChange={setTheme} />
       </div>
@@ -176,6 +178,48 @@ function GifPickerToggle({
         </button>
       ))}
     </div>
+  );
+}
+
+function currentLanguage(): string {
+  const fromUrl = new URLSearchParams(window.location.search).get("lang");
+  if (fromUrl) return fromUrl;
+  try {
+    return window.localStorage.getItem("playground-lang") || "en";
+  } catch {
+    return "en";
+  }
+}
+
+// The language is chosen when the strings module loads, so changing it
+// reloads the page. Variants without a translation stay in English.
+function LanguageToggle() {
+  const value = currentLanguage();
+  return (
+    <button
+      onClick={() => {
+        try {
+          window.localStorage.setItem(
+            "playground-lang",
+            value === "he" ? "en" : "he"
+          );
+        } catch {
+          return;
+        }
+        window.location.reload();
+      }}
+      style={{
+        padding: "4px 12px",
+        borderRadius: 6,
+        border: "1px solid #d1d5db",
+        background: "#fff",
+        color: "#374151",
+        cursor: "pointer",
+        fontSize: 13,
+      }}
+    >
+      {value === "he" ? "עברית" : "English"}
+    </button>
   );
 }
 

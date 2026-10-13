@@ -12,6 +12,7 @@ import GiphyContainer from "~shared/react/giphy-container";
 import MentionSuggestions from "./mention-suggestions";
 import { getCommentCreateErrorMessage } from "../utils/comment-create-error";
 import useUIState from "../hooks/use-ui-state";
+import strings from "../utils/strings";
 
 function NewCommentForm({
   gifPickerFullScreen = false,
@@ -254,7 +255,7 @@ function NewCommentForm({
               if (createError) setDismissedCreateError(createError);
             }}
             // 🎨 CUSTOMIZATION: Comment form styling (Default placeholder)
-            placeholder="Join the conversation"
+            placeholder={strings.commentPlaceholder}
             style={{
               flex: 1,
               // 🎨 CUSTOMIZATION: Comment form styling (Default: 8px)

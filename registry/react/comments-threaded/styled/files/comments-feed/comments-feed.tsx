@@ -4,6 +4,7 @@ import LoadedComments from "./loaded-comments";
 import FetchingCommentsSkeletons from "./fetching-comments-skeletons";
 import NoCommentsPlaceHolder from "./no-comments-placeholder";
 import useUIState from "../../hooks/use-ui-state";
+import strings from "../../utils/strings";
 
 const CommentsFeed = React.memo(
   ({ children: customNoCommentsView }: { children?: ReactNode }) => {
@@ -78,7 +79,7 @@ const CommentsFeed = React.memo(
                 cursor: "pointer",
               }}
             >
-              View all comments
+              {strings.viewAllComments}
             </button>
           </div>
           <LoadedComments data={[focused.parentComment ?? focused.comment]} />
@@ -111,9 +112,9 @@ const CommentsFeed = React.memo(
           <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
             {showLoadMoreError ? (
               <div style={{ fontSize: "13px", color: mutedColor, padding: "4px 12px" }}>
-                Couldn't load more ·{" "}
+                {strings.loadMoreFailed} ·{" "}
                 <button onClick={() => loadMore?.()} style={tryAgainStyle}>
-                  Try again
+                  {strings.tryAgain}
                 </button>
               </div>
             ) : (
@@ -131,7 +132,7 @@ const CommentsFeed = React.memo(
                   cursor: "pointer",
                 }}
               >
-                {loading ? "Loading..." : "Load more comments"}
+                {loading ? strings.loading : strings.loadMoreComments}
               </button>
             )}
           </div>
@@ -140,10 +141,10 @@ const CommentsFeed = React.memo(
         {showLoadError && (
           <div style={{ textAlign: "center", padding: "8px 0" }}>
             <p style={{ fontSize: "14px", color: mutedColor, margin: "0 0 4px 0" }}>
-              Couldn't load comments
+              {strings.loadCommentsFailed}
             </p>
             <button onClick={() => loadMore?.()} style={tryAgainStyle}>
-              Try again
+              {strings.tryAgain}
             </button>
           </div>
         )}

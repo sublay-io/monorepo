@@ -2,13 +2,13 @@ import { useMemo, useState } from "react";
 import {
   handleError,
   ReportReasonKey,
-  reportReasons,
   useCommentSection,
   useCreateReport,
   useUser,
 } from "@sublay/react-js";
 import FlagIcon from "~shared/react/flag-icon";
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 function ReportContent({ resetView }: { resetView: () => void }) {
   const { user } = useUser();
@@ -52,11 +52,10 @@ function ReportContent({ resetView }: { resetView: () => void }) {
     <div style={{ padding: 24, width: "100%" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
         <FlagIcon size={24} color={theme === 'dark' ? "#FFFFFF" : "#000"} />
-        <span style={{ fontSize: "24px", color: theme === 'dark' ? "#FAFAFA" : "#111827" }}>Submit a report</span>
+        <span style={{ fontSize: "24px", color: theme === 'dark' ? "#FAFAFA" : "#111827" }}>{strings.reportTitle}</span>
       </div>
       <p style={{ marginTop: "24px", color: theme === 'dark' ? "#D4D4D4" : "#374151" }}>
-        Thank you for looking out for our community. Let us know what is
-        happening, and we'll look into it.
+        {strings.reportIntro}
       </p>
 
       <div
@@ -67,7 +66,7 @@ function ReportContent({ resetView }: { resetView: () => void }) {
           marginTop: "24px",
         }}
       >
-        {Object.entries(reportReasons).map(([key, value], index) => (
+        {Object.entries(strings.reportReasons).map(([key, value], index) => (
           <button
             onClick={() => setReason(key as ReportReasonKey)}
             key={index}
@@ -106,7 +105,7 @@ function ReportContent({ resetView }: { resetView: () => void }) {
             "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
         }}
       >
-        {submitting ? "Submitting.." : "Submit Report"}
+        {submitting ? strings.submittingReport : strings.submitReport}
       </button>
     </div>
   );

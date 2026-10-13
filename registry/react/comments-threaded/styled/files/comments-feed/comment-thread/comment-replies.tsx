@@ -6,6 +6,7 @@ import IndentationThreadingLines, {
   INDENT,
   MAX_INDENT_DEPTH,
 } from "./single-comment/indentation-threading-lines";
+import strings from "../../../utils/strings";
 
 // 🎨 CUSTOMIZATION: "More replies" row - space above it (Default: 13px)
 const LOAD_MORE_PADDING_TOP = 12;
@@ -48,10 +49,10 @@ function CommentReplies({
   // At the depth boundary nothing is loaded yet: the replies load right here.
   const loadMoreLabel =
     visibleReplies.length === 0
-      ? "Continue this thread"
+      ? strings.continueThread
       : hiddenRepliesCount > 0
-      ? `${hiddenRepliesCount} more ${hiddenRepliesCount === 1 ? "reply" : "replies"}`
-      : "More replies";
+      ? strings.moreReplyCount(hiddenRepliesCount)
+      : strings.moreReplies;
 
   return (
     // Replies sit one level in from their parent, until the indentation cap
@@ -109,7 +110,7 @@ function CommentReplies({
                   cursor: "pointer",
                 }}
               >
-                Try again
+                {strings.tryAgain}
               </button>
             </div>
           ) : (
@@ -150,7 +151,7 @@ function CommentReplies({
                   clipRule="evenodd"
                 />
               </svg>
-              {loading ? "Loading..." : loadMoreLabel}
+              {loading ? strings.loading : loadMoreLabel}
             </button>
           )}
         </div>

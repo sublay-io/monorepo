@@ -9,6 +9,7 @@ import {
 import useTextareaCursorIndicator from "~shared/react/use-textarea-cursor-indicator";
 import MentionSuggestions from "../../mention-suggestions";
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 function NewReplyForm({
   comment,
@@ -203,7 +204,7 @@ function NewReplyForm({
             onDismissError();
           }}
           // 🎨 CUSTOMIZATION: Reply form styling (Default placeholder)
-          placeholder="Add your reply..."
+          placeholder={strings.replyPlaceholder}
           style={{
             flex: 1,
             // 🎨 CUSTOMIZATION: Reply form styling (Default: 6px 8px, derived from verticalPadding)
@@ -251,7 +252,7 @@ function NewReplyForm({
               e.currentTarget.style.backgroundColor = "transparent";
             }}
           >
-            Cancel
+            {strings.cancel}
           </button>
           <button
             onClick={handleReply}

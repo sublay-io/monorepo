@@ -3,6 +3,7 @@ import { User } from "../../interfaces/models/User";
 import { Mention } from "../../interfaces/models/Mention";
 import useFetchUserSuggestions from "./useFetchUserSuggestions";
 import useMentionSuggestions, {
+  DEFAULT_MENTION_PATTERN,
   escapeRegex,
 } from "../utils/useMentionSuggestions";
 
@@ -39,7 +40,7 @@ const useUserMentions = ({
   trigger = "@",
   minChars = 3,
   debounceDelay = 1000,
-  validPattern = "[\\w.\\-]+",
+  validPattern = DEFAULT_MENTION_PATTERN,
 }: UseUserMentionsProps): UseUserMentionsValues => {
   const fetchMentionSuggestions = useFetchUserSuggestions();
 

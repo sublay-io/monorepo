@@ -114,6 +114,52 @@ describe("useUserMentions", () => {
     expect(call.config?.params).toMatchObject({ query: "fat-bro" });
   });
 
+  it.each([
+    ["Hebrew", "@דניאל"],
+    ["accented Latin", "@josé"],
+    ["Chinese", "@张伟明"],
+    ["Cyrillic", "@имя"],
+  ])("opens for a %s name and looks it up", async (_label, typed) => {
+    const content = `hi ${typed}`;
+    const { result, axiosPrivate } = renderHookWithAxios(
+      (props: UseUserMentionsProps) => useUserMentions(props),
+      {
+        initialProps: {
+          content,
+          setContent: vi.fn(),
+          focus: vi.fn(),
+          cursorPosition: content.length,
+          isSelectionActive: false,
+          debounceDelay: 10,
+        },
+      },
+    );
+
+    expect(result.current.isMentionActive).toBe(true);
+    axiosPrivate.mockResponse("get", []);
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+    const [call] = axiosPrivate.calls("get");
+    expect(call.config?.params).toMatchObject({ query: typed.slice(1) });
+  });
+
+  it("closes at a dot, which a username cannot contain", () => {
+    const { result } = renderHookWithAxios(
+      (props: UseUserMentionsProps) => useUserMentions(props),
+      {
+        initialProps: {
+          content: "thanks @alice.",
+          setContent: vi.fn(),
+          focus: vi.fn(),
+          cursorPosition: 14,
+          isSelectionActive: false,
+          debounceDelay: 10,
+        },
+      },
+    );
+
+    expect(result.current.isMentionActive).toBe(false);
+  });
+
   it("activates for a trigger at the start of a new line", () => {
     const { result } = renderHookWithAxios(
       (props: UseUserMentionsProps) => useUserMentions(props),

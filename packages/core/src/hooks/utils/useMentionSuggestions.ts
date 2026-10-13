@@ -5,6 +5,15 @@ export function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+// What the text after a trigger may contain while it is still a name in
+// progress. Usernames and space slugs are letters of any language, digits,
+// hyphens and underscores. Letters outside ASCII are matched as "any
+// character from U+0080 up" rather than with \p{L}: that needs the regex `u`
+// flag and Unicode property escapes, which not every React Native engine
+// version supports. The range also lets through non-ASCII punctuation and
+// symbols; the only cost is a lookup that finds nothing.
+export const DEFAULT_MENTION_PATTERN = "[\\w\\-\\u0080-\\uFFFF]+";
+
 export interface UseMentionSuggestionsProps<T> {
   content: string;
   cursorPosition: number;

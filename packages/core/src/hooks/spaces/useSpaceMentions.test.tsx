@@ -88,6 +88,24 @@ describe("useSpaceMentions", () => {
     expect(result.current.isSpaceMentionActive).toBe(true);
   });
 
+  it("opens for a slug in another script", () => {
+    const { result } = renderHookWithAxios(
+      (props: UseSpaceMentionsProps) => useSpaceMentions(props),
+      {
+        initialProps: {
+          content: "ראו #עיצוב",
+          setContent: vi.fn(),
+          focus: vi.fn(),
+          cursorPosition: 10,
+          isSelectionActive: false,
+          debounceDelay: 10,
+        },
+      },
+    );
+
+    expect(result.current.isSpaceMentionActive).toBe(true);
+  });
+
   it("activates for a trigger at the start of a new line", () => {
     const { result } = renderHookWithAxios(
       (props: UseSpaceMentionsProps) => useSpaceMentions(props),

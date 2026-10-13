@@ -56,6 +56,7 @@ import { Entity } from "@sublay/react-js";
 import useThreadedComments from "../hooks/use-threaded-comments";
 import CommentsFeed from "./comments-feed/comments-feed";
 import NewCommentForm from "./new-comment-form";
+import { SECTION_PADDING_X } from "./comments-feed/comment-thread/single-comment/indentation-threading-lines";
 import { deepEqual, warnPropChanges } from "../utils/prop-comparison";
 
 interface ThreadedCommentSectionProps {
@@ -146,6 +147,10 @@ function ThreadedCommentSectionInner({
           // 🎨 CUSTOMIZATION: Layout styling
           "flex-1 overflow-y-auto bg-white dark:bg-neutral-800 py-2"
         }
+        style={{
+          paddingLeft: `${SECTION_PADDING_X}px`,
+          paddingRight: `${SECTION_PADDING_X}px`,
+        }}
       >
         <CommentsFeed>{children}</CommentsFeed>
       </div>
@@ -153,8 +158,12 @@ function ThreadedCommentSectionInner({
       <div
         className={
           // 🎨 CUSTOMIZATION: Layout styling
-          "border-t border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 pt-2"
+          "border-t border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 pt-2 pb-3"
         }
+        style={{
+          paddingLeft: `${SECTION_PADDING_X}px`,
+          paddingRight: `${SECTION_PADDING_X}px`,
+        }}
       >
         {isVisible && (
           <NewCommentForm gifPickerFullScreen={gifPickerFullScreen} />

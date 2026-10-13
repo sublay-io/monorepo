@@ -82,11 +82,11 @@ function CommentReplies({
             reach={LOAD_MORE_OFFSET_LEFT}
           />
           {failed && !loading ? (
-            <div className="text-xs text-gray-500 dark:text-neutral-400 px-2 py-1">
+            <div className="text-[13px] text-gray-500 dark:text-neutral-400 px-2 py-1">
               Couldn't load more ·{" "}
               <button
                 onClick={onLoadMore}
-                className="text-xs font-medium text-blue-600 dark:text-blue-400 p-0 bg-transparent border-none cursor-pointer hover:underline"
+                className="text-[13px] font-medium text-blue-600 dark:text-blue-400 p-0 bg-transparent border-none cursor-pointer hover:underline"
               >
                 Try again
               </button>
@@ -95,7 +95,7 @@ function CommentReplies({
             <button
               onClick={onLoadMore}
               disabled={loading}
-              className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 font-medium transition-all duration-150 px-2 py-1 rounded-full bg-transparent border-none cursor-pointer hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-400/10"
+              className="flex items-center gap-2 text-[13px] text-blue-600 dark:text-blue-400 font-medium transition-all duration-150 px-2 py-1 rounded-full bg-transparent border-none cursor-pointer hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-400/10"
             >
               <svg
                 className="w-3 h-3"

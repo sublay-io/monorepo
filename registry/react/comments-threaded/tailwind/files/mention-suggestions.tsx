@@ -50,7 +50,7 @@ function MentionSuggestions({
                     @{user.username}
                   </div>
                   {user.name && (
-                    <div className="text-xs font-normal text-gray-500 dark:text-neutral-400">
+                    <div className="text-[13px] font-normal text-gray-500 dark:text-neutral-400">
                       {user.name}
                     </div>
                   )}

@@ -8,7 +8,7 @@ function NoCommentsPlaceHolder() {
         No comments yet
       </p>
       <p
-        className="text-center text-xs text-gray-500 dark:text-neutral-400 mt-0"
+        className="text-center text-[13px] text-gray-500 dark:text-neutral-400 mt-0"
         // 🎨 CUSTOMIZATION: No comments subtitle styling
       >
         Start the conversation.

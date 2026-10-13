@@ -14,7 +14,7 @@ function ReplyButtonAndInfo({
 }) {
   return (
     <div
-      className="flex items-center gap-4 text-xs"
+      className="flex items-center gap-4 text-[13px]"
       // 🎨 CUSTOMIZATION: Reply button spacing and sizing
     >
       {canReply && (

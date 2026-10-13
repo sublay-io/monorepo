@@ -14,6 +14,9 @@ export const ROW_PADDING_Y = 8;
 export const AVATAR_OFFSET_TOP = 4;
 // 🎨 CUSTOMIZATION: Gap between the avatar and the comment content (Default: 12px)
 export const AVATAR_GAP = 12;
+// 🎨 CUSTOMIZATION: Space between the comments and the left and right edges
+// of the section (Default: 16px). The highlight of a comment reaches across it.
+export const SECTION_PADDING_X = 16;
 // 🎨 CUSTOMIZATION: Threading line thickness (Default: 1px)
 export const LINE_WIDTH = 1;
 // 🎨 CUSTOMIZATION: Roundness of the elbow into each reply (Default: 12px)

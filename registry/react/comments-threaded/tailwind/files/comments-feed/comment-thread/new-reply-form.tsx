@@ -107,7 +107,7 @@ function NewReplyForm({
             "flex-1 py-1.5 px-2",
             "bg-transparent",
             "text-gray-900 dark:text-neutral-50",
-            "text-xs leading-relaxed",
+            "text-sm leading-relaxed",
             "outline-none resize-none border-none"
           )}
           rows={2}
@@ -118,7 +118,7 @@ function NewReplyForm({
             className={cn(
               // 🎨 CUSTOMIZATION: Cancel button styling
               "px-2 py-1",
-              "text-xs",
+              "text-[13px]",
               "text-gray-600 dark:text-neutral-400",
               "rounded",
               "transition-colors duration-150",
@@ -169,7 +169,7 @@ function NewReplyForm({
       {errorMessage && (
         <p
           role="alert"
-          className="mt-1.5 px-2 text-xs text-gray-500 dark:text-neutral-400"
+          className="mt-1.5 px-2 text-[13px] text-gray-500 dark:text-neutral-400"
           // 🎨 CUSTOMIZATION: Failed-reply message styling
         >
           {errorMessage}

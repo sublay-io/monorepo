@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Comment as CommentType,
   type CommentCreateError,
+  type Mention,
   UserMention,
   getUserName,
   useCommentSection,
@@ -90,6 +91,7 @@ function SingleComment({
   const { theme } = useUIState();
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState("");
+  const [replyMentions, setReplyMentions] = useState<Mention[]>([]);
   // A reply to this comment that wasn't posted: the message shows under the
   // reply form, until the text is edited or something is sent again (the
   // section clears `createError` then). If the reply was refused because this
@@ -515,6 +517,8 @@ theme={theme}
             setShowReplyForm={setShowReplyForm}
             replyContent={replyContent}
             setReplyContent={setReplyContent}
+            replyMentions={replyMentions}
+            setReplyMentions={setReplyMentions}
             errorMessage={replyErrorMessage}
             onDismissError={() => {
               if (replyErrorMessage) setDismissedReplyError(createError ?? null);

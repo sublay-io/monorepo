@@ -1,12 +1,18 @@
+import { useEffect, useRef } from "react";
 import { User, useCommentSection } from "@sublay/react-js";
 import UserAvatar from "~shared/react/user-avatar";
 import { UserMentionSkeleton } from "~shared/react/skeleton";
+import { cn } from "@/lib/utils";
 
 interface MentionSuggestionsProps {
   isMentionActive: boolean;
   isLoadingMentions: boolean;
   mentionSuggestions: User[];
   handleMentionClick: (user: User) => void;
+  // Which side of the form the list opens on. "above" suits a form at the
+  // bottom of the section; "below" suits one with content right above it,
+  // like the reply form under the comment it replies to.
+  placement?: "above" | "below";
 }
 
 function MentionSuggestions({
@@ -14,14 +20,29 @@ function MentionSuggestions({
   isLoadingMentions,
   mentionSuggestions,
   handleMentionClick,
+  placement = "above",
 }: MentionSuggestionsProps) {
   const { callbacks } = useCommentSection();
+
+  // Opening below can put the list past the bottom edge of the scrolling
+  // comments feed (a reply box near the bottom): bring it into view.
+  const listRef = useRef<HTMLDivElement>(null);
+  const suggestionCount = mentionSuggestions.length;
+  useEffect(() => {
+    if (placement === "below" && isMentionActive) {
+      listRef.current?.scrollIntoView({ block: "nearest" });
+    }
+  }, [placement, isMentionActive, isLoadingMentions, suggestionCount]);
 
   if (!isMentionActive) return null;
 
   return (
     <div
-      className="absolute bottom-full left-0 right-0 z-50 bg-white dark:bg-neutral-800 rounded-xl border border-gray-200 dark:border-neutral-600 shadow-lg max-h-[200px] overflow-y-auto mb-2"
+      ref={listRef}
+      className={cn(
+        "absolute left-0 right-0 z-50 bg-white dark:bg-neutral-800 rounded-xl border border-gray-200 dark:border-neutral-600 shadow-lg max-h-[200px] overflow-y-auto",
+        placement === "below" ? "top-full mt-2 scroll-mb-2" : "bottom-full mb-2"
+      )}
     >
       <div className="p-3">
         {isLoadingMentions ? (

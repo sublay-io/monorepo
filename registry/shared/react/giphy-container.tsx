@@ -166,13 +166,18 @@ function GiphyContainer({
             color: uiColor("muted", theme),
           }}
         >
-          ←
+          {/* Points back toward the start of the line: mirrored when the
+              page reads right to left */}
+          <style>{`[dir="rtl"] .sublay-flip-rtl { transform: scaleX(-1); }`}</style>
+          <span className="sublay-flip-rtl" style={{ display: "inline-block" }}>
+            ←
+          </span>
         </button>
         <div
           style={{
             width: "100%",
             borderRadius: "0.5rem",
-            paddingLeft: 8,
+            paddingInlineStart: 8,
             backgroundColor: uiColor("control", theme),
             display: "flex",
             alignItems: "center",

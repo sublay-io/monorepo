@@ -36,7 +36,7 @@ function ReplyButtonAndInfo({
           fontWeight: 500,
           padding: "4px 8px",
           borderRadius: "4px",
-          marginLeft: "-8px",
+          marginInlineStart: "-8px",
           transition: "all 150ms ease-in-out",
           background: "transparent",
           border: "none",

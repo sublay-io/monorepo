@@ -13,7 +13,7 @@ function ToggleRepliesVisibilty({
     <button
       onClick={onToggleCollapse}
       style={{
-        marginLeft: "4px",
+        marginInlineStart: "4px",
         width: "16px",
         height: "16px",
         display: "flex",

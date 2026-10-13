@@ -21,6 +21,11 @@ export default function ThreadedCommentsPage() {
   const [variant, setVariant] = useState<StyleVariant>("styled");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [gifPickerFullScreen, setGifPickerFullScreen] = useState(false);
+  const [dir, setDir] = useState<"ltr" | "rtl">(() =>
+    new URLSearchParams(window.location.search).get("dir") === "rtl"
+      ? "rtl"
+      : "ltr"
+  );
   const { highlightedCommentId, applied, apply } = useHighlightedCommentId();
   const { mode: entitySource, setMode: setEntitySource } =
     useEntitySourceMode();
@@ -45,6 +50,7 @@ export default function ThreadedCommentsPage() {
           value={gifPickerFullScreen}
           onChange={setGifPickerFullScreen}
         />
+        <DirectionToggle value={dir} onChange={setDir} />
         <ThemeToggle value={theme} onChange={setTheme} />
       </div>
 
@@ -61,6 +67,7 @@ export default function ThreadedCommentsPage() {
           overflow: "hidden",
         }}
         className={theme === "dark" ? "dark" : ""}
+        dir={dir}
       >
         <EntitySource mode={entitySource} foreignId={FOREIGN_ID}>
           {(entityProps) =>
@@ -169,6 +176,31 @@ function GifPickerToggle({
         </button>
       ))}
     </div>
+  );
+}
+
+function DirectionToggle({
+  value,
+  onChange,
+}: {
+  value: "ltr" | "rtl";
+  onChange: (v: "ltr" | "rtl") => void;
+}) {
+  return (
+    <button
+      onClick={() => onChange(value === "ltr" ? "rtl" : "ltr")}
+      style={{
+        padding: "4px 12px",
+        borderRadius: 6,
+        border: "1px solid #d1d5db",
+        background: "#fff",
+        color: "#374151",
+        cursor: "pointer",
+        fontSize: 13,
+      }}
+    >
+      {value === "ltr" ? "LTR" : "RTL"}
+    </button>
   );
 }
 

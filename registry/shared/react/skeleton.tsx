@@ -54,7 +54,7 @@ function CommentSkeleton({
         gap,
         width: "100%",
         boxSizing: "border-box",
-        paddingLeft: paddingLeft + extraLeftPadding,
+        paddingInlineStart: paddingLeft + extraLeftPadding,
       }}
     >
       <Skeleton

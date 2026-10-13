@@ -65,7 +65,7 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
         color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
         fontWeight: 500,
         padding: "4px 8px",
-        marginLeft: "-8px",
+        marginInlineStart: "-8px",
         borderRadius: "4px",
         background: "transparent",
         border: "none",
@@ -134,11 +134,11 @@ function SingleComment({
     comment.moderationReason ? `: ${comment.moderationReason}` : ""
   } · only you can see this`;
 
-  // How far this row sits in from the left edge of its thread. The highlight
+  // How far this row sits in from the start edge of its thread. The highlight
   // reaches back across it, so a highlighted reply is coloured edge to edge.
   const indentationPx = Math.min(depth, MAX_INDENT_DEPTH) * INDENT;
   // ...and on across the section's own side padding, to its edges.
-  const highlightReachLeft = indentationPx + SECTION_PADDING_X;
+  const highlightReachStart = indentationPx + SECTION_PADDING_X;
 
   // The reply form is a row of its own under the comment, first on the line
   // its replies hang from.
@@ -168,9 +168,9 @@ function SingleComment({
     <>
     <div
       style={{
-        marginLeft: `-${highlightReachLeft}px`,
-        marginRight: `-${SECTION_PADDING_X}px`,
-        paddingLeft: `${highlightReachLeft}px`,
+        marginInlineStart: `-${highlightReachStart}px`,
+        marginInlineEnd: `-${SECTION_PADDING_X}px`,
+        paddingInlineStart: `${highlightReachStart}px`,
         backgroundColor: highlightGutterColor,
       }}
     >
@@ -178,9 +178,10 @@ function SingleComment({
         style={{
           position: "relative",
           backgroundColor: highlightColor,
-          // The right padding is the section's own, carried here so the
+          // The end padding is the section's own, carried here so the
           // comment's highlight (not the strip's color) fills it
-          padding: `${ROW_PADDING_Y}px ${SECTION_PADDING_X}px ${ROW_PADDING_Y}px 0`,
+          paddingBlock: `${ROW_PADDING_Y}px`,
+          paddingInlineEnd: `${SECTION_PADDING_X}px`,
           transition: "background-color 150ms ease-in-out",
         }}
       >
@@ -192,7 +193,7 @@ function SingleComment({
           <div
             style={{
               flexShrink: 0,
-              marginRight: `${AVATAR_GAP}px`,
+              marginInlineEnd: `${AVATAR_GAP}px`,
               position: "relative",
               marginTop: `${AVATAR_OFFSET_TOP}px`,
             }}
@@ -385,6 +386,9 @@ theme={theme}
               <>
                 {comment.content && (
                   <p
+                    // A comment reads in the direction of its own text, whatever the
+                    // direction of the page
+                    dir="auto"
                     style={{
                       // 🎨 CUSTOMIZATION: Typography - Comment body (Default: 13px)
                       fontSize: "13px",
@@ -487,23 +491,23 @@ theme={theme}
       <div
         style={{
           marginTop: `-${ROW_PADDING_Y}px`,
-          marginLeft: `-${highlightReachLeft}px`,
-        marginRight: `-${SECTION_PADDING_X}px`,
-          paddingLeft: `${highlightReachLeft}px`,
+          marginInlineStart: `-${highlightReachStart}px`,
+        marginInlineEnd: `-${SECTION_PADDING_X}px`,
+          paddingInlineStart: `${highlightReachStart}px`,
           backgroundColor: highlightGutterColor,
         }}
       >
         <div
           style={{
             backgroundColor: highlightColor,
-            paddingRight: `${SECTION_PADDING_X}px`,
+            paddingInlineEnd: `${SECTION_PADDING_X}px`,
           }}
         >
         <div
           style={{
             position: "relative",
-            marginLeft: `${INDENT}px`,
-            paddingLeft: `${AVATAR_SIZE + AVATAR_GAP - INDENT}px`,
+            marginInlineStart: `${INDENT}px`,
+            paddingInlineStart: `${AVATAR_SIZE + AVATAR_GAP - INDENT}px`,
             paddingBottom: `${ROW_PADDING_Y}px`,
           }}
         >

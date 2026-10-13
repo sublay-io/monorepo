@@ -219,7 +219,7 @@ The text you typed and its mentions stay in the form, and the message goes away 
 
 In the first two cases the comment turns into its `[deleted]` / `[removed]` row (or, for its author, the removed-note row), which has no Reply. On React the reply box closes and the message shows on that row until the next comment is sent. On React Native and Expo the "Replying to" bar goes away, the message shows above the input, and the text stays in the input, which posts top-level comments again.
 
-The messages live in `utils/comment-create-error.ts` and come from the section's [`createError`](/v8/sdk/comments/comment-section#usecommentsection-return-values). On React they are rendered in `new-comment-form.tsx`, `comment-thread/new-reply-form.tsx` and `single-comment.tsx`; on React Native and Expo, in `new-comment-form.tsx`.
+The messages are chosen in `utils/comment-create-error.ts`, worded in `utils/strings.ts`, and come from the section's [`createError`](/v8/sdk/comments/comment-section#usecommentsection-return-values). On React they are rendered in `new-comment-form.tsx`, `comment-thread/new-reply-form.tsx` and `single-comment.tsx`; on React Native and Expo, in `new-comment-form.tsx`.
 
 ---
 

@@ -137,7 +137,7 @@ When posting a comment or a reply fails, a short muted message appears by the co
 
 The text you typed stays in the input, and the message goes away when you edit the text or send again. A GIF that fails to post keeps the text and mentions in the input too. In the first two cases the comment also turns into its `[deleted]` / `[removed]` row (or, for its author, the removed-note row), which has no Reply. The "Replying to …" banner stays, as after any failed reply; close it to post the text as a top-level comment instead.
 
-The messages live in `utils/comment-create-error.ts` and are rendered in `new-comment-form.tsx`, from the section's [`createError`](/v8/sdk/comments/comment-section#usecommentsection-return-values).
+The messages are chosen in `utils/comment-create-error.ts`, worded in `utils/strings.ts` and rendered in `new-comment-form.tsx`, from the section's [`createError`](/v8/sdk/comments/comment-section#usecommentsection-return-values).
 
 ---
 

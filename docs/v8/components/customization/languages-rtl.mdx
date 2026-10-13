@@ -1,0 +1,79 @@
+---
+title: "Languages & Right-to-Left"
+description: "Install the comment sections in another language and use them in right-to-left layouts"
+icon: "language"
+---
+
+# Languages & Right-to-Left
+
+The comment sections keep all their text in one file, and their layout follows the reading direction of your app. Both apply to the social and threaded comments, in every style variant, on React, React Native and Expo.
+
+---
+
+## Installing in another language
+
+Pass `--lang` to `add`:
+
+```bash
+npx @sublay/cli add comments-threaded --ref v8 --lang he
+```
+
+| Code | Language |
+|------|----------|
+| *(none)* | English |
+| `he` | Hebrew |
+
+The component is the same in every language. `--lang` only decides which text goes into its strings file. If the component has no translation for the code you pass, `add` lists the languages it has and installs nothing.
+
+---
+
+## The strings file
+
+Every piece of text the section shows is in `utils/strings.ts` inside the component's folder: placeholders, button labels, tooltips, the report dialog, error messages and relative times. Nothing else in the component contains user-facing text, so rewording or translating it is an edit to this one file.
+
+```ts
+// utils/strings.ts
+const strings = {
+  commentPlaceholder: "Join the conversation",
+  reply: "Reply",
+  replyCount: (count: number) => `${count} ${count === 1 ? "reply" : "replies"}`,
+  // ...
+};
+
+export default strings;
+```
+
+Entries that depend on a number or a name are functions, so a language can use its own plural forms and word order. Hebrew, for example, has its own form for two:
+
+```ts
+replyCount: (count: number) =>
+  count === 1 ? "תגובה אחת" : count === 2 ? "שתי תגובות" : `${count} תגובות`,
+```
+
+The social comments show relative times ("5 minutes ago"). Their wording is in the same file, under `timeAgo`, with one function per unit.
+
+To translate into a language that is not in the table above, install the component in English and replace the values in `utils/strings.ts`.
+
+The label on the GIF button stays "GIF" in every language and is not in the strings file.
+
+---
+
+## Right-to-left layouts
+
+The sections lay themselves out from the start of the line to its end instead of from left to right, so they mirror in a right-to-left app with no setup: avatars, indentation, the thread lines and their elbows, the highlight strip of a highlighted comment, the reply bar, menus and the GIF picker.
+
+**React (Web)** — the section follows the `dir` of the page, or of any element around it:
+
+```tsx
+<div dir="rtl">
+  <ThreadedCommentSection foreignId="article-123" />
+</div>
+```
+
+**React Native / Expo** — the section follows the layout direction of the app, which React Native takes from `I18nManager`.
+
+Direction and language are independent. A right-to-left app gets a right-to-left section whatever language its strings are in, and installing with `--lang he` does not change the direction of your app.
+
+### Text written by users
+
+On React, a comment is laid out in the direction of its own text, so an English comment in a right-to-left section reads left to right and a Hebrew comment in a left-to-right section reads right to left. The same goes for the text in the input while it is being typed; while the input is empty, its placeholder follows the page.

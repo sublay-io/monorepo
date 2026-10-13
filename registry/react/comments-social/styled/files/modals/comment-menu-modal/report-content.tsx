@@ -2,13 +2,13 @@ import { useMemo, useState } from "react";
 import {
   handleError,
   ReportReasonKey,
-  reportReasons,
   useCommentSection,
   useCreateReport,
   useUser,
 } from "@sublay/react-js";
 import FlagIcon from "~shared/react/flag-icon";
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 function ReportContent({ resetView }: { resetView: () => void }) {
   const { user } = useUser();
@@ -56,15 +56,14 @@ function ReportContent({ resetView }: { resetView: () => void }) {
           fontSize: "24px",
           // 🎨 CUSTOMIZATION: Title color
           color: theme === 'dark' ? '#FAFAFA' : '#000'
-        }}>Submit a report</span>
+        }}>{strings.reportTitle}</span>
       </div>
       <p style={{
         marginTop: "24px",
         // 🎨 CUSTOMIZATION: Body text color
         color: theme === 'dark' ? '#E5E5E5' : '#000'
       }}>
-        Thank you for looking out for our community. Let us know what is
-        happening, and we'll look into it.
+        {strings.reportIntro}
       </p>
 
       <div
@@ -75,7 +74,7 @@ function ReportContent({ resetView }: { resetView: () => void }) {
           marginTop: "24px",
         }}
       >
-        {Object.entries(reportReasons).map(([key, value], index) => (
+        {Object.entries(strings.reportReasons).map(([key, value], index) => (
           <button
             onClick={() => setReason(key as ReportReasonKey)}
             key={index}
@@ -124,7 +123,7 @@ function ReportContent({ resetView }: { resetView: () => void }) {
           border: "none",
         }}
       >
-        {submitting ? "Submitting..." : "Submit Report"}
+        {submitting ? strings.submittingReport : strings.submitReport}
       </button>
     </div>
   );

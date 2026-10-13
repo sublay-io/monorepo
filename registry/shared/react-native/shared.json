@@ -31,9 +31,7 @@
         "from-now.tsx"
       ],
       "requires": [],
-      "dependencies": [
-        "moment@^2"
-      ]
+      "dependencies": []
     },
     "get-image-component": {
       "files": [

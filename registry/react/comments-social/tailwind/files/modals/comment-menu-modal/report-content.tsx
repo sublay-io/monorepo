@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import {
   handleError,
   ReportReasonKey,
-  reportReasons,
   useCommentSection,
   useCreateReport,
   useUser,
@@ -10,6 +9,7 @@ import {
 import FlagIcon from "~shared/react/flag-icon";
 import { cn } from "@/lib/utils";
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 function ReportContent({ resetView }: { resetView: () => void }) {
   const { user } = useUser();
@@ -52,15 +52,14 @@ function ReportContent({ resetView }: { resetView: () => void }) {
     <div className="p-6 w-full">
       <div className="flex items-center gap-4 text-gray-900 dark:text-neutral-50">
         <FlagIcon size={24} color="currentColor" />
-        <span className="text-2xl text-gray-900 dark:text-neutral-50">Submit a report</span>
+        <span className="text-2xl text-gray-900 dark:text-neutral-50">{strings.reportTitle}</span>
       </div>
       <p className="mt-6 text-gray-900 dark:text-neutral-200">
-        Thank you for looking out for our community. Let us know what is
-        happening, and we'll look into it.
+        {strings.reportIntro}
       </p>
 
       <div className="flex flex-wrap gap-1.5 mt-6">
-        {Object.entries(reportReasons).map(([key, value], index) => (
+        {Object.entries(strings.reportReasons).map(([key, value], index) => (
           <button
             onClick={() => setReason(key as ReportReasonKey)}
             key={index}
@@ -88,7 +87,7 @@ function ReportContent({ resetView }: { resetView: () => void }) {
           submitting && "opacity-70"
         )}
       >
-        {submitting ? "Submitting..." : "Submit Report"}
+        {submitting ? strings.submittingReport : strings.submitReport}
       </button>
     </div>
   );

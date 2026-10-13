@@ -8,6 +8,7 @@ import NewCommentForm from "../files/new-comment-form";
 import CommentMenuModal from "../files/modals/comment-menu-modal/comment-menu-modal";
 import CommentMenuModalOwner from "../files/modals/comment-menu-modal-owner/comment-menu-modal-owner";
 import { UIStateProvider } from "../context/ui-state-context";
+import strings from "../utils/strings";
 
 type SocialCommentSectionProviderProps = Omit<
   ComponentProps<typeof CommentSectionProvider>,
@@ -65,7 +66,7 @@ function useSocialComments({
     loginRequiredCallback: () => {
       // 🔧 CUSTOMIZE: Handle login requirement
       // Example: router.push('/login?redirect=' + window.location.pathname)
-      alert("Please login to perform this action");
+      alert(strings.loginRequired);
     },
 
     // Called when a user tries to perform an action without having a username set
@@ -78,13 +79,13 @@ function useSocialComments({
     // Called when a user tries to submit an empty comment or reply
     commentTooShortCallback: () => {
       // 🔧 CUSTOMIZE: Handle empty comment validation
-      alert("Comment cannot be empty");
+      alert(strings.commentEmpty);
     },
 
     // Called when trying to mention a user who doesn't have a username
     userCantBeMentionedCallback: () => {
       // 🔧 CUSTOMIZE: Handle mention validation
-      alert("This user doesn't have a username and cannot be mentioned");
+      alert(strings.userNotMentionable);
     },
 
     // Called when the current user clicks on their own avatar or name

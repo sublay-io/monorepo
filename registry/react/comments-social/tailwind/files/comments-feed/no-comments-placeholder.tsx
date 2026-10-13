@@ -1,3 +1,4 @@
+import strings from "../../utils/strings";
 function NoCommentsPlaceHolder() {
   return (
     <div
@@ -6,12 +7,12 @@ function NoCommentsPlaceHolder() {
       <p
         className="text-center text-lg font-bold mb-2 text-gray-900 dark:text-neutral-50"
       >
-        No comments yet
+        {strings.noCommentsTitle}
       </p>
       <p
         className="text-center text-xs text-gray-500 dark:text-neutral-400 mt-0"
       >
-        Start the conversation.
+        {strings.noCommentsSubtitle}
       </p>
     </div>
   );

@@ -1,4 +1,5 @@
 import { resetButton } from "~shared/react/reset-styles";
+import strings from "../../../../utils/strings";
 
 const ShowHideButton = ({
   totalRepliesCount,
@@ -29,35 +30,26 @@ const ShowHideButton = ({
     case !areRepliesVisible && page === 0:
       action = ["show", "load-more"];
       // 🎨 CUSTOMIZATION: Text label for "View more replies ($count)"
-      text = "View more replies ($count)".replace(
-        "$count",
-        totalRepliesCount.toString()
-      );
+      text = strings.viewMoreReplies(totalRepliesCount);
       break;
 
     // This case is if the replies have been shown previously but are now hidden (user had to load all before hiding)
     case !areRepliesVisible && page > 0:
       action = ["show"];
-      text = "View more replies ($count)".replace(
-        "$count",
-        totalRepliesCount.toString()
-      );
+      text = strings.viewMoreReplies(totalRepliesCount);
       break;
 
     // This case is if the replies are visible and there are more replies to load
     case areRepliesVisible && hasMore:
       action = ["load-more"];
-      text = "View more replies ($count)".replace(
-        "$count",
-        Math.max(0, totalRepliesCount - loadedRepliesCount).toString()
-      );
+      text = strings.viewMoreReplies(Math.max(0, totalRepliesCount - loadedRepliesCount));
       break;
 
     // This case is if the replies are visible and all of them have been loaded
     case areRepliesVisible && !hasMore:
       action = ["hide"];
       // 🎨 CUSTOMIZATION: Text label for "Hide replies"
-      text = "Hide replies";
+      text = strings.hideReplies;
       break;
   }
 
@@ -71,7 +63,7 @@ const ShowHideButton = ({
       >
         <div className="h-px w-6 mt-0.5 bg-gray-600 dark:bg-neutral-400" />
         <span className="text-xs text-gray-600 dark:text-neutral-400">
-          Couldn't load more ·{" "}
+          {strings.loadMoreFailed} ·{" "}
           <button
             onClick={() => {
               setAreRepliesVisible(true);
@@ -80,7 +72,7 @@ const ShowHideButton = ({
             style={resetButton}
             className="text-xs font-semibold text-gray-600 dark:text-neutral-400"
           >
-            Try again
+            {strings.tryAgain}
           </button>
         </span>
       </div>

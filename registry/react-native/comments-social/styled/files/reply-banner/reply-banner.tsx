@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { useCommentSection, getUserName } from "@sublay/react-native";
 import useUIState from "../../hooks/use-ui-state";
+import strings from "../../utils/strings";
 
 const ReplyBanner = () => {
   const {
@@ -47,7 +48,7 @@ const ReplyBanner = () => {
           color: theme === 'dark' ? "#A3A3A3" : "#787878",
           fontSize: 12
         }}>
-          Replying to {repliedToUser}
+          {strings.replyingTo(repliedToUser)}
         </Text>
         <TouchableOpacity
           onPress={() => {

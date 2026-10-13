@@ -13,7 +13,6 @@
     "@sublay/react-js": "workspace:*",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
-    "moment": "^2.30.1",
     "react": "19.2.5",
     "react-dom": "19.2.5",
     "styled-components": "^6.4.0",

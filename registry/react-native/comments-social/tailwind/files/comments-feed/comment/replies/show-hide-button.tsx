@@ -1,5 +1,6 @@
 import { TouchableOpacity, View, Text } from "react-native";
 import useUIState from "../../../../hooks/use-ui-state";
+import strings from "../../../../utils/strings";
 
 const ShowHideButton = ({
   totalRepliesCount,
@@ -24,8 +25,7 @@ const ShowHideButton = ({
   const { theme } = useUIState();
 
   // CUSTOMIZATION: Show/hide button styling defaults
-  const viewMoreRepliesText = "View $count more replies";
-  const hideRepliesText = "Hide replies";
+  const hideRepliesText = strings.hideReplies;
 
   let action: ("show" | "hide" | "load-more")[] = [];
   let text = "";
@@ -34,28 +34,19 @@ const ShowHideButton = ({
     // This case is if the replies were never expanded before (page === 0)
     case !areRepliesVisible && page === 0:
       action = ["show", "load-more"];
-      text = viewMoreRepliesText.replace(
-        "$count",
-        totalRepliesCount.toString()
-      );
+      text = strings.viewMoreReplies(totalRepliesCount);
       break;
 
     // This case is if the replies have been shown previously but are now hidden (user had to load all before hiding)
     case !areRepliesVisible && page > 0:
       action = ["show"];
-      text = viewMoreRepliesText.replace(
-        "$count",
-        totalRepliesCount.toString()
-      );
+      text = strings.viewMoreReplies(totalRepliesCount);
       break;
 
     // This case is if the replies are visible and there are more replies to load
     case areRepliesVisible && hasMore:
       action = ["load-more"];
-      text = viewMoreRepliesText.replace(
-        "$count",
-        Math.max(0, totalRepliesCount - loadedRepliesCount).toString()
-      );
+      text = strings.viewMoreReplies(Math.max(0, totalRepliesCount - loadedRepliesCount));
       break;
 
     // This case is if the replies are visible and all of them have been loaded
@@ -78,7 +69,7 @@ const ShowHideButton = ({
           }`}
         />
         <View className="flex-row items-center">
-          <Text className={`text-xs ${mutedTextClass}`}>Couldn't load more · </Text>
+          <Text className={`text-xs ${mutedTextClass}`}>{strings.loadMoreFailed} · </Text>
           <TouchableOpacity
             onPress={() => {
               setAreRepliesVisible(true);
@@ -86,7 +77,7 @@ const ShowHideButton = ({
             }}
           >
             <Text className={`text-xs font-semibold ${mutedTextClass}`}>
-              Try again
+              {strings.tryAgain}
             </Text>
           </TouchableOpacity>
         </View>

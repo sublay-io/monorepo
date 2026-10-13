@@ -22,6 +22,7 @@ import useTextareaCursorIndicator from "~shared/react/use-textarea-cursor-indica
 import ReplyBanner from "./reply-banner";
 import MentionSuggestions from "./mention-suggestions";
 import { getCommentCreateErrorMessage } from "../utils/comment-create-error";
+import strings from "../utils/strings";
 
 function NewCommentForm({
   gifPickerFullScreen = false,
@@ -266,7 +267,7 @@ function NewCommentForm({
               // Typed text reads in its own direction; while empty, the
               // placeholder follows the page
               dir={content ? "auto" : undefined}
-              placeholder="Add a comment..."
+              placeholder={strings.commentPlaceholder}
               onChange={(e) => {
                 setContent(e.target.value);
                 if (createError) setDismissedCreateError(createError);
@@ -293,7 +294,7 @@ function NewCommentForm({
                 style={resetButton}
                 className="border-none outline-none font-semibold text-sm text-blue-600 dark:text-blue-400 cursor-pointer"
               >
-                Post
+                {strings.post}
               </button>
             )}
           </div>

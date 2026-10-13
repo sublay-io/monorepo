@@ -1,5 +1,6 @@
 import { Text, View } from "react-native";
 import useUIState from "../../hooks/use-ui-state";
+import strings from "../../utils/strings";
 
 function NoCommentsPlaceHolder() {
   const { theme } = useUIState();
@@ -11,14 +12,14 @@ function NoCommentsPlaceHolder() {
           theme === 'dark' ? 'text-neutral-50' : 'text-black'
         }`}
       >
-        No comments yet
+        {strings.noCommentsTitle}
       </Text>
       <Text
         className={`text-center text-xs mt-0 ${
           theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
         }`}
       >
-        Start the conversation.
+        {strings.noCommentsSubtitle}
       </Text>
     </View>
   );

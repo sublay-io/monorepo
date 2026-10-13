@@ -1,5 +1,6 @@
 import { resetButton, resetUl } from "~shared/react/reset-styles";
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 function MainContent({ clickReport }: { clickReport: () => void }) {
   const {
@@ -34,7 +35,7 @@ function MainContent({ clickReport }: { clickReport: () => void }) {
           }}
           onClick={clickReport}
         >
-          Report
+          {strings.report}
         </button>
       </li>
       <div style={{
@@ -62,7 +63,7 @@ function MainContent({ clickReport }: { clickReport: () => void }) {
           }}
           onClick={closeCommentMenuModal}
         >
-          Cancel
+          {strings.cancel}
         </button>
       </li>
     </ul>

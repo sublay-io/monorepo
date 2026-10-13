@@ -18,7 +18,6 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
-    "moment": "^2.30.1",
     "nativewind": "^4.2.3",
     "react": "19.2.5",
     "react-native": "^0.85.1",

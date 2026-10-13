@@ -17,6 +17,7 @@ import { parseContentWithMentions } from "~shared/react/parse-content-with-menti
 import Replies from "./replies";
 import HeartButton from "./heart-button";
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 const Comment = React.memo(
   ({
@@ -97,9 +98,9 @@ const Comment = React.memo(
     const tombstone = isUnavailable
       ? null
       : comment.userDeletedAt
-        ? "[deleted]"
+        ? strings.deleted
         : comment.moderationStatus === "removed" && !comment.userId
-          ? "[removed]"
+          ? strings.removed
           : null;
 
     // The viewer's own moderator-removed comment comes back in full (only its
@@ -108,9 +109,7 @@ const Comment = React.memo(
     // delete stays.
     const isOwnRemoved =
       !tombstone && comment.moderationStatus === "removed" && !!comment.userId;
-    const ownRemovedLabel = `Removed by a moderator${
-      comment.moderationReason ? `: ${comment.moderationReason}` : ""
-    } · only you can see this`;
+    const ownRemovedLabel = strings.removedByModerator(comment.moderationReason);
     const canReply = !isOwnRemoved && !parentClosed;
 
     return (
@@ -153,8 +152,8 @@ const Comment = React.memo(
               }}
             >
               {isUnavailable
-                ? "This comment is unavailable"
-                : "Comment from a user you blocked"}
+                ? strings.unavailable
+                : strings.blockedAuthor}
             </span>
             {isUnavailable ? (
               currentReaction && (
@@ -167,7 +166,7 @@ const Comment = React.memo(
                     color: theme === 'dark' ? '#A3A3A3' : '#737373',
                   }}
                 >
-                  Remove your reaction
+                  {strings.removeYourReaction}
                 </button>
               )
             ) : (
@@ -180,7 +179,7 @@ const Comment = React.memo(
                   color: theme === 'dark' ? '#FAFAFA' : '#000',
                 }}
               >
-                Show anyway
+                {strings.showAnyway}
               </button>
             )}
           </div>
@@ -289,7 +288,7 @@ theme={theme}
                   time={comment.createdAt}
                   fontSize={12}
                   color={theme === 'dark' ? '#A3A3A3' : '#737373'}
-                  justNowText="Just now"
+                  strings={strings.timeAgo}
                 />
               </div>
 
@@ -381,7 +380,7 @@ theme={theme}
                     fontWeight: 600,
                   }}
                 >
-                  Reply
+                  {strings.reply}
                 </button>
                 )}
                 {hovered && ( // Conditionally render the EllipsisIcon button

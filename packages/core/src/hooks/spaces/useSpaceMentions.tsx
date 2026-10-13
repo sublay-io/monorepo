@@ -3,6 +3,7 @@ import { Space } from "../../interfaces/models/Space";
 import { Mention } from "../../interfaces/models/Mention";
 import useFetchManySpaces from "./useFetchManySpaces";
 import useMentionSuggestions, {
+  DEFAULT_MENTION_PATTERN,
   escapeRegex,
 } from "../utils/useMentionSuggestions";
 
@@ -37,7 +38,7 @@ const useSpaceMentions = ({
   trigger = "#",
   minChars = 3,
   debounceDelay = 1000,
-  validPattern = "[\\w.\\-]+",
+  validPattern = DEFAULT_MENTION_PATTERN,
 }: UseSpaceMentionsProps): UseSpaceMentionsValues => {
   const fetchManySpaces = useFetchManySpaces();
 

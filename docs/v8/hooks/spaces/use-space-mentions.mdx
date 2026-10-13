@@ -93,7 +93,7 @@ function PostEditor() {
 </ParamField>
 
 <ParamField path="validPattern" type="string">
-  Regex pattern (as a string) that the text after the trigger must match. Defaults to `"[\\w.\\-]+"` (letters, digits, underscores, dots and hyphens).
+  Regex pattern (as a string) that the text after the trigger must match. Defaults to `"[\\w\\-\\u0080-\\uFFFF]+"`: ASCII letters, digits, underscores and hyphens, plus any character outside ASCII, so a name in any language matches. That covers everything a space slug can contain. The pattern is used without the `u` flag.
 </ParamField>
 
 ## Returns

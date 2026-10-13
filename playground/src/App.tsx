@@ -75,7 +75,17 @@ const btnStyle: React.CSSProperties = {
 };
 
 export default function App() {
-  const [activePage, setActivePage] = useState<Page>("social");
+  // Kept in the URL as `?page=`, so a reload stays on the same component
+  const [activePage, setActivePageState] = useState<Page>(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("page");
+    return tabs.some((tab) => tab.id === fromUrl) ? (fromUrl as Page) : "social";
+  });
+  const setActivePage = (page: Page) => {
+    setActivePageState(page);
+    const url = new URL(window.location.href);
+    url.searchParams.set("page", page);
+    window.history.replaceState(null, "", url);
+  };
 
   return (
     <div style={{ fontFamily: "sans-serif", minHeight: "100vh" }}>

@@ -56,6 +56,82 @@ describe("useUserMentions", () => {
     expect(result.current.mentionSuggestions).toEqual([]);
   });
 
+  it("stays closed after a suggestion is picked, until the user types or moves the cursor", async () => {
+    const base = {
+      setContent: vi.fn(),
+      focus: vi.fn(),
+      isSelectionActive: false,
+      debounceDelay: 10,
+    };
+
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseUserMentionsProps) => useUserMentions(props),
+      { initialProps: { ...base, content: "hello @ali", cursorPosition: 10 } },
+    );
+
+    const suggestions = [makeUser({ username: "alice" })];
+    axiosPrivate.mockResponse("get", suggestions);
+    await waitFor(() => expect(result.current.mentionSuggestions).toEqual(suggestions));
+
+    act(() => {
+      result.current.handleMentionClick(suggestions[0]);
+    });
+    expect(result.current.isMentionActive).toBe(false);
+
+    // The caller applies the new text. Its cursor position is still the old
+    // one (the text changed without an input event), so the word before the
+    // cursor reads "@ali" again.
+    rerender({ ...base, content: "hello @alice ", cursorPosition: 10 });
+    expect(result.current.isMentionActive).toBe(false);
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    expect(result.current.isMentionActive).toBe(false);
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+
+    // The user goes on typing a second mention: detection is back.
+    rerender({ ...base, content: "hello @alice @bob", cursorPosition: 17 });
+    expect(result.current.isMentionActive).toBe(true);
+  });
+
+  it("keeps the suggestions open across a hyphen in the name being typed", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(
+      (props: UseUserMentionsProps) => useUserMentions(props),
+      {
+        initialProps: {
+          content: "hi @fat-bro",
+          setContent: vi.fn(),
+          focus: vi.fn(),
+          cursorPosition: 11,
+          isSelectionActive: false,
+          debounceDelay: 10,
+        },
+      },
+    );
+
+    expect(result.current.isMentionActive).toBe(true);
+    axiosPrivate.mockResponse("get", [makeUser({ username: "fat-brown-damselfly" })]);
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+    const [call] = axiosPrivate.calls("get");
+    expect(call.config?.params).toMatchObject({ query: "fat-bro" });
+  });
+
+  it("activates for a trigger at the start of a new line", () => {
+    const { result } = renderHookWithAxios(
+      (props: UseUserMentionsProps) => useUserMentions(props),
+      {
+        initialProps: {
+          content: "hello\n@ali",
+          setContent: vi.fn(),
+          focus: vi.fn(),
+          cursorPosition: 10,
+          isSelectionActive: false,
+          debounceDelay: 10,
+        },
+      },
+    );
+
+    expect(result.current.isMentionActive).toBe(true);
+  });
+
   it("does not activate mention state when there is no trigger before the cursor", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(
       (props: UseUserMentionsProps) => useUserMentions(props),

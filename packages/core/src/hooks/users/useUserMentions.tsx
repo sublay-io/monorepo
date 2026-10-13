@@ -41,7 +41,7 @@ const useUserMentions = ({
   trigger = "@",
   minChars = 3,
   debounceDelay = 1000,
-  validPattern = "[\\w.]+",
+  validPattern = "[\\w.\\-]+",
 }: UseUserMentionsProps): UseUserMentionsValues => {
   const fetchMentionSuggestions = useFetchUserSuggestions();
 
@@ -52,6 +52,14 @@ const useUserMentions = ({
   const [mentionTrigger, setMentionTrigger] = useState("");
   const [mentionSuggestions, setMentionSuggestions] = useState<User[]>([]);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Set when a suggestion is picked: the text and cursor position as they are
+  // right after the pick. The pick changes the text without moving the
+  // caller's reported cursor, so the word "before the cursor" still looks
+  // like the trigger that was just completed; without this the suggestions
+  // would open again at once. It holds until the text or the cursor changes.
+  const pickedRef = useRef<{ content: string; cursorPosition: number } | null>(
+    null
+  );
 
   const resetMentions = () => {
     setMentions([]);
@@ -84,7 +92,13 @@ const useUserMentions = ({
 
   const handleMentionClick = (user: User) => {
     const mentionRegex = new RegExp(`${escapeRegex(trigger)}${escapeRegex(mentionTrigger)}(\\s|$)`);
-    setContent(content.replace(mentionRegex, `${trigger}${user.username} `));
+    const nextContent = content.replace(mentionRegex, `${trigger}${user.username} `);
+    pickedRef.current = { content: nextContent, cursorPosition };
+    setContent(nextContent);
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
 
     addMention(user);
 
@@ -116,10 +130,29 @@ const useUserMentions = ({
   );
 
   useEffect(() => {
+    // Right after a pick, nothing has been typed yet: stay closed.
+    const picked = pickedRef.current;
+    if (picked) {
+      if (
+        picked.content === content &&
+        picked.cursorPosition === cursorPosition
+      ) {
+        return;
+      }
+      // The pick has not reached `content` yet (the caller applies it on its
+      // next render): keep waiting. Anything else is the user typing or moving
+      // the cursor, so normal detection resumes.
+      if (picked.content !== content && picked.cursorPosition === cursorPosition) {
+        return;
+      }
+      pickedRef.current = null;
+    }
+
     let start = cursorPosition - 1;
 
     // Move backward from cursor to find the word directly before the cursor
-    while (start >= 0 && content[start] !== " ") {
+    // (any whitespace ends a word, so a trigger can start a new line)
+    while (start >= 0 && !/\s/.test(content[start])) {
       start--;
     }
 

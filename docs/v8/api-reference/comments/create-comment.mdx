@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/comments"
 description: "Create a new comment or reply on an entity"
 ---
 
-Creates a new comment on an entity, or a reply to an existing comment. The comment is attributed to the authenticated user. Notifications are sent to the entity owner (for a top-level comment), the parent comment's author (for a reply), and mentioned users.
+Creates a new comment on an entity, or a reply to an existing comment. The comment is attributed to the authenticated user, or, with a service or master key, to the user named in `userId`. Notifications are sent to the entity owner (for a top-level comment), the parent comment's author (for a reply), and mentioned users.
 
 **Authentication required.**
 

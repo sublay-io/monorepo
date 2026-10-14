@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/comments"
 description: "Create a new comment or reply on an entity"
 ---
 
-Creates a new comment on an entity, or a reply to an existing comment. The comment is attributed to the authenticated user. Notifications are sent to the entity owner, parent comment author (for replies), and mentioned users.
+Creates a new comment on an entity, or a reply to an existing comment. The comment is attributed to the authenticated user. Notifications are sent to the entity owner (for a top-level comment), the parent comment's author (for a reply), and mentioned users.
 
 **Authentication required.**
 
@@ -56,7 +56,7 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
 </ParamField>
 
 <ParamField body="mentions" type="object[]">
-  Users or spaces mentioned in the comment. Each mentioned user receives an in-app notification.
+  Users or spaces mentioned in the comment. Each mentioned user receives one in-app notification, however many times they are mentioned, except the person the comment already notifies: the entity owner for a top-level comment, or the parent comment's author for a reply. A space mention sends no notification, and a commenter mentioning themselves is not notified.
   - `{ type: "user", id: string, username: string, foreignId?: string }`
   - `{ type: "space", id: string, slug: string }`
 </ParamField>

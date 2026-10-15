@@ -41,6 +41,7 @@ Sets a member's status to `"banned"`, in this space and the child spaces where t
     ```
   </Accordion>
   <Accordion title="Already Banned — 409">
+    The member is already banned here. The ban is still re-applied to their active memberships in child spaces, under the same rules as a first ban, so a repeated ban can instead return one of the errors below.
     ```json
     { "error": "This member is already banned.", "code": "space/already-banned" }
     ```

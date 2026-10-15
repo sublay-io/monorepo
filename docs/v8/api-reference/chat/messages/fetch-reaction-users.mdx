@@ -6,7 +6,7 @@ description: "List users who reacted to a message with a specific emoji"
 
 import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
 
-Returns a paginated list of users who reacted with a given emoji on a message. Useful for rendering a "who reacted" popover. The caller must be a member of the conversation.
+Returns a paginated list of users who reacted with a given emoji on a message. Useful for rendering a "who reacted" popover. The caller must be a member of the conversation. A former member only sees reactions on messages from before they left; a later message returns 404.
 
 ## Path Parameters
 

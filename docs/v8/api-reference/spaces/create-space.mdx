@@ -41,7 +41,7 @@ Creates a new space. The authenticated user is automatically added as an admin. 
 </ParamField>
 
 <ParamField body="parentSpaceId" type="string">
-  Optional UUID of a parent space. The caller must be an admin of the parent space.
+  Optional UUID of a parent space. The caller must be an admin of the parent space; when a service or master key creates the space for a user (`userId`), that user must be.
 </ParamField>
 
 <ParamField body="avatarFile" type="file">
@@ -77,6 +77,12 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
   <Accordion title="Parent Admin Required — 403">
     ```json
     { "error": "Only admins of the parent space can create child spaces.", "code": "space/parent-admin-required" }
+    ```
+  </Accordion>
+  <Accordion title="Banned — 403">
+    The creator was banned in the parent space (or above) while the child space was being created.
+    ```json
+    { "error": "You are banned from a parent of this space.", "code": "space/banned" }
     ```
   </Accordion>
   <Accordion title="Max Depth Exceeded — 400">

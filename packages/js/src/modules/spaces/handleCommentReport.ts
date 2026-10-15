@@ -9,9 +9,9 @@ export interface HandleCommentReportProps {
   commentId: string;
   actions: CommentReportAction[];
   summary?: string;
+  /** Why the user is banned, required when actions include "ban-user". The
+   * banned user is always the author of the reported content. */
   reason?: string;
-  /** The user to ban (target), required when actions include "ban-user". */
-  userId?: string;
 }
 
 export async function handleCommentReport(

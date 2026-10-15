@@ -8,7 +8,6 @@ export interface HandleSpaceCommentReportParams {
   commentId: string;
   actions: Array<"remove-comment" | "ban-user" | "dismiss">;
   summary: string;
-  userId?: string;
   reason?: string;
 }
 
@@ -43,7 +42,6 @@ function useHandleSpaceCommentReport(): (params: HandleSpaceCommentReportParams)
       commentId,
       actions,
       summary,
-      userId,
       reason,
     }: HandleSpaceCommentReportParams) => {
       if (!projectId) {
@@ -60,7 +58,6 @@ function useHandleSpaceCommentReport(): (params: HandleSpaceCommentReportParams)
           commentId,
           actions,
           summary,
-          userId,
           reason,
         }
       );

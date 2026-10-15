@@ -8,7 +8,6 @@ export interface HandleSpaceEntityReportParams {
   entityId: string;
   actions: Array<"remove-entity" | "ban-user" | "dismiss">;
   summary: string;
-  userId?: string;
   reason?: string;
 }
 
@@ -30,7 +29,6 @@ export interface HandleReportResponse {
  *   entityId: "entity-uuid",
  *   actions: ["remove-entity", "ban-user"],
  *   summary: "Removed spam content and banned user",
- *   userId: "user-uuid",
  *   reason: "Spamming"
  * });
  */
@@ -45,7 +43,6 @@ function useHandleSpaceEntityReport(): (params: HandleSpaceEntityReportParams) =
       entityId,
       actions,
       summary,
-      userId,
       reason,
     }: HandleSpaceEntityReportParams) => {
       if (!projectId) {
@@ -62,7 +59,6 @@ function useHandleSpaceEntityReport(): (params: HandleSpaceEntityReportParams) =
           entityId,
           actions,
           summary,
-          userId,
           reason,
         }
       );

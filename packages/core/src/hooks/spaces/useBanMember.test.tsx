@@ -19,7 +19,11 @@ describe("useBanMember", () => {
 
     let returned;
     await act(async () => {
-      returned = await result.current({ spaceId: "space-1", memberId: "membership-1" });
+      returned = await result.current({
+        spaceId: "space-1",
+        memberId: "membership-1",
+        reason: "spam",
+      });
     });
 
     expect(returned).toEqual({
@@ -29,6 +33,7 @@ describe("useBanMember", () => {
 
     const [call] = axiosPrivate.calls("patch");
     expect(call.url).toBe("/test-project/spaces/space-1/members/membership-1/ban");
+    expect(call.body).toEqual({ reason: "spam" });
   });
 
   it("rejects when the server returns an error response", async () => {

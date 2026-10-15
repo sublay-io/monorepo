@@ -26,6 +26,10 @@ Takes a direct moderation action on a chat message in a space's integrated conve
   Optional reason for the removal. Up to 1,000 characters.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Service or master key only: the moderator the key acts for. The request then has exactly that user's moderation permissions; omit it to act as the project.
+</ParamField>
+
 ## Response
 
 <ResponseField name="message" type="string">
@@ -35,3 +39,25 @@ Takes a direct moderation action on a chat message in a space's integrated conve
 <ResponseField name="moderationStatus" type="string">
   The resulting status: `"removed"`.
 </ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Not a Moderator — 403">
+    The user named by `actingUserId` cannot moderate this space.
+    ```json
+    { "error": "Moderator access required", "code": "space/moderator-required" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Found — 400">
+    ```json
+    { "error": "Acting user not found.", "code": "chat/acting-user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent an `actingUserId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "chat/unauthorized" }
+    ```
+  </Accordion>
+</AccordionGroup>

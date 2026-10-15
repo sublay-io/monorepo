@@ -582,7 +582,7 @@ Each space has a single built-in conversation. These three live on **`client.spa
 
 ### spaces.getSpaceConversation
 
-Fetches-or-creates a space's conversation and joins the acting user to it. The acting user must be a non-banned member of the space.
+Fetches-or-creates a space's conversation and joins the acting user to it. The acting user must be an active member of the space; a pending or rejected request, or a ban, is refused.
 
 ```typescript
 const conversation = await sublay.spaces.getSpaceConversation({
@@ -592,7 +592,7 @@ const conversation = await sublay.spaces.getSpaceConversation({
 ```
 
 <ParamField body="spaceId" type="string" required />
-<ParamField body="userId" type="string" required>The acting user (must be a space member).</ParamField>
+<ParamField body="userId" type="string" required>The acting user (must be an active member of the space).</ParamField>
 
 **Returns** — `Promise<Conversation>`
 
@@ -603,10 +603,10 @@ const conversation = await sublay.spaces.getSpaceConversation({
 Removes a message in a space conversation.
 
 <Note>
-  Unlike the conversation-scoped chat calls, the two space-chat moderation routes
-  are **service-key god-mode** — your service key passes the space-moderator check
-  automatically. `actingUserId` here is **attribution only** (who moderated); omit
-  it for a backend/system action.
+  On the two space-chat moderation routes, `actingUserId` is optional. Omit it
+  and your service key acts as the project, passing the space-moderator check.
+  Name a user and the request has exactly that user's moderation permissions:
+  it is refused if they cannot moderate the space.
 </Note>
 
 ```typescript
@@ -623,7 +623,7 @@ await sublay.spaces.moderateSpaceChatMessage({
 <ParamField body="messageId" type="string" required />
 <ParamField body="moderationStatus" type='"removed"' required />
 <ParamField body="moderationReason" type="string" />
-<ParamField body="actingUserId" type="string">Acting moderator, for attribution.</ParamField>
+<ParamField body="actingUserId" type="string">The moderator the key acts for. The request then has exactly that moderator's permissions. Omit it to act as the project.</ParamField>
 
 **Returns** — `Promise<{ message: string; moderationStatus: string }>`
 
@@ -639,7 +639,6 @@ await sublay.spaces.handleSpaceChatReport({
   reportId: "rpt_abc123",
   actions: ["remove-message", "ban-user"],
   messageId: "msg_xyz",
-  userId: "usr_offender",
   reason: "Repeated harassment",
   actingUserId: "usr_mod123",
 });
@@ -648,12 +647,11 @@ await sublay.spaces.handleSpaceChatReport({
 <ParamField body="spaceId" type="string" required />
 <ParamField body="reportId" type="string" required />
 <ParamField body="actions" type='("remove-message" | "ban-user" | "dismiss")[]' required>
-  `dismiss` cannot be combined with the other actions.
+  `dismiss` cannot be combined with the other actions. `ban-user` bans the author of the reported message and requires `reason`.
 </ParamField>
-<ParamField body="messageId" type="string">Required when actions include `remove-message`.</ParamField>
-<ParamField body="userId" type="string">The user to ban (target); required when actions include `ban-user`.</ParamField>
+<ParamField body="messageId" type="string">Optional. The message is read from the report; if sent, it must be the reported message.</ParamField>
 <ParamField body="reason" type="string" />
 <ParamField body="summary" type="string">Stored as the report's resolution note.</ParamField>
-<ParamField body="actingUserId" type="string">Acting moderator, for attribution.</ParamField>
+<ParamField body="actingUserId" type="string">The moderator the key acts for. The request then has exactly that moderator's permissions. Omit it to act as the project.</ParamField>
 
 **Returns** — `Promise<{ message: string; code: string }>`

@@ -36,6 +36,10 @@ function MemberActions({ spaceId, memberId }: { spaceId: string; memberId: strin
   UUID of the membership record to ban.
 </ParamField>
 
+<ParamField body="reason" type="string">
+  Why the member is banned; kept in the space's ban log.
+</ParamField>
+
 ## Returns
 
 <ResponseField name="message" type="string">

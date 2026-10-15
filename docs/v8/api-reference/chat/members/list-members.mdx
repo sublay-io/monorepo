@@ -6,7 +6,7 @@ description: "List the active members of a conversation"
 
 import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
 
-Returns a paginated list of active [ConversationMember](/v8/data-models/conversation-member) objects, each with the member's user profile included. The caller must be a member (any status) to access this endpoint.
+Returns a paginated list of active [ConversationMember](/v8/data-models/conversation-member) objects, each with the member's user profile included. The caller must be an active member: a former member (who left, was removed or was banned from the space) gets a 403.
 
 ## Path Parameters
 

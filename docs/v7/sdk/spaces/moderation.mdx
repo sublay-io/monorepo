@@ -63,6 +63,7 @@ await handleChatReport({
   reportId,
   messageId,
   actions: ["remove-message", "ban-user"],
+  reason: "Harassment",
   userId: offendingUserId, // the ban target
   summary: "Removed and banned",
 });
@@ -72,7 +73,7 @@ Each target type has its own removal action — `remove-entity`, `remove-comment
 `remove-message` — alongside the shared `ban-user` and `dismiss`.
 
 <Note>
-  `ban-user` is **space-scoped**: it bans the user from this space only.
+  `ban-user` is **space-scoped**: it bans the user from this space and the child spaces they belong to, and ends their membership of those spaces' chats.
   Project-wide suspension is a dashboard action — a space moderator cannot
   suspend someone across the whole project.
 </Note>

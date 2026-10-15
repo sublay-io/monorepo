@@ -79,10 +79,12 @@ describe("node-sdk spaces (membership) — request shaping", () => {
     );
   });
 
-  it("banMember patches the ban route with no body", async () => {
+  it("banMember patches the ban route, sending the optional reason", async () => {
     const { client, projectInstance } = makeClient();
-    await banMember(client, { spaceId: "s1", memberId: "m1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1/members/m1/ban");
+    await banMember(client, { spaceId: "s1", memberId: "m1", reason: "spam" });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1/members/m1/ban", {
+      reason: "spam",
+    });
   });
 
   it("unbanMember patches the unban route with no body", async () => {

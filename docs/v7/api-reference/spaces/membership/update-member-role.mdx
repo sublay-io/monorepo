@@ -4,7 +4,7 @@ api: "PATCH /v7/:projectId/spaces/:spaceId/members/:memberId/role"
 description: "Update a member's role within a space"
 ---
 
-Changes a member's role. Only space admins can perform this action.
+Changes a member's role. Only space admins can perform this action. The role also applies in the space's child spaces. Raising someone's role gives it to them there too, but never lowers a role they already hold there: someone who is a regular member here and an admin of a child space stays an admin there when made a moderator here. Lowering someone's role lowers it there too: an admin made a moderator becomes a moderator in the child spaces, and a regular member loses `"admin"` and `"moderator"` there. Giving someone the role they already have changes nothing, here or in the child spaces.
 
 ## Path Parameters
 
@@ -31,5 +31,42 @@ Changes a member's role. Only space admins can perform this action.
 <ResponseField name="membership" type="object">
   Updated membership with `id`, `role`, `status`, `joinedAt`, and `userId`.
 </ResponseField>
+
+## Errors
+
+<AccordionGroup>
+  <Accordion title="Membership Not Found — 404">
+    ```json
+    { "error": "Membership not found.", "code": "space/membership-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Creator Required — 403">
+    Someone other than the space creator (or a service or master key) promoting a member to, or demoting them from, `"admin"`.
+    ```json
+    { "error": "Only the space creator can promote or demote admins.", "code": "space/creator-required" }
+    ```
+  </Accordion>
+  <Accordion title="Last Admin — 400">
+    ```json
+    { "error": "Cannot demote the last admin. Promote another member to admin first.", "code": "space/last-admin" }
+    ```
+    Lowering a role also lowers it in the child spaces, so it is refused too when the member is the last admin of one of them, named by `spaceId`:
+    ```json
+    { "error": "This member is the last admin of a child space. Promote another member to admin there first.", "code": "space/last-admin", "spaceId": "…" }
+    ```
+  </Accordion>
+  <Accordion title="Member Banned — 409">
+    Raising a member to `"moderator"` or `"admin"` while they are banned in this space or in one of its child spaces (the role also applies in the child spaces). Lowering a banned member's role is allowed. `bannedSpaceIds` lists where the bans are, so they can be lifted first with [Unban Member](/v7/api-reference/spaces/membership/unban-member).
+    ```json
+    { "error": "This member is banned in this space or one of its child spaces. Lift those bans before giving them a role.", "code": "space/member-banned", "bannedSpaceIds": ["…"] }
+    ```
+  </Accordion>
+  <Accordion title="Member Not Active — 409">
+    Raising a member to `"moderator"` or `"admin"` while their request is pending or was rejected.
+    ```json
+    { "error": "Only an active member can be given a role.", "code": "space/member-not-active" }
+    ```
+  </Accordion>
+</AccordionGroup>
 
 See also: [useUpdateMemberRole](/v7/hooks/spaces/use-update-member-role)

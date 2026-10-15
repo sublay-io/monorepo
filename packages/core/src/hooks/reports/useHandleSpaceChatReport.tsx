@@ -9,10 +9,9 @@ export interface HandleSpaceChatReportParams {
   messageId?: string;
   actions: Array<"remove-message" | "ban-user" | "dismiss">;
   summary?: string;
-  /** The ban TARGET, not the moderator. */
-  userId?: string;
+  /** Why the author of the reported message is banned; required with "ban-user". */
   reason?: string;
-  /** The acting moderator, for attribution. */
+  /** Service or master key only: the moderator the key acts for, whose permissions then apply. */
   actingUserId?: string;
 }
 
@@ -48,7 +47,6 @@ function useHandleSpaceChatReport(): (
       messageId,
       actions,
       summary,
-      userId,
       reason,
       actingUserId,
     }: HandleSpaceChatReportParams) => {
@@ -66,7 +64,6 @@ function useHandleSpaceChatReport(): (
           messageId,
           actions,
           summary,
-          userId,
           reason,
           actingUserId,
         }

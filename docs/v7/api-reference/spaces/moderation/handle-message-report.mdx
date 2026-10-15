@@ -20,13 +20,13 @@ Resolves a filed report against a chat message in a space's integrated conversat
 
 <ParamField body="actions" type="string[]" required>
   One or more actions to take. Must contain at least one value. Available actions:
-  - `"remove-message"` — marks the message as removed via moderation (requires `messageId`)
-  - `"ban-user"` — bans the target user from the space (requires `userId` and `reason`)
+  - `"remove-message"` — marks the reported message as removed via moderation
+  - `"ban-user"` — bans the author of the reported content from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats, so they can no longer post to or receive them (they keep read access to messages from before the ban). The same rules as [Ban Member](/v7/api-reference/spaces/membership/ban-member) apply, with the same errors: a moderator cannot ban a moderator or admin, only the space creator can ban an admin, and the last admin of a space cannot be banned. A refused ban rolls back the whole request, including any removal in the same request. An author who is not a member of the space (for example, who left before the report was handled) is banned all the same: the ban is kept as a banned membership, so they can't join the space or its child spaces. If the author is already banned in the space, the ban is not repeated and the rest of the request still applies; it is still re-applied to their active memberships in child spaces, under the same rules (requires `reason`)
   - `"dismiss"` — dismisses the report without action (cannot be combined with other actions)
 </ParamField>
 
 <ParamField body="messageId" type="string">
-  UUID of the message to remove. Required when `remove-message` is included in `actions`.
+  Optional. The message acted on is the report's own; if sent, `messageId` must be that message.
 </ParamField>
 
 <ParamField body="summary" type="string">
@@ -34,11 +34,15 @@ Resolves a filed report against a chat message in a space's integrated conversat
 </ParamField>
 
 <ParamField body="userId" type="string">
-  UUID of the user to ban. Required when `ban-user` is included in `actions`.
+  Optional. The server bans the author of the reported content; if `userId` is sent, it must be that author, or the request is refused with `400 report/user-not-author`.
 </ParamField>
 
 <ParamField body="reason" type="string">
-  Reason for the ban. Required when `ban-user` is included in `actions`.
+  Reason for the ban, kept in the space's ban log. Required when `ban-user` is included in `actions`.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Service or master key only: the moderator the key acts for. The request then has exactly that moderator's permissions, so it is refused if they cannot moderate the space or are not allowed the ban.
 </ParamField>
 
 ## Response
@@ -72,14 +76,52 @@ Returns `200 OK`:
     { "error": "User not found.", "code": "report/user-not-found" }
     ```
   </Accordion>
-  <Accordion title="User Not a Member — 404">
-    ```json
-    { "error": "User is not a member of this space.", "code": "space/member-not-found" }
-    ```
-  </Accordion>
   <Accordion title="Invalid Action Combination — 400">
     ```json
     { "error": "Cannot combine 'dismiss' with other actions.", "code": "report/invalid-actions" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Reason — 400">
+    ```json
+    { "error": "reason is required for banning a user", "code": "report/missing-fields" }
+    ```
+  </Accordion>
+  <Accordion title="Not the Author — 400">
+    The `userId` sent is not the author of the reported content.
+    ```json
+    { "error": "userId must be the author of the reported content.", "code": "report/user-not-author" }
+    ```
+  </Accordion>
+  <Accordion title="No Author — 400">
+    The reported content has no author to ban (for example, its author deleted their account).
+    ```json
+    { "error": "The reported content has no author to ban.", "code": "report/no-author" }
+    ```
+  </Accordion>
+  <Accordion title="Target Mismatch — 400">
+    The `messageId` sent does not match what the report is about, or the report is about another kind of content.
+    ```json
+    { "error": "The supplied target id does not match the target of this report", "code": "report/target-mismatch" }
+    ```
+    ```json
+    { "error": "This report targets a comment, not a message", "code": "report/target-type-mismatch" }
+    ```
+  </Accordion>
+  <Accordion title="Not a Moderator — 403">
+    The user named by `actingUserId` cannot moderate this space.
+    ```json
+    { "error": "Moderator access required", "code": "space/moderator-required" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Found — 400">
+    ```json
+    { "error": "Acting user not found.", "code": "chat/acting-user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent an `actingUserId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "chat/unauthorized" }
     ```
   </Accordion>
 </AccordionGroup>

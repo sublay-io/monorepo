@@ -111,13 +111,12 @@ describe("js-sdk spaces (membership) — request shaping", () => {
     expect(projectInstance.patch.mock.calls[0]).toHaveLength(1);
   });
 
-  it("banMember patches the ban route for the memberId target with no body", async () => {
+  it("banMember patches the ban route, sending the optional reason", async () => {
     const { client, projectInstance } = makeClient();
-    await banMember(client, { spaceId: "s1", memberId: "m1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
-      "/spaces/s1/members/m1/ban"
-    );
-    expect(projectInstance.patch.mock.calls[0]).toHaveLength(1);
+    await banMember(client, { spaceId: "s1", memberId: "m1", reason: "spam" });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1/members/m1/ban", {
+      reason: "spam",
+    });
   });
 
   it("unbanMember patches the unban route for the memberId target with no body", async () => {

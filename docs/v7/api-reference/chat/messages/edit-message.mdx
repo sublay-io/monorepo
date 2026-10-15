@@ -46,6 +46,7 @@ Returns the updated [ChatMessage](/v7/data-models/chat-message), with `editedAt`
 
 <AccordionGroup>
   <Accordion title="Forbidden — 403 (not a member)">
+    Also returned to someone who left, was removed or was banned: editing needs an active membership, like sending.
     ```json
     { "error": "You are not a member of this conversation.", "code": "chat/not-a-member" }
     ```

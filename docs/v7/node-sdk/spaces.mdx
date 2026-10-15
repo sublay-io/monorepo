@@ -60,7 +60,7 @@ const space = await sublay.spaces.createSpace({
 </ParamField>
 
 <ParamField body="parentSpaceId" type="string">
-  Makes this space a child of the specified parent space.
+  Makes this space a child of the specified parent space. The user the space is created for (`userId`) must be an active admin of the parent space, or the request is refused with `403 space/parent-admin-required`.
 </ParamField>
 
 <ParamField body="metadata" type="object">

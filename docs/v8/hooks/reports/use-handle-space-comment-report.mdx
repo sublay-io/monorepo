@@ -65,16 +65,12 @@ function CommentReportActions({ report }) {
   One or more actions to take:
 
   - `remove-comment` — Removes the comment.
-  - `ban-user` — Bans the comment's author from the space (requires `userId`).
+  - `ban-user` — Bans the comment's author from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats (requires `reason`).
   - `dismiss` — Marks the report as dismissed.
 </ParamField>
 
 <ParamField body="summary" type="string" required>
   A moderator note describing the action taken.
-</ParamField>
-
-<ParamField body="userId" type="string">
-  The ID of the user to ban. Required when `ban-user` is included in `actions`.
 </ParamField>
 
 <ParamField body="reason" type="string">

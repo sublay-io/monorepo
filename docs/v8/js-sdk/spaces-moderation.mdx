@@ -17,7 +17,8 @@ const result = await sublay.spaces.handleEntityReport({
   reportId: "rep_111",
   entityId: "ent_222",
   actions: ["remove-entity", "ban-user"],
-  userId: "usr_333",
+  reason: "Spam",
+  summary: "Removed and banned for spam",
 });
 ```
 
@@ -34,24 +35,16 @@ const result = await sublay.spaces.handleEntityReport({
 </ParamField>
 
 <ParamField body="actions" type="string[]" required>
-  One or more actions to apply: `"remove-entity"`, `"ban-user"`, and/or `"dismiss"`.
+  One or more actions to apply: `"remove-entity"`, `"ban-user"`, and/or `"dismiss"`. `"ban-user"` bans the author of the reported content and requires `reason`.
 </ParamField>
 
 <ParamField body="summary" type="string">
-  A summary of the resolution.
+  The resolution note stored on the report. Required, whatever the actions.
 </ParamField>
 
 <ParamField body="reason" type="string">
-  The reason for the resolution.
+  Reason for the ban, kept in the space's ban log. Required when `actions` includes `ban-user`.
 </ParamField>
-
-<ParamField body="userId" type="string">
-  The user to ban. Required when `actions` includes `"ban-user"`.
-</ParamField>
-
-<Note>
-  `userId` here is the ban **target** — the user being banned — not the actor performing the moderation.
-</Note>
 
 **Returns** — `Promise<{ message: string; code: string }>`
 
@@ -67,6 +60,7 @@ const result = await sublay.spaces.handleCommentReport({
   reportId: "rep_111",
   commentId: "cmt_222",
   actions: ["dismiss"],
+  summary: "No violation found",
 });
 ```
 
@@ -83,24 +77,16 @@ const result = await sublay.spaces.handleCommentReport({
 </ParamField>
 
 <ParamField body="actions" type="string[]" required>
-  One or more actions to apply: `"remove-comment"`, `"ban-user"`, and/or `"dismiss"`.
+  One or more actions to apply: `"remove-comment"`, `"ban-user"`, and/or `"dismiss"`. `"ban-user"` bans the author of the reported content and requires `reason`.
 </ParamField>
 
 <ParamField body="summary" type="string">
-  A summary of the resolution.
+  The resolution note stored on the report. Required, whatever the actions.
 </ParamField>
 
 <ParamField body="reason" type="string">
-  The reason for the resolution.
+  Reason for the ban, kept in the space's ban log. Required when `actions` includes `ban-user`.
 </ParamField>
-
-<ParamField body="userId" type="string">
-  The user to ban. Required when `actions` includes `"ban-user"`.
-</ParamField>
-
-<Note>
-  `userId` here is the ban **target** — the user being banned — not the actor performing the moderation.
-</Note>
 
 **Returns** — `Promise<{ message: string; code: string }>`
 
@@ -128,7 +114,7 @@ const result = await sublay.spaces.handleSpaceChatReport({
 </ParamField>
 
 <ParamField body="actions" type="string[]" required>
-  One or more actions to apply: `"remove-message"`, `"ban-user"`, and/or `"dismiss"`.
+  One or more actions to apply: `"remove-message"`, `"ban-user"`, and/or `"dismiss"`. `"ban-user"` bans the author of the reported content and requires `reason`.
 </ParamField>
 
 <ParamField body="summary" type="string">
@@ -136,20 +122,12 @@ const result = await sublay.spaces.handleSpaceChatReport({
 </ParamField>
 
 <ParamField body="reason" type="string">
-  The reason for the resolution.
-</ParamField>
-
-<ParamField body="userId" type="string">
-  The user to ban. Required when `actions` includes `"ban-user"`.
+  Reason for the ban, kept in the space's ban log, and the removal reason for `remove-message`. Required when `actions` includes `ban-user`.
 </ParamField>
 
 <ParamField body="messageId" type="string">
   The message to remove. Required when `actions` includes `"remove-message"`.
 </ParamField>
-
-<Note>
-  `userId` here is the ban **target** — the user being banned — not the actor performing the moderation.
-</Note>
 
 **Returns** — `Promise<{ message: string; code: string }>`
 

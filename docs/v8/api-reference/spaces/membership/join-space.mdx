@@ -41,6 +41,10 @@ Joins a space. If the space has `requireJoinApproval: true`, the membership is c
     ```json
     { "error": "You are banned from this space.", "code": "space/banned" }
     ```
+    Also returned when the user is banned in a parent of this space; `bannedSpaceIds` lists those spaces:
+    ```json
+    { "error": "You are banned from a parent of this space.", "code": "space/banned", "bannedSpaceIds": ["…"] }
+    ```
   </Accordion>
   <Accordion title="Already a Member — 409">
     ```json

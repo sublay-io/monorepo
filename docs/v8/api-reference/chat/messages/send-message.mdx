@@ -37,7 +37,7 @@ This endpoint accepts `multipart/form-data` to support file attachments alongsid
 </ParamField>
 
 <ParamField body="quotedMessageId" type="string">
-  ID of a message to quote inline. The message stays in the main stream but renders the quoted content as a preview. Optional.
+  ID of a message to quote inline. The message stays in the main stream but renders the quoted content as a preview. Must be a message in this conversation. Optional.
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -80,6 +80,12 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
   <Accordion title="Invalid Parent — 400 Bad Request">
     ```json
     { "error": "Parent message not found, not in this conversation, already removed, or is itself a reply.", "code": "chat/invalid-parent" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Quote — 400 Bad Request">
+    The quoted message is not in this conversation, or was removed.
+    ```json
+    { "error": "Quoted message not found in this conversation.", "code": "chat/invalid-quote" }
     ```
   </Accordion>
 </AccordionGroup>

@@ -27,6 +27,7 @@ function EntityReportActions({ report }) {
       entityId: report.targetId,
       actions: ["remove-entity", "ban-user"],
       summary: "Removed spam content and banned user from space",
+      reason: "Spam",
       userId: report.target?.userId,
     });
   };
@@ -68,7 +69,7 @@ function EntityReportActions({ report }) {
   One or more actions to take. Multiple actions are applied together.
 
   - `remove-entity` — Removes the entity from the space.
-  - `ban-user` — Bans the entity's author from the space (requires `userId`).
+  - `ban-user` — Bans the entity's author from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats (requires `reason`; `userId` is optional and must be the author if sent).
   - `dismiss` — Marks the report as dismissed without taking action on the content.
 </ParamField>
 
@@ -77,7 +78,7 @@ function EntityReportActions({ report }) {
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The ID of the user to ban. Required when `ban-user` is included in `actions`.
+  Optional. The server bans the author of the reported content; if sent, this must be that author.
 </ParamField>
 
 <ParamField body="reason" type="string">

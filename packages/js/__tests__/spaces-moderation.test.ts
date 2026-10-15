@@ -44,27 +44,24 @@ describe("js-sdk spaces (moderation/reports) — request shaping", () => {
     );
   });
 
-  it("handleEntityReport KEEPS userId as the ban target when actions include ban-user (Rule A exception)", async () => {
+  it("handleEntityReport sends no ban target: the server bans the reported content's author", async () => {
     const { client, projectInstance } = makeClient();
     await handleEntityReport(client, {
       spaceId: "s1",
       reportId: "r1",
       entityId: "e1",
       actions: ["ban-user"],
-      userId: "target-user-1",
+      reason: "spam",
     });
     const [, body] = projectInstance.patch.mock.calls[0];
-    // Contrast with the dropped-actor pattern elsewhere in this module
-    // (joinSpace/leaveSpace/checkMyMembership): here userId IS sent, because
-    // it identifies the report's offending user (the ban target), not the
-    // acting moderator.
-    expect(body).toHaveProperty("userId", "target-user-1");
+    // No ban target is sent: the server bans the reported content's author.
+    expect(body).not.toHaveProperty("userId");
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/reports/entity/r1",
       {
         entityId: "e1",
         actions: ["ban-user"],
-        userId: "target-user-1",
+        reason: "spam",
       }
     );
   });
@@ -83,23 +80,23 @@ describe("js-sdk spaces (moderation/reports) — request shaping", () => {
     );
   });
 
-  it("handleCommentReport KEEPS userId as the ban target when actions include ban-user (Rule A exception)", async () => {
+  it("handleCommentReport sends no ban target: the server bans the reported content's author", async () => {
     const { client, projectInstance } = makeClient();
     await handleCommentReport(client, {
       spaceId: "s1",
       reportId: "r1",
       commentId: "c1",
       actions: ["ban-user"],
-      userId: "target-user-2",
+      reason: "spam",
     });
     const [, body] = projectInstance.patch.mock.calls[0];
-    expect(body).toHaveProperty("userId", "target-user-2");
+    expect(body).not.toHaveProperty("userId");
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/reports/comment/r1",
       {
         commentId: "c1",
         actions: ["ban-user"],
-        userId: "target-user-2",
+        reason: "spam",
       }
     );
   });
@@ -168,19 +165,19 @@ describe("js-sdk spaces (moderation/reports) — request shaping", () => {
     );
   });
 
-  it("handleSpaceChatReport KEEPS userId as the ban target when actions include ban-user (Rule A exception)", async () => {
+  it("handleSpaceChatReport sends no ban target: the server bans the reported content's author", async () => {
     const { client, projectInstance } = makeClient();
     await handleSpaceChatReport(client, {
       spaceId: "s1",
       reportId: "r1",
       actions: ["ban-user"],
-      userId: "target-user-3",
+      reason: "spam",
     });
     const [, body] = projectInstance.patch.mock.calls[0];
-    expect(body).toHaveProperty("userId", "target-user-3");
+    expect(body).not.toHaveProperty("userId");
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/chat/reports/r1",
-      { actions: ["ban-user"], userId: "target-user-3" }
+      { actions: ["ban-user"], reason: "spam" }
     );
   });
 

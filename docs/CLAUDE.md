@@ -124,7 +124,7 @@ API docs are auto-generated from OpenAPI specifications:
 
 ## Deployment
 
-Changes pushed to the main branch automatically deploy to production via Mintlify's GitHub app integration.
+Changes merged into the `v8` branch automatically deploy to production via Mintlify's GitHub app integration (the site builds from `v8` until v8 graduates, then from `main` again). Make every docs change, v7 pages included, on a `v8-<slice>` branch PR'd into `v8`.
 
 ## MDX Components
 

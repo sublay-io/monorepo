@@ -20,6 +20,7 @@ const result = await sublay.spaces.handleEntityReport({
   entityId: "ent_xyz789",
   actions: ["remove-entity", "ban-user"],
   reason: "Repeated spam",
+  summary: "Removed and banned for spam",
 });
 ```
 
@@ -36,19 +37,15 @@ const result = await sublay.spaces.handleEntityReport({
 </ParamField>
 
 <ParamField body="actions" type="string[]" required>
-  One or more actions to apply: `"remove-entity"`, `"ban-user"`, and/or `"dismiss"`.
+  One or more actions to apply: `"remove-entity"`, `"ban-user"`, and/or `"dismiss"`. `"ban-user"` bans the author of the reported content and requires `reason`.
 </ParamField>
 
 <ParamField body="summary" type="string">
-  Optional moderator summary of the resolution.
+  The resolution note stored on the report. Required, whatever the actions.
 </ParamField>
 
 <ParamField body="reason" type="string">
-  Optional reason, stored for audit purposes.
-</ParamField>
-
-<ParamField body="userId" type="string">
-  The Sublay user ID of the moderator performing the action.
+  Reason for the ban, kept in the space's ban log. Required when `actions` includes `ban-user`.
 </ParamField>
 
 **Returns** — `Promise<HandleReportResponse>`
@@ -65,6 +62,7 @@ const result = await sublay.spaces.handleCommentReport({
   reportId: "rpt_abc456",
   commentId: "cmt_abc123",
   actions: ["dismiss"],
+  summary: "No violation found",
 });
 ```
 
@@ -81,19 +79,15 @@ const result = await sublay.spaces.handleCommentReport({
 </ParamField>
 
 <ParamField body="actions" type="string[]" required>
-  One or more actions to apply: `"remove-comment"`, `"ban-user"`, and/or `"dismiss"`.
+  One or more actions to apply: `"remove-comment"`, `"ban-user"`, and/or `"dismiss"`. `"ban-user"` bans the author of the reported content and requires `reason`.
 </ParamField>
 
 <ParamField body="summary" type="string">
-  Optional moderator summary of the resolution.
+  The resolution note stored on the report. Required, whatever the actions.
 </ParamField>
 
 <ParamField body="reason" type="string">
-  Optional reason, stored for audit purposes.
-</ParamField>
-
-<ParamField body="userId" type="string">
-  The Sublay user ID of the moderator performing the action.
+  Reason for the ban, kept in the space's ban log. Required when `actions` includes `ban-user`.
 </ParamField>
 
 **Returns** — `Promise<HandleReportResponse>`

@@ -103,7 +103,7 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
       spaceId: "s1",
       reportId: "r1",
       actions: ["remove-message", "ban-user"],
-      userId: "target1",
+      reason: "spam",
       messageId: "msg1",
       actingUserId: "mod1",
     });
@@ -111,7 +111,7 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
       "/spaces/s1/chat/reports/r1",
       {
         actions: ["remove-message", "ban-user"],
-        userId: "target1",
+        reason: "spam",
         messageId: "msg1",
         actingUserId: "mod1",
       },

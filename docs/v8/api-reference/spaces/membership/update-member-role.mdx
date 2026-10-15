@@ -4,7 +4,7 @@ api: "PATCH /v8/:projectId/spaces/:spaceId/members/:memberId/role"
 description: "Update a member's role within a space"
 ---
 
-Changes a member's role. Only space admins can perform this action. The role also applies in the space's child spaces: giving `"admin"` or `"moderator"` gives it there too (a promotion never lowers a role, so someone who is an admin of a child space stays one there), and a role below that removes `"admin"` and `"moderator"` there.
+Changes a member's role. Only space admins can perform this action. The role also applies in the space's child spaces. Raising someone's role gives it to them there too, but never lowers a role they already hold there: someone who is a regular member here and an admin of a child space stays an admin there when made a moderator here. Lowering someone's role lowers it there too: an admin made a moderator becomes a moderator in the child spaces, and a regular member loses `"admin"` and `"moderator"` there.
 
 ## Path Parameters
 
@@ -50,7 +50,7 @@ Changes a member's role. Only space admins can perform this action. The role als
     ```json
     { "error": "Cannot demote the last admin. Promote another member to admin first.", "code": "space/last-admin" }
     ```
-    A role below `"admin"` also applies in the child spaces, so it is refused too when the member is the last admin of one of them, named by `spaceId`:
+    Lowering a role also lowers it in the child spaces, so it is refused too when the member is the last admin of one of them, named by `spaceId`:
     ```json
     { "error": "This member is the last admin of a child space. Promote another member to admin there first.", "code": "space/last-admin", "spaceId": "…" }
     ```

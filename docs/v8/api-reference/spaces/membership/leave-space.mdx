@@ -22,7 +22,7 @@ Removes the authenticated user's membership from a space and from its child spac
 
 <AccordionGroup>
   <Accordion title="Not a Member — 403">
-    A user token whose user is not an active member of the space.
+    The user is not an active member of the space (for example, banned), including when a service key acts for them.
     ```json
     { "error": "Space membership required", "code": "space/membership-required" }
     ```

@@ -40,6 +40,11 @@ Sets a member's status to `"banned"`, in this space and the child spaces where t
     { "error": "Membership not found.", "code": "space/membership-not-found" }
     ```
   </Accordion>
+  <Accordion title="Already Banned — 409">
+    ```json
+    { "error": "This member is already banned.", "code": "space/already-banned" }
+    ```
+  </Accordion>
   <Accordion title="Insufficient Permissions — 403">
     A moderator banning someone who is a moderator or admin in this space or in a child space the ban reaches. `spaceId` names that space.
     ```json

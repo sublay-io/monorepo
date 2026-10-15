@@ -4,7 +4,7 @@ api: "DELETE /v7/:projectId/spaces/:spaceId"
 description: "Delete a space and all its associated data"
 ---
 
-Permanently deletes a space. All entities, members, child spaces, rules, and reports belonging to the space are also deleted. Only the space's **creator** (the original owner) can perform this action, and not while they are banned from the space. A service or master key can delete any space.
+Permanently deletes a space. All entities, members, child spaces, rules, and reports belonging to the space are also deleted. Only the space's **creator** (the original owner) can perform this action, and not while they are banned from the space or from a space above it. A service or master key can delete any space.
 
 <Warning>This operation is irreversible. All associated data including child spaces will be permanently deleted.</Warning>
 
@@ -39,7 +39,7 @@ Permanently deletes a space. All entities, members, child spaces, rules, and rep
     ```
   </Accordion>
   <Accordion title="Banned — 403">
-    The creator is banned from the space.
+    The creator is banned from the space, or from a space above it.
     ```json
     { "error": "You are banned from this space.", "code": "space/banned" }
     ```

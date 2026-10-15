@@ -35,6 +35,22 @@ Changes a member's role. Only space admins can perform this action.
 ## Errors
 
 <AccordionGroup>
+  <Accordion title="Membership Not Found — 404">
+    ```json
+    { "error": "Membership not found.", "code": "space/membership-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Creator Required — 403">
+    Someone other than the space creator promoting a member to, or demoting them from, `"admin"`.
+    ```json
+    { "error": "Only the space creator can promote or demote admins.", "code": "space/creator-required" }
+    ```
+  </Accordion>
+  <Accordion title="Last Admin — 400">
+    ```json
+    { "error": "Cannot demote the last admin. Promote another member to admin first.", "code": "space/last-admin" }
+    ```
+  </Accordion>
   <Accordion title="Member Banned — 409">
     Giving the role `"admin"` or `"moderator"` to a member who is banned in this space or in one of its child spaces (the role also applies in the child spaces). `bannedSpaceIds` lists where the bans are, so they can be lifted first with [Unban Member](/v7/api-reference/spaces/membership/unban-member).
     ```json

@@ -4,7 +4,7 @@ api: "PATCH /v7/:projectId/spaces/:spaceId/members/:memberId/ban"
 description: "Ban a member from a space"
 ---
 
-Sets a member's status to `"banned"`, in this space and the child spaces they belong to, and ends their membership of those spaces' chats, so they can no longer post to or receive them (they keep read access to messages from before the ban). Requires the caller to be a moderator or admin. Moderators can only ban regular members. Only the **space creator** can ban admins, and the last admin cannot be banned.
+Sets a member's status to `"banned"`, in this space and the child spaces where they are an active member (a pending or rejected request in a child space is left as it is), and ends their membership of those spaces' chats, so they can no longer post to or receive them (they keep read access to messages from before the ban). Requires the caller to be a moderator or admin. Moderators can only ban regular members. Only the **space creator** can ban admins, and the last admin cannot be banned.
 
 ## Path Parameters
 
@@ -37,19 +37,19 @@ Sets a member's status to `"banned"`, in this space and the child spaces they be
   <Accordion title="Insufficient Permissions — 403">
     A moderator banning someone who is a moderator or admin in this space or in a child space the ban reaches. `spaceId` names that space.
     ```json
-    { "error": "Moderators can only ban regular members.", "code": "space/insufficient-permissions" }
+    { "error": "Moderators can only ban regular members.", "code": "space/insufficient-permissions", "spaceId": "…" }
     ```
   </Accordion>
   <Accordion title="Creator Required — 403">
     Someone other than the space creator banning a member who is an admin in this space or in a child space the ban reaches. `spaceId` names that space.
     ```json
-    { "error": "Only the space creator can ban admins.", "code": "space/creator-required" }
+    { "error": "Only the space creator can ban admins.", "code": "space/creator-required", "spaceId": "…" }
     ```
   </Accordion>
   <Accordion title="Last Admin — 400">
     The member is the last admin of this space or of a child space the ban reaches. `spaceId` names that space.
     ```json
-    { "error": "Cannot ban the last admin. Promote another member to admin first.", "code": "space/last-admin" }
+    { "error": "Cannot ban the last admin. Promote another member to admin first.", "code": "space/last-admin", "spaceId": "…" }
     ```
   </Accordion>
 </AccordionGroup>

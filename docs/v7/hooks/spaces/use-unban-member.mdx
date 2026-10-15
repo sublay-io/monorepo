@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useUnbanMember` returns a callable function for unbanning a member. Sets their membership status from `"banned"` back to `"active"`, in this space and in the child spaces where they are banned. Requires the caller to be a moderator or admin.
+`useUnbanMember` returns a callable function for unbanning a member. Sets their membership status from `"banned"` back to `"active"`, in this space and in the child spaces where they are banned. Refused while the member is still banned in a parent space. Requires the caller to be a moderator or admin.
 
 ## Usage Example
 

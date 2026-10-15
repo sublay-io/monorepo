@@ -4,7 +4,7 @@ api: "PATCH /v8/:projectId/spaces/:spaceId/members/:memberId/unban"
 description: "Unban a previously banned member"
 ---
 
-Sets a banned member's status back to `"active"`, in this space and in the child spaces where they are banned (a ban covers child spaces, and so does lifting it). The member gets each space's chat back the next time they open it. Requires the caller to be a moderator or admin. Moderators can only unban regular members, not other moderators or admins.
+Sets a banned member's status back to `"active"`, in this space and in the child spaces where they are banned (a ban covers child spaces, and so does lifting it). A request that was pending or rejected in a child space before the ban stays as it was. The member gets each space's chat back the next time they open it. Requires the caller to be a moderator or admin. Moderators can only unban regular members, not other moderators or admins.
 
 ## Path Parameters
 
@@ -32,6 +32,12 @@ Sets a banned member's status back to `"active"`, in this space and in the child
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Banned membership not found.", "code": "space/membership-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Banned in a Parent Space — 409">
+    The member is still banned in a parent of this space. Lift that ban first; `bannedSpaceIds` lists where.
+    ```json
+    { "error": "This member is banned in a parent of this space. Lift that ban first.", "code": "space/banned-in-parent", "bannedSpaceIds": ["…"] }
     ```
   </Accordion>
   <Accordion title="Insufficient Permissions — 403">

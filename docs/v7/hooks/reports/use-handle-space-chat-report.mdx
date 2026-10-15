@@ -79,7 +79,7 @@ function ChatReportActions({ report }) {
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The ID of the user to ban — the ban **target**, not the moderator. Required when `ban-user` is included in `actions`.
+  Optional. The server bans the author of the reported message; if sent, this must be that author.
 </ParamField>
 
 <ParamField body="reason" type="string">

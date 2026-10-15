@@ -4,7 +4,7 @@ api: "PATCH /v7/:projectId/spaces/:spaceId/members/:memberId/ban"
 description: "Ban a member from a space"
 ---
 
-Sets a member's status to `"banned"`, in this space and the child spaces where they are an active member (a pending or rejected request in a child space is left as it is), and ends their membership of those spaces' chats, so they can no longer post to or receive them (they keep read access to messages from before the ban). Requires the caller to be a moderator or admin. Moderators can only ban regular members. Only the **space creator** can ban admins, and the last admin cannot be banned.
+Sets a member's status to `"banned"`, in this space and the child spaces where they are an active member (a pending or rejected request in a child space is left as it is), and ends their membership of those spaces' chats, so they can no longer post to or receive them (they keep read access to messages from before the ban). A request to join that is still pending can be banned too. Requires the caller to be a moderator or admin. Moderators can only ban regular members. Only the **space creator** can ban admins, and the last admin cannot be banned.
 
 ## Path Parameters
 
@@ -38,12 +38,6 @@ Sets a member's status to `"banned"`, in this space and the child spaces where t
   <Accordion title="Membership Not Found — 404">
     ```json
     { "error": "Membership not found.", "code": "space/membership-not-found" }
-    ```
-  </Accordion>
-  <Accordion title="Request Pending — 409">
-    The member's request to join is still pending: decline it with [Decline Member](/v7/api-reference/spaces/membership/decline-member) instead.
-    ```json
-    { "error": "This member's request is still pending. Decline it instead.", "code": "space/member-pending", "spaceId": "…" }
     ```
   </Accordion>
   <Accordion title="Already Banned — 409">

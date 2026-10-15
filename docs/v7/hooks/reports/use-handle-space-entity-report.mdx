@@ -77,7 +77,7 @@ function EntityReportActions({ report }) {
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The ID of the user to ban. Required when `ban-user` is included in `actions`.
+  Optional. The server bans the author of the reported content; if sent, this must be that author.
 </ParamField>
 
 <ParamField body="reason" type="string">

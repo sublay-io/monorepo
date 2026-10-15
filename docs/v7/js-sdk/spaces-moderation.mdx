@@ -18,6 +18,8 @@ const result = await sublay.spaces.handleEntityReport({
   entityId: "ent_222",
   actions: ["remove-entity", "ban-user"],
   userId: "usr_333",
+  summary: "Removed and banned for spam",
+  reason: "Spam",
 });
 ```
 
@@ -38,11 +40,11 @@ const result = await sublay.spaces.handleEntityReport({
 </ParamField>
 
 <ParamField body="summary" type="string">
-  A summary of the resolution.
+  The resolution note stored on the report. Required, whatever the actions.
 </ParamField>
 
 <ParamField body="reason" type="string">
-  The reason for the resolution.
+  Reason for the ban, kept in the space's ban log. Required when `actions` includes `ban-user`.
 </ParamField>
 
 <ParamField body="userId" type="string">
@@ -67,6 +69,7 @@ const result = await sublay.spaces.handleCommentReport({
   reportId: "rep_111",
   commentId: "cmt_222",
   actions: ["dismiss"],
+  summary: "No violation found",
 });
 ```
 
@@ -87,11 +90,11 @@ const result = await sublay.spaces.handleCommentReport({
 </ParamField>
 
 <ParamField body="summary" type="string">
-  A summary of the resolution.
+  The resolution note stored on the report. Required, whatever the actions.
 </ParamField>
 
 <ParamField body="reason" type="string">
-  The reason for the resolution.
+  Reason for the ban, kept in the space's ban log. Required when `actions` includes `ban-user`.
 </ParamField>
 
 <ParamField body="userId" type="string">
@@ -136,7 +139,7 @@ const result = await sublay.spaces.handleSpaceChatReport({
 </ParamField>
 
 <ParamField body="reason" type="string">
-  The reason for the resolution.
+  Reason for the ban, kept in the space's ban log, and the removal reason for `remove-message`. Required when `actions` includes `ban-user`.
 </ParamField>
 
 <ParamField body="userId" type="string">

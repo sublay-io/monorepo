@@ -29,8 +29,13 @@ Sets a pending member's status to `"active"`. Requires the caller to be a modera
 ## Errors
 
 <AccordionGroup>
+  <Accordion title="Not Found — 404">
+    ```json
+    { "error": "Membership not found.", "code": "space/membership-not-found" }
+    ```
+  </Accordion>
   <Accordion title="Not Pending — 400">
-    The request is no longer pending: it was already approved, declined or banned.
+    The request is no longer pending: it was already approved, declined or banned. The message names the current status, or says the request is no longer pending if it changed while the request was being handled.
     ```json
     { "error": "Membership is already banned.", "code": "space/not-pending" }
     ```

@@ -639,7 +639,6 @@ await sublay.spaces.handleSpaceChatReport({
   reportId: "rpt_abc123",
   actions: ["remove-message", "ban-user"],
   messageId: "msg_xyz",
-  userId: "usr_offender",
   reason: "Repeated harassment",
   actingUserId: "usr_mod123",
 });
@@ -650,7 +649,7 @@ await sublay.spaces.handleSpaceChatReport({
 <ParamField body="actions" type='("remove-message" | "ban-user" | "dismiss")[]' required>
   `dismiss` cannot be combined with the other actions. `ban-user` bans the author of the reported message and requires `reason`.
 </ParamField>
-<ParamField body="messageId" type="string">Required when actions include `remove-message`.</ParamField>
+<ParamField body="messageId" type="string">Optional. The message is read from the report; if sent, it must be the reported message.</ParamField>
 <ParamField body="reason" type="string" />
 <ParamField body="summary" type="string">Stored as the report's resolution note.</ParamField>
 <ParamField body="actingUserId" type="string">The moderator the key acts for. The request then has exactly that moderator's permissions. Omit it to act as the project.</ParamField>

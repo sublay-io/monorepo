@@ -11,8 +11,7 @@ Returns a function that allows a space moderator to take action on a chat messag
 <Note>Requires the authenticated user to have `admin` or `moderator` role in the target space.</Note>
 
 <Info>
-  `ban-user` here is **space-scoped** — it sets the target's space membership to
-  banned. Project-wide suspension is a separate, dashboard-only action; a space
+  `ban-user` here is **space-scoped** — it bans the message's author from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats. Project-wide suspension is a separate, dashboard-only action; a space
   moderator cannot suspend a user across the whole project.
 </Info>
 
@@ -63,14 +62,14 @@ function ChatReportActions({ report }) {
 </ParamField>
 
 <ParamField body="messageId" type="string">
-  The ID of the reported message. Required when `remove-message` is included in `actions`.
+  Optional. The message acted on is the report's own; if sent, `messageId` must be that message.
 </ParamField>
 
 <ParamField body="actions" type="Array<'remove-message' | 'ban-user' | 'dismiss'>" required>
   One or more actions to take:
 
   - `remove-message` — Removes the message.
-  - `ban-user` — Bans the message's author from the space (requires `reason`).
+  - `ban-user` — Bans the message's author from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats (requires `reason`).
   - `dismiss` — Marks the report as dismissed.
 </ParamField>
 
@@ -83,7 +82,7 @@ function ChatReportActions({ report }) {
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  The moderator the action is attributed to. Service and master keys only.
+  The moderator a service or master key acts for. The request then has exactly that moderator's permissions.
 </ParamField>
 
 ## Returns

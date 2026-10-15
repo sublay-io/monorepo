@@ -650,7 +650,7 @@ await sublay.spaces.handleSpaceChatReport({
 <ParamField body="actions" type='("remove-message" | "ban-user" | "dismiss")[]' required>
   `dismiss` cannot be combined with the other actions.
 </ParamField>
-<ParamField body="messageId" type="string">Required when actions include `remove-message`.</ParamField>
+<ParamField body="messageId" type="string">Optional. The message is read from the report; if sent, it must be the reported message.</ParamField>
 <ParamField body="userId" type="string">Optional. The server bans the author of the reported message; if sent, this must be that author.</ParamField>
 <ParamField body="reason" type="string" />
 <ParamField body="summary" type="string">Stored as the report's resolution note.</ParamField>

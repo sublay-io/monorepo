@@ -103,4 +103,13 @@ Returns `201 Created`:
     { "error": "The reported content has no author to ban.", "code": "report/no-author" }
     ```
   </Accordion>
+  <Accordion title="Target Mismatch — 400">
+    The `entityId` sent does not match what the report is about, or the report is about another kind of content.
+    ```json
+    { "error": "The supplied target id does not match the target of this report", "code": "report/target-mismatch" }
+    ```
+    ```json
+    { "error": "This report targets a comment, not a entity", "code": "report/target-type-mismatch" }
+    ```
+  </Accordion>
 </AccordionGroup>

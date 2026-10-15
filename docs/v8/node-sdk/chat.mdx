@@ -603,10 +603,10 @@ const conversation = await sublay.spaces.getSpaceConversation({
 Removes a message in a space conversation.
 
 <Note>
-  Unlike the conversation-scoped chat calls, the two space-chat moderation routes
-  are **service-key god-mode** — your service key passes the space-moderator check
-  automatically. `actingUserId` here is **attribution only** (who moderated); omit
-  it for a backend/system action.
+  On the two space-chat moderation routes, `actingUserId` is optional. Omit it
+  and your service key acts as the project, passing the space-moderator check.
+  Name a user and the request has exactly that user's moderation permissions:
+  it is refused if they cannot moderate the space.
 </Note>
 
 ```typescript

@@ -26,6 +26,10 @@ Takes a direct moderation action on a chat message in a space's integrated conve
   Optional reason for the removal. Up to 1,000 characters.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Service or master key only: the moderator the key acts for. The request then has exactly that user's moderation permissions; omit it to act as the project.
+</ParamField>
+
 ## Response
 
 <ResponseField name="message" type="string">

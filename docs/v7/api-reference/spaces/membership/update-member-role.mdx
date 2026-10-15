@@ -32,4 +32,21 @@ Changes a member's role. Only space admins can perform this action.
   Updated membership with `id`, `role`, `status`, `joinedAt`, and `userId`.
 </ResponseField>
 
+## Errors
+
+<AccordionGroup>
+  <Accordion title="Member Banned — 409">
+    Giving the role `"admin"` or `"moderator"` to a member who is banned in this space or in one of its child spaces (the role also applies in the child spaces). `bannedSpaceIds` lists where the bans are, so they can be lifted first with [Unban Member](/v7/api-reference/spaces/membership/unban-member).
+    ```json
+    { "error": "This member is banned in this space or one of its child spaces. Lift those bans before giving them a role.", "code": "space/member-banned", "bannedSpaceIds": ["…"] }
+    ```
+  </Accordion>
+  <Accordion title="Member Not Active — 409">
+    Giving the role `"admin"` or `"moderator"` to a member whose request is pending or was rejected.
+    ```json
+    { "error": "Only an active member can be given a role.", "code": "space/member-not-active" }
+    ```
+  </Accordion>
+</AccordionGroup>
+
 See also: [useUpdateMemberRole](/v7/hooks/spaces/use-update-member-role)

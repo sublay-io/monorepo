@@ -35,18 +35,19 @@ Sets a member's status to `"banned"`, in this space and the child spaces they be
     ```
   </Accordion>
   <Accordion title="Insufficient Permissions — 403">
-    Moderators attempting to ban another moderator or admin.
+    A moderator banning someone who is a moderator or admin in this space or in a child space the ban reaches. `spaceId` names that space.
     ```json
     { "error": "Moderators can only ban regular members.", "code": "space/insufficient-permissions" }
     ```
   </Accordion>
   <Accordion title="Creator Required — 403">
-    Non-creator attempting to ban an admin.
+    Someone other than the space creator banning a member who is an admin in this space or in a child space the ban reaches. `spaceId` names that space.
     ```json
     { "error": "Only the space creator can ban admins.", "code": "space/creator-required" }
     ```
   </Accordion>
   <Accordion title="Last Admin — 400">
+    The member is the last admin of this space or of a child space the ban reaches. `spaceId` names that space.
     ```json
     { "error": "Cannot ban the last admin. Promote another member to admin first.", "code": "space/last-admin" }
     ```

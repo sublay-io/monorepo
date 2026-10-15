@@ -4,7 +4,7 @@ api: "PATCH /v7/:projectId/spaces/:spaceId/members/:memberId/role"
 description: "Update a member's role within a space"
 ---
 
-Changes a member's role. Only space admins can perform this action.
+Changes a member's role. Only space admins can perform this action. The role also applies in the space's child spaces: giving `"admin"` or `"moderator"` gives it there too (a promotion never lowers a role, so someone who is an admin of a child space stays one there), and a role below that removes `"admin"` and `"moderator"` there.
 
 ## Path Parameters
 

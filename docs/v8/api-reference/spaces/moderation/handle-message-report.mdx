@@ -21,7 +21,7 @@ Resolves a filed report against a chat message in a space's integrated conversat
 <ParamField body="actions" type="string[]" required>
   One or more actions to take. Must contain at least one value. Available actions:
   - `"remove-message"` — marks the message as removed via moderation (requires `messageId`)
-  - `"ban-user"` — bans the author of the reported content from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats, so they can no longer post to or receive them (they keep read access to messages from before the ban). The same rules as [Ban Member](/v8/api-reference/spaces/membership/ban-member) apply, with the same errors: a moderator cannot ban a moderator or admin, only the space creator can ban an admin, and the last admin of a space cannot be banned. A refused ban rolls back the whole request, including any removal in the same request. If the author is already banned in the space, the ban step is skipped and the rest of the request still applies (requires `reason`)
+  - `"ban-user"` — bans the author of the reported content from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats, so they can no longer post to or receive them (they keep read access to messages from before the ban). The same rules as [Ban Member](/v8/api-reference/spaces/membership/ban-member) apply, with the same errors: a moderator cannot ban a moderator or admin, only the space creator can ban an admin, and the last admin of a space cannot be banned. A refused ban rolls back the whole request, including any removal in the same request. An author who is not a member of the space (for example, who left before the report was handled) is banned all the same: the ban is kept as a banned membership, so they can't join the space or its child spaces. If the author is already banned in the space, the ban is not repeated and the rest of the request still applies; it is still re-applied to their active memberships in child spaces, under the same rules (requires `reason`)
   - `"dismiss"` — dismisses the report without action (cannot be combined with other actions)
 </ParamField>
 
@@ -70,11 +70,6 @@ Returns `200 OK`:
   <Accordion title="User Not Found — 404">
     ```json
     { "error": "User not found.", "code": "report/user-not-found" }
-    ```
-  </Accordion>
-  <Accordion title="User Not a Member — 404">
-    ```json
-    { "error": "User is not a member of this space.", "code": "space/member-not-found" }
     ```
   </Accordion>
   <Accordion title="Invalid Action Combination — 400">

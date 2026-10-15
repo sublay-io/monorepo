@@ -6,9 +6,8 @@ export interface ModerateSpaceChatMessageProps {
   moderationStatus: "removed";
   moderationReason?: string;
   /**
-   * Acting moderator, for attribution only. This route is service-key god-mode
-   * (the space-moderator check is bypassed for service keys); omit for a
-   * backend/system action.
+   * The moderator the key acts for: the request then has exactly that
+   * moderator's permissions in the space. Omit it to act as the project.
    */
   actingUserId?: string;
 }

@@ -4,7 +4,7 @@ api: "PATCH /v8/:projectId/spaces/:spaceId/members/:memberId/unban"
 description: "Unban a previously banned member"
 ---
 
-Sets a banned member's status back to `"active"`. Requires the caller to be a moderator or admin. Moderators can only unban regular members, not other moderators or admins.
+Sets a banned member's status back to `"active"` in this space only: a ban also covers child spaces, and those stay banned. The member gets the space's chat back the next time they open it. Requires the caller to be a moderator or admin. Moderators can only unban regular members, not other moderators or admins.
 
 ## Path Parameters
 

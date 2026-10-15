@@ -48,7 +48,7 @@ const result = await sublay.spaces.handleEntityReport({
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The Sublay user ID of the moderator performing the action.
+  Optional. The server bans the author of the reported content; if sent, this must be that author.
 </ParamField>
 
 **Returns** — `Promise<HandleReportResponse>`
@@ -93,7 +93,7 @@ const result = await sublay.spaces.handleCommentReport({
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The Sublay user ID of the moderator performing the action.
+  Optional. The server bans the author of the reported content; if sent, this must be that author.
 </ParamField>
 
 **Returns** — `Promise<HandleReportResponse>`

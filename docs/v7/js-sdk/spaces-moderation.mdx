@@ -46,7 +46,7 @@ const result = await sublay.spaces.handleEntityReport({
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The user to ban. Required when `actions` includes `"ban-user"`.
+  Optional. The server bans the author of the reported content; if sent, this must be that author.
 </ParamField>
 
 <Note>
@@ -95,7 +95,7 @@ const result = await sublay.spaces.handleCommentReport({
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The user to ban. Required when `actions` includes `"ban-user"`.
+  Optional. The server bans the author of the reported content; if sent, this must be that author.
 </ParamField>
 
 <Note>
@@ -140,7 +140,7 @@ const result = await sublay.spaces.handleSpaceChatReport({
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The user to ban. Required when `actions` includes `"ban-user"`.
+  Optional. The server bans the author of the reported content; if sent, this must be that author.
 </ParamField>
 
 <ParamField body="messageId" type="string">

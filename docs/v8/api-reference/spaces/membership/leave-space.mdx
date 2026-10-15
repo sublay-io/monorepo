@@ -21,9 +21,10 @@ Removes the authenticated user's membership from a space and from its child spac
 ## Errors
 
 <AccordionGroup>
-  <Accordion title="Not a Member — 404">
+  <Accordion title="Not a Member — 403">
+    A user token whose user is not an active member of the space.
     ```json
-    { "error": "You are not a member of this space.", "code": "space/not-member" }
+    { "error": "Space membership required", "code": "space/membership-required" }
     ```
   </Accordion>
   <Accordion title="Creator Cannot Leave — 400">

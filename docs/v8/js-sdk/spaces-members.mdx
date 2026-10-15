@@ -208,6 +208,10 @@ const result = await sublay.spaces.banMember({
   The membership ID of the member to ban.
 </ParamField>
 
+<ParamField body="reason" type="string">
+  Why the member is banned; kept in the space's ban log.
+</ParamField>
+
 **Returns** — `Promise<{ message: string; membership: { id: string; status: "banned" } }>`
 
 ---

@@ -11,7 +11,7 @@ export interface HandleSpaceChatReportParams {
   summary?: string;
   /** Why the author of the reported message is banned; required with "ban-user". */
   reason?: string;
-  /** The acting moderator, for attribution. */
+  /** Service or master key only: the moderator the key acts for, whose permissions then apply. */
   actingUserId?: string;
 }
 

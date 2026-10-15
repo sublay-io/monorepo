@@ -21,7 +21,7 @@ Resolves a filed report against a chat message in a space's integrated conversat
 <ParamField body="actions" type="string[]" required>
   One or more actions to take. Must contain at least one value. Available actions:
   - `"remove-message"` — marks the message as removed via moderation (requires `messageId`)
-  - `"ban-user"` — bans the target user from the space (requires `userId` and `reason`)
+  - `"ban-user"` — bans the target user from the space and ends their membership of the space's chat, so they can no longer read, post to or receive it (requires `userId` and `reason`)
   - `"dismiss"` — dismisses the report without action (cannot be combined with other actions)
 </ParamField>
 

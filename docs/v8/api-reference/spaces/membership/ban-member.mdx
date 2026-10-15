@@ -4,7 +4,7 @@ api: "PATCH /v8/:projectId/spaces/:spaceId/members/:memberId/ban"
 description: "Ban a member from a space"
 ---
 
-Sets a member's status to `"banned"`. Requires the caller to be a moderator or admin. Moderators can only ban regular members. Only the **space creator** can ban admins, and the last admin cannot be banned.
+Sets a member's status to `"banned"`, in this space and its child spaces, and ends their membership of those spaces' chats, so they can no longer read, post to or receive them. Requires the caller to be a moderator or admin. Moderators can only ban regular members. Only the **space creator** can ban admins, and the last admin cannot be banned.
 
 ## Path Parameters
 

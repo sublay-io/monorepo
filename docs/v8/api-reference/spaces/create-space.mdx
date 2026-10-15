@@ -79,6 +79,12 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
     { "error": "Only admins of the parent space can create child spaces.", "code": "space/parent-admin-required" }
     ```
   </Accordion>
+  <Accordion title="Banned — 403">
+    The creator was banned in the parent space (or above) while the child space was being created.
+    ```json
+    { "error": "You are banned from a parent of this space.", "code": "space/banned" }
+    ```
+  </Accordion>
   <Accordion title="Max Depth Exceeded — 400">
     ```json
     { "error": "Maximum nesting depth (10) exceeded.", "code": "space/max-depth-exceeded" }

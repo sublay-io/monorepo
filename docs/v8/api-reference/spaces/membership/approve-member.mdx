@@ -29,6 +29,12 @@ Sets a pending member's status to `"active"`. Requires the caller to be a modera
 ## Errors
 
 <AccordionGroup>
+  <Accordion title="Not Pending — 400">
+    The request is no longer pending: it was already approved, declined or banned.
+    ```json
+    { "error": "Membership is already banned.", "code": "space/not-pending" }
+    ```
+  </Accordion>
   <Accordion title="Banned in a Parent Space — 409">
     The member is banned in a parent of this space; `bannedSpaceIds` lists where.
     ```json

@@ -52,8 +52,6 @@ describe("useHandleSpaceChatReport", () => {
         reportId: "report-1",
         messageId: "message-1",
         actions: ["remove-message", "ban-user"],
-        // userId is the ban target; actingUserId is the moderator.
-        userId: "user-2",
         reason: "Repeated harassment",
         actingUserId: "moderator-1",
       });
@@ -62,7 +60,6 @@ describe("useHandleSpaceChatReport", () => {
     const [call] = axiosPrivate.calls("patch");
     expect(call.body).toMatchObject({
       actions: ["remove-message", "ban-user"],
-      userId: "user-2",
       reason: "Repeated harassment",
       actingUserId: "moderator-1",
     });

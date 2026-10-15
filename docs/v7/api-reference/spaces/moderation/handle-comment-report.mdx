@@ -25,7 +25,7 @@ Resolves a filed report against a comment in a space. Requires the caller to be 
 <ParamField body="actions" type="string[]" required>
   One or more actions to take. Must contain at least one value. Available actions:
   - `"remove-comment"` — marks the comment as removed via moderation
-  - `"ban-user"` — bans the target user from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats, so they can no longer post to or receive them (they keep read access to messages from before the ban). The same rules as [Ban Member](/v7/api-reference/spaces/membership/ban-member) apply, with the same errors: a moderator cannot ban a moderator or admin, only the space creator can ban an admin, and the last admin of a space cannot be banned. A refused ban rolls back the whole request, including any removal in the same request (requires `userId` and `reason`)
+  - `"ban-user"` — bans the author of the reported content from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats, so they can no longer post to or receive them (they keep read access to messages from before the ban). The same rules as [Ban Member](/v7/api-reference/spaces/membership/ban-member) apply, with the same errors: a moderator cannot ban a moderator or admin, only the space creator can ban an admin, and the last admin of a space cannot be banned. A refused ban rolls back the whole request, including any removal in the same request (requires `reason`)
   - `"dismiss"` — dismisses the report without action (requires `summary`; cannot be combined with other actions)
 </ParamField>
 
@@ -34,11 +34,11 @@ Resolves a filed report against a comment in a space. Requires the caller to be 
 </ParamField>
 
 <ParamField body="userId" type="string">
-  UUID of the user to ban. Required when `ban-user` is included in `actions`.
+  Optional. The server bans the author of the reported content; if `userId` is sent, it must be that author, or the request is refused with `400 report/user-not-author`.
 </ParamField>
 
 <ParamField body="reason" type="string">
-  Reason for the ban. Required when `ban-user` is included in `actions`.
+  Reason for the ban, kept in the space's ban log. Required when `ban-user` is included in `actions`.
 </ParamField>
 
 ## Response
@@ -91,9 +91,21 @@ Returns `201 Created`:
     ```json
     { "error": "Summary is required for dismissing a report", "code": "report/missing-fields" }
     ```
-    Also returned when `ban-user` is used without `userId` or `reason`:
+    Also returned when `ban-user` is used without `reason`:
     ```json
-    { "error": "userId and reason are required for banning a user", "code": "report/missing-fields" }
+    { "error": "reason is required for banning a user", "code": "report/missing-fields" }
+    ```
+  </Accordion>
+  <Accordion title="Not the Author — 400">
+    The `userId` sent is not the author of the reported content.
+    ```json
+    { "error": "userId must be the author of the reported content.", "code": "report/user-not-author" }
+    ```
+  </Accordion>
+  <Accordion title="No Author — 400">
+    The reported content has no author to ban (for example, its author deleted their account).
+    ```json
+    { "error": "The reported content has no author to ban.", "code": "report/no-author" }
     ```
   </Accordion>
 </AccordionGroup>

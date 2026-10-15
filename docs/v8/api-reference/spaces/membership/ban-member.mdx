@@ -16,6 +16,12 @@ Sets a member's status to `"banned"`, in this space and the child spaces where t
   UUID of the membership record to ban.
 </ParamField>
 
+## Body
+
+<ParamField body="reason" type="string">
+  Optional reason for the ban, kept with who banned them in the space's ban log.
+</ParamField>
+
 ## Response
 
 <ResponseField name="message" type="string">

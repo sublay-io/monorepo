@@ -25,7 +25,6 @@ describe("useHandleSpaceEntityReport", () => {
         entityId: "entity-1",
         actions: ["remove-entity", "ban-user"],
         summary: "Removed spam content and banned user",
-        userId: "user-2",
         reason: "Spamming",
       });
     });
@@ -37,7 +36,6 @@ describe("useHandleSpaceEntityReport", () => {
     expect(call.body).toMatchObject({
       entityId: "entity-1",
       actions: ["remove-entity", "ban-user"],
-      userId: "user-2",
       reason: "Spamming",
     });
   });

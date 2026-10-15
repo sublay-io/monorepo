@@ -8,8 +8,9 @@ export interface HandleEntityReportProps {
   entityId: string;
   actions: EntityReportAction[];
   summary?: string;
+  /** Why the user is banned, required when actions include "ban-user". The
+   * banned user is always the author of the reported content. */
   reason?: string;
-  userId?: string;
 }
 
 export interface HandleReportResponse {

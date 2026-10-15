@@ -53,7 +53,6 @@ describe("useHandleSpaceCommentReport", () => {
         commentId: "comment-1",
         actions: ["remove-comment", "ban-user"],
         summary: "Removed and banned",
-        userId: "user-2",
         reason: "Repeated harassment",
       });
     });
@@ -61,7 +60,6 @@ describe("useHandleSpaceCommentReport", () => {
     const [call] = axiosPrivate.calls("patch");
     expect(call.body).toMatchObject({
       actions: ["remove-comment", "ban-user"],
-      userId: "user-2",
       reason: "Repeated harassment",
     });
   });

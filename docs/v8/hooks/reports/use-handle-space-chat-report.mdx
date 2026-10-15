@@ -70,16 +70,12 @@ function ChatReportActions({ report }) {
   One or more actions to take:
 
   - `remove-message` — Removes the message.
-  - `ban-user` — Bans the message's author from the space (requires `userId`).
+  - `ban-user` — Bans the message's author from the space (requires `reason`).
   - `dismiss` — Marks the report as dismissed.
 </ParamField>
 
 <ParamField body="summary" type="string">
   A moderator note describing the action taken.
-</ParamField>
-
-<ParamField body="userId" type="string">
-  The ID of the user to ban — the ban **target**, not the moderator. Required when `ban-user` is included in `actions`.
 </ParamField>
 
 <ParamField body="reason" type="string">

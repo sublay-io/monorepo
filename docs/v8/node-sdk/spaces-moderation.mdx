@@ -36,7 +36,7 @@ const result = await sublay.spaces.handleEntityReport({
 </ParamField>
 
 <ParamField body="actions" type="string[]" required>
-  One or more actions to apply: `"remove-entity"`, `"ban-user"`, and/or `"dismiss"`.
+  One or more actions to apply: `"remove-entity"`, `"ban-user"`, and/or `"dismiss"`. `"ban-user"` bans the author of the reported content and requires `reason`.
 </ParamField>
 
 <ParamField body="summary" type="string">
@@ -45,10 +45,6 @@ const result = await sublay.spaces.handleEntityReport({
 
 <ParamField body="reason" type="string">
   Optional reason, stored for audit purposes.
-</ParamField>
-
-<ParamField body="userId" type="string">
-  The Sublay user ID of the moderator performing the action.
 </ParamField>
 
 **Returns** — `Promise<HandleReportResponse>`
@@ -81,7 +77,7 @@ const result = await sublay.spaces.handleCommentReport({
 </ParamField>
 
 <ParamField body="actions" type="string[]" required>
-  One or more actions to apply: `"remove-comment"`, `"ban-user"`, and/or `"dismiss"`.
+  One or more actions to apply: `"remove-comment"`, `"ban-user"`, and/or `"dismiss"`. `"ban-user"` bans the author of the reported content and requires `reason`.
 </ParamField>
 
 <ParamField body="summary" type="string">
@@ -90,10 +86,6 @@ const result = await sublay.spaces.handleCommentReport({
 
 <ParamField body="reason" type="string">
   Optional reason, stored for audit purposes.
-</ParamField>
-
-<ParamField body="userId" type="string">
-  The Sublay user ID of the moderator performing the action.
 </ParamField>
 
 **Returns** — `Promise<HandleReportResponse>`

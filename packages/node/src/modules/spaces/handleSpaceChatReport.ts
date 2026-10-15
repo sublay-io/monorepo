@@ -7,8 +7,8 @@ export interface HandleSpaceChatReportProps {
   reportId: string;
   actions: SpaceChatReportAction[];
   summary?: string;
-  /** The user to ban (target), required when actions include "ban-user". */
-  userId?: string;
+  /** Why the user is banned, required when actions include "ban-user". The
+   * banned user is always the author of the reported content. */
   reason?: string;
   /** The message to remove, required when actions include "remove-message". */
   messageId?: string;

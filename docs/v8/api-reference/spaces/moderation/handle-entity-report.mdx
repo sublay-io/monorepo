@@ -25,7 +25,7 @@ Resolves a filed report against an entity in a space. Requires the caller to be 
 <ParamField body="actions" type="string[]" required>
   One or more actions to take. Must contain at least one value. Available actions:
   - `"remove-entity"` — marks the entity as removed via moderation
-  - `"ban-user"` — bans the target user from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats, so they can no longer post to or receive them (they keep read access to messages from before the ban). The same rules as [Ban Member](/v8/api-reference/spaces/membership/ban-member) apply, with the same errors: a moderator cannot ban a moderator or admin, only the space creator can ban an admin, and the last admin of a space cannot be banned. A refused ban rolls back the whole request, including any removal in the same request (requires `userId` and `reason`)
+  - `"ban-user"` — bans the author of the reported content from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats, so they can no longer post to or receive them (they keep read access to messages from before the ban). The same rules as [Ban Member](/v8/api-reference/spaces/membership/ban-member) apply, with the same errors: a moderator cannot ban a moderator or admin, only the space creator can ban an admin, and the last admin of a space cannot be banned. A refused ban rolls back the whole request, including any removal in the same request (requires `reason`)
   - `"dismiss"` — dismisses the report without action (requires `summary`; cannot be combined with other actions)
 </ParamField>
 
@@ -33,12 +33,8 @@ Resolves a filed report against an entity in a space. Requires the caller to be 
   Summary of the action taken. Required when using `dismiss` or any non-dismiss action.
 </ParamField>
 
-<ParamField body="userId" type="string">
-  UUID of the user to ban. Required when `ban-user` is included in `actions`.
-</ParamField>
-
 <ParamField body="reason" type="string">
-  Reason for the ban. Required when `ban-user` is included in `actions`.
+  Reason for the ban, kept in the space's ban log. Required when `ban-user` is included in `actions`.
 </ParamField>
 
 ## Response
@@ -91,9 +87,21 @@ Returns `201 Created`:
     ```json
     { "error": "Summary is required for dismissing a report", "code": "report/missing-fields" }
     ```
-    Also returned when `ban-user` is used without `userId` or `reason`:
+    Also returned when `ban-user` is used without `reason`:
     ```json
-    { "error": "userId and reason are required for banning a user", "code": "report/missing-fields" }
+    { "error": "reason is required for banning a user", "code": "report/missing-fields" }
+    ```
+  </Accordion>
+  <Accordion title="userId Not Accepted — 400">
+    `ban-user` bans the author of the reported content, so the request takes no `userId`.
+    ```json
+    { "error": "userId is not accepted: ban-user bans the author of the reported content.", "code": "report/user-id-not-accepted" }
+    ```
+  </Accordion>
+  <Accordion title="No Author — 400">
+    The reported content has no author to ban (for example, its author deleted their account).
+    ```json
+    { "error": "The reported content has no author to ban.", "code": "report/no-author" }
     ```
   </Accordion>
 </AccordionGroup>

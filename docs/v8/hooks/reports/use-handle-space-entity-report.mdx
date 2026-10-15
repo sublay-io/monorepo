@@ -27,7 +27,6 @@ function EntityReportActions({ report }) {
       entityId: report.targetId,
       actions: ["remove-entity", "ban-user"],
       summary: "Removed spam content and banned user from space",
-      userId: report.target?.userId,
     });
   };
 
@@ -68,16 +67,12 @@ function EntityReportActions({ report }) {
   One or more actions to take. Multiple actions are applied together.
 
   - `remove-entity` — Removes the entity from the space.
-  - `ban-user` — Bans the entity's author from the space (requires `userId`).
+  - `ban-user` — Bans the entity's author from the space (requires `reason`).
   - `dismiss` — Marks the report as dismissed without taking action on the content.
 </ParamField>
 
 <ParamField body="summary" type="string" required>
   A moderator note describing the action taken. Stored on the report record.
-</ParamField>
-
-<ParamField body="userId" type="string">
-  The ID of the user to ban. Required when `ban-user` is included in `actions`.
 </ParamField>
 
 <ParamField body="reason" type="string">

@@ -50,6 +50,10 @@ Changes a member's role. Only space admins can perform this action.
     ```json
     { "error": "Cannot demote the last admin. Promote another member to admin first.", "code": "space/last-admin" }
     ```
+    A role below `"admin"` also applies in the child spaces, so it is refused too when the member is the last admin of one of them, named by `spaceId`:
+    ```json
+    { "error": "This member is the last admin of a child space. Promote another member to admin there first.", "code": "space/last-admin", "spaceId": "…" }
+    ```
   </Accordion>
   <Accordion title="Member Banned — 409">
     Giving the role `"admin"` or `"moderator"` to a member who is banned in this space or in one of its child spaces (the role also applies in the child spaces). `bannedSpaceIds` lists where the bans are, so they can be lifted first with [Unban Member](/v8/api-reference/spaces/membership/unban-member).

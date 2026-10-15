@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/spaces/:spaceId/leave"
 description: "Leave a space"
 ---
 
-Removes the authenticated user's membership from a space.
+Removes the authenticated user's membership from a space and from its child spaces, and ends their membership of those spaces' chats. A ban in a child space is kept: leaving does not clear it.
 
 ## Path Parameters
 
@@ -17,5 +17,30 @@ Removes the authenticated user's membership from a space.
 <ResponseField name="message" type="string">
   Confirmation message.
 </ResponseField>
+
+## Errors
+
+<AccordionGroup>
+  <Accordion title="Not a Member — 404">
+    ```json
+    { "error": "You are not a member of this space.", "code": "space/not-member" }
+    ```
+  </Accordion>
+  <Accordion title="Creator Cannot Leave — 400">
+    ```json
+    { "error": "The space creator cannot leave the space. Transfer ownership or delete the space instead.", "code": "space/creator-cannot-leave" }
+    ```
+  </Accordion>
+  <Accordion title="Last Admin — 400">
+    The user is the last admin of this space:
+    ```json
+    { "error": "You are the last admin of this space. Promote another member to admin before leaving, or delete the space.", "code": "space/last-admin" }
+    ```
+    or of one of its child spaces, named by `spaceId`:
+    ```json
+    { "error": "You are the last admin of a child space. Promote another member to admin there before leaving.", "code": "space/last-admin", "spaceId": "…" }
+    ```
+  </Accordion>
+</AccordionGroup>
 
 See also: [useLeaveSpace](/v8/hooks/spaces/use-leave-space)

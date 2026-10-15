@@ -40,6 +40,12 @@ Sets a member's status to `"banned"`, in this space and the child spaces where t
     { "error": "Membership not found.", "code": "space/membership-not-found" }
     ```
   </Accordion>
+  <Accordion title="Request Pending — 409">
+    The member's request to join is still pending: decline it with [Decline Member](/v8/api-reference/spaces/membership/decline-member) instead.
+    ```json
+    { "error": "This member's request is still pending. Decline it instead.", "code": "space/member-pending", "spaceId": "…" }
+    ```
+  </Accordion>
   <Accordion title="Already Banned — 409">
     ```json
     { "error": "This member is already banned.", "code": "space/already-banned" }

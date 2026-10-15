@@ -13,9 +13,8 @@ export interface HandleSpaceChatReportProps {
   /** The message to remove, required when actions include "remove-message". */
   messageId?: string;
   /**
-   * Acting moderator, for attribution only. This route is service-key god-mode
-   * (the space-moderator check is bypassed for service keys); omit for a
-   * backend/system action.
+   * The moderator a service key acts for. The request then has exactly that
+   * moderator's permissions. Omit it to act as the project.
    */
   actingUserId?: string;
 }

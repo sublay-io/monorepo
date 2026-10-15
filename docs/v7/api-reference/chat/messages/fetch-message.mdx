@@ -43,6 +43,7 @@ Returns a [ChatMessage](/v7/data-models/chat-message) with all populated fields 
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    Also returned to a former member (who left, was removed or was banned) for a message sent after they left.
     ```json
     { "error": "Message not found.", "code": "chat/message-not-found" }
     ```

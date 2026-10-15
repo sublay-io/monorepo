@@ -37,6 +37,10 @@ Resolves a filed report against a chat message in a space's integrated conversat
   Reason for the ban, kept in the space's ban log. Required when `ban-user` is included in `actions`.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Service or master key only: the moderator the key acts for. The request then has exactly that moderator's permissions, so it is refused if they cannot moderate the space or are not allowed the ban.
+</ParamField>
+
 ## Response
 
 Returns `200 OK`:

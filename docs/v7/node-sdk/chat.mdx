@@ -623,7 +623,7 @@ await sublay.spaces.moderateSpaceChatMessage({
 <ParamField body="messageId" type="string" required />
 <ParamField body="moderationStatus" type='"removed"' required />
 <ParamField body="moderationReason" type="string" />
-<ParamField body="actingUserId" type="string">Acting moderator, for attribution.</ParamField>
+<ParamField body="actingUserId" type="string">The moderator the key acts for. The request then has exactly that moderator's permissions. Omit it to act as the project.</ParamField>
 
 **Returns** — `Promise<{ message: string; moderationStatus: string }>`
 
@@ -654,6 +654,6 @@ await sublay.spaces.handleSpaceChatReport({
 <ParamField body="userId" type="string">Optional. The server bans the author of the reported message; if sent, this must be that author.</ParamField>
 <ParamField body="reason" type="string" />
 <ParamField body="summary" type="string">Stored as the report's resolution note.</ParamField>
-<ParamField body="actingUserId" type="string">Acting moderator, for attribution.</ParamField>
+<ParamField body="actingUserId" type="string">The moderator the key acts for. The request then has exactly that moderator's permissions. Omit it to act as the project.</ParamField>
 
 **Returns** — `Promise<{ message: string; code: string }>`

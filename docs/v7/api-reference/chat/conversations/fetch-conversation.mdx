@@ -4,7 +4,7 @@ api: "GET /v7/:projectId/chat/conversations/:conversationId"
 description: "Fetch a single conversation by ID"
 ---
 
-Returns a [Conversation](/v7/data-models/conversation) object with the caller's membership row and active member count included. The caller must be a member of the conversation, current or former; for a space chat, any member of the space who is not banned (including one whose request is pending or was declined) can fetch it before opening it for the first time.
+Returns a [Conversation](/v7/data-models/conversation) object with the caller's membership row and active member count included. The caller must be a member of the conversation, current or former; for a space chat, any member of the space who is not banned there or in a parent space (including one whose request is pending or was declined) can fetch it before opening it for the first time.
 
 ## Path Parameters
 

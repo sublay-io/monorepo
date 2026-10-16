@@ -4,7 +4,7 @@ api: "GET /v7/:projectId/spaces/:spaceId/conversation"
 description: "Get or create the chat conversation for a space"
 ---
 
-Returns the chat conversation associated with a space. If no conversation exists yet, one is created automatically. Requires authentication. The caller must be a member of the space who is not banned; that includes a request still awaiting approval and one that was declined.
+Returns the chat conversation associated with a space. If no conversation exists yet, one is created automatically. Requires authentication. The caller must be a member of the space who is not banned, in the space or in a parent space; that includes a request still awaiting approval and one that was declined.
 
 ## Path Parameters
 
@@ -35,8 +35,12 @@ Returns a [Conversation](/v7/data-models/conversation) object with two additiona
     ```
   </Accordion>
   <Accordion title="Banned — 403">
+    The caller is banned in this space or in a parent space.
     ```json
     { "error": "You are banned from this space.", "code": "chat/banned" }
+    ```
+    ```json
+    { "error": "You are banned from a parent of this space.", "code": "chat/banned" }
     ```
   </Accordion>
 </AccordionGroup>

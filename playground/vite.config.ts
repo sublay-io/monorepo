@@ -130,11 +130,12 @@ function sublayLanguageSwitch(): Plugin {
         .map((name) => name.slice(0, -3));
       return [
         `import en from ${JSON.stringify(`${file}?original`)};`,
+        // Codes such as zh-TW aren't valid names, so imports are numbered.
         ...languages.map(
-          (lang) =>
-            `import lang_${lang} from ${JSON.stringify(path.join(dir, `${lang}.ts`))};`,
+          (lang, i) =>
+            `import lang_${i} from ${JSON.stringify(path.join(dir, `${lang}.ts`))};`,
         ),
-        `const all = { en, ${languages.map((lang) => `${lang}: lang_${lang}`).join(", ")} };`,
+        `const all = { en, ${languages.map((lang, i) => `${JSON.stringify(lang)}: lang_${i}`).join(", ")} };`,
         `let lang = new URLSearchParams(window.location.search).get("lang");`,
         `try { lang = lang || window.localStorage.getItem("playground-lang"); } catch {}`,
         `export default all[lang] || en;`,

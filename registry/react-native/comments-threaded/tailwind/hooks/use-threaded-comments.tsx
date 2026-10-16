@@ -72,7 +72,7 @@ function useThreadedComments({
     loginRequiredCallback: () => {
       // CUSTOMIZE: Handle login requirement
       // Example: navigation.navigate('Login')
-      console.log("Please login to perform this action");
+      console.log("Please log in to perform this action");
     },
 
     // Called when a user tries to perform an action without having a username set

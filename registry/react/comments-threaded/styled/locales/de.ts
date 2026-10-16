@@ -47,7 +47,7 @@ const strings = {
 
   // Menus
   report: "Melden",
-  remove: "Entfernen",
+  remove: "Löschen",
   confirmDelete: "Möchtest du diesen Kommentar wirklich löschen?",
 
   // Report dialog

@@ -52,7 +52,7 @@ const strings = {
 
   // Menus
   report: "דיווח",
-  remove: "הסרה",
+  remove: "מחיקה",
   confirmDelete: "למחוק את התגובה?",
 
   // Report dialog

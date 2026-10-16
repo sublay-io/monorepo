@@ -39,7 +39,7 @@ const strings = {
   blockedAuthor: "来自你已屏蔽用户的评论",
   showAnyway: "仍然显示",
   removedByModerator: (reason?: string | null) =>
-    `已被管理员移除${reason ? `: ${reason}` : ""} · 仅你可见`,
+    `已被管理员移除${reason ? `：${reason}` : ""} · 仅你可见`,
 
   // Mentions
   noUsersFound: "未找到用户",

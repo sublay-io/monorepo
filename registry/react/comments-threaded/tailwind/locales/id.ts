@@ -5,7 +5,7 @@ import type { ReportReasonKey } from "@sublay/react-js";
 // functions, so each language can use its own plural forms and word order.
 const strings = {
   // Inputs
-  commentPlaceholder: "Ikuti percakapan",
+  commentPlaceholder: "Gabung ke percakapan",
   replyPlaceholder: "Tulis balasan Anda...",
   cancel: "Batal",
 
@@ -28,8 +28,8 @@ const strings = {
   expandThread: "Perluas utas",
   collapseThread: "Ciutkan utas",
   moreOptions: "Opsi lainnya",
-  upvote: "Suara naik",
-  downvote: "Suara turun",
+  upvote: "Beri suara positif",
+  downvote: "Beri suara negatif",
   removeYourVote: "Hapus suara Anda",
 
   // Comments that can't be shown

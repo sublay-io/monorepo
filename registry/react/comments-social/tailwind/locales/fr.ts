@@ -45,12 +45,12 @@ const strings = {
   blockedAuthor: "Commentaire d’un utilisateur que vous avez bloqué",
   showAnyway: "Afficher quand même",
   removedByModerator: (reason?: string | null) =>
-    `Retiré par un modérateur${reason ? `: ${reason}` : ""} · visible par vous uniquement`,
+    `Retiré par un modérateur${reason ? ` : ${reason}` : ""} · visible par vous uniquement`,
 
   // Menus
   report: "Signaler",
   remove: "Supprimer",
-  confirmDelete: "Voulez-vous vraiment supprimer ce commentaire ?",
+  confirmDelete: "Voulez-vous vraiment supprimer ce commentaire ?",
 
   // Report dialog
   reportTitle: "Envoyer un signalement",

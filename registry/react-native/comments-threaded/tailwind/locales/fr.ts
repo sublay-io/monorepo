@@ -22,9 +22,9 @@ const strings = {
 
   // A comment
   reply: "Répondre",
-  replyCount: (count: number) => count === 1 ? "1 réponse" : `${count} réponses`,
+  replyCount: (count: number) => count < 2 ? `${count} réponse` : `${count} réponses`,
   moreReplyCount: (count: number) =>
-    count === 1 ? "1 réponse de plus" : `${count} réponses de plus`,
+    count < 2 ? `${count} réponse de plus` : `${count} réponses de plus`,
   moreReplies: "Plus de réponses",
   continueThread: "Continuer ce fil",
   removeYourVote: "Retirer votre vote",
@@ -36,7 +36,7 @@ const strings = {
   blockedAuthor: "Commentaire d’un utilisateur que vous avez bloqué",
   showAnyway: "Afficher quand même",
   removedByModerator: (reason?: string | null) =>
-    `Retiré par un modérateur${reason ? `: ${reason}` : ""} · visible par vous uniquement`,
+    `Retiré par un modérateur${reason ? ` : ${reason}` : ""} · visible par vous uniquement`,
 
   // Mentions
   noUsersFound: "Aucun utilisateur trouvé",
@@ -45,7 +45,7 @@ const strings = {
   report: "Signaler",
   delete: "Supprimer",
   deleteCommentTitle: "Supprimer le commentaire",
-  confirmDelete: "Voulez-vous vraiment supprimer ce commentaire ?",
+  confirmDelete: "Voulez-vous vraiment supprimer ce commentaire ?",
 
   // Report dialog
   reportTitle: "Envoyer un signalement",

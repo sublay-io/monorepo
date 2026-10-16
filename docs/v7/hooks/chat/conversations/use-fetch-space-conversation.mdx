@@ -34,7 +34,7 @@ function SpaceChatPanel({ spaceId }: { spaceId: string }) {
 ## Returns
 
 <ResponseField name="conversation" type="Conversation | null">
-  The [Conversation](/v7/data-models/conversation) associated with the space, or `null` while loading or when the user is not an active member of the space (a pending or rejected request, or a ban).
+  The [Conversation](/v7/data-models/conversation) associated with the space, or `null` while loading or when the user is not a member of the space or is banned from it.
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">

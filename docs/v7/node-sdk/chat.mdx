@@ -582,7 +582,7 @@ Each space has a single built-in conversation. These three live on **`client.spa
 
 ### spaces.getSpaceConversation
 
-Fetches-or-creates a space's conversation and joins the acting user to it. The acting user must be an active member of the space; a pending or rejected request, or a ban, is refused.
+Fetches-or-creates a space's conversation and joins the acting user to it. The acting user must be a member of the space who is not banned; a request still awaiting approval or one that was declined is enough.
 
 ```typescript
 const conversation = await sublay.spaces.getSpaceConversation({
@@ -592,7 +592,7 @@ const conversation = await sublay.spaces.getSpaceConversation({
 ```
 
 <ParamField body="spaceId" type="string" required />
-<ParamField body="userId" type="string" required>The acting user (must be an active member of the space).</ParamField>
+<ParamField body="userId" type="string" required>The acting user (a member of the space who is not banned).</ParamField>
 
 **Returns** — `Promise<Conversation>`
 

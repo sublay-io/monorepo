@@ -61,6 +61,16 @@ describe("resolveLanguageFile", () => {
     expect(resolveLanguageFile(registry, "he", "comments-social")).toBe("locales/he.ts");
   });
 
+  it("accepts a language code with a region", () => {
+    expect(
+      resolveLanguageFile(
+        { files: [stringsFile], languages: { "zh-TW": "locales/zh-TW.ts" } },
+        "zh-TW",
+        "comments-social"
+      )
+    ).toBe("locales/zh-TW.ts");
+  });
+
   it("names the available languages when the one asked for is missing", () => {
     expect(() => resolveLanguageFile(registry, "fr", "comments-social")).toThrow(
       'comments-social is not available in "fr". Available languages: en, he.'

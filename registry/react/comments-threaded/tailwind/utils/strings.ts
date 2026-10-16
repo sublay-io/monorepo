@@ -47,13 +47,13 @@ const strings = {
 
   // Menus
   report: "Report",
-  remove: "Remove",
+  remove: "Delete",
   confirmDelete: "Are you sure you want to delete this comment?",
 
   // Report dialog
   reportTitle: "Submit a report",
   reportIntro:
-    "Thank you for looking out for our community. Let us know what is happening, and we'll look into it.",
+    "Thank you for looking out for our community. Let us know what's happening, and we'll look into it.",
   reportReasons: {
     spam: "It's spam",
     inappropriateContent: "Contains inappropriate content",
@@ -65,14 +65,15 @@ const strings = {
     selfHarm: "Promotes self-harm or suicide",
     other: "Other",
   } satisfies Record<ReportReasonKey, string>,
-  submitReport: "Submit Report",
-  submittingReport: "Submitting..",
+  submitReport: "Submit report",
+  submittingReport: "Submitting...",
 
   // Messages
-  loginRequired: "Please login to perform this action",
+  loginRequired: "Please log in to perform this action",
   usernameRequired: "Please set a username before interacting with comments",
   commentEmpty: "Comment cannot be empty",
-  userNotMentionable: "This user cannot be mentioned (no username set)",
+  userNotMentionable:
+    "This user doesn't have a username and cannot be mentioned",
   parentDeleted: "This comment was deleted, so you can't reply to it.",
   parentRemoved: "This comment was removed, so you can't reply to it.",
   postFailed: "Couldn't post your comment. Try again.",

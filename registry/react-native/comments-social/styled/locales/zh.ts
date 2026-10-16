@@ -22,7 +22,7 @@ const strings = {
 
   // A comment
   reply: "回复",
-  viewMoreReplies: (count: number) => `查看更多回复 (${count})`,
+  viewMoreReplies: (count: number) => `查看更多回复（${count}）`,
   hideReplies: "隐藏回复",
   removeYourReaction: "撤销你的回应",
   timeAgo: {
@@ -41,7 +41,7 @@ const strings = {
   blockedAuthor: "来自你已屏蔽用户的评论",
   showAnyway: "仍然显示",
   removedByModerator: (reason?: string | null) =>
-    `已被管理员移除${reason ? `: ${reason}` : ""} · 仅你可见`,
+    `已被管理员移除${reason ? `：${reason}` : ""} · 仅你可见`,
 
   // Menus
   report: "举报",

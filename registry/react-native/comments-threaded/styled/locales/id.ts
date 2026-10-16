@@ -5,7 +5,7 @@ import type { ReportReasonKey } from "@sublay/react-native";
 // functions, so each language can use its own plural forms and word order.
 const strings = {
   // Inputs
-  commentPlaceholder: "Ikuti percakapan",
+  commentPlaceholder: "Gabung ke percakapan",
   cancel: "Batal",
   replyingTo: "Membalas",
   cancelReply: "Batalkan balasan",

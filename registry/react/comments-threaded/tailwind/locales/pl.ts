@@ -55,7 +55,7 @@ const strings = {
   blockedAuthor: "Komentarz zablokowanego przez Ciebie użytkownika",
   showAnyway: "Pokaż mimo to",
   removedByModerator: (reason?: string | null) =>
-    `Ukryte przez moderatora${reason ? `: ${reason}` : ""} · widoczne tylko dla Ciebie`,
+    `Ukryty przez moderatora${reason ? `: ${reason}` : ""} · widoczny tylko dla Ciebie`,
 
   // Mentions
   noUsersFound: "Nie znaleziono użytkowników",

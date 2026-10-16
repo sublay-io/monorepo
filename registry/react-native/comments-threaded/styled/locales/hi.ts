@@ -29,7 +29,7 @@ const strings = {
   removeYourVote: "अपना वोट हटाएँ",
 
   // Comments that can't be shown
-  deleted: "[हटाई गई]",
+  deleted: "[डिलीट की गई]",
   removed: "[हटा दी गई]",
   unavailable: "यह टिप्पणी उपलब्ध नहीं है",
   blockedAuthor: "आपके द्वारा ब्लॉक किए गए उपयोगकर्ता की टिप्पणी",
@@ -42,9 +42,9 @@ const strings = {
 
   // Menus
   report: "रिपोर्ट करें",
-  delete: "हटाएँ",
-  deleteCommentTitle: "टिप्पणी हटाएँ",
-  confirmDelete: "क्या आप वाकई यह टिप्पणी हटाना चाहते हैं?",
+  delete: "डिलीट करें",
+  deleteCommentTitle: "टिप्पणी डिलीट करें",
+  confirmDelete: "क्या आप वाकई यह टिप्पणी डिलीट करना चाहते हैं?",
 
   // Report dialog
   reportTitle: "रिपोर्ट भेजें",
@@ -57,7 +57,7 @@ const strings = {
     misinformation: "यह गलत जानकारी फैलाती है",
     hateSpeech: "इसमें नफ़रत भरी भाषा या प्रतीक हैं",
     violence: "यह हिंसा या ख़तरनाक व्यवहार को बढ़ावा देती है",
-    illegalActivity: "यह गैर-कानूनी गतिविधि को बढ़ावा देती है",
+    illegalActivity: "यह ग़ैर-क़ानूनी गतिविधि को बढ़ावा देती है",
     selfHarm: "यह आत्म-क्षति या आत्महत्या को बढ़ावा देती है",
     other: "अन्य",
   } satisfies Record<ReportReasonKey, string>,
@@ -65,7 +65,7 @@ const strings = {
   submittingReport: "भेजा जा रहा है...",
 
   // Messages
-  parentDeleted: "यह टिप्पणी हटा दी गई है, इसलिए आप इसका जवाब नहीं दे सकते।",
+  parentDeleted: "यह टिप्पणी डिलीट कर दी गई है, इसलिए आप इसका जवाब नहीं दे सकते।",
   parentRemoved: "यह टिप्पणी हटा दी गई है, इसलिए आप इसका जवाब नहीं दे सकते।",
   postFailed: "आपकी टिप्पणी पोस्ट नहीं हो सकी। फिर से कोशिश करें।",
 };

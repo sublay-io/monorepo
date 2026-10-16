@@ -23,7 +23,7 @@ const strings = {
   sortOld: "ישנות",
 
   // A comment
-  reply: "הגב",
+  reply: "להגיב",
   viewMoreReplies: (count: number) => `הצגת תגובות נוספות (${count})`,
   hideReplies: "הסתרת התגובות",
   removeYourReaction: "הסרת הסימון שלך",
@@ -42,13 +42,13 @@ const strings = {
   },
 
   // Comments that can't be shown
-  deleted: "[נמחק]",
-  removed: "[הוסר]",
+  deleted: "[נמחקה]",
+  removed: "[הוסרה]",
   unavailable: "התגובה אינה זמינה",
   blockedAuthor: "תגובה ממשתמש שחסמת",
-  showAnyway: "הצג בכל זאת",
+  showAnyway: "להציג בכל זאת",
   removedByModerator: (reason?: string | null) =>
-    `הוסר על ידי מנהל${reason ? `: ${reason}` : ""} · גלוי רק לך`,
+    `הוסרה על ידי מנהל${reason ? `: ${reason}` : ""} · גלוי רק לך`,
 
   // Menus
   report: "דיווח",

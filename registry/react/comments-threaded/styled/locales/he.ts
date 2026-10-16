@@ -20,7 +20,7 @@ const strings = {
   tryAgain: "נסו שוב",
 
   // A comment
-  reply: "הגב",
+  reply: "להגיב",
   replyCount: (count: number) =>
     count === 1 ? "תגובה אחת" : count === 2 ? "שתי תגובות" : `${count} תגובות`,
   moreReplyCount: (count: number) =>
@@ -39,13 +39,13 @@ const strings = {
   removeYourVote: "הסרת ההצבעה",
 
   // Comments that can't be shown
-  deleted: "[נמחק]",
-  removed: "[הוסר]",
+  deleted: "[נמחקה]",
+  removed: "[הוסרה]",
   unavailable: "התגובה אינה זמינה",
   blockedAuthor: "תגובה ממשתמש שחסמת",
-  showAnyway: "הצג בכל זאת",
+  showAnyway: "להציג בכל זאת",
   removedByModerator: (reason?: string | null) =>
-    `הוסר על ידי מנהל${reason ? `: ${reason}` : ""} · גלוי רק לך`,
+    `הוסרה על ידי מנהל${reason ? `: ${reason}` : ""} · גלוי רק לך`,
 
   // Mentions
   noUsersFound: "לא נמצאו משתמשים",

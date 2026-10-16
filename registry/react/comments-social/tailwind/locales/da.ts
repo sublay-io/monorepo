@@ -1,0 +1,86 @@
+import type { ReportReasonKey } from "@sublay/react-js";
+
+// 🌐 Every piece of text the comment section shows. Edit the values here to
+// reword or translate it. Entries that depend on a number or a name are
+// functions, so each language can use its own plural forms and word order.
+const strings = {
+  // Inputs
+  commentPlaceholder: "Skriv en kommentar...",
+  cancel: "Annuller",
+  post: "Slå op",
+  replyingTo: (name: string) => `Svarer ${name}`,
+
+  // Comment list
+  noCommentsTitle: "Ingen kommentarer endnu",
+  noCommentsSubtitle: "Start samtalen.",
+  loadMoreComments: "Indlæs flere kommentarer",
+  loading: "Indlæser...",
+  loadCommentsFailed: "Kommentarerne kunne ikke indlæses",
+  loadMoreFailed: "Kunne ikke indlæse flere",
+  tryAgain: "Prøv igen",
+  sortTop: "Top",
+  sortNew: "Nyeste",
+  sortOld: "Ældste",
+
+  // A comment
+  reply: "Svar",
+  viewMoreReplies: (count: number) => `Se flere svar (${count})`,
+  hideReplies: "Skjul svar",
+  removeYourReaction: "Fjern din reaktion",
+  timeAgo: {
+    justNow: "Lige nu",
+    minutes: (count: number) =>
+      count === 1 ? "for et minut siden" : `for ${count} minutter siden`,
+    hours: (count: number) =>
+      count === 1 ? "for en time siden" : `for ${count} timer siden`,
+    days: (count: number) =>
+      count === 1 ? "for en dag siden" : `for ${count} dage siden`,
+    months: (count: number) =>
+      count === 1 ? "for en måned siden" : `for ${count} måneder siden`,
+    years: (count: number) =>
+      count === 1 ? "for et år siden" : `for ${count} år siden`,
+  },
+
+  // Comments that can't be shown
+  deleted: "[slettet]",
+  removed: "[fjernet]",
+  unavailable: "Denne kommentar er ikke tilgængelig",
+  blockedAuthor: "Kommentar fra en bruger, du har blokeret",
+  showAnyway: "Vis alligevel",
+  removedByModerator: (reason?: string | null) =>
+    `Fjernet af en moderator${reason ? `: ${reason}` : ""} · kun du kan se dette`,
+
+  // Menus
+  report: "Anmeld",
+  remove: "Slet",
+  confirmDelete: "Er du sikker på, at du vil slette denne kommentar?",
+
+  // Report dialog
+  reportTitle: "Indsend en anmeldelse",
+  reportIntro:
+    "Tak, fordi du passer på vores fællesskab. Fortæl os, hvad der sker, så kigger vi på det.",
+  reportReasons: {
+    spam: "Det er spam",
+    inappropriateContent: "Indeholder upassende indhold",
+    harassment: "Det er chikane eller mobning",
+    misinformation: "Spreder falske oplysninger",
+    hateSpeech: "Indeholder hadefuld tale eller hadsymboler",
+    violence: "Opfordrer til vold eller farlig adfærd",
+    illegalActivity: "Opfordrer til ulovlig aktivitet",
+    selfHarm: "Opfordrer til selvskade eller selvmord",
+    other: "Andet",
+  } satisfies Record<ReportReasonKey, string>,
+  submitReport: "Send anmeldelse",
+  submittingReport: "Sender...",
+
+  // Messages
+  loginRequired: "Log ind for at udføre denne handling",
+  commentEmpty: "Kommentaren må ikke være tom",
+  userNotMentionable:
+    "Denne bruger har intet brugernavn og kan ikke nævnes",
+  parentDeleted: "Denne kommentar er blevet slettet, så du kan ikke svare på den.",
+  parentRemoved: "Denne kommentar er blevet fjernet, så du kan ikke svare på den.",
+  postFailed: "Din kommentar kunne ikke slås op. Prøv igen.",
+};
+
+export default strings;

@@ -25,7 +25,7 @@ const LANGUAGES = [
     .sort(),
 ];
 
-const RTL_LANGUAGES = ["ar", "he"];
+const RTL_LANGUAGES = ["ar", "fa", "he", "ur"];
 
 /** A language's own name for itself, e.g. "עברית". */
 function languageName(code: string): string {

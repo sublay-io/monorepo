@@ -9,7 +9,9 @@ export const AddCommandBuilder = ({ component: initialComponent = "comments-thre
   const languages = [
     { value: "en", label: "English" },
     { value: "ar", label: "Arabic — العربية" },
+    { value: "bn", label: "Bengali — বাংলা" },
     { value: "zh", label: "Chinese (Simplified) — 简体中文" },
+    { value: "zh-TW", label: "Chinese (Traditional) — 繁體中文" },
     { value: "nl", label: "Dutch — Nederlands" },
     { value: "fr", label: "French — Français" },
     { value: "de", label: "German — Deutsch" },
@@ -19,11 +21,19 @@ export const AddCommandBuilder = ({ component: initialComponent = "comments-thre
     { value: "it", label: "Italian — Italiano" },
     { value: "ja", label: "Japanese — 日本語" },
     { value: "ko", label: "Korean — 한국어" },
+    { value: "ms", label: "Malay — Bahasa Melayu" },
+    { value: "fa", label: "Persian — فارسی" },
     { value: "pl", label: "Polish — Polski" },
-    { value: "pt", label: "Portuguese — Português" },
+    { value: "pt", label: "Portuguese (Brazil) — Português" },
+    { value: "ro", label: "Romanian — Română" },
     { value: "ru", label: "Russian — Русский" },
     { value: "es", label: "Spanish — Español" },
+    { value: "sv", label: "Swedish — Svenska" },
+    { value: "th", label: "Thai — ไทย" },
     { value: "tr", label: "Turkish — Türkçe" },
+    { value: "uk", label: "Ukrainian — Українська" },
+    { value: "ur", label: "Urdu — اردو" },
+    { value: "vi", label: "Vietnamese — Tiếng Việt" },
   ];
 
   const [component, setComponent] = useState(initialComponent);

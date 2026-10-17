@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { View } from "react-native";
+import { View, LayoutAnimation } from "react-native";
 import {
   Comment as CommentType,
   useCommentSection,
@@ -47,7 +47,10 @@ function CommentThread({
   const hiddenRepliesCount = Math.max(0, replyCount - allReplies.length);
 
   const handleToggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
+    // Animates the row shrinking or growing and the replies leaving or coming
+    // back (the next layout change only)
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsCollapsed((collapsed) => !collapsed);
   };
 
   const hasReplies = allReplies.length > 0;

@@ -142,12 +142,10 @@ The line color is set in the same file.
 
 ### Collapsible Threads
 
-Users can collapse/expand entire comment chains.
+Users can collapse a comment and everything under it, at any depth.
 
-- Click `[-]` to collapse a comment and all its replies
-- Click `[+]` to expand
-- Collapsed state shows reply count
-- Useful for navigating long discussions
+- **React (Web)** — click `[-]` beside the author's name to collapse a comment and all its replies, and `[+]` to expand it. A collapsed comment shows its reply count.
+- **React Native and Expo** — tap the comment itself. It shrinks to a single row, avatar, name, time and the start of its text, cut off to fit, and its replies are hidden. Tap the row again to expand it. The avatar, the name, the votes, Reply, the menu and mention links keep their own taps. Collapsing and expanding animate with React Native's `LayoutAnimation`; the row is in `single-comment.tsx` and the collapsed state in `comment-thread.tsx`.
 
 ---
 

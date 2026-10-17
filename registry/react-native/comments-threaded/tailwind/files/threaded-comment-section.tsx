@@ -10,7 +10,7 @@
  * scrolls away with the comments.
  *
  *   <ThreadedComments foreignId={entity.foreignId}>
- *     <ScrollView>
+ *     <ScrollView keyboardShouldPersistTaps="handled">
  *       <YourEntity />
  *       <ThreadedCommentSection />     // Sort by + the comments
  *     </ScrollView>
@@ -46,7 +46,8 @@
  * TEXT:
  * - text-gray-900 / dark:text-neutral-50 (primary text)
  * - text-gray-800 / dark:text-neutral-200 (body text)
- * - text-gray-700 / dark:text-neutral-300 (author names, secondary text)
+ * - text-gray-700 / dark:text-neutral-300 (secondary text)
+ * - text-gray-700 / dark:text-white (author names)
  * - text-gray-500 / dark:text-neutral-400 (timestamps, tertiary text)
  *
  * BORDERS:
@@ -90,7 +91,8 @@ interface ThreadedCommentsProps {
   children?: React.ReactNode;
 }
 
-// Custom comparison function to prevent unnecessary re-renders
+// Re-renders when a prop changes. `children` is the screen, so in practice it
+// re-renders whenever the screen does; the sections inside read context.
 const arePropsEqual = (
   prevProps: ThreadedCommentsProps,
   nextProps: ThreadedCommentsProps

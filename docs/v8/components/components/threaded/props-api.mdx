@@ -301,7 +301,7 @@ function EntityScreen() {
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView>
+        <ScrollView keyboardShouldPersistTaps="handled">
           <YourEntity />
           <ThreadedCommentSection />
         </ScrollView>
@@ -312,7 +312,7 @@ function EntityScreen() {
 }
 ```
 
-The entity above the section scrolls away with the comments, and the comment box stays pinned below the scroll view. Keyboard handling is up to your screen: use `KeyboardAvoidingView` as above, or the keyboard library your app already uses.
+The entity above the section scrolls away with the comments, and the comment box stays pinned below the scroll view. Keyboard handling is up to your screen: use `KeyboardAvoidingView` as above, or the keyboard library your app already uses. Give the scroll view `keyboardShouldPersistTaps="handled"`, so tapping Reply, a vote or **Sort by** while the keyboard is open works on the first tap instead of only closing the keyboard.
 
 ### `ThreadedComments`
 
@@ -443,7 +443,7 @@ function EntityScreen({ entityId, commentId, isDark }) {
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView>
+        <ScrollView keyboardShouldPersistTaps="handled">
           <YourEntity />
           <ThreadedCommentSection>
             <Text>No comments yet. Be respectful in the discussion.</Text>

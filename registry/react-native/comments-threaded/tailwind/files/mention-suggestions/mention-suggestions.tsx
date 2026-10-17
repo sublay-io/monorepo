@@ -27,7 +27,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
 
   return (
     <View
-      className={`h-auto max-h-[200px] absolute bottom-0 left-0 right-0 z-10 overflow-hidden p-3 rounded-xl border mb-2 ${
+      className={`h-auto absolute bottom-0 left-0 right-0 z-10 overflow-hidden p-3 rounded-xl border mb-2 ${
         theme === 'dark'
           ? 'bg-neutral-800 border-neutral-600'
           : 'bg-white border-gray-200'

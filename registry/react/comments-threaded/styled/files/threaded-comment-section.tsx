@@ -31,7 +31,8 @@
  * TEXT:
  * - #111827 → #F9FAFB (primary text)
  * - #1F2937 → #E5E7EB (body text)
- * - #374151 → #D1D5DB (author names, secondary text)
+ * - #374151 → #D1D5DB (secondary text)
+ * - #374151 → #FFFFFF (author names)
  * - #4B5563 → #9CA3AF (hover text)
  * - #6B7280 → #9CA3AF (timestamps, tertiary text)
  * - #8e8e8e → #9CA3AF (placeholder text)

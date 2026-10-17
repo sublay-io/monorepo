@@ -231,7 +231,7 @@ After installation, import and use the component:
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           >
-            <ScrollView>
+            <ScrollView keyboardShouldPersistTaps="handled">
               <YourEntity />
               <ThreadedCommentSection />
             </ScrollView>

@@ -29,7 +29,6 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
     <View
       style={{
         height: 'auto',
-        maxHeight: 200,
         position: 'absolute',
         bottom: 0,
         left: 0,

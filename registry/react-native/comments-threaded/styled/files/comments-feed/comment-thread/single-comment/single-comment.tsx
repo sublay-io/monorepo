@@ -364,7 +364,7 @@ theme={theme}
                       fontSize: 13,
                       lineHeight: 18,
                       // 🎨 CUSTOMIZATION: Author name color
-                      color: theme === 'dark' ? '#D4D4D4' : '#374151',
+                      color: theme === 'dark' ? '#FFFFFF' : '#374151',
                     }}
                   >
                     {getUserName(comment.user ?? {})}

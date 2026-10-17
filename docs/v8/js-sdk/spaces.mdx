@@ -103,7 +103,11 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
 </ParamField>
 
 <ParamField body="sortBy" type="string">
-  Sort order: `"alphabetical"`, `"newest"`, or `"members"`.
+  Sort order: `"createdAt"` (when the space was created), `"alphabetical"` (by name) or `"members"` (by active member count). Defaults to `"members"`.
+</ParamField>
+
+<ParamField body="sortDir" type="string">
+  Direction, `"asc"` or `"desc"` (either case), for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
 <ParamField body="searchSlug" type="string">
@@ -181,7 +185,7 @@ Fetches the spaces the logged-in user belongs to.
 ```typescript
 const userSpaces = await sublay.spaces.fetchUserSpaces({
   role: "admin,moderator",
-  sortBy: "newest",
+  sortBy: "createdAt",
 });
 ```
 
@@ -194,7 +198,11 @@ const userSpaces = await sublay.spaces.fetchUserSpaces({
 </ParamField>
 
 <ParamField body="sortBy" type="string">
-  Sort order: `"alphabetical"`, `"newest"`, or `"members"`.
+  Sort order: `"joinedAt"` (when the user joined), `"createdAt"` (when the space was created), `"alphabetical"` (by name) or `"members"` (by active member count). Defaults to `"joinedAt"`.
+</ParamField>
+
+<ParamField body="sortDir" type="string">
+  Direction, `"asc"` or `"desc"` (either case), for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
 <ParamField body="include" type="string">
@@ -359,7 +367,11 @@ const { data, pagination } = await sublay.spaces.fetchChildSpaces({
 </ParamField>
 
 <ParamField body="sortBy" type="string">
-  Sort order: `"alphabetical"`, `"newest"`, or `"members"`.
+  Sort order: `"createdAt"` (when the space was created), `"alphabetical"` (by name) or `"members"` (by active member count). Defaults to `"alphabetical"`.
+</ParamField>
+
+<ParamField body="sortDir" type="string">
+  Direction, `"asc"` or `"desc"` (either case), for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
 <ParamField body="include" type="string">

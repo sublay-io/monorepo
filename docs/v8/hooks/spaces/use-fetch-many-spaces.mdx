@@ -23,7 +23,7 @@ function SpaceSearch() {
   const fetchSpaces = useFetchManySpaces();
 
   const handleSearch = async (query: string) => {
-    const result = await fetchSpaces({ searchAny: query, sortBy: "newest" });
+    const result = await fetchSpaces({ searchAny: query, sortBy: "createdAt" });
     console.log(result.data, result.pagination);
   };
 }
@@ -40,7 +40,11 @@ function SpaceSearch() {
 </ParamField>
 
 <ParamField path="sortBy" type="string">
-  Sort order: `"newest"`, `"members"` (most members first), or `"alphabetical"`. Defaults to `"members"`.
+  Sort order: `"createdAt"` (when the space was created), `"members"` (by active member count) or `"alphabetical"` (by name). Defaults to `"members"`.
+</ParamField>
+
+<ParamField path="sortDir" type="string">
+  Direction, `"asc"` or `"desc"` (either case), for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
 <ParamField path="searchSlug" type="string | null">

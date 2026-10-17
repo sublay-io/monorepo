@@ -20,7 +20,7 @@ function SpaceDirectory() {
   const { spaces, loading, hasMore, fetchSpaces, loadMore } = useSpaceList({ listId: "directory" });
 
   useEffect(() => {
-    fetchSpaces({ sortBy: "newest" });
+    fetchSpaces({ sortBy: "createdAt" });
   }, []);
 
   return (
@@ -58,7 +58,7 @@ function SpaceDirectory() {
   ```ts
   fetchSpaces(
     filters: {
-      sortBy?: "newest" | "members" | "alphabetical";
+      sortBy?: "createdAt" | "members" | "alphabetical";
       searchSlug?: string | null;
       searchName?: string | null;
       searchDescription?: string | null;

@@ -22,6 +22,14 @@ Returns a paginated list of spaces the authenticated user has a membership in, a
   Results per page. Max `100`.
 </ParamField>
 
+<ParamField query="sortBy" type="string">
+  Sort order: `"joinedAt"` (when the user joined), `"createdAt"` (when the space was created), `"alphabetical"` (by name) or `"members"` (by active member count). Defaults to `"joinedAt"`.
+</ParamField>
+
+<ParamField query="sortDir" type="string">
+  Direction, `"asc"` or `"desc"` (either case), for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
+</ParamField>
+
 <ParamField query="role" type="string">
   Filter by role. Single value (`"admin"`, `"moderator"`, `"member"`) or comma-separated list (e.g. `"admin,moderator"`).
 </ParamField>

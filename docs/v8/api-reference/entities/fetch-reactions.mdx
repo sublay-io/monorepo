@@ -34,8 +34,8 @@ Authentication is optional — the endpoint works without a token. When the call
   Filter to a specific reaction type. One of: `upvote`, `downvote`, `like`, `love`, `wow`, `sad`, `angry`, `funny`. When omitted, all reaction types are returned.
 </ParamField>
 
-<ParamField query="sortDir" type="string" default="DESC">
-  Sort by creation time. `ASC` or `DESC`.
+<ParamField query="sortDir" type="string" default="desc">
+  Sort by creation time, `"asc"` or `"desc"` (either case).
 </ParamField>
 
 ### Space-scoped reputation
@@ -80,7 +80,7 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
 
 <AccordionGroup>
   <Accordion title="Invalid Query — 400">
-    Returned when `page` or `limit` is below `1` or not a whole number, `reactionType` isn't one of the eight types, or `sortDir` isn't `ASC` or `DESC`.
+    Returned when `page` or `limit` is below `1` or not a whole number, `reactionType` isn't one of the eight types, or `sortDir` isn't `asc` or `desc`.
 
     ```json
     { "error": "page: Page must be a positive integer", "code": "entity/invalid-query" }

@@ -21,7 +21,7 @@ function CustomSpaceLoader({ listId }: { listId: string }) {
   const loadSpaces = async () => {
     await actions.fetchSpaces(listId, {
       page: 1,
-      sortBy: "newest",
+      sortBy: "createdAt",
       limit: 20,
     });
   };

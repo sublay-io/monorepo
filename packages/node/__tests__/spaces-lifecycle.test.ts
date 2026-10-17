@@ -40,9 +40,9 @@ describe("node-sdk spaces (lifecycle) — request shaping", () => {
 
   it("fetchManySpaces hits /spaces with the full body as params", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchManySpaces(client, { sortBy: "newest", page: 1 });
+    await fetchManySpaces(client, { sortBy: "createdAt", page: 1 });
     expect(projectInstance.get).toHaveBeenCalledWith("/spaces", {
-      params: { sortBy: "newest", page: 1 },
+      params: { sortBy: "createdAt", page: 1 },
     });
   });
 

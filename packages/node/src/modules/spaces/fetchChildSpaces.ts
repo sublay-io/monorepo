@@ -6,7 +6,8 @@ export interface FetchChildSpacesProps {
   spaceId: string;
   page?: number;
   limit?: number;
-  sortBy?: "alphabetical" | "newest" | "members";
+  sortBy?: "createdAt" | "alphabetical" | "members";
+  sortDir?: "asc" | "desc";
   include?: string;
 }
 

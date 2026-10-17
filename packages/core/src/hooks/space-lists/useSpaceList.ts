@@ -141,7 +141,7 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
 
         // Build final filters by taking current state and applying new filters
         const currentState = spaceList || {
-          sortBy: "newest",
+          sortBy: "createdAt",
           searchSlug: null,
           searchName: null,
           searchDescription: null,
@@ -153,7 +153,7 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
 
         // Apply resetUnspecified logic (only reset filter properties)
         if (options?.resetUnspecified) {
-          finalFilters.sortBy = "newest";
+          finalFilters.sortBy = "createdAt";
           finalFilters.searchSlug = null;
           finalFilters.searchName = null;
           finalFilters.searchDescription = null;

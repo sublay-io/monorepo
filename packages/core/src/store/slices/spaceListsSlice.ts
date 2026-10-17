@@ -44,7 +44,7 @@ const createDefaultSpaceListState = (): SpaceListState => ({
   limit: 20,
 
   // Default filters (user-controlled only)
-  sortBy: "newest",
+  sortBy: "createdAt",
   searchSlug: null,
   searchName: null,
   searchDescription: null,

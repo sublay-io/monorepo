@@ -4,7 +4,8 @@ import { UserSpacesResponse } from "../../interfaces/Space";
 export interface FetchUserSpacesProps {
   page?: number;
   limit?: number;
-  sortBy?: "alphabetical" | "newest" | "members";
+  sortBy?: "createdAt" | "alphabetical" | "members" | "joinedAt";
+  sortDir?: "asc" | "desc";
   include?: string;
   role?: string; // single role or comma-separated, e.g. "admin,moderator"
   all?: "true" | "false";

@@ -41,7 +41,7 @@ describe("useSpaceList", () => {
 
     await waitFor(() => expect(result.current.spaces.map((s) => s.id)).toEqual(["s1"]));
     expect(result.current.hasMore).toBe(true);
-    expect(result.current.sortBy).toBe("newest"); // default
+    expect(result.current.sortBy).toBe("createdAt"); // default
   });
 
   // Real timers only — see [[sdk-testing-fake-timers-corrupt-scheduler]] memory:

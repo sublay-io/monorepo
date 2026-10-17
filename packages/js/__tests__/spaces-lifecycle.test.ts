@@ -120,7 +120,7 @@ describe("js-sdk spaces (lifecycle) — request shaping", () => {
 
   it("fetchManySpaces gets /spaces with the full query as params", async () => {
     const { client, projectInstance } = makeClient();
-    const query = { sortBy: "newest" as const, page: 1 };
+    const query = { sortBy: "createdAt" as const, page: 1 };
     await fetchManySpaces(client, query);
     expect(projectInstance.get).toHaveBeenCalledWith("/spaces", {
       params: query,

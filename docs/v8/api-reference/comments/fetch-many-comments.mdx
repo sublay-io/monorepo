@@ -11,7 +11,7 @@ Returns one level of a comment thread, cursor-paginated:
 - **`entityId`** → the entity's **top-level** comments.
 - **`parentId`** → that comment's **direct replies**.
 
-One of the two is required. You can send both: `parentId` decides the level, and `entityId` must match the parent's entity (otherwise the page is empty).
+Send exactly one of the two: neither or both returns `400 comment/invalid-query`. A replies fetch takes `parentId` alone, since the parent decides the entity.
 
 Each request can also bring a few levels of replies nested inside every returned comment (`replyDepth`, `replyLimit`), each with its own "load more" cursor — so a threaded view can render its first screen with a single request.
 
@@ -28,11 +28,11 @@ Authentication is optional. When the caller is signed in, comments by users they
 ### Thread
 
 <ParamField query="entityId" type="string">
-  Return this entity's top-level comments. Required unless `parentId` is sent.
+  Return this entity's top-level comments. Send this or `parentId`, not both.
 </ParamField>
 
 <ParamField query="parentId" type="string">
-  Return the direct replies of this comment. Required unless `entityId` is sent.
+  Return the direct replies of this comment. Send this or `entityId`, not both.
 </ParamField>
 
 ### Pagination
@@ -249,13 +249,12 @@ Checks run in this order; the first failing check is returned.
     ```
   </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `comment/invalid-query` for invalid values — for example an unknown `include` value, `sortByReaction` without `sortBy=top`, `replySortByReaction` when the nested sort isn't `top`, `limit` below `1` or not a whole number, `replyDepth` above `5`, or `replyLimit` below `1`.
-  </Accordion>
-  <Accordion title="Missing filter — 400">
+    Returned with code `comment/invalid-query` for invalid values — for example neither or both of `entityId` and `parentId`, a malformed id, an unknown `include` value, `sortByReaction` without `sortBy=top`, `replySortByReaction` when the nested sort isn't `top`, `limit` below `1` or not a whole number, `replyDepth` above `5`, or `replyLimit` below `1`. `error` names the first problem found:
+
     ```json
     {
-      "error": "`entityId` or `parentId` is required. To list a user's comments, use `GET /users/:userId/comments`.",
-      "code": "comment/missing-filter"
+      "error": "Send `entityId` (an entity's top-level comments) or `parentId` (a comment's replies), not both. To list a user's comments, use `GET /users/:userId/comments`.",
+      "code": "comment/invalid-query"
     }
     ```
   </Accordion>

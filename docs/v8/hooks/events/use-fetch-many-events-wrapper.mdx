@@ -54,7 +54,7 @@ function EventsList() {
 <ParamField path="descriptionFilters" type="object | null">Free-text filter on `description`.</ParamField>
 <ParamField path="include" type="string | string[]">Associations to expand.</ParamField>
 <ParamField path="defaultSortBy" type='"startTime" | "going"'>Initial sort field. Defaults to `"startTime"`.</ParamField>
-<ParamField path="defaultSortDir" type='"asc" | "desc"'>Initial sort direction. Defaults to `"asc"`.</ParamField>
+<ParamField path="defaultSortDir" type='"asc" | "desc" | null'>Initial sort direction. Defaults to `null`: no direction is sent, so the sort's natural one applies (soonest first for `"startTime"`, most going first for `"going"`).</ParamField>
 
 ## Returns
 
@@ -62,9 +62,9 @@ function EventsList() {
 <ResponseField name="loading" type="boolean">`true` while fetching.</ResponseField>
 <ResponseField name="hasMore" type="boolean">Whether more pages remain.</ResponseField>
 <ResponseField name="sortBy" type='"startTime" | "going"'>Current sort field.</ResponseField>
-<ResponseField name="sortDir" type='"asc" | "desc"'>Current sort direction.</ResponseField>
+<ResponseField name="sortDir" type='"asc" | "desc" | null'>Current sort direction; `null` means the sort's natural one.</ResponseField>
 <ResponseField name="setSortBy" type="(s) => void">Change the sort field (resets to page 1).</ResponseField>
-<ResponseField name="setSortDir" type="(d) => void">Change the sort direction (resets to page 1).</ResponseField>
+<ResponseField name="setSortDir" type="(d) => void">Change the sort direction (resets to page 1). Pass `null` to go back to the sort's natural direction.</ResponseField>
 <ResponseField name="loadMore" type="() => void">Advance to the next page.</ResponseField>
 <ResponseField name="refresh" type="() => void">Re-run the query from page 1.</ResponseField>
 

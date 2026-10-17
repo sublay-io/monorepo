@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Đăng",
   addGif: "Thêm GIF",
 
+  // Sorting
+  sortBy: "Sắp xếp theo",
+  sortTop: "Hàng đầu",
+  sortNew: "Mới nhất",
+  sortOld: "Cũ nhất",
+  sortControversial: "Gây tranh cãi",
+
   // Comment list
   noCommentsTitle: "Chưa có bình luận nào",
   noCommentsSubtitle: "Hãy bắt đầu cuộc trò chuyện.",

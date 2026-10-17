@@ -11,6 +11,13 @@ const strings = {
   submitComment: "పోస్ట్ చేయి",
   addGif: "GIF జోడించు",
 
+  // Sorting
+  sortBy: "క్రమబద్ధీకరించు",
+  sortTop: "ఉత్తమమైనవి",
+  sortNew: "కొత్తవి",
+  sortOld: "పాతవి",
+  sortControversial: "వివాదాస్పదమైనవి",
+
   // Comment list
   noCommentsTitle: "ఇంకా వ్యాఖ్యలు లేవు",
   noCommentsSubtitle: "సంభాషణను ప్రారంభించండి.",

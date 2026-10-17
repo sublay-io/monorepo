@@ -18,6 +18,13 @@ const strings = {
   submitComment: "Odeslat",
   addGif: "Přidat GIF",
 
+  // Sorting
+  sortBy: "Seřadit podle",
+  sortTop: "Nejlepší",
+  sortNew: "Nejnovější",
+  sortOld: "Nejstarší",
+  sortControversial: "Kontroverzní",
+
   // Comment list
   noCommentsTitle: "Zatím žádné komentáře",
   noCommentsSubtitle: "Začněte konverzaci.",

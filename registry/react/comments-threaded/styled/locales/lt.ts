@@ -21,6 +21,13 @@ const strings = {
   submitComment: "Skelbti",
   addGif: "Pridėti GIF",
 
+  // Sorting
+  sortBy: "Rikiuoti pagal",
+  sortTop: "Populiariausi",
+  sortNew: "Naujausi",
+  sortOld: "Seniausi",
+  sortControversial: "Prieštaringi",
+
   // Comment list
   noCommentsTitle: "Komentarų dar nėra",
   noCommentsSubtitle: "Pradėkite pokalbį.",

@@ -11,6 +11,13 @@ const strings = {
   submitComment: "I-post",
   addGif: "Magdagdag ng GIF",
 
+  // Sorting
+  sortBy: "Ayusin ayon sa",
+  sortTop: "Nangunguna",
+  sortNew: "Bago",
+  sortOld: "Luma",
+  sortControversial: "Kontrobersyal",
+
   // Comment list
   noCommentsTitle: "Wala pang komento",
   noCommentsSubtitle: "Simulan ang usapan.",

@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Publicera",
   addGif: "Lägg till en GIF",
 
+  // Sorting
+  sortBy: "Sortera efter",
+  sortTop: "Topp",
+  sortNew: "Nyast",
+  sortOld: "Äldst",
+  sortControversial: "Kontroversiella",
+
   // Comment list
   noCommentsTitle: "Inga kommentarer än",
   noCommentsSubtitle: "Starta samtalet.",

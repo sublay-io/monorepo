@@ -11,6 +11,13 @@ const strings = {
   submitComment: "发布",
   addGif: "添加 GIF",
 
+  // Sorting
+  sortBy: "排序方式",
+  sortTop: "热门",
+  sortNew: "最新",
+  sortOld: "最早",
+  sortControversial: "有争议",
+
   // Comment list
   noCommentsTitle: "暂无评论",
   noCommentsSubtitle: "来发表第一条评论吧。",

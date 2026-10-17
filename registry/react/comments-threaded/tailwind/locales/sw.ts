@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Chapisha",
   addGif: "Ongeza GIF",
 
+  // Sorting
+  sortBy: "Panga kwa",
+  sortTop: "Maarufu",
+  sortNew: "Mapya",
+  sortOld: "Ya zamani",
+  sortControversial: "Zenye utata",
+
   // Comment list
   noCommentsTitle: "Bado hakuna maoni",
   noCommentsSubtitle: "Anzisha mazungumzo.",

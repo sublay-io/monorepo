@@ -58,6 +58,7 @@ import { Entity } from "@sublay/react-js";
 import useThreadedComments from "../hooks/use-threaded-comments";
 import CommentsFeed from "./comments-feed/comments-feed";
 import NewCommentForm from "./new-comment-form";
+import SortByDropdown from "./sort-by-dropdown";
 import { deepEqual, warnPropChanges } from "../utils/prop-comparison";
 import useUIState from "../hooks/use-ui-state";
 import { SECTION_PADDING_X } from "./comments-feed/comment-thread/single-comment/indentation-threading-lines";
@@ -155,6 +156,18 @@ function ThreadedCommentSectionInner({
           <NewCommentForm gifPickerFullScreen={gifPickerFullScreen} />
         </div>
       )}
+
+      {/* Sort by, between the comment box and the comments */}
+      <div
+        style={{
+          flexShrink: 0,
+          backgroundColor: theme === 'dark' ? "#262626" : "#fff",
+          // 🎨 CUSTOMIZATION: Layout styling (Default: 4px 16px)
+          padding: `4px ${SECTION_PADDING_X}px`,
+        }}
+      >
+        <SortByDropdown />
+      </div>
 
       <div
         style={{

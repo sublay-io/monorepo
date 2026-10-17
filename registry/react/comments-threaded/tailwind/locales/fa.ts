@@ -11,6 +11,13 @@ const strings = {
   submitComment: "ارسال",
   addGif: "افزودن GIF",
 
+  // Sorting
+  sortBy: "مرتب‌سازی بر اساس",
+  sortTop: "برترین",
+  sortNew: "جدیدترین",
+  sortOld: "قدیمی‌ترین",
+  sortControversial: "بحث‌برانگیز",
+
   // Comment list
   noCommentsTitle: "هنوز نظری ثبت نشده",
   noCommentsSubtitle: "گفت‌وگو را شروع کنید.",

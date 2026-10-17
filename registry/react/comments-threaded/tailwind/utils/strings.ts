@@ -12,6 +12,13 @@ const strings = {
   // Screen-reader label of the GIF button
   addGif: "Add a GIF",
 
+  // Sorting
+  sortBy: "Sort by",
+  sortTop: "Top",
+  sortNew: "New",
+  sortOld: "Old",
+  sortControversial: "Controversial",
+
   // Comment list
   noCommentsTitle: "No comments yet",
   noCommentsSubtitle: "Start the conversation.",

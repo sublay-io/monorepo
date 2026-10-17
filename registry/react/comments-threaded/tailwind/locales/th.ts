@@ -11,6 +11,13 @@ const strings = {
   submitComment: "โพสต์",
   addGif: "เพิ่ม GIF",
 
+  // Sorting
+  sortBy: "เรียงตาม",
+  sortTop: "ยอดนิยม",
+  sortNew: "ล่าสุด",
+  sortOld: "เก่าสุด",
+  sortControversial: "เป็นที่ถกเถียง",
+
   // Comment list
   noCommentsTitle: "ยังไม่มีความคิดเห็น",
   noCommentsSubtitle: "มาเริ่มบทสนทนากันเลย",

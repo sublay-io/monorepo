@@ -11,6 +11,13 @@ const strings = {
   submitComment: "পোস্ট করুন",
   addGif: "GIF যোগ করুন",
 
+  // Sorting
+  sortBy: "সাজান",
+  sortTop: "জনপ্রিয়",
+  sortNew: "নতুন",
+  sortOld: "পুরনো",
+  sortControversial: "বিতর্কিত",
+
   // Comment list
   noCommentsTitle: "এখনও কোনো মন্তব্য নেই",
   noCommentsSubtitle: "আলোচনা শুরু করুন।",

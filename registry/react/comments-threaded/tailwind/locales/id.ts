@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Kirim",
   addGif: "Tambahkan GIF",
 
+  // Sorting
+  sortBy: "Urutkan",
+  sortTop: "Teratas",
+  sortNew: "Terbaru",
+  sortOld: "Terlama",
+  sortControversial: "Kontroversial",
+
   // Comment list
   noCommentsTitle: "Belum ada komentar",
   noCommentsSubtitle: "Mulai percakapan.",

@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Küldés",
   addGif: "GIF hozzáadása",
 
+  // Sorting
+  sortBy: "Rendezés",
+  sortTop: "Legjobb",
+  sortNew: "Legújabb",
+  sortOld: "Legrégebbi",
+  sortControversial: "Megosztó",
+
   // Comment list
   noCommentsTitle: "Még nincsenek hozzászólások",
   noCommentsSubtitle: "Kezdd el a beszélgetést.",

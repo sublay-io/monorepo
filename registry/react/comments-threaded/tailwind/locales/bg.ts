@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Публикуване",
   addGif: "Добавяне на GIF",
 
+  // Sorting
+  sortBy: "Подреждане по",
+  sortTop: "Най-добри",
+  sortNew: "Нови",
+  sortOld: "Стари",
+  sortControversial: "Спорни",
+
   // Comment list
   noCommentsTitle: "Все още няма коментари",
   noCommentsSubtitle: "Започнете разговора.",

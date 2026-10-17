@@ -31,6 +31,11 @@
       "description": "Form for creating new top-level comments"
     },
     {
+      "path": "files/sort-by-dropdown.tsx",
+      "type": "component",
+      "description": "Sort by dropdown (Top, New, Old, Controversial)"
+    },
+    {
       "path": "files/mention-suggestions.tsx",
       "type": "component",
       "description": "User mention suggestions dropdown"

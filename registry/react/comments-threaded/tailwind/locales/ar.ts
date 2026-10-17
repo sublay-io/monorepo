@@ -28,6 +28,13 @@ const strings = {
   submitComment: "نشر",
   addGif: "إضافة صورة GIF",
 
+  // Sorting
+  sortBy: "ترتيب حسب",
+  sortTop: "الأبرز",
+  sortNew: "الأحدث",
+  sortOld: "الأقدم",
+  sortControversial: "مثيرة للجدل",
+
   // Comment list
   noCommentsTitle: "لا توجد تعليقات بعد",
   noCommentsSubtitle: "ابدأ النقاش.",

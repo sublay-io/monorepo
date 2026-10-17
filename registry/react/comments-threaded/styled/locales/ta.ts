@@ -11,6 +11,13 @@ const strings = {
   submitComment: "இடுகையிடு",
   addGif: "GIF சேர்",
 
+  // Sorting
+  sortBy: "வரிசைப்படுத்து",
+  sortTop: "சிறந்தவை",
+  sortNew: "புதியவை",
+  sortOld: "பழையவை",
+  sortControversial: "சர்ச்சைக்குரியவை",
+
   // Comment list
   noCommentsTitle: "இதுவரை கருத்துகள் இல்லை",
   noCommentsSubtitle: "உரையாடலைத் தொடங்குங்கள்.",

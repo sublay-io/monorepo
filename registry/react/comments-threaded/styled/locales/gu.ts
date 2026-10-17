@@ -11,6 +11,13 @@ const strings = {
   submitComment: "પોસ્ટ કરો",
   addGif: "GIF ઉમેરો",
 
+  // Sorting
+  sortBy: "આના દ્વારા ગોઠવો",
+  sortTop: "લોકપ્રિય",
+  sortNew: "નવી",
+  sortOld: "જૂની",
+  sortControversial: "વિવાદાસ્પદ",
+
   // Comment list
   noCommentsTitle: "હજી સુધી કોઈ ટિપ્પણી નથી",
   noCommentsSubtitle: "વાતચીત શરૂ કરો.",

@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "Csatlakozz a beszélgetéshez",
   replyPlaceholder: "Írd meg a válaszod...",
   cancel: "Mégse",
+  submitComment: "Küldés",
+  addGif: "GIF hozzáadása",
 
   // Comment list
   noCommentsTitle: "Még nincsenek hozzászólások",

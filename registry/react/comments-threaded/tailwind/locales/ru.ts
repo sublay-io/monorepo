@@ -17,6 +17,8 @@ const strings = {
   commentPlaceholder: "Присоединяйтесь к обсуждению",
   replyPlaceholder: "Напишите ответ...",
   cancel: "Отмена",
+  submitComment: "Отправить",
+  addGif: "Добавить GIF",
 
   // Comment list
   noCommentsTitle: "Комментариев пока нет",

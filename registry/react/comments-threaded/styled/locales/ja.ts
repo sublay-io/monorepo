@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "会話に参加する",
   replyPlaceholder: "返信を入力...",
   cancel: "キャンセル",
+  submitComment: "投稿",
+  addGif: "GIFを追加",
 
   // Comment list
   noCommentsTitle: "まだコメントはありません",

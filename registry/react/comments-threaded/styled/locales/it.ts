@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "Partecipa alla conversazione",
   replyPlaceholder: "Scrivi la tua risposta...",
   cancel: "Annulla",
+  submitComment: "Pubblica",
+  addGif: "Aggiungi una GIF",
 
   // Comment list
   noCommentsTitle: "Ancora nessun commento",

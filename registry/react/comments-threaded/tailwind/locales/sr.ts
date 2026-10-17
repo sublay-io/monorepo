@@ -17,6 +17,8 @@ const strings = {
   commentPlaceholder: "Укључи се у разговор",
   replyPlaceholder: "Напиши одговор...",
   cancel: "Откажи",
+  submitComment: "Објави",
+  addGif: "Додај GIF",
 
   // Comment list
   noCommentsTitle: "Још нема коментара",

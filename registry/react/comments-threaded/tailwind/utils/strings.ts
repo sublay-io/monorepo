@@ -8,6 +8,9 @@ const strings = {
   commentPlaceholder: "Join the conversation",
   replyPlaceholder: "Add your reply...",
   cancel: "Cancel",
+  submitComment: "Post",
+  // Screen-reader label of the GIF button
+  addGif: "Add a GIF",
 
   // Comment list
   noCommentsTitle: "No comments yet",

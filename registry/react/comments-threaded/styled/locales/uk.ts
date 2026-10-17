@@ -17,6 +17,8 @@ const strings = {
   commentPlaceholder: "Долучайтеся до обговорення",
   replyPlaceholder: "Напишіть відповідь...",
   cancel: "Скасувати",
+  submitComment: "Опублікувати",
+  addGif: "Додати GIF",
 
   // Comment list
   noCommentsTitle: "Коментарів поки немає",

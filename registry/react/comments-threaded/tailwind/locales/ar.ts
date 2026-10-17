@@ -25,6 +25,8 @@ const strings = {
   commentPlaceholder: "انضم إلى النقاش",
   replyPlaceholder: "اكتب ردك...",
   cancel: "إلغاء",
+  submitComment: "نشر",
+  addGif: "إضافة صورة GIF",
 
   // Comment list
   noCommentsTitle: "لا توجد تعليقات بعد",

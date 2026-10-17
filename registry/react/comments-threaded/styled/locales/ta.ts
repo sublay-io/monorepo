@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "உரையாடலில் இணையுங்கள்",
   replyPlaceholder: "உங்கள் பதிலைச் சேர்க்கவும்...",
   cancel: "ரத்துசெய்",
+  submitComment: "இடுகையிடு",
+  addGif: "GIF சேர்",
 
   // Comment list
   noCommentsTitle: "இதுவரை கருத்துகள் இல்லை",

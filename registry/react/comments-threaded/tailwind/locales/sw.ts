@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "Jiunge na mazungumzo",
   replyPlaceholder: "Andika jibu lako...",
   cancel: "Ghairi",
+  submitComment: "Chapisha",
+  addGif: "Ongeza GIF",
 
   // Comment list
   noCommentsTitle: "Bado hakuna maoni",

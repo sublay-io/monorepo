@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "加入討論",
   replyPlaceholder: "新增你的回覆...",
   cancel: "取消",
+  submitComment: "發佈",
+  addGif: "新增 GIF",
 
   // Comment list
   noCommentsTitle: "還沒有留言",

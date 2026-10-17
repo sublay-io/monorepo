@@ -16,6 +16,8 @@ const strings = {
   commentPlaceholder: "Alătură-te conversației",
   replyPlaceholder: "Scrie un răspuns...",
   cancel: "Anulează",
+  submitComment: "Publică",
+  addGif: "Adaugă un GIF",
 
   // Comment list
   noCommentsTitle: "Niciun comentariu încă",

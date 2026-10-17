@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "సంభాషణలో చేరండి",
   replyPlaceholder: "మీ ప్రత్యుత్తరాన్ని జోడించండి...",
   cancel: "రద్దు చేయండి",
+  submitComment: "పోస్ట్ చేయి",
+  addGif: "GIF జోడించు",
 
   // Comment list
   noCommentsTitle: "ఇంకా వ్యాఖ్యలు లేవు",

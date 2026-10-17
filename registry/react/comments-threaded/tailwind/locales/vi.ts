@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "Tham gia thảo luận",
   replyPlaceholder: "Viết phản hồi...",
   cancel: "Hủy",
+  submitComment: "Đăng",
+  addGif: "Thêm GIF",
 
   // Comment list
   noCommentsTitle: "Chưa có bình luận nào",

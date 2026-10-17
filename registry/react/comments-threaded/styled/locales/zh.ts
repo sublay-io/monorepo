@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "参与讨论",
   replyPlaceholder: "写下你的回复...",
   cancel: "取消",
+  submitComment: "发布",
+  addGif: "添加 GIF",
 
   // Comment list
   noCommentsTitle: "暂无评论",

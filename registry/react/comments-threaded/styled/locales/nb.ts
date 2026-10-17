@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "Bli med i samtalen",
   replyPlaceholder: "Skriv svaret ditt...",
   cancel: "Avbryt",
+  submitComment: "Publiser",
+  addGif: "Legg til en GIF",
 
   // Comment list
   noCommentsTitle: "Ingen kommentarer ennå",

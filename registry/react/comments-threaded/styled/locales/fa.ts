@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "به گفت‌وگو بپیوندید",
   replyPlaceholder: "پاسخ خود را بنویسید...",
   cancel: "لغو",
+  submitComment: "ارسال",
+  addGif: "افزودن GIF",
 
   // Comment list
   noCommentsTitle: "هنوز نظری ثبت نشده",

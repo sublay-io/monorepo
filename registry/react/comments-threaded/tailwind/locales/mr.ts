@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "चर्चेत सहभागी व्हा",
   replyPlaceholder: "तुमचे उत्तर लिहा...",
   cancel: "रद्द करा",
+  submitComment: "पोस्ट करा",
+  addGif: "GIF जोडा",
 
   // Comment list
   noCommentsTitle: "अद्याप कोणत्याही टिप्पण्या नाहीत",

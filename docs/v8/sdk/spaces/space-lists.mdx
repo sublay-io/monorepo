@@ -66,6 +66,8 @@ fetchSpaces({ sortBy: "createdAt", parentSpaceId: null });
 | `"members"` | Most members first |
 | `"alphabetical"` | Sorted by name, A–Z |
 
+Pass `sortDir: "asc"` or `"desc"` to reverse any of them, for example `fetchSpaces({ sortBy: "createdAt", sortDir: "asc" })` for oldest first. Left out, each sort uses the direction above.
+
 ## Creating and Deleting from a List
 
 `useSpaceList` also exposes create and delete operations that automatically update the list state:

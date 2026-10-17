@@ -31,7 +31,7 @@ function CustomSpaceLoader({ listId }: { listId: string }) {
 ## Methods
 
 <ResponseField name="fetchSpaces" type="(listId: string, params: FetchParams) => Promise<Space[] | null>">
-  Fetch spaces for the given list. Updates Redux state with the results.
+  Fetch spaces for the given list. Updates Redux state with the results. `params` takes `page`, `limit`, `sortBy` (`"createdAt"`, `"members"` or `"alphabetical"`), an optional `sortDir` (`"asc"` or `"desc"`; left out, the sort's natural direction) and the same filters as [useSpaceList](/v8/hooks/space-lists/use-space-list).
 </ResponseField>
 
 <ResponseField name="createSpace" type="(listId: string, props: CreateSpaceProps) => Promise<Space | undefined>">

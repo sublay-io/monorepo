@@ -24,5 +24,42 @@ describe("one-way sorts", () => {
     const badCollection: FetchCollectionEntitiesProps = { collectionId: "c", userId: "u", sortBy: "hot", sortDir: "asc" };
     const okCollection: FetchCollectionEntitiesProps = { collectionId: "c", userId: "u", sortBy: "addedAt", sortDir: "asc" };
     expect([ok, okMeta, okHot, badHot, badControversial, badSortBy, badComments, badHistory, badCollection, okCollection]).toHaveLength(10);
+    // A comment sort held in state (no sortDir) is accepted.
+    const pick = (sortBy: "createdAt" | "top" | "controversial") => {
+      const thread: FetchManyCommentsProps = { entityId: "e", sortBy };
+      const replies: FetchManyCommentsProps = { parentId: "p", sortBy };
+      return [thread, replies];
+    };
+    expect(pick("controversial")).toHaveLength(2);
+  });
+});
+
+import { fetchManyComments } from "../src/modules/comments/fetchManyComments";
+
+describe("fetchManyComments request checks", () => {
+  const makeClient = () => {
+    const get = jest.fn().mockResolvedValue({ data: { data: [], pagination: { hasMore: false, nextCursor: null } } });
+    return { client: { projectInstance: { get } } as never, get };
+  };
+
+  it("needs an entityId or a parentId", async () => {
+    const { client, get } = makeClient();
+    await expect(fetchManyComments(client, {} as never)).rejects.toThrow(/entityId or a parentId/);
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it("doesn't send replySortDir when the nested sort is controversial", async () => {
+    const { client, get } = makeClient();
+    await fetchManyComments(client, {
+      entityId: "e",
+      sortBy: "createdAt",
+      replyDepth: 1,
+      replySortBy: "controversial",
+      replySortDir: "asc",
+    });
+    const params = get.mock.calls[0][1].params;
+    expect(params).not.toHaveProperty("replySortDir");
+    await fetchManyComments(client, { entityId: "e", replyDepth: 1, replySortDir: "asc" });
+    expect(get.mock.calls[1][1].params).toMatchObject({ replySortDir: "asc" });
   });
 });

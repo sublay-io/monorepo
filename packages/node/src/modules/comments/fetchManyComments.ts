@@ -39,14 +39,14 @@ interface FetchManyCommentsBaseProps extends SpaceReputationContextParams {
 /**
  * A thread fetch (`GET /comments`): `entityId` → that entity's top-level
  * comments; `parentId` → a comment's direct replies. One of the two is
- * required. A user's comment history is `users.fetchCommentsByUserId`.
+ * required (checked when the request is made: the type can't also enforce it
+ * alongside the one-way sort rule, see WithOneWaySortDir). A user's comment
+ * history is `users.fetchCommentsByUserId`.
  */
 /** `sortDir` is not accepted with `sortBy: "controversial"`. */
-export type FetchManyCommentsProps = WithOneWaySortDir<FetchManyCommentsBaseProps> &
-  (
-    | { entityId: string; parentId?: string }
-    | { entityId?: string; parentId: string }
-  );
+export type FetchManyCommentsProps = WithOneWaySortDir<
+  FetchManyCommentsBaseProps & { entityId?: string; parentId?: string }
+>;
 
 export async function fetchManyComments(
   client: SublayHttpClient,
@@ -70,6 +70,9 @@ export async function fetchManyComments(
     spaceReputationId,
     spaceReputationDescendants,
   } = data;
+  if (!entityId && !parentId) {
+    throw new Error("Fetching comments requires an entityId or a parentId");
+  }
   // Only the thread endpoint's own params are forwarded (no spread), so a
   // stray `page` / `userId` / `sourceId` / `blockedFilter` never reaches it.
   const params: Record<string, unknown> = {
@@ -84,7 +87,10 @@ export async function fetchManyComments(
     replyDepth,
     replyLimit,
     replySortBy,
-    replySortDir,
+    // The server refuses replySortDir when the nested sort is controversial
+    // (it ranks one way only).
+    replySortDir:
+      (replySortBy ?? sortBy) === "controversial" ? undefined : replySortDir,
     replySortByReaction,
     ...buildSpaceReputationParams({
       spaceReputation,

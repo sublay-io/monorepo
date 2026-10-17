@@ -9,8 +9,9 @@ function SortByButton({
   nonActiveView,
 }: {
   priority: CommentsSortByOptions;
-  // The direction this option sorts in. The section's direction applies to
-  // every sort, so each option sets its own (defaults to "desc").
+  // The direction this option sorts in (defaults to "desc"). The section's
+  // direction carries over between sorts, so each option sets its own; it
+  // isn't sent for "controversial", which ranks one way only.
   sortDir?: "asc" | "desc";
   activeView: ReactNode;
   nonActiveView: ReactNode;

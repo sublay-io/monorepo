@@ -41,14 +41,14 @@ interface FetchManyCommentsBaseProps extends SpaceReputationContextParams {
 /**
  * A thread fetch (`GET /comments`): `entityId` → that entity's top-level
  * comments; `parentId` → a comment's direct replies. One of the two is
- * required. A user's comment history is `useFetchCommentsByUserId`.
+ * required (checked when the request is made: the type can't also enforce it
+ * alongside the one-way sort rule, see WithOneWaySortDir). A user's comment
+ * history is `useFetchCommentsByUserId`.
  */
 /** `sortDir` is not accepted with `sortBy: "controversial"`. */
-export type FetchManyCommentsProps = WithOneWaySortDir<FetchManyCommentsBaseProps> &
-  (
-    | { entityId: string; parentId?: string | null }
-    | { entityId?: string | null; parentId: string }
-  );
+export type FetchManyCommentsProps = WithOneWaySortDir<
+  FetchManyCommentsBaseProps & { entityId?: string | null; parentId?: string | null }
+>;
 
 function useFetchManyComments(): (
   props: FetchManyCommentsProps,

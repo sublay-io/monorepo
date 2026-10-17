@@ -1,3 +1,4 @@
+import { isOneWaySort } from "./oneWaySorts";
 import {
   CommentReplySortByOptions,
   CommentsSortByOptions,
@@ -75,8 +76,13 @@ export function resolveReplySort(
   },
 ): CommentSortTrio {
   const sortBy = reply.replySortBy ?? section.sortBy;
+  // `controversial` ranks one way only: as the reply sort it is always desc,
+  // and as the section sort it hands down desc (the server ignores the
+  // section's stored direction for it), whatever direction is stored.
   const sortDir =
-    sortBy === "controversial" ? "desc" : (reply.replySortDir ?? section.sortDir);
+    sortBy === "controversial"
+      ? "desc"
+      : (reply.replySortDir ?? (isOneWaySort(section.sortBy) ? "desc" : section.sortDir));
   const sortByReaction =
     sortBy === "top"
       ? (reply.replySortByReaction ??

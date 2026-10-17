@@ -3,7 +3,6 @@ import {
   useCommentSection,
   useUser,
   useUserMentions,
-  useProject,
   handleError,
   type CommentCreateError,
 } from "@sublay/react-js";
@@ -13,6 +12,7 @@ import MentionSuggestions from "./mention-suggestions";
 import { getCommentCreateErrorMessage } from "../utils/comment-create-error";
 import useUIState from "../hooks/use-ui-state";
 import strings from "../utils/strings";
+import { GIPHY_API_KEY_NAME, giphyApiKey, isDevelopment } from "../utils/env";
 
 function NewCommentForm({
   gifPickerFullScreen = false,
@@ -23,9 +23,6 @@ function NewCommentForm({
 }) {
   const { user } = useUser();
   const { theme } = useUIState();
-  const { project } = useProject();
-  const giphyApiKey = project?.integrations.find((int) => int.name === "giphy")
-    ?.data.apiKey;
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [content, setContent] = useState("");
@@ -229,6 +226,18 @@ function NewCommentForm({
     };
   }, [handleSubmit]);
 
+  // Without a key the GIF button shows only in development, and says what
+  // to set instead of opening the picker
+  const openGifPicker = () => {
+    if (!giphyApiKey) {
+      alert(
+        `GIFs need a Giphy API key. Set ${GIPHY_API_KEY_NAME} in your environment, or change where it's read in this component's utils/env file.`
+      );
+      return;
+    }
+    setIsGiphyVisible(true);
+  };
+
   return (
     <>
       {giphyApiKey ? (
@@ -317,10 +326,10 @@ function NewCommentForm({
                 padding: "0 8px 8px",
               }}
             >
-              {giphyApiKey ? (
+              {giphyApiKey || isDevelopment ? (
                 <button
                   type="button"
-                  onClick={() => setIsGiphyVisible(true)}
+                  onClick={openGifPicker}
                   disabled={isSubmitting}
                   aria-label={strings.addGif}
                   style={{

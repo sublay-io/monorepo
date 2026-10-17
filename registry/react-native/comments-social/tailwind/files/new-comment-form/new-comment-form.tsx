@@ -14,13 +14,13 @@ import {
   Keyboard,
   TextInputKeyPressEventData,
   NativeSyntheticEvent,
+  Alert,
 } from "react-native";
 import {
   handleError,
   useUser,
   useCommentSection,
   useUserMentions,
-  useProject,
   type CommentCreateError,
 } from "@sublay/react-native";
 import UserAvatar from "~shared/react-native/user-avatar";
@@ -33,6 +33,7 @@ import MentionSuggestions from "../mention-suggestions/mention-suggestions";
 import useUIState from "../../hooks/use-ui-state";
 import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
 import strings from "../../utils/strings";
+import { GIPHY_API_KEY_NAME, giphyApiKey, isDevelopment } from "../../utils/env";
 
 function NewCommentForm({
   ref,
@@ -50,11 +51,7 @@ function NewCommentForm({
   containerClassName?: string;
 }) {
   const { user } = useUser();
-  const { project } = useProject();
   const { theme } = useUIState();
-
-  const giphyApiKey = project?.integrations.find((int) => int.name === "giphy")
-    ?.data.apiKey;
 
   const { pushMention, createComment, submittingComment, callbacks, createError } =
     useCommentSection();
@@ -222,6 +219,19 @@ function NewCommentForm({
     },
   }));
 
+  // Without a key the GIF button shows only in development, and says what
+  // to set instead of opening the picker
+  const openGifPicker = () => {
+    if (!giphyApiKey) {
+      Alert.alert(
+        "Giphy API key missing",
+        `GIFs need a Giphy API key. Set ${GIPHY_API_KEY_NAME} in your environment, or change where it's read in this component's utils/env file.`
+      );
+      return;
+    }
+    setIsGiphyVisible(true);
+  };
+
   const form = (
     <View
       className={`relative overflow-visible ${
@@ -293,9 +303,9 @@ theme={theme}
             placeholderTextColor={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
           />
 
-          {content.length === 0 && giphyApiKey ? (
+          {content.length === 0 && (giphyApiKey || isDevelopment) ? (
             <TouchableOpacity
-              onPress={() => setIsGiphyVisible(true)}
+              onPress={openGifPicker}
               disabled={submittingComment}
               className="bg-transparent border-0 p-0 m-0"
             >

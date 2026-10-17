@@ -150,6 +150,11 @@
       "description": "Every piece of text the component shows (English)"
     },
     {
+      "path": "utils/env.ts",
+      "type": "util",
+      "description": "Where the Giphy API key is read from (Expo; see frameworks)"
+    },
+    {
       "path": "context/ui-state-context.tsx",
       "type": "context",
       "description": "Context for UI state (bottom sheets and theme)"
@@ -202,6 +207,9 @@
     "vi": "locales/vi.ts",
     "zh": "locales/zh.ts",
     "zh-TW": "locales/zh-TW.ts"
+  },
+  "frameworks": {
+    "react-native": "env/react-native.ts"
   },
   "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react-native/comments-social/tailwind",
   "exports": {

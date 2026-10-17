@@ -78,6 +78,20 @@ describe("useFetchManyEventsWrapper", () => {
     const calls = axiosPrivate.calls("get");
     const lastCall = calls[calls.length - 1];
     expect(lastCall.config?.params).toMatchObject({ page: 1, sortBy: "going" });
+    // No direction by default: the server uses the sort's natural one (most
+    // going first).
+    expect(result.current.sortDir).toBeNull();
+    expect(lastCall.config?.params?.sortDir).toBeUndefined();
+
+    axiosPrivate.mockResponse("get", makePage([], false));
+    act(() => {
+      result.current.setSortDir("asc");
+    });
+    await waitFor(() => expect(result.current.sortDir).toBe("asc"));
+    await waitFor(() => {
+      const all = axiosPrivate.calls("get");
+      expect(all[all.length - 1].config?.params).toMatchObject({ sortBy: "going", sortDir: "asc" });
+    });
   });
 
   it("refresh() re-runs the query from page 1", async () => {

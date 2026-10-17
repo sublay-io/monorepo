@@ -17,7 +17,7 @@ describe("js-sdk chat messages — request shaping", () => {
       conversationId: "c1",
       before: "2026-06-01T00:00:00Z",
       limit: 50,
-      sort: "desc",
+      sortDir: "desc",
       include: "files",
       filters: { hasReplies: true },
     });
@@ -27,7 +27,7 @@ describe("js-sdk chat messages — request shaping", () => {
         params: {
           before: "2026-06-01T00:00:00Z",
           limit: 50,
-          sort: "desc",
+          sortDir: "desc",
           include: "files",
           filters: { hasReplies: true },
         },

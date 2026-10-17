@@ -35,7 +35,7 @@ describe("useFetchManyChatMessagesWrapper", () => {
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/chat/conversations/conversation-1/messages");
-    expect(call.config?.params).toMatchObject({ limit: 50, sort: "desc" });
+    expect(call.config?.params).toMatchObject({ limit: 50, sortDir: "desc" });
   });
 
   it("forwards includeGrants on both the first page and load-more", async () => {

@@ -23,7 +23,7 @@ export interface ListMessagesProps extends SpaceReputationContextParams {
   /** Keyset pagination: ISO timestamp; return messages created after this. Mutually exclusive with `before`. */
   after?: string;
   limit?: number;
-  sort?: "asc" | "desc";
+  sortDir?: "asc" | "desc";
   /**
    * Comma-separated associations to populate: `"files"` (message
    * attachments) and `"grants"` (the reputation-grant summary). Combine

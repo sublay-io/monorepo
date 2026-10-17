@@ -24,7 +24,7 @@ export interface FetchManyChatMessagesProps extends SpaceReputationContextParams
   after?: string | null;
   /** Page size (1–100, defaults to 50 server-side). */
   limit?: number;
-  sort?: "asc" | "desc";
+  sortDir?: "asc" | "desc";
   /** When `true`, the server populates the `files` field on each message. */
   includeFiles?: boolean;
   /**
@@ -75,7 +75,7 @@ function useFetchManyChatMessages(): (
         before,
         after,
         limit = 50,
-        sort,
+        sortDir,
         includeFiles,
         includeGrants,
         filters,
@@ -95,7 +95,7 @@ function useFetchManyChatMessages(): (
           spaceReputationDescendants,
         }),
       };
-      if (sort) params.sort = sort;
+      if (sortDir) params.sortDir = sortDir;
       if (parentId) params.parentId = parentId;
       if (before) params.before = before;
       if (after) params.after = after;

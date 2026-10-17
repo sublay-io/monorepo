@@ -22,7 +22,7 @@ export interface ListMessagesProps extends SpaceReputationContextParams {
   after?: string;
   /** Page size (default 50, max 100). */
   limit?: number;
-  sort?: "asc" | "desc";
+  sortDir?: "asc" | "desc";
   /**
    * Comma-separated associations to populate: `"files"` (message
    * attachments) and `"grants"` (the reputation-grant summary). Combine

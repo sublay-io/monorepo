@@ -100,7 +100,7 @@ function useLiveChatMessages({
           parentId,
           before,
           limit,
-          sort: isThread ? "asc" : "desc",
+          sortDir: isThread ? "asc" : "desc",
           includeFiles,
           includeGrants,
         });
@@ -181,7 +181,7 @@ function useLiveChatMessages({
           parentId,
           after,
           limit,
-          sort: "asc",
+          sortDir: "asc",
           includeFiles,
           includeGrants,
         });

@@ -16,10 +16,13 @@ The `/hooks/` directory contains the core logic for each component. This is wher
 
 ### Change Default Sort Order
 
+The section starts sorted by `"top"`. To start newest first instead, change `defaultSortBy` (and add `defaultSortDir`) where the hook sets up the comment section:
+
 ```tsx
 // File: hooks/use-threaded-comments.tsx
 
-const [sortBy, setSortBy] = useState<'top' | 'new' | 'old'>('new');  // Changed from 'top'
+defaultSortBy: "createdAt", // was "top"
+defaultSortDir: "desc",     // newest first; "asc" for oldest first
 ```
 
 ### Change Comments Per Page

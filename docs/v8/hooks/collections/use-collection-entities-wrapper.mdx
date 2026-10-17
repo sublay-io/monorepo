@@ -113,7 +113,7 @@ function SavedFeed({ collectionId }) {
   Current sort direction.
 </ResponseField>
 
-<ResponseField name="setSortBy" type="(sortBy: 'new' | 'top' | 'hot' | 'added') => void">
+<ResponseField name="setSortBy" type="(sortBy: 'createdAt' | 'addedAt' | 'top' | 'hot') => void">
   Change the sort mode. Resets the entity list and re-fetches from page 1.
 </ResponseField>
 

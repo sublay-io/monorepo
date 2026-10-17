@@ -28,7 +28,7 @@ function EntityFeed() {
     fetchEntities({
       page: 1,
       limit: 20,
-      sortBy: "score",
+      sortBy: "hot",
       spaceId: "space_abc",
       include: ["user"],
     }).then((res) => setEntities(res.data));

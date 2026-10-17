@@ -129,6 +129,7 @@ function VoteButtons({
 
       {/* Score */}
       <span
+        dir="ltr"
         style={{
           // 🎨 CUSTOMIZATION: Score display styling (Default: medium)
           fontWeight: 500,
@@ -144,6 +145,8 @@ function VoteButtons({
               : (theme === 'dark' ? "#D4D4D4" : "#374151"),
         }}
       >
+        {/* A negative score keeps its minus sign on the left in right-to-left
+            layouts too (the browser would otherwise show -1 as "1-"). */}
         {netScore}
       </span>
 

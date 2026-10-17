@@ -53,7 +53,7 @@ describe("spaceReputation serialization regression guard (core hooks)", () => {
     await act(async () => {
       await result.current({
         entityId: "entity-1",
-        sortBy: "new",
+        sortBy: "createdAt",
         spaceReputation: { spaceId: "context", includeDescendants: true },
       });
     });
@@ -87,7 +87,7 @@ describe("spaceReputation serialization regression guard (core hooks)", () => {
     await act(async () => {
       await objHarness.result.current({
         entityId: "entity-1",
-        sortBy: "new",
+        sortBy: "createdAt",
         spaceReputation: { spaceId: "space-9", includeDescendants: false },
       });
     });
@@ -101,7 +101,7 @@ describe("spaceReputation serialization regression guard (core hooks)", () => {
     await act(async () => {
       await flatHarness.result.current({
         entityId: "entity-1",
-        sortBy: "new",
+        sortBy: "createdAt",
         spaceReputationId: "space-9",
         spaceReputationDescendants: false,
       });

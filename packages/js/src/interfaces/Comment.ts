@@ -112,15 +112,8 @@ export type CommentThreadIncludeParam =
   | CommentThreadInclude
   | CommentThreadIncludeArray;
 
-/** Comment sorts. `new` / `old` are deprecated aliases of `createdAt`. */
-export type CommentsSortBy =
-  | "createdAt"
-  | "top"
-  | "controversial"
-  /** @deprecated Use "createdAt" (with sortDir) instead. */
-  | "new"
-  /** @deprecated Use "createdAt" with sortDir:"asc" instead. */
-  | "old";
+/** Comment sorts. Time order is `"createdAt"` with `sortDir`. */
+export type CommentsSortBy = "createdAt" | "top" | "controversial";
 
-/** Sorts for the nested reply levels (no deprecated aliases). */
+/** Sorts for the nested reply levels. */
 export type CommentReplySortBy = "createdAt" | "top" | "controversial";

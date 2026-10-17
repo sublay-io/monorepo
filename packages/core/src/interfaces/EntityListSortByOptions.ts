@@ -4,19 +4,11 @@ export type SortType = "auto" | "numeric" | "text" | "boolean" | "timestamp";
 
 export type SortByReaction = "upvote" | "downvote" | "like" | "love" | "wow" | "sad" | "angry" | "funny";
 
-/**
- * @deprecated Use `"createdAt"` instead. `"new"` is a directional alias kept for
- * backwards compatibility and will be removed in v8. The server still accepts it
- * (it behaves identically to `"createdAt"`) but responds with deprecation headers.
- */
-export type DeprecatedNewSortBy = "new";
-
 export type EntityListSortByOptions =
   | "createdAt"
   | "top"
   | "hot"
   | "controversial"
-  | DeprecatedNewSortBy
   | `metadata.${string}`;
 
 /**

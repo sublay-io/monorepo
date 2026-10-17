@@ -49,7 +49,7 @@ describe("useCollectionEntitiesWrapper", () => {
     const url = new URL(call.url);
     expect(url.pathname).toContain("/test-project/collections/col-1/entities");
     expect(url.searchParams.get("page")).toBe("1");
-    expect(url.searchParams.get("sortBy")).toBe("added");
+    expect(url.searchParams.get("sortBy")).toBe("addedAt");
     expect(url.searchParams.get("sortDir")).toBe("desc");
   });
 

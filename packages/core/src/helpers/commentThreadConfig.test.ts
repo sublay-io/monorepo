@@ -7,21 +7,15 @@ import {
 } from "./commentThreadConfig";
 
 describe("resolveReplySort (mirrors the server's resolveCommentReplySort)", () => {
-  it("resolves `old` to createdAt asc before defaulting the reply direction", () => {
+  it("the reply levels default to the section's sort and direction", () => {
     expect(
       resolveReplySort(
-        { sortBy: "old", sortDir: "desc", sortByReaction: undefined },
+        { sortBy: "createdAt", sortDir: "asc", sortByReaction: undefined },
         { replySortBy: "top" },
       ),
     ).toEqual({ sortBy: "top", sortDir: "asc", sortByReaction: undefined });
     expect(
-      resolveReplySort({ sortBy: "old", sortDir: "desc", sortByReaction: undefined }, {}),
-    ).toEqual({ sortBy: "createdAt", sortDir: "asc", sortByReaction: undefined });
-  });
-
-  it("resolves `new` to createdAt in the requested direction", () => {
-    expect(
-      resolveReplySort({ sortBy: "new", sortDir: "asc", sortByReaction: undefined }, {}),
+      resolveReplySort({ sortBy: "createdAt", sortDir: "asc", sortByReaction: undefined }, {}),
     ).toEqual({ sortBy: "createdAt", sortDir: "asc", sortByReaction: undefined });
   });
 

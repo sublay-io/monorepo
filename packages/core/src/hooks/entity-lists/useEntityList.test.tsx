@@ -54,14 +54,14 @@ describe("useEntityList", () => {
       projectId: "test-project",
     });
 
-    act(() => result.current.fetchEntities({ userId: "user-1" }, { sortBy: "new" }));
+    act(() => result.current.fetchEntities({ userId: "user-1" }, { sortBy: "createdAt" }));
     expect(fetchHandle.calls()).toHaveLength(0); // not yet — debounced
 
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(1), {
       timeout: DEBOUNCE_MS + 500,
     });
     expect(result.current.userId).toBe("user-1");
-    expect(result.current.sortBy).toBe("new");
+    expect(result.current.sortBy).toBe("createdAt");
   }, 10_000);
 
   it("fetchImmediately bypasses the debounce even with filters/sort set", async () => {
@@ -73,7 +73,7 @@ describe("useEntityList", () => {
     await act(async () => {
       result.current.fetchEntities(
         { userId: "user-1" },
-        { sortBy: "new" },
+        { sortBy: "createdAt" },
         undefined,
         { fetchImmediately: true },
       );
@@ -117,14 +117,14 @@ describe("useEntityList", () => {
     act(() =>
       result.current.fetchEntities(
         { userId: "user-1" },
-        { sortBy: "new" },
+        { sortBy: "createdAt" },
         undefined,
         { fetchImmediately: true },
       ),
     );
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(2));
     expect(result.current.userId).toBe("user-1");
-    expect(result.current.sortBy).toBe("new");
+    expect(result.current.sortBy).toBe("createdAt");
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
     act(() =>

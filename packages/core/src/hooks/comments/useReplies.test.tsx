@@ -348,12 +348,12 @@ describe("useReplies", () => {
     expect(bare.axiosPrivate.calls("get")).toHaveLength(0);
   });
 
-  it("continues nested replies under the server-resolved sort for the deprecated `old` alias", async () => {
+  it("continues nested replies in the section's direction when only replySortBy is set", async () => {
     const { result, axiosPrivate } = renderReplies({
       topLevel: [makeComment({ id: C1, repliesCount: 3 })],
       providerProps: {
-        defaultSortBy: "old",
-        defaultSortDir: "desc",
+        defaultSortBy: "createdAt",
+        defaultSortDir: "asc",
         replySortBy: "top",
       },
     });
@@ -363,7 +363,7 @@ describe("useReplies", () => {
     await act(async () => {
       await result.current.replies.loadMore();
     });
-    // The server resolves `old` → createdAt asc before defaulting replySortDir.
+    // replySortDir defaults to the section's direction.
     expect(axiosPrivate.calls("get")[1].config?.params).toMatchObject({
       sortBy: "top",
       sortDir: "asc",

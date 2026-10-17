@@ -10,7 +10,7 @@ export interface FetchCollectionEntitiesProps extends TopCommentsParams {
   collectionId: string;
   page?: number;
   limit?: number;
-  sortBy?: "new" | "added" | "top" | "hot";
+  sortBy?: "createdAt" | "addedAt" | "top" | "hot";
   /** Which reaction `top` ranks by (server default: "upvote"). Only valid with `sortBy: "top"` — the server rejects it otherwise. */
   sortByReaction?:
     | "upvote"

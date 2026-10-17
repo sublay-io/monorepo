@@ -23,7 +23,7 @@ interface FetchCollectionEntitiesParams {
   collectionId: string;
   page?: number;
   limit?: number;
-  sortBy?: "new" | "top" | "hot" | "added";
+  sortBy?: "createdAt" | "addedAt" | "top" | "hot";
   sortByReaction?: SortByReaction;
   sortDir?: "asc" | "desc";
   include?: CollectionEntityIncludeParam;

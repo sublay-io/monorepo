@@ -60,36 +60,19 @@ export interface CommentSortTrio {
 }
 
 /**
- * The server's mapping of the deprecated aliases, applied before anything
- * else: `old` is `createdAt` ascending (whatever `sortDir` says), `new` is
- * `createdAt` in the requested direction.
- */
-export function resolveSortAlias(sort: CommentSortTrio): CommentSortTrio {
-  if (sort.sortBy === "old") {
-    return { sortBy: "createdAt", sortDir: "asc", sortByReaction: undefined };
-  }
-  if (sort.sortBy === "new") {
-    return { sortBy: "createdAt", sortDir: sort.sortDir, sortByReaction: undefined };
-  }
-  return sort;
-}
-
-/**
  * The sort of the nested levels, resolved exactly the way the server resolves
- * it: the section's sort is alias-resolved first, then each of `replySortBy` /
- * `replySortDir` defaults to the section's own; the reaction applies only to
- * `top` and defaults to the section's reaction when the section also sorts by
- * `top`, else the server default. Never returns a deprecated alias.
+ * it: each of `replySortBy` / `replySortDir` defaults to the section's own; the
+ * reaction applies only to `top` and defaults to the section's reaction when the
+ * section also sorts by `top`, else the server default.
  */
 export function resolveReplySort(
-  sectionSort: CommentSortTrio,
+  section: CommentSortTrio,
   reply: {
     replySortBy?: CommentReplySortByOptions;
     replySortDir?: "asc" | "desc";
     replySortByReaction?: ReactionType;
   },
 ): CommentSortTrio {
-  const section = resolveSortAlias(sectionSort);
   const sortBy = reply.replySortBy ?? section.sortBy;
   const sortDir = reply.replySortDir ?? section.sortDir;
   const sortByReaction =

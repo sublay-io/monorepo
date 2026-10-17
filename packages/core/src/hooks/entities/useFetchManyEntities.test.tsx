@@ -26,14 +26,14 @@ describe("useFetchManyEntities", () => {
 
     let returned: PaginatedResponse<Entity> | undefined;
     await act(async () => {
-      returned = await result.current({ page: 1, sortBy: "new" });
+      returned = await result.current({ page: 1, sortBy: "createdAt" });
     });
 
     expect(returned).toEqual(page);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/entities");
-    expect(call.config?.params).toMatchObject({ page: 1, sortBy: "new" });
+    expect(call.config?.params).toMatchObject({ page: 1, sortBy: "createdAt" });
   });
 
   it("serializes keywordsFilters into bracket-notation params", async () => {

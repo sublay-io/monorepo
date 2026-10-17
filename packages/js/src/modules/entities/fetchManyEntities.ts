@@ -46,10 +46,6 @@ export interface FetchManyEntitiesProps
     | "hot"
     | "top"
     | "controversial"
-    /** @deprecated Use "createdAt" instead. "new" is a directional alias removed
-     * in v8; the server still accepts it (identical behavior) but responds with
-     * deprecation headers. */
-    | "new"
     | (string & {});
   sortDir?: "asc" | "desc";
   sortType?: "auto" | "numeric" | "text" | "boolean" | "timestamp";

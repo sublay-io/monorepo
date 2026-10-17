@@ -45,14 +45,14 @@ describe("entityListsSlice", () => {
         updateFiltersAndSortConfig({
           listId: "feed",
           filters: { userId: "user-1", followedOnly: true },
-          sort: { sortBy: "new", sortDir: "asc" },
+          sort: { sortBy: "createdAt", sortDir: "asc" },
           config: { sourceId: "source-1", limit: 25 },
         }),
       );
       const list = s.lists.feed;
       expect(list.userId).toBe("user-1");
       expect(list.followedOnly).toBe(true);
-      expect(list.sortBy).toBe("new");
+      expect(list.sortBy).toBe("createdAt");
       expect(list.sortDir).toBe("asc");
       expect(list.sourceId).toBe("source-1");
       expect(list.limit).toBe(25);
@@ -80,13 +80,13 @@ describe("entityListsSlice", () => {
         updateFiltersAndSortConfig({
           listId: "feed",
           filters: { userId: "user-1" },
-          sort: { sortBy: "new" },
+          sort: { sortBy: "createdAt" },
           config: { limit: 25 },
         }),
       );
       s = reducer(s, updateFiltersAndSortConfig({ listId: "feed", filters: {}, options: { resetFilters: true } }));
       expect(s.lists.feed.userId).toBeNull();
-      expect(s.lists.feed.sortBy).toBe("new"); // untouched
+      expect(s.lists.feed.sortBy).toBe("createdAt"); // untouched
       expect(s.lists.feed.limit).toBe(25); // untouched
     });
 
@@ -96,7 +96,7 @@ describe("entityListsSlice", () => {
         updateFiltersAndSortConfig({
           listId: "feed",
           filters: { userId: "user-1" },
-          sort: { sortBy: "new" },
+          sort: { sortBy: "createdAt" },
         }),
       );
       s = reducer(s, updateFiltersAndSortConfig({ listId: "feed", filters: {}, options: { resetSort: true } }));
@@ -329,12 +329,12 @@ describe("entityListsSlice", () => {
         updateFiltersAndSortConfig({
           listId: "feed",
           filters: { userId: "user-1" },
-          sort: { sortBy: "new" },
+          sort: { sortBy: "createdAt" },
           config: { sourceId: "source-1", limit: 25 },
         }),
       );
       const state = { sublay: { entityLists: s } } as never;
-      expect(selectEntityListSort(state, "feed")?.sortBy).toBe("new");
+      expect(selectEntityListSort(state, "feed")?.sortBy).toBe("createdAt");
       expect(selectEntityListFilters(state, "feed")?.userId).toBe("user-1");
       expect(selectEntityListConfig(state, "feed")?.sourceId).toBe("source-1");
     });

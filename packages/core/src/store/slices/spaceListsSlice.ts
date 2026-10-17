@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
+import type { SortDirection } from "../../interfaces/EntityListSortByOptions";
 import { resetAccountScopedState } from "../actions";
 import type { SublayState } from '../sublayReducers';
 import { Space } from "../../interfaces/models/Space";
@@ -18,6 +19,8 @@ export interface SpaceListState {
 
   // Filter/sort state (user-controlled filters only)
   sortBy: SpaceListSortByOptions;
+  /** null: the sort's natural direction (A–Z for alphabetical, else newest / most first). */
+  sortDir: SortDirection | null;
   searchSlug: string | null;
   searchName: string | null;
   searchDescription: string | null;
@@ -45,6 +48,7 @@ const createDefaultSpaceListState = (): SpaceListState => ({
 
   // Default filters (user-controlled only)
   sortBy: "createdAt",
+  sortDir: null,
   searchSlug: null,
   searchName: null,
   searchDescription: null,
@@ -61,6 +65,7 @@ const initialState: SpaceListsState = {
 // Space list filters interface - used by both Redux slice and hooks
 export interface SpaceListFilters {
   sortBy?: SpaceListSortByOptions;
+  sortDir?: SortDirection | null;
   searchSlug?: string | null;
   searchName?: string | null;
   searchDescription?: string | null;
@@ -147,6 +152,7 @@ export const spaceListsSlice = createSlice({
         const defaultState = createDefaultSpaceListState();
         // Reset all filter properties to defaults
         list.sortBy = defaultState.sortBy;
+        list.sortDir = defaultState.sortDir;
         list.searchSlug = defaultState.searchSlug;
         list.searchName = defaultState.searchName;
         list.searchDescription = defaultState.searchDescription;
@@ -361,6 +367,7 @@ export const selectSpaceListFilters = createSelector(
 
     return {
       sortBy: spaceList.sortBy,
+      sortDir: spaceList.sortDir,
       searchSlug: spaceList.searchSlug,
       searchName: spaceList.searchName,
       searchDescription: spaceList.searchDescription,

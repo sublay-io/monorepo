@@ -111,11 +111,6 @@
       "description": "Reply button and reply count"
     },
     {
-      "path": "files/comments-feed/comment-thread/single-comment/toggle-replies-visibility.tsx",
-      "type": "component",
-      "description": "Button to show/hide replies"
-    },
-    {
       "path": "files/comments-feed/comment-thread/single-comment/indentation-threading-lines.tsx",
       "type": "component",
       "description": "Visual threading lines for nested comments"

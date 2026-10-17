@@ -13,7 +13,6 @@ import UserAvatar from "~shared/react-native/user-avatar";
 import { getImageComponent } from "~shared/react-native/get-image-component";
 import VoteButtons from "./vote-buttons";
 import ActionMenu from "../action-menu";
-import ToggleRepliesVisibility from "./toggle-replies-visibility";
 import {
   AVATAR_GAP,
   AVATAR_OFFSET_TOP,
@@ -217,7 +216,14 @@ function SingleComment({
         {/* Line from this comment's avatar down to the rows listed under it */}
         {(showReplies || columnContinues) && <ThreadStem />}
 
-        <View style={{ flexDirection: 'row' }}>
+        {/* Tapping the comment collapses it to one line and hides its
+            replies; tapping again expands it. The avatar, name, votes, Reply,
+            the menu and mention links keep their own taps. */}
+        <Pressable
+          style={{ flexDirection: 'row' }}
+          onPress={onToggleCollapse}
+          accessibilityState={{ expanded: !isCollapsed }}
+        >
           {/* Avatar with threading line connection */}
           <View
             style={{
@@ -313,12 +319,6 @@ theme={theme}
                   </Pressable>
                 </>
               )}
-              {hasReplies && (
-                <ToggleRepliesVisibility
-                  isCollapsed={isCollapsed}
-                  onToggleCollapse={onToggleCollapse}
-                />
-              )}
             </View>
           ) : (
           <View style={{ flex: 1 }}>
@@ -327,11 +327,12 @@ theme={theme}
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: 4,
+                marginBottom: isCollapsed ? 0 : 4,
               }}
             >
               <View
                 style={{
+                  flex: 1,
                   flexDirection: 'row',
                   alignItems: 'center',
                   gap: 8,
@@ -389,25 +390,33 @@ theme={theme}
                 >
                   {new Date(comment.createdAt).toLocaleDateString()}
                 </Text>
-                {isCollapsed && hasReplies && (
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      lineHeight: 18,
-                      color: theme === 'dark' ? '#60A5FA' : '#3B82F6',
-                    }}
-                  >
-                    ({strings.replyCount(replyCount)})
-                  </Text>
-                )}
-                {hasReplies && (
-                  <ToggleRepliesVisibility
-                    isCollapsed={isCollapsed}
-                    onToggleCollapse={onToggleCollapse}
-                  />
-                )}
+                {/* Collapsed: the text on the same line, cut to fit */}
+                {isCollapsed && !tombstone && comment.content ? (
+                  <>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        lineHeight: 18,
+                        color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
+                      }}
+                    >
+                      •
+                    </Text>
+                    <Text
+                      numberOfLines={1}
+                      style={{
+                        flex: 1,
+                        fontSize: 13,
+                        lineHeight: 18,
+                        color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
+                      }}
+                    >
+                      {comment.content.replace(/\s+/g, " ")}
+                    </Text>
+                  </>
+                ) : null}
               </View>
-              {!tombstone && <ActionMenu comment={comment} />}
+              {!tombstone && !isCollapsed && <ActionMenu comment={comment} />}
             </View>
 
             {!isCollapsed && tombstone && (
@@ -494,7 +503,7 @@ theme={theme}
             )}
           </View>
           )}
-        </View>
+        </Pressable>
       </View>
     </View>
   );

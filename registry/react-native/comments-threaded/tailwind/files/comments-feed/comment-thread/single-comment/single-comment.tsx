@@ -13,7 +13,6 @@ import UserAvatar from "~shared/react-native/user-avatar";
 import { getImageComponent } from "~shared/react-native/get-image-component";
 import VoteButtons from "./vote-buttons";
 import ActionMenu from "../action-menu";
-import ToggleRepliesVisibility from "./toggle-replies-visibility";
 import {
   AVATAR_GAP,
   AVATAR_OFFSET_TOP,
@@ -211,7 +210,14 @@ function SingleComment({
         {/* Line from this comment's avatar down to the rows listed under it */}
         {(showReplies || columnContinues) && <ThreadStem />}
 
-        <View className="flex-row">
+        {/* Tapping the comment collapses it to one line and hides its
+            replies; tapping again expands it. The avatar, name, votes, Reply,
+            the menu and mention links keep their own taps. */}
+        <Pressable
+          className="flex-row"
+          onPress={onToggleCollapse}
+          accessibilityState={{ expanded: !isCollapsed }}
+        >
           {/* Avatar with threading line connection */}
           <View
             className="relative"
@@ -279,17 +285,15 @@ theme={theme}
                   </Pressable>
                 </>
               )}
-              {hasReplies && (
-                <ToggleRepliesVisibility
-                  isCollapsed={isCollapsed}
-                  onToggleCollapse={onToggleCollapse}
-                />
-              )}
             </View>
           ) : (
           <View className="flex-1">
-            <View className="flex-row items-center justify-between mb-1">
-              <View className="flex-row items-center gap-2">
+            <View
+              className={`flex-row items-center justify-between ${
+                isCollapsed ? '' : 'mb-1'
+              }`}
+            >
+              <View className="flex-1 flex-row items-center gap-2">
                 {tombstone ? (
                   <Text
                     className={`font-medium text-[13px] leading-[18px] ${
@@ -331,23 +335,28 @@ theme={theme}
                 >
                   {new Date(comment.createdAt).toLocaleDateString()}
                 </Text>
-                {isCollapsed && hasReplies && (
-                  <Text
-                    className={`text-[13px] leading-[18px] ${
-                      theme === 'dark' ? 'text-blue-400' : 'text-blue-500'
-                    }`}
-                  >
-                    ({strings.replyCount(replyCount)})
-                  </Text>
-                )}
-                {hasReplies && (
-                  <ToggleRepliesVisibility
-                    isCollapsed={isCollapsed}
-                    onToggleCollapse={onToggleCollapse}
-                  />
-                )}
+                {/* Collapsed: the text on the same line, cut to fit */}
+                {isCollapsed && !tombstone && comment.content ? (
+                  <>
+                    <Text
+                      className={`text-[13px] leading-[18px] ${
+                        theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
+                      }`}
+                    >
+                      •
+                    </Text>
+                    <Text
+                      numberOfLines={1}
+                      className={`flex-1 text-[13px] leading-[18px] ${
+                        theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
+                      }`}
+                    >
+                      {comment.content.replace(/\s+/g, " ")}
+                    </Text>
+                  </>
+                ) : null}
               </View>
-              {!tombstone && <ActionMenu comment={comment} />}
+              {!tombstone && !isCollapsed && <ActionMenu comment={comment} />}
             </View>
 
             {!isCollapsed && tombstone && (
@@ -417,7 +426,7 @@ theme={theme}
             )}
           </View>
           )}
-        </View>
+        </Pressable>
       </View>
     </View>
   );

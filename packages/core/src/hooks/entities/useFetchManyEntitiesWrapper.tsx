@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import { EntityListSortByOptions, SortByReaction, SortDirection, SortType } from "../../interfaces/EntityListSortByOptions";
 import {
   Entity,
@@ -120,9 +121,8 @@ function useFetchManyEntitiesWrapper(
       const response = await fetchManyEntities({
         userId,
         page: 1,
-        sortBy,
+        ...oneWaySortFields(sortBy, sortDir),
         sortByReaction,
-        sortDir,
         sortType,
         timeFrame,
         sourceId,
@@ -201,9 +201,8 @@ function useFetchManyEntitiesWrapper(
         const response = await fetchManyEntities({
           userId,
           page,
-          sortBy,
+          ...oneWaySortFields(sortBy, sortDir),
           sortByReaction,
-          sortDir,
           sortType,
           timeFrame,
           sourceId,

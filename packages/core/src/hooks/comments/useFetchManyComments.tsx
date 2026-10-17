@@ -1,4 +1,6 @@
 import { useCallback } from "react";
+import type { WithOneWaySortDir } from "../../interfaces/OneWaySortParams";
+import { sendableSortDir } from "../../helpers/oneWaySorts";
 import {
   CommentReplySortByOptions,
   CommentsSortByOptions,
@@ -41,7 +43,8 @@ interface FetchManyCommentsBaseProps extends SpaceReputationContextParams {
  * comments; `parentId` → a comment's direct replies. One of the two is
  * required. A user's comment history is `useFetchCommentsByUserId`.
  */
-export type FetchManyCommentsProps = FetchManyCommentsBaseProps &
+/** `sortDir` is not accepted with `sortBy: "controversial"`. */
+export type FetchManyCommentsProps = WithOneWaySortDir<FetchManyCommentsBaseProps> &
   (
     | { entityId: string; parentId?: string | null }
     | { entityId?: string | null; parentId: string }
@@ -99,14 +102,17 @@ function useFetchManyComments(): (
       if (entityId) params.entityId = entityId;
       if (parentId) params.parentId = parentId;
       if (sortBy) params.sortBy = sortBy;
-      if (sortDir) params.sortDir = sortDir;
+      // The server refuses sortDir / replySortDir with controversial.
+      const sendSortDir = sendableSortDir(sortBy, sortDir);
+      if (sendSortDir) params.sortDir = sendSortDir;
       if (sortByReaction) params.sortByReaction = sortByReaction;
       if (limit !== undefined) params.limit = limit;
       if (cursor) params.cursor = cursor;
       if (replyDepth !== undefined) params.replyDepth = replyDepth;
       if (replyLimit !== undefined) params.replyLimit = replyLimit;
       if (replySortBy) params.replySortBy = replySortBy;
-      if (replySortDir) params.replySortDir = replySortDir;
+      const sendReplySortDir = sendableSortDir(replySortBy ?? sortBy, replySortDir);
+      if (sendReplySortDir) params.replySortDir = sendReplySortDir;
       if (replySortByReaction) params.replySortByReaction = replySortByReaction;
 
       if (include && include.length > 0) {

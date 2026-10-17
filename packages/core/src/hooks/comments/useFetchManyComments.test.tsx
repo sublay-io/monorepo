@@ -82,6 +82,24 @@ describe("useFetchManyComments", () => {
     });
   });
 
+  it("never sends sortDir / replySortDir with controversial (it ranks one way only)", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyComments());
+    axiosPrivate.mockResponse("get", { data: [], pagination: { limit: 10, hasMore: false, nextCursor: null } });
+    await act(async () => {
+      await result.current({
+        entityId: "entity-1",
+        sortBy: "controversial",
+        sortDir: "asc",
+        replyDepth: 1,
+        replySortDir: "asc",
+      } as never);
+    });
+    const params = axiosPrivate.calls("get")[0].config?.params;
+    expect(params).toMatchObject({ sortBy: "controversial" });
+    expect(params).not.toHaveProperty("sortDir");
+    expect(params).not.toHaveProperty("replySortDir");
+  });
+
   it("never sends params the thread endpoint rejects, even if passed untyped", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyComments());
 

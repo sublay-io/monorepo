@@ -1,4 +1,5 @@
 import { baseApi } from "./baseApi";
+import { sendableSortDir } from "../../helpers/oneWaySorts";
 import { sendableTopCommentsParams } from "../../utils/topCommentsParams";
 import type { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 import type { Entity, EntityIncludeParam } from "../../interfaces/models/Entity";
@@ -198,7 +199,8 @@ export const entityListsApi = baseApi.injectEndpoints({
             sortBy,
             // The server only accepts sortByReaction with sortBy=top (400 otherwise).
             sortByReaction: sortBy === "top" ? sortByReaction : undefined,
-            sortDir,
+            // The server refuses sortDir with hot / controversial.
+            sortDir: sendableSortDir(sortBy, sortDir),
             sortType,
             timeFrame,
             keywordsFilters,

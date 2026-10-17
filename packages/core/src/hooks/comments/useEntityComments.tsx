@@ -1,3 +1,4 @@
+import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import {
   createContext,
   Dispatch,
@@ -225,8 +226,7 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
       entityId: entityId as string,
       cursor: cursorRef.current,
       limit,
-      sortBy: sectionSort.sortBy,
-      sortDir: sectionSort.sortDir,
+      ...oneWaySortFields(sectionSort.sortBy, sectionSort.sortDir),
       sortByReaction: sectionSort.sortByReaction,
       include,
       ...(replyDepth > 0

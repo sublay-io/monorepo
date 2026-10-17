@@ -36,6 +36,17 @@ describe("useFetchManyEntities", () => {
     expect(call.config?.params).toMatchObject({ page: 1, sortBy: "createdAt" });
   });
 
+  it.each(["hot", "controversial"])("never sends sortDir with sortBy=%s", async (sortBy) => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyEntities());
+    axiosPrivate.mockResponse("get", makePage([]));
+    await act(async () => {
+      await result.current({ page: 1, sortBy, sortDir: "asc" } as never);
+    });
+    const params = axiosPrivate.calls("get")[0].config?.params;
+    expect(params).toMatchObject({ sortBy });
+    expect(params).not.toHaveProperty("sortDir");
+  });
+
   it("serializes keywordsFilters into bracket-notation params", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyEntities());
 

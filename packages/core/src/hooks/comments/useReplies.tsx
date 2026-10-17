@@ -1,3 +1,4 @@
+import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { Comment } from "../../interfaces/models/Comment";
 import { handleError } from "../../utils/handleError";
@@ -157,8 +158,7 @@ function useReplies({
           parentId: commentId,
           cursor: current.repliesCursor,
           limit: pageLimit,
-          sortBy: ctx.replySort.sortBy,
-          sortDir: ctx.replySort.sortDir,
+          ...oneWaySortFields(ctx.replySort.sortBy, ctx.replySort.sortDir),
           sortByReaction: ctx.replySort.sortByReaction,
           include: ctx.include,
           ...(replyDepth > 0 ? { replyDepth, replyLimit: ctx.replyLimit } : {}),

@@ -1,4 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
+import type { WithOneWaySortDir } from "../../interfaces/OneWaySortParams";
 import { Entity, TopCommentsParams } from "../../interfaces/Entity";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
@@ -33,20 +34,20 @@ export interface LocationFilters {
   radius: string;
 }
 
-export interface FetchManyEntitiesProps
+export interface FetchManyEntitiesBaseProps
   extends SpaceReputationContextParams,
     TopCommentsParams {
   sourceId?: string;
   spaceId?: string;
 
   // Sorting & Pagination
-  // `metadata.<prop>` is also accepted by the server for metadata-based sorting.
+  // `metadata.<prop>` sorts by a metadata field.
   sortBy?:
     | "createdAt"
     | "hot"
     | "top"
     | "controversial"
-    | (string & {});
+    | `metadata.${string}`;
   sortDir?: "asc" | "desc";
   sortType?: "auto" | "numeric" | "text" | "boolean" | "timestamp";
   /** Which reaction `top` ranks by (server default: "upvote"). Only valid with `sortBy: "top"` — the server rejects it otherwise. */
@@ -102,6 +103,9 @@ export interface FetchManyEntitiesProps
   // it never surfaces content from users who blocked the viewer.
   blockedFilter?: "exclude" | "include-outbound-blocked";
 }
+
+/** `sortDir` is not accepted with `sortBy: "hot"` or `"controversial"`. */
+export type FetchManyEntitiesProps = WithOneWaySortDir<FetchManyEntitiesBaseProps>;
 
 export async function fetchManyEntities(
   client: SublayHttpClient,

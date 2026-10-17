@@ -1,4 +1,6 @@
 import { useCallback } from "react";
+import type { WithOneWaySortDir } from "../../interfaces/OneWaySortParams";
+import { sendableSortDir } from "../../helpers/oneWaySorts";
 import { CommentsSortByOptions } from "../../interfaces/CommentsSortByOptions";
 import { Comment, CommentIncludeParam } from "../../interfaces/models/Comment";
 import { ReactionType } from "../../interfaces/models/Reaction";
@@ -13,7 +15,7 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
  * A user's comment history (`GET /users/:userId/comments`): flat, at any
  * depth, cursor-paged.
  */
-export interface FetchCommentsByUserIdProps extends SpaceReputationContextParams {
+export interface FetchCommentsByUserIdBaseProps extends SpaceReputationContextParams {
   userId: string;
   /** Only comments on this entity. */
   entityId?: string | null;
@@ -33,6 +35,9 @@ export interface FetchCommentsByUserIdProps extends SpaceReputationContextParams
   cursor?: string | null;
   include?: CommentIncludeParam;
 }
+
+/** `sortDir` is not accepted with `sortBy: "controversial"`. */
+export type FetchCommentsByUserIdProps = WithOneWaySortDir<FetchCommentsByUserIdBaseProps>;
 
 function useFetchCommentsByUserId(): (
   props: FetchCommentsByUserIdProps,
@@ -84,7 +89,9 @@ function useFetchCommentsByUserId(): (
       if (sourceId) params.sourceId = sourceId;
       if (blockedFilter) params.blockedFilter = blockedFilter;
       if (sortBy) params.sortBy = sortBy;
-      if (sortDir) params.sortDir = sortDir;
+      // The server refuses sortDir with controversial.
+      const sendSortDir = sendableSortDir(sortBy, sortDir);
+      if (sendSortDir) params.sortDir = sendSortDir;
       if (sortByReaction) params.sortByReaction = sortByReaction;
       if (limit !== undefined) params.limit = limit;
       if (cursor) params.cursor = cursor;

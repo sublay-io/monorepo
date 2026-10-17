@@ -1,4 +1,5 @@
 import { baseApi } from "./baseApi";
+import { sendableSortDir } from "../../helpers/oneWaySorts";
 import { sendableTopCommentsParams } from "../../utils/topCommentsParams";
 import type { Collection } from "../../interfaces/models/Collection";
 import type {
@@ -128,7 +129,8 @@ export const collectionsApi = baseApi.injectEndpoints({
           sortBy,
           // The server only accepts sortByReaction with sortBy=top (400 otherwise).
           sortByReaction: sortBy === "top" ? sortByReaction : undefined,
-          sortDir,
+          // The server refuses sortDir with hot.
+          sortDir: sendableSortDir(sortBy, sortDir),
           include: Array.isArray(include) ? include.join(',') : include,
           // Only with include=topComments (the server 400s them otherwise).
           ...sendableTopCommentsParams(include, topCommentsLimit, topCommentsSortByReaction),

@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import { CommentsSortByOptions } from "../../interfaces/CommentsSortByOptions";
 import { CommentIncludeParam } from "../../interfaces/models/Comment";
 import { ReactionType } from "../../interfaces/models/Reaction";
@@ -71,8 +72,7 @@ function useFetchCommentsByUserIdWrapper(
         cursor,
         limit,
         include,
-        sortBy: sort.sortBy,
-        sortDir: sort.sortDir,
+        ...oneWaySortFields(sort.sortBy, sort.sortDir),
         sortByReaction: sort.sortBy === "top" ? sort.sortByReaction : undefined,
         spaceReputation,
         spaceReputationId,

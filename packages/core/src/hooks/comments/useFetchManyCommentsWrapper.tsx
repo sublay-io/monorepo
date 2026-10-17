@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import {
   CommentReplySortByOptions,
   CommentsSortByOptions,
@@ -88,8 +89,7 @@ function useFetchManyCommentsWrapper(
         cursor,
         limit,
         include,
-        sortBy: sort.sortBy,
-        sortDir: sort.sortDir,
+        ...oneWaySortFields(sort.sortBy, sort.sortDir),
         sortByReaction: sort.sortBy === "top" ? sort.sortByReaction : undefined,
         replyDepth,
         replyLimit,

@@ -1,4 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
+import type { WithOneWaySortDir } from "../../interfaces/OneWaySortParams";
 import {
   Comment,
   CommentReplySortBy,
@@ -40,7 +41,8 @@ interface FetchManyCommentsBaseProps extends SpaceReputationContextParams {
  * comments; `parentId` → a comment's direct replies. One of the two is
  * required. A user's comment history is `users.fetchCommentsByUserId`.
  */
-export type FetchManyCommentsProps = FetchManyCommentsBaseProps &
+/** `sortDir` is not accepted with `sortBy: "controversial"`. */
+export type FetchManyCommentsProps = WithOneWaySortDir<FetchManyCommentsBaseProps> &
   (
     | { entityId: string; parentId?: string }
     | { entityId?: string; parentId: string }

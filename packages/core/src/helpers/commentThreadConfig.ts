@@ -63,7 +63,8 @@ export interface CommentSortTrio {
  * The sort of the nested levels, resolved exactly the way the server resolves
  * it: each of `replySortBy` / `replySortDir` defaults to the section's own; the
  * reaction applies only to `top` and defaults to the section's reaction when the
- * section also sorts by `top`, else the server default.
+ * section also sorts by `top`, else the server default. `controversial` ranks
+ * one way only, so its direction is always `desc`.
  */
 export function resolveReplySort(
   section: CommentSortTrio,
@@ -74,7 +75,8 @@ export function resolveReplySort(
   },
 ): CommentSortTrio {
   const sortBy = reply.replySortBy ?? section.sortBy;
-  const sortDir = reply.replySortDir ?? section.sortDir;
+  const sortDir =
+    sortBy === "controversial" ? "desc" : (reply.replySortDir ?? section.sortDir);
   const sortByReaction =
     sortBy === "top"
       ? (reply.replySortByReaction ??

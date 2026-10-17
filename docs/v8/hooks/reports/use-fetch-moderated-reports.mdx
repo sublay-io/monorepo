@@ -53,8 +53,12 @@ function ModerationQueue({ spaceId }: { spaceId: string }) {
   Filter by report status.
 </ParamField>
 
-<ParamField body="sortBy" type='"new" | "old"'>
-  Sort order. Defaults to `"new"` (newest first).
+<ParamField body="sortBy" type='"createdAt"'>
+  Reports are sorted by when they were created.
+</ParamField>
+
+<ParamField body="sortDir" type='"asc" | "desc"'>
+  Direction of the `createdAt` sort. Default `"desc"` (newest first).
 </ParamField>
 
 <ParamField body="page" type="number">

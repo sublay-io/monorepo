@@ -65,7 +65,7 @@ Authentication is optional. When the caller is signed in, comments by users they
 </ParamField>
 
 <Note>
-  `new` and `old` are deprecated `sortBy` aliases: `new` is `createdAt` with the requested `sortDir`, `old` is `createdAt` ascending. They still work, but responses carry a non-blocking `Deprecation` header — use `createdAt` with `sortDir` instead. They aren't accepted for `replySortBy`.
+  For time order, use `createdAt` with `sortDir`.
 </Note>
 
 ### Nested replies

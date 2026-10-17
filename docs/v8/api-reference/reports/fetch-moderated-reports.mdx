@@ -27,8 +27,12 @@ Returns a paginated list of reports for spaces where the authenticated user has 
   Filter by report status. One of: `pending`, `on-hold`, `escalated`, `dismissed`, `actioned`.
 </ParamField>
 
-<ParamField query="sortBy" type="string" default="new">
-  Sort order. One of: `new` (newest first), `old` (oldest first).
+<ParamField query="sortBy" type='"createdAt"' default="createdAt">
+  Reports are sorted by when they were created.
+</ParamField>
+
+<ParamField query="sortDir" type='"asc" | "desc"'>
+  Direction of the `createdAt` sort. Default `"desc"` (newest first).
 </ParamField>
 
 <ParamField query="page" type="number" default="1">

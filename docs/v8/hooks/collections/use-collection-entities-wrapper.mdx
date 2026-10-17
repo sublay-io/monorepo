@@ -26,7 +26,7 @@ function SavedFeed({ collectionId }) {
     refetch,
   } = useCollectionEntitiesWrapper({
     collectionId,
-    defaultSortBy: "added",
+    defaultSortBy: "addedAt",
     defaultSortDir: "desc",
     limit: 20,
   });
@@ -34,8 +34,8 @@ function SavedFeed({ collectionId }) {
   return (
     <div>
       <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)}>
-        <option value="added">Recently Added</option>
-        <option value="new">Newest</option>
+        <option value="addedAt">Recently Added</option>
+        <option value="createdAt">Newest</option>
         <option value="top">Top Voted</option>
       </select>
       <ul>
@@ -63,8 +63,8 @@ function SavedFeed({ collectionId }) {
   Number of entities per page. Default: `20`.
 </ParamField>
 
-<ParamField body="defaultSortBy" type='"new" | "top" | "hot" | "added"' optional>
-  Initial sort mode. Default: `"added"` (sorted by when the entity was saved).
+<ParamField body="defaultSortBy" type='"createdAt" | "addedAt" | "top" | "hot"' optional>
+  Initial sort mode. Default: `"addedAt"` (sorted by when the entity was saved).
 </ParamField>
 
 <ParamField body="defaultSortByReaction" type="SortByReaction" optional>
@@ -101,7 +101,7 @@ function SavedFeed({ collectionId }) {
   `true` if additional pages are available.
 </ResponseField>
 
-<ResponseField name="sortBy" type='"new" | "top" | "hot" | "added"'>
+<ResponseField name="sortBy" type='"createdAt" | "addedAt" | "top" | "hot"'>
   Current sort mode.
 </ResponseField>
 
@@ -137,8 +137,8 @@ function SavedFeed({ collectionId }) {
 
 | Value | Description |
 |-------|-------------|
-| `added` | Sorted by when the entity was added to the collection |
-| `new` | Sorted by entity creation date |
+| `addedAt` | Sorted by when the entity was added to the collection |
+| `createdAt` | Sorted by entity creation date |
 | `top` | Sorted by reaction count — upvotes by default, or the reaction set with `sortByReaction` |
 | `hot` | Sorted by hot score (engagement-based) |
 

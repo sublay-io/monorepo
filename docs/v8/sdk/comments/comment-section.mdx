@@ -68,7 +68,7 @@ The section can be handed an entity in two ways: the `entity` prop, or, when the
 </ParamField>
 
 <ParamField path="defaultSortBy" type="string">
-  Initial sort order: `"top"` (default), `"createdAt"`, or `"controversial"`. Changeable at runtime with `setSortBy`. `"new"`/`"old"` are deprecated aliases for `"createdAt"`.
+  Initial sort order: `"top"` (default), `"createdAt"`, or `"controversial"`. Changeable at runtime with `setSortBy`.
 </ParamField>
 
 <ParamField path="defaultSortDir" type='"asc" | "desc"'>
@@ -281,7 +281,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="sortBy" type="CommentsSortByOptions">
-  Current sort: `"createdAt"`, `"top"`, or `"controversial"`. (`"new"`/`"old"` are deprecated aliases for `"createdAt"`.)
+  Current sort: `"createdAt"`, `"top"`, or `"controversial"`.
 </ResponseField>
 
 <ResponseField name="setSortBy" type="(newSortBy: CommentsSortByOptions) => void">

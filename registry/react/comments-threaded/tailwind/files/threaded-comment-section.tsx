@@ -33,7 +33,8 @@
  * TEXT:
  * - text-gray-900 dark:text-neutral-50 (primary text)
  * - text-gray-800 dark:text-neutral-200 (body text)
- * - text-gray-700 dark:text-neutral-300 (author names, secondary text)
+ * - text-gray-700 dark:text-neutral-300 (secondary text)
+ * - text-gray-700 dark:text-white (author names)
  * - text-gray-600 dark:text-neutral-400 (hover text)
  * - text-gray-500 dark:text-neutral-400 (timestamps, tertiary text)
  * - text-gray-400 dark:text-neutral-500 (disabled states)

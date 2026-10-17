@@ -196,7 +196,7 @@ For authentication setup and obtaining `signedToken`, see the [Authentication](/
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           >
-            <ScrollView>
+            <ScrollView keyboardShouldPersistTaps="handled">
               <YourEntity />
               <ThreadedCommentSection />
             </ScrollView>

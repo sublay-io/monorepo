@@ -39,7 +39,7 @@ function ArticlePage({ articleId }: { articleId: string }) {
 - **Highlighted comment** — fetches and shows a specific comment (e.g., from a deep link)
 - **Reply state** — tracks which comment is being replied to and shows/hides the reply banner
 - **CRUD actions** — `createComment`, `updateComment`, `deleteComment` with optimistic updates
-- **Sort** — `sortBy`/`setSortBy` for switching between `"createdAt"`, `"top"` (raw count of `sortByReaction`, default upvotes) and `"controversial"`, plus `sortDir`/`setSortDir` (`"asc"`/`"desc"`), which applies to every sort
+- **Sort** — `sortBy`/`setSortBy` for switching between `"createdAt"`, `"top"` (raw count of `sortByReaction`, default upvotes) and `"controversial"`, plus `sortDir`/`setSortDir` (`"asc"`/`"desc"`), which applies to `"createdAt"` and `"top"` (`"controversial"` always ranks most controversial first)
 - **Errors** — a failed load lands in `error`; `loadMore` never throws
 
 ## In This Section

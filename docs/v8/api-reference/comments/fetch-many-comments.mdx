@@ -57,7 +57,7 @@ Authentication is optional. When the caller is signed in, comments by users they
 </ParamField>
 
 <ParamField query="sortDir" type="string" default="desc">
-  `asc` or `desc` (either case). Applies to every sort, including `top` and `controversial`.
+  `asc` or `desc` (either case). Applies to `createdAt` and `top`. Not accepted with `"controversial"`, which ranks one way only (most controversial first): sending it returns `400 comment/invalid-query`.
 </ParamField>
 
 <ParamField query="sortByReaction" type="string" default="upvote">
@@ -83,7 +83,7 @@ Authentication is optional. When the caller is signed in, comments by users they
 </ParamField>
 
 <ParamField query="replySortDir" type="string">
-  `asc` or `desc` (either case) for the nested levels. Defaults to the level's `sortDir`.
+  `asc` or `desc` (either case) for the nested levels. Defaults to the level's `sortDir`. Not accepted when the nested sort is `controversial` (`replySortBy=controversial`, or `sortBy=controversial` without `replySortBy`): a `controversial` level always ranks most controversial first.
 </ParamField>
 
 <ParamField query="replySortByReaction" type="string">
@@ -199,7 +199,7 @@ A cursor is an opaque string. It records the sort it was created under and the l
 
 - Send the same `sortBy`, `sortDir` and `sortByReaction` with a cursor as the request that returned it. A different sort returns `400 comment/cursor-sort-mismatch`; to change the sort, start over without a cursor.
 - A cursor doesn't record which entity or comment it came from. Sending it with a different `entityId` or `parentId` just continues from the same sort position there.
-- **Continuing nested replies:** a `replies.pagination.nextCursor` was created under the **reply** sort. Continue it with a `parentId` request for that comment, sending the reply sort as `sortBy` / `sortDir` / `sortByReaction`:
+- **Continuing nested replies:** a `replies.pagination.nextCursor` was created under the **reply** sort. Continue it with a `parentId` request for that comment, sending the reply sort as `sortBy` / `sortDir` / `sortByReaction` (for a `controversial` reply sort, leave `sortDir` out):
 
   ```
   GET /v8/:projectId/comments?parentId=c1&cursor=<replies.pagination.nextCursor>&sortBy=<replySortBy>&sortDir=<replySortDir>

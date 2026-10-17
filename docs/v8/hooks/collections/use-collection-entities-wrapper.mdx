@@ -72,7 +72,7 @@ function SavedFeed({ collectionId }) {
 </ParamField>
 
 <ParamField body="defaultSortDir" type='"asc" | "desc"' optional>
-  Initial sort direction. Default: `"desc"`.
+  Initial sort direction. Default: `"desc"`; ignored (not sent) for `"hot"`, which ranks one way only.
 </ParamField>
 
 <ParamField body="include" type="CollectionEntityIncludeParam" optional>

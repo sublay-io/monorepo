@@ -203,7 +203,7 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 </ParamField>
 
 <ParamField body="sortDir" type="string">
-  Sort direction: `"asc"` or `"desc"`.
+  Sort direction: `"asc"` or `"desc"`. Not accepted with `"hot"` or `"controversial"`, which rank one way only.
 </ParamField>
 
 <ParamField body="sortType" type="string">

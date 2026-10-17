@@ -93,7 +93,7 @@ const { data, pagination } = await sublay.collections.fetchCollectionEntities({
 </ParamField>
 
 <ParamField body="sortDir" type='"asc" | "desc"'>
-  Sort direction.
+  Sort direction. Not accepted with `"hot"`, which ranks one way only.
 </ParamField>
 
 <ParamField body="include" type="CollectionEntityIncludeParam">

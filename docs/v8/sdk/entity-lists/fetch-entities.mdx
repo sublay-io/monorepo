@@ -71,7 +71,7 @@ fetchEntities(
 |-------|------|-------------|
 | `sortBy` | `"createdAt" \| "hot" \| "top" \| "controversial" \| "metadata.field"` | Sort algorithm |
 | `sortByReaction` | `"upvote" \| "downvote" \| "like" \| "love" \| "wow" \| "sad" \| "angry" \| "funny"` | Which reaction `top` ranks by; only sent while `sortBy` is `"top"` |
-| `sortDir` | `"asc" \| "desc"` | Sort direction |
+| `sortDir` | `"asc" \| "desc"` | Sort direction (not sent with `"hot"` or `"controversial"`, which rank one way only) |
 | `sortType` | `"auto" \| "numeric" \| "text" \| "boolean" \| "timestamp"` | Type hint for metadata sorts |
 
 ### List config

@@ -116,7 +116,7 @@ The `config` object passed to `fetchEntities` accepts an optional `spaceReputati
 </ResponseField>
 
 <ResponseField name="sortDir" type='"asc" | "desc" | null'>
-  Current sort direction.
+  Current sort direction. Not sent with `"hot"` or `"controversial"`, which rank one way only.
 </ResponseField>
 
 <ResponseField name="sortType" type='"auto" | "numeric" | "text" | "boolean" | "timestamp" | null'>

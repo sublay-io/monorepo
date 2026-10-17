@@ -61,7 +61,7 @@ function CommentList({ entityId }: { entityId: string }) {
 </ParamField>
 
 <ParamField path="defaultSortDir" type='"asc" | "desc"'>
-  Initial sort direction; applies to every sort. Default: `"desc"`. Changeable with `setSortDir`.
+  Initial sort direction for `"createdAt"` and `"top"`; ignored (not sent) for `"controversial"`, which ranks one way only. Default: `"desc"`. Changeable with `setSortDir`.
 </ParamField>
 
 <ParamField path="defaultSortByReaction" type="ReactionType">
@@ -81,7 +81,7 @@ function CommentList({ entityId }: { entityId: string }) {
 </ParamField>
 
 <ParamField path="replySortDir" type='"asc" | "desc"'>
-  Sort direction for replies. Defaults to the current sort direction. Not changeable at runtime.
+  Sort direction for replies. Defaults to the current sort direction; not sent when the reply sort is `"controversial"`. Not changeable at runtime.
 </ParamField>
 
 <ParamField path="replySortByReaction" type="ReactionType">

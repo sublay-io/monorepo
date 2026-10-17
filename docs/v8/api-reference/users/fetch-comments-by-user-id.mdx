@@ -67,7 +67,7 @@ An unknown `userId` returns an empty page.
 </ParamField>
 
 <ParamField query="sortDir" type="string" default="desc">
-  `asc` or `desc` (either case). Applies to every sort.
+  `asc` or `desc` (either case). Applies to `createdAt` and `top`. Not accepted with `"controversial"`, which ranks one way only (most controversial first): sending it returns `400 comment/invalid-query`.
 </ParamField>
 
 <ParamField query="sortByReaction" type="string" default="upvote">

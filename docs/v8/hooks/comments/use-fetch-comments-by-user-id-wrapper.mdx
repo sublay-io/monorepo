@@ -79,7 +79,7 @@ function ProfileComments({ userId }: { userId: string }) {
 </ParamField>
 
 <ParamField body="defaultSortDir" type='"asc" | "desc"' optional>
-  Initial sort direction; applies to every sort. Default: `"desc"`.
+  Initial sort direction for `"createdAt"` and `"top"`; ignored (not sent) for `"controversial"`, which ranks one way only. Default: `"desc"`.
 </ParamField>
 
 <ParamField body="defaultSortByReaction" type="ReactionType" optional>

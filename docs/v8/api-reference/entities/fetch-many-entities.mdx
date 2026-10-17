@@ -36,7 +36,7 @@ Returns a paginated list of entities for the project. Supports rich filtering by
 </ParamField>
 
 <ParamField query="sortDir" type="string" default="desc">
-  Sort direction, `"asc"` or `"desc"` (either case).
+  Sort direction, `"asc"` or `"desc"` (either case). Not accepted with `"hot"` or `"controversial"`, which rank one way only (most first): sending it returns `400 entity/invalid-query`.
 </ParamField>
 
 <ParamField query="sortType" type="string" default="auto">

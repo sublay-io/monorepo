@@ -191,7 +191,7 @@ For a user's comments across entities, use [`users.fetchCommentsByUserId`](/v8/j
 </ParamField>
 
 <ParamField body="sortDir" type='"asc" | "desc"'>
-  Applies to every sort. Server default `"desc"`.
+  Applies to `"createdAt"` and `"top"`; not accepted with `"controversial"`, which ranks one way only. Server default `"desc"`.
 </ParamField>
 
 <ParamField body="sortByReaction" type="ReactionType">
@@ -211,7 +211,7 @@ For a user's comments across entities, use [`users.fetchCommentsByUserId`](/v8/j
 </ParamField>
 
 <ParamField body="replySortDir" type='"asc" | "desc"'>
-  Sort direction for the nested levels. Defaults to `sortDir`.
+  Sort direction for the nested levels. Defaults to `sortDir`. Not sent when the nested sort is `"controversial"`.
 </ParamField>
 
 <ParamField body="replySortByReaction" type="ReactionType">

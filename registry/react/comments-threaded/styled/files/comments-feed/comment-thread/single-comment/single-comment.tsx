@@ -316,8 +316,8 @@ theme={theme}
                     fontWeight: 500,
                     // 🎨 CUSTOMIZATION: Typography - Author (Default: 13px)
                     fontSize: "13px",
-                    // 🎨 CUSTOMIZATION: Typography - Author (Default: gray-700)
-                    color: theme === 'dark' ? "#D4D4D4" : "#374151",
+                    // 🎨 CUSTOMIZATION: Typography - Author (Default: gray-700, white in dark mode)
+                    color: theme === 'dark' ? "#FFFFFF" : "#374151",
                     cursor: "pointer",
                   }}
                   onClick={() => {

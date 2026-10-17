@@ -54,7 +54,7 @@ function ReplyBanner() {
           lineHeight: 18,
           fontWeight: '600',
           // 🎨 CUSTOMIZATION: Author name color
-          color: theme === 'dark' ? '#E5E5E5' : '#1F2937',
+          color: theme === 'dark' ? '#FFFFFF' : '#1F2937',
         }}
       >
         {getUserName(repliedToComment.user ?? {})}

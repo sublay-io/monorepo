@@ -310,7 +310,7 @@ theme={theme}
                 >
                   <Text
                     className={`font-medium text-[13px] leading-[18px] ${
-                      theme === 'dark' ? 'text-neutral-300' : 'text-gray-700'
+                      theme === 'dark' ? 'text-white' : 'text-gray-700'
                     }`}
                   >
                     {getUserName(comment.user ?? {})}

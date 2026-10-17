@@ -245,7 +245,7 @@ function SingleComment({
                   </span>
                 ) : (
                 <span
-                  className="font-medium text-[13px] text-gray-700 dark:text-neutral-300 cursor-pointer hover:underline"
+                  className="font-medium text-[13px] text-gray-700 dark:text-white cursor-pointer hover:underline"
                   // 🎨 CUSTOMIZATION: Author name styling
                   onClick={() => {
                     if (user?.id === comment.user?.id) {

@@ -43,7 +43,7 @@ function ReplyBanner() {
       <Text
         numberOfLines={1}
         className={`shrink text-[13px] leading-[18px] font-semibold ${
-          theme === 'dark' ? 'text-neutral-200' : 'text-gray-800'
+          theme === 'dark' ? 'text-white' : 'text-gray-800'
         }`}
       >
         {getUserName(repliedToComment.user ?? {})}

@@ -59,7 +59,7 @@ npx @sublay/cli add comments-threaded --ref v8
 The CLI will:
 
 1. **Fetch the component** from the registry based on your `sublay.json` platform and style settings
-2. **Copy the component's 40 files** into your project at `{componentsPath}/comments-threaded/`: the component's own files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
+2. **Copy the component's files** (42 on React, 44 on React Native and Expo) into your project at `{componentsPath}/comments-threaded/`: the component's own files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
 3. **Transform imports** to work with your project structure
 4. **Create `index.ts`** barrel export for clean imports
 5. **Display usage examples** and required dependencies
@@ -131,9 +131,11 @@ The CLI will:
     src/components/comments-threaded/
     ├── index.ts                                         # Barrel export (entry point)
     ├── components/
-    │   ├── threaded-comment-section.tsx                 # Main component
+    │   ├── threaded-comment-section.tsx                 # Main file: the three components
     │   ├── new-comment-form/
-    │   │   └── new-comment-form.tsx                     # Comment form (replies are written here too)
+    │   │   └── new-comment-form.tsx                     # Comment box (replies are written here too)
+    │   ├── sort-by-trigger/
+    │   │   └── sort-by-trigger.tsx                      # "Sort by" button that opens the sort sheet
     │   ├── reply-banner/
     │   │   └── reply-banner.tsx                         # "Replying to" bar above the input
     │   ├── mention-suggestions/
@@ -158,7 +160,8 @@ The CLI will:
     │   └── sheets/
     │       ├── comment-options-sheet.tsx                # Menu for other users' comments
     │       ├── comment-options-sheet-owner.tsx          # Menu for your own comments
-    │       └── report-comment-sheet.tsx                 # Report form
+    │       ├── report-comment-sheet.tsx                 # Report form
+    │       └── sort-sheet.tsx                           # "Sort comments by" sheet
     ├── hooks/
     │   ├── use-threaded-comments.tsx                    # Provider props and callbacks
     │   └── use-ui-state.tsx                             # Reads the UI state context
@@ -166,9 +169,10 @@ The CLI will:
     │   ├── prop-comparison.ts                           # Memoization helpers
     │   ├── comment-create-error.ts                      # Messages shown when posting fails
     │   ├── env.ts                                       # Where the Giphy API key is read from
+    │   ├── sort-options.ts                              # The options of the sort sheet
     │   └── strings.ts                                   # Every piece of text the component shows
     ├── context/
-    │   └── ui-state-context.tsx                         # Modal & theme context
+    │   └── ui-state-context.tsx                         # Sheets & theme context
     └── shared/
         ├── custom-button.tsx                            # Button
         ├── flag-icon.tsx                                # Report icon
@@ -193,19 +197,54 @@ The CLI will:
 
 After installation, import and use the component:
 
-```tsx
-import { ThreadedCommentSection } from './components/comments-threaded';
+<Tabs>
+  <Tab title="React (Web)">
+    ```tsx
+    import { ThreadedCommentSection } from './components/comments-threaded';
 
-function BlogPost({ post }) {
-  return (
-    <div>
-      <h1>{post.title}</h1>
-      <article>{post.content}</article>
-      <ThreadedCommentSection foreignId={post.id} createIfNotFound />
-    </div>
-  );
-}
-```
+    function BlogPost({ post }) {
+      return (
+        <div>
+          <h1>{post.title}</h1>
+          <article>{post.content}</article>
+          <ThreadedCommentSection foreignId={post.id} createIfNotFound />
+        </div>
+      );
+    }
+    ```
+
+    The section has no scrolling of its own: it is as tall as its comments, and the page scrolls.
+  </Tab>
+  <Tab title="React Native / Expo">
+    ```tsx
+    import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+    import {
+      ThreadedComments,
+      ThreadedCommentSection,
+      ThreadedCommentInput,
+    } from './components/comments-threaded';
+
+    function EntityScreen() {
+      return (
+        <ThreadedComments foreignId="post_123" createIfNotFound>
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          >
+            <ScrollView>
+              <YourEntity />
+              <ThreadedCommentSection />
+            </ScrollView>
+            <ThreadedCommentInput />
+          </KeyboardAvoidingView>
+        </ThreadedComments>
+      );
+    }
+    ```
+
+    `ThreadedComments` wraps the screen and renders the sheets over it. `ThreadedCommentSection` (Sort by and the comments) goes in the screen's `ScrollView`, so the entity above it scrolls away with the comments. `ThreadedCommentInput` (the comment box) is pinned below. See [React Native and Expo Components](/v8/components/components/threaded/props-api#react-native-and-expo-components).
+  </Tab>
+</Tabs>
 
 <Info>
 Make sure your app is wrapped with `<SublayProvider>`. See the [Quick Start Guide](/v8/components/installation/quick-start) for setup details.
@@ -256,6 +295,10 @@ This replaces your component files. Back up any customizations first.
     // paths.components = "src/components"
     import { ThreadedCommentSection } from './components/comments-threaded';
     ```
+  </Accordion>
+
+  <Accordion title="Error: must be rendered inside ThreadedComments (React Native / Expo)" icon="triangle-exclamation">
+    `ThreadedCommentSection` and `ThreadedCommentInput` share state that `ThreadedComments` holds, so they throw `ThreadedCommentSection must be rendered inside <ThreadedComments>.` (or the same for `ThreadedCommentInput`) when they are rendered outside it. Wrap the screen that renders them in `<ThreadedComments>`.
   </Accordion>
 
   <Accordion title="TypeScript errors" icon="code">

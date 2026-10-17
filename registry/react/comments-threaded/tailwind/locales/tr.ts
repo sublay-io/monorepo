@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "Sohbete katıl",
   replyPlaceholder: "Yanıtını yaz...",
   cancel: "İptal",
+  submitComment: "Gönder",
+  addGif: "GIF ekle",
 
   // Comment list
   noCommentsTitle: "Henüz yorum yok",

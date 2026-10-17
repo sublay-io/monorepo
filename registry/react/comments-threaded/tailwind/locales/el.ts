@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "Πάρε μέρος στη συζήτηση",
   replyPlaceholder: "Γράψε την απάντησή σου...",
   cancel: "Ακύρωση",
+  submitComment: "Δημοσίευση",
+  addGif: "Προσθήκη GIF",
 
   // Comment list
   noCommentsTitle: "Δεν υπάρχουν σχόλια ακόμα",

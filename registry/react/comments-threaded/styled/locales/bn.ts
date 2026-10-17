@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "আলোচনায় যোগ দিন",
   replyPlaceholder: "আপনার উত্তর লিখুন...",
   cancel: "বাতিল করুন",
+  submitComment: "পোস্ট করুন",
+  addGif: "GIF যোগ করুন",
 
   // Comment list
   noCommentsTitle: "এখনও কোনো মন্তব্য নেই",

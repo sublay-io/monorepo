@@ -18,6 +18,8 @@ const strings = {
   commentPlaceholder: "Įsitraukite į pokalbį",
   replyPlaceholder: "Parašykite atsakymą...",
   cancel: "Atšaukti",
+  submitComment: "Skelbti",
+  addGif: "Pridėti GIF",
 
   // Comment list
   noCommentsTitle: "Komentarų dar nėra",

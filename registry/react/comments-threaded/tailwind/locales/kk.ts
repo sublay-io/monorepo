@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "Талқылауға қосылыңыз",
   replyPlaceholder: "Жауабыңызды жазыңыз...",
   cancel: "Бас тарту",
+  submitComment: "Жариялау",
+  addGif: "GIF қосу",
 
   // Comment list
   noCommentsTitle: "Әзірге пікір жоқ",

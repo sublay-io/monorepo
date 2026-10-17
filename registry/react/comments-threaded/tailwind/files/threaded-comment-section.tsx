@@ -139,35 +139,35 @@ function ThreadedCommentSectionInner({
   gifPickerFullScreen: boolean;
   children?: React.ReactNode;
 }) {
+  const sectionPadding = {
+    paddingLeft: `${SECTION_PADDING_X}px`,
+    paddingRight: `${SECTION_PADDING_X}px`,
+  };
+
   return (
     // Positioned, so the GIF picker covers exactly the comment section
     <div className={`relative h-full flex flex-col ${sharedDarkColors}`}>
+      {/* The new-comment box comes first, above the comments */}
+      {isVisible && (
+        <div
+          className={
+            // 🎨 CUSTOMIZATION: Layout styling
+            "shrink-0 bg-white dark:bg-neutral-800 pt-3 pb-2"
+          }
+          style={sectionPadding}
+        >
+          <NewCommentForm gifPickerFullScreen={gifPickerFullScreen} />
+        </div>
+      )}
+
       <div
         className={
           // 🎨 CUSTOMIZATION: Layout styling
           "flex-1 overflow-y-auto bg-white dark:bg-neutral-800 py-2"
         }
-        style={{
-          paddingLeft: `${SECTION_PADDING_X}px`,
-          paddingRight: `${SECTION_PADDING_X}px`,
-        }}
+        style={sectionPadding}
       >
         <CommentsFeed>{children}</CommentsFeed>
-      </div>
-
-      <div
-        className={
-          // 🎨 CUSTOMIZATION: Layout styling
-          "border-t border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 pt-2 pb-3"
-        }
-        style={{
-          paddingLeft: `${SECTION_PADDING_X}px`,
-          paddingRight: `${SECTION_PADDING_X}px`,
-        }}
-      >
-        {isVisible && (
-          <NewCommentForm gifPickerFullScreen={gifPickerFullScreen} />
-        )}
       </div>
     </div>
   );

@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "대화에 참여하기",
   replyPlaceholder: "답글 입력...",
   cancel: "취소",
+  submitComment: "게시",
+  addGif: "GIF 추가",
 
   // Comment list
   noCommentsTitle: "아직 댓글이 없습니다",

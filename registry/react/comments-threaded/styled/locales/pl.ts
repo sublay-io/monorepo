@@ -17,6 +17,8 @@ const strings = {
   commentPlaceholder: "Dołącz do rozmowy",
   replyPlaceholder: "Napisz odpowiedź...",
   cancel: "Anuluj",
+  submitComment: "Opublikuj",
+  addGif: "Dodaj GIF-a",
 
   // Comment list
   noCommentsTitle: "Brak komentarzy",

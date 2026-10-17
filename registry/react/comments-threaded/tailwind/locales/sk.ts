@@ -15,6 +15,8 @@ const strings = {
   commentPlaceholder: "Zapojte sa do konverzácie",
   replyPlaceholder: "Napíšte odpoveď...",
   cancel: "Zrušiť",
+  submitComment: "Odoslať",
+  addGif: "Pridať GIF",
 
   // Comment list
   noCommentsTitle: "Zatiaľ žiadne komentáre",

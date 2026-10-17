@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "Gabung ke percakapan",
   replyPlaceholder: "Tulis balasan Anda...",
   cancel: "Batal",
+  submitComment: "Kirim",
+  addGif: "Tambahkan GIF",
 
   // Comment list
   noCommentsTitle: "Belum ada komentar",

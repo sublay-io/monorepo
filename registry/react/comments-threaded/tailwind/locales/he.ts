@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "הצטרפו לשיחה",
   replyPlaceholder: "כתבו תגובה...",
   cancel: "ביטול",
+  submitComment: "פרסום",
+  addGif: "הוספת GIF",
 
   // Comment list
   noCommentsTitle: "אין עדיין תגובות",

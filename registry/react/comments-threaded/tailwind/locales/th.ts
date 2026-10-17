@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "ร่วมแสดงความคิดเห็น",
   replyPlaceholder: "เขียนการตอบกลับ...",
   cancel: "ยกเลิก",
+  submitComment: "โพสต์",
+  addGif: "เพิ่ม GIF",
 
   // Comment list
   noCommentsTitle: "ยังไม่มีความคิดเห็น",

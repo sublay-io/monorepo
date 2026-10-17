@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "Osallistu keskusteluun",
   replyPlaceholder: "Kirjoita vastauksesi...",
   cancel: "Peruuta",
+  submitComment: "Lähetä",
+  addGif: "Lisää GIF",
 
   // Comment list
   noCommentsTitle: "Ei vielä kommentteja",

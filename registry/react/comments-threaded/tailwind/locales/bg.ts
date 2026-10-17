@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "Включете се в разговора",
   replyPlaceholder: "Напишете отговор...",
   cancel: "Отказ",
+  submitComment: "Публикуване",
+  addGif: "Добавяне на GIF",
 
   // Comment list
   noCommentsTitle: "Все още няма коментари",

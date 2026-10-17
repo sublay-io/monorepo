@@ -30,6 +30,7 @@ function NewCommentForm({
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGiphyVisible, setIsGiphyVisible] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { createComment, callbacks, createError } = useCommentSection();
 
   // A failed post shows a message under the form, until the text is edited or
@@ -100,6 +101,8 @@ function NewCommentForm({
       textArea.value = "";
       setContent("");
       resetMentions();
+      setIsExpanded(false);
+      textArea.blur();
       setIsSubmitting(true);
 
       try {
@@ -109,12 +112,14 @@ function NewCommentForm({
           textArea.value = tempContent;
           setContent(tempContent);
           setMentions(tempMentions);
+          setIsExpanded(true);
         }
       } catch (error) {
         console.error("Error creating comment:", error);
         textArea.value = tempContent;
         setContent(tempContent);
         setMentions(tempMentions);
+        setIsExpanded(true);
       } finally {
         setIsSubmitting(false);
       }
@@ -161,6 +166,7 @@ function NewCommentForm({
       setContent("");
       resetMentions();
       setIsGiphyVisible(false);
+      setIsExpanded(false);
 
       try {
         const result = await createComment?.({ gif, mentions: tempMentions });
@@ -169,16 +175,41 @@ function NewCommentForm({
           textArea.value = tempContent;
           setContent(tempContent);
           setMentions(tempMentions);
+          if (tempContent) setIsExpanded(true);
         }
       } catch (err) {
         handleError(err, "Creating comment failed: ");
         textArea.value = tempContent;
         setContent(tempContent);
         setMentions(tempMentions);
+        if (tempContent) setIsExpanded(true);
       }
     },
     [createComment, mentions, resetMentions, setMentions, user, callbacks]
   );
+
+  // Cancel clears the draft and folds the box back to one line
+  const handleCancel = useCallback(() => {
+    const textArea = textAreaRef.current;
+    if (textArea) {
+      textArea.value = "";
+      textArea.blur();
+    }
+    setContent("");
+    resetMentions();
+    setIsExpanded(false);
+  }, [resetMentions]);
+
+  // While open, the box grows with its text (up to its max height); folded,
+  // it goes back to its one-line height
+  useEffect(() => {
+    const textArea = textAreaRef.current;
+    if (!textArea) return;
+    textArea.style.height = "";
+    if (isExpanded) {
+      textArea.style.height = `${textArea.scrollHeight}px`;
+    }
+  }, [content, isExpanded]);
 
   // Add keyboard event handler for Enter key
   useEffect(() => {
@@ -209,24 +240,23 @@ function NewCommentForm({
         />
       ) : null}
       <form onSubmit={handleSubmit} className="relative">
+        {/* The form sits above the comments, so the suggestions open under it
+            rather than over the content above */}
         <MentionSuggestions
           isMentionActive={isMentionActive}
           isLoadingMentions={loading}
           mentionSuggestions={mentionSuggestions}
           handleMentionClick={handleMentionClick}
+          placement="below"
         />
         <div
           className={cn(
             // 🎨 CUSTOMIZATION: Comment form styling
-            "flex items-end",
-            "bg-white dark:bg-neutral-800",
-            "rounded-2xl",
-            "p-2",
-            "transition-all duration-300",
-            "shadow-sm",
-            hasContent
-              ? "border border-blue-300 dark:border-blue-800 shadow-md"
-              : "border border-gray-200 dark:border-neutral-600 hover:shadow-md"
+            "rounded-[20px] border bg-transparent",
+            "transition-colors duration-150",
+            isExpanded
+              ? "border-gray-400 dark:border-neutral-400"
+              : "border-gray-200 dark:border-neutral-600 hover:border-gray-400 dark:hover:border-neutral-400"
           )}
         >
           <textarea
@@ -234,74 +264,79 @@ function NewCommentForm({
             // Typed text reads in its own direction; while empty, the
             // placeholder follows the page
             dir={content ? "auto" : undefined}
+            // A thin one-line box until focused, then it opens with the
+            // toolbar and grows with its text
+            onFocus={() => setIsExpanded(true)}
             onChange={(e) => {
               setContent(e.target.value);
               if (createError) setDismissedCreateError(createError);
             }}
             // 🎨 CUSTOMIZATION: Comment form styling (Default placeholder)
             placeholder={strings.commentPlaceholder}
+            aria-label={strings.commentPlaceholder}
             className={cn(
               // 🎨 CUSTOMIZATION: Comment form styling
-              "flex-1 p-2",
+              "block w-full px-4 py-2.5",
               "bg-transparent",
               "text-gray-900 dark:text-neutral-50",
-              "text-sm leading-relaxed",
-              "outline-none resize-none border-none"
+              "placeholder:text-gray-500 dark:placeholder:text-neutral-400",
+              "text-sm leading-5",
+              "outline-none resize-none border-none",
+              isExpanded ? "min-h-[4.5rem] max-h-[50vh]" : "h-10 overflow-hidden"
             )}
-            rows={2}
+            rows={1}
           />
-          {!hasContent && giphyApiKey ? (
-            <button
-              type="button"
-              onClick={() => setIsGiphyVisible(true)}
-              disabled={isSubmitting}
-              className={cn(
-                // 🎨 CUSTOMIZATION: Comment form styling
-                "flex-shrink-0 p-2",
-                "border-none outline-none",
-                "font-normal text-[13px]",
-                "text-gray-500 dark:text-neutral-50",
-                "cursor-pointer bg-transparent"
-              )}
-            >
-              GIF
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={!hasContent || isSubmitting}
-              className={cn(
-                // 🎨 CUSTOMIZATION: Comment form styling
-                "flex-shrink-0 p-2",
-                "rounded-full",
-                "shadow-sm",
-                "transition-all duration-200",
-                "border-none outline-none",
-                "focus-visible:ring-2 focus-visible:ring-blue-400 dark:focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-                hasContent && !isSubmitting
-                  ? "bg-blue-600 dark:bg-blue-600 text-white cursor-pointer hover:bg-blue-700 dark:hover:bg-blue-500 hover:shadow-md"
-                  : "bg-gray-200 dark:bg-neutral-600 text-gray-400 dark:text-neutral-500 cursor-not-allowed"
-              )}
-            >
-              <svg
-                className={cn(
-                  // 🎨 CUSTOMIZATION: Comment form styling
-                  "h-3 w-3",
-                  "transition-transform duration-200",
-                  hasContent && "hover:scale-110"
-                )}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 10l7-7m0 0l7 7m-7-7v18"
-                />
-              </svg>
-            </button>
+          {isExpanded && (
+            <div className="flex items-center gap-2 px-2 pb-2">
+              {giphyApiKey ? (
+                <button
+                  type="button"
+                  onClick={() => setIsGiphyVisible(true)}
+                  disabled={isSubmitting}
+                  aria-label={strings.addGif}
+                  className={cn(
+                    // 🎨 CUSTOMIZATION: Comment form styling
+                    "h-9 rounded-full px-3",
+                    "text-xs font-bold text-gray-500 dark:text-neutral-400",
+                    "transition-colors duration-150",
+                    "hover:bg-gray-100 dark:hover:bg-neutral-700 hover:text-gray-900 dark:hover:text-neutral-50",
+                    "disabled:opacity-50"
+                  )}
+                >
+                  GIF
+                </button>
+              ) : null}
+              <div className="ms-auto flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className={cn(
+                    // 🎨 CUSTOMIZATION: Cancel button styling
+                    "h-9 rounded-full px-4",
+                    "text-sm font-semibold text-gray-900 dark:text-neutral-50",
+                    "bg-gray-100 dark:bg-neutral-700 hover:bg-gray-200 dark:hover:bg-neutral-600",
+                    "transition-colors duration-150"
+                  )}
+                >
+                  {strings.cancel}
+                </button>
+                <button
+                  type="submit"
+                  disabled={!hasContent || isSubmitting}
+                  className={cn(
+                    // 🎨 CUSTOMIZATION: Submit button styling
+                    "h-9 rounded-full px-4",
+                    "text-sm font-semibold",
+                    "bg-blue-600 text-white hover:bg-blue-700 dark:hover:bg-blue-500",
+                    "transition-colors duration-150",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 dark:focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+                    "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-blue-600"
+                  )}
+                >
+                  {strings.submitComment}
+                </button>
+              </div>
+            </div>
           )}
         </div>
         {createErrorMessage && (

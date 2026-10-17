@@ -8,6 +8,8 @@ const strings = {
   commentPlaceholder: "Sumali sa usapan",
   replyPlaceholder: "Isulat ang iyong sagot...",
   cancel: "Kanselahin",
+  submitComment: "I-post",
+  addGif: "Magdagdag ng GIF",
 
   // Comment list
   noCommentsTitle: "Wala pang komento",

@@ -142,6 +142,20 @@ function ThreadedCommentSectionInner({
         flexDirection: "column",
       }}
     >
+      {/* The new-comment box comes first, above the comments */}
+      {isVisible && (
+        <div
+          style={{
+            flexShrink: 0,
+            backgroundColor: theme === 'dark' ? "#262626" : "#fff",
+            // 🎨 CUSTOMIZATION: Layout styling (Default: 12px 16px 8px)
+            padding: `12px ${SECTION_PADDING_X}px 8px`,
+          }}
+        >
+          <NewCommentForm gifPickerFullScreen={gifPickerFullScreen} />
+        </div>
+      )}
+
       <div
         style={{
           flex: 1,
@@ -156,19 +170,6 @@ function ThreadedCommentSectionInner({
         }}
       >
         <CommentsFeed>{children}</CommentsFeed>
-      </div>
-
-      <div
-        style={{
-          borderTop: theme === 'dark' ? "1px solid #525252" : "1px solid #e5e7eb",
-          backgroundColor: theme === 'dark' ? "#262626" : "#fff",
-          // 🎨 CUSTOMIZATION: Layout styling (Default: 8px 16px 12px)
-          padding: `8px ${SECTION_PADDING_X}px 12px`,
-        }}
-      >
-        {isVisible && (
-          <NewCommentForm gifPickerFullScreen={gifPickerFullScreen} />
-        )}
       </div>
     </div>
   );

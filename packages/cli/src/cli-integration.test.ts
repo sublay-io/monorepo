@@ -433,6 +433,32 @@ describe("sublay add — shared pieces", () => {
   }
 });
 
+describe("sublay add — env file per framework", () => {
+  const installed = () => path.join(workDir, "src", "components", "framed");
+  const fixture = (file: string) =>
+    fs.readFile(path.join(fixtureRegistry, "react", "framed", "styled", file), "utf-8");
+
+  it.each([
+    ["next", { react: "^19.0.0", next: "^15.0.0" }, "env/next.ts"],
+    ["vite (not listed: the default file)", { react: "^19.0.0", vite: "^5.0.0" }, "utils/env.ts"],
+    ["no recognised framework", { react: "^19.0.0" }, "env/other.ts"],
+  ])("installs the env file for %s as utils/env.ts", async (_label, dependencies, source) => {
+    await writeProject(workDir, {}, dependencies);
+
+    const result = await runCli(["add", "framed"], workDir, local);
+
+    expect(result.code).toBe(0);
+    expect(await listFiles(installed())).toEqual([
+      "components/framed.tsx",
+      "index.ts",
+      "utils/env.ts",
+    ]);
+    expect(await fs.readFile(path.join(installed(), "utils", "env.ts"), "utf-8")).toBe(
+      await fixture(source)
+    );
+  });
+});
+
 describe("sublay add — --ref", () => {
   // Serves the fixture registry the way raw.githubusercontent.com serves the
   // repo: /<org>/<repo>/<ref>/registry/<path>. Each served source file gets a

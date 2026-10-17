@@ -27,28 +27,14 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
 
   return (
     <View
+      // Part of the comment box, above the "Replying to" bar and the text
+      // field: the box grows upward to hold the suggestions (at most 5)
       style={{
-        height: 'auto',
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 10,
-        overflow: 'hidden',
-        padding: 12,
-        borderRadius: 12,
-        borderWidth: 1,
-        marginBottom: 8,
-        // In line with the input below
-        marginHorizontal: SECTION_PADDING_X,
-        // 🎨 CUSTOMIZATION: Mention suggestions background and border
+        paddingVertical: 4,
+        // Each row has 8px padding of its own: avatars line up with the comments
+        paddingHorizontal: SECTION_PADDING_X - 8,
+        // 🎨 CUSTOMIZATION: Mention suggestions background
         backgroundColor: theme === 'dark' ? '#262626' : '#FFFFFF',
-        borderColor: theme === 'dark' ? '#525252' : '#E5E7EB',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
       }}
     >
       {isLoadingMentions ? (

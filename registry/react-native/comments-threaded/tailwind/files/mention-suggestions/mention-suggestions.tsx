@@ -26,21 +26,13 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
   if (!isMentionActive) return null;
 
   return (
+    // Part of the comment box, above the "Replying to" bar and the text field:
+    // the box grows upward to hold the suggestions (at most 5)
     <View
-      className={`h-auto absolute bottom-0 left-0 right-0 z-10 overflow-hidden p-3 rounded-xl border mb-2 ${
-        theme === 'dark'
-          ? 'bg-neutral-800 border-neutral-600'
-          : 'bg-white border-gray-200'
-      }`}
-      style={{
-        // In line with the input below
-        marginHorizontal: SECTION_PADDING_X,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-      }}
+      // 🎨 CUSTOMIZATION: Mention suggestions background
+      className={`py-1 ${theme === 'dark' ? 'bg-neutral-800' : 'bg-white'}`}
+      // Each row has 8px padding of its own: avatars line up with the comments
+      style={{ paddingHorizontal: SECTION_PADDING_X - 8 }}
     >
       {isLoadingMentions ? (
         <View style={{ gap: 4 }}>

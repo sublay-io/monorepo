@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Unamjibu",
   cancelReply: "Ghairi jibu",
 
+  // Sorting
+  sortBy: "Panga kwa",
+  sortSheetTitle: "Panga maoni kwa",
+  sortTop: "Maarufu",
+  sortNew: "Mapya",
+  sortOld: "Ya zamani",
+  sortControversial: "Zenye utata",
+
   // Comment list
   noCommentsTitle: "Bado hakuna maoni",
   noCommentsSubtitle: "Anzisha mazungumzo.",

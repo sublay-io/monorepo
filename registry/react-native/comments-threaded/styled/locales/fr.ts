@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "En réponse à",
   cancelReply: "Annuler la réponse",
 
+  // Sorting
+  sortBy: "Trier par",
+  sortSheetTitle: "Trier les commentaires par",
+  sortTop: "Populaires",
+  sortNew: "Récents",
+  sortOld: "Anciens",
+  sortControversial: "Controversés",
+
   // Comment list
   noCommentsTitle: "Aucun commentaire pour le moment",
   noCommentsSubtitle: "Lancez la conversation.",

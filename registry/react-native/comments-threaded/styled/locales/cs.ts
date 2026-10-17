@@ -17,6 +17,14 @@ const strings = {
   replyingTo: "Odpověď uživateli",
   cancelReply: "Zrušit odpověď",
 
+  // Sorting
+  sortBy: "Seřadit podle",
+  sortSheetTitle: "Seřadit komentáře podle",
+  sortTop: "Nejlepší",
+  sortNew: "Nejnovější",
+  sortOld: "Nejstarší",
+  sortControversial: "Kontroverzní",
+
   // Comment list
   noCommentsTitle: "Zatím žádné komentáře",
   noCommentsSubtitle: "Začněte konverzaci.",

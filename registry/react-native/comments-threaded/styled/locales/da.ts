@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Svarer",
   cancelReply: "Annuller svar",
 
+  // Sorting
+  sortBy: "Sortér efter",
+  sortSheetTitle: "Sortér kommentarer efter",
+  sortTop: "Top",
+  sortNew: "Nyeste",
+  sortOld: "Ældste",
+  sortControversial: "Kontroversielle",
+
   // Comment list
   noCommentsTitle: "Ingen kommentarer endnu",
   noCommentsSubtitle: "Start samtalen.",

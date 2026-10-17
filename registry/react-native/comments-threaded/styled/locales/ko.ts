@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "답글 대상:",
   cancelReply: "답글 취소",
 
+  // Sorting
+  sortBy: "정렬",
+  sortSheetTitle: "댓글 정렬",
+  sortTop: "인기순",
+  sortNew: "최신순",
+  sortOld: "오래된순",
+  sortControversial: "논쟁적",
+
   // Comment list
   noCommentsTitle: "아직 댓글이 없습니다",
   noCommentsSubtitle: "대화를 시작해 보세요.",

@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "กำลังตอบกลับ",
   cancelReply: "ยกเลิกการตอบกลับ",
 
+  // Sorting
+  sortBy: "เรียงตาม",
+  sortSheetTitle: "เรียงความคิดเห็นตาม",
+  sortTop: "ยอดนิยม",
+  sortNew: "ล่าสุด",
+  sortOld: "เก่าสุด",
+  sortControversial: "เป็นที่ถกเถียง",
+
   // Comment list
   noCommentsTitle: "ยังไม่มีความคิดเห็น",
   noCommentsSubtitle: "มาเริ่มบทสนทนากันเลย",

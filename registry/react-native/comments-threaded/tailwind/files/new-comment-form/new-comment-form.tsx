@@ -28,17 +28,11 @@ import { GIPHY_API_KEY_NAME, giphyApiKey, isDevelopment } from "../../utils/env"
 
 function NewCommentForm({
   ref,
-  gifPickerFullScreen = false,
   containerClassName,
 }: {
   ref?: React.Ref<{ focus: () => void }>;
-  // Where the GIF picker opens. false: it covers the view this form is
-  // rendered in (in the section, the whole comment section). true: it covers
-  // the whole screen.
-  gifPickerFullScreen?: boolean;
-  // Wraps the form in a View with these classes. The section passes its
-  // border here instead of wrapping the form itself: the GIF picker fills the
-  // view the form is rendered in, and that has to be the section's root view.
+  // Wraps the form in a View with these classes (ThreadedCommentInput passes
+  // its border and background here).
   containerClassName?: string;
 }) {
   const { user } = useUser();
@@ -351,14 +345,15 @@ function NewCommentForm({
 
   return (
     <>
-      {/* Fills the view this form is rendered in (see gifPickerFullScreen) */}
+      {/* Over the whole screen, in a Modal: the input sits wherever the
+          screen puts it */}
       {giphyApiKey ? (
         <GiphyContainer
           giphyApiKey={giphyApiKey}
           onClickBack={() => setIsGiphyVisible(false)}
           onSelectGif={(selected) => handleCreateGif(selected)}
           visible={isGiphyVisible}
-          fullScreen={gifPickerFullScreen}
+          fullScreen
           theme={theme}
         />
       ) : null}

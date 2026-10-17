@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Antwoord aan",
   cancelReply: "Antwoord annuleren",
 
+  // Sorting
+  sortBy: "Sorteren op",
+  sortSheetTitle: "Reacties sorteren op",
+  sortTop: "Top",
+  sortNew: "Nieuw",
+  sortOld: "Oud",
+  sortControversial: "Controversieel",
+
   // Comment list
   noCommentsTitle: "Nog geen reacties",
   noCommentsSubtitle: "Begin het gesprek.",

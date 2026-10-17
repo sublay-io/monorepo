@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "返信先:",
   cancelReply: "返信をキャンセル",
 
+  // Sorting
+  sortBy: "並べ替え",
+  sortSheetTitle: "コメントの並べ替え",
+  sortTop: "人気順",
+  sortNew: "新しい順",
+  sortOld: "古い順",
+  sortControversial: "賛否両論",
+
   // Comment list
   noCommentsTitle: "まだコメントはありません",
   noCommentsSubtitle: "最初のコメントを投稿しましょう。",

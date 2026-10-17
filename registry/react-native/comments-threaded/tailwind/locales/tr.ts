@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Yanıtlanan:",
   cancelReply: "Yanıtı iptal et",
 
+  // Sorting
+  sortBy: "Sırala",
+  sortSheetTitle: "Yorumları sırala",
+  sortTop: "Popüler",
+  sortNew: "Yeni",
+  sortOld: "Eski",
+  sortControversial: "Tartışmalı",
+
   // Comment list
   noCommentsTitle: "Henüz yorum yok",
   noCommentsSubtitle: "Sohbeti başlat.",

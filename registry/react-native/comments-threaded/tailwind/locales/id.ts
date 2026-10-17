@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Membalas",
   cancelReply: "Batalkan balasan",
 
+  // Sorting
+  sortBy: "Urutkan",
+  sortSheetTitle: "Urutkan komentar",
+  sortTop: "Teratas",
+  sortNew: "Terbaru",
+  sortOld: "Terlama",
+  sortControversial: "Kontroversial",
+
   // Comment list
   noCommentsTitle: "Belum ada komentar",
   noCommentsSubtitle: "Mulai percakapan.",

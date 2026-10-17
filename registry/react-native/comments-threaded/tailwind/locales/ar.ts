@@ -27,6 +27,14 @@ const strings = {
   replyingTo: "ردًا على",
   cancelReply: "إلغاء الرد",
 
+  // Sorting
+  sortBy: "ترتيب حسب",
+  sortSheetTitle: "ترتيب التعليقات حسب",
+  sortTop: "الأبرز",
+  sortNew: "الأحدث",
+  sortOld: "الأقدم",
+  sortControversial: "مثيرة للجدل",
+
   // Comment list
   noCommentsTitle: "لا توجد تعليقات بعد",
   noCommentsSubtitle: "ابدأ النقاش.",

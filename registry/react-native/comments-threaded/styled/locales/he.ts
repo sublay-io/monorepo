@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "בתגובה אל",
   cancelReply: "ביטול התגובה",
 
+  // Sorting
+  sortBy: "מיון לפי",
+  sortSheetTitle: "מיון התגובות לפי",
+  sortTop: "מובילות",
+  sortNew: "חדשות",
+  sortOld: "ישנות",
+  sortControversial: "שנויות במחלוקת",
+
   // Comment list
   noCommentsTitle: "אין עדיין תגובות",
   noCommentsSubtitle: "התחילו את השיחה.",

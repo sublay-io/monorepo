@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Отговор на",
   cancelReply: "Отказ от отговора",
 
+  // Sorting
+  sortBy: "Подреждане по",
+  sortSheetTitle: "Подреждане на коментарите по",
+  sortTop: "Най-добри",
+  sortNew: "Нови",
+  sortOld: "Стари",
+  sortControversial: "Спорни",
+
   // Comment list
   noCommentsTitle: "Все още няма коментари",
   noCommentsSubtitle: "Започнете разговора.",

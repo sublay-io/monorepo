@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Жауап:",
   cancelReply: "Жауаптан бас тарту",
 
+  // Sorting
+  sortBy: "Сұрыптау",
+  sortSheetTitle: "Пікірлерді сұрыптау",
+  sortTop: "Үздік",
+  sortNew: "Жаңа",
+  sortOld: "Ескі",
+  sortControversial: "Даулы",
+
   // Comment list
   noCommentsTitle: "Әзірге пікір жоқ",
   noCommentsSubtitle: "Талқылауды бастаңыз.",

@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Vastaus käyttäjälle",
   cancelReply: "Peruuta vastaus",
 
+  // Sorting
+  sortBy: "Lajittele",
+  sortSheetTitle: "Lajittele kommentit",
+  sortTop: "Suosituimmat",
+  sortNew: "Uusimmat",
+  sortOld: "Vanhimmat",
+  sortControversial: "Kiistanalaiset",
+
   // Comment list
   noCommentsTitle: "Ei vielä kommentteja",
   noCommentsSubtitle: "Aloita keskustelu.",

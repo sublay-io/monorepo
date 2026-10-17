@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Sumasagot kay",
   cancelReply: "Kanselahin ang sagot",
 
+  // Sorting
+  sortBy: "Ayusin ayon sa",
+  sortSheetTitle: "Ayusin ang mga komento ayon sa",
+  sortTop: "Nangunguna",
+  sortNew: "Bago",
+  sortOld: "Luma",
+  sortControversial: "Kontrobersyal",
+
   // Comment list
   noCommentsTitle: "Wala pang komento",
   noCommentsSubtitle: "Simulan ang usapan.",

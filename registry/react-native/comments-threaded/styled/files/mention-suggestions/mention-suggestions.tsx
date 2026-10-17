@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Pressable, FlatList } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { User, useCommentSection } from "@sublay/react-native";
 import UserAvatar from "~shared/react-native/user-avatar";
 import { UserMentionSkeleton } from "~shared/react-native/skeleton";
@@ -53,28 +53,23 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
       }}
     >
       {isLoadingMentions ? (
-        <FlatList
-          data={[1, 2, 3]}
-          keyExtractor={(item) => `loading-${item}`}
-          renderItem={() => (
+        <View style={{ gap: 4 }}>
+          {[1, 2, 3].map((item) => (
             <UserMentionSkeleton
+              key={`loading-${item}`}
               theme={theme}
               avatarSize={32}
               gap={12}
               paddingVertical={8}
               paddingHorizontal={8}
             />
-          )}
-          ItemSeparatorComponent={() => <View style={{ height: 4 }} />}
-          keyboardShouldPersistTaps="always"
-        />
+          ))}
+        </View>
       ) : mentionSuggestions.length > 0 ? (
-        <FlatList
-          data={mentionSuggestions}
-          keyExtractor={(item) => item.id}
-          keyboardShouldPersistTaps="always"
-          renderItem={({ item }) => (
+        <View style={{ gap: 4 }}>
+          {mentionSuggestions.map((item) => (
             <Pressable
+              key={item.id}
               onPress={() => {
                 if (!item.username) {
                   callbacks?.userCantBeMentionedCallback?.();
@@ -128,9 +123,8 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                 )}
               </View>
             </Pressable>
-          )}
-          ItemSeparatorComponent={() => <View style={{ height: 4 }} />}
-        />
+          ))}
+        </View>
       ) : (
         <View
           style={{

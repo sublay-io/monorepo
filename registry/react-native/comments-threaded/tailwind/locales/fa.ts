@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "در پاسخ به",
   cancelReply: "لغو پاسخ",
 
+  // Sorting
+  sortBy: "مرتب‌سازی بر اساس",
+  sortSheetTitle: "مرتب‌سازی نظرها بر اساس",
+  sortTop: "برترین",
+  sortNew: "جدیدترین",
+  sortOld: "قدیمی‌ترین",
+  sortControversial: "بحث‌برانگیز",
+
   // Comment list
   noCommentsTitle: "هنوز نظری ثبت نشده",
   noCommentsSubtitle: "گفت‌وگو را شروع کنید.",

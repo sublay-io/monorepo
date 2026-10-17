@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "回覆",
   cancelReply: "取消回覆",
 
+  // Sorting
+  sortBy: "排序方式",
+  sortSheetTitle: "留言排序方式",
+  sortTop: "熱門",
+  sortNew: "最新",
+  sortOld: "最舊",
+  sortControversial: "有爭議",
+
   // Comment list
   noCommentsTitle: "還沒有留言",
   noCommentsSubtitle: "來開啟話題吧。",

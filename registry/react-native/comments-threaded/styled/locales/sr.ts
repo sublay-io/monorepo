@@ -19,6 +19,14 @@ const strings = {
   replyingTo: "Одговор кориснику",
   cancelReply: "Откажи одговор",
 
+  // Sorting
+  sortBy: "Сортирај по",
+  sortSheetTitle: "Сортирај коментаре по",
+  sortTop: "Најбољи",
+  sortNew: "Најновији",
+  sortOld: "Најстарији",
+  sortControversial: "Контроверзни",
+
   // Comment list
   noCommentsTitle: "Још нема коментара",
   noCommentsSubtitle: "Започни разговор.",

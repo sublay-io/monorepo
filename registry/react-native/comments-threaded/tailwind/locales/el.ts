@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Απάντηση σε",
   cancelReply: "Ακύρωση απάντησης",
 
+  // Sorting
+  sortBy: "Ταξινόμηση κατά",
+  sortSheetTitle: "Ταξινόμηση σχολίων κατά",
+  sortTop: "Κορυφαία",
+  sortNew: "Νεότερα",
+  sortOld: "Παλαιότερα",
+  sortControversial: "Αμφιλεγόμενα",
+
   // Comment list
   noCommentsTitle: "Δεν υπάρχουν σχόλια ακόμα",
   noCommentsSubtitle: "Ξεκίνα τη συζήτηση.",

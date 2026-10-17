@@ -69,3 +69,44 @@ export async function detectTypeScript(): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * The framework an env file is chosen for (see Registry.frameworks): the
+ * platform itself on React Native and Expo; on React, the web framework the
+ * project's package.json declares, or "other".
+ */
+export type Framework = 'next' | 'vite' | 'cra' | 'other' | 'expo' | 'react-native';
+
+export async function detectFramework(
+  platform: 'react' | 'react-native' | 'expo'
+): Promise<Framework> {
+  if (platform !== 'react') {
+    return platform;
+  }
+
+  try {
+    const packageJsonPath = path.join(process.cwd(), 'package.json');
+    if (!(await fs.pathExists(packageJsonPath))) {
+      return 'other';
+    }
+
+    const packageJson = await fs.readJson(packageJsonPath);
+    const deps = {
+      ...packageJson.dependencies,
+      ...packageJson.devDependencies,
+    };
+
+    if (deps['next']) {
+      return 'next';
+    }
+    if (deps['react-scripts']) {
+      return 'cra';
+    }
+    if (deps['vite']) {
+      return 'vite';
+    }
+    return 'other';
+  } catch (error) {
+    return 'other';
+  }
+}

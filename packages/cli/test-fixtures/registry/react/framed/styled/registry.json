@@ -1,0 +1,15 @@
+{
+  "name": "framed",
+  "platform": "react",
+  "style": "styled",
+  "version": "1.0.0",
+  "description": "Fixture component with per-framework env files",
+  "dependencies": ["@sublay/react-js@^7.0.0"],
+  "files": [
+    { "path": "files/framed.tsx", "type": "component", "description": "Main component" },
+    { "path": "utils/env.ts", "type": "util", "description": "Env file (Vite)" }
+  ],
+  "frameworks": { "next": "env/next.ts", "other": "env/other.ts" },
+  "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react/framed/styled",
+  "exports": { "mainComponent": "Framed", "mainFile": "framed" }
+}

@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import os from "os";
 import path from "path";
 
-import { detectProjectType, detectTypeScript } from "./detect";
+import { detectFramework, detectProjectType, detectTypeScript } from "./detect";
 
 // Both functions read process.cwd(), so the fixtures are real directories we
 // chdir into. That is why vitest.config.ts sets `pool: "forks"` — process.chdir
@@ -98,5 +98,35 @@ describe("detectTypeScript", () => {
     await writePackageJson({ dependencies: { react: "^19.0.0" } });
 
     await expect(detectTypeScript()).resolves.toBe(false);
+  });
+});
+
+describe("detectFramework", () => {
+  it("is the platform itself on React Native and Expo", async () => {
+    await writePackageJson({ dependencies: { next: "^15.0.0" } });
+
+    await expect(detectFramework("expo")).resolves.toBe("expo");
+    await expect(detectFramework("react-native")).resolves.toBe("react-native");
+  });
+
+  it.each([
+    ["next", { dependencies: { react: "^19.0.0", next: "^15.0.0" } }],
+    ["cra", { dependencies: { react: "^19.0.0", "react-scripts": "5.0.1" } }],
+    ["vite", { devDependencies: { vite: "^5.0.0" }, dependencies: { react: "^19.0.0" } }],
+    ["other", { dependencies: { react: "^19.0.0" } }],
+  ])("detects %s on React", async (expected, pkg) => {
+    await writePackageJson(pkg);
+
+    await expect(detectFramework("react")).resolves.toBe(expected);
+  });
+
+  it("prefers next over vite when a project has both", async () => {
+    await writePackageJson({ dependencies: { next: "^15.0.0" }, devDependencies: { vite: "^5.0.0" } });
+
+    await expect(detectFramework("react")).resolves.toBe("next");
+  });
+
+  it("is other without a package.json", async () => {
+    await expect(detectFramework("react")).resolves.toBe("other");
   });
 });

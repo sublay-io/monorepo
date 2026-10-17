@@ -423,3 +423,44 @@ test('fails on languages that is not an object', () => {
   registry['react/widget/styled/registry.json'].languages = ['he'];
   assertFails(check(registry), /"languages" must be an object/);
 });
+
+/** The valid registry, with the widget given an env file and a Next.js version of it. */
+function registryWithFrameworks() {
+  const registry = validRegistry();
+  const manifest = registry['react/widget/styled/registry.json'];
+  manifest.files.push({ path: 'utils/env.ts', type: 'util', description: 'Env' });
+  manifest.frameworks = { next: 'env/next.ts' };
+  registry['react/widget/styled/utils/env.ts'] = 'export const key = undefined;';
+  registry['react/widget/styled/env/next.ts'] = 'export const key = undefined;';
+  return registry;
+}
+
+test('passes on a component with frameworks', () => {
+  const result = check(registryWithFrameworks());
+  assert.equal(result.code, 0, result.output);
+});
+
+test("fails on a framework whose file is missing", () => {
+  const registry = registryWithFrameworks();
+  registry['react/widget/styled/env/next.ts'] = undefined;
+  assertFails(check(registry), /frameworks\.next "env\/next\.ts" does not resolve to a file/);
+});
+
+test('fails on a framework file outside the component', () => {
+  const registry = registryWithFrameworks();
+  registry['react/widget/styled/registry.json'].frameworks.next = '../../../shared/react/reset-styles.ts';
+  assertFails(check(registry), /frameworks\.next .* does not resolve to a file of this component/);
+});
+
+test('fails on frameworks without an env file', () => {
+  const registry = registryWithFrameworks();
+  const manifest = registry['react/widget/styled/registry.json'];
+  manifest.files = manifest.files.filter((file) => file.path !== 'utils/env.ts');
+  assertFails(check(registry), /"frameworks" needs utils\/env\.ts in files\[\]/);
+});
+
+test('fails on frameworks that is not an object', () => {
+  const registry = registryWithFrameworks();
+  registry['react/widget/styled/registry.json'].frameworks = ['next'];
+  assertFails(check(registry), /"frameworks" must be an object/);
+});

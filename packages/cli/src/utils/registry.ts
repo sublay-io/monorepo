@@ -27,6 +27,14 @@ export interface Registry {
    * of that language's file, relative to the component. Absent: English only.
    */
   languages?: Record<string, string>;
+  /**
+   * Versions of the component's env file (utils/env.ts, where it reads
+   * settings such as API keys from the app's environment) for particular
+   * frameworks: framework (see detectFramework) to the path of that
+   * framework's file, relative to the component. A framework that isn't
+   * listed gets utils/env.ts as it is.
+   */
+  frameworks?: Record<string, string>;
   registryUrl: string;
   exports: {
     mainComponent: string;

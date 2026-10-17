@@ -126,6 +126,8 @@ Delete or comment out the action menu trigger in `single-comment.tsx`:
 
 Move `<SortByButton />` to the top of the section instead of inline with the feed.
 
+In threaded comments on React Native and Expo, `<SortByTrigger />` works anywhere inside `ThreadedComments`, so you can also move it out of `ThreadedCommentSection`, into your screen.
+
 ---
 
 ## Modifying Spacing
@@ -144,15 +146,24 @@ Move `<SortByButton />` to the top of the section instead of inline with the fee
 
 ## GIF Picker Placement
 
+### Threaded Comments
+
+The GIF picker always covers the whole screen.
+
+- **React** — it covers the browser window. The section has no fixed height of its own to cover: it is as tall as its comments, and the page scrolls.
+- **React Native and Expo** — it opens in a React Native `Modal`, so it covers the whole screen wherever `ThreadedCommentInput` sits, the navigation header included, and Android's back button closes it. Its content is inset from the notch and the home indicator with React Native's `SafeAreaView`, which applies insets on iOS only. If your app uses `react-native-safe-area-context`, swap in its `SafeAreaView` in `giphy-container.tsx` to get insets on Android too.
+
+### Social Comments
+
 The GIF picker opens over the comment section and covers all of it: the comment list and the form. To make it cover the whole screen instead, pass `gifPickerFullScreen` to the section:
 
 ```tsx
-<ThreadedCommentSection foreignId="post_123" gifPickerFullScreen />
+<SocialCommentSection foreignId="post_123" gifPickerFullScreen />
 ```
 
-`SocialCommentSection` takes the same prop. The default is `false`. It works the same on React, React Native and Expo.
+The default is `false`. It works the same on React, React Native and Expo.
 
-### React
+#### React
 
 The picker fills the section's outer element, which is positioned (`relative`), so it is as tall as the section. Give the section a bounded height (it fills its parent and scrolls the comment list inside) to keep the picker's search field on screen in a long thread.
 
@@ -165,11 +176,11 @@ If you compose your own layout from the feed and the form, wrap them in a positi
 </div>
 ```
 
-### React Native and Expo
+#### React Native and Expo
 
 The picker fills the view it is rendered in, and the form renders it. In the section, the form is a direct child of the section's root view, so the picker covers the whole section. The section's border around the form is passed to the form as `containerStyle` (`containerClassName` in the Tailwind variant) rather than wrapped around it, because a wrapping view would become the area the picker covers.
 
-With `gifPickerFullScreen`, the picker opens in a React Native `Modal`: it covers the whole screen wherever the section sits in your app (inside a bottom sheet, for example), and Android's back button closes it. Its content is inset from the notch and the home indicator with React Native's `SafeAreaView`, which applies insets on iOS only. If your app uses `react-native-safe-area-context`, swap in its `SafeAreaView` in `giphy-container.tsx` to get insets on Android too.
+With `gifPickerFullScreen`, the picker opens in a React Native `Modal`: it covers the whole screen wherever the section sits in your app (inside a bottom sheet, for example), and Android's back button closes it. Its content is inset with React Native's `SafeAreaView`, as in threaded comments above.
 
 If you compose your own layout, render the form as a direct child of the view the picker should cover. The prop goes on the form:
 
@@ -188,11 +199,11 @@ If you compose your own layout, render the form as a direct child of the view th
 
 Understanding the component tree helps you know which file to edit:
 
-**Threaded Comments:**
+**Threaded Comments (React):**
 ```
 ThreadedCommentSection        ← threaded-comment-section.tsx
   ├── NewCommentForm           ← new-comment-form.tsx
-  ├── SortByDropdown           ← sort-by-dropdown.tsx (web)
+  ├── SortByDropdown           ← sort-by-dropdown.tsx
   └── CommentsFeed             ← comments-feed.tsx
         └── CommentThread      ← comment-thread.tsx
               └── SingleComment ← single-comment.tsx
@@ -200,6 +211,21 @@ ThreadedCommentSection        ← threaded-comment-section.tsx
                     ├── CommentBody
                     ├── VoteButtons   ← vote-buttons.tsx
                     └── ReplyButton
+```
+
+**Threaded Comments (React Native, Expo):**
+```
+ThreadedComments              ← threaded-comment-section.tsx
+  ├── your screen
+  │     ├── ThreadedCommentSection  ← threaded-comment-section.tsx
+  │     │     ├── SortByTrigger      ← sort-by-trigger.tsx
+  │     │     └── CommentsFeed       ← comments-feed.tsx
+  │     │           └── CommentThread ← comment-thread.tsx
+  │     │                 └── SingleComment ← single-comment.tsx
+  │     └── ThreadedCommentInput    ← threaded-comment-section.tsx
+  │           └── NewCommentForm     ← new-comment-form.tsx
+  │                 └── ReplyBanner  ← reply-banner.tsx
+  └── Sheets: SortSheet, CommentOptionsSheet, CommentOptionsSheetOwner, ReportCommentSheet  ← sheets/
 ```
 
 **Social Comments:**

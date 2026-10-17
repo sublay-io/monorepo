@@ -6,7 +6,7 @@ icon: "folder-tree"
 
 # File Structure
 
-When you install threaded comments, 40 TypeScript/TSX files are copied into your project in a clear, navigable structure: the component's own files, and the shared pieces it is built from in `shared/`. The trees below list every file.
+When you install threaded comments, its TypeScript/TSX files are copied (42 on React, 44 on React Native and Expo, plus the `index.ts` the CLI writes) into your project in a clear, navigable structure: the component's own files, and the shared pieces it is built from in `shared/`. The trees below list every file.
 
 ---
 
@@ -77,9 +77,11 @@ When you install threaded comments, 40 TypeScript/TSX files are copied into your
     src/components/comments-threaded/
     ├── index.ts                                         # Barrel export (entry point)
     ├── components/
-    │   ├── threaded-comment-section.tsx                 # Main component
+    │   ├── threaded-comment-section.tsx                 # Main file: the three components
     │   ├── new-comment-form/
-    │   │   └── new-comment-form.tsx                     # Comment form (replies are written here too)
+    │   │   └── new-comment-form.tsx                     # Comment box (replies are written here too)
+    │   ├── sort-by-trigger/
+    │   │   └── sort-by-trigger.tsx                      # "Sort by" button that opens the sort sheet
     │   ├── reply-banner/
     │   │   └── reply-banner.tsx                         # "Replying to" bar above the input
     │   ├── mention-suggestions/
@@ -104,7 +106,8 @@ When you install threaded comments, 40 TypeScript/TSX files are copied into your
     │   └── sheets/
     │       ├── comment-options-sheet.tsx                # Menu for other users' comments
     │       ├── comment-options-sheet-owner.tsx          # Menu for your own comments
-    │       └── report-comment-sheet.tsx                 # Report form
+    │       ├── report-comment-sheet.tsx                 # Report form
+    │       └── sort-sheet.tsx                           # "Sort comments by" sheet
     ├── hooks/
     │   ├── use-threaded-comments.tsx                    # Provider props and callbacks
     │   └── use-ui-state.tsx                             # Reads the UI state context
@@ -112,9 +115,10 @@ When you install threaded comments, 40 TypeScript/TSX files are copied into your
     │   ├── prop-comparison.ts                           # Memoization helpers
     │   ├── comment-create-error.ts                      # Messages shown when posting fails
     │   ├── env.ts                                       # Where the Giphy API key is read from
+    │   ├── sort-options.ts                              # The options of the sort sheet
     │   └── strings.ts                                   # Every piece of text the component shows
     ├── context/
-    │   └── ui-state-context.tsx                         # Modal & theme context
+    │   └── ui-state-context.tsx                         # Sheets & theme context
     └── shared/
         ├── custom-button.tsx                            # Button
         ├── flag-icon.tsx                                # Report icon
@@ -143,27 +147,38 @@ Barrel export for clean imports:
 
 ```tsx
 export { default as ThreadedCommentSection } from './components/threaded-comment-section';
+export * from './components/threaded-comment-section';
 ```
 
 This lets you write:
 ```tsx
+// React (Web)
 import { ThreadedCommentSection } from './components/comments-threaded';
+
+// React Native / Expo
+import {
+  ThreadedComments,
+  ThreadedCommentSection,
+  ThreadedCommentInput,
+} from './components/comments-threaded';
 ```
 
 ---
 
 ### `threaded-comment-section.tsx` — Main Component
 
-The entry component that orchestrates everything. Edit this to:
+The entry file that orchestrates everything. Edit this to:
 - Add custom headers or footers
 - Modify the overall layout
 - Change the component structure
+
+On React (Web) it holds `ThreadedCommentSection`: the comment box, Sort by and the comments, with no scrolling of its own. On React Native and Expo it holds the three components: `ThreadedComments` (the shared state, and the sheets over the screen), `ThreadedCommentSection` (Sort by and the comments) and `ThreadedCommentInput` (the comment box). See [React Native and Expo Components](/v8/components/components/threaded/props-api#react-native-and-expo-components).
 
 ---
 
 ### `new-comment-form.tsx` — Comment Input
 
-The textarea and submit button for top-level comments. Edit this to:
+The text input and submit button for top-level comments (and, on React Native and Expo, replies). Edit this to:
 - Customize placeholder text
 - Change button styles
 - Add character counters
@@ -175,6 +190,16 @@ The textarea and submit button for top-level comments. Edit this to:
 The **Sort by** dropdown between the comment box and the comments. Edit this to:
 - Remove or reorder the sort options (the list at the top of the file)
 - Change the button and menu styles
+
+---
+
+### `sort-by-trigger.tsx`, `sort-sheet.tsx` and `sort-options.ts` — Sort By (React Native, Expo)
+
+`sort-by-trigger/sort-by-trigger.tsx` is the **Sort by: Top ▾** button above the comments. It opens `sheets/sort-sheet.tsx`, the **Sort comments by** sheet, which `ThreadedComments` renders over the screen. Edit:
+- `utils/sort-options.ts` to remove or reorder the sort options
+- `sort-by-trigger.tsx` and `sort-sheet.tsx` to change the button and sheet styles
+
+The button works anywhere inside `ThreadedComments`, so you can move it out of the section.
 
 ---
 
@@ -303,7 +328,7 @@ return (
 | `/context/` | React context providers |
 | `/shared/` | Presentational pieces the component is built from (GIF picker, avatar, skeletons, icons) |
 | `/components/modals/` | Comment menu and report dialogs (web) |
-| `/components/sheets/` | Comment menu and report bottom sheets (React Native, Expo) |
+| `/components/sheets/` | Sort, comment menu and report bottom sheets (React Native, Expo) |
 
 ---
 

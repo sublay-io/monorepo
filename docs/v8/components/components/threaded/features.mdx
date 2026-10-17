@@ -12,6 +12,15 @@ Comprehensive feature overview for Reddit-style threaded comments.
 
 ## Core Features
 
+### Layout
+
+The section has no scrolling of its own. It is as tall as its comments, and the page or screen it sits in scrolls, so the entity above it scrolls away with the comments.
+
+- **React (Web)** — one component: the comment box at the top, then **Sort by**, then the comments. It has no fixed height; the page scrolls.
+- **React Native and Expo** — three components that your screen places. `ThreadedComments` wraps the screen and renders the sheets over it. `ThreadedCommentSection` (Sort by and the comments) goes inside your screen's `ScrollView`. `ThreadedCommentInput` (the comment box) goes anywhere inside `ThreadedComments`, typically pinned below the `ScrollView`. Keyboard handling is up to your screen. See [React Native and Expo Components](/v8/components/components/threaded/props-api#react-native-and-expo-components).
+
+---
+
 ### Unlimited Nesting
 
 Comments can be nested infinitely deep. Users can reply to any comment, creating branching conversation threads.
@@ -32,8 +41,8 @@ Visual indicators: indentation, threading lines connecting replies to parents, a
 
 Every comment has a **Reply** button. A reply is nested under the exact comment it answers, at any depth. Where the reply is written depends on the platform:
 
-- **React (Web)** — Reply opens a reply box under the comment. Cancel closes it. @ mention suggestions work in the reply box as they do in the main input, and open below the box so they don't cover the comment being replied to. The author being replied to is not mentioned automatically.
-- **React Native and Expo** — replies are written in the main input at the bottom of the section. Reply makes that comment the one being replied to and focuses the input, so the keyboard opens. A **"Replying to"** bar appears above the input, with the author's avatar and name and a cancel button on the right. The comment being replied to is marked in the list the same way as a [highlighted comment](#highlighted-comments). Tapping Reply on the same comment again, or the bar's cancel button, cancels the reply, and the input posts top-level comments again. Tapping Reply on another comment switches to that comment.
+- **React (Web)** — Reply opens a reply box under the comment. Cancel closes it. @ mention suggestions work in the reply box as they do in the comment box, and open below the box so they don't cover the comment being replied to. The author being replied to is not mentioned automatically.
+- **React Native and Expo** — replies are written in the comment box, `ThreadedCommentInput`, wherever your screen places it. Reply makes that comment the one being replied to and focuses the input, so the keyboard opens. The input never focuses itself when the screen opens. A **"Replying to"** bar appears above the input, with the author's avatar and name and a cancel button on the right. The comment being replied to is marked in the list the same way as a [highlighted comment](#highlighted-comments). Tapping Reply on the same comment again, or the bar's cancel button, cancels the reply, and the input posts top-level comments again. Tapping Reply on another comment switches to that comment.
 
 On React Native and Expo, text and GIFs sent while the bar is showing are posted as replies to that comment, and the bar goes away once the reply is posted. @ mention suggestions work in the input as usual; the author being replied to is not mentioned automatically.
 
@@ -46,14 +55,17 @@ The bar lives in `reply-banner/reply-banner.tsx`. The Reply button's behavior is
 
 ### Sorting
 
-On React (Web), a **Sort by** dropdown sits between the comment box and the comments. The section opens on **Top**.
+The section opens on **Top**. The options are:
 
 - **Top** — most upvoted comments first (ranked by the number of upvotes, not upvotes minus downvotes)
 - **New** — newest comments first
 - **Old** — oldest comments first
 - **Controversial** — comments with many upvotes and downvotes and a close split first
 
-Choosing an option reloads the comments in that order. The options are listed at the top of `sort-by-dropdown.tsx`; remove an entry to drop that option. React Native and Expo have no sort control and show Top.
+Choosing an option reloads the comments in that order.
+
+- **React (Web)** — a **Sort by** dropdown sits between the comment box and the comments. The options are listed at the top of `sort-by-dropdown.tsx`; remove an entry to drop that option.
+- **React Native and Expo** — a **Sort by: Top ▾** button sits above the comments. Tapping it opens a **Sort comments by** sheet with the four options and a check mark on the current one. The options are listed in `utils/sort-options.ts`; remove an entry to drop that option. The button is `sort-by-trigger/sort-by-trigger.tsx` and the sheet is `sheets/sort-sheet.tsx`.
 
 ---
 
@@ -147,6 +159,7 @@ Tag other users with `@username`.
 - Clickable mentions link to user profiles (via `otherUserClickCallback`)
 - Mentioned users receive notifications (if enabled)
 - Works in both comments and replies
+- On React Native and Expo, the suggestions are a plain list that doesn't scroll (the server returns at most 5)
 
 ---
 
@@ -220,7 +233,7 @@ When a load fails, the component shows a retry instead of a wrong or stuck state
 
 **Try again** calls the same `loadMore()` that failed, which re-sends the failed request. When the entity couldn't be loaded, it looks the entity up again first, and the comments load once it is found. Edit the text in `comments-feed.tsx` and `comment-thread/comment-replies.tsx`.
 
-When posting fails, a short muted message appears by the form that was used. On React that is under the comment form, or under the reply box. On React Native and Expo, where comments and replies are both written in the main input, it is above that input:
+When posting fails, a short muted message appears by the form that was used. On React that is under the comment form, or under the reply box. On React Native and Expo, where comments and replies are both written in the comment box, it is above that box:
 
 - **Replying to a comment that was deleted in the meantime** — "This comment was deleted, so you can't reply to it."
 - **Replying to a comment a moderator removed in the meantime** — "This comment was removed, so you can't reply to it."
@@ -275,6 +288,8 @@ GIFs come from Giphy and need a Giphy API key, read from your app's environment.
 
 To use a different variable, change its name in `utils/env.ts`. Without a key, the GIF button shows only in development, and clicking it shows an alert naming the variable to set. In production the button is hidden until there is a key (on other web frameworks, once `isDevelopment` in `utils/env.ts` reads your framework's development flag).
 
+The GIF picker always covers the whole screen: on React (Web) it covers the browser window, and on React Native and Expo it opens in a `Modal`. See [GIF Picker Placement](/v8/components/customization/layout-structure#gif-picker-placement).
+
 ---
 
 ## Feature Matrix
@@ -283,7 +298,7 @@ To use a different variable, change its name in `utils/env.ts`. Without a key, t
 |---------|:--------:|:------------:|
 | Unlimited nesting | ✅ | ✅ (max depth can be limited) |
 | Upvote/downvote | ✅ | ✅ (can remove, change icons) |
-| Sorting (Top/New/Old/Controversial), web | ✅ | ✅ (remove options, rename) |
+| Sorting (Top/New/Old/Controversial) | ✅ | ✅ (remove options, rename) |
 | Threading lines | ✅ | ✅ (colors, spacing) |
 | Collapsible threads | ✅ | ✅ (behavior, icons) |
 | @ Mentions | ✅ | ✅ (autocomplete styling) |

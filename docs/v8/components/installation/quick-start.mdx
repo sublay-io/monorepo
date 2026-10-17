@@ -177,6 +177,35 @@ For authentication setup and obtaining `signedToken`, see the [Authentication](/
       );
     }
     ```
+
+    On React Native and Expo, threaded comments are three components that your screen places: `ThreadedComments` wraps the screen, `ThreadedCommentSection` (Sort by and the comments) goes in its `ScrollView`, and `ThreadedCommentInput` (the comment box) is pinned below:
+
+    ```tsx
+    // EntityScreen.tsx
+    import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+    import {
+      ThreadedComments,
+      ThreadedCommentSection,
+      ThreadedCommentInput,
+    } from './components/comments-threaded';
+
+    function EntityScreen({ post }) {
+      return (
+        <ThreadedComments foreignId={post.id} createIfNotFound>
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          >
+            <ScrollView>
+              <YourEntity />
+              <ThreadedCommentSection />
+            </ScrollView>
+            <ThreadedCommentInput />
+          </KeyboardAvoidingView>
+        </ThreadedComments>
+      );
+    }
+    ```
   </Tab>
 
   <Tab title="Social Comments">
@@ -296,7 +325,7 @@ That's it! You now have a fully functional comment system.
 ```
 src/components/comments-threaded/
 ├── index.ts
-├── components/          # 22 UI component files
+├── components/          # 23 UI component files (React)
 │   ├── threaded-comment-section.tsx
 │   ├── new-comment-form.tsx
 │   ├── comments-feed/

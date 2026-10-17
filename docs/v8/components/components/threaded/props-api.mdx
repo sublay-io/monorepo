@@ -1,44 +1,106 @@
 ---
 title: "Props & API"
-description: "ThreadedCommentSection component props and configuration"
+description: "Threaded comments components, props and configuration"
 icon: "sliders"
 ---
 
 # Threaded Comments Props
 
-The `ThreadedCommentSection` component follows a **minimal props philosophy**. It works with a single prop that identifies the entity and offers optional props for specific needs.
+Threaded comments follow a **minimal props philosophy**. They work with a single prop that identifies the entity and offer optional props for specific needs.
+
+- **React (Web)** — one component, `ThreadedCommentSection`.
+- **React Native and Expo** — three components that your screen places: `ThreadedComments`, `ThreadedCommentSection` and `ThreadedCommentInput`. See [React Native and Expo Components](#react-native-and-expo-components).
 
 ---
 
 ## Component Import
 
-```tsx
-import { ThreadedCommentSection } from './components/comments-threaded';
-```
+<Tabs>
+  <Tab title="React (Web)">
+    ```tsx
+    import { ThreadedCommentSection } from './components/comments-threaded';
+    ```
+  </Tab>
+  <Tab title="React Native / Expo">
+    ```tsx
+    import {
+      ThreadedComments,
+      ThreadedCommentSection,
+      ThreadedCommentInput,
+    } from './components/comments-threaded';
+    ```
+  </Tab>
+</Tabs>
 
 ---
 
 ## Props Interface
 
-```tsx
-interface ThreadedCommentSectionProps {
-  // Entity identification (provide ONE of these)
-  entity?: Entity | undefined | null;
-  entityId?: string | undefined | null;
-  foreignId?: string | undefined | null;
-  shortId?: string | undefined | null;
+<Tabs>
+  <Tab title="React (Web)">
+    ```tsx
+    interface ThreadedCommentSectionProps {
+      // Entity identification (provide ONE of these)
+      entity?: Entity | undefined | null;
+      entityId?: string | undefined | null;
+      foreignId?: string | undefined | null;
+      shortId?: string | undefined | null;
 
-  // With foreignId: create the entity if it doesn't exist yet
-  createIfNotFound?: boolean;
+      // With foreignId: create the entity if it doesn't exist yet
+      createIfNotFound?: boolean;
 
-  // Optional features
-  isVisible?: boolean;
-  highlightedCommentId?: string | undefined | null;
-  gifPickerFullScreen?: boolean;
-  theme?: 'light' | 'dark';   // Only for inline styles variant
-  children?: React.ReactNode;
-}
-```
+      // Optional features
+      isVisible?: boolean;
+      highlightedCommentId?: string | undefined | null;
+      theme?: 'light' | 'dark';   // Only for the inline styles variant
+      children?: React.ReactNode;
+    }
+    ```
+  </Tab>
+  <Tab title="React Native / Expo">
+    ```tsx
+    // Wraps the screen
+    interface ThreadedCommentsProps {
+      // Entity identification (provide ONE of these)
+      entity?: Entity | undefined | null;
+      entityId?: string | undefined | null;
+      foreignId?: string | undefined | null;
+      shortId?: string | undefined | null;
+
+      // With foreignId: create the entity if it doesn't exist yet
+      createIfNotFound?: boolean;
+
+      // Optional features
+      highlightedCommentId?: string | undefined | null;
+      theme?: 'light' | 'dark';
+      children?: React.ReactNode;  // Your screen
+    }
+
+    // Sort by and the comments
+    interface ThreadedCommentSectionProps {
+      children?: React.ReactNode;  // Replaces the "no comments yet" view
+    }
+
+    // The comment box
+    interface ThreadedCommentInputProps {
+      containerClassName?: string;            // Tailwind variant
+      containerStyle?: StyleProp<ViewStyle>;  // Inline styles variant
+    }
+    ```
+  </Tab>
+</Tabs>
+
+| Prop | React (Web) | React Native / Expo |
+|------|-------------|---------------------|
+| `entity`, `entityId`, `foreignId`, `shortId` | `ThreadedCommentSection` | `ThreadedComments` |
+| `createIfNotFound` | `ThreadedCommentSection` | `ThreadedComments` |
+| `highlightedCommentId` | `ThreadedCommentSection` | `ThreadedComments` |
+| `theme` | `ThreadedCommentSection`, inline styles variant only | `ThreadedComments`, both variants |
+| `children` | `ThreadedCommentSection`: replaces the "no comments yet" view | `ThreadedComments`: your screen. `ThreadedCommentSection`: replaces the "no comments yet" view |
+| `isVisible` | `ThreadedCommentSection` | — (don't render `ThreadedCommentInput` instead) |
+| `containerClassName` / `containerStyle` | — | `ThreadedCommentInput` |
+
+The examples below use the web component. On React Native and Expo, pass the same props to `ThreadedComments`.
 
 ---
 
@@ -137,18 +199,16 @@ The other examples on this page pass `foreignId` alone, for an entity that alrea
 
 **Type:** `boolean` — **Default:** `true`
 
-Controls whether the comment section is visible. Useful when rendering inside a drawer, modal, or conditional layout.
+**React (Web) only.** Whether the comment box is shown. When `false`, the section shows Sort by and the comments, without the box.
 
 ```tsx
-const [showComments, setShowComments] = useState(false);
-
 <ThreadedCommentSection
   foreignId="post_123"
-  isVisible={showComments}
+  isVisible={canComment}
 />
 ```
 
-Ensures event listeners are only active when the component is visible, improving performance.
+On React Native and Expo, the comment box is its own component: to hide it, don't render [`ThreadedCommentInput`](#threadedcommentinput).
 
 ---
 
@@ -169,28 +229,11 @@ ID of a specific comment to highlight when the section loads. The section opens 
 
 ---
 
-### `gifPickerFullScreen`
-
-**Type:** `boolean` — **Default:** `false`
-
-Where the GIF picker opens, on React, React Native and Expo. By default it covers the comment section: the comment list and the form. When set, it covers the whole screen. On React Native and Expo the full-screen picker opens in a `Modal`, so it covers the screen wherever the section sits in your app, and Android's back button closes it.
-
-```tsx
-<ThreadedCommentSection
-  foreignId="post_123"
-  gifPickerFullScreen
-/>
-```
-
-See [GIF Picker Placement](/v8/components/customization/layout-structure#gif-picker-placement) for custom layouts.
-
----
-
 ### `theme`
 
 **Type:** `'light' | 'dark'` — **Default:** `'light'`
 
-**Only for the inline styles variant.** Sets the color theme for the entire comment section.
+Sets the color theme for the entire comment section. On React (Web) it is **only for the inline styles variant**. On React Native and Expo both variants use it; it goes on `ThreadedComments`.
 
 ```tsx
 <ThreadedCommentSection
@@ -209,7 +252,7 @@ See [GIF Picker Placement](/v8/components/customization/layout-structure#gif-pic
   </Tab>
 
   <Tab title="Tailwind Variant">
-    Ignores this prop. Uses Tailwind's dark mode system instead — add a `dark` class to a parent element:
+    On React (Web), the section has no `theme` prop. It uses Tailwind's dark mode system instead — add a `dark` class to a parent element:
 
     ```tsx
     <html className={isDark ? 'dark' : ''}>
@@ -227,15 +270,82 @@ See [GIF Picker Placement](/v8/components/customization/layout-structure#gif-pic
 
 **Type:** `React.ReactNode`
 
-Optional content rendered within the comment feed area.
+Content shown in place of the "no comments yet" view, when the entity has no comments. On React Native and Expo, this is the `children` of `ThreadedCommentSection`; the `children` of `ThreadedComments` is your screen.
 
 ```tsx
 <ThreadedCommentSection foreignId="post_123">
   <div className="text-center text-gray-500 my-4">
-    Join the discussion!
+    Be the first to comment!
   </div>
 </ThreadedCommentSection>
 ```
+
+---
+
+## React Native and Expo Components
+
+On React Native and Expo, threaded comments are three components, installed together by `sublay add comments-threaded` and all exported from the component's `index.ts`. Your screen places them:
+
+```tsx
+import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import {
+  ThreadedComments,
+  ThreadedCommentSection,
+  ThreadedCommentInput,
+} from './components/comments-threaded';
+
+function EntityScreen() {
+  return (
+    <ThreadedComments foreignId="post_123" theme="dark">
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView>
+          <YourEntity />
+          <ThreadedCommentSection />
+        </ScrollView>
+        <ThreadedCommentInput />
+      </KeyboardAvoidingView>
+    </ThreadedComments>
+  );
+}
+```
+
+The entity above the section scrolls away with the comments, and the comment box stays pinned below the scroll view. Keyboard handling is up to your screen: use `KeyboardAvoidingView` as above, or the keyboard library your app already uses.
+
+### `ThreadedComments`
+
+Wraps the screen. It takes the entity props, [`createIfNotFound`](#createifnotfound), [`highlightedCommentId`](#highlightedcommentid), [`theme`](#theme), and `children`: your screen, which holds `ThreadedCommentSection` and `ThreadedCommentInput`.
+
+It holds the state the other two share, and it renders the sheets — Sort by, the comment menu, the menu for your own comment, and the report form — over the view it wraps. That view is an invisible `flex: 1` view, so wrap the whole screen to have the sheets cover the screen. The navigation header your navigator draws stays outside it.
+
+### `ThreadedCommentSection`
+
+The **Sort by** button and the comments. It has no scrolling of its own: put it inside your screen's `ScrollView`, so content above it (the entity) scrolls away with the comments.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `React.ReactNode` | Replaces the "no comments yet" view |
+
+It throws an error when it is rendered outside `ThreadedComments`.
+
+### `ThreadedCommentInput`
+
+The comment box, with the **"Replying to"** bar above it. Place it anywhere inside `ThreadedComments`, typically pinned below the `ScrollView`. Tapping Reply on a comment focuses it. It never focuses itself when the screen opens.
+
+| Prop | Variant | Type | Description |
+|------|---------|------|-------------|
+| `containerClassName` | Tailwind | `string` | Classes for the view around the box |
+| `containerStyle` | Inline styles | `StyleProp<ViewStyle>` | Style for the view around the box |
+
+By default, the view around the box has a top border, on the section's background color. Passing either prop replaces that default.
+
+```tsx
+<ThreadedCommentInput containerClassName="border-t border-gray-200 bg-white pb-4" />
+```
+
+To hide the comment box, don't render `ThreadedCommentInput`. It throws an error when it is rendered outside `ThreadedComments`.
 
 ---
 
@@ -291,32 +401,57 @@ function BlogPost({ post }) {
 
 ---
 
-### Full Example
+### Full Example (Web)
 
 ```tsx
 function BlogPost({ postId }) {
   const [searchParams] = useSearchParams();
-  const [showComments, setShowComments] = useState(true);
   const [isDark, setIsDark] = useState(false);
+  const { user } = useUser();
   const { data: entity } = useFetchEntity({ foreignId: postId });
 
   return (
-    <>
-      <button onClick={() => setShowComments(!showComments)}>
-        {showComments ? 'Hide' : 'Show'} Comments
-      </button>
+    <ThreadedCommentSection
+      entity={entity}
+      isVisible={!!user}
+      highlightedCommentId={searchParams.get('commentId')}
+      theme={isDark ? 'dark' : 'light'}
+    >
+      <div className="text-center text-sm text-gray-500 my-2">
+        No comments yet. Be respectful in the discussion.
+      </div>
+    </ThreadedCommentSection>
+  );
+}
+```
 
-      <ThreadedCommentSection
-        entity={entity}
-        isVisible={showComments}
-        highlightedCommentId={searchParams.get('commentId')}
-        theme={isDark ? 'dark' : 'light'}
+---
+
+### Full Example (React Native / Expo)
+
+```tsx
+function EntityScreen({ entityId, commentId, isDark }) {
+  const { user } = useUser();
+
+  return (
+    <ThreadedComments
+      entityId={entityId}
+      highlightedCommentId={commentId}
+      theme={isDark ? 'dark' : 'light'}
+    >
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <div className="text-center text-sm text-gray-500 my-2">
-          Be respectful in the discussion
-        </div>
-      </ThreadedCommentSection>
-    </>
+        <ScrollView>
+          <YourEntity />
+          <ThreadedCommentSection>
+            <Text>No comments yet. Be respectful in the discussion.</Text>
+          </ThreadedCommentSection>
+        </ScrollView>
+        {user ? <ThreadedCommentInput /> : null}
+      </KeyboardAvoidingView>
+    </ThreadedComments>
   );
 }
 ```

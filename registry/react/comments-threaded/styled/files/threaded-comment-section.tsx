@@ -75,11 +75,6 @@ interface ThreadedCommentSectionProps {
    */
   createIfNotFound?: boolean;
   isVisible?: boolean;
-  /**
-   * Where the GIF picker opens. Off by default: it covers the comment
-   * section. On: it covers the whole screen.
-   */
-  gifPickerFullScreen?: boolean;
   highlightedCommentId?: string | undefined | null;
   theme?: 'light' | 'dark';
   children?: React.ReactNode;
@@ -102,7 +97,6 @@ const arePropsEqual = (
     prevProps.shortId !== nextProps.shortId ||
     prevProps.createIfNotFound !== nextProps.createIfNotFound ||
     prevProps.isVisible !== nextProps.isVisible ||
-    prevProps.gifPickerFullScreen !== nextProps.gifPickerFullScreen ||
     prevProps.highlightedCommentId !== nextProps.highlightedCommentId ||
     prevProps.theme !== nextProps.theme
   ) {
@@ -124,43 +118,33 @@ const arePropsEqual = (
 
 function ThreadedCommentSectionInner({
   isVisible,
-  gifPickerFullScreen,
   children,
 }: {
   isVisible: boolean;
-  gifPickerFullScreen: boolean;
   children?: React.ReactNode;
 }) {
   const { theme } = useUIState();
 
   return (
-    // Positioned, so the GIF picker covers exactly the comment section
-    <div
-      style={{
-        position: "relative",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    // No scrolling of its own: the section is as tall as its comments, and the
+    // page it sits in scrolls
+    <div>
       {/* The new-comment box comes first, above the comments */}
       {isVisible && (
         <div
           style={{
-            flexShrink: 0,
             backgroundColor: theme === 'dark' ? "#262626" : "#fff",
             // 🎨 CUSTOMIZATION: Layout styling (Default: 12px 16px 8px)
             padding: `12px ${SECTION_PADDING_X}px 8px`,
           }}
         >
-          <NewCommentForm gifPickerFullScreen={gifPickerFullScreen} />
+          <NewCommentForm />
         </div>
       )}
 
       {/* Sort by, between the comment box and the comments */}
       <div
         style={{
-          flexShrink: 0,
           backgroundColor: theme === 'dark' ? "#262626" : "#fff",
           // 🎨 CUSTOMIZATION: Layout styling (Default: 4px 16px)
           padding: `4px ${SECTION_PADDING_X}px`,
@@ -171,8 +155,6 @@ function ThreadedCommentSectionInner({
 
       <div
         style={{
-          flex: 1,
-          overflowY: "auto",
           // 🎨 CUSTOMIZATION: Layout styling (Default: white)
           backgroundColor: theme === 'dark' ? "#262626" : "#fff",
           // 🎨 CUSTOMIZATION: Layout styling (Default: 8px)
@@ -195,7 +177,6 @@ function ThreadedCommentSection({
   shortId,
   createIfNotFound,
   isVisible = true,
-  gifPickerFullScreen = false,
   highlightedCommentId,
   theme = 'light',
   children,
@@ -214,7 +195,6 @@ function ThreadedCommentSection({
     <CommentSectionProvider {...providerProps}>
       <ThreadedCommentSectionInner
         isVisible={isVisible}
-        gifPickerFullScreen={gifPickerFullScreen}
       >
         {children}
       </ThreadedCommentSectionInner>

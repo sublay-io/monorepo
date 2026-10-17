@@ -36,14 +36,16 @@ function languageName(code: string): string {
   }
 }
 
-// A fixed height, as in a real embed: the section fills it and the comment
-// list scrolls inside.
+// A fixed height, as in a real embed. A section with its own scrolling fills
+// it and scrolls its comment list inside; one that scrolls with the page
+// (threaded) is as tall as its comments, and the box scrolls, standing in for
+// the app's page.
 const SECTION_HEIGHT = 640;
 
 type SectionProps = EntitySourceProps & {
   isVisible: boolean;
   highlightedCommentId?: string;
-  gifPickerFullScreen: boolean;
+  gifPickerFullScreen?: boolean;
 };
 
 function currentLanguage(): string {
@@ -74,16 +76,21 @@ function setLanguage(language: string) {
 
 /**
  * A comment section next to the settings that drive it. Shared by the social
- * and threaded pages, which differ only in the components they show.
+ * and threaded pages, which differ in the components they show and in who
+ * scrolls the comments.
  */
 export default function CommentsPlayground({
   foreignId,
   maxWidth,
+  scrollsWithPage = false,
   Styled,
   Tailwind,
 }: {
   foreignId: string;
   maxWidth: number;
+  // The section has no scrolling of its own (and no GIF picker placement
+  // option: its picker always covers the window)
+  scrollsWithPage?: boolean;
   Styled: ComponentType<SectionProps & { theme: Theme }>;
   Tailwind: ComponentType<SectionProps>;
 }) {
@@ -115,7 +122,7 @@ export default function CommentsPlayground({
             height: SECTION_HEIGHT,
             border: "1px solid #e5e7eb",
             borderRadius: 8,
-            overflow: "hidden",
+            overflow: scrollsWithPage ? "auto" : "hidden",
           }}
           className={theme === "dark" ? "dark" : ""}
           dir={dir}
@@ -127,7 +134,7 @@ export default function CommentsPlayground({
                   {...entityProps}
                   isVisible={true}
                   highlightedCommentId={highlightedCommentId}
-                  gifPickerFullScreen={gifPickerFullScreen}
+                  {...(scrollsWithPage ? {} : { gifPickerFullScreen })}
                   theme={theme}
                 />
               ) : (
@@ -135,7 +142,7 @@ export default function CommentsPlayground({
                   {...entityProps}
                   isVisible={true}
                   highlightedCommentId={highlightedCommentId}
-                  gifPickerFullScreen={gifPickerFullScreen}
+                  {...(scrollsWithPage ? {} : { gifPickerFullScreen })}
                 />
               )
             }
@@ -221,16 +228,18 @@ export default function CommentsPlayground({
               ]}
             />
           </Field>
-          <Field label="GIF picker">
-            <Segmented
-              value={gifPickerFullScreen ? "full" : "section"}
-              onChange={(v) => setGifPickerFullScreen(v === "full")}
-              options={[
-                { value: "section", label: "Section" },
-                { value: "full", label: "Full screen" },
-              ]}
-            />
-          </Field>
+          {scrollsWithPage ? null : (
+            <Field label="GIF picker">
+              <Segmented
+                value={gifPickerFullScreen ? "full" : "section"}
+                onChange={(v) => setGifPickerFullScreen(v === "full")}
+                options={[
+                  { value: "section", label: "Section" },
+                  { value: "full", label: "Full screen" },
+                ]}
+              />
+            </Field>
+          )}
         </ControlGroup>
 
         <ControlGroup title="Highlighted comment">

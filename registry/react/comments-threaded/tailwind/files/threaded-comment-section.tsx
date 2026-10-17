@@ -72,11 +72,6 @@ interface ThreadedCommentSectionProps {
    */
   createIfNotFound?: boolean;
   isVisible?: boolean;
-  /**
-   * Where the GIF picker opens. Off by default: it covers the comment
-   * section. On: it covers the whole screen.
-   */
-  gifPickerFullScreen?: boolean;
   highlightedCommentId?: string | undefined | null;
   children?: React.ReactNode;
 }
@@ -98,7 +93,6 @@ const arePropsEqual = (
     prevProps.shortId !== nextProps.shortId ||
     prevProps.createIfNotFound !== nextProps.createIfNotFound ||
     prevProps.isVisible !== nextProps.isVisible ||
-    prevProps.gifPickerFullScreen !== nextProps.gifPickerFullScreen ||
     prevProps.highlightedCommentId !== nextProps.highlightedCommentId
   ) {
     return false;
@@ -133,11 +127,9 @@ const sharedDarkColors = [
 
 function ThreadedCommentSectionInner({
   isVisible,
-  gifPickerFullScreen,
   children,
 }: {
   isVisible: boolean;
-  gifPickerFullScreen: boolean;
   children?: React.ReactNode;
 }) {
   const sectionPadding = {
@@ -146,18 +138,19 @@ function ThreadedCommentSectionInner({
   };
 
   return (
-    // Positioned, so the GIF picker covers exactly the comment section
-    <div className={`relative h-full flex flex-col ${sharedDarkColors}`}>
+    // No scrolling of its own: the section is as tall as its comments, and the
+    // page it sits in scrolls
+    <div className={sharedDarkColors}>
       {/* The new-comment box comes first, above the comments */}
       {isVisible && (
         <div
           className={
             // 🎨 CUSTOMIZATION: Layout styling
-            "shrink-0 bg-white dark:bg-neutral-800 pt-3 pb-2"
+            "bg-white dark:bg-neutral-800 pt-3 pb-2"
           }
           style={sectionPadding}
         >
-          <NewCommentForm gifPickerFullScreen={gifPickerFullScreen} />
+          <NewCommentForm />
         </div>
       )}
 
@@ -165,7 +158,7 @@ function ThreadedCommentSectionInner({
       <div
         className={
           // 🎨 CUSTOMIZATION: Layout styling
-          "shrink-0 bg-white dark:bg-neutral-800 pt-1 pb-1"
+          "bg-white dark:bg-neutral-800 pt-1 pb-1"
         }
         style={sectionPadding}
       >
@@ -175,7 +168,7 @@ function ThreadedCommentSectionInner({
       <div
         className={
           // 🎨 CUSTOMIZATION: Layout styling
-          "flex-1 overflow-y-auto bg-white dark:bg-neutral-800 py-2"
+          "bg-white dark:bg-neutral-800 py-2"
         }
         style={sectionPadding}
       >
@@ -192,7 +185,6 @@ function ThreadedCommentSection({
   shortId,
   createIfNotFound,
   isVisible = true,
-  gifPickerFullScreen = false,
   highlightedCommentId,
   children,
 }: ThreadedCommentSectionProps) {
@@ -209,7 +201,6 @@ function ThreadedCommentSection({
     <CommentSectionProvider {...providerProps}>
       <ThreadedCommentSectionInner
         isVisible={isVisible}
-        gifPickerFullScreen={gifPickerFullScreen}
       >
         {children}
       </ThreadedCommentSectionInner>

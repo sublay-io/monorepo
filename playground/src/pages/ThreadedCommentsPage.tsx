@@ -7,6 +7,7 @@ export default function ThreadedCommentsPage() {
     <CommentsPlayground
       foreignId="playground-threaded-comments"
       maxWidth={700}
+      scrollsWithPage
       Styled={ThreadedCommentSectionStyled}
       Tailwind={ThreadedCommentSectionTailwind}
     />

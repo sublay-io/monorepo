@@ -493,42 +493,20 @@ for (const registryFile of registryFiles) {
 
   // L1. "languages" maps a language code to a file of this component that
   // `sublay add --lang` installs in place of utils/strings.ts.
-  if (manifest.languages !== undefined) {
-    const { languages } = manifest;
-    if (!languages || typeof languages !== 'object' || Array.isArray(languages)) {
-      fail(registryFile, '"languages" must be an object of language code to file path');
-    } else {
-      const listsStringsFile = manifest.files.some(
-        (entry) => entry && entry.path === 'utils/strings.ts'
-      );
-      if (!listsStringsFile) {
-        fail(
-          registryFile,
-          '"languages" needs utils/strings.ts in files[]: that is the file a language replaces'
-        );
-      }
-      for (const [code, languagePath] of Object.entries(languages)) {
-        // Judged on the value as written, by the same rule as the CLI
-        // (resolveLanguageFile): it is requested from the registry as is, so
-        // it must be relative and stay inside the component.
-        const usable =
-          typeof languagePath === 'string' &&
-          /^[A-Za-z0-9_][A-Za-z0-9._/-]*$/.test(languagePath) &&
-          !languagePath.split('/').includes('..');
-        const target = usable ? path.join(dir, languagePath) : null;
-        if (
-          !target ||
-          !fs.existsSync(target) ||
-          !fs.statSync(target).isFile()
-        ) {
-          fail(
-            registryFile,
-            `languages.${code} "${languagePath}" does not resolve to a file of this component`
-          );
-        }
-      }
-    }
-  }
+  // L2. "frameworks" maps a framework to a file of this component that
+  // `sublay add` installs in place of utils/env.ts for that framework.
+  checkReplacementMap(manifest, registryFile, dir, {
+    key: 'languages',
+    entry: 'language code',
+    replaces: 'utils/strings.ts',
+    what: 'a language',
+  });
+  checkReplacementMap(manifest, registryFile, dir, {
+    key: 'frameworks',
+    entry: 'framework',
+    replaces: 'utils/env.ts',
+    what: "a framework's version",
+  });
 
   componentVariants.push({
     registryFile,
@@ -1117,4 +1095,34 @@ if (registryRootOverride) {
   }
 
   console.log('Live registry reachability check passed.');
+}
+
+/**
+ * A manifest map of name to a file of the component that `sublay add`
+ * installs in place of one of its files (`languages`, `frameworks`). Judged
+ * on the values as written, by the same rule as the CLI: they are requested
+ * from the registry as is, so each must be relative and stay inside the
+ * component.
+ */
+function checkReplacementMap(manifest, registryFile, dir, { key, entry, replaces, what }) {
+  if (manifest[key] === undefined) return;
+  const map = manifest[key];
+  if (!map || typeof map !== 'object' || Array.isArray(map)) {
+    fail(registryFile, `"${key}" must be an object of ${entry} to file path`);
+    return;
+  }
+  const listsReplaced = manifest.files.some((file) => file && file.path === replaces);
+  if (!listsReplaced) {
+    fail(registryFile, `"${key}" needs ${replaces} in files[]: that is the file ${what} replaces`);
+  }
+  for (const [name, filePath] of Object.entries(map)) {
+    const usable =
+      typeof filePath === 'string' &&
+      /^[A-Za-z0-9_][A-Za-z0-9._/-]*$/.test(filePath) &&
+      !filePath.split('/').includes('..');
+    const target = usable ? path.join(dir, filePath) : null;
+    if (!target || !fs.existsSync(target) || !fs.statSync(target).isFile()) {
+      fail(registryFile, `${key}.${name} "${filePath}" does not resolve to a file of this component`);
+    }
+  }
 }

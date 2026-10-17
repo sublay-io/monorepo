@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import path from "path";
 
-import { getTargetPath, resolveLanguageFile } from "./add";
+import { getTargetPath, resolveFrameworkFile, resolveLanguageFile } from "./add";
 import type { SublayConfig } from "./init";
 
 const config: SublayConfig = {
@@ -92,5 +92,47 @@ describe("resolveLanguageFile", () => {
     expect(() =>
       resolveLanguageFile({ files: [], languages: { he: "locales/he.ts" } }, "he", "x")
     ).toThrow("has no utils/strings.ts");
+  });
+});
+
+describe("resolveFrameworkFile", () => {
+  const envFile = { path: "utils/env.ts", type: "util", description: "" };
+  const registry = {
+    files: [envFile],
+    frameworks: { next: "env/next.ts", other: "env/other.ts" },
+  };
+
+  it("returns the file of a framework the component lists", () => {
+    expect(resolveFrameworkFile(registry, "next", "comments-social")).toBe("env/next.ts");
+    expect(resolveFrameworkFile(registry, "other", "comments-social")).toBe("env/other.ts");
+  });
+
+  it("installs the env file as it is for a framework it doesn't list, or without frameworks", () => {
+    expect(resolveFrameworkFile(registry, "vite", "comments-social")).toBeNull();
+    expect(resolveFrameworkFile({ files: [] }, "next", "notifications-control")).toBeNull();
+  });
+
+  it("does not treat inherited object keys as frameworks", () => {
+    expect(
+      resolveFrameworkFile(registry, "toString" as never, "comments-social")
+    ).toBeNull();
+  });
+
+  it("rejects a framework file outside the component", () => {
+    for (const bad of ["../../secrets.ts", "/etc/passwd", "env/../../x.ts"]) {
+      expect(() =>
+        resolveFrameworkFile(
+          { files: [envFile], frameworks: { next: bad } },
+          "next",
+          "comments-social"
+        )
+      ).toThrow("not a usable file path");
+    }
+  });
+
+  it("needs an env file to put the framework's version in", () => {
+    expect(() =>
+      resolveFrameworkFile({ files: [], frameworks: { next: "env/next.ts" } }, "next", "x")
+    ).toThrow("has no utils/env.ts");
   });
 });

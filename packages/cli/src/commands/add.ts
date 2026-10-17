@@ -26,6 +26,7 @@ import {
   mergeDependencies,
 } from "../utils/dependencies.js";
 import { stripTypes, convertFileExtension } from "../utils/strip-types.js";
+import { detectFramework, Framework } from "../utils/detect.js";
 
 export interface AddOptions {
   /** Branch to read the registry from instead of the default. */
@@ -37,6 +38,10 @@ export interface AddOptions {
 // The file that holds a component's text, and the language it is written in.
 export const STRINGS_FILE = "utils/strings.ts";
 export const DEFAULT_LANGUAGE = "en";
+
+// The file a component reads settings from the app's environment with
+// (API keys and the like), written for the project's framework.
+export const ENV_FILE = "utils/env.ts";
 
 /** A file fetched and transformed in memory, waiting to be written. */
 interface PendingFile {
@@ -133,6 +138,13 @@ export async function add(componentName: string, options: AddOptions = {}) {
     // With --lang, the strings file is taken from that language's file.
     const languageFile = resolveLanguageFile(registry, options.lang, componentName);
 
+    // The env file is taken from the project's framework's version, if any.
+    const frameworkFile = resolveFrameworkFile(
+      registry,
+      await detectFramework(config.platform),
+      componentName
+    );
+
     // Shared pieces the component lists, plus whatever those require.
     const platform = getRegistryPlatform(config);
     const location = getComponentLocation(componentName, config);
@@ -187,7 +199,9 @@ export async function add(componentName: string, options: AddOptions = {}) {
               location,
               languageFile && registryPath === STRINGS_FILE
                 ? languageFile
-                : registryPath
+                : frameworkFile && registryPath === ENV_FILE
+                  ? frameworkFile
+                  : registryPath
             );
 
         // Every shared piece a file imports has to be one that is being
@@ -394,6 +408,48 @@ export function resolveLanguageFile(
   }
 
   return languageFile;
+}
+
+/**
+ * The registry file that replaces the component's env file for `framework`,
+ * or null when the component is installed as it is (it lists no version for
+ * that framework, or no frameworks at all).
+ */
+export function resolveFrameworkFile(
+  registry: Pick<Registry, "files" | "frameworks">,
+  framework: Framework,
+  componentName: string
+): string | null {
+  const frameworks =
+    registry.frameworks && typeof registry.frameworks === "object"
+      ? registry.frameworks
+      : {};
+  const frameworkFile = Object.prototype.hasOwnProperty.call(frameworks, framework)
+    ? frameworks[framework]
+    : undefined;
+
+  if (frameworkFile === undefined) {
+    return null;
+  }
+
+  // The path is requested from the registry as it is written in the manifest.
+  if (
+    typeof frameworkFile !== "string" ||
+    !/^[A-Za-z0-9_][A-Za-z0-9._/-]*$/.test(frameworkFile) ||
+    frameworkFile.split("/").includes("..")
+  ) {
+    throw new RegistryError(
+      `The "${framework}" entry under "frameworks" for ${componentName} is not a usable file path.`
+    );
+  }
+
+  if (!registry.files.some((file) => file.path === ENV_FILE)) {
+    throw new RegistryError(
+      `${componentName} lists frameworks but has no ${ENV_FILE} to put them in.`
+    );
+  }
+
+  return frameworkFile;
 }
 
 /** The manifest's `shared` list. Absent means the component uses no shared pieces. */

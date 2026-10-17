@@ -83,9 +83,8 @@ function useFetchManyCommentsWrapper(
   const fetchPage = useCallback(
     (cursor: string | null, sort: CommentListSort) =>
       fetchManyComments({
-        ...(parentId
-          ? { parentId, entityId: entityId ?? undefined }
-          : { entityId: entityId as string }),
+        // Replies take parentId alone: the parent decides the entity.
+        ...(parentId ? { parentId } : { entityId: entityId as string }),
         cursor,
         limit,
         include,

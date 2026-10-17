@@ -38,15 +38,18 @@ interface FetchManyCommentsBaseProps extends SpaceReputationContextParams {
 
 /**
  * A thread fetch (`GET /comments`): `entityId` → that entity's top-level
- * comments; `parentId` → a comment's direct replies. One of the two is
- * required (checked when the request is made: the type can't also enforce it
- * alongside the one-way sort rule, see WithOneWaySortDir). A user's comment
- * history is `users.fetchCommentsByUserId`.
+ * comments; `parentId` (alone — the parent decides the entity) → a comment's
+ * direct replies. Exactly one of the two, and no `sortDir` with
+ * `sortBy: "controversial"`. A user's comment history is
+ * `users.fetchCommentsByUserId`.
  */
-/** `sortDir` is not accepted with `sortBy: "controversial"`. */
-export type FetchManyCommentsProps = WithOneWaySortDir<
-  FetchManyCommentsBaseProps & { entityId?: string; parentId?: string }
->;
+export type FetchManyCommentsProps =
+  | WithOneWaySortDir<
+      FetchManyCommentsBaseProps & { entityId: string; parentId?: null }
+    >
+  | WithOneWaySortDir<
+      FetchManyCommentsBaseProps & { parentId: string; entityId?: null }
+    >;
 
 export async function fetchManyComments(
   client: SublayHttpClient,
@@ -70,9 +73,6 @@ export async function fetchManyComments(
     spaceReputationId,
     spaceReputationDescendants,
   } = data;
-  if (!entityId && !parentId) {
-    throw new Error("Fetching comments requires an entityId or a parentId");
-  }
   // Only the thread endpoint's own params are forwarded (no spread), so a
   // stray `page` / `userId` / `sourceId` / `blockedFilter` never reaches it.
   const params: Record<string, unknown> = {

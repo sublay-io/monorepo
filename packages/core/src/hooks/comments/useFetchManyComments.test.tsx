@@ -161,3 +161,38 @@ describe("useFetchManyComments", () => {
     expect(axiosPrivate.calls("get")).toHaveLength(0);
   });
 });
+
+// One of entityId (a thread) or parentId (replies, alone), never neither or
+// both, alongside the one-way sort rule — checked when this file compiles.
+describe("FetchManyCommentsProps", () => {
+  it("takes entityId or parentId, with any sort, including one held in state", () => {
+    const pick = (sortBy: "createdAt" | "top" | "controversial", isReply: boolean) => {
+      const thread: FetchManyCommentsProps = { entityId: "e", sortBy };
+      const replies: FetchManyCommentsProps = { parentId: "p", sortBy };
+      const either: FetchManyCommentsProps = {
+        ...(isReply ? { parentId: "p" } : { entityId: "e" }),
+        sortBy,
+      };
+      return [thread, replies, either];
+    };
+    const threadDir: FetchManyCommentsProps = { entityId: "e", sortBy: "top", sortDir: "asc" };
+    const repliesDir: FetchManyCommentsProps = { parentId: "p", sortDir: "asc" };
+    // @ts-expect-error — neither id
+    const neither: FetchManyCommentsProps = { sortBy: "createdAt" };
+    // @ts-expect-error — not both: replies take parentId alone
+    const both: FetchManyCommentsProps = { entityId: "e", parentId: "p" };
+    // @ts-expect-error — no sortDir with controversial (thread)
+    const badThread: FetchManyCommentsProps = { entityId: "e", sortBy: "controversial", sortDir: "asc" };
+    // @ts-expect-error — no sortDir with controversial (replies)
+    const badReplies: FetchManyCommentsProps = { parentId: "p", sortBy: "controversial", sortDir: "asc" };
+    expect([
+      ...pick("controversial", true),
+      threadDir,
+      repliesDir,
+      neither,
+      both,
+      badThread,
+      badReplies,
+    ]).toHaveLength(9);
+  });
+});

@@ -160,7 +160,7 @@ await sublay.comments.deleteComment({ commentId: "cmt_abc123" });
 
 ### fetchManyComments
 
-Fetches one level of a comment thread, cursor-paginated: an entity's top-level comments (`entityId`) or a comment's direct replies (`parentId`). One of the two is required. Optionally nests a few levels of replies inside each returned comment. See [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments) for the full contract — placeholders, block flags and the request size limit.
+Fetches one level of a comment thread, cursor-paginated: an entity's top-level comments (`entityId`) or a comment's direct replies (`parentId`). Exactly one of the two is required; the props type refuses neither and both. Optionally nests a few levels of replies inside each returned comment. See [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments) for the full contract — placeholders, block flags and the request size limit.
 
 ```typescript
 const { data, pagination } = await sublay.comments.fetchManyComments({
@@ -188,11 +188,11 @@ For a user's comments across entities, use [`users.fetchCommentsByUserId`](/v8/n
 </Note>
 
 <ParamField body="entityId" type="string">
-  Fetch this entity's top-level comments. Required unless `parentId` is passed.
+  Fetch this entity's top-level comments. Pass this or `parentId`, not both.
 </ParamField>
 
 <ParamField body="parentId" type="string">
-  Fetch this comment's direct replies. Required unless `entityId` is passed.
+  Fetch this comment's direct replies. Pass it without `entityId`: the parent decides the entity.
 </ParamField>
 
 <ParamField body="limit" type="number">

@@ -1,4 +1,5 @@
 import { ComponentProps, ReactNode, useMemo } from "react";
+import { View } from "react-native";
 import {
   CommentsSortByOptions,
   CommentSectionProvider,
@@ -11,6 +12,7 @@ import NewCommentForm from "../files/new-comment-form/new-comment-form";
 import CommentOptionsSheet from "../files/sheets/comment-options-sheet";
 import CommentOptionsSheetOwner from "../files/sheets/comment-options-sheet-owner";
 import ReportCommentSheet from "../files/sheets/report-comment-sheet";
+import SortSheet from "../files/sheets/sort-sheet";
 
 type ThreadedCommentSectionProviderProps = Omit<
   ComponentProps<typeof CommentSectionProvider>,
@@ -19,7 +21,8 @@ type ThreadedCommentSectionProviderProps = Omit<
   theme?: "light" | "dark";
 };
 
-// The provider the section renders inside. It is defined here, outside the
+// The provider ThreadedComments renders: the shared state, around the screen,
+// with the sheets over it. It is defined here, outside the
 // hook, so it is the same component on every render: a component created
 // inside the hook would be a new component type whenever it was created
 // again, and React would unmount the whole section (loaded comments,
@@ -33,12 +36,14 @@ function ThreadedCommentSectionProvider({
   return (
     <CommentSectionProvider {...sectionProps}>
       <UIStateProvider theme={theme}>
-        <>
+        {/* The sheets cover this view: the screen ThreadedComments wraps */}
+        <View style={{ flex: 1 }}>
           {children}
+          <SortSheet />
           <CommentOptionsSheet />
           <CommentOptionsSheetOwner />
           <ReportCommentSheet />
-        </>
+        </View>
       </UIStateProvider>
     </CommentSectionProvider>
   );

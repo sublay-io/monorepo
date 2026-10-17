@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "जवाब:",
   cancelReply: "जवाब रद्द करें",
 
+  // Sorting
+  sortBy: "इसके अनुसार क्रमबद्ध करें",
+  sortSheetTitle: "टिप्पणियों को इसके अनुसार क्रमबद्ध करें",
+  sortTop: "लोकप्रिय",
+  sortNew: "नई",
+  sortOld: "पुरानी",
+  sortControversial: "विवादास्पद",
+
   // Comment list
   noCommentsTitle: "अभी तक कोई टिप्पणी नहीं",
   noCommentsSubtitle: "बातचीत शुरू करें।",

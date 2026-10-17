@@ -18,6 +18,14 @@ const strings = {
   replyingTo: "Răspunzi lui",
   cancelReply: "Anulează răspunsul",
 
+  // Sorting
+  sortBy: "Sortează după",
+  sortSheetTitle: "Sortează comentariile după",
+  sortTop: "Top",
+  sortNew: "Noi",
+  sortOld: "Vechi",
+  sortControversial: "Controversate",
+
   // Comment list
   noCommentsTitle: "Niciun comentariu încă",
   noCommentsSubtitle: "Începe conversația.",

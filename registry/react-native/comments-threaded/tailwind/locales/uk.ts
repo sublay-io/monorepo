@@ -19,6 +19,14 @@ const strings = {
   replyingTo: "Відповідь для",
   cancelReply: "Скасувати відповідь",
 
+  // Sorting
+  sortBy: "Сортувати за",
+  sortSheetTitle: "Сортувати коментарі за",
+  sortTop: "Найкращі",
+  sortNew: "Нові",
+  sortOld: "Старі",
+  sortControversial: "Суперечливі",
+
   // Comment list
   noCommentsTitle: "Коментарів поки немає",
   noCommentsSubtitle: "Почніть обговорення.",

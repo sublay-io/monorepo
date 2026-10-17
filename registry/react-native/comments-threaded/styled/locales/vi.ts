@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Đang phản hồi",
   cancelReply: "Hủy phản hồi",
 
+  // Sorting
+  sortBy: "Sắp xếp theo",
+  sortSheetTitle: "Sắp xếp bình luận theo",
+  sortTop: "Hàng đầu",
+  sortNew: "Mới nhất",
+  sortOld: "Cũ nhất",
+  sortControversial: "Gây tranh cãi",
+
   // Comment list
   noCommentsTitle: "Chưa có bình luận nào",
   noCommentsSubtitle: "Hãy bắt đầu cuộc trò chuyện.",

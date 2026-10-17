@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "جواب:",
   cancelReply: "جواب منسوخ کریں",
 
+  // Sorting
+  sortBy: "ترتیب دیں",
+  sortSheetTitle: "تبصرے ترتیب دیں",
+  sortTop: "نمایاں",
+  sortNew: "نئے",
+  sortOld: "پرانے",
+  sortControversial: "متنازع",
+
   // Comment list
   noCommentsTitle: "ابھی تک کوئی تبصرہ نہیں",
   noCommentsSubtitle: "گفتگو شروع کریں۔",

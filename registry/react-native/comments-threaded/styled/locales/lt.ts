@@ -20,6 +20,14 @@ const strings = {
   replyingTo: "Atsakoma naudotojui",
   cancelReply: "Atšaukti atsakymą",
 
+  // Sorting
+  sortBy: "Rikiuoti pagal",
+  sortSheetTitle: "Rikiuoti komentarus pagal",
+  sortTop: "Populiariausi",
+  sortNew: "Naujausi",
+  sortOld: "Seniausi",
+  sortControversial: "Prieštaringi",
+
   // Comment list
   noCommentsTitle: "Komentarų dar nėra",
   noCommentsSubtitle: "Pradėkite pokalbį.",

@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "উত্তর দিচ্ছেন:",
   cancelReply: "উত্তর বাতিল করুন",
 
+  // Sorting
+  sortBy: "সাজান",
+  sortSheetTitle: "মন্তব্য সাজান",
+  sortTop: "জনপ্রিয়",
+  sortNew: "নতুন",
+  sortOld: "পুরনো",
+  sortControversial: "বিতর্কিত",
+
   // Comment list
   noCommentsTitle: "এখনও কোনো মন্তব্য নেই",
   noCommentsSubtitle: "আলোচনা শুরু করুন।",

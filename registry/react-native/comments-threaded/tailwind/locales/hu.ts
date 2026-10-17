@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Válasz neki:",
   cancelReply: "Válasz elvetése",
 
+  // Sorting
+  sortBy: "Rendezés",
+  sortSheetTitle: "Hozzászólások rendezése",
+  sortTop: "Legjobb",
+  sortNew: "Legújabb",
+  sortOld: "Legrégebbi",
+  sortControversial: "Megosztó",
+
   // Comment list
   noCommentsTitle: "Még nincsenek hozzászólások",
   noCommentsSubtitle: "Kezdd el a beszélgetést.",

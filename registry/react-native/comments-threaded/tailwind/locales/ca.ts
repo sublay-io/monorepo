@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "Responent a",
   cancelReply: "Cancel·la la resposta",
 
+  // Sorting
+  sortBy: "Ordena per",
+  sortSheetTitle: "Ordena els comentaris per",
+  sortTop: "Populars",
+  sortNew: "Recents",
+  sortOld: "Antics",
+  sortControversial: "Polèmics",
+
   // Comment list
   noCommentsTitle: "Encara no hi ha comentaris",
   noCommentsSubtitle: "Comença la conversa.",

@@ -8,6 +8,7 @@ type UIStateContext = {
   commentOptionsSheetRef: React.RefObject<BottomSheetMethods | null>;
   reportCommentSheetRef: React.RefObject<BottomSheetMethods | null>;
   commentOptionsSheetOwnerRef: React.RefObject<BottomSheetMethods | null>;
+  sortSheetRef: React.RefObject<BottomSheetMethods | null>;
 
   // The section's main input (the comment form attaches it), and a way to
   // focus it from anywhere in the section: a comment's Reply button does.
@@ -20,6 +21,8 @@ type UIStateContext = {
   closeReportCommentSheet: () => void;
   openCommentOptionsSheetOwner: (newComment?: CommentType) => void;
   closeCommentOptionsSheetOwner: () => void;
+  openSortSheet: () => void;
+  closeSortSheet: () => void;
 
   optionsComment: CommentType | null;
   setOptionsComment: React.Dispatch<React.SetStateAction<CommentType | null>>;
@@ -44,6 +47,7 @@ export const UIStateProvider = ({
   const commentOptionsSheetRef = useRef<BottomSheet>(null);
   const reportCommentSheetRef = useRef<BottomSheet>(null);
   const commentOptionsSheetOwnerRef = useRef<BottomSheet>(null);
+  const sortSheetRef = useRef<BottomSheet>(null);
   const commentInputRef = useRef<TextInput>(null);
 
   const focusCommentInput = useCallback(() => {
@@ -89,10 +93,19 @@ export const UIStateProvider = ({
     commentOptionsSheetOwnerRef.current?.close();
   }, []);
 
+  const openSortSheet = useCallback(() => {
+    sortSheetRef.current?.snapToIndex(0);
+  }, []);
+
+  const closeSortSheet = useCallback(() => {
+    sortSheetRef.current?.close();
+  }, []);
+
   const contextValue = useMemo(() => ({
     commentOptionsSheetRef,
     reportCommentSheetRef,
     commentOptionsSheetOwnerRef,
+    sortSheetRef,
 
     commentInputRef,
     focusCommentInput,
@@ -103,6 +116,8 @@ export const UIStateProvider = ({
     closeReportCommentSheet,
     openCommentOptionsSheetOwner,
     closeCommentOptionsSheetOwner,
+    openSortSheet,
+    closeSortSheet,
 
     optionsComment,
     setOptionsComment,
@@ -118,6 +133,8 @@ export const UIStateProvider = ({
     closeReportCommentSheet,
     openCommentOptionsSheetOwner,
     closeCommentOptionsSheetOwner,
+    openSortSheet,
+    closeSortSheet,
     optionsComment,
     reportedComment,
     theme,

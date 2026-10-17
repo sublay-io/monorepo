@@ -19,6 +19,14 @@ const strings = {
   replyingTo: "Ответ для",
   cancelReply: "Отменить ответ",
 
+  // Sorting
+  sortBy: "Сортировка",
+  sortSheetTitle: "Сортировка комментариев",
+  sortTop: "Лучшие",
+  sortNew: "Новые",
+  sortOld: "Старые",
+  sortControversial: "Спорные",
+
   // Comment list
   noCommentsTitle: "Комментариев пока нет",
   noCommentsSubtitle: "Начните обсуждение.",

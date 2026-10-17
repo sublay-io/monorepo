@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "వీరికి ప్రత్యుత్తరం:",
   cancelReply: "ప్రత్యుత్తరాన్ని రద్దు చేయండి",
 
+  // Sorting
+  sortBy: "క్రమబద్ధీకరించు",
+  sortSheetTitle: "వ్యాఖ్యలను క్రమబద్ధీకరించు",
+  sortTop: "ఉత్తమమైనవి",
+  sortNew: "కొత్తవి",
+  sortOld: "పాతవి",
+  sortControversial: "వివాదాస్పదమైనవి",
+
   // Comment list
   noCommentsTitle: "ఇంకా వ్యాఖ్యలు లేవు",
   noCommentsSubtitle: "సంభాషణను ప్రారంభించండి.",

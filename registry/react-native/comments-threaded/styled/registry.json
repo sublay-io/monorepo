@@ -35,6 +35,11 @@
       "description": "Form for new comments and for replies to the comment being replied to"
     },
     {
+      "path": "files/sort-by-trigger/sort-by-trigger.tsx",
+      "type": "component",
+      "description": "Sort by button that opens the sort sheet"
+    },
+    {
       "path": "files/reply-banner/reply-banner.tsx",
       "type": "component",
       "description": "\"Replying to\" bar shown above the input while replying to a comment"
@@ -130,6 +135,11 @@
       "description": "Bottom sheet for reporting comments"
     },
     {
+      "path": "files/sheets/sort-sheet.tsx",
+      "type": "component",
+      "description": "Sort comments by sheet (Top, New, Old, Controversial)"
+    },
+    {
       "path": "hooks/use-threaded-comments.tsx",
       "type": "hook",
       "description": "Main hook for threaded comment functionality"
@@ -153,6 +163,11 @@
       "path": "utils/strings.ts",
       "type": "util",
       "description": "Every piece of text the component shows (English)"
+    },
+    {
+      "path": "utils/sort-options.ts",
+      "type": "util",
+      "description": "The sort options the sort sheet offers"
     },
     {
       "path": "utils/env.ts",

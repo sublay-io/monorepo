@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { User, useCommentSection } from "@sublay/react-native";
 import UserAvatar from "~shared/react-native/user-avatar";
 import { UserMentionSkeleton } from "~shared/react-native/skeleton";
@@ -43,28 +43,23 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
       }}
     >
       {isLoadingMentions ? (
-        <FlatList
-          data={[1, 2, 3]}
-          keyExtractor={(item) => `loading-${item}`}
-          renderItem={() => (
+        <View style={{ gap: 4 }}>
+          {[1, 2, 3].map((item) => (
             <UserMentionSkeleton
+              key={`loading-${item}`}
               theme={theme}
               avatarSize={32}
               gap={12}
               paddingVertical={8}
               paddingHorizontal={8}
             />
-          )}
-          ItemSeparatorComponent={() => <View className="h-1" />}
-          keyboardShouldPersistTaps="always"
-        />
+          ))}
+        </View>
       ) : mentionSuggestions.length > 0 ? (
-        <FlatList
-          data={mentionSuggestions}
-          keyExtractor={(item) => item.id}
-          keyboardShouldPersistTaps="always"
-          renderItem={({ item }) => (
+        <View style={{ gap: 4 }}>
+          {mentionSuggestions.map((item) => (
             <TouchableOpacity
+              key={item.id}
               // Dim only a little, so the pressed tint shows
               activeOpacity={0.6}
               onPress={() => {
@@ -98,9 +93,8 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                 )}
               </View>
             </TouchableOpacity>
-          )}
-          ItemSeparatorComponent={() => <View className="h-1" />}
-        />
+          ))}
+        </View>
       ) : (
         <View className="py-4 items-center justify-center">
           <Text

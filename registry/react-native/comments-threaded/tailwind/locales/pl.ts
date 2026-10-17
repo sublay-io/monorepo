@@ -19,6 +19,14 @@ const strings = {
   replyingTo: "Odpowiedź dla",
   cancelReply: "Anuluj odpowiedź",
 
+  // Sorting
+  sortBy: "Sortuj według",
+  sortSheetTitle: "Sortuj komentarze według",
+  sortTop: "Najlepsze",
+  sortNew: "Najnowsze",
+  sortOld: "Najstarsze",
+  sortControversial: "Kontrowersyjne",
+
   // Comment list
   noCommentsTitle: "Brak komentarzy",
   noCommentsSubtitle: "Rozpocznij rozmowę.",

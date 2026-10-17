@@ -10,6 +10,14 @@ const strings = {
   replyingTo: "இவருக்குப் பதில்:",
   cancelReply: "பதிலை ரத்துசெய்",
 
+  // Sorting
+  sortBy: "வரிசைப்படுத்து",
+  sortSheetTitle: "கருத்துகளை வரிசைப்படுத்து",
+  sortTop: "சிறந்தவை",
+  sortNew: "புதியவை",
+  sortOld: "பழையவை",
+  sortControversial: "சர்ச்சைக்குரியவை",
+
   // Comment list
   noCommentsTitle: "இதுவரை கருத்துகள் இல்லை",
   noCommentsSubtitle: "உரையாடலைத் தொடங்குங்கள்.",

@@ -26,6 +26,7 @@ import {
   PostingPermission,
 } from "../../interfaces/models/Space";
 import { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions";
+import type { SortDirection } from "../../interfaces/EntityListSortByOptions";
 
 import { handleError } from "../../utils/handleError";
 
@@ -58,6 +59,7 @@ export interface UseSpaceListValues {
 
   // Current filters
   sortBy: SpaceListSortByOptions | null;
+  sortDir: SortDirection | null;
   searchSlug: string | null;
   searchName: string | null;
   searchDescription: string | null;
@@ -141,7 +143,8 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
 
         // Build final filters by taking current state and applying new filters
         const currentState = spaceList || {
-          sortBy: "newest",
+          sortBy: "createdAt",
+          sortDir: null,
           searchSlug: null,
           searchName: null,
           searchDescription: null,
@@ -153,7 +156,8 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
 
         // Apply resetUnspecified logic (only reset filter properties)
         if (options?.resetUnspecified) {
-          finalFilters.sortBy = "newest";
+          finalFilters.sortBy = "createdAt";
+          finalFilters.sortDir = null;
           finalFilters.searchSlug = null;
           finalFilters.searchName = null;
           finalFilters.searchDescription = null;
@@ -179,6 +183,7 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
             page: 1,
             // User-controlled filters from Redux state + new filters
             sortBy: finalFilters.sortBy,
+            sortDir: finalFilters.sortDir,
             searchSlug: finalFilters.searchSlug,
             searchName: finalFilters.searchName,
             searchDescription: finalFilters.searchDescription,
@@ -240,6 +245,7 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
         page: nextPage,
         // User-controlled filters from Redux state
         sortBy: spaceList.sortBy,
+        sortDir: spaceList.sortDir,
         searchSlug: spaceList.searchSlug,
         searchName: spaceList.searchName,
         searchDescription: spaceList.searchDescription,
@@ -296,6 +302,7 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
       hasMore,
 
       sortBy: filters?.sortBy || null,
+      sortDir: filters?.sortDir || null,
       searchSlug: filters?.searchSlug || null,
       searchName: filters?.searchName || null,
       searchDescription: filters?.searchDescription || null,

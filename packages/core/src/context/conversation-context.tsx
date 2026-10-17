@@ -72,7 +72,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       try {
         const response = await axios.get(
           `/${projectId}/chat/conversations/${conversationId}/messages`,
-          { params: { after: afterTimestamp, limit: 100, sort: "asc" } },
+          { params: { after: afterTimestamp, limit: 100, sortDir: "asc" } },
         );
         const { messages } = response.data as { messages: ChatMessage[] };
         messages.forEach((msg) => dispatch(upsertMessage(msg)));

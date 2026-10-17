@@ -68,11 +68,11 @@ The section can be handed an entity in two ways: the `entity` prop, or, when the
 </ParamField>
 
 <ParamField path="defaultSortBy" type="string">
-  Initial sort order: `"top"` (default), `"createdAt"`, or `"controversial"`. Changeable at runtime with `setSortBy`. `"new"`/`"old"` are deprecated aliases for `"createdAt"`.
+  Initial sort order: `"top"` (default), `"createdAt"`, or `"controversial"`. Changeable at runtime with `setSortBy`.
 </ParamField>
 
 <ParamField path="defaultSortDir" type='"asc" | "desc"'>
-  Initial sort direction; applies to every sort. Default: `"desc"`. Changeable with `setSortDir`.
+  Initial sort direction for `"createdAt"` and `"top"`; ignored (not sent) for `"controversial"`, which ranks one way only. Default: `"desc"`. Changeable with `setSortDir`.
 </ParamField>
 
 <ParamField path="defaultSortByReaction" type="ReactionType">
@@ -92,7 +92,7 @@ The section can be handed an entity in two ways: the `entity` prop, or, when the
 </ParamField>
 
 <ParamField path="replySortDir" type='"asc" | "desc"'>
-  Sort direction for replies. Defaults to the current section sort direction.
+  Sort direction for replies. Defaults to the current section sort direction (`"desc"` while the section sorts by `"controversial"`); not sent when the reply sort is `"controversial"`.
 </ParamField>
 
 <ParamField path="replySortByReaction" type="ReactionType">
@@ -281,7 +281,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="sortBy" type="CommentsSortByOptions">
-  Current sort: `"createdAt"`, `"top"`, or `"controversial"`. (`"new"`/`"old"` are deprecated aliases for `"createdAt"`.)
+  Current sort: `"createdAt"`, `"top"`, or `"controversial"`.
 </ResponseField>
 
 <ResponseField name="setSortBy" type="(newSortBy: CommentsSortByOptions) => void">
@@ -289,7 +289,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="sortDir" type='"asc" | "desc"'>
-  Current sort direction; applies to every sort.
+  Current sort direction; applies to `"createdAt"` and `"top"` (`"controversial"` always ranks most controversial first).
 </ResponseField>
 
 <ResponseField name="setSortDir" type='(newSortDir: "asc" | "desc") => void'>

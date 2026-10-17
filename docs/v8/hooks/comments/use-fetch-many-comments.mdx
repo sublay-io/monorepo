@@ -55,7 +55,7 @@ function TopComments({ entityId }: { entityId: string }) {
 
 ## Parameters
 
-One of `entityId` or `parentId` is required.
+Pass exactly one of `entityId` or `parentId`; the props type refuses neither and both. A replies fetch takes `parentId` alone, since the parent decides the entity.
 
 <ParamField path="entityId" type="string">
   Fetch this entity's top-level comments.
@@ -74,11 +74,11 @@ One of `entityId` or `parentId` is required.
 </ParamField>
 
 <ParamField path="sortBy" type="CommentsSortByOptions">
-  `"createdAt"`, `"top"` (raw count of `sortByReaction`) or `"controversial"`. Server default `"createdAt"`. `"new"` / `"old"` are deprecated aliases for `"createdAt"`.
+  `"createdAt"`, `"top"` (raw count of `sortByReaction`) or `"controversial"`. Server default `"createdAt"`.
 </ParamField>
 
 <ParamField path="sortDir" type='"asc" | "desc"'>
-  Applies to every sort. Server default `"desc"`.
+  Applies to `"createdAt"` and `"top"`; not accepted with `"controversial"`, which ranks one way only. Server default `"desc"`.
 </ParamField>
 
 <ParamField path="sortByReaction" type="ReactionType">
@@ -98,7 +98,7 @@ One of `entityId` or `parentId` is required.
 </ParamField>
 
 <ParamField path="replySortDir" type='"asc" | "desc"'>
-  Sort direction for the nested levels. Defaults to `sortDir`.
+  Sort direction for the nested levels. Defaults to `sortDir`. Not sent when the nested sort is `"controversial"`.
 </ParamField>
 
 <ParamField path="replySortByReaction" type="ReactionType">

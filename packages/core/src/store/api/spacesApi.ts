@@ -34,6 +34,7 @@ interface FetchSpacesParams {
   page?: number;
   limit?: number;
   sortBy?: SpaceListSortByOptions;
+  sortDir?: "asc" | "desc";
   searchSlug?: string | null;
   searchName?: string | null;
   searchDescription?: string | null;
@@ -73,6 +74,7 @@ export const spacesApi = baseApi.injectEndpoints({
         if (params.page !== undefined) queryParams.append("page", params.page.toString());
         if (params.limit !== undefined) queryParams.append("limit", params.limit.toString());
         if (params.sortBy) queryParams.append("sortBy", params.sortBy);
+        if (params.sortDir) queryParams.append("sortDir", params.sortDir);
         if (params.searchSlug) queryParams.append("searchSlug", params.searchSlug);
         if (params.searchName) queryParams.append("searchName", params.searchName);
         if (params.searchDescription) queryParams.append("searchDescription", params.searchDescription);

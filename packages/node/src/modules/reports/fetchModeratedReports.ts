@@ -10,7 +10,9 @@ export interface FetchModeratedReportsProps
   spaceId?: string;
   targetType?: ReportTargetType;
   status?: ReportStatus;
-  sortBy?: "new" | "old";
+  /** Time order: `createdAt` in `sortDir` (server default desc, newest first). */
+  sortBy?: "createdAt";
+  sortDir?: "asc" | "desc";
   page?: number;
   limit?: number;
 }

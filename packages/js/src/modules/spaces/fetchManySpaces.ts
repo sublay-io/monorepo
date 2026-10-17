@@ -5,7 +5,8 @@ import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 export interface FetchManySpacesProps {
   page?: number;
   limit?: number;
-  sortBy?: "alphabetical" | "newest" | "members";
+  sortBy?: "createdAt" | "alphabetical" | "members";
+  sortDir?: "asc" | "desc";
   searchSlug?: string;
   searchName?: string;
   searchDescription?: string;

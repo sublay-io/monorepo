@@ -31,7 +31,11 @@ export interface UseFetchManyEventsWrapperProps {
   descriptionFilters?: EventDescriptionFilters | null;
   include?: string | string[];
   defaultSortBy?: EventSortBy;
-  defaultSortDir?: EventSortDir;
+  /**
+   * Left out (null): the sort's natural direction — soonest first for
+   * `startTime`, most going first for `going`.
+   */
+  defaultSortDir?: EventSortDir | null;
 }
 
 export interface UseFetchManyEventsWrapperValues {
@@ -39,9 +43,10 @@ export interface UseFetchManyEventsWrapperValues {
   loading: boolean;
   hasMore: boolean;
   sortBy: EventSortBy;
-  sortDir: EventSortDir;
+  /** null: the sort's natural direction. */
+  sortDir: EventSortDir | null;
   setSortBy: (newSortBy: EventSortBy) => void;
-  setSortDir: (newSortDir: EventSortDir) => void;
+  setSortDir: (newSortDir: EventSortDir | null) => void;
   loadMore: () => void;
   /** Re-run the query from page 1 (e.g. after creating/cancelling an event). */
   refresh: () => void;
@@ -65,7 +70,7 @@ function useFetchManyEventsWrapper(
     descriptionFilters,
     include,
     defaultSortBy = "startTime",
-    defaultSortDir = "asc",
+    defaultSortDir = null,
   } = props;
 
   const fetchManyEvents = useFetchManyEvents();
@@ -77,7 +82,7 @@ function useFetchManyEventsWrapper(
   const [hasMoreState, setHasMoreState] = useState(true);
 
   const [sortBy, setSortBy] = useState<EventSortBy>(defaultSortBy);
-  const [sortDir, setSortDir] = useState<EventSortDir>(defaultSortDir);
+  const [sortDir, setSortDir] = useState<EventSortDir | null>(defaultSortDir);
   const [page, setPage] = useState(1);
   const [events, setEvents] = useState<Event[]>([]);
 
@@ -86,7 +91,7 @@ function useFetchManyEventsWrapper(
       page: pageArg,
       limit,
       sortBy,
-      sortDir,
+      sortDir: sortDir ?? undefined,
       spaceId: spaceId ?? undefined,
       hostId: hostId ?? undefined,
       type: type ?? undefined,

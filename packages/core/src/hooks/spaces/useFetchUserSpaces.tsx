@@ -3,6 +3,7 @@ import useProject from "../projects/useProject";
 import { UserSpacesResponse, SpaceIncludeParam } from "../../interfaces/models/Space";
 import { SpaceMemberRole } from "../../interfaces/models/SpaceMember";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { UserSpacesSortByOptions } from "../../interfaces/SpaceListSortByOptions";
 
 export interface FetchUserSpacesProps {
   page?: number;
@@ -10,6 +11,9 @@ export interface FetchUserSpacesProps {
   status?: "active" | "pending" | "banned";
   role?: SpaceMemberRole | SpaceMemberRole[];
   all?: boolean;
+  /** Server default `"joinedAt"` (most recently joined first). */
+  sortBy?: UserSpacesSortByOptions;
+  sortDir?: "asc" | "desc";
   include?: SpaceIncludeParam;
 }
 

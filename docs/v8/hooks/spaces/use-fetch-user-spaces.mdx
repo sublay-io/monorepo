@@ -40,6 +40,14 @@ function MySpaces() {
   Number of results per page.
 </ParamField>
 
+<ParamField path="sortBy" type="string">
+  Sort order: `"joinedAt"` (when the user joined), `"createdAt"` (when the space was created), `"alphabetical"` (by name) or `"members"` (by active member count). Defaults to `"joinedAt"`.
+</ParamField>
+
+<ParamField path="sortDir" type="string">
+  Direction, `"asc"` or `"desc"`, for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
+</ParamField>
+
 ## Returns
 
 <ResponseField name="data" type="UserSpaceItem[]">

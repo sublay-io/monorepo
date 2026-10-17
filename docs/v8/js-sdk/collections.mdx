@@ -67,7 +67,7 @@ Fetches the entities within a collection, paginated.
 ```typescript
 const { data, pagination } = await sublay.collections.fetchCollectionEntities({
   collectionId: "col_abc123",
-  sortBy: "added",
+  sortBy: "addedAt",
   sortDir: "desc",
 });
 ```
@@ -84,8 +84,8 @@ const { data, pagination } = await sublay.collections.fetchCollectionEntities({
   The number of entities to return per page.
 </ParamField>
 
-<ParamField body="sortBy" type='"new" | "added" | "top" | "hot"'>
-  Sort order: `"new"` (creation date), `"added"` (when saved), `"top"` (reaction count), or `"hot"` (engagement score).
+<ParamField body="sortBy" type='"createdAt" | "addedAt" | "top" | "hot"'>
+  Sort order: `"createdAt"` (creation date), `"addedAt"` (when saved), `"top"` (reaction count), or `"hot"` (engagement score).
 </ParamField>
 
 <ParamField body="sortByReaction" type="string">
@@ -93,7 +93,7 @@ const { data, pagination } = await sublay.collections.fetchCollectionEntities({
 </ParamField>
 
 <ParamField body="sortDir" type='"asc" | "desc"'>
-  Sort direction.
+  Sort direction. Not accepted with `"hot"`, which ranks one way only.
 </ParamField>
 
 <ParamField body="include" type="CollectionEntityIncludeParam">

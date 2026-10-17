@@ -21,10 +21,12 @@ import type {
   PostingPermission,
 } from "../../interfaces/models/Space";
 import type { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions";
+import type { SortDirection } from "../../interfaces/EntityListSortByOptions";
 
 export interface FetchSpacesOptions {
   page: number;
   sortBy: SpaceListSortByOptions;
+  sortDir?: SortDirection | null;
   searchSlug?: string | null;
   searchName?: string | null;
   searchDescription?: string | null;
@@ -85,6 +87,7 @@ export function useSpaceListActions() {
           projectId,
           page: options.page,
           sortBy: options.sortBy,
+          sortDir: options.sortDir ?? undefined,
           searchSlug: options.searchSlug,
           searchName: options.searchName,
           searchDescription: options.searchDescription,

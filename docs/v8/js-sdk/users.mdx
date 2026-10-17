@@ -249,7 +249,7 @@ const next = await sublay.users.fetchCommentsByUserId({
 </ParamField>
 
 <ParamField body="sortDir" type='"asc" | "desc"'>
-  Applies to every sort. Server default `"desc"`.
+  Applies to `"createdAt"` and `"top"`; not accepted with `"controversial"`, which ranks one way only. Server default `"desc"`.
 </ParamField>
 
 <ParamField body="sortByReaction" type="ReactionType">

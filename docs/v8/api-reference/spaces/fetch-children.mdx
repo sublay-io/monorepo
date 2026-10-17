@@ -24,6 +24,14 @@ Only children with `visibility: "public"` are listed, for every caller. Unlike [
   Results per page.
 </ParamField>
 
+<ParamField query="sortBy" type="string">
+  Sort order: `"createdAt"` (when the space was created), `"alphabetical"` (by name) or `"members"` (by active member count). Defaults to `"alphabetical"`.
+</ParamField>
+
+<ParamField query="sortDir" type="string">
+  Direction, `"asc"` or `"desc"` (either case), for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
+</ParamField>
+
 ## Response
 
 <ResponseField name="data" type="Space[]">

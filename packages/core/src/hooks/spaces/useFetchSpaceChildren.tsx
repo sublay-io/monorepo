@@ -3,11 +3,15 @@ import useProject from "../projects/useProject";
 import { Space, SpaceIncludeParam } from "../../interfaces/models/Space";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions";
 
 export interface FetchSpaceChildrenProps {
   spaceId: string;
   page?: number;
   limit?: number;
+  /** Server default `"alphabetical"`. */
+  sortBy?: SpaceListSortByOptions;
+  sortDir?: "asc" | "desc";
   include?: SpaceIncludeParam;
 }
 
@@ -16,7 +20,7 @@ function useFetchSpaceChildren(): (props: FetchSpaceChildrenProps) => Promise<Pa
   const axios = useAxiosPrivate();
 
   const fetchSpaceChildren = useCallback(
-    async ({ spaceId, page = 1, limit = 20, include }: FetchSpaceChildrenProps) => {
+    async ({ spaceId, page = 1, limit = 20, sortBy, sortDir, include }: FetchSpaceChildrenProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -31,6 +35,8 @@ function useFetchSpaceChildren(): (props: FetchSpaceChildrenProps) => Promise<Pa
           params: {
             page,
             limit,
+            sortBy,
+            sortDir,
             include: Array.isArray(include) ? include.join(",") : include,
           },
         }

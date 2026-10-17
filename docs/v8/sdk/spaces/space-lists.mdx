@@ -21,7 +21,7 @@ function SpaceDirectory() {
   } = useSpaceList({ listId: "directory" });
 
   useEffect(() => {
-    fetchSpaces({ sortBy: "newest" });
+    fetchSpaces({ sortBy: "createdAt" });
   }, []);
 
   return (
@@ -43,28 +43,30 @@ function SpaceDirectory() {
 
 ```tsx
 // Search by name
-fetchSpaces({ sortBy: "newest", searchName: "gaming" });
+fetchSpaces({ sortBy: "createdAt", searchName: "gaming" });
 
 // Search across all fields (name, slug, description)
-fetchSpaces({ sortBy: "newest", searchAny: "design" });
+fetchSpaces({ sortBy: "createdAt", searchAny: "design" });
 
 // Filter to spaces the current user is a member of
-fetchSpaces({ sortBy: "newest", memberOf: true });
+fetchSpaces({ sortBy: "createdAt", memberOf: true });
 
 // Fetch only child spaces of a parent
-fetchSpaces({ sortBy: "newest", parentSpaceId: "parent-space-id" });
+fetchSpaces({ sortBy: "createdAt", parentSpaceId: "parent-space-id" });
 
 // Fetch top-level spaces only
-fetchSpaces({ sortBy: "newest", parentSpaceId: null });
+fetchSpaces({ sortBy: "createdAt", parentSpaceId: null });
 ```
 
 ### Sort Options
 
 | Value | Description |
 |-------|-------------|
-| `"newest"` | Most recently created first |
+| `"createdAt"` | Most recently created first |
 | `"members"` | Most members first |
 | `"alphabetical"` | Sorted by name, A–Z |
+
+Pass `sortDir: "asc"` or `"desc"` to reverse any of them, for example `fetchSpaces({ sortBy: "createdAt", sortDir: "asc" })` for oldest first. Left out, each sort uses the direction above.
 
 ## Creating and Deleting from a List
 
@@ -95,8 +97,8 @@ const allSpaces = useSpaceList({ listId: "all" });
 const mySpaces = useSpaceList({ listId: "my-spaces" });
 
 // Both lists are independent
-allSpaces.fetchSpaces({ sortBy: "newest" });
-mySpaces.fetchSpaces({ sortBy: "newest", memberOf: true });
+allSpaces.fetchSpaces({ sortBy: "createdAt" });
+mySpaces.fetchSpaces({ sortBy: "createdAt", memberOf: true });
 ```
 
 ## Return Values

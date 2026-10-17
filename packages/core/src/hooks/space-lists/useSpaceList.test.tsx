@@ -41,7 +41,7 @@ describe("useSpaceList", () => {
 
     await waitFor(() => expect(result.current.spaces.map((s) => s.id)).toEqual(["s1"]));
     expect(result.current.hasMore).toBe(true);
-    expect(result.current.sortBy).toBe("newest"); // default
+    expect(result.current.sortBy).toBe("createdAt"); // default
   });
 
   // Real timers only — see [[sdk-testing-fake-timers-corrupt-scheduler]] memory:
@@ -113,6 +113,51 @@ describe("useSpaceList", () => {
       }),
     );
     await waitFor(() => expect(result.current.searchName).toBeNull());
+  });
+
+  it("sends sortBy and sortDir, keeps them for loadMore, and resets sortDir", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s1" }], true));
+    const { result } = renderHookWithStore(() => useSpaceList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+    expect(result.current.sortDir).toBeNull();
+
+    act(() =>
+      result.current.fetchSpaces(
+        { sortBy: "alphabetical", sortDir: "desc" },
+        undefined,
+        { fetchImmediately: true },
+      ),
+    );
+    await waitFor(() => expect(result.current.spaces).toHaveLength(1));
+    expect(result.current.sortDir).toBe("desc");
+    const first = new URL(fetchHandle.calls()[0].url);
+    expect(first.searchParams.get("sortBy")).toBe("alphabetical");
+    expect(first.searchParams.get("sortDir")).toBe("desc");
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s2" }], false));
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    const page2 = fetchHandle
+      .calls()
+      .map((c) => new URL(c.url))
+      .find((u) => u.searchParams.get("page") === "2")!;
+    expect(page2.searchParams.get("sortDir")).toBe("desc");
+
+    // Left out (null): no sortDir is sent, so the server uses the sort's
+    // natural direction.
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s3" }], false));
+    act(() =>
+      result.current.fetchSpaces({}, undefined, {
+        fetchImmediately: true,
+        resetUnspecified: true,
+      }),
+    );
+    await waitFor(() => expect(result.current.spaces.map((s) => s.id)).toEqual(["s3"]));
+    expect(result.current.sortDir).toBeNull();
+    const last = new URL(fetchHandle.calls()[fetchHandle.calls().length - 1].url);
+    expect(last.searchParams.get("sortDir")).toBeNull();
   });
 
   describe("loadMore", () => {

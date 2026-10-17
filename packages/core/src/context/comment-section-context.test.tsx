@@ -65,10 +65,10 @@ describe("CommentSectionProvider", () => {
     expect(result.current.sortBy).toBe("top");
 
     act(() => {
-      result.current.setSortBy!("new");
+      result.current.setSortBy!("createdAt");
     });
 
-    expect(result.current.sortBy).toBe("new");
+    expect(result.current.sortBy).toBe("createdAt");
   });
 
   it("creates a comment via the exposed createComment action", async () => {

@@ -1,4 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
+import type { WithOneWaySortDir } from "../../interfaces/OneWaySortParams";
 import {
   CollectionEntityIncludeParam,
   Entity,
@@ -6,11 +7,11 @@ import {
 } from "../../interfaces/Entity";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
-export interface FetchCollectionEntitiesProps extends TopCommentsParams {
+export interface FetchCollectionEntitiesBaseProps extends TopCommentsParams {
   collectionId: string;
   page?: number;
   limit?: number;
-  sortBy?: "new" | "added" | "top" | "hot";
+  sortBy?: "createdAt" | "addedAt" | "top" | "hot";
   /** Which reaction `top` ranks by (server default: "upvote"). Only valid with `sortBy: "top"` — the server rejects it otherwise. */
   sortByReaction?:
     | "upvote"
@@ -25,6 +26,9 @@ export interface FetchCollectionEntitiesProps extends TopCommentsParams {
   /** Associations to populate (no "saved": every item in a collection is saved). */
   include?: CollectionEntityIncludeParam;
 }
+
+/** `sortDir` is not accepted with `sortBy: "hot"`. */
+export type FetchCollectionEntitiesProps = WithOneWaySortDir<FetchCollectionEntitiesBaseProps>;
 
 export async function fetchCollectionEntities(
   client: SublayHttpClient,

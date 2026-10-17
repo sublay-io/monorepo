@@ -79,7 +79,8 @@ const { data, pagination } = await sublay.reports.fetchModeratedReports({
   userId: "usr_mod123",
   status: "pending",
   targetType: "entity",
-  sortBy: "new",
+  sortBy: "createdAt",
+  sortDir: "desc",
   page: 1,
   limit: 20,
 });
@@ -103,8 +104,12 @@ const { data, pagination } = await sublay.reports.fetchModeratedReports({
   Filter by report status: `"pending"`, `"on-hold"`, `"escalated"`, `"dismissed"`, or `"actioned"`.
 </ParamField>
 
-<ParamField body="sortBy" type="string">
-  Sort order: `"new"` (most recent first) or `"old"` (oldest first).
+<ParamField body="sortBy" type='"createdAt"'>
+  Reports are sorted by when they were created.
+</ParamField>
+
+<ParamField body="sortDir" type='"asc" | "desc"'>
+  Direction of the `createdAt` sort. Default `"desc"` (newest first).
 </ParamField>
 
 <ParamField body="page" type="number">

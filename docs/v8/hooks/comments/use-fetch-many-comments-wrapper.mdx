@@ -58,7 +58,7 @@ function ReplyList({ commentId }: { commentId: string }) {
 </ParamField>
 
 <ParamField body="parentId" type="string | null" optional>
-  List this comment's direct replies. With both set, `parentId` decides the level and `entityId` must match the parent's entity — otherwise the list is empty.
+  List this comment's direct replies. With `parentId` set, `entityId` is ignored: the parent decides the entity.
 </ParamField>
 
 <ParamField body="limit" type="number" optional>
@@ -66,11 +66,11 @@ function ReplyList({ commentId }: { commentId: string }) {
 </ParamField>
 
 <ParamField body="defaultSortBy" type="CommentsSortByOptions" optional>
-  Initial sort: `"createdAt"`, `"top"` or `"controversial"`. Default: `"createdAt"`. `"new"` / `"old"` are deprecated aliases for `"createdAt"`.
+  Initial sort: `"createdAt"`, `"top"` or `"controversial"`. Default: `"createdAt"`.
 </ParamField>
 
 <ParamField body="defaultSortDir" type='"asc" | "desc"' optional>
-  Initial sort direction; applies to every sort. Default: `"desc"`.
+  Initial sort direction for `"createdAt"` and `"top"`; ignored (not sent) for `"controversial"`, which ranks one way only. Default: `"desc"`.
 </ParamField>
 
 <ParamField body="defaultSortByReaction" type="ReactionType" optional>
@@ -94,7 +94,7 @@ function ReplyList({ commentId }: { commentId: string }) {
 </ParamField>
 
 <ParamField body="replySortDir" type='"asc" | "desc"' optional>
-  Sort direction for the nested levels. Defaults to the current direction.
+  Sort direction for the nested levels. Defaults to the current direction; not sent when the nested sort is `"controversial"`.
 </ParamField>
 
 <ParamField body="replySortByReaction" type="ReactionType" optional>

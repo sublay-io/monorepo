@@ -14,6 +14,10 @@ export { keywordHelpers } from "./utils/keywordHelpers";
 export { safeMergeStyleProps } from "./helpers/safeMergeStyleProps";
 export { getUserName } from "./helpers/getUserName";
 export { default as getPublicFileUrl } from "./helpers/getPublicFileUrl";
+// `hot` / `controversial` rank one way only: build `{ sortBy, sortDir }` for a
+// request from separate sort state without sending a refused sortDir.
+export { oneWaySortFields, isOneWaySort } from "./helpers/oneWaySorts";
+export type { OneWaySort, WithOneWaySortDir } from "./interfaces/OneWaySortParams";
 export {
   isDevelopment,
   isProduction,
@@ -889,7 +893,10 @@ export type {
   SpaceMembersResponse,
   SpaceTeamResponse,
 } from "./interfaces/models/SpaceMember";
-export type { SpaceListSortByOptions } from "./interfaces/SpaceListSortByOptions";
+export type {
+  SpaceListSortByOptions,
+  UserSpacesSortByOptions,
+} from "./interfaces/SpaceListSortByOptions";
 // `SpaceListFilters` is exported from the slice, which is the definition
 // `useSpaceList` actually accepts. A second, unused declaration used to live in
 // `interfaces/SpaceListSortByOptions.ts` and was the one exported here — its

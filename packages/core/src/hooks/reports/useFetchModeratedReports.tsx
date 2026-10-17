@@ -19,7 +19,9 @@ export interface FetchModeratedReportsParams extends SpaceReputationContextParam
    */
   targetType?: ReportTargetType;
   status?: "pending" | "on-hold" | "escalated" | "dismissed" | "actioned";
-  sortBy?: "new" | "old";
+  /** Time order: `createdAt` in `sortDir` (server default desc, newest first). */
+  sortBy?: "createdAt";
+  sortDir?: "asc" | "desc";
   page?: number;
   limit?: number;
 }
@@ -82,6 +84,7 @@ function useFetchModeratedReports(): (params: FetchModeratedReportsParams) => Pr
       targetType,
       status,
       sortBy,
+      sortDir,
       page,
       limit,
       spaceReputation,
@@ -97,6 +100,7 @@ function useFetchModeratedReports(): (params: FetchModeratedReportsParams) => Pr
         targetType,
         status,
         sortBy,
+        sortDir,
         page,
         limit,
         ...buildSpaceReputationParams({

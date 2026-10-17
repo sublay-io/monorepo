@@ -26,14 +26,14 @@ describe("useFetchManySpaces", () => {
 
     let returned: PaginatedResponse<Space> | undefined;
     await act(async () => {
-      returned = await result.current({ page: 1, sortBy: "newest", searchAny: "design" });
+      returned = await result.current({ page: 1, sortBy: "createdAt", searchAny: "design" });
     });
 
     expect(returned).toEqual(page);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/spaces");
-    expect(call.config?.params).toMatchObject({ page: 1, sortBy: "newest", searchAny: "design" });
+    expect(call.config?.params).toMatchObject({ page: 1, sortBy: "createdAt", searchAny: "design" });
   });
 
   it("sends parentSpaceId as the literal string 'null' when explicitly null (root spaces)", async () => {

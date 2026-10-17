@@ -59,7 +59,8 @@ Fetches a paginated list of moderated reports, with optional filters.
 ```typescript
 const { data, pagination } = await sublay.reports.fetchModeratedReports({
   status: "pending",
-  sortBy: "new",
+  sortBy: "createdAt",
+  sortDir: "desc",
   page: 1,
   limit: 20,
 });
@@ -79,8 +80,12 @@ const { data, pagination } = await sublay.reports.fetchModeratedReports({
   Restrict results to reports with a specific moderation status.
 </ParamField>
 
-<ParamField body="sortBy" type='"new" | "old"'>
-  Sort order for the returned reports.
+<ParamField body="sortBy" type='"createdAt"'>
+  Reports are sorted by when they were created.
+</ParamField>
+
+<ParamField body="sortDir" type='"asc" | "desc"'>
+  Direction of the `createdAt` sort. Default `"desc"` (newest first).
 </ParamField>
 
 <ParamField body="page" type="number">

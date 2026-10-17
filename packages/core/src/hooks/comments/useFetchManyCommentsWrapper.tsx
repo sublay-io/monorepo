@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import {
   CommentReplySortByOptions,
   CommentsSortByOptions,
@@ -82,14 +83,12 @@ function useFetchManyCommentsWrapper(
   const fetchPage = useCallback(
     (cursor: string | null, sort: CommentListSort) =>
       fetchManyComments({
-        ...(parentId
-          ? { parentId, entityId: entityId ?? undefined }
-          : { entityId: entityId as string }),
+        // Replies take parentId alone: the parent decides the entity.
+        ...(parentId ? { parentId } : { entityId: entityId as string }),
         cursor,
         limit,
         include,
-        sortBy: sort.sortBy,
-        sortDir: sort.sortDir,
+        ...oneWaySortFields(sort.sortBy, sort.sortDir),
         sortByReaction: sort.sortBy === "top" ? sort.sortByReaction : undefined,
         replyDepth,
         replyLimit,

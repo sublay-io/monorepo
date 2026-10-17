@@ -1,4 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
+import type { WithOneWaySortDir } from "../../interfaces/OneWaySortParams";
 import {
   Comment,
   CommentReplySortBy,
@@ -37,14 +38,18 @@ interface FetchManyCommentsBaseProps extends SpaceReputationContextParams {
 
 /**
  * A thread fetch (`GET /comments`): `entityId` → that entity's top-level
- * comments; `parentId` → a comment's direct replies. One of the two is
- * required. A user's comment history is `users.fetchCommentsByUserId`.
+ * comments; `parentId` (alone — the parent decides the entity) → a comment's
+ * direct replies. Exactly one of the two, and no `sortDir` with
+ * `sortBy: "controversial"`. A user's comment history is
+ * `users.fetchCommentsByUserId`.
  */
-export type FetchManyCommentsProps = FetchManyCommentsBaseProps &
-  (
-    | { entityId: string; parentId?: string }
-    | { entityId?: string; parentId: string }
-  );
+export type FetchManyCommentsProps =
+  | WithOneWaySortDir<
+      FetchManyCommentsBaseProps & { entityId: string; parentId?: null }
+    >
+  | WithOneWaySortDir<
+      FetchManyCommentsBaseProps & { parentId: string; entityId?: null }
+    >;
 
 export async function fetchManyComments(
   client: SublayHttpClient,
@@ -82,7 +87,10 @@ export async function fetchManyComments(
     replyDepth,
     replyLimit,
     replySortBy,
-    replySortDir,
+    // The server refuses replySortDir when the nested sort is controversial
+    // (it ranks one way only).
+    replySortDir:
+      (replySortBy ?? sortBy) === "controversial" ? undefined : replySortDir,
     replySortByReaction,
     ...buildSpaceReputationParams({
       spaceReputation,

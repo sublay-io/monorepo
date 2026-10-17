@@ -11,7 +11,7 @@ Returns one level of a comment thread, cursor-paginated:
 - **`entityId`** → the entity's **top-level** comments.
 - **`parentId`** → that comment's **direct replies**.
 
-One of the two is required. You can send both: `parentId` decides the level, and `entityId` must match the parent's entity (otherwise the page is empty).
+Send exactly one of the two: neither or both returns `400 comment/invalid-query`. A replies fetch takes `parentId` alone, since the parent decides the entity.
 
 Each request can also bring a few levels of replies nested inside every returned comment (`replyDepth`, `replyLimit`), each with its own "load more" cursor — so a threaded view can render its first screen with a single request.
 
@@ -28,11 +28,11 @@ Authentication is optional. When the caller is signed in, comments by users they
 ### Thread
 
 <ParamField query="entityId" type="string">
-  Return this entity's top-level comments. Required unless `parentId` is sent.
+  Return this entity's top-level comments. Send this or `parentId`, not both.
 </ParamField>
 
 <ParamField query="parentId" type="string">
-  Return the direct replies of this comment. Required unless `entityId` is sent.
+  Return the direct replies of this comment. Send this or `entityId`, not both.
 </ParamField>
 
 ### Pagination
@@ -57,7 +57,7 @@ Authentication is optional. When the caller is signed in, comments by users they
 </ParamField>
 
 <ParamField query="sortDir" type="string" default="desc">
-  `asc` or `desc`. Applies to every sort, including `top` and `controversial`.
+  `asc` or `desc` (either case). Applies to `createdAt` and `top`. Not accepted with `"controversial"`, which ranks one way only (most controversial first): sending it returns `400 comment/invalid-query`.
 </ParamField>
 
 <ParamField query="sortByReaction" type="string" default="upvote">
@@ -65,7 +65,7 @@ Authentication is optional. When the caller is signed in, comments by users they
 </ParamField>
 
 <Note>
-  `new` and `old` are deprecated `sortBy` aliases: `new` is `createdAt` with the requested `sortDir`, `old` is `createdAt` ascending. They still work, but responses carry a non-blocking `Deprecation` header — use `createdAt` with `sortDir` instead. They aren't accepted for `replySortBy`.
+  For time order, use `createdAt` with `sortDir`.
 </Note>
 
 ### Nested replies
@@ -83,7 +83,7 @@ Authentication is optional. When the caller is signed in, comments by users they
 </ParamField>
 
 <ParamField query="replySortDir" type="string">
-  `asc` or `desc` for the nested levels. Defaults to the level's `sortDir`.
+  `asc` or `desc` (either case) for the nested levels. Defaults to the level's `sortDir`. Not accepted when the nested sort is `controversial` (`replySortBy=controversial`, or `sortBy=controversial` without `replySortBy`): a `controversial` level always ranks most controversial first.
 </ParamField>
 
 <ParamField query="replySortByReaction" type="string">
@@ -199,7 +199,7 @@ A cursor is an opaque string. It records the sort it was created under and the l
 
 - Send the same `sortBy`, `sortDir` and `sortByReaction` with a cursor as the request that returned it. A different sort returns `400 comment/cursor-sort-mismatch`; to change the sort, start over without a cursor.
 - A cursor doesn't record which entity or comment it came from. Sending it with a different `entityId` or `parentId` just continues from the same sort position there.
-- **Continuing nested replies:** a `replies.pagination.nextCursor` was created under the **reply** sort. Continue it with a `parentId` request for that comment, sending the reply sort as `sortBy` / `sortDir` / `sortByReaction`:
+- **Continuing nested replies:** a `replies.pagination.nextCursor` was created under the **reply** sort. Continue it with a `parentId` request for that comment, sending the reply sort as `sortBy` / `sortDir` / `sortByReaction` (for a `controversial` reply sort, leave `sortDir` out):
 
   ```
   GET /v8/:projectId/comments?parentId=c1&cursor=<replies.pagination.nextCursor>&sortBy=<replySortBy>&sortDir=<replySortDir>
@@ -249,13 +249,12 @@ Checks run in this order; the first failing check is returned.
     ```
   </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `comment/invalid-query` for invalid values — for example an unknown `include` value, `sortByReaction` without `sortBy=top`, `replySortByReaction` when the nested sort isn't `top`, `limit` below `1` or not a whole number, `replyDepth` above `5`, or `replyLimit` below `1`.
-  </Accordion>
-  <Accordion title="Missing filter — 400">
+    Returned with code `comment/invalid-query` for invalid values — for example neither or both of `entityId` and `parentId`, a malformed id, an unknown `include` value, `sortByReaction` without `sortBy=top`, `replySortByReaction` when the nested sort isn't `top`, `limit` below `1` or not a whole number, `replyDepth` above `5`, or `replyLimit` below `1`. `error` names the first problem found:
+
     ```json
     {
-      "error": "`entityId` or `parentId` is required. To list a user's comments, use `GET /users/:userId/comments`.",
-      "code": "comment/missing-filter"
+      "error": "Send `entityId` (an entity's top-level comments) or `parentId` (a comment's replies), not both. To list a user's comments, use `GET /users/:userId/comments`.",
+      "code": "comment/invalid-query"
     }
     ```
   </Accordion>

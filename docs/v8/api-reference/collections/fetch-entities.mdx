@@ -22,10 +22,10 @@ Returns a paginated list of entities saved in the specified collection. The coll
   Number of entities per page. Default: `20`.
 </ParamField>
 
-<ParamField query="sortBy" type='"new" | "top" | "hot" | "added"' optional>
-  Sort mode. Default: `"new"`.
-  - `new` — by when the entity was created
-  - `added` — by when the entity was saved to this collection
+<ParamField query="sortBy" type='"createdAt" | "addedAt" | "top" | "hot"' optional>
+  Sort mode. Default: `"createdAt"`.
+  - `createdAt` — by when the entity was created
+  - `addedAt` — by when the entity was saved to this collection
   - `top` — by reaction count (use `sortByReaction` to choose which reaction)
   - `hot` — by computed engagement score (decays over time)
 
@@ -37,7 +37,7 @@ Returns a paginated list of entities saved in the specified collection. The coll
 </ParamField>
 
 <ParamField query="sortDir" type='"asc" | "desc"' optional>
-  Sort direction. Default: `"desc"`.
+  Sort direction, `"asc"` or `"desc"` (either case). Default: `"desc"`. Not accepted with `"hot"`, which ranks one way only (hottest first): sending it returns `400 collection/invalid-query`.
 </ParamField>
 
 <ParamField query="include" type="string" optional>

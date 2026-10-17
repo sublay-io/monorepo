@@ -55,7 +55,7 @@ describe("useFetchManyChatMessages", () => {
         parentId: "message-1",
         before: "2024-01-02T00:00:00.000Z",
         limit: 20,
-        sort: "asc",
+        sortDir: "asc",
         includeFiles: true,
         filters: { hasReplies: true },
         spaceReputationId: "space-1",
@@ -66,7 +66,7 @@ describe("useFetchManyChatMessages", () => {
     const [call] = axiosPrivate.calls("get");
     expect(call.config?.params).toMatchObject({
       limit: 20,
-      sort: "asc",
+      sortDir: "asc",
       parentId: "message-1",
       before: "2024-01-02T00:00:00.000Z",
       include: "files",

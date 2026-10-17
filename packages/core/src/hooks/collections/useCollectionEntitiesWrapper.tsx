@@ -21,7 +21,7 @@ export interface UseCollectionEntitiesWrapperProps extends TopCommentsParams {
   limit?: number;
   /** No `"saved"`: every entity in a collection is saved. */
   include?: CollectionEntityIncludeParam;
-  defaultSortBy?: "new" | "top" | "hot" | "added";
+  defaultSortBy?: "createdAt" | "addedAt" | "top" | "hot";
   defaultSortByReaction?: SortByReaction;
   defaultSortDir?: "asc" | "desc";
 }
@@ -30,10 +30,10 @@ export interface UseCollectionEntitiesWrapperValues {
   entities: Entity[];
   loading: boolean;
   hasMore: boolean;
-  sortBy: "new" | "top" | "hot" | "added";
+  sortBy: "createdAt" | "addedAt" | "top" | "hot";
   sortByReaction: SortByReaction;
   sortDir: "asc" | "desc";
-  setSortBy: (newSortBy: "new" | "top" | "hot" | "added") => void;
+  setSortBy: (newSortBy: "createdAt" | "addedAt" | "top" | "hot") => void;
   setSortByReaction: (newSortByReaction: SortByReaction) => void;
   setSortDir: (newSortDir: "asc" | "desc") => void;
   loadMore: () => void;
@@ -46,7 +46,7 @@ function useCollectionEntitiesWrapper(
   const {
     collectionId: passedCollectionId,
     limit = 20,
-    defaultSortBy = "added",
+    defaultSortBy = "addedAt",
     defaultSortByReaction = "upvote",
     defaultSortDir = "desc",
     include,
@@ -75,7 +75,7 @@ function useCollectionEntitiesWrapper(
   const hasMore = useRef(true);
   const [hasMoreState, setHasMoreState] = useState(true);
 
-  const [sortBy, setSortBy] = useState<"new" | "top" | "hot" | "added">(defaultSortBy);
+  const [sortBy, setSortBy] = useState<"createdAt" | "addedAt" | "top" | "hot">(defaultSortBy);
   // Only sent when sortBy is "top" (see collectionsApi).
   const [sortByReaction, setSortByReaction] = useState<SortByReaction>(defaultSortByReaction);
   const [sortDir, setSortDir] = useState<"asc" | "desc">(defaultSortDir);

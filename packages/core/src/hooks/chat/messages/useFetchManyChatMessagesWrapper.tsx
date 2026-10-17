@@ -17,7 +17,7 @@ export interface UseFetchManyChatMessagesWrapperProps extends SpaceReputationCon
    * `loadMore` then fetches older messages. With `"asc"`, `loadMore` fetches
    * newer messages.
    */
-  sort?: "asc" | "desc";
+  sortDir?: "asc" | "desc";
   /** When `true`, the server populates the `files` field on each message. */
   includeFiles?: boolean;
   /**
@@ -51,7 +51,7 @@ function useFetchManyChatMessagesWrapper(
     conversationId,
     parentId,
     limit = 50,
-    sort = "desc",
+    sortDir = "desc",
     includeFiles,
     includeGrants,
     filters,
@@ -83,9 +83,9 @@ function useFetchManyChatMessagesWrapper(
 
   const advanceCursor = useCallback(
     (res: { oldestCreatedAt: string | null; newestCreatedAt: string | null }) => {
-      cursorRef.current = sort === "asc" ? res.newestCreatedAt : res.oldestCreatedAt;
+      cursorRef.current = sortDir === "asc" ? res.newestCreatedAt : res.oldestCreatedAt;
     },
-    [sort]
+    [sortDir]
   );
 
   const refetch = useCallback(async () => {
@@ -99,7 +99,7 @@ function useFetchManyChatMessagesWrapper(
         conversationId,
         parentId,
         limit,
-        sort,
+        sortDir,
         includeFiles,
         includeGrants,
         filters,
@@ -116,7 +116,7 @@ function useFetchManyChatMessagesWrapper(
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchMany, conversationId, parentId, limit, sort, includeFiles, includeGrants, filtersKey, reputationKey, advanceCursor]);
+  }, [fetchMany, conversationId, parentId, limit, sortDir, includeFiles, includeGrants, filtersKey, reputationKey, advanceCursor]);
 
   const loadMore = useCallback(async () => {
     if (loadingRef.current || !hasMoreRef.current || !cursorRef.current) return;
@@ -127,12 +127,12 @@ function useFetchManyChatMessagesWrapper(
         conversationId,
         parentId,
         limit,
-        sort,
+        sortDir,
         includeFiles,
         includeGrants,
         filters,
         ...reputation,
-        ...(sort === "asc"
+        ...(sortDir === "asc"
           ? { after: cursorRef.current }
           : { before: cursorRef.current }),
       });
@@ -147,7 +147,7 @@ function useFetchManyChatMessagesWrapper(
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchMany, conversationId, parentId, limit, sort, includeFiles, includeGrants, filtersKey, reputationKey, advanceCursor]);
+  }, [fetchMany, conversationId, parentId, limit, sortDir, includeFiles, includeGrants, filtersKey, reputationKey, advanceCursor]);
 
   useEffect(() => {
     refetch();

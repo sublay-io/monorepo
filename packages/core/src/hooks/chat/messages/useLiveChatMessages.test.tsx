@@ -36,7 +36,7 @@ describe("useLiveChatMessages", () => {
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/chat/conversations/conversation-1/messages");
-    expect(call.config?.params).toMatchObject({ sort: "desc", limit: 50 });
+    expect(call.config?.params).toMatchObject({ sortDir: "desc", limit: 50 });
   });
 
   it("forwards includeGrants to the request, composing it with includeFiles", async () => {
@@ -168,7 +168,7 @@ describe("useLiveChatMessages", () => {
     expect(result.current.hasMore).toBe(false);
 
     const [call] = axiosPrivate.calls("get");
-    expect(call.config?.params).toMatchObject({ sort: "asc", parentId: "message-1" });
+    expect(call.config?.params).toMatchObject({ sortDir: "asc", parentId: "message-1" });
   });
 
   it("loadOlder fetches using the oldest loaded message as the before cursor", async () => {

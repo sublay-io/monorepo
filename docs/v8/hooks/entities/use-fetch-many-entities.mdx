@@ -28,7 +28,7 @@ function EntityFeed() {
     fetchEntities({
       page: 1,
       limit: 20,
-      sortBy: "score",
+      sortBy: "hot",
       spaceId: "space_abc",
       include: ["user"],
     }).then((res) => setEntities(res.data));
@@ -63,7 +63,7 @@ function EntityFeed() {
 </ParamField>
 
 <ParamField path="sortDir" type="string">
-  Sort direction: `"asc"` or `"desc"`.
+  Sort direction: `"asc"` or `"desc"`. Not accepted with `"hot"` or `"controversial"`, which rank one way only.
 </ParamField>
 
 <ParamField path="sortType" type="string">

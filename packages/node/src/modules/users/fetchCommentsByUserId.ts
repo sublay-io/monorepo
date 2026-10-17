@@ -1,4 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
+import type { WithOneWaySortDir } from "../../interfaces/OneWaySortParams";
 import {
   Comment,
   CommentIncludeParam,
@@ -9,7 +10,7 @@ import { CursorPaginatedResponse } from "../../interfaces/IPaginatedResponse";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
-export interface FetchCommentsByUserIdProps extends SpaceReputationContextParams {
+export interface FetchCommentsByUserIdBaseProps extends SpaceReputationContextParams {
   userId: string;
   /**
    * Read the history as this user (service/master key only). Their own
@@ -43,6 +44,9 @@ export interface FetchCommentsByUserIdProps extends SpaceReputationContextParams
   cursor?: string | null;
   include?: CommentIncludeParam;
 }
+
+/** `sortDir` is not accepted with `sortBy: "controversial"`. */
+export type FetchCommentsByUserIdProps = WithOneWaySortDir<FetchCommentsByUserIdBaseProps>;
 
 /** A user's comment history (`GET /users/:userId/comments`): flat, any depth, cursor-paged. */
 export async function fetchCommentsByUserId(

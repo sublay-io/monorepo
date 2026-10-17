@@ -54,7 +54,7 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
   Page size. Defaults to `50`.
 </ParamField>
 
-<ParamField body="sort" type='"asc" | "desc"'>
+<ParamField body="sortDir" type='"asc" | "desc"'>
   Sort by creation time. Defaults to `"desc"` (newest first), where `loadMore` fetches older messages. With `"asc"`, `loadMore` fetches newer messages.
 </ParamField>
 
@@ -86,7 +86,7 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
 </ResponseField>
 
 <ResponseField name="loadMore" type="() => void">
-  Loads the next page in the direction of `sort` and appends it. No-ops while loading or when there are no more pages.
+  Loads the next page in the direction of `sortDir` and appends it. No-ops while loading or when there are no more pages.
 </ResponseField>
 
 <ResponseField name="refetch" type="() => void">

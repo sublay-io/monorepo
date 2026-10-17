@@ -129,7 +129,7 @@ import { useCollectionEntitiesWrapper } from "@sublay/react-js";
 function CollectionFeed({ collectionId }) {
   const { entities, loading, hasMore, loadMore } = useCollectionEntitiesWrapper({
     collectionId,
-    defaultSortBy: "added",
+    defaultSortBy: "addedAt",
   });
 
   return (

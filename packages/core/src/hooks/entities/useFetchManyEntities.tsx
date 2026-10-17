@@ -1,4 +1,6 @@
 import { useCallback } from "react";
+import type { WithOneWaySortDir } from "../../interfaces/OneWaySortParams";
+import { sendableSortDir } from "../../helpers/oneWaySorts";
 import { sendableTopCommentsParams } from "../../utils/topCommentsParams";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
@@ -55,7 +57,7 @@ const serializeObject = (obj: any, prefix: string): Record<string, any> => {
   return params;
 };
 
-interface FetchManyEntitiesParams
+interface FetchManyEntitiesBaseParams
   extends SpaceReputationContextParams,
     TopCommentsParams {
   page?: number;
@@ -80,6 +82,9 @@ interface FetchManyEntitiesParams
   include?: EntityIncludeParam;
 }
 
+/** `sortDir` is not accepted with `sortBy: "hot"` or `"controversial"`. */
+type FetchManyEntitiesParams = WithOneWaySortDir<FetchManyEntitiesBaseParams>;
+
 function useFetchManyEntities(): (params?: FetchManyEntitiesParams) => Promise<PaginatedResponse<Entity>> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
@@ -99,7 +104,8 @@ function useFetchManyEntities(): (params?: FetchManyEntitiesParams) => Promise<P
       if (params?.sortByReaction && params.sortBy === "top") {
         queryParams.sortByReaction = params.sortByReaction;
       }
-      if (params?.sortDir) queryParams.sortDir = params.sortDir;
+      const sortDir = sendableSortDir(params?.sortBy, params?.sortDir);
+      if (sortDir) queryParams.sortDir = sortDir;
       if (params?.sortType) queryParams.sortType = params.sortType;
       if (params?.timeFrame) queryParams.timeFrame = params.timeFrame;
       if (params?.sourceId) queryParams.sourceId = params.sourceId;

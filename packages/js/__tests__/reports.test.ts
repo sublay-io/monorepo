@@ -39,7 +39,8 @@ describe("js-sdk reports — request shaping", () => {
     await fetchModeratedReports(client, {
       spaceId: "s1",
       status: "pending",
-      sortBy: "new",
+      sortBy: "createdAt",
+      sortDir: "asc",
       page: 1,
       limit: 20,
     });
@@ -47,7 +48,8 @@ describe("js-sdk reports — request shaping", () => {
       params: {
         spaceId: "s1",
         status: "pending",
-        sortBy: "new",
+        sortBy: "createdAt",
+        sortDir: "asc",
         page: 1,
         limit: 20,
       },

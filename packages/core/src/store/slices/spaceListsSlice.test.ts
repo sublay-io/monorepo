@@ -31,7 +31,7 @@ const initial: SpaceListsState = { lists: {} };
 describe("spaceListsSlice", () => {
   it("initializeList creates default state once, idempotently", () => {
     let s = reducer(initial, initializeList({ listId: "feed" }));
-    expect(s.lists.feed).toMatchObject({ page: 1, limit: 20, sortBy: "newest", spaces: [] });
+    expect(s.lists.feed).toMatchObject({ page: 1, limit: 20, sortBy: "createdAt", spaces: [] });
 
     s = reducer(s, setSpaceListLoading({ listId: "feed", loading: false }));
     const s2 = reducer(s, initializeList({ listId: "feed" }));

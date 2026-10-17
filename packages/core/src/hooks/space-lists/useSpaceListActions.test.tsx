@@ -42,7 +42,7 @@ describe("useSpaceListActions", () => {
       });
 
       await act(async () => {
-        await result.current.fetchSpaces("feed", { page: 1, sortBy: "newest", limit: 20 });
+        await result.current.fetchSpaces("feed", { page: 1, sortBy: "createdAt", limit: 20 });
       });
 
       expect(selectSpaceListSpaces(store.getState(), "feed").map((s) => s.id)).toEqual(["s1"]);
@@ -51,7 +51,7 @@ describe("useSpaceListActions", () => {
 
       const url = new URL(fetchHandle.calls()[0].url);
       expect(url.pathname).toContain("/test-project/spaces");
-      expect(url.searchParams.get("sortBy")).toBe("newest");
+      expect(url.searchParams.get("sortBy")).toBe("createdAt");
     });
 
     it("appends on page > 1", async () => {
@@ -65,7 +65,7 @@ describe("useSpaceListActions", () => {
         projectId: "test-project",
       });
       await act(async () => {
-        await result.current.fetchSpaces("feed", { page: 1, sortBy: "newest", limit: 1 });
+        await result.current.fetchSpaces("feed", { page: 1, sortBy: "createdAt", limit: 1 });
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(
@@ -75,7 +75,7 @@ describe("useSpaceListActions", () => {
         }),
       );
       await act(async () => {
-        await result.current.fetchSpaces("feed", { page: 2, sortBy: "newest", limit: 1 });
+        await result.current.fetchSpaces("feed", { page: 2, sortBy: "createdAt", limit: 1 });
       });
 
       expect(
@@ -105,7 +105,7 @@ describe("useSpaceListActions", () => {
       const { result } = renderHookWithStore(() => useSpaceListActions(), { projectId: "" });
 
       await expect(
-        result.current.fetchSpaces("feed", { page: 1, sortBy: "newest", limit: 20 }),
+        result.current.fetchSpaces("feed", { page: 1, sortBy: "createdAt", limit: 20 }),
       ).rejects.toThrow("No project ID available");
     });
 
@@ -118,7 +118,7 @@ describe("useSpaceListActions", () => {
 
       await act(async () => {
         await expect(
-          result.current.fetchSpaces("feed", { page: 1, sortBy: "newest", limit: 20 }),
+          result.current.fetchSpaces("feed", { page: 1, sortBy: "createdAt", limit: 20 }),
         ).rejects.toBeTruthy();
       });
 

@@ -20,7 +20,7 @@ function SpaceDirectory() {
   const { spaces, loading, hasMore, fetchSpaces, loadMore } = useSpaceList({ listId: "directory" });
 
   useEffect(() => {
-    fetchSpaces({ sortBy: "newest" });
+    fetchSpaces({ sortBy: "createdAt" });
   }, []);
 
   return (
@@ -58,7 +58,8 @@ function SpaceDirectory() {
   ```ts
   fetchSpaces(
     filters: {
-      sortBy?: "newest" | "members" | "alphabetical";
+      sortBy?: "createdAt" | "members" | "alphabetical";
+      sortDir?: "asc" | "desc" | null; // null: the sort's natural direction
       searchSlug?: string | null;
       searchName?: string | null;
       searchDescription?: string | null;
@@ -111,7 +112,11 @@ function SpaceDirectory() {
 </ResponseField>
 
 <ResponseField name="sortBy" type="string | null">
-  Current sort setting from Redux state.
+  Current sort setting from Redux state. The list sorts by `"createdAt"` (newest first) until you pass another `sortBy`.
+</ResponseField>
+
+<ResponseField name="sortDir" type='"asc" | "desc" | null'>
+  Current sort direction. `null` means the sort's natural direction: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ResponseField>
 
 <ResponseField name="searchSlug" type="string | null">

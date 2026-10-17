@@ -46,7 +46,7 @@ function RefreshButton() {
     <ResponseField name="sortByReaction" type='"upvote" | "downvote" | "like" | "love" | "wow" | "sad" | "angry" | "funny"'>
       Which reaction `top` ranks by. Only sent while `sortBy` is `"top"`.
     </ResponseField>
-    <ResponseField name="sortDir" type='"asc" | "desc"'>Sort direction.</ResponseField>
+    <ResponseField name="sortDir" type='"asc" | "desc"'>Sort direction. Not sent with `"hot"` or `"controversial"`, which rank one way only.</ResponseField>
     <ResponseField name="sortType" type='"auto" | "numeric" | "text" | "boolean" | "timestamp"'>
       Type hint for metadata sorts.
     </ResponseField>

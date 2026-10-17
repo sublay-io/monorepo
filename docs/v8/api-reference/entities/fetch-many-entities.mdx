@@ -35,14 +35,8 @@ Returns a paginated list of entities for the project. Supports rich filtering by
   - `metadata.<property>` — sort by a metadata field (e.g. `metadata.memberCount`)
 </ParamField>
 
-<Note>
-  `new` is a deprecated alias for `createdAt` (removed in v8). It still works and
-  behaves identically, but requests using it receive a non-blocking `Deprecation`
-  response header — switch to `createdAt`.
-</Note>
-
-<ParamField query="sortDir" type="string" default="DESC">
-  Sort direction. `ASC` or `DESC`.
+<ParamField query="sortDir" type="string" default="desc">
+  Sort direction, `"asc"` or `"desc"` (either case). Not accepted with `"hot"` or `"controversial"`, which rank one way only (most first): sending it returns `400 entity/invalid-query`.
 </ParamField>
 
 <ParamField query="sortType" type="string" default="auto">

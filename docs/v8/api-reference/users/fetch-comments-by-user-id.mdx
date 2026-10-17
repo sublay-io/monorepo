@@ -63,11 +63,11 @@ An unknown `userId` returns an empty page.
 ### Sorting
 
 <ParamField query="sortBy" type="string" default="createdAt">
-  `createdAt`, `top` (raw count of `sortByReaction`) or `controversial` — the same meanings as on [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments#sorting). `new` and `old` are deprecated aliases for `createdAt` and receive a `Deprecation` response header.
+  `createdAt`, `top` (raw count of `sortByReaction`) or `controversial` — the same meanings as on [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments#sorting).
 </ParamField>
 
 <ParamField query="sortDir" type="string" default="desc">
-  `asc` or `desc`. Applies to every sort.
+  `asc` or `desc` (either case). Applies to `createdAt` and `top`. Not accepted with `"controversial"`, which ranks one way only (most controversial first): sending it returns `400 comment/invalid-query`.
 </ParamField>
 
 <ParamField query="sortByReaction" type="string" default="upvote">

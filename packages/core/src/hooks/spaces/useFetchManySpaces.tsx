@@ -10,6 +10,7 @@ export interface FetchManySpacesProps {
   page?: number;
   limit?: number;
   sortBy?: SpaceListSortByOptions;
+  sortDir?: "asc" | "desc";
   searchSlug?: string | null;
   searchName?: string | null;
   searchDescription?: string | null;
@@ -35,6 +36,7 @@ function useFetchManySpaces(): (params?: FetchManySpacesProps) => Promise<Pagina
       if (params?.page !== undefined) queryParams.page = params.page;
       if (params?.limit !== undefined) queryParams.limit = params.limit;
       if (params?.sortBy) queryParams.sortBy = params.sortBy;
+      if (params?.sortDir) queryParams.sortDir = params.sortDir;
       if (params?.searchSlug) queryParams.searchSlug = params.searchSlug;
       if (params?.searchName) queryParams.searchName = params.searchName;
       if (params?.searchDescription) queryParams.searchDescription = params.searchDescription;

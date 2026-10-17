@@ -99,7 +99,7 @@ function UserFeed({ userId }: { userId: string }) {
 </ParamField>
 
 <ParamField body="defaultSortDir" type='"asc" | "desc"' optional>
-  Initial sort direction. Default: `"desc"`.
+  Initial sort direction. Default: `"desc"`; ignored (not sent) for `"hot"` and `"controversial"`, which rank one way only.
 </ParamField>
 
 <ParamField body="defaultSortType" type="SortType" optional>

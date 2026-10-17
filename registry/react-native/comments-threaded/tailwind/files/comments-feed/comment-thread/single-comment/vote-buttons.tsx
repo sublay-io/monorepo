@@ -108,7 +108,9 @@ function VoteButtons({
                 : 'text-gray-700'
         }`}
       >
-        {netScore}
+        {/* The left-to-right mark keeps a negative score's minus sign on the
+            left in right-to-left layouts (otherwise -1 shows as "1-"). */}
+        {`\u200E${netScore}`}
       </Text>
 
       {/* Downvote Button */}

@@ -103,6 +103,7 @@ function VoteButtons({
 
       {/* Score */}
       <span
+        dir="ltr"
         className={cn(
           // 🎨 CUSTOMIZATION: Score display styling
           "font-medium min-w-[20px] text-center",
@@ -114,6 +115,8 @@ function VoteButtons({
             : "text-gray-700 dark:text-neutral-300"
         )}
       >
+        {/* A negative score keeps its minus sign on the left in right-to-left
+            layouts too (the browser would otherwise show -1 as "1-"). */}
         {netScore}
       </span>
 

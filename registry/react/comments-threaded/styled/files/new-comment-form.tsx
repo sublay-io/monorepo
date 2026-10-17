@@ -14,13 +14,7 @@ import useUIState from "../hooks/use-ui-state";
 import strings from "../utils/strings";
 import { GIPHY_API_KEY_NAME, giphyApiKey, isDevelopment } from "../utils/env";
 
-function NewCommentForm({
-  gifPickerFullScreen = false,
-}: {
-  // Where the GIF picker opens. false: it covers the comment section.
-  // true: it covers the whole screen.
-  gifPickerFullScreen?: boolean;
-}) {
+function NewCommentForm() {
   const { user } = useUser();
   const { theme } = useUIState();
 
@@ -246,7 +240,8 @@ function NewCommentForm({
           onClickBack={() => setIsGiphyVisible(false)}
           onSelectGif={(selected) => handleCreateGif(selected)}
           visible={isGiphyVisible}
-          fullScreen={gifPickerFullScreen}
+          // Over the whole window: the section has no fixed height to cover
+          fullScreen
           theme={theme}
         />
       ) : null}

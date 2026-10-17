@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Plaatsen",
   addGif: "Een GIF toevoegen",
 
+  // Sorting
+  sortBy: "Sorteren op",
+  sortTop: "Top",
+  sortNew: "Nieuw",
+  sortOld: "Oud",
+  sortControversial: "Controversieel",
+
   // Comment list
   noCommentsTitle: "Nog geen reacties",
   noCommentsSubtitle: "Begin het gesprek.",

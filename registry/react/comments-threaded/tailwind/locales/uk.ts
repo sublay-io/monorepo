@@ -20,6 +20,13 @@ const strings = {
   submitComment: "Опублікувати",
   addGif: "Додати GIF",
 
+  // Sorting
+  sortBy: "Сортувати за",
+  sortTop: "Найкращі",
+  sortNew: "Нові",
+  sortOld: "Старі",
+  sortControversial: "Суперечливі",
+
   // Comment list
   noCommentsTitle: "Коментарів поки немає",
   noCommentsSubtitle: "Почніть обговорення.",

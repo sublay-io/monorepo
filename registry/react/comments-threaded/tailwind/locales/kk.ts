@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Жариялау",
   addGif: "GIF қосу",
 
+  // Sorting
+  sortBy: "Сұрыптау",
+  sortTop: "Үздік",
+  sortNew: "Жаңа",
+  sortOld: "Ескі",
+  sortControversial: "Даулы",
+
   // Comment list
   noCommentsTitle: "Әзірге пікір жоқ",
   noCommentsSubtitle: "Талқылауды бастаңыз.",

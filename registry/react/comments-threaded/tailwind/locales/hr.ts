@@ -20,6 +20,13 @@ const strings = {
   submitComment: "Objavi",
   addGif: "Dodaj GIF",
 
+  // Sorting
+  sortBy: "Poredaj po",
+  sortTop: "Najbolji",
+  sortNew: "Najnoviji",
+  sortOld: "Najstariji",
+  sortControversial: "Kontroverzni",
+
   // Comment list
   noCommentsTitle: "Još nema komentara",
   noCommentsSubtitle: "Započni razgovor.",

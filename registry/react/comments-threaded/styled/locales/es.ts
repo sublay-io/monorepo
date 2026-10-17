@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Publicar",
   addGif: "Añadir un GIF",
 
+  // Sorting
+  sortBy: "Ordenar por",
+  sortTop: "Destacados",
+  sortNew: "Recientes",
+  sortOld: "Antiguos",
+  sortControversial: "Polémicos",
+
   // Comment list
   noCommentsTitle: "Aún no hay comentarios",
   noCommentsSubtitle: "Inicia la conversación.",

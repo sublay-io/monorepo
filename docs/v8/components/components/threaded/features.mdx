@@ -44,6 +44,17 @@ The bar lives in `reply-banner/reply-banner.tsx`. The Reply button's behavior is
 - **React (Web)** — the comment box sits above the comments. It starts as a one-line box; clicking it opens it, and it grows with the text and shows the GIF button (when GIFs are enabled), **Cancel** and **Post**. Cancel clears the text and folds the box back to one line, and so does posting. Enter posts and Shift+Enter adds a line break, in the comment box and in the reply box under a comment. @ mention suggestions open below the comment box. The box is `new-comment-form.tsx`, and its place above the comments is set in `threaded-comment-section.tsx`.
 - **React Native and Expo** — the send button posts the comment. Return adds a line break.
 
+### Sorting
+
+On React (Web), a **Sort by** dropdown sits between the comment box and the comments. The section opens on **Top**.
+
+- **Top** — most upvoted comments first (ranked by the number of upvotes, not upvotes minus downvotes)
+- **New** — newest comments first
+- **Old** — oldest comments first
+- **Controversial** — comments with many upvotes and downvotes and a close split first
+
+Choosing an option reloads the comments in that order. The options are listed at the top of `sort-by-dropdown.tsx`; remove an entry to drop that option. React Native and Expo have no sort control and show Top.
+
 ---
 
 ### Loading Replies
@@ -272,6 +283,7 @@ To use a different variable, change its name in `utils/env.ts`. Without a key, t
 |---------|:--------:|:------------:|
 | Unlimited nesting | ✅ | ✅ (max depth can be limited) |
 | Upvote/downvote | ✅ | ✅ (can remove, change icons) |
+| Sorting (Top/New/Old/Controversial), web | ✅ | ✅ (remove options, rename) |
 | Threading lines | ✅ | ✅ (colors, spacing) |
 | Collapsible threads | ✅ | ✅ (behavior, icons) |
 | @ Mentions | ✅ | ✅ (autocomplete styling) |

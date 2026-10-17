@@ -11,6 +11,13 @@ const strings = {
   submitComment: "פרסום",
   addGif: "הוספת GIF",
 
+  // Sorting
+  sortBy: "מיון לפי",
+  sortTop: "מובילות",
+  sortNew: "חדשות",
+  sortOld: "ישנות",
+  sortControversial: "שנויות במחלוקת",
+
   // Comment list
   noCommentsTitle: "אין עדיין תגובות",
   noCommentsSubtitle: "התחילו את השיחה.",

@@ -19,6 +19,13 @@ const strings = {
   submitComment: "Publică",
   addGif: "Adaugă un GIF",
 
+  // Sorting
+  sortBy: "Sortează după",
+  sortTop: "Top",
+  sortNew: "Noi",
+  sortOld: "Vechi",
+  sortControversial: "Controversate",
+
   // Comment list
   noCommentsTitle: "Niciun comentariu încă",
   noCommentsSubtitle: "Începe conversația.",

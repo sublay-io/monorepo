@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Δημοσίευση",
   addGif: "Προσθήκη GIF",
 
+  // Sorting
+  sortBy: "Ταξινόμηση κατά",
+  sortTop: "Κορυφαία",
+  sortNew: "Νεότερα",
+  sortOld: "Παλαιότερα",
+  sortControversial: "Αμφιλεγόμενα",
+
   // Comment list
   noCommentsTitle: "Δεν υπάρχουν σχόλια ακόμα",
   noCommentsSubtitle: "Ξεκίνα τη συζήτηση.",

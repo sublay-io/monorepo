@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Lähetä",
   addGif: "Lisää GIF",
 
+  // Sorting
+  sortBy: "Lajittele",
+  sortTop: "Suosituimmat",
+  sortNew: "Uusimmat",
+  sortOld: "Vanhimmat",
+  sortControversial: "Kiistanalaiset",
+
   // Comment list
   noCommentsTitle: "Ei vielä kommentteja",
   noCommentsSubtitle: "Aloita keskustelu.",

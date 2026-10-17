@@ -11,6 +11,13 @@ const strings = {
   submitComment: "پوسٹ کریں",
   addGif: "GIF شامل کریں",
 
+  // Sorting
+  sortBy: "ترتیب دیں",
+  sortTop: "نمایاں",
+  sortNew: "نئے",
+  sortOld: "پرانے",
+  sortControversial: "متنازع",
+
   // Comment list
   noCommentsTitle: "ابھی تک کوئی تبصرہ نہیں",
   noCommentsSubtitle: "گفتگو شروع کریں۔",

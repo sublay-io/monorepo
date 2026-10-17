@@ -20,6 +20,13 @@ const strings = {
   submitComment: "Отправить",
   addGif: "Добавить GIF",
 
+  // Sorting
+  sortBy: "Сортировка",
+  sortTop: "Лучшие",
+  sortNew: "Новые",
+  sortOld: "Старые",
+  sortControversial: "Спорные",
+
   // Comment list
   noCommentsTitle: "Комментариев пока нет",
   noCommentsSubtitle: "Начните обсуждение.",

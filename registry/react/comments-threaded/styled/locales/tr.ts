@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Gönder",
   addGif: "GIF ekle",
 
+  // Sorting
+  sortBy: "Sırala",
+  sortTop: "Popüler",
+  sortNew: "Yeni",
+  sortOld: "Eski",
+  sortControversial: "Tartışmalı",
+
   // Comment list
   noCommentsTitle: "Henüz yorum yok",
   noCommentsSubtitle: "Sohbeti başlat.",

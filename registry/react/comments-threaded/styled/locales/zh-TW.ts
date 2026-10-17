@@ -11,6 +11,13 @@ const strings = {
   submitComment: "發佈",
   addGif: "新增 GIF",
 
+  // Sorting
+  sortBy: "排序方式",
+  sortTop: "熱門",
+  sortNew: "最新",
+  sortOld: "最舊",
+  sortControversial: "有爭議",
+
   // Comment list
   noCommentsTitle: "還沒有留言",
   noCommentsSubtitle: "來開啟話題吧。",

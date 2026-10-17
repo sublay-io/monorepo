@@ -11,6 +11,13 @@ const strings = {
   submitComment: "Posten",
   addGif: "GIF hinzufügen",
 
+  // Sorting
+  sortBy: "Sortieren nach",
+  sortTop: "Top",
+  sortNew: "Neu",
+  sortOld: "Alt",
+  sortControversial: "Kontrovers",
+
   // Comment list
   noCommentsTitle: "Noch keine Kommentare",
   noCommentsSubtitle: "Beginne die Unterhaltung.",

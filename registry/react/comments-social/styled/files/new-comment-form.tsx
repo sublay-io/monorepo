@@ -10,7 +10,6 @@ import {
   handleError,
   useUserMentions,
   useUser,
-  useProject,
   type CommentCreateError,
 } from "@sublay/react-js";
 import { resetButton, resetDiv, resetTextInput } from "~shared/react/reset-styles";
@@ -24,6 +23,7 @@ import MentionSuggestions from "./mention-suggestions";
 import { getCommentCreateErrorMessage } from "../utils/comment-create-error";
 import useUIState from "../hooks/use-ui-state";
 import strings from "../utils/strings";
+import { GIPHY_API_KEY_NAME, giphyApiKey, isDevelopment } from "../utils/env";
 
 function NewCommentForm({
   gifPickerFullScreen = false,
@@ -33,9 +33,6 @@ function NewCommentForm({
   gifPickerFullScreen?: boolean;
 }) {
   const { user } = useUser();
-  const { project } = useProject();
-  const giphyApiKey = project?.integrations.find((int) => int.name === "giphy")
-    ?.data.apiKey;
 
   const { pushMention, createComment, submittingComment, callbacks, createError } =
     useCommentSection();
@@ -215,6 +212,18 @@ function NewCommentForm({
     return () => clearTimeout(timeout); // Proper cleanup to clear the timeout
   }, []);
 
+  // Without a key the GIF button shows only in development, and says what
+  // to set instead of opening the picker
+  const openGifPicker = () => {
+    if (!giphyApiKey) {
+      alert(
+        `GIFs need a Giphy API key. Set ${GIPHY_API_KEY_NAME} in your environment, or change where it's read in this component's utils/env.ts.`
+      );
+      return;
+    }
+    setIsGiphyVisible(true);
+  };
+
   return (
     <>
       {giphyApiKey ? (
@@ -301,10 +310,10 @@ theme={theme}
                 backgroundColor: theme === 'dark' ? '#262626' : '#fff',
               }}
             />
-            {content.length === 0 && giphyApiKey ? (
+            {content.length === 0 && (giphyApiKey || isDevelopment) ? (
               <button
                 type="button"
-                onClick={() => setIsGiphyVisible(true)}
+                onClick={openGifPicker}
                 disabled={submittingComment}
                 style={{
                   ...resetButton,

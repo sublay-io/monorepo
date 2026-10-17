@@ -16,13 +16,13 @@ import {
   NativeSyntheticEvent,
   StyleProp,
   ViewStyle,
+  Alert,
 } from "react-native";
 import {
   handleError,
   useUser,
   useCommentSection,
   useUserMentions,
-  useProject,
   type CommentCreateError,
 } from "@sublay/react-native";
 import { resetButton, resetTextInput, resetView } from "~shared/react-native/reset-styles";
@@ -36,6 +36,7 @@ import MentionSuggestions from "../mention-suggestions/mention-suggestions";
 import useUIState from "../../hooks/use-ui-state";
 import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
 import strings from "../../utils/strings";
+import { GIPHY_API_KEY_NAME, giphyApiKey, isDevelopment } from "../../utils/env";
 
 function NewCommentForm({
   ref,
@@ -53,11 +54,7 @@ function NewCommentForm({
   containerStyle?: StyleProp<ViewStyle>;
 }) {
   const { user } = useUser();
-  const { project } = useProject();
   const { theme } = useUIState();
-
-  const giphyApiKey = project?.integrations.find((int) => int.name === "giphy")
-    ?.data.apiKey;
 
   const { pushMention, createComment, submittingComment, callbacks, createError } =
     useCommentSection();
@@ -237,6 +234,19 @@ function NewCommentForm({
     },
   }));
 
+  // Without a key the GIF button shows only in development, and says what
+  // to set instead of opening the picker
+  const openGifPicker = () => {
+    if (!giphyApiKey) {
+      Alert.alert(
+        "Giphy API key missing",
+        `GIFs need a Giphy API key. Set ${GIPHY_API_KEY_NAME} in your environment, or change where it's read in this component's utils/env.ts.`
+      );
+      return;
+    }
+    setIsGiphyVisible(true);
+  };
+
   const form = (
     <View
       style={{
@@ -334,9 +344,9 @@ theme={theme}
             }}
           />
 
-          {content.length === 0 && giphyApiKey ? (
+          {content.length === 0 && (giphyApiKey || isDevelopment) ? (
             <TouchableOpacity
-              onPress={() => setIsGiphyVisible(true)}
+              onPress={openGifPicker}
               disabled={submittingComment}
               style={{ ...resetButton }}
             >

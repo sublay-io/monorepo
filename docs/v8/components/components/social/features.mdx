@@ -170,7 +170,17 @@ Full dark mode support.
 
 ### GIF Support (Optional)
 
-Enable a GIF picker via the [Sublay Dashboard](https://dash.sublay.io). Add a Giphy API key and GIF search appears in comment forms automatically — no code changes needed.
+GIFs come from Giphy and need a Giphy API key, read from your app's environment. The key is read in `utils/env.ts`, inside the component's folder, which `add` writes for your framework (it looks for `next`, `vite` or `react-scripts` in your `package.json`):
+
+| Framework | Environment variable |
+|-----------|----------------------|
+| Next.js | `NEXT_PUBLIC_GIPHY_API_KEY` |
+| Vite | `VITE_GIPHY_API_KEY` |
+| Create React App | `REACT_APP_GIPHY_API_KEY` |
+| Expo | `EXPO_PUBLIC_GIPHY_API_KEY` |
+| Other web frameworks, React Native without Expo | None: `utils/env.ts` reads nothing until you edit it to read your key |
+
+To use a different variable, change its name in `utils/env.ts`. Without a key, the GIF button shows only in development, and clicking it shows an alert naming the variable to set. In production the button is hidden until there is a key.
 
 ---
 
@@ -189,7 +199,7 @@ Enable a GIF picker via the [Sublay Dashboard](https://dash.sublay.io). Add a Gi
 | Error states with retry | ✅ | ✅ (messaging, design) |
 | Real-time updates | ✅ | ❌ (handled by core SDK) |
 | Dark mode | ✅ | ✅ |
-| GIF support | ✅ | ❌ (enabled in dashboard) |
+| GIF support | ✅ | ✅ (Giphy key read in `utils/env.ts`) |
 
 ---
 

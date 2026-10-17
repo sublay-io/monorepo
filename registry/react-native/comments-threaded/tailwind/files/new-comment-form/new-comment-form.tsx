@@ -6,13 +6,13 @@ import {
   View,
   Keyboard,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import {
   handleError,
   useUser,
   useCommentSection,
   useUserMentions,
-  useProject,
   type CommentCreateError,
 } from "@sublay/react-native";
 import useTextInputCursorIndicator from "~shared/react-native/use-text-input-cursor-indicator";
@@ -24,6 +24,7 @@ import useUIState from "../../hooks/use-ui-state";
 import { SECTION_PADDING_X } from "../comments-feed/comment-thread/single-comment/indentation-threading-lines";
 import { getCommentCreateErrorMessage } from "../../utils/comment-create-error";
 import strings from "../../utils/strings";
+import { GIPHY_API_KEY_NAME, giphyApiKey, isDevelopment } from "../../utils/env";
 
 function NewCommentForm({
   ref,
@@ -41,11 +42,8 @@ function NewCommentForm({
   containerClassName?: string;
 }) {
   const { user } = useUser();
-  const { project } = useProject();
   const { theme, commentInputRef } = useUIState();
 
-  const giphyApiKey = project?.integrations.find((int) => int.name === "giphy")
-    ?.data.apiKey;
 
   const { createComment, callbacks, createError } = useCommentSection();
 
@@ -205,6 +203,19 @@ function NewCommentForm({
     },
   }));
 
+  // Without a key the GIF button shows only in development, and says what
+  // to set instead of opening the picker
+  const openGifPicker = () => {
+    if (!giphyApiKey) {
+      Alert.alert(
+        "Giphy API key missing",
+        `GIFs need a Giphy API key. Set ${GIPHY_API_KEY_NAME} in your environment, or change where it's read in this component's utils/env.ts.`
+      );
+      return;
+    }
+    setIsGiphyVisible(true);
+  };
+
   const form = (
     <View
       className={`relative overflow-visible ${
@@ -271,9 +282,9 @@ function NewCommentForm({
             placeholderTextColor={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
             style={{ textAlignVertical: 'top' }}
           />
-          {!hasContent && giphyApiKey ? (
+          {!hasContent && (giphyApiKey || isDevelopment) ? (
             <TouchableOpacity
-              onPress={() => setIsGiphyVisible(true)}
+              onPress={openGifPicker}
               disabled={isSubmitting}
               className="p-2"
             >

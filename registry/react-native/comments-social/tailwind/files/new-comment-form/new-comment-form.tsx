@@ -225,7 +225,7 @@ function NewCommentForm({
     if (!giphyApiKey) {
       Alert.alert(
         "Giphy API key missing",
-        `GIFs need a Giphy API key. Set ${GIPHY_API_KEY_NAME} in your environment, or change where it's read in this component's utils/env.ts.`
+        `GIFs need a Giphy API key. Set ${GIPHY_API_KEY_NAME} in your environment, or change where it's read in this component's utils/env file.`
       );
       return;
     }

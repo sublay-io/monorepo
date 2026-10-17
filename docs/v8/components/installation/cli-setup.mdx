@@ -149,7 +149,7 @@ npx @sublay/cli add <component> --ref v8
 
 1. **Downloads the component** for your platform and style from the chosen branch.
 2. **Downloads the shared pieces** the component is built from (the GIF picker, avatar, skeletons, icons and similar) into a `shared/` folder inside the component's own folder.
-3. **Writes the files** to `{paths.components}/<component>/`, with imports adjusted to the installed layout. If any file fails to download, nothing is written. Among them is `utils/env.ts`, written for your framework (Next.js, Vite, Create React App, Expo or React Native): the file the GIF picker reads its Giphy API key from. See [GIF Support](/v8/components/components/threaded/features#gif-support-optional).
+3. **Writes the files** to `{paths.components}/<component>/`, with imports adjusted to the installed layout. If any file fails to download, nothing is written. Among them is `utils/env.ts`, written for your framework (Next.js, Vite, Create React App, Expo or React Native; another web framework gets a version for you to fill in): the file the GIF picker reads its Giphy API key from. See [GIF Support](/v8/components/components/threaded/features#gif-support-optional).
 4. **Checks your `package.json`** for the packages the component and its shared pieces need, and offers to install the missing ones.
 
 A branch name may contain letters, digits, `.`, `_`, `-` and `/`. If the branch or the component does not exist on it, `add` stops with a message naming the one that is missing and writes nothing.

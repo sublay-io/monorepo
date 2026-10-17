@@ -260,9 +260,9 @@ GIFs come from Giphy and need a Giphy API key, read from your app's environment.
 | Vite | `VITE_GIPHY_API_KEY` |
 | Create React App | `REACT_APP_GIPHY_API_KEY` |
 | Expo | `EXPO_PUBLIC_GIPHY_API_KEY` |
-| Other web frameworks, React Native without Expo | None: `utils/env.ts` reads nothing until you edit it to read your key |
+| Other web frameworks, React Native without Expo | None: `utils/env.ts` reads nothing until you edit it to read your key. On other web frameworks it also can't tell development from production, so until you edit it the GIF button, and without a key the alert, show in production too |
 
-To use a different variable, change its name in `utils/env.ts`. Without a key, the GIF button shows only in development, and clicking it shows an alert naming the variable to set. In production the button is hidden until there is a key.
+To use a different variable, change its name in `utils/env.ts`. Without a key, the GIF button shows only in development, and clicking it shows an alert naming the variable to set. In production the button is hidden until there is a key (on other web frameworks, once `isDevelopment` in `utils/env.ts` reads your framework's development flag).
 
 ---
 

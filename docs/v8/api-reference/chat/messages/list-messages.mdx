@@ -34,8 +34,8 @@ The caller must be a member. Former members (who left) can only read messages up
   Number of messages to return. Defaults to 50.
 </ParamField>
 
-<ParamField query="sort" type="string">
-  Sort order: `asc` or `desc`. Defaults to `desc` for the main stream, `asc` for threads.
+<ParamField query="sortDir" type="string">
+  Sort direction by creation time: `asc` or `desc` (either case). Defaults to `desc` for the main stream, `asc` for threads.
 </ParamField>
 
 <ParamField query="include" type="string">
@@ -84,6 +84,12 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
   <Accordion title="Forbidden — 403">
     ```json
     { "error": "You are not a member of this conversation.", "code": "chat/not-a-member" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Query — 400">
+    For example `sortDir` other than `asc`/`desc`, both `before` and `after`, or `sort` (not accepted; use `sortDir`).
+    ```json
+    { "error": "sort: 'sort' is not accepted in v8; use 'sortDir'", "code": "chat/invalid-query" }
     ```
   </Accordion>
 </AccordionGroup>

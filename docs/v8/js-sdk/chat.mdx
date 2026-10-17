@@ -323,7 +323,7 @@ Lists messages in a conversation with keyset (before/after) pagination.
 const { messages, hasMore, oldestCreatedAt } = await sublay.chat.listMessages({
   conversationId: "cnv_abc123",
   limit: 50,
-  sort: "desc",
+  sortDir: "desc",
 });
 
 // Older page: pass the oldest message's timestamp as `before`.
@@ -361,7 +361,7 @@ const withReplies = await sublay.chat.listMessages({
   Page size. Defaults to `50`, max `100`.
 </ParamField>
 
-<ParamField body="sort" type='"asc" | "desc"'>
+<ParamField body="sortDir" type='"asc" | "desc"'>
   Sort direction by creation time.
 </ParamField>
 

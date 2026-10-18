@@ -1,5 +1,20 @@
-import * as Notifications from "expo-notifications";
+import { handleError } from "@sublay/core";
 import type { PushTokenAdapter, PushDeviceIdentifier } from "@sublay/core";
+
+type ExpoNotifications = typeof import("expo-notifications");
+
+let notificationsModule: Promise<ExpoNotifications> | null = null;
+
+// expo-notifications is loaded the first time push is used, not together with
+// @sublay/expo. Loading it looks up its native modules, and Expo Go doesn't
+// ship all of them (push needs a development build): loaded up front, it
+// crashed every app on @sublay/expo in Expo Go, including apps that never use
+// push. Apps that use push get the same module, a moment later. In Expo Go,
+// the push calls below reject instead, which usePushRegistration reports.
+function loadNotifications(): Promise<ExpoNotifications> {
+  notificationsModule ??= import("expo-notifications");
+  return notificationsModule;
+}
 
 /** Maps an expo-notifications DevicePushToken onto Sublay's identifier shape. */
 function toIdentifier(devicePushToken: {
@@ -21,6 +36,7 @@ function toIdentifier(devicePushToken: {
 // needs the token those services recognize, not an Expo-relay token.
 export const expoPushTokenAdapter: PushTokenAdapter = {
   async requestPermission(): Promise<boolean> {
+    const Notifications = await loadNotifications();
     const { status } = await Notifications.requestPermissionsAsync();
     return status === "granted";
   },
@@ -39,11 +55,13 @@ export const expoPushTokenAdapter: PushTokenAdapter = {
   // turned notifications off still has one, and gating on this would leave it
   // permanently unreachable. See `AccountMap.pushIdentifierProbed`.
   async hasPermission(): Promise<boolean> {
+    const Notifications = await loadNotifications();
     const { status } = await Notifications.getPermissionsAsync();
     return status === "granted";
   },
 
   async getDeviceIdentifier(): Promise<PushDeviceIdentifier | null> {
+    const Notifications = await loadNotifications();
     const devicePushToken = await Notifications.getDevicePushTokenAsync();
     return toIdentifier(devicePushToken);
   },
@@ -70,11 +88,28 @@ export const expoPushTokenAdapter: PushTokenAdapter = {
   // `DevicePushToken` shape `getDevicePushTokenAsync` returns, so the emitted
   // value can be used directly. Subscribing asks the user for nothing — a
   // refreshed token is delivered, not requested.
+  //
+  // Core calls this synchronously while a screen mounts, so it must never
+  // throw: the listener is attached once expo-notifications has loaded, and a
+  // failed load (Expo Go) is reported, not thrown.
   subscribeToIdentifierChanges(_context, onChange): () => void {
-    const subscription = Notifications.addPushTokenListener((token) => {
-      onChange(toIdentifier(token));
-    });
+    let subscription: { remove(): void } | null = null;
+    let unsubscribed = false;
 
-    return () => subscription.remove();
+    loadNotifications()
+      .then((Notifications) => {
+        if (unsubscribed) return;
+        subscription = Notifications.addPushTokenListener((token) => {
+          onChange(toIdentifier(token));
+        });
+      })
+      .catch((error) => {
+        handleError(error, "Push notifications are unavailable (expo-notifications didn't load)");
+      });
+
+    return () => {
+      unsubscribed = true;
+      subscription?.remove();
+    };
   },
 };

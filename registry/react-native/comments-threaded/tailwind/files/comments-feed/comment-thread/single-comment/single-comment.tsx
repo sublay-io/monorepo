@@ -217,7 +217,9 @@ function SingleComment({
         <Pressable
           className="flex-row"
           onPress={onToggleCollapse}
-          accessibilityState={{ expanded: !isCollapsed }}
+          // Not one big element for screen readers: the votes, Reply, the menu
+          // and the name inside stay reachable one by one
+          accessible={false}
         >
           {/* Avatar with threading line connection */}
           <View
@@ -314,8 +316,12 @@ theme={theme}
                       callbacks?.otherUserClickCallback?.(comment.user?.id ?? "", comment.user?.foreignId);
                     }
                   }}
+                  // A long name shrinks and is cut off, so the row never runs
+                  // past its edge
+                  className="shrink"
                 >
                   <Text
+                    numberOfLines={1}
                     className={`font-medium text-[13px] leading-[18px] ${
                       theme === 'dark' ? 'text-white' : 'text-gray-700'
                     }`}

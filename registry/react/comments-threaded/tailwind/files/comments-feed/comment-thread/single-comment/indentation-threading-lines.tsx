@@ -1,4 +1,4 @@
-import React, { createContext } from "react";
+import React, { createContext, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import strings from "../../../../utils/strings";
 // 🎨 CUSTOMIZATION: Thread geometry. Every connector line is derived from
@@ -50,6 +50,8 @@ export interface ThreadLine {
   hovered: boolean;
   setHovered: (hovered: boolean) => void;
   toggle: () => void;
+  /** Set when the circle toggles: the circle that replaces it takes focus. */
+  focusCircleOnMount: React.MutableRefObject<boolean>;
 }
 
 export const ThreadLineContext = createContext<ThreadLine | null>(null);
@@ -70,14 +72,30 @@ function LineHitArea({
   line: ThreadLine | null | undefined;
   style: React.CSSProperties;
 }) {
+  // A piece that goes away while the mouse is on it (e.g. the reply box's
+  // elbow when the reply is posted) gets no mouseleave: clear the hover then
+  const hoveredHere = useRef(false);
+  const setHovered = line?.setHovered;
+  useEffect(
+    () => () => {
+      if (hoveredHere.current) setHovered?.(false);
+    },
+    [setHovered]
+  );
   if (!line) return null;
   return (
     <div
       aria-hidden="true"
       className="absolute cursor-pointer"
       style={style}
-      onMouseEnter={() => line.setHovered(true)}
-      onMouseLeave={() => line.setHovered(false)}
+      onMouseEnter={() => {
+        hoveredHere.current = true;
+        line.setHovered(true);
+      }}
+      onMouseLeave={() => {
+        hoveredHere.current = false;
+        line.setHovered(false);
+      }}
       onClick={line.toggle}
     />
   );
@@ -112,13 +130,25 @@ export function ThreadCollapseButton({
   className?: string;
   style: React.CSSProperties;
 }) {
+  // Toggled from a circle (e.g. with the keyboard): the circle replacing it
+  // takes focus, so focus isn't dropped to the page
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (line.focusCircleOnMount.current) {
+      line.focusCircleOnMount.current = false;
+      buttonRef.current?.focus();
+    }
+  }, [line.focusCircleOnMount]);
+
   return (
     <button
+      ref={buttonRef}
       type="button"
       aria-expanded={!collapsed}
       aria-label={collapsed ? strings.expandThread : strings.collapseThread}
       onClick={(event) => {
         event.stopPropagation();
+        line.focusCircleOnMount.current = true;
         line.toggle();
       }}
       onMouseEnter={() => line.setHovered(true)}

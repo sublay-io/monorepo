@@ -62,7 +62,11 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
 
   return (
     <button
-      onClick={() => toggleReaction({ reactionType: currentReaction })}
+      onClick={(event) => {
+        // Inside a collapsed row: don't also expand it
+        event.stopPropagation();
+        toggleReaction({ reactionType: currentReaction });
+      }}
       className="text-[13px] not-italic font-medium text-gray-500 dark:text-neutral-400 px-2 py-1 -ms-2 rounded bg-transparent border-none cursor-pointer hover:text-blue-600 dark:hover:text-blue-300"
     >
       {strings.removeYourVote}
@@ -179,6 +183,20 @@ function SingleComment({
         {/* Line from this comment's avatar down to the rows listed under it */}
         {(showReplies || showForm) && <ThreadStem line={line} />}
 
+        {/* Rows without actions (deleted, removed, blocked): the ⊖ sits on
+            the line just below the avatar instead */}
+        {showReplies && line && (tombstone || isPlaceholderRow) && (
+          <ThreadCollapseButton
+            line={line}
+            collapsed={false}
+            className={circleBackgroundClass}
+            style={{
+              insetInlineStart: circleInlineStart(0),
+              top: `${ROW_PADDING_Y + AVATAR_SIZE + 4}px`,
+            }}
+          />
+        )}
+
         <div
           // Collapsed: one row, the ⊕ level with the name and text
           className={cn("flex", isCollapsed && "items-center cursor-pointer")}
@@ -248,7 +266,10 @@ function SingleComment({
                 <>
                   <span>{strings.blockedAuthor}</span>
                   <button
-                    onClick={() => setShowBlockedComment(true)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setShowBlockedComment(true);
+                    }}
                     className="text-[13px] not-italic font-medium text-blue-600 dark:text-blue-400 bg-transparent border-none p-0 cursor-pointer hover:underline"
                   >
                     {strings.showAnyway}

@@ -63,7 +63,11 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
 
   return (
     <button
-      onClick={() => toggleReaction({ reactionType: currentReaction })}
+      onClick={(event) => {
+        // Inside a collapsed row: don't also expand it
+        event.stopPropagation();
+        toggleReaction({ reactionType: currentReaction });
+      }}
       style={{
         fontSize: "13px",
         color: theme === 'dark' ? "#A3A3A3" : "#6B7280",
@@ -197,6 +201,20 @@ function SingleComment({
         {/* Line from this comment's avatar down to the rows listed under it */}
         {(showReplies || showForm) && <ThreadStem line={line} />}
 
+        {/* Rows without actions (deleted, removed, blocked): the ⊖ sits on
+            the line just below the avatar instead */}
+        {showReplies && line && (tombstone || isPlaceholderRow) && (
+          <ThreadCollapseButton
+            line={line}
+            collapsed={false}
+            backgroundColor={circleBackgroundColor}
+            style={{
+              insetInlineStart: circleInlineStart(0),
+              top: `${ROW_PADDING_Y + AVATAR_SIZE + 4}px`,
+            }}
+          />
+        )}
+
         <div
           style={{
             display: "flex",
@@ -292,7 +310,10 @@ theme={theme}
                 <>
                   <span>{strings.blockedAuthor}</span>
                   <button
-                    onClick={() => setShowBlockedComment(true)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setShowBlockedComment(true);
+                    }}
                     style={{
                       fontSize: "13px",
                       fontStyle: "normal",

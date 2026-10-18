@@ -17,6 +17,7 @@ import {
 } from "@sublay/react-native";
 import useTextInputCursorIndicator from "~shared/react-native/use-text-input-cursor-indicator";
 import GiphyContainer from "~shared/react-native/giphy-container";
+import SendIcon from "~shared/react-native/send-icon";
 
 import MentionSuggestions from "../mention-suggestions/mention-suggestions";
 import ReplyBanner from "../reply-banner/reply-banner";
@@ -243,15 +244,8 @@ function NewCommentForm({
         {/* Shown while a comment is being replied to */}
         <ReplyBanner />
         <View
-          className={`flex-row items-end p-2 mb-2 rounded-2xl ${
-            hasContent
-              ? theme === 'dark'
-                ? 'border border-blue-800'
-                : 'border border-blue-300'
-              : theme === 'dark'
-                ? 'border border-neutral-600'
-                : 'border border-gray-200'
-          }`}
+          // No border of its own: the text sits in the comment area
+          className="flex-row items-end p-2 mb-2"
           // In line with the comments above
           style={{ marginHorizontal: SECTION_PADDING_X }}
         >
@@ -270,7 +264,7 @@ function NewCommentForm({
               handleTextChange(text);
             }}
             onSelectionChange={handleSelectionChange}
-            className={`flex-1 p-2 text-sm bg-transparent ${
+            className={`flex-1 p-2 text-base bg-transparent ${
               theme === 'dark' ? 'text-neutral-50' : 'text-gray-900'
             }`}
             placeholderTextColor={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
@@ -307,8 +301,8 @@ function NewCommentForm({
               {isSubmitting ? (
                 <View
                   style={{
-                    width: 12,
-                    height: 12,
+                    width: 16,
+                    height: 16,
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -320,21 +314,16 @@ function NewCommentForm({
                   />
                 </View>
               ) : (
-                <View
-                  style={{ width: 12, height: 12, alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <Text
-                    className={`text-xs ${
-                      hasContent
-                        ? 'text-white'
-                        : theme === 'dark'
-                          ? 'text-neutral-500'
-                          : 'text-gray-400'
-                    }`}
-                  >
-                    ↑
-                  </Text>
-                </View>
+                <SendIcon
+                  size={16}
+                  color={
+                    hasContent
+                      ? '#FFFFFF'
+                      : theme === 'dark'
+                        ? '#737373'
+                        : '#9CA3AF'
+                  }
+                />
               )}
             </TouchableOpacity>
           )}

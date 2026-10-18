@@ -119,6 +119,15 @@
       "requires": [],
       "dependencies": []
     },
+    "send-icon": {
+      "files": [
+        "send-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": [
+        "react-native-svg@^15"
+      ]
+    },
     "skeleton": {
       "files": [
         "skeleton.tsx"

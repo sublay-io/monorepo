@@ -250,7 +250,7 @@ function NewCommentForm({
               fontSize: 13,
               lineHeight: 18,
               paddingHorizontal: SECTION_PADDING_X,
-              paddingBottom: 6,
+              paddingBottom: 5.25,
               color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
             }}
           >
@@ -263,11 +263,11 @@ function NewCommentForm({
           style={{
             flexDirection: 'row',
             alignItems: 'flex-end',
-            padding: 8,
+            padding: 7,
             // In line with the comments above
             marginHorizontal: SECTION_PADDING_X,
-            marginBottom: 8,
-            borderRadius: 16,
+            marginBottom: 7,
+            borderRadius: 14,
             borderWidth: 1,
             // 🎨 CUSTOMIZATION: Input border (blue once there is text)
             borderColor: hasContent
@@ -293,10 +293,10 @@ function NewCommentForm({
             placeholderTextColor={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
             style={{
               flex: 1,
-              padding: 8,
-              // 🎨 CUSTOMIZATION: Input text size (Default: 14)
-              fontSize: 14,
-              lineHeight: 20,
+              padding: 7,
+              // 🎨 CUSTOMIZATION: Input text size (Default: 12.25)
+              fontSize: 12.25,
+              lineHeight: 17.5,
               backgroundColor: 'transparent',
               // 🎨 CUSTOMIZATION: Input text color
               color: theme === 'dark' ? '#FAFAFA' : '#111827',
@@ -308,7 +308,7 @@ function NewCommentForm({
               onPress={openGifPicker}
               disabled={isSubmitting}
               style={{
-                padding: 8,
+                padding: 7,
               }}
             >
               <Text
@@ -327,7 +327,7 @@ function NewCommentForm({
               onPress={handleCreateComment}
               disabled={!hasContent || isSubmitting}
               style={{
-                padding: 8,
+                padding: 7,
                 borderRadius: 9999,
                 // 🎨 CUSTOMIZATION: Send button color
                 backgroundColor:
@@ -357,8 +357,8 @@ function NewCommentForm({
                 >
                   <Text
                     style={{
-                      fontSize: 12,
-                      lineHeight: 16,
+                      fontSize: 10.5,
+                      lineHeight: 14,
                       color: hasContent
                         ? '#FFFFFF'
                         : theme === 'dark' ? '#737373' : '#9CA3AF',

@@ -42,8 +42,8 @@ function Replies({
   const [areRepliesVisible, setAreRepliesVisible] = useState(false);
 
   // 🎨 CUSTOMIZATION: Replies styling defaults
-  const repliesGap = 8;
-  const repliesPaddingTop = 8;
+  const repliesGap = 7;
+  const repliesPaddingTop = 7;
 
 
   const filteredReplies = useMemo(() => {
@@ -136,7 +136,7 @@ function Replies({
             <CommentSkeleton theme={theme} extraLeftPadding={42} />
           )}
           keyExtractor={(item) => String(item)}
-          ItemSeparatorComponent={() => <View style={{ height: 28 }} />}
+          ItemSeparatorComponent={() => <View style={{ height: 24.5 }} />}
           style={{
             // The first reply's own top padding, plus the gap after the
             // replies already listed

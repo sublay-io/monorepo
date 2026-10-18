@@ -10,10 +10,10 @@ function NoCommentsPlaceHolder() {
       <Text
         style={{
           textAlign: 'center',
-          fontSize: 18,
-          lineHeight: 28,
+          fontSize: 15.75,
+          lineHeight: 24.5,
           fontWeight: '700',
-          marginBottom: 8,
+          marginBottom: 7,
           // 🎨 CUSTOMIZATION: Heading color
           color: theme === 'dark' ? '#E5E5E5' : '#1F2937',
         }}

@@ -13,6 +13,7 @@
     "react-native-reanimated@^3.16.0"
   ],
   "shared": [
+    "chevron-icon",
     "custom-button",
     "flag-icon",
     "from-now",

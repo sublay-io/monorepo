@@ -10,9 +10,10 @@ function NoCommentsPlaceHolder() {
       <Text
         style={{
           textAlign: "center",
-          fontSize: 18,
+          fontSize: 15.75,
+          lineHeight: 24.5,
           fontWeight: '700',
-          marginBottom: 8,
+          marginBottom: 7,
           // 🎨 CUSTOMIZATION: Heading color
           color: theme === 'dark' ? '#FAFAFA' : '#000',
         }}
@@ -22,7 +23,8 @@ function NoCommentsPlaceHolder() {
       <Text
         style={{
           textAlign: "center",
-          fontSize: 12,
+          fontSize: 10.5,
+          lineHeight: 14,
           marginTop: 0,
           // 🎨 CUSTOMIZATION: Subtext color
           color: theme === 'dark' ? '#A3A3A3' : '#8e8e8e',

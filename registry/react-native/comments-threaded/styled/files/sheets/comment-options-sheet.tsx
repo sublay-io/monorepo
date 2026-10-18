@@ -54,8 +54,8 @@ const CommentOptionsSheet = () => {
       handleComponent={() => (
         <View
           style={{
-            paddingHorizontal: 32,
-            paddingVertical: 16,
+            paddingHorizontal: 28,
+            paddingVertical: 14,
             flexDirection: 'row',
             borderBottomWidth: 1,
             borderBottomColor: theme === 'dark' ? '#525252' : '#E5E7EB',
@@ -64,8 +64,8 @@ const CommentOptionsSheet = () => {
           <Text
             style={{
               textTransform: 'uppercase',
-              fontSize: 14,
-              lineHeight: 20,
+              fontSize: 12.25,
+              lineHeight: 17.5,
               color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
             }}
           >
@@ -74,7 +74,7 @@ const CommentOptionsSheet = () => {
         </View>
       )}
     >
-      <BottomSheetView style={{ padding: 16 }}>
+      <BottomSheetView style={{ padding: 14 }}>
         <Pressable
           onPress={() => {
             closeCommentOptionsSheet?.();
@@ -84,8 +84,8 @@ const CommentOptionsSheet = () => {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 16,
-            padding: 12,
+            gap: 14,
+            padding: 10.5,
           }}
         >
           <FlagIcon
@@ -94,8 +94,8 @@ const CommentOptionsSheet = () => {
           />
           <Text
             style={{
-              fontSize: 16,
-              lineHeight: 24,
+              fontSize: 14,
+              lineHeight: 21,
               flex: 1,
               color: theme === 'dark' ? '#FAFAFA' : '#374151',
             }}

@@ -58,8 +58,8 @@ function RemoveOwnReactionButton({ comment }: { comment: CommentType }) {
     <Pressable
       onPress={() => toggleReaction({ reactionType: currentReaction })}
       style={{
-        paddingHorizontal: 8,
-        paddingVertical: 4,
+        paddingHorizontal: 7,
+        paddingVertical: 3.5,
       }}
     >
       <Text
@@ -299,8 +299,8 @@ theme={theme}
                 flex: 1,
                 flexDirection: 'row',
                 alignItems: 'center',
-                gap: 8,
-                minHeight: 28,
+                gap: 7,
+                minHeight: 24.5,
               }}
             >
               {isUnavailable ? (
@@ -351,7 +351,7 @@ theme={theme}
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: isCollapsed ? 0 : 4,
+                marginBottom: isCollapsed ? 0 : 3.5,
                 // As tall as the avatar, so the name and time sit level with it
                 minHeight: AVATAR_SIZE,
               }}
@@ -361,7 +361,7 @@ theme={theme}
                   flex: 1,
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 7,
                 }}
               >
                 {tombstone ? (
@@ -454,7 +454,7 @@ theme={theme}
                   fontSize: 13,
                   lineHeight: 21,
                   fontStyle: 'italic',
-                  marginBottom: 12,
+                  marginBottom: 10.5,
                   color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
                 }}
               >
@@ -470,7 +470,7 @@ theme={theme}
                     style={{
                       fontSize: 13,
                       lineHeight: 21,
-                      marginBottom: 12,
+                      marginBottom: 10.5,
                       // 🎨 CUSTOMIZATION: Comment body color
                       color: theme === 'dark' ? '#E5E5E5' : '#1F2937',
                     }}
@@ -497,7 +497,7 @@ theme={theme}
                     style={{
                       fontSize: 13,
                       lineHeight: 18,
-                      marginBottom: 12,
+                      marginBottom: 10.5,
                       color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
                     }}
                   >

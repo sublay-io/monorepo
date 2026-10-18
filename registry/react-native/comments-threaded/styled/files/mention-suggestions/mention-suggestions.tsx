@@ -30,9 +30,9 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
       // Part of the comment box, above the "Replying to" bar and the text
       // field: the box grows upward to hold the suggestions (at most 5)
       style={{
-        paddingVertical: 4,
-        // Each row has 8px padding of its own: avatars line up with the comments
-        paddingHorizontal: SECTION_PADDING_X - 8,
+        paddingVertical: 3.5,
+        // Each row has 7px padding of its own: avatars line up with the comments
+        paddingHorizontal: SECTION_PADDING_X - 7,
         // 🎨 CUSTOMIZATION: Mention suggestions background
         backgroundColor: theme === 'dark' ? '#262626' : '#FFFFFF',
       }}
@@ -62,66 +62,73 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                 }
                 handleMentionClick(item);
               }}
-              style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 12,
-                padding: 8,
-                borderRadius: 8,
-                // 🎨 CUSTOMIZATION: Press feedback
-                backgroundColor: pressed
-                  ? theme === 'dark' ? '#404040' : '#F9FAFB'
-                  : 'transparent',
-                opacity: pressed ? 0.6 : 1,
-              })}
             >
-              <UserAvatar theme={theme} user={item} size={32} />
-              <View
-                style={{
-                  flexDirection: 'column',
-                  gap: 2,
-                }}
-              >
-                <Text
+              {/* The pressed look is on a view inside: NativeWind, when the
+                  app uses it, drops a `style` given as a function */}
+              {({ pressed }) => (
+                <View
                   style={{
-                    fontSize: 14,
-                    lineHeight: 20,
-                    fontWeight: '500',
-                    // 🎨 CUSTOMIZATION: Username color
-                    color: theme === 'dark' ? '#FAFAFA' : '#111827',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 10.5,
+                    padding: 7,
+                    borderRadius: 7,
+                    // 🎨 CUSTOMIZATION: Press feedback
+                    backgroundColor: pressed
+                      ? theme === 'dark' ? '#404040' : '#F9FAFB'
+                      : 'transparent',
+                    opacity: pressed ? 0.6 : 1,
                   }}
                 >
-                  @{item.username}
-                </Text>
-                {item.name && (
-                  <Text
+                  <UserAvatar theme={theme} user={item} size={32} />
+                  <View
                     style={{
-                      fontSize: 13,
-                      lineHeight: 18,
-                      fontWeight: '400',
-                      // 🎨 CUSTOMIZATION: Name color
-                      color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
+                      flexDirection: 'column',
+                      gap: 1.75,
                     }}
                   >
-                    {item.name}
-                  </Text>
-                )}
-              </View>
+                    <Text
+                      style={{
+                        fontSize: 12.25,
+                        lineHeight: 17.5,
+                        fontWeight: '500',
+                        // 🎨 CUSTOMIZATION: Username color
+                        color: theme === 'dark' ? '#FAFAFA' : '#111827',
+                      }}
+                    >
+                      @{item.username}
+                    </Text>
+                    {item.name && (
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          lineHeight: 18,
+                          fontWeight: '400',
+                          // 🎨 CUSTOMIZATION: Name color
+                          color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
+                        }}
+                      >
+                        {item.name}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              )}
             </Pressable>
           ))}
         </View>
       ) : (
         <View
           style={{
-            paddingVertical: 16,
+            paddingVertical: 14,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
           <Text
             style={{
-              fontSize: 14,
-              lineHeight: 20,
+              fontSize: 12.25,
+              lineHeight: 17.5,
               color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
             }}
           >

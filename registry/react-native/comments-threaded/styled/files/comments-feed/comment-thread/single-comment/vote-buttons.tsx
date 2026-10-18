@@ -5,6 +5,7 @@ import {
   Comment as CommentType,
   useReactionToggle,
 } from "@sublay/react-native";
+import ChevronIcon from "~shared/react-native/chevron-icon";
 import useUIState from "../../../../hooks/use-ui-state";
 
 interface VoteButtonsProps {
@@ -44,8 +45,9 @@ function VoteButtons({
 
   // Size-based styling
   const iconSize = size === "small" ? 12 : 16;
+  const inactiveIconColor = theme === 'dark' ? '#A3A3A3' : '#6B7280';
   // The padding is on the buttons, not around them: a bigger area to tap
-  const buttonPadding = size === "small" ? 6 : 8;
+  const buttonPadding = size === "small" ? 5.25 : 7;
 
   return (
     <View
@@ -57,8 +59,8 @@ function VoteButtons({
         flexDirection: 'row',
         alignItems: 'center',
         borderRadius: 9999,
-        gap: 2,
-        padding: 2,
+        gap: 1.75,
+        padding: 1.75,
         backgroundColor: highlighted
           ? theme === 'dark' ? '#525252' : '#E5E7EB'
           : theme === 'dark' ? '#404040' : '#F9FAFB',
@@ -87,17 +89,12 @@ function VoteButtons({
             : 'transparent',
         }}
       >
-        <Text
-          style={{
-            fontSize: iconSize,
-            lineHeight: iconSize,
-            color: userVote === "up"
-              ? '#FFFFFF'
-              : theme === 'dark' ? '#A3A3A3' : '#6B7280',
-          }}
-        >
-          ▲
-        </Text>
+        <ChevronIcon
+          direction="up"
+          size={iconSize}
+          strokeWidth={2.5}
+          color={userVote === "up" ? '#FFFFFF' : inactiveIconColor}
+        />
       </TouchableOpacity>
 
       {/* Score */}
@@ -106,8 +103,8 @@ function VoteButtons({
           fontWeight: '500',
           textAlign: 'center',
           minWidth: 20,
-          fontSize: size === "small" ? 13 : 14,
-          lineHeight: size === "small" ? 18 : 20,
+          fontSize: size === "small" ? 13 : 12.25,
+          lineHeight: size === "small" ? 18 : 17.5,
           // 🎨 CUSTOMIZATION: Score color. Colored only by your own vote: blue
           // after an upvote, red after a downvote, neutral otherwise
           color:
@@ -146,17 +143,12 @@ function VoteButtons({
             : 'transparent',
         }}
       >
-        <Text
-          style={{
-            fontSize: iconSize,
-            lineHeight: iconSize,
-            color: userVote === "down"
-              ? '#FFFFFF'
-              : theme === 'dark' ? '#A3A3A3' : '#6B7280',
-          }}
-        >
-          ▼
-        </Text>
+        <ChevronIcon
+          direction="down"
+          size={iconSize}
+          strokeWidth={2.5}
+          color={userVote === "down" ? '#FFFFFF' : inactiveIconColor}
+        />
       </TouchableOpacity>
     </View>
   );

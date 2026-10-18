@@ -46,8 +46,8 @@ const Comment = React.memo(
     const { theme, openCommentOptionsSheet, openCommentOptionsSheetOwner } = useUIState();
 
     // 🎨 CUSTOMIZATION: Comment styling defaults
-    const horizontalItemsGap = 8;
-    const verticalItemsGap = 4;
+    const horizontalItemsGap = 7;
+    const verticalItemsGap = 3.5;
     const authorAvatarSize = 32;
     const authorFontSize = 13;
     const authorFontWeight = '700' as const;
@@ -56,8 +56,9 @@ const Comment = React.memo(
     const fromNowFontColor = theme === 'dark' ? '#A3A3A3' : '#737373';
     const commentBodyFontSize = 13;
     const commentBodyFontColor = theme === 'dark' ? '#FAFAFA' : '#000';
-    const actionsItemGap = 12;
-    const replyButtonFontSize = 12;
+    const actionsItemGap = 10.5;
+    const replyButtonFontSize = 10.5;
+    const replyButtonLineHeight = 14;
     const replyButtonFontWeight = '600' as const;
     const replyButtonFontColor = theme === 'dark' ? '#A3A3A3' : '#737373';
     const heartIconSize = 14;
@@ -156,7 +157,7 @@ const Comment = React.memo(
     return (
       <View
         style={{
-          paddingVertical: 8,
+          paddingVertical: 7,
           // 🎨 CUSTOMIZATION: Highlighted comment background
           backgroundColor:
             highlightedComment?.comment.id === comment.id
@@ -167,18 +168,18 @@ const Comment = React.memo(
         {isPlaceholderRow ? (
           <View
             style={{
-              paddingEnd: 16,
+              paddingEnd: 14,
               paddingStart: 16 + extraLeftPadding,
               flexDirection: "row",
               alignItems: "center",
-              gap: 12,
+              gap: 10.5,
             }}
           >
             <View
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: 32,
+                width: 28,
+                height: 28,
+                borderRadius: 9999,
                 backgroundColor: theme === 'dark' ? '#404040' : '#E5E7EB',
               }}
             />
@@ -200,7 +201,8 @@ const Comment = React.memo(
                 >
                   <Text
                     style={{
-                      fontSize: 12,
+                      fontSize: 10.5,
+                      lineHeight: 14,
                       fontWeight: "600",
                       color: theme === 'dark' ? '#A3A3A3' : '#737373',
                     }}
@@ -213,7 +215,8 @@ const Comment = React.memo(
               <TouchableOpacity onPress={() => setShowBlockedComment(true)}>
                 <Text
                   style={{
-                    fontSize: 12,
+                    fontSize: 10.5,
+                    lineHeight: 14,
                     fontWeight: "600",
                     color: theme === 'dark' ? '#FAFAFA' : '#000',
                   }}
@@ -237,7 +240,7 @@ const Comment = React.memo(
           }}
           style={{
             ...styles.container,
-            paddingEnd: 16,
+            paddingEnd: 14,
             paddingStart: 16 + extraLeftPadding,
           }}
         >
@@ -245,9 +248,9 @@ const Comment = React.memo(
             {tombstone ? (
               <View
                 style={{
-                  width: authorAvatarSize,
-                  height: authorAvatarSize,
-                  borderRadius: authorAvatarSize,
+                  width: 28,
+                  height: 28,
+                  borderRadius: 9999,
                   backgroundColor: theme === 'dark' ? '#404040' : '#E5E7EB',
                 }}
               />
@@ -359,7 +362,8 @@ theme={theme}
               {isOwnRemoved && (
                 <Text
                   style={{
-                    fontSize: 12,
+                    fontSize: 10.5,
+                    lineHeight: 14,
                     color: theme === 'dark' ? '#A3A3A3' : '#737373',
                   }}
                 >
@@ -381,6 +385,7 @@ theme={theme}
                     style={{
                       color: replyButtonFontColor,
                       fontSize: replyButtonFontSize,
+                      lineHeight: replyButtonLineHeight,
                       fontWeight: replyButtonFontWeight,
                     }}
                   >
@@ -442,8 +447,8 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     alignItems: "baseline",
-    gap: 4,
-    marginTop: 2,
+    gap: 3.5,
+    marginTop: 1.75,
   },
   authorText: {
     // Custom styles if needed

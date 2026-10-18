@@ -91,7 +91,7 @@ const ReportCommentSheet = () => {
     >
       <BottomSheetView
         style={{
-          padding: 28,
+          padding: 24.5,
           flex: 1,
           height: "100%",
           justifyContent: "space-between",
@@ -102,7 +102,7 @@ const ReportCommentSheet = () => {
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: 16,
+              gap: 14,
             }}
           >
             <FlagIcon
@@ -110,7 +110,8 @@ const ReportCommentSheet = () => {
               color={theme === 'dark' ? '#FAFAFA' : '#e5e7eb'}
             />
             <Text style={{
-              fontSize: 24,
+              fontSize: 21,
+              lineHeight: 28,
               color: theme === 'dark' ? '#FAFAFA' : '#e5e7eb',
             }}>
               {strings.reportTitle}
@@ -119,7 +120,7 @@ const ReportCommentSheet = () => {
           <Text
             style={{
               color: theme === 'dark' ? '#FAFAFA' : '#e5e7eb',
-              marginTop: 24,
+              marginTop: 21,
             }}
           >
             {strings.reportIntro}
@@ -129,8 +130,8 @@ const ReportCommentSheet = () => {
             style={{
               flexDirection: "row",
               flexWrap: "wrap",
-              gap: 12,
-              marginTop: 24,
+              gap: 10.5,
+              marginTop: 21,
             }}
           >
             {Object.entries(strings.reportReasons).map(([key, value], index) => (
@@ -140,9 +141,9 @@ const ReportCommentSheet = () => {
                 style={{
                   borderWidth: 1,
                   borderColor: theme === 'dark' ? '#525252' : '#e5e7eb',
-                  paddingHorizontal: 16,
-                  paddingVertical: 10,
-                  borderRadius: 12,
+                  paddingHorizontal: 14,
+                  paddingVertical: 8.75,
+                  borderRadius: 10.5,
                   backgroundColor: key === reason
                     ? (theme === 'dark' ? '#404040' : '#f9fafb')
                     : "transparent",

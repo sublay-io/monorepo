@@ -13,15 +13,15 @@ const CommentsFooterComponent = () => {
     return (
       <View
         style={{
-          padding: 12,
+          padding: 10.5,
           flexDirection: "row",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <Text style={{ fontSize: 12, color: mutedColor }}>{strings.loadMoreFailed} · </Text>
+        <Text style={{ fontSize: 10.5, lineHeight: 14, color: mutedColor }}>{strings.loadMoreFailed} · </Text>
         <TouchableOpacity onPress={() => loadMore?.()}>
-          <Text style={{ fontSize: 12, fontWeight: '600', color: mutedColor }}>
+          <Text style={{ fontSize: 10.5, lineHeight: 14, fontWeight: '600', color: mutedColor }}>
             {strings.tryAgain}
           </Text>
         </TouchableOpacity>
@@ -34,7 +34,7 @@ const CommentsFooterComponent = () => {
     loading && (
       <View
         style={{
-          padding: 12,
+          padding: 10.5,
           justifyContent: "center",
           alignItems: "center",
         }}

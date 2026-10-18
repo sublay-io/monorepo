@@ -31,8 +31,8 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
     <View
       // 🎨 CUSTOMIZATION: Mention suggestions background
       className={`py-1 ${theme === 'dark' ? 'bg-neutral-800' : 'bg-white'}`}
-      // Each row has 8px padding of its own: avatars line up with the comments
-      style={{ paddingHorizontal: SECTION_PADDING_X - 8 }}
+      // Each row has 7px padding of its own: avatars line up with the comments
+      style={{ paddingHorizontal: SECTION_PADDING_X - 7 }}
     >
       {isLoadingMentions ? (
         <View style={{ gap: 4 }}>

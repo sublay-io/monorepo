@@ -35,6 +35,56 @@ const strings = {
   sortOld: "الأقدم",
   sortControversial: "مثيرة للجدل",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "الآن",
+    minutes: (count: number) =>
+      plural(
+        count,
+        "قبل دقيقة",
+        "قبل دقيقتين",
+        `قبل ${count} دقائق`,
+        `قبل ${count} دقيقة`,
+        `قبل ${count} دقيقة`,
+      ),
+    hours: (count: number) =>
+      plural(
+        count,
+        "قبل ساعة",
+        "قبل ساعتين",
+        `قبل ${count} ساعات`,
+        `قبل ${count} ساعة`,
+        `قبل ${count} ساعة`,
+      ),
+    days: (count: number) =>
+      plural(
+        count,
+        "قبل يوم",
+        "قبل يومين",
+        `قبل ${count} أيام`,
+        `قبل ${count} يومًا`,
+        `قبل ${count} يوم`,
+      ),
+    months: (count: number) =>
+      plural(
+        count,
+        "قبل شهر",
+        "قبل شهرين",
+        `قبل ${count} أشهر`,
+        `قبل ${count} شهرًا`,
+        `قبل ${count} شهر`,
+      ),
+    years: (count: number) =>
+      plural(
+        count,
+        "قبل سنة",
+        "قبل سنتين",
+        `قبل ${count} سنوات`,
+        `قبل ${count} سنة`,
+        `قبل ${count} سنة`,
+      ),
+  },
+
   // Comment list
   noCommentsTitle: "لا توجد تعليقات بعد",
   noCommentsSubtitle: "ابدأ النقاش.",

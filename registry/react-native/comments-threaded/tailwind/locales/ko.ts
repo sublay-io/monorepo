@@ -18,6 +18,16 @@ const strings = {
   sortOld: "오래된순",
   sortControversial: "논쟁적",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "방금 전",
+    minutes: (count: number) => `${count}분 전`,
+    hours: (count: number) => `${count}시간 전`,
+    days: (count: number) => `${count}일 전`,
+    months: (count: number) => `${count}개월 전`,
+    years: (count: number) => `${count}년 전`,
+  },
+
   // Comment list
   noCommentsTitle: "아직 댓글이 없습니다",
   noCommentsSubtitle: "대화를 시작해 보세요.",

@@ -11,6 +11,7 @@
   ],
   "shared": [
     "flag-icon",
+    "from-now",
     "giphy-container",
     "modal",
     "parse-content-with-mentions",

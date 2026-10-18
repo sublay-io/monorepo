@@ -18,6 +18,21 @@ const strings = {
   sortOld: "Äldst",
   sortControversial: "Kontroversiella",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Just nu",
+    minutes: (count: number) =>
+      count === 1 ? "för en minut sedan" : `för ${count} minuter sedan`,
+    hours: (count: number) =>
+      count === 1 ? "för en timme sedan" : `för ${count} timmar sedan`,
+    days: (count: number) =>
+      count === 1 ? "för en dag sedan" : `för ${count} dagar sedan`,
+    months: (count: number) =>
+      count === 1 ? "för en månad sedan" : `för ${count} månader sedan`,
+    years: (count: number) =>
+      count === 1 ? "för ett år sedan" : `för ${count} år sedan`,
+  },
+
   // Comment list
   noCommentsTitle: "Inga kommentarer än",
   noCommentsSubtitle: "Starta samtalet.",

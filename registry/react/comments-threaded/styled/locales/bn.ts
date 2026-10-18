@@ -18,6 +18,16 @@ const strings = {
   sortOld: "পুরনো",
   sortControversial: "বিতর্কিত",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "এইমাত্র",
+    minutes: (count: number) => `${count} মিনিট আগে`,
+    hours: (count: number) => `${count} ঘণ্টা আগে`,
+    days: (count: number) => `${count} দিন আগে`,
+    months: (count: number) => `${count} মাস আগে`,
+    years: (count: number) => `${count} বছর আগে`,
+  },
+
   // Comment list
   noCommentsTitle: "এখনও কোনো মন্তব্য নেই",
   noCommentsSubtitle: "আলোচনা শুরু করুন।",

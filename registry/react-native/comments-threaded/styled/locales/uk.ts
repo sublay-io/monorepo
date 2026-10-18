@@ -27,6 +27,21 @@ const strings = {
   sortOld: "Старі",
   sortControversial: "Суперечливі",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Щойно",
+    minutes: (count: number) =>
+      plural(count, `${count} хвилину тому`, `${count} хвилини тому`, `${count} хвилин тому`),
+    hours: (count: number) =>
+      plural(count, `${count} годину тому`, `${count} години тому`, `${count} годин тому`),
+    days: (count: number) =>
+      plural(count, `${count} день тому`, `${count} дні тому`, `${count} днів тому`),
+    months: (count: number) =>
+      plural(count, `${count} місяць тому`, `${count} місяці тому`, `${count} місяців тому`),
+    years: (count: number) =>
+      plural(count, `${count} рік тому`, `${count} роки тому`, `${count} років тому`),
+  },
+
   // Comment list
   noCommentsTitle: "Коментарів поки немає",
   noCommentsSubtitle: "Почніть обговорення.",

@@ -27,6 +27,41 @@ const strings = {
   sortOld: "Старые",
   sortControversial: "Спорные",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Только что",
+    minutes: (count: number) =>
+      plural(
+        count,
+        `${count} минуту назад`,
+        `${count} минуты назад`,
+        `${count} минут назад`,
+      ),
+    hours: (count: number) =>
+      plural(
+        count,
+        `${count} час назад`,
+        `${count} часа назад`,
+        `${count} часов назад`,
+      ),
+    days: (count: number) =>
+      plural(
+        count,
+        `${count} день назад`,
+        `${count} дня назад`,
+        `${count} дней назад`,
+      ),
+    months: (count: number) =>
+      plural(
+        count,
+        `${count} месяц назад`,
+        `${count} месяца назад`,
+        `${count} месяцев назад`,
+      ),
+    years: (count: number) =>
+      plural(count, `${count} год назад`, `${count} года назад`, `${count} лет назад`),
+  },
+
   // Comment list
   noCommentsTitle: "Комментариев пока нет",
   noCommentsSubtitle: "Начните обсуждение.",

@@ -18,6 +18,21 @@ const strings = {
   sortOld: "ישנות",
   sortControversial: "שנויות במחלוקת",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "עכשיו",
+    minutes: (count: number) =>
+      count === 1 ? "לפני דקה" : count === 2 ? "לפני שתי דקות" : `לפני ${count} דקות`,
+    hours: (count: number) =>
+      count === 1 ? "לפני שעה" : count === 2 ? "לפני שעתיים" : `לפני ${count} שעות`,
+    days: (count: number) =>
+      count === 1 ? "לפני יום" : count === 2 ? "לפני יומיים" : `לפני ${count} ימים`,
+    months: (count: number) =>
+      count === 1 ? "לפני חודש" : count === 2 ? "לפני חודשיים" : `לפני ${count} חודשים`,
+    years: (count: number) =>
+      count === 1 ? "לפני שנה" : count === 2 ? "לפני שנתיים" : `לפני ${count} שנים`,
+  },
+
   // Comment list
   noCommentsTitle: "אין עדיין תגובות",
   noCommentsSubtitle: "התחילו את השיחה.",

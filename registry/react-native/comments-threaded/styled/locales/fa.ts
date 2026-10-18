@@ -18,6 +18,20 @@ const strings = {
   sortOld: "قدیمی‌ترین",
   sortControversial: "بحث‌برانگیز",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "همین حالا",
+    minutes: (count: number) =>
+      count === 1 ? "یک دقیقه پیش" : `${count} دقیقه پیش`,
+    hours: (count: number) =>
+      count === 1 ? "یک ساعت پیش" : `${count} ساعت پیش`,
+    days: (count: number) => (count === 1 ? "یک روز پیش" : `${count} روز پیش`),
+    months: (count: number) =>
+      count === 1 ? "یک ماه پیش" : `${count} ماه پیش`,
+    years: (count: number) =>
+      count === 1 ? "یک سال پیش" : `${count} سال پیش`,
+  },
+
   // Comment list
   noCommentsTitle: "هنوز نظری ثبت نشده",
   noCommentsSubtitle: "گفت‌وگو را شروع کنید.",

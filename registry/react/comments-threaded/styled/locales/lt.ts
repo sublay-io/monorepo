@@ -28,6 +28,31 @@ const strings = {
   sortOld: "Seniausi",
   sortControversial: "Prieštaringi",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Ką tik",
+    minutes: (count: number) =>
+      count === 1
+        ? "prieš minutę"
+        : plural(count, `prieš ${count} minutę`, `prieš ${count} minutes`, `prieš ${count} minučių`),
+    hours: (count: number) =>
+      count === 1
+        ? "prieš valandą"
+        : plural(count, `prieš ${count} valandą`, `prieš ${count} valandas`, `prieš ${count} valandų`),
+    days: (count: number) =>
+      count === 1
+        ? "prieš dieną"
+        : plural(count, `prieš ${count} dieną`, `prieš ${count} dienas`, `prieš ${count} dienų`),
+    months: (count: number) =>
+      count === 1
+        ? "prieš mėnesį"
+        : plural(count, `prieš ${count} mėnesį`, `prieš ${count} mėnesius`, `prieš ${count} mėnesių`),
+    years: (count: number) =>
+      count === 1
+        ? "prieš metus"
+        : plural(count, `prieš ${count} metus`, `prieš ${count} metus`, `prieš ${count} metų`),
+  },
+
   // Comment list
   noCommentsTitle: "Komentarų dar nėra",
   noCommentsSubtitle: "Pradėkite pokalbį.",

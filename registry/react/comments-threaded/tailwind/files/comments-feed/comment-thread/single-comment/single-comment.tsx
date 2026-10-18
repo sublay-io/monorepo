@@ -11,6 +11,7 @@ import {
 } from "@sublay/react-js";
 import { parseContentWithMentions } from "~shared/react/parse-content-with-mentions";
 import UserAvatar from "~shared/react/user-avatar";
+import FromNow from "~shared/react/from-now";
 import VoteButtons from "./vote-buttons";
 import ActionMenu from "../action-menu";
 import NewReplyForm from "../new-reply-form";
@@ -288,7 +289,13 @@ function SingleComment({
                 </span>
                 )}
                 <span className="text-gray-500 dark:text-neutral-400">•</span>
-                <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
+                {/* Takes the row's size and color */}
+                <FromNow
+                  time={comment.createdAt}
+                  strings={strings.timeAgo}
+                  fontSize={13}
+                  color="inherit"
+                />
                 {/* Collapsed: the text on the same line, cut to fit */}
                 {isCollapsed && !tombstone && comment.content ? (
                   <>

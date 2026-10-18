@@ -18,6 +18,21 @@ const strings = {
   sortOld: "Παλαιότερα",
   sortControversial: "Αμφιλεγόμενα",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Μόλις τώρα",
+    minutes: (count: number) =>
+      count === 1 ? "πριν από ένα λεπτό" : `πριν από ${count} λεπτά`,
+    hours: (count: number) =>
+      count === 1 ? "πριν από μία ώρα" : `πριν από ${count} ώρες`,
+    days: (count: number) =>
+      count === 1 ? "πριν από μία μέρα" : `πριν από ${count} μέρες`,
+    months: (count: number) =>
+      count === 1 ? "πριν από έναν μήνα" : `πριν από ${count} μήνες`,
+    years: (count: number) =>
+      count === 1 ? "πριν από έναν χρόνο" : `πριν από ${count} χρόνια`,
+  },
+
   // Comment list
   noCommentsTitle: "Δεν υπάρχουν σχόλια ακόμα",
   noCommentsSubtitle: "Ξεκίνα τη συζήτηση.",

@@ -19,6 +19,20 @@ const strings = {
   sortOld: "Old",
   sortControversial: "Controversial",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Just now",
+    minutes: (count: number) =>
+      count === 1 ? "a minute ago" : `${count} minutes ago`,
+    hours: (count: number) =>
+      count === 1 ? "an hour ago" : `${count} hours ago`,
+    days: (count: number) => (count === 1 ? "a day ago" : `${count} days ago`),
+    months: (count: number) =>
+      count === 1 ? "a month ago" : `${count} months ago`,
+    years: (count: number) =>
+      count === 1 ? "a year ago" : `${count} years ago`,
+  },
+
   // Comment list
   noCommentsTitle: "No comments yet",
   noCommentsSubtitle: "Start the conversation.",

@@ -18,6 +18,21 @@ const strings = {
   sortOld: "जुने",
   sortControversial: "वादग्रस्त",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "आत्ताच",
+    minutes: (count: number) =>
+      count === 1 ? "एका मिनिटापूर्वी" : `${count} मिनिटांपूर्वी`,
+    hours: (count: number) =>
+      count === 1 ? "एका तासापूर्वी" : `${count} तासांपूर्वी`,
+    days: (count: number) =>
+      count === 1 ? "एका दिवसापूर्वी" : `${count} दिवसांपूर्वी`,
+    months: (count: number) =>
+      count === 1 ? "एका महिन्यापूर्वी" : `${count} महिन्यांपूर्वी`,
+    years: (count: number) =>
+      count === 1 ? "एका वर्षापूर्वी" : `${count} वर्षांपूर्वी`,
+  },
+
   // Comment list
   noCommentsTitle: "अद्याप कोणत्याही टिप्पण्या नाहीत",
   noCommentsSubtitle: "चर्चा सुरू करा.",

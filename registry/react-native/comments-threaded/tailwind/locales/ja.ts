@@ -18,6 +18,16 @@ const strings = {
   sortOld: "古い順",
   sortControversial: "賛否両論",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "たった今",
+    minutes: (count: number) => `${count}分前`,
+    hours: (count: number) => `${count}時間前`,
+    days: (count: number) => `${count}日前`,
+    months: (count: number) => `${count}か月前`,
+    years: (count: number) => `${count}年前`,
+  },
+
   // Comment list
   noCommentsTitle: "まだコメントはありません",
   noCommentsSubtitle: "最初のコメントを投稿しましょう。",

@@ -27,6 +27,26 @@ const strings = {
   sortOld: "Najstarsze",
   sortControversial: "Kontrowersyjne",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Przed chwilą",
+    minutes: (count: number) =>
+      plural(count, "minutę temu", `${count} minuty temu`, `${count} minut temu`),
+    hours: (count: number) =>
+      plural(count, "godzinę temu", `${count} godziny temu`, `${count} godzin temu`),
+    days: (count: number) =>
+      plural(count, "dzień temu", `${count} dni temu`, `${count} dni temu`),
+    months: (count: number) =>
+      plural(
+        count,
+        "miesiąc temu",
+        `${count} miesiące temu`,
+        `${count} miesięcy temu`,
+      ),
+    years: (count: number) =>
+      plural(count, "rok temu", `${count} lata temu`, `${count} lat temu`),
+  },
+
   // Comment list
   noCommentsTitle: "Brak komentarzy",
   noCommentsSubtitle: "Rozpocznij rozmowę.",

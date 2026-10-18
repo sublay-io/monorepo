@@ -18,6 +18,19 @@ const strings = {
   sortOld: "Oud",
   sortControversial: "Controversieel",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Zojuist",
+    minutes: (count: number) =>
+      count === 1 ? "een minuut geleden" : `${count} minuten geleden`,
+    hours: (count: number) => count === 1 ? "een uur geleden" : `${count} uur geleden`,
+    days: (count: number) => count === 1 ? "een dag geleden" : `${count} dagen geleden`,
+    months: (count: number) =>
+      count === 1 ? "een maand geleden" : `${count} maanden geleden`,
+    years: (count: number) =>
+      count === 1 ? "een jaar geleden" : `${count} jaar geleden`,
+  },
+
   // Comment list
   noCommentsTitle: "Nog geen reacties",
   noCommentsSubtitle: "Begin het gesprek.",

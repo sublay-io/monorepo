@@ -16,6 +16,7 @@
   "shared": [
     "custom-button",
     "flag-icon",
+    "from-now",
     "get-image-component",
     "giphy-container",
     "parse-content-with-mentions",

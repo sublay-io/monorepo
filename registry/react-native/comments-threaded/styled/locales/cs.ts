@@ -25,6 +25,20 @@ const strings = {
   sortOld: "Nejstarší",
   sortControversial: "Kontroverzní",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Právě teď",
+    minutes: (count: number) =>
+      count === 1 ? "před minutou" : `před ${count} minutami`,
+    hours: (count: number) =>
+      count === 1 ? "před hodinou" : `před ${count} hodinami`,
+    days: (count: number) => (count === 1 ? "před dnem" : `před ${count} dny`),
+    months: (count: number) =>
+      count === 1 ? "před měsícem" : `před ${count} měsíci`,
+    years: (count: number) =>
+      count === 1 ? "před rokem" : `před ${count} lety`,
+  },
+
   // Comment list
   noCommentsTitle: "Zatím žádné komentáře",
   noCommentsSubtitle: "Začněte konverzaci.",

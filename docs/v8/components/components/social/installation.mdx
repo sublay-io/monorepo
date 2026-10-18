@@ -206,6 +206,22 @@ function Post({ post }) {
 Make sure your app is wrapped with `<SublayProvider>`. See the [Quick Start Guide](/v8/components/installation/quick-start) for setup details.
 </Info>
 
+<Info>
+On React Native and Expo, the sheets (the comment menu, Report) also need your whole app wrapped in `<GestureHandlerRootView style={{ flex: 1 }}>` from `react-native-gesture-handler`. Without it they don't open or drag. `react-native-reanimated` needs its Babel setup too: Expo's preset does it for you; on React Native, follow [Reanimated's install steps](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/getting-started/).
+
+```tsx
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SublayProvider projectId="your-project-id">{/* your app */}</SublayProvider>
+    </GestureHandlerRootView>
+  );
+}
+```
+</Info>
+
 ---
 
 ## Platform Support

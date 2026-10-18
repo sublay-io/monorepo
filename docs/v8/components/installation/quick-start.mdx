@@ -137,16 +137,20 @@ Wrap your app (or the relevant section) with `SublayProvider`:
   <Tab title="React Native / Expo">
     ```tsx
     // App.tsx
+    import { GestureHandlerRootView } from 'react-native-gesture-handler';
     import { SublayProvider } from '@sublay/react-native'; // or '@sublay/expo'
 
     function App() {
       return (
-        <SublayProvider
-          projectId="your-project-id"
-          signedToken={yourAuthToken}
-        >
-          {/* Your app content */}
-        </SublayProvider>
+        // The comment sections' sheets need the gesture handler root
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SublayProvider
+            projectId="your-project-id"
+            signedToken={yourAuthToken}
+          >
+            {/* Your app content */}
+          </SublayProvider>
+        </GestureHandlerRootView>
       );
     }
     ```

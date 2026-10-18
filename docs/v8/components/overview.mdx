@@ -107,7 +107,7 @@ Choose your variant during `init` — you can switch by re-running `add` command
 
 ## What Gets Installed
 
-When you add a comment component, about **40 TypeScript/TSX files** are copied into your project (42 for threaded comments on React, 44 on React Native and Expo; 42 for social comments, or 43 for the inline styles variant of social comments on React Native and Expo):
+When you add a comment component, about **40 TypeScript/TSX files** are copied into your project (42 for threaded comments on React, 45 on React Native and Expo; 42 for social comments, or 43 for the inline styles variant of social comments on React Native and Expo):
 
 ```
 src/components/comments-threaded/
@@ -147,7 +147,7 @@ Components depend on Sublay's core libraries for data fetching, real-time update
 | Package | Used for |
 |---------|----------|
 | `@sublay/react-native` `^8.0.0-beta.0` (`@sublay/expo` on Expo) | Data, authentication, real-time updates |
-| `@gorhom/bottom-sheet` `^5.0.0`, `react-native-reanimated` `^3.16.0` | The comment menu and report sheets |
+| `@gorhom/bottom-sheet` `^5.0.0`, `react-native-reanimated` `>=3.16.0` | The comment menu and report sheets, and the collapse slide of threaded comments |
 | `react-native-gesture-handler` `^2.31.1` | The sheets and the GIF picker |
 | `react-native-svg` `^15` | Icons and the generated avatar for users without one |
 | `nativewind` `^4.0.0` | Tailwind variant only |

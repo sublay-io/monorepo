@@ -22,7 +22,7 @@ function ReplyBanner() {
 
   return (
     <View
-      className="flex-row items-center gap-1.5 pb-2"
+      className="flex-row items-center gap-1.5 pt-2 pb-2"
       style={{ paddingHorizontal: SECTION_PADDING_X }}
     >
       {/* 🎨 CUSTOMIZATION: "Replying to" label color */}
@@ -57,12 +57,10 @@ function ReplyBanner() {
         accessibilityRole="button"
         accessibilityLabel={strings.cancelReply}
         hitSlop={8}
-        className={`ms-auto w-5 h-5 items-center justify-center rounded-full active:opacity-50 ${
-          theme === 'dark' ? 'bg-neutral-700' : 'bg-gray-100'
-        }`}
+        className="ms-auto px-1 items-center justify-center active:opacity-50"
       >
         <Text
-          className={`text-sm leading-4 ${
+          className={`text-xl leading-5 ${
             theme === 'dark' ? 'text-neutral-300' : 'text-gray-600'
           }`}
         >

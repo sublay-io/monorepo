@@ -260,6 +260,8 @@ function SingleComment({
             <div
               className={cn("flex items-center justify-between", !isCollapsed && "mb-1")}
               // 🎨 CUSTOMIZATION: Spacing
+              // As tall as the avatar, so the name and date sit level with it
+              style={{ minHeight: `${AVATAR_SIZE}px` }}
             >
               <div
                 className="flex flex-1 min-w-0 items-center gap-2 text-[13px] text-gray-500 dark:text-neutral-400"

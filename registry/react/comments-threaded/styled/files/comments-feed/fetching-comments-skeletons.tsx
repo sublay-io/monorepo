@@ -18,7 +18,7 @@ function FetchingCommentsSkeletons() {
       {[1, 2, 3].map((i) => (
         <CommentSkeleton
           theme={theme}
-          avatarSize={24}
+          avatarSize={28}
           gap={12}
           lineGap={12}
           paddingLeft={0}

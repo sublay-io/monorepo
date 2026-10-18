@@ -57,8 +57,8 @@ const Comment = React.memo(
     const commentBodyFontSize = 13;
     const commentBodyFontColor = theme === 'dark' ? '#FAFAFA' : '#000';
     const actionsItemGap = 10.5;
-    const replyButtonFontSize = 10.5;
-    const replyButtonLineHeight = 14;
+    const replyButtonFontSize = 12.25;
+    const replyButtonLineHeight = 17.5;
     const replyButtonFontWeight = '600' as const;
     const replyButtonFontColor = theme === 'dark' ? '#A3A3A3' : '#737373';
     const heartIconSize = 14;

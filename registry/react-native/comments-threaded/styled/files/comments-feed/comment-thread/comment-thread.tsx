@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { View, LayoutAnimation } from "react-native";
+import Animated, { LinearTransition } from "react-native-reanimated";
 import {
   Comment as CommentType,
   useCommentSection,
@@ -21,6 +21,9 @@ export interface CommentThreadProps {
    */
   parentColumnContinues?: boolean;
 }
+
+// 🎨 CUSTOMIZATION: How long the slide takes, in ms
+const COLLAPSE_TRANSITION = LinearTransition.duration(180);
 
 function CommentThread({
   comment,
@@ -47,9 +50,6 @@ function CommentThread({
   const hiddenRepliesCount = Math.max(0, replyCount - allReplies.length);
 
   const handleToggleCollapse = () => {
-    // Animates the row shrinking or growing and the replies leaving or coming
-    // back (the next layout change only)
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setIsCollapsed((collapsed) => !collapsed);
   };
 
@@ -65,8 +65,10 @@ function CommentThread({
 
   return (
     // The wrapper spans the comment and everything nested under it, which is
-    // what the threading lines measure themselves against.
-    <View>
+    // what the threading lines measure themselves against. When its size
+    // changes (collapsing, expanding), it and the threads after it slide to
+    // their new place instead of jumping; replies leave and arrive at once.
+    <Animated.View layout={COLLAPSE_TRANSITION}>
       <SingleComment
         comment={comment}
         depth={depth}
@@ -106,7 +108,7 @@ function CommentThread({
           }
         />
       )}
-    </View>
+    </Animated.View>
   );
 }
 

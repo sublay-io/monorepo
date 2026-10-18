@@ -20,6 +20,7 @@
     "get-image-component",
     "giphy-container",
     "parse-content-with-mentions",
+    "send-icon",
     "skeleton",
     "trash-icon",
     "use-text-input-cursor-indicator",

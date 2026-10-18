@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count}টি উত্তর`,
   moreReplyCount: (count: number) => `আরও ${count}টি উত্তর`,
   moreReplies: "আরও উত্তর",
-  continueThread: "এই থ্রেডটি চালিয়ে যান",
   removeYourVote: "আপনার ভোট সরান",
 
   // Comments that can't be shown

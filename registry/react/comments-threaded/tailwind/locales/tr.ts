@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} yanıt`,
   moreReplyCount: (count: number) => `${count} yanıt daha`,
   moreReplies: "Diğer yanıtlar",
-  continueThread: "Bu konuya devam et",
   expandThread: "Konuyu genişlet",
   collapseThread: "Konuyu daralt",
   moreOptions: "Diğer seçenekler",

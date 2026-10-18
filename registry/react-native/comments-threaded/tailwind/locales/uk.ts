@@ -44,7 +44,6 @@ const strings = {
   moreReplyCount: (count: number) =>
     plural(count, `ще ${count} відповідь`, `ще ${count} відповіді`, `ще ${count} відповідей`),
   moreReplies: "Ще відповіді",
-  continueThread: "Продовжити гілку",
   removeYourVote: "Прибрати свій голос",
 
   // Comments that can't be shown

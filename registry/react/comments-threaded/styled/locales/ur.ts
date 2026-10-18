@@ -35,7 +35,6 @@ const strings = {
   moreReplyCount: (count: number) =>
     count === 1 ? `مزید ${count} جواب` : `مزید ${count} جوابات`,
   moreReplies: "مزید جوابات",
-  continueThread: "یہ تھریڈ جاری رکھیں",
   expandThread: "تھریڈ کھولیں",
   collapseThread: "تھریڈ سمیٹیں",
   moreOptions: "مزید اختیارات",

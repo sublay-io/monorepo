@@ -47,7 +47,6 @@ const strings = {
       `ještě ${count} odpovědí`,
     ),
   moreReplies: "Další odpovědi",
-  continueThread: "Pokračovat ve vlákně",
   expandThread: "Rozbalit vlákno",
   collapseThread: "Sbalit vlákno",
   moreOptions: "Další možnosti",

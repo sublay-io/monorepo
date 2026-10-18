@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} válasz`,
   moreReplyCount: (count: number) => `még ${count} válasz`,
   moreReplies: "További válaszok",
-  continueThread: "Szál folytatása",
   expandThread: "Szál kibontása",
   collapseThread: "Szál összecsukása",
   moreOptions: "További lehetőségek",

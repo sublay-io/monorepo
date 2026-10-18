@@ -50,7 +50,6 @@ const strings = {
       `dar ${count} atsakymų`,
     ),
   moreReplies: "Daugiau atsakymų",
-  continueThread: "Tęsti giją",
   removeYourVote: "Atšaukti savo balsą",
 
   // Comments that can't be shown

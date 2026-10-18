@@ -39,7 +39,6 @@ const strings = {
         ? "שתי תגובות נוספות"
         : `${count} תגובות נוספות`,
   moreReplies: "תגובות נוספות",
-  continueThread: "המשך השרשור",
   removeYourVote: "הסרת ההצבעה",
 
   // Comments that can't be shown

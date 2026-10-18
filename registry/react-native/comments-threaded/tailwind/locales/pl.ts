@@ -49,7 +49,6 @@ const strings = {
       `jeszcze ${count} odpowiedzi`,
     ),
   moreReplies: "Więcej odpowiedzi",
-  continueThread: "Kontynuuj ten wątek",
   removeYourVote: "Cofnij swój głos",
 
   // Comments that can't be shown

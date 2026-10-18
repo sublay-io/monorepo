@@ -35,7 +35,6 @@ const strings = {
   moreReplyCount: (count: number) =>
     count === 1 ? "మరో 1 ప్రత్యుత్తరం" : `మరో ${count} ప్రత్యుత్తరాలు`,
   moreReplies: "మరిన్ని ప్రత్యుత్తరాలు",
-  continueThread: "ఈ థ్రెడ్‌ను కొనసాగించండి",
   expandThread: "థ్రెడ్‌ను విస్తరించండి",
   collapseThread: "థ్రెడ్‌ను కుదించండి",
   moreOptions: "మరిన్ని ఎంపికలు",

@@ -54,7 +54,6 @@ const strings = {
       `још ${count} одговора`,
     ),
   moreReplies: "Још одговора",
-  continueThread: "Настави нит",
   expandThread: "Прошири нит",
   collapseThread: "Скупи нит",
   moreOptions: "Још опција",

@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} sagot`,
   moreReplyCount: (count: number) => `${count} pang sagot`,
   moreReplies: "Iba pang sagot",
-  continueThread: "Ituloy ang thread na ito",
   removeYourVote: "Alisin ang iyong boto",
 
   // Comments that can't be shown

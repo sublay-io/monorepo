@@ -73,8 +73,7 @@ Choosing an option reloads the comments in that order.
 
 The section loads its first screen in a single request: 10 top-level comments, each with up to 3 replies, 2 levels deep.
 
-- **More replies** — when a comment has more replies than are shown, a "N more replies" button loads the next ones in place.
-- **Continue this thread** — comments below the second level show a "Continue this thread" button that loads their replies right there, again with a few levels of nesting. Indentation stops growing after 6 levels.
+- **More replies** — when a comment has replies that aren't shown, a "N more replies" button loads them in place. That covers replies beyond the ones listed, and replies of comments below the second level, which the first screen doesn't bring; those load with a few levels of nesting again. Indentation stops growing after 6 levels.
 - **Load more comments** — a button under the list loads the next top-level comments.
 
 Reply counts come from each comment's `repliesCount`; whether a "more" button shows is driven by `hasMore`. To change how much loads up front, edit `limit`, `replyDepth` and `replyLimit` in `providerProps` in `hooks/use-threaded-comments.tsx`.
@@ -119,7 +118,7 @@ Clear visual hierarchy with indentation and connection lines.
 
 - Each reply level is indented by 24px, up to 6 levels; deeper replies stay in one column
 - One continuous line runs from under a comment's avatar down to its last reply, with a rounded elbow into each reply's avatar
-- The "N more replies" / "Continue this thread" row hangs from the same line, and so does the reply box on React
+- The "N more replies" row hangs from the same line, and so does the reply box on React
 - Collapsing a thread removes its lines along with its replies
 
 The geometry is a set of named values at the top of `indentation-threading-lines.tsx`. Every line is derived from them, so changing one keeps the joins intact:
@@ -144,7 +143,7 @@ The line color is set in the same file.
 
 Users can collapse a comment and everything under it, at any depth.
 
-- **React (Web)** — click `[-]` beside the author's name to collapse a comment and all its replies, and `[+]` to expand it. A collapsed comment shows its reply count.
+- **React (Web)** — a comment with replies has a ⊖ circle on its line, level with its Reply and vote buttons. Hovering the line, the circle, or the elbow into any of its direct replies highlights that whole line (white in dark mode, near-black in light); clicking any of them collapses the comment. A collapsed comment is a single row: a ⊕ in place of the avatar, then the name, the time and the start of its text, cut to fit, with its replies hidden. Clicking the row or the ⊕ expands it. The line pieces, the hit areas and the circle are in `indentation-threading-lines.tsx`; each comment's hover state is in `comment-thread.tsx`.
 - **React Native and Expo** — tap the comment itself. It shrinks to a single row, avatar, name, time and the start of its text, cut off to fit, and its replies are hidden. Tap the row again to expand it. The avatar, the name, the votes, Reply, the menu and mention links keep their own taps. Collapsing and expanding animate with React Native's `LayoutAnimation`; the row is in `single-comment.tsx` and the collapsed state in `comment-thread.tsx`.
 
 ---
@@ -175,7 +174,7 @@ Deep-link to a specific comment and open the section focused on its thread.
 While the highlighted comment loads, the section shows its loading skeletons. Once it loads, the component shows only that comment's thread:
 
 1. The highlighted comment's parent at the top, with the highlighted comment under it marked: a subtle background across its whole row, a blue tint on the indentation beside it, and a blue connector line leading into it. A top-level comment is shown on its own, as the top of the thread.
-2. The normal replies machinery under them — load more replies, "Continue this thread", voting, replying and deleting work as everywhere else in the section.
+2. The normal replies machinery under them — "N more replies", voting, replying and deleting work as everywhere else in the section.
 3. A **View all comments** button above the thread. It switches to the full comment section: the regular thread from the top, loaded as usual. The highlighted comment is marked there when it is among the loaded comments; a comment deeper in the thread, or further down the list, shows once its thread is loaded. Opening the link again returns to the focused view. Posting a new top-level comment from the focused view switches to the full section too, so the new comment is visible; replies posted inside the focused thread keep the focused view.
 
 If the highlighted comment doesn't exist, the section shows the full comment list. A deleted or removed comment is focused like any other, as its placeholder.
@@ -227,7 +226,7 @@ When a load fails, the component shows a retry instead of a wrong or stuck state
 - **First load fails** — "Couldn't load comments" with a **Try again** button, in place of the empty state.
 - **The entity can't be loaded** — the same "Couldn't load comments" with **Try again**. This is the case when the section looks the entity up from `entityId`, `foreignId` or `shortId` and the lookup fails or finds nothing. A `foreignId` that has no entity yet finds nothing unless the section is given [`createIfNotFound`](/v8/components/components/threaded/props-api#createifnotfound).
 - **"Load more comments" fails** — "Couldn't load more · Try again" in place of the button.
-- **"N more replies" or "Continue this thread" fails** — the same "Couldn't load more · Try again" in place of that button, including inside the focused thread view.
+- **"N more replies" fails** — the same "Couldn't load more · Try again" in place of that button, including inside the focused thread view.
 
 **Try again** calls the same `loadMore()` that failed, which re-sends the failed request. When the entity couldn't be loaded, it looks the entity up again first, and the comments load once it is found. Edit the text in `comments-feed.tsx` and `comment-thread/comment-replies.tsx`.
 

@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count}件の返信`,
   moreReplyCount: (count: number) => `他${count}件の返信`,
   moreReplies: "その他の返信",
-  continueThread: "このスレッドの続きを表示",
   removeYourVote: "評価を取り消す",
 
   // Comments that can't be shown

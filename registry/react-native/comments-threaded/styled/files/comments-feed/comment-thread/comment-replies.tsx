@@ -51,11 +51,10 @@ function CommentReplies({
     return null;
   }
 
-  // At the depth boundary nothing is loaded yet: the replies load right here.
+  // "N more replies": the replies not shown yet, whether some are listed
+  // above or none have loaded (below the levels the first page brings)
   const loadMoreLabel =
-    visibleReplies.length === 0
-      ? strings.continueThread
-      : hiddenRepliesCount > 0
+    hiddenRepliesCount > 0
       ? strings.moreReplyCount(hiddenRepliesCount)
       : strings.moreReplies;
 

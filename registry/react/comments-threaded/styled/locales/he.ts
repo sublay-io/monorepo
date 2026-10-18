@@ -39,7 +39,6 @@ const strings = {
         ? "שתי תגובות נוספות"
         : `${count} תגובות נוספות`,
   moreReplies: "תגובות נוספות",
-  continueThread: "המשך השרשור",
   expandThread: "הרחבת השרשור",
   collapseThread: "צמצום השרשור",
   moreOptions: "אפשרויות נוספות",

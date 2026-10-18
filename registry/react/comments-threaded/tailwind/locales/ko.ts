@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `답글 ${count}개`,
   moreReplyCount: (count: number) => `답글 ${count}개 더 보기`,
   moreReplies: "답글 더 보기",
-  continueThread: "이 스레드 계속 보기",
   expandThread: "스레드 펼치기",
   collapseThread: "스레드 접기",
   moreOptions: "옵션 더 보기",

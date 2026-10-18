@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} жауап`,
   moreReplyCount: (count: number) => `тағы ${count} жауап`,
   moreReplies: "Басқа жауаптар",
-  continueThread: "Тармақты жалғастыру",
   expandThread: "Тармақты ашу",
   collapseThread: "Тармақты жию",
   moreOptions: "Басқа әрекеттер",

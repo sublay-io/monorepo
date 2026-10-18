@@ -35,7 +35,6 @@ const strings = {
   moreReplyCount: (count: number) =>
     count === 1 ? "1 ακόμα απάντηση" : `${count} ακόμα απαντήσεις`,
   moreReplies: "Περισσότερες απαντήσεις",
-  continueThread: "Συνέχεια του νήματος",
   expandThread: "Ανάπτυξη νήματος",
   collapseThread: "Σύμπτυξη νήματος",
   moreOptions: "Περισσότερες επιλογές",

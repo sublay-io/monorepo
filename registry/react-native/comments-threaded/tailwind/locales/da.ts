@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} svar`,
   moreReplyCount: (count: number) => `${count} svar mere`,
   moreReplies: "Flere svar",
-  continueThread: "Fortsæt tråden",
   removeYourVote: "Fjern din stemme",
 
   // Comments that can't be shown

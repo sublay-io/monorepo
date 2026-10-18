@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} پاسخ`,
   moreReplyCount: (count: number) => `${count} پاسخ دیگر`,
   moreReplies: "پاسخ‌های بیشتر",
-  continueThread: "ادامهٔ این رشته",
   removeYourVote: "حذف رأی شما",
 
   // Comments that can't be shown

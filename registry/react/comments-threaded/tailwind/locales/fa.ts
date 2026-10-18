@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} پاسخ`,
   moreReplyCount: (count: number) => `${count} پاسخ دیگر`,
   moreReplies: "پاسخ‌های بیشتر",
-  continueThread: "ادامهٔ این رشته",
   expandThread: "باز کردن رشته",
   collapseThread: "بستن رشته",
   moreOptions: "گزینه‌های بیشتر",

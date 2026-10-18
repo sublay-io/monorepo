@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} жауап`,
   moreReplyCount: (count: number) => `тағы ${count} жауап`,
   moreReplies: "Басқа жауаптар",
-  continueThread: "Тармақты жалғастыру",
   removeYourVote: "Дауысыңызды алып тастау",
 
   // Comments that can't be shown

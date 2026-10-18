@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count}件の返信`,
   moreReplyCount: (count: number) => `他${count}件の返信`,
   moreReplies: "その他の返信",
-  continueThread: "このスレッドの続きを表示",
   expandThread: "スレッドを展開",
   collapseThread: "スレッドを折りたたむ",
   moreOptions: "その他のオプション",

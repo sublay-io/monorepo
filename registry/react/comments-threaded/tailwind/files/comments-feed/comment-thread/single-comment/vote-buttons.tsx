@@ -44,7 +44,8 @@ function VoteButtons({
   // 🎨 CUSTOMIZATION: Vote button sizing
   const iconClass = size === "small" ? "w-3 h-3" : "w-4 h-4";
   const textClass = size === "small" ? "text-[13px]" : "text-sm";
-  const paddingClass = size === "small" ? "px-2 py-1" : "px-3 py-1.5";
+  // The padding is on the buttons, not around them: a bigger area to click
+  const buttonPaddingClass = size === "small" ? "p-1.5" : "p-2";
 
   return (
     <div
@@ -56,8 +57,8 @@ function VoteButtons({
           ? "bg-gray-200 dark:bg-neutral-600"
           : "bg-gray-50 dark:bg-neutral-700",
         "rounded-full",
-        paddingClass,
-        "gap-1"
+        "p-0.5",
+        "gap-0.5"
       )}
     >
       {/* Upvote Button */}
@@ -76,13 +77,14 @@ function VoteButtons({
         }}
         className={cn(
           // 🎨 CUSTOMIZATION: Upvote button styling
-          "p-1 rounded-full",
+          buttonPaddingClass,
+          "rounded-full",
           "transition-colors duration-150",
           "flex items-center justify-center",
           "border-none cursor-pointer",
           userVote === "up"
             ? "bg-blue-500 dark:bg-blue-400 text-white"
-            : "bg-transparent text-gray-500 dark:text-neutral-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-400/10"
+            : "bg-transparent text-gray-500 dark:text-neutral-400 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-400/25"
         )}
         title={strings.upvote}
       >
@@ -108,9 +110,11 @@ function VoteButtons({
           // 🎨 CUSTOMIZATION: Score display styling
           "font-medium min-w-[20px] text-center",
           textClass,
-          netScore > 0
+          // Colored only by your own vote: blue after an upvote, red after a
+          // downvote, neutral when you haven't voted
+          userVote === "up"
             ? "text-blue-500 dark:text-blue-400"
-            : netScore < 0
+            : userVote === "down"
             ? "text-red-500 dark:text-red-400"
             : "text-gray-700 dark:text-neutral-300"
         )}
@@ -136,13 +140,14 @@ function VoteButtons({
         }}
         className={cn(
           // 🎨 CUSTOMIZATION: Downvote button styling
-          "p-1 rounded-full",
+          buttonPaddingClass,
+          "rounded-full",
           "transition-colors duration-150",
           "flex items-center justify-center",
           "border-none cursor-pointer",
           userVote === "down"
             ? "bg-red-500 dark:bg-red-400 text-white"
-            : "bg-transparent text-gray-500 dark:text-neutral-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
+            : "bg-transparent text-gray-500 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-100 dark:hover:bg-red-400/25"
         )}
         title={strings.downvote}
       >

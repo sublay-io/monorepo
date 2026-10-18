@@ -293,6 +293,8 @@ theme={theme}
               className={`flex-row items-center justify-between ${
                 isCollapsed ? '' : 'mb-1'
               }`}
+              // As tall as the avatar, so the name and time sit level with it
+              style={{ minHeight: AVATAR_SIZE }}
             >
               <View className="flex-1 flex-row items-center gap-2">
                 {tombstone ? (

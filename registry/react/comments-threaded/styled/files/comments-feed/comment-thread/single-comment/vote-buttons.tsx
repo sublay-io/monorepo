@@ -49,7 +49,8 @@ function VoteButtons({
       : { width: "16px", height: "16px" };
   // 🎨 CUSTOMIZATION: Score display styling (Default: 12px for small, 14px for normal)
   const textSize = size === "small" ? "13px" : "14px";
-  const padding = size === "small" ? "4px 8px" : "6px 12px";
+  // The padding is on the buttons, not around them: a bigger area to click
+  const buttonPadding = size === "small" ? "6px" : "8px";
 
   return (
     <div
@@ -62,8 +63,8 @@ function VoteButtons({
           ? (theme === 'dark' ? "#525252" : "#E5E7EB")
           : (theme === 'dark' ? "#404040" : "#F3F4F6"),
         borderRadius: "9999px",
-        padding: padding,
-        gap: "4px",
+        padding: "2px",
+        gap: "2px",
       }}
     >
       {/* Upvote Button */}
@@ -81,7 +82,7 @@ function VoteButtons({
           handleVote("up");
         }}
         style={{
-          padding: "4px",
+          padding: buttonPadding,
           borderRadius: "50%",
           transition:
             "color 150ms ease-in-out, background-color 150ms ease-in-out, border-color 150ms ease-in-out",
@@ -97,10 +98,10 @@ function VoteButtons({
         }}
         onMouseEnter={(e) => {
           if (userVote !== "up") {
-            // 🎨 CUSTOMIZATION: Vote button styling (Default: blue-500)
-            e.currentTarget.style.color = theme === 'dark' ? "#60A5FA" : "#3B82F6";
-            // 🎨 CUSTOMIZATION: Vote button styling (Default: blue-50)
-            e.currentTarget.style.backgroundColor = theme === 'dark' ? "rgba(96, 165, 250, 0.1)" : "#EFF6FF";
+            // 🎨 CUSTOMIZATION: Upvote hover color (Default: blue-600)
+            e.currentTarget.style.color = theme === 'dark' ? "#93C5FD" : "#2563EB";
+            // 🎨 CUSTOMIZATION: Upvote hover background (Default: blue-100)
+            e.currentTarget.style.backgroundColor = theme === 'dark' ? "rgba(96, 165, 250, 0.25)" : "#DBEAFE";
           }
         }}
         onMouseLeave={(e) => {
@@ -136,11 +137,12 @@ function VoteButtons({
           fontSize: textSize,
           minWidth: "20px",
           textAlign: "center",
-          // 🎨 CUSTOMIZATION: Score display styling (Default: blue-500 for positive, red-500 for negative, gray-700 for neutral)
+          // 🎨 CUSTOMIZATION: Score display styling. Colored only by your own
+          // vote: blue after an upvote, red after a downvote, else gray-700
           color:
-            netScore > 0
+            userVote === "up"
               ? (theme === 'dark' ? "#60A5FA" : "#3B82F6")
-              : netScore < 0
+              : userVote === "down"
               ? (theme === 'dark' ? "#F87171" : "#EF4444")
               : (theme === 'dark' ? "#D4D4D4" : "#374151"),
         }}
@@ -165,7 +167,7 @@ function VoteButtons({
           handleVote("down");
         }}
         style={{
-          padding: "4px",
+          padding: buttonPadding,
           borderRadius: "50%",
           transition:
             "color 150ms ease-in-out, background-color 150ms ease-in-out, border-color 150ms ease-in-out",
@@ -181,10 +183,10 @@ function VoteButtons({
         }}
         onMouseEnter={(e) => {
           if (userVote !== "down") {
-            // 🎨 CUSTOMIZATION: Vote button styling (Default: red-500)
-            e.currentTarget.style.color = theme === 'dark' ? "#F87171" : "#EF4444";
-            // 🎨 CUSTOMIZATION: Vote button styling (Default: red-50)
-            e.currentTarget.style.backgroundColor = theme === 'dark' ? "#7F1D1D" : "#FEF2F2";
+            // 🎨 CUSTOMIZATION: Downvote hover color (Default: red-600)
+            e.currentTarget.style.color = theme === 'dark' ? "#FCA5A5" : "#DC2626";
+            // 🎨 CUSTOMIZATION: Downvote hover background (Default: red-100)
+            e.currentTarget.style.backgroundColor = theme === 'dark' ? "rgba(248, 113, 113, 0.25)" : "#FEE2E2";
           }
         }}
         onMouseLeave={(e) => {

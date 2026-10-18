@@ -1,5 +1,5 @@
 import { ComponentProps, ReactNode, useMemo } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   CommentsSortByOptions,
   CommentSectionProvider,
@@ -13,6 +13,12 @@ import CommentOptionsSheet from "../files/sheets/comment-options-sheet";
 import CommentOptionsSheetOwner from "../files/sheets/comment-options-sheet-owner";
 import ReportCommentSheet from "../files/sheets/report-comment-sheet";
 import SortSheet from "../files/sheets/sort-sheet";
+
+// The screen and the sheets each get a layer, the sheets' on top. A z-index
+// inside the screen (the comment box has one) would otherwise compete with the
+// sheets and could draw over them.
+const SCREEN_LAYER = { flex: 1, zIndex: 1 };
+const SHEETS_LAYER = [StyleSheet.absoluteFill, { zIndex: 2, elevation: 2 }];
 
 type ThreadedCommentSectionProviderProps = Omit<
   ComponentProps<typeof CommentSectionProvider>,
@@ -38,11 +44,13 @@ function ThreadedCommentSectionProvider({
       <UIStateProvider theme={theme}>
         {/* The sheets cover this view: the screen ThreadedComments wraps */}
         <View style={{ flex: 1 }}>
-          {children}
-          <SortSheet />
-          <CommentOptionsSheet />
-          <CommentOptionsSheetOwner />
-          <ReportCommentSheet />
+          <View style={SCREEN_LAYER}>{children}</View>
+          <View pointerEvents="box-none" style={SHEETS_LAYER}>
+            <SortSheet />
+            <CommentOptionsSheet />
+            <CommentOptionsSheetOwner />
+            <ReportCommentSheet />
+          </View>
         </View>
       </UIStateProvider>
     </CommentSectionProvider>

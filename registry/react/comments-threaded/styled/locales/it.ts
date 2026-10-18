@@ -18,6 +18,16 @@ const strings = {
   sortOld: "Meno recenti",
   sortControversial: "Controversi",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Proprio ora",
+    minutes: (count: number) => count === 1 ? "un minuto fa" : `${count} minuti fa`,
+    hours: (count: number) => count === 1 ? "un’ora fa" : `${count} ore fa`,
+    days: (count: number) => count === 1 ? "un giorno fa" : `${count} giorni fa`,
+    months: (count: number) => count === 1 ? "un mese fa" : `${count} mesi fa`,
+    years: (count: number) => count === 1 ? "un anno fa" : `${count} anni fa`,
+  },
+
   // Comment list
   noCommentsTitle: "Ancora nessun commento",
   noCommentsSubtitle: "Inizia la conversazione.",

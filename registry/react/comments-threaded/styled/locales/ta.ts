@@ -18,6 +18,21 @@ const strings = {
   sortOld: "பழையவை",
   sortControversial: "சர்ச்சைக்குரியவை",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "இப்போது",
+    minutes: (count: number) =>
+      count === 1 ? "ஒரு நிமிடத்திற்கு முன்பு" : `${count} நிமிடங்களுக்கு முன்பு`,
+    hours: (count: number) =>
+      count === 1 ? "ஒரு மணிநேரத்திற்கு முன்பு" : `${count} மணிநேரத்திற்கு முன்பு`,
+    days: (count: number) =>
+      count === 1 ? "ஒரு நாளுக்கு முன்பு" : `${count} நாட்களுக்கு முன்பு`,
+    months: (count: number) =>
+      count === 1 ? "ஒரு மாதத்திற்கு முன்பு" : `${count} மாதங்களுக்கு முன்பு`,
+    years: (count: number) =>
+      count === 1 ? "ஒரு வருடத்திற்கு முன்பு" : `${count} வருடங்களுக்கு முன்பு`,
+  },
+
   // Comment list
   noCommentsTitle: "இதுவரை கருத்துகள் இல்லை",
   noCommentsSubtitle: "உரையாடலைத் தொடங்குங்கள்.",

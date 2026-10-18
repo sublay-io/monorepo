@@ -18,6 +18,20 @@ const strings = {
   sortOld: "Стари",
   sortControversial: "Спорни",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Току-що",
+    minutes: (count: number) =>
+      count === 1 ? "преди минута" : `преди ${count} минути`,
+    hours: (count: number) =>
+      count === 1 ? "преди час" : `преди ${count} часа`,
+    days: (count: number) => (count === 1 ? "преди ден" : `преди ${count} дни`),
+    months: (count: number) =>
+      count === 1 ? "преди месец" : `преди ${count} месеца`,
+    years: (count: number) =>
+      count === 1 ? "преди година" : `преди ${count} години`,
+  },
+
   // Comment list
   noCommentsTitle: "Все още няма коментари",
   noCommentsSubtitle: "Започнете разговора.",

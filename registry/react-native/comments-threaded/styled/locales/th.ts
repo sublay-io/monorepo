@@ -18,6 +18,16 @@ const strings = {
   sortOld: "เก่าสุด",
   sortControversial: "เป็นที่ถกเถียง",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "เมื่อสักครู่",
+    minutes: (count: number) => `${count} นาทีที่แล้ว`,
+    hours: (count: number) => `${count} ชั่วโมงที่แล้ว`,
+    days: (count: number) => `${count} วันที่แล้ว`,
+    months: (count: number) => `${count} เดือนที่แล้ว`,
+    years: (count: number) => `${count} ปีที่แล้ว`,
+  },
+
   // Comment list
   noCommentsTitle: "ยังไม่มีความคิดเห็น",
   noCommentsSubtitle: "มาเริ่มบทสนทนากันเลย",

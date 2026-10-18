@@ -59,7 +59,7 @@ npx @sublay/cli add comments-threaded --ref v8
 The CLI will:
 
 1. **Fetch the component** from the registry based on your `sublay.json` platform and style settings
-2. **Copy the component's files** (41 on React, 43 on React Native and Expo) into your project at `{componentsPath}/comments-threaded/`: the component's own files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
+2. **Copy the component's files** (42 on React, 44 on React Native and Expo) into your project at `{componentsPath}/comments-threaded/`: the component's own files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
 3. **Transform imports** to work with your project structure
 4. **Create `index.ts`** barrel export for clean imports
 5. **Display usage examples** and required dependencies
@@ -112,6 +112,7 @@ The CLI will:
     │   └── ui-state-context.tsx                         # Modal & theme context
     └── shared/
         ├── flag-icon.tsx                                # Report icon
+        ├── from-now.tsx                                 # Relative time ("5 minutes ago")
         ├── get-user-avatar.ts                           # Generated avatar for users without one
         ├── giphy-container.tsx                          # GIF picker
         ├── magnifying-glass-icon.tsx                    # Search icon of the GIF picker
@@ -174,6 +175,7 @@ The CLI will:
     └── shared/
         ├── custom-button.tsx                            # Button
         ├── flag-icon.tsx                                # Report icon
+        ├── from-now.tsx                                 # Relative time ("5 minutes ago")
         ├── get-image-component.tsx                      # expo-image when installed, else Image
         ├── get-user-avatar.ts                           # Generated avatar for users without one
         ├── giphy-container.tsx                          # GIF picker

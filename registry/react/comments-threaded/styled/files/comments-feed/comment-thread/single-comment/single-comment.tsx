@@ -11,6 +11,7 @@ import {
 } from "@sublay/react-js";
 import { parseContentWithMentions } from "~shared/react/parse-content-with-mentions";
 import UserAvatar from "~shared/react/user-avatar";
+import FromNow from "~shared/react/from-now";
 import VoteButtons from "./vote-buttons";
 import ActionMenu from "../action-menu";
 import NewReplyForm from "../new-reply-form";
@@ -375,7 +376,12 @@ theme={theme}
                 </span>
                 )}
                 <span style={{ color: theme === 'dark' ? "#A3A3A3" : "#6B7280" }}>•</span>
-                <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
+                <FromNow
+                  time={comment.createdAt}
+                  strings={strings.timeAgo}
+                  fontSize={13}
+                  color={theme === 'dark' ? "#A3A3A3" : "#6B7280"}
+                />
                 {/* Collapsed: the text on the same line, cut to fit */}
                 {isCollapsed && !tombstone && comment.content ? (
                   <>

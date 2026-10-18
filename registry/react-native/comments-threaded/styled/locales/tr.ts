@@ -18,6 +18,16 @@ const strings = {
   sortOld: "Eski",
   sortControversial: "Tartışmalı",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Az önce",
+    minutes: (count: number) => `${count} dakika önce`,
+    hours: (count: number) => `${count} saat önce`,
+    days: (count: number) => `${count} gün önce`,
+    months: (count: number) => `${count} ay önce`,
+    years: (count: number) => `${count} yıl önce`,
+  },
+
   // Comment list
   noCommentsTitle: "Henüz yorum yok",
   noCommentsSubtitle: "Sohbeti başlat.",

@@ -18,6 +18,16 @@ const strings = {
   sortOld: "Ескі",
   sortControversial: "Даулы",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Жаңа ғана",
+    minutes: (count: number) => `${count} минут бұрын`,
+    hours: (count: number) => `${count} сағат бұрын`,
+    days: (count: number) => `${count} күн бұрын`,
+    months: (count: number) => `${count} ай бұрын`,
+    years: (count: number) => `${count} жыл бұрын`,
+  },
+
   // Comment list
   noCommentsTitle: "Әзірге пікір жоқ",
   noCommentsSubtitle: "Талқылауды бастаңыз.",

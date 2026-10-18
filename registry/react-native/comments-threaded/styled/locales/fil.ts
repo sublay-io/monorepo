@@ -18,6 +18,21 @@ const strings = {
   sortOld: "Luma",
   sortControversial: "Kontrobersyal",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Ngayon lang",
+    minutes: (count: number) =>
+      count === 1 ? "isang minuto ang nakalipas" : `${count} minuto ang nakalipas`,
+    hours: (count: number) =>
+      count === 1 ? "isang oras ang nakalipas" : `${count} oras ang nakalipas`,
+    days: (count: number) =>
+      count === 1 ? "isang araw ang nakalipas" : `${count} araw ang nakalipas`,
+    months: (count: number) =>
+      count === 1 ? "isang buwan ang nakalipas" : `${count} buwan ang nakalipas`,
+    years: (count: number) =>
+      count === 1 ? "isang taon ang nakalipas" : `${count} taon ang nakalipas`,
+  },
+
   // Comment list
   noCommentsTitle: "Wala pang komento",
   noCommentsSubtitle: "Simulan ang usapan.",

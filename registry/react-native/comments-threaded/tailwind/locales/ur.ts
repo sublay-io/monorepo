@@ -18,6 +18,20 @@ const strings = {
   sortOld: "پرانے",
   sortControversial: "متنازع",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "ابھی ابھی",
+    minutes: (count: number) =>
+      count === 1 ? "ایک منٹ پہلے" : `${count} منٹ پہلے`,
+    hours: (count: number) =>
+      count === 1 ? "ایک گھنٹہ پہلے" : `${count} گھنٹے پہلے`,
+    days: (count: number) => (count === 1 ? "ایک دن پہلے" : `${count} دن پہلے`),
+    months: (count: number) =>
+      count === 1 ? "ایک مہینہ پہلے" : `${count} مہینے پہلے`,
+    years: (count: number) =>
+      count === 1 ? "ایک سال پہلے" : `${count} سال پہلے`,
+  },
+
   // Comment list
   noCommentsTitle: "ابھی تک کوئی تبصرہ نہیں",
   noCommentsSubtitle: "گفتگو شروع کریں۔",

@@ -26,6 +26,21 @@ const strings = {
   sortOld: "Vechi",
   sortControversial: "Controversate",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Chiar acum",
+    minutes: (count: number) =>
+      plural(count, `acum un minut`, `acum ${count} minute`, `acum ${count} de minute`),
+    hours: (count: number) =>
+      plural(count, `acum o oră`, `acum ${count} ore`, `acum ${count} de ore`),
+    days: (count: number) =>
+      plural(count, `acum o zi`, `acum ${count} zile`, `acum ${count} de zile`),
+    months: (count: number) =>
+      plural(count, `acum o lună`, `acum ${count} luni`, `acum ${count} de luni`),
+    years: (count: number) =>
+      plural(count, `acum un an`, `acum ${count} ani`, `acum ${count} de ani`),
+  },
+
   // Comment list
   noCommentsTitle: "Niciun comentariu încă",
   noCommentsSubtitle: "Începe conversația.",

@@ -18,6 +18,21 @@ const strings = {
   sortOld: "Ya zamani",
   sortControversial: "Zenye utata",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Sasa hivi",
+    minutes: (count: number) =>
+      count === 1 ? "dakika moja iliyopita" : `dakika ${count} zilizopita`,
+    hours: (count: number) =>
+      count === 1 ? "saa moja iliyopita" : `saa ${count} zilizopita`,
+    days: (count: number) =>
+      count === 1 ? "siku moja iliyopita" : `siku ${count} zilizopita`,
+    months: (count: number) =>
+      count === 1 ? "mwezi mmoja uliopita" : `miezi ${count} iliyopita`,
+    years: (count: number) =>
+      count === 1 ? "mwaka mmoja uliopita" : `miaka ${count} iliyopita`,
+  },
+
   // Comment list
   noCommentsTitle: "Bado hakuna maoni",
   noCommentsSubtitle: "Anzisha mazungumzo.",

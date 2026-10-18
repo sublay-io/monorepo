@@ -18,6 +18,16 @@ const strings = {
   sortOld: "Terlama",
   sortControversial: "Kontroversial",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Baru saja",
+    minutes: (count: number) => `${count} menit yang lalu`,
+    hours: (count: number) => `${count} jam yang lalu`,
+    days: (count: number) => `${count} hari yang lalu`,
+    months: (count: number) => `${count} bulan yang lalu`,
+    years: (count: number) => `${count} tahun yang lalu`,
+  },
+
   // Comment list
   noCommentsTitle: "Belum ada komentar",
   noCommentsSubtitle: "Mulai percakapan.",

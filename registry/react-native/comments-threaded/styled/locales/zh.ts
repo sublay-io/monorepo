@@ -18,6 +18,16 @@ const strings = {
   sortOld: "最早",
   sortControversial: "有争议",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "刚刚",
+    minutes: (count: number) => `${count} 分钟前`,
+    hours: (count: number) => `${count} 小时前`,
+    days: (count: number) => `${count} 天前`,
+    months: (count: number) => `${count} 个月前`,
+    years: (count: number) => `${count} 年前`,
+  },
+
   // Comment list
   noCommentsTitle: "暂无评论",
   noCommentsSubtitle: "来发表第一条评论吧。",

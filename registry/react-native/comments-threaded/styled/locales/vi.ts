@@ -18,6 +18,16 @@ const strings = {
   sortOld: "Cũ nhất",
   sortControversial: "Gây tranh cãi",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Vừa xong",
+    minutes: (count: number) => `${count} phút trước`,
+    hours: (count: number) => `${count} giờ trước`,
+    days: (count: number) => `${count} ngày trước`,
+    months: (count: number) => `${count} tháng trước`,
+    years: (count: number) => `${count} năm trước`,
+  },
+
   // Comment list
   noCommentsTitle: "Chưa có bình luận nào",
   noCommentsSubtitle: "Hãy bắt đầu cuộc trò chuyện.",

@@ -18,6 +18,16 @@ const strings = {
   sortOld: "જૂની",
   sortControversial: "વિવાદાસ્પદ",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "હમણાં જ",
+    minutes: (count: number) => `${count} મિનિટ પહેલાં`,
+    hours: (count: number) => `${count} કલાક પહેલાં`,
+    days: (count: number) => `${count} દિવસ પહેલાં`,
+    months: (count: number) => `${count} મહિના પહેલાં`,
+    years: (count: number) => `${count} વર્ષ પહેલાં`,
+  },
+
   // Comment list
   noCommentsTitle: "હજી સુધી કોઈ ટિપ્પણી નથી",
   noCommentsSubtitle: "વાતચીત શરૂ કરો.",

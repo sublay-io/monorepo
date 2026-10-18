@@ -18,6 +18,17 @@ const strings = {
   sortOld: "Legrégebbi",
   sortControversial: "Megosztó",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Épp most",
+    minutes: (count: number) => (count === 1 ? "egy perce" : `${count} perce`),
+    hours: (count: number) => (count === 1 ? "egy órája" : `${count} órája`),
+    days: (count: number) => (count === 1 ? "egy napja" : `${count} napja`),
+    months: (count: number) =>
+      count === 1 ? "egy hónapja" : `${count} hónapja`,
+    years: (count: number) => (count === 1 ? "egy éve" : `${count} éve`),
+  },
+
   // Comment list
   noCommentsTitle: "Még nincsenek hozzászólások",
   noCommentsSubtitle: "Kezdd el a beszélgetést.",

@@ -95,7 +95,7 @@ replyCount: (count: number) =>
   count === 1 ? "תגובה אחת" : count === 2 ? "שתי תגובות" : `${count} תגובות`,
 ```
 
-The social comments show relative times ("5 minutes ago"). Their wording is in the same file, under `timeAgo`, with one function per unit.
+Both comment sections show relative times ("5 minutes ago"), never a date in a country-specific format. Their wording is in the same file, under `timeAgo`, with one function per unit.
 
 To translate into a language that is not in the table above, install the component in English and replace the values in `utils/strings.ts`.
 

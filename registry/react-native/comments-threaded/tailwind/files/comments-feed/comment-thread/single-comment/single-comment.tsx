@@ -10,6 +10,7 @@ import {
 } from "@sublay/react-native";
 import { parseContentWithMentions } from "~shared/react-native/parse-content-with-mentions";
 import UserAvatar from "~shared/react-native/user-avatar";
+import FromNow from "~shared/react-native/from-now";
 import { getImageComponent } from "~shared/react-native/get-image-component";
 import VoteButtons from "./vote-buttons";
 import ActionMenu from "../action-menu";
@@ -328,13 +329,12 @@ theme={theme}
                 >
                   •
                 </Text>
-                <Text
-                  className={`text-[13px] leading-[18px] ${
-                    theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
-                  }`}
-                >
-                  {new Date(comment.createdAt).toLocaleDateString()}
-                </Text>
+                <FromNow
+                  time={comment.createdAt}
+                  strings={strings.timeAgo}
+                  fontSize={13}
+                  color={theme === 'dark' ? '#A3A3A3' : '#6B7280'}
+                />
                 {/* Collapsed: the text on the same line, cut to fit */}
                 {isCollapsed && !tombstone && comment.content ? (
                   <>

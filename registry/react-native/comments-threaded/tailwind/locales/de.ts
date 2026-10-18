@@ -18,6 +18,17 @@ const strings = {
   sortOld: "Alt",
   sortControversial: "Kontrovers",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Gerade eben",
+    minutes: (count: number) =>
+      count === 1 ? "vor einer Minute" : `vor ${count} Minuten`,
+    hours: (count: number) => count === 1 ? "vor einer Stunde" : `vor ${count} Stunden`,
+    days: (count: number) => count === 1 ? "vor einem Tag" : `vor ${count} Tagen`,
+    months: (count: number) => count === 1 ? "vor einem Monat" : `vor ${count} Monaten`,
+    years: (count: number) => count === 1 ? "vor einem Jahr" : `vor ${count} Jahren`,
+  },
+
   // Comment list
   noCommentsTitle: "Noch keine Kommentare",
   noCommentsSubtitle: "Beginne die Unterhaltung.",

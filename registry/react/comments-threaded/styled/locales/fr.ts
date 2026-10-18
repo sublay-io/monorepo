@@ -18,6 +18,18 @@ const strings = {
   sortOld: "Anciens",
   sortControversial: "Controversés",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "À l’instant",
+    minutes: (count: number) =>
+      count === 1 ? "il y a une minute" : `il y a ${count} minutes`,
+    hours: (count: number) =>
+      count === 1 ? "il y a une heure" : `il y a ${count} heures`,
+    days: (count: number) => count === 1 ? "il y a un jour" : `il y a ${count} jours`,
+    months: (count: number) => count === 1 ? "il y a un mois" : `il y a ${count} mois`,
+    years: (count: number) => count === 1 ? "il y a un an" : `il y a ${count} ans`,
+  },
+
   // Comment list
   noCommentsTitle: "Aucun commentaire pour le moment",
   noCommentsSubtitle: "Lancez la conversation.",

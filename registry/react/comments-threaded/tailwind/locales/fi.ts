@@ -18,6 +18,21 @@ const strings = {
   sortOld: "Vanhimmat",
   sortControversial: "Kiistanalaiset",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Juuri nyt",
+    minutes: (count: number) =>
+      count === 1 ? "minuutti sitten" : `${count} minuuttia sitten`,
+    hours: (count: number) =>
+      count === 1 ? "tunti sitten" : `${count} tuntia sitten`,
+    days: (count: number) =>
+      count === 1 ? "päivä sitten" : `${count} päivää sitten`,
+    months: (count: number) =>
+      count === 1 ? "kuukausi sitten" : `${count} kuukautta sitten`,
+    years: (count: number) =>
+      count === 1 ? "vuosi sitten" : `${count} vuotta sitten`,
+  },
+
   // Comment list
   noCommentsTitle: "Ei vielä kommentteja",
   noCommentsSubtitle: "Aloita keskustelu.",

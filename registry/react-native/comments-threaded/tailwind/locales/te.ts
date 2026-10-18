@@ -18,6 +18,21 @@ const strings = {
   sortOld: "పాతవి",
   sortControversial: "వివాదాస్పదమైనవి",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "ఇప్పుడే",
+    minutes: (count: number) =>
+      count === 1 ? "ఒక నిమిషం క్రితం" : `${count} నిమిషాల క్రితం`,
+    hours: (count: number) =>
+      count === 1 ? "ఒక గంట క్రితం" : `${count} గంటల క్రితం`,
+    days: (count: number) =>
+      count === 1 ? "ఒక రోజు క్రితం" : `${count} రోజుల క్రితం`,
+    months: (count: number) =>
+      count === 1 ? "ఒక నెల క్రితం" : `${count} నెలల క్రితం`,
+    years: (count: number) =>
+      count === 1 ? "ఒక సంవత్సరం క్రితం" : `${count} సంవత్సరాల క్రితం`,
+  },
+
   // Comment list
   noCommentsTitle: "ఇంకా వ్యాఖ్యలు లేవు",
   noCommentsSubtitle: "సంభాషణను ప్రారంభించండి.",

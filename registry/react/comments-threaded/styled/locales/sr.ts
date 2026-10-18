@@ -27,6 +27,46 @@ const strings = {
   sortOld: "Најстарији",
   sortControversial: "Контроверзни",
 
+  // When a comment was posted
+  timeAgo: {
+    justNow: "Управо сада",
+    minutes: (count: number) =>
+      plural(
+        count,
+        `пре ${count} минута`,
+        `пре ${count} минута`,
+        `пре ${count} минута`,
+      ),
+    hours: (count: number) =>
+      plural(
+        count,
+        `пре ${count} сата`,
+        `пре ${count} сата`,
+        `пре ${count} сати`,
+      ),
+    days: (count: number) =>
+      plural(
+        count,
+        `пре ${count} дана`,
+        `пре ${count} дана`,
+        `пре ${count} дана`,
+      ),
+    months: (count: number) =>
+      plural(
+        count,
+        `пре ${count} месеца`,
+        `пре ${count} месеца`,
+        `пре ${count} месеци`,
+      ),
+    years: (count: number) =>
+      plural(
+        count,
+        `пре ${count} године`,
+        `пре ${count} године`,
+        `пре ${count} година`,
+      ),
+  },
+
   // Comment list
   noCommentsTitle: "Још нема коментара",
   noCommentsSubtitle: "Започни разговор.",

@@ -27,6 +27,7 @@ function ReplyBanner() {
         alignItems: 'center',
         gap: 5.25,
         paddingHorizontal: SECTION_PADDING_X,
+        paddingTop: 7,
         paddingBottom: 7,
       }}
     >
@@ -74,20 +75,16 @@ function ReplyBanner() {
         {({ pressed }) => (
           <View
             style={{
-              width: 17.5,
-              height: 17.5,
+              paddingHorizontal: 3.5,
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: 9999,
-              // 🎨 CUSTOMIZATION: Cancel control background
-              backgroundColor: theme === 'dark' ? '#404040' : '#F3F4F6',
               opacity: pressed ? 0.5 : 1,
             }}
           >
             <Text
               style={{
-                fontSize: 12.25,
-                lineHeight: 14,
+                fontSize: 17.5,
+                lineHeight: 17.5,
                 // 🎨 CUSTOMIZATION: Cancel control color
                 color: theme === 'dark' ? '#D4D4D4' : '#4B5563',
               }}

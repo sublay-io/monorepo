@@ -51,6 +51,11 @@ const VARIANTS: {
   hook: string;
   /** The section component's file, under `files/`. */
   section: string;
+  /**
+   * The export that takes the entity props, when it isn't the default one:
+   * mobile threaded's default export goes inside `ThreadedComments`.
+   */
+  sectionExport?: string;
   files: string[];
   /** Mocked files with named exports instead of a default one. */
   namedFiles?: Record<string, string>;
@@ -90,7 +95,8 @@ const VARIANTS: {
     dir: "react-native/comments-threaded/tailwind",
     hook: "use-threaded-comments",
     section: "threaded-comment-section",
-    files: NATIVE_FILES,
+    sectionExport: "ThreadedComments",
+    files: [...NATIVE_FILES, "files/sheets/sort-sheet"],
     native: true,
   },
   {
@@ -130,7 +136,7 @@ type SectionComponent = React.ComponentType<
 type LoadedVariant = {
   useSection: SectionHook;
   ThemeContext: ThemeContext;
-  /** The variant's section component (its default export). */
+  /** The variant's section component (its default export, or `sectionExport`). */
   loadSection: () => Promise<SectionComponent>;
 };
 const loaded = new Map<string, Promise<LoadedVariant>>();
@@ -177,8 +183,9 @@ async function importVariant(
   }
   const mod = await import(/* @vite-ignore */ `${base}/hooks/${variant.hook}.tsx`);
   const loadSection = async () =>
-    (await import(/* @vite-ignore */ `${base}/files/${variant.section}.tsx`))
-      .default as SectionComponent;
+    (await import(/* @vite-ignore */ `${base}/files/${variant.section}.tsx`))[
+      variant.sectionExport ?? "default"
+    ] as SectionComponent;
   return { useSection: mod.default as SectionHook, ThemeContext, loadSection };
 }
 

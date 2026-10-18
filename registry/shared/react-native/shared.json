@@ -1,6 +1,15 @@
 {
   "platform": "react-native",
   "pieces": {
+    "chevron-icon": {
+      "files": [
+        "chevron-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": [
+        "react-native-svg@^15"
+      ]
+    },
     "custom-button": {
       "files": [
         "custom-button.tsx"

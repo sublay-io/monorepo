@@ -6,7 +6,7 @@ icon: "folder-tree"
 
 # File Structure
 
-When you install threaded comments, its TypeScript/TSX files are copied (42 on React, 44 on React Native and Expo, plus the `index.ts` the CLI writes) into your project in a clear, navigable structure: the component's own files, and the shared pieces it is built from in `shared/`. The trees below list every file.
+When you install threaded comments, its TypeScript/TSX files are copied (42 on React, 45 on React Native and Expo, plus the `index.ts` the CLI writes) into your project in a clear, navigable structure: the component's own files, and the shared pieces it is built from in `shared/`. The trees below list every file.
 
 ---
 
@@ -119,6 +119,7 @@ When you install threaded comments, its TypeScript/TSX files are copied (42 on R
     ├── context/
     │   └── ui-state-context.tsx                         # Sheets & theme context
     └── shared/
+        ├── chevron-icon.tsx                             # Vote and sort chevrons
         ├── custom-button.tsx                            # Button
         ├── flag-icon.tsx                                # Report icon
         ├── from-now.tsx                                 # Relative time ("5 minutes ago")
@@ -195,7 +196,7 @@ The **Sort by** dropdown between the comment box and the comments. Edit this to:
 
 ### `sort-by-trigger.tsx`, `sort-sheet.tsx` and `sort-options.ts` — Sort By (React Native, Expo)
 
-`sort-by-trigger/sort-by-trigger.tsx` is the **Sort by: Top ▾** button above the comments. It opens `sheets/sort-sheet.tsx`, the **Sort comments by** sheet, which `ThreadedComments` renders over the screen. Edit:
+`sort-by-trigger/sort-by-trigger.tsx` is the **Sort by: Top** button above the comments. It opens `sheets/sort-sheet.tsx`, the **Sort comments by** sheet, which `ThreadedComments` renders over the screen. Edit:
 - `utils/sort-options.ts` to remove or reorder the sort options
 - `sort-by-trigger.tsx` and `sort-sheet.tsx` to change the button and sheet styles
 

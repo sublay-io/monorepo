@@ -19,6 +19,7 @@ const strings = {
   cancel: "Atšaukti",
   replyingTo: "Atsakoma naudotojui",
   cancelReply: "Atšaukti atsakymą",
+  moreOptions: "Daugiau parinkčių",
   collapseThread: "Suskleisti giją",
   expandThread: "Išskleisti giją",
 

@@ -9,6 +9,7 @@ const strings = {
   cancel: "İptal",
   replyingTo: "Yanıtlanan:",
   cancelReply: "Yanıtı iptal et",
+  moreOptions: "Diğer seçenekler",
   collapseThread: "Konuyu daralt",
   expandThread: "Konuyu genişlet",
 

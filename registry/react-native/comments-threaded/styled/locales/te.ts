@@ -9,6 +9,7 @@ const strings = {
   cancel: "రద్దు చేయండి",
   replyingTo: "వీరికి ప్రత్యుత్తరం:",
   cancelReply: "ప్రత్యుత్తరాన్ని రద్దు చేయండి",
+  moreOptions: "మరిన్ని ఎంపికలు",
   collapseThread: "థ్రెడ్‌ను కుదించండి",
   expandThread: "థ్రెడ్‌ను విస్తరించండి",
 

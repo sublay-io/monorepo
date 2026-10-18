@@ -9,6 +9,7 @@ const strings = {
   cancel: "ரத்துசெய்",
   replyingTo: "இவருக்குப் பதில்:",
   cancelReply: "பதிலை ரத்துசெய்",
+  moreOptions: "மேலும் விருப்பங்கள்",
   collapseThread: "இழையைச் சுருக்கு",
   expandThread: "இழையை விரி",
 

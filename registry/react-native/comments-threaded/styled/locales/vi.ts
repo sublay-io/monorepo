@@ -9,6 +9,7 @@ const strings = {
   cancel: "Hủy",
   replyingTo: "Đang phản hồi",
   cancelReply: "Hủy phản hồi",
+  moreOptions: "Tùy chọn khác",
   collapseThread: "Thu gọn chuỗi thảo luận",
   expandThread: "Mở rộng chuỗi thảo luận",
 

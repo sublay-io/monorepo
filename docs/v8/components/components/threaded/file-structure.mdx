@@ -6,7 +6,7 @@ icon: "folder-tree"
 
 # File Structure
 
-When you install threaded comments, its TypeScript/TSX files are copied (42 on React, 46 on React Native and Expo, plus the `index.ts` the CLI writes) into your project in a clear, navigable structure: the component's own files, and the shared pieces it is built from in `shared/`. The trees below list every file.
+When you install threaded comments, its TypeScript/TSX files are copied (42 on React, 47 on React Native and Expo, plus the `index.ts` the CLI writes) into your project in a clear, navigable structure: the component's own files, and the shared pieces it is built from in `shared/`. The trees below list every file.
 
 ---
 
@@ -37,7 +37,7 @@ When you install threaded comments, its TypeScript/TSX files are copied (42 on R
     │   │           ├── index.ts                         # Barrel export
     │   │           ├── single-comment.tsx               # Individual comment
     │   │           ├── vote-buttons.tsx                 # Upvote/downvote
-    │   │           ├── reply-button-and-info.tsx        # Reply button
+    │   │           ├── reply-button-and-info.tsx        # Reply count, menu and Reply
     │   │           └── indentation-threading-lines.tsx  # Threading lines
     │   └── modals/
     │       ├── comment-menu-modal/
@@ -100,7 +100,7 @@ When you install threaded comments, its TypeScript/TSX files are copied (42 on R
     │   │           ├── index.ts                         # Barrel export
     │   │           ├── single-comment.tsx               # Individual comment
     │   │           ├── vote-buttons.tsx                 # Upvote/downvote
-    │   │           ├── reply-button-and-info.tsx        # Reply button
+    │   │           ├── reply-button-and-info.tsx        # Reply count, menu and Reply
     │   │           └── indentation-threading-lines.tsx  # Threading lines
     │   └── sheets/
     │       ├── comment-options-sheet.tsx                # Menu for other users' comments
@@ -121,6 +121,7 @@ When you install threaded comments, its TypeScript/TSX files are copied (42 on R
     └── shared/
         ├── chevron-icon.tsx                             # Vote and sort chevrons
         ├── custom-button.tsx                            # Button
+        ├── ellipsis-vertical-icon.tsx                   # Vertical dots of the comment menu button
         ├── flag-icon.tsx                                # Report icon
         ├── from-now.tsx                                 # Relative time ("5 minutes ago")
         ├── get-image-component.tsx                      # expo-image when installed, else Image

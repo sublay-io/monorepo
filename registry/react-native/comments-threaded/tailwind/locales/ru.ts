@@ -18,6 +18,7 @@ const strings = {
   cancel: "Отмена",
   replyingTo: "Ответ для",
   cancelReply: "Отменить ответ",
+  moreOptions: "Ещё",
   collapseThread: "Свернуть ветку",
   expandThread: "Развернуть ветку",
 

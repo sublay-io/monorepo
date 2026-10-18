@@ -9,6 +9,7 @@ const strings = {
   cancel: "Cancel",
   replyingTo: "Replying to",
   cancelReply: "Cancel reply",
+  moreOptions: "More options",
   // Screen-reader actions on a comment (tapping it collapses it)
   collapseThread: "Collapse thread",
   expandThread: "Expand thread",

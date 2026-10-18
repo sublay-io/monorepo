@@ -18,15 +18,15 @@ function ActionMenu({ comment }: ActionMenuProps) {
             ? openCommentOptionsModalOwner?.(comment)
             : openCommentOptionsModal?.(comment)
         }
-        className="p-0.5 text-gray-400 dark:text-neutral-500 transition-colors duration-150 rounded bg-transparent border-none cursor-pointer hover:text-gray-600 dark:hover:text-neutral-400 hover:bg-gray-50 dark:hover:bg-neutral-700"
+        className="p-1 text-gray-400 dark:text-neutral-500 transition-colors duration-150 rounded bg-transparent border-none cursor-pointer hover:text-gray-600 dark:hover:text-neutral-400 hover:bg-gray-50 dark:hover:bg-neutral-700"
         title={strings.moreOptions}
       >
         <svg
-          className="w-3 h-3"
+          className="w-4 h-4"
           fill="currentColor"
           viewBox="0 0 20 20"
         >
-          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+          <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
         </svg>
       </button>
     </div>

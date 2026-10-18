@@ -444,7 +444,6 @@ theme={theme}
                   </>
                 ) : null}
               </View>
-              {!tombstone && !isCollapsed && <ActionMenu comment={comment} />}
             </View>
 
             {!isCollapsed && tombstone && (
@@ -509,7 +508,7 @@ theme={theme}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
+                    gap: 10.5,
                   }}
                 >
                   <ReplyButtonAndInfo
@@ -517,6 +516,7 @@ theme={theme}
                     replyCount={replyCount}
                     onReplyPress={handleReplyPress}
                     canReply={!isOwnRemoved}
+                    menu={<ActionMenu comment={comment} />}
                   />
                   {/* Vote buttons inline with reply options */}
                   {!isOwnRemoved && (

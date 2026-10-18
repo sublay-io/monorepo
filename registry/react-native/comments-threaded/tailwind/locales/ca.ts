@@ -9,6 +9,7 @@ const strings = {
   cancel: "Cancel·la",
   replyingTo: "Responent a",
   cancelReply: "Cancel·la la resposta",
+  moreOptions: "Més opcions",
   collapseThread: "Plega el fil",
   expandThread: "Desplega el fil",
 

@@ -1,6 +1,8 @@
-import { TouchableOpacity, Text, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
+import EllipsisVerticalIcon from "~shared/react-native/ellipsis-vertical-icon";
 import { useUser, Comment as CommentType } from "@sublay/react-native";
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 interface ActionMenuProps {
   comment: CommentType;
@@ -20,17 +22,16 @@ function ActionMenu({ comment }: ActionMenuProps) {
             ? openCommentOptionsSheetOwner?.(comment)
             : openCommentOptionsSheet?.(comment)
         }
+        accessibilityRole="button"
+        accessibilityLabel={strings.moreOptions}
         className={`p-1 rounded ${
           theme === 'dark' ? 'active:bg-neutral-700' : 'active:bg-gray-50'
         }`}
       >
-        <Text
-          className={`text-xs ${
-            theme === 'dark' ? 'text-neutral-500' : 'text-gray-400'
-          }`}
-        >
-          •••
-        </Text>
+        <EllipsisVerticalIcon
+          size={18}
+          color={theme === 'dark' ? '#737373' : '#9CA3AF'}
+        />
       </TouchableOpacity>
     </View>
   );

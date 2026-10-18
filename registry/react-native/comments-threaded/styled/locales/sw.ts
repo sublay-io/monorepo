@@ -9,6 +9,7 @@ const strings = {
   cancel: "Ghairi",
   replyingTo: "Unamjibu",
   cancelReply: "Ghairi jibu",
+  moreOptions: "Chaguo zaidi",
   collapseThread: "Kunja mjadala",
   expandThread: "Panua mjadala",
 

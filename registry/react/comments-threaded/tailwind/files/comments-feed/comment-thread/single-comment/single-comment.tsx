@@ -327,7 +327,6 @@ function SingleComment({
                   </>
                 ) : null}
               </div>
-              {!tombstone && !isCollapsed && <ActionMenu comment={comment} />}
             </div>
 
             {!isCollapsed && tombstone && (
@@ -396,7 +395,7 @@ function SingleComment({
                 )}
 
                 <div
-                  className="relative flex items-center justify-between"
+                  className="relative flex items-center gap-1"
                   // 🎨 CUSTOMIZATION: Actions layout
                 >
                   {/* ⊖ on the line, level with the actions, when replies are
@@ -419,6 +418,7 @@ function SingleComment({
                     replyCount={replyCount}
                     setShowReplyForm={setShowReplyForm}
                     canReply={!isOwnRemoved}
+                    menu={<ActionMenu comment={comment} />}
                   />
                   {/* Vote buttons inline with reply options */}
                   {!isOwnRemoved && (

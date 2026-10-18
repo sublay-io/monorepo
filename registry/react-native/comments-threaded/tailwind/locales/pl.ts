@@ -18,6 +18,7 @@ const strings = {
   cancel: "Anuluj",
   replyingTo: "Odpowiedź dla",
   cancelReply: "Anuluj odpowiedź",
+  moreOptions: "Więcej opcji",
   collapseThread: "Zwiń wątek",
   expandThread: "Rozwiń wątek",
 

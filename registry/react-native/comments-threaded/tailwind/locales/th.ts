@@ -9,6 +9,7 @@ const strings = {
   cancel: "ยกเลิก",
   replyingTo: "กำลังตอบกลับ",
   cancelReply: "ยกเลิกการตอบกลับ",
+  moreOptions: "ตัวเลือกเพิ่มเติม",
   collapseThread: "ยุบเธรด",
   expandThread: "ขยายเธรด",
 

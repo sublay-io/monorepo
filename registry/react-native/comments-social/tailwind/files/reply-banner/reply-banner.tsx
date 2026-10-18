@@ -29,7 +29,7 @@ const ReplyBanner = () => {
     >
       <View className="flex-row items-center justify-between">
         <Text
-          className={`text-xs ${
+          className={`text-sm ${
             theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
           }`}
         >

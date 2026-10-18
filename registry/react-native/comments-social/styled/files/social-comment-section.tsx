@@ -45,7 +45,7 @@
  * - #8E8E8E → #9CA3AF (empty heart)
  */
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { CommentsSortByOptions, Entity } from "@sublay/react-native";
 import useSocialComments from "../hooks/use-social-comments";
 import SortByButton from "./sort-by-button/sort-by-button";
@@ -217,7 +217,9 @@ function SocialCommentSectionInner({
         </View>
       )}
 
-      <ScrollView
+      {/* The feed's own list scrolls (and loads more at the end): a scroll
+          view around it would stop both */}
+      <View
         style={{
           flex: 1,
           // 🎨 CUSTOMIZATION: Feed background
@@ -225,7 +227,7 @@ function SocialCommentSectionInner({
         }}
       >
         <CommentsFeed>{children}</CommentsFeed>
-      </ScrollView>
+      </View>
 
       {isVisible ? (
         <NewCommentForm

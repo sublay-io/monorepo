@@ -1,12 +1,21 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FlatList, View } from "react-native";
 import { useReplies, useCommentSection } from "@sublay/react-native";
 import { CommentSkeleton } from "~shared/react-native/skeleton";
 import useUIState from "../../../../hooks/use-ui-state";
-import Comment from "../comment";
+// Type only: the component itself comes in as a prop, so comment.tsx (which
+// renders Replies) and this file don't import each other at runtime
+import type CommentRow from "../comment";
 import ShowHideButton from "./show-hide-button";
 
-function Replies({ commentId }: { commentId: string }) {
+function Replies({
+  commentId,
+  CommentComponent,
+}: {
+  commentId: string;
+  // The comment row (comment.tsx passes itself)
+  CommentComponent: React.ComponentType<React.ComponentProps<typeof CommentRow>>;
+}) {
   const { theme } = useUIState();
   const { highlightedComment } = useCommentSection();
 
@@ -40,7 +49,7 @@ function Replies({ commentId }: { commentId: string }) {
     <FlatList
       data={newReplies}
       renderItem={({ item }) => (
-        <Comment
+        <CommentComponent
           comment={item}
           extraLeftPadding={42}
           parentClosed={parentClosed}
@@ -56,7 +65,7 @@ function Replies({ commentId }: { commentId: string }) {
     <FlatList
       data={filteredReplies}
       renderItem={({ item }) => (
-        <Comment
+        <CommentComponent
           comment={item}
           extraLeftPadding={42}
           parentClosed={parentClosed}
@@ -87,7 +96,7 @@ function Replies({ commentId }: { commentId: string }) {
           {/* Highlighted reply */}
           {highlightedComment &&
             highlightedComment.parentComment?.id === commentId && (
-              <Comment
+              <CommentComponent
                 comment={highlightedComment.comment}
                 extraLeftPadding={42}
                 parentClosed={parentClosed}

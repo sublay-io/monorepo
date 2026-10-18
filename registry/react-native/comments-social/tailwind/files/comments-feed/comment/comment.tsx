@@ -359,7 +359,9 @@ theme={theme}
           </View>
         </Pressable>
         )}
-        {!comment.parentId && <Replies commentId={comment.id} />}
+        {!comment.parentId && (
+          <Replies commentId={comment.id} CommentComponent={Comment} />
+        )}
       </View>
     );
   }

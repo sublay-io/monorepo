@@ -5,7 +5,7 @@ import useUIState from "../../../../hooks/use-ui-state";
 // these values, so changing one keeps the joins intact.
 
 // 🎨 CUSTOMIZATION: Avatar size (Default: 24)
-export const AVATAR_SIZE = 24;
+export const AVATAR_SIZE = 28;
 // 🎨 CUSTOMIZATION: Indentation per reply level (Default: 24).
 // Keep it larger than half the avatar, or the elbows have no room.
 export const INDENT = 24;
@@ -14,7 +14,7 @@ export const MAX_INDENT_DEPTH = 6;
 // 🎨 CUSTOMIZATION: Vertical padding of a comment row (Default: 8)
 export const ROW_PADDING_Y = 8;
 // 🎨 CUSTOMIZATION: Space between the top of a row's content and its avatar (Default: 4)
-export const AVATAR_OFFSET_TOP = 4;
+export const AVATAR_OFFSET_TOP = 0;
 // 🎨 CUSTOMIZATION: Gap between the avatar and the comment content (Default: 12)
 export const AVATAR_GAP = 12;
 // 🎨 CUSTOMIZATION: Space between the comments and the edges on both sides

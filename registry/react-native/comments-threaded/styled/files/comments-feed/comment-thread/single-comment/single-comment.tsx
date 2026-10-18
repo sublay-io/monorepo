@@ -329,6 +329,8 @@ theme={theme}
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 marginBottom: isCollapsed ? 0 : 4,
+                // As tall as the avatar, so the name and time sit level with it
+                minHeight: AVATAR_SIZE,
               }}
             >
               <View

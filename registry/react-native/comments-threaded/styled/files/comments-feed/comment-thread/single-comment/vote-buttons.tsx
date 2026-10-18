@@ -44,10 +44,8 @@ function VoteButtons({
 
   // Size-based styling
   const iconSize = size === "small" ? 12 : 16;
-  const containerPadding =
-    size === "small"
-      ? { paddingHorizontal: 8, paddingVertical: 4 }
-      : { paddingHorizontal: 12, paddingVertical: 6 };
+  // The padding is on the buttons, not around them: a bigger area to tap
+  const buttonPadding = size === "small" ? 6 : 8;
 
   return (
     <View
@@ -56,8 +54,8 @@ function VoteButtons({
         flexDirection: 'row',
         alignItems: 'center',
         borderRadius: 9999,
-        gap: 4,
-        ...containerPadding,
+        gap: 2,
+        padding: 2,
         backgroundColor: highlighted
           ? theme === 'dark' ? '#525252' : '#E5E7EB'
           : theme === 'dark' ? '#404040' : '#F9FAFB',
@@ -77,7 +75,7 @@ function VoteButtons({
           handleVote("up");
         }}
         style={{
-          padding: 4,
+          padding: buttonPadding,
           borderRadius: 9999,
           alignItems: 'center',
           justifyContent: 'center',
@@ -107,11 +105,12 @@ function VoteButtons({
           minWidth: 20,
           fontSize: size === "small" ? 13 : 14,
           lineHeight: size === "small" ? 18 : 20,
-          // 🎨 CUSTOMIZATION: Score color (positive / negative / zero)
+          // 🎨 CUSTOMIZATION: Score color. Colored only by your own vote: blue
+          // after an upvote, red after a downvote, neutral otherwise
           color:
-            netScore > 0
+            userVote === "up"
               ? theme === 'dark' ? '#60A5FA' : '#3B82F6'
-              : netScore < 0
+              : userVote === "down"
                 ? theme === 'dark' ? '#F87171' : '#EF4444'
                 : theme === 'dark' ? '#D4D4D4' : '#374151',
         }}
@@ -135,7 +134,7 @@ function VoteButtons({
           handleVote("down");
         }}
         style={{
-          padding: 4,
+          padding: buttonPadding,
           borderRadius: 9999,
           alignItems: 'center',
           justifyContent: 'center',

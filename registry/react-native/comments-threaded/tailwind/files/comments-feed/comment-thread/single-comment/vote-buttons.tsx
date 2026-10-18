@@ -44,12 +44,13 @@ function VoteButtons({
 
   // Size-based styling
   const iconSize = size === "small" ? 12 : 16;
-  const containerPadding = size === "small" ? "px-2 py-1" : "px-3 py-1.5";
+  // The padding is on the buttons, not around them: a bigger area to tap
+  const buttonPadding = size === "small" ? "p-1.5" : "p-2";
 
   return (
     <View
       // One step stronger on the highlighted comment, whose background is gray-100
-      className={`flex-row items-center rounded-full gap-1 ${containerPadding} ${
+      className={`flex-row items-center rounded-full gap-0.5 p-0.5 ${
         highlighted
           ? theme === 'dark' ? 'bg-neutral-600' : 'bg-gray-200'
           : theme === 'dark' ? 'bg-neutral-700' : 'bg-gray-50'
@@ -68,7 +69,7 @@ function VoteButtons({
           }
           handleVote("up");
         }}
-        className={`p-1 rounded-full items-center justify-center ${
+        className={`${buttonPadding} rounded-full items-center justify-center ${
           userVote === "up"
             ? theme === 'dark'
               ? 'bg-blue-400'
@@ -95,11 +96,13 @@ function VoteButtons({
         className={`font-medium text-center min-w-[20px] ${
           size === "small" ? "text-[13px] leading-[18px]" : "text-sm"
         } ${
-          netScore > 0
+          // Colored only by your own vote: blue after an upvote, red after a
+          // downvote, neutral when you haven't voted
+          userVote === "up"
             ? theme === 'dark'
               ? 'text-blue-400'
               : 'text-blue-500'
-            : netScore < 0
+            : userVote === "down"
               ? theme === 'dark'
                 ? 'text-red-400'
                 : 'text-red-500'
@@ -126,7 +129,7 @@ function VoteButtons({
           }
           handleVote("down");
         }}
-        className={`p-1 rounded-full items-center justify-center ${
+        className={`${buttonPadding} rounded-full items-center justify-center ${
           userVote === "down"
             ? theme === 'dark'
               ? 'bg-red-400'

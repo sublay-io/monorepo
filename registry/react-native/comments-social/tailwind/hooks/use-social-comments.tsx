@@ -4,6 +4,7 @@ import {
   CommentSectionProvider,
   Entity,
 } from "@sublay/react-native";
+import { StyleSheet, View } from "react-native";
 import { UIStateProvider } from "../context/ui-state-context";
 
 import CommentsFeed from "../files/comments-feed/comments-feed";
@@ -12,6 +13,12 @@ import SortByButton from "../files/sort-by-button/sort-by-button";
 import CommentOptionsSheet from "../files/sheets/comment-options-sheet";
 import CommentOptionsSheetOwner from "../files/sheets/comment-options-sheet-owner";
 import ReportCommentSheet from "../files/sheets/report-comment-sheet";
+
+// The section and the sheets each get a layer, the sheets' on top. A z-index
+// inside the section (the comment box has one) would otherwise compete with the
+// sheets and could draw over them.
+const SECTION_LAYER = { flex: 1, zIndex: 1 };
+const SHEETS_LAYER = [StyleSheet.absoluteFill, { zIndex: 2, elevation: 2 }];
 
 type SocialCommentSectionProviderProps = Omit<
   ComponentProps<typeof CommentSectionProvider>,
@@ -35,10 +42,12 @@ function SocialCommentSectionProvider({
     <CommentSectionProvider {...sectionProps}>
       <UIStateProvider theme={theme}>
         <>
-          {children}
-          <CommentOptionsSheet />
-          <CommentOptionsSheetOwner />
-          <ReportCommentSheet />
+          <View style={SECTION_LAYER}>{children}</View>
+          <View pointerEvents="box-none" style={SHEETS_LAYER}>
+            <CommentOptionsSheet />
+            <CommentOptionsSheetOwner />
+            <ReportCommentSheet />
+          </View>
         </>
       </UIStateProvider>
     </CommentSectionProvider>

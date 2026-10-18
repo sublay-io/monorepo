@@ -46,8 +46,8 @@ const ReplyBanner = () => {
         <Text style={{
           // 🎨 CUSTOMIZATION: Reply banner text color
           color: theme === 'dark' ? "#A3A3A3" : "#787878",
-          fontSize: 10.5,
-          lineHeight: 14,
+          fontSize: 12.25,
+          lineHeight: 17.5,
         }}>
           {strings.replyingTo(repliedToUser)}
         </Text>

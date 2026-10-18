@@ -43,7 +43,7 @@
  * - text-red-600 / dark:text-red-400 (filled heart, danger)
  */
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { CommentsSortByOptions, Entity } from "@sublay/react-native";
 import useSocialComments from "../hooks/use-social-comments";
 import SortByButton from "./sort-by-button/sort-by-button";
@@ -192,11 +192,13 @@ function SocialCommentSectionInner({
         </View>
       )}
 
-      <ScrollView
+      {/* The feed's own list scrolls (and loads more at the end): a scroll
+          view around it would stop both */}
+      <View
         className={`flex-1 ${theme === 'dark' ? 'bg-neutral-800' : 'bg-white'}`}
       >
         <CommentsFeed>{children}</CommentsFeed>
-      </ScrollView>
+      </View>
 
       {isVisible ? (
         <NewCommentForm

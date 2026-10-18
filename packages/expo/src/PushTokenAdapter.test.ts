@@ -12,6 +12,9 @@ vi.mock("expo-notifications", () => ({
   addPushTokenListener: (...args: unknown[]) => addPushTokenListener(...args),
 }));
 
+// The adapter reports a failed load through core's handleError
+vi.mock("@sublay/core", () => ({ handleError: vi.fn() }));
+
 import { expoPushTokenAdapter } from "./PushTokenAdapter";
 
 afterEach(() => {
@@ -129,7 +132,7 @@ describe("expoPushTokenAdapter.getDeviceIdentifier", () => {
 });
 
 describe("expoPushTokenAdapter.subscribeToIdentifierChanges", () => {
-  it("maps the emitted DevicePushToken straight through — Expo is the clean case", () => {
+  it("maps the emitted DevicePushToken straight through — Expo is the clean case", async () => {
     let emitted: unknown;
     const remove = vi.fn();
     addPushTokenListener.mockImplementation(() => ({ remove }));
@@ -141,6 +144,8 @@ describe("expoPushTokenAdapter.subscribeToIdentifierChanges", () => {
       },
     );
 
+    // Attached once expo-notifications has loaded (it loads on first use)
+    await vi.waitFor(() => expect(addPushTokenListener).toHaveBeenCalled());
     const handler = addPushTokenListener.mock.calls[0][0] as (t: unknown) => void;
     handler({ type: "android", data: "fcm-token-2" });
     expect(emitted).toEqual({ platform: "android", token: "fcm-token-2" });
@@ -152,12 +157,24 @@ describe("expoPushTokenAdapter.subscribeToIdentifierChanges", () => {
     expect(remove).toHaveBeenCalled();
   });
 
-  it("does not ask the user for anything", () => {
+  it("does not attach a listener when unsubscribed before expo-notifications loaded", async () => {
+    addPushTokenListener.mockImplementation(() => ({ remove: vi.fn() }));
+    const unsubscribe = expoPushTokenAdapter.subscribeToIdentifierChanges!(
+      { projectId: "project-1" },
+      () => {},
+    );
+    unsubscribe();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(addPushTokenListener).not.toHaveBeenCalled();
+  });
+
+  it("does not ask the user for anything", async () => {
     addPushTokenListener.mockImplementation(() => ({ remove: vi.fn() }));
     expoPushTokenAdapter.subscribeToIdentifierChanges!(
       { projectId: "project-1" },
       () => {},
     );
+    await vi.waitFor(() => expect(addPushTokenListener).toHaveBeenCalled());
     expect(requestPermissionsAsync).not.toHaveBeenCalled();
     expect(getDevicePushTokenAsync).not.toHaveBeenCalled();
   });

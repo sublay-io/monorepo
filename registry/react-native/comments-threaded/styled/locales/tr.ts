@@ -9,6 +9,8 @@ const strings = {
   cancel: "İptal",
   replyingTo: "Yanıtlanan:",
   cancelReply: "Yanıtı iptal et",
+  collapseThread: "Konuyu daralt",
+  expandThread: "Konuyu genişlet",
 
   // Sorting
   sortBy: "Sırala",

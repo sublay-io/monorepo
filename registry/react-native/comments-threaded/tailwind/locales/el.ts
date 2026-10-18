@@ -9,6 +9,8 @@ const strings = {
   cancel: "Ακύρωση",
   replyingTo: "Απάντηση σε",
   cancelReply: "Ακύρωση απάντησης",
+  collapseThread: "Σύμπτυξη νήματος",
+  expandThread: "Ανάπτυξη νήματος",
 
   // Sorting
   sortBy: "Ταξινόμηση κατά",

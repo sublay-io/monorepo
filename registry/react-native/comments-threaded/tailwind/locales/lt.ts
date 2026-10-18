@@ -19,6 +19,8 @@ const strings = {
   cancel: "Atšaukti",
   replyingTo: "Atsakoma naudotojui",
   cancelReply: "Atšaukti atsakymą",
+  collapseThread: "Suskleisti giją",
+  expandThread: "Išskleisti giją",
 
   // Sorting
   sortBy: "Rikiuoti pagal",

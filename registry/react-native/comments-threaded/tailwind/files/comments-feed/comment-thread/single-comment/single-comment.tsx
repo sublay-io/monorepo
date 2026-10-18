@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, type AccessibilityActionEvent } from "react-native";
 import {
   Comment as CommentType,
   UserMention,
@@ -190,6 +190,27 @@ function SingleComment({
         source: { uri: comment.gif?.gifUrl },
       };
 
+  // Screen readers can't tap the comment to collapse it (the buttons inside
+  // are reachable one by one), so its text offers it as an action:
+  // double-tap, or "Collapse thread" / "Expand thread" in the actions list
+  const collapseAccessibility = {
+    accessibilityActions: [
+      { name: "activate" as const },
+      {
+        name: "toggleCollapse",
+        label: isCollapsed ? strings.expandThread : strings.collapseThread,
+      },
+    ],
+    onAccessibilityAction: (event: AccessibilityActionEvent) => {
+      if (
+        event.nativeEvent.actionName === "activate" ||
+        event.nativeEvent.actionName === "toggleCollapse"
+      ) {
+        onToggleCollapse();
+      }
+    },
+  };
+
   return (
     <View
       className={highlightGutterClass}
@@ -354,6 +375,7 @@ theme={theme}
                       •
                     </Text>
                     <Text
+                      {...collapseAccessibility}
                       numberOfLines={1}
                       className={`flex-1 text-[13px] leading-[18px] ${
                         theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
@@ -369,6 +391,7 @@ theme={theme}
 
             {!isCollapsed && tombstone && (
               <Text
+                {...collapseAccessibility}
                 className={`text-[13px] leading-[21px] italic mb-3 ${
                   theme === 'dark' ? 'text-neutral-400' : 'text-gray-500'
                 }`}
@@ -381,6 +404,7 @@ theme={theme}
               <>
                 {comment.content && (
                   <Text
+                    {...collapseAccessibility}
                     className={`text-[13px] leading-[21px] mb-3 ${
                       theme === 'dark' ? 'text-neutral-200' : 'text-gray-800'
                     }`}

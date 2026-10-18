@@ -9,6 +9,8 @@ const strings = {
   cancel: "Peruuta",
   replyingTo: "Vastaus käyttäjälle",
   cancelReply: "Peruuta vastaus",
+  collapseThread: "Tiivistä ketju",
+  expandThread: "Laajenna ketju",
 
   // Sorting
   sortBy: "Lajittele",

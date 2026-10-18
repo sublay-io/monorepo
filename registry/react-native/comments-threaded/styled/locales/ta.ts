@@ -9,6 +9,8 @@ const strings = {
   cancel: "ரத்துசெய்",
   replyingTo: "இவருக்குப் பதில்:",
   cancelReply: "பதிலை ரத்துசெய்",
+  collapseThread: "இழையைச் சுருக்கு",
+  expandThread: "இழையை விரி",
 
   // Sorting
   sortBy: "வரிசைப்படுத்து",

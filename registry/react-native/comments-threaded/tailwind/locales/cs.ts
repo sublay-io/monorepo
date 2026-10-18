@@ -16,6 +16,8 @@ const strings = {
   cancel: "Zrušit",
   replyingTo: "Odpověď uživateli",
   cancelReply: "Zrušit odpověď",
+  collapseThread: "Sbalit vlákno",
+  expandThread: "Rozbalit vlákno",
 
   // Sorting
   sortBy: "Seřadit podle",

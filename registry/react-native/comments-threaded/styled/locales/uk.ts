@@ -18,6 +18,8 @@ const strings = {
   cancel: "Скасувати",
   replyingTo: "Відповідь для",
   cancelReply: "Скасувати відповідь",
+  collapseThread: "Згорнути гілку",
+  expandThread: "Розгорнути гілку",
 
   // Sorting
   sortBy: "Сортувати за",

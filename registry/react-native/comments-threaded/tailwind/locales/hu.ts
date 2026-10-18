@@ -9,6 +9,8 @@ const strings = {
   cancel: "Mégse",
   replyingTo: "Válasz neki:",
   cancelReply: "Válasz elvetése",
+  collapseThread: "Szál összecsukása",
+  expandThread: "Szál kibontása",
 
   // Sorting
   sortBy: "Rendezés",

@@ -9,6 +9,8 @@ const strings = {
   cancel: "キャンセル",
   replyingTo: "返信先:",
   cancelReply: "返信をキャンセル",
+  collapseThread: "スレッドを折りたたむ",
+  expandThread: "スレッドを展開",
 
   // Sorting
   sortBy: "並べ替え",

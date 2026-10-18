@@ -9,6 +9,8 @@ const strings = {
   cancel: "ביטול",
   replyingTo: "בתגובה אל",
   cancelReply: "ביטול התגובה",
+  collapseThread: "צמצום השרשור",
+  expandThread: "הרחבת השרשור",
 
   // Sorting
   sortBy: "מיון לפי",

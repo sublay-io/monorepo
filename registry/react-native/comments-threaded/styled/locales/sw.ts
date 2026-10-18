@@ -9,6 +9,8 @@ const strings = {
   cancel: "Ghairi",
   replyingTo: "Unamjibu",
   cancelReply: "Ghairi jibu",
+  collapseThread: "Kunja mjadala",
+  expandThread: "Panua mjadala",
 
   // Sorting
   sortBy: "Panga kwa",

@@ -9,6 +9,8 @@ const strings = {
   cancel: "Abbrechen",
   replyingTo: "Antwort an",
   cancelReply: "Antwort abbrechen",
+  collapseThread: "Thread einklappen",
+  expandThread: "Thread ausklappen",
 
   // Sorting
   sortBy: "Sortieren nach",

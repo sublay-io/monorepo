@@ -6,6 +6,15 @@ const coreSource = fileURLToPath(new URL("./src/index.ts", import.meta.url));
 const reactNativeStub = fileURLToPath(
   new URL("./src/test-utils/reactNativeStub.tsx", import.meta.url),
 );
+const reactNativeSvgStub = fileURLToPath(
+  new URL("./src/test-utils/reactNativeSvgStub.tsx", import.meta.url),
+);
+const registryLibUtils = fileURLToPath(
+  new URL("../../registry/lib/utils.ts", import.meta.url),
+);
+const registryShared = fileURLToPath(
+  new URL("../../registry/shared/", import.meta.url),
+);
 
 export default defineConfig({
   plugins: [react()],
@@ -16,11 +25,17 @@ export default defineConfig({
     // them against the same core the test harness mocks, and needs no build.
     // The native section components also import `react-native` itself, which
     // this package doesn't depend on: a stub of the few layout components
-    // they use.
+    // they use, and one of `react-native-svg` for their icons. `@/lib/utils`
+    // is the `cn` helper web components import from the developer's app; the
+    // registry's own stand-in takes its place. `~shared/` is where components
+    // import the registry's shared pieces from, as in registry/tsconfig.json.
     alias: [
       { find: "@sublay/react-js", replacement: coreSource },
       { find: "@sublay/react-native", replacement: coreSource },
       { find: /^react-native$/, replacement: reactNativeStub },
+      { find: /^react-native-svg$/, replacement: reactNativeSvgStub },
+      { find: /^@\/lib\/utils$/, replacement: registryLibUtils },
+      { find: /^~shared\//, replacement: registryShared },
     ],
   },
   test: {

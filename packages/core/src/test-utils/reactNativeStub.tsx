@@ -9,3 +9,6 @@ export const View = Box;
 export const ScrollView = Box;
 export const Text = Box;
 export const TouchableOpacity = Box;
+export const StyleSheet = {
+  absoluteFill: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0 },
+};

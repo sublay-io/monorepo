@@ -101,7 +101,7 @@ function CommentReplies({
                 padding: "4px 8px",
               }}
             >
-              Couldn't load more ·{" "}
+              {strings.loadMoreFailed} ·{" "}
               <button
                 onClick={onLoadMore}
                 style={{

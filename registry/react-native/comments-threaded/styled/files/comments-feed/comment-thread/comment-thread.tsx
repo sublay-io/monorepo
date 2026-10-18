@@ -32,7 +32,7 @@ function CommentThread({
   const { highlightedComment, repliedToComment } = useCommentSection();
 
   // Replies the section already brought in (nested) are here from the start;
-  // "load more" / "continue this thread" fetch the rest on demand.
+  // "N more replies" fetches the rest on demand.
   const { replies, newReplies, loading, error, hasMore, loadMore } = useReplies({
     commentId: comment.id,
   });

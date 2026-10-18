@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import {
   Comment as CommentType,
   useCommentSection,
@@ -27,7 +27,7 @@ function CommentThread({
   const { highlightedComment } = useCommentSection();
 
   // Replies the section already brought in (nested) are here from the start;
-  // "load more" / "continue this thread" fetch the rest on demand.
+  // "load more" / "N more replies" fetch the rest on demand.
   const { replies, newReplies, loading, error, hasMore, loadMore } = useReplies({
     commentId: comment.id,
   });
@@ -46,6 +46,7 @@ function CommentThread({
   const [isLineHovered, setIsLineHovered] = useState(false);
   // The line this comment hangs from: its connector belongs to the parent
   const parentLine = useContext(ThreadLineContext);
+  const focusCircleOnMount = useRef(false);
 
   const handleToggleCollapse = useCallback(() => {
     // The line goes away when collapsing, so the mouse never "leaves" it
@@ -58,6 +59,7 @@ function CommentThread({
       hovered: isLineHovered,
       setHovered: setIsLineHovered,
       toggle: handleToggleCollapse,
+      focusCircleOnMount,
     }),
     [isLineHovered, handleToggleCollapse]
   );

@@ -59,7 +59,7 @@ npx @sublay/cli add comments-threaded --ref v8
 The CLI will:
 
 1. **Fetch the component** from the registry based on your `sublay.json` platform and style settings
-2. **Copy the component's files** (42 on React, 44 on React Native and Expo) into your project at `{componentsPath}/comments-threaded/`: the component's own files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
+2. **Copy the component's files** (42 on React, 45 on React Native and Expo) into your project at `{componentsPath}/comments-threaded/`: the component's own files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
 3. **Transform imports** to work with your project structure
 4. **Create `index.ts`** barrel export for clean imports
 5. **Display usage examples** and required dependencies
@@ -248,6 +248,22 @@ After installation, import and use the component:
 
 <Info>
 Make sure your app is wrapped with `<SublayProvider>`. See the [Quick Start Guide](/v8/components/installation/quick-start) for setup details.
+</Info>
+
+<Info>
+On React Native and Expo, the sheets (the comment menu, Report, Sort) also need your whole app wrapped in `<GestureHandlerRootView style={{ flex: 1 }}>` from `react-native-gesture-handler`. Without it they don't open or drag. `react-native-reanimated` needs its Babel setup too: Expo's preset does it for you; on React Native, follow [Reanimated's install steps](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/getting-started/).
+
+```tsx
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SublayProvider projectId="your-project-id">{/* your app */}</SublayProvider>
+    </GestureHandlerRootView>
+  );
+}
+```
 </Info>
 
 ---

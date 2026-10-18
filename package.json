@@ -1,6 +1,5 @@
 {
   "name": "@sublay/monorepo",
-  "version": "7.13.5",
   "packageManager": "pnpm@11.4.0",
   "license": "Apache-2.0",
   "author": "Sublay, maintained by Yanay Tsabary",
@@ -34,9 +33,9 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "pnpm -r --if-present run test",
-    "react:version:patch": "pnpm --filter @sublay/monorepo --filter @sublay/core --filter @sublay/expo --filter @sublay/react-js --filter @sublay/react-native version patch --no-git-tag-version --no-git-checks",
-    "react:version:minor": "pnpm --filter @sublay/monorepo --filter @sublay/core --filter @sublay/expo --filter @sublay/react-js --filter @sublay/react-native version minor --no-git-tag-version --no-git-checks",
-    "react:version:prerelease": "pnpm --filter @sublay/monorepo --filter @sublay/core --filter @sublay/expo --filter @sublay/react-js --filter @sublay/react-native version prerelease --preid beta --no-git-tag-version --no-git-checks",
+    "react:version:patch": "pnpm --filter @sublay/core --filter @sublay/expo --filter @sublay/react-js --filter @sublay/react-native version patch --no-git-tag-version --no-git-checks",
+    "react:version:minor": "pnpm --filter @sublay/core --filter @sublay/expo --filter @sublay/react-js --filter @sublay/react-native version minor --no-git-tag-version --no-git-checks",
+    "react:version:prerelease": "pnpm --filter @sublay/core --filter @sublay/expo --filter @sublay/react-js --filter @sublay/react-native version prerelease --preid beta --no-git-tag-version --no-git-checks",
     "react:build-all": "pnpm --filter @sublay/core run build && pnpm --filter @sublay/react-js run build && pnpm --filter @sublay/react-native run build && pnpm --filter @sublay/expo run build",
     "react:publish-prod": "node .github/scripts/check-publish-target.mjs --channel prod --group react && pnpm react:build-all && pnpm --filter @sublay/core --filter @sublay/react-js --filter @sublay/react-native --filter @sublay/expo run test && SUBLAY_PUBLISH_CHANNEL=prod pnpm --filter @sublay/core --filter @sublay/expo --filter @sublay/react-js --filter @sublay/react-native publish --no-git-checks",
     "react:publish-beta": "node .github/scripts/check-publish-target.mjs --channel beta --group react && pnpm react:build-all && pnpm --filter @sublay/core --filter @sublay/react-js --filter @sublay/react-native --filter @sublay/expo run test && SUBLAY_PUBLISH_CHANNEL=beta pnpm --filter @sublay/core --filter @sublay/expo --filter @sublay/react-js --filter @sublay/react-native publish --tag beta --no-git-checks",

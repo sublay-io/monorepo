@@ -26,7 +26,7 @@ const ShowHideButton = ({
   const { theme } = useUIState();
 
   // 🎨 CUSTOMIZATION: Show/hide button styling defaults
-  const viewRepliesPaddingTop = 8;
+  const viewRepliesPaddingTop = 7;
   const hideRepliesText = strings.hideReplies;
 
   let action: ("show" | "hide" | "load-more")[] = [];
@@ -68,25 +68,27 @@ const ShowHideButton = ({
         style={{
           paddingTop: viewRepliesPaddingTop,
           paddingStart: 58,
-          paddingEnd: 16,
+          paddingEnd: 14,
           flexDirection: "row",
           alignItems: "center",
-          gap: 12,
+          gap: 10.5,
         }}
       >
-        <View style={{ height: 1, width: 24, marginTop: 2, backgroundColor: mutedColor }} />
-        <Text style={{ fontSize: 12, color: mutedColor }}>{strings.loadMoreFailed} · </Text>
-        <TouchableOpacity
-          onPress={() => {
-            setAreRepliesVisible(true);
-            onLoadMore();
-          }}
-          style={resetButton}
-        >
-          <Text style={{ fontSize: 12, fontWeight: '600', color: mutedColor }}>
-            {strings.tryAgain}
-          </Text>
-        </TouchableOpacity>
+        <View style={{ height: 1, width: 21, marginTop: 1.75, backgroundColor: mutedColor }} />
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={{ fontSize: 10.5, lineHeight: 14, color: mutedColor }}>{strings.loadMoreFailed} · </Text>
+          <TouchableOpacity
+            onPress={() => {
+              setAreRepliesVisible(true);
+              onLoadMore();
+            }}
+            style={resetButton}
+          >
+            <Text style={{ fontSize: 10.5, lineHeight: 14, fontWeight: '600', color: mutedColor }}>
+              {strings.tryAgain}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -102,23 +104,24 @@ const ShowHideButton = ({
         ...resetButton,
         paddingTop: viewRepliesPaddingTop,
         paddingStart: 58,
-        paddingEnd: 16,
+        paddingEnd: 14,
         flexDirection: "row",
         alignItems: "center",
-        gap: 12,
+        gap: 10.5,
       }}
     >
       <View
         style={{
           height: 1,
-          width: 24,
-          marginTop: 2,
+          width: 21,
+          marginTop: 1.75,
           // 🎨 CUSTOMIZATION: Line color
           backgroundColor: theme === 'dark' ? '#A3A3A3' : '#737373',
         }}
       />
       <Text style={{
-        fontSize: 12,
+        fontSize: 10.5,
+        lineHeight: 14,
         fontWeight: '600',
         // 🎨 CUSTOMIZATION: Text color
         color: theme === 'dark' ? '#A3A3A3' : '#737373',

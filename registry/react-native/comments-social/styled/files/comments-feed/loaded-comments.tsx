@@ -8,7 +8,7 @@ const LoadedComments = ({ data }: { data: CommentType[] }) => {
   const { loadMore, error, highlightedComment } = useCommentSection();
 
   // 🎨 CUSTOMIZATION: Comments gap (spacing between comments)
-  const commentsGap = 8;
+  const commentsGap = 7;
 
   return (
     <FlatList

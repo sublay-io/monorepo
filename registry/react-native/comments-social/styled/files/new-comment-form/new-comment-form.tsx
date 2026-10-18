@@ -74,17 +74,19 @@ function NewCommentForm({
   // 🎨 CUSTOMIZATION: Form styling defaults
   const backgroundColor = theme === 'dark' ? '#262626' : '#fff';
   const withAvatar = true;
-  const itemsGap = 8;
-  const verticalPadding = 8;
-  const paddingLeft = 8;
-  const paddingRight = 16;
+  const itemsGap = 7;
+  const verticalPadding = 7;
+  const paddingLeft = 7;
+  const paddingRight = 14;
   const authorAvatarSize = 32;
   const placeholderText = strings.commentPlaceholder;
-  const textareaTextSize = 14;
+  const textareaTextSize = 12.25;
+  const textareaLineHeight = 17.5;
   const textareaTextColor = theme === 'dark' ? '#E5E5E5' : '#000';
   const textareaBackgroundColor = theme === 'dark' ? '#262626' : '#fff';
   const postButtonText = strings.post;
-  const postButtonFontSize = 14;
+  const postButtonFontSize = 12.25;
+  const postButtonLineHeight = 17.5;
   const postButtonFontColor = theme === 'dark' ? '#60A5FA' : '#0A99F6';
   const postButtonFontWeight = '600' as const;
 
@@ -280,10 +282,11 @@ function NewCommentForm({
             accessibilityRole="alert"
             style={{
               // 🎨 CUSTOMIZATION: Failed-post message styling
-              fontSize: 12,
-              paddingHorizontal: 16,
-              paddingTop: 8,
-              paddingBottom: 4,
+              fontSize: 10.5,
+              lineHeight: 14,
+              paddingHorizontal: 14,
+              paddingTop: 7,
+              paddingBottom: 3.5,
               color: theme === 'dark' ? '#A3A3A3' : '#737373',
             }}
           >
@@ -337,8 +340,9 @@ theme={theme}
             style={{
               ...resetTextInput,
               flex: 1,
-              marginHorizontal: 8,
+              marginHorizontal: 7,
               fontSize: textareaTextSize,
+              lineHeight: textareaLineHeight,
               backgroundColor: textareaBackgroundColor,
               color: textareaTextColor,
             }}
@@ -354,6 +358,7 @@ theme={theme}
                 style={{
                   fontWeight: postButtonFontWeight,
                   fontSize: postButtonFontSize,
+                  lineHeight: postButtonLineHeight,
                   color: postButtonFontColor,
                 }}
               >
@@ -370,6 +375,7 @@ theme={theme}
                 style={{
                   fontWeight: postButtonFontWeight,
                   fontSize: postButtonFontSize,
+                  lineHeight: postButtonLineHeight,
                   color: postButtonFontColor,
                 }}
               >

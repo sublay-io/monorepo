@@ -143,31 +143,33 @@ function SocialCommentSectionInner({
     active: {
       // 🎨 CUSTOMIZATION: Sort button active styles
       backgroundColor: theme === 'dark' ? '#262626' : 'black',
-      paddingVertical: 4,
-      paddingHorizontal: 8,
-      borderRadius: 6,
+      paddingVertical: 3.5,
+      paddingHorizontal: 7,
+      borderRadius: 5.25,
     },
     textActive: {
       color: theme === 'dark' ? '#FAFAFA' : 'white',
-      fontSize: 12,
+      fontSize: 10.5,
+      lineHeight: 14,
     },
     inactive: {
       // 🎨 CUSTOMIZATION: Sort button inactive styles
       backgroundColor: theme === 'dark' ? '#525252' : '#e5e7eb',
-      paddingVertical: 4,
-      paddingHorizontal: 8,
-      borderRadius: 6,
+      paddingVertical: 3.5,
+      paddingHorizontal: 7,
+      borderRadius: 5.25,
     },
     textInactive: {
       color: theme === 'dark' ? '#FAFAFA' : 'black',
-      fontSize: 12,
+      fontSize: 10.5,
+      lineHeight: 14,
     },
   };
 
   const renderSortButtons = () => {
     return sortOptions.map(({ label, sortBy, sortDir }, index) => {
       const isFirst = index === 0;
-      const marginStyle = isFirst ? {} : { marginStart: 4 };
+      const marginStyle = isFirst ? {} : { marginStart: 3.5 };
 
       return (
         <SortByButton
@@ -204,11 +206,11 @@ function SocialCommentSectionInner({
         <View
           style={{
             flexDirection: "row",
-            // 🎨 CUSTOMIZATION: Header padding (Default: 24px horizontal, 12px vertical)
-            paddingStart: 24,
-            paddingEnd: 24,
-            paddingTop: 12,
-            paddingBottom: 12,
+            // 🎨 CUSTOMIZATION: Header padding (Default: 21px horizontal, 10.5px vertical)
+            paddingStart: 21,
+            paddingEnd: 21,
+            paddingTop: 10.5,
+            paddingBottom: 10.5,
             alignItems: "center",
             justifyContent: "flex-end",
           }}

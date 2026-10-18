@@ -23,34 +23,41 @@ function ReplyButtonAndInfo({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 16,
+        gap: 14,
       }}
     >
       {canReply && (
       <Pressable
         onPress={onReplyPress}
-        style={({ pressed }) => ({
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-          marginStart: -8,
-          borderRadius: 4,
-          // 🎨 CUSTOMIZATION: Press feedback
-          backgroundColor: pressed
-            ? theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : '#EFF6FF'
-            : 'transparent',
-          opacity: pressed ? 0.6 : 1,
-        })}
+        style={{ marginStart: -7 }}
       >
-        <Text
-          style={{
-            fontSize: 13,
-            lineHeight: 18,
-            fontWeight: '500',
-            color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
-          }}
-        >
-          {strings.reply}
-        </Text>
+        {/* The pressed look is on a view inside: NativeWind, when the app
+            uses it, drops a `style` given as a function */}
+        {({ pressed }) => (
+          <View
+            style={{
+              paddingHorizontal: 7,
+              paddingVertical: 3.5,
+              borderRadius: 3.5,
+              // 🎨 CUSTOMIZATION: Press feedback
+              backgroundColor: pressed
+                ? theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : '#EFF6FF'
+                : 'transparent',
+              opacity: pressed ? 0.6 : 1,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 13,
+                lineHeight: 18,
+                fontWeight: '500',
+                color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
+              }}
+            >
+              {strings.reply}
+            </Text>
+          </View>
+        )}
       </Pressable>
       )}
       {hasReplies && (

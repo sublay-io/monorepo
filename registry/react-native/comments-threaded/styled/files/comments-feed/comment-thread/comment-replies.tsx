@@ -11,9 +11,9 @@ import strings from "../../../utils/strings";
 
 // 🎨 CUSTOMIZATION: "More replies" row - space above it (Default: 12)
 const LOAD_MORE_PADDING_TOP = 12;
-// 🎨 CUSTOMIZATION: "More replies" row - height (Default: 24).
-// The row's text has a line height of 16, plus 4 of padding above and below.
-const LOAD_MORE_HEIGHT = 24;
+// 🎨 CUSTOMIZATION: "More replies" row - height (Default: 21).
+// The row's text has a line height of 14, plus 3.5 of padding above and below.
+const LOAD_MORE_HEIGHT = 21;
 // 🎨 CUSTOMIZATION: "More replies" row - space between the elbow and the button (Default: 4)
 const LOAD_MORE_OFFSET_START = 4;
 
@@ -96,14 +96,14 @@ function CommentReplies({
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                paddingHorizontal: 8,
-                paddingVertical: 4,
+                paddingHorizontal: 7,
+                paddingVertical: 3.5,
               }}
             >
               <Text
                 style={{
                   fontSize: 13,
-                  lineHeight: 16,
+                  lineHeight: 14,
                   color: theme === 'dark' ? '#A3A3A3' : '#6B7280',
                 }}
               >
@@ -113,7 +113,7 @@ function CommentReplies({
                 <Text
                   style={{
                     fontSize: 13,
-                    lineHeight: 16,
+                    lineHeight: 14,
                     fontWeight: '500',
                     color: theme === 'dark' ? '#60A5FA' : '#2563EB',
                   }}
@@ -126,39 +126,46 @@ function CommentReplies({
             <Pressable
               onPress={onLoadMore}
               disabled={loading}
-              style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-                paddingHorizontal: 8,
-                paddingVertical: 4,
-                borderRadius: 9999,
-                // 🎨 CUSTOMIZATION: Press feedback
-                backgroundColor: pressed
-                  ? theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : '#EFF6FF'
-                  : 'transparent',
-                opacity: pressed ? 0.6 : 1,
-              })}
             >
-              <Text
-                style={{
-                  fontSize: 13,
-                  lineHeight: 16,
-                  color: theme === 'dark' ? '#60A5FA' : '#2563EB',
-                }}
-              >
-                +
-              </Text>
-              <Text
-                style={{
-                  fontSize: 13,
-                  lineHeight: 16,
-                  fontWeight: '500',
-                  color: theme === 'dark' ? '#60A5FA' : '#2563EB',
-                }}
-              >
-                {loading ? strings.loading : loadMoreLabel}
-              </Text>
+              {/* The pressed look is on a view inside: NativeWind, when the
+                  app uses it, drops a `style` given as a function */}
+              {({ pressed }) => (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 7,
+                    paddingHorizontal: 7,
+                    paddingVertical: 3.5,
+                    borderRadius: 9999,
+                    // 🎨 CUSTOMIZATION: Press feedback
+                    backgroundColor: pressed
+                      ? theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : '#EFF6FF'
+                      : 'transparent',
+                    opacity: pressed ? 0.6 : 1,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      lineHeight: 14,
+                      color: theme === 'dark' ? '#60A5FA' : '#2563EB',
+                    }}
+                  >
+                    +
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      lineHeight: 14,
+                      fontWeight: '500',
+                      color: theme === 'dark' ? '#60A5FA' : '#2563EB',
+                    }}
+                  >
+                    {loading ? strings.loading : loadMoreLabel}
+                  </Text>
+                </View>
+              )}
             </Pressable>
           )}
         </View>

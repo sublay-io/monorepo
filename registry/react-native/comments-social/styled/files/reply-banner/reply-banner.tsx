@@ -32,7 +32,7 @@ const ReplyBanner = () => {
         overflow: "hidden",
         // 🎨 CUSTOMIZATION: Reply banner background
         backgroundColor: theme === 'dark' ? "#404040" : "#e7e7e7",
-        padding: 12,
+        padding: 10.5,
         height: "auto",
       }}
     >
@@ -46,7 +46,8 @@ const ReplyBanner = () => {
         <Text style={{
           // 🎨 CUSTOMIZATION: Reply banner text color
           color: theme === 'dark' ? "#A3A3A3" : "#787878",
-          fontSize: 12
+          fontSize: 10.5,
+          lineHeight: 14,
         }}>
           {strings.replyingTo(repliedToUser)}
         </Text>
@@ -57,7 +58,8 @@ const ReplyBanner = () => {
           }}
         >
           <Text style={{
-            fontSize: 16,
+            fontSize: 14,
+            lineHeight: 21,
             // 🎨 CUSTOMIZATION: Close button color
             color: theme === 'dark' ? "#FAFAFA" : "#000"
           }}>&times;</Text>

@@ -175,7 +175,7 @@ function ThreadedCommentSection({ children }: { children?: React.ReactNode }) {
   return (
     <View
       style={{
-        paddingVertical: 8,
+        paddingVertical: 7,
         // 🎨 CUSTOMIZATION: Feed background
         backgroundColor: theme === 'dark' ? '#262626' : '#FFFFFF',
         // The side padding is on this view, so a highlighted comment can
@@ -209,7 +209,7 @@ export function ThreadedCommentInput({
       containerStyle={
         containerStyle ?? {
           borderTopWidth: 1,
-          paddingTop: 8,
+          paddingTop: 7,
           // 🎨 CUSTOMIZATION: Comment box border and background
           borderTopColor: theme === 'dark' ? '#525252' : '#E5E7EB',
           backgroundColor: theme === 'dark' ? '#262626' : '#FFFFFF',

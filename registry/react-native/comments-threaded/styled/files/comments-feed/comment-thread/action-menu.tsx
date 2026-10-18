@@ -18,26 +18,33 @@ function ActionMenu({ comment }: ActionMenuProps) {
             ? openCommentOptionsSheetOwner?.(comment)
             : openCommentOptionsSheet?.(comment)
         }
-        style={({ pressed }) => ({
-          padding: 4,
-          borderRadius: 4,
-          // 🎨 CUSTOMIZATION: Press feedback
-          backgroundColor: pressed
-            ? theme === 'dark' ? '#404040' : '#F9FAFB'
-            : 'transparent',
-          opacity: pressed ? 0.6 : 1,
-        })}
       >
-        <Text
-          style={{
-            fontSize: 12,
-            lineHeight: 16,
-            // 🎨 CUSTOMIZATION: Menu icon color
-            color: theme === 'dark' ? '#737373' : '#9CA3AF',
-          }}
-        >
-          •••
-        </Text>
+        {/* The pressed look is on a view inside: NativeWind, when the app
+            uses it, drops a `style` given as a function */}
+        {({ pressed }) => (
+          <View
+            style={{
+              padding: 3.5,
+              borderRadius: 3.5,
+              // 🎨 CUSTOMIZATION: Press feedback
+              backgroundColor: pressed
+                ? theme === 'dark' ? '#404040' : '#F9FAFB'
+                : 'transparent',
+              opacity: pressed ? 0.6 : 1,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 10.5,
+                lineHeight: 14,
+                // 🎨 CUSTOMIZATION: Menu icon color
+                color: theme === 'dark' ? '#737373' : '#9CA3AF',
+              }}
+            >
+              •••
+            </Text>
+          </View>
+        )}
       </Pressable>
     </View>
   );

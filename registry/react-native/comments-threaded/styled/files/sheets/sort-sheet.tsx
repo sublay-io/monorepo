@@ -44,8 +44,8 @@ const SortSheet = () => {
       handleComponent={() => (
         <View
           style={{
-            paddingHorizontal: 32,
-            paddingVertical: 16,
+            paddingHorizontal: 28,
+            paddingVertical: 14,
             flexDirection: 'row',
             borderBottomWidth: 1,
             borderBottomColor: theme === 'dark' ? '#525252' : '#E5E7EB',
@@ -53,8 +53,8 @@ const SortSheet = () => {
         >
           <Text
             style={{
-              fontSize: 16,
-              lineHeight: 24,
+              fontSize: 14,
+              lineHeight: 21,
               fontWeight: '600',
               color: theme === 'dark' ? '#FAFAFA' : '#111827',
             }}
@@ -64,7 +64,7 @@ const SortSheet = () => {
         </View>
       )}
     >
-      <BottomSheetView style={{ padding: 16 }}>
+      <BottomSheetView style={{ padding: 14 }}>
         {SORT_OPTIONS.map((option) => {
           const isActive = option === current;
           return (
@@ -77,39 +77,47 @@ const SortSheet = () => {
               }}
               accessibilityRole="radio"
               accessibilityState={{ checked: isActive }}
-              style={({ pressed }) => ({
-                // 🎨 CUSTOMIZATION: Sort option styling
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 16,
-                padding: 12,
-                borderRadius: 8,
-                backgroundColor: pressed
-                  ? theme === 'dark' ? '#404040' : '#F9FAFB'
-                  : 'transparent',
-              })}
             >
-              <Text
-                style={{
-                  fontSize: 16,
-                  lineHeight: 24,
-                  flex: 1,
-                  fontWeight: isActive ? '600' : '400',
-                  color: theme === 'dark' ? '#FAFAFA' : '#374151',
-                }}
-              >
-                {option.label}
-              </Text>
-              {isActive ? (
-                <Text
+              {/* The pressed look is on a view inside: NativeWind, when the
+                  app uses it, drops a `style` given as a function */}
+              {({ pressed }) => (
+                <View
                   style={{
-                    fontSize: 16,
-                    color: theme === 'dark' ? '#FAFAFA' : '#111827',
+                    // 🎨 CUSTOMIZATION: Sort option styling
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 14,
+                    padding: 10.5,
+                    borderRadius: 7,
+                    backgroundColor: pressed
+                      ? theme === 'dark' ? '#404040' : '#F9FAFB'
+                      : 'transparent',
                   }}
                 >
-                  ✓
-                </Text>
-              ) : null}
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      lineHeight: 21,
+                      flex: 1,
+                      fontWeight: isActive ? '600' : '400',
+                      color: theme === 'dark' ? '#FAFAFA' : '#374151',
+                    }}
+                  >
+                    {option.label}
+                  </Text>
+                  {isActive ? (
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        lineHeight: 21,
+                        color: theme === 'dark' ? '#FAFAFA' : '#111827',
+                      }}
+                    >
+                      ✓
+                    </Text>
+                  ) : null}
+                </View>
+              )}
             </Pressable>
           );
         })}

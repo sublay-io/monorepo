@@ -25,9 +25,9 @@ function ReplyBanner() {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        gap: 5.25,
         paddingHorizontal: SECTION_PADDING_X,
-        paddingBottom: 8,
+        paddingBottom: 7,
       }}
     >
       <Text
@@ -67,28 +67,35 @@ function ReplyBanner() {
         accessibilityRole="button"
         accessibilityLabel={strings.cancelReply}
         hitSlop={8}
-        style={({ pressed }) => ({
-          marginStart: 'auto',
-          width: 20,
-          height: 20,
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: 9999,
-          // 🎨 CUSTOMIZATION: Cancel control background
-          backgroundColor: theme === 'dark' ? '#404040' : '#F3F4F6',
-          opacity: pressed ? 0.5 : 1,
-        })}
+        style={{ marginStart: 'auto' }}
       >
-        <Text
-          style={{
-            fontSize: 14,
-            lineHeight: 16,
-            // 🎨 CUSTOMIZATION: Cancel control color
-            color: theme === 'dark' ? '#D4D4D4' : '#4B5563',
-          }}
-        >
-          ×
-        </Text>
+        {/* The pressed look is on a view inside: NativeWind, when the app
+            uses it, drops a `style` given as a function */}
+        {({ pressed }) => (
+          <View
+            style={{
+              width: 17.5,
+              height: 17.5,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 9999,
+              // 🎨 CUSTOMIZATION: Cancel control background
+              backgroundColor: theme === 'dark' ? '#404040' : '#F3F4F6',
+              opacity: pressed ? 0.5 : 1,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 12.25,
+                lineHeight: 14,
+                // 🎨 CUSTOMIZATION: Cancel control color
+                color: theme === 'dark' ? '#D4D4D4' : '#4B5563',
+              }}
+            >
+              ×
+            </Text>
+          </View>
+        )}
       </Pressable>
     </View>
   );

@@ -69,14 +69,14 @@ const CommentsFeed = React.memo(
           <View
             style={{
               alignItems: 'flex-start',
-              paddingBottom: 8,
+              paddingBottom: 7,
             }}
           >
             <TouchableOpacity
               onPress={() => setShowAll(true)}
               style={{
-                paddingHorizontal: 8,
-                paddingVertical: 4,
+                paddingHorizontal: 7,
+                paddingVertical: 3.5,
                 borderRadius: 9999,
               }}
             >
@@ -114,7 +114,7 @@ const CommentsFeed = React.memo(
           <View
             style={{
               alignItems: 'center',
-              paddingVertical: 8,
+              paddingVertical: 7,
             }}
           >
             {showLoadMoreError ? (
@@ -122,8 +122,8 @@ const CommentsFeed = React.memo(
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  paddingHorizontal: 12,
-                  paddingVertical: 4,
+                  paddingHorizontal: 10.5,
+                  paddingVertical: 3.5,
                 }}
               >
                 <Text
@@ -153,8 +153,8 @@ const CommentsFeed = React.memo(
                 onPress={() => loadMore?.()}
                 disabled={loading}
                 style={{
-                  paddingHorizontal: 12,
-                  paddingVertical: 4,
+                  paddingHorizontal: 10.5,
+                  paddingVertical: 3.5,
                   borderRadius: 9999,
                 }}
               >
@@ -177,14 +177,14 @@ const CommentsFeed = React.memo(
           <View
             style={{
               alignItems: 'center',
-              paddingVertical: 8,
+              paddingVertical: 7,
             }}
           >
             <Text
               style={{
-                fontSize: 14,
-                lineHeight: 20,
-                marginBottom: 4,
+                fontSize: 12.25,
+                lineHeight: 17.5,
+                marginBottom: 3.5,
                 color: mutedTextColor,
               }}
             >

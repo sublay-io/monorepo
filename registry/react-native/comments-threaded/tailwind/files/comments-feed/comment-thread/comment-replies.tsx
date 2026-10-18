@@ -11,9 +11,9 @@ import strings from "../../../utils/strings";
 
 // 🎨 CUSTOMIZATION: "More replies" row - space above it (Default: 12)
 const LOAD_MORE_PADDING_TOP = 12;
-// 🎨 CUSTOMIZATION: "More replies" row - height (Default: 24).
-// The row's text has a line height of 16, plus 4 of padding above and below.
-const LOAD_MORE_HEIGHT = 24;
+// 🎨 CUSTOMIZATION: "More replies" row - height (Default: 21).
+// The row's text has a line height of 14, plus 3.5 of padding above and below.
+const LOAD_MORE_HEIGHT = 21;
 // 🎨 CUSTOMIZATION: "More replies" row - space between the elbow and the button (Default: 4)
 const LOAD_MORE_OFFSET_START = 4;
 

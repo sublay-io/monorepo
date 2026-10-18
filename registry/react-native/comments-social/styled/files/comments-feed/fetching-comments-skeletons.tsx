@@ -5,7 +5,7 @@ import useUIState from "../../hooks/use-ui-state";
 const FetchingCommentsSkeletons = () => {
   const { theme } = useUIState();
   // Sized and spaced like the comment rows they stand in for
-  const commentsGap = 28;
+  const commentsGap = 24.5;
 
   return (
     <FlatList

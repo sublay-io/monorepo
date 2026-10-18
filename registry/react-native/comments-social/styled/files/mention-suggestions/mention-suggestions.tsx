@@ -37,7 +37,7 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
         backgroundColor: theme === 'dark' ? "#262626" : "white",
         borderTopColor: theme === 'dark' ? "#525252" : "#e7e7e7",
         borderTopWidth: 1,
-        padding: 16,
+        padding: 14,
       }}
     >
       {isLoadingMentions ? (
@@ -58,13 +58,14 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                paddingVertical: 8,
+                paddingVertical: 7,
               }}
             >
               <UserAvatar theme={theme} user={item} />
-              <View style={{ justifyContent: "space-evenly", marginStart: 8 }}>
+              <View style={{ justifyContent: "space-evenly", marginStart: 7 }}>
                 <Text style={{
-                  fontSize: 14,
+                  fontSize: 12.25,
+                  lineHeight: 17.5,
                   fontWeight: "500",
                   // 🎨 CUSTOMIZATION: Username color
                   color: theme === 'dark' ? "#FAFAFA" : "#000",
@@ -74,7 +75,8 @@ const MentionSuggestions: React.FC<MentionSuggestionsProps> = ({
                 {item.name && (
                   <Text
                     style={{
-                      fontSize: 14,
+                      fontSize: 12.25,
+                  lineHeight: 17.5,
                       fontWeight: "400",
                       // 🎨 CUSTOMIZATION: Name color
                       color: theme === 'dark' ? "#A3A3A3" : "gray",

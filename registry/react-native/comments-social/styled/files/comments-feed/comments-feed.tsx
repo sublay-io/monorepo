@@ -48,12 +48,12 @@ const CommentsFeed = ({
       {showLoadedComments && <LoadedComments data={mergedComments} />}
       {showFetchingSkeletons && <FetchingCommentsSkeletons />}
       {showLoadError && (
-        <View style={{ alignItems: "center", paddingVertical: 8 }}>
-          <Text style={{ fontSize: 14, color: mutedColor, marginBottom: 4 }}>
+        <View style={{ alignItems: "center", paddingVertical: 7 }}>
+          <Text style={{ fontSize: 12.25, lineHeight: 17.5, color: mutedColor, marginBottom: 3.5 }}>
             {strings.loadCommentsFailed}
           </Text>
           <TouchableOpacity onPress={() => loadMore?.()}>
-            <Text style={{ fontSize: 12, fontWeight: '600', color: mutedColor }}>
+            <Text style={{ fontSize: 10.5, lineHeight: 14, fontWeight: '600', color: mutedColor }}>
               {strings.tryAgain}
             </Text>
           </TouchableOpacity>

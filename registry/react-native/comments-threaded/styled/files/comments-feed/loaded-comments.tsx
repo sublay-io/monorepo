@@ -6,8 +6,8 @@ function LoadedComments({ data }: { data: CommentType[] }) {
   return (
     <View
       style={{
-        // 🎨 CUSTOMIZATION: Space between top-level threads (Default: 8)
-        gap: 8,
+        // 🎨 CUSTOMIZATION: Space between top-level threads (Default: 7)
+        gap: 7,
       }}
     >
       {data?.map((c) => (

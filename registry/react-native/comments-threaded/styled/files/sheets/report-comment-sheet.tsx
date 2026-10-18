@@ -95,7 +95,7 @@ const ReportCommentSheet = () => {
     >
       <BottomSheetView
         style={{
-          padding: 28,
+          padding: 24.5,
           flex: 1,
           height: '100%',
           justifyContent: 'space-between',
@@ -106,7 +106,7 @@ const ReportCommentSheet = () => {
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 16,
+              gap: 14,
             }}
           >
             <FlagIcon
@@ -115,8 +115,8 @@ const ReportCommentSheet = () => {
             />
             <Text
               style={{
-                fontSize: 24,
-                lineHeight: 32,
+                fontSize: 21,
+                lineHeight: 28,
                 color: theme === 'dark' ? '#FAFAFA' : '#111827',
               }}
             >
@@ -125,7 +125,7 @@ const ReportCommentSheet = () => {
           </View>
           <Text
             style={{
-              marginTop: 24,
+              marginTop: 21,
               color: theme === 'dark' ? '#D4D4D4' : '#374151',
             }}
           >
@@ -136,8 +136,8 @@ const ReportCommentSheet = () => {
             style={{
               flexDirection: 'row',
               flexWrap: 'wrap',
-              gap: 6,
-              marginTop: 24,
+              gap: 5.25,
+              marginTop: 21,
             }}
           >
             {Object.entries(strings.reportReasons).map(([key, value], index) => {
@@ -147,9 +147,9 @@ const ReportCommentSheet = () => {
                   onPress={() => setReason(key as ReportReasonKey)}
                   key={index}
                   style={{
-                    paddingHorizontal: 8,
-                    paddingVertical: 4,
-                    borderRadius: 6,
+                    paddingHorizontal: 7,
+                    paddingVertical: 3.5,
+                    borderRadius: 5.25,
                     // 🎨 CUSTOMIZATION: Reason chip background (selected / not selected)
                     backgroundColor: isSelected
                       ? theme === 'dark' ? '#FFFFFF' : '#111827'
@@ -158,8 +158,8 @@ const ReportCommentSheet = () => {
                 >
                   <Text
                     style={{
-                      fontSize: 14,
-                      lineHeight: 20,
+                      fontSize: 12.25,
+                      lineHeight: 17.5,
                       color: isSelected
                         ? theme === 'dark' ? '#171717' : '#FFFFFF'
                         : theme === 'dark' ? '#A3A3A3' : '#6B7280',

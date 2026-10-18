@@ -15,7 +15,7 @@ function FetchingCommentsSkeletons() {
         // Sized and spaced like the comment rows they stand in for
         gap: 39,
         paddingTop: AVATAR_TOP,
-        paddingBottom: 24,
+        paddingBottom: 21,
       }}
     >
       {[1, 2, 3].map((i) => (

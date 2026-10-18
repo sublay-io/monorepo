@@ -47,7 +47,6 @@ const strings = {
       `ešte ${count} odpovedí`,
     ),
   moreReplies: "Ďalšie odpovede",
-  continueThread: "Pokračovať vo vlákne",
   removeYourVote: "Odstrániť hlas",
 
   // Comments that can't be shown

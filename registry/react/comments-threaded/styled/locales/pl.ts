@@ -49,7 +49,6 @@ const strings = {
       `jeszcze ${count} odpowiedzi`,
     ),
   moreReplies: "Więcej odpowiedzi",
-  continueThread: "Kontynuuj ten wątek",
   expandThread: "Rozwiń wątek",
   collapseThread: "Zwiń wątek",
   moreOptions: "Więcej opcji",

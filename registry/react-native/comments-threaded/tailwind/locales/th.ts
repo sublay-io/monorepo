@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `การตอบกลับ ${count} รายการ`,
   moreReplyCount: (count: number) => `การตอบกลับอีก ${count} รายการ`,
   moreReplies: "การตอบกลับเพิ่มเติม",
-  continueThread: "ดูเธรดนี้ต่อ",
   removeYourVote: "ยกเลิกการโหวตของคุณ",
 
   // Comments that can't be shown

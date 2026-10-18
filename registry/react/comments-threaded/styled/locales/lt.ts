@@ -50,7 +50,6 @@ const strings = {
       `dar ${count} atsakymų`,
     ),
   moreReplies: "Daugiau atsakymų",
-  continueThread: "Tęsti giją",
   expandThread: "Išskleisti giją",
   collapseThread: "Suskleisti giją",
   moreOptions: "Daugiau parinkčių",

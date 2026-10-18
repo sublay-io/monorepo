@@ -35,7 +35,6 @@ const strings = {
   moreReplyCount: (count: number) =>
     `${count} more ${count === 1 ? "reply" : "replies"}`,
   moreReplies: "More replies",
-  continueThread: "Continue this thread",
   expandThread: "Expand thread",
   collapseThread: "Collapse thread",
   moreOptions: "More options",

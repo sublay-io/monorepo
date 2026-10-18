@@ -35,7 +35,6 @@ const strings = {
   moreReplyCount: (count: number) =>
     count === 1 ? "jibu 1 zaidi" : `majibu ${count} zaidi`,
   moreReplies: "Majibu zaidi",
-  continueThread: "Endeleza mjadala huu",
   expandThread: "Panua mjadala",
   collapseThread: "Kunja mjadala",
   moreOptions: "Chaguo zaidi",

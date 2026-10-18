@@ -59,7 +59,6 @@ const strings = {
       `${count} رد آخر`,
     ),
   moreReplies: "ردود أخرى",
-  continueThread: "متابعة هذا النقاش",
   expandThread: "توسيع النقاش",
   collapseThread: "طي النقاش",
   moreOptions: "خيارات إضافية",

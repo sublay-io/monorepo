@@ -122,7 +122,7 @@ function useThreadedComments({
       limit: 10,
       // 🔧 CUSTOMIZE: Replies brought with each page of comments — 2 levels,
       // up to 3 per comment — so the first paint is a single request. Deeper
-      // replies load on demand ("Continue this thread").
+      // replies load on demand ("N more replies").
       replyDepth: 2,
       replyLimit: 3,
     }),

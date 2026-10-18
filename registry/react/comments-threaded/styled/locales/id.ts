@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} balasan`,
   moreReplyCount: (count: number) => `${count} balasan lainnya`,
   moreReplies: "Balasan lainnya",
-  continueThread: "Lanjutkan utas ini",
   expandThread: "Perluas utas",
   collapseThread: "Ciutkan utas",
   moreOptions: "Opsi lainnya",

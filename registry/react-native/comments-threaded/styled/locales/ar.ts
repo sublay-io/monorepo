@@ -59,7 +59,6 @@ const strings = {
       `${count} رد آخر`,
     ),
   moreReplies: "ردود أخرى",
-  continueThread: "متابعة هذا النقاش",
   removeYourVote: "إزالة تصويتك",
 
   // Comments that can't be shown

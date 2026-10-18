@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import {
   Comment as CommentType,
   useCommentSection,
@@ -8,6 +8,8 @@ import SingleComment from "./single-comment";
 import CommentReplies from "./comment-replies";
 import IndentationThreadingLines, {
   MAX_INDENT_DEPTH,
+  ThreadLine,
+  ThreadLineContext,
 } from "./single-comment/indentation-threading-lines";
 
 export interface CommentThreadProps {
@@ -39,39 +41,84 @@ function CommentThread({
   const replyCount = Math.max(comment.repliesCount ?? 0, allReplies.length);
   const hiddenRepliesCount = Math.max(0, replyCount - allReplies.length);
 
-  const handleToggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
+  // This comment's line: hovering it (or the circle on it) lights it and its
+  // direct replies' elbows; clicking it collapses or expands the comment
+  const [isLineHovered, setIsLineHovered] = useState(false);
+  // The line this comment hangs from: its connector belongs to the parent
+  const parentLine = useContext(ThreadLineContext);
+
+  const handleToggleCollapse = useCallback(() => {
+    // The line goes away when collapsing, so the mouse never "leaves" it
+    setIsLineHovered(false);
+    setIsCollapsed((collapsed) => !collapsed);
+  }, []);
+
+  const line: ThreadLine = useMemo(
+    () => ({
+      hovered: isLineHovered,
+      setHovered: setIsLineHovered,
+      toggle: handleToggleCollapse,
+    }),
+    [isLineHovered, handleToggleCollapse]
+  );
 
   const hasReplies = allReplies.length > 0;
   // Whether anything is listed under this comment: replies, or the row that loads them.
   const showReplies = !isCollapsed && (hasReplies || hasMore);
 
+  // The comment and its replies, kept the same while only the line's hover
+  // changes: the line pieces read it from context, so hovering doesn't render
+  // the whole thread again
+  const content = useMemo(
+    () => (
+      <>
+        <SingleComment
+          comment={comment}
+          depth={depth}
+          hasReplies={hasReplies}
+          isCollapsed={isCollapsed}
+          replyCount={replyCount}
+          showReplies={showReplies}
+          onToggleCollapse={handleToggleCollapse}
+        />
+
+        <CommentReplies
+          depth={depth}
+          isCollapsed={isCollapsed}
+          loading={loading}
+          failed={!!error}
+          visibleReplies={allReplies}
+          hiddenRepliesCount={hiddenRepliesCount}
+          hasMore={hasMore}
+          onLoadMore={() => loadMore()}
+          CommentThreadComponent={CommentThread}
+        />
+      </>
+    ),
+    [
+      comment,
+      depth,
+      hasReplies,
+      isCollapsed,
+      replyCount,
+      showReplies,
+      handleToggleCollapse,
+      loading,
+      error,
+      allReplies,
+      hiddenRepliesCount,
+      hasMore,
+      loadMore,
+    ]
+  );
+
   return (
     // The wrapper spans the comment and everything nested under it, which is
     // what the threading lines measure themselves against.
     <div className="relative">
-      <SingleComment
-        comment={comment}
-        depth={depth}
-        hasReplies={hasReplies}
-        isCollapsed={isCollapsed}
-        replyCount={replyCount}
-        showReplies={showReplies}
-        onToggleCollapse={handleToggleCollapse}
-      />
-
-      <CommentReplies
-        depth={depth}
-        isCollapsed={isCollapsed}
-        loading={loading}
-        failed={!!error}
-        visibleReplies={allReplies}
-        hiddenRepliesCount={hiddenRepliesCount}
-        hasMore={hasMore}
-        onLoadMore={() => loadMore()}
-        CommentThreadComponent={CommentThread}
-      />
+      <ThreadLineContext.Provider value={line}>
+        {content}
+      </ThreadLineContext.Provider>
 
       {/* Threading lines connecting this comment to its parent */}
       {depth > 0 && (
@@ -79,6 +126,7 @@ function CommentThread({
           isLastReply={isLastReply}
           indented={depth <= MAX_INDENT_DEPTH}
           highlighted={highlightedComment?.comment.id === comment.id}
+          line={parentLine}
         />
       )}
     </div>

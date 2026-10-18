@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} phản hồi`,
   moreReplyCount: (count: number) => `${count} phản hồi khác`,
   moreReplies: "Xem thêm phản hồi",
-  continueThread: "Tiếp tục chuỗi thảo luận",
   expandThread: "Mở rộng chuỗi thảo luận",
   collapseThread: "Thu gọn chuỗi thảo luận",
   moreOptions: "Tùy chọn khác",

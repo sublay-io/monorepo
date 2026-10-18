@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} 則回覆`,
   moreReplyCount: (count: number) => `還有 ${count} 則回覆`,
   moreReplies: "更多回覆",
-  continueThread: "繼續這串討論",
   expandThread: "展開討論串",
   collapseThread: "收合討論串",
   moreOptions: "更多選項",

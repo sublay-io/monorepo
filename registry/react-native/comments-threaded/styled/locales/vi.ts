@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} phản hồi`,
   moreReplyCount: (count: number) => `${count} phản hồi khác`,
   moreReplies: "Xem thêm phản hồi",
-  continueThread: "Tiếp tục chuỗi thảo luận",
   removeYourVote: "Hủy phiếu của bạn",
 
   // Comments that can't be shown

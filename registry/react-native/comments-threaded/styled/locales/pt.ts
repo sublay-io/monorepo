@@ -34,7 +34,6 @@ const strings = {
   moreReplyCount: (count: number) =>
     count === 1 ? "mais 1 resposta" : `mais ${count} respostas`,
   moreReplies: "Mais respostas",
-  continueThread: "Continuar esta conversa",
   removeYourVote: "Remover seu voto",
 
   // Comments that can't be shown

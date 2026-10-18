@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} 則回覆`,
   moreReplyCount: (count: number) => `還有 ${count} 則回覆`,
   moreReplies: "更多回覆",
-  continueThread: "繼續這串討論",
   removeYourVote: "收回你的投票",
 
   // Comments that can't be shown

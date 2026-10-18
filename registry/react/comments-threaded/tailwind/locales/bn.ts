@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count}টি উত্তর`,
   moreReplyCount: (count: number) => `আরও ${count}টি উত্তর`,
   moreReplies: "আরও উত্তর",
-  continueThread: "এই থ্রেডটি চালিয়ে যান",
   expandThread: "থ্রেড প্রসারিত করুন",
   collapseThread: "থ্রেড সংকুচিত করুন",
   moreOptions: "আরও বিকল্প",

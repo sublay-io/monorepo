@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} svar`,
   moreReplyCount: (count: number) => `${count} svar mere`,
   moreReplies: "Flere svar",
-  continueThread: "Fortsæt tråden",
   expandThread: "Fold tråden ud",
   collapseThread: "Fold tråden sammen",
   moreOptions: "Flere muligheder",

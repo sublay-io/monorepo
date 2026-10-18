@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Comment as CommentType } from "@sublay/react-js";
 import { CommentThreadProps } from "./comment-thread";
 import useUIState from "../../../hooks/use-ui-state";
 import IndentationThreadingLines, {
   INDENT,
   MAX_INDENT_DEPTH,
+  ThreadLineContext,
 } from "./single-comment/indentation-threading-lines";
 import strings from "../../../utils/strings";
 
@@ -40,17 +41,18 @@ function CommentReplies({
   CommentThreadComponent,
 }: CommentRepliesProps) {
   const { theme } = useUIState();
+  // The comment's line: the load-more row hangs from it, so it lights up with it
+  const line = useContext(ThreadLineContext);
 
   // Don't render anything if collapsed, or if there are no replies to show or load
   if (isCollapsed || (visibleReplies.length === 0 && !hasMore)) {
     return null;
   }
 
-  // At the depth boundary nothing is loaded yet: the replies load right here.
+  // "N more replies": the replies not shown yet, whether some are listed
+  // above or none have loaded (below the levels the first page brings)
   const loadMoreLabel =
-    visibleReplies.length === 0
-      ? strings.continueThread
-      : hiddenRepliesCount > 0
+    hiddenRepliesCount > 0
       ? strings.moreReplyCount(hiddenRepliesCount)
       : strings.moreReplies;
 
@@ -85,6 +87,8 @@ function CommentReplies({
           }}
         >
           <IndentationThreadingLines
+            // Part of the comment's line: it lights up with it
+            line={line}
             isLastReply
             joinAt={LOAD_MORE_PADDING_TOP + LOAD_MORE_HEIGHT / 2}
             reach={LOAD_MORE_OFFSET_START}

@@ -54,7 +54,6 @@ const strings = {
       `još ${count} odgovora`,
     ),
   moreReplies: "Još odgovora",
-  continueThread: "Nastavi nit",
   removeYourVote: "Ukloni svoj glas",
 
   // Comments that can't be shown

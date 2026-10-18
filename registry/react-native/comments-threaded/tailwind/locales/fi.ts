@@ -35,7 +35,6 @@ const strings = {
   moreReplyCount: (count: number) =>
     count === 1 ? "1 vastaus lisää" : `${count} vastausta lisää`,
   moreReplies: "Lisää vastauksia",
-  continueThread: "Jatka tätä ketjua",
   removeYourVote: "Poista äänesi",
 
   // Comments that can't be shown

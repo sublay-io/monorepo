@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   Comment as CommentType,
   type CommentCreateError,
@@ -14,7 +14,6 @@ import UserAvatar from "~shared/react/user-avatar";
 import VoteButtons from "./vote-buttons";
 import ActionMenu from "../action-menu";
 import NewReplyForm from "../new-reply-form";
-import ToggleRepliesVisibilty from "./toggle-replies-visibility";
 import IndentationThreadingLines, {
   AVATAR_GAP,
   AVATAR_OFFSET_TOP,
@@ -24,6 +23,9 @@ import IndentationThreadingLines, {
   ROW_PADDING_Y,
   SECTION_PADDING_X,
   ThreadStem,
+  ThreadCollapseButton,
+  ThreadLineContext,
+  circleInlineStart,
 } from "./indentation-threading-lines";
 import ReplyButtonAndInfo from "./reply-button-and-info";
 import { getCommentCreateErrorMessage } from "../../../../utils/comment-create-error";
@@ -155,6 +157,13 @@ function SingleComment({
     ? (theme === 'dark' ? "#333333" : "#F3F4F6")
     : "transparent";
   // 🎨 CUSTOMIZATION: Highlight color on the indentation beside it (Default: blue-100)
+  // This comment's line (see ThreadLineContext)
+  const line = useContext(ThreadLineContext);
+  // The collapse circle's background: the row's, so the line seems to pass
+  // behind it
+  const circleBackgroundColor = isHighlighted
+    ? (theme === 'dark' ? "#333333" : "#F3F4F6")
+    : (theme === 'dark' ? "#262626" : "#FFFFFF");
   const highlightGutterColor = isHighlighted
     ? (theme === 'dark' ? "#172554" : "#DBEAFE")
     : "transparent";
@@ -185,19 +194,47 @@ function SingleComment({
         }}
       >
         {/* Line from this comment's avatar down to the rows listed under it */}
-        {(showReplies || showForm) && <ThreadStem />}
+        {(showReplies || showForm) && <ThreadStem line={line} />}
 
-        <div style={{ display: "flex" }}>
+        <div
+          style={{
+            display: "flex",
+            // Collapsed: one row, the ⊕ level with the name and text
+            ...(isCollapsed ? { alignItems: "center", cursor: "pointer" } : {}),
+          }}
+          // A collapsed comment is one row: clicking it expands it
+          onClick={isCollapsed ? onToggleCollapse : undefined}
+        >
           {/* Avatar positioned for threading line connection with top margin */}
           <div
             style={{
               flexShrink: 0,
               marginInlineEnd: `${AVATAR_GAP}px`,
               position: "relative",
-              marginTop: `${AVATAR_OFFSET_TOP}px`,
+              marginTop: isCollapsed ? 0 : `${AVATAR_OFFSET_TOP}px`,
             }}
           >
-            {isPlaceholderRow || tombstone ? (
+            {isCollapsed && line ? (
+              // Collapsed: ⊕ in place of the avatar, centered on the line
+              <div
+                style={{
+                  position: "relative",
+                  width: `${AVATAR_SIZE}px`,
+                  height: `${AVATAR_SIZE}px`,
+                }}
+              >
+                <ThreadCollapseButton
+                  line={line}
+                  collapsed
+                  backgroundColor={circleBackgroundColor}
+                  style={{
+                    insetInlineStart: circleInlineStart(0),
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                  }}
+                />
+              </div>
+            ) : isPlaceholderRow || tombstone ? (
               <div
                 style={{
                   position: "relative",
@@ -211,7 +248,8 @@ function SingleComment({
             ) : (
               <div
                 style={{ position: "relative", zIndex: 10, cursor: "pointer" }}
-                onClick={() => {
+                onClick={(event) => {
+                  event.stopPropagation();
                   if (user?.id === comment.user?.id) {
                     callbacks?.currentUserClickCallback?.();
                   } else {
@@ -269,12 +307,6 @@ theme={theme}
                   </button>
                 </>
               )}
-              {hasReplies && (
-                <ToggleRepliesVisibilty
-                  isCollapsed={isCollapsed}
-                  onToggleCollapse={onToggleCollapse}
-                />
-              )}
             </div>
           ) : (
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -284,12 +316,14 @@ theme={theme}
                 alignItems: "center",
                 justifyContent: "space-between",
                 // 🎨 CUSTOMIZATION: Spacing (Default: 4px, derived from 8/2)
-                marginBottom: "4px",
+                marginBottom: isCollapsed ? 0 : "4px",
               }}
             >
               <div
                 style={{
                   display: "flex",
+                  flex: 1,
+                  minWidth: 0,
                   alignItems: "center",
                   // 🎨 CUSTOMIZATION: Spacing (Default: 8px)
                   gap: "8px",
@@ -320,7 +354,8 @@ theme={theme}
                     color: theme === 'dark' ? "#FFFFFF" : "#374151",
                     cursor: "pointer",
                   }}
-                  onClick={() => {
+                  onClick={(event) => {
+                    event.stopPropagation();
                     if (user?.id === comment.user?.id) {
                       callbacks?.currentUserClickCallback?.();
                     } else {
@@ -339,19 +374,25 @@ theme={theme}
                 )}
                 <span style={{ color: theme === 'dark' ? "#A3A3A3" : "#6B7280" }}>•</span>
                 <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
-                {isCollapsed && hasReplies && (
-                  <span style={{ color: theme === 'dark' ? "#60A5FA" : "#3B82F6", fontSize: "13px" }}>
-                    ({strings.replyCount(replyCount)})
-                  </span>
-                )}
-                {hasReplies && (
-                  <ToggleRepliesVisibilty
-                    isCollapsed={isCollapsed}
-                    onToggleCollapse={onToggleCollapse}
-                  />
-                )}
+                {/* Collapsed: the text on the same line, cut to fit */}
+                {isCollapsed && !tombstone && comment.content ? (
+                  <>
+                    <span style={{ color: theme === 'dark' ? "#A3A3A3" : "#6B7280" }}>•</span>
+                    <span
+                      dir="auto"
+                      style={{
+                        minWidth: 0,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {comment.content.replace(/\s+/g, " ")}
+                    </span>
+                  </>
+                ) : null}
               </div>
-              {!tombstone && <ActionMenu comment={comment} />}
+              {!tombstone && !isCollapsed && <ActionMenu comment={comment} />}
             </div>
 
             {!isCollapsed && tombstone && (
@@ -454,11 +495,27 @@ theme={theme}
 
                 <div
                   style={{
+                    position: "relative",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
                   }}
                 >
+                  {/* ⊖ on the line, level with the actions, when replies are
+                      listed under the comment */}
+                  {showReplies && line && (
+                    <ThreadCollapseButton
+                      line={line}
+                      collapsed={false}
+                      backgroundColor={circleBackgroundColor}
+                      style={{
+                        // The actions start after the avatar and its gap
+                        insetInlineStart: circleInlineStart(AVATAR_SIZE + AVATAR_GAP),
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                      }}
+                    />
+                  )}
                   <ReplyButtonAndInfo
                     hasReplies={replyCount > 0}
                     replyCount={replyCount}
@@ -511,6 +568,7 @@ theme={theme}
           }}
         >
           <IndentationThreadingLines
+            line={line}
             isLastReply={!showReplies}
             joinAt={REPLY_FORM_JOIN_Y}
             reach={AVATAR_SIZE + AVATAR_GAP - INDENT}

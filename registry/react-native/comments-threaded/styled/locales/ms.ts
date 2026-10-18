@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `${count} balasan`,
   moreReplyCount: (count: number) => `${count} lagi balasan`,
   moreReplies: "Lagi balasan",
-  continueThread: "Teruskan bebenang ini",
   removeYourVote: "Alih keluar undian anda",
 
   // Comments that can't be shown

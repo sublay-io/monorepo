@@ -33,7 +33,6 @@ const strings = {
   replyCount: (count: number) => `답글 ${count}개`,
   moreReplyCount: (count: number) => `답글 ${count}개 더 보기`,
   moreReplies: "답글 더 보기",
-  continueThread: "이 스레드 계속 보기",
   removeYourVote: "내 투표 취소",
 
   // Comments that can't be shown

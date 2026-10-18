@@ -35,7 +35,6 @@ const strings = {
   moreReplyCount: (count: number) =>
     count === 1 ? "1 vastaus lisää" : `${count} vastausta lisää`,
   moreReplies: "Lisää vastauksia",
-  continueThread: "Jatka tätä ketjua",
   expandThread: "Laajenna ketju",
   collapseThread: "Tiivistä ketju",
   moreOptions: "Lisää vaihtoehtoja",

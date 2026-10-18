@@ -34,7 +34,6 @@ const strings = {
   moreReplyCount: (count: number) =>
     count < 2 ? `${count} réponse de plus` : `${count} réponses de plus`,
   moreReplies: "Plus de réponses",
-  continueThread: "Continuer ce fil",
   expandThread: "Développer le fil",
   collapseThread: "Réduire le fil",
   moreOptions: "Plus d’options",

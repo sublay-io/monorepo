@@ -49,6 +49,9 @@ function VoteButtons({
 
   return (
     <View
+      // Taps on the score or between the arrows stop here instead of reaching
+      // the comment, which would collapse it; the arrows take their own taps
+      onStartShouldSetResponder={() => true}
       // One step stronger on the highlighted comment, whose background is #F3F4F6
       style={{
         flexDirection: 'row',

@@ -1,7 +1,8 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks } from "../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks, makeAuthUser } from "../../test-utils";
+import { setUser } from "../../store/slices/authSlice";
 import useEntityComments from "./useEntityComments";
 import { makeComment } from "./testHelpers";
 import type { CursorPaginatedResponse } from "../../interfaces/PaginatedResponse";
@@ -413,5 +414,62 @@ describe("useEntityComments — the entity changing", () => {
     rerender({ entityId: null });
     expect(result.current.comments).toEqual([]);
     expect(result.current.getComment("b1")).toBeUndefined();
+  });
+});
+
+describe("useEntityComments — signed-in user changes", () => {
+  it("fetches the comments again when the user signs out, signs in or switches accounts", async () => {
+    const asUserA = makeComment({ id: "comment-1", userReaction: "upvote" });
+    const signedOut = makeComment({ id: "comment-1", userReaction: null });
+    const asUserB = makeComment({ id: "comment-1", userReaction: "downvote" });
+
+    const { result, axiosPrivate, store } = renderHookWithAxios(
+      () => useEntityComments({ entityId: "entity-1" }),
+      {
+        user: makeAuthUser({ id: "user-a" }),
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([asUserA], null)),
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.comments[0].userReaction).toBe("upvote");
+
+    axiosPrivate.mockResponse("get", makePage([signedOut], null));
+    act(() => {
+      store.dispatch(setUser(null));
+    });
+    await waitFor(() =>
+      expect(result.current.comments[0]?.userReaction).toBeNull(),
+    );
+
+    axiosPrivate.mockResponse("get", makePage([asUserB], null));
+    act(() => {
+      store.dispatch(setUser(makeAuthUser({ id: "user-b" })));
+    });
+    await waitFor(() =>
+      expect(result.current.comments[0]?.userReaction).toBe("downvote"),
+    );
+
+    expect(axiosPrivate.calls("get")).toHaveLength(3);
+  });
+
+  it("does not fetch again when the same user's profile changes", async () => {
+    const { result, axiosPrivate, store } = renderHookWithAxios(
+      () => useEntityComments({ entityId: "entity-1" }),
+      {
+        user: makeAuthUser({ id: "user-a" }),
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeComment()], null)),
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    act(() => {
+      store.dispatch(setUser(makeAuthUser({ id: "user-a", name: "Renamed" })));
+    });
+
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
   });
 });

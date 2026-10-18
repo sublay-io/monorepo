@@ -49,6 +49,8 @@ description: "Load a single entity and access its state and actions from any chi
   `EntityProvider` renders `null` if none of the identifier props are provided. Exactly one must be present.
 </Note>
 
+When the signed-in user signs in, signs out or switches accounts, `EntityProvider` fetches its entity again (when it was given an id), since the entity carries that user's own reaction (`userReaction`). An entity passed as the `entity` prop is used as it is.
+
 ## Accessing Entity State with `useEntity`
 
 Inside any child of `EntityProvider`, call `useEntity()` to access the entity and its actions:

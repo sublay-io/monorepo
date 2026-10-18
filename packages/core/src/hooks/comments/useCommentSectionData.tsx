@@ -34,6 +34,8 @@ import {
 } from "../../helpers/commentStore";
 import useFetchComment from "./useFetchComment";
 import { useUser } from "../user";
+import { useSublaySelector } from "../../store/hooks";
+import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
 import { Entity } from "../../interfaces/models/Entity";
 
 import {
@@ -1144,6 +1146,21 @@ export function useCommentSectionDataInternal(
 
     requestEntity(wantedEntityKey);
   }, [wantedEntityKey, hasEntity, requestEntity]);
+
+  // The entity carries the signed-in user's own reaction (`userReaction`), so
+  // an entity the section fetched itself is fetched again when the user signs
+  // in, signs out or switches accounts. A supplied entity is its supplier's to
+  // refresh (`EntityProvider` does).
+  const userId = useSublaySelector(selectAuthUser)?.id ?? null;
+  const entityUserIdRef = useRef(userId);
+  useEffect(() => {
+    if (entityUserIdRef.current === userId) return;
+    entityUserIdRef.current = userId;
+    const key = wantedEntityKeyRef.current;
+    if (!key || !hasEntity || followedEntityRef.current) return;
+    if (requestedEntityKeyRef.current === key) return;
+    requestEntity(key);
+  }, [userId, hasEntity, requestEntity]);
 
   // What the section reports while it has no entity to list: a failed
   // lookup is an error with nothing loading (so "Try again" shows); a

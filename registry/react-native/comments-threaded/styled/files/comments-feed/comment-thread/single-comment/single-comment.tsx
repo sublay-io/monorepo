@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, type AccessibilityActionEvent } from "react-native";
 import {
   Comment as CommentType,
   UserMention,
@@ -195,6 +195,27 @@ function SingleComment({
     : {
         source: { uri: comment.gif?.gifUrl },
       };
+
+  // Screen readers can't tap the comment to collapse it (the buttons inside
+  // are reachable one by one), so its text offers it as an action:
+  // double-tap, or "Collapse thread" / "Expand thread" in the actions list
+  const collapseAccessibility = {
+    accessibilityActions: [
+      { name: "activate" as const },
+      {
+        name: "toggleCollapse",
+        label: isCollapsed ? strings.expandThread : strings.collapseThread,
+      },
+    ],
+    onAccessibilityAction: (event: AccessibilityActionEvent) => {
+      if (
+        event.nativeEvent.actionName === "activate" ||
+        event.nativeEvent.actionName === "toggleCollapse"
+      ) {
+        onToggleCollapse();
+      }
+    },
+  };
 
   return (
     <View
@@ -409,6 +430,7 @@ theme={theme}
                       •
                     </Text>
                     <Text
+                      {...collapseAccessibility}
                       numberOfLines={1}
                       style={{
                         flex: 1,
@@ -427,6 +449,7 @@ theme={theme}
 
             {!isCollapsed && tombstone && (
               <Text
+                {...collapseAccessibility}
                 style={{
                   fontSize: 13,
                   lineHeight: 21,
@@ -443,6 +466,7 @@ theme={theme}
               <>
                 {comment.content && (
                   <Text
+                    {...collapseAccessibility}
                     style={{
                       fontSize: 13,
                       lineHeight: 21,

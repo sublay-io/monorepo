@@ -26,6 +26,8 @@ const strings = {
   cancel: "إلغاء",
   replyingTo: "ردًا على",
   cancelReply: "إلغاء الرد",
+  collapseThread: "طي النقاش",
+  expandThread: "توسيع النقاش",
 
   // Sorting
   sortBy: "ترتيب حسب",

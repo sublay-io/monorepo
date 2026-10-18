@@ -18,6 +18,8 @@ const strings = {
   cancel: "Odustani",
   replyingTo: "Odgovor korisniku",
   cancelReply: "Odustani od odgovora",
+  collapseThread: "Sažmi nit",
+  expandThread: "Proširi nit",
 
   // Sorting
   sortBy: "Poredaj po",

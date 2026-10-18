@@ -17,6 +17,8 @@ const strings = {
   cancel: "Anulează",
   replyingTo: "Răspunzi lui",
   cancelReply: "Anulează răspunsul",
+  collapseThread: "Restrânge firul",
+  expandThread: "Extinde firul",
 
   // Sorting
   sortBy: "Sortează după",

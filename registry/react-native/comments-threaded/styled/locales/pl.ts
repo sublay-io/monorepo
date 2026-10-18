@@ -18,6 +18,8 @@ const strings = {
   cancel: "Anuluj",
   replyingTo: "Odpowiedź dla",
   cancelReply: "Anuluj odpowiedź",
+  collapseThread: "Zwiń wątek",
+  expandThread: "Rozwiń wątek",
 
   // Sorting
   sortBy: "Sortuj według",

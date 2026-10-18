@@ -9,6 +9,8 @@ const strings = {
   cancel: "취소",
   replyingTo: "답글 대상:",
   cancelReply: "답글 취소",
+  collapseThread: "스레드 접기",
+  expandThread: "스레드 펼치기",
 
   // Sorting
   sortBy: "정렬",

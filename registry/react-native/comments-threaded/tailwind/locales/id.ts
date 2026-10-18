@@ -9,6 +9,8 @@ const strings = {
   cancel: "Batal",
   replyingTo: "Membalas",
   cancelReply: "Batalkan balasan",
+  collapseThread: "Ciutkan utas",
+  expandThread: "Perluas utas",
 
   // Sorting
   sortBy: "Urutkan",

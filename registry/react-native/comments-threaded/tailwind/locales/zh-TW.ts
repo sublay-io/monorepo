@@ -9,6 +9,8 @@ const strings = {
   cancel: "取消",
   replyingTo: "回覆",
   cancelReply: "取消回覆",
+  collapseThread: "收合討論串",
+  expandThread: "展開討論串",
 
   // Sorting
   sortBy: "排序方式",

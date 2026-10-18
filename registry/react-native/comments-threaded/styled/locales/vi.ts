@@ -9,6 +9,8 @@ const strings = {
   cancel: "Hủy",
   replyingTo: "Đang phản hồi",
   cancelReply: "Hủy phản hồi",
+  collapseThread: "Thu gọn chuỗi thảo luận",
+  expandThread: "Mở rộng chuỗi thảo luận",
 
   // Sorting
   sortBy: "Sắp xếp theo",

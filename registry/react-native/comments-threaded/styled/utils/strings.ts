@@ -9,6 +9,9 @@ const strings = {
   cancel: "Cancel",
   replyingTo: "Replying to",
   cancelReply: "Cancel reply",
+  // Screen-reader actions on a comment (tapping it collapses it)
+  collapseThread: "Collapse thread",
+  expandThread: "Expand thread",
 
   // Sorting
   sortBy: "Sort by",

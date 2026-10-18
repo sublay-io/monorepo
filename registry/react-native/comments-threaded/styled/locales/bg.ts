@@ -9,6 +9,8 @@ const strings = {
   cancel: "Отказ",
   replyingTo: "Отговор на",
   cancelReply: "Отказ от отговора",
+  collapseThread: "Свиване на нишката",
+  expandThread: "Разгъване на нишката",
 
   // Sorting
   sortBy: "Подреждане по",

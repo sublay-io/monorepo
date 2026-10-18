@@ -9,6 +9,8 @@ const strings = {
   cancel: "ยกเลิก",
   replyingTo: "กำลังตอบกลับ",
   cancelReply: "ยกเลิกการตอบกลับ",
+  collapseThread: "ยุบเธรด",
+  expandThread: "ขยายเธรด",
 
   // Sorting
   sortBy: "เรียงตาม",

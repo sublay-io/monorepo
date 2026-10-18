@@ -14,6 +14,7 @@
     "nativewind@^4.0.0"
   ],
   "shared": [
+    "chevron-icon",
     "custom-button",
     "flag-icon",
     "from-now",

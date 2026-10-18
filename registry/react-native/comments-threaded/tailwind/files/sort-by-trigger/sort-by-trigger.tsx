@@ -1,10 +1,11 @@
 import { View, Text, Pressable } from "react-native";
 import { useCommentSection } from "@sublay/react-native";
+import ChevronIcon from "~shared/react-native/chevron-icon";
 import useUIState from "../../hooks/use-ui-state";
 import { findSortOption } from "../../utils/sort-options";
 import strings from "../../utils/strings";
 
-// "Sort by: Top ▾". Opens the sort sheet, which ThreadedComments renders over
+// "Sort by: Top", with a chevron. Opens the sort sheet, which ThreadedComments renders over
 // the screen; move this button anywhere inside ThreadedComments.
 function SortByTrigger() {
   const { sortBy, sortDir } = useCommentSection();
@@ -38,13 +39,12 @@ function SortByTrigger() {
         >
           {current.label}
         </Text>
-        <Text
-          className={`text-[11px] ${
-            theme === 'dark' ? 'text-neutral-50' : 'text-gray-900'
-          }`}
-        >
-          ▾
-        </Text>
+        <ChevronIcon
+          direction="down"
+          size={14}
+          strokeWidth={2.5}
+          color={theme === 'dark' ? '#FAFAFA' : '#111827'}
+        />
       </Pressable>
     </View>
   );

@@ -56,10 +56,13 @@ const ReplyBanner = () => {
             setRepliedToComment?.(null);
             setShowReplyBanner?.({ newState: false });
           }}
+          hitSlop={8}
+          // 🎨 CUSTOMIZATION: Close button spacing from the screen's edge
+          style={{ paddingHorizontal: 7 }}
         >
           <Text style={{
-            fontSize: 14,
-            lineHeight: 21,
+            fontSize: 17.5,
+            lineHeight: 24.5,
             // 🎨 CUSTOMIZATION: Close button color
             color: theme === 'dark' ? "#FAFAFA" : "#000"
           }}>&times;</Text>

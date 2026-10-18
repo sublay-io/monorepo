@@ -325,7 +325,7 @@ theme={theme}
                   }
                 >
                   <Text
-                    className={`text-xs font-semibold ${
+                    className={`text-sm font-semibold ${
                       theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'
                     }`}
                   >

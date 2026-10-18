@@ -40,9 +40,12 @@ const ReplyBanner = () => {
             setRepliedToComment?.(null);
             setShowReplyBanner?.({ newState: false });
           }}
+          hitSlop={8}
+          // 🎨 CUSTOMIZATION: Close button spacing from the screen's edge
+          className="px-2"
         >
           <Text
-            className={`text-base ${
+            className={`text-xl ${
               theme === 'dark' ? 'text-neutral-50' : 'text-black'
             }`}
           >

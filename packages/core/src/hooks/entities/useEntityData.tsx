@@ -8,6 +8,8 @@ import useDeleteEntity from "./useDeleteEntity";
 
 import { Entity } from "../../interfaces/models/Entity";
 import { handleError } from "../../utils/handleError";
+import { useSublaySelector } from "../../store/hooks";
+import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
 
 export type UseEntityDataProps =
   | {
@@ -59,6 +61,12 @@ function useEntityData({
   // Cache to store fetched entities keyed by unique identifier
   const entityCache = useRef<Record<string, Entity>>({});
 
+  // The entity carries the signed-in user's own reaction (`userReaction`), so
+  // it is fetched again, and the cache dropped, when the user signs in, signs
+  // out or switches accounts. An entity passed in as a prop is used as given.
+  const userId = useSublaySelector(selectAuthUser)?.id ?? null;
+  const fetchedForUserRef = useRef(userId);
+
   const fetchEntity = useFetchEntity();
   const fetchEntityByForeignId = useFetchEntityByForeignId();
   const fetchEntityByShortId = useFetchEntityByShortId();
@@ -98,9 +106,15 @@ function useEntityData({
     const handleFetchEntity = async () => {
       if (!foreignId && !entityId && !shortId) return;
 
-      if (entity && entityId && entity.id === entityId) return;
-      if (entity && foreignId && entity.foreignId === foreignId) return;
-      if (entity && shortId && entity.shortId === shortId) return;
+      const userChanged = fetchedForUserRef.current !== userId;
+      fetchedForUserRef.current = userId;
+      if (userChanged) {
+        entityCache.current = {};
+      } else {
+        if (entity && entityId && entity.id === entityId) return;
+        if (entity && foreignId && entity.foreignId === foreignId) return;
+        if (entity && shortId && entity.shortId === shortId) return;
+      }
 
       const uniqueKey = `${entityId ?? ""}-${foreignId ?? ""}-${shortId ?? ""}`;
 
@@ -150,6 +164,7 @@ function useEntityData({
     shortId,
     entity,
     createIfNotFound,
+    userId,
   ]);
 
   useEffect(() => {

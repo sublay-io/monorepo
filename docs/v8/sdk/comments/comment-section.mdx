@@ -41,6 +41,12 @@ The section can be handed an entity in two ways: the `entity` prop, or, when the
 - **An id prop decides which entity is wanted.** With `entityId`, `foreignId` or `shortId` set, a handed entity is used only if it is that entity. One that doesn't match is ignored, and the section fetches the entity the id names.
 - **A handed entity that goes away is kept.** If the `entity` prop or the `EntityProvider` entity becomes `undefined`, the section keeps showing the last entity it had until it's given another.
 
+### When the signed-in user changes
+
+Each comment carries the signed-in user's own reaction (`userReaction`), and so does the entity. When the user signs in, signs out or switches accounts, the section loads its comments again from the first page, so the reactions shown are the new user's. Replies loaded on demand through [`useReplies`](/v8/hooks/comments/use-replies) are dropped and load again when asked for; the sort stays as it is.
+
+An entity the section fetched itself (from `entityId`, `foreignId` or `shortId`) is fetched again at the same time. A handed entity is left as it is: `EntityProvider` fetches its entity again on its own, and an `entity` prop is yours to refresh.
+
 ## Provider Props Reference
 
 <ParamField path="entityId" type="string">

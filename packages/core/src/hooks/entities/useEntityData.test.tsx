@@ -1,7 +1,8 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeEntity } from "../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks, makeEntity, makeAuthUser } from "../../test-utils";
+import { setUser } from "../../store/slices/authSlice";
 import useEntityData, { type UseEntityDataProps } from "./useEntityData";
 
 afterEach(() => {
@@ -164,5 +165,53 @@ describe("useEntityData", () => {
         await result.current.deleteEntity();
       }),
     ).resolves.not.toThrow();
+  });
+});
+
+describe("useEntityData — signed-in user changes", () => {
+  it("fetches the entity again, past its cache, when the user signs out or switches accounts", async () => {
+    const asUserA = makeEntity({ id: "entity-1", userReaction: "upvote" });
+    const signedOut = makeEntity({ id: "entity-1", userReaction: null });
+    const asUserB = makeEntity({ id: "entity-1", userReaction: "downvote" });
+
+    const { result, axiosPrivate, store } = renderHookWithAxios(
+      () => useEntityData({ entityId: "entity-1" }),
+      {
+        user: makeAuthUser({ id: "user-a" }),
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", asUserA),
+      },
+    );
+
+    await waitFor(() => expect(result.current.entity?.userReaction).toBe("upvote"));
+
+    axiosPrivate.mockResponse("get", signedOut);
+    act(() => {
+      store.dispatch(setUser(null));
+    });
+    await waitFor(() => expect(result.current.entity?.userReaction).toBeNull());
+
+    axiosPrivate.mockResponse("get", asUserB);
+    act(() => {
+      store.dispatch(setUser(makeAuthUser({ id: "user-b" })));
+    });
+    await waitFor(() => expect(result.current.entity?.userReaction).toBe("downvote"));
+
+    expect(axiosPrivate.calls("get")).toHaveLength(3);
+  });
+
+  it("leaves an entity passed in as a prop as it is", async () => {
+    const entity = makeEntity({ id: "entity-1", userReaction: "upvote" });
+
+    const { result, axiosPrivate, store } = renderHookWithAxios(
+      () => useEntityData({ entity }),
+      { user: makeAuthUser({ id: "user-a" }) },
+    );
+
+    act(() => {
+      store.dispatch(setUser(null));
+    });
+
+    expect(result.current.entity).toEqual(entity);
+    expect(axiosPrivate.calls("get")).toHaveLength(0);
   });
 });

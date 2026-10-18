@@ -3,6 +3,7 @@ import { act, waitFor } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeAuthUser } from "../../test-utils";
 import useCommentSectionData from "./useCommentSectionData";
+import { setUser } from "../../store/slices/authSlice";
 import { makeComment, makeEntity } from "./testHelpers";
 import type { CursorPaginatedResponse } from "../../interfaces/PaginatedResponse";
 import type { Comment } from "../../interfaces/models/Comment";
@@ -378,5 +379,81 @@ describe("useCommentSectionData", () => {
       await result.current.deleteComment({ commentId: r1 });
     });
     expect(result.current.getComment("p1")?.repliesCount).toBe(4);
+  });
+});
+
+describe("useCommentSectionData — signed-in user changes", () => {
+  it("fetches the entity it fetched itself, and the comments, again when the user signs out", async () => {
+    const entity = makeEntity({ id: "entity-1", userReaction: "upvote" });
+    const comment = makeComment({ id: "comment-1", entityId: "entity-1", userReaction: "upvote" });
+
+    const { result, axiosPrivate, store } = renderHookWithAxios(
+      () => useCommentSectionData({ entityId: "entity-1" }),
+      {
+        user: makeAuthUser({ id: "user-a" }),
+        beforeRender: ({ axiosPrivate }) => {
+          axiosPrivate.mockResponse("get", entity);
+          axiosPrivate.mockResponse("get", commentsPage([comment]));
+        },
+      },
+    );
+
+    await waitFor(() => expect(result.current.comments).toEqual([comment]));
+    expect(result.current.entity?.userReaction).toBe("upvote");
+
+    // Signed out, the server sends no reactions: answered by URL, since the
+    // two requests go out together.
+    const get = vi
+      .spyOn(axiosPrivate.instance, "get")
+      .mockImplementation((url: string) =>
+        Promise.resolve({
+          data: url.endsWith("/entities/entity-1")
+            ? { ...entity, userReaction: null }
+            : commentsPage([{ ...comment, userReaction: null }]),
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config: {},
+        } as never),
+      );
+    act(() => {
+      store.dispatch(setUser(null));
+    });
+
+    await waitFor(() => {
+      expect(result.current.entity?.userReaction).toBeNull();
+      expect(result.current.comments[0]?.userReaction).toBeNull();
+    });
+    expect(get.mock.calls.map(([url]) => url).sort()).toEqual([
+      "/test-project/comments",
+      "/test-project/entities/entity-1",
+    ]);
+  });
+
+  it("leaves a supplied entity to its supplier", async () => {
+    const entity = makeEntity({ id: "entity-1", userReaction: "upvote" });
+
+    const { result, axiosPrivate, store } = renderHookWithAxios(
+      () => useCommentSectionData({ entity }),
+      {
+        user: makeAuthUser({ id: "user-a" }),
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", commentsPage([])),
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    axiosPrivate.mockResponse("get", commentsPage([]));
+    act(() => {
+      store.dispatch(setUser(null));
+    });
+
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(2));
+    expect(axiosPrivate.calls("get").map((call) => call.url)).toEqual([
+      "/test-project/comments",
+      "/test-project/comments",
+    ]);
+    expect(result.current.entity).toEqual(entity);
   });
 });

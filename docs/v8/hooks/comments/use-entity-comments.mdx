@@ -8,6 +8,8 @@ icon: "cube"
 
 `useEntityComments` is a lower-level hook that loads an entity's top-level comments, cursor-paginated, with optional nested replies. It is used internally by `CommentSectionProvider`. Use it directly when you need the comment list without the rest of the provider (reply state, comment creation, highlighted comments).
 
+The list starts over from the first page when the signed-in user signs in, signs out or switches accounts, since each comment carries that user's own reaction (`userReaction`).
+
 <Note>
   For most use cases, use `CommentSectionProvider` + `useCommentSection` instead. See [Comment Section](/v8/sdk/comments/comment-section). Replies loaded through [`useReplies`](/v8/hooks/comments/use-replies) require the provider.
 </Note>

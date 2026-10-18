@@ -36,6 +36,8 @@ import {
   resolveReplySort,
   sendableReplySortByReaction,
 } from "../../helpers/commentThreadConfig";
+import { useSublaySelector } from "../../store/hooks";
+import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
 
 export interface UseEntityCommentsProps extends SpaceReputationContextParams {
   entityId: string | undefined | null;
@@ -167,6 +169,10 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
   const includeKey = JSON.stringify(include);
 
   const fetchManyComments = useFetchManyComments();
+  // Each comment carries the signed-in user's own reaction (`userReaction`),
+  // so the list is fetched again when the user signs in, signs out or
+  // switches accounts.
+  const userId = useSublaySelector(selectAuthUser)?.id ?? null;
 
   const [sortBy, setSortBy] = useState<CommentsSortByOptions>(defaultSortBy);
   const [sortDir, setSortDir] = useState<"asc" | "desc">(defaultSortDir);
@@ -302,6 +308,7 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
     replySortByReaction,
     includeKey,
     reputation,
+    userId,
     runFetch,
   ]);
 

@@ -317,6 +317,8 @@ theme={theme}
                 justifyContent: "space-between",
                 // 🎨 CUSTOMIZATION: Spacing (Default: 4px, derived from 8/2)
                 marginBottom: isCollapsed ? 0 : "4px",
+                // As tall as the avatar, so the name and date sit level with it
+                minHeight: `${AVATAR_SIZE}px`,
               }}
             >
               <div

@@ -9,6 +9,7 @@ const strings = {
   cancel: "取消",
   replyingTo: "回覆",
   cancelReply: "取消回覆",
+  moreOptions: "更多選項",
   collapseThread: "收合討論串",
   expandThread: "展開討論串",
 

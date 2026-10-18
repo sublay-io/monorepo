@@ -9,6 +9,7 @@ const strings = {
   cancel: "لغو",
   replyingTo: "در پاسخ به",
   cancelReply: "لغو پاسخ",
+  moreOptions: "گزینه‌های بیشتر",
   collapseThread: "بستن رشته",
   expandThread: "باز کردن رشته",
 

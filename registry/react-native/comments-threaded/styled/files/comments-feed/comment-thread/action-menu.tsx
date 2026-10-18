@@ -1,6 +1,8 @@
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import EllipsisVerticalIcon from "~shared/react-native/ellipsis-vertical-icon";
 import { useUser, Comment as CommentType } from "@sublay/react-native";
 import useUIState from "../../../hooks/use-ui-state";
+import strings from "../../../utils/strings";
 
 interface ActionMenuProps {
   comment: CommentType;
@@ -18,6 +20,8 @@ function ActionMenu({ comment }: ActionMenuProps) {
             ? openCommentOptionsSheetOwner?.(comment)
             : openCommentOptionsSheet?.(comment)
         }
+        accessibilityRole="button"
+        accessibilityLabel={strings.moreOptions}
       >
         {/* The pressed look is on a view inside: NativeWind, when the app
             uses it, drops a `style` given as a function */}
@@ -33,16 +37,11 @@ function ActionMenu({ comment }: ActionMenuProps) {
               opacity: pressed ? 0.6 : 1,
             }}
           >
-            <Text
-              style={{
-                fontSize: 10.5,
-                lineHeight: 14,
-                // 🎨 CUSTOMIZATION: Menu icon color
-                color: theme === 'dark' ? '#737373' : '#9CA3AF',
-              }}
-            >
-              •••
-            </Text>
+            <EllipsisVerticalIcon
+              size={18}
+              // 🎨 CUSTOMIZATION: Menu icon color
+              color={theme === 'dark' ? '#737373' : '#9CA3AF'}
+            />
           </View>
         )}
       </Pressable>

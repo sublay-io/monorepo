@@ -17,6 +17,7 @@ const strings = {
   cancel: "Anulează",
   replyingTo: "Răspunzi lui",
   cancelReply: "Anulează răspunsul",
+  moreOptions: "Mai multe opțiuni",
   collapseThread: "Restrânge firul",
   expandThread: "Extinde firul",
 

@@ -386,7 +386,6 @@ theme={theme}
                   </>
                 ) : null}
               </View>
-              {!tombstone && !isCollapsed && <ActionMenu comment={comment} />}
             </View>
 
             {!isCollapsed && tombstone && (
@@ -436,12 +435,13 @@ theme={theme}
                   </Text>
                 )}
 
-                <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-3">
                   <ReplyButtonAndInfo
                     hasReplies={replyCount > 0}
                     replyCount={replyCount}
                     onReplyPress={handleReplyPress}
                     canReply={!isOwnRemoved}
+                    menu={<ActionMenu comment={comment} />}
                   />
                   {/* Vote buttons inline with reply options */}
                   {!isOwnRemoved && (

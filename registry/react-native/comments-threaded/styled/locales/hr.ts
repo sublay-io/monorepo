@@ -18,6 +18,7 @@ const strings = {
   cancel: "Odustani",
   replyingTo: "Odgovor korisniku",
   cancelReply: "Odustani od odgovora",
+  moreOptions: "Više mogućnosti",
   collapseThread: "Sažmi nit",
   expandThread: "Proširi nit",
 

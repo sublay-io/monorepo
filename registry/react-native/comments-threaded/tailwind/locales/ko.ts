@@ -9,6 +9,7 @@ const strings = {
   cancel: "취소",
   replyingTo: "답글 대상:",
   cancelReply: "답글 취소",
+  moreOptions: "옵션 더 보기",
   collapseThread: "스레드 접기",
   expandThread: "스레드 펼치기",
 

@@ -9,6 +9,7 @@ const strings = {
   cancel: "キャンセル",
   replyingTo: "返信先:",
   cancelReply: "返信をキャンセル",
+  moreOptions: "その他のオプション",
   collapseThread: "スレッドを折りたたむ",
   expandThread: "スレッドを展開",
 

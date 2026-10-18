@@ -9,6 +9,7 @@ const strings = {
   cancel: "Batal",
   replyingTo: "Membalas",
   cancelReply: "Batalkan balasan",
+  moreOptions: "Lagi pilihan",
   collapseThread: "Kuncupkan bebenang",
   expandThread: "Kembangkan bebenang",
 

@@ -9,6 +9,7 @@ const strings = {
   cancel: "Peruuta",
   replyingTo: "Vastaus käyttäjälle",
   cancelReply: "Peruuta vastaus",
+  moreOptions: "Lisää vaihtoehtoja",
   collapseThread: "Tiivistä ketju",
   expandThread: "Laajenna ketju",
 

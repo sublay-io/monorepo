@@ -16,6 +16,7 @@ const strings = {
   cancel: "Zrušit",
   replyingTo: "Odpověď uživateli",
   cancelReply: "Zrušit odpověď",
+  moreOptions: "Další možnosti",
   collapseThread: "Sbalit vlákno",
   expandThread: "Rozbalit vlákno",
 

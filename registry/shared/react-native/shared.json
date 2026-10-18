@@ -17,6 +17,15 @@
       "requires": [],
       "dependencies": []
     },
+    "ellipsis-vertical-icon": {
+      "files": [
+        "ellipsis-vertical-icon.tsx"
+      ],
+      "requires": [],
+      "dependencies": [
+        "react-native-svg@^15"
+      ]
+    },
     "emoji-suggestions": {
       "files": [
         "emoji-suggestions.tsx"

@@ -26,6 +26,7 @@ const strings = {
   cancel: "إلغاء",
   replyingTo: "ردًا على",
   cancelReply: "إلغاء الرد",
+  moreOptions: "خيارات إضافية",
   collapseThread: "طي النقاش",
   expandThread: "توسيع النقاش",
 

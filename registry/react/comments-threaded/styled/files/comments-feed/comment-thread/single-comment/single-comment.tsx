@@ -421,7 +421,6 @@ theme={theme}
                   </>
                 ) : null}
               </div>
-              {!tombstone && !isCollapsed && <ActionMenu comment={comment} />}
             </div>
 
             {!isCollapsed && tombstone && (
@@ -527,7 +526,7 @@ theme={theme}
                     position: "relative",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "space-between",
+                    gap: "4px",
                   }}
                 >
                   {/* ⊖ on the line, level with the actions, when replies are
@@ -550,6 +549,7 @@ theme={theme}
                     replyCount={replyCount}
                     setShowReplyForm={setShowReplyForm}
                     canReply={!isOwnRemoved}
+                    menu={<ActionMenu comment={comment} />}
                   />
                   {/* Vote buttons inline with reply options */}
                   {!isOwnRemoved && (

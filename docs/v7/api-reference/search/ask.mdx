@@ -67,7 +67,7 @@ data: [{"sourceType": "entity", "similarity": 0.87, "record": {...}}, ...]
 
 Each source object follows the same shape as the [Search Content](/v7/api-reference/search/search-content) response — `sourceType`, `similarity`, and a fully populated `record`. An empty array is sent when no relevant context was found.
 
-Chat messages used as context, and returned as sources, come only from conversations the signed-in user can read in the chat itself: ones they're an active member of, and, for a conversation they left or were removed or banned from, messages sent before they left. `conversationId` narrows the search; it never widens what the user can read. Messages their author deleted or a moderator removed are never used. A request made with a service or master key uses no chat messages.
+Chat messages used as context, and returned as sources, come only from conversations the signed-in user can read in the chat itself: ones they're an active member of, and, for a conversation they left or were removed or banned from, messages sent before they left. `conversationId` narrows the search; it never widens what the user can read. Messages their author deleted or a moderator removed are never used. A request made with a service key uses no chat messages.
 
 **`done`** — signals the stream is finished:
 ```

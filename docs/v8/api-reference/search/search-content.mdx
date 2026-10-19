@@ -10,7 +10,7 @@ Performs vector-similarity search over project content (entities, comments, and 
 
 **Requires a paid plan with semantic search enabled.**
 
-**Authentication required.** Send a user's access token as `Authorization: Bearer <token>` — missing token → `401`, invalid/expired token → `403` (refresh and retry). A service or master key is accepted too, and searches as the user named in `actingUserId`. A key that names no user gets no chat messages, and the block filtering under [What's left out](#whats-left-out) doesn't apply to it.
+**Authentication required.** Send a user's access token as `Authorization: Bearer <token>` — missing token → `401`, invalid/expired token → `403` (refresh and retry). A service key is accepted too, and searches as the user named in `actingUserId`. A service key that names no user gets no chat messages, and the block filtering under [What's left out](#whats-left-out) doesn't apply to it.
 
 ## Body Parameters
 
@@ -35,7 +35,7 @@ Performs vector-similarity search over project content (entities, comments, and 
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service or master key only: the user to search as. Results follow that user's access — their chats, their blocks. Without it, a key gets entities and comments but no chat messages. A user token may only send its own user's id.
+  Service key only: the user to search as. Results follow that user's access — their chats, their blocks. Without it, a service key gets entities and comments but no chat messages. A user token may only send its own user's id.
 </ParamField>
 
 <ParamField body="limit" type="number" default="20">
@@ -73,9 +73,9 @@ Each result includes:
 
 Comments their author deleted are never returned. Comments a moderator removed are never returned either — to anyone, including the removed comment's author and requests made with a service or master key.
 
-Chat messages come only from conversations the user can read in the chat itself: ones they're an active member of, and, for a conversation they left or were removed or banned from, messages sent before they left. `conversationId` narrows the search; it never widens what the user can read. Messages their author deleted or a moderator removed are never returned. A request with no user (a key without `actingUserId`) gets no chat messages.
+Chat messages come only from conversations the user can read in the chat itself: ones they're an active member of, and, for a conversation they left or were removed or banned from, messages sent before they left. `conversationId` narrows the search; it never widens what the user can read. Messages their author deleted or a moderator removed are never returned. A request with no user (a service key without `actingUserId`) gets no chat messages.
 
-Results are also filtered for the user — the signed-in user, or the `actingUserId` a key sends (with the `moderation` bundle installed):
+Results are also filtered for the user — the signed-in user, or the `actingUserId` a service key sends (with the `moderation` bundle installed):
 
 - Content by users they are block-edged with, in either direction, is left out.
 - Comments on an entity whose author has blocked them are left out — their own comments there included.

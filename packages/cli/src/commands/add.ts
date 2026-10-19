@@ -269,7 +269,7 @@ export async function add(componentName: string, options: AddOptions = {}) {
     }
 
     // Check dependencies: the component's own plus what its shared pieces need
-    await checkComponentDependencies(dependencies);
+    await checkComponentDependencies(dependencies, config.platform);
 
     // Show usage example
     const componentInfo = getComponentInfo(registry);

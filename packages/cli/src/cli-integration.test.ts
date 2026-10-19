@@ -331,7 +331,8 @@ describe("sublay add — shared pieces", () => {
     expect(all).not.toContain("@sublay/react-native");
     expect(all).toContain('from "@sublay/expo"');
     expect(result.stdout).not.toContain("@sublay/react-native");
-    expect(result.stdout).toContain("npm install moment@^2\n");
+    // Expo installs through expo install, which picks the SDK's versions.
+    expect(result.stdout).toContain("npx expo install moment\n");
   });
 
   it("offers an upgrade when the project's @sublay package is below what the component needs", async () => {

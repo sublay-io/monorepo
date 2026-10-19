@@ -1,7 +1,13 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import fs from "fs-extra";
+import os from "os";
+import path from "path";
 
 import {
+  detectPackageManager,
   findDependencyStatus,
+  formatCommand,
+  planInstall,
   isDeclaredRangeBelow,
   mergeDependencies,
   parseDependencyName,
@@ -233,5 +239,117 @@ describe("findDependencyStatus", () => {
       ],
       upgrades: [],
     });
+  });
+});
+
+describe("detectPackageManager", () => {
+  const dirs: string[] = [];
+  const tempDir = async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "sublay-pm-"));
+    dirs.push(dir);
+    return dir;
+  };
+  afterEach(async () => {
+    await Promise.all(dirs.splice(0).map((dir) => fs.remove(dir)));
+  });
+
+  it("reads the lock file of each package manager, bun included", async () => {
+    for (const [lockFile, pm] of [
+      ["pnpm-lock.yaml", "pnpm"],
+      ["yarn.lock", "yarn"],
+      ["bun.lock", "bun"],
+      ["bun.lockb", "bun"],
+      ["package-lock.json", "npm"],
+    ] as const) {
+      const dir = await tempDir();
+      await fs.writeFile(path.join(dir, lockFile), "");
+      expect(await detectPackageManager(dir)).toBe(pm);
+    }
+  });
+
+  it("finds a workspace's lock file above the package", async () => {
+    const root = await tempDir();
+    await fs.writeFile(path.join(root, "pnpm-lock.yaml"), "");
+    const app = path.join(root, "apps", "mobile");
+    await fs.ensureDir(app);
+    await fs.writeJson(path.join(app, "package.json"), { name: "mobile" });
+    expect(await detectPackageManager(app)).toBe("pnpm");
+  });
+
+  it("prefers the packageManager field over lock files", async () => {
+    const dir = await tempDir();
+    await fs.writeJson(path.join(dir, "package.json"), { packageManager: "yarn@4.5.0" });
+    await fs.writeFile(path.join(dir, "package-lock.json"), "");
+    expect(await detectPackageManager(dir)).toBe("yarn");
+  });
+
+  it("falls back to npm", async () => {
+    expect(await detectPackageManager(await tempDir())).toBe("npm");
+  });
+});
+
+describe("planInstall", () => {
+  const specs = ["react-native-reanimated@>=3.16.0", "@sublay/expo@^8.0.0-beta.0"];
+
+  it("adds packages with each package manager's own command", () => {
+    expect(planInstall(specs, { packageManager: "npm" })).toEqual({
+      command: "npm",
+      args: ["install", ...specs],
+    });
+    for (const pm of ["yarn", "pnpm", "bun"] as const) {
+      expect(planInstall(specs, { packageManager: pm })).toEqual({
+        command: pm,
+        args: ["add", ...specs],
+      });
+    }
+  });
+
+  it("goes through expo install on Expo: names only, except @sublay ranges", () => {
+    expect(
+      planInstall(["@gorhom/bottom-sheet@^5.0.0", "@sublay/expo@^8.0.0-beta.0"], {
+        platform: "expo",
+        packageManager: "yarn",
+      })
+    ).toEqual({
+      command: "npx",
+      args: ["expo", "install", "@gorhom/bottom-sheet", "@sublay/expo@^8.0.0-beta.0"],
+    });
+  });
+
+  it("installs react-native-worklets with Reanimated on Expo", () => {
+    expect(planInstall(specs, { platform: "expo", packageManager: "npm" }).args).toEqual([
+      "expo",
+      "install",
+      "react-native-reanimated",
+      "@sublay/expo@^8.0.0-beta.0",
+      "react-native-worklets",
+    ]);
+  });
+
+  it("leaves react-native-worklets out when the project already has it", () => {
+    expect(
+      planInstall(specs, {
+        platform: "expo",
+        packageManager: "npm",
+        declared: { "react-native-worklets": "0.10.1" },
+      }).args
+    ).not.toContain("react-native-worklets");
+  });
+
+  it("doesn't add react-native-worklets outside Expo", () => {
+    expect(
+      planInstall(specs, { platform: "react-native", packageManager: "npm" }).args
+    ).not.toContain("react-native-worklets");
+  });
+});
+
+describe("formatCommand", () => {
+  it("quotes arguments a shell would act on", () => {
+    expect(
+      formatCommand({
+        command: "npm",
+        args: ["install", "react-native-reanimated@>=3.16.0", "@sublay/react-js@^8.0.0-beta.0"],
+      })
+    ).toBe('npm install "react-native-reanimated@>=3.16.0" @sublay/react-js@^8.0.0-beta.0');
   });
 });

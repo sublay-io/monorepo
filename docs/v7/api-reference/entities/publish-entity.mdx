@@ -44,4 +44,10 @@ Returns the published [Entity](/v7/data-models/entity) object with `isDraft: fal
     { "error": "Not authorized to publish this draft.", "code": "entity/unauthorized" }
     ```
   </Accordion>
+  <Accordion title="Rejected by Validation Webhook — 400">
+    ```json
+    { "error": "Not now", "code": "entity/validation-failed" }
+    ```
+    Returned when your `entity.created` [validation webhook](/v7/webhooks) rejects the publish. `error` carries the `message` your webhook returned. The entity stays a draft.
+  </Accordion>
 </AccordionGroup>

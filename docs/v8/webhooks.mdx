@@ -152,6 +152,8 @@ For validation webhooks, your server must respond with a signed JSON body indica
 { "valid": false, "message": "Reason for rejection" }
 ```
 
+The request that triggered the event then fails with `400`, and its `error` field carries your `message`.
+
 Your response must include an `X-Response-Signature` header:
 
 ```

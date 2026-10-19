@@ -529,14 +529,6 @@ function isValidConfig(value: unknown): value is SublayConfig {
     return false;
   }
 
-  const aliases = config.aliases;
-  if (typeof aliases !== "object" || aliases === null) {
-    return false;
-  }
-  if (typeof (aliases as Record<string, unknown>)["@/components"] !== "string") {
-    return false;
-  }
-
   return true;
 }
 

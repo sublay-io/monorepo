@@ -31,7 +31,6 @@ const baseConfig: SublayConfig = {
   style: "styled",
   typescript: true,
   paths: { components: "src/components" },
-  aliases: { "@/components": "@/components" },
 };
 
 describe("validateRef", () => {
@@ -525,7 +524,6 @@ describe("pinRegistrySource", () => {
     style: "styled",
     typescript: true,
     paths: { components: "src/components" },
-    aliases: { "@/components": "./src/components" },
   };
   let localRoot: string;
 

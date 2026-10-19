@@ -85,6 +85,7 @@ describe("sublay add", () => {
       style: "styled",
       typescript: true,
       paths: { components: "src/components" },
+      // Written by CLIs before 7.3, which required it; still accepted.
       aliases: { "@/components": "./src/components" },
     });
 
@@ -110,21 +111,11 @@ describe("sublay add", () => {
   // undefined`, `SyntaxError: ... in JSON`) rather than actionable guidance.
   const malformedConfigs: Array<{ label: string; contents: string }> = [
     {
-      label: "missing aliases",
-      contents: JSON.stringify({
-        platform: "react",
-        style: "styled",
-        typescript: true,
-        paths: { components: "src/components" },
-      }),
-    },
-    {
       label: "missing paths",
       contents: JSON.stringify({
         platform: "react",
         style: "styled",
         typescript: true,
-        aliases: { "@/components": "./src/components" },
       }),
     },
     {
@@ -132,8 +123,7 @@ describe("sublay add", () => {
       // A trailing comma — valid to a human, fatal to JSON.parse.
       contents:
         '{"platform":"react","style":"styled","typescript":true,' +
-        '"paths":{"components":"src/components"},' +
-        '"aliases":{"@/components":"./src/components"},}',
+        '"paths":{"components":"src/components"},}',
     },
   ];
 
@@ -189,7 +179,6 @@ async function writeProject(
     style: config.style ?? "styled",
     typescript: config.typescript ?? true,
     paths: { components: "src/components" },
-    aliases: { "@/components": "./src/components" },
   });
 }
 

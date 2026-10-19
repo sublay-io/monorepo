@@ -42,6 +42,10 @@ const { data, pagination } = await sublay.search.searchContent({
   Scope the search to a specific conversation.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  The user to search as. Results follow that user's access — their chats, their blocks. Without it, no chat messages are returned.
+</ParamField>
+
 <ParamField body="limit" type="number">
   Maximum number of results to return.
 </ParamField>
@@ -134,6 +138,10 @@ const { answer, sources } = await sublay.search.askContent({
 
 <ParamField body="conversationId" type="string">
   Scope the search to a specific conversation.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to search as. Results follow that user's access — their chats, their blocks. Without it, no chat messages are returned.
 </ParamField>
 
 <ParamField body="limit" type="number">

@@ -3,15 +3,9 @@
  *
  * A complete threaded comment system with upvotes/downvotes, nested replies, and moderation.
  *
- * Installation: npx @sublay/cli add comments-threaded
- *
- * Required dependencies:
- * - @sublay/react-js ^8.0.0-beta.0
- * - @giphy/js-fetch-api ^5.7.0 (used by the shared pieces in shared/)
- * - @giphy/react-components ^10.1.1 (used by the shared pieces in shared/)
- *
- * Requires Tailwind CSS with dark mode enabled in tailwind.config.js:
- * - darkMode: 'class' or darkMode: 'media'
+ * Dark mode: the `dark:` classes switch with a `dark` class on a parent
+ * element (Tailwind 3: darkMode: 'class' in tailwind.config.js; Tailwind 4:
+ * @custom-variant dark (&:where(.dark, .dark *)); in your CSS).
  *
  * @see https://docs.sublay.io/v8/components/components/threaded/overview
  *

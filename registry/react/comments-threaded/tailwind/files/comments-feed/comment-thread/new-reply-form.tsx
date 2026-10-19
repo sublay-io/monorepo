@@ -8,7 +8,7 @@ import {
 } from "@sublay/react-js";
 import useTextareaCursorIndicator from "~shared/react/use-textarea-cursor-indicator";
 import MentionSuggestions from "../../mention-suggestions";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 import strings from "../../../utils/strings";
 
 function NewReplyForm({
@@ -219,7 +219,7 @@ function NewReplyForm({
             disabled={!hasContent}
             className={cn(
               // 🎨 CUSTOMIZATION: Submit button styling
-              "flex-shrink-0 p-1.5",
+              "shrink-0 p-1.5",
               "rounded-full",
               "shadow-sm",
               "transition-all duration-200",

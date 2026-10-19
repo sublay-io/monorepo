@@ -30,7 +30,7 @@ import IndentationThreadingLines, {
 } from "./indentation-threading-lines";
 import ReplyButtonAndInfo from "./reply-button-and-info";
 import { getCommentCreateErrorMessage } from "../../../../utils/comment-create-error";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 import strings from "../../../../utils/strings";
 
 interface SingleCommentProps {
@@ -205,7 +205,7 @@ function SingleComment({
         >
           {/* Avatar positioned for threading line connection with top margin */}
           <div
-            className="flex-shrink-0 relative"
+            className="shrink-0 relative"
             style={{
               marginInlineEnd: `${AVATAR_GAP}px`,
               marginTop: isCollapsed ? 0 : `${AVATAR_OFFSET_TOP}px`,
@@ -395,7 +395,7 @@ function SingleComment({
                 )}
 
                 <div
-                  className="relative flex items-center gap-1"
+                  className="relative flex items-center gap-[7px]"
                   // 🎨 CUSTOMIZATION: Actions layout
                 >
                   {/* ⊖ on the line, level with the actions, when replies are
@@ -422,7 +422,7 @@ function SingleComment({
                   />
                   {/* Vote buttons inline with reply options */}
                   {!isOwnRemoved && (
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <VoteButtons
                         comment={comment}
                         size="small"

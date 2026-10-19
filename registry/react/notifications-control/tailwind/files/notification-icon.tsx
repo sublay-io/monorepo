@@ -5,12 +5,17 @@
  * Uses Tailwind CSS for styling with dark mode support.
  *
  * TAILWIND CONFIGURATION:
- * Requires tailwind.config.js with:
+ * Dark mode follows a `dark` class on a parent element. Tailwind 3, in
+ * tailwind.config.js:
  * ```js
  * module.exports = {
  *   darkMode: 'class',
  *   // ... other config
  * }
+ * ```
+ * Tailwind 4, in your CSS:
+ * ```css
+ * @custom-variant dark (&:where(.dark, .dark *));
  * ```
  *
  * COLORS USED:
@@ -38,7 +43,7 @@ import {
   ThumbsDown,
 } from "lucide-react";
 import { AppNotification } from "@sublay/react-js";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 
 interface NotificationIconProps {
   type: AppNotification.UnifiedAppNotification["type"];

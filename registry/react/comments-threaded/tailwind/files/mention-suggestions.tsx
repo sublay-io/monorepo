@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { User, useCommentSection } from "@sublay/react-js";
 import UserAvatar from "~shared/react/user-avatar";
 import { UserMentionSkeleton } from "~shared/react/skeleton";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 import strings from "../utils/strings";
 
 interface MentionSuggestionsProps {

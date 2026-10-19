@@ -7,7 +7,7 @@
   "author": "Sublay",
   "license": "Apache-2.0",
   "dependencies": [
-    "@sublay/react-js@^7.0.0",
+    "@sublay/react-js@^8.0.0-beta.0",
     "framer-motion@^12.0.0",
     "lucide-react@^1.0.0"
   ],

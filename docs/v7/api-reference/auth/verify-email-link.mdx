@@ -14,20 +14,15 @@ This endpoint is called automatically by the browser — you do not call it dire
   The verification token embedded in the link by the server.
 </ParamField>
 
-<ParamField query="redirect" type="string">
-  The URL to redirect the user to after verification. This is set automatically by the server based on the `redirectUrl` you passed to [Send Verification Email](/v7/api-reference/auth/send-verification-email).
-
-  On success: redirects to `{redirectUrl}?verified=true`
-  On failure: redirects to `{redirectUrl}?verified=false&error=invalid-or-expired-token`
-</ParamField>
-
 ## Behaviour
 
-| Outcome | `redirect` present | `redirect` absent |
-|---------|-------------------|------------------|
-| Success | Redirect to `{redirectUrl}?verified=true` | Render hosted success page |
-| Invalid / expired token | Redirect to `{redirectUrl}?verified=false&error=invalid-or-expired-token` | Render hosted error page |
-| Server error | Redirect to `{redirectUrl}?verified=false&error=server-error` | Render hosted error page |
+| Outcome | `redirectUrl` was given | No `redirectUrl` |
+|---------|------------------------|------------------|
+| Success | Redirect to `{redirectUrl}` with `verified=true` added to its query | Render hosted success page |
+| Invalid / expired token | Render hosted error page | Render hosted error page |
+| Server error | Render hosted error page | Render hosted error page |
+
+The destination is the `redirectUrl` you passed to [Send Verification Email](/v7/api-reference/auth/send-verification-email), stored with the token when the email was sent. The link itself carries no destination, so it can't be edited to send someone elsewhere. A failed verification always shows the hosted page, never a redirect.
 
 ## See Also
 

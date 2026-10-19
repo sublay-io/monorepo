@@ -37,7 +37,7 @@ All parameters are optional.
 <ParamField body="redirectUrl" type="string">
   A URL to redirect the user to after they click the verification link. Only used when `mode` is `"link"`.
 
-  On success the query parameter `?verified=true` is appended. On failure, `?verified=false&error=invalid-or-expired-token` is appended instead.
+  On success `verified=true` is added to its query string. An invalid or expired link shows the hosted error page instead of redirecting.
 
   If omitted, the server renders a hosted success/error page.
 </ParamField>

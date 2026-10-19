@@ -6,7 +6,7 @@ icon: "folder-tree"
 
 # File Structure
 
-When you install threaded comments, its TypeScript/TSX files are copied (42 on React, 47 on React Native and Expo, plus the `index.ts` the CLI writes) into your project in a clear, navigable structure: the component's own files, and the shared pieces it is built from in `shared/`. The trees below list every file.
+When you install threaded comments, its TypeScript/TSX files are copied (42 on React, 43 with Tailwind, 47 on React Native and Expo, plus the `index.ts` the CLI writes) into your project in a clear, navigable structure: the component's own files, and the shared pieces it is built from in `shared/`. The trees below list every file.
 
 ---
 
@@ -57,6 +57,7 @@ When you install threaded comments, its TypeScript/TSX files are copied (42 on R
     ├── context/
     │   └── ui-state-context.tsx                         # Modal & theme context
     └── shared/
+        ├── cn.ts                                        # Joins class names (Tailwind variant only)
         ├── flag-icon.tsx                                # Report icon
         ├── from-now.tsx                                 # Relative time ("5 minutes ago")
         ├── get-user-avatar.ts                           # Generated avatar for users without one

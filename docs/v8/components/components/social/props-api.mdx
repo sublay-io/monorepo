@@ -35,7 +35,7 @@ interface SocialCommentSectionProps {
   isVisible?: boolean;
   highlightedCommentId?: string | undefined | null;
   gifPickerFullScreen?: boolean;
-  theme?: 'light' | 'dark';   // Only for inline styles variant
+  theme?: 'light' | 'dark';   // Not used by the Tailwind variant on React
   children?: React.ReactNode;
 }
 ```
@@ -143,7 +143,7 @@ See [GIF Picker Placement](/v8/components/customization/layout-structure#gif-pic
 
 **Type:** `'light' | 'dark'` — **Default:** `'light'`
 
-**Only for the inline styles variant.** Sets the color theme for the component.
+Sets the color theme for the component: in both variants on React Native and Expo, and in the inline styles variant on React. The Tailwind variant on React ignores it.
 
 <Tabs>
   <Tab title="Inline Styles Variant">
@@ -156,7 +156,9 @@ See [GIF Picker Placement](/v8/components/customization/layout-structure#gif-pic
   </Tab>
 
   <Tab title="Tailwind Variant">
-    Ignores this prop. Use Tailwind's dark mode system instead:
+    **React Native and Expo:** pass `theme` as above. Each class is chosen from it in code; there is no Tailwind dark mode setup.
+
+    **React:** ignores this prop. Use Tailwind's dark mode system instead:
 
     ```tsx
     <html className={isDark ? 'dark' : ''}>
@@ -164,7 +166,7 @@ See [GIF Picker Placement](/v8/components/customization/layout-structure#gif-pic
     </html>
     ```
 
-    Requires `darkMode: 'class'` in `tailwind.config.js`.
+    Requires Tailwind's dark mode to follow the `dark` class: `darkMode: 'class'` in `tailwind.config.js` (Tailwind CSS 3), or `@custom-variant dark (&:where(.dark, .dark *));` in your CSS (Tailwind CSS 4).
   </Tab>
 </Tabs>
 

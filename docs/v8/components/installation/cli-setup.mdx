@@ -6,7 +6,7 @@ icon: "terminal"
 
 # Installing the Sublay CLI
 
-The Sublay CLI copies fully customizable comment components directly into your project as editable source code. You can use it with `npx` (no installation required) or install it globally.
+The Sublay CLI copies fully customizable comment components directly into your project as editable source code. Run it with `npx`: there is nothing to install, and you always get the latest version.
 
 ---
 
@@ -34,32 +34,13 @@ The Sublay CLI copies fully customizable comment components directly into your p
 
 ---
 
-## Using npx (Recommended)
+## Using npx
 
 No installation required — `npx` always uses the latest version:
 
 ```bash
 npx @sublay/cli init
 ```
-
----
-
-## Global Installation (Optional)
-
-```bash
-npm install -g @sublay/cli
-```
-
-Then use without `npx`:
-
-```bash
-sublay init
-sublay add comments-threaded --ref v8
-```
-
-<Note>
-The rest of this documentation uses `npx @sublay/cli` to stay version-agnostic, but `sublay` works identically when installed globally.
-</Note>
 
 ---
 
@@ -108,7 +89,6 @@ npx @sublay/cli init
 
 1. **Detects your project type** from `package.json`
 2. **Creates `sublay.json`** in your project root
-3. **Checks for required peer dependencies** and offers to install missing ones
 
 ---
 
@@ -123,9 +103,6 @@ After initialization, a `sublay.json` file is created in your project root:
   "typescript": true,
   "paths": {
     "components": "src/components"
-  },
-  "aliases": {
-    "@/components": "./src/components"
   }
 }
 ```
@@ -151,6 +128,7 @@ npx @sublay/cli add <component> --ref v8
 2. **Downloads the shared pieces** the component is built from (the GIF picker, avatar, skeletons, icons and similar) into a `shared/` folder inside the component's own folder.
 3. **Writes the files** to `{paths.components}/<component>/`, with imports adjusted to the installed layout. If any file fails to download, nothing is written. Among them is `utils/env.ts`, written for your framework (Next.js, Vite, Create React App, Expo or React Native; another web framework gets a version for you to fill in): the file the GIF picker reads its Giphy API key from. See [GIF Support](/v8/components/components/threaded/features#gif-support-optional).
 4. **Checks your `package.json`** for the packages the component and its shared pieces need, and offers to install the missing ones.
+5. **Prints how to use the component**: an import line, or, for a component used as several pieces (threaded comments on React Native and Expo), a short example of how the pieces fit together, with the path the component was installed at.
 
 A branch name may contain letters, digits, `.`, `_`, `-` and `/`. If the branch or the component does not exist on it, `add` stops with a message naming the one that is missing and writes nothing.
 
@@ -160,7 +138,9 @@ Every installed file is yours to edit, the files in `shared/` included. Each com
 
 ## Installing Dependencies
 
-`add` checks for the packages a component needs and prompts to install them if missing. The Sublay SDK for your platform is always one of them:
+`add` checks for the packages a component needs and prompts to install them if missing. It installs them with your project's package manager (npm, yarn, pnpm or bun, from your lock file or the `packageManager` field of your `package.json`). On Expo it runs `npx expo install`, which picks the version of each package that matches your Expo SDK. Without an interactive terminal (a script, CI), it doesn't prompt: it prints the command to run instead.
+
+The Sublay SDK for your platform is always one of the packages:
 
 **React (Web):**
 ```bash

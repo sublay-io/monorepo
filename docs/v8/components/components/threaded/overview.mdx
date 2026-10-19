@@ -139,7 +139,7 @@ Choose your preference during `npx @sublay/cli init`.
 }
 ```
 
-On Expo, `@sublay/expo` takes the place of `@sublay/react-native`. The Tailwind variant on React Native and Expo also needs `nativewind` `^4.0.0`.
+The Tailwind variant on React also needs `clsx` `^2.1.1` and `tailwind-merge` `^3.0.0` (for `cn`, in `shared/cn.ts`, which joins class names). On Expo, `@sublay/expo` takes the place of `@sublay/react-native`. The Tailwind variant on React Native and Expo also needs `nativewind` `^4.0.0`.
 
 The Giphy packages and `react-native-svg` are used by the files in the component's `shared/` folder (the GIF picker, the icons and the generated avatar for users without one). `add` checks your `package.json` for all of these and offers to install the ones that are missing.
 

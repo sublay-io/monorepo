@@ -6,7 +6,7 @@ icon: "terminal"
 
 # Installing the Sublay CLI
 
-The Sublay CLI copies fully customizable comment components directly into your project as editable source code. You can use it with `npx` (no installation required) or install it globally.
+The Sublay CLI copies fully customizable comment components directly into your project as editable source code. Run it with `npx`: there is nothing to install, and you always get the latest version.
 
 ---
 
@@ -34,32 +34,13 @@ The Sublay CLI copies fully customizable comment components directly into your p
 
 ---
 
-## Using npx (Recommended)
+## Using npx
 
 No installation required — `npx` always uses the latest version:
 
 ```bash
 npx @sublay/cli init
 ```
-
----
-
-## Global Installation (Optional)
-
-```bash
-npm install -g @sublay/cli
-```
-
-Then use without `npx`:
-
-```bash
-sublay init
-sublay add comments-threaded
-```
-
-<Note>
-The rest of this documentation uses `npx @sublay/cli` to stay version-agnostic, but `sublay` works identically when installed globally.
-</Note>
 
 ---
 
@@ -108,7 +89,6 @@ npx @sublay/cli init
 
 1. **Detects your project type** from `package.json`
 2. **Creates `sublay.json`** in your project root
-3. **Checks for required peer dependencies** and offers to install missing ones
 
 ---
 
@@ -123,9 +103,6 @@ After initialization, a `sublay.json` file is created in your project root:
   "typescript": true,
   "paths": {
     "components": "src/components"
-  },
-  "aliases": {
-    "@/components": "./src/components"
   }
 }
 ```
@@ -136,7 +113,7 @@ See [Configuration](/v7/components/installation/configuration) for a full refere
 
 ## Installing Dependencies
 
-The CLI checks for required peer dependencies and prompts to install them if missing.
+`add` checks for the packages a component needs and prompts to install them if missing. It installs them with your project's package manager (npm, yarn, pnpm or bun, from your lock file or the `packageManager` field of your `package.json`). On Expo it runs `npx expo install`, which picks the version of each package that matches your Expo SDK. Without an interactive terminal (a script, CI), it doesn't prompt: it prints the command to run instead.
 
 **React (Web):**
 ```bash

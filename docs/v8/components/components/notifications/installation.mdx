@@ -24,6 +24,8 @@ Add a notification dropdown control to your navigation bar with a single command
     ```bash
     npm install @sublay/react-js framer-motion lucide-react
     ```
+
+    The Tailwind variant also uses `clsx` and `tailwind-merge`. `add` checks for all of these and offers to install the ones that are missing.
   </Step>
 </Steps>
 
@@ -41,7 +43,7 @@ npx @sublay/cli add notifications-control --ref v8
 
 ## What Gets Installed
 
-Only **5 files** — much simpler than comment components:
+Only **5 files** (6 for the Tailwind variant), plus the `index.ts` the CLI writes — much simpler than comment components:
 
 ```
 src/components/notifications-control/
@@ -51,8 +53,10 @@ src/components/notifications-control/
 │   ├── notification-list.tsx             # List with infinite scroll
 │   ├── notification-item.tsx             # Individual notification row
 │   └── notification-icon.tsx            # Type-based icon display
-└── utils/
-    └── notification-utils.ts             # Time formatting, text truncation
+├── utils/
+│   └── notification-utils.ts             # Time formatting, text truncation
+└── shared/
+    └── cn.ts                             # Joins class names (Tailwind variant only)
 ```
 
 ---

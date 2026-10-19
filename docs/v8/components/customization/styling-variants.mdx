@@ -14,8 +14,8 @@ Understanding inline styles vs Tailwind CSS variants and when to use each.
 
 | Aspect | Inline Styles | Tailwind CSS |
 |--------|:-------------:|:------------:|
-| **Dependencies** | None | Requires Tailwind CSS |
-| **Dark Mode** | `theme` prop | `dark:` prefix |
+| **Dependencies** | None | Tailwind CSS (React), NativeWind (React Native and Expo) |
+| **Dark Mode** | `theme` prop | React: `dark:` prefix. React Native and Expo: `theme` prop |
 | **Customization** | Change hex codes | Change classes or config |
 | **Code verbosity** | More verbose | Concise |
 | **Learning curve** | Easier | Tailwind knowledge needed |
@@ -71,12 +71,12 @@ Understanding inline styles vs Tailwind CSS variants and when to use each.
 
 **Pros:**
 - Concise, readable code
-- Automatic dark mode with `dark:` prefix
+- On React, automatic dark mode with the `dark:` prefix
 - Integrates with design systems
 - Smaller bundle with purging
 
 **Cons:**
-- Requires Tailwind CSS 3.3 or later installed (on React Native and Expo, NativeWind 4)
+- Requires Tailwind CSS 3.3 or later (4 included) on React, and NativeWind 4 (with Tailwind CSS 3) on React Native and Expo
 - Learning curve if unfamiliar
 - Less explicit (need to know what classes do)
 
@@ -129,7 +129,102 @@ For React Native and Expo:
 - **Inline Styles** → Standard React Native `StyleSheet` / `style` prop approach
 - **Tailwind** → Uses [NativeWind](https://www.nativewind.dev/) (`className` prop)
 
-NativeWind must be installed and configured for the Tailwind variant to work on React Native.
+### Tailwind on React Native and Expo
+
+The Tailwind variant styles everything with `className`, which works only once NativeWind is set up in your app. Without it the components render unstyled, with no error. NativeWind's [installation guide](https://www.nativewind.dev/docs/getting-started/installation) is the reference; for these components the setup is:
+
+<Steps>
+  <Step title="Install NativeWind and Tailwind CSS 3">
+    ```bash
+    npm install nativewind
+    npm install -D tailwindcss@^3
+    ```
+    NativeWind 4 works with Tailwind CSS 3, not 4.
+  </Step>
+
+  <Step title="tailwind.config.js">
+    ```js
+    module.exports = {
+      // Your app's files, and the folder the components are installed in
+      content: ["./App.tsx", "./src/**/*.{js,jsx,ts,tsx}"],
+      presets: [require("nativewind/preset")],
+      theme: { extend: {} },
+      plugins: [],
+    };
+    ```
+  </Step>
+
+  <Step title="global.css, imported once">
+    ```css
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+    ```
+    Import it in your app's entry file: `import "./global.css";`
+  </Step>
+
+  <Step title="babel.config.js">
+    <Tabs>
+      <Tab title="Expo">
+        ```js
+        module.exports = function (api) {
+          api.cache(true);
+          return {
+            presets: [
+              ["babel-preset-expo", { jsxImportSource: "nativewind" }],
+              "nativewind/babel",
+            ],
+          };
+        };
+        ```
+      </Tab>
+      <Tab title="React Native">
+        ```js
+        module.exports = {
+          presets: ["module:@react-native/babel-preset", "nativewind/babel"],
+        };
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="metro.config.js">
+    <Tabs>
+      <Tab title="Expo">
+        ```js
+        const { getDefaultConfig } = require("expo/metro-config");
+        const { withNativeWind } = require("nativewind/metro");
+
+        const config = getDefaultConfig(__dirname);
+
+        module.exports = withNativeWind(config, { input: "./global.css" });
+        ```
+      </Tab>
+      <Tab title="React Native">
+        ```js
+        const { getDefaultConfig, mergeConfig } = require("@react-native/metro-config");
+        const { withNativeWind } = require("nativewind/metro");
+
+        const config = mergeConfig(getDefaultConfig(__dirname), {});
+
+        module.exports = withNativeWind(config, { input: "./global.css" });
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="TypeScript only: nativewind-env.d.ts">
+    ```ts
+    /// <reference types="nativewind/types" />
+    ```
+  </Step>
+</Steps>
+
+Dark mode needs no Tailwind setup on React Native and Expo: pass the component's `theme` prop (`"light"` or `"dark"`), and each class is chosen from it in code.
+
+<Note>
+NativeWind counts `1rem` as 14 pixels on phones (Tailwind on the web counts 16). The inline styles variant uses the same 14-based sizes, so the two variants look the same.
+</Note>
 
 ---
 

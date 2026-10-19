@@ -4,43 +4,35 @@
  * A complete social-style comment system with likes, replies, and moderation.
  * Instagram-inspired design with hearts, avatars, and nested replies.
  *
- * Installation: npx @sublay/cli add comments-social
- *
- * Required dependencies:
- * - @sublay/react-native ^8.0.0-beta.0
- * - react-native-svg ^15 (used by the shared pieces in shared/)
- * - moment ^2 (used by the shared pieces in shared/)
- * - @gorhom/bottom-sheet
- * - nativewind ^4.0.0
- *
  * @see https://docs.sublay.io/v8/components/components/social/overview
  *
  * ====================
- * THEME COLOR PALETTE
+ * THEME COLOR PALETTE (light / dark)
  * ====================
  *
  * This component supports light and dark themes via the `theme` prop.
- * Tailwind dark mode classes are used for conditional styling.
+ * Each class is picked from it in code (theme === 'dark' ? … : …): there
+ * are no dark: classes, and no Tailwind dark mode setup is needed.
  *
  * BACKGROUNDS:
- * - bg-white / dark:bg-neutral-800 (main background)
- * - bg-gray-100 / dark:bg-neutral-700 (secondary background, hover states)
- * - bg-gray-200 / dark:bg-neutral-600 (sort buttons inactive)
- * - bg-black / dark:bg-neutral-800 (sort buttons active background)
+ * - bg-white / bg-neutral-800 (main background)
+ * - bg-gray-100 / bg-neutral-700 (secondary background, hover states)
+ * - bg-gray-200 / bg-neutral-600 (sort buttons inactive)
+ * - bg-black / bg-neutral-800 (sort buttons active background)
  *
  * TEXT:
- * - text-black / dark:text-neutral-50 (primary text - author names, comment body)
- * - text-neutral-500 / dark:text-neutral-400 (secondary text - timestamps, reply button)
- * - text-white / dark:text-neutral-50 (sort button active text)
+ * - text-black / text-neutral-50 (primary text - author names, comment body)
+ * - text-neutral-500 / text-neutral-400 (secondary text - timestamps, reply button)
+ * - text-white / text-neutral-50 (sort button active text)
  *
  * BORDERS:
- * - border-gray-200 / dark:border-neutral-600 (borders, dividers)
+ * - border-gray-200 / border-neutral-600 (borders, dividers)
  *
  * BLUES (post button, links):
- * - text-sky-500 / dark:text-blue-400 (primary blue - post button)
+ * - text-sky-500 / text-blue-400 (primary blue - post button)
  *
  * REDS (heart icon, destructive actions):
- * - text-red-600 / dark:text-red-400 (filled heart, danger)
+ * - text-red-600 / text-red-400 (filled heart, danger)
  */
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";

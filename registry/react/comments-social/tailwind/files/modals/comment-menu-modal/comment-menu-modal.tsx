@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Modal from "~shared/react/modal";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 import useUIState from "../../../hooks/use-ui-state";
 import MainContent from "./main-content";
 import ReportContent from "./report-content";

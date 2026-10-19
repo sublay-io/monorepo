@@ -111,7 +111,7 @@ Then use `bg-primary`, `text-primary`, etc.
 
 ### Dark Mode (Tailwind)
 
-Components use `dark:` prefix for dark mode:
+**On React,** components use the `dark:` prefix:
 
 ```tsx
 <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50">
@@ -119,14 +119,24 @@ Components use `dark:` prefix for dark mode:
 
 **Setup:**
 
-1. Configure Tailwind for class-based dark mode:
+1. Make Tailwind's dark mode follow a `dark` class:
 
-```js
-// tailwind.config.js
-module.exports = {
-  darkMode: 'class',
-}
-```
+<Tabs>
+  <Tab title="Tailwind CSS 3">
+    ```js
+    // tailwind.config.js
+    module.exports = {
+      darkMode: 'class',
+    }
+    ```
+  </Tab>
+  <Tab title="Tailwind CSS 4">
+    ```css
+    /* your main CSS file */
+    @custom-variant dark (&:where(.dark, .dark *));
+    ```
+  </Tab>
+</Tabs>
 
 2. Add `dark` class to parent element:
 
@@ -137,6 +147,8 @@ module.exports = {
 ```
 
 All components automatically switch to dark colors.
+
+**On React Native and Expo,** there are no `dark:` classes and no Tailwind dark mode setup: pass the component's `theme` prop (`"light"` or `"dark"`), and each class is chosen from it in code, the same way the inline styles variant chooses its colors.
 
 ---
 

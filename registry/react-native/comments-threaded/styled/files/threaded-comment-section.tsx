@@ -3,8 +3,6 @@
  *
  * A complete threaded comment system with upvotes/downvotes, nested replies, and moderation.
  *
- * Installation: npx @sublay/cli add comments-threaded
- *
  * Three pieces, placed by your screen. The section has no scrolling of its
  * own: put it in your screen's scroll view, so what's above it (the entity)
  * scrolls away with the comments.
@@ -20,11 +18,6 @@
  * ThreadedComments holds the shared state and renders the sheets (sort,
  * comment options, report) over the view it wraps, normally the whole screen.
  * Keyboard handling (KeyboardAvoidingView or your library) is up to the screen.
- *
- * Required dependencies:
- * - @sublay/react-native ^8.0.0-beta.0
- * - react-native-svg ^15 (used by the shared pieces in shared/)
- * - @gorhom/bottom-sheet
  *
  * @see https://docs.sublay.io/v8/components/components/threaded/overview
  *

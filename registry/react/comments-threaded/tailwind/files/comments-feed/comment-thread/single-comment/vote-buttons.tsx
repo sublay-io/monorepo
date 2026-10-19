@@ -4,7 +4,7 @@ import {
   Comment as CommentType,
   useReactionToggle,
 } from "@sublay/react-js";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 import strings from "../../../../utils/strings";
 
 interface VoteButtonsProps {

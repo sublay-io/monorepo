@@ -32,9 +32,6 @@ your-project/
   "typescript": true | false,
   "paths": {
     "components": "src/components"
-  },
-  "aliases": {
-    "@/components": "./src/components"
   }
 }
 ```
@@ -146,31 +143,6 @@ Use any path relative to your project root. The CLI creates the directory if it 
 
 ---
 
-### `aliases`
-
-**Type:** `object`
-
-Path aliases used in component imports. These should match your `tsconfig.json` paths or bundler alias configuration.
-
-```json
-{
-  "aliases": {
-    "@/components": "./src/components"
-  }
-}
-```
-
-Components will use imports like:
-```tsx
-import { SomeUtil } from '@/components/utils';
-```
-
-<Warning>
-Aliases must match your `tsconfig.json` or bundler config. Mismatched aliases cause import errors.
-</Warning>
-
----
-
 ## Complete Example
 
 A typical `sublay.json` for a React web app with Tailwind CSS:
@@ -182,9 +154,6 @@ A typical `sublay.json` for a React web app with Tailwind CSS:
   "typescript": true,
   "paths": {
     "components": "src/components"
-  },
-  "aliases": {
-    "@/components": "./src/components"
   }
 }
 ```

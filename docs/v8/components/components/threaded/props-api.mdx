@@ -260,7 +260,7 @@ Sets the color theme for the entire comment section. On React (Web) it is **only
     </html>
     ```
 
-    Requires `darkMode: 'class'` in `tailwind.config.js`.
+    Requires Tailwind's dark mode to follow the `dark` class: `darkMode: 'class'` in `tailwind.config.js` (Tailwind CSS 3), or `@custom-variant dark (&:where(.dark, .dark *));` in your CSS (Tailwind CSS 4). On React Native and Expo, the Tailwind variant takes `theme` like the inline styles variant.
   </Tab>
 </Tabs>
 
@@ -284,7 +284,7 @@ Content shown in place of the "no comments yet" view, when the entity has no com
 
 ## React Native and Expo Components
 
-On React Native and Expo, threaded comments are three components, installed together by `sublay add comments-threaded` and all exported from the component's `index.ts`. Your screen places them:
+On React Native and Expo, threaded comments are three components, installed together by `npx @sublay/cli add comments-threaded --ref v8` and all exported from the component's `index.ts`. Your screen places them:
 
 ```tsx
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';

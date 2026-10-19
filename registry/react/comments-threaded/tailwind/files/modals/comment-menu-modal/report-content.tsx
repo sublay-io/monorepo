@@ -8,7 +8,7 @@ import {
 } from "@sublay/react-js";
 import FlagIcon from "~shared/react/flag-icon";
 import useUIState from "../../../hooks/use-ui-state";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 import strings from "../../../utils/strings";
 
 function ReportContent({ resetView }: { resetView: () => void }) {

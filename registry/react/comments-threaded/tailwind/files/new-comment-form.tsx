@@ -10,7 +10,7 @@ import useTextareaCursorIndicator from "~shared/react/use-textarea-cursor-indica
 import GiphyContainer from "~shared/react/giphy-container";
 import MentionSuggestions from "./mention-suggestions";
 import { getCommentCreateErrorMessage } from "../utils/comment-create-error";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 import strings from "../utils/strings";
 import { GIPHY_API_KEY_NAME, giphyApiKey, isDevelopment } from "../utils/env";
 

@@ -33,7 +33,7 @@ function ReplyButtonAndInfo({
       ) : (
         <span />
       )}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-[7px]">
         {menu}
         {canReply && (
           <button

@@ -1,12 +1,11 @@
 import React, { createContext, useState, useRef, useMemo, useCallback } from "react";
 import { Comment as CommentType } from "@sublay/react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 
 type UIStateContext = {
-  commentOptionsSheetRef: React.RefObject<BottomSheetMethods | null>;
-  reportCommentSheetRef: React.RefObject<BottomSheetMethods | null>;
-  commentOptionsSheetOwnerRef: React.RefObject<BottomSheetMethods | null>;
+  commentOptionsSheetRef: React.RefObject<BottomSheet | null>;
+  reportCommentSheetRef: React.RefObject<BottomSheet | null>;
+  commentOptionsSheetOwnerRef: React.RefObject<BottomSheet | null>;
 
   openCommentOptionsSheet: (newComment?: CommentType) => void;
   closeCommentOptionsSheet: () => void;

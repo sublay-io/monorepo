@@ -56,7 +56,7 @@ npx @sublay/cli add comments-social --ref v8
 
 ## What Gets Installed
 
-The CLI copies 42 files into your project (43 for the inline styles variant on React Native and Expo): the component's own 25 files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
+The CLI copies 43 files into your project on React (44 with Tailwind), and 44 on React Native and Expo (43 with Tailwind): the component's own 26 files, and the shared pieces it is built from in `shared/`. Every file is yours to edit, the shared pieces included.
 
 <Tabs>
   <Tab title="React (Web)">
@@ -100,6 +100,7 @@ The CLI copies 42 files into your project (43 for the inline styles variant on R
     ├── context/
     │   └── ui-state-context.tsx                  # Modal & theme context
     └── shared/
+        ├── cn.ts                                 # Joins class names (Tailwind variant only)
         ├── ellipsis-icon.tsx                     # Three-dots icon
         ├── emoji-suggestions.tsx                 # Emoji bar above the input
         ├── flag-icon.tsx                         # Report icon
@@ -220,6 +221,10 @@ export default function App() {
   );
 }
 ```
+</Info>
+
+<Info>
+The Tailwind variant on React Native and Expo needs NativeWind set up in your app, or the components render unstyled. See [Tailwind on React Native and Expo](/v8/components/customization/styling-variants#tailwind-on-react-native-and-expo).
 </Info>
 
 ---

@@ -374,11 +374,13 @@ All files are editable TypeScript/TSX, documented with inline comments, and comm
   </Accordion>
 
   <Accordion title="Dark mode not working (Tailwind)" icon="moon">
-    Set `darkMode: 'class'` in `tailwind.config.js` and add a `dark` class to a parent element:
+    **React:** make Tailwind's dark mode follow a `dark` class (Tailwind CSS 3: `darkMode: 'class'` in `tailwind.config.js`; Tailwind CSS 4: `@custom-variant dark (&:where(.dark, .dark *));` in your CSS), and add a `dark` class to a parent element:
 
     ```tsx
     <html className={isDark ? 'dark' : ''}>
     ```
+
+    **React Native and Expo:** pass `theme="dark"` to the component. There is no Tailwind dark mode setup.
   </Accordion>
 </AccordionGroup>
 

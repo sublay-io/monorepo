@@ -4,15 +4,6 @@
  * A complete social-style comment system with likes, replies, and moderation.
  * Instagram-inspired design with hearts, avatars, and nested replies.
  *
- * Installation: npx @sublay/cli add comments-social
- *
- * Required dependencies:
- * - @sublay/react-js ^8.0.0-beta.0
- * - moment ^2 (used by the shared pieces in shared/)
- * - @giphy/js-fetch-api ^5.7.0 (used by the shared pieces in shared/)
- * - @giphy/react-components ^10.1.1 (used by the shared pieces in shared/)
- * - Tailwind CSS configured with dark mode support
- *
  * @see https://docs.sublay.io/v8/components/components/social/overview
  *
  * ========================
@@ -22,12 +13,16 @@
  * This component uses Tailwind CSS with native dark mode support.
  * Dark mode is triggered via the `dark:` prefix when a parent element has the `.dark` class.
  *
- * Required tailwind.config.js settings:
+ * Tailwind 3, in tailwind.config.js:
  * ```js
  * module.exports = {
  *   darkMode: 'class', // Enable class-based dark mode
  *   // ... other config
  * }
+ * ```
+ * Tailwind 4, in your CSS:
+ * ```css
+ * @custom-variant dark (&:where(.dark, .dark *));
  * ```
  *
  * TAILWIND CLASSES USED:

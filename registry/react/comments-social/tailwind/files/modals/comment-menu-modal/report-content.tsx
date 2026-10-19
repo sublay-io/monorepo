@@ -7,7 +7,7 @@ import {
   useUser,
 } from "@sublay/react-js";
 import FlagIcon from "~shared/react/flag-icon";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 import useUIState from "../../../hooks/use-ui-state";
 import strings from "../../../utils/strings";
 

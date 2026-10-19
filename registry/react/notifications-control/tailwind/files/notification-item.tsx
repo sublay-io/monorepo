@@ -30,7 +30,7 @@ import { AppNotification } from "@sublay/react-js";
 import { motion } from "framer-motion";
 import { formatRelativeTime, truncateText } from "../utils/notification-utils";
 import NotificationIcon from "./notification-icon";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 import { useState } from "react";
 
 interface NotificationItemProps {

@@ -14,7 +14,7 @@ import { resetButton, resetDiv, resetP } from "~shared/react/reset-styles";
 import EllipsisIcon from "~shared/react/ellipsis-icon";
 import { parseContentWithMentions } from "~shared/react/parse-content-with-mentions";
 
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 import Replies from "./replies";
 import HeartButton from "./heart-button";
 import useUIState from "../../../hooks/use-ui-state";

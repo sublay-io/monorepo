@@ -260,12 +260,14 @@ Comments automatically update when other users post. No configuration needed —
 />
 ```
 
-**Tailwind Variant:**
+**Tailwind Variant on React:**
 ```tsx
 <html className={isDark ? 'dark' : ''}>
   <ThreadedCommentSection foreignId="post_123" />
 </html>
 ```
+
+On React Native and Expo, the Tailwind variant takes `theme` the same way as the inline styles variant.
 
 All colors adapt automatically.
 

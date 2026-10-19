@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 import strings from "../../../../utils/strings";
 // 🎨 CUSTOMIZATION: Thread geometry. Every connector line is derived from
 // these values, so changing one keeps the joins intact.

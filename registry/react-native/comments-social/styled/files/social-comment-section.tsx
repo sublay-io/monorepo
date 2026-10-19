@@ -4,14 +4,6 @@
  * A complete social-style comment system with likes, replies, and moderation.
  * Instagram-inspired design with hearts, avatars, and nested replies.
  *
- * Installation: npx @sublay/cli add comments-social
- *
- * Required dependencies:
- * - @sublay/react-native ^8.0.0-beta.0
- * - react-native-svg ^15 (used by the shared pieces in shared/)
- * - moment ^2 (used by the shared pieces in shared/)
- * - @gorhom/bottom-sheet
- *
  * @see https://docs.sublay.io/v8/components/components/social/overview
  *
  * ====================

@@ -5,12 +5,17 @@
  * Uses Tailwind CSS for styling with dark mode support.
  *
  * TAILWIND CONFIGURATION:
- * Requires tailwind.config.js with:
+ * Dark mode follows a `dark` class on a parent element. Tailwind 3, in
+ * tailwind.config.js:
  * ```js
  * module.exports = {
  *   darkMode: 'class',
  *   // ... other config
  * }
+ * ```
+ * Tailwind 4, in your CSS:
+ * ```css
+ * @custom-variant dark (&:where(.dark, .dark *));
  * ```
  *
  * USAGE:
@@ -43,7 +48,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { AppNotification, useAppNotifications } from "@sublay/react-js";
 import { CheckCheck } from "lucide-react";
 import NotificationList from "./notification-list";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 
 function NotificationControl({
   notificationTemplates,

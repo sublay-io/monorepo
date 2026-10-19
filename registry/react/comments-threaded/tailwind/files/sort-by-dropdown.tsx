@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { type CommentsSortByOptions, useCommentSection } from "@sublay/react-js";
-import { cn } from "@/lib/utils";
+import { cn } from "~shared/react/cn";
 import strings from "../utils/strings";
 
 // The sorts the dropdown offers, each with the direction it sorts in. New and

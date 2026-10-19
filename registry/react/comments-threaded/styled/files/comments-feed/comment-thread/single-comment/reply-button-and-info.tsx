@@ -45,7 +45,7 @@ function ReplyButtonAndInfo({
       ) : (
         <span />
       )}
-      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
         {menu}
         {canReply && (
           <button

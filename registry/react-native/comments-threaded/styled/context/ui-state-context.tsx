@@ -2,13 +2,12 @@ import React, { createContext, useState, useRef, useMemo, useCallback } from "re
 import { Keyboard, TextInput } from "react-native";
 import { Comment as CommentType } from "@sublay/react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 
 type UIStateContext = {
-  commentOptionsSheetRef: React.RefObject<BottomSheetMethods | null>;
-  reportCommentSheetRef: React.RefObject<BottomSheetMethods | null>;
-  commentOptionsSheetOwnerRef: React.RefObject<BottomSheetMethods | null>;
-  sortSheetRef: React.RefObject<BottomSheetMethods | null>;
+  commentOptionsSheetRef: React.RefObject<BottomSheet | null>;
+  reportCommentSheetRef: React.RefObject<BottomSheet | null>;
+  commentOptionsSheetOwnerRef: React.RefObject<BottomSheet | null>;
+  sortSheetRef: React.RefObject<BottomSheet | null>;
 
   // The section's main input (the comment form attaches it), and a way to
   // focus it from anywhere in the section: a comment's Reply button does.

@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import path from "path";
 
-import { getTargetPath, resolveFrameworkFile, resolveLanguageFile } from "./add";
+import { formatUsage, getTargetPath, printAppSetupNotes, resolveFrameworkFile, resolveLanguageFile } from "./add";
 import type { SublayConfig } from "./init";
 
 const config: SublayConfig = {
@@ -9,7 +9,6 @@ const config: SublayConfig = {
   style: "styled",
   typescript: true,
   paths: { components: "src/components" },
-  aliases: { "@/components": "./src/components" },
 };
 
 const inComponent = (...parts: string[]) =>
@@ -144,5 +143,50 @@ describe("resolveFrameworkFile", () => {
     expect(() =>
       resolveFrameworkFile({ files: [], frameworks: { next: "env/next.ts" } }, "next", "x")
     ).toThrow("has no utils/env.ts");
+  });
+});
+
+describe("formatUsage", () => {
+  it("puts the install path in place of {importPath}", () => {
+    expect(
+      formatUsage(
+        ['import { A, B } from "{importPath}";', "", "<A><B /></A>"],
+        "./src/components/comments-threaded"
+      )
+    ).toEqual([
+      'import { A, B } from "./src/components/comments-threaded";',
+      "",
+      "<A><B /></A>",
+    ]);
+  });
+});
+
+describe("printAppSetupNotes", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+  const output = (...args: Parameters<typeof printAppSetupNotes>) => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    printAppSetupNotes(...args);
+    return log.mock.calls.map((call) => String(call[0])).join("\n");
+  };
+
+  it("links NativeWind's install guide for components that use it", () => {
+    expect(output(["nativewind@^4.0.0"], "expo")).toContain(
+      "https://www.nativewind.dev/docs/getting-started/installation"
+    );
+  });
+
+  it("tells bare React Native about react-native-worklets when Reanimated was missing", () => {
+    expect(
+      output(["react-native-reanimated@>=3.16.0"], "react-native", ["react-native-reanimated"])
+    ).toContain("react-native-worklets");
+  });
+
+  it("says nothing about worklets when Reanimated was already there, or on Expo", () => {
+    expect(output(["react-native-reanimated@>=3.16.0"], "react-native", [])).toBe("");
+    expect(
+      output(["react-native-reanimated@>=3.16.0"], "expo", ["react-native-reanimated"])
+    ).toBe("");
   });
 });

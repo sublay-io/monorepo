@@ -58,10 +58,6 @@ export function transformImports(
   // Handle dynamic imports as well
   transformed = transformed.replace(/import\((['"])\.\.\/files\//g, 'import($1../components/');
 
-  // Transform @/components alias if user has different setup
-  // For now, keep imports as-is since they use relative paths
-  // In the future, we can add more sophisticated transformations
-
   // Expo projects use @sublay/expo instead of @sublay/react-native
   if (config.platform === 'expo') {
     transformed = transformed.replace(
@@ -74,12 +70,6 @@ export function transformImports(
       /^(\s*\*\s+-\s+)@sublay\/react-native(?=\s|$)/gm,
       '$1@sublay/expo'
     );
-  }
-
-  // Optionally transform based on user's alias configuration
-  if (config.aliases['@/components']) {
-    // Keep relative imports as-is for now
-    // Future: transform to use user's aliases if they prefer
   }
 
   return transformed;

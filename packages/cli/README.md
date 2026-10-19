@@ -26,8 +26,10 @@ npx @sublay/cli add comments-threaded
 `add` reads `sublay.json`, downloads the matching component from the registry, writes its files into your components directory, and generates an `index.ts` barrel so you can import it directly:
 
 ```tsx
-import { ThreadedCommentSection } from "@/components/comments-threaded";
+import { ThreadedCommentSection } from "./src/components/comments-threaded";
 ```
+
+It then checks your `package.json` for the packages the component needs and offers to install the missing ones with your package manager (npm, yarn, pnpm or bun). On Expo it uses `npx expo install`, so each package matches your Expo SDK. Finally it prints how to use the component, with the path it was installed at.
 
 ### Available components
 

@@ -5,14 +5,129 @@ import prompts from 'prompts';
 import { execa } from 'execa';
 import semver from 'semver';
 
-async function installDependencies(deps: string[]) {
+export type PackageManager = 'npm' | 'yarn' | 'pnpm' | 'bun';
+
+/** How each package manager adds packages to a project. */
+const ADD_COMMAND: Record<PackageManager, string[]> = {
+  npm: ['install'],
+  yarn: ['add'],
+  pnpm: ['add'],
+  bun: ['add'],
+};
+
+const LOCK_FILES: [string, PackageManager][] = [
+  ['pnpm-lock.yaml', 'pnpm'],
+  ['yarn.lock', 'yarn'],
+  ['bun.lock', 'bun'],
+  ['bun.lockb', 'bun'],
+  ['package-lock.json', 'npm'],
+];
+
+/**
+ * The package manager a project uses: the `packageManager` field of the
+ * nearest package.json that has one, or the nearest lock file. Both are looked
+ * for from `startDir` up, in folders that have a package.json, so a package
+ * inside a workspace finds the workspace's lock file at its root. npm when
+ * there's neither.
+ */
+export async function detectPackageManager(startDir: string = process.cwd()): Promise<PackageManager> {
+  let dir = path.resolve(startDir);
+
+  while (true) {
+    const packageJsonPath = path.join(dir, 'package.json');
+    // Only a folder that is a package counts (a workspace root always is), so
+    // a stray lock file in a home folder doesn't.
+    if (await fs.pathExists(packageJsonPath)) {
+      try {
+        const field = (await fs.readJson(packageJsonPath)).packageManager;
+        if (typeof field === 'string') {
+          const name = field.split('@')[0];
+          if (name in ADD_COMMAND) return name as PackageManager;
+        }
+      } catch {
+        // An unreadable package.json says nothing about the package manager.
+      }
+
+      for (const [lockFile, pm] of LOCK_FILES) {
+        if (await fs.pathExists(path.join(dir, lockFile))) {
+          return pm;
+        }
+      }
+    }
+
+    const parent = path.dirname(dir);
+    if (parent === dir) return 'npm';
+    dir = parent;
+  }
+}
+
+export interface InstallPlan {
+  command: string;
+  args: string[];
+}
+
+/**
+ * The command that installs `specs` (as `name@range`) into a project.
+ *
+ * Expo projects go through `npx expo install`, which picks the version of each
+ * package that matches the project's Expo SDK, so third-party packages are
+ * passed by name only; `@sublay/*` keep their ranges, which Expo doesn't pin.
+ * Installing Reanimated there on SDK 54 or later (which pairs it with
+ * Reanimated 4) also installs `react-native-worklets`, the package Reanimated
+ * 4 needs alongside it, unless the project already has it.
+ * Everything else uses the package manager's own command.
+ */
+/** The Expo SDK a project's `expo` range starts at (0 when unknown). */
+export function expoSdkMajor(range: unknown): number {
+  if (typeof range !== 'string' || !semver.validRange(range)) return 0;
+  return semver.minVersion(range)?.major ?? 0;
+}
+
+export function planInstall(
+  specs: string[],
+  options: {
+    platform?: string;
+    packageManager: PackageManager;
+    declared?: Record<string, unknown>;
+  }
+): InstallPlan {
+  if (options.platform === 'expo') {
+    const packages = specs.map((spec) =>
+      spec.startsWith('@sublay/') ? spec : parseDependencyName(spec)
+    );
+    if (
+      expoSdkMajor(options.declared?.expo) >= 54 &&
+      packages.includes('react-native-reanimated') &&
+      !packages.includes('react-native-worklets') &&
+      !options.declared?.['react-native-worklets']
+    ) {
+      packages.push('react-native-worklets');
+    }
+    return { command: 'npx', args: ['expo', 'install', ...packages] };
+  }
+
+  return {
+    command: options.packageManager,
+    args: [...ADD_COMMAND[options.packageManager], ...specs],
+  };
+}
+
+/**
+ * A plan as a command to paste into a shell: arguments with characters a
+ * shell may act on are quoted (`>=` redirects; `^` is cmd.exe's escape
+ * character and a zsh glob operator).
+ */
+export function formatCommand(plan: InstallPlan): string {
+  return [plan.command, ...plan.args]
+    .map((arg) => (/^[\w@./:=-]+$/.test(arg) ? arg : `"${arg}"`))
+    .join(' ');
+}
+
+async function installDependencies(plan: InstallPlan) {
   try {
-    console.log(chalk.blue(`\n📦 Installing ${deps.join(', ')}...\n`));
+    console.log(chalk.blue(`\n📦 Installing: ${formatCommand(plan)}\n`));
 
-    // Detect package manager
-    const packageManager = await detectPackageManager();
-
-    await execa(packageManager, ['install', ...deps], {
+    await execa(plan.command, plan.args, {
       stdio: 'inherit',
       cwd: process.cwd(),
     });
@@ -21,23 +136,8 @@ async function installDependencies(deps: string[]) {
   } catch (error) {
     console.error(chalk.red('\n❌ Failed to install dependencies'));
     console.error(error);
+    console.log(chalk.dim(`\nYou can install them yourself with:\n  ${formatCommand(plan)}\n`));
   }
-}
-
-async function detectPackageManager(): Promise<'npm' | 'yarn' | 'pnpm'> {
-  const lockFiles = {
-    'pnpm-lock.yaml': 'pnpm',
-    'yarn.lock': 'yarn',
-    'package-lock.json': 'npm',
-  } as const;
-
-  for (const [lockFile, pm] of Object.entries(lockFiles)) {
-    if (await fs.pathExists(path.join(process.cwd(), lockFile))) {
-      return pm;
-    }
-  }
-
-  return 'npm'; // Default to npm
 }
 
 /**
@@ -184,14 +284,19 @@ export function findDependencyStatus(
 /**
  * Check and optionally install component-specific dependencies
  * @param dependencies Array of dependencies in format "package@version"
+ * @param platform The project's platform (sublay.json): Expo installs through `npx expo install`
+ * @returns The names of the packages the project didn't have
  */
-export async function checkComponentDependencies(dependencies: string[]) {
+export async function checkComponentDependencies(
+  dependencies: string[],
+  platform?: string
+): Promise<string[]> {
   try {
     const packageJsonPath = path.join(process.cwd(), 'package.json');
 
     if (!(await fs.pathExists(packageJsonPath))) {
       console.log(chalk.yellow('\n⚠️  No package.json found'));
-      return;
+      return [];
     }
 
     const packageJson = await fs.readJson(packageJsonPath);
@@ -204,7 +309,7 @@ export async function checkComponentDependencies(dependencies: string[]) {
 
     if (missing.length === 0 && upgrades.length === 0) {
       console.log(chalk.green('\n✅ All required dependencies are installed'));
-      return;
+      return [];
     }
 
     if (missing.length > 0) {
@@ -222,6 +327,11 @@ export async function checkComponentDependencies(dependencies: string[]) {
     }
 
     const toInstall = [...missing, ...upgrades.map((upgrade) => upgrade.spec)];
+    const plan = planInstall(toInstall, {
+      platform,
+      packageManager: await detectPackageManager(),
+      declared: allDeps,
+    });
 
     // Without a TTY (scripts, CI, agents) there is nobody to answer the prompt.
     // Skip it and take the same branch as an explicit "no" so we never block.
@@ -237,14 +347,14 @@ export async function checkComponentDependencies(dependencies: string[]) {
     }
 
     if (install) {
-      await installDependencies(toInstall);
+      await installDependencies(plan);
     } else {
       console.log(chalk.dim('\nYou can install them later with:'));
-      const packageManager = await detectPackageManager();
-      const installCmd = packageManager === 'npm' ? 'npm install' : packageManager === 'yarn' ? 'yarn add' : 'pnpm add';
-      console.log(chalk.dim(`  ${installCmd} ${toInstall.join(' ')}\n`));
+      console.log(chalk.dim(`  ${formatCommand(plan)}\n`));
     }
+    return missing.map(parseDependencyName);
   } catch (error) {
     console.error(chalk.red('\n❌ Error checking dependencies:'), error);
+    return [];
   }
 }

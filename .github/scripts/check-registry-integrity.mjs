@@ -508,6 +508,18 @@ for (const registryFile of registryFiles) {
     what: "a framework's version",
   });
 
+  // L3. "usage" is the example `sublay add` prints after installing, in place
+  // of its generic import line: a non-empty list of lines of code.
+  if (manifest.usage !== undefined) {
+    if (
+      !Array.isArray(manifest.usage) ||
+      manifest.usage.length === 0 ||
+      manifest.usage.some((line) => typeof line !== 'string')
+    ) {
+      fail(registryFile, '"usage" must be a non-empty array of strings (lines of example code)');
+    }
+  }
+
   componentVariants.push({
     registryFile,
     dir,

@@ -58,39 +58,23 @@ Authenticates an existing user by email and password. Returns an access token, r
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="User Not Found — 403">
+  <Accordion title="Invalid Credentials — 401">
     ```json
     {
-      "error": "User not found.",
-      "code": "auth/no-user-found"
-    }
-    ```
-  </Accordion>
-  <Accordion title="Invalid Credentials — 403 or 400">
-    ```json
-    {
-      "error": "Invalid credentials.",
+      "error": "Email or password is incorrect.",
       "code": "auth/invalid-credentials"
     }
     ```
-    `403` when the user exists but has no password set (e.g. an OAuth-only account).
-
-    The **same code also arrives as `400`** for a malformed request body — a missing or non-string `email` or `password`. Sign-in is the one auth route whose body validation reports `auth/invalid-credentials` rather than `auth/invalid-body`, so this code has two statuses. Branch on the status as well as the code if you need to tell "fix your request" from "these credentials will never work".
-
+    The same answer for an email with no account, an account with no password (e.g. one created through OAuth), and a wrong password, so sign-in never reveals whether an email has an account. To offer "create an account" or "sign in with Google" after a failure, show those options alongside the error rather than choosing between them.
+  </Accordion>
+  <Accordion title="Malformed Body — 400">
     ```json
     {
       "error": "...",
       "code": "auth/invalid-credentials"
     }
     ```
-  </Accordion>
-  <Accordion title="Wrong Password — 401">
-    ```json
-    {
-      "error": "Incorrect password.",
-      "code": "auth/wrong-password"
-    }
-    ```
+    A missing or non-string `email` or `password`. Sign-in is the one auth route whose body validation reports `auth/invalid-credentials` rather than `auth/invalid-body`, so this code has two statuses: branch on the status to tell "fix your request" (`400`) from "these credentials are wrong" (`401`).
   </Accordion>
   <Accordion title="Server Error — 500">
     ```json

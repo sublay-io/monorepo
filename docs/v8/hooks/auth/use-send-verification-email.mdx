@@ -100,7 +100,7 @@ The returned function requires a props object — `mode` is always required, and
 </ParamField>
 
 <ParamField path="redirectUrl" type="string">
-  URL to redirect to after link verification. Only valid with `mode: "link"`. Receives `?verified=true` or `?verified=false&error=...` as query params.
+  URL to redirect to after link verification. Only valid with `mode: "link"`. On success it receives `verified=true` in its query string; an invalid or expired link shows Sublay's hosted error page instead.
 </ParamField>
 
 <Tip>

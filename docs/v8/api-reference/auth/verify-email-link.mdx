@@ -22,7 +22,7 @@ This endpoint is called automatically by the browser — you do not call it dire
 | Invalid / expired token | Render hosted error page | Render hosted error page |
 | Server error | Render hosted error page | Render hosted error page |
 
-The destination is the `redirectUrl` you passed to [Send Verification Email](/v8/api-reference/auth/send-verification-email), stored with the token when the email was sent. The link itself carries no destination, so a link can only ever lead to the URL your app chose. A failed verification always shows the hosted page, never a redirect.
+The destination is the `redirectUrl` you passed to [Send Verification Email](/v8/api-reference/auth/send-verification-email), stored with the token when the email was sent. The link itself carries no destination, so it can't be edited to send someone elsewhere. A failed verification always shows the hosted page, never a redirect.
 
 ## See Also
 

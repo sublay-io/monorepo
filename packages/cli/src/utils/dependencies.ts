@@ -26,14 +26,17 @@ const LOCK_FILES: [string, PackageManager][] = [
 /**
  * The package manager a project uses: the `packageManager` field of the
  * nearest package.json that has one, or the nearest lock file. Both are looked
- * for from `startDir` up, so a package inside a workspace finds the
- * workspace's lock file at its root. npm when there's neither.
+ * for from `startDir` up, in folders that have a package.json, so a package
+ * inside a workspace finds the workspace's lock file at its root. npm when
+ * there's neither.
  */
 export async function detectPackageManager(startDir: string = process.cwd()): Promise<PackageManager> {
   let dir = path.resolve(startDir);
 
   while (true) {
     const packageJsonPath = path.join(dir, 'package.json');
+    // Only a folder that is a package counts (a workspace root always is), so
+    // a stray lock file in a home folder doesn't.
     if (await fs.pathExists(packageJsonPath)) {
       try {
         const field = (await fs.readJson(packageJsonPath)).packageManager;
@@ -44,11 +47,11 @@ export async function detectPackageManager(startDir: string = process.cwd()): Pr
       } catch {
         // An unreadable package.json says nothing about the package manager.
       }
-    }
 
-    for (const [lockFile, pm] of LOCK_FILES) {
-      if (await fs.pathExists(path.join(dir, lockFile))) {
-        return pm;
+      for (const [lockFile, pm] of LOCK_FILES) {
+        if (await fs.pathExists(path.join(dir, lockFile))) {
+          return pm;
+        }
       }
     }
 
@@ -69,10 +72,17 @@ export interface InstallPlan {
  * Expo projects go through `npx expo install`, which picks the version of each
  * package that matches the project's Expo SDK, so third-party packages are
  * passed by name only; `@sublay/*` keep their ranges, which Expo doesn't pin.
- * Installing Reanimated there also installs `react-native-worklets`, the
- * package Reanimated 4 needs alongside it, unless the project already has it.
+ * Installing Reanimated there on SDK 54 or later (which pairs it with
+ * Reanimated 4) also installs `react-native-worklets`, the package Reanimated
+ * 4 needs alongside it, unless the project already has it.
  * Everything else uses the package manager's own command.
  */
+/** The Expo SDK a project's `expo` range starts at (0 when unknown). */
+export function expoSdkMajor(range: unknown): number {
+  if (typeof range !== 'string' || !semver.validRange(range)) return 0;
+  return semver.minVersion(range)?.major ?? 0;
+}
+
 export function planInstall(
   specs: string[],
   options: {
@@ -86,6 +96,7 @@ export function planInstall(
       spec.startsWith('@sublay/') ? spec : parseDependencyName(spec)
     );
     if (
+      expoSdkMajor(options.declared?.expo) >= 54 &&
       packages.includes('react-native-reanimated') &&
       !packages.includes('react-native-worklets') &&
       !options.declared?.['react-native-worklets']
@@ -102,12 +113,13 @@ export function planInstall(
 }
 
 /**
- * A plan as a command to paste into a shell: arguments with characters the
- * shell would act on (`>=3.16.0` would redirect) are quoted.
+ * A plan as a command to paste into a shell: arguments with characters a
+ * shell may act on are quoted (`>=` redirects; `^` is cmd.exe's escape
+ * character and a zsh glob operator).
  */
 export function formatCommand(plan: InstallPlan): string {
   return [plan.command, ...plan.args]
-    .map((arg) => (/^[\w@./:^~=-]+$/.test(arg) ? arg : `"${arg}"`))
+    .map((arg) => (/^[\w@./:=-]+$/.test(arg) ? arg : `"${arg}"`))
     .join(' ');
 }
 
@@ -124,6 +136,7 @@ async function installDependencies(plan: InstallPlan) {
   } catch (error) {
     console.error(chalk.red('\n❌ Failed to install dependencies'));
     console.error(error);
+    console.log(chalk.dim(`\nYou can install them yourself with:\n  ${formatCommand(plan)}\n`));
   }
 }
 
@@ -272,14 +285,18 @@ export function findDependencyStatus(
  * Check and optionally install component-specific dependencies
  * @param dependencies Array of dependencies in format "package@version"
  * @param platform The project's platform (sublay.json): Expo installs through `npx expo install`
+ * @returns The names of the packages the project didn't have
  */
-export async function checkComponentDependencies(dependencies: string[], platform?: string) {
+export async function checkComponentDependencies(
+  dependencies: string[],
+  platform?: string
+): Promise<string[]> {
   try {
     const packageJsonPath = path.join(process.cwd(), 'package.json');
 
     if (!(await fs.pathExists(packageJsonPath))) {
       console.log(chalk.yellow('\n⚠️  No package.json found'));
-      return;
+      return [];
     }
 
     const packageJson = await fs.readJson(packageJsonPath);
@@ -292,7 +309,7 @@ export async function checkComponentDependencies(dependencies: string[], platfor
 
     if (missing.length === 0 && upgrades.length === 0) {
       console.log(chalk.green('\n✅ All required dependencies are installed'));
-      return;
+      return [];
     }
 
     if (missing.length > 0) {
@@ -335,7 +352,9 @@ export async function checkComponentDependencies(dependencies: string[], platfor
       console.log(chalk.dim('\nYou can install them later with:'));
       console.log(chalk.dim(`  ${formatCommand(plan)}\n`));
     }
+    return missing.map(parseDependencyName);
   } catch (error) {
     console.error(chalk.red('\n❌ Error checking dependencies:'), error);
+    return [];
   }
 }

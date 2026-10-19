@@ -5,6 +5,7 @@ import path from "path";
 
 import {
   detectPackageManager,
+  expoSdkMajor,
   findDependencyStatus,
   formatCommand,
   planInstall,
@@ -263,17 +264,28 @@ describe("detectPackageManager", () => {
     ] as const) {
       const dir = await tempDir();
       await fs.writeFile(path.join(dir, lockFile), "");
+      await fs.writeJson(path.join(dir, "package.json"), { name: "app" });
       expect(await detectPackageManager(dir)).toBe(pm);
     }
   });
 
   it("finds a workspace's lock file above the package", async () => {
     const root = await tempDir();
+    await fs.writeJson(path.join(root, "package.json"), { name: "root", private: true });
     await fs.writeFile(path.join(root, "pnpm-lock.yaml"), "");
     const app = path.join(root, "apps", "mobile");
     await fs.ensureDir(app);
     await fs.writeJson(path.join(app, "package.json"), { name: "mobile" });
     expect(await detectPackageManager(app)).toBe("pnpm");
+  });
+
+  it("ignores a lock file above the project in a folder that isn't a package", async () => {
+    const home = await tempDir();
+    await fs.writeFile(path.join(home, "yarn.lock"), "");
+    const app = path.join(home, "app");
+    await fs.ensureDir(app);
+    await fs.writeJson(path.join(app, "package.json"), { name: "app" });
+    expect(await detectPackageManager(app)).toBe("npm");
   });
 
   it("prefers the packageManager field over lock files", async () => {
@@ -316,8 +328,14 @@ describe("planInstall", () => {
     });
   });
 
-  it("installs react-native-worklets with Reanimated on Expo", () => {
-    expect(planInstall(specs, { platform: "expo", packageManager: "npm" }).args).toEqual([
+  it("installs react-native-worklets with Reanimated on Expo SDK 54 and later", () => {
+    expect(
+      planInstall(specs, {
+        platform: "expo",
+        packageManager: "npm",
+        declared: { expo: "~54.0.0" },
+      }).args
+    ).toEqual([
       "expo",
       "install",
       "react-native-reanimated",
@@ -326,12 +344,20 @@ describe("planInstall", () => {
     ]);
   });
 
+  it("leaves react-native-worklets out before SDK 54 (Reanimated 3)", () => {
+    for (const expo of ["~53.0.0", undefined]) {
+      expect(
+        planInstall(specs, { platform: "expo", packageManager: "npm", declared: { expo } }).args
+      ).not.toContain("react-native-worklets");
+    }
+  });
+
   it("leaves react-native-worklets out when the project already has it", () => {
     expect(
       planInstall(specs, {
         platform: "expo",
         packageManager: "npm",
-        declared: { "react-native-worklets": "0.10.1" },
+        declared: { expo: "^57.0.0", "react-native-worklets": "0.10.1" },
       }).args
     ).not.toContain("react-native-worklets");
   });
@@ -344,12 +370,27 @@ describe("planInstall", () => {
 });
 
 describe("formatCommand", () => {
-  it("quotes arguments a shell would act on", () => {
+  it("quotes arguments a shell may act on, and leaves plain names alone", () => {
+    expect(formatCommand({ command: "npx", args: ["expo", "install", "@gorhom/bottom-sheet"] })).toBe(
+      "npx expo install @gorhom/bottom-sheet"
+    );
     expect(
       formatCommand({
         command: "npm",
         args: ["install", "react-native-reanimated@>=3.16.0", "@sublay/react-js@^8.0.0-beta.0"],
       })
-    ).toBe('npm install "react-native-reanimated@>=3.16.0" @sublay/react-js@^8.0.0-beta.0');
+    ).toBe('npm install "react-native-reanimated@>=3.16.0" "@sublay/react-js@^8.0.0-beta.0"');
+  });
+});
+
+describe("expoSdkMajor", () => {
+  it("reads the SDK a range starts at", () => {
+    expect(expoSdkMajor("~54.0.12")).toBe(54);
+    expect(expoSdkMajor("^57.0.0")).toBe(57);
+  });
+
+  it("gives 0 when the project has no usable expo range", () => {
+    expect(expoSdkMajor(undefined)).toBe(0);
+    expect(expoSdkMajor("latest")).toBe(0);
   });
 });

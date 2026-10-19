@@ -209,6 +209,31 @@ async function readAll(dir: string): Promise<string> {
 
 const local = { SUBLAY_REGISTRY_LOCAL_PATH: fixtureRegistry };
 
+describe("sublay add — usage example", () => {
+  it("prints the manifest's usage, with the install path, instead of the generic import", async () => {
+    // A copy of the fixture registry whose widget carries a usage example
+    const registry = path.join(workDir, "registry-copy");
+    await fs.copy(fixtureRegistry, registry);
+    const manifestPath = path.join(registry, "react", "widget", "styled", "registry.json");
+    const manifest = await fs.readJson(manifestPath);
+    manifest.usage = ['import { Widget, WidgetPart } from "{importPath}";', "", "<Widget><WidgetPart /></Widget>"];
+    await fs.writeJson(manifestPath, manifest);
+    const project = path.join(workDir, "project");
+    await fs.ensureDir(project);
+    await writeProject(project);
+
+    const result = await runCli(["add", "widget"], project, { SUBLAY_REGISTRY_LOCAL_PATH: registry });
+
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain(
+      'import { Widget, WidgetPart } from "./src/components/widget";'
+    );
+    expect(result.stdout).toContain("<Widget><WidgetPart /></Widget>");
+    expect(result.stdout).not.toContain("{importPath}");
+    expect(result.stdout).not.toContain("import { Widget } from");
+  });
+});
+
 describe("sublay add — shared pieces", () => {
   const installed = () => path.join(workDir, "src", "components", "widget");
 
@@ -264,7 +289,7 @@ describe("sublay add — shared pieces", () => {
     expect(result.code).toBe(0);
     // The component asks for moment@^2.30.0 and from-now for moment@^2.
     expect(result.stdout).toContain(
-      "npm install @sublay/react-js@^7.0.0 moment@^2.30.0 @giphy/js-fetch-api@^5.7.0\n"
+      'npm install "@sublay/react-js@^7.0.0" "moment@^2.30.0" "@giphy/js-fetch-api@^5.7.0"\n'
     );
     expect(result.stdout).not.toContain("moment@^2 ");
     // A piece that is not installed contributes nothing.
@@ -344,7 +369,7 @@ describe("sublay add — shared pieces", () => {
     expect(result.stdout).toContain("Dependencies that need an upgrade:");
     expect(result.stdout).toContain("@sublay/react-js@^7.0.0 (your project has ^6.4.0)");
     expect(result.stdout).toContain(
-      "npm install @giphy/js-fetch-api@^5.7.0 @sublay/react-js@^7.0.0\n"
+      'npm install "@giphy/js-fetch-api@^5.7.0" "@sublay/react-js@^7.0.0"\n'
     );
   });
 

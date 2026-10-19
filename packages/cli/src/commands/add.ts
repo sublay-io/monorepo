@@ -270,7 +270,7 @@ export async function add(componentName: string, options: AddOptions = {}) {
     }
 
     // Check dependencies: the component's own plus what its shared pieces need
-    await checkComponentDependencies(dependencies, config.platform);
+    const missingPackages = await checkComponentDependencies(dependencies, config.platform);
 
     // Show usage example
     const componentInfo = getComponentInfo(registry);
@@ -299,7 +299,7 @@ export async function add(componentName: string, options: AddOptions = {}) {
     }
 
     // Some dependencies need app-level wiring the installer cannot do for you.
-    printAppSetupNotes(dependencies, config.platform);
+    printAppSetupNotes(dependencies, config.platform, missingPackages);
 
     console.log();
   } catch (error) {
@@ -541,13 +541,19 @@ function isValidConfig(value: unknown): value is SublayConfig {
 /**
  * Print notes for dependencies that require app-level setup the CLI can't perform.
  */
-function printAppSetupNotes(dependencies: string[], platform: SublayConfig["platform"]): void {
+export function printAppSetupNotes(
+  dependencies: string[],
+  platform: SublayConfig["platform"],
+  missingPackages: string[] = []
+): void {
   const deps = dependencies.map((dep) => parseDependencyName(dep).toLowerCase());
   const usesNativeWind = deps.includes('nativewind');
   const usesBottomSheet = deps.includes('@gorhom/bottom-sheet');
-  // Expo installs Reanimated's worklets package with it (see dependencies.ts);
-  // elsewhere the package manager may not, and the app crashes at launch.
-  const needsWorkletsNote = platform === 'react-native' && deps.includes('react-native-reanimated');
+  // When Reanimated is being added: Expo installs the worklets package with it
+  // (see dependencies.ts); elsewhere the package manager may not, and on
+  // Reanimated 4 the app then crashes at launch.
+  const needsWorkletsNote =
+    platform === 'react-native' && missingPackages.includes('react-native-reanimated');
 
   if (!usesNativeWind && !usesBottomSheet && !needsWorkletsNote) {
     return;
@@ -586,7 +592,7 @@ function printAppSetupNotes(dependencies: string[], platform: SublayConfig["plat
 
   if (needsWorkletsNote) {
     console.log(
-      chalk.yellow('  • Reanimated 4 also needs react-native-worklets.')
+      chalk.yellow('  • Reanimated 4 and later also need react-native-worklets.')
     );
     console.log(
       chalk.dim(

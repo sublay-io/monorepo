@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import path from "path";
 
-import { formatUsage, getTargetPath, resolveFrameworkFile, resolveLanguageFile } from "./add";
+import { formatUsage, getTargetPath, printAppSetupNotes, resolveFrameworkFile, resolveLanguageFile } from "./add";
 import type { SublayConfig } from "./init";
 
 const config: SublayConfig = {
@@ -148,5 +148,35 @@ describe("formatUsage", () => {
       "",
       "<A><B /></A>",
     ]);
+  });
+});
+
+describe("printAppSetupNotes", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+  const output = (...args: Parameters<typeof printAppSetupNotes>) => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    printAppSetupNotes(...args);
+    return log.mock.calls.map((call) => String(call[0])).join("\n");
+  };
+
+  it("links NativeWind's install guide for components that use it", () => {
+    expect(output(["nativewind@^4.0.0"], "expo")).toContain(
+      "https://www.nativewind.dev/docs/getting-started/installation"
+    );
+  });
+
+  it("tells bare React Native about react-native-worklets when Reanimated was missing", () => {
+    expect(
+      output(["react-native-reanimated@>=3.16.0"], "react-native", ["react-native-reanimated"])
+    ).toContain("react-native-worklets");
+  });
+
+  it("says nothing about worklets when Reanimated was already there, or on Expo", () => {
+    expect(output(["react-native-reanimated@>=3.16.0"], "react-native", [])).toBe("");
+    expect(
+      output(["react-native-reanimated@>=3.16.0"], "expo", ["react-native-reanimated"])
+    ).toBe("");
   });
 });

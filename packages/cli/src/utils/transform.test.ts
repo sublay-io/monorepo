@@ -11,7 +11,6 @@ function makeConfig(
     style: "styled",
     typescript: true,
     paths: { components: "src/components" },
-    aliases: { "@/components": "./src/components" },
   };
 }
 

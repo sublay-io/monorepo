@@ -35,6 +35,13 @@ export interface Registry {
    * listed gets utils/env.ts as it is.
    */
   frameworks?: Record<string, string>;
+  /**
+   * How to use the component, printed after `add` in place of the generic
+   * import line: lines of example code. `{importPath}` in them is replaced
+   * with the path the component was installed at, relative to the project.
+   * Absent: `add` prints an import of `exports.mainComponent`.
+   */
+  usage?: string[];
   registryUrl: string;
   exports: {
     mainComponent: string;

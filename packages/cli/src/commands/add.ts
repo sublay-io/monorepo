@@ -24,6 +24,7 @@ import { findSharedAliasImports, transformImports } from "../utils/transform.js"
 import {
   checkComponentDependencies,
   mergeDependencies,
+  parseDependencyName,
 } from "../utils/dependencies.js";
 import { stripTypes, convertFileExtension } from "../utils/strip-types.js";
 import { detectFramework, Framework } from "../utils/detect.js";
@@ -269,31 +270,36 @@ export async function add(componentName: string, options: AddOptions = {}) {
     }
 
     // Check dependencies: the component's own plus what its shared pieces need
-    await checkComponentDependencies(dependencies);
+    const missingPackages = await checkComponentDependencies(dependencies, config.platform);
 
     // Show usage example
     const componentInfo = getComponentInfo(registry);
-    const relativeImportPath = path.relative(
-      process.cwd(),
-      path.join(config.paths.components, componentName)
-    );
+    const importPath = `./${path
+      .relative(process.cwd(), path.join(config.paths.components, componentName))
+      .split(path.sep)
+      .join("/")}`;
     console.log(chalk.bold("\n📖 Usage:"));
-    console.log(
-      chalk.dim(
-        `  import { ${componentInfo.mainComponent} } from './${relativeImportPath}';`
-      )
-    );
-    if (componentInfo.typeExport) {
+    if (registry.usage?.length) {
+      // The component's own example, with the path it was installed at
+      for (const line of formatUsage(registry.usage, importPath)) {
+        console.log(chalk.dim(`  ${line}`));
+      }
+    } else {
+      console.log(
+        chalk.dim(`  import { ${componentInfo.mainComponent} } from '${importPath}';`)
+      );
+    }
+    if (!registry.usage?.length && componentInfo.typeExport) {
       console.log(chalk.dim(`  // With types:`));
       console.log(
         chalk.dim(
-          `  import { ${componentInfo.mainComponent}, type ${componentInfo.typeExport} } from './${relativeImportPath}';`
+          `  import { ${componentInfo.mainComponent}, type ${componentInfo.typeExport} } from '${importPath}';`
         )
       );
     }
 
     // Some dependencies need app-level wiring the installer cannot do for you.
-    printAppSetupNotes(dependencies);
+    printAppSetupNotes(dependencies, config.platform, missingPackages);
 
     console.log();
   } catch (error) {
@@ -529,26 +535,27 @@ function isValidConfig(value: unknown): value is SublayConfig {
     return false;
   }
 
-  const aliases = config.aliases;
-  if (typeof aliases !== "object" || aliases === null) {
-    return false;
-  }
-  if (typeof (aliases as Record<string, unknown>)["@/components"] !== "string") {
-    return false;
-  }
-
   return true;
 }
 
 /**
  * Print notes for dependencies that require app-level setup the CLI can't perform.
  */
-function printAppSetupNotes(dependencies: string[]): void {
-  const deps = dependencies.map((dep) => dep.toLowerCase());
-  const usesNativeWind = deps.some((dep) => dep.includes('nativewind'));
-  const usesBottomSheet = deps.some((dep) => dep.includes('@gorhom/bottom-sheet'));
+export function printAppSetupNotes(
+  dependencies: string[],
+  platform: SublayConfig["platform"],
+  missingPackages: string[] = []
+): void {
+  const deps = dependencies.map((dep) => parseDependencyName(dep).toLowerCase());
+  const usesNativeWind = deps.includes('nativewind');
+  const usesBottomSheet = deps.includes('@gorhom/bottom-sheet');
+  // When Reanimated is being added: Expo installs the worklets package with it
+  // (see dependencies.ts); elsewhere the package manager may not, and on
+  // Reanimated 4 the app then crashes at launch.
+  const needsWorkletsNote =
+    platform === 'react-native' && missingPackages.includes('react-native-reanimated');
 
-  if (!usesNativeWind && !usesBottomSheet) {
+  if (!usesNativeWind && !usesBottomSheet && !needsWorkletsNote) {
     return;
   }
 
@@ -560,11 +567,14 @@ function printAppSetupNotes(dependencies: string[]): void {
     );
     console.log(
       chalk.dim(
-        '    Wire up babel.config.js, metro.config.js, and add this component'
+        '    Set it up (Tailwind config, global.css, babel.config.js, metro.config.js)'
       )
     );
     console.log(
-      chalk.dim("    directory to your Tailwind config's `content` globs.")
+      chalk.dim("    and add this component's directory to your Tailwind `content`:")
+    );
+    console.log(
+      chalk.dim('    https://www.nativewind.dev/docs/getting-started/installation')
     );
   }
 
@@ -578,6 +588,22 @@ function printAppSetupNotes(dependencies: string[]): void {
       )
     );
     console.log(chalk.dim("    from 'react-native-gesture-handler'."));
+  }
+
+  if (needsWorkletsNote) {
+    console.log(
+      chalk.yellow('  • Reanimated 4 and later also need react-native-worklets.')
+    );
+    console.log(
+      chalk.dim(
+        "    If your package manager didn't add it, install the version Reanimated's"
+      )
+    );
+    console.log(
+      chalk.dim(
+        '    guide names: https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/getting-started/'
+      )
+    );
   }
 
   console.log(chalk.dim('\n  Setup guides: https://docs.sublay.io'));
@@ -642,6 +668,14 @@ export * from './components/${componentInfo.mainFile}';
 
   // Write index file
   await fs.writeFile(indexPath, indexContent, "utf-8");
+}
+
+/**
+ * A manifest's `usage` lines, with `{importPath}` replaced by the path the
+ * component was installed at.
+ */
+export function formatUsage(usage: string[], importPath: string): string[] {
+  return usage.map((line) => line.split("{importPath}").join(importPath));
 }
 
 interface ComponentInfo {

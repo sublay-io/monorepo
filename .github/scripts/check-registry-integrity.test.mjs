@@ -464,3 +464,22 @@ test('fails on frameworks that is not an object', () => {
   registry['react/widget/styled/registry.json'].frameworks = ['next'];
   assertFails(check(registry), /"frameworks" must be an object/);
 });
+
+test('passes on a component with a usage example', () => {
+  const registry = validRegistry();
+  registry['react/widget/styled/registry.json'].usage = [
+    'import { Widget } from "{importPath}";',
+    '',
+    '<Widget />',
+  ];
+  const result = check(registry);
+  assert.equal(result.code, 0, result.output);
+});
+
+test('fails on a usage that is not a list of strings', () => {
+  for (const usage of ['<Widget />', [], ['<Widget />', 3]]) {
+    const registry = validRegistry();
+    registry['react/widget/styled/registry.json'].usage = usage;
+    assertFails(check(registry), /"usage" must be a non-empty array of strings/);
+  }
+});

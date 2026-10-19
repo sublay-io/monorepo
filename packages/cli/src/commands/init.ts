@@ -11,8 +11,20 @@ export interface SublayConfig {
   paths: {
     components: string;
   };
-  aliases: {
-    '@/components': string;
+}
+
+/** The `sublay.json` `init` writes, from the answers to its prompts. */
+export function buildConfig(
+  answers: { platform: SublayConfig['platform']; style?: SublayConfig['style']; componentsPath?: string },
+  typescript: boolean
+): SublayConfig {
+  return {
+    platform: answers.platform,
+    style: answers.style || 'styled',
+    typescript,
+    paths: {
+      components: answers.componentsPath || 'src/components',
+    },
   };
 }
 
@@ -85,19 +97,7 @@ export async function init() {
   }
 
   // Create configuration
-  const componentsPath = answers.componentsPath || 'src/components';
-
-  const config: SublayConfig = {
-    platform: answers.platform,
-    style: answers.style || 'styled',
-    typescript: hasTypeScript,
-    paths: {
-      components: componentsPath,
-    },
-    aliases: {
-      '@/components': `./${componentsPath}`,
-    },
-  };
+  const config = buildConfig(answers, hasTypeScript);
 
   // Write configuration file. Warn (but never block) when an existing config —
   // the one file every future `add` reads — is about to be replaced, matching

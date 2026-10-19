@@ -5,7 +5,7 @@ description: "Update an existing comment's content"
 auth: "bearer"
 ---
 
-Updates the content of an existing comment. Only the original author or a master client may perform this operation.
+Updates the content of an existing comment. Only the original author or a service key may perform this operation.
 
 ## Path Parameters
 
@@ -84,5 +84,5 @@ Returns the updated comment object.
 
 ## Notes
 
-- Only the author of the comment or a master client can update a comment.
+- Only the author of the comment or a service key can update a comment.
 - If the comment doesn't exist or the user isn't authorized, appropriate error responses are returned.

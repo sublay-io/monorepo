@@ -7,7 +7,7 @@ description: "Create a custom table in your project's schema"
 Creates a new custom table.
 
 <Warning>
-  **Service or master key required.** Table management is not reachable with an end-user token, which is why the JS SDK and the React hook are row-only.
+  **Service key required.** Table management is not reachable with an end-user token, which is why the JS SDK and the React hook are row-only.
 </Warning>
 
 <Note>
@@ -105,7 +105,7 @@ Returns `201 Created`.
   <Accordion title="Elevated Auth Required — 403">
     ```json
     {
-      "error": "Service or master key required.",
+      "error": "Service key required.",
       "code": "auth/elevated-auth-required"
     }
     ```

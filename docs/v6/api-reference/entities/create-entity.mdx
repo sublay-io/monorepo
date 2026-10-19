@@ -160,6 +160,6 @@ Creates a new entity. Can be used with or without authentication. When authentic
 
 ## Notes
 
-- If `userId` is provided, it must match the logged-in user unless the request is from a master key.
+- If `userId` is provided, it must match the logged-in user unless the request uses a service key.
 - Mentions will trigger a notification if the mentioned user is not the creator.
 - User reputation is updated if an authenticated user creates the entity.

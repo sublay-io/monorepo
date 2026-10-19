@@ -25,7 +25,7 @@ Creates a new entity in your project. Supports optional file uploads via `multip
 </ParamField>
 
 <ParamField body="userId" type="string">
-  Attribute the entity to a specific user. Must match the authenticated user ID unless the request uses a service or master key.
+  Attribute the entity to a specific user. Must match the authenticated user ID unless the request uses a service key.
 </ParamField>
 
 <ParamField body="title" type="string">
@@ -49,7 +49,7 @@ Creates a new entity in your project. Supports optional file uploads via `multip
   - `{ type: "user", id: string, username: string, foreignId?: string }`
   - `{ type: "space", id: string, slug: string }`
 
-  Each mentioned user receives one in-app notification, however many times they are mentioned. A space mention sends no notification, and an author mentioning themselves is not notified. When a service or master key creates the entity on a user's behalf, that user is the notification's initiator. An entity without an author sends no mention notifications.
+  Each mentioned user receives one in-app notification, however many times they are mentioned. A space mention sends no notification, and an author mentioning themselves is not notified. When a service key creates the entity on a user's behalf, that user is the notification's initiator. An entity without an author sends no mention notifications.
 </ParamField>
 
 <ParamField body="location" type="object">
@@ -77,11 +77,11 @@ Creates a new entity in your project. Supports optional file uploads via `multip
 </ParamField>
 
 <ParamField body="createdAt" type="string">
-  ISO 8601 datetime to backfill a creation timestamp. **Service or master key only.**
+  ISO 8601 datetime to backfill a creation timestamp. **Service key only.**
 </ParamField>
 
 <ParamField body="updatedAt" type="string">
-  ISO 8601 datetime for `updatedAt`. Requires `createdAt` to also be set. Must be ≥ `createdAt`. **Service or master key only.**
+  ISO 8601 datetime for `updatedAt`. Requires `createdAt` to also be set. Must be ≥ `createdAt`. **Service key only.**
 </ParamField>
 
 ### File Uploads (multipart/form-data)

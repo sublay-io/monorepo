@@ -160,7 +160,7 @@ export interface WorkspaceRosterReason {
   // them. Only a SEALED node (`inheritsFromParent: false`) blocks the descent,
   // and there your standing on the parent is genuinely worth nothing.
   //
-  // "The caller" is the ACTING USER: a service/master key that passes
+  // "The caller" is the ACTING USER: a service key that passes
   // `actingUserId` is fenced exactly as that user would be, not as a key. Only
   // a key naming nobody sees every field on every entry.
   rank?: number;
@@ -237,7 +237,7 @@ export interface WorkspaceMemberStanding {
   // `edit-member-access` or `edit-member-profile`), is an owner/ancestor-owner,
   // or is asking about THEMSELVES — a caller always sees their own access.
   //
-  // "The caller" is the ACTING USER: a service/master key that passes
+  // "The caller" is the ACTING USER: a service key that passes
   // `actingUserId` is fenced exactly as that user would be, not as a key.
   capabilities?: string[];
   permissions?: string[];

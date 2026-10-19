@@ -8,7 +8,7 @@ Registers a push device for the currently authenticated user. Re-registering the
 
 A device can serve several accounts at once. Registrations are unique per `(device, user)` pair, so registering a device that is already registered by a different user (e.g. a shared device, or a second account signed in on the same phone) **adds a second binding** — it does not reassign or replace the first user's registration. Each bound account then receives its own notifications on that device.
 
-Requires end-user authentication (`Authorization: Bearer <accessToken>`). Service and master keys are explicitly rejected — this endpoint has no impersonation path by design (see [Security note](#security-note)).
+Requires end-user authentication (`Authorization: Bearer <accessToken>`). Service keys are explicitly rejected — this endpoint has no impersonation path by design (see [Security note](#security-note)).
 
 Requires the `push` bundle.
 
@@ -70,7 +70,7 @@ Returns `200` with the stored device record on success.
     ```json
     { "error": "Unauthorized", "code": "push-device/unauthorized" }
     ```
-    Returned when a service or master key is used. This endpoint has no
+    Returned when a service key is used. This endpoint has no
     impersonation path by design (see [Security note](#security-note)).
   </Accordion>
   <Accordion title="Invalid Body — 400">

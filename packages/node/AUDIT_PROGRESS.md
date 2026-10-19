@@ -66,7 +66,7 @@ Applied to 9 controllers: `comments/createComment`, `comments/addReaction`, `com
 ### server — Spaces Module Made Service-Key-Compatible
 
 **`requireSpacePermission` middleware** (`server/src/middleware/requireSpacePermission.ts`):
-All three middlewares (`requireSpaceAdmin`, `requireSpaceModerator`, `requireSpaceMember`) now bypass role checks for service/master keys. They still fetch and validate the space (404 handling), set `req.space`, and attach a super-admin `req.spacePermission`.
+All three middlewares (`requireSpaceAdmin`, `requireSpaceModerator`, `requireSpaceMember`) now bypass role checks for service keys. They still fetch and validate the space (404 handling), set `req.space`, and attach a super-admin `req.spacePermission`.
 
 **New validation schemas** (`server/src/validation/spaces/space.schema.ts`):
 - `joinSpaceBodySchema` — optional `userId`

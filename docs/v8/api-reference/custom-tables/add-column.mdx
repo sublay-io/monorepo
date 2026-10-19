@@ -7,7 +7,7 @@ description: "Add a column to an existing custom table"
 Adds one column to a custom table.
 
 <Warning>
-  **Service or master key required.**
+  **Service key required.**
 </Warning>
 
 ## Path Parameters
@@ -73,7 +73,7 @@ Returns `201 Created`.
   <Accordion title="Elevated Auth Required — 403">
     ```json
     {
-      "error": "Service or master key required.",
+      "error": "Service key required.",
       "code": "auth/elevated-auth-required"
     }
     ```

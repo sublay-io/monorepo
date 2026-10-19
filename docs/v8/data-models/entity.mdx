@@ -43,7 +43,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `isSaved` | `boolean` | Whether the current user has saved this entity to a collection. Populated when `include` contains `"saved"`. |
 | `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
 | `isDraft` | `boolean \| null` | Whether this entity is in draft state. |
-| `nsfw` | `boolean` | The entity's **own** NSFW flag. `false` by default. Set on create/update by the owner (or a service/master key), or by a space moderator via the [set-NSFW endpoint](/v8/hooks/spaces/use-set-space-entity-nsfw). See [NSFW flagging](#nsfw-flagging). |
+| `nsfw` | `boolean` | The entity's **own** NSFW flag. `false` by default. Set on create/update by the owner (or a service key), or by a space moderator via the [set-NSFW endpoint](/v8/hooks/spaces/use-set-space-entity-nsfw). See [NSFW flagging](#nsfw-flagging). |
 | `nsfwEffective` | `boolean` | **Computed live, read-only.** `true` when the entity's own `nsfw` is `true` **or** its space is effectively NSFW: `entity.nsfw OR (space?.nsfwEffective ?? false)`. This is the value the `nsfwFilter` query param keys off. See [NSFW flagging](#nsfw-flagging). |
 | `moderationStatus` | `"approved" \| "removed" \| null` | Current space moderation status. |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
@@ -67,7 +67,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 
 An entity carries its own `nsfw` boolean and exposes a live-computed `nsfwEffective`:
 
-- **`nsfw`** — the entity's own flag. It defaults to `false` and is what the owner, a service/master key, or a space moderator toggles.
+- **`nsfw`** — the entity's own flag. It defaults to `false` and is what the owner, a service key, or a space moderator toggles.
 - **`nsfwEffective`** — never stored on the entity. It is computed on **every** read as:
 
   ```

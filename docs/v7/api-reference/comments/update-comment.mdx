@@ -4,7 +4,7 @@ api: "PATCH /v7/:projectId/comments/:commentId"
 description: "Edit a comment's content and/or metadata"
 ---
 
-Updates a comment's content, its metadata, or both. Only the comment's author, or a request with a service or master key, can update a comment. A comment its author deleted can't be edited: the request returns `404 comment/not-found` and nothing is changed.
+Updates a comment's content, its metadata, or both. Only the comment's author, or a request with a service key, can update a comment. A comment its author deleted can't be edited: the request returns `404 comment/not-found` and nothing is changed.
 
 **Authentication required.**
 

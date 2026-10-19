@@ -5,7 +5,7 @@ description: "Create a new comment or reply on an entity"
 auth: "bearer"
 ---
 
-Creates a new comment or reply on a specific entity. Comments can include text, a GIF, mentions, attachments, and metadata. Only authenticated users (or master clients) may create comments.
+Creates a new comment or reply on a specific entity. Comments can include text, a GIF, mentions, attachments, and metadata. Only authenticated users (or service keys) may create comments.
 
 ## Body Parameters
 
@@ -65,7 +65,7 @@ Creates a new comment or reply on a specific entity. Comments can include text, 
 </ParamField>
 
 <ParamField body="userId" type="string">
-  Allowed only for master clients. Posts the comment on behalf of a user.
+  Allowed only for service keys. Posts the comment on behalf of a user.
 </ParamField>
 
 ## Response
@@ -165,7 +165,7 @@ Creates a new comment or reply on a specific entity. Comments can include text, 
 ## Notes
 
 - Either `content` or `gif` must be present.
-- If `userId` is provided, the request must come from a master client.
+- If `userId` is provided, the request must use a service key.
 - Reputation is awarded to the user who posts the comment.
 - Notifications are triggered automatically:
   - To the entity author

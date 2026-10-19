@@ -63,7 +63,7 @@ Visibility is enforced **server-side** on every read — an event you can't see 
 | `"members"` | Active members of the event's `spaceId`. Requires a `spaceId` and the `spaces` bundle. |
 | `"invite"` | Users with an `EventInvite` row for the event. |
 
-In every case, a **host** (a user whose ID is in `hostIds`) can always see the event regardless of visibility, and service/master keys bypass visibility entirely.
+In every case, a **host** (a user whose ID is in `hostIds`) can always see the event regardless of visibility, and service keys bypass visibility entirely.
 
 ## Capacity & RSVP rules
 

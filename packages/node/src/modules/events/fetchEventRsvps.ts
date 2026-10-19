@@ -15,7 +15,7 @@ export interface FetchEventRsvpsProps {
 
 /**
  * Named RSVP (guest) list. Visible to hosts always, to any viewer when the
- * event's `guestListVisible` is true, or to service/master keys; otherwise 403.
+ * event's `guestListVisible` is true, or to service keys; otherwise 403.
  * RSVP counts themselves are public via the event's `rsvpCounts`.
  */
 export async function fetchEventRsvps(

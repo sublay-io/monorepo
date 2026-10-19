@@ -10,7 +10,7 @@ The `workspaces` module is the developer's **authorization-server SDK** for the 
 </Note>
 
 <Note>
-  **This SDK is not required in order to manage workspaces.** All 21 endpoints are equally available to a browser or mobile app through the [`@sublay/core` hooks](/v7/sdk/workspaces/overview) and [`@sublay/js`](/v7/js-sdk/workspaces), acting as the signed-in user and subject to the same ownership / capability / rank rules. What the node SDK adds is the acting-user field `actingUserId` — performing an action **as some other named user** — which only a service/master key may do.
+  **This SDK is not required in order to manage workspaces.** All 21 endpoints are equally available to a browser or mobile app through the [`@sublay/core` hooks](/v7/sdk/workspaces/overview) and [`@sublay/js`](/v7/js-sdk/workspaces), acting as the signed-in user and subject to the same ownership / capability / rank rules. What the node SDK adds is the acting-user field `actingUserId` — performing an action **as some other named user** — which only a service key may do.
 </Note>
 
 <Warning>

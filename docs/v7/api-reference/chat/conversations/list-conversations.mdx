@@ -31,7 +31,7 @@ To fetch a single conversation in this same shape — one that was paginated out
 </ParamField>
 
 <ParamField query="userId" type="string">
-  The acting user whose conversations are listed. **Service/master keys only** — a service key must pass it (there is no implicit session user); an end-user token infers it from the auth token and may not name a different user.
+  The acting user whose conversations are listed. **Service keys only** — a service key must pass it (there is no implicit session user); an end-user token infers it from the auth token and may not name a different user.
 </ParamField>
 
 ## Response

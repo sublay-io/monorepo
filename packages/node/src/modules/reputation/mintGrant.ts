@@ -28,7 +28,7 @@ export type MintGrantProps = MintGrantBaseProps & ReputationGrantTargetFilter;
 /**
  * Mints reputation — creates it from nothing, with no sender.
  *
- * Service/master keys only, which is why there is no counterpart in
+ * Service keys only, which is why there is no counterpart in
  * `@sublay/js`: a user token can never reach this route. There is deliberately
  * no actor field — the grant is written with a null `senderId` and
  * `sourceType: "app"`.

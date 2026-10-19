@@ -11,7 +11,7 @@ export interface FetchWorkspaceMembersProps {
   include?: string;
   // Numbers-only escape hatch — returns per-reason counts + distinct-user total.
   countOnly?: boolean;
-  // Act as a named user (service/master key only). Naming one means being BOUND
+  // Act as a named user (service key only). Naming one means being BOUND
   // by that user — this call resolves and is checked against THEIR authority,
   // exactly as their own token would be. Omit it to act as the app itself
   // (unbounded). A user token may only name itself.

@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/comments/:commentId"
 description: "Delete a comment"
 ---
 
-Deletes a comment. Only the comment's author, or a request with a service or master key, can delete a comment.
+Deletes a comment. Only the comment's author, or a request with a service key, can delete a comment.
 
 **Authentication required.**
 
@@ -18,7 +18,7 @@ All deletes are soft-deletes: the comment's content, gif, mentions, and attachme
 
 ## Blocks
 
-A comment on an entity whose author has blocked the caller is hidden from them, so when the caller isn't the comment's author, the delete is refused with `404 comment/not-found` — the same response as a missing comment. This check runs before the others, so such a caller gets `comment/not-found` rather than `comment/already-deleted` or a `403`. A comment's author can always delete their own comment, and requests made with a service or master key aren't subject to this check. It applies only when the `moderation` bundle is installed.
+A comment on an entity whose author has blocked the caller is hidden from them, so when the caller isn't the comment's author, the delete is refused with `404 comment/not-found` — the same response as a missing comment. This check runs before the others, so such a caller gets `comment/not-found` rather than `comment/already-deleted` or a `403`. A comment's author can always delete their own comment, and requests made with a service key aren't subject to this check. It applies only when the `moderation` bundle is installed.
 
 ## Response
 
@@ -47,7 +47,7 @@ Returns `204 No Content` on success.
     ```
   </Accordion>
   <Accordion title="Forbidden — 403">
-    Returned when the caller isn't the comment's author and isn't using a service or master key.
+    Returned when the caller isn't the comment's author and isn't using a service key.
 
     ```json
     { "error": "You do not have permission to delete this comment.", "code": "comment/not-authorized" }

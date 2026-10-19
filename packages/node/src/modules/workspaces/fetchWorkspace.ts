@@ -7,7 +7,7 @@ export interface FetchWorkspaceProps {
   // member count to the response; omit it and the field is absent. The same
   // flag works on `fetchManyWorkspaces`. An unrecognized flag is ignored.
   include?: string;
-  // Act as a named user (service/master key only). Naming one means being BOUND
+  // Act as a named user (service key only). Naming one means being BOUND
   // by that user — this call resolves and is checked against THEIR authority,
   // exactly as their own token would be. Omit it to act as the app itself
   // (unbounded). A user token may only name itself.

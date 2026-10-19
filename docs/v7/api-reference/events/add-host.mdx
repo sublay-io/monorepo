@@ -4,7 +4,7 @@ api: "POST /v7/:projectId/events/:eventId/hosts"
 description: "Grant a user host privileges on an event (host-only)"
 ---
 
-Adds a user to the event's `hostIds`. **Host-only** — the caller must already be a host (service/master keys bypass this). The operation is idempotent (adding an existing host is a no-op) and takes a row-level lock to serialize concurrent host changes.
+Adds a user to the event's `hostIds`. **Host-only** — the caller must already be a host (service keys bypass this). The operation is idempotent (adding an existing host is a no-op) and takes a row-level lock to serialize concurrent host changes.
 
 There is no requirement that the target be a space member or invitee — any user can be made a host.
 

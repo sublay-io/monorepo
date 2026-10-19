@@ -5,7 +5,7 @@ description: "Delete a comment from the project"
 auth: "bearer"
 ---
 
-Deletes a comment from the project. Only the original author or a master client can delete the comment. Decreases the author's reputation. Recursively updates all replies to mark their parent as deleted (`parentDeletedAt`).
+Deletes a comment from the project. Only the original author or a service key can delete the comment. Decreases the author's reputation. Recursively updates all replies to mark their parent as deleted (`parentDeletedAt`).
 
 ## Path Parameters
 
@@ -64,7 +64,7 @@ Deletes a comment from the project. Only the original author or a master client 
 
 ## Notes
 
-- Only the comment's author or a master client may delete the comment.
+- Only the comment's author or a service key may delete the comment.
 - Upon deletion, the comment author's reputation is reduced.
 - All child replies have their `parentDeletedAt` timestamp updated recursively.
 - Replies are not deleted — they are marked as having a deleted parent.

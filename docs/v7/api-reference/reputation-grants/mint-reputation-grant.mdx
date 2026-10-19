@@ -8,7 +8,7 @@ Mints reputation: it is created from nothing and credited to a user, with no sen
 
 A mint may also be **negative**, which is the only way to take reputation away: a moderation clawback, a decay sweep, or a correction to a mistaken grant. A negative mint may drive a bucket below zero (buckets have no floor).
 
-**Service or master key only.** A user token never reaches this route. Blocks are ignored, suspension is not consulted (there is no acting user), and a `chat-message` target is not membership-checked — the app is trusted.
+**Service key only.** A user token never reaches this route. Blocks are ignored, suspension is not consulted (there is no acting user), and a `chat-message` target is not membership-checked — the app is trusted.
 
 Requires the `reputation` bundle.
 
@@ -61,7 +61,7 @@ A **positive** mint notifies the recipient and, for a `chat-message` target, bro
   </Accordion>
   <Accordion title="Elevated Auth Required — 403">
     ```json
-    { "error": "Service or master key required.", "code": "auth/elevated-auth-required" }
+    { "error": "Service key required.", "code": "auth/elevated-auth-required" }
     ```
   </Accordion>
   <Accordion title="Tables Not Available — 403">

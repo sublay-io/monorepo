@@ -4,7 +4,7 @@ api: "PATCH /v7/:projectId/users/:userId"
 description: "Update a user's profile fields, including avatar and banner images"
 ---
 
-Updates one or more profile fields for the specified user. The requesting user must own the account, or use a service or master token to update any user.
+Updates one or more profile fields for the specified user. The requesting user must own the account, or use a service key to update any user.
 
 Supports direct image uploads for the avatar and banner via `multipart/form-data`. Uploaded images are processed, stored in Supabase, and the old files are automatically cleaned up after a successful update.
 
@@ -15,7 +15,7 @@ Supports direct image uploads for the avatar and banner via `multipart/form-data
 
 ## Authentication
 
-Requires a valid user auth token. The authenticated user must match `:userId`, or the request must carry a service/master token.
+Requires a valid user auth token. The authenticated user must match `:userId`, or the request must carry a service token.
 
 ## Path Parameters
 

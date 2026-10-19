@@ -6,7 +6,7 @@ description: "Transfer reputation from one user's bucket to another user's bucke
 
 Transfers reputation between two users. This is a **debited transfer**: the amount leaves the sender's bucket and lands in the recipient's bucket for the same space. Nothing is created — see [Mint Reputation Grant](/v7/api-reference/reputation-grants/mint-reputation-grant) for that.
 
-Requires authentication. A user token sends from the token's own user. A service or master key may name any sender via `actingUserId`, which is how an app performs a **mediated transfer** — enforcing its own economic rules before letting the transfer through. Mediated transfers skip the project-level user-grant switch and ignore block relationships; they are otherwise identical to a user grant, including the balance check.
+Requires authentication. A user token sends from the token's own user. A service key may name any sender via `actingUserId`, which is how an app performs a **mediated transfer** — enforcing its own economic rules before letting the transfer through. Mediated transfers skip the project-level user-grant switch and ignore block relationships; they are otherwise identical to a user grant, including the balance check.
 
 Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants` must be present in the project's schema).
 
@@ -43,7 +43,7 @@ Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service/master key only. The **sender** — the user reputation is debited from. Spelled `actingUserId` rather than `userId` because this body already names a target user (`recipientId`). A user token may only name itself.
+  Service key only. The **sender** — the user reputation is debited from. Spelled `actingUserId` rather than `userId` because this body already names a target user (`recipientId`). A user token may only name itself.
 </ParamField>
 
 ## Response
@@ -54,9 +54,9 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
 
 ## Gating and blocks
 
-- **Project setting.** The switch is `settings.reputationGrants.allowUserInitiated`, flipped from **Settings → SDK** in the dashboard. Only an explicit `false` closes the endpoint to user tokens — an absent key means grants are allowed — and the stored value survives unrelated settings updates, so it changes only when that key is explicitly sent. When the switch is off a user token is rejected with `403 reputation-grant/user-grants-disabled`; service and master keys still work, so peer transfers remain available when routed through your backend.
-- **Blocks.** If either party has blocked the other, a user grant is rejected in both directions — with the same non-disclosing answer as a missing user. Service and master keys ignore block relationships.
-- **Suspension.** A suspended user cannot send a grant, including on the mediated path — a service key naming a suspended `actingUserId` is rejected too. A master key bypasses the check. A suspended user can always receive a grant.
+- **Project setting.** The switch is `settings.reputationGrants.allowUserInitiated`, flipped from **Settings → SDK** in the dashboard. Only an explicit `false` closes the endpoint to user tokens — an absent key means grants are allowed — and the stored value survives unrelated settings updates, so it changes only when that key is explicitly sent. When the switch is off a user token is rejected with `403 reputation-grant/user-grants-disabled`; service keys still work, so peer transfers remain available when routed through your backend.
+- **Blocks.** If either party has blocked the other, a user grant is rejected in both directions — with the same non-disclosing answer as a missing user. Service keys ignore block relationships.
+- **Suspension.** A suspended user cannot send a grant, including on the mediated path — a service key naming a suspended `actingUserId` is rejected too. A suspended user can always receive a grant.
 
 ## Error Responses
 
@@ -76,7 +76,7 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
     ```json
     { "error": "Missing user ID", "code": "reputation-grant/missing-user-id" }
     ```
-    A service or master key called the endpoint without naming an `actingUserId`.
+    A service key called the endpoint without naming an `actingUserId`.
   </Accordion>
   <Accordion title="User Grants Disabled — 403">
     ```json

@@ -3,7 +3,7 @@ import { Event } from "../../interfaces/Event";
 
 export interface WithdrawRsvpProps {
   eventId: string;
-  /** Act on behalf of a user (service/master key); defaults to the caller. */
+  /** Act on behalf of a user (service key); defaults to the caller. */
   userId?: string;
 }
 

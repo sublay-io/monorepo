@@ -21,7 +21,7 @@ On a **new** block, Sublay retroactively tears down the existing relationship be
 ## Body Parameters
 
 <ParamField body="actingUserId" type="string">
-  The user performing the block (the blocker). Only service/master keys may supply an `actingUserId` other than the caller's own; with a user token the blocker is derived from the token and this field is ignored.
+  The user performing the block (the blocker). Only service keys may supply an `actingUserId` other than the caller's own; with a user token the blocker is derived from the token and this field is ignored.
 </ParamField>
 
 ## Response

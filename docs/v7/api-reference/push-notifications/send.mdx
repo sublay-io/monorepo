@@ -6,7 +6,7 @@ description: "Send a push notification to one or more users across all their reg
 
 Fans a push notification out to every registered device binding belonging to the listed users. The server dispatches to APNs (iOS), FCM (Android), and the Web Push protocol in parallel, using whichever platform credentials are configured for this project.
 
-Requires a service or master key (`Authorization: Bearer <serviceKey>`). End-user tokens are rejected — this endpoint is intended for your backend, not for end users calling it directly.
+Requires a service key (`Authorization: Bearer <serviceKey>`). End-user tokens are rejected — this endpoint is intended for your backend, not for end users calling it directly.
 
 Requires the `push` bundle.
 
@@ -140,11 +140,11 @@ Returns `200` with a `results` map keyed by user ID. Every requested `userId` is
   <Accordion title="Elevated Auth Required — 403">
     ```json
     {
-      "error": "Service or master key required.",
+      "error": "Service key required.",
       "code": "auth/elevated-auth-required"
     }
     ```
-    Returned when called with an end-user access token instead of a service/master key.
+    Returned when called with an end-user access token instead of a service key.
   </Accordion>
   <Accordion title="Bundle Not Installed — 403">
     ```json

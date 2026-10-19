@@ -526,7 +526,7 @@ theme={theme}
                     position: "relative",
                     display: "flex",
                     alignItems: "center",
-                    gap: "4px",
+                    gap: "7px",
                   }}
                 >
                   {/* ⊖ on the line, level with the actions, when replies are

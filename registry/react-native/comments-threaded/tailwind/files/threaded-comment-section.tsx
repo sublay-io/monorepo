@@ -3,8 +3,6 @@
  *
  * A complete threaded comment system with upvotes/downvotes, nested replies, and moderation.
  *
- * Installation: npx @sublay/cli add comments-threaded
- *
  * Three pieces, placed by your screen. The section has no scrolling of its
  * own: put it in your screen's scroll view, so what's above it (the entity)
  * scrolls away with the comments.
@@ -21,46 +19,41 @@
  * comment options, report) over the view it wraps, normally the whole screen.
  * Keyboard handling (KeyboardAvoidingView or your library) is up to the screen.
  *
- * Required dependencies:
- * - @sublay/react-native ^8.0.0-beta.0
- * - react-native-svg ^15 (used by the shared pieces in shared/)
- * - @gorhom/bottom-sheet
- * - nativewind ^4.0.0
- *
  * @see https://docs.sublay.io/v8/components/components/threaded/overview
  *
  * ====================
- * THEME COLOR PALETTE
+ * THEME COLOR PALETTE (light / dark)
  * ====================
  *
  * This component supports light and dark themes via the `theme` prop.
- * Tailwind dark mode classes are used for conditional styling.
+ * Each class is picked from it in code (theme === 'dark' ? … : …): there
+ * are no dark: classes, and no Tailwind dark mode setup is needed.
  *
  * BACKGROUNDS:
- * - bg-white / dark:bg-neutral-800 (main background)
- * - bg-gray-50 / dark:bg-neutral-700 (secondary background, vote buttons)
- * - bg-gray-100 / dark:bg-[#333333] (highlighted comment background)
- * - bg-blue-100 / dark:bg-blue-950 (indentation beside a highlighted comment)
- * - bg-gray-200 / dark:bg-neutral-600 (vote buttons on a highlighted comment)
+ * - bg-white / bg-neutral-800 (main background)
+ * - bg-gray-50 / bg-neutral-700 (secondary background, vote buttons)
+ * - bg-gray-100 / bg-[#333333] (highlighted comment background)
+ * - bg-blue-100 / bg-blue-950 (indentation beside a highlighted comment)
+ * - bg-gray-200 / bg-neutral-600 (vote buttons on a highlighted comment)
  *
  * TEXT:
- * - text-gray-900 / dark:text-neutral-50 (primary text)
- * - text-gray-800 / dark:text-neutral-200 (body text)
- * - text-gray-700 / dark:text-neutral-300 (secondary text)
- * - text-gray-700 / dark:text-white (author names)
- * - text-gray-500 / dark:text-neutral-400 (timestamps, tertiary text)
+ * - text-gray-900 / text-neutral-50 (primary text)
+ * - text-gray-800 / text-neutral-200 (body text)
+ * - text-gray-700 / text-neutral-300 (secondary text)
+ * - text-gray-700 / text-white (author names)
+ * - text-gray-500 / text-neutral-400 (timestamps, tertiary text)
  *
  * BORDERS:
- * - border-gray-200 / dark:border-neutral-600 (primary borders)
- * - border-gray-300 / dark:border-neutral-500 (threading lines)
+ * - border-gray-200 / border-neutral-600 (primary borders)
+ * - border-gray-300 / border-neutral-500 (threading lines)
  *
  * BLUES (links, actions, upvotes):
- * - text-blue-600 / dark:text-blue-400 (primary blue)
- * - bg-blue-500 / dark:bg-blue-400 (active upvote)
+ * - text-blue-600 / text-blue-400 (primary blue)
+ * - bg-blue-500 / bg-blue-400 (active upvote)
  *
  * REDS (downvotes, destructive actions):
- * - text-red-600 / dark:text-red-400 (primary red)
- * - bg-red-500 / dark:bg-red-400 (active downvote)
+ * - text-red-600 / text-red-400 (primary red)
+ * - bg-red-500 / bg-red-400 (active downvote)
  */
 import React, { useContext } from "react";
 import { View } from "react-native";

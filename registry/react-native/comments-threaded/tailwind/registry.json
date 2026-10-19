@@ -231,6 +231,18 @@
   "frameworks": {
     "react-native": "env/react-native.ts"
   },
+  "usage": [
+    "import { ScrollView } from \"react-native\";",
+    "import { ThreadedComments, ThreadedCommentSection, ThreadedCommentInput } from \"{importPath}\";",
+    "",
+    "<ThreadedComments foreignId=\"your-content-id\" createIfNotFound>",
+    "  <ScrollView keyboardShouldPersistTaps=\"handled\">",
+    "    {/* your content */}",
+    "    <ThreadedCommentSection />",
+    "  </ScrollView>",
+    "  <ThreadedCommentInput />",
+    "</ThreadedComments>"
+  ],
   "registryUrl": "https://raw.githubusercontent.com/sublay-io/monorepo/main/registry/react-native/comments-threaded/tailwind",
   "exports": {
     "mainComponent": "ThreadedCommentSection",

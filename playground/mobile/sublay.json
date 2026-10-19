@@ -1,0 +1,8 @@
+{
+  "platform": "expo",
+  "style": "styled",
+  "typescript": true,
+  "paths": {
+    "components": "components/styled"
+  }
+}

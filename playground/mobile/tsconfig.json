@@ -1,0 +1,8 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    // Only this app's own types: not the monorepo's node_modules/@types above it
+    "typeRoots": ["./node_modules/@types"]
+  }
+}

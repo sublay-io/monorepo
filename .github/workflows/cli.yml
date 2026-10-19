@@ -11,18 +11,18 @@
 # watched too, since that check is the only consumer of those scripts and a
 # PR editing one of them would otherwise run no CI at all.
 #
-# playground/ is watched and built here too: it is the cli group's dev
+# playground/web/ is watched and built here too: it is the cli group's dev
 # harness, and since it now declares @sublay/react-js and
 # @sublay/ui-core-react-js as workspace:* dependencies rather than
 # resolving them from npm, a breaking change in either compiles straight
 # into it. `playground build` runs `tsc && vite build`, so that break
 # surfaces here instead of the next time a human opens the harness by hand.
 #
-# This workflow owns playground/ outright: it is the only one that watches
-# it. The other four used to list playground/package.json in their own
+# This workflow owns playground/web/ outright: it is the only one that watches
+# it. The other four used to list playground/package.json (now playground/web/) in their own
 # filters, from before this group took ownership, on the grounds that
 # playground was an ownerless workspace member feeding the single shared
-# pnpm-lock.yaml. Since `playground/**` here already covers that manifest,
+# pnpm-lock.yaml. Since `playground/web/**` here already covers that manifest,
 # those four entries were removed — they only added four irrelevant red
 # checks to any playground manifest edit. registry/package.json is the
 # identical case and was only ever watched here.
@@ -68,7 +68,7 @@
 # registry/package.json declares five @sublay/* devDependencies and its
 # source imports four of them — @sublay/react-js, @sublay/react-native,
 # @sublay/ui-core-react-js, @sublay/ui-core-react-native (@sublay/core is
-# named only in doc comments, never imported). playground/package.json
+# named only in doc comments, never imported). playground/web/package.json
 # declares two and its source imports one, @sublay/react-js.
 # packages/core/** is watched despite nobody importing it directly because
 # react-js/react-native's emitted types reach into core's dist, so it has
@@ -78,7 +78,7 @@
 # deliberate, documented widening of per-group isolation.
 #
 # packages/expo/** is deliberately NOT here. registry/package.json declares
-# @sublay/expo as a devDependency, but nothing in registry/ or playground/
+# @sublay/expo as a devDependency, but nothing in registry/ or playground/web/
 # imports it (grep for `from "@sublay/expo"`: zero hits), so watching and
 # building it bought no coverage — it only meant an expo-only PR ran this
 # whole job for nothing, and a genuinely broken expo build reddened the cli
@@ -122,7 +122,7 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
-      - "playground/**"
+      - "playground/web/**"
       - "tsconfig.json"
       - ".github/scripts/**"
       - ".github/workflows/cli.yml"
@@ -140,7 +140,7 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
-      - "playground/**"
+      - "playground/web/**"
       - "tsconfig.json"
       - ".github/scripts/**"
       - ".github/workflows/cli.yml"
@@ -196,7 +196,7 @@ jobs:
         # one of them alike (the ui-core pair also declares `prepublishOnly`,
         # which install never runs at all, but their `prepare` is what
         # --ignore-scripts is blocking here).
-        # registry/ and playground/ link them through workspace:* and
+        # registry/ and playground/web/ link them through workspace:* and
         # read their dist/ type entries (every one declares
         # "types": "dist/esm/index.d.ts"), so the next two steps cannot
         # compile without them.

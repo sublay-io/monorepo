@@ -1,6 +1,6 @@
 # Playground
 
-A manual Vite harness for eyeballing the registry components (`../registry/react/`) against the locally built `@sublay/*` packages. Not published, not deployed.
+A manual Vite harness for eyeballing the registry components (`../../registry/react/`) against the locally built `@sublay/*` packages. Not published, not deployed.
 
 ## Setup
 

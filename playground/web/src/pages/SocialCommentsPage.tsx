@@ -1,5 +1,5 @@
-import SocialCommentSectionStyled from "../../../registry/react/comments-social/styled/files/social-comment-section";
-import SocialCommentSectionTailwind from "../../../registry/react/comments-social/tailwind/files/social-comment-section";
+import SocialCommentSectionStyled from "../../../../registry/react/comments-social/styled/files/social-comment-section";
+import SocialCommentSectionTailwind from "../../../../registry/react/comments-social/tailwind/files/social-comment-section";
 import CommentsPlayground from "../components/CommentsPlayground";
 
 export default function SocialCommentsPage() {

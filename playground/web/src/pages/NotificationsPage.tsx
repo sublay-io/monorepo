@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Bell } from "lucide-react";
-import NotificationControlStyled from "../../../registry/react/notifications-control/styled/files/notification-control";
-import NotificationControlTailwind from "../../../registry/react/notifications-control/tailwind/files/notification-control";
+import NotificationControlStyled from "../../../../registry/react/notifications-control/styled/files/notification-control";
+import NotificationControlTailwind from "../../../../registry/react/notifications-control/tailwind/files/notification-control";
 
 type StyleVariant = "styled" | "tailwind";
 

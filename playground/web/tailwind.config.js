@@ -4,7 +4,7 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{ts,tsx}",
-    "../registry/react/**/*.{ts,tsx}",
+    "../../registry/react/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {},

@@ -27,7 +27,7 @@ const { data, pagination } = await sublay.search.searchContent({
 </ParamField>
 
 <ParamField body="sourceTypes" type="string[]">
-  Which content types to search: any of `"entity"`, `"comment"`, `"message"`.
+  Which content types to search: any of `"entity"`, `"comment"`, `"message"`. The Node SDK uses a service key, which gets no chat messages, so `"message"` returns nothing.
 </ParamField>
 
 <ParamField body="spaceId" type="string">
@@ -39,7 +39,7 @@ const { data, pagination } = await sublay.search.searchContent({
 </ParamField>
 
 <ParamField body="conversationId" type="string">
-  Scope the search to a specific conversation.
+  Scope the search to a specific conversation. The Node SDK uses a service key, which gets no chat messages, so this returns nothing.
 </ParamField>
 
 <ParamField body="limit" type="number">
@@ -121,7 +121,7 @@ const { answer, sources } = await sublay.search.askContent({
 </ParamField>
 
 <ParamField body="sourceTypes" type="string[]">
-  Which content types to draw from: any of `"entity"`, `"comment"`, `"message"`.
+  Which content types to draw from: any of `"entity"`, `"comment"`, `"message"`. The Node SDK uses a service key, which gets no chat messages, so `"message"` returns nothing.
 </ParamField>
 
 <ParamField body="spaceId" type="string">
@@ -133,7 +133,7 @@ const { answer, sources } = await sublay.search.askContent({
 </ParamField>
 
 <ParamField body="conversationId" type="string">
-  Scope the search to a specific conversation.
+  Scope the search to a specific conversation. The Node SDK uses a service key, which gets no chat messages, so this returns nothing.
 </ParamField>
 
 <ParamField body="limit" type="number">

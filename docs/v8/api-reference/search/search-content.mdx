@@ -10,7 +10,7 @@ Performs vector-similarity search over project content (entities, comments, and 
 
 **Requires a paid plan with semantic search enabled.**
 
-**Authentication required.** Send a user's access token as `Authorization: Bearer <token>` — missing token → `401`, invalid/expired token → `403` (refresh and retry). A service or master key is accepted too; such a request has no signed-in user, so the per-user filtering under [What's left out](#whats-left-out) doesn't apply to it.
+**Authentication required.** Send a user's access token as `Authorization: Bearer <token>` — missing token → `401`, invalid/expired token → `403` (refresh and retry). A service key is accepted too, and searches as the user named in `actingUserId`. A service key that names no user gets no chat messages, and the block filtering under [What's left out](#whats-left-out) doesn't apply to it.
 
 ## Body Parameters
 
@@ -32,6 +32,10 @@ Performs vector-similarity search over project content (entities, comments, and 
 
 <ParamField body="conversationId" type="string">
   Restrict message search to a specific conversation.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Service key only: the user to search as. Results follow that user's access — their chats, their blocks. Without it, a service key gets entities and comments but no chat messages. A user token may only send its own user's id.
 </ParamField>
 
 <ParamField body="limit" type="number" default="20">
@@ -69,7 +73,9 @@ Each result includes:
 
 Comments their author deleted are never returned. Comments a moderator removed are never returned either — to anyone, including the removed comment's author and requests made with a service or master key.
 
-Results are also filtered for the signed-in user (with the `moderation` bundle installed):
+Chat messages come only from conversations the user can read in the chat itself: ones they're an active member of, and, for a conversation they left or were removed or banned from, messages sent before they left. `conversationId` narrows the search; it never widens what the user can read. Messages their author deleted or a moderator removed are never returned. A request with no user (a service key without `actingUserId`) gets no chat messages.
+
+Results are also filtered for the user — the signed-in user, or the `actingUserId` a service key sends (with the `moderation` bundle installed):
 
 - Content by users they are block-edged with, in either direction, is left out.
 - Comments on an entity whose author has blocked them are left out — their own comments there included.
@@ -82,11 +88,17 @@ Results are also filtered for the signed-in user (with the `moderation` bundle i
     The endpoint requires a user token or a service or master key. A missing token returns a bare `401`; an invalid or expired token returns a bare `403` — refresh the access token and retry.
   </Accordion>
   <Accordion title="Invalid Body — 400">
-    Returned when the body fails validation: `query` is missing or empty, `limit` isn't a whole number from `1` to `50`, `sourceTypes` contains a value other than `entity`, `comment` or `message`, `spaceId` or `conversationId` isn't a UUID, or `includeChildSpaces` isn't a boolean.
+    Returned when the body fails validation: `query` is missing or empty, `limit` isn't a whole number from `1` to `50`, `sourceTypes` contains a value other than `entity`, `comment` or `message`, `spaceId`, `conversationId` or `actingUserId` isn't a UUID, or `includeChildSpaces` isn't a boolean.
 
     ```json
     { "error": "limit: Too big: expected number to be <=50", "code": "search/invalid-body" }
     ```
+  </Accordion>
+  <Accordion title="Acting as Another User — 403">
+    ```json
+    { "error": "Unauthorized", "code": "search/unauthorized" }
+    ```
+    Returned when a user token sends an `actingUserId` other than its own user.
   </Accordion>
   <Accordion title="Plan Required — 403">
     ```json

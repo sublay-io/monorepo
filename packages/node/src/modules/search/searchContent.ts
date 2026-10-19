@@ -16,6 +16,11 @@ export interface SearchContentProps extends SpaceReputationContextParams {
   includeChildSpaces?: boolean;
   conversationId?: string;
   limit?: number;
+  /**
+   * The user to search as: results follow that user's access (their chats,
+   * their blocks). Without it, no chat messages are returned.
+   */
+  actingUserId?: string;
 }
 
 export async function searchContent(

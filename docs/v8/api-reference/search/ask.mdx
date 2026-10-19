@@ -10,7 +10,7 @@ Answers a natural language question using content from your project as context. 
 
 **Requires a paid plan with semantic search enabled.**
 
-**Requires an authenticated user.** Send the user's access token as `Authorization: Bearer <token>`. Requests without a valid token are rejected before any work is done — missing token → `401`, invalid/expired token → `403` (refresh the access token and retry).
+**Authentication required.** Send the user's access token as `Authorization: Bearer <token>`. Requests without a valid token are rejected before any work is done — missing token → `401`, invalid/expired token → `403` (refresh the access token and retry). A service key is accepted too, and asks as the user named in `actingUserId`; a service key that names no user gets no chat messages as context.
 
 ## Body Parameters
 
@@ -32,6 +32,10 @@ Answers a natural language question using content from your project as context. 
 
 <ParamField body="conversationId" type="string">
   Restrict message context lookup to a specific conversation.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Service key only: the user to search as. Results follow that user's access — their chats, their blocks. Without it, a service key gets entities and comments but no chat messages. A user token may only send its own user's id.
 </ParamField>
 
 <ParamField body="limit" type="number" default="20">
@@ -67,7 +71,7 @@ data: [{"sourceType": "entity", "similarity": 0.87, "record": {...}}, ...]
 
 Each source object follows the same shape as the [Search Content](/v8/api-reference/search/search-content) response — `sourceType`, `similarity`, and a fully populated `record`. An empty array is sent when no relevant context was found.
 
-The answer is generated only from content the signed-in user can see: content by users they are block-edged with (in either direction), comments on an entity whose author has blocked them, and comments their author deleted, are never used as context or returned as sources.
+The answer is generated only from content the user (the signed-in user, or the `actingUserId` a service key sends) can see: content by users they are block-edged with (in either direction), comments on an entity whose author has blocked them, and comments their author deleted, are never used as context or returned as sources. Chat messages come only from conversations the user can read in the chat itself: ones they're an active member of, and, for a conversation they left or were removed or banned from, messages sent before they left. `conversationId` narrows the search; it never widens what the user can read. Messages their author deleted or a moderator removed are never returned.
 
 **`done`** — signals the stream is finished:
 ```
@@ -83,7 +87,13 @@ data: {}
 
 <AccordionGroup>
   <Accordion title="Authentication Required — 401 / 403">
-    The endpoint requires an authenticated user. A missing token returns a bare `401`; an invalid or expired token returns a bare `403` — refresh the access token and retry. These are returned before streaming starts.
+    The endpoint requires a user token or a service or master key. A missing token returns a bare `401`; an invalid or expired token returns a bare `403` — refresh the access token and retry. These are returned before streaming starts.
+  </Accordion>
+  <Accordion title="Acting as Another User — 403">
+    ```json
+    { "error": "Unauthorized", "code": "search/unauthorized" }
+    ```
+    Returned when a user token sends an `actingUserId` other than its own user.
   </Accordion>
   <Accordion title="Plan Required — 403">
     ```json

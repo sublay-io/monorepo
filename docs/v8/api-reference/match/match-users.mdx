@@ -90,7 +90,7 @@ Returns the `{ results: [...] }` envelope (a deliberate divergence from `search/
 - `matchedFacets[].similarity` — cosine similarity of the facet pair.
 - `matchedFacets[].askerFacet` — the asker's side of the pair. Present in `passive` mode; **omitted in `directed` mode** (there is no asker facet — the query is the anchor) and for the cold-start bio fallback.
 - `matchedFacets[].candidateFacet` — the candidate's facet: its `id` and lazily-decayed `hotness`.
-- `matchedFacets[].sampleContent` — present **only** when both sample gates are satisfied. Never contains moderation-removed, soft-deleted, or private-DM content.
+- `matchedFacets[].sampleContent` — present **only** when both sample gates are satisfied. Never contains moderation-removed, soft-deleted, or private-DM content. A chat message is included only from a group or space chat the asker can read: one they're an active member of, or one they left after the message was sent.
 
 The always-returned breakdown (users, scores, facet ids, similarities, hotness) carries **no readable content** — raw content appears only behind the two gates.
 

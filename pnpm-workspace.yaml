@@ -1,12 +1,14 @@
 packages:
   - "packages/**/*"
-  # registry and playground live at the repo root, not under packages/, so
-  # they need listing explicitly — the glob above will never reach them.
-  # Both are private dev-only members of the cli group: registry holds the
-  # component sources `sublay add` installs, playground is a manual Vite
-  # harness for eyeballing them.
+  # registry and the web playground live at the repo root, not under
+  # packages/, so they need listing explicitly — the glob above will never
+  # reach them. Both are private dev-only members of the cli group: registry
+  # holds the component sources `sublay add` installs, playground/web is a
+  # manual Vite harness for eyeballing them. playground/mobile (an Expo app)
+  # is deliberately NOT a member: it needs its own React / React Native
+  # versions and npm install, which a pnpm workspace would override.
   - "registry"
-  - "playground"
+  - "playground/web"
 allowBuilds:
   '@firebase/util': true
   protobufjs: true

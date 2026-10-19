@@ -1,5 +1,5 @@
-import ThreadedCommentSectionStyled from "../../../registry/react/comments-threaded/styled/files/threaded-comment-section";
-import ThreadedCommentSectionTailwind from "../../../registry/react/comments-threaded/tailwind/files/threaded-comment-section";
+import ThreadedCommentSectionStyled from "../../../../registry/react/comments-threaded/styled/files/threaded-comment-section";
+import ThreadedCommentSectionTailwind from "../../../../registry/react/comments-threaded/tailwind/files/threaded-comment-section";
 import CommentsPlayground from "../components/CommentsPlayground";
 
 export default function ThreadedCommentsPage() {

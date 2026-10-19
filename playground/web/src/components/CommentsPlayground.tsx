@@ -17,7 +17,7 @@ const LANGUAGES = [
   "en",
   ...Object.keys(
     import.meta.glob(
-      "../../../registry/react/comments-social/styled/locales/*.ts"
+      "../../../../registry/react/comments-social/styled/locales/*.ts"
     )
   )
     .map((file) => file.slice(file.lastIndexOf("/") + 1, -".ts".length))

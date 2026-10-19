@@ -18,12 +18,12 @@
     "types": ["vite/client"],
     "paths": {
       "@/*": ["./src/*"],
-      "~shared/*": ["../registry/shared/*"]
+      "~shared/*": ["../../registry/shared/*"]
     }
   },
-  "include": ["src", "../registry/react"],
+  "include": ["src", "../../registry/react"],
   // The components' env files for other frameworks (env/next.ts, ...) read
   // globals a Vite app doesn't have; the playground uses the default
   // utils/env.ts (Vite), and the registry's own typecheck covers the rest.
-  "exclude": ["../registry/react/**/env/**"]
+  "exclude": ["../../registry/react/**/env/**"]
 }

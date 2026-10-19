@@ -417,7 +417,7 @@ importers:
         specifier: ^1.6.1
         version: 1.6.1(@types/node@25.9.5)(jsdom@24.1.3)(lightningcss@1.30.2)(terser@5.44.1)
 
-  playground:
+  playground/web:
     dependencies:
       '@giphy/js-fetch-api':
         specifier: ^5.7.0
@@ -427,7 +427,7 @@ importers:
         version: 10.1.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(styled-components@6.5.3(react-dom@19.2.5(react@19.2.5))(react-native@0.85.3(@babel/core@7.28.5)(@react-native/metro-config@0.85.3(@babel/core@7.28.5))(@types/react@19.2.14)(react@19.2.5))(react@19.2.5))
       '@sublay/react-js':
         specifier: workspace:*
-        version: link:../packages/react-js
+        version: link:../../packages/react-js
       framer-motion:
         specifier: ^12.38.0
         version: 12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)

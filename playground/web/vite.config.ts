@@ -8,12 +8,12 @@ const PROD_API_ORIGIN = "https://api.sublay.io";
 
 // The workspace SDK packages, as Vite sees them after resolving the pnpm
 // symlinks: <monorepo>/packages/<name>/dist/...
-const SDK_DIST = path.resolve(__dirname, "../packages") + path.sep;
+const SDK_DIST = path.resolve(__dirname, "../../packages") + path.sep;
 
 // The dist folders of the SDK packages the playground loads (the same
 // packages as optimizeDeps.exclude below).
 const SDK_DIST_DIRS = ["core", "react-js"].map((name) =>
-  path.resolve(__dirname, "../packages", name, "dist"),
+  path.resolve(__dirname, "../../packages", name, "dist"),
 );
 
 /** How many .js/.mjs/.cjs files under `dir` contain `needle`. */
@@ -105,7 +105,7 @@ function sublayApiBaseOverride(apiBase: string): Plugin {
 }
 
 // The registry, as Vite sees it.
-const REGISTRY_DIR = path.resolve(__dirname, "../registry") + path.sep;
+const REGISTRY_DIR = path.resolve(__dirname, "../../registry") + path.sep;
 
 /**
  * Playground-only: a component's text comes from its utils/strings.ts, and
@@ -176,7 +176,7 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
         // Shared registry pieces: component files import them as
         // ~shared/<platform>/<piece> (rewritten to a relative path at install).
-        "~shared": path.resolve(__dirname, "../registry/shared"),
+        "~shared": path.resolve(__dirname, "../../registry/shared"),
       },
     },
     // Dep pre-bundling skips plugin transforms. Linked workspace packages are

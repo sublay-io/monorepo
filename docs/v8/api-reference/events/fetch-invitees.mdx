@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/events/:eventId/invites"
 description: "List an event's invited users (host-only)"
 ---
 
-Returns a paginated list of [EventInvite](/v8/data-models/event-invite) records, each with the invited `user` populated. **Host-only** — a non-host receives `403`, and a non-existent event receives `404` (service/master keys bypass the host check). Results are ordered by `invitedAt` descending.
+Returns a paginated list of [EventInvite](/v8/data-models/event-invite) records, each with the invited `user` populated. **Host-only** — a non-host receives `403`, and a non-existent event receives `404` (service keys bypass the host check). Results are ordered by `invitedAt` descending.
 
 ## Path Parameters
 

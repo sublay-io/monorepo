@@ -12,7 +12,7 @@ Both this endpoint and the list are served by the same underlying query, so the 
   This is distinct from [Fetch Conversation](/v7/api-reference/chat/conversations/fetch-conversation), which returns a different shape — the conversation plus `currentMember` and `memberCount`. Reach for this endpoint when you are inserting a row into a conversation list, and for Fetch Conversation when you are opening a conversation.
 </Note>
 
-Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) reads its own view of the conversation. A service/master key acts on behalf of a named user via the optional query `userId` — a service key without `userId` is rejected, and an end-user token may not name a different user. Requires the `chat` bundle.
+Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) reads its own view of the conversation. A service key acts on behalf of a named user via the optional query `userId` — a service key without `userId` is rejected, and an end-user token may not name a different user. Requires the `chat` bundle.
 
 Membership is enforced by the query itself. A conversation the caller is not a member of, and a conversation that does not exist, both return `404` — no `lastMessage`, `otherMembers` or `unreadCount` is exposed in either case.
 
@@ -25,7 +25,7 @@ Membership is enforced by the query itself. A conversation the caller is not a m
 ## Query Parameters
 
 <ParamField query="userId" type="string">
-  The acting user whose view of the conversation is returned. **Service/master keys only** — a service key must pass it (there is no implicit session user); an end-user token infers it from the auth token and may not name a different user.
+  The acting user whose view of the conversation is returned. **Service keys only** — a service key must pass it (there is no implicit session user); an end-user token infers it from the auth token and may not name a different user.
 </ParamField>
 
 ## Response

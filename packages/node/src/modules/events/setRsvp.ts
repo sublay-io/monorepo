@@ -4,7 +4,7 @@ import { Event, RsvpStatus } from "../../interfaces/Event";
 export interface SetRsvpProps {
   eventId: string;
   status: RsvpStatus;
-  /** Act on behalf of a user (service/master key); defaults to the caller. */
+  /** Act on behalf of a user (service key); defaults to the caller. */
   userId?: string;
 }
 

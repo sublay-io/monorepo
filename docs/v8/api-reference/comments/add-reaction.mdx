@@ -21,7 +21,7 @@ Adds a reaction of the specified type to a comment. If the user already has a re
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The user the reaction is attributed to. **Service or master key only**, and required with one — a key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. A user token always reacts as itself: naming a different user returns `403 comment/unauthorized`.
+  The user the reaction is attributed to. **Service key only**, and required with one — a key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. A user token always reacts as itself: naming a different user returns `403 comment/unauthorized`.
 
   A `userId` that doesn't match a user returns `404 comment/user-not-found`.
 </ParamField>
@@ -78,14 +78,14 @@ Returns the updated [Comment](/v8/data-models/comment) object with the new `reac
     ```
   </Accordion>
   <Accordion title="Missing User — 400">
-    Returned when a service or master key sends no `userId`.
+    Returned when a service key sends no `userId`.
 
     ```json
     { "error": "Missing user ID", "code": "comment/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
-    Returned when a service or master key names a `userId` that doesn't exist.
+    Returned when a service key names a `userId` that doesn't exist.
 
     ```json
     { "error": "User not found", "code": "comment/user-not-found" }

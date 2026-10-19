@@ -14,7 +14,7 @@ Grants belong to the **`reputation`** bundle — every project with reputation h
 | `sourceType` | What it is | Who can issue it | Debits a sender |
 |--------------|-----------|------------------|-----------------|
 | `"user"` | A **transfer** — reputation leaves one user's bucket and lands in another's. | The sender (user token), or your backend acting on their behalf with a service key. | Yes |
-| `"app"` | A **mint** — reputation created from nothing, or (with a negative amount) destroyed. | Service or master key only. | No |
+| `"app"` | A **mint** — reputation created from nothing, or (with a negative amount) destroyed. | Service key only. | No |
 
 `sourceType` is persisted rather than inferred from `senderId`, because `senderId` is also `null` on a transfer whose sender was later deleted.
 
@@ -77,9 +77,9 @@ The full per-item list of individual grants comes from [Fetch Many Reputation Gr
 
 A grant row carries its `targetType`, `targetId` and the granter's free-text `note`, and a list read can hydrate both parties. On a `chat-message` target those facts describe a private conversation — who is talking to whom, and what one of them said about it — so such a grant is exactly as private as the message it points at:
 
-- **The target shape is gated on membership.** Listing grants by `targetType: "chat-message"` + `targetId` returns rows only to a **member** of that message's conversation. The test is the one [Fetch Message](/v8/api-reference/chat/messages/fetch-message) itself applies — any membership row counts, so a member who has since left the conversation still sees the grants on a message chat still hands them. Everyone else — a user who was never a member, any user on a project without the `chat` bundle — gets a successful empty page with the zero summary, never a `403`, so the response cannot be used to prove the message exists. Service and master keys pass the gate unconditionally: they are the app's own backend, which holds no membership.
-- **The user-keyed shapes carry the same test into the query.** Listing by `recipientId` or `senderId` returns a chat-message-targeted grant to a caller who can see the underlying message and withholds it from one who cannot. So a user's own "reputation I received" feed does include the grants made on messages in their own conversations, and reconciles with the reputation on their profile; a caller outside the conversation loses those rows from the page **and** from `totalItems` together, leaving nothing to infer arithmetically. Service and master keys are filtered on neither shape and read every row.
-- **A removed message takes its grants with it.** Once moderation removes a message it is invisible on every chat surface, so its grants are invisible on both of these shapes too — to a member of the conversation as much as to a stranger, and to the grant's own sender and recipient. Only service and master keys still read them.
+- **The target shape is gated on membership.** Listing grants by `targetType: "chat-message"` + `targetId` returns rows only to a **member** of that message's conversation. The test is the one [Fetch Message](/v8/api-reference/chat/messages/fetch-message) itself applies — any membership row counts, so a member who has since left the conversation still sees the grants on a message chat still hands them. Everyone else — a user who was never a member, any user on a project without the `chat` bundle — gets a successful empty page with the zero summary, never a `403`, so the response cannot be used to prove the message exists. Service keys pass the gate unconditionally: they are the app's own backend, which holds no membership.
+- **The user-keyed shapes carry the same test into the query.** Listing by `recipientId` or `senderId` returns a chat-message-targeted grant to a caller who can see the underlying message and withholds it from one who cannot. So a user's own "reputation I received" feed does include the grants made on messages in their own conversations, and reconciles with the reputation on their profile; a caller outside the conversation loses those rows from the page **and** from `totalItems` together, leaving nothing to infer arithmetically. Service keys are filtered on neither shape and read every row.
+- **A removed message takes its grants with it.** Once moderation removes a message it is invisible on every chat surface, so its grants are invisible on both of these shapes too — to a member of the conversation as much as to a stranger, and to the grant's own sender and recipient. Only service keys still read them.
 
 Grants targeting an entity or a comment are unaffected — those items are public — and so are grants with no target at all. The inline summary on the chat reads needs no special rule: those endpoints already refuse a non-member with `403 chat/not-a-member` before they read a message.
 
@@ -89,7 +89,7 @@ A mint may be negative — a moderation clawback, a decay sweep, or a correction
 
 - They never notify the recipient.
 - They are never broadcast over the chat socket.
-- They are excluded from the public list endpoint **for every caller**, including service and master keys.
+- They are excluded from the public list endpoint **for every caller**, including service keys.
 - They are excluded from every `GrantSummary`.
 
 The only way to read them is the dashboard history route, [Fetch User Grant History](/v8/api-reference/reputation-grants/fetch-user-grant-history), and the user detail view in the [dashboard](https://dash.sublay.io).

@@ -4,7 +4,7 @@ api: "PATCH /v8/:projectId/events/:eventId"
 description: "Edit an event's mutable fields and curate its images (host-only)"
 ---
 
-Updates an event. **Host-only** — the caller must be in `hostIds` (service/master keys bypass this). Every provided field is updated; omitted fields are left untouched. Type-conditional location validation is re-applied when `type` is present.
+Updates an event. **Host-only** — the caller must be in `hostIds` (service keys bypass this). Every provided field is updated; omitted fields are left untouched. Type-conditional location validation is re-applied when `type` is present.
 
 `hostIds`, `status`, and `spaceId` are **not** editable here — manage hosts via the [host endpoints](/v8/api-reference/events/add-host), cancel via [Cancel Event](/v8/api-reference/events/cancel-event); the space is immutable.
 

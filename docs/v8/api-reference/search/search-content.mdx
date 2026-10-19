@@ -71,7 +71,7 @@ Each result includes:
 
 ### What's left out
 
-Comments their author deleted are never returned. Comments a moderator removed are never returned either — to anyone, including the removed comment's author and requests made with a service or master key.
+Comments their author deleted are never returned. Comments a moderator removed are never returned either — to anyone, including the removed comment's author and requests made with a service key.
 
 Chat messages come only from conversations the user can read in the chat itself: ones they're an active member of, and, for a conversation they left or were removed or banned from, messages sent before they left. `conversationId` narrows the search; it never widens what the user can read. Messages their author deleted or a moderator removed are never returned. A request with no user (a service key without `actingUserId`) gets no chat messages.
 
@@ -85,7 +85,7 @@ Results are also filtered for the user — the signed-in user, or the `actingUse
 
 <AccordionGroup>
   <Accordion title="Authentication Required — 401 / 403">
-    The endpoint requires a user token or a service or master key. A missing token returns a bare `401`; an invalid or expired token returns a bare `403` — refresh the access token and retry.
+    The endpoint requires a user token or a service key. A missing token returns a bare `401`; an invalid or expired token returns a bare `403` — refresh the access token and retry.
   </Accordion>
   <Accordion title="Invalid Body — 400">
     Returned when the body fails validation: `query` is missing or empty, `limit` isn't a whole number from `1` to `50`, `sourceTypes` contains a value other than `entity`, `comment` or `message`, `spaceId`, `conversationId` or `actingUserId` isn't a UUID, or `includeChildSpaces` isn't a boolean.

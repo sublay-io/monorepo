@@ -10,7 +10,7 @@ export interface FetchUserByForeignIdProps extends SpaceReputationUserParams {
 
 // Note: the server's `createIfNotFound` flag (and the accompanying creation
 // fields name/username/avatar/bio/metadata/secureMetadata) is gated to
-// service/master keys only (`req.isService || req.isMaster` in the controller).
+// service keys only (checked in the controller).
 // A user token cannot use it, so it is intentionally omitted here.
 export async function fetchUserByForeignId(
   client: SublayHttpClient,

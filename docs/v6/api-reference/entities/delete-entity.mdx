@@ -5,7 +5,7 @@ description: "Delete an existing entity"
 auth: "bearer"
 ---
 
-Deletes an existing entity within the project. Only the entity author or a master user can perform this operation. Deletion also deducts reputation from the original author.
+Deletes an existing entity within the project. Only the entity author or a service key can perform this operation. Deletion also deducts reputation from the original author.
 
 ## Path Parameters
 
@@ -73,6 +73,6 @@ Deletes an existing entity within the project. Only the entity author or a maste
 
 ## Notes
 
-- Only the original author or a master user can delete an entity.
+- Only the original author or a service key can delete an entity.
 - Deleting an entity deducts reputation points from the author if applicable.
 - If the entity does not exist or was already deleted, the operation is a no-op.

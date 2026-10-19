@@ -6,18 +6,14 @@ description: "A single user's full grant history, negative grants included — t
 
 Returns one user's complete reputation-grant history, received and sent, **including negative grants**. This is the only route on which negatives are readable: the public [list endpoint](/v7/api-reference/reputation-grants/fetch-many-reputation-grants) bakes `amount > 0` into its query for every caller, so a service key sees no more there than an ordinary user does.
 
-This is a dashboard route, not a `/v7/:projectId` route — it powers the grant-history dialog on a user's detail view in the [dashboard](https://dash.sublay.io) — but it is callable with a service or master key, which is how a backend reads its own moderation deductions back.
+This is a dashboard route, not a `/v7/:projectId` route — it powers the grant-history dialog on a user's detail view in the [dashboard](https://dash.sublay.io) — but it is callable with a service key, which is how a backend reads its own moderation deductions back.
 
 The route cannot issue grants. It is read-only.
 
 ## Authentication and headers
 
 <ParamField header="x-sublay-project-id" type="string">
-  The project UUID. **Required when you authenticate with a service key** — that header is how the server finds the project whose key you are presenting, and without it a raw project key is parsed as a dashboard session token and rejected with `403`. Master keys and dashboard sessions only need the project named somewhere on the request, and may send it as a `?projectId=` query parameter instead; supplying both is fine as long as they match.
-</ParamField>
-
-<ParamField header="x-sublay-internal" type="string">
-  Set to `true` when authenticating with a **master key**. Master keys are only recognized on requests carrying this header.
+  The project UUID. **Required when you authenticate with a service key** — that header is how the server finds the project whose key you are presenting, and without it a raw project key is parsed as a dashboard session token and rejected with `403`. Dashboard sessions only need the project named somewhere on the request, and may send it as a `?projectId=` query parameter instead; supplying both is fine as long as they match.
 </ParamField>
 
 A service key is presented as the bearer credential alongside `x-sublay-project-id`. Dashboard sessions authenticate with their client JWT as usual, naming the project in the header or the query string.

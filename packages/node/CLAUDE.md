@@ -122,7 +122,7 @@ Event lifecycle, RSVPs, hosts, and invites.
 
 `createEvent`, `fetchEvent`, `fetchManyEvents`, `updateEvent`, `cancelEvent`, `deleteEvent`, `setRsvp`, `withdrawRsvp`, `addHost`, `removeHost`, `addInvite`, `removeInvite`, `fetchInvitees`, `fetchEventRsvps`
 
-`EventType` is `online`/`physical`/`hybrid`; `EventVisibility` is `public`/`members`/`invite`; `RsvpStatus` is `going`/`maybe`/`not_going`. `fetchManyEvents` filters: `timeWindow` (upcoming/ongoing/past) or an explicit `startsAfter`/`startsBefore` range, `spaceId`, `hostId`, `type`, `status` (defaults to `active`), `myRsvp` (requires `userId`), `locationFilters`, `titleFilters`/`descriptionFilters`. `fetchInvitees` (the guest list) is host-only; `fetchEventRsvps` is visible to hosts, to any viewer when `guestListVisible` is true, or to service/master keys.
+`EventType` is `online`/`physical`/`hybrid`; `EventVisibility` is `public`/`members`/`invite`; `RsvpStatus` is `going`/`maybe`/`not_going`. `fetchManyEvents` filters: `timeWindow` (upcoming/ongoing/past) or an explicit `startsAfter`/`startsBefore` range, `spaceId`, `hostId`, `type`, `status` (defaults to `active`), `myRsvp` (requires `userId`), `locationFilters`, `titleFilters`/`descriptionFilters`. `fetchInvitees` (the guest list) is host-only; `fetchEventRsvps` is visible to hosts, to any viewer when `guestListVisible` is true, or to service keys.
 
 ### 3. Comments Module (10 functions)
 
@@ -203,7 +203,7 @@ File and image uploads, plus read/delete. `uploadFile`, `uploadImage`, `getFile`
   mirroring the server schema (see `interfaces/ImageProcessing.ts`); plus optional `pathParts`, one
   association, and `userId`. (No `metadata`/`position` — the image schema doesn't read them.)
 - **Access model:** reads (`getFile`) are project-scoped (any caller in the project); **delete is
-  owner-or-service** — a user token may only delete files it owns, service/master keys may delete any.
+  owner-or-service** — a user token may only delete files it owns, service keys may delete any.
   Both enforced server-side in `server/src/{v7,v7-schema}/controllers/storage/`.
 
 ### 15. Chat Module (20 functions)

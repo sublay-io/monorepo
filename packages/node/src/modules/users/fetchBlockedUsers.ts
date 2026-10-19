@@ -5,7 +5,7 @@ import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 export interface FetchBlockedUsersProps {
   /**
    * The user whose own outbound block list is being read (the blocker). The
-   * server resolves this via `resolveActingUserId` (service/master keys), so it
+   * server resolves this via `resolveActingUserId` (service keys), so it
    * is sent as the `userId` query param on the `/blocks` route — mirroring the
    * server's act-on-behalf handling for the private block list.
    */

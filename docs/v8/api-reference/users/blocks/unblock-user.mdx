@@ -21,7 +21,7 @@ Unblocking is **idempotent** — unblocking a user who isn't blocked is a succes
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string">
-  The user performing the unblock (the blocker). Only service/master keys may supply an `actingUserId` other than the caller's own; with a user token the blocker is derived from the token.
+  The user performing the unblock (the blocker). Only service keys may supply an `actingUserId` other than the caller's own; with a user token the blocker is derived from the token.
 </ParamField>
 
 ## Response

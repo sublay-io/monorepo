@@ -146,7 +146,7 @@ Base path: `/v8/:projectId/`
 | DELETE | `/entities/:entityId/reactions` | can access with a key | `entities.removeReaction` | yes |
 | GET | `/entities/:entityId/reactions` | no key needed | `entities.fetchReactions` | yes |
 | GET | `/entities/:entityId/reactions/me` | can access with a key | `entities.getUserReaction` | yes |
-| PATCH | `/entities/:entityId/increment-views` | can access with a key *(requires service or master key — elevated auth enforced)* | `entities.incrementEntityViews` | yes |
+| PATCH | `/entities/:entityId/increment-views` | can access with a key *(requires service key — elevated auth enforced)* | `entities.incrementEntityViews` | yes |
 | PATCH | `/entities/:entityId` | can access with a key | `entities.updateEntity` | yes |
 | DELETE | `/entities/:entityId` | can access with a key | `entities.deleteEntity` | yes |
 
@@ -308,8 +308,8 @@ Base path: `/v8/:projectId/`
 
 - Service keys are sent as `Authorization: Bearer <key>` with an `x-sublay-project-id` header.
 - The `flagServiceAccess` middleware validates the key against a hashed key stored in `ProjectApiKey`. If valid, it sets `req.isService = true`.
-- The `requireUserAuth` middleware checks `if (req.isMaster || req.isService)` first — so a valid service key bypasses JWT validation on any user-auth-guarded endpoint at the middleware level.
-- `requireElevatedAuth` (used only on `increment-views`) explicitly requires `req.isService` or `req.isMaster` and returns 403 otherwise — it is the only endpoint that actively enforces a service key.
+- The `requireUserAuth` middleware checks for a service key first — so a valid service key bypasses JWT validation on any user-auth-guarded endpoint at the middleware level.
+- `requireElevatedAuth` (used only on `increment-views`) explicitly requires a service key and returns 403 otherwise — it is the only endpoint that actively enforces a service key.
 - Endpoints marked `can't access even with a key` will pass the auth middleware with a service key, but their controller logic depends on `req.userId` (the caller's user identity), which a service key does not provide, making the operation meaningless or broken in practice.
 
 ## Known Issues

@@ -10,7 +10,7 @@ Removes the calling user's push device registration. The device is identified th
 
 Only the calling user's own binding is removed. A device can be registered by several accounts at once, so deregistering unbinds the caller's account from that device and leaves every other account's binding on the same device intact — callers cannot deregister devices they don't own.
 
-Requires end-user authentication. Service and master keys are rejected for the same reason as [Register Device](/v7/api-reference/push-notifications/register-device#security-note).
+Requires end-user authentication. Service keys are rejected for the same reason as [Register Device](/v7/api-reference/push-notifications/register-device#security-note).
 
 Requires the `push` bundle.
 
@@ -64,7 +64,7 @@ Returns `200` on success, including when no matching registration existed.
     ```json
     { "error": "Unauthorized", "code": "push-device/unauthorized" }
     ```
-    Returned when a service or master key is used. This endpoint has no
+    Returned when a service key is used. This endpoint has no
     impersonation path by design (see [Security note](/v7/api-reference/push-notifications/register-device#security-note)).
   </Accordion>
   <Accordion title="Invalid Body — 400">

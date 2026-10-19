@@ -6,7 +6,7 @@ description: "Delete a file and all its variants from storage"
 
 Deletes a file record and removes all associated storage objects. For image files, all generated variants are also deleted.
 
-Requires an authenticated user. **Delete is owner-or-service:** a user token may only delete files it owns; **service/master keys** may delete any file in the project. Backend-owned files (uploaded without a `userId`) are deletable only with a service/master key.
+Requires an authenticated user. **Delete is owner-or-service:** a user token may only delete files it owns; **service keys** may delete any file in the project. Backend-owned files (uploaded without a `userId`) are deletable only with a service key.
 
 **Rate limit**: 50 requests per 5 minutes.
 

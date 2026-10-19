@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/events/:eventId"
 description: "Permanently or soft-delete an event and clean up its children (host-only)"
 ---
 
-Deletes an event. **Host-only** (service/master keys bypass the host check). The event's child `EventRsvps` and `EventInvites` are cleaned up, and—depending on settings—its files.
+Deletes an event. **Host-only** (service keys bypass the host check). The event's child `EventRsvps` and `EventInvites` are cleaned up, and—depending on settings—its files.
 
 Deletion honors the project's `eventDeletion` settings:
 

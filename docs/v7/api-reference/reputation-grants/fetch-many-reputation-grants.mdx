@@ -6,10 +6,10 @@ description: "List positive reputation grants by recipient, by sender, or by rew
 
 import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
-Returns a paginated list of reputation grants, newest first. Requires authentication (user token, service key, or master key) and the `reputation` bundle.
+Returns a paginated list of reputation grants, newest first. Requires authentication (user token or service key) and the `reputation` bundle.
 
 <Warning>
-  **Only positive grants are ever returned — for every caller.** The `amount > 0` filter is baked into the query, so negative grants (your app's private moderation deductions) are unreachable here for a service or master key exactly as they are for a user token. Read them from [Fetch User Grant History](/v7/api-reference/reputation-grants/fetch-user-grant-history) instead.
+  **Only positive grants are ever returned — for every caller.** The `amount > 0` filter is baked into the query, so negative grants (your app's private moderation deductions) are unreachable here for a service key exactly as they are for a user token. Read them from [Fetch User Grant History](/v7/api-reference/reputation-grants/fetch-user-grant-history) instead.
 </Warning>
 
 ## One filter shape per request
@@ -64,7 +64,7 @@ A grant row carries `targetType`, `targetId` and the granter's free-text `note`,
 - **The `recipientId` and `senderId` shapes carry the same test into the query.** A chat-message-targeted grant stays in these feeds for a caller who can see the message, and is excluded from both the page and `totalItems` for one who cannot. The predicate rides the same `where` clause the `COUNT` uses, so a filtered page and a filtered total always move together and `hasMore` never asserts rows the caller may not read. A user's own "reputation I received / sent" feed therefore includes the grants made on messages in their own conversations, and reconciles with the reputation shown on their profile.
 - **A message removed by moderation takes its grants with it.** A `removed` message is invisible on every chat surface, so both shapes hide its grants: the target shape answers the same empty page, and the user-keyed shapes drop the rows from the page and `totalItems`. That holds for a member of the conversation as much as for a stranger.
 
-Service and master keys are exempt on both shapes: they pass the target-shape membership gate unconditionally, and the user-keyed shapes apply no membership predicate to them at all — so a backend can enumerate every grant it minted, removed messages included. They are the app's own backend, which has no membership and is already trusted to mint grants and to read every conversation. They hold no viewer identity, so `viewerTotal` is `0` for them while `total` and `count` are real.
+Service keys are exempt on both shapes: they pass the target-shape membership gate unconditionally, and the user-keyed shapes apply no membership predicate to them at all — so a backend can enumerate every grant it minted, removed messages included. They are the app's own backend, which has no membership and is already trusted to mint grants and to read every conversation. They hold no viewer identity, so `viewerTotal` is `0` for them while `total` and `count` are real.
 
 Entity and comment targets are unaffected — those items are public, and both shapes return them normally. Grants with no target at all are returned by every shape.
 
@@ -105,7 +105,7 @@ On the **target** shape only, a `summary` block rides alongside the envelope, so
 }
 ```
 
-`viewerTotal` is the calling user's own summed grants on the target, and is `0` for a service or master key, which has no viewer identity. The other two shapes return no `summary` key at all.
+`viewerTotal` is the calling user's own summed grants on the target, and is `0` for a service key, which has no viewer identity. The other two shapes return no `summary` key at all.
 
 See [ReputationGrant](/v7/data-models/reputation-grant) for the row shape and [GrantSummary](/v7/data-models/reputation-grant#grantsummary) for the summary.
 

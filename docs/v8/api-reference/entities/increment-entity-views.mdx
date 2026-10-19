@@ -7,7 +7,7 @@ description: "Add to an entity's view count"
 Increments an entity's `views` counter and returns the updated entity.
 
 <Warning>
-  This endpoint requires a **service or master key** and cannot be called with an end-user token. Count views from your own backend rather than from the client, so a browser cannot inflate the number.
+  This endpoint requires a **service key** and cannot be called with an end-user token. Count views from your own backend rather than from the client, so a browser cannot inflate the number.
 </Warning>
 
 ## Path Parameters
@@ -54,7 +54,7 @@ Returns the full updated [Entity](/v8/data-models/entity), with `views` reflecti
   <Accordion title="Elevated Auth Required — 403">
     ```json
     {
-      "error": "Service or master key required.",
+      "error": "Service key required.",
       "code": "auth/elevated-auth-required"
     }
     ```

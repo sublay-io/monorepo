@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/events/:eventId/invites"
 description: "Invite a user to an event (host-only)"
 ---
 
-Creates an [EventInvite](/v8/data-models/event-invite) for a user. **Host-only** (service/master keys bypass the check). The invite is keyed on a Sublay `userId` (never a foreign ID) and is idempotent against the unique `(eventId, userId)` constraint — re-inviting an already-invited user is a no-op success.
+Creates an [EventInvite](/v8/data-models/event-invite) for a user. **Host-only** (service keys bypass the check). The invite is keyed on a Sublay `userId` (never a foreign ID) and is idempotent against the unique `(eventId, userId)` constraint — re-inviting an already-invited user is a no-op success.
 
 For an `invite`-visibility event, the invited user can now see and RSVP to the event. When the `notifications` bundle is present, the invitee receives an `event-invite` notification (best-effort).
 

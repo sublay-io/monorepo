@@ -27,7 +27,7 @@ export interface CreateEventProps {
   hostIds?: string[];
   metadata?: Record<string, any>;
   /**
-   * Attribute the event to a user. With a service/master key this may be any
+   * Attribute the event to a user. With a service key this may be any
    * user; the creator is auto-added to `hostIds`.
    */
   userId?: string;

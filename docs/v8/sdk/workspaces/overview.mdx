@@ -71,13 +71,13 @@ With a client token, every endpoint in the bundle resolves the actor from that t
 <Warning>
   **Seeing the roster and seeing people's *authority* are two different tiers.** Any relation may read the roster and one member's standing — who is there, their `reasons`, `title` and `metadata`. But the authority-bearing fields — **`capabilities`, `permissions`, `rank`, `relativeRank`** — are **omitted** (absent, not `null`) unless the caller holds one of the four people-operating capabilities (`invite`, `remove-member`, `edit-member-access`, `edit-member-profile`) or is the `owner` / an `ancestor-owner`.
 
-  A caller **always** sees their own — their own roster row, their own standing, and the [authority read](/v8/api-reference/workspaces/fetch-authority), which is inherently a self read and never fenced. So a plain member can always discover their own access; they just cannot enumerate everyone else's. A service/master key acting as **itself** is never fenced; one that **names** an `actingUserId` is fenced exactly as that user is — see [Acting on behalf of a user](#acting-on-behalf-of-a-user). Type all four fields as optional on client surfaces. (`relativeRank` is fenced *with* `rank` because it is `rank` minus a number the caller already knows — leaking it would leak `rank` exactly.)
+  A caller **always** sees their own — their own roster row, their own standing, and the [authority read](/v8/api-reference/workspaces/fetch-authority), which is inherently a self read and never fenced. So a plain member can always discover their own access; they just cannot enumerate everyone else's. A service key acting as **itself** is never fenced; one that **names** an `actingUserId` is fenced exactly as that user is — see [Acting on behalf of a user](#acting-on-behalf-of-a-user). Type all four fields as optional on client surfaces. (`relativeRank` is fenced *with* `rank` because it is `rank` minus a number the caller already knows — leaking it would leak `rank` exactly.)
 
   **The gate is answered per node, not once per request.** Every row a response returns is judged against your **resolved** standing on the workspace *that row belongs to* — including capabilities [reaching](/v8/data-models/workspace#reach-and-the-wall-door-rule) in through an unbroken open inherit chain, and ownership from any ancestor, but not authority a **sealed** node blocks. The place this bites is [`include=descendants`](/v8/api-reference/workspaces/members/list-members) on the roster: a `descendant-member` row is judged on its own node, so holding `invite` on a parent does not unfence a sealed child's ranks and capabilities. Being allowed to *see* a descendant's roster (sealing) and being allowed to see its members' **authority** (the fence) are two tiers, and passing the first does not pass the second.
 </Warning>
 
 <Note>
-  **What actually needs a service key: acting on behalf of a *different* user.** Nearly every endpoint accepts an actor field, `actingUserId`, so a service/master key can perform an action *as* some named user. That parameter is **[node SDK](/v8/node-sdk/workspaces) only** — `@sublay/core` and `@sublay/js` never expose it, because a client's actor is always the token's own user. (There is no client-side strip: a call that hand-writes `actingUserId` past the types is bound by the same rule as any user token — naming a user other than the token's own is rejected with a `403`.) This is the *only* difference in reach between the client SDKs and the node SDK for this bundle; it is **not** a restriction on which operations a client may perform. The rule that governs it is [below](#acting-on-behalf-of-a-user).
+  **What actually needs a service key: acting on behalf of a *different* user.** Nearly every endpoint accepts an actor field, `actingUserId`, so a service key can perform an action *as* some named user. That parameter is **[node SDK](/v8/node-sdk/workspaces) only** — `@sublay/core` and `@sublay/js` never expose it, because a client's actor is always the token's own user. (There is no client-side strip: a call that hand-writes `actingUserId` past the types is bound by the same rule as any user token — naming a user other than the token's own is rejected with a `403`.) This is the *only* difference in reach between the client SDKs and the node SDK for this bundle; it is **not** a restriction on which operations a client may perform. The rule that governs it is [below](#acting-on-behalf-of-a-user).
 
   Note that a **target**-identifying `userId` is a different thing and is fully available on the client: the invitee `userId` on [`useCreateWorkspaceInvite`](/v8/hooks/workspaces/use-create-workspace-invite), and the `targetUserId` path param on the member hooks.
 </Note>
@@ -90,7 +90,7 @@ One rule governs every workspace endpoint, with no exceptions:
   **If a request acts as Bob, then for all intents and purposes it *is* Bob.** Reads and writes alike. The credential decides only *whether* you may name someone other than yourself — never how much authority you get once you have.
 </Info>
 
-A service or master key therefore has exactly two modes:
+A service key therefore has exactly two modes:
 
 | Mode | Wire shape | Authority |
 |------|-----------|-----------|
@@ -258,7 +258,7 @@ They come from **two layers**, and knowing which one answered tells you what to 
 <Note>
   **Why this bundle is stricter than the rest of the API.** Elsewhere in Sublay an undeclared field is dropped and the request proceeds. Here it is refused, and the reason is what an unreadable field can *mean* on this bundle.
 
-  A service/master key that names **no** acting user runs unbounded, with owner authority over a whole workspace hierarchy. So absence-of-actor is not a neutral state — it is the signal that grants full authority. A caller who writes `onBehalfOf: "<bob>"`, or `acting_user_id`, or spells the field correctly inside a body no parser read, believes the request is scoped to Bob; under a permissive rule it would instead receive the app's full authority, silently, in production, on routes that cascade-delete a subtree.
+  A service key that names **no** acting user runs unbounded, with owner authority over a whole workspace hierarchy. So absence-of-actor is not a neutral state — it is the signal that grants full authority. A caller who writes `onBehalfOf: "<bob>"`, or `acting_user_id`, or spells the field correctly inside a body no parser read, believes the request is scoped to Bob; under a permissive rule it would instead receive the app's full authority, silently, in production, on routes that cascade-delete a subtree.
 
   Guessing which stray fields "look like" an actor cannot work: an open input space can always be shown a name nobody enumerated, and every miss lands on the unbounded path. Refusing categorically fails the other way — a field we forgot to declare is a `400` on first use, in development, fixed the same day.
 </Note>
@@ -273,7 +273,7 @@ They come from **two layers**, and knowing which one answered tells you what to 
 </Note>
 
 <Note>
-  **The content-type rule is the one asymmetric check — deliberately.** It applies **only** when a service/master key named nobody. Under a user token, or a key that **did** name an actor, a `text/plain` body is merely an empty one, exactly as on every other bundle.
+  **The content-type rule is the one asymmetric check — deliberately.** It applies **only** when a service key named nobody. Under a user token, or a key that **did** name an actor, a `text/plain` body is merely an empty one, exactly as on every other bundle.
 
   The reason is what a *dropped* body could mean on each path. Under a token the actor comes from the token no matter what you send, so nothing lost in transit can change who is acting — there is no authority to gain. Under a key naming nobody, a body the server could not read is exactly the shape of an actor it failed to receive: one missing header, and a request the caller believed was bound to one person runs as the app.
 
@@ -361,7 +361,7 @@ There is **no separate "only the owner may assign rank 0" check** — owners are
 </Warning>
 
 <Warning>
-  **Omitting the rank field is the easiest way in the whole API to mint rank 0.** "One rung below me" is measured from your anchor, and an inviter with **no member row on this workspace** anchors at apex — so for an **owner**, an **ancestor owner**, a **reach holder** with no direct row, or a **service/master key acting as itself**, the default lands on **rank 0**, the most senior rung there is. Everything else in this bundle gates that rung carefully; the default reaches it by leaving a field off.
+  **Omitting the rank field is the easiest way in the whole API to mint rank 0.** "One rung below me" is measured from your anchor, and an inviter with **no member row on this workspace** anchors at apex — so for an **owner**, an **ancestor owner**, a **reach holder** with no direct row, or a **service key acting as itself**, the default lands on **rank 0**, the most senior rung there is. Everything else in this bundle gates that rung carefully; the default reaches it by leaving a field off.
 
   It is semantically correct — one below apex *is* the top rung — and it is not changing. But it inverts the usual instinct that omitting a field is the conservative choice. The case to watch is a **backend invite flow**: a server route that invites people with a service key and no rank field creates a workspace of rank-0 members, each able to manage all the others and none manageable by anyone but the owner. A service-key flow that wants new members at the **bottom** of the ladder has to name a coordinate — an absolute `rank`, or a `relativeRank` anchored on an `actingUserId` who actually sits in the ladder.
 

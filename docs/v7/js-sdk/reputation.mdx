@@ -7,7 +7,7 @@ The `reputation` module gives reputation deliberately and reads grants back. It 
 
 Because the JS SDK authenticates as an **end user** (bearer token), you never pass an actor `userId` — the sender is always the user the token belongs to. Naming somebody else as the sender requires a service key, which this SDK never holds.
 
-There is deliberately **no mint function**. Creating reputation from nothing — and destroying it — is service/master-key only and lives in [`@sublay/node`](/v7/node-sdk/reputation).
+There is deliberately **no mint function**. Creating reputation from nothing — and destroying it — is service-key only and lives in [`@sublay/node`](/v7/node-sdk/reputation).
 
 Requires the `reputation` bundle. A `chat-message` target additionally needs the `chat` bundle, and a `spaceId` needs the `spaces` bundle.
 

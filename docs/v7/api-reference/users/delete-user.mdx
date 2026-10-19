@@ -12,7 +12,7 @@ Permanently deletes the specified user and cascades cleanup across all of their 
 
 ## Authentication
 
-Requires a **service or master key**. User auth tokens are rejected with a `403`.
+Requires a **service key**. User auth tokens are rejected with a `403`.
 
 ## Path Parameters
 
@@ -30,7 +30,7 @@ On success, returns HTTP `204 No Content` with an empty body.
   <Accordion title="Elevated Auth Required — 403">
     ```json
     {
-      "error": "Service or master key required.",
+      "error": "Service key required.",
       "code": "auth/elevated-auth-required"
     }
     ```

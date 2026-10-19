@@ -6,7 +6,7 @@ description: "Look up a user by your own system's external user ID"
 
 import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
-Finds a user within the project by their `foreignId` — the external identifier you provided when creating or syncing the user. Optionally creates the user if not found (requires service or master token).
+Finds a user within the project by their `foreignId` — the external identifier you provided when creating or syncing the user. Optionally creates the user if not found (requires a service key).
 
 <Note>
   If the profile owner has blocked the signed-in caller, this returns `404` — the
@@ -27,7 +27,7 @@ Finds a user within the project by their `foreignId` — the external identifier
 
 <ParamField query="createIfNotFound" type="string">
   Set to `"true"` to create the user if they do not exist. Requires a service
-  or master token. Returns `201` on creation, `200` on an existing user.
+  key. Returns `201` on creation, `200` on an existing user.
 </ParamField>
 
 <ParamField query="name" type="string">
@@ -117,8 +117,7 @@ Returns HTTP `200` (found) or `201` (created) with the user object:
 </ResponseField>
 
 <Note>
-  `createIfNotFound=true` is only permitted with a **service** or **master**
-  token. Client tokens receive a 404 if the user does not exist.
+  `createIfNotFound=true` is only permitted with a **service key**. Client tokens receive a 404 if the user does not exist.
 </Note>
 
 ## Error Responses

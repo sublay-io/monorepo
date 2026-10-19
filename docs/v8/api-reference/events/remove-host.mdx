@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/events/:eventId/hosts"
 description: "Revoke a user's host privileges on an event (host-only)"
 ---
 
-Removes a user from the event's `hostIds`. **Host-only** (service/master keys bypass the check). The mutation runs under a row-level lock and enforces the **at-least-one-host invariant**: a removal that would leave the event with zero hosts is rejected with `409`.
+Removes a user from the event's `hostIds`. **Host-only** (service keys bypass the check). The mutation runs under a row-level lock and enforces the **at-least-one-host invariant**: a removal that would leave the event with zero hosts is rejected with `409`.
 
 The target user is supplied in the request body (symmetric with [Withdraw RSVP](/v8/api-reference/events/withdraw-rsvp)).
 

@@ -6,7 +6,7 @@ description: "Set or clear the authenticated user's mute on a conversation"
 
 Sets or clears the acting user's mute on a conversation. Muting suppresses the `message` push for this conversation only — the message is still delivered, socket-emitted, and readable. Timed mutes expire lazily (push resumes once the window passes).
 
-Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) mutes its own membership. A service/master key acts on behalf of a named user via the optional body `userId` — a service key without `userId` is rejected, and an end-user token may not name a different user (both consistent with every other per-user write). Requires the `chat` bundle.
+Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) mutes its own membership. A service key acts on behalf of a named user via the optional body `userId` — a service key without `userId` is rejected, and an end-user token may not name a different user (both consistent with every other per-user write). Requires the `chat` bundle.
 
 ## Path Parameters
 
@@ -29,7 +29,7 @@ Requires authentication. **Acting-user-scoped:** an end-user token (`Authorizati
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The acting user whose membership is muted. **Service/master keys only** — a service key must pass it (there is no implicit session user); an end-user token infers it from the auth token and may not name a different user.
+  The acting user whose membership is muted. **Service keys only** — a service key must pass it (there is no implicit session user); an end-user token infers it from the auth token and may not name a different user.
 </ParamField>
 
 ## Response
@@ -67,7 +67,7 @@ Returns `200` with the acting user's own (self-serialized) member row under `cur
     ```json
     { "error": "Missing user ID", "code": "chat/missing-user-id" }
     ```
-    Returned when a service/master key omits the required `userId` (it has no implicit session user).
+    Returned when a service key omits the required `userId` (it has no implicit session user).
   </Accordion>
   <Accordion title="Not Found — 404">
     ```json

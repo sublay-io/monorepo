@@ -12,7 +12,7 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 Returns a user's comments as one flat list — top-level comments and replies alike, across every entity — cursor-paginated. Use it for profile pages and activity views. To render a discussion, use [Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments) instead.
 
-Authentication is optional. The history is read as the **caller**: the signed-in user, or — with a service or master key — the user named in `actingUserId`. Without one (no user token, or a key without `actingUserId`) the request is anonymous: deleted and moderator-removed comments are left out, no block rule applies, `isAuthorBlocked` and `isUnavailable` are always `false`, and `userReaction` isn't populated.
+Authentication is optional. The history is read as the **caller**: the signed-in user, or — with a service key — the user named in `actingUserId`. Without one (no user token, or a key without `actingUserId`) the request is anonymous: deleted and moderator-removed comments are left out, no block rule applies, `isAuthorBlocked` and `isUnavailable` are always `false`, and `userReaction` isn't populated.
 
 An unknown `userId` returns an empty page.
 
@@ -33,7 +33,7 @@ An unknown `userId` returns an empty page.
 ### Acting user
 
 <ParamField query="actingUserId" type="string">
-  The user to read the history as. Takes effect only with a **service or master key**. A user token always reads as itself: naming its own ID changes nothing, and naming a different user returns `403 comment/unauthorized`. On a request with neither a key nor a user token it is ignored, and the request stays anonymous. With a key, the rules below (own removed comments, blocks, `blockedFilter`, the `isAuthorBlocked` / `isUnavailable` flags and `userReaction`) apply from that user's perspective.
+  The user to read the history as. Takes effect only with a **service key**. A user token always reads as itself: naming its own ID changes nothing, and naming a different user returns `403 comment/unauthorized`. On a request with neither a key nor a user token it is ignored, and the request stays anonymous. With a key, the rules below (own removed comments, blocks, `blockedFilter`, the `isAuthorBlocked` / `isUnavailable` flags and `userReaction`) apply from that user's perspective.
 </ParamField>
 
 ### Filtering

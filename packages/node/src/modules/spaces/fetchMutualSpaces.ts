@@ -5,7 +5,7 @@ import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 export interface FetchMutualSpacesProps {
   /** The OTHER user — spaces shared with this user are returned. */
   userId: string;
-  /** The acting (authenticated) user. A service/master key is required to name a user. */
+  /** The acting (authenticated) user. A service key is required to name a user. */
   actingUserId: string;
   page?: number;
   limit?: number;

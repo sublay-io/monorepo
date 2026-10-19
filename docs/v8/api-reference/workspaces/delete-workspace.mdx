@@ -25,7 +25,7 @@ Deletion **cascades** the entire subtree in one transaction, bottom-up: invitati
 ## Body Parameters
 
 <ParamField body="actingUserId" type="string">
-  Service/master keys only — the user to act as. Sent in the request body so the act-as-user path works on `DELETE`. **Enforced:** the owner-only guard runs against the named user, so a key naming a non-owner is refused exactly as that user would be. Omit it to act as the app itself (unbounded) — but on a call that cascade-deletes the whole subtree, prefer naming the owner so the request carries a user id. See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  Service keys only — the user to act as. Sent in the request body so the act-as-user path works on `DELETE`. **Enforced:** the owner-only guard runs against the named user, so a key naming a non-owner is refused exactly as that user would be. Omit it to act as the app itself (unbounded) — but on a call that cascade-deletes the whole subtree, prefer naming the owner so the request carries a user id. See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 
   The [node SDK](/v8/node-sdk/workspaces) is stricter than this endpoint: it types `actingUserId` as **required** here, so omitting it is only possible by calling the REST route directly.
 
@@ -65,6 +65,6 @@ Deletion **cascades** the entire subtree in one transaction, bottom-up: invitati
       "code": "workspace/invalid-body"
     }
     ```
-    Returned when a service/master key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would fall through to the unbounded path. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+    Returned when a service key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would fall through to the unbounded path. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
 </AccordionGroup>

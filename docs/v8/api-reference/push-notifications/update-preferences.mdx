@@ -6,7 +6,7 @@ description: "Set the authenticated user's disabled push notification types"
 
 Upserts the acting user's push notification preferences. The request **replaces** the whole disabled-types set — send the complete set you want stored, not a delta. Duplicates are collapsed; only valid event type names are accepted.
 
-Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) writes its own preferences. A service/master key acts on behalf of a named user via the optional body `userId` — a service key without `userId` is rejected, and an end-user token may not name a different user. Requires the `push` bundle.
+Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) writes its own preferences. A service key acts on behalf of a named user via the optional body `userId` — a service key without `userId` is rejected, and an end-user token may not name a different user. Requires the `push` bundle.
 
 ## Body Parameters
 
@@ -15,7 +15,7 @@ Requires authentication. **Acting-user-scoped:** an end-user token (`Authorizati
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The acting user whose preferences are written. **Service/master keys only** — a service key must pass it; an end-user token infers it from the auth token and may not name a different user.
+  The acting user whose preferences are written. **Service keys only** — a service key must pass it; an end-user token infers it from the auth token and may not name a different user.
 </ParamField>
 
 ## Response
@@ -49,7 +49,7 @@ Returns `200` with the stored set (deduplicated).
     ```json
     { "error": "Missing user ID", "code": "notification-preferences/missing-user-id" }
     ```
-    Returned when a service/master key omits the required `userId` (it has no implicit session user).
+    Returned when a service key omits the required `userId` (it has no implicit session user).
   </Accordion>
   <Accordion title="Invalid Body — 400">
     ```json

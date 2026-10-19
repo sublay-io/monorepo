@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/events/:eventId/invites"
 description: "Revoke a user's invite to an event (host-only)"
 ---
 
-Removes a user's [EventInvite](/v8/data-models/event-invite). **Host-only** (service/master keys bypass the check). Removing the invite **revokes access** to an `invite`-only event and also **deletes that user's RSVP** (decrementing the matching `rsvpCounts` entry), all under a row-level lock. Removing a non-invited user is an idempotent no-op success.
+Removes a user's [EventInvite](/v8/data-models/event-invite). **Host-only** (service keys bypass the check). Removing the invite **revokes access** to an `invite`-only event and also **deletes that user's RSVP** (decrementing the matching `rsvpCounts` entry), all under a row-level lock. Removing a non-invited user is an idempotent no-op success.
 
 ## Path Parameters
 

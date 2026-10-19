@@ -66,19 +66,19 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
 </ParamField>
 
 <ParamField body="userId" type="string">
-  Attribute the comment to a specific user. **Service or master key only**, and required with one — a key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. Useful for backfilling comments from external systems. A user token is always its own user: naming a different user returns `403 comment/unauthorized`.
+  Attribute the comment to a specific user. **Service key only**, and required with one — a key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. Useful for backfilling comments from external systems. A user token is always its own user: naming a different user returns `403 comment/unauthorized`.
 
   A `userId` that doesn't match a user returns `404 comment/user-not-found`.
 </ParamField>
 
 <ParamField body="createdAt" type="string">
-  Datetime to backfill a creation timestamp. **Service or master key only** — with a user token the value is ignored and the comment gets the current time.
+  Datetime to backfill a creation timestamp. **Service key only** — with a user token the value is ignored and the comment gets the current time.
 
   Must be a UTC ISO 8601 datetime ending in `Z`, such as `2026-01-15T09:30:00Z`. A value with an offset (`+02:00`) or a date without a time returns `400 comment/invalid-body` (`createdAt: Invalid ISO datetime`), whichever credential sends it.
 </ParamField>
 
 <ParamField body="updatedAt" type="string">
-  Datetime for `updatedAt`, in the same format as `createdAt` — UTC ISO 8601 ending in `Z`; anything else returns `400 comment/invalid-body`. **Service or master key only** — with a user token the value is ignored.
+  Datetime for `updatedAt`, in the same format as `createdAt` — UTC ISO 8601 ending in `Z`; anything else returns `400 comment/invalid-body`. **Service key only** — with a user token the value is ignored.
 
   Requires `createdAt`, and must be the same as or later than it; otherwise the request returns `400 comment/invalid-timestamp`. When only `createdAt` is sent, `updatedAt` is set to the same time.
 </ParamField>
@@ -122,7 +122,7 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     ```
   </Accordion>
   <Accordion title="Missing User — 400">
-    Returned when a service or master key sends no `userId`.
+    Returned when a service key sends no `userId`.
 
     ```json
     { "error": "Missing user ID", "code": "comment/missing-user-id" }
@@ -158,14 +158,14 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
-    Returned when a service or master key names a `userId` that doesn't exist.
+    Returned when a service key names a `userId` that doesn't exist.
 
     ```json
     { "error": "User not found", "code": "comment/user-not-found" }
     ```
   </Accordion>
   <Accordion title="Invalid Timestamp — 400">
-    Returned to a service or master key when `updatedAt` is sent without `createdAt`, or is earlier than it.
+    Returned to a service key when `updatedAt` is sent without `createdAt`, or is earlier than it.
 
     ```json
     { "error": "Cannot set updatedAt without also setting createdAt.", "code": "comment/invalid-timestamp" }

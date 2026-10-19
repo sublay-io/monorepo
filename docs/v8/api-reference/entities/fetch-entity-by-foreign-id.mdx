@@ -75,4 +75,10 @@ Returns an [Entity](/v8/data-models/entity) object.
     ```
     Returned when no entity with this `foreignId` exists and `createIfNotFound` is not `"true"`.
   </Accordion>
+  <Accordion title="Rejected by Validation Webhook — 400">
+    ```json
+    { "error": "Entities are created by server only", "code": "entity/webhook-validation-failed" }
+    ```
+    Returned when your `entity.created` [validation webhook](/v8/webhooks) rejects the entity that `createIfNotFound` would create. `error` carries the `message` your webhook returned. Nothing is stored.
+  </Accordion>
 </AccordionGroup>

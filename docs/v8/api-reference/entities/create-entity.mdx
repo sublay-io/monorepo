@@ -149,6 +149,12 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
     { "error": "User is not authorized to create this entity.", "code": "entity/unauthorized" }
     ```
   </Accordion>
+  <Accordion title="Rejected by Validation Webhook — 400">
+    ```json
+    { "error": "Entities are created by server only", "code": "entity/webhook-validation-failed" }
+    ```
+    Returned when your `entity.created` [validation webhook](/v8/webhooks) rejects the request. `error` carries the `message` your webhook returned. Nothing is stored.
+  </Accordion>
   <Accordion title="Space Not Found — 404">
     ```json
     { "error": "Space not found", "code": "entity/space-not-found" }

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import path from "path";
 
-import { getTargetPath, resolveFrameworkFile, resolveLanguageFile } from "./add";
+import { formatUsage, getTargetPath, resolveFrameworkFile, resolveLanguageFile } from "./add";
 import type { SublayConfig } from "./init";
 
 const config: SublayConfig = {
@@ -133,5 +133,20 @@ describe("resolveFrameworkFile", () => {
     expect(() =>
       resolveFrameworkFile({ files: [], frameworks: { next: "env/next.ts" } }, "next", "x")
     ).toThrow("has no utils/env.ts");
+  });
+});
+
+describe("formatUsage", () => {
+  it("puts the install path in place of {importPath}", () => {
+    expect(
+      formatUsage(
+        ['import { A, B } from "{importPath}";', "", "<A><B /></A>"],
+        "./src/components/comments-threaded"
+      )
+    ).toEqual([
+      'import { A, B } from "./src/components/comments-threaded";',
+      "",
+      "<A><B /></A>",
+    ]);
   });
 });

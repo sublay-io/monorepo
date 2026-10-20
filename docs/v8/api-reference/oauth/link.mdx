@@ -65,6 +65,12 @@ https://yourapp.com/callback?error=...&error_description=...
     }
     ```
   </Accordion>
+  <Accordion title="Session Ended — 401">
+    ```json
+    { "error": "This session has ended. Sign in again.", "code": "auth/session-ended" }
+    ```
+    The access token is still valid, but its session no longer exists (signed out, password reset, or the account was claimed by a provider sign-in after its email went unverified). Adding a provider needs a live session, so sign in again.
+  </Accordion>
 </AccordionGroup>
 
 ## See Also

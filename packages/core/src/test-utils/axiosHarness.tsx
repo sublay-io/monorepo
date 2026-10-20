@@ -89,7 +89,12 @@ export function mockAxiosInstance(instance: AxiosInstance): AxiosMockHandle {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const spies: Record<AxiosMethod, any> = {} as never;
   for (const method of AXIOS_METHODS) {
-    spies[method] = vi.spyOn(instance, method);
+    // Reuse a spy a test already installed on this method rather than
+    // spying again: a second vi.spyOn on a spied method doesn't stack the
+    // way it did in vitest 1, and the test's own handle then records no calls.
+    spies[method] = vi.isMockFunction(instance[method])
+      ? instance[method]
+      : vi.spyOn(instance, method);
   }
 
   return {

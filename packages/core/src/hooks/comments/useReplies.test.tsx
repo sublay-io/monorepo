@@ -340,12 +340,15 @@ describe("useReplies", () => {
     expect(result.current.replies.hasMore).toBe(false);
     expect(axiosPrivate.calls("get")).toHaveLength(1);
 
+    // Both renders share the instance's one `get` spy, so count what this
+    // render adds rather than the total.
+    const callsBefore = axiosPrivate.calls("get").length;
     const bare = renderWithCommentSection(() => useReplies({ commentId: C1 }));
     await act(async () => {
       await bare.result.current.loadMore();
     });
     expect(bare.result.current.replies).toEqual([]);
-    expect(bare.axiosPrivate.calls("get")).toHaveLength(0);
+    expect(bare.axiosPrivate.calls("get")).toHaveLength(callsBefore);
   });
 
   it("continues nested replies in the section's direction when only replySortBy is set", async () => {

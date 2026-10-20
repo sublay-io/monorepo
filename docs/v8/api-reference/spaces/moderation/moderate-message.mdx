@@ -27,7 +27,7 @@ Takes a direct moderation action on a chat message in a space's integrated conve
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only: the moderator the key acts for. The request then has exactly that user's moderation permissions; omit it to act as the project.
+  Required with a service key: the user this request acts as. The request has exactly that user's permissions, so it is refused unless they are a moderator or admin of the space, and it is recorded as theirs. With a user token, omit it (it may only name the token's own user).
 </ParamField>
 
 ## Response
@@ -43,21 +43,28 @@ Takes a direct moderation action on a chat message in a space's integrated conve
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="Not a Moderator — 403">
-    The user named by `actingUserId` cannot moderate this space.
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId`.
     ```json
-    { "error": "Moderator access required", "code": "space/moderator-required" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "space/missing-user-id" }
     ```
   </Accordion>
-  <Accordion title="Acting User Not Found — 400">
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
     ```json
-    { "error": "Acting user not found.", "code": "chat/acting-user-not-found" }
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
     ```
   </Accordion>
   <Accordion title="Unauthorized — 403">
     A user token sent an `actingUserId` other than its own user.
     ```json
-    { "error": "Unauthorized", "code": "chat/unauthorized" }
+    { "error": "Unauthorized", "code": "space/unauthorized" }
+    ```
+  </Accordion>
+  <Accordion title="Not a Moderator — 403">
+    The user named by `actingUserId` cannot moderate this space.
+    ```json
+    { "error": "Moderator access required", "code": "space/moderator-required" }
     ```
   </Accordion>
 </AccordionGroup>

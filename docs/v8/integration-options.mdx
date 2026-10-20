@@ -61,6 +61,7 @@ A service API key is generated once from the project dashboard and stored secure
 - **No user token required** — the service key bypasses user authentication entirely. You do not need to sign in as a user or manage token refresh on the server.
 - **Act on behalf of any user** — many endpoints accept a `userId` body parameter when the request is authenticated with a service key, allowing you to perform actions on behalf of a specific user.
 - **Elevated permissions** — the service key bypasses ownership checks, so it can update or delete any content, access draft entities, and read private user fields regardless of which user owns the resource.
+- **Space roles still apply** — on space admin, moderation and membership actions (editing a space, its rules and member roles; approving, declining, banning and unbanning members; handling reports and moderating content in a space; leaving a space), the key must name the user it acts as in `actingUserId`, and the request has exactly that user's role in the space.
 
 Requests with a service key require two headers:
 

@@ -26,6 +26,10 @@ Takes a direct moderation action on a comment in a space. Requires the caller to
   Optional reason for the moderation action. Up to 1,000 characters. Stored on the comment as `moderationReason`, which only moderators, keys and the comment's author can see — see [Moderation fields](/v8/data-models/comment#moderation-fields).
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Required with a service key: the user this request acts as. The request has exactly that user's permissions, so it is refused unless they are a moderator or admin of the space, and it is recorded as theirs. With a user token, omit it (it may only name the token's own user).
+</ParamField>
+
 ## Response
 
 <ResponseField name="message" type="string">
@@ -35,5 +39,34 @@ Takes a direct moderation action on a comment in a space. Requires the caller to
 <ResponseField name="moderationStatus" type="string">
   The resulting status: `"approved"` or `"removed"`.
 </ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "space/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent an `actingUserId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "space/unauthorized" }
+    ```
+  </Accordion>
+  <Accordion title="Not a Moderator — 403">
+    The caller (or the user named by `actingUserId`) is not a moderator or admin of the space.
+    ```json
+    { "error": "Moderator access required", "code": "space/moderator-required" }
+    ```
+  </Accordion>
+</AccordionGroup>
 
 See also: [useModerateSpaceComment](/v8/hooks/spaces/use-moderate-space-comment)

@@ -178,4 +178,4 @@ Beyond authentication, Sublay enforces authorization on every request:
 - Most write operations require an authenticated user (or a service API key)
 - Ownership checks are enforced server-side — a user cannot modify another user's content through the normal API
 - Space roles (owner, admin, moderator, member) control what is permitted within a space
-- Service API keys bypass user-level authorization and are intended for server-side use only — see [Integration Options](/v8/integration-options#service-api-key-recommended-for-server-to-server)
+- Service API keys bypass user-level authorization, except on space admin, moderation and membership actions, where the key names the user it acts as (`actingUserId`) and that user's space role applies. They are intended for server-side use only — see [Integration Options](/v8/integration-options#service-api-key-recommended-for-server-to-server)

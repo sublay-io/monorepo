@@ -13,10 +13,10 @@ export interface HandleSpaceChatReportProps {
   /** The message to remove, required when actions include "remove-message". */
   messageId?: string;
   /**
-   * The moderator a service key acts for. The request then has exactly that
-   * moderator's permissions. Omit it to act as the project.
+   * The user this request acts as. The request has exactly that user's
+   * permissions in the space and is recorded as theirs. Required.
    */
-  actingUserId?: string;
+  actingUserId: string;
 }
 
 export interface HandleSpaceChatReportResponse {

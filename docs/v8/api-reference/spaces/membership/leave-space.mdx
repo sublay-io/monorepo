@@ -12,6 +12,12 @@ Removes the authenticated user's membership from a space and from its child spac
   UUID of the space to leave.
 </ParamField>
 
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Required with a service key: the user this request acts as. The request has exactly that user's permissions, so it is refused unless they are an active member of the space, and it is recorded as theirs. With a user token, omit it (it may only name the token's own user).
+</ParamField>
+
 ## Response
 
 <ResponseField name="message" type="string">
@@ -21,14 +27,26 @@ Removes the authenticated user's membership from a space and from its child spac
 ## Errors
 
 <AccordionGroup>
-  <Accordion title="No Membership — 404">
-    A service key acted for a user who has no membership in the space.
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId`.
     ```json
-    { "error": "You are not a member of this space.", "code": "space/not-member" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "space/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent an `actingUserId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "space/unauthorized" }
     ```
   </Accordion>
   <Accordion title="Not a Member — 403">
-    The user is not an active member of the space (for example, banned), including when a service key acts for them.
+    The user is not an active member of the space (no membership, or one that is pending, banned or rejected), including when a service key acts for them.
     ```json
     { "error": "Space membership required", "code": "space/membership-required" }
     ```

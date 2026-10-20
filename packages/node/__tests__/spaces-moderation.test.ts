@@ -23,10 +23,11 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
       reportId: "r1",
       entityId: "e1",
       actions: ["remove-entity", "ban-user"],
+      actingUserId: "u-actor",
     });
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/reports/entity/r1",
-      { entityId: "e1", actions: ["remove-entity", "ban-user"] },
+      { entityId: "e1", actions: ["remove-entity", "ban-user"], actingUserId: "u-actor" },
     );
   });
 
@@ -37,28 +38,39 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
       reportId: "r1",
       commentId: "c1",
       actions: ["remove-comment", "dismiss"],
+      actingUserId: "u-actor",
     });
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/reports/comment/r1",
-      { commentId: "c1", actions: ["remove-comment", "dismiss"] },
+      { commentId: "c1", actions: ["remove-comment", "dismiss"], actingUserId: "u-actor" },
     );
   });
 
   it("moderateSpaceEntity strips spaceId/entityId into the path and patches the rest", async () => {
     const { client, projectInstance } = makeClient();
-    await moderateSpaceEntity(client, { spaceId: "s1", entityId: "e1", action: "remove" });
+    await moderateSpaceEntity(client, {
+      spaceId: "s1",
+      entityId: "e1",
+      action: "remove",
+      actingUserId: "u-actor",
+    });
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/entities/e1/moderation",
-      { action: "remove" },
+      { action: "remove", actingUserId: "u-actor" },
     );
   });
 
   it("moderateSpaceComment strips spaceId/commentId into the path and patches the rest", async () => {
     const { client, projectInstance } = makeClient();
-    await moderateSpaceComment(client, { spaceId: "s1", commentId: "c1", action: "approve" });
+    await moderateSpaceComment(client, {
+      spaceId: "s1",
+      commentId: "c1",
+      action: "approve",
+      actingUserId: "u-actor",
+    });
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/comments/c1/moderation",
-      { action: "approve" },
+      { action: "approve", actingUserId: "u-actor" },
     );
   });
 
@@ -70,7 +82,7 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
     });
   });
 
-  it("moderateSpaceChatMessage sends the body as-is, including optional actingUserId, with no extra client-side gating", async () => {
+  it("moderateSpaceChatMessage sends the body as-is, including actingUserId, with no extra client-side gating", async () => {
     const { client, projectInstance } = makeClient();
     await moderateSpaceChatMessage(client, {
       spaceId: "s1",
@@ -84,20 +96,7 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
     );
   });
 
-  it("moderateSpaceChatMessage works with actingUserId omitted (backend/system action)", async () => {
-    const { client, projectInstance } = makeClient();
-    await moderateSpaceChatMessage(client, {
-      spaceId: "s1",
-      messageId: "msg1",
-      moderationStatus: "removed",
-    });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
-      "/spaces/s1/chat/messages/msg1/moderation",
-      { moderationStatus: "removed" },
-    );
-  });
-
-  it("handleSpaceChatReport sends the body as-is, including optional actingUserId, with no extra client-side gating", async () => {
+  it("handleSpaceChatReport sends the body as-is, including actingUserId, with no extra client-side gating", async () => {
     const { client, projectInstance } = makeClient();
     await handleSpaceChatReport(client, {
       spaceId: "s1",
@@ -120,24 +119,33 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
 
   it("createRule strips spaceId into the path and posts the rest", async () => {
     const { client, projectInstance } = makeClient();
-    await createRule(client, { spaceId: "s1", title: "Be nice" });
+    await createRule(client, { spaceId: "s1", title: "Be nice", actingUserId: "u-actor" });
     expect(projectInstance.post).toHaveBeenCalledWith("/spaces/s1/rules", {
       title: "Be nice",
+      actingUserId: "u-actor",
     });
   });
 
   it("updateRule strips spaceId/ruleId into the path and patches the rest", async () => {
     const { client, projectInstance } = makeClient();
-    await updateRule(client, { spaceId: "s1", ruleId: "r1", title: "Updated" });
+    await updateRule(client, {
+      spaceId: "s1",
+      ruleId: "r1",
+      title: "Updated",
+      actingUserId: "u-actor",
+    });
     expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1/rules/r1", {
       title: "Updated",
+      actingUserId: "u-actor",
     });
   });
 
-  it("deleteRule deletes /spaces/:id/rules/:ruleId", async () => {
+  it("deleteRule deletes /spaces/:id/rules/:ruleId sending actingUserId as a param", async () => {
     const { client, projectInstance } = makeClient();
-    await deleteRule(client, { spaceId: "s1", ruleId: "r1" });
-    expect(projectInstance.delete).toHaveBeenCalledWith("/spaces/s1/rules/r1");
+    await deleteRule(client, { spaceId: "s1", ruleId: "r1", actingUserId: "u-actor" });
+    expect(projectInstance.delete).toHaveBeenCalledWith("/spaces/s1/rules/r1", {
+      params: { actingUserId: "u-actor" },
+    });
   });
 
   it("fetchRule hits /spaces/:id/rules/:ruleId with no params", async () => {
@@ -152,11 +160,12 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
     expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/rules");
   });
 
-  it("reorderRules patches the reorder route with ruleIds in the body", async () => {
+  it("reorderRules patches the reorder route with ruleIds and actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await reorderRules(client, { spaceId: "s1", ruleIds: ["r2", "r1"] });
+    await reorderRules(client, { spaceId: "s1", ruleIds: ["r2", "r1"], actingUserId: "u-actor" });
     expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1/rules/reorder", {
       ruleIds: ["r2", "r1"],
+      actingUserId: "u-actor",
     });
   });
 });
@@ -172,6 +181,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
         reportId: "r1",
         entityId: "e1",
         actions: ["dismiss"],
+        actingUserId: "u-actor",
       }),
     ).resolves.toEqual(result);
   });
@@ -186,6 +196,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
         reportId: "r1",
         commentId: "c1",
         actions: ["dismiss"],
+        actingUserId: "u-actor",
       }),
     ).resolves.toEqual(result);
   });
@@ -195,7 +206,12 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
     const result = { message: "moderated" };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
-      moderateSpaceEntity(client, { spaceId: "s1", entityId: "e1", action: "remove" }),
+      moderateSpaceEntity(client, {
+        spaceId: "s1",
+        entityId: "e1",
+        action: "remove",
+        actingUserId: "u-actor",
+      }),
     ).resolves.toEqual(result);
   });
 
@@ -204,7 +220,12 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
     const result = { message: "moderated" };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
-      moderateSpaceComment(client, { spaceId: "s1", commentId: "c1", action: "approve" }),
+      moderateSpaceComment(client, {
+        spaceId: "s1",
+        commentId: "c1",
+        action: "approve",
+        actingUserId: "u-actor",
+      }),
     ).resolves.toEqual(result);
   });
 
@@ -226,6 +247,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
         spaceId: "s1",
         messageId: "msg1",
         moderationStatus: "removed",
+        actingUserId: "u-actor",
       }),
     ).resolves.toEqual(result);
   });
@@ -239,6 +261,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
         spaceId: "s1",
         reportId: "r1",
         actions: ["dismiss"],
+        actingUserId: "u-actor",
       }),
     ).resolves.toEqual(result);
   });
@@ -248,7 +271,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
     const rule = { id: "r1", title: "Be nice" };
     projectInstance.post.mockResolvedValueOnce({ data: rule });
     await expect(
-      createRule(client, { spaceId: "s1", title: "Be nice" }),
+      createRule(client, { spaceId: "s1", title: "Be nice", actingUserId: "u-actor" }),
     ).resolves.toEqual(rule);
   });
 
@@ -257,7 +280,12 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
     const rule = { id: "r1", title: "Updated" };
     projectInstance.patch.mockResolvedValueOnce({ data: rule });
     await expect(
-      updateRule(client, { spaceId: "s1", ruleId: "r1", title: "Updated" }),
+      updateRule(client, {
+        spaceId: "s1",
+        ruleId: "r1",
+        title: "Updated",
+        actingUserId: "u-actor",
+      }),
     ).resolves.toEqual(rule);
   });
 
@@ -266,7 +294,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
     const result = { deleted: true };
     projectInstance.delete.mockResolvedValueOnce({ data: result });
     await expect(
-      deleteRule(client, { spaceId: "s1", ruleId: "r1" }),
+      deleteRule(client, { spaceId: "s1", ruleId: "r1", actingUserId: "u-actor" }),
     ).resolves.toEqual(result);
   });
 
@@ -291,7 +319,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
     const rules = [{ id: "r2" }, { id: "r1" }];
     projectInstance.patch.mockResolvedValueOnce({ data: rules });
     await expect(
-      reorderRules(client, { spaceId: "s1", ruleIds: ["r2", "r1"] }),
+      reorderRules(client, { spaceId: "s1", ruleIds: ["r2", "r1"], actingUserId: "u-actor" }),
     ).resolves.toEqual(rules);
   });
 });

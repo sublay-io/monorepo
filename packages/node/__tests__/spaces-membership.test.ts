@@ -21,11 +21,11 @@ describe("node-sdk spaces (membership) — request shaping", () => {
     });
   });
 
-  it("leaveSpace sends userId as a param to /spaces/:id/leave", async () => {
+  it("leaveSpace sends actingUserId as a param to /spaces/:id/leave", async () => {
     const { client, projectInstance } = makeClient();
-    await leaveSpace(client, { spaceId: "s1", userId: "u1" });
+    await leaveSpace(client, { spaceId: "s1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/spaces/s1/leave", {
-      params: { userId: "u1" },
+      params: { actingUserId: "u1" },
     });
   });
 
@@ -54,44 +54,58 @@ describe("node-sdk spaces (membership) — request shaping", () => {
     });
   });
 
-  it("updateMemberRole patches the role route with role in the body", async () => {
+  it("updateMemberRole patches the role route with role and actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await updateMemberRole(client, { spaceId: "s1", memberId: "m1", role: "moderator" });
+    await updateMemberRole(client, {
+      spaceId: "s1",
+      memberId: "m1",
+      role: "moderator",
+      actingUserId: "u-actor",
+    });
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/members/m1/role",
-      { role: "moderator" },
+      { role: "moderator", actingUserId: "u-actor" },
     );
   });
 
-  it("approveMembership patches the approve route with no body", async () => {
+  it("approveMembership patches the approve route sending actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await approveMembership(client, { spaceId: "s1", memberId: "m1" });
+    await approveMembership(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" });
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/members/m1/approve",
+      { actingUserId: "u-actor" },
     );
   });
 
-  it("declineMembership patches the decline route with no body", async () => {
+  it("declineMembership patches the decline route sending actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await declineMembership(client, { spaceId: "s1", memberId: "m1" });
+    await declineMembership(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" });
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/members/m1/decline",
+      { actingUserId: "u-actor" },
     );
   });
 
-  it("banMember patches the ban route, sending the optional reason", async () => {
+  it("banMember patches the ban route, sending the optional reason and actingUserId", async () => {
     const { client, projectInstance } = makeClient();
-    await banMember(client, { spaceId: "s1", memberId: "m1", reason: "spam" });
+    await banMember(client, {
+      spaceId: "s1",
+      memberId: "m1",
+      reason: "spam",
+      actingUserId: "u-actor",
+    });
     expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1/members/m1/ban", {
       reason: "spam",
+      actingUserId: "u-actor",
     });
   });
 
-  it("unbanMember patches the unban route with no body", async () => {
+  it("unbanMember patches the unban route sending actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await unbanMember(client, { spaceId: "s1", memberId: "m1" });
+    await unbanMember(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" });
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/members/m1/unban",
+      { actingUserId: "u-actor" },
     );
   });
 });
@@ -111,7 +125,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
     const result = { left: true };
     projectInstance.delete.mockResolvedValueOnce({ data: result });
     await expect(
-      leaveSpace(client, { spaceId: "s1", userId: "u1" }),
+      leaveSpace(client, { spaceId: "s1", actingUserId: "u1" }),
     ).resolves.toEqual(result);
   });
 
@@ -143,7 +157,12 @@ describe("node-sdk spaces (membership) — response mapping", () => {
     const result = { membership: { id: "m1", role: "moderator" } };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
-      updateMemberRole(client, { spaceId: "s1", memberId: "m1", role: "moderator" }),
+      updateMemberRole(client, {
+        spaceId: "s1",
+        memberId: "m1",
+        role: "moderator",
+        actingUserId: "u-actor",
+      }),
     ).resolves.toEqual(result);
   });
 
@@ -152,7 +171,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
     const result = { message: "approved", membership: { id: "m1", status: "active" } };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
-      approveMembership(client, { spaceId: "s1", memberId: "m1" }),
+      approveMembership(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" }),
     ).resolves.toEqual(result);
   });
 
@@ -161,7 +180,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
     const result = { message: "declined", membership: { id: "m1", status: "rejected" } };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
-      declineMembership(client, { spaceId: "s1", memberId: "m1" }),
+      declineMembership(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" }),
     ).resolves.toEqual(result);
   });
 
@@ -170,7 +189,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
     const result = { message: "banned", membership: { id: "m1", status: "banned" as const } };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
-      banMember(client, { spaceId: "s1", memberId: "m1" }),
+      banMember(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" }),
     ).resolves.toEqual(result);
   });
 
@@ -179,7 +198,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
     const result = { message: "unbanned", membership: { id: "m1", status: "active" as const } };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
-      unbanMember(client, { spaceId: "s1", memberId: "m1" }),
+      unbanMember(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" }),
     ).resolves.toEqual(result);
   });
 });

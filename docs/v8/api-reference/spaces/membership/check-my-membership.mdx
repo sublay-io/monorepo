@@ -19,7 +19,7 @@ Returns the authenticated user's membership status and resolved permissions in a
 </ResponseField>
 
 <ResponseField name="role" type="string | null">
-  `"admin"`, `"moderator"`, `"member"`, or `null` if not a member.
+  `"admin"`, `"moderator"`, `"member"`, or `null` if not an active member.
 </ResponseField>
 
 <ResponseField name="status" type="string | null">
@@ -27,7 +27,7 @@ Returns the authenticated user's membership status and resolved permissions in a
 </ResponseField>
 
 <ResponseField name="joinedAt" type="Date | null">
-  When the membership was created. `null` if not a member.
+  When the membership was created. `null` if not an active member.
 </ResponseField>
 
 <ResponseField name="permissions" type="object">

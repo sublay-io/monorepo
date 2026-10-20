@@ -11,6 +11,11 @@ export interface HandleEntityReportProps {
   /** Why the user is banned, required when actions include "ban-user". The
    * banned user is always the author of the reported content. */
   reason?: string;
+  /**
+   * The user this request acts as. The request has exactly that user's
+   * permissions in the space and is recorded as theirs. Required.
+   */
+  actingUserId: string;
 }
 
 export interface HandleReportResponse {

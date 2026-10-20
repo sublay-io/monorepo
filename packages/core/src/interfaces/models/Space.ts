@@ -12,7 +12,7 @@ export interface SpaceMemberPermissions {
   isAdmin: boolean;
   isModerator: boolean;
   isMember: boolean;
-  status: "pending" | "active" | "banned" | null;
+  status: "pending" | "active" | "banned" | "rejected" | null;
   canPost: boolean;
   canModerate: boolean;
   canRead: boolean;

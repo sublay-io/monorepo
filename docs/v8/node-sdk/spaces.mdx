@@ -280,6 +280,7 @@ Updates settings on an existing space.
 ```typescript
 const space = await sublay.spaces.updateSpace({
   spaceId: "spc_abc123",
+  actingUserId: "usr_admin123",
   name: "Photography Community",
   postingPermission: "admins",
   requireJoinApproval: true,
@@ -288,6 +289,10 @@ const space = await sublay.spaces.updateSpace({
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID to update.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be an admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="name" type="string">

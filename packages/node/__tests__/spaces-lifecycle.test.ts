@@ -108,17 +108,23 @@ describe("node-sdk spaces (lifecycle) — request shaping", () => {
 
   it("updateSpace strips spaceId into the path and patches the rest", async () => {
     const { client, projectInstance } = makeClient();
-    await updateSpace(client, { spaceId: "s1", name: "New name" });
+    await updateSpace(client, { spaceId: "s1", name: "New name", actingUserId: "u-actor" });
     expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1", {
       name: "New name",
+      actingUserId: "u-actor",
     });
   });
 
   it("updateSpace forwards visibility in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await updateSpace(client, { spaceId: "s1", visibility: "unlisted" });
+    await updateSpace(client, {
+      spaceId: "s1",
+      visibility: "unlisted",
+      actingUserId: "u-actor",
+    });
     expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1", {
       visibility: "unlisted",
+      actingUserId: "u-actor",
     });
   });
 
@@ -219,7 +225,7 @@ describe("node-sdk spaces (lifecycle) — response mapping", () => {
     const space = { id: "s1", name: "New name" };
     projectInstance.patch.mockResolvedValueOnce({ data: space });
     await expect(
-      updateSpace(client, { spaceId: "s1", name: "New name" }),
+      updateSpace(client, { spaceId: "s1", name: "New name", actingUserId: "u-actor" }),
     ).resolves.toEqual(space);
   });
 

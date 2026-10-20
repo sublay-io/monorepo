@@ -603,10 +603,9 @@ const conversation = await sublay.spaces.getSpaceConversation({
 Removes a message in a space conversation.
 
 <Note>
-  On the two space-chat moderation routes, `actingUserId` is optional. Omit it
-  and your service key acts as the project, passing the space-moderator check.
-  Name a user and the request has exactly that user's moderation permissions:
-  it is refused if they cannot moderate the space.
+  On the space moderation routes, `actingUserId` is required: the request has
+  exactly that user's moderation permissions and is refused if they cannot
+  moderate the space.
 </Note>
 
 ```typescript
@@ -623,7 +622,7 @@ await sublay.spaces.moderateSpaceChatMessage({
 <ParamField body="messageId" type="string" required />
 <ParamField body="moderationStatus" type='"removed"' required />
 <ParamField body="moderationReason" type="string" />
-<ParamField body="actingUserId" type="string">The moderator the key acts for. The request then has exactly that moderator's permissions. Omit it to act as the project.</ParamField>
+<ParamField body="actingUserId" type="string" required>The moderator the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.</ParamField>
 
 **Returns** — `Promise<{ message: string; moderationStatus: string }>`
 
@@ -652,6 +651,6 @@ await sublay.spaces.handleSpaceChatReport({
 <ParamField body="messageId" type="string">Optional. The message is read from the report; if sent, it must be the reported message.</ParamField>
 <ParamField body="reason" type="string" />
 <ParamField body="summary" type="string">Stored as the report's resolution note.</ParamField>
-<ParamField body="actingUserId" type="string">The moderator the key acts for. The request then has exactly that moderator's permissions. Omit it to act as the project.</ParamField>
+<ParamField body="actingUserId" type="string" required>The moderator the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.</ParamField>
 
 **Returns** — `Promise<{ message: string; code: string }>`

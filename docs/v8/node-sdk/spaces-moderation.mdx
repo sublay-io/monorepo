@@ -16,6 +16,7 @@ Resolves a report filed against an entity in a space by applying one or more mod
 ```typescript
 const result = await sublay.spaces.handleEntityReport({
   spaceId: "spc_abc123",
+  actingUserId: "usr_mod123",
   reportId: "rpt_xyz789",
   entityId: "ent_xyz789",
   actions: ["remove-entity", "ban-user"],
@@ -26,6 +27,10 @@ const result = await sublay.spaces.handleEntityReport({
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID where the report was filed.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="reportId" type="string" required>
@@ -59,6 +64,7 @@ Resolves a report filed against a comment in a space by applying one or more mod
 ```typescript
 const result = await sublay.spaces.handleCommentReport({
   spaceId: "spc_abc123",
+  actingUserId: "usr_mod123",
   reportId: "rpt_abc456",
   commentId: "cmt_abc123",
   actions: ["dismiss"],
@@ -68,6 +74,10 @@ const result = await sublay.spaces.handleCommentReport({
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID where the report was filed.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="reportId" type="string" required>
@@ -113,6 +123,7 @@ Approves or removes an entity within a space.
 ```typescript
 const result = await sublay.spaces.moderateSpaceEntity({
   spaceId: "spc_abc123",
+  actingUserId: "usr_mod123",
   entityId: "ent_xyz789",
   action: "remove",
   reason: "Violates community guidelines",
@@ -121,6 +132,10 @@ const result = await sublay.spaces.moderateSpaceEntity({
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="entityId" type="string" required>
@@ -146,6 +161,7 @@ Sets the NSFW own-flag on an entity within a space — including other users' en
 ```typescript
 const result = await sublay.spaces.setSpaceEntityNsfw({
   spaceId: "spc_abc123",
+  actingUserId: "usr_mod123",
   entityId: "ent_xyz789",
   nsfw: true,
 });
@@ -153,6 +169,10 @@ const result = await sublay.spaces.setSpaceEntityNsfw({
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID containing the entity.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="entityId" type="string" required>
@@ -174,6 +194,7 @@ Approves or removes a comment within a space.
 ```typescript
 const result = await sublay.spaces.moderateSpaceComment({
   spaceId: "spc_abc123",
+  actingUserId: "usr_mod123",
   commentId: "cmt_abc123",
   action: "approve",
 });
@@ -181,6 +202,10 @@ const result = await sublay.spaces.moderateSpaceComment({
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="commentId" type="string" required>
@@ -249,6 +274,7 @@ Creates a new rule for a space.
 ```typescript
 const rule = await sublay.spaces.createRule({
   spaceId: "spc_abc123",
+  actingUserId: "usr_admin123",
   title: "Be respectful",
   description: "Treat all members with respect and courtesy.",
 });
@@ -256,6 +282,10 @@ const rule = await sublay.spaces.createRule({
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be an admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="title" type="string" required>
@@ -277,6 +307,7 @@ Updates an existing rule's title or description.
 ```typescript
 const rule = await sublay.spaces.updateRule({
   spaceId: "spc_abc123",
+  actingUserId: "usr_admin123",
   ruleId: "rul_xyz789",
   title: "Be respectful and kind",
   description: "Updated description.",
@@ -285,6 +316,10 @@ const rule = await sublay.spaces.updateRule({
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be an admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="ruleId" type="string" required>
@@ -310,12 +345,17 @@ Deletes a rule from a space.
 ```typescript
 const result = await sublay.spaces.deleteRule({
   spaceId: "spc_abc123",
+  actingUserId: "usr_admin123",
   ruleId: "rul_xyz789",
 });
 ```
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be an admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="ruleId" type="string" required>
@@ -333,12 +373,17 @@ Sets the display order of all rules for a space by providing an ordered array of
 ```typescript
 const rules = await sublay.spaces.reorderRules({
   spaceId: "spc_abc123",
+  actingUserId: "usr_admin123",
   ruleIds: ["rul_first", "rul_second", "rul_third"],
 });
 ```
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be an admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="ruleIds" type="string[]" required>

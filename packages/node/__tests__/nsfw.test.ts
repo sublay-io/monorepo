@@ -12,16 +12,17 @@ import type { Space } from "../src/interfaces/Space";
  * to the request. Type-level assertions below guard the interface fields.
  */
 describe("node-sdk NSFW — request shaping", () => {
-  it("setSpaceEntityNsfw patches /spaces/:spaceId/entities/:entityId/nsfw with { nsfw }", async () => {
+  it("setSpaceEntityNsfw patches /spaces/:spaceId/entities/:entityId/nsfw with { nsfw, actingUserId }", async () => {
     const { client, projectInstance } = makeClient();
     await setSpaceEntityNsfw(client, {
       spaceId: "s1",
       entityId: "e1",
       nsfw: true,
+      actingUserId: "u-actor",
     });
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/entities/e1/nsfw",
-      { nsfw: true },
+      { nsfw: true, actingUserId: "u-actor" },
     );
   });
 
@@ -30,7 +31,12 @@ describe("node-sdk NSFW — request shaping", () => {
     const result = { message: "Entity NSFW flag updated.", nsfw: true };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
-      setSpaceEntityNsfw(client, { spaceId: "s1", entityId: "e1", nsfw: true }),
+      setSpaceEntityNsfw(client, {
+        spaceId: "s1",
+        entityId: "e1",
+        nsfw: true,
+        actingUserId: "u-actor",
+      }),
     ).resolves.toEqual(result);
   });
 
@@ -68,7 +74,7 @@ describe("node-sdk NSFW — request shaping", () => {
 
   it("updateSpace forwards the own nsfw flag in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await updateSpace(client, { spaceId: "s1", nsfw: true });
+    await updateSpace(client, { spaceId: "s1", nsfw: true, actingUserId: "u-actor" });
     const [, body] = projectInstance.patch.mock.calls[0];
     expect(body).toEqual(expect.objectContaining({ nsfw: true }));
   });

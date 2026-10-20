@@ -47,7 +47,7 @@ Returned when fetching a single space by ID, shortId, or slug. Includes all `Spa
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `memberPermissions` | `SpaceMemberPermissions \| null` | The authenticated user's resolved permissions in this space. `null` if the user is not a member. |
+| `memberPermissions` | `SpaceMemberPermissions \| null` | The authenticated user's resolved permissions in this space. `null` if the user has no membership in this space. A pending, banned or rejected user gets it with `isMember: false` and their `status`. |
 | `parentSpace` | `SpacePreview \| null` | Preview of the parent space. `null` for root-level spaces. |
 | `childSpaces` | `SpacePreview[]` | Preview of up to 10 immediate child spaces. |
 
@@ -69,14 +69,14 @@ A minimal space shape used only as an embedded reference — never returned dire
 
 ## SpaceMemberPermissions
 
-Included in `SpaceDetailed.memberPermissions` for authenticated users who are members.
+Included in `SpaceDetailed.memberPermissions` for authenticated users with a membership in the space, whatever its status.
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `isAdmin` | `boolean` | Whether the user is an admin of this space. |
 | `isModerator` | `boolean` | Whether the user is a moderator of this space. |
 | `isMember` | `boolean` | Whether the user has an active membership. |
-| `status` | `"pending" \| "active" \| "banned" \| null` | The user's membership status. |
+| `status` | `"pending" \| "active" \| "banned" \| "rejected" \| null` | The user's membership status. |
 | `canPost` | `boolean` | Whether the user can post entities in this space. |
 | `canModerate` | `boolean` | Whether the user can perform moderation actions. |
 | `canRead` | `boolean` | Whether the user can read content in this space. |

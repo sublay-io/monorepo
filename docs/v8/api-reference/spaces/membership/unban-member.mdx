@@ -4,7 +4,7 @@ api: "PATCH /v8/:projectId/spaces/:spaceId/members/:memberId/unban"
 description: "Unban a previously banned member"
 ---
 
-Sets a banned member's status back to `"active"`, in this space and in the child spaces where they are banned (a ban covers child spaces, and so does lifting it). A request that was pending or rejected in a child space before the ban stays as it was. Unbanning makes the person an active member of this space even if they were never approved, for example when their request was still pending at the time of the ban. The member gets each space's chat back the next time they open it. Requires the caller to be a moderator or admin. Moderators can only unban regular members, not other moderators or admins. Only the **space creator** (or a service key) can unban an admin, as only they can ban one.
+Sets a banned member's status back to `"active"`, in this space and in the child spaces where they are banned (a ban covers child spaces, and so does lifting it). A request that was pending or rejected in a child space before the ban stays as it was. Unbanning makes the person an active member of this space even if they were never approved, for example when their request was still pending at the time of the ban. The member gets each space's chat back the next time they open it. Requires the caller to be a moderator or admin. Moderators can only unban regular members, not other moderators or admins. Only the **space creator** can unban an admin, as only they can ban one.
 
 ## Path Parameters
 
@@ -77,7 +77,7 @@ Sets a banned member's status back to `"active"`, in this space and in the child
     ```
   </Accordion>
   <Accordion title="Creator Required — 403">
-    Unbanning someone who is an admin in this space or in one of the child spaces the unban covers, by anyone but the space creator or a service key.
+    Unbanning someone who is an admin in this space or in one of the child spaces the unban covers, by anyone but the space creator.
     ```json
     { "error": "Only the space creator can unban admins.", "code": "space/creator-required" }
     ```

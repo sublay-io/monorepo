@@ -106,6 +106,12 @@ Returns `200` with the stored device record on success.
     The registration could not be written. No diagnostic detail is returned;
     retry.
   </Accordion>
+  <Accordion title="Session Ended — 401">
+    ```json
+    { "error": "This session has ended. Sign in again.", "code": "auth/session-ended" }
+    ```
+    The access token is still valid, but its session no longer exists (signed out, password reset, or the account was claimed by a provider sign-in after its email went unverified). A device binding outlives the session that makes it, so registering needs a live session. Sign in again.
+  </Accordion>
 </AccordionGroup>
 
 **Rate limit:** 50 requests per 5 minutes per IP. Exceeding it returns `429` with a plain-text message and no `code`.

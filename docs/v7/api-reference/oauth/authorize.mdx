@@ -45,6 +45,8 @@ https://yourapp.com/callback#accessToken=...&refreshToken=...
 https://yourapp.com/callback?error=access_denied&error_description=...
 ```
 
+`error=email_not_verified` means the provider's email belongs to an existing user but the provider hasn't verified it, so the sign-in can't be connected to that account. `error_description` says so in words you can show the user: verify the email with the provider, or sign in the way they originally signed up.
+
 ## Error Responses
 
 <AccordionGroup>

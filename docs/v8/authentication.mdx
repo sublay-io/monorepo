@@ -139,8 +139,10 @@ Each provider must be configured in the project dashboard with:
     Sublay exchanges the authorization code for the provider's tokens, fetches the user profile, and resolves which Sublay user to return using this priority:
 
     1. **Existing identity** — if this provider account has signed in before, the matching user is returned immediately.
-    2. **Verified email match** — if the provider supplies a verified email that matches an existing user, the new identity is linked to that account automatically.
-    3. **New user** — if no match is found, a new user is created from the provider profile (name, email, avatar).
+    2. **Email match** — if the provider's email matches an existing user:
+       - **The provider has verified the email:** the new identity is linked to that account. If the account had never verified its own email, its password is removed and all of its sessions are signed out, since whoever set that password may not own the address (someone can sign up with another person's email first). The provider sign-in keeps the account, and the email is marked verified.
+       - **The provider hasn't verified the email:** the sign-in is refused with `error=email_not_verified`, because an unverified email can't prove the account is theirs.
+    3. **New user** — if no user has the email, a new user is created from the provider profile (name, email, avatar).
 
     Sublay then redirects to the `redirectAfterAuth` URL with Sublay tokens appended as query parameters.
   </Step>

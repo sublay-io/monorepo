@@ -28,4 +28,15 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
   Array of [SpaceMemberWithUser](/v7/data-models/space-member) objects with `role` of `"admin"` or `"moderator"` and `status` of `"active"`.
 </ResponseField>
 
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Members Only — 403">
+    The space has `readingPermission: "members"` and the caller is not an active member (no membership, or one that is pending, banned or rejected).
+    ```json
+    { "error": "This space requires membership. You must be a member to view the team.", "code": "space/members-access-denied" }
+    ```
+  </Accordion>
+</AccordionGroup>
+
 See also: [useFetchSpaceTeam](/v7/hooks/spaces/use-fetch-space-team)

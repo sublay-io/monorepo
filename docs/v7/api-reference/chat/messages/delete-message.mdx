@@ -9,7 +9,7 @@ Deletes a message. The behavior differs based on who is deleting:
 - **Author self-delete**: The message is soft-deleted. The row is retained as a `[Message deleted]` placeholder — content, GIF, mentions, and metadata are cleared, and `userDeletedAt` is set. File attachments are deleted from storage.
 - **Group admin moderation delete**: The message is marked `moderationStatus: "removed"` and excluded from all future queries. Content is not cleared; the record is retained for moderation audit purposes.
 
-The caller must be either the message author or a group `admin`.
+The caller must be either the message author or an active group `admin`. An admin who left or was removed can still delete their own messages, but not other members'.
 
 ## Path Parameters
 

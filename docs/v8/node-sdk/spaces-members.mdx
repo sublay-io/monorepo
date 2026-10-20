@@ -34,12 +34,12 @@ const result = await sublay.spaces.joinSpace({
 
 ### leaveSpace
 
-Removes a user from a space.
+Removes a member from a space, acting as that member.
 
 ```typescript
 const result = await sublay.spaces.leaveSpace({
   spaceId: "spc_abc123",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -47,8 +47,8 @@ const result = await sublay.spaces.leaveSpace({
   The Sublay space ID.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID to remove.
+<ParamField body="actingUserId" type="string" required>
+  The member who leaves: the request acts as them, and they must be an active member of the space.
 </ParamField>
 
 **Returns** — `Promise<LeaveSpaceResponse>`
@@ -141,6 +141,7 @@ Updates a member's role within a space.
 ```typescript
 const result = await sublay.spaces.updateMemberRole({
   spaceId: "spc_abc123",
+  actingUserId: "usr_admin123",
   memberId: "mem_xyz789",
   role: "moderator",
 });
@@ -148,6 +149,10 @@ const result = await sublay.spaces.updateMemberRole({
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be an admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="memberId" type="string" required>
@@ -169,12 +174,17 @@ Approves a pending membership request. Only relevant when the space has `require
 ```typescript
 const result = await sublay.spaces.approveMembership({
   spaceId: "spc_abc123",
+  actingUserId: "usr_mod123",
   memberId: "mem_xyz789",
 });
 ```
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="memberId" type="string" required>
@@ -192,12 +202,17 @@ Declines and removes a pending membership request.
 ```typescript
 const result = await sublay.spaces.declineMembership({
   spaceId: "spc_abc123",
+  actingUserId: "usr_mod123",
   memberId: "mem_xyz789",
 });
 ```
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="memberId" type="string" required>
@@ -215,12 +230,17 @@ Bans a member from a space, preventing them from rejoining.
 ```typescript
 const result = await sublay.spaces.banMember({
   spaceId: "spc_abc123",
+  actingUserId: "usr_mod123",
   memberId: "mem_xyz789",
 });
 ```
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="memberId" type="string" required>
@@ -242,12 +262,17 @@ Removes a ban, allowing the user to rejoin the space.
 ```typescript
 const result = await sublay.spaces.unbanMember({
   spaceId: "spc_abc123",
+  actingUserId: "usr_mod123",
   memberId: "mem_xyz789",
 });
 ```
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
 <ParamField body="memberId" type="string" required>

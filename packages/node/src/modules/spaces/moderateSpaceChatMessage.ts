@@ -6,10 +6,10 @@ export interface ModerateSpaceChatMessageProps {
   moderationStatus: "removed";
   moderationReason?: string;
   /**
-   * The moderator the key acts for: the request then has exactly that
-   * moderator's permissions in the space. Omit it to act as the project.
+   * The user this request acts as. The request has exactly that user's
+   * permissions in the space and is recorded as theirs. Required.
    */
-  actingUserId?: string;
+  actingUserId: string;
 }
 
 export interface ModerateSpaceChatMessageResponse {

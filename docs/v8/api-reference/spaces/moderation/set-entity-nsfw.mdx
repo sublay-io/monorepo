@@ -28,6 +28,10 @@ Requires the `entities` bundle in addition to `spaces`.
   `true` to flag the entity as NSFW, `false` to clear the flag.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Required with a service key: the user this request acts as. The request has exactly that user's permissions, so it is refused unless they are a moderator or admin of the space, and it is recorded as theirs. With a user token, omit it (it may only name the token's own user).
+</ParamField>
+
 ## Response
 
 <ResponseField name="message" type="string">
@@ -41,6 +45,30 @@ Requires the `entities` bundle in addition to `spaces`.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "space/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent an `actingUserId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "space/unauthorized" }
+    ```
+  </Accordion>
+  <Accordion title="Not a Moderator — 403">
+    The caller (or the user named by `actingUserId`) is not a moderator or admin of the space.
+    ```json
+    { "error": "Moderator access required", "code": "space/moderator-required" }
+    ```
+  </Accordion>
   <Accordion title="Invalid Body — 400">
     ```json
     { "error": "Invalid request body.", "code": "moderation/invalid-body" }

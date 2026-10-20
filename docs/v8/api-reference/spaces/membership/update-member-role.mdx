@@ -22,6 +22,10 @@ Changes a member's role. Only space admins can perform this action. The role als
   New role: `"admin"`, `"moderator"`, or `"member"`.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Required with a service key: the user this request acts as. The request has exactly that user's permissions, so it is refused unless they are an admin of the space, and it is recorded as theirs. With a user token, omit it (it may only name the token's own user).
+</ParamField>
+
 ## Response
 
 <ResponseField name="message" type="string">
@@ -35,6 +39,30 @@ Changes a member's role. Only space admins can perform this action. The role als
 ## Errors
 
 <AccordionGroup>
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "space/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent an `actingUserId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "space/unauthorized" }
+    ```
+  </Accordion>
+  <Accordion title="Not an Admin — 403">
+    The caller (or the user named by `actingUserId`) is not an admin of the space.
+    ```json
+    { "error": "Admin access required", "code": "space/admin-required" }
+    ```
+  </Accordion>
   <Accordion title="Membership Not Found — 404">
     ```json
     { "error": "Membership not found.", "code": "space/membership-not-found" }

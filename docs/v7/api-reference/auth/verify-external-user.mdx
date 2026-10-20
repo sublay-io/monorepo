@@ -6,7 +6,7 @@ description: "Verify or create a user from an external auth system JWT"
 
 Accepts a JWT signed by your own auth system and returns Sublay tokens. If the user does not exist in the project, they are created. If they do exist, their profile is updated with any changed fields from the JWT payload.
 
-A user who hasn't signed in this way before is matched by `email` to an existing user. Sublay trusts your auth system to have confirmed that email, so if the matched user never verified it, its password is removed, every provider linked to it is unlinked, and all of its sessions are signed out: whoever set that account up may not own the address.
+A user who hasn't signed in this way before is matched by `email` to an existing user. Sublay trusts your auth system to have confirmed that email, so if the matched user never verified it, its password is removed, every provider linked to it is unlinked, and all of its sessions are signed out (an access token already issued stops working within 30 minutes and can't be used to add a password or provider): whoever set that account up may not own the address.
 
 The JWT must be signed with the RSA private key corresponding to the public key configured in your Sublay project settings.
 

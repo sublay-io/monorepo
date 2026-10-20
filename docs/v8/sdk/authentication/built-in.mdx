@@ -324,9 +324,9 @@ On success, `user.isVerified` is updated immediately in the local Redux store â€
 
 ### Link mode
 
-When using `mode: "link"`, the email contains a button the user clicks. The server verifies the token and either:
-- Redirects to the `redirectUrl` you provided with `?verified=true` appended, or
-- Renders a hosted success page if no `redirectUrl` was given.
+When using `mode: "link"`, the email contains a button that opens a Sublay page asking the user to confirm (so an email scanner opening the link verifies nothing). When they click **Confirm my email**, the email is verified and they see a success page that either:
+- sends them on to the `redirectUrl` you provided, with `verified=true` added, after 5 seconds, or
+- stays on the success page if no `redirectUrl` was given.
 
 The `user.isVerified` field will be `true` the next time the user's session is loaded (e.g. on next sign-in or token refresh). There is no SDK callback for link-mode verification since it happens outside the app's JS context.
 

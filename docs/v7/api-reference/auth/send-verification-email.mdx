@@ -16,7 +16,7 @@ All parameters are optional.
   Delivery mode.
 
   - `"code"` — The email contains a short token the user types into your app. Call the [Verify Email](/v7/api-reference/auth/verify-email) endpoint to complete verification.
-  - `"link"` — The email contains a clickable button. When clicked, the server verifies the token and redirects the user (or renders a hosted confirmation page).
+  - `"link"` — The email contains a button that opens a Sublay page where the user confirms; confirming verifies the email, then shows a success page that sends them on to `redirectUrl` (or stays there if none was given). See [Verify Email Link](/v7/api-reference/auth/verify-email-link).
 </ParamField>
 
 <ParamField body="tokenFormat" type='"hex" | "numeric" | "alpha" | "alphanumeric"' default='"hex"'>

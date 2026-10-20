@@ -1,12 +1,14 @@
 ---
 title: "Verify Email Link"
 api: "GET /v8/:projectId/auth/verify-email-link"
-description: "Verify a user's email address via a link clicked in an email"
+description: "The page a verification email's link opens: confirm to verify"
 ---
 
-Verifies a user's email address when they click the link from a verification email sent with `mode: "link"`. On success, `isVerified` is set to `true` and the token is invalidated.
+The page a verification email's link opens (emails sent with `mode: "link"`). Opening it doesn't verify anything: it shows a Sublay page asking the user to confirm — "Only confirm if you created an account with {your app's name}" — with a **Confirm my email** button. Clicking it verifies the email (`isVerified` becomes `true`) and invalidates the token.
 
-This endpoint is called automatically by the browser — you do not call it directly from your app. It is the target URL embedded in the verification button in the email.
+The confirm step exists because work email scanners open every link in incoming mail. If opening the link verified the account, a scanner could verify an account someone else created with that person's email.
+
+You don't call this endpoint from your app: it's the target of the button in the email.
 
 ## Query Parameters
 
@@ -18,11 +20,12 @@ This endpoint is called automatically by the browser — you do not call it dire
 
 | Outcome | `redirectUrl` was given | No `redirectUrl` |
 |---------|------------------------|------------------|
-| Success | Redirect to `{redirectUrl}` with `verified=true` added to its query | Render hosted success page |
-| Invalid / expired token | Render hosted error page | Render hosted error page |
-| Server error | Render hosted error page | Render hosted error page |
+| Link opened | Confirm page | Confirm page |
+| Confirmed | Success page, then on to `{redirectUrl}` with `verified=true` added to its query after 5 seconds (or at once with **Continue now**) | Success page |
+| Invalid / expired token | Hosted error page | Hosted error page |
+| Server error | Hosted error page | Hosted error page |
 
-The destination is the `redirectUrl` you passed to [Send Verification Email](/v8/api-reference/auth/send-verification-email), stored with the token when the email was sent. The link itself carries no destination, so it can't be edited to send someone elsewhere. A failed verification always shows the hosted page, never a redirect.
+The destination is the `redirectUrl` you passed to [Send Verification Email](/v8/api-reference/auth/send-verification-email), stored with the token when the email was sent. The link itself carries no destination, so it can't be edited to send someone elsewhere. Only `http` and `https` addresses are followed. A failed verification always shows the hosted page.
 
 ## See Also
 

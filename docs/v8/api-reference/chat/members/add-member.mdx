@@ -8,7 +8,7 @@ Adds a user to a group conversation. Only group conversations support explicit m
 
 The caller must be an active `admin` of the conversation. The target user must belong to the same project.
 
-If the user was previously a member who left or was removed, they are re-activated (their `isActive` is set back to `true` and `lastReadAt` is reset to now).
+If the user was previously a member who left or was removed, they are re-activated as a `member` (their `isActive` is set back to `true`, `lastReadAt` is reset to now, and any role they held before, such as `admin`, is not restored).
 
 ## Path Parameters
 

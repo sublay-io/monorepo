@@ -16,7 +16,7 @@ All parameters are optional.
   Delivery mode.
 
   - `"code"` — The email contains a short token the user types into your app. Call the [Verify Email](/v8/api-reference/auth/verify-email) endpoint to complete verification.
-  - `"link"` — The email contains a clickable button. When clicked, the server verifies the token and redirects the user (or renders a hosted confirmation page).
+  - `"link"` — The email contains a button that opens a Sublay page where the user confirms; confirming verifies the email, then shows a success page that sends them on to `redirectUrl` (or stays there if none was given). See [Verify Email Link](/v8/api-reference/auth/verify-email-link).
 </ParamField>
 
 <ParamField body="tokenFormat" type='"hex" | "numeric" | "alpha" | "alphanumeric"' default='"hex"'>
@@ -37,7 +37,7 @@ All parameters are optional.
 <ParamField body="redirectUrl" type="string">
   A URL to redirect the user to after they click the verification link. Only used when `mode` is `"link"`.
 
-  On success `verified=true` is added to its query string. An invalid or expired link shows the hosted error page instead of redirecting.
+  Must be an `http` or `https` address; any other kind isn't followed. On success `verified=true` is added to its query string. An invalid or expired link shows the hosted error page instead of redirecting.
 
   If omitted, the server renders a hosted success/error page.
 </ParamField>

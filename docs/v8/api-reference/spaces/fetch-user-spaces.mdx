@@ -8,6 +8,10 @@ Returns a paginated list of spaces the authenticated user has a membership in, a
 
 ## Query Parameters
 
+<ParamField query="userId" type="string">
+  The user whose spaces to list. With a user token, leave it out (or send the signed-in user's own id) to list your own spaces. A service key must send it.
+</ParamField>
+
 <ParamField query="status" type="string">
   Membership status to list: `"active"` (default), `"pending"`, or `"banned"`.
 
@@ -78,6 +82,18 @@ Returns a paginated list of spaces the authenticated user has a membership in, a
   </Accordion>
   <Accordion title="Invalid query — 400">
     Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`. `error` names the first problem found.
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `userId`.
+    ```json
+    { "error": "Missing user ID", "code": "space/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent a `userId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "space/unauthorized" }
+    ```
   </Accordion>
 </AccordionGroup>
 

@@ -59,4 +59,20 @@ Returns a paginated list of spaces the authenticated user has a membership in, a
   Standard pagination metadata.
 </ResponseField>
 
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Unsupported sort — 400">
+    `sortBy=newest` is rejected with a pointer to the two sorts it could mean: `sortBy=createdAt` (newest spaces first) or `sortBy=joinedAt` (the default, most recently joined first).
+
+    ```json
+    {
+      "error": "`sortBy=newest` isn't supported in v8. Use `sortBy=createdAt` to list the newest spaces first, or `sortBy=joinedAt` (the default) to list the spaces the user joined most recently first.",
+      "code": "space/unsupported-param",
+      "param": "sortBy"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
 See also: [useFetchUserSpaces](/v8/hooks/spaces/use-fetch-user-spaces)

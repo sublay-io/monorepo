@@ -219,9 +219,9 @@ These parameters return `400` with code `comment/unsupported-param`, a `param` f
 | `blockedFilter` | Threads always include comments by users the caller blocked, marked `isAuthorBlocked: true`. `blockedFilter` is available on [`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id). |
 | `sourceId` | A thread already belongs to one entity. To filter a user's comments by source, use [`GET /users/:userId/comments?sourceId=…`](/v8/api-reference/users/fetch-comments-by-user-id). |
 | `include=entity`, `include=space` | Every comment in a thread belongs to the entity you requested. Supported values: `user`, `grants`. |
+| `include=parent` | Top-level comments have no parent, and replies all share the one you requested. Available on [`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id) and the single-comment fetches. |
 | `sortBy=new` | `sortBy=createdAt` (newest first by default). |
 | `sortBy=old` | `sortBy=createdAt&sortDir=asc`. |
-| `include=parent` | Top-level comments have no parent, and replies all share the one you requested. Available on [`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id) and the single-comment fetches. |
 
 Other unknown query parameters are ignored.
 

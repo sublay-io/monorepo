@@ -55,22 +55,27 @@ describe("node-sdk events — request shaping", () => {
 
   it("updateEvent strips eventId into the path and patches the rest", async () => {
     const { client, projectInstance } = makeClient();
-    await updateEvent(client, { eventId: "ev1", title: "New title" });
+    await updateEvent(client, { eventId: "ev1", title: "New title", actingUserId: "h1" });
     expect(projectInstance.patch).toHaveBeenCalledWith("/events/ev1", {
       title: "New title",
+      actingUserId: "h1",
     });
   });
 
-  it("cancelEvent posts the cancel route with no body", async () => {
+  it("cancelEvent posts the cancel route with actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await cancelEvent(client, { eventId: "ev1" });
-    expect(projectInstance.post).toHaveBeenCalledWith("/events/ev1/cancel");
+    await cancelEvent(client, { eventId: "ev1", actingUserId: "h1" });
+    expect(projectInstance.post).toHaveBeenCalledWith("/events/ev1/cancel", {
+      actingUserId: "h1",
+    });
   });
 
-  it("deleteEvent deletes /events/:id", async () => {
+  it("deleteEvent deletes /events/:id, sending actingUserId as a param", async () => {
     const { client, projectInstance } = makeClient();
-    await deleteEvent(client, { eventId: "ev1" });
-    expect(projectInstance.delete).toHaveBeenCalledWith("/events/ev1");
+    await deleteEvent(client, { eventId: "ev1", actingUserId: "h1" });
+    expect(projectInstance.delete).toHaveBeenCalledWith("/events/ev1", {
+      params: { actingUserId: "h1" },
+    });
   });
 
   it("setRsvp strips eventId into the path and posts the rest", async () => {
@@ -92,41 +97,43 @@ describe("node-sdk events — request shaping", () => {
 
   it("addHost posts userId to /events/:id/hosts", async () => {
     const { client, projectInstance } = makeClient();
-    await addHost(client, { eventId: "ev1", userId: "u1" });
+    await addHost(client, { eventId: "ev1", userId: "u1", actingUserId: "h1" });
     expect(projectInstance.post).toHaveBeenCalledWith("/events/ev1/hosts", {
       userId: "u1",
+      actingUserId: "h1",
     });
   });
 
   it("removeHost sends userId via the data option", async () => {
     const { client, projectInstance } = makeClient();
-    await removeHost(client, { eventId: "ev1", userId: "u1" });
+    await removeHost(client, { eventId: "ev1", userId: "u1", actingUserId: "h1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/events/ev1/hosts", {
-      data: { userId: "u1" },
+      data: { userId: "u1", actingUserId: "h1" },
     });
   });
 
   it("addInvite posts userId to /events/:id/invites", async () => {
     const { client, projectInstance } = makeClient();
-    await addInvite(client, { eventId: "ev1", userId: "u1" });
+    await addInvite(client, { eventId: "ev1", userId: "u1", actingUserId: "h1" });
     expect(projectInstance.post).toHaveBeenCalledWith("/events/ev1/invites", {
       userId: "u1",
+      actingUserId: "h1",
     });
   });
 
   it("removeInvite sends userId via the data option", async () => {
     const { client, projectInstance } = makeClient();
-    await removeInvite(client, { eventId: "ev1", userId: "u1" });
+    await removeInvite(client, { eventId: "ev1", userId: "u1", actingUserId: "h1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/events/ev1/invites", {
-      data: { userId: "u1" },
+      data: { userId: "u1", actingUserId: "h1" },
     });
   });
 
   it("fetchInvitees strips eventId into the path and passes the rest as params", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchInvitees(client, { eventId: "ev1", page: 2 });
+    await fetchInvitees(client, { eventId: "ev1", page: 2, actingUserId: "h1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/events/ev1/invites", {
-      params: { page: 2 },
+      params: { page: 2, actingUserId: "h1" },
     });
   });
 
@@ -168,7 +175,7 @@ describe("node-sdk events — response mapping", () => {
     const event = { id: "ev1", title: "New title" };
     projectInstance.patch.mockResolvedValueOnce({ data: event });
     await expect(
-      updateEvent(client, { eventId: "ev1", title: "New title" }),
+      updateEvent(client, { eventId: "ev1", title: "New title", actingUserId: "h1" }),
     ).resolves.toEqual(event);
   });
 
@@ -176,12 +183,12 @@ describe("node-sdk events — response mapping", () => {
     const { client, projectInstance } = makeClient();
     const event = { id: "ev1", status: "cancelled" };
     projectInstance.post.mockResolvedValueOnce({ data: event });
-    await expect(cancelEvent(client, { eventId: "ev1" })).resolves.toEqual(event);
+    await expect(cancelEvent(client, { eventId: "ev1", actingUserId: "h1" })).resolves.toEqual(event);
   });
 
   it("deleteEvent resolves to undefined", async () => {
     const { client } = makeClient();
-    await expect(deleteEvent(client, { eventId: "ev1" })).resolves.toBeUndefined();
+    await expect(deleteEvent(client, { eventId: "ev1", actingUserId: "h1" })).resolves.toBeUndefined();
   });
 
   it("setRsvp returns response.data", async () => {
@@ -205,7 +212,7 @@ describe("node-sdk events — response mapping", () => {
     const event = { id: "ev1", hostIds: ["u1"] };
     projectInstance.post.mockResolvedValueOnce({ data: event });
     await expect(
-      addHost(client, { eventId: "ev1", userId: "u1" }),
+      addHost(client, { eventId: "ev1", userId: "u1", actingUserId: "h1" }),
     ).resolves.toEqual(event);
   });
 
@@ -214,7 +221,7 @@ describe("node-sdk events — response mapping", () => {
     const event = { id: "ev1", hostIds: [] };
     projectInstance.delete.mockResolvedValueOnce({ data: event });
     await expect(
-      removeHost(client, { eventId: "ev1", userId: "u1" }),
+      removeHost(client, { eventId: "ev1", userId: "u1", actingUserId: "h1" }),
     ).resolves.toEqual(event);
   });
 
@@ -223,7 +230,7 @@ describe("node-sdk events — response mapping", () => {
     const event = { id: "ev1" };
     projectInstance.post.mockResolvedValueOnce({ data: event });
     await expect(
-      addInvite(client, { eventId: "ev1", userId: "u1" }),
+      addInvite(client, { eventId: "ev1", userId: "u1", actingUserId: "h1" }),
     ).resolves.toEqual(event);
   });
 
@@ -232,7 +239,7 @@ describe("node-sdk events — response mapping", () => {
     const event = { id: "ev1" };
     projectInstance.delete.mockResolvedValueOnce({ data: event });
     await expect(
-      removeInvite(client, { eventId: "ev1", userId: "u1" }),
+      removeInvite(client, { eventId: "ev1", userId: "u1", actingUserId: "h1" }),
     ).resolves.toEqual(event);
   });
 
@@ -241,7 +248,7 @@ describe("node-sdk events — response mapping", () => {
     const envelope = { data: [{ userId: "u1" }], pagination: { page: 1, limit: 10, total: 1 } };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
     await expect(
-      fetchInvitees(client, { eventId: "ev1" }),
+      fetchInvitees(client, { eventId: "ev1", actingUserId: "h1" }),
     ).resolves.toEqual(envelope);
   });
 

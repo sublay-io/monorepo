@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/events/:eventId/cancel"
 description: "Cancel an event without deleting it (host-only)"
 ---
 
-Cancels an event by setting its `status` to `"cancelled"`. The event remains fetchable, but new and changed RSVPs are rejected. **Host-only** (service keys bypass the host check).
+Cancels an event by setting its `status` to `"cancelled"`. The event remains fetchable, but new and changed RSVPs are rejected. Allowed for a host of the event, or an active admin or moderator of the event's space. A service key acts as the user it names in `actingUserId`, with that user's powers.
 
 On cancel, an `event-cancelled` notification is fanned out to all `going`/`maybe` RSVPs (best-effort, requires the `notifications` bundle).
 
@@ -16,6 +16,12 @@ To remove an event entirely, use [Delete Event](/v8/api-reference/events/delete-
   UUID of the event to cancel.
 </ParamField>
 
+## Body Parameters
+
+<ParamField body="actingUserId" type="string">
+  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, or an active admin or moderator of its space, and it is recorded as theirs. With a user token, omit it (it may only name the token's own user).
+</ParamField>
+
 ## Response
 
 Returns the updated [Event](/v8/data-models/event) object with `status: "cancelled"`.
@@ -23,6 +29,24 @@ Returns the updated [Event](/v8/data-models/event) object with `status: "cancell
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "event/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "actingUserId must be a user id.", "code": "event/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent an `actingUserId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "event/unauthorized" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Event not found", "code": "event/not-found" }

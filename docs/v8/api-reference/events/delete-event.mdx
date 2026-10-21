@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/events/:eventId"
 description: "Permanently or soft-delete an event and clean up its children (host-only)"
 ---
 
-Deletes an event. **Host-only** (service keys bypass the host check). The event's child `EventRsvps` and `EventInvites` are cleaned up, and—depending on settings—its files.
+Deletes an event. Allowed for a host of the event, or an active admin or moderator of the event's space. A service key acts as the user it names in `actingUserId`, with that user's powers. The event's child `EventRsvps` and `EventInvites` are cleaned up, and—depending on settings—its files.
 
 Deletion honors the project's `eventDeletion` settings:
 
@@ -17,6 +17,12 @@ Deletion honors the project's `eventDeletion` settings:
   UUID of the event to delete.
 </ParamField>
 
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, or an active admin or moderator of its space, and it is recorded as theirs. With a user token, omit it (it may only name the token's own user).
+</ParamField>
+
 ## Response
 
 Returns `204 No Content` on success.
@@ -24,6 +30,24 @@ Returns `204 No Content` on success.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "event/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "actingUserId must be a user id.", "code": "event/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent an `actingUserId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "event/unauthorized" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Event not found", "code": "event/not-found" }

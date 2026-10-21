@@ -86,6 +86,9 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
     }
     ```
   </Accordion>
+  <Accordion title="Invalid query — 400">
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`. `error` names the first problem found.
+  </Accordion>
 </AccordionGroup>
 
 See also: [useFetchManySpaces](/v8/hooks/spaces/use-fetch-many-spaces)

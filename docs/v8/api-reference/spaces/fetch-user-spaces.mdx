@@ -62,6 +62,9 @@ Returns a paginated list of spaces the authenticated user has a membership in, a
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Not signed in — 401 / 403">
+    Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired.
+  </Accordion>
   <Accordion title="Unsupported sort — 400">
     `sortBy=newest` is rejected with a pointer to the two sorts it could mean: `sortBy=createdAt` (newest spaces first) or `sortBy=joinedAt` (the default, most recently joined first).
 
@@ -72,6 +75,9 @@ Returns a paginated list of spaces the authenticated user has a membership in, a
       "param": "sortBy"
     }
     ```
+  </Accordion>
+  <Accordion title="Invalid query — 400">
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`. `error` names the first problem found.
   </Accordion>
 </AccordionGroup>
 

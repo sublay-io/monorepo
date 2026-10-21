@@ -45,16 +45,24 @@ Only children with `visibility: "public"` are listed, for every caller. Unlike [
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Not Found — 404">
+    ```json
+    { "error": "Parent space not found.", "code": "space/not-found" }
+    ```
+  </Accordion>
   <Accordion title="Unsupported sort — 400">
-    `sortBy=newest` is rejected with a pointer to its replacement, `sortBy=createdAt`.
+    `sortBy=newest` is rejected with a pointer to `sortBy=createdAt` (newest child spaces first) or to leaving `sortBy` out (the default, A–Z by name).
 
     ```json
     {
-      "error": "`sortBy=newest` isn't supported in v8. Use `sortBy=createdAt`, which lists newest first by default.",
+      "error": "`sortBy=newest` isn't supported in v8. Use `sortBy=createdAt` to list the newest child spaces first, or leave `sortBy` out for the default, A–Z by name.",
       "code": "space/unsupported-param",
       "param": "sortBy"
     }
     ```
+  </Accordion>
+  <Accordion title="Invalid query — 400">
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`. `error` names the first problem found.
   </Accordion>
 </AccordionGroup>
 

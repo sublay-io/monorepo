@@ -35,6 +35,25 @@ Content-Type: application/json
 }
 ```
 
+## Ids
+
+Every Sublay record id (`spaceId`, `entityId`, `userId`, …) is a UUID. Ids are accepted in either case and the server lowercases them; record ids in responses are lowercase.
+
+An id that isn't a UUID is refused with `400`:
+
+- **In the URL path:** checked before sign-in, permissions or any lookup (only a missing bundle, `403 database/tables-not-available`, is reported first). Code `<area>/invalid-params`, where `<area>` is the endpoint's area (`space`, `entity`, `chat`, …):
+
+  ```json
+  {
+    "error": "Invalid space id: expected a UUID.",
+    "code": "space/invalid-params"
+  }
+  ```
+
+- **In the query string or body:** code `<area>/invalid-query` or `<area>/invalid-body`, with `error` naming the field.
+
+`foreignId` and `sourceId` are your own strings, not Sublay ids, so they accept any text.
+
 ## Authentication
 
 Protected endpoints require a `Bearer` token in the `Authorization` header:

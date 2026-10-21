@@ -57,7 +57,7 @@ Returns the updated [Comment](/v8/data-models/comment) object with the new `reac
     Returned when `commentId` isn't a valid UUID.
 
     ```json
-    { "error": "commentId: Invalid UUID format", "code": "comment/invalid-params" }
+    { "error": "Invalid comment id: expected a UUID.", "code": "comment/invalid-params" }
     ```
   </Accordion>
   <Accordion title="Invalid Body — 400">

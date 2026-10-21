@@ -22,4 +22,15 @@ Returns an ordered list of spaces from the root ancestor down to and including t
   Nesting depth of the requested space. `0` for root-level spaces.
 </ResponseField>
 
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Id — 400">
+    Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
+    ```json
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
+</AccordionGroup>
+
 See also: [useFetchSpaceBreadcrumb](/v8/hooks/spaces/use-fetch-space-breadcrumb)

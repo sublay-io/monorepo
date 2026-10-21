@@ -135,7 +135,7 @@ Returns `200` with a `results` map keyed by user ID. Every requested `userId` is
     ```json
     { "error": "...", "code": "push-send/invalid-body" }
     ```
-    Returned when `userIds` is empty, exceeds 100 entries, or required fields are missing.
+    Returned when `userIds` is empty, exceeds 100 entries or holds something that isn't a user id, or when required fields are missing.
   </Accordion>
   <Accordion title="Elevated Auth Required — 403">
     ```json

@@ -232,7 +232,7 @@ That's it! You now have a fully functional comment system.
 
 ## Complete Example
 
-A working page with a sign-in form, using [built-in auth](/v8/sdk/authentication/built-in). Users sign up with `signUpWithEmailAndPassword` the same way; pass a `username` too, because the comment components ask for one before a user can post.
+A working page with a sign-in form, using [built-in auth](/v8/sdk/authentication/built-in). Users sign up with `signUpWithEmailAndPassword` the same way. Sublay doesn't require a username, but the comment components do: as installed, they stop a user without one from posting, replying, voting or reporting. Pass a `username` at sign-up, or change `usernameRequiredCallback` in `hooks/use-threaded-comments.tsx` (or `hooks/use-social-comments.tsx`).
 
 <Tabs>
   <Tab title="Threaded Comments">

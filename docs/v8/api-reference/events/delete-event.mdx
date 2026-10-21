@@ -55,7 +55,7 @@ Returns `204 No Content` on success.
   </Accordion>
   <Accordion title="Forbidden (not a host) — 403">
     ```json
-    { "error": "Only a host of this event may delete it.", "code": "event/forbidden" }
+    { "error": "Only a host of this event or an admin/moderator of its space may delete it.", "code": "event/forbidden" }
     ```
   </Accordion>
   <Accordion title="Already Deleted — 404">

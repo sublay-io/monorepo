@@ -1,10 +1,10 @@
 ---
 title: "Fetch User Spaces"
 api: "GET /v8/:projectId/spaces/user-spaces"
-description: "Get spaces the authenticated user is a member of"
+description: "Get the spaces a user is a member of"
 ---
 
-Returns a paginated list of spaces the authenticated user has a membership in, along with their membership details for each space. By default only active memberships are returned; use `status` to list pending join requests or spaces the user was banned from.
+Returns a paginated list of spaces a user has a membership in — the signed-in user, or with a service key the user named by `userId` — along with their membership details for each space. By default only active memberships are returned; use `status` to list pending join requests or spaces the user was banned from.
 
 ## Query Parameters
 
@@ -81,7 +81,7 @@ Returns a paginated list of spaces the authenticated user has a membership in, a
     ```
   </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`. `error` names the first problem found.
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`, or a `userId` that isn't a user id. `error` names the first problem found.
   </Accordion>
   <Accordion title="Missing User — 400">
     A service key sent no `userId`.

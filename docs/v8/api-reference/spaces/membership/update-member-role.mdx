@@ -39,6 +39,12 @@ Changes a member's role. Only space admins can perform this action. The role als
 ## Errors
 
 <AccordionGroup>
+  <Accordion title="Invalid Id — 400">
+    Returned when `spaceId` or `memberId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
+    ```json
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
   <Accordion title="Missing Acting User — 400">
     A service key sent no `actingUserId`.
     ```json
@@ -93,17 +99,6 @@ Changes a member's role. Only space admins can perform this action. The role als
     Raising a member to `"moderator"` or `"admin"` while their request is pending or was rejected.
     ```json
     { "error": "Only an active member can be given a role.", "code": "space/member-not-active" }
-    ```
-  </Accordion>
-</AccordionGroup>
-
-## Error Responses
-
-<AccordionGroup>
-  <Accordion title="Invalid Id — 400">
-    Returned when `spaceId` or `memberId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
-    ```json
-    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
     ```
   </Accordion>
 </AccordionGroup>

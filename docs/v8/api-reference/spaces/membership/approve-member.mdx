@@ -35,6 +35,12 @@ Sets a pending member's status to `"active"`. Requires the caller to be a modera
 ## Errors
 
 <AccordionGroup>
+  <Accordion title="Invalid Id — 400">
+    Returned when `spaceId` or `memberId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
+    ```json
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
   <Accordion title="Missing Acting User — 400">
     A service key sent no `actingUserId`.
     ```json
@@ -74,17 +80,6 @@ Sets a pending member's status to `"active"`. Requires the caller to be a modera
     The member is banned in a parent of this space; `bannedSpaceIds` lists where.
     ```json
     { "error": "This member is banned in a parent of this space.", "code": "space/banned-in-parent", "bannedSpaceIds": ["…"] }
-    ```
-  </Accordion>
-</AccordionGroup>
-
-## Error Responses
-
-<AccordionGroup>
-  <Accordion title="Invalid Id — 400">
-    Returned when `spaceId` or `memberId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
-    ```json
-    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
     ```
   </Accordion>
 </AccordionGroup>

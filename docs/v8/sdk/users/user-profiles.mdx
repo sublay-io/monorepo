@@ -5,7 +5,7 @@ description: "Fetch and search public profiles of other users in your project"
 
 User Profiles covers fetching and searching for other users' public profiles. This is distinct from [Current User](/v8/sdk/users/current-user), which covers the authenticated user's own data.
 
-All hooks in this section return `User` objects — the public-facing profile type. Unlike `AuthUser`, `User` omits private fields such as `email`, `secureMetadata`, `isVerified`, `isActive`, and `lastActive`.
+All hooks in this section return `User` objects — the public-facing profile type. Unlike `AuthUser`, `User` omits private fields such as `email`, `isVerified`, `isActive`, and `lastActive`. Neither type includes `secureMetadata`: no API response returns it.
 
 ## Hooks
 
@@ -45,7 +45,6 @@ const user = await fetchUser({ userId, include: "files" });
 |-------|:-:|:-:|
 | `id`, `name`, `username`, `avatar`, `bio` | ✓ | ✓ |
 | `email` | — | ✓ |
-| `secureMetadata` | — | ✓ |
 | `authMethods` | — | ✓ |
 | `suspensions` | — | ✓ |
 | `isVerified`, `isActive`, `lastActive` | — | ✓ |

@@ -161,7 +161,7 @@ const updatedUser = await sublay.users.updateUser({
 </ParamField>
 
 <ParamField body="secureMetadata" type="object">
-  Updated secure metadata (`Record<string, any>`, not exposed in public responses).
+  Updated secure metadata (`Record<string, any>`). No API response returns it, to this user or anyone else; your backend receives it in webhooks. The user can write it themselves, so don't store anything your app needs to trust here.
 </ParamField>
 
 <ParamField body="avatarFile" type="object">

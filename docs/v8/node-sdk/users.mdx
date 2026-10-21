@@ -73,7 +73,7 @@ const user = await sublay.users.fetchUserByForeignId({
 </ParamField>
 
 <ParamField body="secureMetadata" type="object">
-  Secure metadata (not exposed to the client) — used only when creating a new user.
+  Secure metadata, used only when creating a new user. No API response returns it to any user. Users can also write their own, so don't treat it as trusted.
 </ParamField>
 
 <ParamField body="include" type="string">
@@ -147,7 +147,7 @@ const updatedUser = await sublay.users.updateUser({
 </ParamField>
 
 <ParamField body="secureMetadata" type="object">
-  Updated secure metadata (not exposed in public responses). Merged with existing values.
+  Updated secure metadata. No API response returns it to any user. Users can also write their own, so don't treat it as trusted. Merged with existing values.
 </ParamField>
 
 <ParamField body="birthdate" type="string">

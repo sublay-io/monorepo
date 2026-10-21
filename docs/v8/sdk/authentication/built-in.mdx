@@ -54,7 +54,7 @@ You can pass additional profile data at registration time:
 | `location` | `{ latitude: number; longitude: number }` | Geographic location |
 | `birthdate` | `Date` | Date of birth |
 | `metadata` | `Record<string, any>` | Public custom data |
-| `secureMetadata` | `Record<string, any>` | Private custom data (not returned to other users) |
+| `secureMetadata` | `Record<string, any>` | Custom data no API response returns, the user's own included. The user can write it, so don't store anything your app needs to trust here. |
 | `avatarFile` | `File \| Blob` | Upload an avatar image directly |
 | `bannerFile` | `File \| Blob` | Upload a profile banner image |
 

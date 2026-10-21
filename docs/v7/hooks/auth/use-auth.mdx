@@ -102,7 +102,7 @@ function SignInButton() {
   - `location` (optional) — `{ latitude, longitude }`
   - `birthdate` (optional) — Date of birth
   - `metadata` (optional) — Public custom fields
-  - `secureMetadata` (optional) — Private custom fields
+  - `secureMetadata` (optional) — Custom fields no API response returns, the user's own included. The user can write them but not read them back, so don't store anything your app needs to trust.
   - `avatarFile` (optional) — Avatar image file to upload
   - `avatarOptions` (optional) — Image processing options for the avatar
   - `bannerFile` (optional) — Banner image file to upload

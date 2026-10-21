@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/events/:eventId/invites"
 description: "Revoke a user's invite to an event (host-only)"
 ---
 
-Removes a user's [EventInvite](/v8/data-models/event-invite). **Host-only** (service keys bypass the check). Removing the invite **revokes access** to an `invite`-only event and also **deletes that user's RSVP** (decrementing the matching `rsvpCounts` entry), all under a row-level lock. Removing a non-invited user is an idempotent no-op success.
+Removes a user's [EventInvite](/v8/data-models/event-invite). **Host-only**. A service key acts as the host it names in `actingUserId`. Removing the invite **revokes access** to an `invite`-only event and also **deletes that user's RSVP** (decrementing the matching `rsvpCounts` entry), all under a row-level lock. Removing a non-invited user is an idempotent no-op success.
 
 ## Path Parameters
 
@@ -18,6 +18,10 @@ Removes a user's [EventInvite](/v8/data-models/event-invite). **Host-only** (ser
   The invitee to remove.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, and it is recorded as theirs. With a user token, omit it (it may only name the token's own user).
+</ParamField>
+
 ## Response
 
 Returns the updated [Event](/v8/data-models/event) with refreshed `rsvpCounts`.
@@ -25,6 +29,24 @@ Returns the updated [Event](/v8/data-models/event) with refreshed `rsvpCounts`.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "event/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "actingUserId must be a user id.", "code": "event/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent an `actingUserId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "event/unauthorized" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Event not found", "code": "event/not-found" }

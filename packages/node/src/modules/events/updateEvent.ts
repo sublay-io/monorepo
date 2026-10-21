@@ -21,6 +21,11 @@ export interface UpdateEventProps {
   allowMaybe?: boolean;
   guestListVisible?: boolean;
   metadata?: Record<string, any>;
+  /**
+   * The event host this request acts as. It has exactly that user's powers
+   * on the event and is recorded as theirs. Required.
+   */
+  actingUserId: string;
 }
 
 export async function updateEvent(

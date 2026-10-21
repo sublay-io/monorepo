@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/events/:eventId/invites"
 description: "List an event's invited users (host-only)"
 ---
 
-Returns a paginated list of [EventInvite](/v8/data-models/event-invite) records, each with the invited `user` populated. **Host-only** — a non-host receives `403`, and a non-existent event receives `404` (service keys bypass the host check). Results are ordered by `invitedAt` descending.
+Returns a paginated list of [EventInvite](/v8/data-models/event-invite) records, each with the invited `user` populated. **Host-only** — a non-host receives `403`, and a non-existent event receives `404`. A service key acts as the host it names in `actingUserId`. Results are ordered by `invitedAt` descending.
 
 ## Path Parameters
 
@@ -22,6 +22,10 @@ Returns a paginated list of [EventInvite](/v8/data-models/event-invite) records,
   Results per page. Capped at `100`. Defaults to `10`.
 </ParamField>
 
+<ParamField query="actingUserId" type="string">
+  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, and it is recorded as theirs. With a user token, omit it (it may only name the token's own user).
+</ParamField>
+
 ## Response
 
 Returns a paginated response: `{ data: EventInvite[], pagination: {...} }`.
@@ -29,6 +33,24 @@ Returns a paginated response: `{ data: EventInvite[], pagination: {...} }`.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "event/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "actingUserId must be a user id.", "code": "event/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent an `actingUserId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "event/unauthorized" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Event not found", "code": "event/not-found" }

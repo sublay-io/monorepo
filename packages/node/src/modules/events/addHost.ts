@@ -5,16 +5,21 @@ export interface AddHostProps {
   eventId: string;
   /** The user to grant host on the event. */
   userId: string;
+  /**
+   * The event host this request acts as. It has exactly that user's powers
+   * on the event and is recorded as theirs. Required.
+   */
+  actingUserId: string;
 }
 
 export async function addHost(
   client: SublayHttpClient,
   data: AddHostProps
 ): Promise<Event> {
-  const { eventId, userId } = data;
+  const { eventId, userId, actingUserId } = data;
   const response = await client.projectInstance.post<Event>(
     `/events/${eventId}/hosts`,
-    { userId }
+    { userId, actingUserId }
   );
   return response.data;
 }

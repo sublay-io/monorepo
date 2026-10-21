@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/events/:eventId/invites"
 description: "Invite a user to an event (host-only)"
 ---
 
-Creates an [EventInvite](/v8/data-models/event-invite) for a user. **Host-only** (service keys bypass the check). The invite is keyed on a Sublay `userId` (never a foreign ID) and is idempotent against the unique `(eventId, userId)` constraint — re-inviting an already-invited user is a no-op success.
+Creates an [EventInvite](/v8/data-models/event-invite) for a user. **Host-only**. A service key acts as the host it names in `actingUserId`. The invite is keyed on a Sublay `userId` (never a foreign ID) and is idempotent against the unique `(eventId, userId)` constraint — re-inviting an already-invited user is a no-op success.
 
 For an `invite`-visibility event, the invited user can now see and RSVP to the event. When the `notifications` bundle is present, the invitee receives an `event-invite` notification (best-effort).
 
@@ -20,6 +20,10 @@ For an `invite`-visibility event, the invited user can now see and RSVP to the e
   The user to invite.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, and it is recorded as theirs. With a user token, omit it (it may only name the token's own user).
+</ParamField>
+
 ## Response
 
 Returns the updated [Event](/v8/data-models/event).
@@ -27,6 +31,24 @@ Returns the updated [Event](/v8/data-models/event).
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "event/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "actingUserId must be a user id.", "code": "event/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent an `actingUserId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "event/unauthorized" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Event not found", "code": "event/not-found" }

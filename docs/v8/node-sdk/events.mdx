@@ -5,7 +5,7 @@ description: "Create and manage events, RSVPs, hosts, and invites from the serve
 
 The `events` module covers the full events surface: creating and editing events, the RSVP lifecycle, host and invite management, and the guest list. It maps directly to the [Events API](/v8/api-reference/events/create-event).
 
-Because the Node SDK authenticates with a **service key** (it acts as the whole project, not a single end user), most write functions take an explicit `userId` naming the user the action is performed as. For host- and invite-management functions, `userId` is instead the **target** user (the host/invitee), and the action is authorized as the project.
+Because the Node SDK authenticates with a **service key** (it acts as the whole project, not a single end user), most write functions take an explicit `userId` naming the user the action is performed as. The event-management functions (`updateEvent`, `cancelEvent`, `deleteEvent`, the host and invite functions, `fetchInvitees`) take a required `actingUserId` instead: the host the call acts as, with exactly that host's powers. On the host and invite functions, `userId` is the **target** user (the host or invitee).
 
 <Note>
   **Image upload caveat.** The Node SDK does not support inline cover/gallery
@@ -127,17 +127,19 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
 
 ### updateEvent
 
-Edits an event's mutable fields. Host-only at the API level; with a service key the call is authorized as the project. `hostIds`, `status`, and `spaceId` are not editable here.
+Edits an event's mutable fields. Host-only: `actingUserId` must be one of the event's hosts. `hostIds`, `status`, and `spaceId` are not editable here.
 
 ```typescript
 const event = await sublay.events.updateEvent({
   eventId: "evt_abc123",
+  actingUserId: "usr_host",
   capacity: 150,
   description: "Now with more space!",
 });
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
 <ParamField body="title" type="string">New title.</ParamField>
 <ParamField body="description" type="string">New description.</ParamField>
 <ParamField body="startTime" type="string">New ISO start datetime.</ParamField>
@@ -160,13 +162,17 @@ const event = await sublay.events.updateEvent({
 
 ### cancelEvent
 
-Cancels an event (sets `status: "cancelled"`). The event stays fetchable but rejects new RSVPs.
+Cancels an event (sets `status: "cancelled"`). The event stays fetchable but rejects new RSVPs. `actingUserId` must be a host, or an active admin or moderator of the event's space.
 
 ```typescript
-const event = await sublay.events.cancelEvent({ eventId: "evt_abc123" });
+const event = await sublay.events.cancelEvent({
+  eventId: "evt_abc123",
+  actingUserId: "usr_host",
+});
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
 
 **Returns** — `Promise<Event>`
 
@@ -174,13 +180,17 @@ const event = await sublay.events.cancelEvent({ eventId: "evt_abc123" });
 
 ### deleteEvent
 
-Permanently (or soft-, per the project's `eventDeletion` settings) deletes an event and cleans up its RSVPs and invites.
+Permanently (or soft-, per the project's `eventDeletion` settings) deletes an event and cleans up its RSVPs and invites. `actingUserId` must be a host, or an active admin or moderator of the event's space.
 
 ```typescript
-await sublay.events.deleteEvent({ eventId: "evt_abc123" });
+await sublay.events.deleteEvent({
+  eventId: "evt_abc123",
+  actingUserId: "usr_host",
+});
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
 
 **Returns** — `Promise<void>`
 
@@ -226,16 +236,18 @@ const event = await sublay.events.withdrawRsvp({
 
 ### addHost
 
-Grants a user host privileges. The `userId` is the **target** host; the action is authorized as the project.
+Grants a user host privileges. The `userId` is the **target** host; `actingUserId` must be an existing host.
 
 ```typescript
 const event = await sublay.events.addHost({
   eventId: "evt_abc123",
+  actingUserId: "usr_host",
   userId: "usr_cohost",
 });
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
 <ParamField body="userId" type="string" required>The user to grant host on the event.</ParamField>
 
 **Returns** — `Promise<Event>`
@@ -249,11 +261,13 @@ Revokes a user's host privileges. Rejected if it would leave the event with no h
 ```typescript
 const event = await sublay.events.removeHost({
   eventId: "evt_abc123",
+  actingUserId: "usr_host",
   userId: "usr_cohost",
 });
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
 <ParamField body="userId" type="string" required>The host to remove.</ParamField>
 
 **Returns** — `Promise<Event>`
@@ -267,11 +281,13 @@ Invites a user to the event. Idempotent. The `userId` is the **target** invitee.
 ```typescript
 const event = await sublay.events.addInvite({
   eventId: "evt_abc123",
+  actingUserId: "usr_host",
   userId: "usr_guest",
 });
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
 <ParamField body="userId" type="string" required>The user to invite (userId only — never a foreign ID).</ParamField>
 
 **Returns** — `Promise<Event>`
@@ -285,11 +301,13 @@ Removes a user's invite, revoking their access and dropping their RSVP.
 ```typescript
 const event = await sublay.events.removeInvite({
   eventId: "evt_abc123",
+  actingUserId: "usr_host",
   userId: "usr_guest",
 });
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
 <ParamField body="userId" type="string" required>The invitee to remove.</ParamField>
 
 **Returns** — `Promise<Event>`
@@ -303,12 +321,14 @@ Host-only invitee (guest) list. Returns paginated [EventInvite](/v8/data-models/
 ```typescript
 const { data, pagination } = await sublay.events.fetchInvitees({
   eventId: "evt_abc123",
+  actingUserId: "usr_host",
   page: 1,
   limit: 20,
 });
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
 <ParamField body="page" type="number">Page number (1-indexed).</ParamField>
 <ParamField body="limit" type="number">Results per page. Capped at `100`.</ParamField>
 

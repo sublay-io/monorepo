@@ -77,7 +77,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 </ParamField>
 
 <ParamField query="userId" type="string">
-  The requester id. Used for the `myRsvp` filter, `userRsvp` enrichment, and visibility resolution. For non-privileged callers the server infers this from the auth token; service keys may pass it explicitly.
+  The requester id. Used for the `myRsvp` filter, `userRsvp` enrichment, and visibility resolution. For non-privileged callers the server infers this from the auth token, and a user token may only name itself (`403` otherwise); service keys may pass it explicitly.
 </ParamField>
 
 ## Response
@@ -87,6 +87,12 @@ Returns a paginated response: `{ data: Event[], pagination: { page, pageSize, to
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Unauthorized — 403">
+    A user token passed a `userId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "event/unauthorized" }
+    ```
+  </Accordion>
   <Accordion title="myRsvp Requires Auth — 400">
     ```json
     { "error": "The myRsvp filter requires an authenticated caller (or a service key acting via a userId query param).", "code": "event/my-rsvp-requires-auth" }

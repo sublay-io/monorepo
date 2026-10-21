@@ -21,7 +21,7 @@ The response always includes inline `rsvpCounts`. Authentication is optional; pa
 </ParamField>
 
 <ParamField query="userId" type="string">
-  The requester id, used for visibility resolution and `userRsvp` enrichment. Inferred from the token for normal callers; service keys may pass it explicitly.
+  The requester id, used for visibility resolution and `userRsvp` enrichment. Inferred from the token for normal callers, and a user token may only name itself (`403` otherwise); service keys may pass it explicitly.
 </ParamField>
 
 ## Response
@@ -31,6 +31,12 @@ Returns the [Event](/v8/data-models/event) object.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Unauthorized — 403">
+    A user token passed a `userId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "event/unauthorized" }
+    ```
+  </Accordion>
   <Accordion title="Not Found / No Access — 404">
     ```json
     { "error": "Event not found", "code": "event/not-found" }

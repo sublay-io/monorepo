@@ -1,12 +1,16 @@
 ---
 title: "Fetch User Spaces"
 api: "GET /v8/:projectId/spaces/user-spaces"
-description: "Get spaces the authenticated user is a member of"
+description: "Get the spaces a user is a member of"
 ---
 
-Returns a paginated list of spaces the authenticated user has a membership in, along with their membership details for each space. By default only active memberships are returned; use `status` to list pending join requests or spaces the user was banned from.
+Returns a paginated list of spaces a user has a membership in — the signed-in user, or with a service key the user named by `userId` — along with their membership details for each space. By default only active memberships are returned; use `status` to list pending join requests or spaces the user was banned from.
 
 ## Query Parameters
+
+<ParamField query="userId" type="string">
+  The user whose spaces to list. With a user token, leave it out (or send the signed-in user's own id) to list your own spaces. A service key must send it.
+</ParamField>
 
 <ParamField query="status" type="string">
   Membership status to list: `"active"` (default), `"pending"`, or `"banned"`.
@@ -58,5 +62,39 @@ Returns a paginated list of spaces the authenticated user has a membership in, a
 <ResponseField name="pagination" type="object">
   Standard pagination metadata.
 </ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Not signed in — 401 / 403">
+    Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired.
+  </Accordion>
+  <Accordion title="Unsupported sort — 400">
+    `sortBy=newest` is rejected with a pointer to the two sorts it could mean: `sortBy=createdAt` (newest spaces first) or `sortBy=joinedAt` (the default, most recently joined first).
+
+    ```json
+    {
+      "error": "`sortBy=newest` isn't supported in v8. Use `sortBy=createdAt` to list the newest spaces first, or `sortBy=joinedAt` (the default) to list the spaces the user joined most recently first.",
+      "code": "space/unsupported-param",
+      "param": "sortBy"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Invalid query — 400">
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`, or a `userId` that isn't a valid UUID. `error` names the first problem found.
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `userId`.
+    ```json
+    { "error": "Missing user ID", "code": "space/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Unauthorized — 403">
+    A user token sent a `userId` other than its own user.
+    ```json
+    { "error": "Unauthorized", "code": "space/unauthorized" }
+    ```
+  </Accordion>
+</AccordionGroup>
 
 See also: [useFetchUserSpaces](/v8/hooks/spaces/use-fetch-user-spaces)

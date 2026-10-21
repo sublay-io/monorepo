@@ -100,6 +100,17 @@ Returns a paginated list of entities saved in the specified collection. The coll
     }
     ```
   </Accordion>
+  <Accordion title="Unsupported sort — 400">
+    `sortBy=new` and `sortBy=added` are rejected with a pointer to their replacements: `sortBy=createdAt` (when the entity was created) and `sortBy=addedAt` (when it was added to the collection).
+
+    ```json
+    {
+      "error": "`sortBy=added` isn't supported in v8. Use `sortBy=addedAt` to order by when the entity was added to the collection.",
+      "code": "collection/unsupported-param",
+      "param": "sortBy"
+    }
+    ```
+  </Accordion>
   <Accordion title="Invalid Query — 400">
     Returned when a query parameter is invalid, including `sortByReaction` sent without `sortBy=top`.
     ```json

@@ -126,7 +126,7 @@ These comments are **read-and-delete only**: replying under them, reacting to th
 
 <AccordionGroup>
   <Accordion title="Unsupported parameter — 400">
-    `page` isn't supported — comments use cursor pagination.
+    `page` isn't supported — comments use cursor pagination. `sortBy=new` and `sortBy=old` are rejected the same way, with `param: "sortBy"` and a message naming the replacement: `sortBy=createdAt` (newest first by default) or `sortBy=createdAt&sortDir=asc`.
 
     ```json
     {

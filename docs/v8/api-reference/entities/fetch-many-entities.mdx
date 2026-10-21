@@ -210,6 +210,17 @@ Each item in `data` is an [Entity](/v8/data-models/entity) object. File URLs are
     }
     ```
   </Accordion>
+  <Accordion title="Unsupported sort — 400">
+    `sortBy=new` is rejected with a pointer to its replacement, `sortBy=createdAt`.
+
+    ```json
+    {
+      "error": "`sortBy=new` isn't supported in v8. Use `sortBy=createdAt`, which lists newest first by default.",
+      "code": "entity/unsupported-param",
+      "param": "sortBy"
+    }
+    ```
+  </Accordion>
 </AccordionGroup>
 
 ## See Also

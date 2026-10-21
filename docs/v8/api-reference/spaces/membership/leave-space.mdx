@@ -68,4 +68,15 @@ Removes the authenticated user's membership from a space and from its child spac
   </Accordion>
 </AccordionGroup>
 
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Id — 400">
+    Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
+    ```json
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
+</AccordionGroup>
+
 See also: [useLeaveSpace](/v8/hooks/spaces/use-leave-space)

@@ -37,11 +37,11 @@ Content-Type: application/json
 
 ## Ids
 
-Every Sublay record id (`spaceId`, `entityId`, `userId`, …) is a UUID. Ids are accepted in either case and the server lowercases them; every id it returns is lowercase.
+Every Sublay record id (`spaceId`, `entityId`, `userId`, …) is a UUID. Ids are accepted in either case and the server lowercases them; record ids in responses are lowercase.
 
 An id that isn't a UUID is refused with `400`:
 
-- **In the URL path:** checked before anything else on the endpoint. Code `<area>/invalid-params`, where `<area>` is the endpoint's area (`space`, `entity`, `chat`, …):
+- **In the URL path:** checked before sign-in, permissions or any lookup (only a missing bundle, `403 database/tables-not-available`, is reported first). Code `<area>/invalid-params`, where `<area>` is the endpoint's area (`space`, `entity`, `chat`, …):
 
   ```json
   {

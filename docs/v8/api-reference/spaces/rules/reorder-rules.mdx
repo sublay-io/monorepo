@@ -29,6 +29,12 @@ Returns the full array of all rules for the space in the new order (same shape a
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Id — 400">
+    Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
+    ```json
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
   <Accordion title="Missing Acting User — 400">
     A service key sent no `actingUserId`.
     ```json

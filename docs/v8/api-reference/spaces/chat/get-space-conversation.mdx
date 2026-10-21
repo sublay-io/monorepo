@@ -29,6 +29,12 @@ Returns a [Conversation](/v8/data-models/conversation) object with two additiona
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Id — 400">
+    Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
+    ```json
+    { "error": "Invalid space id: expected a UUID.", "code": "chat/invalid-params" }
+    ```
+  </Accordion>
   <Accordion title="Not a Member — 403">
     Also returned when the caller's request to join was rejected.
 

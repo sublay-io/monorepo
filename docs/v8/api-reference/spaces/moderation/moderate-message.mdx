@@ -43,6 +43,12 @@ Takes a direct moderation action on a chat message in a space's integrated conve
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Id — 400">
+    Returned when `spaceId` or `messageId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
+    ```json
+    { "error": "Invalid space id: expected a UUID.", "code": "chat/invalid-params" }
+    ```
+  </Accordion>
   <Accordion title="Missing Acting User — 400">
     A service key sent no `actingUserId`.
     ```json

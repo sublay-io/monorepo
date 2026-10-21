@@ -90,7 +90,7 @@ All optional. Each is mapped to whichever platform(s) support it at dispatch tim
 
 ## Response
 
-Returns `200` with a `results` map keyed by user ID. Every requested `userId` is present in the response — users with no registered devices get an empty array rather than being omitted.
+Returns `200` with a `results` map keyed by user ID (lowercase, whatever case you sent). Every requested `userId` is present in the response — users with no registered devices get an empty array rather than being omitted.
 
 ```json
 {

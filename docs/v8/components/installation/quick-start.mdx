@@ -123,10 +123,7 @@ Wrap your app (or the relevant section) with `SublayProvider`:
 
     function App() {
       return (
-        <SublayProvider
-          projectId="your-project-id"
-          signedToken={yourAuthToken}
-        >
+        <SublayProvider projectId="your-project-id">
           {/* Your app content */}
         </SublayProvider>
       );
@@ -144,10 +141,7 @@ Wrap your app (or the relevant section) with `SublayProvider`:
       return (
         // The comment sections' sheets need the gesture handler root
         <GestureHandlerRootView style={{ flex: 1 }}>
-          <SublayProvider
-            projectId="your-project-id"
-            signedToken={yourAuthToken}
-          >
+          <SublayProvider projectId="your-project-id">
             {/* Your app content */}
           </SublayProvider>
         </GestureHandlerRootView>
@@ -157,8 +151,10 @@ Wrap your app (or the relevant section) with `SublayProvider`:
   </Tab>
 </Tabs>
 
+To post, reply or vote, a user must be signed in. Sublay's [built-in auth](/v8/sdk/authentication/built-in) handles sign-up and sign-in for you; the [complete example](#complete-example) below adds a sign-in form.
+
 <Note>
-For authentication setup and obtaining `signedToken`, see the [Authentication](/v8/authentication) guide.
+If your app already has its own authentication, see [External Authentication](/v8/sdk/authentication/external) to connect it to Sublay.
 </Note>
 
 ---
@@ -236,37 +232,45 @@ That's it! You now have a fully functional comment system.
 
 ## Complete Example
 
+A working page with a sign-in form, using [built-in auth](/v8/sdk/authentication/built-in). Users sign up with `signUpWithEmailAndPassword` the same way.
+
 <Tabs>
   <Tab title="Threaded Comments">
     ```tsx
-    import { useEffect, useState } from 'react';
-    import { SublayProvider, useSignTestingJwt } from '@sublay/react-js';
+    import { SublayProvider, useAuth } from '@sublay/react-js';
     import { ThreadedCommentSection } from './components/comments-threaded';
 
     const PROJECT_ID = import.meta.env.VITE_PUBLIC_SUBLAY_PROJECT_ID;
-    const PRIVATE_KEY = import.meta.env.VITE_PUBLIC_SUBLAY_SECRET_KEY;
 
-    const DUMMY_USER = { id: 'user1', username: 'tech_developer' };
+    function SignInForm() {
+      const { initialized, accessToken, signInWithEmailAndPassword } = useAuth();
 
-    function App() {
-      const signTestingJwt = useSignTestingJwt();
-      const [signedToken, setSignedToken] = useState<string>();
+      // Hide the form until auth has loaded, and once the user is signed in
+      if (!initialized || accessToken) return null;
 
-      useEffect(() => {
-        const handleSignJwt = async () => {
-          const token = await signTestingJwt({
-            projectId: PROJECT_ID,
-            privateKey: PRIVATE_KEY,
-            payload: DUMMY_USER,
-          });
-          setSignedToken(token);
-        };
-        handleSignJwt();
-      }, []);
+      const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const form = e.currentTarget;
+        signInWithEmailAndPassword({
+          email: form.email.value,
+          password: form.password.value,
+        }).catch(console.error);
+      };
 
       return (
-        <SublayProvider projectId={PROJECT_ID} signedToken={signedToken}>
+        <form onSubmit={handleSubmit}>
+          <input name="email" type="email" placeholder="Email" />
+          <input name="password" type="password" placeholder="Password" />
+          <button type="submit">Sign in</button>
+        </form>
+      );
+    }
+
+    function App() {
+      return (
+        <SublayProvider projectId={PROJECT_ID}>
           <div className="max-w-4xl mx-auto p-8">
+            <SignInForm />
             <h1>My Blog Post</h1>
             <p>This is my awesome blog post content...</p>
             <ThreadedCommentSection foreignId="blog-post-123" createIfNotFound />
@@ -281,36 +285,42 @@ That's it! You now have a fully functional comment system.
 
   <Tab title="Social Comments">
     ```tsx
-    import { useEffect, useState } from 'react';
-    import { SublayProvider, useSignTestingJwt } from '@sublay/react-js';
+    import { SublayProvider, useAuth } from '@sublay/react-js';
     import { SocialCommentSection } from './components/comments-social';
 
     const PROJECT_ID = import.meta.env.VITE_PUBLIC_SUBLAY_PROJECT_ID;
-    const PRIVATE_KEY = import.meta.env.VITE_PUBLIC_SUBLAY_SECRET_KEY;
 
-    const DUMMY_USER = { id: 'user1', username: 'social_user' };
+    function SignInForm() {
+      const { initialized, accessToken, signInWithEmailAndPassword } = useAuth();
 
-    function App() {
-      const signTestingJwt = useSignTestingJwt();
-      const [signedToken, setSignedToken] = useState<string>();
+      // Hide the form until auth has loaded, and once the user is signed in
+      if (!initialized || accessToken) return null;
 
-      useEffect(() => {
-        const handleSignJwt = async () => {
-          const token = await signTestingJwt({
-            projectId: PROJECT_ID,
-            privateKey: PRIVATE_KEY,
-            payload: DUMMY_USER,
-          });
-          setSignedToken(token);
-        };
-        handleSignJwt();
-      }, []);
+      const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const form = e.currentTarget;
+        signInWithEmailAndPassword({
+          email: form.email.value,
+          password: form.password.value,
+        }).catch(console.error);
+      };
 
       return (
-        <SublayProvider projectId={PROJECT_ID} signedToken={signedToken}>
-          <div className="max-w-2xl mx-auto p-8">
-            <img src="post.jpg" className="w-full rounded-lg" />
-            <p className="mt-4">Check out this amazing photo!</p>
+        <form onSubmit={handleSubmit}>
+          <input name="email" type="email" placeholder="Email" />
+          <input name="password" type="password" placeholder="Password" />
+          <button type="submit">Sign in</button>
+        </form>
+      );
+    }
+
+    function App() {
+      return (
+        <SublayProvider projectId={PROJECT_ID}>
+          <div className="max-w-4xl mx-auto p-8">
+            <SignInForm />
+            <h1>My Post</h1>
+            <p>Check out this amazing photo!</p>
             <SocialCommentSection foreignId="post-456" createIfNotFound />
           </div>
         </SublayProvider>
@@ -361,7 +371,7 @@ All files are editable TypeScript/TSX, documented with inline comments, and comm
 
   <Accordion title="Components not rendering" icon="eye-slash">
     1. Check that `<SublayProvider>` wraps the component
-    2. Verify `projectId` and `signedToken` are correctly set
+    2. Verify `projectId` is correctly set
     3. Check the browser console for errors
   </Accordion>
 

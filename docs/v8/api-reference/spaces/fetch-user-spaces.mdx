@@ -81,7 +81,7 @@ Returns a paginated list of spaces a user has a membership in — the signed-in 
     ```
   </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`, or a `userId` that isn't a user id. `error` names the first problem found.
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`, or a `userId` that isn't a valid UUID. `error` names the first problem found.
   </Accordion>
   <Accordion title="Missing User — 400">
     A service key sent no `userId`.

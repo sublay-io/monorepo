@@ -59,7 +59,7 @@ Registers a new user within the specified project. On success, returns an access
 </ParamField>
 
 <ParamField body="secureMetadata" type="object">
-  Private custom key-value data. Not returned to other users.
+  Custom key-value data. No API response returns it, to this user or anyone else; your backend receives it in webhooks. The user can write it themselves, so don't store anything your app needs to trust here.
 </ParamField>
 
 <ParamField body="avatarFile" type="file">

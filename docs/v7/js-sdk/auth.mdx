@@ -61,7 +61,7 @@ const { user, accessToken, refreshToken } = await sublay.auth.signUp({
 </ParamField>
 
 <ParamField body="secureMetadata" type="Record<string, any>">
-  Sensitive key-value data attached to the user, not exposed to clients.
+  Custom key-value data. No API response returns it, to this user or anyone else; your backend receives it in webhooks. The user can write it themselves, so don't store anything your app needs to trust here.
 </ParamField>
 
 **Returns** — `Promise<{ user: AuthUser; accessToken: string; refreshToken: string }>`

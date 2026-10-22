@@ -49,21 +49,24 @@ describe("node-sdk workspaces (lifecycle + ownership) — request shaping", () =
     });
   });
 
-  it("fetchWorkspace hits /workspaces/:id with no params when no include", async () => {
+  it("fetchWorkspace hits /workspaces/:id with the actor actingUserId as a query param", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchWorkspace(client, { workspaceId: "w1" });
-    // Everything but `workspaceId` is a query param, so an id-only call sends an
-    // EMPTY params object — axios appends no query string for it.
+    await fetchWorkspace(client, { workspaceId: "w1", actingUserId: "u1" });
+    // Everything but `workspaceId` is a query param.
     expect(projectInstance.get).toHaveBeenCalledWith("/workspaces/w1", {
-      params: {},
+      params: { actingUserId: "u1" },
     });
   });
 
   it("fetchWorkspace passes include=memberCount as a param", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchWorkspace(client, { workspaceId: "w1", include: "memberCount" });
+    await fetchWorkspace(client, {
+      workspaceId: "w1",
+      include: "memberCount",
+      actingUserId: "u1",
+    });
     expect(projectInstance.get).toHaveBeenCalledWith("/workspaces/w1", {
-      params: { include: "memberCount" },
+      params: { include: "memberCount", actingUserId: "u1" },
     });
   });
 

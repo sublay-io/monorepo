@@ -7,12 +7,11 @@ export interface FetchWorkspaceProps {
   // member count to the response; omit it and the field is absent. The same
   // flag works on `fetchManyWorkspaces`. An unrecognized flag is ignored.
   include?: string;
-  // Act as a named user (service key only): visibility resolves against them,
-  // exactly as their own token would. Omit it and the request gets the
-  // anonymous view, which is always a 404.
-  //
-  // A user with no relation to the workspace gets the same 404.
-  actingUserId?: string;
+  // The user this request acts as. Required: visibility resolves against
+  // them, exactly as their own token would, so a user with no relation to the
+  // workspace gets a 404. (The server gives a key naming nobody the anonymous
+  // view, which for a workspace is always a 404.)
+  actingUserId: string;
 }
 
 export async function fetchWorkspace(

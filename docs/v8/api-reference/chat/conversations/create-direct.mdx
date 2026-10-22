@@ -14,6 +14,10 @@ Returns `201` when a new conversation was created, `200` when an existing one wa
   The ID of the user to start a direct conversation with. Must belong to the same project.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. One side of the conversation; `userId` is the other. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
+</ParamField>
+
 ## Response
 
 Returns a [Conversation](/v8/data-models/conversation) object with `type: "direct"`.
@@ -25,6 +29,18 @@ Returns a [Conversation](/v8/data-models/conversation) object with `type: "direc
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "chat/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "Missing user ID", "code": "chat/missing-user-id" }
+    ```
+  </Accordion>
   <Accordion title="Invalid Member — 400 Bad Request">
     ```json
     { "error": "Target user does not belong to this project.", "code": "chat/invalid-member" }

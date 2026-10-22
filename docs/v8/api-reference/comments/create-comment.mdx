@@ -65,10 +65,10 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
   A free-form JSON object for any custom data your application needs alongside the comment. Up to 10 KB (10,240 bytes) as JSON — a larger object returns `400 comment/invalid-body`.
 </ParamField>
 
-<ParamField body="userId" type="string">
-  Attribute the comment to a specific user. **Service key only**, and required with one — a key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. Useful for backfilling comments from external systems. A user token is always its own user: naming a different user returns `403 comment/unauthorized`.
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as, who authors the comment. A key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. Useful for backfilling comments from external systems. A user token always acts as its own user and must not send it (`400 comment/acting-user-not-allowed`).
 
-  A `userId` that doesn't match a user returns `404 comment/user-not-found`.
+  An `actingUserId` that doesn't match a user returns `404 comment/user-not-found`.
 </ParamField>
 
 <ParamField body="createdAt" type="string">
@@ -122,7 +122,7 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     ```
   </Accordion>
   <Accordion title="Missing User — 400">
-    Returned when a service key sends no `userId`.
+    Returned when a service key sends no `actingUserId`.
 
     ```json
     { "error": "Missing user ID", "code": "comment/missing-user-id" }
@@ -135,7 +135,7 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     Returned when the body fails validation. `error` names the field and the problem:
 
     - none of `content`, `gif` or `attachments` is provided — `content` that is empty or only whitespace, and an empty `attachments` array, don't count;
-    - `entityId`, `parentId`, `referencedCommentId` or `userId` isn't a UUID (a missing `entityId` included);
+    - `entityId`, `parentId`, `referencedCommentId` or `actingUserId` isn't a UUID (a missing `entityId` included);
     - `gif` is missing one of its six fields, or one has the wrong type;
     - a `mentions` item doesn't match one of the two shapes;
     - `foreignId` is an empty string or longer than 255 characters;
@@ -150,15 +150,26 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     { "error": "entityId: Invalid UUID format", "code": "comment/invalid-body" }
     ```
   </Accordion>
-  <Accordion title="Acting as another user — 403">
-    Returned when a request authenticated with a user token sends a `userId` other than that user's own ID.
+  <Accordion title="Acting User Not Allowed — 400">
+    Returned when a user token sends `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
 
     ```json
-    { "error": "Unauthorized", "code": "comment/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "comment/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    Returned when the request sends `userId`. On this route the user a service key acts as is `actingUserId`.
+
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "comment/unsupported-param",
+      "param": "userId"
+    }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
-    Returned when a service key names a `userId` that doesn't exist.
+    Returned when a service key names an `actingUserId` that doesn't exist.
 
     ```json
     { "error": "User not found", "code": "comment/user-not-found" }

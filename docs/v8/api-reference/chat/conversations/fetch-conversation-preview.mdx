@@ -12,7 +12,7 @@ Both this endpoint and the list are served by the same underlying query, so the 
   This is distinct from [Fetch Conversation](/v8/api-reference/chat/conversations/fetch-conversation), which returns a different shape — the conversation plus `currentMember` and `memberCount`. Reach for this endpoint when you are inserting a row into a conversation list, and for Fetch Conversation when you are opening a conversation.
 </Note>
 
-Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) reads its own view of the conversation. A service key acts on behalf of a named user via the optional query `userId` — a service key without `userId` is rejected, and an end-user token may not name a different user. Requires the `chat` bundle.
+Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) reads its own view of the conversation. A service key acts on behalf of a named user via the query `actingUserId`, which it must send; an end-user token must not send it. Requires the `chat` bundle.
 
 Membership is enforced by the query itself. A conversation the caller is not a member of, and a conversation that does not exist, both return `404` — no `lastMessage`, `otherMembers` or `unreadCount` is exposed in either case.
 
@@ -24,8 +24,8 @@ Membership is enforced by the query itself. A conversation the caller is not a m
 
 ## Query Parameters
 
-<ParamField query="userId" type="string">
-  The acting user whose view of the conversation is returned. **Service keys only** — a service key must pass it (there is no implicit session user); an end-user token infers it from the auth token and may not name a different user.
+<ParamField query="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. Must be a member of the conversation; the preview shows their view of it. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -59,6 +59,31 @@ Returns a [Conversation](/v8/data-models/conversation) extended with the followi
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "chat/acting-user-not-allowed" }
+    ```
+  </Accordion>
+
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "chat/unsupported-param",
+      "param": "userId"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "Missing user ID", "code": "chat/missing-user-id" }
+    ```
+  </Accordion>
+
   <Accordion title="Invalid Parameters — 400">
     ```json
     { "error": "Invalid conversation id: expected a UUID.", "code": "chat/invalid-params" }

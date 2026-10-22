@@ -20,10 +20,10 @@ Adds a reaction of the specified type to a comment. If the user already has a re
   The type of reaction to add. One of: `upvote`, `downvote`, `like`, `love`, `wow`, `sad`, `angry`, `funny`.
 </ParamField>
 
-<ParamField body="userId" type="string">
-  The user the reaction is attributed to. **Service key only**, and required with one — a key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. A user token always reacts as itself: naming a different user returns `403 comment/unauthorized`.
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as, who the reaction is attributed to. A key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. A user token always acts as its own user and must not send it (`400 comment/acting-user-not-allowed`).
 
-  A `userId` that doesn't match a user returns `404 comment/user-not-found`.
+  An `actingUserId` that doesn't match a user returns `404 comment/user-not-found`.
 </ParamField>
 
 ## Blocks
@@ -61,7 +61,7 @@ Returns the updated [Comment](/v8/data-models/comment) object with the new `reac
     ```
   </Accordion>
   <Accordion title="Invalid Body — 400">
-    Returned when `reactionType` is missing or isn't one of the eight types, or when `userId` isn't a valid UUID.
+    Returned when `reactionType` is missing or isn't one of the eight types, or when `actingUserId` isn't a valid UUID.
 
     ```json
     {
@@ -70,22 +70,33 @@ Returns the updated [Comment](/v8/data-models/comment) object with the new `reac
     }
     ```
   </Accordion>
-  <Accordion title="Acting as another user — 403">
-    Returned when a request authenticated with a user token sends a `userId` other than that user's own ID.
+  <Accordion title="Acting User Not Allowed — 400">
+    Returned when a user token sends `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
 
     ```json
-    { "error": "Unauthorized", "code": "comment/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "comment/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    Returned when the request sends `userId`. On this route the user a service key acts as is `actingUserId`.
+
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "comment/unsupported-param",
+      "param": "userId"
+    }
     ```
   </Accordion>
   <Accordion title="Missing User — 400">
-    Returned when a service key sends no `userId`.
+    Returned when a service key sends no `actingUserId`.
 
     ```json
     { "error": "Missing user ID", "code": "comment/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
-    Returned when a service key names a `userId` that doesn't exist.
+    Returned when a service key names an `actingUserId` that doesn't exist.
 
     ```json
     { "error": "User not found", "code": "comment/user-not-found" }

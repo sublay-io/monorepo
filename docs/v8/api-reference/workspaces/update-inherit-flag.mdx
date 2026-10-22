@@ -22,7 +22,7 @@ Flips the workspace's `inheritsFromParent` flag — the switch controlling wheth
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service keys only — the user to act as. **Enforced:** the owner-only guard runs against the named user, so a key naming a non-owner is refused exactly as that user would be. Omit it to act as the app itself (unbounded). The `workspace/inherit-enforced` project lock is a separate gate and applies either way. See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  Service keys only — the user to act as. **Enforced:** the owner-only guard runs against the named user, so a key naming a non-owner is refused exactly as that user would be. Omit it to act as the app itself (unbounded). The `workspace/inherit-enforced` project lock is a separate gate and applies either way. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 
   The [node SDK](/v8/node-sdk/workspaces) is stricter than this endpoint: it types `actingUserId` as **required** here, so omitting it is only possible by calling the REST route directly.
 
@@ -66,5 +66,11 @@ Returns the updated [Workspace](/v8/data-models/workspace) object.
     }
     ```
     Returned when a service key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would fall through to the unbounded path. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
+    ```
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
 </AccordionGroup>

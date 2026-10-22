@@ -15,7 +15,7 @@ Returns the authenticated user's **live** pending invites (`status = 'pending' A
 <ParamField query="actingUserId" type="string" required>
   Service keys only — the user to act as, whose invites are read. **Required for a key:** this is an *inbox* read, so it has no unbounded path — a key that names nobody is refused with `400 workspace/missing-user-id`.
 
-  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
@@ -35,11 +35,11 @@ Each item is a `MyWorkspaceInvitation`: a [WorkspaceInvitation](/v8/data-models/
     ```
     A service key called this route without naming an `actingUserId`. An inbox belongs to a person; there is no app-level inbox to return.
   </Accordion>
-  <Accordion title="Acted as Another User — 403">
+  <Accordion title="Acting User Not Allowed — 400">
     ```json
-    { "error": "Unauthorized", "code": "workspace/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
     ```
-    A plain user token sent an `actingUserId` naming a **different** user. Only a service key may act as someone else.
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
 </AccordionGroup>
 

@@ -18,6 +18,10 @@ Sends a connection request from the authenticated user to the specified user. An
   Optional message to include with the connection request.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as, who sends the connection request. A user token always acts as its own user and must not send it (`400 connection/acting-user-not-allowed`).
+</ParamField>
+
 ## Response
 
 On success, returns HTTP `201` with the created connection record:
@@ -37,6 +41,24 @@ On success, returns HTTP `201` with the created connection record:
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    {
+      "error": "Missing user ID",
+      "code": "connection/missing-user-id"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    {
+      "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
+      "code": "connection/acting-user-not-allowed"
+    }
+    ```
+  </Accordion>
   <Accordion title="Self-Request — 400">
     ```json
     {

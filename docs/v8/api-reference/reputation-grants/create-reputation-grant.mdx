@@ -6,7 +6,7 @@ description: "Transfer reputation from one user's bucket to another user's bucke
 
 Transfers reputation between two users. This is a **debited transfer**: the amount leaves the sender's bucket and lands in the recipient's bucket for the same space. Nothing is created — see [Mint Reputation Grant](/v8/api-reference/reputation-grants/mint-reputation-grant) for that.
 
-Requires authentication. A user token sends from the token's own user. A service key may name any sender via `actingUserId`, which is how an app performs a **mediated transfer** — enforcing its own economic rules before letting the transfer through. Mediated transfers skip the project-level user-grant switch and ignore block relationships; they are otherwise identical to a user grant, including the balance check.
+Requires authentication. A user token sends from the token's own user. A service key names the sender in `actingUserId`, which is how an app performs a **mediated transfer** — enforcing its own economic rules before letting the transfer through. Mediated transfers skip the project-level user-grant switch and ignore block relationships; they are otherwise identical to a user grant, including the balance check.
 
 Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants` must be present in the project's schema).
 
@@ -43,7 +43,7 @@ Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only. The **sender** — the user reputation is debited from. Spelled `actingUserId` rather than `userId` because this body already names a target user (`recipientId`). A user token may only name itself.
+  Service key only, and required with one: the user this request acts as, the **sender** the reputation is debited from. A user token always acts as its own user and must not send it (`400 reputation-grant/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -78,16 +78,16 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
     ```
     A service key called the endpoint without naming an `actingUserId`.
   </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "reputation-grant/acting-user-not-allowed" }
+    ```
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+  </Accordion>
   <Accordion title="User Grants Disabled — 403">
     ```json
     { "error": "User-initiated reputation grants are disabled for this project.", "code": "reputation-grant/user-grants-disabled" }
     ```
-  </Accordion>
-  <Accordion title="Unauthorized Sender — 403">
-    ```json
-    { "error": "Unauthorized", "code": "reputation-grant/unauthorized" }
-    ```
-    A user token named an `actingUserId` other than its own.
   </Accordion>
   <Accordion title="Suspended — 403">
     ```json

@@ -21,7 +21,7 @@ On a **new** block, Sublay retroactively tears down the existing relationship be
 ## Body Parameters
 
 <ParamField body="actingUserId" type="string">
-  The user performing the block (the blocker). Only service keys may supply an `actingUserId` other than the caller's own; with a user token the blocker is derived from the token and this field is ignored.
+  Service key only, and required with one: the user this request acts as, who performs the block (the blocker). A user token always acts as its own user and must not send it (`400 block/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -47,6 +47,24 @@ On a **new** block, returns HTTP `201` with the created block record. Re-blockin
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    {
+      "error": "Missing user ID",
+      "code": "block/missing-user-id"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    {
+      "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
+      "code": "block/acting-user-not-allowed"
+    }
+    ```
+  </Accordion>
   <Accordion title="Self-Block — 400">
     ```json
     {

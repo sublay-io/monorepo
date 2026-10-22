@@ -24,8 +24,8 @@ Adds a reaction of the specified type to an entity. If the user already has a re
   The type of reaction to add. One of: `upvote`, `downvote`, `like`, `love`, `wow`, `sad`, `angry`, `funny`.
 </ParamField>
 
-<ParamField body="userId" type="string">
-  Override which user the reaction is attributed to. **Service key only.** Useful for backfilling reactions from an external system.
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as, who the reaction is attributed to. Useful for backfilling reactions from an external system. A user token always acts as its own user and must not send it (`400 entity/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -43,7 +43,23 @@ Returns the updated [Entity](/v8/data-models/entity) object with the new `reacti
     ```json
     { "error": "Missing user ID", "code": "entity/missing-user-id" }
     ```
-    Returned when no user is authenticated and no `userId` override is provided.
+    Returned when a service key sends no `actingUserId`.
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "entity/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "entity/unsupported-param",
+      "param": "userId"
+    }
+    ```
   </Accordion>
   <Accordion title="Not Found — 404">
     ```json

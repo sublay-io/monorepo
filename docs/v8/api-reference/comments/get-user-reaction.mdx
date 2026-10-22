@@ -16,8 +16,8 @@ Returns the authenticated user's current reaction on the specified comment, or `
 
 ## Query Parameters
 
-<ParamField query="userId" type="string">
-  The user whose reaction to return. **Service key only**, and required with one — a key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. A user token always reads its own reaction: naming a different user returns `403 comment/unauthorized`.
+<ParamField query="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as, whose reaction is returned. A key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. A user token always acts as its own user and must not send it (`400 comment/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -42,15 +42,26 @@ or, if the user has no reaction:
     { "error": "Invalid comment id: expected a UUID.", "code": "comment/invalid-params" }
     ```
   </Accordion>
-  <Accordion title="Acting as another user — 403">
-    Returned when a request authenticated with a user token sends a `userId` other than that user's own ID.
+  <Accordion title="Acting User Not Allowed — 400">
+    Returned when a user token sends `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
 
     ```json
-    { "error": "Unauthorized", "code": "comment/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "comment/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    Returned when the request sends `userId`. On this route the user a service key acts as is `actingUserId`.
+
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "comment/unsupported-param",
+      "param": "userId"
+    }
     ```
   </Accordion>
   <Accordion title="Missing User — 400">
-    Returned when a service key sends no `userId`.
+    Returned when a service key sends no `actingUserId`.
 
     ```json
     { "error": "Missing user ID", "code": "comment/missing-user-id" }

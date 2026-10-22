@@ -24,8 +24,8 @@ Creates a new entity in your project. Supports optional file uploads via `multip
   The ID of the space this entity belongs to. The space must exist in the same project.
 </ParamField>
 
-<ParamField body="userId" type="string">
-  Attribute the entity to a specific user. Must match the authenticated user ID unless the request uses a service key.
+<ParamField body="actingUserId" type="string">
+  Service key only: the user this request acts as, who authors the entity. Leave it out to create an app-owned entity with no author. A user token always acts as its own user and must not send it (`400 entity/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField body="title" type="string">
@@ -144,9 +144,20 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
     { "error": "Authentication required to create this entity.", "code": "entity/user-required" }
     ```
   </Accordion>
-  <Accordion title="Unauthorized User ID — 403">
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
-    { "error": "User is not authorized to create this entity.", "code": "entity/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "entity/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "entity/unsupported-param",
+      "param": "userId"
+    }
     ```
   </Accordion>
   <Accordion title="Rejected by Validation Webhook — 400">

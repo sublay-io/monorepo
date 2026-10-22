@@ -4,12 +4,12 @@ api: "GET /v8/:projectId/spaces/user-spaces"
 description: "Get the spaces a user is a member of"
 ---
 
-Returns a paginated list of spaces a user has a membership in — the signed-in user, or with a service key the user named by `userId` — along with their membership details for each space. By default only active memberships are returned; use `status` to list pending join requests or spaces the user was banned from.
+Returns a paginated list of spaces a user has a membership in — the signed-in user, or with a service key the user named by `actingUserId` — along with their membership details for each space. By default only active memberships are returned; use `status` to list pending join requests or spaces the user was banned from.
 
 ## Query Parameters
 
-<ParamField query="userId" type="string">
-  The user whose spaces to list. With a user token, leave it out (or send the signed-in user's own id) to list your own spaces. A service key must send it.
+<ParamField query="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as, whose spaces are listed. A user token always acts as its own user and must not send it (`400 space/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField query="status" type="string">
@@ -81,18 +81,28 @@ Returns a paginated list of spaces a user has a membership in — the signed-in 
     ```
   </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`, or a `userId` that isn't a valid UUID. `error` names the first problem found.
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`, or an `actingUserId` that isn't a valid UUID. `error` names the first problem found.
   </Accordion>
   <Accordion title="Missing User — 400">
-    A service key sent no `userId`.
+    A service key sent no `actingUserId`.
     ```json
     { "error": "Missing user ID", "code": "space/missing-user-id" }
     ```
   </Accordion>
-  <Accordion title="Unauthorized — 403">
-    A user token sent a `userId` other than its own user.
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
-    { "error": "Unauthorized", "code": "space/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "space/unsupported-param",
+      "param": "userId"
+    }
     ```
   </Accordion>
 </AccordionGroup>

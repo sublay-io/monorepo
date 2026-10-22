@@ -104,7 +104,7 @@ This endpoint doubles as an **upsert**, so a second call for a target who alread
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service keys only — the **inviter** to act as. Enforced: the no-escalation and rank floors above run against *that* user's resolved standing, so a key naming a rank-5 manager may only invite at rank 6+ and only with capabilities that manager holds. Omit it to invite as the app itself (unbounded; `invitedBy` then falls back to the workspace owner) — but omit means **absent**: `actingUserId: ""` or `null` is a `400`, not a fall-through to that mode. Every top-level field this endpoint does not declare is a `400` too — `Unrecognized key: "…"`, in the body and the query string alike, for every caller. The fields this endpoint *does* declare are accepted on their own terms: `username` reaches the server intact and behaves identically to `email` and `userId`. The **body** `userId` is the one declared field on the bundle that names a person and is not the actor, so it carries a carve-out from the bundle-wide `userId` rejection; a query `userId` is refused here as everywhere else. See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user) and [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+  Service keys only — the **inviter** to act as. Enforced: the no-escalation and rank floors above run against *that* user's resolved standing, so a key naming a rank-5 manager may only invite at rank 6+ and only with capabilities that manager holds. Omit it to invite as the app itself (unbounded; `invitedBy` then falls back to the workspace owner) — but omit means **absent**: `actingUserId: ""` or `null` is a `400`, not a fall-through to that mode. Every top-level field this endpoint does not declare is a `400` too — `Unrecognized key: "…"`, in the body and the query string alike, for every caller. The fields this endpoint *does* declare are accepted on their own terms: `username` reaches the server intact and behaves identically to `email` and `userId`. The **body** `userId` is the one declared field on the bundle that names a person and is not the actor, so it carries a carve-out from the bundle-wide `userId` rejection; a query `userId` is refused here as everywhere else. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user) and [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
 </ParamField>
 
 ## Response
@@ -182,6 +182,12 @@ Returns the created [WorkspaceInvitation](/v8/data-models/workspace-invitation) 
     }
     ```
     Returned when a service key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would fall through to the unbounded path. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
+    ```
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
 </AccordionGroup>
 

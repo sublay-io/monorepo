@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/events"
 description: "Create an event, optionally with a cover image and gallery"
 ---
 
-Creates an event. The authenticated user becomes the creator (`userId`) and is automatically added to `hostIds`. Supports inline cover and gallery image upload via `multipart/form-data`.
+Creates an event. The acting user (the token's own user, or the `actingUserId` a service key sends) becomes the creator (`userId`) and is automatically added to `hostIds`. Supports inline cover and gallery image upload via `multipart/form-data`.
 
 The required location fields depend on `type`: `online` needs a `url`; `physical` needs an `address` or `location`; `hybrid` needs both a `url` and an `address`/`location`.
 
@@ -80,8 +80,8 @@ Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bu
   Arbitrary key-value data. Up to 1 MB.
 </ParamField>
 
-<ParamField body="userId" type="string">
-  Service key only. Create the event on behalf of this user (who becomes the creator and first host).
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as, who becomes the creator and first host. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField body="cover" type="file">
@@ -107,6 +107,28 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "Missing user ID", "code": "event/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "event/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "event/unsupported-param",
+      "param": "userId"
+    }
+    ```
+  </Accordion>
   <Accordion title="Invalid Body — 400">
     ```json
     { "error": "Online events require a `url`.", "code": "event/invalid-body" }

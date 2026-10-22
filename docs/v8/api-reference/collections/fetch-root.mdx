@@ -6,6 +6,12 @@ description: "Get or create the current user's root collection"
 
 Returns the root collection for the authenticated user. If no root collection exists yet, one is created automatically with the name `"root"`.
 
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. Their root collection is returned. A user token always acts as its own user and must not send it (`400 collection/acting-user-not-allowed`).
+</ParamField>
+
 ## Response
 
 Returns a [Collection](/v8/data-models/collection) object with `parentId: null` and `isRoot: true`.
@@ -20,6 +26,28 @@ Returns a [Collection](/v8/data-models/collection) object with `parentId: null` 
   <Accordion title="Server Error — 500">
     ```json
     { "error": "Server error", "code": "collection/server-error" }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "Missing user ID", "code": "collection/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "collection/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "collection/unsupported-param",
+      "param": "userId"
+    }
     ```
   </Accordion>
 </AccordionGroup>

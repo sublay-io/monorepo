@@ -12,6 +12,12 @@ Joins a space. If the space has `requireJoinApproval: true`, the membership is c
   UUID of the space to join.
 </ParamField>
 
+## Body Parameters
+
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as, who joins the space. A user token always acts as its own user and must not send it (`400 space/acting-user-not-allowed`).
+</ParamField>
+
 ## Response
 
 <ResponseField name="message" type="string">
@@ -36,6 +42,28 @@ Joins a space. If the space has `requireJoinApproval: true`, the membership is c
     Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
     { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "Missing user ID", "code": "space/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "space/unsupported-param",
+      "param": "userId"
+    }
     ```
   </Accordion>
   <Accordion title="Space Not Found — 404">

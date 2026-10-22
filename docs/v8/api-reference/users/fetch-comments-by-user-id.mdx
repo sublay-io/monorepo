@@ -33,7 +33,7 @@ An unknown `userId` returns an empty page.
 ### Acting user
 
 <ParamField query="actingUserId" type="string">
-  The user to read the history as. Takes effect only with a **service key**. A user token always reads as itself: naming its own ID changes nothing, and naming a different user returns `403 comment/unauthorized`. On a request with neither a key nor a user token it is ignored, and the request stays anonymous. With a key, the rules below (own removed comments, blocks, `blockedFilter`, the `isAuthorBlocked` / `isUnavailable` flags and `userReaction`) apply from that user's perspective.
+  Service key only: the user this request acts as, who reads the history. Leave it out to read anonymously. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 comment/acting-user-not-allowed`). With a key, the rules below (own removed comments, blocks, `blockedFilter`, the `isAuthorBlocked` / `isUnavailable` flags and `userReaction`) apply from that user's perspective.
 </ParamField>
 
 ### Filtering
@@ -158,13 +158,13 @@ These comments are **read-and-delete only**: replying under them, reacting to th
     }
     ```
   </Accordion>
-  <Accordion title="Acting as another user — 403">
-    Returned when a request authenticated with a user token sends an `actingUserId` other than that user's own ID.
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
 
     ```json
     {
-      "error": "Unauthorized",
-      "code": "comment/unauthorized"
+      "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
+      "code": "comment/acting-user-not-allowed"
     }
     ```
   </Accordion>

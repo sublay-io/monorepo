@@ -62,7 +62,7 @@ Returns a paginated list of entities for the project. Supports rich filtering by
 </ParamField>
 
 <ParamField query="userId" type="string">
-  Filter by the author's user ID. When this matches the authenticated user's ID, moderation-removed entities are also included (author can see their own removed posts).
+  Filter by author: returns only entities whose `userId` is this user. When this matches the authenticated user's ID, moderation-removed entities are also included (an author can see their own removed entities).
 </ParamField>
 
 <ParamField query="followedOnly" type="string">

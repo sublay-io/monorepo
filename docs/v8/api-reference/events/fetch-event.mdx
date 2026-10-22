@@ -20,8 +20,8 @@ The response always includes inline `rsvpCounts`. Authentication is optional; pa
   Comma-separated associations to expand: `"user"`, `"space"`, `"files"`, `"userRsvp"`.
 </ParamField>
 
-<ParamField query="userId" type="string">
-  The requester id, used for visibility resolution and `userRsvp` enrichment. Inferred from the token for normal callers, and a user token may only name itself (`403` otherwise); service keys may pass it explicitly.
+<ParamField query="actingUserId" type="string">
+  Service key only: the user this request acts as, whose view is returned (visibility, `userRsvp`). Leave it out for the key's own view. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -31,10 +31,20 @@ Returns the [Event](/v8/data-models/event) object.
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="Unauthorized — 403">
-    A user token passed a `userId` other than its own user.
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
-    { "error": "Unauthorized", "code": "event/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "event/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "event/unsupported-param",
+      "param": "userId"
+    }
     ```
   </Accordion>
   <Accordion title="Not Found / No Access — 404">

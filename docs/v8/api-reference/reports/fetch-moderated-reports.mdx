@@ -43,6 +43,10 @@ Returns a paginated list of reports for spaces where the authenticated user has 
   Number of reports per page.
 </ParamField>
 
+<ParamField query="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. Reports are returned for the spaces this user moderates. A user token always acts as its own user and must not send it (`400 report/acting-user-not-allowed`).
+</ParamField>
+
 ### Space-scoped reputation
 
 This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each reported content author's populated `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
@@ -98,6 +102,28 @@ Each report includes the full reported content (`target`), the space it belongs 
       "error": "`sortBy=old` isn't supported in v8. Use `sortBy=createdAt&sortDir=asc`.",
       "code": "report/unsupported-param",
       "param": "sortBy"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "Missing user ID", "code": "report/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "report/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "report/unsupported-param",
+      "param": "userId"
     }
     ```
   </Accordion>

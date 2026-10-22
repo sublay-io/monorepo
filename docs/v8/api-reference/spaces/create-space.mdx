@@ -6,6 +6,8 @@ description: "Create a new community space"
 
 Creates a new space. Its creator — the signed-in user, or the user a service key names in `actingUserId` — is automatically added as an admin. A space always has a creator, so a service key must name one. Supports optional avatar and banner image upload via multipart form data.
 
+**Authentication required.** A request with no credentials returns `401`.
+
 ## Body Parameters
 
 <ParamField body="name" type="string">

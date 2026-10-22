@@ -8,7 +8,7 @@ description: "Create a new entity, with optional file upload support"
   **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
 </Note>
 
-Creates a new entity in your project. Supports optional file uploads via `multipart/form-data`. When no files are attached, use `application/json`. The entity's author is the signed-in user, or the user a service key names in `actingUserId`; the create then runs under that user's own checks (suspension, the space's posting rules). A service key naming nobody creates an app-owned entity with no author, which only a service key naming nobody can later edit, publish or delete.
+Creates a new entity in your project. Supports optional file uploads via `multipart/form-data`. When no files are attached, use `application/json`. The entity's author is the signed-in user, or the user a service key names in `actingUserId`; the create then runs under that user's own checks, such as suspension. A service key naming nobody creates an app-owned entity with no author, which only a service key naming nobody can later edit, publish or delete.
 
 ## Body Parameters
 

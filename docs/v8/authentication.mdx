@@ -178,7 +178,7 @@ Beyond authentication, Sublay enforces authorization on every request:
 - Most write operations require an authenticated user (or a service API key)
 - Ownership checks are enforced server-side — a user cannot modify another user's content through the normal API
 - Space roles (owner, admin, moderator, member) control what is permitted within a space
-- Service API keys act either as a user they name (`actingUserId`), with exactly that user's permissions, or as your app, which owns only the records created without a user (see [Acting as a user](#acting-as-a-user)). They are intended for server-side use only — see [Integration Options](/v8/integration-options#service-api-key-recommended-for-server-to-server)
+- Service API keys act either as a user they name (`actingUserId`), with exactly that user's permissions, or as your app, which owns the records created without a user (see [Acting as a user](#acting-as-a-user)). The exceptions are [deleting a space](/v8/api-reference/spaces/delete-space) and workspace management, where a key naming nobody acts with full authority. They are intended for server-side use only — see [Integration Options](/v8/integration-options#service-api-key-recommended-for-server-to-server)
 
 ### Acting as a user
 

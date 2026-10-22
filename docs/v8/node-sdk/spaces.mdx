@@ -83,6 +83,10 @@ const space = await sublay.spaces.fetchSpace({ spaceId: "spc_abc123" });
   The Sublay space ID.
 </ParamField>
 
+<ParamField body="include" type="string">
+  Comma-separated associations to expand. Pass `"files"` for the avatar and banner file objects.
+</ParamField>
+
 <ParamField body="actingUserId" type="string">
   The user to read as: exactly what their own access token would get (their role, `memberPermissions` and membership). Omit it for the anonymous view.
 </ParamField>
@@ -172,6 +176,10 @@ const space = await sublay.spaces.fetchSpaceBySlug({ slug: "photography" });
   The space's URL slug.
 </ParamField>
 
+<ParamField body="include" type="string">
+  Comma-separated associations to expand. Pass `"files"` for the avatar and banner file objects.
+</ParamField>
+
 <ParamField body="actingUserId" type="string">
   The user to read as: exactly what their own access token would get (their role, `memberPermissions` and membership). Omit it for the anonymous view.
 </ParamField>
@@ -190,6 +198,10 @@ const space = await sublay.spaces.fetchSpaceByShortId({ shortId: "ph3x9" });
 
 <ParamField body="shortId" type="string" required>
   The space's short ID.
+</ParamField>
+
+<ParamField body="include" type="string">
+  Comma-separated associations to expand. Pass `"files"` for the avatar and banner file objects.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">

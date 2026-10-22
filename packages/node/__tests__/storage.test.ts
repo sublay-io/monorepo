@@ -110,8 +110,10 @@ describe("node-sdk storage — getFile/deleteFile request shaping", () => {
 
   it("deleteFile deletes /storage/:fileId", async () => {
     const { client, projectInstance } = makeClient();
-    await deleteFile(client, { fileId: "f1" });
-    expect(projectInstance.delete).toHaveBeenCalledWith("/storage/f1");
+    await deleteFile(client, { fileId: "f1", actingUserId: "u1" });
+    expect(projectInstance.delete).toHaveBeenCalledWith("/storage/f1", {
+      params: { actingUserId: "u1" },
+    });
   });
 });
 

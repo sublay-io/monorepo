@@ -3,6 +3,12 @@ import { Comment } from "../../interfaces/Comment";
 
 export interface FetchCommentByForeignIdProps {
   foreignId: string;
+  /**
+   * Read as this user (service key only): the response is exactly what their
+   * own access token would get (blocks, hidden posts, moderation details).
+   * Omit it for the anonymous view.
+   */
+  actingUserId?: string;
   include?: string;
 }
 

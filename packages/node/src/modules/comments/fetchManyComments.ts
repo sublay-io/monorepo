@@ -34,6 +34,12 @@ interface FetchManyCommentsBaseProps extends SpaceReputationContextParams {
   replySortBy?: CommentReplySortBy;
   replySortDir?: "asc" | "desc";
   replySortByReaction?: ReactionType;
+  /**
+   * List as this user (service key only): the page is exactly what their
+   * own access token would get (blocks, hidden posts, moderation details).
+   * Omit it for the anonymous view.
+   */
+  actingUserId?: string;
 }
 
 /**
@@ -69,6 +75,7 @@ export async function fetchManyComments(
     replySortBy,
     replySortDir,
     replySortByReaction,
+    actingUserId,
     spaceReputation,
     spaceReputationId,
     spaceReputationDescendants,
@@ -92,6 +99,7 @@ export async function fetchManyComments(
     replySortDir:
       (replySortBy ?? sortBy) === "controversial" ? undefined : replySortDir,
     replySortByReaction,
+    actingUserId,
     ...buildSpaceReputationParams({
       spaceReputation,
       spaceReputationId,

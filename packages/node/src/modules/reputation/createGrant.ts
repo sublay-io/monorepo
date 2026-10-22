@@ -36,8 +36,11 @@ export type CreateGrantProps = CreateGrantBaseProps &
  * same space. Nothing is created.
  *
  * A service key is the "mediated" caller here: the project setting that can
- * disable user-initiated grants, and block edges between the two parties, are
- * both skipped.
+ * disable user-initiated grants only closes the route to user tokens, so it is
+ * skipped. Everything else is the sender's own: a block between the two users
+ * (either way) answers 404 `reputation-grant/user-not-found`, exactly as for
+ * the sender's own grant, and a suspended sender is refused. To pay a user
+ * regardless, use {@link mintGrant}.
  */
 export async function createGrant(
   client: SublayHttpClient,

@@ -95,10 +95,20 @@ describe("node-sdk entities — request shaping", () => {
     );
   });
 
-  it("deleteEntity deletes /entities/:id", async () => {
+  it("deleteEntity deletes /entities/:id with actingUserId as a query param", async () => {
+    const { client, projectInstance } = makeClient();
+    await deleteEntity(client, { entityId: "e1", actingUserId: "u1" });
+    expect(projectInstance.delete).toHaveBeenCalledWith("/entities/e1", {
+      params: { actingUserId: "u1" },
+    });
+  });
+
+  it("deleteEntity sends no actingUserId for an app-owned entity", async () => {
     const { client, projectInstance } = makeClient();
     await deleteEntity(client, { entityId: "e1" });
-    expect(projectInstance.delete).toHaveBeenCalledWith("/entities/e1");
+    expect(projectInstance.delete).toHaveBeenCalledWith("/entities/e1", {
+      params: { actingUserId: undefined },
+    });
   });
 
   it("fetchDrafts hits /entities/drafts with the full body as params", async () => {
@@ -109,10 +119,34 @@ describe("node-sdk entities — request shaping", () => {
     });
   });
 
-  it("publishDraft patches the publish route with no body", async () => {
+  it("publishDraft patches the publish route with actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await publishDraft(client, { entityId: "e1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith("/entities/e1/publish");
+    await publishDraft(client, { entityId: "e1", actingUserId: "u1" });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/entities/e1/publish", {
+      actingUserId: "u1",
+    });
+  });
+
+  it("updateEntity sends actingUserId in the body", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateEntity(client, { entityId: "e1", title: "new", actingUserId: "u1" });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/entities/e1", {
+      title: "new",
+      actingUserId: "u1",
+    });
+  });
+
+  it("entity reads send actingUserId as a query param, apart from the userId author filter", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchEntity(client, { entityId: "e1", actingUserId: "u1" });
+    await fetchEntityByShortId(client, { shortId: "s1", actingUserId: "u1" });
+    await fetchEntityByForeignId(client, { foreignId: "f1", actingUserId: "u1" });
+    await fetchManyEntities(client, { userId: "author1", actingUserId: "u1" });
+    await fetchReactions(client, { entityId: "e1", actingUserId: "u1" });
+    for (const [, config] of projectInstance.get.mock.calls) {
+      expect(config.params.actingUserId).toBe("u1");
+    }
+    expect(projectInstance.get.mock.calls[3][1].params.userId).toBe("author1");
   });
 
   it("entity fetchers forward topCommentsLimit / topCommentsSortByReaction", async () => {

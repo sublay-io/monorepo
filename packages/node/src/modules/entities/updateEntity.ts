@@ -15,6 +15,12 @@ export interface UpdateEntityProps {
   };
   metadata?: Record<string, any>;
   nsfw?: boolean;
+  /**
+   * The user this edit acts as (service key only). Required when the entity
+   * has an author: name the author, and the request runs exactly as their own
+   * access token's. Omit it only for an app-owned entity (no author).
+   */
+  actingUserId?: string;
 }
 
 export async function updateEntity(

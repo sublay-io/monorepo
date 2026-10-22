@@ -6,6 +6,12 @@ import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
 export interface FetchEntityReactionsProps extends SpaceReputationContextParams {
   entityId: string;
+  /**
+   * List as this user (service key only): reactions from users they are
+   * block-edged with are left out, as for their own access token. Omit it for
+   * the anonymous view.
+   */
+  actingUserId?: string;
   reactionType?: ReactionType;
   page?: number;
   limit?: number;

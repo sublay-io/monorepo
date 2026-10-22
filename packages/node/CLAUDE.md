@@ -104,7 +104,7 @@ const client = await SublayClient.init({
 
 `SublayClient` binds **15 modules**. The source of truth is `src/index.ts` (the `bindModule` calls) and each module's `index.ts`. The full public surface and per-function props/returns are documented in `docs/v7/node-sdk/`.
 
-**Acting on behalf of a user**: the SDK authenticates as the project (service key), not as an end user. So user-scoped functions take `actingUserId` — the user the operation is performed as — on every v8 route, in the body or query where the server reads it. `userId` only ever names a user the request is about: a path target (`users.*ByUserId`, the follow/connection/block pairs, `spaces.fetchMutualSpaces`), a body target (`chat.createDirectConversation` / `chat.addMember`, event hosts and invites, `workspaces.createWorkspaceInvite`), or the author filter on `entities.fetchManyEntities`. The server answers an old actor `userId` with 400 `<resource>/unsupported-param`. Some user reads take an optional `actingUserId` to get that user's view (profiles, follower/following/connection lists and counts, `fetchCommentsByUserId`, `search.searchUsers`); without it they return the anonymous view. Routes that need the user's own access token (password change/set, account deletion, OAuth link/identities, push device register/deregister) refuse service keys, so the SDK has no methods for them.
+**Acting on behalf of a user**: the SDK authenticates as the project (service key), not as an end user. So user-scoped functions take `actingUserId` — the user the operation is performed as — on every v8 route, in the body or query where the server reads it. `userId` only ever names a user the request is about: a path target (`users.*ByUserId`, the follow/connection/block pairs, `spaces.fetchMutualSpaces`), a body target (`chat.createDirectConversation` / `chat.addMember`, event hosts and invites, `workspaces.createWorkspaceInvite`), or the author filter on `entities.fetchManyEntities`. The server answers an old actor `userId` with 400 `<resource>/unsupported-param`. Open reads take an optional `actingUserId` to get exactly that user's view (user profiles, follower/following/connection lists and counts, `fetchCommentsByUserId`, `search.searchUsers`/`searchContent`/`askContent`, the entity and comment reads and reaction lists, the event reads and `fetchEventRsvps`, the space reads, member and team lists and child spaces, `reputation.listGrants`); without it they return exactly the anonymous view (for `listGrants`, a signed-in user in no conversation). **The owner acts**: `updateEntity`/`deleteEntity`/`publishDraft`, `updateComment`/`deleteComment` and `storage.deleteFile` need `actingUserId` naming the author when the record has one (400 `<area>/missing-user-id` without it), and omit it only for an app-owned record. Creates without `actingUserId` (`createEntity`, uploads) make an app-owned record; a draft needs an owner. `createdAt`/`updatedAt` backdating on entity and comment create is a service-key ability, also with `actingUserId`. Routes that need the user's own access token (password change/set, account deletion, OAuth link/identities, push device register/deregister) refuse service keys, so the SDK has no methods for them.
 
 **Intentionally NOT bound**: `oauth` only (a browser redirect flow). The directory exists under `src/modules/` but is not exposed on `SublayClient`; do not document it.
 
@@ -122,7 +122,7 @@ Event lifecycle, RSVPs, hosts, and invites.
 
 `createEvent`, `fetchEvent`, `fetchManyEvents`, `updateEvent`, `cancelEvent`, `deleteEvent`, `setRsvp`, `withdrawRsvp`, `addHost`, `removeHost`, `addInvite`, `removeInvite`, `fetchInvitees`, `fetchEventRsvps`
 
-`EventType` is `online`/`physical`/`hybrid`; `EventVisibility` is `public`/`members`/`invite`; `RsvpStatus` is `going`/`maybe`/`not_going`. `fetchManyEvents` filters: `timeWindow` (upcoming/ongoing/past) or an explicit `startsAfter`/`startsBefore` range, `spaceId`, `hostId`, `type`, `status` (defaults to `active`), `myRsvp` (requires `actingUserId`), `locationFilters`, `titleFilters`/`descriptionFilters`. `fetchInvitees` (the guest list) is host-only; `fetchEventRsvps` is visible to hosts, to any viewer when `guestListVisible` is true, or to service keys.
+`EventType` is `online`/`physical`/`hybrid`; `EventVisibility` is `public`/`members`/`invite`; `RsvpStatus` is `going`/`maybe`/`not_going`. `fetchManyEvents` filters: `timeWindow` (upcoming/ongoing/past) or an explicit `startsAfter`/`startsBefore` range, `spaceId`, `hostId`, `type`, `status` (defaults to `active`), `myRsvp` (requires `actingUserId`), `locationFilters`, `titleFilters`/`descriptionFilters`. `fetchInvitees` (the guest list) is host-only; `fetchEventRsvps` is visible to hosts and, when `guestListVisible` is true, to anyone who can see the event; a service key gets the view of the user it names in `actingUserId`, or the anonymous view.
 
 ### 3. Comments Module (10 functions)
 
@@ -202,9 +202,9 @@ File and image uploads, plus read/delete. `uploadFile`, `uploadImage`, `getFile`
   `aspect-ratio-width-based`, `aspect-ratio-height-based`, `original-aspect`, `multi-aspect-ratio`),
   mirroring the server schema (see `interfaces/ImageProcessing.ts`); plus optional `pathParts`, one
   association, and `actingUserId`. (No `metadata`/`position` — the image schema doesn't read them.)
-- **Access model:** reads (`getFile`) are project-scoped (any caller in the project); **delete is
-  owner-or-service** — a user token may only delete files it owns, service keys may delete any.
-  Both enforced server-side in `server/src/{v7,v7-schema}/controllers/storage/`.
+- **Access model:** reads (`getFile`) are project-scoped (any caller in the project); **delete
+  follows "the owner acts"**: a file with an owner is deleted only as that owner (`actingUserId`
+  required, 400 `storage/missing-user-id` without it), an app-owned file only by a key naming nobody.
 
 ### 15. Chat Module (20 functions)
 

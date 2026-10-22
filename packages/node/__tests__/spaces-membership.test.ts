@@ -40,9 +40,9 @@ describe("node-sdk spaces (membership) — request shaping", () => {
 
   it("fetchSpaceMembers strips spaceId into the path and passes the rest as params", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchSpaceMembers(client, { spaceId: "s1", role: "admin", page: 1 });
+    await fetchSpaceMembers(client, { spaceId: "s1", role: "admin", page: 1, actingUserId: "u1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/members", {
-      params: { role: "admin", page: 1 },
+      params: { role: "admin", page: 1, actingUserId: "u1" },
     });
   });
 
@@ -51,6 +51,14 @@ describe("node-sdk spaces (membership) — request shaping", () => {
     await fetchSpaceTeam(client, { spaceId: "s1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/team", {
       params: {},
+    });
+  });
+
+  it("fetchSpaceTeam sends actingUserId as a query param", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchSpaceTeam(client, { spaceId: "s1", actingUserId: "u1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/team", {
+      params: { actingUserId: "u1" },
     });
   });
 

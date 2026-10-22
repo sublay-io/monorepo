@@ -17,12 +17,18 @@ export interface CreateEntityProps {
   };
   metadata?: Record<string, any>;
   nsfw?: boolean;
-  /** The user the service key acts as, who authors the entity. Omit for an app-owned entity. */
+  /**
+   * The user the service key acts as, who authors the entity; the create runs
+   * under that user's own checks. Omit it for an app-owned entity (no author).
+   */
   actingUserId?: string;
+  /** Save as a draft. A draft needs an owner, so this requires `actingUserId`. */
   isDraft?: boolean;
-  excludeUserId?: boolean;
+  /** Refuse to create the entity without an author (`actingUserId`). */
   requireUser?: boolean;
+  /** Backdate the entity (service key only, also with `actingUserId`). */
   createdAt?: Date;
+  /** Backdate the entity's last update (service key only, also with `actingUserId`). */
   updatedAt?: Date;
 }
 

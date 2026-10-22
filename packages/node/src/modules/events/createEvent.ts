@@ -28,7 +28,8 @@ export interface CreateEventProps {
   metadata?: Record<string, any>;
   /**
    * The user the service key acts as: the event's creator, who is
-   * auto-added to `hostIds`.
+   * auto-added to `hostIds`. Held to that user's own permissions (in a space,
+   * they must be an active member).
    */
   actingUserId: string;
 }

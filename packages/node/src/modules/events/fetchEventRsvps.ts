@@ -11,11 +11,17 @@ export interface FetchEventRsvpsProps {
    * omitted, all statuses are returned.
    */
   status?: string;
+  /**
+   * Read as this user (service key only): exactly what their own access token
+   * would get (event visibility, the host check). Omit it for the anonymous
+   * view.
+   */
+  actingUserId?: string;
 }
 
 /**
  * Named RSVP (guest) list. Visible to hosts always, to any viewer when the
- * event's `guestListVisible` is true, or to service keys; otherwise 403.
+ * event's `guestListVisible` is true; otherwise 403.
  * RSVP counts themselves are public via the event's `rsvpCounts`.
  */
 export async function fetchEventRsvps(

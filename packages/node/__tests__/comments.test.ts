@@ -67,10 +67,32 @@ describe("node-sdk comments — request shaping", () => {
     });
   });
 
-  it("deleteComment deletes /comments/:id", async () => {
+  it("deleteComment deletes /comments/:id with actingUserId as a query param", async () => {
     const { client, projectInstance } = makeClient();
-    await deleteComment(client, { commentId: "c1" });
-    expect(projectInstance.delete).toHaveBeenCalledWith("/comments/c1");
+    await deleteComment(client, { commentId: "c1", actingUserId: "u1" });
+    expect(projectInstance.delete).toHaveBeenCalledWith("/comments/c1", {
+      params: { actingUserId: "u1" },
+    });
+  });
+
+  it("updateComment sends actingUserId in the body", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateComment(client, { commentId: "c1", content: "x", actingUserId: "u1" });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/comments/c1", {
+      content: "x",
+      actingUserId: "u1",
+    });
+  });
+
+  it("comment reads send actingUserId as a query param", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchComment(client, { commentId: "c1", actingUserId: "u1" });
+    await fetchCommentByForeignId(client, { foreignId: "f1", actingUserId: "u1" });
+    await fetchManyComments(client, { entityId: "e1", actingUserId: "u1" });
+    await fetchReactions(client, { commentId: "c1", actingUserId: "u1" });
+    for (const [, config] of projectInstance.get.mock.calls) {
+      expect(config.params.actingUserId).toBe("u1");
+    }
   });
 
   it("fetchManyComments sends only thread params, with cursor and nesting", async () => {

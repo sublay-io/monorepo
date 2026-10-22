@@ -7,6 +7,12 @@ export interface UpdateCommentProps {
   content?: string;
   /** Replaces the comment's metadata wholesale (not merged). */
   metadata?: Record<string, any>;
+  /**
+   * The user this edit acts as (service key only). Required when the comment
+   * has an author: name the author, and the request runs exactly as their own
+   * access token's. Omit it only for an app-owned comment (no author).
+   */
+  actingUserId?: string;
 }
 
 export async function updateComment(

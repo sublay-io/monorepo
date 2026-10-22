@@ -7,6 +7,13 @@ import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 export interface FetchCommentReactionsProps
   extends SpaceReputationContextParams {
   commentId: string;
+  /**
+   * List as this user (service key only): reactions from users they are
+   * block-edged with are left out, and a comment on a post whose author
+   * blocked them answers 404, as for their own access token. Omit it for the
+   * anonymous view.
+   */
+  actingUserId?: string;
   reactionType?: ReactionType;
   page?: number;
   limit?: number;

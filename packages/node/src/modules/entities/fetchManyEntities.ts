@@ -69,8 +69,16 @@ export interface FetchManyEntitiesBaseProps
   // Time-based filtering
   timeFrame?: "hour" | "day" | "week" | "month" | "year";
 
-  /** Author filter: only entities whose `userId` is this user. */
+  /** Author filter: only entities whose `userId` is this user. Not the viewer. */
   userId?: string;
+  /**
+   * List as this user (service key only): the page is exactly what their own
+   * access token would get (followed-only, blocks, their own drafts, saved
+   * flags, own reactions, top comments), and the reads count as their views.
+   * Omit it for the anonymous view.
+   */
+  actingUserId?: string;
+  /** Only entities by users the viewer follows. Needs a viewer (`actingUserId`). */
   followedOnly?: "true" | "false";
 
   // Keyword filters

@@ -98,7 +98,7 @@ Results are also filtered for the user — the signed-in user, or the `actingUse
     ```json
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "search/acting-user-not-allowed" }
     ```
-    Returned when a user token, or a request with no credentials, sends `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    Returned when a user token sends `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
   <Accordion title="Plan Required — 403">
     ```json

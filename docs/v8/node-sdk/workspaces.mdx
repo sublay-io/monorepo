@@ -469,6 +469,9 @@ await sublay.workspaces.declineWorkspaceInvite({ inviteId: "inv_1", actingUserId
 
 Identity-matched + verified-email — the same gate as accept, so an unverified squatter on someone else's address cannot burn their invite. A service key does **not** bypass it: the `actingUserId` you act as must itself be verified, or the call returns `403 workspace/email-not-verified`.
 
+<ParamField body="inviteId" type="string" required />
+<ParamField body="actingUserId" type="string" required>The declining user (must be the target and verified).</ParamField>
+
 ### fetchMyWorkspaceInvites
 
 ```typescript
@@ -476,6 +479,8 @@ const { data } = await sublay.workspaces.fetchMyWorkspaceInvites({ actingUserId:
 ```
 
 The user's **inbox** — their live pending invites addressed *to them* across every workspace (matched by `userId`). The per-workspace **outbox** counterpart is [`fetchWorkspaceInvites`](#fetchworkspaceinvites).
+
+<ParamField body="actingUserId" type="string" required>The user whose inbox to read. Sent as a query param.</ParamField>
 
 ---
 

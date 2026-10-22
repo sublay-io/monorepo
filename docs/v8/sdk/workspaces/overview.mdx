@@ -87,7 +87,7 @@ With a client token, every endpoint in the bundle resolves the actor from that t
 One rule governs every workspace endpoint, with no exceptions:
 
 <Info>
-  **If a request acts as Bob, then for all intents and purposes it *is* Bob.** Reads and writes alike. The credential decides only *whether* you may name someone other than yourself — never how much authority you get once you have.
+  **If a request acts as Bob, then for all intents and purposes it *is* Bob.** Reads and writes alike. The credential decides only *whether* you may name an acting user at all (a service key may; a user token never does) — never how much authority that user has.
 </Info>
 
 A service key therefore has exactly two modes:

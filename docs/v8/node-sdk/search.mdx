@@ -43,7 +43,7 @@ const { data, pagination } = await sublay.search.searchContent({
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  The user to search as. Results follow that user's access — their chats, their blocks. Without it, no chat messages are returned.
+  The user to search as: the result is exactly what their own access token would get — their chats, their blocks, the comment moderation details they may see. Without it you get the anonymous view: no chat messages, no block filtering, no moderation details.
 </ParamField>
 
 <ParamField body="limit" type="number">
@@ -145,7 +145,7 @@ const { answer, sources } = await sublay.search.askContent({
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  The user to search as. Results follow that user's access — their chats, their blocks. Without it, no chat messages are returned.
+  The user to search as: the result is exactly what their own access token would get — their chats, their blocks, the comment moderation details they may see. Without it you get the anonymous view: no chat messages, no block filtering, no moderation details.
 </ParamField>
 
 <ParamField body="limit" type="number">

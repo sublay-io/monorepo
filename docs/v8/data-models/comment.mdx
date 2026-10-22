@@ -32,9 +32,9 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `metadata` | `Record<string, any> \| null` | Custom key-value data, up to 10 KB (10,240 bytes) as JSON. `null` on placeholders. |
 | `moderationStatus` | `"approved" \| "removed" \| null` | Space moderation status. Visible to everyone. |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
-| `moderatedById` | `string \| null` | ID of the moderator. Visible only to moderators and keys — see [Moderation fields](#moderation-fields); `null` for everyone else. |
-| `moderatedByType` | `"client" \| "user" \| null` | Whether a client (admin) or user performed moderation. Visible only to moderators and keys — see [Moderation fields](#moderation-fields); `null` for everyone else. |
-| `moderationReason` | `string \| null` | Reason provided for moderation. Visible only to moderators, keys and the comment's author — see [Moderation fields](#moderation-fields); `null` for everyone else. |
+| `moderatedById` | `string \| null` | ID of the moderator. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
+| `moderatedByType` | `"client" \| "user" \| null` | Whether a client (admin) or user performed moderation. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
+| `moderationReason` | `string \| null` | Reason provided for moderation. Visible only to some requesters, including the comment's author — see [Moderation fields](#moderation-fields); `null` for everyone else. |
 | `userDeletedAt` | `Date \| null` | Set when the author deletes their own comment. The comment stays in threads as a [placeholder](#placeholders), so the replies under it remain. |
 | `createdAt` | `Date` | When the comment was created. |
 | `updatedAt` | `Date` | When the comment was last updated. |
@@ -120,13 +120,13 @@ A placeholder's moderation fields follow [Moderation fields](#moderation-fields)
 |---|---|---|
 | An active admin or moderator of the comment's space | ✓ | ✓ |
 | A user whose project [`role`](/v8/data-models/user) is `admin` or `moderator` | ✓ | ✓ |
-| A request made with a service key | ✓ | ✓ |
+| A request made with a service key, except on the open reads below | ✓ | ✓ |
 | The comment's author | ✓ | — |
 | Anyone else, including signed-out requests | — | — |
 
-A comment on an entity with no space has no space moderators: only project-role admins and moderators, keys and the comment's author qualify.
+A comment on an entity with no space has no space moderators: only project-role admins and moderators, keys (where the key row applies) and the comment's author qualify.
 
-On [Search Content](/v8/api-reference/search/search-content) and [Ask](/v8/api-reference/search/ask), a service key that sends `actingUserId` is treated as that user, not as a key: it gets exactly what the user's own token would get. On [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id), a service key never counts as a key here: with `actingUserId` it gets exactly that user's view, and without it the anonymous view.
+**Open reads.** On [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id), [Search Content](/v8/api-reference/search/search-content) and [Ask](/v8/api-reference/search/ask), a service key never gets the key row: with `actingUserId` it gets exactly what that user's own token would get, and without it exactly the anonymous view, with no moderation details.
 
 ## Blocked authors
 

@@ -81,6 +81,16 @@ https://yourapp.com/callback?error=...&error_description=...
     }
     ```
   </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. A user token always acts as its own user. (A service key gets the `403` above instead.)
+
+    ```json
+    {
+      "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
+      "code": "oauth/acting-user-not-allowed"
+    }
+    ```
+  </Accordion>
 </AccordionGroup>
 
 ## See Also

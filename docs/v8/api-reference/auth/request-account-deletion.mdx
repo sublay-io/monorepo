@@ -33,6 +33,7 @@ This endpoint takes no body parameters.
 | `auth/no-user-found` | 403 | The access token is valid but no matching user record exists (e.g. the account was already deleted). |
 | `auth/unsupported-param` | 400 | The request sent `userId`, in the body or the query. These endpoints always act as the signed-in user: ``"`userId` isn't accepted here: these endpoints always act as the signed-in user."``, with `param: "userId"`. |
 | `auth/user-token-required` | 403 | A service key called this endpoint, with or without `actingUserId`: `"This endpoint needs the user's own access token; a service key can't use it."` |
+| `auth/acting-user-not-allowed` | 400 | A user token, or a request with no credentials, sent `actingUserId`: `"actingUserId is only accepted with a service key. A user's own token always acts as that user."` A user token always acts as its own user. |
 
 <Note>
   Each call generates a fresh code and overwrites any pending one for that user.

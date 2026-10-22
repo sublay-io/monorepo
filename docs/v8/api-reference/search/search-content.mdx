@@ -10,7 +10,7 @@ Performs vector-similarity search over project content (entities, comments, and 
 
 **Requires a paid plan with semantic search enabled.**
 
-**Authentication required.** Send a user's access token as `Authorization: Bearer <token>` — missing token → `401`, invalid/expired token → `403` (refresh and retry). A service key is accepted too, and searches as the user named in `actingUserId`. A service key that names no user gets no chat messages, and the block filtering under [What's left out](#whats-left-out) doesn't apply to it.
+**Authentication required.** Send a user's access token as `Authorization: Bearer <token>` — missing token → `401`, invalid/expired token → `403` (refresh and retry). A service key is accepted too: with `actingUserId` it gets exactly what that user's own token would get, and without it exactly the anonymous view — no chat messages, no block filtering under [What's left out](#whats-left-out), and no [comment moderation details](/v8/data-models/comment#moderation-fields).
 
 ## Body Parameters
 
@@ -35,7 +35,7 @@ Performs vector-similarity search over project content (entities, comments, and 
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only: the user to search as. Results follow that user's access — their chats, their blocks. Without it, a service key gets entities and comments but no chat messages. A user token always acts as its own user and must not send it (`400 search/acting-user-not-allowed`).
+  Service key only: the user to search as. Results follow that user's access — their chats, their blocks. Without it, a service key gets the anonymous view: entities and comments, but no chat messages. A user token always acts as its own user and must not send it (`400 search/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField body="limit" type="number" default="20">

@@ -20,7 +20,7 @@ Access tokens expire after **30 minutes**.
 
 Server-to-server requests can authenticate with a **service key** instead of a user's access token. A service key has no user of its own; to act as a user, it names that user in `actingUserId`, in the body or query of the request (wherever that endpoint reads it). The request then runs with that user's permissions and is recorded as theirs.
 
-- A user token always acts as its own user. Sending `actingUserId` with a user token, or with no credentials, returns `400 <resource>/acting-user-not-allowed`, even when it names the token's own user. An endpoint that requires sign-in may answer a request with no credentials with `401` first.
+- A user token always acts as its own user. Sending `actingUserId` with a user token, or with no credentials, returns `400 <resource>/acting-user-not-allowed`, even when it names the token's own user. An endpoint that requires sign-in may answer a request with no credentials with `401` first. Endpoints that always act as the app (below) answer `400 <resource>/unsupported-param` instead, to every caller.
 - An endpoint that needs an acting user returns `400 <resource>/missing-user-id` to a service key that sends none.
 - On reads shaped by who is looking (user profiles and suggestions, follower, following and connection lists and their counts, a user's comment history, user search, content search and Ask), `actingUserId` is optional: with it, the response is exactly what that user's own token would get; without it, the anonymous view.
 - Endpoints that always act as the app (updating or deleting a user, sending push notifications) refuse `actingUserId` with `400 <resource>/unsupported-param`.

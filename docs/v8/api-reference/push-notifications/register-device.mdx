@@ -76,6 +76,16 @@ Returns `200` with the stored device record on success.
     Returned when a service key is used, with or without `actingUserId`, before the body is checked. This endpoint has no
     acting-as-a-user path by design (see [Security note](#security-note)).
   </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. A user token always acts as its own user. (A service key gets the `403` above instead.)
+
+    ```json
+    {
+      "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
+      "code": "push-device/acting-user-not-allowed"
+    }
+    ```
+  </Accordion>
   <Accordion title="Invalid Body — 400">
     ```json
     { "error": "...", "code": "push-device/invalid-body" }

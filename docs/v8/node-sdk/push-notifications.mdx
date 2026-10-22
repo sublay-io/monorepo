@@ -147,7 +147,7 @@ Common `reason` values when `success` is `false`:
 Read and update a user's per-type push preferences — the set of event types they've disabled for push. See [Notification Preferences & Mute](/v8/notification-preferences) for the model and the full event palette.
 
 <Note>
-  These endpoints are **per-user**. The Node SDK authenticates with a service key, so — exactly like the other per-user operations — you name the user with an explicit `userId` and the SDK acts on that user's behalf. (End-user-token clients, such as the React hooks and the browser JS SDK, act on the signed-in user and omit `userId`.)
+  These endpoints are **per-user**. The Node SDK authenticates with a service key, so — exactly like the other per-user operations — you name the user in [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user) and the SDK acts on that user's behalf. (End-user-token clients, such as the React hooks and the browser JS SDK, act on the signed-in user and send no `actingUserId`.)
 </Note>
 
 ### getNotificationPreferences
@@ -156,12 +156,12 @@ Reads a user's disabled push types. Returns an empty array (all-on) when no pref
 
 ```typescript
 const { disabledTypes } = await sublay.push.getNotificationPreferences({
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
-<ParamField body="userId" type="string" required>
-  The user whose preferences to read.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose preferences to read.
 </ParamField>
 
 **Returns** — `Promise<NotificationPreferences>`
@@ -183,7 +183,7 @@ import { PUSH_EVENT_TYPES } from "@sublay/node";
 
 await sublay.push.updateNotificationPreferences({
   disabledTypes: ["comment-mention", "message"],
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -191,8 +191,8 @@ await sublay.push.updateNotificationPreferences({
   The complete set of event types to disable for push. Values must be from `PUSH_EVENT_TYPES` (see the [event palette](/v8/notification-preferences#the-event-palette)); unknown names are rejected. Pass `[]` to re-enable everything.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The user whose preferences to write.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose preferences to write.
 </ParamField>
 
 **Returns** — `Promise<NotificationPreferences>` (the stored, deduplicated set).
@@ -201,4 +201,4 @@ await sublay.push.updateNotificationPreferences({
 
 ## Conversation mute
 
-Setting or clearing a conversation mute lives on the **`chat`** module (it's a `/chat/...` route): [`chat.muteConversation`](/v8/node-sdk/chat#muteconversation). Like the preference endpoints it is per-user — name the acting user with `userId` — and takes a duration **choice**, never a timestamp.
+Setting or clearing a conversation mute lives on the **`chat`** module (it's a `/chat/...` route): [`chat.muteConversation`](/v8/node-sdk/chat#muteconversation). Like the preference endpoints it is per-user — name the acting user with `actingUserId` — and takes a duration **choice**, never a timestamp.

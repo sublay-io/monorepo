@@ -9,7 +9,7 @@ The `reports` module lets a user report an entity, comment, or chat message, and
 
 <Note>
   Both functions act on behalf of a named user. Pass that user's Sublay ID as
-  `userId` — for `createReport` this is the reporter; for `fetchModeratedReports`
+  [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user), the user your service key acts as. For `createReport` this is the reporter; for `fetchModeratedReports`
   it is the moderator whose queue is returned.
 </Note>
 
@@ -21,7 +21,7 @@ Files a report against an entity, comment, or chat message on behalf of a user. 
 
 ```typescript
 const result = await sublay.reports.createReport({
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   targetType: "comment",
   targetId: "cmt_abc123",
   reason: "spam",
@@ -29,8 +29,8 @@ const result = await sublay.reports.createReport({
 });
 ```
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID filing the report (the reporter).
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as: the reporter.
 </ParamField>
 
 <ParamField body="targetType" type="string" required>
@@ -76,7 +76,7 @@ Returns a paginated list of reports in the spaces the user moderates. Each repor
 
 ```typescript
 const { data, pagination } = await sublay.reports.fetchModeratedReports({
-  userId: "usr_mod123",
+  actingUserId: "usr_mod123",
   status: "pending",
   targetType: "entity",
   sortBy: "createdAt",
@@ -86,8 +86,8 @@ const { data, pagination } = await sublay.reports.fetchModeratedReports({
 });
 ```
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID of the moderator whose queue to fetch.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as: the moderator whose queue to fetch.
 </ParamField>
 
 <ParamField body="spaceId" type="string">

@@ -6,16 +6,17 @@ description: "Upload, retrieve, and delete files and images from your server"
 The `storage` module uploads files and images to managed cloud storage and returns proxy URLs, plus reads and deletes existing files. Uploads are sent as `multipart/form-data` — pass the file bytes as a `Uint8Array` or a `Blob`.
 
 <Note>
-  Uploads can be attributed to a user by passing that user's Sublay ID as `userId` —
-  your service key performs the upload on behalf of that named user. Omit `userId`
-  for a **backend/project-owned** file (no owning user).
+  Uploads can be attributed to a user by passing that user's Sublay ID as
+  [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user), the user your
+  service key acts as. Omit `actingUserId` for a **backend/project-owned** file (no
+  owning user).
 </Note>
 
 <Warning>
   **Access model.** Reads (`getFile`) are project-scoped — reachable for any file
   in your project. **Deletes are owner-or-service:** your service key may delete
   any file, but the same call made with an end-user token only succeeds for files
-  that user owns. Backend-owned files (`userId` unset) are deletable only with a
+  that user owns. Backend-owned files (uploaded without an `actingUserId`) are deletable only with a
   service key.
 </Warning>
 
@@ -35,7 +36,7 @@ const file = await sublay.storage.uploadFile({
   filename: "report.pdf",
   mimeType: "application/pdf",
   pathParts: ["documents", "usr_abc123"],
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -79,8 +80,8 @@ const file = await sublay.storage.uploadFile({
   Associates the file with a space.
 </ParamField>
 
-<ParamField body="userId" type="string">
-  Attribute the upload to a user. Omit for a backend/project-owned file.
+<ParamField body="actingUserId" type="string">
+  The user the service key acts as, who owns the upload. Omit it for a backend/project-owned file.
 </ParamField>
 
 **Returns** — `Promise<File>`
@@ -110,7 +111,7 @@ const file = await sublay.storage.uploadImage({
     quality: 85,
   },
   pathParts: ["avatars", "usr_abc123"],
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -166,8 +167,8 @@ const file = await sublay.storage.uploadImage({
   support inline event image upload). See the [Events module](/v8/node-sdk/events).
 </ParamField>
 
-<ParamField body="userId" type="string">
-  Attribute the upload to a user. Omit for a backend/project-owned file.
+<ParamField body="actingUserId" type="string">
+  The user the service key acts as, who owns the upload. Omit it for a backend/project-owned file.
 </ParamField>
 
 **Returns** — `Promise<File>` (the `image` field carries the generated `variants`).

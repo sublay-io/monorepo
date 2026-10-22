@@ -15,7 +15,7 @@ Creates a new space.
 
 ```typescript
 const space = await sublay.spaces.createSpace({
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   name: "Photography",
   slug: "photography",
   description: "A community for photographers",
@@ -23,8 +23,8 @@ const space = await sublay.spaces.createSpace({
 });
 ```
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID of the space creator, who becomes the initial admin.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as: the space creator, who becomes the initial admin.
 </ParamField>
 
 <ParamField body="name" type="string" required>
@@ -60,7 +60,7 @@ const space = await sublay.spaces.createSpace({
 </ParamField>
 
 <ParamField body="parentSpaceId" type="string">
-  Makes this space a child of the specified parent space. The user the space is created for (`userId`) must be an active admin of the parent space, or the request is refused with `403 space/parent-admin-required`.
+  Makes this space a child of the specified parent space. The user the space is created for (`actingUserId`) must be an active admin of the parent space, or the request is refused with `403 space/parent-admin-required`.
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -190,14 +190,14 @@ Fetches the spaces a specific user is a member of.
 
 ```typescript
 const result = await sublay.spaces.fetchUserSpaces({
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   page: 1,
   limit: 20,
 });
 ```
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose spaces to list.
 </ParamField>
 
 <ParamField body="page" type="number">

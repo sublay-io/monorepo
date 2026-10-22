@@ -5,7 +5,7 @@ description: "Create and manage events, RSVPs, hosts, and invites from the serve
 
 The `events` module covers the full events surface: creating and editing events, the RSVP lifecycle, host and invite management, and the guest list. It maps directly to the [Events API](/v8/api-reference/events/create-event).
 
-Because the Node SDK authenticates with a **service key** (it acts as the whole project, not a single end user), most write functions take an explicit `userId` naming the user the action is performed as. The event-management functions (`updateEvent`, `cancelEvent`, `deleteEvent`, the host and invite functions, `fetchInvitees`) take a required `actingUserId` instead: the host the call acts as, with exactly that host's powers. On the host and invite functions, `userId` is the **target** user (the host or invitee).
+Because the Node SDK authenticates with a **service key** (it acts as the whole project, not a single end user), functions that act as a user take that user in [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user). On the event-management functions (`updateEvent`, `cancelEvent`, `deleteEvent`, the host and invite functions, `fetchInvitees`), `actingUserId` is the host the call acts as, with exactly that host's powers. On the host and invite functions, `userId` is the **target** user (the host or invitee).
 
 <Note>
   **Image upload caveat.** The Node SDK does not support inline cover/gallery
@@ -21,11 +21,11 @@ Requires the `events` bundle. Space-scoping needs the `spaces` bundle; images ne
 
 ### createEvent
 
-Creates an event. The `userId` you pass becomes the creator and is auto-added to `hostIds`. Returns the event with inline `rsvpCounts`.
+Creates an event. The `actingUserId` you pass becomes the creator and is auto-added to `hostIds`. Returns the event with inline `rsvpCounts`.
 
 ```typescript
 const event = await sublay.events.createEvent({
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   title: "Launch Party",
   type: "physical",
   startTime: "2026-09-01T18:00:00.000Z",
@@ -44,8 +44,8 @@ const event = await sublay.events.createEvent({
 <ParamField body="type" type='"online" | "physical" | "hybrid"' required>
   Event format. `online` requires `url`; `physical` requires `address` or `location`; `hybrid` requires both.
 </ParamField>
-<ParamField body="userId" type="string">
-  The user to create the event as (creator + first host). With a service key this may be any user.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as: the event's creator and first host.
 </ParamField>
 <ParamField body="description" type="string">Optional description.</ParamField>
 <ParamField body="endTime" type="string">Optional ISO end datetime.</ParamField>
@@ -68,19 +68,19 @@ const event = await sublay.events.createEvent({
 
 ### fetchEvent
 
-Fetches a single event by ID. Pass `userId` to resolve visibility for that user and to populate `userRsvp` (with the `userRsvp` include).
+Fetches a single event by ID. Pass `actingUserId` to resolve visibility for that user and to populate `userRsvp` (with the `userRsvp` include).
 
 ```typescript
 const event = await sublay.events.fetchEvent({
   eventId: "evt_abc123",
   include: "user,space,files,userRsvp",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
 <ParamField body="include" type="string">Comma-separated associations: `"user"`, `"space"`, `"files"`, `"userRsvp"`.</ParamField>
-<ParamField body="userId" type="string">The requester id, for visibility resolution and `userRsvp` enrichment.</ParamField>
+<ParamField body="actingUserId" type="string">The user the service key acts as, whose view is returned (visibility, `userRsvp`). Omit it for the key's own view.</ParamField>
 
 **Returns** — `Promise<Event>`
 
@@ -88,7 +88,7 @@ const event = await sublay.events.fetchEvent({
 
 ### fetchManyEvents
 
-Lists events with visibility enforced, plus filtering, sorting, geo, and free-text search. Pass `userId` to resolve member/invite/host visibility and to use the `myRsvp` filter.
+Lists events with visibility enforced, plus filtering, sorting, geo, and free-text search. Pass `actingUserId` to resolve member/invite/host visibility and to use the `myRsvp` filter.
 
 ```typescript
 const { data, pagination } = await sublay.events.fetchManyEvents({
@@ -98,7 +98,7 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
   type: "physical",
   page: 1,
   limit: 20,
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   include: "user,userRsvp",
 });
 ```
@@ -114,12 +114,12 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
 <ParamField body="hostId" type="string">Only events this user hosts.</ParamField>
 <ParamField body="type" type='"online" | "physical" | "hybrid"'>Filter by type.</ParamField>
 <ParamField body="status" type='"active" | "cancelled"'>Defaults to `"active"`.</ParamField>
-<ParamField body="myRsvp" type="string">Comma-separated statuses the requester RSVP'd with, e.g. `"going,maybe"`. Requires `userId`.</ParamField>
+<ParamField body="myRsvp" type="string">Comma-separated statuses the requester RSVP'd with, e.g. `"going,maybe"`. Requires `actingUserId`.</ParamField>
 <ParamField body="locationFilters" type="{ latitude: string; longitude: string; radius: string }">Proximity filter (radius in meters).</ParamField>
 <ParamField body="titleFilters" type="{ hasTitle?; includes?; doesNotInclude? }">Free-text filter on `title`.</ParamField>
 <ParamField body="descriptionFilters" type="{ hasDescription?; includes?; doesNotInclude? }">Free-text filter on `description`.</ParamField>
 <ParamField body="include" type="string">Comma-separated associations.</ParamField>
-<ParamField body="userId" type="string">The requester id (visibility + `myRsvp` + `userRsvp`).</ParamField>
+<ParamField body="actingUserId" type="string">The user the service key acts as, whose view is returned (visibility, `myRsvp`, `userRsvp`). Omit it for the key's own view.</ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Event>>`
 
@@ -204,13 +204,13 @@ Sets or changes a user's RSVP. Transitions into `going` are capacity-checked.
 const event = await sublay.events.setRsvp({
   eventId: "evt_abc123",
   status: "going",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
 <ParamField body="status" type='"going" | "maybe" | "not_going"' required>The RSVP response.</ParamField>
-<ParamField body="userId" type="string">The user to RSVP as. With a service key this may be any user.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the service key acts as, who RSVPs.</ParamField>
 
 **Returns** — `Promise<Event>` (with refreshed `rsvpCounts`)
 
@@ -223,12 +223,12 @@ Removes a user's RSVP. Idempotent.
 ```typescript
 const event = await sublay.events.withdrawRsvp({
   eventId: "evt_abc123",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="userId" type="string">The user to withdraw. With a service key this may be any user.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the service key acts as, whose RSVP is withdrawn.</ParamField>
 
 **Returns** — `Promise<Event>`
 
@@ -366,7 +366,7 @@ Create the event, then upload a cover or gallery image and associate it with `ev
 import { readFile } from "node:fs/promises";
 
 const event = await sublay.events.createEvent({
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   title: "Launch Party",
   type: "online",
   url: "https://meet.example.com/launch",
@@ -380,7 +380,7 @@ await sublay.storage.uploadImage({
   mimeType: "image/jpeg",
   imageOptions: { mode: "original-aspect", sizes: { full: 1600 }, format: "webp" },
   eventId: event.id,
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 

@@ -213,7 +213,7 @@ Sends (or re-sends) an email-verification message to a user. Verification can be
 
 ```typescript
 const { success } = await sublay.auth.sendVerificationEmail({
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   mode: "code",
   tokenFormat: "numeric",
   tokenLength: 6,
@@ -222,8 +222,8 @@ const { success } = await sublay.auth.sendVerificationEmail({
 
 `mode` is always required, and it determines what else is required — enforced by TypeScript as a discriminated union, not just documented:
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID to send the verification email to.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, who receives the verification email.
 </ParamField>
 
 <ParamField body="mode" type='"code" | "link"' required>

@@ -239,11 +239,11 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The author to filter by, also used as the viewing user to resolve `followedOnly`.
+  Author filter: returns only entities whose `userId` is this user.
 </ParamField>
 
 <ParamField body="followedOnly" type='"true" | "false"'>
-  When `"true"`, returns only entities from users the given `userId` follows.
+  When `"true"`, returns only entities from users the signed-in user follows.
 </ParamField>
 
 <ParamField body="keywordsFilters" type="object">

@@ -461,10 +461,10 @@ const { count } = await sublay.users.fetchConnectionsCountByUserId({
 
 ## Acting on a user's follows and connections
 
-The functions above are read-only queries about a target user. The functions below **perform an action** on behalf of one user toward another. Because a service key isn't tied to a single user, these routes take both:
+The functions above are read-only queries about a target user. The functions below **perform an action** on behalf of one user toward another, so they take both:
 
 - `userId` — the **target** of the action (the user being followed, connected with, etc.), taken from the request path.
-- `actingUserId` — the **actor** performing it (the follower, the requester, the user whose perspective a status is from).
+- [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user) — the user the service key acts as (the follower, the requester, the user whose perspective a status is from).
 
 <Note>
   Listing and managing the acting user's own follow/connection graph by record ID
@@ -709,7 +709,7 @@ const { data, pagination } = await sublay.users.fetchBlockedUsers({
 ```
 
 <ParamField body="actingUserId" type="string" required>
-  The user whose own block list to read (the blocker).
+  The user the service key acts as, whose own block list to read (the blocker).
 </ParamField>
 
 <ParamField body="page" type="number">

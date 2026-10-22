@@ -7,8 +7,7 @@ The `collections` module manages a user's saved-content collections. Every user 
 
 <Note>
   Collections are always scoped to a specific user. Pass that user's Sublay ID as
-  `userId` on every call — your service key performs the operation on behalf of
-  that named user.
+  [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user), the user your service key acts as, on every call.
 </Note>
 
 ---
@@ -19,12 +18,12 @@ Fetches a user's root collection, creating it on first access if it does not yet
 
 ```typescript
 const root = await sublay.collections.fetchRootCollection({
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID whose root collection to fetch.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose root collection to fetch.
 </ParamField>
 
 **Returns** — `Promise<Collection>`
@@ -38,7 +37,7 @@ Fetches the direct child collections nested under a given collection.
 ```typescript
 const subCollections = await sublay.collections.fetchSubCollections({
   collectionId: "col_root123",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -46,8 +45,8 @@ const subCollections = await sublay.collections.fetchSubCollections({
   The parent collection ID.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID who owns the collection.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, who owns the collection.
 </ParamField>
 
 **Returns** — `Promise<Collection[]>`
@@ -62,7 +61,7 @@ Creates a new sub-collection under an existing parent collection.
 const collection = await sublay.collections.createNewCollection({
   collectionId: "col_root123",
   collectionName: "Recipes",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -74,8 +73,8 @@ const collection = await sublay.collections.createNewCollection({
   The name of the new collection.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID who will own the collection.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, who will own the collection.
 </ParamField>
 
 **Returns** — `Promise<Collection>`
@@ -89,7 +88,7 @@ Fetches a paginated list of entities saved in a collection.
 ```typescript
 const { data, pagination } = await sublay.collections.fetchCollectionEntities({
   collectionId: "col_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   sortBy: "addedAt",
   page: 1,
   limit: 20,
@@ -100,8 +99,8 @@ const { data, pagination } = await sublay.collections.fetchCollectionEntities({
   The collection ID.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID who owns the collection.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, who owns the collection.
 </ParamField>
 
 <ParamField body="page" type="number">
@@ -148,7 +147,7 @@ Saves an entity into a collection.
 const collection = await sublay.collections.addEntityToCollection({
   collectionId: "col_xyz789",
   entityId: "ent_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -160,8 +159,8 @@ const collection = await sublay.collections.addEntityToCollection({
   The Sublay entity ID to save.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID who owns the collection.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, who owns the collection.
 </ParamField>
 
 **Returns** — `Promise<Collection>`
@@ -176,7 +175,7 @@ Removes an entity from a collection.
 await sublay.collections.removeEntityFromCollection({
   collectionId: "col_xyz789",
   entityId: "ent_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -188,8 +187,8 @@ await sublay.collections.removeEntityFromCollection({
   The Sublay entity ID to remove.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID who owns the collection.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, who owns the collection.
 </ParamField>
 
 **Returns** — `Promise<void>`
@@ -203,7 +202,7 @@ Renames a collection.
 ```typescript
 const collection = await sublay.collections.updateCollection({
   collectionId: "col_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   name: "Favorite Recipes",
 });
 ```
@@ -212,8 +211,8 @@ const collection = await sublay.collections.updateCollection({
   The collection ID to update.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID who owns the collection.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, who owns the collection.
 </ParamField>
 
 <ParamField body="name" type="string" required>
@@ -231,7 +230,7 @@ Deletes a collection.
 ```typescript
 await sublay.collections.deleteCollection({
   collectionId: "col_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -239,8 +238,8 @@ await sublay.collections.deleteCollection({
   The collection ID to delete.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID who owns the collection.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, who owns the collection.
 </ParamField>
 
 **Returns** — `Promise<void>`

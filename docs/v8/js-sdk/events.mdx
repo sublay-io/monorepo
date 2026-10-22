@@ -5,7 +5,7 @@ description: "Create and manage events, RSVPs, hosts, and invites from the brows
 
 The `events` module covers the full events surface: creating and editing events (with inline cover/gallery image upload), the RSVP lifecycle, host and invite management, and the guest list. It maps directly to the [Events API](/v8/api-reference/events/create-event).
 
-Because the JS SDK authenticates as an **end user** (bearer token), you never pass an actor `userId` — the server derives who is acting from the token. The only `userId` arguments are **targets**: the host or invitee on the host/invite functions.
+Because the JS SDK authenticates as an **end user** (bearer token), you never send `actingUserId` — the server derives who is acting from the token. The only `userId` arguments are **targets**: the host or invitee on the host/invite functions.
 
 Requires the `events` bundle. Space-scoping needs the `spaces` bundle; images need `files-images`; notifications need `notifications`.
 

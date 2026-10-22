@@ -1,7 +1,7 @@
 import { SublayHttpClient } from "../../core/client";
 
 export interface FetchFollowingCountProps {
-  userId: string;
+  actingUserId: string;
 }
 
 export interface FollowingCountResponse {

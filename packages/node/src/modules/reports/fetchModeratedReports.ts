@@ -6,7 +6,7 @@ import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
 export interface FetchModeratedReportsProps
   extends SpaceReputationContextParams {
-  userId: string;
+  actingUserId: string;
   spaceId?: string;
   targetType?: ReportTargetType;
   status?: ReportStatus;

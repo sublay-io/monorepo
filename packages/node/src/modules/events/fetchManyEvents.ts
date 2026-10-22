@@ -42,7 +42,7 @@ export interface FetchManyEventsProps {
 
   /**
    * Comma-separated RSVP statuses the requester RSVP'd with, e.g. "going,maybe".
-   * Requires `userId` to be set.
+   * Requires `actingUserId` to be set.
    */
   myRsvp?: string;
 
@@ -55,8 +55,8 @@ export interface FetchManyEventsProps {
 
   /** Comma-separated associations to expand, e.g. "user,space,files,userRsvp". */
   include?: string;
-  /** Requester id — for `myRsvp` filter, `userRsvp` enrichment, and visibility. */
-  userId?: string;
+  /** The user the service key acts as, for that user's view (`myRsvp` filter, `userRsvp`, visibility). Omit for the key's own view. */
+  actingUserId?: string;
 }
 
 export async function fetchManyEvents(

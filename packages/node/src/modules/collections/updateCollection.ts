@@ -3,7 +3,7 @@ import { Collection } from "../../interfaces/Collection";
 
 export interface UpdateCollectionProps {
   collectionId: string;
-  userId: string;
+  actingUserId: string;
   name: string;
 }
 

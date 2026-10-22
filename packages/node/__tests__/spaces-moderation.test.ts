@@ -74,11 +74,11 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
     );
   });
 
-  it("getSpaceConversation sends userId as a param", async () => {
+  it("getSpaceConversation sends actingUserId as a param", async () => {
     const { client, projectInstance } = makeClient();
-    await getSpaceConversation(client, { spaceId: "s1", userId: "u1" });
+    await getSpaceConversation(client, { spaceId: "s1", actingUserId: "u1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/conversation", {
-      params: { userId: "u1" },
+      params: { actingUserId: "u1" },
     });
   });
 
@@ -234,7 +234,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
     const conversation = { id: "conv1" };
     projectInstance.get.mockResolvedValueOnce({ data: conversation });
     await expect(
-      getSpaceConversation(client, { spaceId: "s1", userId: "u1" }),
+      getSpaceConversation(client, { spaceId: "s1", actingUserId: "u1" }),
     ).resolves.toEqual(conversation);
   });
 

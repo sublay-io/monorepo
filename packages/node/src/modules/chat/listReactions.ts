@@ -10,7 +10,7 @@ export interface ListReactionsProps extends SpaceReputationContextParams {
   /** The reaction emoji to list reactors for (required). */
   emoji: string;
   /** The user to act as (must be a member). Service key required to name a user. */
-  userId: string;
+  actingUserId: string;
   page?: number;
   limit?: number;
 }

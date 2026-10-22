@@ -14,7 +14,7 @@ export interface MuteConversationProps {
    * The acting user whose membership is muted. The service key acts on this
    * user's behalf; the returned `currentMember` reflects that user's row.
    */
-  userId: string;
+  actingUserId: string;
 }
 
 export interface MuteConversationResult {
@@ -26,17 +26,17 @@ export interface MuteConversationResult {
  *
  * Mirrors `POST /:projectId/chat/conversations/:conversationId/mute`. The route
  * is acting-user-scoped; the SDK authenticates with a service key and names the
- * acting user via `userId` (like the other per-user operations).
+ * acting user via `actingUserId` (like the other per-user operations).
  */
 export async function muteConversation(
   client: SublayHttpClient,
   data: MuteConversationProps
 ): Promise<MuteConversationResult> {
-  const { conversationId, duration, userId } = data;
+  const { conversationId, duration, actingUserId } = data;
   const response =
     await client.projectInstance.post<MuteConversationResult>(
       `/chat/conversations/${conversationId}/mute`,
-      { duration, userId }
+      { duration, actingUserId }
     );
   return response.data;
 }

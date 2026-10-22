@@ -21,8 +21,8 @@ describe("one-way sorts", () => {
     // @ts-expect-error — a user's comment history: same
     const badHistory: FetchCommentsByUserIdProps = { userId: "u", sortBy: "controversial", sortDir: "asc" };
     // @ts-expect-error — collection entities: no sortDir with hot
-    const badCollection: FetchCollectionEntitiesProps = { collectionId: "c", userId: "u", sortBy: "hot", sortDir: "asc" };
-    const okCollection: FetchCollectionEntitiesProps = { collectionId: "c", userId: "u", sortBy: "addedAt", sortDir: "asc" };
+    const badCollection: FetchCollectionEntitiesProps = { collectionId: "c", actingUserId: "u", sortBy: "hot", sortDir: "asc" };
+    const okCollection: FetchCollectionEntitiesProps = { collectionId: "c", actingUserId: "u", sortBy: "addedAt", sortDir: "asc" };
     expect([ok, okMeta, okHot, badHot, badControversial, badSortBy, badComments, badHistory, badCollection, okCollection]).toHaveLength(10);
     // A comment sort held in state (no sortDir) is accepted.
     const pick = (sortBy: "createdAt" | "top" | "controversial") => {

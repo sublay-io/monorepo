@@ -7,7 +7,7 @@ export interface GetMessageProps extends SpaceReputationContextParams {
   conversationId: string;
   messageId: string;
   /** The user to act as (must be a member). Service key required to name a user. */
-  userId: string;
+  actingUserId: string;
   /**
    * Comma-separated associations to populate. Only `"grants"` is supported
    * here — it attaches the message's reputation-grant summary.

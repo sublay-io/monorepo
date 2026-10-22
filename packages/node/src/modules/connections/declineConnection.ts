@@ -3,17 +3,17 @@ import { ConnectionActionResponse } from "../../interfaces/Connection";
 
 export interface DeclineConnectionProps {
   connectionId: string;
-  userId: string;
+  actingUserId: string;
 }
 
 export async function declineConnection(
   client: SublayHttpClient,
   data: DeclineConnectionProps
 ): Promise<ConnectionActionResponse> {
-  const { connectionId, userId } = data;
+  const { connectionId, actingUserId } = data;
   const response = await client.projectInstance.patch<ConnectionActionResponse>(
     `/connections/${connectionId}/decline`,
-    { userId }
+    { actingUserId }
   );
   return response.data;
 }

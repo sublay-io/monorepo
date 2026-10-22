@@ -17,9 +17,9 @@ import { makeClient } from "./helpers/mockClient";
 describe("node-sdk spaces (lifecycle) — request shaping", () => {
   it("createSpace posts the full body to /spaces", async () => {
     const { client, projectInstance } = makeClient();
-    await createSpace(client, { userId: "u1", name: "My Space" });
+    await createSpace(client, { actingUserId: "u1", name: "My Space" });
     expect(projectInstance.post).toHaveBeenCalledWith("/spaces", {
-      userId: "u1",
+      actingUserId: "u1",
       name: "My Space",
     });
   });
@@ -27,12 +27,12 @@ describe("node-sdk spaces (lifecycle) — request shaping", () => {
   it("createSpace forwards visibility in the body", async () => {
     const { client, projectInstance } = makeClient();
     await createSpace(client, {
-      userId: "u1",
+      actingUserId: "u1",
       name: "My Space",
       visibility: "private",
     });
     expect(projectInstance.post).toHaveBeenCalledWith("/spaces", {
-      userId: "u1",
+      actingUserId: "u1",
       name: "My Space",
       visibility: "private",
     });
@@ -78,9 +78,9 @@ describe("node-sdk spaces (lifecycle) — request shaping", () => {
 
   it("fetchUserSpaces hits /spaces/user-spaces with the full body as params", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchUserSpaces(client, { userId: "u1", role: "admin" });
+    await fetchUserSpaces(client, { actingUserId: "u1", role: "admin" });
     expect(projectInstance.get).toHaveBeenCalledWith("/spaces/user-spaces", {
-      params: { userId: "u1", role: "admin" },
+      params: { actingUserId: "u1", role: "admin" },
     });
   });
 
@@ -141,7 +141,7 @@ describe("node-sdk spaces (lifecycle) — response mapping", () => {
     const space = { id: "s1", name: "My Space" };
     projectInstance.post.mockResolvedValueOnce({ data: space });
     await expect(
-      createSpace(client, { userId: "u1", name: "My Space" }),
+      createSpace(client, { actingUserId: "u1", name: "My Space" }),
     ).resolves.toEqual(space);
   });
 
@@ -190,7 +190,7 @@ describe("node-sdk spaces (lifecycle) — response mapping", () => {
     const { client, projectInstance } = makeClient();
     const result = { data: [{ id: "s1" }], pagination: { page: 1, limit: 10, total: 1 } };
     projectInstance.get.mockResolvedValueOnce({ data: result });
-    await expect(fetchUserSpaces(client, { userId: "u1" })).resolves.toEqual(result);
+    await expect(fetchUserSpaces(client, { actingUserId: "u1" })).resolves.toEqual(result);
   });
 
   it("fetchChildSpaces returns the full PaginatedResponse envelope", async () => {

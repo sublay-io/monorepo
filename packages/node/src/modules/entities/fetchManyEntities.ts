@@ -69,6 +69,7 @@ export interface FetchManyEntitiesBaseProps
   // Time-based filtering
   timeFrame?: "hour" | "day" | "week" | "month" | "year";
 
+  /** Author filter: only entities whose `userId` is this user. */
   userId?: string;
   followedOnly?: "true" | "false";
 

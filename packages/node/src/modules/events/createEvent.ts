@@ -27,10 +27,10 @@ export interface CreateEventProps {
   hostIds?: string[];
   metadata?: Record<string, any>;
   /**
-   * Attribute the event to a user. With a service key this may be any
-   * user; the creator is auto-added to `hostIds`.
+   * The user the service key acts as: the event's creator, who is
+   * auto-added to `hostIds`. Required: the server refuses the call without it.
    */
-  userId?: string;
+  actingUserId?: string;
 }
 
 export async function createEvent(

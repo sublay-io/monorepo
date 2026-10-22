@@ -4,7 +4,7 @@ import { Collection } from "../../interfaces/Collection";
 export interface AddEntityToCollectionProps {
   collectionId: string;
   entityId: string;
-  userId: string;
+  actingUserId: string;
 }
 
 export async function addEntityToCollection(

@@ -5,16 +5,16 @@ export interface MarkAsReadProps {
   /** The message up to which the conversation is marked read. */
   messageId: string;
   /** The user to act as (must be a member). Service key required to name a user. */
-  userId: string;
+  actingUserId: string;
 }
 
 export async function markAsRead(
   client: SublayHttpClient,
   data: MarkAsReadProps
 ): Promise<void> {
-  const { conversationId, messageId, userId } = data;
+  const { conversationId, messageId, actingUserId } = data;
   await client.projectInstance.post(
     `/chat/conversations/${conversationId}/read`,
-    { messageId, userId }
+    { messageId, actingUserId }
   );
 }

@@ -178,7 +178,7 @@ describe("node-sdk reputation — chat grants include", () => {
     await getMessage(client, {
       conversationId: "conversation-1",
       messageId: "message-1",
-      userId: "u1",
+      actingUserId: "u1",
       include: "grants",
     });
     const [url, config] = projectInstance.get.mock.calls[0];
@@ -192,7 +192,7 @@ describe("node-sdk reputation — chat grants include", () => {
     const { client, projectInstance } = makeClient();
     await listMessages(client, {
       conversationId: "conversation-1",
-      userId: "u1",
+      actingUserId: "u1",
       include: "files,grants",
     });
     const [, config] = projectInstance.get.mock.calls[0];

@@ -3,8 +3,8 @@ import { Event } from "../../interfaces/Event";
 
 export interface WithdrawRsvpProps {
   eventId: string;
-  /** Act on behalf of a user (service key); defaults to the caller. */
-  userId?: string;
+  /** The user the service key acts as. Required: the server refuses the call without it. */
+  actingUserId?: string;
 }
 
 export async function withdrawRsvp(

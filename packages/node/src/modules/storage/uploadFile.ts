@@ -19,10 +19,10 @@ export interface UploadFileProps {
   commentId?: string;
   spaceId?: string;
   /**
-   * Attribute the upload to a user. With a service key this may be any user;
-   * omit for a backend/project-owned file.
+   * The user the service key acts as, who owns the upload. Omit for an
+   * app-owned file.
    */
-  userId?: string;
+  actingUserId?: string;
 }
 
 export async function uploadFile(

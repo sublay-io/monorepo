@@ -1,7 +1,7 @@
 import { SublayHttpClient } from "../../core/client";
 
 export interface MarkAllNotificationsAsReadProps {
-  userId: string;
+  actingUserId: string;
 }
 
 export interface MarkAllNotificationsAsReadResponse {
@@ -15,7 +15,7 @@ export async function markAllNotificationsAsRead(
   const response =
     await client.projectInstance.patch<MarkAllNotificationsAsReadResponse>(
       "/app-notifications/mark-all-as-read",
-      { userId: data.userId }
+      { actingUserId: data.actingUserId }
     );
   return response.data;
 }

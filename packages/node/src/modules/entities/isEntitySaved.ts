@@ -2,7 +2,7 @@ import { SublayHttpClient } from "../../core/client";
 
 export interface IsEntitySavedProps {
   entityId: string;
-  userId: string;
+  actingUserId: string;
 }
 
 export interface IsEntitySavedResponse {

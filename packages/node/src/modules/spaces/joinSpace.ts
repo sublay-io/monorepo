@@ -3,17 +3,17 @@ import { JoinSpaceResponse } from "../../interfaces/Space";
 
 export interface JoinSpaceProps {
   spaceId: string;
-  userId: string;
+  actingUserId: string;
 }
 
 export async function joinSpace(
   client: SublayHttpClient,
   data: JoinSpaceProps
 ): Promise<JoinSpaceResponse> {
-  const { spaceId, userId } = data;
+  const { spaceId, actingUserId } = data;
   const response = await client.projectInstance.post<JoinSpaceResponse>(
     `/spaces/${spaceId}/join`,
-    { userId }
+    { actingUserId }
   );
   return response.data;
 }

@@ -3,16 +3,16 @@ import { SublayHttpClient } from "../../core/client";
 export interface RemoveEntityFromCollectionProps {
   collectionId: string;
   entityId: string;
-  userId: string;
+  actingUserId: string;
 }
 
 export async function removeEntityFromCollection(
   client: SublayHttpClient,
   data: RemoveEntityFromCollectionProps
 ): Promise<void> {
-  const { collectionId, entityId, userId } = data;
+  const { collectionId, entityId, actingUserId } = data;
   await client.projectInstance.delete(
     `/collections/${collectionId}/entities/${entityId}`,
-    { params: { userId } }
+    { params: { actingUserId } }
   );
 }

@@ -9,7 +9,7 @@ import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface FetchCollectionEntitiesBaseProps extends TopCommentsParams {
   collectionId: string;
-  userId: string;
+  actingUserId: string;
   page?: number;
   limit?: number;
   sortBy?: "createdAt" | "addedAt" | "top" | "hot";

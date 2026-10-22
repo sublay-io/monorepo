@@ -3,7 +3,7 @@ import { DraftIncludeParam, Entity } from "../../interfaces/Entity";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface FetchDraftsProps {
-  userId: string;
+  actingUserId: string;
   page?: number;
   limit?: number;
   sourceId?: string;

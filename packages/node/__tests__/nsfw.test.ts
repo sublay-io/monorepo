@@ -65,7 +65,7 @@ describe("node-sdk NSFW — request shaping", () => {
 
   it("createSpace forwards the own nsfw flag in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await createSpace(client, { name: "NSFW space", userId: "u1", nsfw: true });
+    await createSpace(client, { name: "NSFW space", actingUserId: "u1", nsfw: true });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/spaces",
       expect.objectContaining({ nsfw: true }),

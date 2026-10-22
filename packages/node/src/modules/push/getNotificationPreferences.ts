@@ -6,7 +6,7 @@ export interface GetNotificationPreferencesProps {
    * The acting user whose preferences are read. The service key acts on this
    * user's behalf.
    */
-  userId: string;
+  actingUserId: string;
 }
 
 /**
@@ -16,7 +16,7 @@ export interface GetNotificationPreferencesProps {
  *
  * Mirrors `GET /:projectId/push-notifications/preferences`. The route is
  * acting-user-scoped; the SDK authenticates with a service key and names the
- * acting user via the `userId` query param (like the other per-user reads).
+ * acting user via the `actingUserId` query param (like the other per-user reads).
  */
 export async function getNotificationPreferences(
   client: SublayHttpClient,
@@ -24,7 +24,7 @@ export async function getNotificationPreferences(
 ): Promise<NotificationPreferences> {
   const response = await client.projectInstance.get<NotificationPreferences>(
     `/push-notifications/preferences`,
-    { params: { userId: data.userId } }
+    { params: { actingUserId: data.actingUserId } }
   );
   return response.data;
 }

@@ -15,7 +15,7 @@ export interface ChatMessageFile {
 export interface SendMessageProps extends SpaceReputationContextParams {
   conversationId: string;
   /** The message author (must be a member). Service key required to name a user. */
-  userId: string;
+  actingUserId: string;
   content?: string;
   gif?: GifData | null;
   mentions?: Mention[];

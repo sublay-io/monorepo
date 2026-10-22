@@ -226,11 +226,11 @@ describe("node-sdk users — graph actions — request shaping (actingUserId vs 
     });
   });
 
-  it("fetchBlockedUsers hits /blocks with the actor as the userId query param", async () => {
+  it("fetchBlockedUsers hits /blocks with the actor as the actingUserId query param", async () => {
     const { client, projectInstance } = makeClient();
     await fetchBlockedUsers(client, { actingUserId: "blocker1", page: 2 });
     expect(projectInstance.get).toHaveBeenCalledWith("/blocks", {
-      params: { userId: "blocker1", page: 2 },
+      params: { actingUserId: "blocker1", page: 2 },
     });
   });
 });

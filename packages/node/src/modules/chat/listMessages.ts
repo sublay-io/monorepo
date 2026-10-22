@@ -15,7 +15,7 @@ export interface MessageFilters {
 export interface ListMessagesProps extends SpaceReputationContextParams {
   conversationId: string;
   /** The user to act as (must be a member). Service key required to name a user. */
-  userId: string;
+  actingUserId: string;
   /** Restrict to replies of this message (thread view). */
   parentId?: string;
   /** Keyset pagination: ISO timestamp; return messages created before this. Mutually exclusive with `after`. */

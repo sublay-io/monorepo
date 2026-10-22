@@ -7,7 +7,7 @@ import { SublayHttpClient } from "../../core/client";
 // literal) skips TypeScript's excess-property check, so plain omission alone
 // doesn't stop `tokenLength` from sneaking through.
 export interface SendCodeVerificationEmailHexProps {
-  userId: string;
+  actingUserId: string;
   mode: "code";
   tokenFormat: "hex";
   tokenLength?: never;
@@ -16,7 +16,7 @@ export interface SendCodeVerificationEmailHexProps {
 // mode: "code" + a short format — tokenLength is required so the caller makes
 // a deliberate choice about how long the code a user has to type actually is.
 export interface SendCodeVerificationEmailShortProps {
-  userId: string;
+  actingUserId: string;
   mode: "code";
   tokenFormat: "numeric" | "alpha" | "alphanumeric";
   tokenLength: number;
@@ -25,7 +25,7 @@ export interface SendCodeVerificationEmailShortProps {
 // mode: "link" — the token is embedded in a URL, never read by a human, so
 // format/length are just entropy choices with sensible server-side defaults.
 export interface SendLinkVerificationEmailProps {
-  userId: string;
+  actingUserId: string;
   mode: "link";
   tokenFormat?: "hex" | "numeric" | "alpha" | "alphanumeric";
   tokenLength?: number;

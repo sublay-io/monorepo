@@ -17,9 +17,9 @@ import { makeClient } from "./helpers/mockClient";
 describe("node-sdk chat (conversations) — request shaping", () => {
   it("listConversations hits /chat/conversations with the full body as params (cursor pagination)", async () => {
     const { client, projectInstance } = makeClient();
-    await listConversations(client, { userId: "u1", cursor: "c1", cursorCreatedAt: "t1" });
+    await listConversations(client, { actingUserId: "u1", cursor: "c1", cursorCreatedAt: "t1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/chat/conversations", {
-      params: { userId: "u1", cursor: "c1", cursorCreatedAt: "t1" },
+      params: { actingUserId: "u1", cursor: "c1", cursorCreatedAt: "t1" },
     });
   });
 
@@ -34,54 +34,54 @@ describe("node-sdk chat (conversations) — request shaping", () => {
 
   it("createGroupConversation posts type: 'group' plus the rest of the body", async () => {
     const { client, projectInstance } = makeClient();
-    await createGroupConversation(client, { userId: "u1", name: "Team chat" });
+    await createGroupConversation(client, { actingUserId: "u1", name: "Team chat" });
     expect(projectInstance.post).toHaveBeenCalledWith("/chat/conversations", {
       type: "group",
-      userId: "u1",
+      actingUserId: "u1",
       name: "Team chat",
     });
   });
 
-  it("getConversation strips conversationId into the path, sends userId as a param", async () => {
+  it("getConversation strips conversationId into the path, sends actingUserId as a param", async () => {
     const { client, projectInstance } = makeClient();
-    await getConversation(client, { conversationId: "conv1", userId: "u1" });
+    await getConversation(client, { conversationId: "conv1", actingUserId: "u1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/chat/conversations/conv1", {
-      params: { userId: "u1" },
+      params: { actingUserId: "u1" },
     });
   });
 
   it("updateConversation strips conversationId into the path and patches the rest", async () => {
     const { client, projectInstance } = makeClient();
-    await updateConversation(client, { conversationId: "conv1", userId: "u1", name: "New name" });
+    await updateConversation(client, { conversationId: "conv1", actingUserId: "u1", name: "New name" });
     expect(projectInstance.patch).toHaveBeenCalledWith("/chat/conversations/conv1", {
-      userId: "u1",
+      actingUserId: "u1",
       name: "New name",
     });
   });
 
-  it("deleteConversation sends userId as a param", async () => {
+  it("deleteConversation sends actingUserId as a param", async () => {
     const { client, projectInstance } = makeClient();
-    await deleteConversation(client, { conversationId: "conv1", userId: "u1" });
+    await deleteConversation(client, { conversationId: "conv1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/chat/conversations/conv1", {
-      params: { userId: "u1" },
+      params: { actingUserId: "u1" },
     });
   });
 
-  it("getUnreadCount hits the unread-count route with userId as a param", async () => {
+  it("getUnreadCount hits the unread-count route with actingUserId as a param", async () => {
     const { client, projectInstance } = makeClient();
-    await getUnreadCount(client, { userId: "u1" });
+    await getUnreadCount(client, { actingUserId: "u1" });
     expect(projectInstance.get).toHaveBeenCalledWith(
       "/chat/conversations/unread-count",
-      { params: { userId: "u1" } },
+      { params: { actingUserId: "u1" } },
     );
   });
 
   it("listMembers strips conversationId into the path and passes the rest as params (offset pagination)", async () => {
     const { client, projectInstance } = makeClient();
-    await listMembers(client, { conversationId: "conv1", userId: "u1", page: 2, limit: 10 });
+    await listMembers(client, { conversationId: "conv1", actingUserId: "u1", page: 2, limit: 10 });
     expect(projectInstance.get).toHaveBeenCalledWith(
       "/chat/conversations/conv1/members",
-      { params: { userId: "u1", page: 2, limit: 10 } },
+      { params: { actingUserId: "u1", page: 2, limit: 10 } },
     );
   });
 
@@ -103,12 +103,12 @@ describe("node-sdk chat (conversations) — request shaping", () => {
     );
   });
 
-  it("leaveConversation sends userId as a param to the leave route", async () => {
+  it("leaveConversation sends actingUserId as a param to the leave route", async () => {
     const { client, projectInstance } = makeClient();
-    await leaveConversation(client, { conversationId: "conv1", userId: "u1" });
+    await leaveConversation(client, { conversationId: "conv1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith(
       "/chat/conversations/conv1/leave",
-      { params: { userId: "u1" } },
+      { params: { actingUserId: "u1" } },
     );
   });
 
@@ -132,7 +132,7 @@ describe("node-sdk chat (conversations) — response mapping", () => {
     const { client, projectInstance } = makeClient();
     const result = { conversations: [{ id: "conv1" }], hasMore: true };
     projectInstance.get.mockResolvedValueOnce({ data: result });
-    await expect(listConversations(client, { userId: "u1" })).resolves.toEqual(result);
+    await expect(listConversations(client, { actingUserId: "u1" })).resolves.toEqual(result);
   });
 
   it("createDirectConversation returns response.data", async () => {
@@ -149,7 +149,7 @@ describe("node-sdk chat (conversations) — response mapping", () => {
     const conversation = { id: "conv1", type: "group" };
     projectInstance.post.mockResolvedValueOnce({ data: conversation });
     await expect(
-      createGroupConversation(client, { userId: "u1" }),
+      createGroupConversation(client, { actingUserId: "u1" }),
     ).resolves.toEqual(conversation);
   });
 
@@ -158,7 +158,7 @@ describe("node-sdk chat (conversations) — response mapping", () => {
     const conversation = { id: "conv1" };
     projectInstance.get.mockResolvedValueOnce({ data: conversation });
     await expect(
-      getConversation(client, { conversationId: "conv1", userId: "u1" }),
+      getConversation(client, { conversationId: "conv1", actingUserId: "u1" }),
     ).resolves.toEqual(conversation);
   });
 
@@ -167,14 +167,14 @@ describe("node-sdk chat (conversations) — response mapping", () => {
     const conversation = { id: "conv1", name: "New name" };
     projectInstance.patch.mockResolvedValueOnce({ data: conversation });
     await expect(
-      updateConversation(client, { conversationId: "conv1", userId: "u1", name: "New name" }),
+      updateConversation(client, { conversationId: "conv1", actingUserId: "u1", name: "New name" }),
     ).resolves.toEqual(conversation);
   });
 
   it("deleteConversation resolves to undefined", async () => {
     const { client } = makeClient();
     await expect(
-      deleteConversation(client, { conversationId: "conv1", userId: "u1" }),
+      deleteConversation(client, { conversationId: "conv1", actingUserId: "u1" }),
     ).resolves.toBeUndefined();
   });
 
@@ -182,7 +182,7 @@ describe("node-sdk chat (conversations) — response mapping", () => {
     const { client, projectInstance } = makeClient();
     const result = { totalUnread: 3, unreadConversationCount: 2 };
     projectInstance.get.mockResolvedValueOnce({ data: result });
-    await expect(getUnreadCount(client, { userId: "u1" })).resolves.toEqual(result);
+    await expect(getUnreadCount(client, { actingUserId: "u1" })).resolves.toEqual(result);
   });
 
   it("listMembers returns the full PaginatedResponse envelope (offset pagination, distinct from cursor pagination above)", async () => {
@@ -190,7 +190,7 @@ describe("node-sdk chat (conversations) — response mapping", () => {
     const envelope = { data: [{ userId: "u2" }], pagination: { page: 1, limit: 10, total: 1 } };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
     await expect(
-      listMembers(client, { conversationId: "conv1", userId: "u1" }),
+      listMembers(client, { conversationId: "conv1", actingUserId: "u1" }),
     ).resolves.toEqual(envelope);
   });
 
@@ -213,7 +213,7 @@ describe("node-sdk chat (conversations) — response mapping", () => {
   it("leaveConversation resolves to undefined", async () => {
     const { client } = makeClient();
     await expect(
-      leaveConversation(client, { conversationId: "conv1", userId: "u1" }),
+      leaveConversation(client, { conversationId: "conv1", actingUserId: "u1" }),
     ).resolves.toBeUndefined();
   });
 

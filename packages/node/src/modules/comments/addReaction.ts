@@ -5,18 +5,18 @@ import { Comment } from "../../interfaces/Comment";
 export interface AddCommentReactionProps {
   commentId: string;
   reactionType: ReactionType;
-  userId: string;
+  actingUserId: string;
 }
 
 export async function addReaction(
   client: SublayHttpClient,
   data: AddCommentReactionProps
 ): Promise<Comment> {
-  const { commentId, reactionType, userId } = data;
-  // The server returns the updated comment, as `userId` sees it.
+  const { commentId, reactionType, actingUserId } = data;
+  // The server returns the updated comment, as `actingUserId` sees it.
   const response = await client.projectInstance.post<Comment>(
     `/comments/${commentId}/reactions`,
-    { reactionType, userId }
+    { reactionType, actingUserId }
   );
   return response.data;
 }

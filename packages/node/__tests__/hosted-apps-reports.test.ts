@@ -24,13 +24,13 @@ describe("node-sdk reports — request shaping", () => {
   it("createReport posts the full body to /reports", async () => {
     const { client, projectInstance } = makeClient();
     await createReport(client, {
-      userId: "u1",
+      actingUserId: "u1",
       targetType: "entity",
       targetId: "e1",
       reason: "spam",
     });
     expect(projectInstance.post).toHaveBeenCalledWith("/reports", {
-      userId: "u1",
+      actingUserId: "u1",
       targetType: "entity",
       targetId: "e1",
       reason: "spam",
@@ -40,7 +40,7 @@ describe("node-sdk reports — request shaping", () => {
   it("createReport posts a message report to /reports with no conversationId", async () => {
     const { client, projectInstance } = makeClient();
     await createReport(client, {
-      userId: "u1",
+      actingUserId: "u1",
       targetType: "message",
       targetId: "m1",
       reason: "harassment",
@@ -48,7 +48,7 @@ describe("node-sdk reports — request shaping", () => {
     // Chat message reports go through the shared endpoint; the server resolves
     // the conversation from the message id.
     expect(projectInstance.post).toHaveBeenCalledWith("/reports", {
-      userId: "u1",
+      actingUserId: "u1",
       targetType: "message",
       targetId: "m1",
       reason: "harassment",
@@ -57,9 +57,9 @@ describe("node-sdk reports — request shaping", () => {
 
   it("fetchModeratedReports hits /reports/moderated with the full body as params", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchModeratedReports(client, { userId: "u1", status: "pending" });
+    await fetchModeratedReports(client, { actingUserId: "u1", status: "pending" });
     expect(projectInstance.get).toHaveBeenCalledWith("/reports/moderated", {
-      params: { userId: "u1", status: "pending" },
+      params: { actingUserId: "u1", status: "pending" },
     });
   });
 });
@@ -71,7 +71,7 @@ describe("node-sdk reports — response mapping", () => {
     projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
       createReport(client, {
-        userId: "u1",
+        actingUserId: "u1",
         targetType: "entity",
         targetId: "e1",
         reason: "spam",
@@ -84,7 +84,7 @@ describe("node-sdk reports — response mapping", () => {
     const envelope = { data: [{ id: "rep1" }], pagination: { page: 1, limit: 10, total: 1 } };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
     await expect(
-      fetchModeratedReports(client, { userId: "u1" }),
+      fetchModeratedReports(client, { actingUserId: "u1" }),
     ).resolves.toEqual(envelope);
   });
 });

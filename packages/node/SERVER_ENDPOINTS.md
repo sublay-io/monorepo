@@ -207,7 +207,7 @@ Base path: `/v8/:projectId/`
 | GET | `/spaces/by-slug` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceBySlug` | yes |
 | GET | `/spaces/:spaceId` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpace` | yes |
 | PATCH | `/spaces/:spaceId` | can access with a key | `spaces.updateSpace` | yes |
-| DELETE | `/spaces/:spaceId` | can access with a key | `spaces.deleteSpace` | yes |
+| DELETE | `/spaces/:spaceId` | can access with a key (required `actingUserId`, the creator) | `spaces.deleteSpace` | yes |
 | POST | `/spaces/:spaceId/join` | can access with a key | `spaces.joinSpace` | yes |
 | GET | `/spaces/:spaceId/members` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceMembers` | yes |
 | GET | `/spaces/:spaceId/team` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceTeam` | yes |

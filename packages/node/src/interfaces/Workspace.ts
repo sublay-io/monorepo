@@ -161,8 +161,7 @@ export interface WorkspaceRosterReason {
   // and there your standing on the parent is genuinely worth nothing.
   //
   // "The caller" is the ACTING USER: a service key that passes
-  // `actingUserId` is fenced exactly as that user would be, not as a key. Only
-  // a key naming nobody sees every field on every entry.
+  // `actingUserId` is fenced exactly as that user would be, not as a key.
   rank?: number;
   /**
    * The SAME ladder position, expressed as an offset from the CALLER: `1` = one

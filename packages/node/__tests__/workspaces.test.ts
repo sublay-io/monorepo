@@ -141,23 +141,23 @@ describe("node-sdk workspaces (membership) — request shaping", () => {
       workspaceId: "w1",
       include: "descendants",
       countOnly: true,
+      actingUserId: "actor1",
     });
     expect(projectInstance.get).toHaveBeenCalledWith("/workspaces/w1/members", {
-      params: { include: "descendants", countOnly: true },
+      params: { include: "descendants", countOnly: true, actingUserId: "actor1" },
     });
   });
 
-  it("fetchWorkspaceMemberStanding puts target in the path (no query params)", async () => {
+  it("fetchWorkspaceMemberStanding puts target in the path, actor actingUserId in the query", async () => {
     const { client, projectInstance } = makeClient();
     await fetchWorkspaceMemberStanding(client, {
       workspaceId: "w1",
       targetUserId: "target1",
+      actingUserId: "actor1",
     });
     expect(projectInstance.get).toHaveBeenCalledWith(
       "/workspaces/w1/members/target1",
-      // No `actingUserId` given, so the params object is empty and no query
-      // string is appended.
-      { params: {} }
+      { params: { actingUserId: "actor1" } }
     );
   });
 
@@ -240,10 +240,17 @@ describe("node-sdk workspaces (invitations) — request shaping", () => {
       capabilities: ["invite"],
       rank: 2,
       title: "Manager",
+      actingUserId: "actor1",
     });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/workspaces/w1/invites",
-      { userId: "invitee1", capabilities: ["invite"], rank: 2, title: "Manager" }
+      {
+        userId: "invitee1",
+        capabilities: ["invite"],
+        rank: 2,
+        title: "Manager",
+        actingUserId: "actor1",
+      }
     );
   });
 
@@ -253,10 +260,11 @@ describe("node-sdk workspaces (invitations) — request shaping", () => {
       workspaceId: "w1",
       email: "New.Member@Example.com",
       rank: 1,
+      actingUserId: "actor1",
     });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/workspaces/w1/invites",
-      { email: "New.Member@Example.com", rank: 1 }
+      { email: "New.Member@Example.com", rank: 1, actingUserId: "actor1" }
     );
   });
 
@@ -276,36 +284,48 @@ describe("node-sdk workspaces (invitations) — request shaping", () => {
 
     // Neither coordinate: the SDK sends nothing and the server applies its
     // one-below-the-inviter default. It must NOT invent a rank client-side.
-    await createWorkspaceInvite(client, { workspaceId: "w1", email: "c@d.co" });
+    await createWorkspaceInvite(client, {
+      workspaceId: "w1",
+      email: "c@d.co",
+      actingUserId: "actor1",
+    });
     const [, body] = projectInstance.post.mock.calls[1];
-    expect(body).toEqual({ email: "c@d.co" });
+    expect(body).toEqual({ email: "c@d.co", actingUserId: "actor1" });
     expect(body).not.toHaveProperty("rank");
     expect(body).not.toHaveProperty("relativeRank");
   });
 
   it("fetchWorkspaceInvites hits /workspaces/:id/invites", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchWorkspaceInvites(client, { workspaceId: "w1" });
+    await fetchWorkspaceInvites(client, { workspaceId: "w1", actingUserId: "actor1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/workspaces/w1/invites", {
-      params: {},
+      params: { actingUserId: "actor1" },
     });
   });
 
-  it("revokeWorkspaceInvite posts to the revoke route with an empty body", async () => {
+  it("revokeWorkspaceInvite posts the actor actingUserId to the revoke route", async () => {
     const { client, projectInstance } = makeClient();
-    await revokeWorkspaceInvite(client, { workspaceId: "w1", inviteId: "i1" });
+    await revokeWorkspaceInvite(client, {
+      workspaceId: "w1",
+      inviteId: "i1",
+      actingUserId: "actor1",
+    });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/workspaces/w1/invites/i1/revoke",
-      {}
+      { actingUserId: "actor1" }
     );
   });
 
-  it("resendWorkspaceInvite posts to the resend route with an empty body", async () => {
+  it("resendWorkspaceInvite posts the actor actingUserId to the resend route", async () => {
     const { client, projectInstance } = makeClient();
-    await resendWorkspaceInvite(client, { workspaceId: "w1", inviteId: "i1" });
+    await resendWorkspaceInvite(client, {
+      workspaceId: "w1",
+      inviteId: "i1",
+      actingUserId: "actor1",
+    });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/workspaces/w1/invites/i1/resend",
-      {}
+      { actingUserId: "actor1" }
     );
   });
 
@@ -384,7 +404,11 @@ describe("node-sdk workspaces — response mapping", () => {
     };
     projectInstance.get.mockResolvedValueOnce({ data: counts });
     await expect(
-      fetchWorkspaceMembers(client, { workspaceId: "w1", countOnly: true })
+      fetchWorkspaceMembers(client, {
+        workspaceId: "w1",
+        countOnly: true,
+        actingUserId: "actor1",
+      })
     ).resolves.toEqual(counts);
   });
 

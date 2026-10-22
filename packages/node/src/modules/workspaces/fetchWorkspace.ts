@@ -7,13 +7,11 @@ export interface FetchWorkspaceProps {
   // member count to the response; omit it and the field is absent. The same
   // flag works on `fetchManyWorkspaces`. An unrecognized flag is ignored.
   include?: string;
-  // Act as a named user (service key only). Naming one means being BOUND
-  // by that user — this call resolves and is checked against THEIR authority,
-  // exactly as their own token would be. Omit it to act as the app itself
-  // (unbounded). A user token never sends it.
+  // Act as a named user (service key only): visibility resolves against them,
+  // exactly as their own token would. Omit it and the request gets the
+  // anonymous view, which is always a 404.
   //
-  // Here that means visibility resolves against them: a key acting as a user
-  // with no relation to the workspace gets the same 404 that user would.
+  // A user with no relation to the workspace gets the same 404.
   actingUserId?: string;
 }
 

@@ -130,10 +130,12 @@ describe("node-sdk spaces (lifecycle) — request shaping", () => {
     });
   });
 
-  it("deleteSpace deletes /spaces/:id", async () => {
+  it("deleteSpace deletes /spaces/:id with actingUserId in the query", async () => {
     const { client, projectInstance } = makeClient();
-    await deleteSpace(client, { spaceId: "s1" });
-    expect(projectInstance.delete).toHaveBeenCalledWith("/spaces/s1");
+    await deleteSpace(client, { spaceId: "s1", actingUserId: "u1" });
+    expect(projectInstance.delete).toHaveBeenCalledWith("/spaces/s1", {
+      params: { actingUserId: "u1" },
+    });
   });
 });
 
@@ -235,7 +237,7 @@ describe("node-sdk spaces (lifecycle) — response mapping", () => {
     const { client, projectInstance } = makeClient();
     const result = { deleted: true };
     projectInstance.delete.mockResolvedValueOnce({ data: result });
-    await expect(deleteSpace(client, { spaceId: "s1" })).resolves.toEqual(result);
+    await expect(deleteSpace(client, { spaceId: "s1", actingUserId: "u1" })).resolves.toEqual(result);
   });
 });
 

@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useDeleteSpace` returns a callable function for deleting a space. Only space admins can delete a space. Deletion cascades to all entities, members, child spaces, rules, and reports associated with the space.
+`useDeleteSpace` returns a callable function for deleting a space. Only the space's creator can delete it, and not while they are banned from the space or from a space above it. Deletion cascades to all entities, members, child spaces, rules, and reports associated with the space.
 
 <Warning>Deleting a space is permanent. All entities, comments, members, child spaces, and rules belonging to the space are also deleted.</Warning>
 

@@ -27,7 +27,7 @@ const events = sublay.table<EventRow>("Events");
 const { data } = await events.find({ limit: 20 });
 ```
 
-The `name` you pass is the **logical** table name — Sublay applies the `custom_` prefix for you. As with the rest of the JS SDK, these operations act as the **user behind the token** — you never pass an actor `userId`.
+The `name` you pass is the **logical** table name — Sublay applies the `custom_` prefix for you. As with the rest of the JS SDK, these operations act as the **user behind the token** — you never send `actingUserId`.
 
 ---
 

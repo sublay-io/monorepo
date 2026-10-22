@@ -5,7 +5,7 @@ description: "Give, list, and display reputation grants with the React SDK"
 
 Reputation in Sublay is normally *earned* — posting, commenting, receiving reactions. **Grants** are the other half: reputation deliberately *given*, by one user to another. They are the primitive behind tipping, bounties, best-answer awards, and peer recognition.
 
-The React SDK exposes the user-facing half of that surface: sending a grant as the logged-in user, and reading grants back. Hooks authenticate as the **logged-in user** — the server derives the sender from the token, so you never pass an actor `userId`.
+The React SDK exposes the user-facing half of that surface: sending a grant as the logged-in user, and reading grants back. Hooks authenticate as the **logged-in user** — the server derives the sender from the token, so you never send `actingUserId`.
 
 Minting (creating reputation from nothing, or destroying it) is service-key-only and lives in [`@sublay/node`](/v8/node-sdk/reputation).
 

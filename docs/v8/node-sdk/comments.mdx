@@ -16,7 +16,7 @@ Creates a new comment on an entity.
 ```typescript
 const comment = await sublay.comments.createComment({
   entityId: "ent_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   content: "Great post!",
 });
 ```
@@ -25,8 +25,8 @@ const comment = await sublay.comments.createComment({
   The Sublay entity ID to comment on.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID of the comment author.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as: the comment author.
 </ParamField>
 
 <ParamField body="content" type="string">
@@ -252,7 +252,7 @@ Adds a reaction from a user to a comment.
 ```typescript
 const comment = await sublay.comments.addReaction({
   commentId: "cmt_abc123",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   reactionType: "like",
 });
 ```
@@ -261,8 +261,8 @@ const comment = await sublay.comments.addReaction({
   The Sublay comment ID.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID of the reactor.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as: the reacting user.
 </ParamField>
 
 <ParamField body="reactionType" type="ReactionType" required>
@@ -280,7 +280,7 @@ Removes a user's existing reaction from a comment.
 ```typescript
 const comment = await sublay.comments.removeReaction({
   commentId: "cmt_abc123",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -288,8 +288,8 @@ const comment = await sublay.comments.removeReaction({
   The Sublay comment ID.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID whose reaction to remove.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose reaction to remove.
 </ParamField>
 
 **Returns** — `Promise<Comment>` — the updated comment, as that user sees it. When the user has no reaction on the comment, the comment comes back unchanged.
@@ -342,7 +342,7 @@ Checks what reaction (if any) a specific user has left on a comment.
 ```typescript
 const { reactionType } = await sublay.comments.getUserReaction({
   commentId: "cmt_abc123",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 // reactionType is "like" | "upvote" | ... | null
 ```
@@ -351,8 +351,8 @@ const { reactionType } = await sublay.comments.getUserReaction({
   The Sublay comment ID.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID to check.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose reaction is checked.
 </ParamField>
 
 **Returns** — `Promise<{ reactionType: ReactionType | null }>`. Rejects with `404 comment/not-found` when the comment doesn't exist, or is on an entity whose author has blocked the user (the user's own comments excepted).

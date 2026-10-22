@@ -7,15 +7,14 @@ The `connections` module reads and manages a user's mutual connections (bidirect
 
 <Note>
   Every function acts on behalf of a named user. Pass that user's Sublay ID as
-  `userId` — your service key performs the operation as that user.
+  [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user), the user your service key acts as.
 </Note>
 
 <Tip>
   To **send** a connection request, check a connection's status, or remove a
   connection by the other user's ID, use the nested routes on the
   [`users`](/v8/node-sdk/users) module (`requestConnection`,
-  `fetchConnectionStatus`, `removeConnectionByUserId`), which take an
-  `actingUserId`.
+  `fetchConnectionStatus`, `removeConnectionByUserId`).
 </Tip>
 
 ---
@@ -26,14 +25,14 @@ Fetches a paginated list of a user's established (mutual) connections.
 
 ```typescript
 const { data, pagination } = await sublay.connections.fetchConnections({
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   page: 1,
   limit: 20,
 });
 ```
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID whose connections to fetch.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose connections to fetch.
 </ParamField>
 
 <ParamField body="page" type="number">
@@ -62,12 +61,12 @@ Returns the number of established connections for a user.
 
 ```typescript
 const { count } = await sublay.connections.fetchConnectionsCount({
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as.
 </ParamField>
 
 **Returns** — `Promise<{ count: number }>`
@@ -81,14 +80,14 @@ Returns a paginated list of connection requests the user has sent that are still
 ```typescript
 const { data, pagination } =
   await sublay.connections.fetchSentPendingConnections({
-    userId: "usr_abc123",
+    actingUserId: "usr_abc123",
     page: 1,
     limit: 20,
   });
 ```
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID whose sent requests to fetch.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose sent requests to fetch.
 </ParamField>
 
 <ParamField body="page" type="number">
@@ -110,14 +109,14 @@ Returns a paginated list of pending connection requests the user has received.
 ```typescript
 const { data, pagination } =
   await sublay.connections.fetchReceivedPendingConnections({
-    userId: "usr_abc123",
+    actingUserId: "usr_abc123",
     page: 1,
     limit: 20,
   });
 ```
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID whose received requests to fetch.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose received requests to fetch.
 </ParamField>
 
 <ParamField body="page" type="number">
@@ -139,7 +138,7 @@ Accepts a pending connection request received by the user.
 ```typescript
 const result = await sublay.connections.acceptConnection({
   connectionId: "con_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -147,8 +146,8 @@ const result = await sublay.connections.acceptConnection({
   The ID of the pending connection request to accept.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID accepting the request (the recipient).
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as: the recipient accepting the request.
 </ParamField>
 
 **Returns** — `Promise<ConnectionActionResponse>` — `{ id, status, createdAt?, respondedAt? }`
@@ -162,7 +161,7 @@ Declines a pending connection request received by the user.
 ```typescript
 const result = await sublay.connections.declineConnection({
   connectionId: "con_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -170,8 +169,8 @@ const result = await sublay.connections.declineConnection({
   The ID of the pending connection request to decline.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID declining the request (the recipient).
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as: the recipient declining the request.
 </ParamField>
 
 **Returns** — `Promise<ConnectionActionResponse>` — `{ id, status, createdAt?, respondedAt? }`
@@ -185,7 +184,7 @@ Removes an established connection (or withdraws a pending request) by its connec
 ```typescript
 await sublay.connections.removeConnection({
   connectionId: "con_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -193,8 +192,8 @@ await sublay.connections.removeConnection({
   The connection ID to remove.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID on whose behalf the connection is removed.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, on whose behalf the connection is removed.
 </ParamField>
 
 **Returns** — `Promise<void>`

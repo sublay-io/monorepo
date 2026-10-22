@@ -6,11 +6,11 @@ description: "Full server-side workspace surface — CRUD, membership, invitatio
 The `workspaces` module is the developer's **authorization-server SDK** for the [Workspaces bundle](/v8/data-models/workspace). It exposes the full surface: workspace CRUD, membership management, the invitation lifecycle, and the service-key **authority read** you use to make your own app-level decisions.
 
 <Note>
-  **Requires the `workspaces` bundle.** See [Bundles](/v8/bundles) to install it. Because this is a **service-key** SDK, every call **accepts** an `actingUserId` — the user the action is performed **as** (the service key can [act as any user](/v8/node-sdk/overview)). Whether it is required or optional is **per route** — see the notes below. For `fetchWorkspaceAuthority`, `actingUserId` is the user whose standing is resolved.
+  **Requires the `workspaces` bundle.** See [Bundles](/v8/bundles) to install it. As on every Node SDK call that acts as a user, the user the action is performed **as** goes in [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user), and every workspace call **accepts** it. Whether it is required or optional is **per route** — see the notes below. For `fetchWorkspaceAuthority`, `actingUserId` is the user whose standing is resolved.
 </Note>
 
 <Note>
-  **This SDK is not required in order to manage workspaces.** All 21 endpoints are equally available to a browser or mobile app through the [`@sublay/core` hooks](/v8/sdk/workspaces/overview) and [`@sublay/js`](/v8/js-sdk/workspaces), acting as the signed-in user and subject to the same ownership / capability / rank rules. What the node SDK adds is the acting-user field `actingUserId` — performing an action **as some other named user** — which only a service key may do.
+  **This SDK is not required in order to manage workspaces.** All 21 endpoints are equally available to a browser or mobile app through the [`@sublay/core` hooks](/v8/sdk/workspaces/overview) and [`@sublay/js`](/v8/js-sdk/workspaces), acting as the signed-in user and subject to the same ownership / capability / rank rules. What the node SDK adds is performing an action **as some other named user** through `actingUserId`, which only a service key may send.
 </Note>
 
 <Warning>

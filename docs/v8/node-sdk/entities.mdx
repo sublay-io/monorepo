@@ -23,7 +23,7 @@ const entity = await sublay.entities.createEntity({
   title: "My First Post",
   content: "Hello world",
   keywords: ["intro", "welcome"],
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   metadata: { category: "blog" },
 });
 ```
@@ -68,8 +68,8 @@ const entity = await sublay.entities.createEntity({
   Arbitrary public metadata.
 </ParamField>
 
-<ParamField body="userId" type="string">
-  The Sublay user ID to set as the entity's author.
+<ParamField body="actingUserId" type="string">
+  The user the service key acts as, who authors the entity. Omit it to create an app-owned entity with no author.
 </ParamField>
 
 <ParamField body="nsfw" type="boolean">
@@ -81,7 +81,7 @@ const entity = await sublay.entities.createEntity({
 </ParamField>
 
 <ParamField body="excludeUserId" type="boolean">
-  When `true`, creates the entity with no author association even if `userId` is provided.
+  When `true`, creates the entity with no author association even if `actingUserId` is provided.
 </ParamField>
 
 <ParamField body="requireUser" type="boolean">
@@ -256,11 +256,11 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 </ParamField>
 
 <ParamField body="userId" type="string">
-  The viewing user, used to resolve `followedOnly`.
+  Author filter: returns only entities authored by this user.
 </ParamField>
 
 <ParamField body="followedOnly" type='"true" | "false"'>
-  When `"true"`, returns only entities from users the given `userId` follows.
+  When `"true"`, returns only entities from users the signed-in user follows. A service key has no signed-in user, so this filter has no effect from the Node SDK.
 </ParamField>
 
 <ParamField body="keywordsFilters" type="object">
@@ -398,14 +398,14 @@ Fetches a user's unpublished draft entities.
 
 ```typescript
 const { data, pagination } = await sublay.entities.fetchDrafts({
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   page: 1,
   limit: 20,
 });
 ```
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID whose drafts to fetch.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose drafts to fetch.
 </ParamField>
 
 <ParamField body="page" type="number">
@@ -455,7 +455,7 @@ Adds a reaction from a user to an entity.
 ```typescript
 const entity = await sublay.entities.addReaction({
   entityId: "ent_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   reactionType: "like",
 });
 ```
@@ -464,8 +464,8 @@ const entity = await sublay.entities.addReaction({
   The Sublay entity ID.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID of the reactor.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as: the reacting user.
 </ParamField>
 
 <ParamField body="reactionType" type="ReactionType" required>
@@ -483,7 +483,7 @@ Removes a user's existing reaction from an entity.
 ```typescript
 const entity = await sublay.entities.removeReaction({
   entityId: "ent_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -491,8 +491,8 @@ const entity = await sublay.entities.removeReaction({
   The Sublay entity ID.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID whose reaction to remove.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose reaction to remove.
 </ParamField>
 
 **Returns** — `Promise<Entity>` — the updated entity, as that user sees it. When the user has no reaction on the entity, the entity comes back unchanged.
@@ -547,7 +547,7 @@ Checks what reaction (if any) a specific user has left on an entity.
 ```typescript
 const { reactionType } = await sublay.entities.getUserReaction({
   entityId: "ent_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 // reactionType is "like" | "upvote" | ... | null
 ```
@@ -556,8 +556,8 @@ const { reactionType } = await sublay.entities.getUserReaction({
   The Sublay entity ID.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID to check.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose reaction is checked.
 </ParamField>
 
 **Returns** — `Promise<{ reactionType: ReactionType | null }>`
@@ -571,7 +571,7 @@ Checks whether a user has saved an entity to any of their collections.
 ```typescript
 const { isSaved } = await sublay.entities.isEntitySaved({
   entityId: "ent_xyz789",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -579,8 +579,8 @@ const { isSaved } = await sublay.entities.isEntitySaved({
   The Sublay entity ID.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID to check.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose saved state is checked.
 </ParamField>
 
 **Returns** — `Promise<{ isSaved: boolean }>`

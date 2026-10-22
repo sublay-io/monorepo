@@ -5,7 +5,7 @@ description: "Framework-agnostic client surface for workspaces — the full 21-e
 
 The `workspaces` module in `@sublay/js` is the **client-side** surface of the [Workspaces bundle](/v8/data-models/workspace). It covers **all 21 endpoints** — workspace CRUD, membership management, the full invitation lifecycle, and the authority read — so a members-management UI needs no server-side code.
 
-The actor is always derived from the **bearer token**. **No actor field is ever sent from the client** — the props types simply do not carry one, and a call that hand-writes `actingUserId` past the types to name a user other than the token's own is rejected by the server with a `403`. Acting on behalf of a *different* user is the [node SDK](/v8/node-sdk/workspaces) service-key capability, and it is the only difference in reach between the two SDKs for this bundle — **not** a restriction on which operations a client may perform.
+The actor is always derived from the **bearer token**. **No actor field is ever sent from the client** — the props types simply do not carry one, and a call that hand-writes `actingUserId` past the types, even naming the token's own user, is rejected by the server with `400 workspace/acting-user-not-allowed`. Acting on behalf of a *different* user is the [node SDK](/v8/node-sdk/workspaces) service-key capability, and it is the only difference in reach between the two SDKs for this bundle — **not** a restriction on which operations a client may perform.
 
 <Note>
   **Requires the `workspaces` bundle.** See [Bundles](/v8/bundles) to install it.

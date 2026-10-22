@@ -5,7 +5,7 @@ description: "Give and list reputation grants from the browser"
 
 The `reputation` module gives reputation deliberately and reads grants back. It maps directly to the [Reputation Grants API](/v8/api-reference/reputation-grants/create-reputation-grant).
 
-Because the JS SDK authenticates as an **end user** (bearer token), you never pass an actor `userId` — the sender is always the user the token belongs to. Naming somebody else as the sender requires a service key, which this SDK never holds.
+Because the JS SDK authenticates as an **end user** (bearer token), you never send `actingUserId` — the sender is always the user the token belongs to. Naming somebody else as the sender requires a service key, which this SDK never holds.
 
 There is deliberately **no mint function**. Creating reputation from nothing — and destroying it — is service-key only and lives in [`@sublay/node`](/v8/node-sdk/reputation).
 

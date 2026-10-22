@@ -16,7 +16,7 @@ Adds a user to a space. If the space requires approval (`requireJoinApproval: tr
 ```typescript
 const result = await sublay.spaces.joinSpace({
   spaceId: "spc_abc123",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -24,8 +24,8 @@ const result = await sublay.spaces.joinSpace({
   The Sublay space ID.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID to add.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as: the user who joins.
 </ParamField>
 
 **Returns** — `Promise<JoinSpaceResponse>`
@@ -62,7 +62,7 @@ Returns the membership status of a user in a space.
 ```typescript
 const result = await sublay.spaces.checkMyMembership({
   spaceId: "spc_abc123",
-  userId: "usr_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -70,8 +70,8 @@ const result = await sublay.spaces.checkMyMembership({
   The Sublay space ID.
 </ParamField>
 
-<ParamField body="userId" type="string" required>
-  The Sublay user ID to check.
+<ParamField body="actingUserId" type="string" required>
+  The user the service key acts as, whose membership is checked.
 </ParamField>
 
 **Returns** — `Promise<CheckMyMembershipResponse>`

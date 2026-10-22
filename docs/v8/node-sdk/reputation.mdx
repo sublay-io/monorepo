@@ -35,7 +35,7 @@ const grant = await sublay.reputation.createGrant({
 ```
 
 <ParamField body="actingUserId" type="string" required>
-  The **sender** — the user reputation is debited from. Spelled `actingUserId` rather than `userId` because the body already names a target user (`recipientId`).
+  The **sender**, the user the service key acts as: reputation is debited from them.
 </ParamField>
 <ParamField body="recipientId" type="string" required>The user credited. Must differ from `actingUserId`.</ParamField>
 <ParamField body="amount" type="number" required>

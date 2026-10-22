@@ -4,12 +4,18 @@ api: "GET /v8/:projectId/users/:userId/connections-count"
 description: "Get the number of accepted connections for a user"
 ---
 
-Returns the total number of accepted connections for the specified user. Authentication is optional — the endpoint works without a token. When the caller is signed in, any user with a block between them and the caller, in either direction, is excluded from the count. Block filtering requires the `moderation` bundle.
+Returns the total number of accepted connections for the specified user. Authentication is optional — the endpoint works without a token. When the request has a viewer — the signed-in user, or the user a service key names in `actingUserId` — any user with a block between them and the viewer, in either direction, is excluded from the count. Block filtering requires the `moderation` bundle.
 
 ## Path Parameters
 
 <ParamField path="userId" type="string" required>
   The Sublay user ID (UUID) of the user whose connection count to retrieve.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to read as. The response is exactly what that user's own access token would get — users block-edged with them are left out. Leave it out for the anonymous view. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 connection/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -19,6 +25,21 @@ On success, returns HTTP `200`:
 <ResponseField name="count" type="number">
   Total number of accepted connections for this user.
 </ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    {
+      "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
+      "code": "connection/acting-user-not-allowed"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
 
 ## See Also
 

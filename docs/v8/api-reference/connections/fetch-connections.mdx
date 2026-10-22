@@ -7,7 +7,8 @@ description: "Get a paginated list of the authenticated user's accepted connecti
 Returns a paginated list of accepted connections for the authenticated user. Each entry includes the connected user's public profile. Unlike the [user-scoped endpoint](/v8/api-reference/users/connections/get-connections), this route always returns data for the current authenticated user.
 
 <Note>
-  Users with a block between them and you, in either direction, are excluded
+  Users with a block between them and the acting user (the signed-in user, or the
+  user a service key names in `actingUserId`), in either direction, are excluded
   from the results. Requires the `moderation` bundle.
 </Note>
 

@@ -22,6 +22,9 @@ Server-to-server requests can authenticate with a **service key** instead of a u
 
 - A user token always acts as its own user. Sending `actingUserId` with a user token, or with no credentials, returns `400 <resource>/acting-user-not-allowed`, even when it names the token's own user. An endpoint that requires sign-in may answer a request with no credentials with `401` first.
 - An endpoint that needs an acting user returns `400 <resource>/missing-user-id` to a service key that sends none.
+- On reads shaped by who is looking (user profiles, follower and connection lists, user search), `actingUserId` is optional: with it, the response is exactly what that user's own token would get; without it, the anonymous view.
+- Endpoints that always act as the app (updating or deleting a user, sending push notifications) refuse `actingUserId` with `400 <resource>/unsupported-param`.
+- Endpoints where the person must prove it's them (changing or setting a password, account deletion, OAuth link and identities, push device registration) refuse a service key with `403 <resource>/user-token-required`.
 - `userId` only names a user the request is about — a target, or a filter such as the author filter on [Fetch Entities](/v8/api-reference/entities/fetch-many-entities). Don't send the acting user as `userId`: most endpoints that take an acting user refuse a `userId` field with `400 <resource>/unsupported-param` and `"param": "userId"` (workspace endpoints with `400 workspace/invalid-body` or `workspace/invalid-query`). Each endpoint's page lists the error.
 
 `<resource>` is the endpoint's own code prefix, for example `comment` or `chat`. See [Acting as a user](/v8/authentication#acting-as-a-user).

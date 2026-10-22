@@ -6,12 +6,13 @@ description: "Email the authenticated user a one-time code to confirm self-servi
 
 Starts the self-service account-deletion flow for the authenticated user. The server generates a one-time, 6-digit confirmation code, emails it to the user's registered address, and stores it for **10 minutes**. The user completes deletion by passing that code to the [Confirm Account Deletion](/v8/api-reference/auth/confirm-account-deletion) endpoint.
 
-Requires a valid user access token. This step does **not** delete anything — it only sends the code.
+Requires the user's own access token; a service key is refused (`403 auth/user-token-required`). This step does **not** delete anything — it only sends the code.
 
 <Warning>
   This flow only works for accounts with an email on file. Accounts without one
   (e.g. anonymous or foreign-id users) cannot self-serve deletion — delete them
-  server-side with a service key via the [node SDK](/v8/node-sdk/users).
+  from your backend with [Delete User](/v8/api-reference/users/delete-user)
+  (`users.deleteUser` in the [node SDK](/v8/node-sdk/users)).
 </Warning>
 
 ## Body Parameters
@@ -30,6 +31,8 @@ This endpoint takes no body parameters.
 |------|--------|-------------|
 | `auth/no-email-on-file` | 400 | The authenticated account has no email address, so a confirmation code cannot be delivered. Use a service key to delete it instead. |
 | `auth/no-user-found` | 403 | The access token is valid but no matching user record exists (e.g. the account was already deleted). |
+| `auth/unsupported-param` | 400 | The request sent `userId`, in the body or the query. These endpoints always act as the signed-in user: ``"`userId` isn't accepted here: these endpoints always act as the signed-in user."``, with `param: "userId"`. |
+| `auth/user-token-required` | 403 | A service key called this endpoint, with or without `actingUserId`: `"This endpoint needs the user's own access token; a service key can't use it."` |
 
 <Note>
   Each call generates a fresh code and overwrites any pending one for that user.

@@ -8,7 +8,9 @@ Performs vector-similarity search over user profiles in the project using AI emb
 
 **Requires a paid plan with semantic search enabled.**
 
-**Requires an authenticated user.** Send the user's access token as `Authorization: Bearer <token>` — missing token → `401`, invalid/expired token → `403` (refresh and retry).
+**Authentication required.** Send a user's access token as `Authorization: Bearer <token>` — missing token → `401`, invalid/expired token → `403` (refresh and retry). A service key is accepted too, and searches as the user named in `actingUserId`, or with no viewer when it names nobody.
+
+When the search has a viewer — the signed-in user, or the user a service key names in `actingUserId` — users with a block between them and the viewer, in either direction, are left out. Block filtering requires the `moderation` bundle.
 
 ## Body Parameters
 
@@ -18,6 +20,10 @@ Performs vector-similarity search over user profiles in the project using AI emb
 
 <ParamField body="limit" type="number" default="20">
   Maximum number of users to return. Maximum `50`.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Service key only: the user to search as. The results are exactly what that user's own access token would get. Leave it out to search with no viewer. A user token always acts as its own user and must not send it (`400 search/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -38,6 +44,12 @@ Returns an array of result objects ordered by similarity:
 <AccordionGroup>
   <Accordion title="Authentication Required — 401 / 403">
     The endpoint requires an authenticated user. A missing token returns a bare `401`; an invalid or expired token returns a bare `403` — refresh the access token and retry.
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "search/acting-user-not-allowed" }
+    ```
+    Returned when a user token, or a request with no credentials, sends `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
   <Accordion title="Plan Required — 403">
     ```json

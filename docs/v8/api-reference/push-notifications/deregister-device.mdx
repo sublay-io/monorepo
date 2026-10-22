@@ -10,7 +10,7 @@ Removes the calling user's push device registration. The device is identified th
 
 Only the calling user's own binding is removed. A device can be registered by several accounts at once, so deregistering unbinds the caller's account from that device and leaves every other account's binding on the same device intact — callers cannot deregister devices they don't own.
 
-Requires end-user authentication. Service keys are rejected for the same reason as [Register Device](/v8/api-reference/push-notifications/register-device#security-note).
+Requires end-user authentication. A service key is refused (`403 push-device/user-token-required`) for the same reason as [Register Device](/v8/api-reference/push-notifications/register-device#security-note).
 
 Requires the `push` bundle.
 
@@ -60,12 +60,15 @@ Returns `200` on success, including when no matching registration existed.
     common case, since access tokens live 30 minutes. Refresh the access token
     and retry; do not treat this as a permanent refusal.
   </Accordion>
-  <Accordion title="Service Key Rejected — 401">
+  <Accordion title="User Token Required — 403">
     ```json
-    { "error": "Unauthorized", "code": "push-device/unauthorized" }
+    {
+      "error": "This endpoint needs the user's own access token; a service key can't use it.",
+      "code": "push-device/user-token-required"
+    }
     ```
-    Returned when a service key is used. This endpoint has no
-    impersonation path by design (see [Security note](/v8/api-reference/push-notifications/register-device#security-note)).
+    Returned when a service key is used, with or without `actingUserId`, before the body is checked. This endpoint has no
+    acting-as-a-user path by design (see [Security note](/v8/api-reference/push-notifications/register-device#security-note)).
   </Accordion>
   <Accordion title="Invalid Body — 400">
     ```json

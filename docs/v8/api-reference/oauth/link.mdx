@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/oauth/link"
 description: "Link a new OAuth provider to the current authenticated user"
 ---
 
-Initiates an OAuth 2.0 flow to link an additional provider to the currently authenticated user's account. Requires a valid access token. The flow and callback behavior are identical to the [Authorize OAuth](/v8/api-reference/oauth/authorize) endpoint.
+Initiates an OAuth 2.0 flow to link an additional provider to the currently authenticated user's account. Requires the user's own access token; a service key is refused (`403 oauth/user-token-required`). The flow and callback behavior are identical to the [Authorize OAuth](/v8/api-reference/oauth/authorize) endpoint.
 
 The authenticated user's ID is taken from the access token — it cannot be specified in the request body.
 
@@ -70,6 +70,16 @@ https://yourapp.com/callback?error=...&error_description=...
     { "error": "This session has ended. Sign in again.", "code": "auth/session-ended" }
     ```
     The access token is still valid, but its session no longer exists (signed out, password reset, or the account was claimed by a provider sign-in after its email went unverified). Adding a provider needs a live session, so sign in again.
+  </Accordion>
+  <Accordion title="User Token Required — 403">
+    A service key called this endpoint, with or without `actingUserId`. It needs the signed-in user's own access token.
+
+    ```json
+    {
+      "error": "This endpoint needs the user's own access token; a service key can't use it.",
+      "code": "oauth/user-token-required"
+    }
+    ```
   </Accordion>
 </AccordionGroup>
 

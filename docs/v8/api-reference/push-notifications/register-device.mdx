@@ -8,7 +8,7 @@ Registers a push device for the currently authenticated user. Re-registering the
 
 A device can serve several accounts at once. Registrations are unique per `(device, user)` pair, so registering a device that is already registered by a different user (e.g. a shared device, or a second account signed in on the same phone) **adds a second binding** — it does not reassign or replace the first user's registration. Each bound account then receives its own notifications on that device.
 
-Requires end-user authentication (`Authorization: Bearer <accessToken>`). Service keys are explicitly rejected — this endpoint has no impersonation path by design (see [Security note](#security-note)).
+Requires end-user authentication (`Authorization: Bearer <accessToken>`). A service key is refused (`403 push-device/user-token-required`) — this endpoint has no acting-as-a-user path by design (see [Security note](#security-note)).
 
 Requires the `push` bundle.
 
@@ -66,12 +66,15 @@ Returns `200` with the stored device record on success.
     common case, since access tokens live 30 minutes. Refresh the access token
     and retry; do not treat this as a permanent refusal.
   </Accordion>
-  <Accordion title="Service Key Rejected — 401">
+  <Accordion title="User Token Required — 403">
     ```json
-    { "error": "Unauthorized", "code": "push-device/unauthorized" }
+    {
+      "error": "This endpoint needs the user's own access token; a service key can't use it.",
+      "code": "push-device/user-token-required"
+    }
     ```
-    Returned when a service key is used. This endpoint has no
-    impersonation path by design (see [Security note](#security-note)).
+    Returned when a service key is used, with or without `actingUserId`, before the body is checked. This endpoint has no
+    acting-as-a-user path by design (see [Security note](#security-note)).
   </Accordion>
   <Accordion title="Invalid Body — 400">
     ```json

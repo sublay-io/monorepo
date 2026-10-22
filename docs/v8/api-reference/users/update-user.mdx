@@ -4,7 +4,7 @@ api: "PATCH /v8/:projectId/users/:userId"
 description: "Update a user's profile fields, including avatar and banner images"
 ---
 
-Updates one or more profile fields for the specified user. The requesting user must own the account, or use a service key to update any user.
+Updates one or more profile fields for the specified user. The requesting user must own the account, or use a service key to update any user. A service key updates the user as the app: it doesn't name a user to act as, and sending `actingUserId` is refused (`400 user/unsupported-param`).
 
 Supports direct image uploads for the avatar and banner via `multipart/form-data`. Uploaded images are processed, stored in Supabase, and the old files are automatically cleaned up after a successful update.
 
@@ -216,6 +216,17 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     {
       "error": "...",
       "code": "user/invalid-params"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `actingUserId`, in the body or the query. This endpoint always acts as the app, so there is no user to name.
+
+    ```json
+    {
+      "error": "`actingUserId` isn't accepted here: this endpoint always acts as the app.",
+      "code": "user/unsupported-param",
+      "param": "actingUserId"
     }
     ```
   </Accordion>

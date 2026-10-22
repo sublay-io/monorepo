@@ -6,7 +6,7 @@ description: "List all OAuth identities linked to the current user"
 
 Returns all OAuth identities linked to the authenticated user's account, ordered by creation date. Use this to display connected accounts on a settings page.
 
-Requires a valid access token.
+Requires the user's own access token; a service key is refused.
 
 ## Headers
 
@@ -52,6 +52,21 @@ Requires a valid access token.
   [set an initial password](/v8/api-reference/auth/set-password) before letting
   them unlink their last identity.
 </ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="User Token Required — 403">
+    A service key called this endpoint, with or without `actingUserId`. It needs the signed-in user's own access token.
+
+    ```json
+    {
+      "error": "This endpoint needs the user's own access token; a service key can't use it.",
+      "code": "oauth/user-token-required"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
 
 ## See Also
 

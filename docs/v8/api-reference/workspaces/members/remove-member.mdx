@@ -23,7 +23,7 @@ Removes a member from a workspace. Requires the `remove-member` capability and i
 ## Body Parameters
 
 <ParamField body="actingUserId" type="string" required>
-  Service keys only — the **acting** user (sent in the body so the act-as-user path works on `DELETE`; the path `:userId` is the target). **Required for a key:** this route has no unbounded path, so a key that names nobody is refused with `400 workspace/missing-user-id`. The `remove-member` capability and the rank bound are enforced against the named user — act as the **owner** for an unrestricted removal.
+  Service keys only — the **acting** user (sent in the body so the act-as-user path works on `DELETE`; the path `:userId` is the target). **Required for a key:** a key that names nobody is refused with `400 workspace/missing-user-id`. The `remove-member` capability and the rank bound are enforced against the named user — act as the **owner** for an unrestricted removal.
 
   A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
@@ -47,7 +47,7 @@ Removes a member from a workspace. Requires the `remove-member` capability and i
   </Accordion>
   <Accordion title="Missing Acting User — 400">
     ```json
-    { "error": "Missing user ID", "code": "workspace/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
     ```
     A service key called this route without naming an `actingUserId`. Removal is rank-bounded against the remover's own standing, so it must be performed *as* somebody — act as the owner for an unrestricted removal.
   </Accordion>

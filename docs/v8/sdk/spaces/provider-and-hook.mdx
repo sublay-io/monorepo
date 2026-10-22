@@ -167,7 +167,7 @@ function SpaceContent() {
 </ResponseField>
 
 <ResponseField name="deleteSpace" type="() => Promise<void>">
-  Delete the space and all associated data. Only available to admins.
+  Delete the space and all associated data. Only the space's creator can delete it.
 </ResponseField>
 
 <ResponseField name="setSpace" type="React.Dispatch">

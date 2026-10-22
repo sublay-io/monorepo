@@ -17,7 +17,7 @@ Marks the invite `declined` and fires `workspace.invite.declined`.
 ## Body Parameters
 
 <ParamField body="actingUserId" type="string" required>
-  Service keys only — the declining user (must be the invite's target). **Required for a key:** a decline is an act by the invitee, so there is no unbounded path — a key that names nobody is refused with `400 workspace/missing-user-id`.
+  Service keys only — the declining user (must be the invite's target). **Required for a key:** a decline is an act by the invitee, so a key that names nobody is refused with `400 workspace/missing-user-id`.
 
   A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>

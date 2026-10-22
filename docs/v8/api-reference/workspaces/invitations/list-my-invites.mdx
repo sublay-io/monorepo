@@ -13,7 +13,7 @@ Returns the authenticated user's **live** pending invites (`status = 'pending' A
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string" required>
-  Service keys only — the user to act as, whose invites are read. **Required for a key:** this is an *inbox* read, so it has no unbounded path — a key that names nobody is refused with `400 workspace/missing-user-id`.
+  Service keys only — the user to act as, whose invites are read. **Required for a key:** this is an *inbox* read, so a key that names nobody is refused with `400 workspace/missing-user-id`.
 
   A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>

@@ -16,18 +16,18 @@ The invited `capabilities`/`permissions` are validated against the inviter's own
 
 The invited rank is named in **either coordinate** — `rank` (absolute) or `relativeRank` (an offset from the inviter) — and they are **mutually exclusive**. Supplying **neither** applies the default, `relativeRank: 1`: one rung below the inviter. Whichever arrives, it is resolved to an absolute number here and stored absolute on the invitation row. See [choosing a rank](/v8/sdk/workspaces/overview#choosing-a-rank).
 
-The inviter is the caller's own token subject, or — for a service key — the `actingUserId` it names. Both floors are skipped for an owner or ancestor owner, and for a key that names nobody.
+The inviter is the caller's own token subject, or — for a service key — the `actingUserId` it names, which a key must send. The invitation's `invitedBy` records the inviter. Both floors are skipped for an owner or ancestor owner.
 
 <Note>
   **A tier cannot grow itself.** Because the rank floor is strict, a rank-5 manager with a direct member row can invite rank 6, 7, 8… but **never another rank 5**. Minting a peer needs someone above that tier, and no ranked member at all clears the floor for **rank 0**. If your product has a server-driven "add a manager" action, act as the owner for it.
 
-  As stated above, the floor only binds an inviter who holds a **direct member row** here — an owner or ancestor owner, a reach-holder with no direct row, and a key naming nobody all skip it and may invite at any rank, rank 0 included.
+  As stated above, the floor only binds an inviter who holds a **direct member row** here — an owner or ancestor owner and a reach-holder with no direct row skip it and may invite at any rank, rank 0 included.
 </Note>
 
 <Warning>
-  **Omitting the rank field is the easiest way in the whole API to mint rank 0.** The default is `relativeRank: 1` — one rung below the inviter — and *apex* is where an inviter with no member row on this workspace stands. So for an **owner**, an **ancestor owner**, a **reach-holder** with no direct row, or a **service key acting as itself**, one below apex **is rank 0**: the most senior rung on the ladder, handed out by leaving a field off.
+  **Omitting the rank field is the easiest way in the whole API to mint rank 0.** The default is `relativeRank: 1` — one rung below the inviter — and *apex* is where an inviter with no member row on this workspace stands. So for an **owner**, an **ancestor owner** or a **reach-holder** with no direct row, one below apex **is rank 0**: the most senior rung on the ladder, handed out by leaving a field off.
 
-  That is semantically right — one below apex *is* the top rung — and it is not changing. But it inverts the intuition that omitting a field is the cautious choice, and it lands squarely on the path this page calls the happy path. The scenario to watch is the **backend invite flow**: a server route that invites people with a service key, sending an address and capabilities and no rank, mints a workspace full of rank-0 members — each one able to manage everyone else, and none of them manageable by anyone but the owner. If a service-key flow wants new members at the **bottom** of the ladder, it must name a coordinate (`rank: 10`, or `relativeRank` against an `actingUserId` who actually sits in the ladder) rather than rely on the default.
+  That is semantically right — one below apex *is* the top rung — and it is not changing. But it inverts the intuition that omitting a field is the cautious choice, and it lands squarely on the path this page calls the happy path. The scenario to watch is the **backend invite flow**: a server route that invites people with a service key acting as the owner, sending an address and capabilities and no rank, mints a workspace full of rank-0 members — each one able to manage everyone else, and none of them manageable by anyone but the owner. If a service-key flow wants new members at the **bottom** of the ladder, it must name a coordinate (`rank: 10`, or `relativeRank` against an `actingUserId` who actually sits in the ladder) rather than rely on the default.
 
   **The milder collision applies to in-ladder inviters.** A rank-0 lead who invites six people with no rank field gets six rank-1 members, and equals cannot act on equals — none of those six can manage each other; only the lead can. Often correct for a flat team, and worth deciding on purpose rather than discovering later. If your product has tiers, name one on the invite.
 </Warning>
@@ -103,8 +103,8 @@ This endpoint doubles as an **upsert**, so a second call for a target who alread
   Optional initial cosmetic title. On a [re-invite](#what-a-re-invite-does-to-the-grant), omitting it preserves the stored title; sending `null` clears it.
 </ParamField>
 
-<ParamField body="actingUserId" type="string">
-  Service keys only — the **inviter** to act as. Enforced: the no-escalation and rank floors above run against *that* user's resolved standing, so a key naming a rank-5 manager may only invite at rank 6+ and only with capabilities that manager holds. Omit it to invite as the app itself (unbounded; `invitedBy` then falls back to the workspace owner) — but omit means **absent**: `actingUserId: ""` or `null` is a `400`, not a fall-through to that mode. Every top-level field this endpoint does not declare is a `400` too — `Unrecognized key: "…"`, in the body and the query string alike, for every caller. The fields this endpoint *does* declare are accepted on their own terms: `username` reaches the server intact and behaves identically to `email` and `userId`. The **body** `userId` is the one declared field on the bundle that names a person and is not the actor, so it carries a carve-out from the bundle-wide `userId` rejection; a query `userId` is refused here as everywhere else. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user) and [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+<ParamField body="actingUserId" type="string" required>
+  Service keys only — the **inviter** to act as. **Required with a service key:** a key that names nobody is refused with `400 workspace/missing-user-id`. Enforced: the `invite` capability, the no-escalation and rank floors above run against *that* user's resolved standing, so a key naming a rank-5 manager may only invite at rank 6+ and only with capabilities that manager holds, and the invitation's `invitedBy` records them. `actingUserId: ""` or `null` is a `400`, an attempt to name someone that names no one. Every top-level field this endpoint does not declare is a `400` too — `Unrecognized key: "…"`, in the body and the query string alike, for every caller. The fields this endpoint *does* declare are accepted on their own terms: `username` reaches the server intact and behaves identically to `email` and `userId`. The **body** `userId` is the one declared field on the bundle that names a person and is not the actor, so it carries a carve-out from the bundle-wide `userId` rejection; a query `userId` is refused here as everywhere else. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user) and [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
 </ParamField>
 
 ## Response
@@ -181,7 +181,13 @@ Returns the created [WorkspaceInvitation](/v8/data-models/workspace-invitation) 
       "code": "workspace/invalid-body"
     }
     ```
-    Returned when a service key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would fall through to the unbounded path. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+    Returned when a service key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would name no acting user. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+  </Accordion>
+  <Accordion title="Missing Acting User — 400">
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
+    ```
+    A service key sent no `actingUserId`. An invitation always has an inviter: the request acts as them, is held to their standing, and records them as `invitedBy`.
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     ```json

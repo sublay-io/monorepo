@@ -30,8 +30,8 @@ Returns the roster as a **single unified array, one entry per distinct user**, e
   When `true`, returns per-reason counts + a distinct-user total instead of the array (never materializes the roster). Honors the same includes.
 </ParamField>
 
-<ParamField query="actingUserId" type="string">
-  Service keys only — the user to act as. Enforced: roster visibility **and** the authority-field fence below both evaluate against the named user, so a key acting as a plain member receives the fenced view. Omit it to read as the app itself (unfenced) — where "omit" means **absent**: `actingUserId: ""` or `null` is a `400`, not a fall-through to that mode. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user) and [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+<ParamField query="actingUserId" type="string" required>
+  Service keys only — the user to act as. **Required with a service key:** a key that names nobody is refused with `400 workspace/missing-user-id`. Enforced: roster visibility **and** the authority-field fence below both evaluate against the named user, so a key acting as a plain member receives the fenced view. `actingUserId: ""` or `null` is a `400`, an attempt to name someone that names no one. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user) and [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
 </ParamField>
 
 <Note>
@@ -60,8 +60,9 @@ Each entry's `reasons[]` contains `{ type, ...detail }` objects. A user present 
   **The authority-bearing detail fields are fenced, and the gate is evaluated PER NODE — not once per request.** `capabilities`, `permissions`, `rank` and `relativeRank` are **omitted from a reason** (absent — not `null`) on **other users'** entries unless the caller, judged **on the workspace that reason belongs to**:
 
   - holds one of the four people-operating capabilities there — `invite`, `remove-member`, `edit-member-access`, `edit-member-profile`; **or**
-  - is that workspace's `owner` or an `ancestor-owner`; **or**
-  - is a service key acting as **itself** (naming no `actingUserId`). A key that **does** name one is fenced exactly as that user is — see [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  - is that workspace's `owner` or an `ancestor-owner`.
+
+  A service key names the user it reads as and is fenced exactly as that user is — see [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 
   For `owner`, `member`, `ancestor-owner` and `reach-holder` reasons, that workspace **is** the one in the path. For a `descendant-member` reason it is the descendant named by the reason's own `workspaceId`, so the verdict is re-taken there. "Judged on that node" means your **resolved** standing there — which includes capabilities [reaching](/v8/data-models/workspace#reach-and-the-wall-door-rule) in through an unbroken open inherit chain, and ownership from any ancestor. What it does *not* include is authority that stops at a **sealed** boundary.
 
@@ -142,6 +143,12 @@ The same roster read by a caller who cannot manage people here — the `member` 
     { "error": "Unrecognized key: \"page\"", "code": "workspace/invalid-query" }
     ```
     This route declares `include`, `countOnly`, `actingUserId` and `projectId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "page", "limit"`. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+  </Accordion>
+  <Accordion title="Missing Acting User — 400">
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
+    ```
+    A service key sent no `actingUserId`. This read needs a user: the key names the user whose view it gets.
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     ```json

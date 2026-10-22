@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/workspaces/:id"
 description: "Read a single workspace, visibility-filtered"
 ---
 
-Returns a single [Workspace](/v8/data-models/workspace), filtered by the caller's reach-visibility — a caller never sees a node their authority doesn't reach.
+Returns a single [Workspace](/v8/data-models/workspace), filtered by the caller's reach-visibility — a caller never sees a node their authority doesn't reach. A caller with no user — anonymous, or a service key that names nobody — always gets `404`.
 
 ## Path Parameters
 
@@ -19,7 +19,7 @@ Returns a single [Workspace](/v8/data-models/workspace), filtered by the caller'
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
-  Service keys only — the user to act as. Enforced: visibility resolves against the named user, so a key acting as someone with no relation to this workspace gets the same `404` that user would. Omit it to read as the app itself (unbounded) — where "omit" means **absent**: `actingUserId: ""` or `null` is a `400`, not a fall-through to that mode. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  Service keys only — the user to act as. Enforced: visibility resolves against the named user, so a key acting as someone with no relation to this workspace gets the same `404` that user would. Omit it and the key gets exactly the anonymous view: `404`. `actingUserId: ""` or `null` is a `400`, an attempt to name someone that names no one. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
@@ -33,6 +33,7 @@ Returns the [Workspace](/v8/data-models/workspace) object.
     ```json
     { "error": "Workspace not found.", "code": "workspace/not-found" }
     ```
+    The workspace does not exist, or the caller (or the user named by `actingUserId`) has no relation to it. Always returned to an anonymous request and to a service key that names nobody.
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json

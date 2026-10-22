@@ -18,8 +18,8 @@ Marks a pending invitation `revoked`. Requires the `invite` capability (or owner
 
 ## Body Parameters
 
-<ParamField body="actingUserId" type="string">
-  Service keys only — the user to act as. Enforced: the `invite` capability (or ownership) is required *of the named user*. Omit it to act as the app itself (unbounded). A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+<ParamField body="actingUserId" type="string" required>
+  Service keys only — the user to act as. **Required with a service key:** a key that names nobody is refused with `400 workspace/missing-user-id`. Enforced: the `invite` capability (or ownership) is required *of the named user*. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
@@ -55,7 +55,13 @@ Marks a pending invitation `revoked`. Requires the `invite` capability (or owner
       "code": "workspace/invalid-body"
     }
     ```
-    Returned when a service key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would fall through to the unbounded path. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+    Returned when a service key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would name no acting user. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+  </Accordion>
+  <Accordion title="Missing Acting User — 400">
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
+    ```
+    A service key sent no `actingUserId`. The request has to act as somebody, and is held to exactly that user's standing on the workspace.
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     ```json

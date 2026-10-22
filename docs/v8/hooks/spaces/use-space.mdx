@@ -114,7 +114,7 @@ function SpaceHeader() {
 </ResponseField>
 
 <ResponseField name="deleteSpace" type="() => Promise<void>">
-  Delete the space (admin only).
+  Delete the space. Only the space's creator can delete it.
 </ResponseField>
 
 <ResponseField name="setSpace" type="React.Dispatch">

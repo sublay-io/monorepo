@@ -4,14 +4,12 @@ import { WorkspaceInvitation } from "../../interfaces/Workspace";
 export interface ResendWorkspaceInviteProps {
   workspaceId: string;
   inviteId: string;
-  // Act as a named user (service key only). Naming one means being BOUND
-  // by that user — this call resolves and is checked against THEIR authority,
-  // exactly as their own token would be. Omit it to act as the app itself
-  // (unbounded). A user token never sends it.
+  // The user this request acts as. Required: the request resolves and is
+  // checked against THEIR authority, exactly as their own token would be.
   //
   // Here that means the `invite` capability is required OF THEM: a key acting
   // as a user without it gets the same 403 that user would.
-  actingUserId?: string;
+  actingUserId: string;
 }
 
 /**

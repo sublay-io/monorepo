@@ -4,8 +4,8 @@ import { Event, RsvpStatus } from "../../interfaces/Event";
 export interface SetRsvpProps {
   eventId: string;
   status: RsvpStatus;
-  /** The user the service key acts as. Required: the server refuses the call without it. */
-  actingUserId?: string;
+  /** The user the service key acts as. */
+  actingUserId: string;
 }
 
 export async function setRsvp(

@@ -8,7 +8,7 @@ export interface FetchWorkspaceMemberStandingProps {
   // Act as a named user (service key only). Naming one means being BOUND
   // by that user — this call resolves and is checked against THEIR authority,
   // exactly as their own token would be. Omit it to act as the app itself
-  // (unbounded). A user token may only name itself.
+  // (unbounded). A user token never sends it.
   //
   // Here that means the same authority-field fence as the roster read: a key
   // acting as a member who does not operate people (and is not asking about

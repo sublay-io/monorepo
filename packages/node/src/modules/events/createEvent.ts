@@ -28,9 +28,9 @@ export interface CreateEventProps {
   metadata?: Record<string, any>;
   /**
    * The user the service key acts as: the event's creator, who is
-   * auto-added to `hostIds`. Required: the server refuses the call without it.
+   * auto-added to `hostIds`.
    */
-  actingUserId?: string;
+  actingUserId: string;
 }
 
 export async function createEvent(

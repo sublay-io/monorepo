@@ -53,7 +53,7 @@ export interface CreateWorkspaceInviteProps {
   // invited grant is floored by THEIR capabilities/permissions, and the invited
   // rank must be strictly below theirs. Omit it to invite as the app itself
   // (unbounded, and `invitedBy` falls back to the workspace owner). A user
-  // token may only name itself.
+  // token never sends it.
   //
   // ⚠️ Distinct from `userId` above, which addresses the INVITEE.
   actingUserId?: string;

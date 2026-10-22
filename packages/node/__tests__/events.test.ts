@@ -23,11 +23,13 @@ describe("node-sdk events — request shaping", () => {
       title: "Launch party",
       startTime: "2026-07-01T18:00:00Z",
       type: "physical",
+      actingUserId: "u1",
     });
     expect(projectInstance.post).toHaveBeenCalledWith("/events", {
       title: "Launch party",
       startTime: "2026-07-01T18:00:00Z",
       type: "physical",
+      actingUserId: "u1",
     });
   });
 
@@ -152,7 +154,7 @@ describe("node-sdk events — response mapping", () => {
     const event = { id: "ev1", title: "Launch party" };
     projectInstance.post.mockResolvedValueOnce({ data: event });
     await expect(
-      createEvent(client, { title: "Launch party", startTime: "2026-07-01T18:00:00Z", type: "physical" }),
+      createEvent(client, { title: "Launch party", startTime: "2026-07-01T18:00:00Z", type: "physical", actingUserId: "u1" }),
     ).resolves.toEqual(event);
   });
 
@@ -196,7 +198,7 @@ describe("node-sdk events — response mapping", () => {
     const event = { id: "ev1", rsvpCounts: { going: 1 } };
     projectInstance.post.mockResolvedValueOnce({ data: event });
     await expect(
-      setRsvp(client, { eventId: "ev1", status: "going" }),
+      setRsvp(client, { eventId: "ev1", status: "going", actingUserId: "u1" }),
     ).resolves.toEqual(event);
   });
 
@@ -204,7 +206,7 @@ describe("node-sdk events — response mapping", () => {
     const { client, projectInstance } = makeClient();
     const event = { id: "ev1", rsvpCounts: { going: 0 } };
     projectInstance.delete.mockResolvedValueOnce({ data: event });
-    await expect(withdrawRsvp(client, { eventId: "ev1" })).resolves.toEqual(event);
+    await expect(withdrawRsvp(client, { eventId: "ev1", actingUserId: "u1" })).resolves.toEqual(event);
   });
 
   it("addHost returns response.data", async () => {

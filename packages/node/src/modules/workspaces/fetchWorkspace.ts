@@ -10,7 +10,7 @@ export interface FetchWorkspaceProps {
   // Act as a named user (service key only). Naming one means being BOUND
   // by that user — this call resolves and is checked against THEIR authority,
   // exactly as their own token would be. Omit it to act as the app itself
-  // (unbounded). A user token may only name itself.
+  // (unbounded). A user token never sends it.
   //
   // Here that means visibility resolves against them: a key acting as a user
   // with no relation to the workspace gets the same 404 that user would.

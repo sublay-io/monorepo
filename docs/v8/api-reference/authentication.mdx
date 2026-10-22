@@ -16,6 +16,16 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 Access tokens expire after **30 minutes**.
 
+## Service Keys and `actingUserId`
+
+Server-to-server requests can authenticate with a **service key** instead of a user's access token. A service key has no user of its own; to act as a user, it names that user in `actingUserId`, in the body or query of the request (wherever that endpoint reads it). The request then runs with that user's permissions and is recorded as theirs.
+
+- A user token always acts as its own user. Sending `actingUserId` with a user token, or with no credentials, returns `400 <resource>/acting-user-not-allowed`, even when it names the token's own user.
+- An endpoint that needs an acting user returns `400 <resource>/missing-user-id` to a service key that sends none.
+- `userId` only names a user the request is about — a target, or a filter such as the author filter on [Fetch Entities](/v8/api-reference/entities/fetch-many-entities). Don't send the acting user as `userId`: most endpoints that take an acting user refuse a `userId` field with `400 <resource>/unsupported-param` and `"param": "userId"` (workspace endpoints with `400 workspace/invalid-body`). Each endpoint's page lists the error.
+
+`<resource>` is the endpoint's own code prefix, for example `comment` or `chat`. See [Acting as a user](/v8/authentication#acting-as-a-user).
+
 ## Obtaining Tokens
 
 Tokens are issued by the auth endpoints. Depending on your auth setup:

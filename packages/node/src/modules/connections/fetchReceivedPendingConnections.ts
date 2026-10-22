@@ -3,7 +3,7 @@ import { PendingConnection } from "../../interfaces/Connection";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface FetchReceivedPendingConnectionsProps {
-  userId: string;
+  actingUserId: string;
   page?: number;
   limit?: number;
 }

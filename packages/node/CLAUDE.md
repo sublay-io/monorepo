@@ -35,9 +35,9 @@ pnpm prepare
 
 The SDK exposes **16 modules** bound on `SublayClient` (camelCase accessor in
 parentheses). Every endpoint is reached with a **service key**; operations that
-act on behalf of a user take an explicit `userId` (or `actingUserId` on the
-nested `users` follow/connection routes and the `chat` target routes), since a
-service key has no implicit session user.
+act on behalf of a user take that user as `actingUserId`, since a service key
+has no implicit session user. `userId` only ever names a user the request is
+about (a target or a filter).
 
 ```
 src/
@@ -54,14 +54,14 @@ src/
 │   ├── search/             # client.search
 │   ├── auth/               # client.auth
 │   ├── hosted-apps/        # client.hostedApps
-│   ├── collections/        # client.collections      (service-key userId)
-│   ├── connections/        # client.connections      (service-key userId)
-│   ├── follows/            # client.follows          (service-key userId)
-│   ├── reports/            # client.reports          (service-key userId)
-│   ├── app-notifications/  # client.appNotifications (service-key userId)
-│   ├── storage/            # client.storage          (service-key userId)
+│   ├── collections/        # client.collections      (service-key actingUserId)
+│   ├── connections/        # client.connections      (service-key actingUserId)
+│   ├── follows/            # client.follows          (service-key actingUserId)
+│   ├── reports/            # client.reports          (service-key actingUserId)
+│   ├── app-notifications/  # client.appNotifications (service-key actingUserId)
+│   ├── storage/            # client.storage          (service-key actingUserId)
 │   ├── push/               # client.push             (service-key userIds batch)
-│   └── chat/               # client.chat             (service-key userId / actingUserId)
+│   └── chat/               # client.chat             (service-key actingUserId)
 └── index.ts                # Main entry point with SublayClient class
 ```
 
@@ -104,7 +104,7 @@ const client = await SublayClient.init({
 
 `SublayClient` binds **15 modules**. The source of truth is `src/index.ts` (the `bindModule` calls) and each module's `index.ts`. The full public surface and per-function props/returns are documented in `docs/v7/node-sdk/`.
 
-**Acting on behalf of a user**: the SDK authenticates as the project (service key), not as an end user. So user-scoped functions take an explicit `userId` — the user the operation is performed as. A few routes act on one user *toward another* and take the actor as `actingUserId` while `userId` is the target: the nested follow/connection routes on the `users` module, and `chat.createDirectConversation` / `chat.addMember` / `chat.removeMember` / `chat.changeMemberRole`.
+**Acting on behalf of a user**: the SDK authenticates as the project (service key), not as an end user. So user-scoped functions take `actingUserId` — the user the operation is performed as — on every v8 route, in the body or query where the server reads it. `userId` only ever names a user the request is about: a path target (`users.*ByUserId`, the follow/connection/block pairs, `spaces.fetchMutualSpaces`), a body target (`chat.createDirectConversation` / `chat.addMember`, event hosts and invites, `workspaces.createWorkspaceInvite`), or the author filter on `entities.fetchManyEntities`. The server answers an old actor `userId` with 400 `<resource>/unsupported-param`. Exceptions not yet renamed: `auth.changePassword` still sends `userId`.
 
 **Intentionally NOT bound**: `oauth` only (a browser redirect flow). The directory exists under `src/modules/` but is not exposed on `SublayClient`; do not document it.
 
@@ -114,7 +114,7 @@ Core content objects (posts, articles, products, listings, etc.).
 
 `createEntity`, `fetchEntity`, `fetchEntityByForeignId`, `fetchEntityByShortId`, `fetchManyEntities`, `updateEntity`, `incrementEntityViews`, `deleteEntity`, `fetchDrafts`, `publishDraft`, `addReaction`, `removeReaction`, `fetchReactions`, `getUserReaction`, `isEntitySaved`
 
-`fetchManyEntities` supports rich filtering via object-shaped filters: `keywordsFilters`, `metadataFilters` (`includes`/`includesAny`/`doesNotInclude`/`exists`/`doesNotExist`), `titleFilters`, `contentFilters`, `attachmentsFilters`, `locationFilters`; plus `sortBy` (new/hot/top/controversial or `metadata.<prop>`), `sortDir`, `sortType`, `sortByReaction`, `timeFrame`, `userId`/`followedOnly`, `include`, pagination.
+`fetchManyEntities` supports rich filtering via object-shaped filters: `keywordsFilters`, `metadataFilters` (`includes`/`includesAny`/`doesNotInclude`/`exists`/`doesNotExist`), `titleFilters`, `contentFilters`, `attachmentsFilters`, `locationFilters`; plus `sortBy` (new/hot/top/controversial or `metadata.<prop>`), `sortDir`, `sortType`, `sortByReaction`, `timeFrame`, `userId` (author filter)/`followedOnly`, `include`, pagination.
 
 ### 2. Events Module (14 functions)
 
@@ -122,7 +122,7 @@ Event lifecycle, RSVPs, hosts, and invites.
 
 `createEvent`, `fetchEvent`, `fetchManyEvents`, `updateEvent`, `cancelEvent`, `deleteEvent`, `setRsvp`, `withdrawRsvp`, `addHost`, `removeHost`, `addInvite`, `removeInvite`, `fetchInvitees`, `fetchEventRsvps`
 
-`EventType` is `online`/`physical`/`hybrid`; `EventVisibility` is `public`/`members`/`invite`; `RsvpStatus` is `going`/`maybe`/`not_going`. `fetchManyEvents` filters: `timeWindow` (upcoming/ongoing/past) or an explicit `startsAfter`/`startsBefore` range, `spaceId`, `hostId`, `type`, `status` (defaults to `active`), `myRsvp` (requires `userId`), `locationFilters`, `titleFilters`/`descriptionFilters`. `fetchInvitees` (the guest list) is host-only; `fetchEventRsvps` is visible to hosts, to any viewer when `guestListVisible` is true, or to service keys.
+`EventType` is `online`/`physical`/`hybrid`; `EventVisibility` is `public`/`members`/`invite`; `RsvpStatus` is `going`/`maybe`/`not_going`. `fetchManyEvents` filters: `timeWindow` (upcoming/ongoing/past) or an explicit `startsAfter`/`startsBefore` range, `spaceId`, `hostId`, `type`, `status` (defaults to `active`), `myRsvp` (requires `actingUserId`), `locationFilters`, `titleFilters`/`descriptionFilters`. `fetchInvitees` (the guest list) is host-only; `fetchEventRsvps` is visible to hosts, to any viewer when `guestListVisible` is true, or to service keys.
 
 ### 3. Comments Module (10 functions)
 
@@ -144,19 +144,19 @@ Graph actions (nested routes, take `actingUserId` + path `userId`): `createFollo
 
 ### 5. Collections Module (8 functions)
 
-A user's saved-content collections (replaces the old "lists"). All take `userId`.
+A user's saved-content collections (replaces the old "lists"). All take `actingUserId`.
 
 `fetchRootCollection`, `fetchSubCollections`, `createNewCollection`, `fetchCollectionEntities`, `addEntityToCollection`, `removeEntityFromCollection`, `updateCollection`, `deleteCollection`
 
 ### 6. Follows Module (5 functions)
 
-Read a user's follow graph and remove follows by record ID. All take `userId`.
+Read a user's follow graph and remove follows by record ID. All take `actingUserId`.
 
 `fetchFollowing`, `fetchFollowers`, `fetchFollowingCount`, `fetchFollowersCount`, `deleteFollow`
 
 ### 7. Connections Module (7 functions)
 
-A user's mutual connections and pending requests. All take `userId`.
+A user's mutual connections and pending requests. All take `actingUserId`.
 
 `fetchConnections`, `fetchConnectionsCount`, `fetchSentPendingConnections`, `fetchReceivedPendingConnections`, `acceptConnection`, `declineConnection`, `removeConnection`
 
@@ -176,11 +176,11 @@ Moderation/rules: `handleEntityReport`, `handleCommentReport` (both take an `act
 
 ### 10. Reports Module (2 functions)
 
-`createReport` (reporter is `userId`), `fetchModeratedReports` (moderator is `userId`). `ReportStatus`: `pending` | `on-hold` | `escalated` | `dismissed` | `actioned`.
+`createReport` (reporter is `actingUserId`), `fetchModeratedReports` (moderator is `actingUserId`). `ReportStatus`: `pending` | `on-hold` | `escalated` | `dismissed` | `actioned`.
 
 ### 11. App Notifications Module (4 functions)
 
-`fetchNotifications`, `countUnreadNotifications`, `markNotificationAsRead`, `markAllNotificationsAsRead`. All take `userId`.
+`fetchNotifications`, `countUnreadNotifications`, `markNotificationAsRead`, `markAllNotificationsAsRead`. All take `actingUserId`.
 
 ### 12. Auth Module (10 functions)
 
@@ -197,11 +197,11 @@ File and image uploads, plus read/delete. `uploadFile`, `uploadImage`, `getFile`
 - **Uploads** are multipart (`FormData`); `file` accepts a `Uint8Array` or `Blob`. Content-Type is left
   to axios so the multipart boundary is set correctly — do not hand-set it.
 - **`uploadFile`** requires `pathParts` (string[]); optional `position`, `metadata`, one of
-  `entityId`/`commentId`/`spaceId`, and `userId` (attribution; omit for a backend/project-owned file).
+  `entityId`/`commentId`/`spaceId`, and `actingUserId` (owner; omit for an app-owned file).
 - **`uploadImage`** takes `imageOptions` — a discriminated union on `mode` (`exact-dimensions`,
   `aspect-ratio-width-based`, `aspect-ratio-height-based`, `original-aspect`, `multi-aspect-ratio`),
   mirroring the server schema (see `interfaces/ImageProcessing.ts`); plus optional `pathParts`, one
-  association, and `userId`. (No `metadata`/`position` — the image schema doesn't read them.)
+  association, and `actingUserId`. (No `metadata`/`position` — the image schema doesn't read them.)
 - **Access model:** reads (`getFile`) are project-scoped (any caller in the project); **delete is
   owner-or-service** — a user token may only delete files it owns, service keys may delete any.
   Both enforced server-side in `server/src/{v7,v7-schema}/controllers/storage/`.
@@ -216,12 +216,11 @@ Messages: `listMessages`, `sendMessage`, `getMessage`, `editMessage`, `deleteMes
 (Reporting a message is not a chat fn — use `reports.createReport` with `targetType: "message"`.)
 Reactions: `toggleReaction`, `listReactions` · Read state: `markAsRead`
 
-- **Acting user — resolve-then-check.** Every call takes the acting user (`userId`,
-  or `actingUserId` where `userId` is the target: `createDirectConversation`,
-  `addMember`, `removeMember`, `changeMemberRole`). The server resolves that user,
-  then runs the normal membership/role checks against them — so you can only act as
-  a genuine member, and admin ops require that user to be a group admin. This is
-  stricter than `spaces` (which bypasses the check entirely for service keys).
+- **Acting user — resolve-then-check.** Every call takes the acting user as
+  `actingUserId` (`createDirectConversation`, `addMember`, `removeMember`,
+  `changeMemberRole` also take the target as `userId`). The server resolves that
+  user, then runs the normal membership/role checks against them — so you can only
+  act as a genuine member, and admin ops require that user to be a group admin.
 - **Cursor pagination.** `listConversations` (`cursor`/`cursorCreatedAt`) and
   `listMessages` (`before`/`after`) return raw arrays + `hasMore`, **not** the
   `PaginatedResponse` envelope. `listMembers` uses offset (`PaginatedResponse`).
@@ -230,8 +229,7 @@ Reactions: `toggleReaction`, `listReactions` · Read state: `markAsRead`
   Content-Type.
 - **Space chat lives on `client.spaces`:** `getSpaceConversation`,
   `moderateSpaceChatMessage`, `handleSpaceChatReport`. The two moderation routes
-  are service-key god-mode (space-moderator check bypassed); their `actingUserId`
-  is attribution-only. See `plan-chat-node-sdk-parity.md` at the engine root.
+  require `actingUserId`, held to that user's moderator role in the space.
 
 ### 16. Push Notifications Module (1 function)
 
@@ -285,7 +283,7 @@ const entity = await client.entities.createEntity({
     title: 'My First Post',
     content: 'This is the content of my post',
     keywords: ['tutorial', 'nodejs'],
-    userId: 'user-456',
+    actingUserId: 'user-456',
     metadata: {
         category: 'technology',
         featured: true
@@ -304,7 +302,7 @@ const trendingPosts = await client.entities.fetchManyEntities({
 // Create a comment
 const comment = await client.comments.createComment({
     entityId: entity.id,
-    userId: 'user-789',
+    actingUserId: 'user-789',
     content: 'Great post! Thanks for sharing.'
 });
 

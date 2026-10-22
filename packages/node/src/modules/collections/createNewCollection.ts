@@ -5,7 +5,7 @@ export interface CreateNewCollectionProps {
   /** The parent collection under which to create the sub-collection. */
   collectionId: string;
   collectionName: string;
-  userId: string;
+  actingUserId: string;
 }
 
 export async function createNewCollection(

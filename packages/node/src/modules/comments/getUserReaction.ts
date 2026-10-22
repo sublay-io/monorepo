@@ -3,7 +3,7 @@ import { ReactionType } from "../../interfaces/Reaction";
 
 export interface GetUserCommentReactionProps {
   commentId: string;
-  userId: string;
+  actingUserId: string;
 }
 
 export interface UserCommentReactionResponse {
@@ -14,11 +14,11 @@ export async function getUserReaction(
   client: SublayHttpClient,
   data: GetUserCommentReactionProps
 ): Promise<UserCommentReactionResponse> {
-  const { commentId, userId } = data;
+  const { commentId, actingUserId } = data;
   const response =
     await client.projectInstance.get<UserCommentReactionResponse>(
       `/comments/${commentId}/reactions/me`,
-      { params: { userId } }
+      { params: { actingUserId } }
     );
   return response.data;
 }

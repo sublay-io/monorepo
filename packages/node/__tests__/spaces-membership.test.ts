@@ -13,11 +13,11 @@ import {
 import { makeClient } from "./helpers/mockClient";
 
 describe("node-sdk spaces (membership) — request shaping", () => {
-  it("joinSpace posts userId to /spaces/:id/join", async () => {
+  it("joinSpace posts actingUserId to /spaces/:id/join", async () => {
     const { client, projectInstance } = makeClient();
-    await joinSpace(client, { spaceId: "s1", userId: "u1" });
+    await joinSpace(client, { spaceId: "s1", actingUserId: "u1" });
     expect(projectInstance.post).toHaveBeenCalledWith("/spaces/s1/join", {
-      userId: "u1",
+      actingUserId: "u1",
     });
   });
 
@@ -29,12 +29,12 @@ describe("node-sdk spaces (membership) — request shaping", () => {
     });
   });
 
-  it("checkMyMembership sends userId as a param to /spaces/:id/membership/me", async () => {
+  it("checkMyMembership sends actingUserId as a param to /spaces/:id/membership/me", async () => {
     const { client, projectInstance } = makeClient();
-    await checkMyMembership(client, { spaceId: "s1", userId: "u1" });
+    await checkMyMembership(client, { spaceId: "s1", actingUserId: "u1" });
     expect(projectInstance.get).toHaveBeenCalledWith(
       "/spaces/s1/membership/me",
-      { params: { userId: "u1" } },
+      { params: { actingUserId: "u1" } },
     );
   });
 
@@ -116,7 +116,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
     const result = { membership: { id: "m1", status: "active" } };
     projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
-      joinSpace(client, { spaceId: "s1", userId: "u1" }),
+      joinSpace(client, { spaceId: "s1", actingUserId: "u1" }),
     ).resolves.toEqual(result);
   });
 
@@ -134,7 +134,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
     const result = { isMember: true, role: "member" };
     projectInstance.get.mockResolvedValueOnce({ data: result });
     await expect(
-      checkMyMembership(client, { spaceId: "s1", userId: "u1" }),
+      checkMyMembership(client, { spaceId: "s1", actingUserId: "u1" }),
     ).resolves.toEqual(result);
   });
 

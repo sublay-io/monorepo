@@ -2,7 +2,7 @@ import { SublayHttpClient } from "../../core/client";
 import { UserSpacesResponse } from "../../interfaces/Space";
 
 export interface FetchUserSpacesProps {
-  userId: string;
+  actingUserId: string;
   page?: number;
   limit?: number;
   sortBy?: "createdAt" | "alphabetical" | "members" | "joinedAt";

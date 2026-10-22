@@ -5,7 +5,7 @@ export interface ToggleReactionProps {
   messageId: string;
   emoji: string;
   /** The reacting user (must be a member). Service key required to name a user. */
-  userId: string;
+  actingUserId: string;
 }
 
 export interface ToggleReactionResponse {
@@ -21,10 +21,10 @@ export async function toggleReaction(
   client: SublayHttpClient,
   data: ToggleReactionProps
 ): Promise<ToggleReactionResponse> {
-  const { conversationId, messageId, emoji, userId } = data;
+  const { conversationId, messageId, emoji, actingUserId } = data;
   const response = await client.projectInstance.post<ToggleReactionResponse>(
     `/chat/conversations/${conversationId}/messages/${messageId}/reactions`,
-    { emoji, userId }
+    { emoji, actingUserId }
   );
   return response.data;
 }

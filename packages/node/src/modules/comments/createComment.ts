@@ -4,7 +4,7 @@ import { Mention } from "../../interfaces/Mention";
 
 export interface CreateCommentProps {
   foreignId?: string;
-  userId: string;
+  actingUserId: string;
   entityId: string;
   content?: string;
   gif?: GifData | null;

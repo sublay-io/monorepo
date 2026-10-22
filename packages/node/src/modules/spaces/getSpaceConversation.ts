@@ -8,17 +8,17 @@ export interface GetSpaceConversationProps {
    * fetches-or-creates the space conversation and joins this user to it.
    * Service key required to name a user.
    */
-  userId: string;
+  actingUserId: string;
 }
 
 export async function getSpaceConversation(
   client: SublayHttpClient,
   data: GetSpaceConversationProps
 ): Promise<Conversation> {
-  const { spaceId, userId } = data;
+  const { spaceId, actingUserId } = data;
   const response = await client.projectInstance.get<Conversation>(
     `/spaces/${spaceId}/conversation`,
-    { params: { userId } }
+    { params: { actingUserId } }
   );
   return response.data;
 }

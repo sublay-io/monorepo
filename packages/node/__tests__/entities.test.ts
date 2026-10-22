@@ -20,10 +20,10 @@ import { makeClient } from "./helpers/mockClient";
 describe("node-sdk entities — request shaping", () => {
   it("createEntity posts the full body to /entities", async () => {
     const { client, projectInstance } = makeClient();
-    await createEntity(client, { title: "x", userId: "u1" });
+    await createEntity(client, { title: "x", actingUserId: "u1" });
     expect(projectInstance.post).toHaveBeenCalledWith("/entities", {
       title: "x",
-      userId: "u1",
+      actingUserId: "u1",
     });
   });
 
@@ -103,9 +103,9 @@ describe("node-sdk entities — request shaping", () => {
 
   it("fetchDrafts hits /entities/drafts with the full body as params", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchDrafts(client, { userId: "u1", page: 2 });
+    await fetchDrafts(client, { actingUserId: "u1", page: 2 });
     expect(projectInstance.get).toHaveBeenCalledWith("/entities/drafts", {
-      params: { userId: "u1", page: 2 },
+      params: { actingUserId: "u1", page: 2 },
     });
   });
 
@@ -129,25 +129,25 @@ describe("node-sdk entities — request shaping", () => {
 
   it("fetchDrafts joins an include array into a comma string", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchDrafts(client, { userId: "u1", include: ["user", "files"] });
+    await fetchDrafts(client, { actingUserId: "u1", include: ["user", "files"] });
     const [, config] = projectInstance.get.mock.calls[0];
-    expect(config.params).toMatchObject({ userId: "u1", include: "user,files" });
+    expect(config.params).toMatchObject({ actingUserId: "u1", include: "user,files" });
   });
 
-  it("addReaction posts reactionType and userId to /entities/:id/reactions", async () => {
+  it("addReaction posts reactionType and actingUserId to /entities/:id/reactions", async () => {
     const { client, projectInstance } = makeClient();
-    await addReaction(client, { entityId: "e1", reactionType: "like", userId: "u1" });
+    await addReaction(client, { entityId: "e1", reactionType: "like", actingUserId: "u1" });
     expect(projectInstance.post).toHaveBeenCalledWith("/entities/e1/reactions", {
       reactionType: "like",
-      userId: "u1",
+      actingUserId: "u1",
     });
   });
 
-  it("removeReaction sends userId via the data option", async () => {
+  it("removeReaction sends actingUserId via the data option", async () => {
     const { client, projectInstance } = makeClient();
-    await removeReaction(client, { entityId: "e1", userId: "u1" });
+    await removeReaction(client, { entityId: "e1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/entities/e1/reactions", {
-      data: { userId: "u1" },
+      data: { actingUserId: "u1" },
     });
   });
 
@@ -159,19 +159,19 @@ describe("node-sdk entities — request shaping", () => {
     });
   });
 
-  it("getUserReaction hits the /reactions/me route with userId as a param", async () => {
+  it("getUserReaction hits the /reactions/me route with actingUserId as a param", async () => {
     const { client, projectInstance } = makeClient();
-    await getUserReaction(client, { entityId: "e1", userId: "u1" });
+    await getUserReaction(client, { entityId: "e1", actingUserId: "u1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/entities/e1/reactions/me", {
-      params: { userId: "u1" },
+      params: { actingUserId: "u1" },
     });
   });
 
   it("isEntitySaved hits /entities/is-entity-saved with the full body as params", async () => {
     const { client, projectInstance } = makeClient();
-    await isEntitySaved(client, { entityId: "e1", userId: "u1" });
+    await isEntitySaved(client, { entityId: "e1", actingUserId: "u1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/entities/is-entity-saved", {
-      params: { entityId: "e1", userId: "u1" },
+      params: { entityId: "e1", actingUserId: "u1" },
     });
   });
 });
@@ -244,7 +244,7 @@ describe("node-sdk entities — response mapping", () => {
     const { client, projectInstance } = makeClient();
     const envelope = { data: [{ id: "e1" }], pagination: { page: 1, limit: 10, total: 1 } };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
-    await expect(fetchDrafts(client, { userId: "u1" })).resolves.toEqual(envelope);
+    await expect(fetchDrafts(client, { actingUserId: "u1" })).resolves.toEqual(envelope);
   });
 
   it("publishDraft returns response.data", async () => {
@@ -259,7 +259,7 @@ describe("node-sdk entities — response mapping", () => {
     const entity = { id: "e1", userReaction: "like", reactionCounts: { like: 1 } };
     projectInstance.post.mockResolvedValueOnce({ data: entity });
     await expect(
-      addReaction(client, { entityId: "e1", reactionType: "like", userId: "u1" }),
+      addReaction(client, { entityId: "e1", reactionType: "like", actingUserId: "u1" }),
     ).resolves.toEqual(entity);
   });
 
@@ -268,7 +268,7 @@ describe("node-sdk entities — response mapping", () => {
     const entity = { id: "e1", userReaction: null, reactionCounts: { like: 0 } };
     projectInstance.delete.mockResolvedValueOnce({ data: entity });
     await expect(
-      removeReaction(client, { entityId: "e1", userId: "u1" }),
+      removeReaction(client, { entityId: "e1", actingUserId: "u1" }),
     ).resolves.toEqual(entity);
   });
 
@@ -284,7 +284,7 @@ describe("node-sdk entities — response mapping", () => {
     const result = { reactionType: "like" as const };
     projectInstance.get.mockResolvedValueOnce({ data: result });
     await expect(
-      getUserReaction(client, { entityId: "e1", userId: "u1" }),
+      getUserReaction(client, { entityId: "e1", actingUserId: "u1" }),
     ).resolves.toEqual(result);
   });
 
@@ -293,7 +293,7 @@ describe("node-sdk entities — response mapping", () => {
     const result = { isSaved: true };
     projectInstance.get.mockResolvedValueOnce({ data: result });
     await expect(
-      isEntitySaved(client, { entityId: "e1", userId: "u1" }),
+      isEntitySaved(client, { entityId: "e1", actingUserId: "u1" }),
     ).resolves.toEqual(result);
   });
 });

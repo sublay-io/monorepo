@@ -112,7 +112,7 @@ Presentational components the CLI registry imports: `GiphyContainer` (Giphy pick
 
 Server-side (`node`, service-key auth) and framework-agnostic browser (`js`, user-token auth) SDKs. Each has its own detailed `CLAUDE.md` — [`packages/node/CLAUDE.md`](packages/node/CLAUDE.md) and [`packages/js/CLAUDE.md`](packages/js/CLAUDE.md) — covering their full module list, the `bindModule` pattern, and (for `js`) the two auth modes and refresh-token rotation. Read those directly rather than duplicating here; the short version:
 
-- **`node`**: `SublayClient.init({ projectId, apiKey })`, 15 bound modules (entities, comments, users, spaces, chat, etc.), acts on behalf of any user via an explicit `userId`/`actingUserId` param since a service key has no implicit session user.
+- **`node`**: `SublayClient.init({ projectId, apiKey })`, 15 bound modules (entities, comments, users, spaces, chat, etc.), acts on behalf of any user via an explicit `actingUserId` param since a service key has no implicit session user (`userId` only names a target or filter).
 - **`js`**: `SublayClient.init({ projectId, initialTokens? | getToken? })`, 14 bound modules, authenticates as an end user via a bearer token — no explicit actor param, the server derives it from the token.
 - Both build via `tsup` (CJS+ESM) plus a separate `build:types` (`tsc --noEmit`) whole-project type-check step — `build:types` emits nothing, it exists purely to catch errors in source files `tsup`'s entry-graph-only build never reaches.
 

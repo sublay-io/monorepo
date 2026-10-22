@@ -2,7 +2,7 @@ import { SublayHttpClient } from "../../core/client";
 import { Collection } from "../../interfaces/Collection";
 
 export interface FetchRootCollectionProps {
-  userId: string;
+  actingUserId: string;
 }
 
 export async function fetchRootCollection(

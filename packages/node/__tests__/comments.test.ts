@@ -15,9 +15,9 @@ import { makeClient } from "./helpers/mockClient";
 describe("node-sdk comments — request shaping", () => {
   it("createComment posts the full body to /comments", async () => {
     const { client, projectInstance } = makeClient();
-    await createComment(client, { userId: "u1", entityId: "e1", content: "hi" });
+    await createComment(client, { actingUserId: "u1", entityId: "e1", content: "hi" });
     expect(projectInstance.post).toHaveBeenCalledWith("/comments", {
-      userId: "u1",
+      actingUserId: "u1",
       entityId: "e1",
       content: "hi",
     });
@@ -123,20 +123,20 @@ describe("node-sdk comments — request shaping", () => {
     });
   });
 
-  it("addReaction posts reactionType and userId to /comments/:id/reactions", async () => {
+  it("addReaction posts reactionType and actingUserId to /comments/:id/reactions", async () => {
     const { client, projectInstance } = makeClient();
-    await addReaction(client, { commentId: "c1", reactionType: "like", userId: "u1" });
+    await addReaction(client, { commentId: "c1", reactionType: "like", actingUserId: "u1" });
     expect(projectInstance.post).toHaveBeenCalledWith("/comments/c1/reactions", {
       reactionType: "like",
-      userId: "u1",
+      actingUserId: "u1",
     });
   });
 
-  it("removeReaction sends userId via the data option", async () => {
+  it("removeReaction sends actingUserId via the data option", async () => {
     const { client, projectInstance } = makeClient();
-    await removeReaction(client, { commentId: "c1", userId: "u1" });
+    await removeReaction(client, { commentId: "c1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/comments/c1/reactions", {
-      data: { userId: "u1" },
+      data: { actingUserId: "u1" },
     });
   });
 
@@ -148,11 +148,11 @@ describe("node-sdk comments — request shaping", () => {
     });
   });
 
-  it("getUserReaction hits the /reactions/me route with userId as a param", async () => {
+  it("getUserReaction hits the /reactions/me route with actingUserId as a param", async () => {
     const { client, projectInstance } = makeClient();
-    await getUserReaction(client, { commentId: "c1", userId: "u1" });
+    await getUserReaction(client, { commentId: "c1", actingUserId: "u1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/comments/c1/reactions/me", {
-      params: { userId: "u1" },
+      params: { actingUserId: "u1" },
     });
   });
 });
@@ -163,7 +163,7 @@ describe("node-sdk comments — response mapping", () => {
     const comment = { id: "c1", content: "hi" };
     projectInstance.post.mockResolvedValueOnce({ data: comment });
     await expect(
-      createComment(client, { userId: "u1", entityId: "e1" }),
+      createComment(client, { actingUserId: "u1", entityId: "e1" }),
     ).resolves.toEqual(comment);
   });
 
@@ -220,7 +220,7 @@ describe("node-sdk comments — response mapping", () => {
     const comment = { id: "c1", userReaction: "like", reactionCounts: { like: 1 } };
     projectInstance.post.mockResolvedValueOnce({ data: comment });
     await expect(
-      addReaction(client, { commentId: "c1", reactionType: "like", userId: "u1" }),
+      addReaction(client, { commentId: "c1", reactionType: "like", actingUserId: "u1" }),
     ).resolves.toEqual(comment);
   });
 
@@ -229,7 +229,7 @@ describe("node-sdk comments — response mapping", () => {
     const comment = { id: "c1", userReaction: null, reactionCounts: { like: 0 } };
     projectInstance.delete.mockResolvedValueOnce({ data: comment });
     await expect(
-      removeReaction(client, { commentId: "c1", userId: "u1" }),
+      removeReaction(client, { commentId: "c1", actingUserId: "u1" }),
     ).resolves.toEqual(comment);
   });
 
@@ -245,7 +245,7 @@ describe("node-sdk comments — response mapping", () => {
     const result = { reactionType: "like" as const };
     projectInstance.get.mockResolvedValueOnce({ data: result });
     await expect(
-      getUserReaction(client, { commentId: "c1", userId: "u1" }),
+      getUserReaction(client, { commentId: "c1", actingUserId: "u1" }),
     ).resolves.toEqual(result);
   });
 });

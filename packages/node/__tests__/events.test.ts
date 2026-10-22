@@ -80,18 +80,18 @@ describe("node-sdk events — request shaping", () => {
 
   it("setRsvp strips eventId into the path and posts the rest", async () => {
     const { client, projectInstance } = makeClient();
-    await setRsvp(client, { eventId: "ev1", status: "going", userId: "u1" });
+    await setRsvp(client, { eventId: "ev1", status: "going", actingUserId: "u1" });
     expect(projectInstance.post).toHaveBeenCalledWith("/events/ev1/rsvp", {
       status: "going",
-      userId: "u1",
+      actingUserId: "u1",
     });
   });
 
   it("withdrawRsvp sends the rest of the body via the data option", async () => {
     const { client, projectInstance } = makeClient();
-    await withdrawRsvp(client, { eventId: "ev1", userId: "u1" });
+    await withdrawRsvp(client, { eventId: "ev1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/events/ev1/rsvp", {
-      data: { userId: "u1" },
+      data: { actingUserId: "u1" },
     });
   });
 

@@ -2,7 +2,7 @@ import { SublayHttpClient } from "../../core/client";
 import { ConnectionCountResponse } from "../../interfaces/Connection";
 
 export interface FetchConnectionsCountProps {
-  userId: string;
+  actingUserId: string;
 }
 
 export async function fetchConnectionsCount(

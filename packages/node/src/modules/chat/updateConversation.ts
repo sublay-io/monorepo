@@ -4,7 +4,7 @@ import { Conversation } from "../../interfaces/Conversation";
 export interface UpdateConversationProps {
   conversationId: string;
   /** The acting user (must be a group admin). Service key required to name a user. */
-  userId: string;
+  actingUserId: string;
   name?: string;
   description?: string;
   /** File id for the conversation avatar, or null to clear it. */

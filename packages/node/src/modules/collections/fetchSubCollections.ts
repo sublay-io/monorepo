@@ -3,7 +3,7 @@ import { Collection } from "../../interfaces/Collection";
 
 export interface FetchSubCollectionsProps {
   collectionId: string;
-  userId: string;
+  actingUserId: string;
 }
 
 export async function fetchSubCollections(

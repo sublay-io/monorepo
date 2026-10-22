@@ -4,7 +4,7 @@ import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 import { UserSearchParams } from "../../interfaces/UserSearch";
 
 export interface FetchConnectionsProps extends UserSearchParams {
-  userId: string;
+  actingUserId: string;
   page?: number;
   limit?: number;
 }

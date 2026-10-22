@@ -143,10 +143,10 @@ describe("node-sdk auth — request shaping", () => {
 
   it("sendVerificationEmail posts the full body to /auth/send-verification-email", async () => {
     const { client, projectInstance } = makeClient();
-    await sendVerificationEmail(client, { userId: "u1", mode: "link" });
+    await sendVerificationEmail(client, { actingUserId: "u1", mode: "link" });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/auth/send-verification-email",
-      { userId: "u1", mode: "link" },
+      { actingUserId: "u1", mode: "link" },
     );
   });
 });
@@ -226,7 +226,7 @@ describe("node-sdk auth — response mapping", () => {
     const result = { success: true };
     projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
-      sendVerificationEmail(client, { userId: "u1", mode: "link" }),
+      sendVerificationEmail(client, { actingUserId: "u1", mode: "link" }),
     ).resolves.toEqual(result);
   });
 });

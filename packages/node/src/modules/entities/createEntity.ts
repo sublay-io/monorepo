@@ -17,7 +17,8 @@ export interface CreateEntityProps {
   };
   metadata?: Record<string, any>;
   nsfw?: boolean;
-  userId?: string;
+  /** The user the service key acts as, who authors the entity. Omit for an app-owned entity. */
+  actingUserId?: string;
   isDraft?: boolean;
   excludeUserId?: boolean;
   requireUser?: boolean;

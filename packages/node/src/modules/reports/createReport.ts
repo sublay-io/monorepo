@@ -6,7 +6,7 @@ import {
 } from "../../interfaces/Report";
 
 export interface CreateReportProps {
-  userId: string;
+  actingUserId: string;
   targetType: ReportTargetType;
   targetId: string;
   reason: ReportReason;

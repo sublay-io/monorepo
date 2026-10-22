@@ -3,7 +3,7 @@ import { UnifiedAppNotification } from "../../interfaces/AppNotification";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface FetchNotificationsProps {
-  userId: string;
+  actingUserId: string;
   page?: number;
   limit?: number;
 }

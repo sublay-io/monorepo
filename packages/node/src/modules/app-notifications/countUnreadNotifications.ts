@@ -1,7 +1,7 @@
 import { SublayHttpClient } from "../../core/client";
 
 export interface CountUnreadNotificationsProps {
-  userId: string;
+  actingUserId: string;
 }
 
 export async function countUnreadNotifications(

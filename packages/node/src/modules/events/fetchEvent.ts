@@ -5,8 +5,8 @@ export interface FetchEventProps {
   eventId: string;
   /** Comma-separated associations to expand, e.g. "user,space,files,userRsvp". */
   include?: string;
-  /** Requester id — enables visibility resolution + `userRsvp` enrichment. */
-  userId?: string;
+  /** The user the service key acts as, for that user's view (visibility, `userRsvp`). Omit for the key's own view. */
+  actingUserId?: string;
 }
 
 export async function fetchEvent(

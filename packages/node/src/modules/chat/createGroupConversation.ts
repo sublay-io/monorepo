@@ -3,7 +3,7 @@ import { Conversation } from "../../interfaces/Conversation";
 
 export interface CreateGroupConversationProps {
   /** The acting user (becomes the group admin). Service key required to name a user. */
-  userId: string;
+  actingUserId: string;
   name?: string;
   description?: string;
   memberIds?: string[];

@@ -7,12 +7,9 @@ import {
 
 interface CreateGrantBaseProps extends GrantWriteCommonProps {
   /**
-   * The sender — the user the reputation is debited FROM. Required: a service
-   * key has no session user, so the actor must be named explicitly.
-   *
-   * Spelled `actingUserId` rather than `userId` because this body also names a
-   * target user (`recipientId`), and the house rule reserves `userId` for the
-   * target on any route that has one.
+   * The sender — the user the reputation is debited FROM, named as the user
+   * the service key acts as. Required: a service key has no session user, so
+   * the actor must be named explicitly.
    */
   actingUserId: string;
   /** The user receiving the reputation. Must differ from `actingUserId`. */

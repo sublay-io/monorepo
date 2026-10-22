@@ -7,7 +7,7 @@ export interface EditMessageProps {
   conversationId: string;
   messageId: string;
   /** The acting user (must be the message author). Service key required to name a user. */
-  userId: string;
+  actingUserId: string;
   content?: string;
   /** A GIF attachment, or null to clear it. */
   gif?: GifData | null;

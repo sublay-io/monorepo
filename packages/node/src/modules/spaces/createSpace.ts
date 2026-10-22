@@ -7,7 +7,7 @@ import {
 } from "../../interfaces/Space";
 
 export interface CreateSpaceProps {
-  userId: string;
+  actingUserId: string;
   name: string;
   slug?: string;
   description?: string;

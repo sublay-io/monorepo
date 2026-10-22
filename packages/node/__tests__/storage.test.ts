@@ -19,7 +19,7 @@ describe("node-sdk storage — uploadFile request shaping", () => {
       pathParts: ["avatars", "u1"],
       position: 1,
       metadata: { source: "upload" },
-      userId: "u1",
+      actingUserId: "u1",
     });
 
     expect(projectInstance.post).toHaveBeenCalledTimes(1);
@@ -33,7 +33,7 @@ describe("node-sdk storage — uploadFile request shaping", () => {
     expect(fields.pathParts).toBe(JSON.stringify(["avatars", "u1"]));
     expect(fields.position).toBe("1");
     expect(fields.metadata).toBe(JSON.stringify({ source: "upload" }));
-    expect(fields.userId).toBe("u1");
+    expect(fields.actingUserId).toBe("u1");
   });
 
   it("defaults the filename to 'upload' and skips undefined fields", async () => {
@@ -47,7 +47,7 @@ describe("node-sdk storage — uploadFile request shaping", () => {
     const fields = formDataToObject(formData as FormData);
     expect((fields.file as File).name).toBe("upload");
     expect(fields.pathParts).toBe(JSON.stringify(["files"]));
-    expect(fields).not.toHaveProperty("userId");
+    expect(fields).not.toHaveProperty("actingUserId");
     expect(fields).not.toHaveProperty("metadata");
   });
 });

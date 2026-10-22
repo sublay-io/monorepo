@@ -102,8 +102,6 @@ describe("node-sdk auth — request shaping", () => {
     });
   });
 
-
-
   it("verifyEmail posts the full body to /auth/verify-email", async () => {
     const { client, projectInstance } = makeClient();
     await verifyEmail(client, { token: "tok1" });
@@ -177,7 +175,6 @@ describe("node-sdk auth — response mapping", () => {
       resetPassword(client, { token: "tok1", newPassword: "new-pw" }),
     ).resolves.toBeUndefined();
   });
-
 
   it("verifyEmail resolves to undefined", async () => {
     const { client } = makeClient();

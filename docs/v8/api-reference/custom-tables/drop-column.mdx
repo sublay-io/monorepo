@@ -11,7 +11,7 @@ Drops one column from a custom table.
 </Warning>
 
 <Warning>
-  **Service key required.**
+  **Service key required.** The request always acts as your app, so `actingUserId` is refused (`400 database/unsupported-param`).
 </Warning>
 
 ## Path Parameters
@@ -65,6 +65,13 @@ Drops one column from a custom table.
   <Accordion title="Server Error — 500">
     ```json
     { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `actingUserId`. This endpoint always acts as the app, so no caller may name a user.
+
+    ```json
+    { "error": "`actingUserId` isn't accepted here: this endpoint always acts as the app.", "code": "database/unsupported-param", "param": "actingUserId" }
     ```
   </Accordion>
 </AccordionGroup>

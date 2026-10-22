@@ -10,12 +10,18 @@ description: "Publish a draft entity, making it publicly visible"
 
 Publishes a draft entity. After publishing, the entity appears in normal feeds and is visible to all users. The entity's `isDraft` field is set to `false` and `createdAt` is reset to the current time.
 
-**Authentication required.** Only the entity's author, or a request with a service key, can publish a draft.
+**Authentication required.** Only the draft's author may publish it: with their own access token, or with a service key naming them in `actingUserId` — the request then runs exactly as theirs. A draft with no author belongs to your app: only a service key naming nobody may publish it, and a user token gets `403`.
 
 ## Path Parameters
 
 <ParamField path="entityId" type="string" required>
   The UUID of the draft entity to publish.
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="actingUserId" type="string">
+  Service key only: the user this publish acts as. Required when the draft has an author: name the author, and the request runs exactly as their own access token's (naming anyone else gets what their token gets, `403`). Leave it out only for an app-owned draft (no author). A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 entity/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -49,5 +55,19 @@ Returns the published [Entity](/v8/data-models/entity) object with `isDraft: fal
     { "error": "Not now", "code": "entity/webhook-validation-failed" }
     ```
     Returned when your `entity.created` [validation webhook](/v8/webhooks) rejects the publish. `error` carries the `message` your webhook returned. The entity stays a draft.
+  </Accordion>
+  <Accordion title="Missing User ID — 400">
+    A service key sent no `actingUserId` for a draft that has an author. Name the author: the request then runs exactly as their own.
+
+    ```json
+    { "error": "A service key must send actingUserId to change a record that has an author: the request then acts as that user.", "code": "entity/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "entity/acting-user-not-allowed" }
+    ```
   </Accordion>
 </AccordionGroup>

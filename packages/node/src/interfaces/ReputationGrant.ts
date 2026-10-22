@@ -90,7 +90,10 @@ export interface GrantSummary {
   total: number;
   /** Number of positive grants on the item. */
   count: number;
-  /** The calling user's own summed positive grants on the item. */
+  /**
+   * The viewer's own summed positive grants on the item: the user named in
+   * `actingUserId`, or 0 when the request names nobody.
+   */
   viewerTotal: number;
 }
 

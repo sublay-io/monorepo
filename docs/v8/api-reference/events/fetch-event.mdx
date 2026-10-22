@@ -21,7 +21,7 @@ The response always includes inline `rsvpCounts`. Authentication is optional; pa
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
-  Service key only: the user this request acts as, whose view is returned (visibility, `userRsvp`). Leave it out for the key's own view. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
+  Service key only: the user to read as. The response is exactly what that user's own access token would get (visibility, `userRsvp`). Leave it out for the anonymous view: only a `public` event is returned, and any other answers `404`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response

@@ -9,6 +9,11 @@ export interface FetchChildSpacesProps {
   sortBy?: "createdAt" | "alphabetical" | "members";
   sortDir?: "asc" | "desc";
   include?: string;
+  /**
+   * List as this user (service key only): exactly what their own access token
+   * would get (`isMember` on each child space). Omit it for the anonymous view.
+   */
+  actingUserId?: string;
 }
 
 export async function fetchChildSpaces(

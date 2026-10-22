@@ -5,7 +5,7 @@ description: "Transfer, mint, and list reputation grants from the server"
 
 The `reputation` module moves reputation deliberately: **transfers** between two users, **mints** that create reputation from nothing (or destroy it), and reads of the grant history. It maps directly to the [Reputation Grants API](/v8/api-reference/reputation-grants/create-reputation-grant).
 
-Because the Node SDK authenticates with a **service key** (it acts as the whole project, not a single end user), `createGrant` takes an explicit `actingUserId` naming the sender. This is the *mediated transfer* path: it behaves exactly like a user-initiated grant — same bucket routing, same balance check — but it lets your backend enforce its own rules first (caps, cooldowns, daily limits, eligibility), which Sublay deliberately does not impose.
+Because the Node SDK authenticates with a **service key** (it acts as the whole project, not a single end user), `createGrant` takes an explicit `actingUserId` naming the sender. This is the *mediated transfer* path: it behaves exactly like the sender's own grant — same bucket routing, balance check, blocks and suspension — but it lets your backend enforce its own rules first (caps, cooldowns, daily limits, eligibility), which Sublay deliberately does not impose.
 
 Two things a service key does **not** get you here:
 
@@ -20,7 +20,7 @@ Requires the `reputation` bundle. A `chat-message` target additionally needs the
 
 Transfers reputation from one user to another — the amount leaves the sender's bucket and lands in the recipient's bucket for the same space. Nothing is created.
 
-Mediated transfers skip the project's user-grants switch and ignore block relationships between the two parties.
+Mediated transfers skip the project's user-grants switch, which only decides whether user tokens may send grants straight from the client. Blocks apply as to the sender's own grant: if either user blocked the other, the call fails with `404 reputation-grant/user-not-found`. To pay a user regardless, use `mintGrant`.
 
 ```typescript
 const grant = await sublay.reputation.createGrant({
@@ -59,7 +59,7 @@ Throws `409 reputation-grant/insufficient-reputation` when the sender's bucket i
 
 ### mintGrant
 
-Creates reputation from nothing and credits a user. There is no sender and nothing is debited; the grant is written with a `null` `senderId` and `sourceType: "app"`.
+Creates reputation from nothing and credits a user. It always acts as your app and takes no `actingUserId`. There is no sender and nothing is debited; the grant is written with a `null` `senderId` and `sourceType: "app"`.
 
 A **negative** amount destroys reputation instead — the moderation clawback, decay sweep, or correction path. It is the only operation permitted to drive a bucket below zero, and it is entirely silent: no notification, no socket broadcast, and invisible on every public read surface.
 
@@ -123,6 +123,9 @@ console.log(summary?.total, "points from", summary?.count, "people");
 <ParamField body="include" type="string">
   Comma-separated associations. Only `"user"` is supported — it hydrates both the sender and the recipient.
 </ParamField>
+<ParamField body="actingUserId" type="string">
+  The user to list as: exactly what their own access token would get (grants on chat messages only where they can read the message; `summary.viewerTotal` is theirs). Omit it to list as a signed-in user in no conversation: no grants on chat messages, and `viewerTotal` is `0`.
+</ParamField>
 <ParamField body="spaceReputation" type="object">
   Opt-in per-user space reputation on the hydrated users. `{ spaceId: "context" }` scores each user against that grant's own space. See [Reputation](/v8/data-models/reputation#reading-space-scoped-reputation).
 </ParamField>
@@ -130,7 +133,7 @@ console.log(summary?.total, "points from", summary?.count, "people");
 **Returns** — `Promise<{ data: ReputationGrant[]; pagination; summary? }>`. The `summary` block (`{ total, count, viewerTotal }`) is returned **only** on the target filter shape.
 
 <Note>
-  **Grants on chat messages are private to their conversation — and a service key is exempt from that.** For a user token, every shape asks whether that user can see the underlying message and withholds the grant if they cannot. A service key answers to neither gate: the target shape returns its rows unconditionally, and the `recipientId` / `senderId` shapes apply no membership predicate to it at all, so a backend can enumerate every grant it minted, including grants on messages moderation has removed. It is the app's own backend, already trusted to mint grants and to read every conversation. It holds no viewer identity, so `summary.viewerTotal` is always `0`.
+  **Grants on chat messages are private to their conversation, for a service key too.** Every shape asks whether the viewer can see the underlying message and withholds the grant if they cannot. With `actingUserId` the viewer is that user, exactly as their own token; without it, the key is treated as a signed-in user in no conversation and gets no chat-message grants.
 </Note>
 
 <Warning>

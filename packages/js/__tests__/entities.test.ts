@@ -30,15 +30,6 @@ describe("js-sdk entities — request shaping", () => {
     expect(body).not.toHaveProperty("userId");
   });
 
-  it("createEntity passes excludeUserId through when set", async () => {
-    const { client, projectInstance } = makeClient();
-    await createEntity(client, { title: "x", excludeUserId: true });
-    expect(projectInstance.post).toHaveBeenCalledWith("/entities", {
-      title: "x",
-      excludeUserId: true,
-    });
-  });
-
   it("fetchEntity strips entityId into the path and passes the rest as params", async () => {
     const { client, projectInstance } = makeClient();
     await fetchEntity(client, {

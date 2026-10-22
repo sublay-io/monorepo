@@ -7,6 +7,11 @@ import {
 } from "../../interfaces/Space";
 
 export interface CreateSpaceProps {
+  /**
+   * The user the service key creates the space as: its creator and first
+   * admin, held to that user's own permissions (a child space needs them to
+   * be an admin of the parent).
+   */
   actingUserId: string;
   name: string;
   slug?: string;

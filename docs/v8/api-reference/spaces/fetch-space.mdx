@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/spaces/:spaceId"
 description: "Get a single space by its UUID"
 ---
 
-Fetches a space by UUID. Returns full space details including membership permissions for the authenticated user, parent space, and child space previews.
+Fetches a space by UUID. Returns full space details including membership permissions for the viewer (the signed-in user, or the user a service key names in `actingUserId`), parent space, and child space previews.
 
 ## Path Parameters
 
@@ -13,6 +13,10 @@ Fetches a space by UUID. Returns full space details including membership permiss
 </ParamField>
 
 ## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to read as. The response is exactly what that user's own access token would get (their role, `memberPermissions` and membership). Leave it out for the anonymous view. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
+</ParamField>
 
 <ParamField query="include" type="string">
   Optional. Pass `"files"` to include avatar and banner file objects.
@@ -34,6 +38,13 @@ Returns a [SpaceDetailed](/v8/data-models/space) object including `memberPermiss
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Space not found.", "code": "space/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
     ```
   </Accordion>
 </AccordionGroup>

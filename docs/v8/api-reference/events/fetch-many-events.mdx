@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/events"
 description: "List events with visibility enforcement, filtering, sorting, geo, and free-text search"
 ---
 
-Returns a paginated list of events. The [server-side visibility predicate](/v8/data-models/event#visibility) is always applied: anonymous callers see only `public` events; authenticated callers additionally see `members` events of spaces they belong to, `invite` events they were invited to, and any event they host. Service keys see everything.
+Returns a paginated list of events. The [server-side visibility predicate](/v8/data-models/event#visibility) is always applied: anonymous callers see only `public` events; authenticated callers additionally see `members` events of spaces they belong to, `invite` events they were invited to, and any event they host. A service key sees exactly what the user it names in `actingUserId` sees, and only `public` events when it names nobody.
 
 Each event includes inline `rsvpCounts`, and—with the `userRsvp` include and an authenticated caller—the caller's own `userRsvp`.
 
@@ -77,7 +77,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
-  Service key only: the user this request acts as, whose view is returned (visibility, `userRsvp`, the `myRsvp` filter). Leave it out for the key's own view. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
+  Service key only: the user to list as. The page is exactly what that user's own access token would get (visibility, `userRsvp`, the `myRsvp` filter). Leave it out for the anonymous view: `public` events only. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response

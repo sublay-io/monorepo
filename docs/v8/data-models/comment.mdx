@@ -114,23 +114,20 @@ A placeholder's moderation fields follow [Moderation fields](#moderation-fields)
 
 ## Moderation fields
 
-`moderationStatus` is returned to everyone. The other three moderation fields are returned only to some requesters, on every comment response; everyone else gets `null`:
+`moderationStatus` is returned to everyone. The other three moderation fields are returned only to some requesters, on every comment response; everyone else gets `null`. The requester is the signed-in user, or the user a service key names in `actingUserId` (the key then gets exactly that user's view); a service key naming nobody is treated as signed out:
 
 | Requester | `moderationReason` | `moderatedById`, `moderatedByType` |
 |---|---|---|
 | An active admin or moderator of the comment's space | ✓ | ✓ |
 | A user whose project [`role`](/v8/data-models/user) is `admin` or `moderator` | ✓ | ✓ |
-| A request made with a service key, except on the open reads below | ✓ | ✓ |
 | The comment's author | ✓ | — |
-| Anyone else, including signed-out requests | — | — |
+| Anyone else, including signed-out requests and a service key naming nobody | — | — |
 
-A comment on an entity with no space has no space moderators: only project-role admins and moderators, keys (where the key row applies) and the comment's author qualify.
-
-**Open reads.** On [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id), [Search Content](/v8/api-reference/search/search-content) and [Ask](/v8/api-reference/search/ask), a service key never gets the key row: with `actingUserId` it gets exactly what that user's own token would get, and without it exactly the anonymous view, with no moderation details.
+A comment on an entity with no space has no space moderators: only project-role admins and moderators and the comment's author qualify.
 
 ## Blocked authors
 
-When the requesting user is signed in and the `moderation` bundle is installed, comments returned by thread, user-history, single-comment, `topComments`, update-comment and add/remove-reaction responses carry two flags (both `false` by default):
+When there is a requesting user (signed in, or named by a service key in `actingUserId`) and the `moderation` bundle is installed, comments returned by thread, user-history, single-comment, `topComments`, update-comment and add/remove-reaction responses carry two flags (both `false` by default):
 
 | The requesting user and the comment's author | The comment is returned as | Flags |
 |---|---|---|

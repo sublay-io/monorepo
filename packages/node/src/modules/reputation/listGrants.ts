@@ -20,6 +20,14 @@ interface ListGrantsBaseProps extends SpaceReputationContextParams {
 
   /** Associations to expand. Only `"user"` is supported (hydrates both parties). */
   include?: string;
+
+  /**
+   * List as this user (service key only): exactly what their own access token
+   * would get (grants on chat messages only where they can read the message;
+   * the summary's `viewerTotal`). Omit it to get what a signed-in user in no
+   * conversation gets: no grants on chat messages.
+   */
+  actingUserId?: string;
 }
 
 /**
@@ -50,8 +58,7 @@ export interface ListGrantsResponse extends PaginatedResponse<ReputationGrant> {
  * shapes are not AND-ed, which is what keeps the `summary` block reconcilable
  * with the rows beneath it.
  *
- * Only positive grants are ever returned — for a service key exactly as for a
- * user token. Negative grants are app moderation deductions and are readable
+ * Only positive grants are ever returned, for every caller. Negative grants are app moderation deductions and are readable
  * only from the dashboard.
  */
 export async function listGrants(

@@ -110,6 +110,10 @@ const result = await sublay.spaces.fetchSpaceMembers({
   Filter by membership status: `"pending"`, `"active"`, `"banned"`, or `"rejected"`.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  The user to list as, exactly as their own access token: a members-only space's list is open to them only as an active member. Omit it for the anonymous view (a members-only space returns `403 space/members-access-denied`).
+</ParamField>
+
 <SpaceReputationParams variant="context" field="body" />
 
 **Returns** — `Promise<SpaceMembersResponse>`
@@ -126,6 +130,10 @@ const result = await sublay.spaces.fetchSpaceTeam({ spaceId: "spc_abc123" });
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to read as, exactly as their own access token: a members-only space's team is open to them only as an active member. Omit it for the anonymous view (a members-only space returns `403 space/members-access-denied`).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />

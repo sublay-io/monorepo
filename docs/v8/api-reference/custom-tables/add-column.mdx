@@ -7,7 +7,7 @@ description: "Add a column to an existing custom table"
 Adds one column to a custom table.
 
 <Warning>
-  **Service key required.**
+  **Service key required.** The request always acts as your app, so `actingUserId` is refused (`400 database/unsupported-param`).
 </Warning>
 
 ## Path Parameters
@@ -98,6 +98,13 @@ Returns `201 Created`.
   <Accordion title="Server Error — 500">
     ```json
     { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `actingUserId`. This endpoint always acts as the app, so no caller may name a user.
+
+    ```json
+    { "error": "`actingUserId` isn't accepted here: this endpoint always acts as the app.", "code": "database/unsupported-param", "param": "actingUserId" }
     ```
   </Accordion>
 </AccordionGroup>

@@ -8,7 +8,7 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 Returns a paginated list of reactions for a comment, each with the reacting user's profile. Useful for displaying "reacted by" lists or per-type reaction breakdowns.
 
-Authentication is optional — the endpoint works without a token. When the caller is signed in, reactions from users with a block between them and the caller, in either direction, are excluded from both the results and the count. Block filtering requires the `moderation` bundle.
+Authentication is optional — the endpoint works without a token. When there is a viewer (the signed-in user, or the user a service key names in `actingUserId`), reactions from users with a block between them and the viewer, in either direction, are excluded from both the results and the count. Block filtering requires the `moderation` bundle.
 
 ## Path Parameters
 
@@ -17,6 +17,10 @@ Authentication is optional — the endpoint works without a token. When the call
 </ParamField>
 
 ## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to list as, exactly as their own access token: their block filtering, and `404` for a comment on an entity whose author blocked them. Leave it out for the anonymous view. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 comment/acting-user-not-allowed`).
+</ParamField>
 
 <ParamField query="page" type="number" default="1">
   Page number (1-indexed). A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 comment/invalid-query`.
@@ -94,6 +98,13 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
 
     ```json
     { "error": "Comment not found.", "code": "comment/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "comment/acting-user-not-allowed" }
     ```
   </Accordion>
 </AccordionGroup>

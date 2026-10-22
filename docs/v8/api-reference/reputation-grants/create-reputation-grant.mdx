@@ -6,7 +6,7 @@ description: "Transfer reputation from one user's bucket to another user's bucke
 
 Transfers reputation between two users. This is a **debited transfer**: the amount leaves the sender's bucket and lands in the recipient's bucket for the same space. Nothing is created — see [Mint Reputation Grant](/v8/api-reference/reputation-grants/mint-reputation-grant) for that.
 
-Requires authentication. A user token sends from the token's own user. A service key names the sender in `actingUserId`, which is how an app performs a **mediated transfer** — enforcing its own economic rules before letting the transfer through. Mediated transfers skip the project-level user-grant switch and ignore block relationships; they are otherwise identical to a user grant, including the balance check.
+Requires authentication. A user token sends from the token's own user. A service key names the sender in `actingUserId`, which is how an app performs a **mediated transfer** — enforcing its own economic rules before letting the transfer through. The project-level user-grant switch only chooses the channel (user tokens straight from the client, or your backend), so mediated transfers skip it; everything else is the sender's own — blocks, suspension, conversation membership and the balance check apply exactly as to the sender's own grant. To pay a user regardless, [mint](/v8/api-reference/reputation-grants/mint-reputation-grant).
 
 Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants` must be present in the project's schema).
 
@@ -55,7 +55,7 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
 ## Gating and blocks
 
 - **Project setting.** The switch is `settings.reputationGrants.allowUserInitiated`, flipped from **Settings → SDK** in the dashboard. Only an explicit `false` closes the endpoint to user tokens — an absent key means grants are allowed — and the stored value survives unrelated settings updates, so it changes only when that key is explicitly sent. When the switch is off a user token is rejected with `403 reputation-grant/user-grants-disabled`; service keys still work, so peer transfers remain available when routed through your backend.
-- **Blocks.** If either party has blocked the other, a user grant is rejected in both directions — with the same non-disclosing answer as a missing user. Service keys ignore block relationships.
+- **Blocks.** If either party has blocked the other, the grant is rejected in both directions — with the same non-disclosing answer as a missing user. This applies to mediated transfers too: a service key acting as the sender is refused exactly as the sender's own grant would be.
 - **Suspension.** A suspended user cannot send a grant, including on the mediated path — a service key naming a suspended `actingUserId` is rejected too. A suspended user can always receive a grant.
 
 ## Error Responses
@@ -120,7 +120,7 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
     ```json
     { "error": "One or both users involved in this grant do not exist.", "code": "reputation-grant/user-not-found" }
     ```
-    One answer for both parties, deliberately non-disclosing — and the same answer returned when a block edge exists in either direction.
+    One answer for both parties, deliberately non-disclosing — and the same answer returned when a block edge exists in either direction, for a user token and a service key alike.
   </Accordion>
   <Accordion title="Target Not Found — 404">
     ```json

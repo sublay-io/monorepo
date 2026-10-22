@@ -46,10 +46,12 @@ describe("node-sdk spaces (lifecycle) — request shaping", () => {
     });
   });
 
-  it("fetchSpace hits /spaces/:id with no params", async () => {
+  it("fetchSpace hits /spaces/:id with actingUserId as a query param", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchSpace(client, { spaceId: "s1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1");
+    await fetchSpace(client, { spaceId: "s1", actingUserId: "u1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1", {
+      params: { actingUserId: "u1" },
+    });
   });
 
   it("fetchSpaceByShortId hits /spaces/by-short-id with the full body as params", async () => {
@@ -234,5 +236,30 @@ describe("node-sdk spaces (lifecycle) — response mapping", () => {
     const result = { deleted: true };
     projectInstance.delete.mockResolvedValueOnce({ data: result });
     await expect(deleteSpace(client, { spaceId: "s1" })).resolves.toEqual(result);
+  });
+});
+
+describe("node-sdk spaces — reads as a user", () => {
+  it("space reads send actingUserId as a query param", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchManySpaces(client, { memberOf: "true", actingUserId: "u1" });
+    await fetchSpaceBySlug(client, { slug: "my-space", actingUserId: "u1" });
+    await fetchSpaceByShortId(client, { shortId: "sh1", actingUserId: "u1" });
+    await fetchChildSpaces(client, { spaceId: "s1", actingUserId: "u1" });
+    for (const [, config] of projectInstance.get.mock.calls) {
+      expect(config.params.actingUserId).toBe("u1");
+    }
+  });
+});
+
+describe("node-sdk spaces — include on single-space reads", () => {
+  it("fetchSpace, fetchSpaceBySlug and fetchSpaceByShortId forward include", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchSpace(client, { spaceId: "s1", include: "files" });
+    await fetchSpaceBySlug(client, { slug: "my-space", include: "files" });
+    await fetchSpaceByShortId(client, { shortId: "sh1", include: "files" });
+    for (const [, config] of projectInstance.get.mock.calls) {
+      expect(config.params.include).toBe("files");
+    }
   });
 });

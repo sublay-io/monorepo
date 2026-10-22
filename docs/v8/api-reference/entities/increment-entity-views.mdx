@@ -7,7 +7,7 @@ description: "Add to an entity's view count"
 Increments an entity's `views` counter and returns the updated entity.
 
 <Warning>
-  This endpoint requires a **service key** and cannot be called with an end-user token. Count views from your own backend rather than from the client, so a browser cannot inflate the number.
+  This endpoint requires a **service key** and cannot be called with an end-user token. It always acts as your app: sending `actingUserId` returns `400 entity/unsupported-param`. Count views from your own backend rather than from the client, so a browser cannot inflate the number.
 </Warning>
 
 ## Path Parameters
@@ -72,6 +72,13 @@ Returns the full updated [Entity](/v8/data-models/entity), with `views` reflecti
       "error": "An error occurred while updating entity views.",
       "code": "entity/server-error"
     }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `actingUserId`. This endpoint always acts as the app, so no caller may name a user.
+
+    ```json
+    { "error": "`actingUserId` isn't accepted here: this endpoint always acts as the app.", "code": "entity/unsupported-param", "param": "actingUserId" }
     ```
   </Accordion>
 </AccordionGroup>

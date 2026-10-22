@@ -8,7 +8,7 @@ Mints reputation: it is created from nothing and credited to a user, with no sen
 
 A mint may also be **negative**, which is the only way to take reputation away: a moderation clawback, a decay sweep, or a correction to a mistaken grant. A negative mint may drive a bucket below zero (buckets have no floor).
 
-**Service key only.** A user token never reaches this route. Blocks are ignored, suspension is not consulted (there is no acting user), and a `chat-message` target is not membership-checked — the app is trusted.
+**Service key only.** A user token never reaches this route. The mint always acts as the app: there is no sender, so `actingUserId` is refused (`400 reputation-grant/unsupported-param`). Blocks are ignored, suspension is not consulted, and a `chat-message` target is not membership-checked — the app is trusted.
 
 Requires the `reputation` bundle.
 
@@ -94,6 +94,13 @@ A **positive** mint notifies the recipient and, for a `chat-message` target, bro
   <Accordion title="Conflict — 409">
     ```json
     { "error": "The grant conflicted with a concurrent write. Retry.", "code": "reputation-grant/conflict" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `actingUserId`. This endpoint always acts as the app, so no caller may name a user.
+
+    ```json
+    { "error": "`actingUserId` isn't accepted here: this endpoint always acts as the app.", "code": "reputation-grant/unsupported-param", "param": "actingUserId" }
     ```
   </Accordion>
 </AccordionGroup>

@@ -8,6 +8,10 @@ Returns a single comment matching the given `foreignId` within the project. Usef
 
 ## Query Parameters
 
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to read as. The response is exactly what that user's own access token would get: the [blocks](#blocks) below apply to them, a moderator-removed comment of theirs is shown in full, and moderation details (`moderationReason`, `moderatedById`, `moderatedByType`) appear only where that user may see them. Leave it out for the anonymous view, with no moderation details. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 comment/acting-user-not-allowed`).
+</ParamField>
+
 <ParamField query="foreignId" type="string" required>
   The foreign ID to look up.
 </ParamField>
@@ -50,6 +54,13 @@ An embedded `parentComment` follows the same placeholder and flag rules.
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Comment not found", "code": "comment/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "comment/acting-user-not-allowed" }
     ```
   </Accordion>
 </AccordionGroup>

@@ -107,15 +107,15 @@ Base path: `/v8/:projectId/`
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
 | POST | `/comments/` | can access with a key | `comments.createComment` | yes |
-| GET | `/comments/` | no key needed | `comments.fetchManyComments` | yes |
-| GET | `/comments/by-foreign-id` | no key needed | `comments.fetchCommentByForeignId` | yes |
-| GET | `/comments/:commentId` | no key needed | `comments.fetchComment` | yes |
-| PATCH | `/comments/:commentId` | can access with a key | `comments.updateComment` | yes |
+| GET | `/comments/` | no key needed (optional `actingUserId` = that user's view) | `comments.fetchManyComments` | yes |
+| GET | `/comments/by-foreign-id` | no key needed (optional `actingUserId` = that user's view) | `comments.fetchCommentByForeignId` | yes |
+| GET | `/comments/:commentId` | no key needed (optional `actingUserId` = that user's view) | `comments.fetchComment` | yes |
+| PATCH | `/comments/:commentId` | can access with a key (`actingUserId` required when the record has an author, and must name the author; omitted only for an app-owned record) | `comments.updateComment` | yes |
 | POST | `/comments/:commentId/reactions` | can access with a key | `comments.addReaction` | yes |
 | DELETE | `/comments/:commentId/reactions` | can access with a key | `comments.removeReaction` | yes |
-| GET | `/comments/:commentId/reactions` | no key needed | `comments.fetchReactions` | yes |
+| GET | `/comments/:commentId/reactions` | no key needed (optional `actingUserId` = that user's view) | `comments.fetchReactions` | yes |
 | GET | `/comments/:commentId/reactions/me` | can access with a key | `comments.getUserReaction` | yes |
-| DELETE | `/comments/:commentId` | can access with a key | `comments.deleteComment` | yes |
+| DELETE | `/comments/:commentId` | can access with a key (`actingUserId` required when the record has an author, and must name the author; omitted only for an app-owned record) | `comments.deleteComment` | yes |
 
 ---
 
@@ -138,21 +138,21 @@ Base path: `/v8/:projectId/`
 
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
-| POST | `/entities/` | can access with a key | `entities.createEntity` | yes |
-| GET | `/entities/` | no key needed | `entities.fetchManyEntities` | yes |
-| GET | `/entities/by-foreign-id` | no key needed | `entities.fetchEntityByForeignId` | yes |
-| GET | `/entities/by-short-id` | no key needed | `entities.fetchEntityByShortId` | yes |
+| POST | `/entities/` | can access with a key (optional `actingUserId` = the author; omitted = app-owned, no drafts) | `entities.createEntity` | yes |
+| GET | `/entities/` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchManyEntities` | yes |
+| GET | `/entities/by-foreign-id` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntityByForeignId` | yes |
+| GET | `/entities/by-short-id` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntityByShortId` | yes |
 | GET | `/entities/drafts` | can access with a key | `entities.fetchDrafts` | yes |
 | GET | `/entities/is-entity-saved` | can access with a key | `entities.isEntitySaved` | yes |
-| PATCH | `/entities/:entityId/publish` | can access with a key | `entities.publishDraft` | yes |
-| GET | `/entities/:entityId` | no key needed | `entities.fetchEntity` | yes |
+| PATCH | `/entities/:entityId/publish` | can access with a key (`actingUserId` required when the record has an author, and must name the author; omitted only for an app-owned record) | `entities.publishDraft` | yes |
+| GET | `/entities/:entityId` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntity` | yes |
 | POST | `/entities/:entityId/reactions` | can access with a key | `entities.addReaction` | yes |
 | DELETE | `/entities/:entityId/reactions` | can access with a key | `entities.removeReaction` | yes |
-| GET | `/entities/:entityId/reactions` | no key needed | `entities.fetchReactions` | yes |
+| GET | `/entities/:entityId/reactions` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchReactions` | yes |
 | GET | `/entities/:entityId/reactions/me` | can access with a key | `entities.getUserReaction` | yes |
-| PATCH | `/entities/:entityId/increment-views` | can access with a key *(requires service key — elevated auth enforced)* | `entities.incrementEntityViews` | yes |
-| PATCH | `/entities/:entityId` | can access with a key | `entities.updateEntity` | yes |
-| DELETE | `/entities/:entityId` | can access with a key | `entities.deleteEntity` | yes |
+| PATCH | `/entities/:entityId/increment-views` | can access with a key *(requires service key; acts as the app, refuses `actingUserId`)* | `entities.incrementEntityViews` | yes |
+| PATCH | `/entities/:entityId` | can access with a key (`actingUserId` required when the record has an author, and must name the author; omitted only for an app-owned record) | `entities.updateEntity` | yes |
+| DELETE | `/entities/:entityId` | can access with a key (`actingUserId` required when the record has an author, and must name the author; omitted only for an app-owned record) | `entities.deleteEntity` | yes |
 
 ---
 
@@ -199,18 +199,18 @@ Base path: `/v8/:projectId/`
 
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
-| POST | `/spaces/` | can access with a key | `spaces.createSpace` | yes |
-| GET | `/spaces/` | no key needed | `spaces.fetchManySpaces` | yes |
+| POST | `/spaces/` | can access with a key (required `actingUserId`, the creator) | `spaces.createSpace` | yes |
+| GET | `/spaces/` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchManySpaces` | yes |
 | GET | `/spaces/check-slug` | no key needed | `spaces.checkSlugAvailability` | yes |
 | GET | `/spaces/user-spaces` | can access with a key | `spaces.fetchUserSpaces` | yes |
-| GET | `/spaces/by-short-id` | no key needed | `spaces.fetchSpaceByShortId` | yes |
-| GET | `/spaces/by-slug` | no key needed | `spaces.fetchSpaceBySlug` | yes |
-| GET | `/spaces/:spaceId` | no key needed | `spaces.fetchSpace` | yes |
+| GET | `/spaces/by-short-id` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceByShortId` | yes |
+| GET | `/spaces/by-slug` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceBySlug` | yes |
+| GET | `/spaces/:spaceId` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpace` | yes |
 | PATCH | `/spaces/:spaceId` | can access with a key | `spaces.updateSpace` | yes |
 | DELETE | `/spaces/:spaceId` | can access with a key | `spaces.deleteSpace` | yes |
 | POST | `/spaces/:spaceId/join` | can access with a key | `spaces.joinSpace` | yes |
-| GET | `/spaces/:spaceId/members` | no key needed | `spaces.fetchSpaceMembers` | yes |
-| GET | `/spaces/:spaceId/team` | no key needed | `spaces.fetchSpaceTeam` | yes |
+| GET | `/spaces/:spaceId/members` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceMembers` | yes |
+| GET | `/spaces/:spaceId/team` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceTeam` | yes |
 | GET | `/spaces/:spaceId/membership/me` | can access with a key | `spaces.checkMyMembership` | yes |
 | PATCH | `/spaces/:spaceId/members/:memberId/role` | can access with a key | `spaces.updateMemberRole` | yes |
 | PATCH | `/spaces/:spaceId/members/:memberId/approve` | can access with a key | `spaces.approveMembership` | yes |
@@ -222,7 +222,7 @@ Base path: `/v8/:projectId/`
 | PATCH | `/spaces/:spaceId/reports/comment/:reportId` | can access with a key | `spaces.handleCommentReport` | yes |
 | PATCH | `/spaces/:spaceId/entities/:entityId/moderation` | can access with a key | `spaces.moderateSpaceEntity` | yes |
 | PATCH | `/spaces/:spaceId/comments/:commentId/moderation` | can access with a key | `spaces.moderateSpaceComment` | yes |
-| GET | `/spaces/:spaceId/children` | no key needed | `spaces.fetchChildSpaces` | yes |
+| GET | `/spaces/:spaceId/children` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchChildSpaces` | yes |
 | GET | `/spaces/:spaceId/breadcrumb` | no key needed | `spaces.fetchSpaceBreadcrumb` | yes |
 | GET | `/spaces/:spaceId/rules` | no key needed | `spaces.fetchManyRules` | yes |
 | PATCH | `/spaces/:spaceId/rules/reorder` | can access with a key | `spaces.reorderRules` | yes |
@@ -268,10 +268,10 @@ Base path: `/v8/:projectId/`
 
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
-| POST | `/storage/images` | can't access even with a key | `storage.uploadImage` | no: needs user identity |
-| POST | `/storage/` | can't access even with a key | `storage.uploadFile` | no: needs user identity |
+| POST | `/storage/images` | can access with a key (optional `actingUserId` = the owner; omitted = app-owned) | `storage.uploadImage` | yes |
+| POST | `/storage/` | can access with a key (optional `actingUserId` = the owner; omitted = app-owned) | `storage.uploadFile` | yes |
 | GET | `/storage/:fileId` | can't access even with a key | `storage.getFile` | no: needs user identity |
-| DELETE | `/storage/:fileId` | can't access even with a key | `storage.deleteFile` | no: needs user identity |
+| DELETE | `/storage/:fileId` | can access with a key (`actingUserId` required when the record has an author, and must name the author; omitted only for an app-owned record) | `storage.deleteFile` | yes |
 
 ---
 

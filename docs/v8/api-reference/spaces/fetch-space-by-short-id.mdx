@@ -8,6 +8,10 @@ Fetches a space using its `shortId`. Returns the same `SpaceDetailed` shape as t
 
 ## Query Parameters
 
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to read as. The response is exactly what that user's own access token would get (their role, `memberPermissions` and membership). Leave it out for the anonymous view. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
+</ParamField>
+
 <ParamField query="shortId" type="string" required>
   The short identifier of the space.
 </ParamField>
@@ -26,6 +30,13 @@ Returns a [SpaceDetailed](/v8/data-models/space) object.
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Space not found.", "code": "space/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
     ```
   </Accordion>
 </AccordionGroup>

@@ -14,10 +14,9 @@ The `storage` module uploads files and images to managed cloud storage and retur
 
 <Warning>
   **Access model.** Reads (`getFile`) are project-scoped — reachable for any file
-  in your project. **Deletes are owner-or-service:** your service key may delete
-  any file, but the same call made with an end-user token only succeeds for files
-  that user owns. Backend-owned files (uploaded without an `actingUserId`) are deletable only with a
-  service key.
+  in your project. **The owner deletes:** a file with an owner is deleted as that
+  user, so pass them as `actingUserId`. Backend-owned files (uploaded without an
+  `actingUserId`) are deletable only by your service key naming nobody.
 </Warning>
 
 ---
@@ -81,7 +80,7 @@ const file = await sublay.storage.uploadFile({
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  The user the service key acts as, who owns the upload. Omit it for a backend/project-owned file.
+  The user the service key acts as, who owns the upload. Omit it for a backend/project-owned file. A user that doesn't exist returns `404 storage/user-not-found`.
 </ParamField>
 
 **Returns** — `Promise<File>`
@@ -168,7 +167,7 @@ const file = await sublay.storage.uploadImage({
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  The user the service key acts as, who owns the upload. Omit it for a backend/project-owned file.
+  The user the service key acts as, who owns the upload. Omit it for a backend/project-owned file. A user that doesn't exist returns `404 storage/user-not-found`.
 </ParamField>
 
 **Returns** — `Promise<File>` (the `image` field carries the generated `variants`).
@@ -200,6 +199,7 @@ Deletes a file record and removes all associated storage objects (for images, ev
 ```typescript
 await sublay.storage.deleteFile({
   fileId: "fil_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -207,9 +207,8 @@ await sublay.storage.deleteFile({
   The UUID of the file to delete.
 </ParamField>
 
-**Returns** — `Promise<void>`
+<ParamField body="actingUserId" type="string">
+  The user this delete acts as. Required when the file has an owner: pass the owner, and the delete runs exactly as their own (`400 storage/missing-user-id` without it; anyone else gets `403`). Omit it only for a backend-owned file.
+</ParamField>
 
-<Note>
-  With a service key this deletes any file in the project. The same call from an
-  end-user token only succeeds when that user owns the file (otherwise `403`).
-</Note>
+**Returns** — `Promise<void>`

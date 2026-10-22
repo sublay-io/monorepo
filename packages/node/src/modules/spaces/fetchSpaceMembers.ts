@@ -9,6 +9,11 @@ export interface FetchSpaceMembersProps extends SpaceReputationContextParams {
   limit?: number;
   role?: "admin" | "moderator" | "member";
   status?: "pending" | "active" | "banned" | "rejected";
+  /**
+   * List as this user (service key only): exactly what their own access token
+   * would get (members-only reading, the moderator view of non-active members). Omit it for the anonymous view.
+   */
+  actingUserId?: string;
 }
 
 export async function fetchSpaceMembers(

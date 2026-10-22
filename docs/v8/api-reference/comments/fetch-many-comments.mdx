@@ -17,13 +17,19 @@ Each request can also bring a few levels of replies nested inside every returned
 
 To list a user's comments across entities, use [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id) instead.
 
-Authentication is optional. When the caller is signed in, comments by users they are [block-edged](/v8/sdk/moderation/overview#blocking) with are marked or shown as placeholders (see [Blocked authors](#blocked-authors)).
+Authentication is optional. When there is a viewer — the signed-in user, or the user a service key names in `actingUserId` — comments by users they are [block-edged](/v8/sdk/moderation/overview#blocking) with are marked or shown as placeholders (see [Blocked authors](#blocked-authors)).
 
 <Tip>
   For previews (for example, the best comment under an entity in a feed), use `include=topComments` on the entity fetch instead — it returns real content only. Thread fetches include placeholders.
 </Tip>
 
 ## Query Parameters
+
+### Acting user
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to list as. The page is exactly what that user's own access token would get: the [blocked-author rules](#blocked-authors) below apply to them, a moderator-removed comment of theirs is shown in full, and moderation details (`moderationReason`, `moderatedById`, `moderatedByType`) appear only where that user may see them. Leave it out for the anonymous view, with no moderation details. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 comment/acting-user-not-allowed`).
+</ParamField>
 
 ### Thread
 
@@ -284,6 +290,13 @@ Checks run in this order; the first failing check is returned.
       "error": "This `cursor` was created under a different sort. Send the same `sortBy`, `sortDir` and `sortByReaction` as the request that returned it, or leave `cursor` out to start from the beginning.",
       "code": "comment/cursor-sort-mismatch"
     }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "comment/acting-user-not-allowed" }
     ```
   </Accordion>
 </AccordionGroup>

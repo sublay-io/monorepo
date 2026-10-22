@@ -5,6 +5,11 @@ import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
 export interface FetchSpaceTeamProps extends SpaceReputationContextParams {
   spaceId: string;
+  /**
+   * Read as this user (service key only): exactly what their own access token
+   * would get (members-only reading). Omit it for the anonymous view.
+   */
+  actingUserId?: string;
 }
 
 export async function fetchSpaceTeam(

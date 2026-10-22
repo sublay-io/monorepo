@@ -75,6 +75,7 @@ describe("node-sdk reputation — request shaping", () => {
       page: 2,
       limit: 50,
       include: "user",
+      actingUserId: "viewer-1",
       spaceReputation: { spaceId: "context" },
     });
     expect(projectInstance.get).toHaveBeenCalledWith("/reputation-grants", {
@@ -83,6 +84,7 @@ describe("node-sdk reputation — request shaping", () => {
         page: 2,
         limit: 50,
         include: "user",
+        actingUserId: "viewer-1",
         spaceReputationId: "context",
       },
     });

@@ -14,6 +14,12 @@ Returns a paginated list of entities for the project. Supports rich filtering by
 
 ## Query Parameters
 
+### Acting user
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to list as. The page is exactly what that user's own access token would get — `followedOnly` and `blockedFilter` for them, their own removed entities when `userId` names them, `saved`, their own reactions and the top comments they may see — and the reads count as their views. Leave it out for the anonymous view (no follow or block filtering; the reads don't count as views). This is the viewer, not the author filter: that is `userId`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 entity/acting-user-not-allowed`).
+</ParamField>
+
 ### Pagination
 
 <ParamField query="page" type="number" default="1">
@@ -62,11 +68,11 @@ Returns a paginated list of entities for the project. Supports rich filtering by
 </ParamField>
 
 <ParamField query="userId" type="string">
-  Filter by author: returns only entities whose `userId` is this user. When this matches the authenticated user's ID, moderation-removed entities are also included (an author can see their own removed entities).
+  Filter by author: returns only entities whose `userId` is this user. Not the viewer: a service key names the viewer in `actingUserId`. When this matches the viewer (the signed-in user, or the user named in `actingUserId`), moderation-removed entities are also included (an author can see their own removed entities).
 </ParamField>
 
 <ParamField query="followedOnly" type="string">
-  When `"true"`, only returns entities from users the authenticated user follows. Requires authentication.
+  When `"true"`, only returns entities from users the viewer follows. Needs a viewer: the signed-in user, or the user a service key names in `actingUserId`; without one it has no effect.
 </ParamField>
 
 <ParamField query="blockedFilter" type="string" default="exclude">
@@ -219,6 +225,13 @@ Each item in `data` is an [Entity](/v8/data-models/entity) object. File URLs are
       "code": "entity/unsupported-param",
       "param": "include"
     }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "entity/acting-user-not-allowed" }
     ```
   </Accordion>
 </AccordionGroup>

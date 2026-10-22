@@ -11,10 +11,16 @@ export interface FetchManySpacesProps {
   searchName?: string;
   searchDescription?: string;
   searchAny?: string;
+  /** Only spaces the viewer is a member of. Needs a viewer (`actingUserId`). */
   memberOf?: "true";
   parentSpaceId?: string | "null";
   nsfwFilter?: "include-all" | "exclude" | "only";
   include?: string;
+  /**
+   * List as this user (service key only): exactly what their own access token
+   * would get (`memberOf`, their role and member permissions). Omit it for the anonymous view.
+   */
+  actingUserId?: string;
 }
 
 export async function fetchManySpaces(

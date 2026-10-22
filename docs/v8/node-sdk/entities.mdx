@@ -69,7 +69,7 @@ const entity = await sublay.entities.createEntity({
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  The user the service key acts as, who authors the entity. Omit it to create an app-owned entity with no author.
+  The user the service key acts as, who authors the entity; the create runs under that user's own checks. Omit it to create an app-owned entity with no author, which only your service key naming nobody can later edit, publish or delete. A user that doesn't exist returns `404 entity/user-not-found`.
 </ParamField>
 
 <ParamField body="nsfw" type="boolean">
@@ -77,19 +77,15 @@ const entity = await sublay.entities.createEntity({
 </ParamField>
 
 <ParamField body="isDraft" type="boolean">
-  When `true`, the entity is created as an unpublished draft. Defaults to `false`.
-</ParamField>
-
-<ParamField body="excludeUserId" type="boolean">
-  When `true`, creates the entity with no author association even if `actingUserId` is provided.
+  When `true`, the entity is created as an unpublished draft. Defaults to `false`. A draft needs an owner, so it requires `actingUserId` (`400 entity/draft-requires-user` otherwise).
 </ParamField>
 
 <ParamField body="requireUser" type="boolean">
-  When `true`, the request fails unless a valid author user is resolved.
+  When `true`, the request fails with `401 entity/user-required` unless the entity has an author (`actingUserId`).
 </ParamField>
 
 <ParamField body="createdAt" type="Date">
-  A `Date` used to backdate the entity's creation time.
+  A `Date` used to backdate the entity's creation time. A service key ability, also with `actingUserId` (for imports with original authors and dates).
 </ParamField>
 
 <ParamField body="updatedAt" type="Date">
@@ -110,6 +106,10 @@ const entity = await sublay.entities.fetchEntity({ entityId: "ent_xyz789" });
 
 <ParamField body="entityId" type="string" required>
   The Sublay entity ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to read as: you get exactly what their own access token would get (their drafts, blocks, `saved`, their own reaction, top comments), and the read counts as their view. Omit it for the anonymous view (drafts return `404`; no view is counted).
 </ParamField>
 
 <ParamField body="include" type="string">
@@ -149,6 +149,10 @@ const entity = await sublay.entities.fetchEntityByForeignId({
   When `true`, creates a stub entity if no match is found. Defaults to `false`.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  The user to read as: you get exactly what their own access token would get (their drafts, blocks, `saved`, their own reaction, top comments), and the read counts as their view. Omit it for the anonymous view (drafts return `404`; no view is counted). It shapes the read only: an entity made by `createIfNotFound` is always app-owned.
+</ParamField>
+
 <ParamField body="include" type="string">
   Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
 </ParamField>
@@ -175,6 +179,10 @@ const entity = await sublay.entities.fetchEntityByShortId({ shortId: "abc12" });
 
 <ParamField body="shortId" type="string" required>
   The entity's short ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to read as: you get exactly what their own access token would get (their drafts, blocks, `saved`, their own reaction, top comments), and the read counts as their view. Omit it for the anonymous view (drafts return `404`; no view is counted).
 </ParamField>
 
 <ParamField body="include" type="string">
@@ -256,11 +264,15 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 </ParamField>
 
 <ParamField body="userId" type="string">
-  Author filter: returns only entities authored by this user.
+  Author filter: returns only entities authored by this user. Not the viewer: that is `actingUserId`.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to list as: you get exactly what their own access token would get (`followedOnly` and `blockedFilter` for them, their own removed entities when `userId` names them, `saved`, their own reactions, top comments), and the reads count as their views. Omit it for the anonymous view.
 </ParamField>
 
 <ParamField body="followedOnly" type='"true" | "false"'>
-  When `"true"`, returns only entities from users the signed-in user follows. A service key has no signed-in user, so this filter has no effect from the Node SDK.
+  When `"true"`, returns only entities from users the viewer (`actingUserId`) follows. Without `actingUserId` it has no effect.
 </ParamField>
 
 <ParamField body="keywordsFilters" type="object">
@@ -303,11 +315,12 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 
 ### updateEntity
 
-Updates fields on an existing entity.
+Updates fields on an existing entity, as its author.
 
 ```typescript
 const entity = await sublay.entities.updateEntity({
   entityId: "ent_xyz789",
+  actingUserId: "usr_abc123",
   title: "Updated Title",
   metadata: { featured: true },
 });
@@ -338,15 +351,19 @@ const entity = await sublay.entities.updateEntity({
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  Updated metadata. Merged with existing values.
+  Replaces the entity's metadata wholesale (not merged).
 </ParamField>
 
 <ParamField body="mentions" type="array">
   Updated user mentions list.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  The user this edit acts as. Required when the entity has an author: pass the author, and the request runs exactly as their own (`400 entity/missing-user-id` without it; anyone else gets `403`). Omit it only for an app-owned entity.
+</ParamField>
+
 <ParamField body="nsfw" type="boolean">
-  Updated NSFW own-flag (owner / service). A space moderator flagging another user's entity uses `spaces.setSpaceEntityNsfw` instead. See [Entity NSFW flagging](/v8/data-models/entity#nsfw-flagging).
+  Updated NSFW own-flag (the owner's). A space moderator flagging another user's entity uses `spaces.setSpaceEntityNsfw` instead. See [Entity NSFW flagging](/v8/data-models/entity#nsfw-flagging).
 </ParamField>
 
 **Returns** — `Promise<Entity>`
@@ -355,14 +372,18 @@ const entity = await sublay.entities.updateEntity({
 
 ### deleteEntity
 
-Permanently deletes an entity and its associated data.
+Deletes an entity and its associated data, as its author.
 
 ```typescript
-await sublay.entities.deleteEntity({ entityId: "ent_xyz789" });
+await sublay.entities.deleteEntity({ entityId: "ent_xyz789", actingUserId: "usr_abc123" });
 ```
 
 <ParamField body="entityId" type="string" required>
   The Sublay entity ID to delete.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user this delete acts as. Required when the entity has an author: pass the author, and the request runs exactly as their own (`400 entity/missing-user-id` without it; anyone else gets `403`). Omit it only for an app-owned entity.
 </ParamField>
 
 **Returns** — `Promise<void>`
@@ -371,7 +392,7 @@ await sublay.entities.deleteEntity({ entityId: "ent_xyz789" });
 
 ### incrementEntityViews
 
-Increments the view counter on an entity. Call this when a user views content to track engagement.
+Increments the view counter on an entity. Call this when a user views content to track engagement. It always acts as your app and takes no `actingUserId`.
 
 ```typescript
 const entity = await sublay.entities.incrementEntityViews({
@@ -434,14 +455,18 @@ const { data, pagination } = await sublay.entities.fetchDrafts({
 
 ### publishDraft
 
-Publishes a draft entity, making it publicly visible.
+Publishes a draft entity as its author, making it publicly visible.
 
 ```typescript
-const entity = await sublay.entities.publishDraft({ entityId: "ent_xyz789" });
+const entity = await sublay.entities.publishDraft({ entityId: "ent_xyz789", actingUserId: "usr_abc123" });
 ```
 
 <ParamField body="entityId" type="string" required>
   The Sublay entity ID of the draft to publish.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user this publish acts as. Required when the draft has an author: pass the author, and the request runs exactly as their own (`400 entity/missing-user-id` without it; anyone else gets `403`). Omit it only for an app-owned draft.
 </ParamField>
 
 **Returns** — `Promise<Entity>`
@@ -516,6 +541,10 @@ const { data, pagination } = await sublay.entities.fetchReactions({
 
 <ParamField body="entityId" type="string" required>
   The Sublay entity ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to list as: reactions from users they are block-edged with are left out, as for their own access token. Omit it for the anonymous view.
 </ParamField>
 
 <ParamField body="reactionType" type="ReactionType">

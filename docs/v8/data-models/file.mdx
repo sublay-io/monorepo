@@ -11,7 +11,7 @@ A `File` record represents a file uploaded to Sublay's storage system. Files can
 |----------|------|-------------|
 | `id` | `string` | Unique file identifier (UUID). |
 | `projectId` | `string` | The project this file belongs to. |
-| `userId` | `string \| null` | The user this file is associated with (for avatars/banners). |
+| `userId` | `string \| null` | The file's owner: the uploader, or the user a service key named in `actingUserId`. `null` for an app-owned file (uploaded by a service key naming nobody), which only a service key naming nobody may delete. |
 | `entityId` | `string \| null` | The entity this file is attached to. |
 | `commentId` | `string \| null` | The comment this file is attached to. |
 | `chatMessageId` | `string \| null` | The chat message this file is attached to. |

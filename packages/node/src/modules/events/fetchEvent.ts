@@ -5,7 +5,11 @@ export interface FetchEventProps {
   eventId: string;
   /** Comma-separated associations to expand, e.g. "user,space,files,userRsvp". */
   include?: string;
-  /** The user the service key acts as, for that user's view (visibility, `userRsvp`). Omit for the key's own view. */
+  /**
+   * Read as this user (service key only): exactly what their own access token
+   * would get (event visibility, `userRsvp`). Omit it for the anonymous view
+   * (public events only).
+   */
   actingUserId?: string;
 }
 

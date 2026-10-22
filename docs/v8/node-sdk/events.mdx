@@ -45,7 +45,7 @@ const event = await sublay.events.createEvent({
   Event format. `online` requires `url`; `physical` requires `address` or `location`; `hybrid` requires both.
 </ParamField>
 <ParamField body="actingUserId" type="string" required>
-  The user the service key acts as: the event's creator and first host.
+  The user the service key acts as: the event's creator and first host, held to their own permissions (a space-scoped event needs them to be an active member). A user that doesn't exist returns `404 event/user-not-found`.
 </ParamField>
 <ParamField body="description" type="string">Optional description.</ParamField>
 <ParamField body="endTime" type="string">Optional ISO end datetime.</ParamField>
@@ -80,7 +80,7 @@ const event = await sublay.events.fetchEvent({
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
 <ParamField body="include" type="string">Comma-separated associations: `"user"`, `"space"`, `"files"`, `"userRsvp"`.</ParamField>
-<ParamField body="actingUserId" type="string">The user the service key acts as, whose view is returned (visibility, `userRsvp`). Omit it for the key's own view.</ParamField>
+<ParamField body="actingUserId" type="string">The user to read as: exactly what their own access token would get (visibility, `userRsvp`). Omit it for the anonymous view: only a `public` event is returned, any other answers `404`.</ParamField>
 
 **Returns** — `Promise<Event>`
 
@@ -119,7 +119,7 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
 <ParamField body="titleFilters" type="{ hasTitle?; includes?; doesNotInclude? }">Free-text filter on `title`.</ParamField>
 <ParamField body="descriptionFilters" type="{ hasDescription?; includes?; doesNotInclude? }">Free-text filter on `description`.</ParamField>
 <ParamField body="include" type="string">Comma-separated associations.</ParamField>
-<ParamField body="actingUserId" type="string">The user the service key acts as, whose view is returned (visibility, `myRsvp`, `userRsvp`). Omit it for the key's own view.</ParamField>
+<ParamField body="actingUserId" type="string">The user to list as: exactly what their own access token would get (visibility, `myRsvp`, `userRsvp`). Omit it for the anonymous view: `public` events only.</ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Event>>`
 
@@ -210,7 +210,7 @@ const event = await sublay.events.setRsvp({
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
 <ParamField body="status" type='"going" | "maybe" | "not_going"' required>The RSVP response.</ParamField>
-<ParamField body="actingUserId" type="string" required>The user the service key acts as, who RSVPs.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the service key acts as, who RSVPs, held to their own event visibility (an event they can't see returns `404`).</ParamField>
 
 **Returns** — `Promise<Event>` (with refreshed `rsvpCounts`)
 
@@ -228,7 +228,7 @@ const event = await sublay.events.withdrawRsvp({
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="actingUserId" type="string" required>The user the service key acts as, whose RSVP is withdrawn.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the service key acts as, whose RSVP is withdrawn, held to their own event visibility.</ParamField>
 
 **Returns** — `Promise<Event>`
 
@@ -338,7 +338,7 @@ const { data, pagination } = await sublay.events.fetchInvitees({
 
 ### fetchEventRsvps
 
-Named RSVP (guest) list. Returns paginated [EventRsvp](/v8/data-models/event-rsvp) records with the user populated. Visible to hosts always, to any viewer when `guestListVisible` is `true`, or to service keys. RSVP counts themselves are public via the event's `rsvpCounts`.
+Named RSVP (guest) list. Returns paginated [EventRsvp](/v8/data-models/event-rsvp) records with the user populated. Visible to hosts always, and to anyone who can see the event when `guestListVisible` is `true`; otherwise `403 event/guest-list-hidden`. Pass `actingUserId` to read as that user. RSVP counts themselves are public via the event's `rsvpCounts`.
 
 ```typescript
 const { data, pagination } = await sublay.events.fetchEventRsvps({
@@ -351,6 +351,7 @@ const { data, pagination } = await sublay.events.fetchEventRsvps({
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
 <ParamField body="status" type="string">Comma-separated statuses to filter by, e.g. `"going,maybe"`. Omit for all.</ParamField>
+<ParamField body="actingUserId" type="string">The user to read as: exactly what their own access token would get (event visibility, whether they host it). Omit it for the anonymous view.</ParamField>
 <ParamField body="page" type="number">Page number (1-indexed).</ParamField>
 <ParamField body="limit" type="number">Results per page. Capped at `100`.</ParamField>
 

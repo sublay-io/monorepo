@@ -24,7 +24,7 @@ const space = await sublay.spaces.createSpace({
 ```
 
 <ParamField body="actingUserId" type="string" required>
-  The user the service key acts as: the space creator, who becomes the initial admin.
+  The user the service key acts as: the space creator, who becomes the initial admin, held to their own permissions. A space always has a creator: leaving it out returns `400 space/missing-user-id`.
 </ParamField>
 
 <ParamField body="name" type="string" required>
@@ -83,6 +83,14 @@ const space = await sublay.spaces.fetchSpace({ spaceId: "spc_abc123" });
   The Sublay space ID.
 </ParamField>
 
+<ParamField body="include" type="string">
+  Comma-separated associations to expand. Pass `"files"` for the avatar and banner file objects.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to read as: exactly what their own access token would get (their role, `memberPermissions` and membership). Omit it for the anonymous view.
+</ParamField>
+
 **Returns** — `Promise<SpaceDetailed>`
 
 ---
@@ -133,7 +141,7 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
 </ParamField>
 
 <ParamField body="memberOf" type='"true"'>
-  When `"true"`, returns only spaces the requesting context is a member of.
+  When `"true"`, returns only spaces `actingUserId` is an active member of. Without `actingUserId` it returns `401 space/auth-required`.
 </ParamField>
 
 <ParamField body="parentSpaceId" type='string | "null"'>
@@ -146,6 +154,10 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
 
 <ParamField body="include" type="string">
   Comma-separated list of associations to populate.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to list as: exactly what their own access token would get (`memberOf` and their membership on each space). Omit it for the anonymous view.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Space>>`
@@ -164,6 +176,14 @@ const space = await sublay.spaces.fetchSpaceBySlug({ slug: "photography" });
   The space's URL slug.
 </ParamField>
 
+<ParamField body="include" type="string">
+  Comma-separated associations to expand. Pass `"files"` for the avatar and banner file objects.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to read as: exactly what their own access token would get (their role, `memberPermissions` and membership). Omit it for the anonymous view.
+</ParamField>
+
 **Returns** — `Promise<SpaceDetailed>`
 
 ---
@@ -178,6 +198,14 @@ const space = await sublay.spaces.fetchSpaceByShortId({ shortId: "ph3x9" });
 
 <ParamField body="shortId" type="string" required>
   The space's short ID.
+</ParamField>
+
+<ParamField body="include" type="string">
+  Comma-separated associations to expand. Pass `"files"` for the avatar and banner file objects.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to read as: exactly what their own access token would get (their role, `memberPermissions` and membership). Omit it for the anonymous view.
 </ParamField>
 
 **Returns** — `Promise<SpaceDetailed>`
@@ -399,6 +427,10 @@ const { data, pagination } = await sublay.spaces.fetchChildSpaces({
 
 <ParamField body="include" type="string">
   Comma-separated list of associations to populate.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to list as: `isMember` on each child is theirs, exactly as their own access token. Omit it for the anonymous view.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Space>>`

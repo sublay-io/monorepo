@@ -8,7 +8,7 @@ Creates an event. The acting user (the token's own user, or the `actingUserId` a
 
 The required location fields depend on `type`: `online` needs a `url`; `physical` needs an `address` or `location`; `hybrid` needs both a `url` and an `address`/`location`.
 
-Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bundle and active membership of the space. Image upload requires the `files-images` bundle.
+Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bundle and active membership of the space — for a service key, the membership of the user it names in `actingUserId`, exactly as that user's own request. Image upload requires the `files-images` bundle.
 
 ## Body Parameters
 
@@ -81,7 +81,7 @@ Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bu
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only, and required with one: the user this request acts as, who becomes the creator and first host. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
+  Service key only, and required with one: the user this request acts as, who becomes the creator and first host, held to their own permissions. A user that doesn't exist returns `404 event/user-not-found`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField body="cover" type="file">
@@ -162,6 +162,13 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
   <Accordion title="Invalid Image — 422">
     ```json
     { "code": "event/invalid-image", "message": "File \"cover.jpg\" is not a valid image: ..." }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    The user named in `actingUserId` doesn't exist.
+
+    ```json
+    { "error": "User not found", "code": "event/user-not-found" }
     ```
   </Accordion>
 </AccordionGroup>

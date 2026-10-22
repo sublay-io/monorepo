@@ -6,7 +6,7 @@ description: "Delete a file and all its variants from storage"
 
 Deletes a file record and removes all associated storage objects. For image files, all generated variants are also deleted.
 
-Requires an authenticated user. **Delete is owner-or-service:** a user token may only delete files it owns; **service keys** may delete any file in the project. App-owned files (uploaded without an `actingUserId`) are deletable only with a service key.
+Requires authentication. **The owner deletes:** a file with an owner is deleted only as that user — with their own access token, or with a service key naming them in `actingUserId`, and the request then runs exactly as theirs (suspension included). An app-owned file (uploaded without an `actingUserId`) is deleted only by a service key naming nobody; a user token gets `403`.
 
 **Rate limit**: 50 requests per 5 minutes.
 
@@ -14,6 +14,12 @@ Requires an authenticated user. **Delete is owner-or-service:** a user token may
 
 <ParamField path="fileId" type="string" required>
   The UUID of the file to delete.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user this delete acts as. Required when the file has an owner: name the owner (naming anyone else gets `403`). Leave it out only for an app-owned file. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 storage/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -47,9 +53,23 @@ Requires an authenticated user. **Delete is owner-or-service:** a user token may
     ```
   </Accordion>
   <Accordion title="Unauthorized — 403">
-    Returned when a user token attempts to delete a file it does not own.
+    Returned when the acting user doesn't own the file, or when a user token, or a service key naming a user, deletes an app-owned file.
     ```json
     { "error": "Unauthorized", "code": "storage/unauthorized" }
+    ```
+  </Accordion>
+  <Accordion title="Missing User ID — 400">
+    A service key sent no `actingUserId` for a file that has an owner. Name the owner: the request then runs exactly as their own.
+
+    ```json
+    { "error": "A service key must send actingUserId to change a record that has an author: the request then acts as that user.", "code": "storage/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "storage/acting-user-not-allowed" }
     ```
   </Accordion>
 </AccordionGroup>

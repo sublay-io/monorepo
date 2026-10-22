@@ -7,7 +7,7 @@ description: "Create a custom table in your project's schema"
 Creates a new custom table.
 
 <Warning>
-  **Service key required.** Table management is not reachable with an end-user token, which is why the JS SDK and the React hook are row-only.
+  **Service key required.** Table management is not reachable with an end-user token, which is why the JS SDK and the React hook are row-only. The request always acts as your app, so `actingUserId` is refused (`400 database/unsupported-param`).
 </Warning>
 
 <Note>
@@ -124,6 +124,13 @@ Returns `201 Created`.
   <Accordion title="Server Error — 500">
     ```json
     { "error": "Internal Server Error", "code": "database/server-error" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `actingUserId`. This endpoint always acts as the app, so no caller may name a user.
+
+    ```json
+    { "error": "`actingUserId` isn't accepted here: this endpoint always acts as the app.", "code": "database/unsupported-param", "param": "actingUserId" }
     ```
   </Accordion>
 </AccordionGroup>

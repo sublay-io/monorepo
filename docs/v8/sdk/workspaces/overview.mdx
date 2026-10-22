@@ -130,7 +130,7 @@ The owner resolves the full capability vocabulary and apex rank, so nothing is o
   If you need attribution you can actually trust, record it in your own system at the point you decide to make the call.
 </Warning>
 
-The [node SDK](/v8/node-sdk/workspaces) types match the server: `actingUserId` is required on every workspace function except `fetchWorkspace`, where leaving it out gets the anonymous view.
+The [node SDK](/v8/node-sdk/workspaces) types `actingUserId` as required on every workspace function, `fetchWorkspace` included: a key always uses it, since naming nobody there only ever gets the anonymous `404`.
 
 ### Shapes the server rejects
 
@@ -168,7 +168,7 @@ They come from **two layers**, and knowing which one answered tells you what to 
   <Accordion title="A near-miss spelling of `actingUserId` — 400">
     ```json
     {
-      "error": "`actingUserID` is not a recognized field — did you mean `actingUserId`? A misspelled acting user names nobody, which would run this request unbound instead of on that user's behalf.",
+      "error": "`actingUserID` is not a recognized field — did you mean `actingUserId`? A misspelled acting user names nobody, so the request couldn't tell which user it acts as.",
       "code": "workspace/invalid-body"
     }
     ```
@@ -198,7 +198,7 @@ They come from **two layers**, and knowing which one answered tells you what to 
   <Accordion title="A query string with 1,000 or more parameters — 400">
     ```json
     {
-      "error": "Too many query parameters: 1000 `&`-separated segments, and the limit is 999. The query parser silently discards everything past 1000 of them — including `actingUserId`, which would run this request unbound instead of on that user's behalf. Empty segments and unparseable ones count too.",
+      "error": "Too many query parameters: 1000 `&`-separated segments, and the limit is 999. The query parser silently discards everything past 1000 of them — including `actingUserId`, so the request couldn't tell which user it acts as. Empty segments and unparseable ones count too.",
       "code": "workspace/invalid-query"
     }
     ```
@@ -213,7 +213,7 @@ They come from **two layers**, and knowing which one answered tells you what to 
   <Accordion title="A repeated or nested `_` / `_t` — 400">
     ```json
     {
-      "error": "`_` must be a single value. Repeating it (or nesting it) can push other query parameters past the parser's limit, silently discarding them — including `actingUserId`, which would run this request unbound instead of on that user's behalf.",
+      "error": "`_` must be a single value. Repeating it (or nesting it) can push other query parameters past the parser's limit, silently discarding them — including `actingUserId`, so the request couldn't tell which user it acts as.",
       "code": "workspace/invalid-query"
     }
     ```

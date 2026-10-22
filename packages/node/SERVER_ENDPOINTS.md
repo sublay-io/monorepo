@@ -245,7 +245,7 @@ Base path: `/v8/:projectId/`
 | GET | `/users/by-foreign-id` | no key needed (optional `actingUserId` = that user's view) | `users.fetchUserByForeignId` | yes |
 | GET | `/users/by-username` | no key needed (optional `actingUserId` = that user's view) | `users.fetchUserByUsername` | yes |
 | GET | `/users/:userId` | no key needed (optional `actingUserId` = that user's view) | `users.fetchUserById` | yes |
-| PATCH | `/users/:userId` | can access with a key (acts as the app; `actingUserId` refused) | `users.updateUser` | yes |
+| PATCH | `/users/:userId` | can access with a key (required `actingUserId`, must be the user in the path) | `users.updateUser` | yes |
 | POST | `/users/:userId/follow` | can access with a key | `users.createFollow` | yes |
 | GET | `/users/:userId/follow` | can access with a key | `users.fetchFollowStatus` | yes |
 | GET | `/users/:userId/comments` | no key needed (optional `actingUserId` = that user's view) | `users.fetchCommentsByUserId` | yes |

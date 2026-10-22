@@ -3,6 +3,12 @@ import { UserFull } from "../../interfaces/User";
 
 export interface UpdateUserProps {
   userId: string;
+  /**
+   * The user this request acts as. Must be the same user as `userId`: a
+   * service key updates a user by acting as that user, and the request then
+   * behaves exactly as that user's own access token would.
+   */
+  actingUserId: string;
   name?: string;
   username?: string;
   bio?: string;

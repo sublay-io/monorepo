@@ -84,10 +84,11 @@ describe("node-sdk users — profile — request shaping", () => {
     });
   });
 
-  it("updateUser strips userId into the path and patches the rest", async () => {
+  it("updateUser strips userId into the path and sends actingUserId in the body with the rest", async () => {
     const { client, projectInstance } = makeClient();
-    await updateUser(client, { userId: "u1", name: "Alice" });
+    await updateUser(client, { userId: "u1", actingUserId: "u1", name: "Alice" });
     expect(projectInstance.patch).toHaveBeenCalledWith("/users/u1", {
+      actingUserId: "u1",
       name: "Alice",
     });
   });
@@ -356,7 +357,7 @@ describe("node-sdk users — response mapping", () => {
     const user = { id: "u1", name: "Alice" };
     projectInstance.patch.mockResolvedValueOnce({ data: user });
     await expect(
-      updateUser(client, { userId: "u1", name: "Alice" }),
+      updateUser(client, { userId: "u1", actingUserId: "u1", name: "Alice" }),
     ).resolves.toEqual(user);
   });
 

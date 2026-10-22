@@ -35,7 +35,7 @@ The API returns three space shapes depending on context:
 | `parentSpaceId` | `string \| null` | ID of the parent space, if this is a sub-space. |
 | `depth` | `number` | Nesting depth (0 for root spaces, incremented for each sub-level). Maximum depth is 10. |
 | `metadata` | `Record<string, any>` | Arbitrary key-value data attached to the space. Up to 1 MB. |
-| `isMember` | `boolean \| undefined` | Whether the authenticated user is a member of this space. Only present when the user is signed in. |
+| `isMember` | `boolean \| undefined` | Whether the viewer is a member of this space. Only present when there is a viewer: the signed-in user, or the user a service key names in `actingUserId`. |
 | `membersCount` | `number` | Computed count of active members. |
 | `childSpacesCount` | `number` | Computed count of direct child spaces. |
 | `createdAt` | `Date` | Timestamp when the space was created. |
@@ -47,7 +47,7 @@ Returned when fetching a single space by ID, shortId, or slug. Includes all `Spa
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `memberPermissions` | `SpaceMemberPermissions \| null` | The authenticated user's resolved permissions in this space. `null` if the user has no membership in this space. A pending, banned or rejected user gets it with `isMember: false` and their `status`. |
+| `memberPermissions` | `SpaceMemberPermissions \| null` | The viewer's resolved permissions in this space (the signed-in user, or the user a service key names in `actingUserId`). `null` if the user has no membership in this space. A pending, banned or rejected user gets it with `isMember: false` and their `status`. |
 | `parentSpace` | `SpacePreview \| null` | Preview of the parent space. `null` for root-level spaces. |
 | `childSpaces` | `SpacePreview[]` | Preview of up to 10 immediate child spaces. |
 
@@ -69,7 +69,7 @@ A minimal space shape used only as an embedded reference — never returned dire
 
 ## SpaceMemberPermissions
 
-Included in `SpaceDetailed.memberPermissions` for authenticated users with a membership in the space, whatever its status.
+Included in `SpaceDetailed.memberPermissions` for a viewer with a membership in the space, whatever its status.
 
 | Property | Type | Description |
 |----------|------|-------------|

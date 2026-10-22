@@ -265,7 +265,7 @@ Triggered when a user is granted reputation — by another user, or by the app. 
 | `messageId`, `conversationId` | `string \| null \| undefined` | Id forms of a chat-message target. Both are needed to place a message. |
 
 <Note>
-  The granter is carried under `granter*` keys, **never** `initiatorId`. A notification whose `metadata.initiatorId` is blocked by the recipient is suppressed entirely — and an app-mediated transfer between two users who blocked each other is required to succeed *and* to notify.
+  The granter is carried under `granter*` keys, **never** `initiatorId`. A notification whose `metadata.initiatorId` is blocked by the recipient is suppressed entirely. A grant between two users who blocked each other is refused before it is created — from a user token and from a service key acting as the sender alike — so a grant notification never comes from a user the recipient blocked.
 </Note>
 
 ### `system`

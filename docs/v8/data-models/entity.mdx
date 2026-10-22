@@ -20,7 +20,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `sourceId` | `string \| null` | Groups entities by content type within a project. Useful when one project hosts multiple distinct categories of content (e.g. `"user-post"` vs `"blog-post"`), allowing you to filter and separate them without creating separate projects. |
 | `spaceId` | `string \| null` | The space this entity belongs to, if any. |
 | `space` | `Space \| null` | Populated space object when `include` contains `"space"`. |
-| `userId` | `string \| null` | ID of the user this entity is associated with. `null` if the entity is not associated with any user. |
+| `userId` | `string \| null` | The author: the user whose token created it, or the user a service key named in `actingUserId`. `null` for an app-owned entity, created by a service key naming nobody; only a service key naming nobody may edit, publish or delete it. |
 | `user` | `User \| null` | The author. Populated when `include` contains `"user"`. |
 | `title` | `string \| null` | Optional title. |
 | `content` | `string \| null` | Optional text content. |
@@ -34,7 +34,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `userReaction` | `ReactionType \| null` | The current user's reaction. Only present when the user is authenticated and has reacted to this entity. |
 | `commentsCount` | `number` | How many comments the entity has, at any depth. Counts everything its thread contains — deleted, removed and unavailable comments included, since they stay in the thread as [placeholders](/v8/data-models/comment#placeholders) — so it's the same number for every user. |
 | `sharesCount` | `number` | Share counter stored on the entity. `0` by default. |
-| `views` | `number` | View count. Auto-incremented on every fetch. Can also be incremented manually via the service-key-only `PATCH /entities/:entityId/increment-views` endpoint. |
+| `views` | `number` | View count. Auto-incremented on every fetch by a person: a signed-in user, an anonymous caller, or a service key naming a user in `actingUserId` (a service key naming nobody doesn't count). Can also be incremented manually via the service-key-only `PATCH /entities/:entityId/increment-views` endpoint. |
 | `score` | `number` | Computed "hotness" score based on engagement activity. |
 | `scoreUpdatedAt` | `Date` | When the score was last recalculated. |
 | `location` | `GeoPoint \| null` | Optional geo-location stored as a GeoJSON point. |
@@ -42,8 +42,8 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `topComments` | `Comment[]` | The entity's best top-level comments, as full [Comment](/v8/data-models/comment) objects. Populated when `include` contains `"topComments"`; `[]` when none qualify. See [Top comments](#top-comments). |
 | `isSaved` | `boolean` | Whether the current user has saved this entity to a collection. Populated when `include` contains `"saved"`. |
 | `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
-| `isDraft` | `boolean \| null` | Whether this entity is in draft state. |
-| `nsfw` | `boolean` | The entity's **own** NSFW flag. `false` by default. Set on create/update by the owner (or a service key), or by a space moderator via the [set-NSFW endpoint](/v8/hooks/spaces/use-set-space-entity-nsfw). See [NSFW flagging](#nsfw-flagging). |
+| `isDraft` | `boolean \| null` | Whether this entity is in draft state. A draft always has an author, and only that author sees it. |
+| `nsfw` | `boolean` | The entity's **own** NSFW flag. `false` by default. Set on create/update by the owner (a service key acting as the author, or naming nobody for an app-owned entity), or by a space moderator via the [set-NSFW endpoint](/v8/hooks/spaces/use-set-space-entity-nsfw). See [NSFW flagging](#nsfw-flagging). |
 | `nsfwEffective` | `boolean` | **Computed live, read-only.** `true` when the entity's own `nsfw` is `true` **or** its space is effectively NSFW: `entity.nsfw OR (space?.nsfwEffective ?? false)`. This is the value the `nsfwFilter` query param keys off. See [NSFW flagging](#nsfw-flagging). |
 | `moderationStatus` | `"approved" \| "removed" \| null` | Current space moderation status. |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
@@ -67,7 +67,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 
 An entity carries its own `nsfw` boolean and exposes a live-computed `nsfwEffective`:
 
-- **`nsfw`** — the entity's own flag. It defaults to `false` and is what the owner, a service key, or a space moderator toggles.
+- **`nsfw`** — the entity's own flag. It defaults to `false` and is what the owner or a space moderator toggles.
 - **`nsfwEffective`** — never stored on the entity. It is computed on **every** read as:
 
   ```

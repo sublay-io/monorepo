@@ -172,7 +172,7 @@ await sublay.auth.requestPasswordReset({ email: "user@example.com" });
 
 Completes a password reset using a token from the reset email.
 
-This revokes **every** session for that user and removes **every** push binding they hold, on every device — a reset is the remedy for a suspected compromise, so nothing is spared and there is no field to spare one with. Contrast [Change Password](/v8/api-reference/auth/change-password), which a user calls with their own access token: it keeps their current session and can keep one device's binding. They sign in again everywhere, and each device re-binds for push on its own once it is next opened. Projects without the `push` bundle skip the binding step and are otherwise unaffected.
+This revokes **every** session for that user and removes **every** push binding they hold, on every device — a reset is the remedy for a suspected compromise, so nothing is spared and there is no field to spare one with. The user signs in again everywhere, and each device re-binds for push on its own once it is next opened. Projects without the `push` bundle skip the binding step and are otherwise unaffected. Contrast [Change Password](/v8/api-reference/auth/change-password), which a user calls with their own access token: it keeps their current session and can keep one device's binding.
 
 ```typescript
 await sublay.auth.resetPassword({

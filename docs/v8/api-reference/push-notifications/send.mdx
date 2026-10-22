@@ -6,7 +6,7 @@ description: "Send a push notification to one or more users across all their reg
 
 Fans a push notification out to every registered device binding belonging to the listed users. The server dispatches to APNs (iOS), FCM (Android), and the Web Push protocol in parallel, using whichever platform credentials are configured for this project.
 
-Requires a service key (`Authorization: Bearer <serviceKey>`). End-user tokens are rejected — this endpoint is intended for your backend, not for end users calling it directly.
+Requires a service key (`Authorization: Bearer <serviceKey>`). End-user tokens are rejected — this endpoint is intended for your backend, not for end users calling it directly. The key sends as the app: name the recipients in `userIds`; sending `actingUserId` is refused (`400 push-send/unsupported-param`).
 
 Requires the `push` bundle.
 
@@ -172,6 +172,17 @@ Returns `200` with a `results` map keyed by user ID (lowercase, whatever case yo
     The fan-out itself failed. Nothing beyond this code is returned. Note that a
     failure while pruning dead tokens *after* delivery does not reach here — the
     pushes were delivered and the response is still `200`.
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `actingUserId`, in the body or the query. This endpoint always acts as the app, so there is no user to name.
+
+    ```json
+    {
+      "error": "`actingUserId` isn't accepted here: this endpoint always acts as the app.",
+      "code": "push-send/unsupported-param",
+      "param": "actingUserId"
+    }
+    ```
   </Accordion>
 </AccordionGroup>
 

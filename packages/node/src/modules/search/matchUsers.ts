@@ -2,6 +2,11 @@ import { SublayHttpClient } from "../../core/client";
 import { User } from "../../interfaces/User";
 
 export interface MatchUsersProps {
+  /**
+   * The user to find matches for. Their interests drive passive mode, and
+   * users block-edged with them are left out.
+   */
+  actingUserId: string;
   mode: "passive" | "directed";
   query?: string;
   limit?: number;

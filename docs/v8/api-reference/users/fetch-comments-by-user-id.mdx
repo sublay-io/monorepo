@@ -14,6 +14,8 @@ Returns a user's comments as one flat list — top-level comments and replies al
 
 Authentication is optional. The history is read as the **caller**: the signed-in user, or — with a service key — the user named in `actingUserId`. Without one (no user token, or a key without `actingUserId`) the request is anonymous: deleted and moderator-removed comments are left out, no block rule applies, `isAuthorBlocked` and `isUnavailable` are always `false`, and `userReaction` isn't populated.
 
+[Moderation details](/v8/data-models/comment#moderation-fields) (`moderationReason`, `moderatedById`, `moderatedByType`) follow the same reader: a key with `actingUserId` gets exactly what that user's own token would get, and a key naming nobody gets the anonymous view, with no moderation details.
+
 An unknown `userId` returns an empty page.
 
 **What's in the list:**
@@ -33,7 +35,7 @@ An unknown `userId` returns an empty page.
 ### Acting user
 
 <ParamField query="actingUserId" type="string">
-  Service key only: the user this request acts as, who reads the history. Leave it out to read anonymously. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 comment/acting-user-not-allowed`). With a key, the rules below (own removed comments, blocks, `blockedFilter`, the `isAuthorBlocked` / `isUnavailable` flags and `userReaction`) apply from that user's perspective.
+  Service key only: the user this request acts as, who reads the history. Leave it out to read anonymously. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 comment/acting-user-not-allowed`). With a key, the response is exactly what that user's own token would get: the rules below (own removed comments, blocks, `blockedFilter`, the `isAuthorBlocked` / `isUnavailable` flags and `userReaction`) and the moderation details apply from that user's perspective.
 </ParamField>
 
 ### Filtering

@@ -3,6 +3,7 @@
 **Legend — Service Key Access:**
 - `no key needed` — public endpoint, no auth required (works anonymously)
 - `can access with a key` — service key bypasses user-auth middleware and the endpoint is meaningful without a specific user identity
+- `user token only` — the server refuses every service key (403 `<area>/user-token-required`), even one sending `actingUserId`; the person must call it with their own access token
 - `can't access even with a key` — endpoint is inherently user-identity-dependent (relies on `req.userId` in controller logic; a service key bypasses the auth middleware but the operation itself requires a real user session)
 
 **Legend — SDK Call Valid:**
@@ -22,7 +23,10 @@ Base path: `/v8/:projectId/`
 | POST | `/auth/sign-up` | no key needed | `auth.signUp` | yes |
 | POST | `/auth/sign-in` | no key needed | `auth.signIn` | yes |
 | POST | `/auth/sign-out` | no key needed | `auth.signOut` | yes |
-| POST | `/auth/change-password` | can access with a key | `auth.changePassword` | yes |
+| POST | `/auth/change-password` | user token only | — | — |
+| POST | `/auth/set-password` | user token only | — | — |
+| POST | `/auth/request-account-deletion` | user token only | — | — |
+| POST | `/auth/confirm-account-deletion` | user token only | — | — |
 | POST | `/auth/request-password-reset` | no key needed | `auth.requestPasswordReset` | yes |
 | POST | `/auth/reset-password` | no key needed | `auth.resetPassword` | yes |
 | GET | `/auth/reset-password-page` | no key needed | — | — |
@@ -236,24 +240,24 @@ Base path: `/v8/:projectId/`
 
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
-| GET | `/users/suggestions` | no key needed | `users.fetchUserSuggestions` | yes |
+| GET | `/users/suggestions` | no key needed (optional `actingUserId` = that user's view) | `users.fetchUserSuggestions` | yes |
 | GET | `/users/check-username` | no key needed | `users.checkUsernameAvailability` | yes |
-| GET | `/users/by-foreign-id` | no key needed | `users.fetchUserByForeignId` | yes |
-| GET | `/users/by-username` | no key needed | `users.fetchUserByUsername` | yes |
-| GET | `/users/:userId` | no key needed | `users.fetchUserById` | yes |
-| PATCH | `/users/:userId` | can access with a key | `users.updateUser` | yes |
+| GET | `/users/by-foreign-id` | no key needed (optional `actingUserId` = that user's view) | `users.fetchUserByForeignId` | yes |
+| GET | `/users/by-username` | no key needed (optional `actingUserId` = that user's view) | `users.fetchUserByUsername` | yes |
+| GET | `/users/:userId` | no key needed (optional `actingUserId` = that user's view) | `users.fetchUserById` | yes |
+| PATCH | `/users/:userId` | can access with a key (required `actingUserId`, must be the user in the path) | `users.updateUser` | yes |
 | POST | `/users/:userId/follow` | can access with a key | `users.createFollow` | yes |
 | GET | `/users/:userId/follow` | can access with a key | `users.fetchFollowStatus` | yes |
-| GET | `/users/:userId/comments` | no key needed | `users.fetchCommentsByUserId` | yes |
-| GET | `/users/:userId/followers` | no key needed | `users.fetchFollowersByUserId` | yes |
-| GET | `/users/:userId/followers-count` | no key needed | `users.fetchFollowersCountByUserId` | yes |
-| GET | `/users/:userId/following` | no key needed | `users.fetchFollowingByUserId` | yes |
-| GET | `/users/:userId/following-count` | no key needed | `users.fetchFollowingCountByUserId` | yes |
+| GET | `/users/:userId/comments` | no key needed (optional `actingUserId` = that user's view) | `users.fetchCommentsByUserId` | yes |
+| GET | `/users/:userId/followers` | no key needed (optional `actingUserId` = that user's view) | `users.fetchFollowersByUserId` | yes |
+| GET | `/users/:userId/followers-count` | no key needed (optional `actingUserId` = that user's view) | `users.fetchFollowersCountByUserId` | yes |
+| GET | `/users/:userId/following` | no key needed (optional `actingUserId` = that user's view) | `users.fetchFollowingByUserId` | yes |
+| GET | `/users/:userId/following-count` | no key needed (optional `actingUserId` = that user's view) | `users.fetchFollowingCountByUserId` | yes |
 | DELETE | `/users/:userId/follow` | can access with a key | `users.deleteFollow` | yes |
 | POST | `/users/:userId/connection` | can access with a key | `users.requestConnection` | yes |
 | GET | `/users/:userId/connection` | can access with a key | `users.fetchConnectionStatus` | yes |
-| GET | `/users/:userId/connections` | no key needed | `users.fetchConnectionsByUserId` | yes |
-| GET | `/users/:userId/connections-count` | no key needed | `users.fetchConnectionsCountByUserId` | yes |
+| GET | `/users/:userId/connections` | no key needed (optional `actingUserId` = that user's view) | `users.fetchConnectionsByUserId` | yes |
+| GET | `/users/:userId/connections-count` | no key needed (optional `actingUserId` = that user's view) | `users.fetchConnectionsCountByUserId` | yes |
 | DELETE | `/users/:userId/connection` | can access with a key | `users.removeConnectionByUserId` | yes |
 
 ---
@@ -286,9 +290,9 @@ Base path: `/v8/:projectId/`
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
 | POST | `/oauth/authorize` | no key needed | `oauth.authorize` | yes |
-| POST | `/oauth/link` | can't access even with a key | `oauth.linkIdentity` | no: needs user identity |
-| GET | `/oauth/identities` | can't access even with a key | `oauth.listIdentities` | no: needs user identity |
-| DELETE | `/oauth/identities/:identityId` | can't access even with a key | `oauth.unlinkIdentity` | no: needs user identity |
+| POST | `/oauth/link` | user token only | — | — |
+| GET | `/oauth/identities` | user token only | — | — |
+| DELETE | `/oauth/identities/:identityId` | user token only | — | — |
 | GET/POST | `/v7/oauth/callback` *(app-level, no projectId)* | no key needed | — | — |
 
 ---
@@ -298,7 +302,7 @@ Base path: `/v8/:projectId/`
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
 | POST | `/search/content` | no key needed | `search.searchContent` | yes |
-| POST | `/search/users` | no key needed | `search.searchUsers` | yes |
+| POST | `/search/users` | no key needed (optional `actingUserId` = that user's view) | `search.searchUsers` | yes |
 | POST | `/search/spaces` | no key needed | `search.searchSpaces` | yes |
 | POST | `/search/ask` | no key needed | `search.askContent` | yes |
 

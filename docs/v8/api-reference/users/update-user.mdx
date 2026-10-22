@@ -4,7 +4,7 @@ api: "PATCH /v8/:projectId/users/:userId"
 description: "Update a user's profile fields, including avatar and banner images"
 ---
 
-Updates one or more profile fields for the specified user. The requesting user must own the account, or use a service key to update any user.
+Updates one or more profile fields for the specified user. A user edits only their own profile. A service key edits a user by acting as that user: it must send `actingUserId` naming the user in the path, and the request then behaves exactly as that user's own token would.
 
 Supports direct image uploads for the avatar and banner via `multipart/form-data`. Uploaded images are processed, stored in Supabase, and the old files are automatically cleaned up after a successful update.
 
@@ -15,7 +15,7 @@ Supports direct image uploads for the avatar and banner via `multipart/form-data
 
 ## Authentication
 
-Requires a valid user auth token. The authenticated user must match `:userId`, or the request must carry a service token.
+Requires a user access token whose user matches `:userId`, or a service key that sends `actingUserId` set to `:userId`.
 
 ## Path Parameters
 
@@ -25,7 +25,11 @@ Requires a valid user auth token. The authenticated user must match `:userId`, o
 
 ## Body Parameters
 
-All fields are optional. Only the fields provided are updated.
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. It must be the user in the path (`:userId`). Not an update field. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 user/acting-user-not-allowed`). With `multipart/form-data`, send it as a form field.
+</ParamField>
+
+All other fields are optional. Only the fields provided are updated.
 
 <ParamField body="name" type="string">
   Display name.
@@ -164,6 +168,8 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
 
 <AccordionGroup>
   <Accordion title="Not Authorized — 403">
+    A user token tried to update a different user.
+
     ```json
     {
       "error": "Not authorized to update this user.",
@@ -216,6 +222,33 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     {
       "error": "...",
       "code": "user/invalid-params"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Missing User ID — 400">
+    A service key sent no `actingUserId`.
+
+    ```json
+    { "error": "Missing user ID", "code": "user/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Not the User in the Path — 403">
+    A service key sent an `actingUserId` other than `:userId`.
+
+    ```json
+    {
+      "error": "actingUserId must be the user in the path: a service key updates a user by acting as that user.",
+      "code": "user/unauthorized"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. A user token always acts as its own user.
+
+    ```json
+    {
+      "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
+      "code": "user/acting-user-not-allowed"
     }
     ```
   </Accordion>

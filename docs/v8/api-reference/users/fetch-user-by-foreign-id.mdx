@@ -9,12 +9,18 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 Finds a user within the project by their `foreignId` — the external identifier you provided when creating or syncing the user. Optionally creates the user if not found (requires a service key).
 
 <Note>
-  If the profile owner has blocked the signed-in caller, this returns `404` — the
+  If the profile owner has blocked the viewer — the signed-in user, or the user a service key names in `actingUserId` — this returns `404` — the
   same response as a user who does not exist. The reverse is not true: a user
   *you* have blocked stays visible, so you keep a way to find and unblock them. Requires the `moderation` bundle.
 </Note>
 
 ## Query Parameters
+
+### Acting user
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to read as. The response is exactly what that user's own access token would get — a profile whose owner blocked them returns `404`. Leave it out for the anonymous view. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 user/acting-user-not-allowed`).
+</ParamField>
 
 <ParamField query="foreignId" type="string" required>
   The external identifier from your system.
@@ -117,7 +123,7 @@ Returns HTTP `200` (found) or `201` (created) with the user object:
 </ResponseField>
 
 <Note>
-  `createIfNotFound=true` is only permitted with a **service key**. Client tokens receive a 404 if the user does not exist.
+  `createIfNotFound=true` is only permitted with a **service key**. Client tokens receive a 404 if the user does not exist. With `actingUserId`, the named user shapes only the read; a user this request creates is always created by the app.
 </Note>
 
 ## Error Responses
@@ -136,6 +142,16 @@ Returns HTTP `200` (found) or `201` (created) with the user object:
     {
       "error": "...",
       "code": "user/invalid-query"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    {
+      "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
+      "code": "user/acting-user-not-allowed"
     }
     ```
   </Accordion>

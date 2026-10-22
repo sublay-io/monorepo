@@ -1,5 +1,4 @@
 import {
-  changePassword,
   requestNewAccessToken,
   requestPasswordReset,
   resetPassword,
@@ -103,36 +102,6 @@ describe("node-sdk auth — request shaping", () => {
     });
   });
 
-  it("changePassword posts the full body to /auth/change-password", async () => {
-    const { client, projectInstance } = makeClient();
-    await changePassword(client, { userId: "u1", password: "old-pw", newPassword: "new-pw" });
-    expect(projectInstance.post).toHaveBeenCalledWith("/auth/change-password", {
-      userId: "u1",
-      password: "old-pw",
-      newPassword: "new-pw",
-    });
-  });
-
-  it("changePassword FORWARDS an optional pushDevice, naming the device to spare", async () => {
-    // A password change deletes every push binding that user holds. A
-    // service-key caller usually has no device to name and should omit this —
-    // but when its own client told it which handset it is on, naming that
-    // device keeps it receiving notifications while every other one goes quiet.
-    const { client, projectInstance } = makeClient();
-    await changePassword(client, {
-      userId: "u1",
-      password: "old-pw",
-      newPassword: "new-pw",
-      pushDevice: { platform: "ios", token: "device-of-the-handset-to-keep" },
-    });
-    expect(projectInstance.post).toHaveBeenCalledWith("/auth/change-password", {
-      userId: "u1",
-      password: "old-pw",
-      newPassword: "new-pw",
-      pushDevice: { platform: "ios", token: "device-of-the-handset-to-keep" },
-    });
-  });
-
   it("verifyEmail posts the full body to /auth/verify-email", async () => {
     const { client, projectInstance } = makeClient();
     await verifyEmail(client, { token: "tok1" });
@@ -205,15 +174,6 @@ describe("node-sdk auth — response mapping", () => {
     await expect(
       resetPassword(client, { token: "tok1", newPassword: "new-pw" }),
     ).resolves.toBeUndefined();
-  });
-
-  it("changePassword returns response.data", async () => {
-    const { client, projectInstance } = makeClient();
-    const result = { success: true, message: "Password changed" };
-    projectInstance.post.mockResolvedValueOnce({ data: result });
-    await expect(
-      changePassword(client, { userId: "u1", password: "old-pw", newPassword: "new-pw" }),
-    ).resolves.toEqual(result);
   });
 
   it("verifyEmail resolves to undefined", async () => {

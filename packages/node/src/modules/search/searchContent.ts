@@ -17,8 +17,10 @@ export interface SearchContentProps extends SpaceReputationContextParams {
   conversationId?: string;
   limit?: number;
   /**
-   * The user to search as: results follow that user's access (their chats,
-   * their blocks). Without it, no chat messages are returned.
+   * The user to search as: the result is exactly what their own access token
+   * would get (their chats, their blocks, the moderation details they may
+   * see). Without it, the anonymous view: no chat messages, no block
+   * filtering, no comment moderation details.
    */
   actingUserId?: string;
 }

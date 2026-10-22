@@ -27,6 +27,15 @@ describe("node-sdk search — request shaping", () => {
     });
   });
 
+  it("searchUsers forwards an optional actingUserId in the body", async () => {
+    const { client, projectInstance } = makeClient();
+    await searchUsers(client, { query: "ali", actingUserId: "viewer1" });
+    expect(projectInstance.post).toHaveBeenCalledWith("/search/users", {
+      query: "ali",
+      actingUserId: "viewer1",
+    });
+  });
+
   it("searchSpaces posts the full body to /search/spaces", async () => {
     const { client, projectInstance } = makeClient();
     await searchSpaces(client, { query: "design", limit: 5 });
@@ -54,6 +63,7 @@ describe("node-sdk search — request shaping", () => {
   it("matchUsers POSTs the full body to /match/users", async () => {
     const { client, projectInstance } = makeClient();
     await matchUsers(client, {
+      actingUserId: "asker1",
       mode: "directed",
       query: "biotech",
       limit: 10,
@@ -63,6 +73,7 @@ describe("node-sdk search — request shaping", () => {
       excludeSelf: false,
     });
     expect(projectInstance.post).toHaveBeenCalledWith("/match/users", {
+      actingUserId: "asker1",
       mode: "directed",
       query: "biotech",
       limit: 10,
@@ -75,8 +86,9 @@ describe("node-sdk search — request shaping", () => {
 
   it("matchUsers passes a minimal passive body through unchanged", async () => {
     const { client, projectInstance } = makeClient();
-    await matchUsers(client, { mode: "passive" });
+    await matchUsers(client, { actingUserId: "asker1", mode: "passive" });
     expect(projectInstance.post).toHaveBeenCalledWith("/match/users", {
+      actingUserId: "asker1",
       mode: "passive",
     });
   });
@@ -131,7 +143,7 @@ describe("node-sdk search — response mapping", () => {
       ],
     };
     projectInstance.post.mockResolvedValueOnce({ data: envelope });
-    const res = await matchUsers(client, { mode: "passive" });
+    const res = await matchUsers(client, { actingUserId: "asker1", mode: "passive" });
     expect(res).toEqual(envelope);
     expect(res.results[0].matchedFacets[0].candidateFacet.hotness).toBe(4);
   });

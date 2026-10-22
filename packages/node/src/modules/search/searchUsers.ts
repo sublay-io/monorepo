@@ -4,6 +4,12 @@ import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface SearchUsersProps {
   query: string;
+  /**
+   * Read as this user (service key only): the response is exactly what their
+   * own access token would get, with their block rules applied. Omit it for
+   * the anonymous view.
+   */
+  actingUserId?: string;
   limit?: number;
 }
 

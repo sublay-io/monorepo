@@ -63,11 +63,11 @@ sublay.storage           // File and image uploads, read, delete
 
 ## Acting on behalf of a user
 
-Your service key authenticates as the project, not as any single end user. So functions that operate **on a user's behalf** take an explicit `userId` — the named user the action is performed as (saving to a collection, reading a notification feed, filing a report, listing connections).
+Your service key authenticates as the project, not as any single end user. So functions that operate **on a user's behalf** take `actingUserId`: the user the service key acts as (saving to a collection, reading a notification feed, filing a report, listing connections, moderating a space). The request runs with that user's permissions — their role in a space, their hosting of an event, their membership of a conversation — and is recorded as theirs.
 
-A few routes — on the `users` module (following someone, requesting a connection) and on `chat` (`createDirectConversation`, `addMember`, `removeMember`, `changeMemberRole`) — act on one user toward another. There the **target** is `userId` and the **actor** is passed separately as `actingUserId`.
+`userId` only ever names a user the request is **about**: a target, such as the user to follow, block or add to a conversation, or a filter, such as the author filter on `fetchManyEntities`. So a call that acts on one user toward another carries both, for example `createFollow({ userId: target, actingUserId: actor })`.
 
-The `spaces` admin, moderation, rules and `leaveSpace` methods, and the `events` management methods (edit, cancel, delete, hosts, invites, `fetchInvitees`), take a required `actingUserId`: the request acts as that user and has exactly their role in the space or on the event.
+Where a method requires an acting user and you leave `actingUserId` out, the server answers `400 <resource>/missing-user-id`. The SDK's types send it under the right name; a raw `userId` in its place is refused by most endpoints with `400 <resource>/unsupported-param`. See [Authentication → Acting as a user](/v8/authentication#acting-as-a-user).
 
 <Note>
   `oauth` is intentionally not exposed by this SDK (it's a browser redirect flow).

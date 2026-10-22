@@ -59,9 +59,9 @@ For server-to-server calls, using a **service API key** is almost always the rig
 A service API key is generated once from the project dashboard and stored securely on your server. When included in a request, it grants elevated access to the API:
 
 - **No user token required** — the service key bypasses user authentication entirely. You do not need to sign in as a user or manage token refresh on the server.
-- **Act on behalf of any user** — many endpoints accept a `userId` body parameter when the request is authenticated with a service key, allowing you to perform actions on behalf of a specific user.
+- **Act on behalf of any user** — a service key names the user it acts as in `actingUserId` (in the body or query, wherever the endpoint reads it), and the request runs as that user. `userId` only names a user the request is about, such as a target or a filter. See [Acting as a user](/v8/authentication#acting-as-a-user).
 - **Elevated permissions** — the service key bypasses ownership checks, so it can update or delete any content, access draft entities, and read private user fields regardless of which user owns the resource.
-- **Space and event roles still apply** — on space admin, moderation and membership actions (editing a space, its rules and member roles; approving, declining, banning and unbanning members; handling reports and moderating content in a space; leaving a space) and on event management (editing, cancelling and deleting an event; managing its hosts and invites; listing its invitees), the key must name the user it acts as in `actingUserId`, and the request has exactly that user's role in the space or on the event.
+- **Space and event roles still apply** — on space admin, moderation and membership actions (editing a space, its rules and member roles; approving, declining, banning and unbanning members; handling reports and moderating content in a space; leaving a space) and on event management (editing, cancelling and deleting an event; managing its hosts and invites; listing its invitees), the key must send `actingUserId`, and the request has exactly that user's role in the space or on the event.
 
 Requests with a service key require two headers:
 

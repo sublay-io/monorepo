@@ -13,10 +13,12 @@ import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 export interface FetchCommentsByUserIdBaseProps extends SpaceReputationContextParams {
   userId: string;
   /**
-   * Read the history as this user (service key only). Their own
-   * removed comments, block rules, `blockedFilter` and the
-   * `isAuthorBlocked`/`isUnavailable` flags then apply from their perspective.
-   * Omit it to read the history anonymously.
+   * Read the history as this user (service key only): the response is exactly
+   * what their own access token would get. Their own removed comments, block
+   * rules, `blockedFilter`, the `isAuthorBlocked`/`isUnavailable` flags and
+   * which moderation details (`moderationReason`, `moderatedById`) they may
+   * see all apply from their perspective. Omit it to read the history with no
+   * viewer; a service key then gets every moderation detail.
    */
   actingUserId?: string;
   /** Only comments on this entity. */

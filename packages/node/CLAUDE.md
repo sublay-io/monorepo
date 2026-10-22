@@ -104,7 +104,7 @@ const client = await SublayClient.init({
 
 `SublayClient` binds **15 modules**. The source of truth is `src/index.ts` (the `bindModule` calls) and each module's `index.ts`. The full public surface and per-function props/returns are documented in `docs/v7/node-sdk/`.
 
-**Acting on behalf of a user**: the SDK authenticates as the project (service key), not as an end user. So user-scoped functions take `actingUserId` — the user the operation is performed as — on every v8 route, in the body or query where the server reads it. `userId` only ever names a user the request is about: a path target (`users.*ByUserId`, the follow/connection/block pairs, `spaces.fetchMutualSpaces`), a body target (`chat.createDirectConversation` / `chat.addMember`, event hosts and invites, `workspaces.createWorkspaceInvite`), or the author filter on `entities.fetchManyEntities`. The server answers an old actor `userId` with 400 `<resource>/unsupported-param`. Exceptions not yet renamed: `auth.changePassword` still sends `userId`.
+**Acting on behalf of a user**: the SDK authenticates as the project (service key), not as an end user. So user-scoped functions take `actingUserId` — the user the operation is performed as — on every v8 route, in the body or query where the server reads it. `userId` only ever names a user the request is about: a path target (`users.*ByUserId`, the follow/connection/block pairs, `spaces.fetchMutualSpaces`), a body target (`chat.createDirectConversation` / `chat.addMember`, event hosts and invites, `workspaces.createWorkspaceInvite`), or the author filter on `entities.fetchManyEntities`. The server answers an old actor `userId` with 400 `<resource>/unsupported-param`. Some user reads take an optional `actingUserId` to get that user's view (profiles, follower/following/connection lists and counts, `fetchCommentsByUserId`, `search.searchUsers`); without it they return the anonymous view. Routes that need the user's own access token (password change/set, account deletion, OAuth link/identities, push device register/deregister) refuse service keys, so the SDK has no methods for them.
 
 **Intentionally NOT bound**: `oauth` only (a browser redirect flow). The directory exists under `src/modules/` but is not exposed on `SublayClient`; do not document it.
 
@@ -170,9 +170,9 @@ Members: `joinSpace`, `leaveSpace`, `checkMyMembership`, `fetchSpaceMembers`, `f
 
 Moderation/rules: `handleEntityReport`, `handleCommentReport` (both take an `actions` array), `moderateSpaceEntity`, `moderateSpaceComment`, `fetchManyRules`, `fetchRule`, `createRule`, `updateRule`, `deleteRule`, `reorderRules`
 
-### 9. Search Module (4 functions)
+### 9. Search Module (5 functions)
 
-`searchContent`, `searchUsers`, `searchSpaces`, `askContent` (AI Q&A). Content/ask take `query`, `sourceTypes`, `spaceId`, `conversationId`, `limit`.
+`searchContent`, `searchUsers`, `searchSpaces`, `askContent` (AI Q&A), `matchUsers` (requires `actingUserId`, the user to find matches for). Content/ask take `query`, `sourceTypes`, `spaceId`, `conversationId`, `limit`.
 
 ### 10. Reports Module (2 functions)
 
@@ -182,9 +182,9 @@ Moderation/rules: `handleEntityReport`, `handleCommentReport` (both take an `act
 
 `fetchNotifications`, `countUnreadNotifications`, `markNotificationAsRead`, `markAllNotificationsAsRead`. All take `actingUserId`.
 
-### 12. Auth Module (10 functions)
+### 12. Auth Module (9 functions)
 
-`signUp`, `signIn`, `signOut`, `requestNewAccessToken`, `verifyExternalUser`, `requestPasswordReset`, `resetPassword`, `verifyEmail`, `sendVerificationEmail`, `changePassword`
+`signUp`, `signIn`, `signOut`, `requestNewAccessToken`, `verifyExternalUser`, `requestPasswordReset`, `resetPassword`, `verifyEmail`, `sendVerificationEmail`
 
 ### 13. Hosted Apps Module (1 function)
 

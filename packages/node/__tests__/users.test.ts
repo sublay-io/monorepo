@@ -45,6 +45,7 @@ describe("node-sdk users — profile — request shaping", () => {
     expect(projectInstance.get).toHaveBeenCalledWith("/users/by-foreign-id", {
       params: {
         foreignId: "f1",
+        actingUserId: undefined,
         createIfNotFound: undefined,
         name: undefined,
         username: undefined,
@@ -110,7 +111,9 @@ describe("node-sdk users — graph queries — request shaping", () => {
   it("fetchFollowersCountByUserId hits the followers-count route", async () => {
     const { client, projectInstance } = makeClient();
     await fetchFollowersCountByUserId(client, { userId: "u1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/users/u1/followers-count");
+    expect(projectInstance.get).toHaveBeenCalledWith("/users/u1/followers-count", {
+      params: {},
+    });
   });
 
   it("fetchFollowingByUserId strips userId into the path and passes the rest as params", async () => {
@@ -124,7 +127,9 @@ describe("node-sdk users — graph queries — request shaping", () => {
   it("fetchFollowingCountByUserId hits the following-count route", async () => {
     const { client, projectInstance } = makeClient();
     await fetchFollowingCountByUserId(client, { userId: "u1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/users/u1/following-count");
+    expect(projectInstance.get).toHaveBeenCalledWith("/users/u1/following-count", {
+      params: {},
+    });
   });
 
   it("fetchConnectionsByUserId strips userId into the path and passes the rest as params", async () => {
@@ -138,7 +143,74 @@ describe("node-sdk users — graph queries — request shaping", () => {
   it("fetchConnectionsCountByUserId hits the connections-count route", async () => {
     const { client, projectInstance } = makeClient();
     await fetchConnectionsCountByUserId(client, { userId: "u1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/users/u1/connections-count");
+    expect(projectInstance.get).toHaveBeenCalledWith("/users/u1/connections-count", {
+      params: {},
+    });
+  });
+});
+
+describe("node-sdk users — reads as a named user (optional actingUserId)", () => {
+  it("fetchUserById forwards actingUserId as a query param", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchUserById(client, { userId: "u1", actingUserId: "viewer1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/users/u1", {
+      params: { actingUserId: "viewer1" },
+    });
+  });
+
+  it("fetchUserByUsername and fetchUserSuggestions forward actingUserId", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchUserByUsername(client, { username: "alice", actingUserId: "viewer1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/users/by-username", {
+      params: { username: "alice", actingUserId: "viewer1" },
+    });
+    await fetchUserSuggestions(client, { query: "ali", actingUserId: "viewer1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/users/suggestions", {
+      params: { query: "ali", actingUserId: "viewer1" },
+    });
+  });
+
+  it("fetchUserByForeignId forwards actingUserId alongside createIfNotFound", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchUserByForeignId(client, {
+      foreignId: "f1",
+      actingUserId: "viewer1",
+      createIfNotFound: true,
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith(
+      "/users/by-foreign-id",
+      expect.objectContaining({
+        params: expect.objectContaining({
+          foreignId: "f1",
+          actingUserId: "viewer1",
+          createIfNotFound: true,
+        }),
+      }),
+    );
+  });
+
+  it.each([
+    ["followers", fetchFollowersByUserId],
+    ["following", fetchFollowingByUserId],
+    ["connections", fetchConnectionsByUserId],
+  ] as const)("the %s list forwards actingUserId", async (route, fn) => {
+    const { client, projectInstance } = makeClient();
+    await fn(client, { userId: "u1", actingUserId: "viewer1" });
+    expect(projectInstance.get).toHaveBeenCalledWith(`/users/u1/${route}`, {
+      params: { actingUserId: "viewer1" },
+    });
+  });
+
+  it.each([
+    ["followers-count", fetchFollowersCountByUserId],
+    ["following-count", fetchFollowingCountByUserId],
+    ["connections-count", fetchConnectionsCountByUserId],
+  ] as const)("the %s route forwards actingUserId", async (route, fn) => {
+    const { client, projectInstance } = makeClient();
+    await fn(client, { userId: "u1", actingUserId: "viewer1" });
+    expect(projectInstance.get).toHaveBeenCalledWith(`/users/u1/${route}`, {
+      params: { actingUserId: "viewer1" },
+    });
   });
 });
 

@@ -206,7 +206,6 @@ export type { ConversationMember, ConversationMemberRole } from "./interfaces/Co
 export type { ChatMessage } from "./interfaces/ChatMessage";
 export type { Reaction, ReactionType, ReactionCounts } from "./interfaces/Reaction";
 export type { UnifiedAppNotification, PotentiallyPopulatedUnifiedAppNotification } from "./interfaces/AppNotification";
-export type { OAuthIdentity } from "./interfaces/OAuthIdentity";
 export type { PushDeviceResult, SendPushResult } from "./interfaces/Push";
 export { PUSH_EVENT_TYPES, MUTE_DURATIONS } from "./interfaces/Push";
 export type {

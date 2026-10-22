@@ -5,6 +5,14 @@ import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
 export interface FetchUserByForeignIdProps extends SpaceReputationUserParams {
   foreignId: string;
+  /**
+   * Read as this user (service key only): the response is exactly what their
+   * own access token would get, so a profile whose owner blocked them comes
+   * back as not found. Omit it for the anonymous view. With
+   * `createIfNotFound`, it shapes only the read; a user created by this call
+   * is always created by the app.
+   */
+  actingUserId?: string;
   createIfNotFound?: boolean;
   name?: string;
   username?: string;
@@ -23,6 +31,7 @@ export async function fetchUserByForeignId(
 
   const params: Record<string, any> = {
     foreignId: data.foreignId,
+    actingUserId: data.actingUserId,
     createIfNotFound: data.createIfNotFound,
     name: data.name,
     username: data.username,

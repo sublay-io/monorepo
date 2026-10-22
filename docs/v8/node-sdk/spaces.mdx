@@ -364,11 +364,18 @@ const space = await sublay.spaces.updateSpace({
 Permanently deletes a space and all its content.
 
 ```typescript
-const result = await sublay.spaces.deleteSpace({ spaceId: "spc_abc123" });
+const result = await sublay.spaces.deleteSpace({
+  spaceId: "spc_abc123",
+  actingUserId: "usr_creator123",
+});
 ```
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID to delete.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as, exactly as their own token would: only the space's creator may delete it, and not while banned from the space or from a space above it (`403 space/creator-required`, `403 space/banned`).
 </ParamField>
 
 **Returns** — `Promise<DeleteSpaceResponse>`

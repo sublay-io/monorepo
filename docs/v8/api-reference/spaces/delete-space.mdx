@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/spaces/:spaceId"
 description: "Delete a space and all its associated data"
 ---
 
-Permanently deletes a space. All entities, members, child spaces, rules, and reports belonging to the space are also deleted. Only the space's **creator** (the original owner) can perform this action, and not while they are banned from the space or from a space above it. A service key can delete any space.
+Permanently deletes a space. All entities, members, child spaces, rules, and reports belonging to the space are also deleted. Only the space's **creator** (the original owner) can perform this action, and not while they are banned from the space or from a space above it. A service key must name the user it acts as in `actingUserId`; the request then behaves exactly as that user's own token.
 
 <Warning>This operation is irreversible. All associated data including child spaces will be permanently deleted.</Warning>
 
@@ -12,6 +12,12 @@ Permanently deletes a space. All entities, members, child spaces, rules, and rep
 
 <ParamField path="spaceId" type="string" required>
   UUID of the space to delete.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Required with a service key: the user this request acts as. The request behaves exactly as that user's own token, so it is refused unless they created the space and are not banned from it or from a space above it. Sent in the query; an `actingUserId` in the body is not read. A user token always acts as its own user and must not send it (`400 space/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -29,9 +35,22 @@ Permanently deletes a space. All entities, members, child spaces, rules, and rep
     { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
     ```
   </Accordion>
-  <Accordion title="Not Found — 404">
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
-    { "error": "Space not found.", "code": "space/not-found" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "actingUserId: Invalid UUID format", "code": "space/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId` in the query.
+    ```json
+    { "error": "Missing user ID", "code": "space/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="Deletion Disabled — 403">
@@ -39,13 +58,19 @@ Permanently deletes a space. All entities, members, child spaces, rules, and rep
     { "error": "Space deletion is disabled for this project.", "code": "space/deletion-disabled" }
     ```
   </Accordion>
+  <Accordion title="Not Found — 404">
+    ```json
+    { "error": "Space not found.", "code": "space/not-found" }
+    ```
+  </Accordion>
   <Accordion title="Creator Required — 403">
+    The caller (or the user named by `actingUserId`) did not create the space.
     ```json
     { "error": "Only the space creator can delete the space.", "code": "space/creator-required" }
     ```
   </Accordion>
   <Accordion title="Banned — 403">
-    The creator is banned from the space, or from a space above it.
+    The creator (or the user named by `actingUserId`) is banned from the space, or from a space above it.
     ```json
     { "error": "You are banned from this space.", "code": "space/banned" }
     ```

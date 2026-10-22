@@ -39,7 +39,7 @@ describe("useHandleSpaceChatReport", () => {
     });
   });
 
-  it("supports combining ban-user with remove-message, attributing the moderator", async () => {
+  it("supports combining ban-user with remove-message, never sending actingUserId (the moderator comes from the user token)", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() =>
       useHandleSpaceChatReport(),
     );
@@ -53,7 +53,6 @@ describe("useHandleSpaceChatReport", () => {
         messageId: "message-1",
         actions: ["remove-message", "ban-user"],
         reason: "Repeated harassment",
-        actingUserId: "moderator-1",
       });
     });
 
@@ -61,8 +60,9 @@ describe("useHandleSpaceChatReport", () => {
     expect(call.body).toMatchObject({
       actions: ["remove-message", "ban-user"],
       reason: "Repeated harassment",
-      actingUserId: "moderator-1",
     });
+    expect(call.body).not.toHaveProperty("actingUserId");
+    expect(call.body).not.toHaveProperty("userId");
   });
 
   it("rejects when the server returns an error response", async () => {

@@ -11,13 +11,12 @@ export interface HandleSpaceChatReportParams {
   summary?: string;
   /** Why the author of the reported message is banned; required with "ban-user". */
   reason?: string;
-  /** Service key only: the moderator the key acts for, whose permissions then apply. */
-  actingUserId?: string;
 }
 
 /**
  * Hook to handle chat message reports at the space level.
  * Space moderators can: remove message, ban user from space, dismiss.
+ * The moderator is the signed-in user; the request never names an acting user.
  *
  * `ban-user` is space-scoped (it sets the target's SpaceMember status to
  * "banned"). Project-wide suspension is a dashboard action, not one a space
@@ -48,7 +47,6 @@ function useHandleSpaceChatReport(): (
       actions,
       summary,
       reason,
-      actingUserId,
     }: HandleSpaceChatReportParams) => {
       if (!projectId) {
         throw new Error("No projectId available.");
@@ -65,7 +63,6 @@ function useHandleSpaceChatReport(): (
           actions,
           summary,
           reason,
-          actingUserId,
         }
       );
 

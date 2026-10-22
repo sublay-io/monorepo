@@ -77,7 +77,7 @@ With a client token, every endpoint in the bundle resolves the actor from that t
 </Warning>
 
 <Note>
-  **What actually needs a service key: acting on behalf of a *different* user.** Nearly every endpoint accepts an actor field, `actingUserId`, so a service key can perform an action *as* some named user. That parameter is **[node SDK](/v8/node-sdk/workspaces) only** — `@sublay/core` and `@sublay/js` never expose it, because a client's actor is always the token's own user. (There is no client-side strip: a call that hand-writes `actingUserId` past the types is bound by the same rule as any user token — any `actingUserId`, even the token's own user, is rejected with `400 workspace/acting-user-not-allowed`.) This is the *only* difference in reach between the client SDKs and the node SDK for this bundle; it is **not** a restriction on which operations a client may perform. The rule that governs it is [below](#acting-on-behalf-of-a-user).
+  **What actually needs a service key: acting on behalf of a *different* user.** Every endpoint accepts an actor field, `actingUserId`, so a service key can perform an action *as* some named user. That parameter is **[node SDK](/v8/node-sdk/workspaces) only** — `@sublay/core` and `@sublay/js` never expose it, because a client's actor is always the token's own user. (There is no client-side strip: a call that hand-writes `actingUserId` past the types is bound by the same rule as any user token — any `actingUserId`, even the token's own user, is rejected with `400 workspace/acting-user-not-allowed`.) This is the *only* difference in reach between the client SDKs and the node SDK for this bundle; it is **not** a restriction on which operations a client may perform. The rule that governs it is [below](#acting-on-behalf-of-a-user).
 
   Note that a **target**-identifying `userId` is a different thing and is fully available on the client: the invitee `userId` on [`useCreateWorkspaceInvite`](/v8/hooks/workspaces/use-create-workspace-invite), and the `targetUserId` path param on the member hooks.
 </Note>
@@ -90,27 +90,27 @@ One rule governs every workspace endpoint, with no exceptions:
   **If a request acts as Bob, then for all intents and purposes it *is* Bob.** Reads and writes alike. The credential decides only *whether* you may name an acting user at all (a service key may; a user token never does) — never how much authority that user has.
 </Info>
 
-A service key therefore has exactly two modes:
+A service key therefore acts as a named user, `actingUserId: "<uuid>"`, and gets exactly that user's authority: their capabilities, their rank, their visibility, their fencing — the same answer their own token would get. There is no mode in which a key acts as the app with authority of its own:
 
-| Mode | Wire shape | Authority |
-|------|-----------|-----------|
-| **The app itself** | the field is **absent** | Unbounded — where the route has an unbounded path at all. Every capability, owner-only and rank check is skipped. |
-| **A named user** | `actingUserId: "<uuid>"` | Exactly that user's. Their capabilities, their rank, their visibility, their fencing — the same answer their own token would get. |
+| Route | A key that names nobody |
+|------|-----------|
+| [Fetch Workspace](/v8/api-reference/workspaces/fetch-workspace) | Gets exactly the anonymous view: `404 workspace/not-found`. |
+| Every other workspace route | Is refused with `400 workspace/missing-user-id`. |
 
 <Warning>
-  **"The app itself" means the field is *absent*, not falsy.** `actingUserId: ""` and `actingUserId: null` are a caller *attempting* to name someone, and they are a `400`, never a fall-through to the unbounded mode. So `actingUserId: user?.id ?? ""` — the shape a backend reaches for naturally — fails loudly instead of quietly acquiring full authority. That is the point: a request that believed it was binding to a user must never be promoted to the app itself. Only omitting the key entirely (or sending `undefined`, which is indistinguishable from omission) selects that mode. See [Shapes the server rejects](#shapes-the-server-rejects).
+  **"Names nobody" means the field is *absent*, not falsy.** `actingUserId: ""` and `actingUserId: null` are a caller *attempting* to name someone, and they are a `400` for a malformed actor. So `actingUserId: user?.id ?? ""` — the shape a backend reaches for naturally — fails with a message about the field itself rather than about a missing user. See [Shapes the server rejects](#shapes-the-server-rejects).
 </Warning>
 
 A plain user token has only one mode: itself. It must not send `actingUserId` at all: any value, even the token's own user id, is a `400 workspace/acting-user-not-allowed`. The field is never silently ignored for a user token.
 
 Naming an acting user is not a hint or an audit field. It **binds**: if the named user would be refused, so are you. That covers the capability gate, the owner-only gate, the rank guard, [no-escalation](/v8/data-models/workspace-member#no-privilege-escalation), roster/standing [fencing](#what-a-client-app-can-do), and the visibility `404` on a workspace the named user has no relation to.
 
-### The unrestricted path names a user
+### Acting with full authority
 
-Backends that need to do something a normal member could not — reset a team, seed an org, repair a bad grant — should act **as the workspace owner**, not as nobody:
+Backends that need to do something a normal member could not — reset a team, seed an org, repair a bad grant — act **as the workspace owner**:
 
 ```typescript
-// ✅ Unrestricted, and carried out under a named user id.
+// Full authority, carried out under the owner's user id.
 await sublay.workspaces.updateWorkspaceMember({
   workspaceId,
   targetUserId,
@@ -119,7 +119,7 @@ await sublay.workspaces.updateWorkspaceMember({
 });
 ```
 
-The owner resolves the full capability vocabulary and apex rank, so nothing is out of reach, and the resulting webhooks carry that user id rather than nothing.
+The owner resolves the full capability vocabulary and apex rank, so nothing is out of reach, and the resulting webhooks carry that user id.
 
 <Warning>
   **This is naming, not authentication.** A service key may name *any* UUID, and the server does not verify that it belongs to a live account — it only checks whether the id matches the workspace's `ownerId` (or a membership row). Two consequences:
@@ -130,13 +130,7 @@ The owner resolves the full capability vocabulary and apex rank, so nothing is o
   If you need attribution you can actually trust, record it in your own system at the point you decide to make the call.
 </Warning>
 
-On roughly half the bundle the actor is **required**, so acting-as-a-user is not merely the good practice — it is the only path, and omitting `actingUserId` is a `400 workspace/missing-user-id` rather than a bypass. Those routes are the ones whose result *belongs to* a specific person: creating a workspace, listing your workspaces or your invites, reading your own authority, accepting or declining an invite, leaving, and the three member-management writes (`updateWorkspaceMember`, `removeWorkspaceMember`, `removeWorkspaceMemberFromSubtree`).
-
-The unbounded path survives on the rest — the guard-only routes (`updateWorkspace`, `updateWorkspaceInheritFlag`, `deleteWorkspace`, `transferWorkspaceOwnership`, the invite outbox reads and `revoke`/`resend`), the three reads, and `createWorkspaceInvite`.
-
-<Note>
-  **The [node SDK](/v8/node-sdk/workspaces) types are stricter than the wire on four of those routes.** `updateWorkspace`, `updateWorkspaceInheritFlag`, `deleteWorkspace` and `transferWorkspaceOwnership` accept an omitted actor over REST — that request runs as the app itself — but the node SDK declares `actingUserId` **required** on all four, so TypeScript will not let you omit it. That is a deliberate guardrail on the four most destructive owner-only calls, not a different server rule. Reach the unbounded path on them by calling the REST endpoint directly.
-</Note>
+The [node SDK](/v8/node-sdk/workspaces) types match the server: `actingUserId` is required on every workspace function except `fetchWorkspace`, where leaving it out gets the anonymous view.
 
 ### Shapes the server rejects
 
@@ -166,9 +160,9 @@ They come from **two layers**, and knowing which one answered tells you what to 
     { "error": "Invalid actingUserId.", "code": "workspace/invalid-body" }
     ```
 
-    The actor is read by **presence**, not truthiness. `""`, `null` and a non-UUID string are all a caller *attempting* to name someone, and they fail here rather than falling through to the unbounded mode. On a route with no capability guard the rejection comes from the schema instead and reads `actingUserId: Invalid UUID format` — same status, same code, same outcome.
+    The actor is read by **presence**, not truthiness. `""`, `null` and a non-UUID string are all a caller *attempting* to name someone, and they fail here as a malformed actor. On a route with no capability guard the rejection comes from the schema instead and reads `actingUserId: Invalid UUID format` — same status, same code, same outcome.
 
-    This is the trap behind `actingUserId: user?.id ?? ""`. A backend writing that believes it is binding the call to a user; if the empty string read as "named nobody" it would instead receive full owner authority on routes including `DELETE /workspaces/:id`. Only an absent key (or `undefined`, which is indistinguishable from omission) selects the app-itself mode.
+    This is the trap behind `actingUserId: user?.id ?? ""`: the error names the field you sent rather than reporting a missing user. Only an absent key (or `undefined`, which is indistinguishable from omission) means the request names nobody.
   </Accordion>
 
   <Accordion title="A near-miss spelling of `actingUserId` — 400">
@@ -213,7 +207,7 @@ They come from **two layers**, and knowing which one answered tells you what to 
 
     **This is a rule about the query string's length, not about which names are in it.** The parser's budget is spent per `&`-separated segment, and a segment that parses to nothing spends it just the same — so 1,000 bare ampersands (`?&&&…`), 1,000 copies of `__proto__=1` (a name the parser discards on sight, leaving no key behind), and 1,000 copies of an ordinary *declared* parameter such as `include=` all reach the limit identically and are all refused identically. Which names you used has nothing to do with it, and neither does whether any of them is reserved.
 
-    What makes the limit worth a rule is that the parser truncates **silently**: past the budget, everything beyond it is discarded with no error and no trace, and `actingUserId` goes with it. On this bundle a request naming no acting user is the app itself, so a silently dropped actor is a request that runs unbounded while its caller believes it was scoped to one person. Counting segments on the raw URL is the only rule that can close that — how many segments you sent is not a property of any field name, and after truncation there is nothing left in the parsed request for a schema or an allowlist to inspect.
+    What makes the limit worth a rule is that the parser truncates **silently**: past the budget, everything beyond it is discarded with no error and no trace, and `actingUserId` goes with it. A silently dropped actor turns a request its caller believes is scoped to one person into one that names nobody. Counting segments on the raw URL is the only rule that can close that — how many segments you sent is not a property of any field name, and after truncation there is nothing left in the parsed request for a schema or an allowlist to inspect.
   </Accordion>
 
   <Accordion title="A repeated or nested `_` / `_t` — 400">
@@ -256,26 +250,26 @@ They come from **two layers**, and knowing which one answered tells you what to 
 </AccordionGroup>
 
 <Note>
-  **Why this bundle is stricter than the rest of the API.** Elsewhere in Sublay an undeclared field is dropped and the request proceeds. Here it is refused, and the reason is what an unreadable field can *mean* on this bundle.
+  **Why this bundle is stricter than the rest of the API.** Elsewhere in Sublay an undeclared field is dropped and the request proceeds. Here it is refused, so that an actor lost on the way is reported as what it is.
 
-  A service key that names **no** acting user runs unbounded, with owner authority over a whole workspace hierarchy. So absence-of-actor is not a neutral state — it is the signal that grants full authority. A caller who writes `onBehalfOf: "<bob>"`, or `acting_user_id`, or spells the field correctly inside a body no parser read, believes the request is scoped to Bob; under a permissive rule it would instead receive the app's full authority, silently, in production, on routes that cascade-delete a subtree.
+  A caller who writes `onBehalfOf: "<bob>"`, or `acting_user_id`, or spells the field correctly inside a body no parser read, believes the request is scoped to Bob. The server never sees Bob, so the request names nobody. Refusing the shape itself answers with an error that points at the field, instead of a missing-user error (or, on Fetch Workspace, the anonymous view) that leaves the caller guessing why Bob was not received.
 
-  Guessing which stray fields "look like" an actor cannot work: an open input space can always be shown a name nobody enumerated, and every miss lands on the unbounded path. Refusing categorically fails the other way — a field we forgot to declare is a `400` on first use, in development, fixed the same day.
+  Guessing which stray fields "look like" an actor cannot work: an open input space can always be shown a name nobody enumerated. Refusing categorically fails the other way — a field we forgot to declare is a `400` on first use, in development, fixed the same day.
 </Note>
 
 <Note>
   **The guarantee covers TOP-LEVEL keys.** State it with that scope rather than as "unknown fields are impossible":
 
-  - `metadata` is caller-owned JSON and is never inspected, so `{"metadata":{"actingUserId":"<bob>"}}` parses, names nobody, and runs as the app. That is correct — `metadata` is your data — but it is not an actor channel.
+  - `metadata` is caller-owned JSON and is never inspected, so `{"metadata":{"actingUserId":"<bob>"}}` parses and names nobody (so a key gets `400 workspace/missing-user-id`, or the anonymous view on Fetch Workspace). That is correct — `metadata` is your data — but it is not an actor channel.
   - A nested or wrapped actor is **refused**, not ignored — the wrapper itself is an undeclared top-level key: `{ data: { actingUserId } }` and `?ctx[actingUserId]=` both come back `400 Unrecognized key: "data"` / `"ctx"`, and an array-wrapped body is `400 Invalid input: expected object, received array`. (Don't confuse this with the node SDK's `{ data: { actingUserId } }` axios *config* for DELETE bodies — that sends `{ actingUserId }` as the body and works.)
 
-  What makes that safe is not the field rules but the gate itself — no request reaches the unbounded path without clearing it. Spell `actingUserId` at the top level and none of this applies.
+  Spell `actingUserId` at the top level and none of this applies.
 </Note>
 
 <Note>
   **The content-type rule is the one asymmetric check — deliberately.** It applies **only** when a service key named nobody. Under a user token, or a key that **did** name an actor, a `text/plain` body is merely an empty one, exactly as on every other bundle.
 
-  The reason is what a *dropped* body could mean on each path. Under a token the actor comes from the token no matter what you send, so nothing lost in transit can change who is acting — there is no authority to gain. Under a key naming nobody, a body the server could not read is exactly the shape of an actor it failed to receive: one missing header, and a request the caller believed was bound to one person runs as the app.
+  The reason is what a *dropped* body could mean on each path. Under a token the actor comes from the token no matter what you send, so nothing lost in transit can change who is acting. Under a key naming nobody, a body the server could not read is exactly the shape of an actor it failed to receive: one missing header, and a request the caller believed was bound to one person names nobody. The error says so, rather than a bare missing-user error.
 
   Everything else on this page — the `userId` rejection, the undeclared-field rule, the cache-buster rule — applies uniformly to every caller.
 </Note>
@@ -284,15 +278,11 @@ They come from **two layers**, and knowing which one answered tells you what to 
   **Don't confuse these `400`s with the missing-actor `400`.** Two different failures, two different codes, checked in a fixed order.
 
   - `workspace/invalid-body` / `workspace/invalid-query` — **the request is malformed.** It carries a `userId`, a field the endpoint does not declare, an unreadable body, or a bad `actingUserId`. Checked **first**, before the route runs.
-  - `workspace/missing-user-id` — **the route's own rule.** On the ten routes whose actor is [required](#acting-on-behalf-of-a-user) a key must name someone, and there is no unbounded path to fall back on. Nothing about the request's shape is wrong; it is simply an operation that has to belong to a person.
+  - `workspace/missing-user-id` — **the route's own rule.** On every route but Fetch Workspace a key [must name someone](#acting-on-behalf-of-a-user). Nothing about the request's shape is wrong; it is simply an operation that has to belong to a person.
 
   On `POST /workspaces` a key with no `actingUserId` and a clean request gets `workspace/missing-user-id` — but the same call carrying an undeclared field, or sent with a `text/plain` body, gets `workspace/invalid-body` instead. Fix what the message names; the missing-actor error appears once the request is otherwise well formed.
 
   Read the code, not the status: both are `400`, and only the code tells you whether to add an actor or repair the request.
-</Note>
-
-<Note>
-  **A request that never reaches the gate cannot be unbounded either.** Unbounded authority is *earned* by clearing the gate, not inferred from an absent field. If some future route, router or ordering mistake ever skipped it, the request would fall through to "no actor, no privilege" — a `400` or `403` — rather than silently to app-level authority. The practical guarantee for you: a malformed workspaces request fails loudly, never with more authority than you intended.
 </Note>
 
 ### Consequence: accepting an invite on someone's behalf
@@ -314,11 +304,7 @@ Rank is strict — you may only act on, and invite at, a rank **strictly below**
 | **another rank-5 manager** | someone ranked 0–4, or the owner |
 | **a rank-0 member** | the **owner** — no ranked member clears the floor |
 
-This is not new behavior, but it is easy to hit for the first time when a backend stops running as an implicit owner. If your "add a manager" button is server-driven, act as the owner for it. The floor applies only to an actor with a **direct member row** on the workspace, so it is skipped for an owner or ancestor owner, and for a cross-node [reach](/v8/data-models/workspace#reach-and-the-wall-door-rule) holder with no direct row.
-
-<Note>
-  **"A key naming nobody" skips the floor on [Create Invite](/v8/api-reference/workspaces/invitations/create-invite) — and nowhere else.** Invite is the one rank-assigning route with an unbounded path left, so a key that names no inviter genuinely faces no floor there. [Update Member](/v8/api-reference/workspaces/members/update-member) has **no** unbounded path: its actor is required, so a key naming nobody is a `400 workspace/missing-user-id` rather than an exemption. On that route a key is always somebody, and faces exactly that somebody's floors.
-</Note>
+If your "add a manager" button is server-driven, act as the owner for it. The floor applies only to an actor with a **direct member row** on the workspace, so it is skipped for an owner or ancestor owner, and for a cross-node [reach](/v8/data-models/workspace#reach-and-the-wall-door-rule) holder with no direct row. A key always names its actor on these routes, so it faces exactly that actor's floors.
 
 ## Choosing a rank
 
@@ -348,11 +334,11 @@ Reads return **both**. The roster and member-standing reads each carry `rank` (a
 
 An offset is measured from **your own rank on this workspace if you hold a member row here**, and from **apex** (one step above rank 0) if you do not.
 
-Owners, ancestor owners, reach holders and keys acting as themselves normally have no row on the node in question, so they normally anchor at apex — but that is a coincidence of the common case, not the rule. An ancestor owner who *also* sits in this node's roster measures from that row: Alice owns `root` and is rank 3 on `child`, so on `child` her `relativeRank: 1` resolves to rank **4**, and she reads `child`'s rank-0 member back as `-3`. See [rank semantics](/v8/data-models/workspace-member#the-anchor-your-member-row-not-what-kind-of-actor-you-are).
+Owners, ancestor owners and reach holders normally have no row on the node in question, so they normally anchor at apex — but that is a coincidence of the common case, not the rule. An ancestor owner who *also* sits in this node's roster measures from that row: Alice owns `root` and is rank 3 on `child`, so on `child` her `relativeRank: 1` resolves to rank **4**, and she reads `child`'s rank-0 member back as `-3`. See [rank semantics](/v8/data-models/workspace-member#the-anchor-your-member-row-not-what-kind-of-actor-you-are).
 
 One consequence worth knowing: because an in-ladder anchor is `>= 0` and a write offset is `>= 1`, **a direct member can never mint rank 0 through the relative form** — the arithmetic simply cannot reach it. The absolute form does not need a special case either. Naming `rank: 0` outright is refused by the ordinary **assign rule**, which requires a strictly larger number than your own: an actor with a member row here is at rank `>= 0`, and nothing is strictly below `0`. They get `403 workspace/insufficient-rank` — *"You may only set ranks strictly below your own."* on [Update Member](/v8/api-reference/workspaces/members/update-member), or *"You may only invite at a rank strictly below your own."* on [Create Invite](/v8/api-reference/workspaces/invitations/create-invite).
 
-There is **no separate "only the owner may assign rank 0" check** — owners are the only minters of rank 0 because they skip the rank block entirely, not because a guard names them. So rank 0 is reachable by the owner, and by any actor with **no member row on this workspace** — an ancestor owner or a [reach](/v8/data-models/workspace#reach-and-the-wall-door-rule) holder — who skips or clears the same floor and, from `relativeRank: 1`, anchors at apex and lands on 0. On [Create Invite](/v8/api-reference/workspaces/invitations/create-invite) only, a **key naming nobody** joins that list; on [Update Member](/v8/api-reference/workspaces/members/update-member) it cannot, because the actor is required there (see the note [above](#consequence-a-tier-cannot-grow-itself)).
+There is **no separate "only the owner may assign rank 0" check** — owners are the only minters of rank 0 because they skip the rank block entirely, not because a guard names them. So rank 0 is reachable by the owner, and by any actor with **no member row on this workspace** — an ancestor owner or a [reach](/v8/data-models/workspace#reach-and-the-wall-door-rule) holder — who skips or clears the same floor and, from `relativeRank: 1`, anchors at apex and lands on 0.
 
 <Warning>
   **A relative offset is a snapshot, not a live link.** It is resolved once, at write time, and frozen as an absolute number. Invite at `relativeRank: 1` while you are rank 1 and they land on rank 2 — get promoted to rank 0 later and they are still 2, now two rungs below you rather than one. Nothing re-derives.
@@ -361,9 +347,9 @@ There is **no separate "only the owner may assign rank 0" check** — owners are
 </Warning>
 
 <Warning>
-  **Omitting the rank field is the easiest way in the whole API to mint rank 0.** "One rung below me" is measured from your anchor, and an inviter with **no member row on this workspace** anchors at apex — so for an **owner**, an **ancestor owner**, a **reach holder** with no direct row, or a **service key acting as itself**, the default lands on **rank 0**, the most senior rung there is. Everything else in this bundle gates that rung carefully; the default reaches it by leaving a field off.
+  **Omitting the rank field is the easiest way in the whole API to mint rank 0.** "One rung below me" is measured from your anchor, and an inviter with **no member row on this workspace** anchors at apex — so for an **owner**, an **ancestor owner** or a **reach holder** with no direct row, the default lands on **rank 0**, the most senior rung there is. Everything else in this bundle gates that rung carefully; the default reaches it by leaving a field off.
 
-  It is semantically correct — one below apex *is* the top rung — and it is not changing. But it inverts the usual instinct that omitting a field is the conservative choice. The case to watch is a **backend invite flow**: a server route that invites people with a service key and no rank field creates a workspace of rank-0 members, each able to manage all the others and none manageable by anyone but the owner. A service-key flow that wants new members at the **bottom** of the ladder has to name a coordinate — an absolute `rank`, or a `relativeRank` anchored on an `actingUserId` who actually sits in the ladder.
+  It is semantically correct — one below apex *is* the top rung — and it is not changing. But it inverts the usual instinct that omitting a field is the conservative choice. The case to watch is a **backend invite flow**: a server route that invites people with a service key acting as the owner and no rank field creates a workspace of rank-0 members, each able to manage all the others and none manageable by anyone but the owner. A service-key flow that wants new members at the **bottom** of the ladder has to name a coordinate — an absolute `rank`, or a `relativeRank` anchored on an `actingUserId` who actually sits in the ladder.
 
   **The milder version applies to in-ladder inviters.** A lead at rank 0 who invites six people with no rank field gets six rank-1 members — and equals cannot act on equals, so none of those six can manage each other. Only the lead can manage any of them. That is often exactly right for a flat team. But if your product has tiers, say so on the invite instead of discovering the flat layer later.
 </Warning>

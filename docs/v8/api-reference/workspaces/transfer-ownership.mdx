@@ -40,10 +40,8 @@ Reassigns a workspace's `ownerId`. Doable by the workspace's **own owner OR any 
   On demote, the ex-owner's capabilities.
 </ParamField>
 
-<ParamField body="actingUserId" type="string">
-  Service keys only — the user to act as. **Enforced:** the owner-only guard runs against the named user, so a key naming a non-owner is refused exactly as that user would be. Omitting it alongside `newOwnerId` is a supported unbounded call — `newOwnerId` is a declared field of this endpoint, so it is accepted on its own terms. Omit it to act as the app itself (unbounded) — but on a call that hands the workspace to a new owner, prefer naming the current owner so the request carries a user id. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
-
-  The [node SDK](/v8/node-sdk/workspaces) is stricter than this endpoint: it types `actingUserId` as **required** here, so omitting it is only possible by calling the REST route directly.
+<ParamField body="actingUserId" type="string" required>
+  Service keys only — the user to act as. **Required with a service key:** a key that names nobody is refused with `400 workspace/missing-user-id`. **Enforced:** the owner-only guard runs against the named user, so a key naming a non-owner is refused exactly as that user would be. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 
   Several shapes are refused rather than ignored on this path. `actingUserId: ""` or `null` is a `400` — it reads as an *attempt* to name someone, not as "nobody". So is **every top-level field this endpoint does not declare**, in the body and in the query string alike, for every caller: `onBehalfOf`, `acting_user_id` and `impersonate` all come back as `Unrecognized key: "…"` rather than being quietly dropped. A key that differs from `actingUserId` only in capitalization — `actingUserID`, `actinguserid` — is refused too, but with a "did you mean `actingUserId`?" message instead of the generic one. And when the request names nobody, so is any body whose `Content-Type` is not `application/json` — an unparsed body discards the `actingUserId` inside it just as surely as a misspelling would. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
 </ParamField>
@@ -98,7 +96,13 @@ Returns the updated [Workspace](/v8/data-models/workspace) object with the new `
       "code": "workspace/invalid-body"
     }
     ```
-    Returned when a service key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would fall through to the unbounded path. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+    Returned when a service key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would name no acting user. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+  </Accordion>
+  <Accordion title="Missing Acting User — 400">
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
+    ```
+    A service key sent no `actingUserId`. The request has to act as somebody, and is held to exactly that user's standing on the workspace.
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     ```json

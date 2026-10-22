@@ -19,7 +19,7 @@ Removes the caller's own membership on **this node only** (self-service, no capa
 ## Body Parameters
 
 <ParamField body="actingUserId" type="string" required>
-  Service keys only — the user to act as, whose membership is removed (sent in the body so the act-as-user path works on `DELETE`). **Required for a key:** leaving is inherently self-service, so there is no unbounded path — a key that names nobody is refused with `400 workspace/missing-user-id`.
+  Service keys only — the user to act as, whose membership is removed (sent in the body so the act-as-user path works on `DELETE`). **Required for a key:** leaving is inherently self-service, so a key that names nobody is refused with `400 workspace/missing-user-id`.
 
   A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>

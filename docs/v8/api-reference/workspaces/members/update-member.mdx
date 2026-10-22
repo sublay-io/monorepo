@@ -46,7 +46,7 @@ All optional; the controller enforces which tier each touched field belongs to. 
 
   Because an in-ladder anchor is `>= 0` and the offset is `>= 1`, a direct-member actor can never reach rank `0` this way — and neither can they by naming absolute `rank: 0`, which the assign rule below refuses for exactly the same reason (nothing is strictly below `0`). There is no separate rank-0 guard: rank `0` is effectively owner-only because the owner skips the rank block, not because a check names them. An actor with **no** member row here — an ancestor owner, or a cross-node reach holder — also skips it.
 
-  A service key is **not** on that list. Unlike [Create Invite](/v8/api-reference/workspaces/invitations/create-invite), this route has no unbounded path: `actingUserId` is required, so a key is always *somebody*, and it faces exactly the floors that somebody faces. A key that names nobody does not skip the guard — it gets a `400 workspace/missing-user-id`.
+  A service key is **not** on that list. `actingUserId` is required, so a key is always *somebody*, and it faces exactly the floors that somebody faces. A key that names nobody gets a `400 workspace/missing-user-id`.
 </ParamField>
 
 <ParamField body="title" type="string">
@@ -58,7 +58,7 @@ All optional; the controller enforces which tier each touched field belongs to. 
 </ParamField>
 
 <ParamField body="actingUserId" type="string" required>
-  Service keys only — the **acting** user (sent in the body; the path `:userId` is the target). **Required for a key:** this route has **no unbounded path**, so a key that names nobody is refused with `400 workspace/missing-user-id`. Every check below — the two capability tiers, the rank guard, the assign rule and no-escalation — runs against the named user. Act as the **owner** for an unrestricted edit.
+  Service keys only — the **acting** user (sent in the body; the path `:userId` is the target). **Required for a key:** a key that names nobody is refused with `400 workspace/missing-user-id`. Every check below — the two capability tiers, the rank guard, the assign rule and no-escalation — runs against the named user. Act as the **owner** for an unrestricted edit.
 
   A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
@@ -125,7 +125,7 @@ Returns the updated [WorkspaceMember](/v8/data-models/workspace-member) object.
   </Accordion>
   <Accordion title="Missing Acting User — 400">
     ```json
-    { "error": "Missing user ID", "code": "workspace/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
     ```
     A service key called this route without naming an `actingUserId`. Every gate on this route is measured against the editor's own standing, so the edit must be performed *as* somebody — act as the owner for an unrestricted edit.
   </Accordion>

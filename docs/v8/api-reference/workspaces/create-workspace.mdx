@@ -28,7 +28,7 @@ Creates a workspace. The authenticated caller becomes the `ownerId`. Omit `paren
 </ParamField>
 
 <ParamField body="actingUserId" type="string" required>
-  Service keys only — the user to act as (the created workspace's owner). **Required for a key:** this route has no unbounded path, so a key that names nobody is refused with `400 workspace/missing-user-id`. The named user must satisfy the same gates a self-driven call would: for a **root** workspace they must have a **verified email**.
+  Service keys only — the user to act as (the created workspace's owner). **Required for a key:** a key that names nobody is refused with `400 workspace/missing-user-id`. The named user must satisfy the same gates a self-driven call would: for a **root** workspace they must have a **verified email**.
 
   A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
@@ -65,7 +65,7 @@ Returns the created [Workspace](/v8/data-models/workspace) object.
     ```json
     { "error": "Missing user ID", "code": "workspace/missing-user-id" }
     ```
-    A service key called this route without naming an `actingUserId`. There is no unbounded path here — a workspace has to be created *by* somebody, so the key must name that user.
+    A service key called this route without naming an `actingUserId`. A workspace has to be created *by* somebody, so the key must name that user.
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     ```json

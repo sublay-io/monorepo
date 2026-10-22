@@ -10,6 +10,8 @@ The `tables` module manages the **schema** of your custom tables — creating an
   `@sublay/node` SDK only — the browser [`@sublay/js`](/v8/js-sdk/overview) SDK
   and the React `useTable` hook are row-only. The same operations are also
   available in the [dashboard data editor](/v8/custom-tables#the-dashboard-data-editor).
+  These calls always act as your app and take no `actingUserId` (the server
+  refuses it with `400 database/unsupported-param`).
 </Note>
 
 All names you pass are **logical** — Sublay applies the `custom_` prefix for you.

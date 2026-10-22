@@ -87,6 +87,10 @@ const comment = await sublay.comments.fetchComment({ commentId: "cmt_abc123" });
   The Sublay comment ID.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  The user to read as: you get exactly what their own access token would get (blocks, their own removed comments in full, moderation details only where they may see them). Omit it for the anonymous view, with no moderation details.
+</ParamField>
+
 <ParamField body="include" type="string">
   Comma-separated list of associations to populate.
 </ParamField>
@@ -111,6 +115,10 @@ const comment = await sublay.comments.fetchCommentByForeignId({
   Your application's comment identifier.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  The user to read as: you get exactly what their own access token would get (blocks, their own removed comments in full, moderation details only where they may see them). Omit it for the anonymous view, with no moderation details.
+</ParamField>
+
 <ParamField body="include" type="string">
   Comma-separated list of associations to populate.
 </ParamField>
@@ -121,11 +129,12 @@ const comment = await sublay.comments.fetchCommentByForeignId({
 
 ### updateComment
 
-Updates the content of an existing comment.
+Updates the content or metadata of an existing comment, as its author.
 
 ```typescript
 const comment = await sublay.comments.updateComment({
   commentId: "cmt_abc123",
+  actingUserId: "usr_abc123",
   content: "Edited comment text",
 });
 ```
@@ -134,8 +143,16 @@ const comment = await sublay.comments.updateComment({
   The Sublay comment ID to update.
 </ParamField>
 
-<ParamField body="content" type="string" required>
-  The new comment text.
+<ParamField body="content" type="string">
+  The new comment text. Can't be empty. Send `content`, `metadata` or both.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Replaces the comment's metadata wholesale (not merged).
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user this edit acts as. Required when the comment has an author: pass the author, and the request runs exactly as their own (`400 comment/missing-user-id` without it; anyone else gets `403`). Omit it only for an app-owned comment.
 </ParamField>
 
 **Returns** — `Promise<Comment>`
@@ -144,14 +161,18 @@ const comment = await sublay.comments.updateComment({
 
 ### deleteComment
 
-Permanently deletes a comment.
+Deletes a comment as its author. The comment stays in its thread as a [placeholder](/v8/data-models/comment#placeholders).
 
 ```typescript
-await sublay.comments.deleteComment({ commentId: "cmt_abc123" });
+await sublay.comments.deleteComment({ commentId: "cmt_abc123", actingUserId: "usr_abc123" });
 ```
 
 <ParamField body="commentId" type="string" required>
   The Sublay comment ID to delete.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user this delete acts as. Required when the comment has an author: pass the author, and the request runs exactly as their own (`400 comment/missing-user-id` without it; anyone else gets `403`). Omit it only for an app-owned comment.
 </ParamField>
 
 **Returns** — `Promise<void>`
@@ -235,6 +256,10 @@ For a user's comments across entities, use [`users.fetchCommentsByUserId`](/v8/n
   The reaction the nested levels rank by, when their sort is `"top"`.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  The user to list as: you get exactly what their own access token would get (blocks, their own removed comments in full, moderation details only where they may see them). Omit it for the anonymous view, with no moderation details.
+</ParamField>
+
 <ParamField body="include" type='"user" | "grants" | ("user" | "grants")[]'>
   Related data to populate, at every level.
 </ParamField>
@@ -311,6 +336,10 @@ const { data, pagination } = await sublay.comments.fetchReactions({
 
 <ParamField body="commentId" type="string" required>
   The Sublay comment ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to list as, with their block filtering, exactly as their own access token. Omit it for the anonymous view.
 </ParamField>
 
 <ParamField body="reactionType" type="ReactionType">

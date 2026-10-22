@@ -125,7 +125,7 @@ const { messages } = useLiveChatMessages({ conversationId, includeGrants: true }
 
 ## When users can't grant directly
 
-A project can switch **user-initiated grants off** from **Settings → SDK** in the dashboard. The switch is the project setting `settings.reputationGrants.allowUserInitiated`: only an explicit `false` closes the endpoint to user tokens, an absent key means grants are allowed, and the stored value survives unrelated settings updates so it changes only when that key is explicitly sent. When it's off, `useCreateReputationGrant` rejects with `403 reputation-grant/user-grants-disabled`, and grants must be routed through your backend with a service key instead — a *mediated transfer*, which behaves identically to a user grant (same bucket routing, same balance check) but lets you enforce your own rules first: caps, cooldowns, daily limits, eligibility. Sublay imposes none of those itself.
+A project can switch **user-initiated grants off** from **Settings → SDK** in the dashboard. The switch is the project setting `settings.reputationGrants.allowUserInitiated`: only an explicit `false` closes the endpoint to user tokens, an absent key means grants are allowed, and the stored value survives unrelated settings updates so it changes only when that key is explicitly sent. When it's off, `useCreateReputationGrant` rejects with `403 reputation-grant/user-grants-disabled`, and grants must be routed through your backend with a service key instead — a *mediated transfer*, which behaves identically to the sender's own grant (same bucket routing, balance check, blocks and suspension) but lets you enforce your own rules first: caps, cooldowns, daily limits, eligibility. Sublay imposes none of those itself.
 
 ## See Also
 

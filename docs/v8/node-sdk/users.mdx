@@ -5,7 +5,7 @@ description: "Fetch, update and delete user profiles, check usernames, and query
 
 import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
 
-The `users` module provides server-side access to user profiles, social graph data (follows and connections), and username availability. All operations use your project API key and do not require a user access token.
+The `users` module provides server-side access to user profiles, social graph data (follows and connections), and username availability. All operations use your project API key and do not require a user access token. Reads that depend on who is looking (profiles, suggestions, follower, following and connection lists and counts, comment history) take an optional [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user) to read as that user; without it they return the anonymous view. `updateUser` and `deleteUser` act as your app and take no `actingUserId`.
 
 ---
 
@@ -19,6 +19,10 @@ const user = await sublay.users.fetchUserById({ userId: "usr_abc123" });
 
 <ParamField body="userId" type="string" required>
   The Sublay user ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Read as this user: the result is exactly what their own access token would get, so a profile whose owner blocked them comes back as `404`. Omit for the anonymous view.
 </ParamField>
 
 <ParamField body="include" type="string">
@@ -46,6 +50,10 @@ const user = await sublay.users.fetchUserByForeignId({
 
 <ParamField body="foreignId" type="string" required>
   Your application's user identifier.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Read as this user: the result is exactly what their own access token would get, so a profile whose owner blocked them comes back as `404`. Omit for the anonymous view. With `createIfNotFound`, it shapes only the read; a user this call creates is always created by the app.
 </ParamField>
 
 <ParamField body="createIfNotFound" type="boolean">
@@ -96,6 +104,10 @@ const user = await sublay.users.fetchUserByUsername({ username: "alice" });
 
 <ParamField body="username" type="string" required>
   The user's unique username.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Read as this user: the result is exactly what their own access token would get, so a profile whose owner blocked them comes back as `404`. Omit for the anonymous view.
 </ParamField>
 
 <ParamField body="include" type="string">
@@ -194,6 +206,10 @@ const users = await sublay.users.fetchUserSuggestions({ query: "ali" });
   Partial name or username to search for.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Read as this user: the result is exactly what their own access token would get, so users block-edged with them are left out. Omit for the anonymous view.
+</ParamField>
+
 <SpaceReputationParams variant="user" field="body" />
 
 **Returns** — `Promise<User[]>`
@@ -223,7 +239,7 @@ const { available } = await sublay.users.checkUsernameAvailability({
 Returns a user's comments — top-level comments and replies alike, across entities — cursor-paginated. See [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id).
 
 <Note>
-  Pass `actingUserId` to read the history as that user: their own moderator-removed comments are included in full, the block rules and `blockedFilter` apply from their perspective (comments on an entity whose author blocked them are left out, except [their own](/v8/api-reference/users/fetch-comments-by-user-id#your-own-comments-on-an-unavailable-entity)), the `isAuthorBlocked` / `isUnavailable` flags are set and `userReaction` is populated. Without it the read is anonymous: deleted and moderator-removed comments are left out, no block rule applies, `isAuthorBlocked` and `isUnavailable` are always `false`, and `userReaction` isn't populated.
+  Pass `actingUserId` to read the history as that user: their own moderator-removed comments are included in full, the block rules and `blockedFilter` apply from their perspective (comments on an entity whose author blocked them are left out, except [their own](/v8/api-reference/users/fetch-comments-by-user-id#your-own-comments-on-an-unavailable-entity)), the `isAuthorBlocked` / `isUnavailable` flags are set, `userReaction` is populated, and the [moderation details](/v8/data-models/comment#moderation-fields) are what that user may see. Without it the read is anonymous: deleted and moderator-removed comments are left out, no block rule applies, `isAuthorBlocked` and `isUnavailable` are always `false`, and `userReaction` isn't populated; the moderation details are all included, since the request is made with your service key.
 </Note>
 
 ```typescript
@@ -246,7 +262,7 @@ const next = await sublay.users.fetchCommentsByUserId({
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  The user to read the history as. Omit for the anonymous view.
+  The user to read the history as: the result is exactly what their own access token would get. Omit for the anonymous view.
 </ParamField>
 
 <ParamField body="entityId" type="string">
@@ -307,6 +323,10 @@ const { data, pagination } = await sublay.users.fetchFollowersByUserId({
   The Sublay user ID.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Read as this user: the result is exactly what their own access token would get, so users block-edged with them are left out. Omit for the anonymous view.
+</ParamField>
+
 <ParamField body="page" type="number">
   Page number (1-indexed). Defaults to `1`.
 </ParamField>
@@ -343,6 +363,10 @@ const { count } = await sublay.users.fetchFollowersCountByUserId({
   The Sublay user ID.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Read as this user: the result is exactly what their own access token would get, so users block-edged with them are left out. Omit for the anonymous view.
+</ParamField>
+
 **Returns** — `Promise<{ count: number }>`
 
 ---
@@ -361,6 +385,10 @@ const { data, pagination } = await sublay.users.fetchFollowingByUserId({
 
 <ParamField body="userId" type="string" required>
   The Sublay user ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Read as this user: the result is exactly what their own access token would get, so users block-edged with them are left out. Omit for the anonymous view.
 </ParamField>
 
 <ParamField body="page" type="number">
@@ -399,6 +427,10 @@ const { count } = await sublay.users.fetchFollowingCountByUserId({
   The Sublay user ID.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Read as this user: the result is exactly what their own access token would get, so users block-edged with them are left out. Omit for the anonymous view.
+</ParamField>
+
 **Returns** — `Promise<{ count: number }>`
 
 ---
@@ -417,6 +449,10 @@ const { data, pagination } = await sublay.users.fetchConnectionsByUserId({
 
 <ParamField body="userId" type="string" required>
   The Sublay user ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Read as this user: the result is exactly what their own access token would get, so users block-edged with them are left out. Omit for the anonymous view.
 </ParamField>
 
 <ParamField body="page" type="number">
@@ -453,6 +489,10 @@ const { count } = await sublay.users.fetchConnectionsCountByUserId({
 
 <ParamField body="userId" type="string" required>
   The Sublay user ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Read as this user: the result is exactly what their own access token would get, so users block-edged with them are left out. Omit for the anonymous view.
 </ParamField>
 
 **Returns** — `Promise<{ count: number }>`

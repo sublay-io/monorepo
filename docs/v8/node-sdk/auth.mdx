@@ -9,6 +9,8 @@ The `auth` module handles user authentication flows server-side. This is useful 
   All auth functions operate on behalf of your project. The caller is your server, authenticated via API key — not an end user.
 </Note>
 
+Changing or setting a password, self-service account deletion, and linking or listing OAuth identities need the user's own access token: a service key is refused (`403 auth/user-token-required` or `oauth/user-token-required`), so this SDK has no functions for them. Call them from your client with the user's session. To delete an account from your server, use [`users.deleteUser`](/v8/node-sdk/users#deleteuser).
+
 ---
 
 ### signUp
@@ -170,7 +172,7 @@ await sublay.auth.requestPasswordReset({ email: "user@example.com" });
 
 Completes a password reset using a token from the reset email.
 
-This revokes **every** session for that user and removes **every** push binding they hold, on every device — a reset is the remedy for a suspected compromise, so nothing is spared and there is no field to spare one with. Contrast [`changePassword`](#changepassword), which keeps the calling session and can keep one device's binding. They sign in again everywhere, and each device re-binds for push on its own once it is next opened. Projects without the `push` bundle skip the binding step and are otherwise unaffected.
+This revokes **every** session for that user and removes **every** push binding they hold, on every device — a reset is the remedy for a suspected compromise, so nothing is spared and there is no field to spare one with. Contrast [Change Password](/v8/api-reference/auth/change-password), which a user calls with their own access token: it keeps their current session and can keep one device's binding. They sign in again everywhere, and each device re-binds for push on its own once it is next opened. Projects without the `push` bundle skip the binding step and are otherwise unaffected.
 
 ```typescript
 await sublay.auth.resetPassword({
@@ -248,39 +250,3 @@ const { success } = await sublay.auth.sendVerificationEmail({
 </ParamField>
 
 **Returns** — `Promise<{ success: boolean }>`
-
----
-
-### changePassword
-
-Changes a user's password, verifying their current password first. Use this for an authenticated "change password" flow (as opposed to the token-based `resetPassword`).
-
-A password change ends **every session** for that user and deletes every push binding they hold — see [Change Password](/v8/api-reference/auth/change-password). A service key is not a session, so a call made with one has nothing to spare.
-
-```typescript
-const { success, message } = await sublay.auth.changePassword({
-  userId: "usr_abc123",
-  password: "currentP@ss",
-  newPassword: "newS3cur3P@ss",
-});
-```
-
-<ParamField body="userId" type="string" required>
-  The Sublay user ID whose password to change.
-</ParamField>
-
-<ParamField body="password" type="string" required>
-  The user's current password (verified before the change).
-</ParamField>
-
-<ParamField body="newPassword" type="string" required>
-  The new password to set.
-</ParamField>
-
-<ParamField body="pushDevice" type="object">
-  One device whose push binding should survive the change: `{ platform: "ios" | "android", token }` or `{ platform: "web", subscription }`.
-
-  A server-side caller normally has no device to name and should omit this — every binding for the user then goes, which is the right default when acting on someone's behalf. Supply it only when your own client told you which device it is on and you want that one to keep receiving notifications.
-</ParamField>
-
-**Returns** — `Promise<{ success: boolean; message: string }>`

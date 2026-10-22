@@ -67,7 +67,7 @@ Your service key authenticates as the project, not as any single end user. So fu
 
 `userId` only ever names a user the request is **about**: a target, such as the user to follow, block or add to a conversation, or a filter, such as the author filter on `fetchManyEntities`. So a call that acts on one user toward another carries both, for example `createFollow({ userId: target, actingUserId: actor })`.
 
-Where a method requires an acting user and you leave `actingUserId` out, the server answers `400 <resource>/missing-user-id`. The SDK's types send it under the right name; a raw `userId` in its place is refused by most endpoints with `400 <resource>/unsupported-param`. See [Authentication → Acting as a user](/v8/authentication#acting-as-a-user).
+Where a method requires an acting user and you leave `actingUserId` out, the server answers `400 <resource>/missing-user-id`. Reads shaped by who is looking (user profiles, follower, following and connection lists and counts, comment history, `search.searchUsers`) take it optionally: with it you get exactly that user's view, without it the anonymous one. `users.updateUser`, `users.deleteUser` and `push.send` act as your app and take no `actingUserId`. Endpoints that need the user's own access token (password change, account deletion, OAuth identities, push device registration) refuse service keys, so the SDK has no functions for them. The SDK's types send it under the right name; a raw `userId` in its place is refused by most endpoints with `400 <resource>/unsupported-param`. See [Authentication → Acting as a user](/v8/authentication#acting-as-a-user).
 
 <Note>
   `oauth` is intentionally not exposed by this SDK (it's a browser redirect flow).

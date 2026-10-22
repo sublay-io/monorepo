@@ -75,6 +75,10 @@ const { data, pagination } = await sublay.search.searchUsers({
   Maximum number of results to return.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  The user to search as: the results are exactly what their own access token would get, so users block-edged with them are left out. Omit to search with no viewer.
+</ParamField>
+
 **Returns** — `Promise<PaginatedResponse<User>>`
 
 ---
@@ -156,14 +160,19 @@ const { answer, sources } = await sublay.search.askContent({
 
 ### matchUsers
 
-Matches people by **activity-derived interest facets**, in `passive` mode (against a given user's own facets) or `directed` mode (against a free-text topic). See the [Interest Matching](/v8/interest-matching) guide for setup and the model.
+Matches people by **activity-derived interest facets**, for one user (`actingUserId`), in `passive` mode (against that user's own facets) or `directed` mode (against a free-text topic). See the [Interest Matching](/v8/interest-matching) guide for setup and the model.
 
 <Note>
   Requires a paid plan, the `ai-search` and `interest-matching` bundles, and `interestMatching.enabled` on the project.
 </Note>
 
+<Warning>
+  The rate limit is per IP address (30 requests per minute in `passive` mode, 10 in `directed` mode), so matches your server runs for different users share one budget.
+</Warning>
+
 ```typescript
 const { results } = await sublay.search.matchUsers({
+  actingUserId: "usr_abc123",
   mode: "directed",
   query: "biotech",
   limit: 10,
@@ -171,6 +180,10 @@ const { results } = await sublay.search.matchUsers({
 
 // results: [{ user, score, matchedFacets: [{ similarity, candidateFacet, askerFacet?, sampleContent? }] }]
 ```
+
+<ParamField body="actingUserId" type="string" required>
+  The user to find matches for (the asker). Their interests drive `passive` mode, users block-edged with them are left out, and the result is exactly what their own access token would get.
+</ParamField>
 
 <ParamField body="mode" type="string" required>
   `"passive"` or `"directed"`.

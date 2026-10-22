@@ -21,7 +21,7 @@ The target user is supplied in the request body (symmetric with [Withdraw RSVP](
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, and it is recorded as theirs. With a user token, omit it (it may only name the token's own user).
+  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -43,10 +43,10 @@ Returns the updated [Event](/v8/data-models/event) with the new `hostIds`.
     { "error": "actingUserId must be a user id.", "code": "event/invalid-body" }
     ```
   </Accordion>
-  <Accordion title="Unauthorized — 403">
-    A user token sent an `actingUserId` other than its own user.
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
-    { "error": "Unauthorized", "code": "event/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "event/acting-user-not-allowed" }
     ```
   </Accordion>
   <Accordion title="Not Found — 404">

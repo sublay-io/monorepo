@@ -40,10 +40,8 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
   Custom key-value data stored alongside the file record.
 </ParamField>
 
-<ParamField body="userId" type="string">
-  Attribute the upload to a specific user. With a user token the upload is
-  already attributed to the caller; only **service keys** may name a
-  different user. Omit for a backend/project-owned file (no owning user).
+<ParamField body="actingUserId" type="string">
+  Service key only: the user this request acts as, who owns the uploaded file. Leave it out to upload an app-owned file with no owning user. A user token always acts as its own user and must not send it (`400 storage/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -65,6 +63,22 @@ The `type` field is one of: `image`, `video`, `document`, `other`. It is inferre
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "storage/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "storage/unsupported-param",
+      "param": "userId"
+    }
+    ```
+  </Accordion>
   <Accordion title="No File — 400 Bad Request">
     ```json
     { "error": "No file provided", "code": "storage/no-file" }

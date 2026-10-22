@@ -29,6 +29,10 @@ Returns a paginated list of users that the authenticated user is following. Unli
   Restricts which field `query` matches against — `username` or `name`. When omitted, `query` matches either field.
 </ParamField>
 
+<ParamField query="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. The users they follow are listed. A user token always acts as its own user and must not send it (`400 follow/acting-user-not-allowed`).
+</ParamField>
+
 ## Response
 
 On success, returns HTTP `200` with a paginated response:
@@ -68,6 +72,39 @@ On success, returns HTTP `200` with a paginated response:
     </ResponseField>
   </Expandable>
 </ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    {
+      "error": "Missing user ID",
+      "code": "follow/missing-user-id"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    {
+      "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
+      "code": "follow/acting-user-not-allowed"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "follow/unsupported-param",
+      "param": "userId"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
 
 ## See Also
 

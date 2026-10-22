@@ -6,7 +6,7 @@ description: "Set the authenticated user's disabled push notification types"
 
 Upserts the acting user's push notification preferences. The request **replaces** the whole disabled-types set — send the complete set you want stored, not a delta. Duplicates are collapsed; only valid event type names are accepted.
 
-Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) writes its own preferences. A service key acts on behalf of a named user via the optional body `userId` — a service key without `userId` is rejected, and an end-user token may not name a different user. Requires the `push` bundle.
+Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) writes its own preferences. A service key acts on behalf of a named user via the body `actingUserId` — a service key without `actingUserId` is rejected, and an end-user token must not send it. Requires the `push` bundle.
 
 ## Body Parameters
 
@@ -14,8 +14,8 @@ Requires authentication. **Acting-user-scoped:** an end-user token (`Authorizati
   The complete set of event types to disable for push. Each value must be one of the server's exact event type names (see the [event palette](/v8/notification-preferences#the-event-palette)) — unknown names are rejected. Pass `[]` to re-enable everything (all-on).
 </ParamField>
 
-<ParamField body="userId" type="string">
-  The acting user whose preferences are written. **Service keys only** — a service key must pass it; an end-user token infers it from the auth token and may not name a different user.
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. Their preferences are written. A user token always acts as its own user and must not send it (`400 notification-preferences/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -39,17 +39,27 @@ Returns `200` with the stored set (deduplicated).
     common case, since access tokens live 30 minutes. Refresh the access token
     and retry.
   </Accordion>
-  <Accordion title="Acting As Another User — 403">
+  <Accordion title="Acting User Not Allowed — 400">
     ```json
-    { "error": "Unauthorized", "code": "notification-preferences/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "notification-preferences/acting-user-not-allowed" }
     ```
-    Returned when an end-user token names a `userId` other than its own.
+    Returned when a user token sends `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "notification-preferences/unsupported-param",
+      "param": "userId"
+    }
+    ```
+    Returned when the request sends `userId`. On this route the user a service key acts as is `actingUserId`.
   </Accordion>
   <Accordion title="Missing User ID — 400">
     ```json
     { "error": "Missing user ID", "code": "notification-preferences/missing-user-id" }
     ```
-    Returned when a service key omits the required `userId` (it has no implicit session user).
+    Returned when a service key omits the required `actingUserId` (it has no implicit session user).
   </Accordion>
   <Accordion title="Invalid Body — 400">
     ```json

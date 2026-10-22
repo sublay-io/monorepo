@@ -16,6 +16,12 @@ Removes the connection relationship between the authenticated user and the speci
   The Sublay user ID (UUID) of the other user.
 </ParamField>
 
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as, who removes the connection. A user token always acts as its own user and must not send it (`400 connection/acting-user-not-allowed`).
+</ParamField>
+
 ## Response
 
 On success, returns HTTP `200`.
@@ -47,6 +53,24 @@ On success, returns HTTP `200`.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    {
+      "error": "Missing user ID",
+      "code": "connection/missing-user-id"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    {
+      "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
+      "code": "connection/acting-user-not-allowed"
+    }
+    ```
+  </Accordion>
   <Accordion title="Self-Disconnect — 400">
     ```json
     {

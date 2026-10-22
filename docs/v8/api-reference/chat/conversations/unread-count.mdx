@@ -8,6 +8,12 @@ Returns two aggregate counts across all of the current user's active conversatio
 
 Thread replies are excluded from unread counts. Only main-stream messages are counted.
 
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. Their unread counts are returned. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
+</ParamField>
+
 ## Response
 
 <ResponseField name="totalUnread" type="number">
@@ -17,3 +23,30 @@ Thread replies are excluded from unread counts. Only main-stream messages are co
 <ResponseField name="unreadConversationCount" type="number">
   Number of conversations with at least one unread message.
 </ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "chat/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "chat/unsupported-param",
+      "param": "userId"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "Missing user ID", "code": "chat/missing-user-id" }
+    ```
+  </Accordion>
+</AccordionGroup>

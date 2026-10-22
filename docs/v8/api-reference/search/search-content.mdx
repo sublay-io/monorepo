@@ -35,7 +35,7 @@ Performs vector-similarity search over project content (entities, comments, and 
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only: the user to search as. Results follow that user's access — their chats, their blocks. Without it, a service key gets entities and comments but no chat messages. A user token may only send its own user's id.
+  Service key only: the user to search as. Results follow that user's access — their chats, their blocks. Without it, a service key gets entities and comments but no chat messages. A user token always acts as its own user and must not send it (`400 search/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField body="limit" type="number" default="20">
@@ -94,11 +94,11 @@ Results are also filtered for the user — the signed-in user, or the `actingUse
     { "error": "limit: Too big: expected number to be <=50", "code": "search/invalid-body" }
     ```
   </Accordion>
-  <Accordion title="Acting as Another User — 403">
+  <Accordion title="Acting User Not Allowed — 400">
     ```json
-    { "error": "Unauthorized", "code": "search/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "search/acting-user-not-allowed" }
     ```
-    Returned when a user token sends an `actingUserId` other than its own user.
+    Returned when a user token, or a request with no credentials, sends `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
   <Accordion title="Plan Required — 403">
     ```json

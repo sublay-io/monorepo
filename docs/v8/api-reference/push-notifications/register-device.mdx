@@ -118,7 +118,7 @@ Returns `200` with the stored device record on success.
 
 ## Security note
 
-Unlike most other write endpoints, this endpoint does not accept a `userId` body parameter and cannot be called with a service key. Allowing a backend to register an arbitrary token for an arbitrary user would let it redirect that user's push notifications to an attacker-controlled device. Registration must always come from the end user's own session.
+Unlike most other write endpoints, this endpoint takes no `actingUserId` and cannot be called with a service key. Allowing a backend to register an arbitrary token for an arbitrary user would let it redirect that user's push notifications to an attacker-controlled device. Registration must always come from the end user's own session.
 
 ## See Also
 

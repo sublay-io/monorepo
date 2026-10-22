@@ -52,6 +52,10 @@ This endpoint accepts `multipart/form-data` to support file attachments alongsid
   File attachments (multipart/form-data). Up to 10 files per message. Optional.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. The message author; must be an active member. On a multipart request, send it as a form field. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
+</ParamField>
+
 ## Query Parameters
 
 ### Space-scoped reputation
@@ -67,6 +71,28 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "chat/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "chat/unsupported-param",
+      "param": "userId"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "Missing user ID", "code": "chat/missing-user-id" }
+    ```
+  </Accordion>
   <Accordion title="Empty Message — 400 Bad Request">
     ```json
     { "error": "Message must have content, a GIF, or at least one file.", "code": "chat/empty-message" }

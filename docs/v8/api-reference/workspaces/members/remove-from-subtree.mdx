@@ -27,7 +27,7 @@ Removes the target user's **direct** memberships on this workspace and every des
 <ParamField body="actingUserId" type="string" required>
   Service keys only — the **acting** user (must hold `remove-member`, rank-bounded per node). **Required** for a key: there is no unbounded path on this route, so the sweep's reach is always that user's — a key that names nobody is refused with `400 workspace/missing-user-id`. Name the **owner** for a full-subtree sweep.
 
-  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
@@ -96,11 +96,11 @@ Removes the target user's **direct** memberships on this workspace and every des
     ```
     A service key called this route without naming an `actingUserId`. The sweep's reach is defined by the acting user's standing per node, so it must be performed *as* somebody.
   </Accordion>
-  <Accordion title="Acted as Another User — 403">
+  <Accordion title="Acting User Not Allowed — 400">
     ```json
-    { "error": "Unauthorized", "code": "workspace/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
     ```
-    A plain user token sent an `actingUserId` naming a **different** user. Only a service key may act as someone else.
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json

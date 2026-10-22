@@ -6,7 +6,7 @@ description: "Set or clear the authenticated user's mute on a conversation"
 
 Sets or clears the acting user's mute on a conversation. Muting suppresses the `message` push for this conversation only — the message is still delivered, socket-emitted, and readable. Timed mutes expire lazily (push resumes once the window passes).
 
-Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) mutes its own membership. A service key acts on behalf of a named user via the optional body `userId` — a service key without `userId` is rejected, and an end-user token may not name a different user (both consistent with every other per-user write). Requires the `chat` bundle.
+Requires authentication. **Acting-user-scoped:** an end-user token (`Authorization: Bearer <accessToken>`) mutes its own membership. A service key acts on behalf of a named user via the body `actingUserId`, which it must send; an end-user token must not send it (both consistent with every other per-user write). Requires the `chat` bundle.
 
 ## Path Parameters
 
@@ -28,8 +28,8 @@ Requires authentication. **Acting-user-scoped:** an end-user token (`Authorizati
   The server resolves the window from its own clock, so client clock skew can't distort it.
 </ParamField>
 
-<ParamField body="userId" type="string">
-  The acting user whose membership is muted. **Service keys only** — a service key must pass it (there is no implicit session user); an end-user token infers it from the auth token and may not name a different user.
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. Their membership is muted. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -57,17 +57,27 @@ Returns `200` with the acting user's own (self-serialized) member row under `cur
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="Unauthorized — 401 / 403">
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
-    { "error": "Unauthorized", "code": "chat/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "chat/acting-user-not-allowed" }
     ```
-    `403 chat/unauthorized` when an end-user token names a `userId` other than its own. A `401` is returned when no valid credential is present.
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "chat/unsupported-param",
+      "param": "userId"
+    }
+    ```
   </Accordion>
   <Accordion title="Missing User ID — 400">
     ```json
     { "error": "Missing user ID", "code": "chat/missing-user-id" }
     ```
-    Returned when a service key omits the required `userId` (it has no implicit session user).
+    Returned when a service key omits the required `actingUserId` (it has no implicit session user).
   </Accordion>
   <Accordion title="Not Found — 404">
     ```json

@@ -36,6 +36,10 @@ All fields are optional. Only provided fields are updated.
   Who can post messages. Only valid for `space` conversations. Accepted values: `"members"` (any active member), `"admins"` (only space admins and moderators).
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. Must be allowed to update the conversation (see **Authorization** above). A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
+</ParamField>
+
 ## Response
 
 Returns the updated [Conversation](/v8/data-models/conversation) object, with `avatarFile` populated if set.
@@ -43,6 +47,28 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "chat/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "chat/unsupported-param",
+      "param": "userId"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "Missing user ID", "code": "chat/missing-user-id" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Conversation not found.", "code": "chat/not-found" }

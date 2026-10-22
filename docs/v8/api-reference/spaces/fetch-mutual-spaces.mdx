@@ -15,7 +15,7 @@ Returns a paginated list of spaces that both the authenticated user and another 
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string">
-  The authenticated user to act as. Only accepted with a **service key** — a user token always acts as itself and may not name a different user. Ignored (the token's user is used) for end-user requests.
+  Service key only, and required with one: the user this request acts as, whose spaces are compared with the user in the path. A user token always acts as its own user and must not send it (`400 space/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField query="page" type="number">
@@ -47,6 +47,18 @@ Returns a paginated list of spaces that both the authenticated user and another 
     Returned when `userId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
     { "error": "Invalid user id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "Missing user ID", "code": "space/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
     ```
   </Accordion>
 </AccordionGroup>

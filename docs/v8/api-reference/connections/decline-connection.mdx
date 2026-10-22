@@ -12,6 +12,12 @@ Declines a pending connection request. Only the receiver of the original request
   The ID (UUID) of the pending connection record to decline.
 </ParamField>
 
+## Body Parameters
+
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. Must be the receiver of the request. A user token always acts as its own user and must not send it (`400 connection/acting-user-not-allowed`).
+</ParamField>
+
 ## Response
 
 On success, returns HTTP `200`:
@@ -44,6 +50,34 @@ On success, returns HTTP `200`:
     {
       "error": "Only the receiver can decline a connection request.",
       "code": "connection/unauthorized"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    {
+      "error": "Missing user ID",
+      "code": "connection/missing-user-id"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    {
+      "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
+      "code": "connection/acting-user-not-allowed"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "connection/unsupported-param",
+      "param": "userId"
     }
     ```
   </Accordion>

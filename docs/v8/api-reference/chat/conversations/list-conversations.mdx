@@ -30,8 +30,8 @@ To fetch a single conversation in this same shape — one that was paginated out
   Number of conversations to return per page. Defaults to `20`. Maximum `50`.
 </ParamField>
 
-<ParamField query="userId" type="string">
-  The acting user whose conversations are listed. **Service keys only** — a service key must pass it (there is no implicit session user); an end-user token infers it from the auth token and may not name a different user.
+<ParamField query="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. Their conversations are listed. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -99,3 +99,30 @@ To fetch a single conversation in this same shape — one that was paginated out
 <ResponseField name="hasMore" type="boolean">
   Whether more conversations exist beyond this page.
 </ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "chat/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "chat/unsupported-param",
+      "param": "userId"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "Missing user ID", "code": "chat/missing-user-id" }
+    ```
+  </Accordion>
+</AccordionGroup>

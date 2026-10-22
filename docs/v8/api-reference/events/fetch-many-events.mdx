@@ -57,7 +57,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 </ParamField>
 
 <ParamField query="myRsvp" type="string">
-  Comma-separated RSVP statuses the caller responded with, e.g. `"going,maybe"`. Requires an authenticated caller (or a service key passing `userId`); otherwise returns `400`.
+  Comma-separated RSVP statuses the caller responded with, e.g. `"going,maybe"`. Requires an authenticated caller (or a service key sending `actingUserId`); otherwise returns `400`.
 </ParamField>
 
 <ParamField query="locationFilters" type="object">
@@ -76,8 +76,8 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
   Comma-separated associations to expand: `"user"`, `"space"`, `"files"`, `"userRsvp"`.
 </ParamField>
 
-<ParamField query="userId" type="string">
-  The requester id. Used for the `myRsvp` filter, `userRsvp` enrichment, and visibility resolution. For non-privileged callers the server infers this from the auth token, and a user token may only name itself (`403` otherwise); service keys may pass it explicitly.
+<ParamField query="actingUserId" type="string">
+  Service key only: the user this request acts as, whose view is returned (visibility, `userRsvp`, the `myRsvp` filter). Leave it out for the key's own view. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -87,15 +87,25 @@ Returns a paginated response: `{ data: Event[], pagination: { page, pageSize, to
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="Unauthorized — 403">
-    A user token passed a `userId` other than its own user.
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
-    { "error": "Unauthorized", "code": "event/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "event/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "event/unsupported-param",
+      "param": "userId"
+    }
     ```
   </Accordion>
   <Accordion title="myRsvp Requires Auth — 400">
     ```json
-    { "error": "The myRsvp filter requires an authenticated caller (or a service key acting via a userId query param).", "code": "event/my-rsvp-requires-auth" }
+    { "error": "The myRsvp filter requires an authenticated caller (or a service key acting via an actingUserId query param).", "code": "event/my-rsvp-requires-auth" }
     ```
   </Accordion>
   <Accordion title="Invalid Query — 400">

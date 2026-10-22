@@ -7,7 +7,7 @@ description: "Get a paginated list of app notifications for the authenticated us
 Returns a paginated list of app notifications for the currently authenticated user, ordered newest first. Notifications are scoped to the calling user — a user cannot read another user's notifications.
 
 <Note>
-  This endpoint requires an authenticated user. Include a valid `Authorization: Bearer <accessToken>` header.
+  This endpoint requires an authenticated user. Include a valid `Authorization: Bearer <accessToken>` header, or use a service key and name the user in `actingUserId`.
 </Note>
 
 ## Query Parameters
@@ -18,6 +18,10 @@ Returns a paginated list of app notifications for the currently authenticated us
 
 <ParamField query="limit" type="number" default="5">
   Number of results per page. Maximum `50`.
+</ParamField>
+
+<ParamField query="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as. Their notifications are listed. A user token always acts as its own user and must not send it (`400 app-notification/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -91,6 +95,34 @@ Returns a paginated envelope containing an array of notification objects.
     {
       "error": "...",
       "code": "app-notification/invalid-query"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    {
+      "error": "Missing user ID",
+      "code": "app-notification/missing-user-id"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    {
+      "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
+      "code": "app-notification/acting-user-not-allowed"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "app-notification/unsupported-param",
+      "param": "userId"
     }
     ```
   </Accordion>

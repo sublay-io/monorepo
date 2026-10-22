@@ -21,7 +21,7 @@ Removes the caller's own membership on **this node only** (self-service, no capa
 <ParamField body="actingUserId" type="string" required>
   Service keys only — the user to act as, whose membership is removed (sent in the body so the act-as-user path works on `DELETE`). **Required for a key:** leaving is inherently self-service, so there is no unbounded path — a key that names nobody is refused with `400 workspace/missing-user-id`.
 
-  A plain user token omits it — the actor is the token's own user. The field is **not** ignored for such a token: sending your *own* user id is a harmless no-op, but sending **anyone else's** is a `403 workspace/unauthorized`. See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
@@ -47,11 +47,11 @@ Removes the caller's own membership on **this node only** (self-service, no capa
     ```
     A service key called this route without naming an `actingUserId`. Leaving removes *your own* membership row; there is none for the app itself. To remove somebody else, use [Remove Member](/v8/api-reference/workspaces/members/remove-member).
   </Accordion>
-  <Accordion title="Acted as Another User — 403">
+  <Accordion title="Acting User Not Allowed — 400">
     ```json
-    { "error": "Unauthorized", "code": "workspace/unauthorized" }
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
     ```
-    A plain user token sent an `actingUserId` naming a **different** user. Only a service key may act as someone else.
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json

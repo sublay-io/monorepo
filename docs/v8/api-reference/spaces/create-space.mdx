@@ -41,7 +41,7 @@ Creates a new space. The authenticated user is automatically added as an admin. 
 </ParamField>
 
 <ParamField body="parentSpaceId" type="string">
-  Optional UUID of a parent space. The caller must be an admin of the parent space; when a service key creates the space for a user (`userId`), that user must be.
+  Optional UUID of a parent space. The caller must be an admin of the parent space; when a service key creates the space for a user (`actingUserId`), that user must be.
 </ParamField>
 
 <ParamField body="avatarFile" type="file">
@@ -52,6 +52,10 @@ Creates a new space. The authenticated user is automatically added as an admin. 
   Optional banner image. Multipart form field. Requires `bannerFile.options` when provided.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as, who creates the space and becomes its admin. A user token always acts as its own user and must not send it (`400 space/acting-user-not-allowed`).
+</ParamField>
+
 ## Response
 
 Returns the created [Space](/v8/data-models/space) object with `membersCount`, `childSpacesCount`, and optional file associations.
@@ -60,8 +64,25 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
 
 <AccordionGroup>
   <Accordion title="Auth Required — 401">
+    No user token, and no `actingUserId` from a service key.
     ```json
     { "error": "Authentication required to create a space.", "code": "space/auth-required" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "space/unsupported-param",
+      "param": "userId"
+    }
     ```
   </Accordion>
   <Accordion title="Slug Taken — 409">

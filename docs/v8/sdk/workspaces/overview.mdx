@@ -71,7 +71,7 @@ With a client token, every endpoint in the bundle resolves the actor from that t
 <Warning>
   **Seeing the roster and seeing people's *authority* are two different tiers.** Any relation may read the roster and one member's standing — who is there, their `reasons`, `title` and `metadata`. But the authority-bearing fields — **`capabilities`, `permissions`, `rank`, `relativeRank`** — are **omitted** (absent, not `null`) unless the caller holds one of the four people-operating capabilities (`invite`, `remove-member`, `edit-member-access`, `edit-member-profile`) or is the `owner` / an `ancestor-owner`.
 
-  A caller **always** sees their own — their own roster row, their own standing, and the [authority read](/v8/api-reference/workspaces/fetch-authority), which is inherently a self read and never fenced. So a plain member can always discover their own access; they just cannot enumerate everyone else's. A service key acting as **itself** is never fenced; one that **names** an `actingUserId` is fenced exactly as that user is — see [Acting on behalf of a user](#acting-on-behalf-of-a-user). Type all four fields as optional on client surfaces. (`relativeRank` is fenced *with* `rank` because it is `rank` minus a number the caller already knows — leaking it would leak `rank` exactly.)
+  A caller **always** sees their own — their own roster row, their own standing, and the [authority read](/v8/api-reference/workspaces/fetch-authority), which is inherently a self read and never fenced. So a plain member can always discover their own access; they just cannot enumerate everyone else's. A service key reads the roster and member standing only by naming an `actingUserId` (a key that names nobody gets `400 workspace/missing-user-id`), and is fenced exactly as that user is — see [Acting on behalf of a user](#acting-on-behalf-of-a-user). Type all four fields as optional on client surfaces. (`relativeRank` is fenced *with* `rank` because it is `rank` minus a number the caller already knows — leaking it would leak `rank` exactly.)
 
   **The gate is answered per node, not once per request.** Every row a response returns is judged against your **resolved** standing on the workspace *that row belongs to* — including capabilities [reaching](/v8/data-models/workspace#reach-and-the-wall-door-rule) in through an unbroken open inherit chain, and ownership from any ancestor, but not authority a **sealed** node blocks. The place this bites is [`include=descendants`](/v8/api-reference/workspaces/members/list-members) on the roster: a `descendant-member` row is judged on its own node, so holding `invite` on a parent does not unfence a sealed child's ranks and capabilities. Being allowed to *see* a descendant's roster (sealing) and being allowed to see its members' **authority** (the fence) are two tiers, and passing the first does not pass the second.
 </Warning>
@@ -138,8 +138,10 @@ Eight request shapes are refused outright rather than ignored, all of them `400`
 
 They come from **two layers**, and knowing which one answered tells you what to fix:
 
-1. **A gate**, mounted ahead of every route on the bundle. It reads the raw request, so it behaves identically whichever endpoint you call and whatever that route declares.
-2. **Each route's own body and query schemas.** All 21 routes validate *both* sides, and every schema declares exactly the fields its endpoint accepts. A top-level field it does not declare is refused, not stripped. On the query side one check runs ahead of the schema and reads the raw query string rather than the parsed one — the length limit below — so it too behaves identically on every route.
+1. **A gate**, mounted ahead of every route on the bundle. It reads the raw request, so it behaves identically whichever endpoint you call and whatever that route declares. It refuses a `userId`, a near-miss spelling of `actingUserId`, and (when a key names nobody) a body no parser read.
+2. **Each route's own body and query schemas.** All 21 routes validate *both* sides, and every schema declares exactly the fields its endpoint accepts. A top-level field it does not declare is refused, not stripped. On the query side two checks run just ahead of the schema — the length limit and the cache-buster rule below — and the first reads the raw query string rather than the parsed one.
+
+Between the two, on the routes that check the acting user's standing before anything else — editing, deleting or transferring a workspace, its inherit flag, the four invitation routes, and the member routes (listing members, reading, editing or removing one, removing one from the subtree) — that check runs **after the gate and before the schemas**. It refuses a malformed `actingUserId`, a key that names nobody (`400 workspace/missing-user-id`), a workspace the acting user cannot see (`404`) and a missing capability (`403`). So on those routes a request that is refused there never reaches its schemas, and an undeclared field is only reported once the request names a user who may perform it.
 
 <AccordionGroup>
   <Accordion title="A body or query `userId` — 400">
@@ -203,7 +205,7 @@ They come from **two layers**, and knowing which one answered tells you what to 
     }
     ```
 
-    A workspaces request whose raw query string holds **1,000 or more `&`-separated segments** is refused before anything else about it is examined. The most any workspaces request may carry is 999; the largest query vocabulary on the bundle is five parameters, so no real call comes near it.
+    A workspaces request whose raw query string holds **1,000 or more `&`-separated segments** is refused before its parameters are checked against the route's schema. The most any workspaces request may carry is 999; the largest query vocabulary on the bundle is five parameters, so no real call comes near it.
 
     **This is a rule about the query string's length, not about which names are in it.** The parser's budget is spent per `&`-separated segment, and a segment that parses to nothing spends it just the same — so 1,000 bare ampersands (`?&&&…`), 1,000 copies of `__proto__=1` (a name the parser discards on sight, leaving no key behind), and 1,000 copies of an ordinary *declared* parameter such as `include=` all reach the limit identically and are all refused identically. Which names you used has nothing to do with it, and neither does whether any of them is reserved.
 
@@ -252,7 +254,7 @@ They come from **two layers**, and knowing which one answered tells you what to 
 <Note>
   **Why this bundle is stricter than the rest of the API.** Elsewhere in Sublay an undeclared field is dropped and the request proceeds. Here it is refused, so that an actor lost on the way is reported as what it is.
 
-  A caller who writes `onBehalfOf: "<bob>"`, or `acting_user_id`, or spells the field correctly inside a body no parser read, believes the request is scoped to Bob. The server never sees Bob, so the request names nobody. Refusing the shape itself answers with an error that points at the field, instead of a missing-user error (or, on Fetch Workspace, the anonymous view) that leaves the caller guessing why Bob was not received.
+  A caller who writes `onBehalfOf: "<bob>"`, or `acting_user_id`, or spells the field correctly inside a body no parser read, believes the request is scoped to Bob. The server never sees Bob, so the request names nobody, and it is never carried out as anyone. A near-miss spelling and an unread body are refused at the gate with an error that points at the cause. Any other stray field is refused by the route's schema: on the routes that check the acting user first, a key that named nobody gets `400 workspace/missing-user-id` before that, and the stray field is reported once a user is named.
 
   Guessing which stray fields "look like" an actor cannot work: an open input space can always be shown a name nobody enumerated. Refusing categorically fails the other way — a field we forgot to declare is a `400` on first use, in development, fixed the same day.
 </Note>
@@ -261,7 +263,7 @@ They come from **two layers**, and knowing which one answered tells you what to 
   **The guarantee covers TOP-LEVEL keys.** State it with that scope rather than as "unknown fields are impossible":
 
   - `metadata` is caller-owned JSON and is never inspected, so `{"metadata":{"actingUserId":"<bob>"}}` parses and names nobody (so a key gets `400 workspace/missing-user-id`, or the anonymous view on Fetch Workspace). That is correct — `metadata` is your data — but it is not an actor channel.
-  - A nested or wrapped actor is **refused**, not ignored — the wrapper itself is an undeclared top-level key: `{ data: { actingUserId } }` and `?ctx[actingUserId]=` both come back `400 Unrecognized key: "data"` / `"ctx"`, and an array-wrapped body is `400 Invalid input: expected object, received array`. (Don't confuse this with the node SDK's `{ data: { actingUserId } }` axios *config* for DELETE bodies — that sends `{ actingUserId }` as the body and works.)
+  - A nested or wrapped actor is **refused**, not ignored — the wrapper itself is an undeclared top-level key: `{ data: { actingUserId } }` and `?ctx[actingUserId]=` come back `400 Unrecognized key: "data"` / `"ctx"`, and an array-wrapped body is `400 Invalid input: expected object, received array`. On the routes that check the acting user first, a key that names nobody at the top level gets `400 workspace/missing-user-id` instead, before the schema sees the wrapper. (Don't confuse this with the node SDK's `{ data: { actingUserId } }` axios *config* for DELETE bodies — that sends `{ actingUserId }` as the body and works.)
 
   Spell `actingUserId` at the top level and none of this applies.
 </Note>
@@ -277,10 +279,15 @@ They come from **two layers**, and knowing which one answered tells you what to 
 <Note>
   **Don't confuse these `400`s with the missing-actor `400`.** Two different failures, two different codes, checked in a fixed order.
 
-  - `workspace/invalid-body` / `workspace/invalid-query` — **the request is malformed.** It carries a `userId`, a field the endpoint does not declare, an unreadable body, or a bad `actingUserId`. Checked **first**, before the route runs.
+  - `workspace/invalid-body` / `workspace/invalid-query` — **the request is malformed.** It carries a `userId`, a field the endpoint does not declare, an unreadable body, a bad `actingUserId`, or a query string that is too long or repeats a cache-buster.
   - `workspace/missing-user-id` — **the route's own rule.** On every route but Fetch Workspace a key [must name someone](#acting-on-behalf-of-a-user). Nothing about the request's shape is wrong; it is simply an operation that has to belong to a person.
 
-  On `POST /workspaces` a key with no `actingUserId` and a clean request gets `workspace/missing-user-id` — but the same call carrying an undeclared field, or sent with a `text/plain` body, gets `workspace/invalid-body` instead. Fix what the message names; the missing-actor error appears once the request is otherwise well formed.
+  The gate's refusals (a `userId`, a near-miss spelling, an unread body) always come first. After that the order depends on the route:
+
+  - On the routes that check the acting user first (see [the layers above](#shapes-the-server-rejects)), `workspace/missing-user-id` comes **before** the schema refusals: a key with no `actingUserId` that also carries an undeclared field, an over-long query or a repeated `_`, gets `workspace/missing-user-id`, and the malformed part is reported once a user is named.
+  - On the other routes, such as `POST /workspaces`, the schemas run first: a key with no `actingUserId` and a clean request gets `workspace/missing-user-id`, but the same call carrying an undeclared field gets `workspace/invalid-body` instead, and the missing-actor error appears once the request is otherwise well formed.
+
+  Fix what the message names, then send again.
 
   Read the code, not the status: both are `400`, and only the code tells you whether to add an actor or repair the request.
 </Note>

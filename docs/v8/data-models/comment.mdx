@@ -126,7 +126,7 @@ A placeholder's moderation fields follow [Moderation fields](#moderation-fields)
 
 A comment on an entity with no space has no space moderators: only project-role admins and moderators, keys and the comment's author qualify.
 
-On [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id), [Search Content](/v8/api-reference/search/search-content) and [Ask](/v8/api-reference/search/ask), a service key that sends `actingUserId` is treated as that user, not as a key: it gets exactly what the user's own token would get.
+On [Search Content](/v8/api-reference/search/search-content) and [Ask](/v8/api-reference/search/ask), a service key that sends `actingUserId` is treated as that user, not as a key: it gets exactly what the user's own token would get. On [Fetch Comments by User](/v8/api-reference/users/fetch-comments-by-user-id), a service key never counts as a key here: with `actingUserId` it gets exactly that user's view, and without it the anonymous view.
 
 ## Blocked authors
 

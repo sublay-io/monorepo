@@ -17,8 +17,8 @@ export interface FetchCommentsByUserIdBaseProps extends SpaceReputationContextPa
    * what their own access token would get. Their own removed comments, block
    * rules, `blockedFilter`, the `isAuthorBlocked`/`isUnavailable` flags and
    * which moderation details (`moderationReason`, `moderatedById`) they may
-   * see all apply from their perspective. Omit it to read the history with no
-   * viewer; a service key then gets every moderation detail.
+   * see all apply from their perspective. Omit it for the anonymous view
+   * (no moderation details).
    */
   actingUserId?: string;
   /** Only comments on this entity. */

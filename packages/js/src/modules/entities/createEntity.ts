@@ -18,8 +18,6 @@ export interface CreateEntityProps {
   metadata?: Record<string, any>;
   nsfw?: boolean;
   isDraft?: boolean;
-  /** Create the entity without attributing it to the logged-in user (authorless). */
-  excludeUserId?: boolean;
 }
 
 export async function createEntity(

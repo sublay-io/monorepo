@@ -49,7 +49,6 @@ export interface CreateEntityProps {
   };
   metadata?: Record<string, any>;
   nsfw?: boolean;
-  excludeUserId?: boolean;
   requireUser?: boolean;
   isDraft?: boolean;
   images?: ImageUploadConfig;
@@ -74,7 +73,6 @@ function useCreateEntity(): (props: CreateEntityProps) => Promise<Entity> {
         location,
         metadata,
         nsfw,
-        excludeUserId,
         requireUser,
         isDraft,
         images,
@@ -105,7 +103,6 @@ function useCreateEntity(): (props: CreateEntityProps) => Promise<Entity> {
         if (location !== undefined) formData.append("location", JSON.stringify(location));
         if (metadata !== undefined) formData.append("metadata", JSON.stringify(metadata));
         if (nsfw !== undefined) formData.append("nsfw", nsfw.toString());
-        if (excludeUserId !== undefined) formData.append("excludeUserId", excludeUserId.toString());
         if (requireUser !== undefined) formData.append("requireUser", requireUser.toString());
         if (isDraft !== undefined) formData.append("isDraft", isDraft.toString());
 
@@ -173,7 +170,6 @@ function useCreateEntity(): (props: CreateEntityProps) => Promise<Entity> {
             location,
             metadata,
             nsfw,
-            excludeUserId,
             requireUser,
             isDraft,
           },

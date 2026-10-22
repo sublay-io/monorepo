@@ -6,7 +6,7 @@ description: "List positive reputation grants by recipient, by sender, or by rew
 
 import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
 
-Returns a paginated list of reputation grants, newest first. Requires authentication (user token or service key) and the `reputation` bundle.
+Returns a paginated list of reputation grants, newest first. Requires authentication (user token or service key) and the `reputation` bundle. A service key may name a viewer in `actingUserId` and then gets exactly that user's list; naming nobody, it gets what a signed-in user in no conversation gets.
 
 <Warning>
   **Only positive grants are ever returned — for every caller.** The `amount > 0` filter is baked into the query, so negative grants (your app's private moderation deductions) are unreachable here for a service key exactly as they are for a user token. Read them from [Fetch User Grant History](/v8/api-reference/reputation-grants/fetch-user-grant-history) instead.
@@ -27,6 +27,10 @@ Grants pointing at a **chat message** are private to that conversation, which is
 Supplying none returns `400 reputation-grant/missing-filter`; supplying more than one returns `400 reputation-grant/invalid-filter`. Combining shapes is rejected rather than intersected, because a target list narrowed by sender would render rows that no longer reconcile with the `summary` printed above them.
 
 ## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to list as. The page and summary are exactly what that user's own access token would get: grants on chat messages only where they can read the message, and `viewerTotal` is their own. Leave it out to list as a signed-in user in no conversation: no grants on chat messages, and `viewerTotal` is `0`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 reputation-grant/acting-user-not-allowed`).
+</ParamField>
 
 <ParamField query="page" type="number">
   Page number (1-indexed). Defaults to `1`.
@@ -64,7 +68,7 @@ A grant row carries `targetType`, `targetId` and the granter's free-text `note`,
 - **The `recipientId` and `senderId` shapes carry the same test into the query.** A chat-message-targeted grant stays in these feeds for a caller who can see the message, and is excluded from both the page and `totalItems` for one who cannot. The predicate rides the same `where` clause the `COUNT` uses, so a filtered page and a filtered total always move together and `hasMore` never asserts rows the caller may not read. A user's own "reputation I received / sent" feed therefore includes the grants made on messages in their own conversations, and reconciles with the reputation shown on their profile.
 - **A message removed by moderation takes its grants with it.** A `removed` message is invisible on every chat surface, so both shapes hide its grants: the target shape answers the same empty page, and the user-keyed shapes drop the rows from the page and `totalItems`. That holds for a member of the conversation as much as for a stranger.
 
-Service keys are exempt on both shapes: they pass the target-shape membership gate unconditionally, and the user-keyed shapes apply no membership predicate to them at all — so a backend can enumerate every grant it minted, removed messages included. They are the app's own backend, which has no membership and is already trusted to mint grants and to read every conversation. They hold no viewer identity, so `viewerTotal` is `0` for them while `total` and `count` are real.
+A service key gets no exemption: it is tested as the user it names in `actingUserId`, exactly as that user's token. Naming nobody, it is tested as a signed-in user in no conversation, so it gets no chat-message grants on either shape.
 
 Entity and comment targets are unaffected — those items are public, and both shapes return them normally. Grants with no target at all are returned by every shape.
 
@@ -105,7 +109,7 @@ On the **target** shape only, a `summary` block rides alongside the envelope, so
 }
 ```
 
-`viewerTotal` is the calling user's own summed grants on the target, and is `0` for a service key, which has no viewer identity. The other two shapes return no `summary` key at all.
+`viewerTotal` is the viewer's own summed grants on the target: the signed-in user, or the user a service key names in `actingUserId`. It is `0` for a service key naming nobody. The other two shapes return no `summary` key at all.
 
 See [ReputationGrant](/v8/data-models/reputation-grant) for the row shape and [GrantSummary](/v8/data-models/reputation-grant#grantsummary) for the summary.
 
@@ -142,6 +146,13 @@ See [ReputationGrant](/v8/data-models/reputation-grant) for the row shape and [G
     }
     ```
     The route names both of the `reputation` bundle's tables, so a project without the bundle is told about both.
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "reputation-grant/acting-user-not-allowed" }
+    ```
   </Accordion>
 </AccordionGroup>
 

@@ -16,8 +16,12 @@ Returns an entity matching the given `foreignId` within the project. Optionally 
   The foreign ID to look up. This is the identifier from your application (URL, slug, database ID, etc.).
 </ParamField>
 
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to read as. The response is exactly what that user's own access token would get — their own drafts, block filtering, `saved`, their own reaction and the top comments they may see — and the read counts as their view. Leave it out for the anonymous view: drafts return `404`, and the read doesn't count as a view. It shapes the read only: an entity made by `createIfNotFound` is always app-owned, with no author. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 entity/acting-user-not-allowed`).
+</ParamField>
+
 <ParamField query="createIfNotFound" type="string">
-  When `"true"`, creates a blank entity with this `foreignId` if no entity is found. The new entity has no title, content, or user attribution. Defaults to `"false"`.
+  When `"true"`, creates a blank entity with this `foreignId` if no entity is found. The new entity has no title, content, or author (an app-owned entity), whoever asks. Defaults to `"false"`.
 </ParamField>
 
 <ParamField query="include" type="string">
@@ -45,7 +49,7 @@ Returns an entity matching the given `foreignId` within the project. Optionally 
 Returns an [Entity](/v8/data-models/entity) object.
 
 <Note>
-  This endpoint returns entities regardless of moderation status, so the client can display the appropriate moderation state. Draft entities are only returned to their author (or with a service key).
+  This endpoint returns entities regardless of moderation status, so the client can display the appropriate moderation state. Draft entities are only returned to their author: a user token, or a service key naming the author in `actingUserId`.
 </Note>
 
 ## Error Responses
@@ -80,5 +84,12 @@ Returns an [Entity](/v8/data-models/entity) object.
     { "error": "Entities are created by server only", "code": "entity/webhook-validation-failed" }
     ```
     Returned when your `entity.created` [validation webhook](/v8/webhooks) rejects the entity that `createIfNotFound` would create. `error` carries the `message` your webhook returned. Nothing is stored.
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "entity/acting-user-not-allowed" }
+    ```
   </Accordion>
 </AccordionGroup>

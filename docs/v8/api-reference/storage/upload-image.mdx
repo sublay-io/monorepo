@@ -83,7 +83,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only: the user this request acts as, who owns the uploaded file. Leave it out to upload an app-owned file with no owning user. A user token always acts as its own user and must not send it (`400 storage/acting-user-not-allowed`).
+  Service key only: the user this request acts as, who owns the uploaded file; the upload runs under that user's own checks. Leave it out to upload an app-owned file with no owning user. A user that doesn't exist returns `404 storage/user-not-found`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 storage/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -143,6 +143,13 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
   <Accordion title="Invalid Image — 422">
     ```json
     { "error": "Invalid image file", "code": "storage/invalid-image" }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    The user named in `actingUserId` doesn't exist. Checked before the upload.
+
+    ```json
+    { "error": "User not found", "code": "storage/user-not-found" }
     ```
   </Accordion>
 </AccordionGroup>

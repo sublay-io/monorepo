@@ -8,7 +8,7 @@ description: "Delete an entity"
   **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
 </Note>
 
-Deletes an entity and its associated data. Only the entity's author, or a request with a service key, can delete an entity.
+Deletes an entity and its associated data. Only the entity's author may delete it: with their own access token, or with a service key naming them in `actingUserId` — the request then runs exactly as theirs. An entity with no author belongs to your app: only a service key naming nobody may delete it, and a user token gets `403`.
 
 **Authentication required.**
 
@@ -20,6 +20,12 @@ Deletion behavior depends on your project's `entityDeletion` settings:
 
 <ParamField path="entityId" type="string" required>
   The UUID of the entity to delete.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user this delete acts as. Required when the entity has an author: name the author, and the request runs exactly as their own access token's (naming anyone else gets what their token gets, `403`). Leave it out only for an app-owned entity (no author). A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 entity/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -43,6 +49,20 @@ Returns `204 No Content` on success.
   <Accordion title="Unauthorized — 403">
     ```json
     { "error": "Not authorized to delete this entity.", "code": "entity/not-authorized" }
+    ```
+  </Accordion>
+  <Accordion title="Missing User ID — 400">
+    A service key sent no `actingUserId` for an entity that has an author. Name the author: the request then runs exactly as their own.
+
+    ```json
+    { "error": "A service key must send actingUserId to change a record that has an author: the request then acts as that user.", "code": "entity/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "entity/acting-user-not-allowed" }
     ```
   </Accordion>
 </AccordionGroup>

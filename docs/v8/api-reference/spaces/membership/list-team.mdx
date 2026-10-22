@@ -16,6 +16,10 @@ Returns all admins and moderators of a space in a single non-paginated response.
 
 ## Query Parameters
 
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to list as. The page is exactly what that user's own access token would get (their membership, so a members-only space's list is open to them only as an active member). Leave it out for the anonymous view: a members-only space's list returns `403`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
+</ParamField>
+
 ### Space-scoped reputation
 
 This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each returned member's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
@@ -41,6 +45,13 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
     The space has `readingPermission: "members"` and the caller is not an active member (no membership, or one that is pending, banned or rejected).
     ```json
     { "error": "This space requires membership. You must be a member to view the team.", "code": "space/members-access-denied" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
     ```
   </Accordion>
 </AccordionGroup>

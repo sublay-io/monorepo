@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/spaces"
 description: "Create a new community space"
 ---
 
-Creates a new space. The authenticated user is automatically added as an admin. Supports optional avatar and banner image upload via multipart form data.
+Creates a new space. Its creator — the signed-in user, or the user a service key names in `actingUserId` — is automatically added as an admin. A space always has a creator, so a service key must name one. Supports optional avatar and banner image upload via multipart form data.
 
 ## Body Parameters
 
@@ -53,7 +53,7 @@ Creates a new space. The authenticated user is automatically added as an admin. 
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only, and required with one: the user this request acts as, who creates the space and becomes its admin. A user token always acts as its own user and must not send it (`400 space/acting-user-not-allowed`).
+  Service key only, and required with one: the user this request acts as, who creates the space and becomes its admin, held to their own permissions. Leaving it out returns `400 space/missing-user-id`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -63,10 +63,10 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="Auth Required — 401">
-    No user token, and no `actingUserId` from a service key.
+  <Accordion title="Missing User ID — 400">
+    A service key sent no `actingUserId`. A space needs a creator.
     ```json
-    { "error": "Authentication required to create a space.", "code": "space/auth-required" }
+    { "error": "Missing user ID", "code": "space/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

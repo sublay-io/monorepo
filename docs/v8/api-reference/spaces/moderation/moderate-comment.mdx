@@ -23,7 +23,7 @@ Takes a direct moderation action on a comment in a space. Requires the caller to
 </ParamField>
 
 <ParamField body="reason" type="string">
-  Optional reason for the moderation action. Up to 1,000 characters. Stored on the comment as `moderationReason`, which only moderators, keys and the comment's author can see — see [Moderation fields](/v8/data-models/comment#moderation-fields).
+  Optional reason for the moderation action. Up to 1,000 characters. Stored on the comment as `moderationReason`, which only moderators and the comment's author can see (a service key sees it only when it acts as one of them) — see [Moderation fields](/v8/data-models/comment#moderation-fields).
 </ParamField>
 
 <ParamField body="actingUserId" type="string">

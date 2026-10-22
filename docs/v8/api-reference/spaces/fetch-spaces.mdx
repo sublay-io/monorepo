@@ -12,6 +12,10 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
 
 ## Query Parameters
 
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to list as. The page is exactly what that user's own access token would get (`memberOf` and their membership on each space). Leave it out for the anonymous view (`memberOf=true` then returns `401`). A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
+</ParamField>
+
 <ParamField query="page" type="number">
   Page number. Defaults to `1`.
 </ParamField>
@@ -45,7 +49,7 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
 </ParamField>
 
 <ParamField query="memberOf" type="boolean">
-  When `true`, returns only spaces where the authenticated user is an active member.
+  When `true`, returns only spaces where the viewer is an active member: the signed-in user, or the user a service key names in `actingUserId`. Without a viewer — no credentials, or a service key naming nobody — it returns `401 space/auth-required`.
 </ParamField>
 
 <ParamField query="parentSpaceId" type="string">
@@ -88,6 +92,20 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
   </Accordion>
   <Accordion title="Invalid query — 400">
     Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`. `error` names the first problem found.
+  </Accordion>
+  <Accordion title="Auth Required — 401">
+    `memberOf=true` without a viewer: no credentials, or a service key naming nobody.
+
+    ```json
+    { "error": "Authentication required to filter by membership.", "code": "space/auth-required" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
+    ```
   </Accordion>
 </AccordionGroup>
 

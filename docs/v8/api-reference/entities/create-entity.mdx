@@ -8,7 +8,7 @@ description: "Create a new entity, with optional file upload support"
   **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
 </Note>
 
-Creates a new entity in your project. Supports optional file uploads via `multipart/form-data`. When no files are attached, use `application/json`. The entity is attributed to the authenticated user unless `excludeUserId` is set.
+Creates a new entity in your project. Supports optional file uploads via `multipart/form-data`. When no files are attached, use `application/json`. The entity's author is the signed-in user, or the user a service key names in `actingUserId`; the create then runs under that user's own checks (suspension, the space's posting rules). A service key naming nobody creates an app-owned entity with no author, which only a service key naming nobody can later edit, publish or delete.
 
 ## Body Parameters
 
@@ -25,7 +25,7 @@ Creates a new entity in your project. Supports optional file uploads via `multip
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only: the user this request acts as, who authors the entity. Leave it out to create an app-owned entity with no author. A user token always acts as its own user and must not send it (`400 entity/acting-user-not-allowed`).
+  Service key only: the user this request acts as, who authors the entity. Leave it out to create an app-owned entity with no author. A user that doesn't exist returns `404 entity/user-not-found`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 entity/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField body="title" type="string">
@@ -65,23 +65,19 @@ Creates a new entity in your project. Supports optional file uploads via `multip
 </ParamField>
 
 <ParamField body="isDraft" type="boolean">
-  When `true`, the entity is saved as a draft and excluded from public feeds. Publish it later via the [Publish Entity](/v8/api-reference/entities/publish-entity) endpoint.
-</ParamField>
-
-<ParamField body="excludeUserId" type="boolean">
-  When `true`, the entity is created without user attribution even if a user is authenticated.
+  When `true`, the entity is saved as a draft and excluded from public feeds. Publish it later via the [Publish Entity](/v8/api-reference/entities/publish-entity) endpoint. A draft needs an owner: send it with a user token, or with a service key and `actingUserId`. Otherwise it returns `400 entity/draft-requires-user`.
 </ParamField>
 
 <ParamField body="requireUser" type="boolean">
-  When `true`, returns `401` if no user is authenticated.
+  When `true`, the entity must have an author: a request with no credentials, or a service key naming nobody, returns `401 entity/user-required`. A service key with `actingUserId` passes.
 </ParamField>
 
 <ParamField body="createdAt" type="string">
-  ISO 8601 datetime to backfill a creation timestamp. **Service key only.**
+  ISO 8601 datetime to backfill a creation timestamp. **Service key only**, also with `actingUserId` (importing content with its original authors and dates). Ignored from a user token.
 </ParamField>
 
 <ParamField body="updatedAt" type="string">
-  ISO 8601 datetime for `updatedAt`. Requires `createdAt` to also be set. Must be ≥ `createdAt`. **Service key only.**
+  ISO 8601 datetime for `updatedAt`. Requires `createdAt` to also be set. Must be ≥ `createdAt`. **Service key only**, also with `actingUserId`. Ignored from a user token.
 </ParamField>
 
 ### File Uploads (multipart/form-data)
@@ -133,7 +129,7 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
 Returns the created [Entity](/v8/data-models/entity) object. When files are uploaded, the entity includes a `files` array with signed URLs for each attachment.
 
 <Note>
-  Draft entities are invisible to all users until published. Use [Fetch Drafts](/v8/api-reference/entities/fetch-drafts) to list an author's unpublished drafts.
+  Draft entities are invisible to everyone but their author until published. Use [Fetch Drafts](/v8/api-reference/entities/fetch-drafts) to list an author's unpublished drafts.
 </Note>
 
 ## Error Responses
@@ -145,7 +141,7 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
-    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "entity/acting-user-not-allowed" }
     ```
@@ -188,6 +184,27 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
   <Accordion title="Invalid Image — 422">
     ```json
     { "code": "entity/invalid-image", "message": "File \"doc.txt\" is not a valid image: ..." }
+    ```
+  </Accordion>
+  <Accordion title="Removed Parameter — 400">
+    The request sent `excludeUserId`. To create an entity with no author, use a service key without `actingUserId`.
+
+    ```json
+    { "error": "`excludeUserId` isn't accepted: to create an entity with no author, use a service key without actingUserId.", "code": "entity/unsupported-param", "param": "excludeUserId" }
+    ```
+  </Accordion>
+  <Accordion title="Draft Requires User — 400">
+    `isDraft` was `true` with no author: a request with no credentials, or a service key naming nobody. A draft needs an owner.
+
+    ```json
+    { "error": "A draft needs an owner: create it with a user's token, or with a service key and actingUserId.", "code": "entity/draft-requires-user" }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    The user named in `actingUserId` doesn't exist.
+
+    ```json
+    { "error": "User not found", "code": "entity/user-not-found" }
     ```
   </Accordion>
 </AccordionGroup>

@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/comments/:commentId"
 description: "Delete a comment"
 ---
 
-Deletes a comment. Only the comment's author, or a request with a service key, can delete a comment.
+Deletes a comment. Only the comment's author may delete it: with their own access token, or with a service key naming them in `actingUserId` — the request then runs exactly as theirs (their own delete, which leaves the same placeholder). A comment with no author belongs to your app: only a service key naming nobody may delete it, and a user token gets `403`.
 
 **Authentication required.**
 
@@ -16,9 +16,15 @@ All deletes are soft-deletes: the comment's content, gif, mentions, and attachme
   The UUID of the comment to delete.
 </ParamField>
 
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user this delete acts as. Required when the comment has an author: name the author, and the request runs exactly as their own access token's (naming anyone else gets what their token gets). Leave it out only for an app-owned comment (no author). A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 comment/acting-user-not-allowed`).
+</ParamField>
+
 ## Blocks
 
-A comment on an entity whose author has blocked the caller is hidden from them, so when the caller isn't the comment's author, the delete is refused with `404 comment/not-found` — the same response as a missing comment. This check runs before the others, so such a caller gets `comment/not-found` rather than `comment/already-deleted` or a `403`. A comment's author can always delete their own comment, and requests made with a service key aren't subject to this check. It applies only when the `moderation` bundle is installed.
+A comment on an entity whose author has blocked the caller is hidden from them, so when the caller isn't the comment's author, the delete is refused with `404 comment/not-found` — the same response as a missing comment. This check runs before the others, so such a caller gets `comment/not-found` rather than `comment/already-deleted` or a `403`. A comment's author can always delete their own comment, also through a service key acting as them, and an app-owned comment deleted by a service key naming nobody isn't subject to this check. It applies only when the `moderation` bundle is installed.
 
 ## Response
 
@@ -47,10 +53,24 @@ Returns `204 No Content` on success.
     ```
   </Accordion>
   <Accordion title="Forbidden — 403">
-    Returned when the caller isn't the comment's author and isn't using a service key.
+    Returned when the acting user isn't the comment's author, or when a user token, or a service key naming a user, deletes a comment with no author.
 
     ```json
     { "error": "You do not have permission to delete this comment.", "code": "comment/not-authorized" }
+    ```
+  </Accordion>
+  <Accordion title="Missing User ID — 400">
+    A service key sent no `actingUserId` for a comment that has an author. Name the author: the request then runs exactly as their own.
+
+    ```json
+    { "error": "A service key must send actingUserId to change a record that has an author: the request then acts as that user.", "code": "comment/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "comment/acting-user-not-allowed" }
     ```
   </Accordion>
 </AccordionGroup>

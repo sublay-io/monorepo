@@ -17,7 +17,7 @@ Withdrawing is idempotent — withdrawing when there is no RSVP succeeds and cha
 ## Body Parameters
 
 <ParamField body="actingUserId" type="string">
-  Service key only, and required with one: the user this request acts as, whose RSVP is withdrawn. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
+  Service key only, and required with one: the user this request acts as, whose RSVP is withdrawn. The request is held to that user's own event visibility: an event they can't see (an `invite` event they weren't invited to, a `members` event of a space they aren't in) returns `404`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response

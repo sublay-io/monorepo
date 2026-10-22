@@ -5,7 +5,7 @@ description: "Fetch, update and delete user profiles, check usernames, and query
 
 import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
 
-The `users` module provides server-side access to user profiles, social graph data (follows and connections), and username availability. All operations use your project API key and do not require a user access token. Reads that depend on who is looking (profiles, suggestions, follower, following and connection lists and counts, comment history) take an optional [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user) to read as that user; without it they return the anonymous view. `updateUser` and `deleteUser` act as your app and take no `actingUserId`.
+The `users` module provides server-side access to user profiles, social graph data (follows and connections), and username availability. All operations use your project API key and do not require a user access token. Reads that depend on who is looking (profiles, suggestions, follower, following and connection lists and counts, comment history) take an optional [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user) to read as that user; without it they return the anonymous view. `updateUser` acts as the user being updated, so it requires `actingUserId` set to that user; `deleteUser` acts as your app and takes no `actingUserId`.
 
 ---
 
@@ -122,11 +122,12 @@ const user = await sublay.users.fetchUserByUsername({ username: "alice" });
 
 ### updateUser
 
-Updates a user's profile fields.
+Updates a user's profile fields. The update acts as that user: `actingUserId` must be the same user as `userId`, and the request behaves exactly as their own access token would (`403 user/unauthorized` if the two differ).
 
 ```typescript
 const updatedUser = await sublay.users.updateUser({
   userId: "usr_abc123",
+  actingUserId: "usr_abc123",
   name: "Alice Updated",
   bio: "New bio",
   avatar: "https://cdn.example.com/avatar.jpg",
@@ -136,6 +137,10 @@ const updatedUser = await sublay.users.updateUser({
 
 <ParamField body="userId" type="string" required>
   The Sublay user ID to update.
+</ParamField>
+
+<ParamField body="actingUserId" type="string" required>
+  The user the request acts as. Must be the same user as `userId`.
 </ParamField>
 
 <ParamField body="name" type="string">

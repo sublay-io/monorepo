@@ -12,7 +12,7 @@ Permanently deletes the specified user and cascades cleanup across all of their 
 
 ## Authentication
 
-Requires a **service key**. User auth tokens are rejected with a `403`. The key deletes the user as the app: sending `actingUserId` is refused (`400 user/unsupported-param`).
+Requires a **service key**. User auth tokens are rejected with a `403`. The key deletes the user as the app; the user the request is about is the one in the path, so sending `actingUserId` is refused (`400 user/unsupported-param`).
 
 ## Path Parameters
 
@@ -60,11 +60,11 @@ On success, returns HTTP `204 No Content` with an empty body.
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
-    The request sent `actingUserId`, in the body or the query. This endpoint always acts as the app, so there is no user to name.
+    The request sent `actingUserId`, in the body or the query. The user this request is about is the one in the path, and the key deletes them as the app.
 
     ```json
     {
-      "error": "`actingUserId` isn't accepted here: this endpoint always acts as the app.",
+      "error": "`actingUserId` isn't accepted here: the user this request is about is the one in the path.",
       "code": "user/unsupported-param",
       "param": "actingUserId"
     }

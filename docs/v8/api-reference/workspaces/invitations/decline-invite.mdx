@@ -66,6 +66,12 @@ Marks the invite `declined` and fires `workspace.invite.declined`.
     ```
     Returned when a service key names an `actingUserId` that isn't a user in this project.
   </Accordion>
+  <Accordion title="Acting User Not Found — 404">
+    ```json
+    { "error": "Acting user not found.", "code": "workspace/invalid-target" }
+    ```
+    The user behind the request no longer exists, for example a user token that outlived its user.
+  </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json
     { "error": "Invalid invitation id: expected a UUID.", "code": "workspace/invalid-params" }

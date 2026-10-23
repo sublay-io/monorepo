@@ -77,7 +77,7 @@ Creates a new entity in your project. Supports optional file uploads via `multip
 </ParamField>
 
 <ParamField body="updatedAt" type="string">
-  ISO 8601 datetime for `updatedAt`. Requires `createdAt` to also be set. Must be ≥ `createdAt`. **Service key only**, also with `actingUserId`. Ignored from a user token. More than five minutes in the future returns `400 entity/invalid-body` (`updatedAt can't be in the future.`).
+  ISO 8601 datetime for `updatedAt`. Requires `createdAt` to also be set. Must be ≥ `createdAt`. When only `createdAt` is sent, `updatedAt` is set to the same time. **Service key only**, also with `actingUserId`. Ignored from a user token. More than five minutes in the future returns `400 entity/invalid-body` (`updatedAt can't be in the future.`).
 </ParamField>
 
 ### File Uploads (multipart/form-data)

@@ -64,7 +64,7 @@ export interface BulkDeleteProps {
 
 /**
  * Per-table row-operations accessor returned by `client.table<T>(name)`.
- * The actor is derived server-side from the user token (js-sdk Rule A) — no
+ * The actor is derived server-side from the user token — no
  * actor params here. No DDL surface (no service key).
  */
 export interface TableAccessor<T = TableRow> {

@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Only runtime dependency**: `axios`
 - **Base URL**: `https://api.sublay.io/v8/{projectId}`
 
-> Sibling SDKs: `@sublay/node` is the server-side SDK (authenticates with a **service key** and may act on behalf of any user). This SDK is its user-token counterpart. The two share the same module/file layout and the `bindModule` pattern, so `@sublay/node` is a useful reference donor — but with one inversion (see **Rule A** below).
+> Sibling SDKs: `@sublay/node` is the server-side SDK (authenticates with a **service key** and may act on behalf of any user). This SDK is its user-token counterpart. The two share the same module/file layout and the `bindModule` pattern, so `@sublay/node` is a useful reference donor — but with one inversion (see **The token is the actor** below).
 
 ## Development Commands
 
@@ -57,19 +57,19 @@ An explicit `Authorization` header on a request always wins over both.
 
 Every module function is written as `(client: SublayHttpClient, data) => Promise<...>`. At init, `bindModule` partially applies the client so callers write `sublay.entities.fetchEntity({ entityId })` (no client arg). Adding a function = add the file, export it from the module's `index.ts`, and (for a new module) bind it in [src/index.ts](src/index.ts).
 
-### Rule A — the user-token inversion (READ THIS before porting from @sublay/node)
+### The token is the actor (READ THIS before porting from @sublay/node)
 
-`@sublay/node` is a service-key SDK with no inherent user, so it passes an explicit `userId`/`actingUserId` to tell the server who is acting. This SDK uses a **user token**, so the server derives the actor from the token. **When porting a function, DROP the actor param.** Decide per-param by reading the server controller:
+`@sublay/node` is a service-key SDK with no inherent user, so it passes `actingUserId` to tell the server who is acting. This SDK uses a **user token**, so the server derives the actor from the token, and a user token that sends `actingUserId` is refused (`400 <resource>/acting-user-not-allowed`). **When porting a function, DROP `actingUserId`.** `userId` never names the actor on v8; decide per-param by reading the server controller:
 
-- Param feeds `resolveUserId(...)` / `resolveActingUserId(...)` / `req.userId` (the **actor**) → **drop it**.
+- `actingUserId`, or any param that feeds `resolveActingUserId(...)` / `req.userId` (the **actor**) → **drop it**.
 - Param is a path `:userId` target, a ban/moderation **target**, or a genuine query **filter** (e.g. "entities by this author") → **keep it**.
 - Param the controller never reads → drop it.
 
-Sending an actor param a user token shouldn't set → `403` or silently ignored. This is the single most common porting mistake.
+Sending `actingUserId` with a user token → `400 <resource>/acting-user-not-allowed`; sending the actor as `userId` → `400 <resource>/unsupported-param` on most routes. This is the single most common porting mistake.
 
 ### Mirror the server exactly
 
-The server's zod schemas + controllers are the source of truth ([server/src/v7-schema/controllers/](../server/src/v7-schema/controllers/)). Expose the server's exact param names (no aliases/renames), drop params the server ignores, and type returns to what the controller actually responds with (`res.json(...)`) — not what a naive port assumed. The `@sublay/node` donor has several wrong return types; verify against the controller, not the donor.
+The server's zod schemas + controllers are the source of truth (`server/src/v8/controllers/` in the server repo). Expose the server's exact param names (no aliases/renames), drop params the server ignores, and type returns to what the controller actually responds with (`res.json(...)`) — not what a naive port assumed. The `@sublay/node` donor has several wrong return types; verify against the controller, not the donor.
 
 ### Multipart uploads
 
@@ -108,6 +108,6 @@ Source under [src/modules/](src/modules/); each folder has one file per function
 ## Conventions
 
 - One function per file; export it from the module `index.ts`.
-- `(client, data)` signature; keep the server's exact param names; apply **Rule A**.
+- `(client, data)` signature; keep the server's exact param names; drop the actor (**The token is the actor**).
 - Type returns to the controller's actual response; reuse `src/interfaces/` types.
 - TypeScript strict mode; framework-agnostic (no DOM-only assumptions beyond `fetch`/`FormData`, which the build's `lib` provides).

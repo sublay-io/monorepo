@@ -16,7 +16,7 @@ export interface UpdateNotificationPreferencesProps {
  * Upsert the logged-in user's push notification preferences.
  *
  * Mirrors `PUT /:projectId/push-notifications/preferences`. The actor is derived
- * from the user token (Rule A) — no `userId` param.
+ * from the user token — no `actingUserId` param.
  */
 export async function updateNotificationPreferences(
   client: SublayHttpClient,

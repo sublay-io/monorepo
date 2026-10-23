@@ -7,7 +7,7 @@ import { NotificationPreferences } from "../../interfaces/Push";
  * preference row exists.
  *
  * Mirrors `GET /:projectId/push-notifications/preferences`. The actor is derived
- * from the user token (Rule A) — no `userId` param.
+ * from the user token — no `actingUserId` param.
  */
 export async function getNotificationPreferences(
   client: SublayHttpClient

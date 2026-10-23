@@ -20,8 +20,8 @@ export interface MuteConversationResponse {
  * Set / clear the logged-in user's conversation mute.
  *
  * Mirrors `POST /:projectId/chat/conversations/:conversationId/mute`. The actor
- * is derived from the user token (Rule A) — a user only mutes their own
- * membership, so there is no `userId` param.
+ * is derived from the user token — a user only mutes their own membership,
+ * so there is no `actingUserId` param.
  */
 export async function muteConversation(
   client: SublayHttpClient,

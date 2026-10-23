@@ -10,7 +10,7 @@ icon: "plug"
 
 ## Overview
 
-`useCreateEntity` returns a function that creates a new entity. It supports both JSON and multipart form requests — the hook automatically selects multipart when images or files are included.
+`useCreateEntity` returns a function that creates a new entity. It supports both JSON and multipart form requests — the hook automatically selects multipart when images or files are included. A signed-in user's entity is always theirs. Without a signed-in user, the entity has no author, and the request is allowed only while the project's **Who can create entities without an author** setting is **Everyone** (the default); otherwise it fails with `403 entity/authorless-creation-not-allowed`. See [Create Entity](/v8/api-reference/entities/create-entity).
 
 ## Usage Example
 
@@ -93,10 +93,6 @@ const entity = await createEntity({
 
 <ParamField path="isDraft" type="boolean">
   If `true`, creates the entity as a draft (not publicly visible). Default `false`.
-</ParamField>
-
-<ParamField path="requireUser" type="boolean">
-  If `true`, the request fails if no authenticated user is present.
 </ParamField>
 
 <ParamField path="images" type="{ files: File[]; options?: UploadImageOptions }">

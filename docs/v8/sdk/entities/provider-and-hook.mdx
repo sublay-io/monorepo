@@ -117,5 +117,5 @@ function EntityDetail() {
 </ParamField>
 
 <ParamField path="createIfNotFound" type="boolean">
-  Only valid with `foreignId`. If `true`, the entity is automatically created when it doesn't exist yet. Useful for "entity-per-resource" patterns.
+  Only valid with `foreignId`. If `true`, the entity is automatically created when it doesn't exist yet. Useful for "entity-per-resource" patterns. The created entity has no author, so the project's **Who can create entities without an author** setting decides who may create it: everyone by default. A caller the setting refuses gets `403 entity/authorless-creation-not-allowed`. See [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id).
 </ParamField>

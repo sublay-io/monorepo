@@ -24,8 +24,6 @@ export interface CreateEntityProps {
   actingUserId?: string;
   /** Save as a draft. A draft needs an owner, so this requires `actingUserId`. */
   isDraft?: boolean;
-  /** Refuse to create the entity without an author (`actingUserId`). */
-  requireUser?: boolean;
   /**
    * Backdate the entity (service key only, also with `actingUserId`). More
    * than five minutes in the future: 400 `entity/invalid-body`.

@@ -208,8 +208,8 @@ describe("useAxiosPrivate", () => {
     });
 
     it("does NOT refresh on a 401 that carries a semantic code", async () => {
-      // Controllers raise coded 401s (space/auth-required, entity/user-required,
-      // auth/user-required, push-device/unauthorized, auth/token-reuse-detected).
+      // Controllers raise coded 401s (space/auth-required, auth/user-required,
+      // push-device/unauthorized, auth/token-reuse-detected).
       // A refresh cannot fix any of them, and rotating on each would burn the
       // refresh token — the same trap the 403 branch already avoids.
       const requestNewAccessToken = vi.fn().mockResolvedValue("fresh-token");

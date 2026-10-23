@@ -14,13 +14,13 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | `string` | Unique entity identifier (UUID). |
-| `foreignId` | `string \| null` | Your system's content ID, if this entity maps to existing data. Can also be a static identifier like `"about-page"`. |
+| `foreignId` | `string \| null` | Your system's content ID, if this entity maps to existing data. Can also be a static identifier like `"about-page"`. Unique within the project, including deleted entities: a deleted entity's `foreignId` can't be reused (`409 entity/foreign-id-taken`). |
 | `shortId` | `string` | Auto-generated short identifier, useful for sharing links. |
 | `projectId` | `string` | The project this entity belongs to. |
 | `sourceId` | `string \| null` | Groups entities by content type within a project. Useful when one project hosts multiple distinct categories of content (e.g. `"user-post"` vs `"blog-post"`), allowing you to filter and separate them without creating separate projects. |
 | `spaceId` | `string \| null` | The space this entity belongs to, if any. |
 | `space` | `Space \| null` | Populated space object when `include` contains `"space"`. |
-| `userId` | `string \| null` | The author: the user whose token created it, or the user a service key named in `actingUserId`. `null` for an app-owned entity, created by a service key naming nobody, and for a published entity whose author was deleted; only a service key naming nobody may edit or delete it. |
+| `userId` | `string \| null` | The author: the user whose token created it, or the user a service key named in `actingUserId`. `null` for an app-owned entity — created by a service key naming nobody, by a request with no credentials, or by [`createIfNotFound`](/v8/api-reference/entities/fetch-entity-by-foreign-id) (who may create one is the project's **Who can create entities without an author** setting) — and for a published entity whose author was deleted; only a service key naming nobody may edit or delete it. |
 | `user` | `User \| null` | The author. Populated when `include` contains `"user"`. |
 | `title` | `string \| null` | Optional title. |
 | `content` | `string \| null` | Optional text content. |

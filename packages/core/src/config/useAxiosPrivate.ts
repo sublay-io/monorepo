@@ -79,7 +79,7 @@ const useAxiosPrivate = (): AxiosInstance => {
         // that fails verification. Every semantic 401/403 the controllers raise
         // carries a `code` — 403: project/plan-required, project/owner-required,
         // space-permission, user/suspended, auth/no-user-found; 401:
-        // space/auth-required, entity/user-required, auth/user-required,
+        // space/auth-required, auth/user-required,
         // push-device/unauthorized, auth/token-reuse-detected, auth/wrong-password.
         // Those are
         // rejections a refresh cannot fix, so we must not rotate the token or

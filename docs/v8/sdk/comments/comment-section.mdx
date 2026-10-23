@@ -67,6 +67,8 @@ An entity the section fetched itself (from `entityId`, `foreignId` or `shortId`)
 
 <ParamField path="createIfNotFound" type="boolean">
   Used with `foreignId`. Default: `false`. When `true`, the entity is created the first time the section loads if no entity with that `foreignId` exists yet. Without it, the section only finds an existing entity: when there is none, `error` is set and no comments load.
+
+  The created entity has no author, so the project's **Who can create entities without an author** setting decides who may create it. The default, **Everyone**, lets any visitor's section create it. Under **Signed-in users only** a visitor with no session is refused, and under **No one from the client** every client is refused: the lookup fails with `403 entity/authorless-creation-not-allowed` and `error` is set. See [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id).
 </ParamField>
 
 <ParamField path="limit" type="number">

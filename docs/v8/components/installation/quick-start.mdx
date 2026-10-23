@@ -226,6 +226,10 @@ If your app already has its own authentication, see [External Authentication](/v
   </Tab>
 </Tabs>
 
+<Note>
+  `createIfNotFound` creates the post's entity the first time its comment section loads. That entity has no author, and the project's **Who can create entities without an author** setting decides who may create one. The default, **Everyone**, lets any visitor's section create it; under **Signed-in users only** or **No one from the client**, see `createIfNotFound` for [threaded](/v8/components/components/threaded/props-api#createifnotfound) and [social](/v8/components/components/social/props-api#createifnotfound) comments.
+</Note>
+
 That's it! You now have a fully functional comment system.
 
 ---

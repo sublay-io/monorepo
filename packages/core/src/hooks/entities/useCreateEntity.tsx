@@ -49,7 +49,6 @@ export interface CreateEntityProps {
   };
   metadata?: Record<string, any>;
   nsfw?: boolean;
-  requireUser?: boolean;
   isDraft?: boolean;
   images?: ImageUploadConfig;
   files?: FileUploadConfig;
@@ -73,7 +72,6 @@ function useCreateEntity(): (props: CreateEntityProps) => Promise<Entity> {
         location,
         metadata,
         nsfw,
-        requireUser,
         isDraft,
         images,
         files,
@@ -103,7 +101,6 @@ function useCreateEntity(): (props: CreateEntityProps) => Promise<Entity> {
         if (location !== undefined) formData.append("location", JSON.stringify(location));
         if (metadata !== undefined) formData.append("metadata", JSON.stringify(metadata));
         if (nsfw !== undefined) formData.append("nsfw", nsfw.toString());
-        if (requireUser !== undefined) formData.append("requireUser", requireUser.toString());
         if (isDraft !== undefined) formData.append("isDraft", isDraft.toString());
 
         // Append images
@@ -170,7 +167,6 @@ function useCreateEntity(): (props: CreateEntityProps) => Promise<Entity> {
             location,
             metadata,
             nsfw,
-            requireUser,
             isDraft,
           },
         );

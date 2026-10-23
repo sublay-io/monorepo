@@ -187,6 +187,8 @@ Used with `foreignId`. When set, the entity is created the first time the sectio
 
 Without it, the section only finds an existing entity. When there is none, it shows its ["Couldn't load comments" state](/v8/components/components/threaded/features#error-states) instead of the comments.
 
+The created entity has no author, so the project's **Who can create entities without an author** setting decides who may create it. The default, **Everyone**, lets any visitor's section create it. Under **Signed-in users only** a visitor with no session can't, and under **No one from the client** only a service key can (create the entity from your backend first). A refused section shows the same "Couldn't load comments" state. See [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id).
+
 It has no effect with `entity`, `entityId` or `shortId`.
 
 The other examples on this page pass `foreignId` alone, for an entity that already exists.

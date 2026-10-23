@@ -80,10 +80,6 @@ const entity = await sublay.entities.createEntity({
   When `true`, the entity is created as an unpublished draft. Defaults to `false`. A draft needs an owner, so it requires `actingUserId` (`400 entity/draft-requires-user` otherwise).
 </ParamField>
 
-<ParamField body="requireUser" type="boolean">
-  When `true`, the request fails with `401 entity/user-required` unless the entity has an author (`actingUserId`).
-</ParamField>
-
 <ParamField body="createdAt" type="Date">
   A `Date` used to backdate the entity's creation time. A service key ability, also with `actingUserId` (for imports with original authors and dates). More than five minutes in the future returns `400 entity/invalid-body` (`createdAt can't be in the future.`).
 </ParamField>
@@ -146,7 +142,7 @@ const entity = await sublay.entities.fetchEntityByForeignId({
 </ParamField>
 
 <ParamField body="createIfNotFound" type="boolean">
-  When `true`, creates a stub entity if no match is found. Defaults to `false`.
+  When `true`, creates a stub entity if no match is found. Defaults to `false`. The new entity has no author. A service key may always create it, whatever the project's **Who can create entities without an author** setting, except when it names a suspended user in `actingUserId`: that returns `403 user/suspended` and nothing is created.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">

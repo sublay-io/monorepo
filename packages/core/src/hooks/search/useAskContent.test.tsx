@@ -276,8 +276,8 @@ describe("useAskContent", () => {
   });
 
   it("does not refresh on a coded 401 and surfaces the error", async () => {
-    // Controllers raise coded 401s (space/auth-required, entity/user-required,
-    // auth/user-required, …). No refresh can fix those.
+    // Controllers raise coded 401s (space/auth-required, auth/user-required,
+    // …). No refresh can fix those.
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(
         JSON.stringify({

@@ -22,9 +22,9 @@ The `workspaces` module is the developer's **authorization-server SDK** for the 
 
   So an unrestricted backend action is performed **as the workspace
   owner**: the owner resolves the full capability
-  vocabulary and apex rank, and the resulting webhooks carry that user id. Treat that id as a *claim*, not proof — a key may name any UUID,
-  and `ownerId` is not a foreign key, so a deleted owner's id still resolves
-  owner authority. Two consequences bite first-time integrators —
+  vocabulary and apex rank, and the resulting webhooks carry that user id. Treat that id as a *claim*, not proof — a key may name any
+  user in the project (an id that isn't one gets `404 workspace/user-not-found`).
+  Two consequences bite first-time integrators —
   [`acceptWorkspaceInvite`](#acceptworkspaceinvite) requires the invite to be
   actually addressed to the named user *and* that user's email to be verified,
   and a rank tier cannot grow itself (see

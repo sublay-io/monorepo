@@ -140,6 +140,12 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
     { "code": "space/file-too-large", "message": "Avatar image exceeds 50MB limit." }
     ```
   </Accordion>
+  <Accordion title="files-images Bundle Required — 403">
+    Returned when an avatar or banner is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed.
+    ```json
+    { "error": "Space avatar/banner uploads require the files-images bundle. Enable it for this project.", "code": "space/files-images-bundle-required", "missingTables": ["Files", "Images"] }
+    ```
+  </Accordion>
 </AccordionGroup>
 
 See also: [useCreateSpace](/v8/hooks/spaces/use-create-space)

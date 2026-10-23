@@ -264,6 +264,12 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     { "error": "No user with this actingUserId exists in this project.", "code": "user/user-not-found" }
     ```
   </Accordion>
+  <Accordion title="files-images Bundle Required — 403">
+    Returned when an avatar or banner is uploaded on a project without the files-images bundle.
+    ```json
+    { "error": "Avatar and banner uploads require the files-images bundle, which is not installed for this project.", "code": "user/files-images-not-installed" }
+    ```
+  </Accordion>
 </AccordionGroup>
 
 ## See Also

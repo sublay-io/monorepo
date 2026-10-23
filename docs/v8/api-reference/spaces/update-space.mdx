@@ -111,8 +111,11 @@ Returns the updated [SpaceDetailed](/v8/data-models/space) object.
     { "error": "Space not found.", "code": "space/not-found" }
     ```
   </Accordion>
-  <Accordion title="Forbidden — 403">
-    Caller is not an admin of the space.
+  <Accordion title="files-images Bundle Required — 403">
+    Returned when an avatar or banner is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed.
+    ```json
+    { "error": "Space avatar/banner uploads require the files-images bundle. Enable it for this project.", "code": "space/files-images-bundle-required", "missingTables": ["Files", "Images"] }
+    ```
   </Accordion>
 </AccordionGroup>
 

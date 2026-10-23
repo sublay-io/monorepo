@@ -9,6 +9,7 @@ import useWithdrawRsvp from "./useWithdrawRsvp";
 
 import {
   Event,
+  EventInclude,
   EventIncludeParam,
   RsvpStatus,
 } from "../../interfaces/models/Event";
@@ -42,6 +43,9 @@ function useEventData(props: UseEventDataProps): UseEventDataValues {
   const eventProp = "event" in props ? props.event : undefined;
   const eventId = "eventId" in props ? props.eventId : undefined;
   const include = "include" in props ? props.include : undefined;
+  // Flattened to a string for the fetch effect's deps: an inline array is a
+  // fresh reference every render and would re-run the effect each time.
+  const includeKey = Array.isArray(include) ? include.join(",") : include;
 
   const [event, setEvent] = useState<Event | undefined | null>(eventProp);
 
@@ -126,7 +130,12 @@ function useEventData(props: UseEventDataProps): UseEventDataValues {
       }
 
       try {
-        const fetchedEvent = await fetchEvent({ eventId, include });
+        const fetchedEvent = await fetchEvent({
+          eventId,
+          include: includeKey
+            ? (includeKey.split(",") as EventInclude[])
+            : undefined,
+        });
         if (fetchedEvent) {
           eventCache.current[eventId] = fetchedEvent;
           setEvent(fetchedEvent);
@@ -139,7 +148,7 @@ function useEventData(props: UseEventDataProps): UseEventDataValues {
     };
 
     handleFetchEvent();
-  }, [fetchEvent, eventId, include, event]);
+  }, [fetchEvent, eventId, includeKey, event]);
 
   useEffect(() => {
     if (eventProp) setEvent(eventProp);

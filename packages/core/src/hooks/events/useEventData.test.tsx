@@ -148,4 +148,57 @@ describe("useEventData", () => {
       }),
     ).resolves.not.toThrow();
   });
+
+  // REGRESSION: an inline `include` array is a fresh reference every render.
+  // Held raw in the fetch effect's deps, every re-render while the fetch was in
+  // flight started another one. The effect depends on a flattened key instead.
+  it("fetches once when re-rendered with an equal inline include array mid-fetch", async () => {
+    const event = makeEvent({ id: "event-1" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      () => useEventData({ eventId: "event-1", include: ["user", "space"] }),
+      {
+        beforeRender: ({ axiosPrivate }) => {
+          for (let i = 0; i < 10; i += 1) {
+            axiosPrivate.mockResponse("get", event);
+          }
+        },
+      },
+    );
+
+    // Re-render synchronously, before the first fetch resolves.
+    for (let i = 0; i < 5; i += 1) rerender();
+    await waitFor(() => expect(result.current.event).toEqual(event));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(1);
+    expect(calls[0].config?.params).toMatchObject({ include: "user,space" });
+  });
+
+  it("fetches with the changed include when include changes before the event loads", async () => {
+    const event = makeEvent({ id: "event-1" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEventDataProps) => useEventData(props),
+      {
+        initialProps: { eventId: "event-1", include: ["user"] } as UseEventDataProps,
+        beforeRender: ({ axiosPrivate }) => {
+          for (let i = 0; i < 10; i += 1) {
+            axiosPrivate.mockResponse("get", event);
+          }
+        },
+      },
+    );
+
+    rerender({ eventId: "event-1", include: ["user", "files"] } as UseEventDataProps);
+    await waitFor(() => expect(result.current.event).toEqual(event));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(2);
+    expect(calls[1].config?.params).toMatchObject({ include: "user,files" });
+  });
 });

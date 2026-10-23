@@ -125,4 +125,63 @@ describe("useFetchManyEventsWrapper", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.events).toEqual([]);
   });
+
+  // REGRESSION: inline `include` / `myRsvp` arrays are fresh references every
+  // render. Held raw in the buildParams deps they re-fired the reset effect
+  // forever. The hook depends on flattened keys, so equal arrays must not refetch.
+  it("does not refetch when re-rendered with equal inline include and myRsvp arrays", async () => {
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      () =>
+        useFetchManyEventsWrapper({
+          include: ["user", "space"],
+          myRsvp: ["going", "maybe"],
+        }),
+      {
+        beforeRender: ({ axiosPrivate }) => {
+          for (let i = 0; i < 10; i += 1) {
+            axiosPrivate.mockResponse("get", makePage([], false));
+          }
+        },
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    for (let i = 0; i < 5; i += 1) rerender();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(1);
+    expect(calls[0].config?.params).toMatchObject({
+      include: "user,space",
+      myRsvp: "going,maybe",
+    });
+  });
+
+  it("refetches when include really changes", async () => {
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: { include: ("user" | "space" | "files" | "userRsvp")[] }) =>
+        useFetchManyEventsWrapper({ include: props.include }),
+      {
+        initialProps: { include: ["user", "space"] },
+        beforeRender: ({ axiosPrivate }) => {
+          for (let i = 0; i < 10; i += 1) {
+            axiosPrivate.mockResponse("get", makePage([], false));
+          }
+        },
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    rerender({ include: ["user", "userRsvp"] });
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(2));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(2);
+    expect(calls[1].config?.params).toMatchObject({ include: "user,userRsvp" });
+  });
 });

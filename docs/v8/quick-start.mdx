@@ -14,7 +14,7 @@ The examples use React on the web. React Native and Expo work the same way — s
   <Step title="Create a project">
     Sign in to the [Sublay dashboard](https://dash.sublay.io) and create a project. A project is your app's backend: its own users, its own data, isolated from every other project.
 
-    When you create it, choose the bundles this guide uses: **`entities`**, **`comments`** and **`reactions`**. Every project also has **`core`** (users and auth). You can add or remove bundles later from the project's **Database** page — see [Bundles](/v8/bundles).
+    When you create it, choose the bundles this guide uses: **`entities`**, **`comments`**, **`reactions`** and **`moderation`** (the comment section's report button files reports through it). Every project also has **`core`** (users and auth). You can add or remove bundles later from the project's **Database** page — see [Bundles](/v8/bundles).
 
     Copy the project's ID. You pass it to the SDK in step 3.
   </Step>
@@ -106,7 +106,7 @@ The examples use React on the web. React Native and Expo work the same way — s
     }
     ```
 
-    Sublay doesn't require a username, but the comment section you add in step 7 does, so this form asks for one at sign-up. `useUser` returns the signed-in user anywhere in the app; you use it in the last step.
+    Sublay doesn't require a username, but the comment section you add in step 7 does, so this form asks for one at sign-up. `useUser` returns the signed-in user anywhere in the app; the list in step 6 and the app in the last step use it.
 
     More: [Built-in auth](/v8/sdk/authentication/built-in), [`useAuth`](/v8/hooks/auth/use-auth).
   </Step>
@@ -240,7 +240,7 @@ The examples use React on the web. React Native and Expo work the same way — s
     }
     ```
 
-    The comment section loads the entity's comments and lets signed-in users post, reply, vote, mention other users, add GIFs, delete their comments and report others'. Sublay stores every comment against the entity, and `commentsCount` on the entity stays current.
+    The comment section loads the entity's comments and lets signed-in users post, reply, vote, mention other users, add GIFs (with a [Giphy API key](/v8/components/components/threaded/features#gif-support-optional)), delete their comments and report others'. Sublay stores every comment against the entity, and `commentsCount` on the entity stays current.
 
     To build your own comment UI instead, use `CommentSectionProvider` and `useCommentSection` — see [Comments](/v8/sdk/comments/overview).
   </Step>
@@ -313,12 +313,12 @@ The examples use React on the web. React Native and Expo work the same way — s
 </Steps>
 
 <Note>
-  Before you go to production, whitelist your app's domain in the project dashboard; requests from other origins are rejected. See [Integration Options](/v8/integration-options).
+  Before you go to production, add your app's domain under **Settings → Domains → Verified Domains** in the dashboard; requests from other web origins are rejected. See [Integration Options](/v8/integration-options).
 </Note>
 
 ## React Native and Expo
 
-Install `@sublay/react-native` (or `@sublay/expo` on Expo) instead of `@sublay/react-js`, and import from it. `SublayProvider` and every hook in this guide are the same; only your UI components change (`View`, `Text`, `TextInput`, `Pressable`).
+Install `@sublay/react-native@beta` (or `@sublay/expo@beta` on Expo) instead of `@sublay/react-js`, and import from it. `SublayProvider` and every hook in this guide are the same; only your UI components change (`View`, `Text`, `TextInput`, `Pressable`).
 
 The comment components on React Native and Expo are three pieces your screen places — `ThreadedComments`, `ThreadedCommentSection` and `ThreadedCommentInput` — and they need a gesture handler root. See the [components quick start](/v8/components/installation/quick-start).
 

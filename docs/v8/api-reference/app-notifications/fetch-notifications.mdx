@@ -102,7 +102,7 @@ Returns a paginated envelope containing an array of notification objects.
     A service key sent no `actingUserId`.
     ```json
     {
-      "error": "Missing user ID",
+      "error": "A service key must send actingUserId: the user this request acts as.",
       "code": "app-notification/missing-user-id"
     }
     ```
@@ -116,11 +116,30 @@ Returns a paginated envelope containing an array of notification objects.
     }
     ```
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "app-notification/user-not-found" }
+    ```
+  </Accordion>
   <Accordion title="Unsupported Parameter — 400">
     The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+
+    With a service key:
+
     ```json
     {
       "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "app-notification/unsupported-param",
+      "param": "userId"
+    }
+    ```
+
+    With a user token, or with no credentials:
+
+    ```json
+    {
+      "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
       "code": "app-notification/unsupported-param",
       "param": "userId"
     }

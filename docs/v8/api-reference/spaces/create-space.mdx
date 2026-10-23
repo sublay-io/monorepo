@@ -68,7 +68,7 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
   <Accordion title="Missing User ID — 400">
     A service key sent no `actingUserId`. A space needs a creator.
     ```json
-    { "error": "Missing user ID", "code": "space/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "space/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
@@ -77,11 +77,30 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "space/user-not-found" }
+    ```
+  </Accordion>
   <Accordion title="Unsupported Parameter — 400">
     The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+
+    With a service key:
+
     ```json
     {
       "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "space/unsupported-param",
+      "param": "userId"
+    }
+    ```
+
+    With a user token, or with no credentials:
+
+    ```json
+    {
+      "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
       "code": "space/unsupported-param",
       "param": "userId"
     }

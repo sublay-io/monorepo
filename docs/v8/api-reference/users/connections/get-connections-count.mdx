@@ -39,6 +39,13 @@ On success, returns HTTP `200`:
     }
     ```
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "connection/user-not-found" }
+    ```
+  </Accordion>
 </AccordionGroup>
 
 ## See Also

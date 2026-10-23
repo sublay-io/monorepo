@@ -41,6 +41,12 @@ Permanently deletes a space. All entities, members, child spaces, rules, and rep
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "space/user-not-found" }
+    ```
+  </Accordion>
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
@@ -50,7 +56,7 @@ Permanently deletes a space. All entities, members, child spaces, rules, and rep
   <Accordion title="Missing Acting User — 400">
     A service key sent no `actingUserId` in the query.
     ```json
-    { "error": "Missing user ID", "code": "space/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "space/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="Deletion Disabled — 403">

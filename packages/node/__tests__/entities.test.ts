@@ -127,6 +127,12 @@ describe("node-sdk entities — request shaping", () => {
     });
   });
 
+  it("publishDraft requires actingUserId (the draft's author)", async () => {
+    const { client } = makeClient();
+    // @ts-expect-error actingUserId is required: a draft always has an author.
+    await publishDraft(client, { entityId: "e1" });
+  });
+
   it("updateEntity sends actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
     await updateEntity(client, { entityId: "e1", title: "new", actingUserId: "u1" });
@@ -285,7 +291,7 @@ describe("node-sdk entities — response mapping", () => {
     const { client, projectInstance } = makeClient();
     const entity = { id: "e1", isDraft: false };
     projectInstance.patch.mockResolvedValueOnce({ data: entity });
-    await expect(publishDraft(client, { entityId: "e1" })).resolves.toEqual(entity);
+    await expect(publishDraft(client, { entityId: "e1", actingUserId: "u1" })).resolves.toEqual(entity);
   });
 
   it("addReaction returns the updated entity (response.data)", async () => {

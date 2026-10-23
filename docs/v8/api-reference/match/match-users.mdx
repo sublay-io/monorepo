@@ -117,7 +117,7 @@ Candidates are excluded when they are: the asker (unless `excludeSelf: false`), 
     A service key called this endpoint without `actingUserId`.
 
     ```json
-    { "error": "Missing user ID", "code": "match/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "match/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
@@ -125,6 +125,13 @@ Candidates are excluded when they are: the asker (unless `excludeSelf: false`), 
 
     ```json
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "match/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "match/user-not-found" }
     ```
   </Accordion>
   <Accordion title="Plan Required — 403">

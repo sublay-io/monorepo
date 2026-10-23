@@ -51,7 +51,7 @@ On a **new** block, returns HTTP `201` with the created block record. Re-blockin
     A service key sent no `actingUserId`.
     ```json
     {
-      "error": "Missing user ID",
+      "error": "A service key must send actingUserId: the user this request acts as.",
       "code": "block/missing-user-id"
     }
     ```
@@ -74,6 +74,14 @@ On a **new** block, returns HTTP `201` with the created block record. Re-blockin
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
+    A service key named an `actingUserId` that isn't a user in this project:
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "block/user-not-found" }
+    ```
+
+    Otherwise, the user to block doesn't exist:
+
     ```json
     {
       "error": "One or both users involved in the block do not exist.",

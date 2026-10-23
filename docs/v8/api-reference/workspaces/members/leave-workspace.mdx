@@ -43,7 +43,7 @@ Removes the caller's own membership on **this node only** (self-service, no capa
   </Accordion>
   <Accordion title="Missing Acting User — 400">
     ```json
-    { "error": "Missing user ID", "code": "workspace/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
     ```
     A service key called this route without naming an `actingUserId`. Leaving removes *your own* membership row; there is none for the app itself. To remove somebody else, use [Remove Member](/v8/api-reference/workspaces/members/remove-member).
   </Accordion>
@@ -52,6 +52,12 @@ Removes the caller's own membership on **this node only** (self-service, no capa
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
     ```
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }
+    ```
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json

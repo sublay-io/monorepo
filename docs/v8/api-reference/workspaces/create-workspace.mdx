@@ -63,7 +63,7 @@ Returns the created [Workspace](/v8/data-models/workspace) object.
   </Accordion>
   <Accordion title="Missing Acting User — 400">
     ```json
-    { "error": "Missing user ID", "code": "workspace/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
     ```
     A service key called this route without naming an `actingUserId`. A workspace has to be created *by* somebody, so the key must name that user.
   </Accordion>
@@ -72,6 +72,12 @@ Returns the created [Workspace](/v8/data-models/workspace) object.
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
     ```
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }
+    ```
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
   </Accordion>
 </AccordionGroup>
 

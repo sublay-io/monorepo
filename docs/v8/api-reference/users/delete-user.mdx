@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/users/:userId"
 description: "Permanently delete a user and cascade cleanup across all of their related data"
 ---
 
-Permanently deletes the specified user and cascades cleanup across all of their related records. Reactions, files, follows, connections, notifications, collections, reports, and mentions are removed, and the user's entities and comments are stripped of their authored content. This is the same full-cascade delete performed from the dashboard.
+Permanently deletes the specified user and cascades cleanup across all of their related records. Reactions, files, follows, connections, notifications, collections, reports, and mentions are removed. The user's drafts are deleted, with everything attached to them (files, reactions, comments, collection entries, reports). Their published entities and comments stay, with no author (`userId: null`) and stripped of their authored content. This is the same full-cascade delete performed from the dashboard.
 
 <Warning>
   This is a hard, irreversible delete. It cannot be undone.

@@ -15,7 +15,7 @@ export interface BlockResponse {
 /**
  * POST /users/:userId/block — block `:userId`.
  *
- * The blocker is derived from the token (Rule A — no `actingUserId`). Idempotent:
+ * The blocker is derived from the token (no `actingUserId`). Idempotent:
  * re-blocking an already-blocked user succeeds. Self-block is rejected server-side.
  * On a new block the server tears down existing follows/connections both ways.
  */

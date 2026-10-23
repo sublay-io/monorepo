@@ -8,7 +8,7 @@ export interface DeleteBlockProps {
 /**
  * DELETE /users/:userId/block — unblock `:userId`.
  *
- * The blocker is derived from the token (Rule A — no `actingUserId`). Idempotent:
+ * The blocker is derived from the token (no `actingUserId`). Idempotent:
  * unblocking a user who isn't blocked succeeds. Restores nothing (torn-down
  * follows/connections are gone for good).
  */

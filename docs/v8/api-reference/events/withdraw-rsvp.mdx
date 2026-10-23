@@ -30,7 +30,7 @@ Returns the [Event](/v8/data-models/event) with refreshed `rsvpCounts`.
   <Accordion title="Missing User — 400">
     A service key sent no `actingUserId`.
     ```json
-    { "error": "Missing user ID", "code": "event/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "event/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
@@ -39,11 +39,30 @@ Returns the [Event](/v8/data-models/event) with refreshed `rsvpCounts`.
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "event/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "event/user-not-found" }
+    ```
+  </Accordion>
   <Accordion title="Unsupported Parameter — 400">
     The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+
+    With a service key:
+
     ```json
     {
       "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "event/unsupported-param",
+      "param": "userId"
+    }
+    ```
+
+    With a user token, or with no credentials:
+
+    ```json
+    {
+      "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
       "code": "event/unsupported-param",
       "param": "userId"
     }

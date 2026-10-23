@@ -6,7 +6,7 @@ description: "Verify the emailed code and permanently delete the authenticated u
 
 Completes the self-service account-deletion flow. Verifies the one-time code sent by the [Request Account Deletion](/v8/api-reference/auth/request-account-deletion) endpoint and, on a match, **permanently deletes** the authenticated user's account.
 
-Requires the user's own access token; a service key is refused (`403 auth/user-token-required`) — from your backend, use [Delete User](/v8/api-reference/users/delete-user). The cascade is identical to the service-key [Delete User](/v8/api-reference/users/delete-user) endpoint: reactions, files, follows, connections, collections, reports, mentions, notifications, and embeddings are removed, while the user's entities and comments are preserved as hollow shells (their `userId`, content, and attachments cleared) to keep threads intact.
+Requires the user's own access token; a service key is refused (`403 auth/user-token-required`) — from your backend, use [Delete User](/v8/api-reference/users/delete-user). The cascade is identical to the service-key [Delete User](/v8/api-reference/users/delete-user) endpoint: reactions, files, follows, connections, collections, reports, mentions, notifications, embeddings, and the user's drafts (with everything attached to them) are removed, while the user's published entities and comments are preserved as hollow shells (their `userId`, content, and attachments cleared) to keep threads intact.
 
 <Warning>
   Deletion is **immediate and irreversible**. There is no grace period and no

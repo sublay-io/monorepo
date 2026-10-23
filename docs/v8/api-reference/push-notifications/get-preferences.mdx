@@ -47,10 +47,29 @@ Returns `200`.
     ```
     Returned when a user token sends `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "notification-preferences/user-not-found" }
+    ```
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+  </Accordion>
   <Accordion title="Unsupported Parameter — 400">
+
+    With a service key:
+
     ```json
     {
       "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "notification-preferences/unsupported-param",
+      "param": "userId"
+    }
+    ```
+
+    With a user token, or with no credentials:
+
+    ```json
+    {
+      "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
       "code": "notification-preferences/unsupported-param",
       "param": "userId"
     }
@@ -65,7 +84,7 @@ Returns `200`.
   </Accordion>
   <Accordion title="Missing User ID — 400">
     ```json
-    { "error": "Missing user ID", "code": "notification-preferences/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "notification-preferences/missing-user-id" }
     ```
     Returned when a service key omits the required `actingUserId` (it has no implicit session user).
   </Accordion>

@@ -21,7 +21,7 @@ export interface BlockStatusResponse {
 
 /**
  * GET /users/:userId/block — the token holder's outbound block status toward
- * `:userId` (Rule A — no `actingUserId`).
+ * `:userId` (derived from the token, no `actingUserId`).
  */
 export async function fetchBlockStatus(
   client: SublayHttpClient,

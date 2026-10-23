@@ -8,8 +8,8 @@ import type { Space } from "../src/interfaces/Space";
  * NSFW flagging surface (Phase 5, Task 5.2). Asserts the new mod function hits
  * the exact server route `.../spaces/:spaceId/entities/:entityId/nsfw` and that
  * the `nsfw` create/update flags + `nsfwFilter` fetch param are shaped through
- * to the request. This is the user-token SDK: no actor (`userId`) param is
- * carried — the server derives the actor from the bearer token (Rule A).
+ * to the request. This is the user-token SDK: no actor (`actingUserId`) param
+ * is carried — the server derives the actor from the bearer token.
  */
 describe("js-sdk NSFW — request shaping", () => {
   it("setSpaceEntityNsfw patches /spaces/:spaceId/entities/:entityId/nsfw with { nsfw }", async () => {

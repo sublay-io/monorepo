@@ -62,7 +62,7 @@ Requires authentication. **The owner deletes:** a file with an owner is deleted 
     A service key sent no `actingUserId` for a file that has an owner. Name the owner: the request then runs exactly as their own.
 
     ```json
-    { "error": "A service key must send actingUserId to change a record that has an author: the request then acts as that user.", "code": "storage/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "storage/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
@@ -70,6 +70,13 @@ Requires authentication. **The owner deletes:** a file with an owner is deleted 
 
     ```json
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "storage/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "storage/user-not-found" }
     ```
   </Accordion>
 </AccordionGroup>

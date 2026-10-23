@@ -77,4 +77,11 @@ Returns an [Entity](/v8/data-models/entity) object.
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "entity/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "entity/user-not-found" }
+    ```
+  </Accordion>
 </AccordionGroup>

@@ -10,7 +10,7 @@ description: "Publish a draft entity, making it publicly visible"
 
 Publishes a draft entity. After publishing, the entity appears in normal feeds and is visible to all users. The entity's `isDraft` field is set to `false` and `createdAt` is reset to the current time.
 
-**Authentication required.** Only the draft's author may publish it: with their own access token, or with a service key naming them in `actingUserId` — the request then runs exactly as theirs. A draft with no author belongs to your app: only a service key naming nobody may publish it, and a user token gets `403`.
+**Authentication required.** Only the draft's author may publish it: with their own access token, or with a service key naming them in `actingUserId` — the request then runs exactly as theirs. A draft always has an author here: one without an author, which this API never creates, is answered as not found (`404 entity/not-found`) for every caller.
 
 ## Path Parameters
 
@@ -21,7 +21,7 @@ Publishes a draft entity. After publishing, the entity appears in normal feeds a
 ## Body Parameters
 
 <ParamField body="actingUserId" type="string">
-  Service key only: the user this publish acts as. Required when the draft has an author: name the author, and the request runs exactly as their own access token's (naming anyone else gets what their token gets, `403`). Leave it out only for an app-owned draft (no author). A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 entity/acting-user-not-allowed`).
+  Service key only, and required with one: the user this publish acts as. Name the draft's author, and the request runs exactly as their own access token's (naming anyone else gets what their token gets, `403`). A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 entity/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -43,7 +43,7 @@ Returns the published [Entity](/v8/data-models/entity) object with `isDraft: fal
     ```json
     { "error": "Draft entity not found", "code": "entity/not-found" }
     ```
-    Returned when no draft with this ID exists (or the entity is not a draft).
+    Returned when no draft with this ID exists, the entity is not a draft, or the draft has no author.
   </Accordion>
   <Accordion title="Unauthorized — 403">
     ```json
@@ -57,10 +57,10 @@ Returns the published [Entity](/v8/data-models/entity) object with `isDraft: fal
     Returned when your `entity.created` [validation webhook](/v8/webhooks) rejects the publish. `error` carries the `message` your webhook returned. The entity stays a draft.
   </Accordion>
   <Accordion title="Missing User ID — 400">
-    A service key sent no `actingUserId` for a draft that has an author. Name the author: the request then runs exactly as their own.
+    A service key sent no `actingUserId`. Name the draft's author: the request then runs exactly as their own.
 
     ```json
-    { "error": "A service key must send actingUserId to change a record that has an author: the request then acts as that user.", "code": "entity/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "entity/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
@@ -68,6 +68,13 @@ Returns the published [Entity](/v8/data-models/entity) object with `isDraft: fal
 
     ```json
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "entity/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "entity/user-not-found" }
     ```
   </Accordion>
 </AccordionGroup>

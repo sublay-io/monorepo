@@ -85,11 +85,11 @@ const entity = await sublay.entities.createEntity({
 </ParamField>
 
 <ParamField body="createdAt" type="Date">
-  A `Date` used to backdate the entity's creation time. A service key ability, also with `actingUserId` (for imports with original authors and dates).
+  A `Date` used to backdate the entity's creation time. A service key ability, also with `actingUserId` (for imports with original authors and dates). More than five minutes in the future returns `400 entity/invalid-body` (`createdAt can't be in the future.`).
 </ParamField>
 
 <ParamField body="updatedAt" type="Date">
-  A `Date` used to backdate the entity's last update time.
+  A `Date` used to backdate the entity's last update time. More than five minutes in the future returns `400 entity/invalid-body` (`updatedAt can't be in the future.`).
 </ParamField>
 
 **Returns** — `Promise<Entity>`
@@ -465,8 +465,8 @@ const entity = await sublay.entities.publishDraft({ entityId: "ent_xyz789", acti
   The Sublay entity ID of the draft to publish.
 </ParamField>
 
-<ParamField body="actingUserId" type="string">
-  The user this publish acts as. Required when the draft has an author: pass the author, and the request runs exactly as their own (`400 entity/missing-user-id` without it; anyone else gets `403`). Omit it only for an app-owned draft.
+<ParamField body="actingUserId" type="string" required>
+  The user this publish acts as: the draft's author, and the request runs exactly as their own (`400 entity/missing-user-id` without it; anyone else gets `403`). A draft with no author, which this API never creates, is answered as not found (`404 entity/not-found`).
 </ParamField>
 
 **Returns** — `Promise<Entity>`

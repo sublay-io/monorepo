@@ -27,8 +27,8 @@ import { makeClient } from "./helpers/client";
 /**
  * Recursively asserts that no acting-user `userId` leaks into a client call.
  * The bearer token is the actor for @sublay/js, so the server derives the
- * actor — sending an `actingUserId` that names anyone but the token's own user
- * would be Rule A's classic porting mistake (403 from the server). node-sdk
+ * actor — sending any `actingUserId` with a user token, even the token's own
+ * user, is the classic porting mistake (400 workspace/acting-user-not-allowed). node-sdk
  * deliberately DOES send one (service keys act on behalf of a named user); the
  * @sublay/js props types simply never carry it.
  *
@@ -433,11 +433,12 @@ describe("js-sdk workspaces — authority request shaping", () => {
   });
 });
 
-describe("js-sdk workspaces — no actor field on the client surface (Rule A)", () => {
+describe("js-sdk workspaces — no actor field on the client surface", () => {
   // @sublay/js never exposes an acting-user field: the bearer token IS the
   // actor. There is deliberately no defensive strip — a caller who casts past
-  // the props type and hand-writes an actor gets a 403 from the server rather
-  // than a silently swallowed field. What the tests below lock in is that the
+  // the props type and hand-writes an actor gets a 400
+  // workspace/acting-user-not-allowed from the server rather than a silently
+  // swallowed field. What the tests below lock in is that the
   // wrappers never MANUFACTURE an actor, and that the target user ids that do
   // exist (the invitee, the `:userId` path segment) still reach the wire.
 

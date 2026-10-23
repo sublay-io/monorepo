@@ -26,9 +26,16 @@ export interface CreateEntityProps {
   isDraft?: boolean;
   /** Refuse to create the entity without an author (`actingUserId`). */
   requireUser?: boolean;
-  /** Backdate the entity (service key only, also with `actingUserId`). */
+  /**
+   * Backdate the entity (service key only, also with `actingUserId`). More
+   * than five minutes in the future: 400 `entity/invalid-body`.
+   */
   createdAt?: Date;
-  /** Backdate the entity's last update (service key only, also with `actingUserId`). */
+  /**
+   * Backdate the entity's last update (service key only, also with
+   * `actingUserId`). More than five minutes in the future: 400
+   * `entity/invalid-body`.
+   */
   updatedAt?: Date;
 }
 

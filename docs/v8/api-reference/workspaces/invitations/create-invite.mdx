@@ -195,6 +195,12 @@ Returns the created [WorkspaceInvitation](/v8/data-models/workspace-invitation) 
     ```
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }
+    ```
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+  </Accordion>
 </AccordionGroup>
 
 See also: [useCreateWorkspaceInvite](/v8/hooks/workspaces/use-create-workspace-invite) · [createWorkspaceInvite (js-sdk)](/v8/js-sdk/workspaces) · [createWorkspaceInvite (node-sdk)](/v8/node-sdk/workspaces)

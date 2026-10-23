@@ -16,8 +16,8 @@ export interface BlockedUserListItem {
 
 /**
  * GET /blocks — the token holder's own block list (their outbound blocks),
- * paginated. This is the private "manage / way back to unblock" surface (Rule A
- * — the subject is derived from the token, no `actingUserId`).
+ * paginated. This is the private "manage / way back to unblock" surface (the
+ * subject is derived from the token, no `actingUserId`).
  */
 export async function fetchBlockedUsers(
   client: SublayHttpClient,

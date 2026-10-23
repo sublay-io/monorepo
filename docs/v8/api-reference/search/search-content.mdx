@@ -100,6 +100,12 @@ Results are also filtered for the user — the signed-in user, or the `actingUse
     ```
     Returned when a user token, or a request with no credentials, sends `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "search/user-not-found" }
+    ```
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+  </Accordion>
   <Accordion title="Plan Required — 403">
     ```json
     { "error": "Semantic search requires a paid plan", "code": "project/plan-required" }

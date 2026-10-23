@@ -178,6 +178,8 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
+    The user in the path no longer exists, for example a user token that outlived its user.
+
     ```json
     {
       "error": "User not found",
@@ -229,7 +231,7 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     A service key sent no `actingUserId`.
 
     ```json
-    { "error": "Missing user ID", "code": "user/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "user/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="Not the User in the Path — 403">
@@ -250,6 +252,13 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
       "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
       "code": "user/acting-user-not-allowed"
     }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project, so also when it names a `:userId` that doesn't exist.
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "user/user-not-found" }
     ```
   </Accordion>
 </AccordionGroup>

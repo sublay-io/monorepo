@@ -122,10 +122,7 @@ await sublay.workspaces.updateWorkspaceMember({
 The owner resolves the full capability vocabulary and apex rank, so nothing is out of reach, and the resulting webhooks carry that user id.
 
 <Warning>
-  **This is naming, not authentication.** A service key may name *any* UUID, and the server does not verify that it belongs to a live account — it only checks whether the id matches the workspace's `ownerId` (or a membership row). Two consequences:
-
-  - The user id on a webhook tells you what the caller **claimed**, with the same trust level as the key itself. It is not evidence a person acted.
-  - `ownerId` is a plain column, not a foreign key — deliberately, so deleting a user cannot cascade away every workspace they own. So acting as the id of a **deleted** owner still resolves full owner authority. If your product deletes accounts, transfer ownership as part of that teardown; do not rely on the id going stale to revoke anything.
+  **This is naming, not authentication.** A service key may name any user in the project. The server checks that the id is a user in this project (`404 workspace/user-not-found` otherwise), so a deleted user can't be named, but nothing more: the user id on a webhook tells you what the caller **claimed**, with the same trust level as the key itself. It is not evidence a person acted.
 
   If you need attribution you can actually trust, record it in your own system at the point you decide to make the call.
 </Warning>
@@ -148,6 +145,15 @@ Between the two, on the routes that check the acting user's standing before anyt
     ```json
     {
       "error": "`userId` is not the acting user on workspace routes — it addresses the target. Use `actingUserId` to act on behalf of a user.",
+      "code": "workspace/invalid-body"
+    }
+    ```
+
+    That is the text a service key gets. A user token, or a request with no credentials, can't send `actingUserId` either, so it gets:
+
+    ```json
+    {
+      "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
       "code": "workspace/invalid-body"
     }
     ```

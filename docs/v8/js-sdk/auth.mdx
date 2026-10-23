@@ -393,7 +393,7 @@ Takes no arguments.
 
 ### confirmAccountDeletion
 
-Verifies the emailed code and **permanently deletes** the authenticated user's account. The cascade matches the service-key delete — entities and comments are kept as hollow shells; everything else owned by the user is removed.
+Verifies the emailed code and **permanently deletes** the authenticated user's account. The cascade matches the service-key delete — published entities and comments are kept as hollow shells with no author; drafts and everything else owned by the user are removed.
 
 ```typescript
 await sublay.auth.confirmAccountDeletion({ code: "048291" });

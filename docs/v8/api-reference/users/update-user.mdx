@@ -168,10 +168,10 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
 
 <AccordionGroup>
   <Accordion title="Not signed in — 401 / 403">
-    Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired. Checked before any uploaded file is read, so a request with no credentials gets `401` rather than a body or acting-user error.
+    Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired. Checked before any uploaded file is read, so a request with no credentials gets `401` rather than a body or acting-user error. A valid token for a different user gets `403 user/not-authorized` instead (Signed In as Another User, below).
   </Accordion>
-  <Accordion title="Not Authorized — 403">
-    A user token tried to update a different user.
+  <Accordion title="Signed In as Another User — 403">
+    A valid user token, signed in as a user other than `:userId`, tried to update that user. Returned with a JSON body, unlike the invalid-token `403` above.
 
     ```json
     {

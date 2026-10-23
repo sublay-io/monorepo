@@ -67,6 +67,9 @@ Returns the updated [SpaceDetailed](/v8/data-models/space) object.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Not signed in — 401 / 403">
+    Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired. Checked before any uploaded file is read, so a request with no credentials gets `401` rather than a body or acting-user error.
+  </Accordion>
   <Accordion title="Invalid Id — 400">
     Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json

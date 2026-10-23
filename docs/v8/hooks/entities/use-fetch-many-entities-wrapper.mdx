@@ -79,7 +79,7 @@ function UserFeed({ userId }: { userId: string }) {
 </ParamField>
 
 <ParamField body="include" type="EntityIncludeParam" optional>
-  Populate related fields. Accepted values: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`.
+  Populate related fields, as a single value or an array. Accepted values: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`.
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number" optional>

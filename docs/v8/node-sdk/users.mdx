@@ -25,8 +25,8 @@ const user = await sublay.users.fetchUserById({ userId: "usr_abc123" });
   Read as this user: the result is exactly what their own access token would get, so a profile whose owner blocked them comes back as `404`. Omit for the anonymous view.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="UserIncludeParam">
+  Associations to populate, as a single value or an array. The only value is `"files"`, which populates `avatarFile` and `bannerFile`.
 </ParamField>
 
 <SpaceReputationParams variant="user" field="body" />
@@ -84,8 +84,8 @@ const user = await sublay.users.fetchUserByForeignId({
   Secure metadata, used only when creating a new user. No API response returns it to any user. Users can also write their own, so don't treat it as trusted.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="UserIncludeParam">
+  Associations to populate, as a single value or an array. The only value is `"files"`, which populates `avatarFile` and `bannerFile`.
 </ParamField>
 
 <SpaceReputationParams variant="user" field="body" />
@@ -110,8 +110,8 @@ const user = await sublay.users.fetchUserByUsername({ username: "alice" });
   Read as this user: the result is exactly what their own access token would get, so a profile whose owner blocked them comes back as `404`. Omit for the anonymous view.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="UserIncludeParam">
+  Associations to populate, as a single value or an array. The only value is `"files"`, which populates `avatarFile` and `bannerFile`.
 </ParamField>
 
 <SpaceReputationParams variant="user" field="body" />

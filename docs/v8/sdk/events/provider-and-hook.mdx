@@ -15,7 +15,7 @@ Identify the event by `eventId`, or pass a pre-fetched `event` object to skip th
 import { EventProvider } from "@sublay/react-js";
 
 // By ID (fetches the event)
-<EventProvider eventId="evt_abc123" include="user,files,userRsvp">
+<EventProvider eventId="evt_abc123" include={["user", "files", "userRsvp"]}>
   <EventDetail />
 </EventProvider>
 
@@ -35,8 +35,8 @@ import { EventProvider } from "@sublay/react-js";
   A pre-fetched event object. Skips the initial fetch. Use this or `eventId`.
 </ParamField>
 
-<ParamField body="include" type="string | string[]">
-  Associations to expand on the fetch, e.g. `"user,files,userRsvp"`. Only used with `eventId`.
+<ParamField body="include" type="EventIncludeParam">
+  Associations to expand on the fetch, as a single value or an array: `"user"`, `"space"`, `"files"`, `"userRsvp"`. Only used with `eventId`.
 </ParamField>
 
 <Note>`EventProvider` renders `null` if neither `eventId` nor a valid `event` is provided.</Note>

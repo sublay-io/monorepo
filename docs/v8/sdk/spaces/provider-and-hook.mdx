@@ -51,8 +51,8 @@ import { SpaceProvider } from "@sublay/react-js";
   A pre-fetched space object. Skips the initial fetch if provided. Useful for SSR or when the space is already loaded in a parent component.
 </ParamField>
 
-<ParamField body="include" type='"files" | string[]'>
-  Optional. Pass `"files"` to include avatar and banner file data in the fetched space.
+<ParamField body="include" type="SpaceIncludeParam">
+  Optional. A single value or an array; the only value is `"files"`. Pass it to include avatar and banner file data in the fetched space.
 </ParamField>
 
 <Note>`SpaceProvider` renders `null` if none of `spaceId`, `shortId`, `slug`, or `space` is provided.</Note>

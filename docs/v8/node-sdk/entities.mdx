@@ -107,8 +107,8 @@ const entity = await sublay.entities.fetchEntity({ entityId: "ent_xyz789" });
   The user to read as: you get exactly what their own access token would get (their drafts, blocks, `saved`, their own reaction, top comments), and the read counts as their view. Omit it for the anonymous view (drafts return `404`; no view is counted).
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+<ParamField body="include" type="EntityIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">
@@ -148,8 +148,8 @@ const entity = await sublay.entities.fetchEntityByForeignId({
   The user to read as: you get exactly what their own access token would get (their drafts, blocks, `saved`, their own reaction, top comments), and the read counts as their view. Omit it for the anonymous view (drafts return `404`; no view is counted). It shapes the read only: an entity made by `createIfNotFound` is always app-owned.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+<ParamField body="include" type="EntityIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">
@@ -180,8 +180,8 @@ const entity = await sublay.entities.fetchEntityByShortId({ shortId: "abc12" });
   The user to read as: you get exactly what their own access token would get (their drafts, blocks, `saved`, their own reaction, top comments), and the read counts as their view. Omit it for the anonymous view (drafts return `404`; no view is counted).
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+<ParamField body="include" type="EntityIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">
@@ -242,8 +242,8 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
   Results per page. Defaults to `20`.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+<ParamField body="include" type="EntityIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">

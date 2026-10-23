@@ -27,7 +27,7 @@ function Roster({ workspaceId }: { workspaceId: string }) {
   const load = async () => {
     const roster = await fetchWorkspaceMembers({
       workspaceId,
-      include: "ancestorOwners,descendants",
+      include: ["ancestorOwners", "descendants"],
     });
     // roster.data: WorkspaceRosterEntry[]
   };
@@ -40,8 +40,8 @@ function Roster({ workspaceId }: { workspaceId: string }) {
   The workspace UUID.
 </ParamField>
 
-<ParamField path="include" type="string">
-  Comma-separated add-on buckets: `ancestorOwners`, `reachHolders`, `descendants`.
+<ParamField path="include" type="WorkspaceMemberIncludeParam">
+  Add-on buckets, as a single value or an array: `"ancestorOwners"`, `"reachHolders"`, `"descendants"`.
 </ParamField>
 
 <ParamField path="countOnly" type="boolean">

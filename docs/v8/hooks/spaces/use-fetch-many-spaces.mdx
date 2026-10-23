@@ -75,8 +75,8 @@ function SpaceSearch() {
   Filter by each space's `nsfwEffective` (own flag OR any ancestor). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW spaces; `"only"` returns only them. Because the filter keys off effective status, `"only"` may return an NSFW child whose safe parent is omitted — results are not guaranteed to form a contiguous tree. See [Space NSFW flagging](/v8/data-models/space#nsfw-flagging).
 </ParamField>
 
-<ParamField path="include" type='"files" | string[]'>
-  Optional. Pass `"files"` to include avatar file objects in each result.
+<ParamField path="include" type="SpaceIncludeParam">
+  Optional. A single value or an array; the only value is `"files"`. Pass it to include avatar and banner file objects in each result.
 </ParamField>
 
 ## Returns

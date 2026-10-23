@@ -37,8 +37,8 @@ function MyComment({ myCommentId }: { myCommentId: string }) {
   The foreign ID to look up.
 </ParamField>
 
-<ParamField path="include" type="string | string[]">
-  Populate related data. Accepted values: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
+<ParamField path="include" type="CommentIncludeParam">
+  Populate related data, as a single value or an array. Accepted values: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
 </ParamField>
 
 ## Returns

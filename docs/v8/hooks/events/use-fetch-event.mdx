@@ -22,8 +22,8 @@ function useLoadEvent(eventId: string) {
 ## Parameters
 
 <ParamField path="eventId" type="string" required>The event ID.</ParamField>
-<ParamField path="include" type="string | string[]">
-  Associations to expand: `"user"`, `"space"`, `"files"`, `"userRsvp"`.
+<ParamField path="include" type="EventIncludeParam">
+  Associations to expand, as a single value or an array: `"user"`, `"space"`, `"files"`, `"userRsvp"`.
 </ParamField>
 
 ## Returns

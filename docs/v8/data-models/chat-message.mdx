@@ -18,7 +18,7 @@ A `ChatMessage` represents a single message in a conversation. Messages support 
 | `content` | `string \| null` | Text content of the message. `null` for GIF-only or file-only messages. |
 | `gif` | `GifData \| null` | GIF attachment data. `null` if no GIF was attached. |
 | `mentions` | `Mention[]` | Array of @mentions embedded in the message. |
-| `files` | `File[] \| undefined` | File attachments. Only populated when the hook is called with `includeFiles: true`. Omitted by default to keep payloads small. |
+| `files` | `File[] \| undefined` | File attachments. On message lists, only populated when the hook is called with `includeFiles: true` (or `include` contains `"files"` on the REST API and the `@sublay/js` / `@sublay/node` SDKs); omitted by default to keep payloads small. A single-message fetch always returns them. |
 | `metadata` | `Record<string, any>` | Custom key-value data. Limited to 10 KB. |
 | `parentMessageId` | `string \| null` | ID of the parent message if this is a thread reply. Thread replies are excluded from the main conversation stream. |
 | `parentMessage` | `ChatMessage \| null \| undefined` | The parent message for thread replies. |
@@ -34,7 +34,7 @@ A `ChatMessage` represents a single message in a conversation. Messages support 
 | `moderatedById` | `string \| null` | ID of the moderator (user or client). |
 | `moderatedByType` | `"client" \| "user" \| null` | Whether the moderator was a client (dashboard/API key) or a user. |
 | `moderationReason` | `string \| null` | Optional reason recorded with the moderation action. |
-| `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when the read asks for grants (`includeGrants: true` on the React message hooks, or a `"grants"` token in the `include` string on the REST and server SDKs). Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
+| `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when the read asks for grants (`includeGrants: true` on the React message hooks, or `"grants"` in `include` on the REST API and the `@sublay/js` / `@sublay/node` SDKs). Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
 | `createdAt` | `Date` | Timestamp when the message was sent. |
 | `updatedAt` | `Date` | Timestamp of the last update to this record. |
 

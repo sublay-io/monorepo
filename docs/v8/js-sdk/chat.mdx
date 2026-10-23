@@ -365,8 +365,8 @@ const withReplies = await sublay.chat.listMessages({
   Sort direction by creation time.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated associations to populate: `"files"` (message attachments) and `"grants"` (each message's [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). Combine them as `"files,grants"`.
+<ParamField body="include" type="ChatMessageListIncludeParam">
+  Associations to populate, as a single value or an array: `"files"` (message attachments) and `"grants"` (each message's [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). Pass `["files", "grants"]` for both.
 </ParamField>
 
 <ParamField body="filters" type="MessageFilters">
@@ -463,8 +463,8 @@ const message = await sublay.chat.getMessage({
   The message ID.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated associations to populate. Only `"grants"` is supported here — it attaches the message's [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) at `message.grants`.
+<ParamField body="include" type="ChatMessageIncludeParam">
+  A single value or an array. The only value is `"grants"` — it attaches the message's [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) at `message.grants`. The message's files are always returned.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />

@@ -44,7 +44,7 @@ function useUpcoming() {
 <ParamField path="locationFilters" type="{ latitude; longitude; radius }">Proximity filter (radius in meters).</ParamField>
 <ParamField path="titleFilters" type="{ hasTitle?; includes?; doesNotInclude? }">Free-text filter on `title`.</ParamField>
 <ParamField path="descriptionFilters" type="{ hasDescription?; includes?; doesNotInclude? }">Free-text filter on `description`.</ParamField>
-<ParamField path="include" type="string | string[]">Associations to expand.</ParamField>
+<ParamField path="include" type="EventIncludeParam">Associations to expand, as a single value or an array: `"user"`, `"space"`, `"files"`, `"userRsvp"`.</ParamField>
 
 ## Returns
 

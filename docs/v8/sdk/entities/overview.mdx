@@ -82,7 +82,7 @@ When the item your users interact with already lives in your own database — an
 
 ## The `include` Parameter
 
-The entity fetch hooks accept an optional `include` parameter that populates related data. Each endpoint accepts only the values it supports — drafts don't take `"topComments"` or `"saved"`, collection entities don't take `"saved"` — and an unknown value is rejected with `400`:
+The entity fetch hooks accept an optional `include` parameter that populates related data: one value or an array of values. Each endpoint accepts only the values it supports — drafts don't take `"topComments"` or `"saved"`, collection entities don't take `"saved"` — and an unknown value is rejected with `400`:
 
 | Value | What it adds |
 |-------|-------------|

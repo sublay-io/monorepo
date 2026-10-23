@@ -90,8 +90,8 @@ const entity = await sublay.entities.fetchEntity({ entityId: "ent_xyz789" });
   The Sublay entity ID.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+<ParamField body="include" type="EntityIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">
@@ -127,8 +127,8 @@ const entity = await sublay.entities.fetchEntityByForeignId({
   When `true`, creates a stub entity if no match is found. The new entity has no author, so the project's **Who can create entities without an author** setting decides who may create it: everyone by default. When it is set to **Signed-in users only** (a visitor with no session is refused) or **No one from the client** (only a service key may create it), a refused caller gets `403 entity/authorless-creation-not-allowed` and nothing is created. See [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id).
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+<ParamField body="include" type="EntityIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">
@@ -155,8 +155,8 @@ const entity = await sublay.entities.fetchEntityByShortId({ shortId: "abc12" });
   The entity's short ID.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+<ParamField body="include" type="EntityIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">
@@ -217,8 +217,8 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
   Results per page.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+<ParamField body="include" type="EntityIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">

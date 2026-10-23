@@ -154,7 +154,7 @@ Full dark mode support.
 **Inline Styles Variant:**
 ```tsx
 <SocialCommentSection
-  foreignId="photo_123"
+  entityId={entity.id}
   theme={isDark ? 'dark' : 'light'}
 />
 ```
@@ -162,7 +162,7 @@ Full dark mode support.
 **Tailwind Variant on React:**
 ```tsx
 <html className={isDark ? 'dark' : ''}>
-  <SocialCommentSection foreignId="photo_123" />
+  <SocialCommentSection entityId={entity.id} />
 </html>
 ```
 

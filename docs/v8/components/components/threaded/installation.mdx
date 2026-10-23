@@ -206,12 +206,12 @@ After installation, import and use the component:
     ```tsx
     import { ThreadedCommentSection } from './components/comments-threaded';
 
-    function BlogPost({ post }) {
+    function EntityPage({ entity }) {
       return (
         <div>
-          <h1>{post.title}</h1>
-          <article>{post.content}</article>
-          <ThreadedCommentSection foreignId={post.id} createIfNotFound />
+          <h1>{entity.title}</h1>
+          <article>{entity.content}</article>
+          <ThreadedCommentSection entityId={entity.id} />
         </div>
       );
     }
@@ -228,9 +228,9 @@ After installation, import and use the component:
       ThreadedCommentInput,
     } from './components/comments-threaded';
 
-    function EntityScreen() {
+    function EntityScreen({ entity }) {
       return (
-        <ThreadedComments foreignId="post_123" createIfNotFound>
+        <ThreadedComments entityId={entity.id}>
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -249,6 +249,8 @@ After installation, import and use the component:
     `ThreadedComments` wraps the screen and renders the sheets over it. `ThreadedCommentSection` (Sort by and the comments) goes in the screen's `ScrollView`, so the entity above it scrolls away with the comments. `ThreadedCommentInput` (the comment box) is pinned below. See [React Native and Expo Components](/v8/components/components/threaded/props-api#react-native-and-expo-components).
   </Tab>
 </Tabs>
+
+The section is bound to a Sublay entity by `entityId` (or pass the `entity` object). For a record in your own database, pass its ID as `foreignId` with `createIfNotFound` instead; see [Attach comments to records you already have](/v8/components/installation/quick-start#attach-comments-to-records-you-already-have).
 
 <Info>
 Make sure your app is wrapped with `<SublayProvider>`. See the [Quick Start Guide](/v8/components/installation/quick-start) for setup details.

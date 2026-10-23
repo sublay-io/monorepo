@@ -1,4 +1,4 @@
-# Server V7 Endpoints — Service Key Access Reference
+# Server v8 Endpoints — Service Key Access Reference
 
 **Legend — Service Key Access:**
 - `no key needed` — public endpoint, no auth required (works anonymously)
@@ -52,10 +52,9 @@ Base path: `/v8/:projectId/`
 
 ## Chat — Conversations
 
-> **Bound (2026-06-07).** Chat is now reachable with a service key via the act-as-user
-> param (`userId`, or `actingUserId` where `userId` is the target). The server resolves
-> the acting user and then runs the normal membership/role checks against them
-> (resolve-then-check). See `plan-chat-node-sdk-parity.md` at the engine root.
+> Chat is reachable with a service key that names the acting user in `actingUserId`
+> (`userId` only ever names a target). The server resolves the acting user and then runs
+> the normal membership/role checks against them (resolve-then-check).
 
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
@@ -230,9 +229,9 @@ Base path: `/v8/:projectId/`
 | POST | `/spaces/:spaceId/rules` | can access with a key | `spaces.createRule` | yes |
 | PATCH | `/spaces/:spaceId/rules/:ruleId` | can access with a key | `spaces.updateRule` | yes |
 | DELETE | `/spaces/:spaceId/rules/:ruleId` | can access with a key | `spaces.deleteRule` | yes |
-| GET | `/spaces/:spaceId/conversation` | can't access even with a key | — | — |
-| PATCH | `/spaces/:spaceId/chat/messages/:messageId/moderation` | can't access even with a key | — | — |
-| PATCH | `/spaces/:spaceId/chat/reports/:reportId` | can't access even with a key | — | — |
+| GET | `/spaces/:spaceId/conversation` | can access with a key (required `actingUserId`) | `spaces.getSpaceConversation` | yes |
+| PATCH | `/spaces/:spaceId/chat/messages/:messageId/moderation` | can access with a key (required `actingUserId`, held to that user's moderator role) | `spaces.moderateSpaceChatMessage` | yes |
+| PATCH | `/spaces/:spaceId/chat/reports/:reportId` | can access with a key (required `actingUserId`, held to that user's moderator role) | `spaces.handleSpaceChatReport` | yes |
 
 ---
 
@@ -263,8 +262,6 @@ Base path: `/v8/:projectId/`
 ---
 
 ## Storage
-
-> **SDK module unmounted** — all endpoints require user identity. Files kept for future re-enablement.
 
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
@@ -313,7 +310,8 @@ Base path: `/v8/:projectId/`
 - Service keys are sent as `Authorization: Bearer <key>` with an `x-sublay-project-id` header.
 - The `flagServiceAccess` middleware validates the key against a hashed key stored in `ProjectApiKey`. If valid, it sets `req.isService = true`.
 - The `requireUserAuth` middleware checks for a service key first — so a valid service key bypasses JWT validation on any user-auth-guarded endpoint at the middleware level.
-- `requireElevatedAuth` (used only on `increment-views`) explicitly requires a service key and returns 403 otherwise — it is the only endpoint that actively enforces a service key.
+- `requireElevatedAuth` explicitly requires a service key and returns 403 otherwise (for example `increment-views` and deleting a user).
+- A service key acts as a user by naming them in `actingUserId`; `userId` only ever names a target or a filter. `actingUserGuard` runs on every route that accepts `actingUserId`: a user token sending it gets `400 <area>/acting-user-not-allowed`, and a key naming an id that isn't a user in the project gets `404 <area>/user-not-found` ("No user with this actingUserId exists in this project."). A route that needs an acting user answers a key naming nobody with `400 <area>/missing-user-id` ("A service key must send actingUserId: the user this request acts as.").
 - Endpoints marked `can't access even with a key` will pass the auth middleware with a service key, but their controller logic depends on `req.userId` (the caller's user identity), which a service key does not provide, making the operation meaningless or broken in practice.
 
 ## Known Issues

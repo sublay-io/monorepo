@@ -1,5 +1,7 @@
 # Node SDK Audit — Progress & Handoff
 
+> **Historical record (April 2026, v7).** This log describes the server and SDK as they were during that audit. Read it as history, not as current behavior: on v8 a service key names the acting user in `actingUserId`, most modules listed as unmounted below are mounted again, and the server's messages and helpers have changed. For the current state see `SERVER_ENDPOINTS.md` and `docs/v8/`.
+
 **Goal**: Audit and clean up `node-sdk/` so it only exposes endpoints that actually work with a service key. Working module by module through `SERVER_ENDPOINTS.md`.
 
 ---

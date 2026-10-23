@@ -36,6 +36,13 @@ Only children with `visibility: "public"` are listed, for every caller. Unlike [
   Direction, `"asc"` or `"desc"` (either case), for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
+<ParamField query="include" type="string">
+  Associations to include, as a comma-separated value or repeated params. The only value is:
+  - `files` — the processed `avatarFile` and `bannerFile` objects on each child space (requires the `files-images` bundle)
+
+  Matching ignores case. An unknown value returns `400 space/invalid-query`.
+</ParamField>
+
 ## Response
 
 <ResponseField name="data" type="Space[]">
@@ -72,7 +79,11 @@ Only children with `visibility: "public"` are listed, for every caller. Unlike [
     ```
   </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`. `error` names the first problem found.
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy`, `sortDir` or `include` value. `error` names the first problem found.
+
+    ```json
+    { "error": "include: Unknown include `members`. Allowed: files.", "code": "space/invalid-query" }
+    ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.

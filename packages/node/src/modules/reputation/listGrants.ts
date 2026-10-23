@@ -1,8 +1,10 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
 import {
   GrantSummary,
   ReputationGrant,
   ReputationGrantTargetFilter,
+  ReputationGrantIncludeParam,
 } from "../../interfaces/ReputationGrant";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
@@ -19,7 +21,7 @@ interface ListGrantsBaseProps extends SpaceReputationContextParams {
   senderId?: string;
 
   /** Associations to expand. Only `"user"` is supported (hydrates both parties). */
-  include?: string;
+  include?: ReputationGrantIncludeParam;
 
   /**
    * List as this user (service key only): exactly what their own access token
@@ -76,6 +78,7 @@ export async function listGrants(
     {
       params: {
         ...rest,
+        include: serializeInclude(rest.include),
         // `spaceReputationId=context` scores each hydrated user against THAT
         // GRANT'S own bucket. Normalized rather than spread raw — axios would
         // bracket-encode the object and the server would ignore it.

@@ -60,8 +60,8 @@ Call `refresh` after issuing a grant to pull the new row and updated totals.
 </ParamField>
 <ParamField path="targetId" type="string | null">The rewarded record's ID. Supplied together with `targetType`.</ParamField>
 <ParamField path="limit" type="number">Page size. Defaults to `10`. The server's maximum is `100`; a larger value is rejected with `400 reputation-grant/invalid-query` rather than clamped.</ParamField>
-<ParamField path="include" type="string | string[]">
-  Associations to expand. Only `"user"` is supported — it hydrates both the sender and the recipient.
+<ParamField path="include" type="ReputationGrantIncludeParam">
+  Associations to expand, as a single value or an array. The only value is `"user"` — it hydrates both the sender and the recipient.
 </ParamField>
 <ParamField path="spaceReputation" type="object">
   Opt-in per-user space reputation on the hydrated users. `{ spaceId: "context" }` scores each user against that grant's own space. See [Reputation](/v8/data-models/reputation#reading-space-scoped-reputation).

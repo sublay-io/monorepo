@@ -186,7 +186,7 @@ export interface DeleteSpaceResponse {
   message: string;
 }
 
-// Space include types (following Entity/User pattern)
+/** `include` values every space read (single, lists, children, mutual) accepts. */
 export type SpaceInclude = "files";
 export type SpaceIncludeArray = SpaceInclude[];
 export type SpaceIncludeParam = SpaceInclude | SpaceIncludeArray;

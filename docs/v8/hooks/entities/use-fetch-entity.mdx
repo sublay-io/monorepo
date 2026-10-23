@@ -37,8 +37,8 @@ function EntityLoader({ entityId }: { entityId: string }) {
   The Sublay entity ID to fetch.
 </ParamField>
 
-<ParamField path="include" type="string | EntityInclude[]">
-  Optional. Populate related fields. Accepted values: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`.
+<ParamField path="include" type="EntityIncludeParam">
+  Optional. Populate related fields, as a single value or an array. Accepted values: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`.
 </ParamField>
 
 <ParamField path="topCommentsLimit" type="number">

@@ -111,11 +111,11 @@ using the values after `limit` and `replyLimit` are capped at 100. Requests abov
 ### Optional associations
 
 <ParamField query="include" type="string">
-  Comma-separated list of associations to include, applied at every level (nested replies included):
+  Associations to include, as a comma-separated value (`include=user,grants`) or repeated params, applied at every level (nested replies included). Values:
   - `user` — the comment author, with the avatar file URLs
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)
 
-  Every comment in a thread belongs to the entity you asked for, so `entity`, `space` and `parent` aren't available here (see [Unsupported parameters](#unsupported-parameters)).
+  Matching ignores case. Every comment in a thread belongs to the entity you asked for, so `entity`, `space` and `parent` aren't available here: they return `400 comment/unsupported-param` (see [Unsupported parameters](#unsupported-parameters)). Any other unknown value returns `400 comment/invalid-query`.
 </ParamField>
 
 ### Space-scoped reputation
@@ -264,6 +264,10 @@ Checks run in this order; the first failing check is returned.
       "error": "Send `entityId` (an entity's top-level comments) or `parentId` (a comment's replies), not both. To list a user's comments, use `GET /users/:userId/comments`.",
       "code": "comment/invalid-query"
     }
+    ```
+
+    ```json
+    { "error": "include: Unknown include `replies`. Allowed: user, grants.", "code": "comment/invalid-query" }
     ```
   </Accordion>
   <Accordion title="Request too large — 400">

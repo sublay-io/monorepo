@@ -74,8 +74,8 @@ const comment = await sublay.comments.fetchComment({ commentId: "cmt_abc123" });
   The Sublay comment ID.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="CommentIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />
@@ -98,8 +98,8 @@ const comment = await sublay.comments.fetchCommentByForeignId({
   Your application's comment identifier.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="CommentIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
 </ParamField>
 
 **Returns** — `Promise<Comment>`

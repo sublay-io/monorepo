@@ -308,3 +308,18 @@ export interface RemoveWorkspaceMemberFromSubtreeResponse {
   /** One entry per retained membership; `skippedCount === skipped.length`. */
   skipped: SkippedWorkspace[];
 }
+
+/** `include` values the workspace fetches (single and list) accept. */
+export type WorkspaceInclude = "memberCount";
+export type WorkspaceIncludeArray = WorkspaceInclude[];
+export type WorkspaceIncludeParam = WorkspaceInclude | WorkspaceIncludeArray;
+
+/** `include` values the workspace roster (`GET /workspaces/:id/members`) accepts. */
+export type WorkspaceMemberInclude =
+  | "ancestorOwners"
+  | "reachHolders"
+  | "descendants";
+export type WorkspaceMemberIncludeArray = WorkspaceMemberInclude[];
+export type WorkspaceMemberIncludeParam =
+  | WorkspaceMemberInclude
+  | WorkspaceMemberIncludeArray;

@@ -34,8 +34,8 @@ The hook returns a function. That function accepts:
   UUID of the space to fetch.
 </ParamField>
 
-<ParamField path="include" type='"files" | string[]'>
-  Optional. Pass `"files"` to include avatar and banner file objects in the response.
+<ParamField path="include" type="SpaceIncludeParam">
+  Optional. A single value or an array; the only value is `"files"`. Pass it to include avatar and banner file objects in the response.
 </ParamField>
 
 ## Returns

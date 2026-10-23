@@ -79,14 +79,14 @@ An unknown `userId` returns an empty page.
 ### Optional associations
 
 <ParamField query="include" type="string">
-  Comma-separated list of associations to include in each comment:
+  Associations to include in each comment, as a comma-separated value (`include=user,entity`) or repeated params. Values:
   - `user` — the comment author, with the avatar file URLs
   - `entity` — the entity the comment is on, as its stored record: the fields an entity fetch computes or joins (such as `commentsCount`, `userReaction` and `nsfwEffective`) are not included — see [The included entity](/v8/data-models/comment#the-included-entity); `null` when the entity isn't available to the caller (for example, removed by a moderator) — the comment is still returned
   - `space` — the entity's space, as `entity.space` (also includes `entity`); when `entity` is `null` there is no space
   - `parent` — `parentComment`, for replies; `null` when the parent no longer exists or is on another entity
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)
 
-  `include` never changes which comments are returned.
+  `include` never changes which comments are returned. Matching ignores case; an unknown value returns `400 comment/invalid-query`.
 </ParamField>
 
 ### Space-scoped reputation
@@ -143,6 +143,10 @@ These comments are **read-and-delete only**: replying under them, reacting to th
   </Accordion>
   <Accordion title="Invalid query — 400">
     Returned with code `comment/invalid-query` for invalid values — for example an unknown `include` value, `limit` below `1` or not a whole number, or `sortByReaction` without `sortBy=top`.
+
+    ```json
+    { "error": "include: Unknown include `replies`. Allowed: user, entity, space, grants, parent.", "code": "comment/invalid-query" }
+    ```
   </Accordion>
   <Accordion title="Invalid cursor — 400">
     ```json

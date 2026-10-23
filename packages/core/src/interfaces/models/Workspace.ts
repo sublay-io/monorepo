@@ -53,9 +53,20 @@ export type WorkspaceAuthorityReasonDetail =
       viaWorkspaceId: string;
     };
 
+/** `include` values the workspace fetches (single and list) accept. */
 export type WorkspaceInclude = "memberCount";
 export type WorkspaceIncludeArray = WorkspaceInclude[];
-export type WorkspaceIncludeParam = string | WorkspaceIncludeArray;
+export type WorkspaceIncludeParam = WorkspaceInclude | WorkspaceIncludeArray;
+
+/** `include` values the workspace roster (`GET /workspaces/:id/members`) accepts. */
+export type WorkspaceMemberInclude =
+  | "ancestorOwners"
+  | "reachHolders"
+  | "descendants";
+export type WorkspaceMemberIncludeArray = WorkspaceMemberInclude[];
+export type WorkspaceMemberIncludeParam =
+  | WorkspaceMemberInclude
+  | WorkspaceMemberIncludeArray;
 
 export interface Workspace {
   id: string;

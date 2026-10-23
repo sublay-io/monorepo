@@ -1,14 +1,16 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
 import {
   WorkspaceRosterResponse,
   WorkspaceRosterCountsResponse,
+  WorkspaceMemberIncludeParam,
 } from "../../interfaces/Workspace";
 
 export interface FetchWorkspaceMembersProps {
   workspaceId: string;
-  // Comma-separated add-on buckets: `ancestorOwners`, `reachHolders`,
-  // `descendants`. Default returns owner + direct members only.
-  include?: string;
+  // Add-on buckets: `ancestorOwners`, `reachHolders`, `descendants`.
+  // Default returns owner + direct members only.
+  include?: WorkspaceMemberIncludeParam;
   // Numbers-only escape hatch — returns per-reason counts + distinct-user total.
   countOnly?: boolean;
   // The user this request acts as. Required: the request resolves and is
@@ -39,6 +41,8 @@ export async function fetchWorkspaceMembers(
   const { workspaceId, ...params } = data;
   const response = await client.projectInstance.get<
     WorkspaceRosterResponse | WorkspaceRosterCountsResponse
-  >(`/workspaces/${workspaceId}/members`, { params });
+  >(`/workspaces/${workspaceId}/members`, {
+    params: { ...params, include: serializeInclude(params.include) },
+  });
   return response.data;
 }

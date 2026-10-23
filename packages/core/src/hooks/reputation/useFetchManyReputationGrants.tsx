@@ -4,6 +4,7 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 import {
   GrantSummary,
   ReputationGrant,
+  ReputationGrantIncludeParam,
   ReputationGrantTargetFilter,
 } from "../../interfaces/models/ReputationGrant";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
@@ -19,7 +20,7 @@ interface FetchManyReputationGrantsBaseProps
   /** What this user sent. */
   senderId?: string;
   /** Associations to expand. Only `"user"` is supported (hydrates both parties). */
-  include?: string | string[];
+  include?: ReputationGrantIncludeParam;
 }
 
 /**

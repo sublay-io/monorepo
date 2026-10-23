@@ -40,8 +40,8 @@ function MutualSpaces({ otherUserId }: { otherUserId: string }) {
   Number of results per page. Max `100`.
 </ParamField>
 
-<ParamField path="include" type="string | string[]">
-  Optional includes. Pass `"files"` to populate avatar and banner file objects on each space.
+<ParamField path="include" type="SpaceIncludeParam">
+  Optional. A single value or an array; the only value is `"files"`. Pass it to populate avatar and banner file objects on each space.
 </ParamField>
 
 ## Returns

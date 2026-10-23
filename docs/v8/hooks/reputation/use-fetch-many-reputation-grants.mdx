@@ -47,8 +47,8 @@ function useRecentRewards(userId: string) {
 <ParamField path="targetId" type="string">The rewarded record's ID. Supplied together with `targetType`.</ParamField>
 <ParamField path="page" type="number">Page number (1-indexed). Defaults to `1`.</ParamField>
 <ParamField path="limit" type="number">Page size. Defaults to `20`; the maximum is `100`. A larger value is rejected by the server with `400 reputation-grant/invalid-query` rather than clamped.</ParamField>
-<ParamField path="include" type="string | string[]">
-  Associations to expand. Only `"user"` is supported — it hydrates **both** the sender and the recipient on every row.
+<ParamField path="include" type="ReputationGrantIncludeParam">
+  Associations to expand, as a single value or an array. The only value is `"user"` — it hydrates **both** the sender and the recipient on every row.
 </ParamField>
 <ParamField path="spaceReputation" type="object">
   Opt-in per-user space reputation on the hydrated users. This is a context surface, so `spaceReputation: { spaceId: "context" }` scores each user against *that grant's own* space. See [Reputation](/v8/data-models/reputation#reading-space-scoped-reputation).

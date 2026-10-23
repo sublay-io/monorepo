@@ -52,7 +52,7 @@ function EventsList() {
 <ParamField path="locationFilters" type="object | null">Proximity filter.</ParamField>
 <ParamField path="titleFilters" type="object | null">Free-text filter on `title`.</ParamField>
 <ParamField path="descriptionFilters" type="object | null">Free-text filter on `description`.</ParamField>
-<ParamField path="include" type="string | string[]">Associations to expand.</ParamField>
+<ParamField path="include" type="EventIncludeParam">Associations to expand, as a single value or an array: `"user"`, `"space"`, `"files"`, `"userRsvp"`.</ParamField>
 <ParamField path="defaultSortBy" type='"startTime" | "going"'>Initial sort field. Defaults to `"startTime"`.</ParamField>
 <ParamField path="defaultSortDir" type='"asc" | "desc" | null'>Initial sort direction. Defaults to `null`: no direction is sent, so the sort's natural one applies (soonest first for `"startTime"`, most going first for `"going"`).</ParamField>
 

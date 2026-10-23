@@ -29,8 +29,10 @@ Returns a user's public profile by their Sublay user ID. Optionally includes ass
 </ParamField>
 
 <ParamField query="include" type="string">
-  Comma-separated list of associations to include. Pass `"files"` to include
-  the processed `avatarFile` and `bannerFile` objects.
+  Associations to include, as a comma-separated value or repeated params. The only value is:
+  - `files` — the processed `avatarFile` and `bannerFile` objects
+
+  Matching ignores case. An unknown value returns `400 user/invalid-query`.
 </ParamField>
 
 ### Space-scoped reputation
@@ -103,6 +105,16 @@ On success, returns HTTP `200` with the user object:
     {
       "error": "User not found",
       "code": "user/not-found"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Query — 400">
+    Returned for an unknown `include` value.
+
+    ```json
+    {
+      "error": "include: Unknown include `avatar`. Allowed: files.",
+      "code": "user/invalid-query"
     }
     ```
   </Accordion>

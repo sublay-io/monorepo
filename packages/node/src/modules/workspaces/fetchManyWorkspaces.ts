@@ -1,5 +1,6 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { Workspace } from "../../interfaces/Workspace";
+import { Workspace, WorkspaceIncludeParam } from "../../interfaces/Workspace";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface FetchManyWorkspacesProps {
@@ -8,11 +9,11 @@ export interface FetchManyWorkspacesProps {
   actingUserId: string;
   page?: number;
   limit?: number;
-  // Comma-separated include flags. `memberCount` adds each row's DIRECT member
+  // Include flags. `memberCount` adds each row's DIRECT member
   // count — resolved in one grouped query over the page that was returned, so a
   // switcher UI does not need a follow-up read per workspace. Omit it and the
-  // field is absent from every row. An unrecognized flag is ignored.
-  include?: string;
+  // field is absent from every row. An unknown flag is a 400.
+  include?: WorkspaceIncludeParam;
 }
 
 /**
@@ -28,6 +29,8 @@ export async function fetchManyWorkspaces(
 ): Promise<PaginatedResponse<Workspace>> {
   const response = await client.projectInstance.get<
     PaginatedResponse<Workspace>
-  >("/workspaces", { params: data });
+  >("/workspaces", {
+    params: { ...data, include: serializeInclude(data.include) },
+  });
   return response.data;
 }

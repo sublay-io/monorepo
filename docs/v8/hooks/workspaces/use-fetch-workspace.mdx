@@ -29,8 +29,8 @@ function WorkspaceHeader({ workspaceId }: { workspaceId: string }) {
   The workspace UUID.
 </ParamField>
 
-<ParamField path="include" type="string | string[]">
-  Include flags; `memberCount` adds the direct member count. An array is joined with commas.
+<ParamField path="include" type="WorkspaceIncludeParam">
+  A single value or an array. The only value is `"memberCount"`: it adds the direct member count.
 </ParamField>
 
 ## Returns

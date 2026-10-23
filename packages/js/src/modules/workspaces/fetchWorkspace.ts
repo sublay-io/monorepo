@@ -1,12 +1,13 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { Workspace } from "../../interfaces/Workspace";
+import { Workspace, WorkspaceIncludeParam } from "../../interfaces/Workspace";
 
 export interface FetchWorkspaceProps {
   workspaceId: string;
-  // Comma-separated include flags. `memberCount` adds the workspace's DIRECT
+  // Include flags. `memberCount` adds the workspace's DIRECT
   // member count to the response; omit it and the field is absent. The same
-  // flag works on `fetchManyWorkspaces`. An unrecognized flag is ignored.
-  include?: string;
+  // flag works on `fetchManyWorkspaces`. An unknown flag is a 400.
+  include?: WorkspaceIncludeParam;
 }
 
 export async function fetchWorkspace(
@@ -16,7 +17,7 @@ export async function fetchWorkspace(
   const { workspaceId, include } = data;
   const response = await client.projectInstance.get<Workspace>(
     `/workspaces/${workspaceId}`,
-    { params: include ? { include } : undefined }
+    { params: include ? { include: serializeInclude(include) } : undefined }
   );
   return response.data;
 }

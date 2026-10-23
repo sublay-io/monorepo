@@ -39,7 +39,11 @@ The caller must be a member. Former members (who left) can only read messages up
 </ParamField>
 
 <ParamField query="include" type="string">
-  Comma-separated list of extra fields to include: `files` (attachments) and `grants` (the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). Combine them as `include=files,grants`.
+  Extra fields to include, as a comma-separated value (`include=files,grants`) or repeated params. Values:
+  - `files` — the message's file attachments
+  - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) for each message
+
+  Matching ignores case. An unknown value returns `400 chat/invalid-query`.
 </ParamField>
 
 <ParamField query="filters" type="object">
@@ -132,9 +136,12 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
     ```
   </Accordion>
   <Accordion title="Invalid Query — 400">
-    For example `sortDir` other than `asc`/`desc`, both `before` and `after`, or `sort` (not accepted; use `sortDir`).
+    For example `sortDir` other than `asc`/`desc`, both `before` and `after`, `sort` (not accepted; use `sortDir`), or an unknown `include` value.
     ```json
     { "error": "sort: 'sort' is not accepted in v8; use 'sortDir'", "code": "chat/invalid-query" }
+    ```
+    ```json
+    { "error": "include: Unknown include `reactions`. Allowed: files, grants.", "code": "chat/invalid-query" }
     ```
   </Accordion>
 </AccordionGroup>

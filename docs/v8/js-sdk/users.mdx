@@ -23,8 +23,8 @@ const user = await sublay.users.fetchUserById({ userId: "usr_abc123" });
   The Sublay user ID.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="UserIncludeParam">
+  Associations to populate, as a single value or an array. The only value is `"files"`, which populates `avatarFile` and `bannerFile`.
 </ParamField>
 
 <SpaceReputationParams variant="user" field="body" />
@@ -47,8 +47,8 @@ const user = await sublay.users.fetchUserByForeignId({
   Your application's user identifier.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="UserIncludeParam">
+  Associations to populate, as a single value or an array. The only value is `"files"`, which populates `avatarFile` and `bannerFile`.
 </ParamField>
 
 <SpaceReputationParams variant="user" field="body" />
@@ -69,8 +69,8 @@ const user = await sublay.users.fetchUserByUsername({ username: "alice" });
   The user's unique username.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="UserIncludeParam">
+  Associations to populate, as a single value or an array. The only value is `"files"`, which populates `avatarFile` and `bannerFile`.
 </ParamField>
 
 <SpaceReputationParams variant="user" field="body" />

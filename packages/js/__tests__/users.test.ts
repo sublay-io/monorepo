@@ -28,9 +28,9 @@ import { formDataToObject, makeClient } from "./helpers/client";
 describe("js-sdk users — profile — request shaping", () => {
   it("fetchUserById strips userId into the path and passes the rest as params", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchUserById(client, { userId: "u1", include: "stats" });
+    await fetchUserById(client, { userId: "u1", include: "files" });
     expect(projectInstance.get).toHaveBeenCalledWith("/users/u1", {
-      params: { include: "stats" },
+      params: { include: "files" },
     });
   });
 
@@ -48,9 +48,9 @@ describe("js-sdk users — profile — request shaping", () => {
 
   it("fetchUserByForeignId gets /users/by-foreign-id with the full data as params (no createIfNotFound — service-only)", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchUserByForeignId(client, { foreignId: "f1", include: "stats" });
+    await fetchUserByForeignId(client, { foreignId: "f1", include: "files" });
     expect(projectInstance.get).toHaveBeenCalledWith("/users/by-foreign-id", {
-      params: { foreignId: "f1", include: "stats" },
+      params: { foreignId: "f1", include: "files" },
     });
   });
 

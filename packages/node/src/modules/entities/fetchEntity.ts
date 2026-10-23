@@ -1,5 +1,10 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { Entity, TopCommentsParams } from "../../interfaces/Entity";
+import {
+  Entity,
+  TopCommentsParams,
+  EntityIncludeParam,
+} from "../../interfaces/Entity";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
@@ -14,7 +19,7 @@ export interface FetchEntityProps
    * anonymous view.
    */
   actingUserId?: string;
-  include?: string;
+  include?: EntityIncludeParam;
 }
 
 export async function fetchEntity(
@@ -33,6 +38,7 @@ export async function fetchEntity(
     {
       params: {
         ...rest,
+        include: serializeInclude(rest.include),
         ...buildSpaceReputationParams({
           spaceReputation,
           spaceReputationId,

@@ -21,9 +21,9 @@ Returns a paginated list of workspaces scoped to the caller's **direct membershi
 </ParamField>
 
 <ParamField query="include" type="string">
-  Comma-separated include flags. `include=memberCount` adds a `memberCount` to **every row** — the workspace's **direct** member count, the same number [Fetch Workspace](/v8/api-reference/workspaces/fetch-workspace) returns for one workspace, counting neither descendants nor reach-holders.
+  Include flags, as a comma-separated value or repeated params. The only value is `memberCount`: it adds a `memberCount` to **every row** — the workspace's **direct** member count, the same number [Fetch Workspace](/v8/api-reference/workspaces/fetch-workspace) returns for one workspace, counting neither descendants nor reach-holders.
 
-  It is resolved with a single grouped query over the page that was returned, so a workspace switcher showing counts costs one request rather than one per row. Omit the flag and the field is **absent** from each row — not `null`, not `0`. An unrecognized flag value is ignored rather than rejected.
+  It is resolved with a single grouped query over the page that was returned, so a workspace switcher showing counts costs one request rather than one per row. Omit the flag and the field is **absent** from each row — not `null`, not `0`. Matching ignores case; an unknown value returns `400 workspace/invalid-query`.
 </ParamField>
 
 <ParamField query="actingUserId" type="string" required>
@@ -82,6 +82,12 @@ GET /v8/:projectId/workspaces?page=1&limit=10&include=memberCount
     { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }
     ```
     Returned when a service key names an `actingUserId` that isn't a user in this project.
+  </Accordion>
+  <Accordion title="Unknown Include — 400">
+    ```json
+    { "error": "include: Unknown include `members`. Allowed: memberCount.", "code": "workspace/invalid-query" }
+    ```
+    An `include` value outside `memberCount`. Matching ignores case.
   </Accordion>
   <Accordion title="Undeclared Query Parameter — 400">
     ```json

@@ -51,6 +51,10 @@ function ChildSpaceList({ spaceId }: { spaceId: string }) {
   Direction, `"asc"` or `"desc"`, for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
+<ParamField path="include" type="SpaceIncludeParam">
+  Optional. A single value or an array; the only value is `"files"`. Pass it to populate avatar and banner file objects on each space.
+</ParamField>
+
 ## Returns
 
 <ResponseField name="data" type="Space[]">

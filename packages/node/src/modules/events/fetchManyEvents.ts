@@ -1,5 +1,11 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { Event, EventType, EventStatus } from "../../interfaces/Event";
+import {
+  Event,
+  EventType,
+  EventStatus,
+  EventIncludeParam,
+} from "../../interfaces/Event";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface EventTextFilters {
@@ -53,8 +59,8 @@ export interface FetchManyEventsProps {
   titleFilters?: EventTextFilters;
   descriptionFilters?: EventDescriptionFilters;
 
-  /** Comma-separated associations to expand, e.g. "user,space,files,userRsvp". */
-  include?: string;
+  /** Associations to expand: `user`, `space`, `files`, `userRsvp`. */
+  include?: EventIncludeParam;
   /**
    * List as this user (service key only): exactly what their own access token
    * would get (event visibility, the `myRsvp` filter, `userRsvp`). Omit it for
@@ -69,7 +75,7 @@ export async function fetchManyEvents(
 ): Promise<PaginatedResponse<Event>> {
   const response = await client.projectInstance.get<PaginatedResponse<Event>>(
     `/events`,
-    { params: data }
+    { params: { ...data, include: serializeInclude(data.include) } }
   );
   return response.data;
 }

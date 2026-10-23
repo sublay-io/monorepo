@@ -1,5 +1,9 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { ChatMessage } from "../../interfaces/ChatMessage";
+import {
+  ChatMessage,
+  ChatMessageListIncludeParam,
+} from "../../interfaces/ChatMessage";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
@@ -24,11 +28,10 @@ export interface ListMessagesProps extends SpaceReputationContextParams {
   limit?: number;
   sortDir?: "asc" | "desc";
   /**
-   * Comma-separated associations to populate: `"files"` (message
-   * attachments) and `"grants"` (the reputation-grant summary). Combine
-   * them as `"files,grants"` — the server splits and trims this itself.
+   * Associations to populate: `"files"` (message attachments) and
+   * `"grants"` (the reputation-grant summary). Pass one or an array of both.
    */
-  include?: string;
+  include?: ChatMessageListIncludeParam;
   /** Optional filters, e.g. `{ hasReplies: true }`. */
   filters?: MessageFilters;
 }
@@ -59,6 +62,7 @@ export async function listMessages(
   } = data;
   const params = {
     ...rest,
+    include: serializeInclude(rest.include),
     ...buildSpaceReputationParams({
       spaceReputation,
       spaceReputationId,

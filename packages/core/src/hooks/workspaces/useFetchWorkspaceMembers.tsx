@@ -2,15 +2,16 @@ import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import {
+  WorkspaceMemberIncludeParam,
   WorkspaceRosterResponse,
   WorkspaceRosterCountsResponse,
 } from "../../interfaces/models/Workspace";
 
 export interface FetchWorkspaceMembersProps {
   workspaceId: string;
-  // Comma-separated add-on buckets: `ancestorOwners`, `reachHolders`,
-  // `descendants`. Default returns owner + direct members only.
-  include?: string;
+  // Add-on buckets: `ancestorOwners`, `reachHolders`, `descendants`.
+  // Default returns owner + direct members only.
+  include?: WorkspaceMemberIncludeParam;
   // Numbers-only escape hatch — per-reason counts + distinct-user total.
   countOnly?: boolean;
 }
@@ -41,7 +42,9 @@ function useFetchWorkspaceMembers(): (
       }
 
       const params: Record<string, any> = {};
-      if (include) params.include = include;
+      if (include && include.length > 0) {
+        params.include = Array.isArray(include) ? include.join(",") : include;
+      }
       if (countOnly !== undefined) params.countOnly = countOnly;
 
       const response = await axios.get<

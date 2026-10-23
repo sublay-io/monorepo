@@ -1,5 +1,6 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { Space } from "../../interfaces/Space";
+import { Space, SpaceIncludeParam } from "../../interfaces/Space";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface FetchMutualSpacesProps {
@@ -9,7 +10,7 @@ export interface FetchMutualSpacesProps {
   actingUserId: string;
   page?: number;
   limit?: number;
-  include?: string;
+  include?: SpaceIncludeParam;
 }
 
 export async function fetchMutualSpaces(
@@ -18,7 +19,9 @@ export async function fetchMutualSpaces(
 ): Promise<PaginatedResponse<Space>> {
   const response = await client.projectInstance.get<PaginatedResponse<Space>>(
     `/spaces/mutual/${userId}`,
-    { params }
+    {
+      params: { ...params, include: serializeInclude(params.include) },
+    }
   );
   return response.data;
 }

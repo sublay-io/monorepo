@@ -49,7 +49,7 @@ function EventCard({ eventId }: { eventId: string }) {
 
 <ParamField path="event" type="Event">A pre-fetched event. Use this or `eventId`.</ParamField>
 <ParamField path="eventId" type="string">An event ID to fetch. Use this or `event`.</ParamField>
-<ParamField path="include" type="string | string[]">Associations to expand when fetching by `eventId`.</ParamField>
+<ParamField path="include" type="EventIncludeParam">Associations to expand when fetching by `eventId`, as a single value or an array: `"user"`, `"space"`, `"files"`, `"userRsvp"`.</ParamField>
 
 ## Returns (both hooks)
 

@@ -14,7 +14,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | `string` | Unique entity identifier (UUID). |
-| `foreignId` | `string \| null` | Your system's content ID, if this entity maps to existing data. Can also be a static identifier like `"about-page"`. |
+| `foreignId` | `string \| null` | Your system's content ID, if this entity maps to existing data. Can also be a static identifier like `"about-page"`. Unique within the project, including deleted entities: a deleted entity's `foreignId` can't be reused (`409 entity/foreign-id-taken`). |
 | `shortId` | `string` | Auto-generated short identifier, useful for sharing links. |
 | `projectId` | `string` | The project this entity belongs to. |
 | `sourceId` | `string \| null` | Groups entities by content type within a project. Useful when one project hosts multiple distinct categories of content (e.g. `"user-post"` vs `"blog-post"`), allowing you to filter and separate them without creating separate projects. |

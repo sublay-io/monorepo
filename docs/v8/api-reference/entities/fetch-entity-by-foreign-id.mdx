@@ -31,7 +31,7 @@ Returns an entity matching the given `foreignId` within the project. Optionally 
   | User token | Creates | Creates | `403` |
   | No credentials | Creates | `403` | `403` |
 
-  A refused caller gets `403 entity/authorless-creation-not-allowed` and nothing is created. A user token that is expired or invalid counts as no credentials, so under **Signed-in users only** that caller is refused too. A suspended user can't create the entity: they get `403 user/suspended`, as on [Create Entity](/v8/api-reference/entities/create-entity). The setting only matters when the entity doesn't exist yet: reading an existing entity works for every caller. A project admin changes the setting in the dashboard under **Settings → General → SDK**.
+  A refused caller gets `403 entity/authorless-creation-not-allowed` and nothing is created. A user token that is expired or invalid counts as no credentials, so under **Signed-in users only** that caller is refused too. A suspended user can't create the entity: they get `403 user/suspended`, as on [Create Entity](/v8/api-reference/entities/create-entity). The setting only matters when the entity doesn't exist yet: reading an existing entity works for every caller. Requests that race to create the same `foreignId` all get the one entity that was created. A `foreignId` whose entity was deleted stays taken: the lookup answers `409 entity/foreign-id-taken` instead of creating a new entity. A project admin changes the setting in the dashboard under **Settings → General → SDK**.
 </ParamField>
 
 <ParamField query="include" type="string">
@@ -88,6 +88,13 @@ Returns an [Entity](/v8/data-models/entity) object.
     { "error": "Entity not found", "code": "entity/not-found" }
     ```
     Returned when no entity with this `foreignId` exists and `createIfNotFound` is not `"true"`.
+  </Accordion>
+  <Accordion title="Foreign ID Taken — 409">
+    `createIfNotFound` was `"true"` and the entity with this `foreignId` was deleted. A `foreignId` is unique across the project's entities, deleted ones included, so a deleted entity's `foreignId` can't be reused. Nothing is created.
+
+    ```json
+    { "error": "An entity with this foreignId was deleted; its foreignId can't be reused.", "code": "entity/foreign-id-taken" }
+    ```
   </Accordion>
   <Accordion title="Rejected by Validation Webhook — 400">
     ```json

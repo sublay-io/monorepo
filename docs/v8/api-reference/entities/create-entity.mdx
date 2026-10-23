@@ -180,6 +180,19 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
     ```
     Returned when your `entity.created` [validation webhook](/v8/webhooks) rejects the request. `error` carries the `message` your webhook returned. Nothing is stored.
   </Accordion>
+  <Accordion title="Foreign ID Taken — 409">
+    The request sent a `foreignId` that is taken. Another entity already has this `foreignId`, or had it: a `foreignId` is unique across the project's entities, deleted ones included, and a deleted entity's `foreignId` can't be reused. Nothing is created.
+
+    ```json
+    { "error": "An entity with this foreignId already exists.", "code": "entity/foreign-id-taken" }
+    ```
+
+    When the entity holding it was deleted:
+
+    ```json
+    { "error": "An entity with this foreignId was deleted; its foreignId can't be reused.", "code": "entity/foreign-id-taken" }
+    ```
+  </Accordion>
   <Accordion title="Space Not Found — 404">
     ```json
     { "error": "Space not found", "code": "entity/space-not-found" }

@@ -1,5 +1,6 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { User } from "../../interfaces/User";
+import { User, UserIncludeParam } from "../../interfaces/User";
 import { SpaceReputationUserParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
@@ -20,7 +21,7 @@ export interface FetchUserByForeignIdProps extends SpaceReputationUserParams {
   bio?: string;
   metadata?: Record<string, any>;
   secureMetadata?: Record<string, any>;
-  include?: string;
+  include?: UserIncludeParam;
 }
 
 export async function fetchUserByForeignId(
@@ -41,7 +42,7 @@ export async function fetchUserByForeignId(
     secureMetadata: data.secureMetadata
       ? JSON.stringify(data.secureMetadata)
       : undefined,
-    include: data.include,
+    include: serializeInclude(data.include),
     ...buildSpaceReputationParams({
       spaceReputation: data.spaceReputation,
       spaceReputationId: data.spaceReputationId,

@@ -69,3 +69,8 @@ export interface EventInvite {
   createdAt: string;
   updatedAt: string;
 }
+
+/** `include` values the event fetches (single and list) accept. */
+export type EventInclude = "user" | "space" | "files" | "userRsvp";
+export type EventIncludeArray = EventInclude[];
+export type EventIncludeParam = EventInclude | EventIncludeArray;

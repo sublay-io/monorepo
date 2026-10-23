@@ -1,5 +1,10 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { Entity, TopCommentsParams } from "../../interfaces/Entity";
+import {
+  Entity,
+  TopCommentsParams,
+  EntityIncludeParam,
+} from "../../interfaces/Entity";
 
 export interface FetchEntityByForeignIdProps extends TopCommentsParams {
   foreignId: string;
@@ -12,7 +17,7 @@ export interface FetchEntityByForeignIdProps extends TopCommentsParams {
    */
   actingUserId?: string;
   createIfNotFound?: boolean;
-  include?: string;
+  include?: EntityIncludeParam;
 }
 
 export async function fetchEntityByForeignId(
@@ -21,7 +26,7 @@ export async function fetchEntityByForeignId(
 ): Promise<Entity> {
   const path = `/entities/by-foreign-id`;
   const response = await client.projectInstance.get<Entity>(path, {
-    params: data,
+    params: { ...data, include: serializeInclude(data.include) },
   });
   return response.data;
 }

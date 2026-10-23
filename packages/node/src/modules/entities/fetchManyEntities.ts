@@ -1,6 +1,11 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
 import type { WithOneWaySortDir } from "../../interfaces/OneWaySortParams";
-import { Entity, TopCommentsParams } from "../../interfaces/Entity";
+import {
+  Entity,
+  TopCommentsParams,
+  EntityIncludeParam,
+} from "../../interfaces/Entity";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
@@ -64,7 +69,7 @@ export interface FetchManyEntitiesBaseProps
   limit?: number;
 
   // Optional associations to expand
-  include?: string;
+  include?: EntityIncludeParam;
 
   // Time-based filtering
   timeFrame?: "hour" | "day" | "week" | "month" | "year";
@@ -128,6 +133,7 @@ export async function fetchManyEntities(
     {
       params: {
         ...rest,
+        include: serializeInclude(rest.include),
         ...buildSpaceReputationParams({
           spaceReputation,
           spaceReputationId,

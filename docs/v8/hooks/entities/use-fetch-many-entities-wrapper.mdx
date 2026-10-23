@@ -10,7 +10,7 @@ icon: "cube"
 
 ## Overview
 
-`useFetchManyEntitiesWrapper` is a stateful wrapper around [`useFetchManyEntities`](/v8/hooks/entities/use-fetch-many-entities) that manages pagination, sorting, and list state for you. Use it when you need a custom entity feed outside of `EntityListProvider` — for example, a user profile feed, a filtered search results page, or any custom list with infinite scroll.
+`useFetchManyEntitiesWrapper` is a stateful wrapper around [`useFetchManyEntities`](/v8/hooks/entities/use-fetch-many-entities) that manages pagination, sorting, and list state for you. Use it for a self-contained entity feed kept in component state rather than in a shared, `listId`-keyed [`useEntityList`](/v8/hooks/entity-lists/use-entity-list) list — for example, a user profile feed, a filtered search results page, or any custom list with infinite scroll.
 
 All filters and sort options mirror those of `useFetchManyEntities`. Changing any sort option automatically resets the list and re-fetches from page 1.
 

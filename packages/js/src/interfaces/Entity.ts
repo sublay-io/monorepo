@@ -67,6 +67,8 @@ export type EntityInclude =
   | "saved"
   | "files"
   | "grants";
+export type EntityIncludeArray = EntityInclude[];
+export type EntityIncludeParam = EntityInclude | EntityIncludeArray;
 
 /** `include` values the collection-entities fetch accepts (no `saved`). */
 export type CollectionEntityInclude = Exclude<EntityInclude, "saved">;

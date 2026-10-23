@@ -134,6 +134,8 @@ export type {
 export type {
   Entity,
   EntityInclude,
+  EntityIncludeArray,
+  EntityIncludeParam,
   CollectionEntityInclude,
   CollectionEntityIncludeArray,
   CollectionEntityIncludeParam,
@@ -153,6 +155,9 @@ export type {
   ReputationGrantTargetType,
   ReputationGrantTargetFilter,
   GrantSummary,
+  ReputationGrantInclude,
+  ReputationGrantIncludeArray,
+  ReputationGrantIncludeParam,
 } from "./interfaces/ReputationGrant";
 export type { CreateGrantProps } from "./modules/reputation/createGrant";
 export type {
@@ -178,7 +183,36 @@ export type {
   WorkspaceAuthority,
   RemoveWorkspaceMemberFromSubtreeResponse,
   SkippedWorkspace,
+  WorkspaceInclude,
+  WorkspaceIncludeArray,
+  WorkspaceIncludeParam,
+  WorkspaceMemberInclude,
+  WorkspaceMemberIncludeArray,
+  WorkspaceMemberIncludeParam,
 } from "./interfaces/Workspace";
+export type {
+  UserInclude,
+  UserIncludeArray,
+  UserIncludeParam,
+} from "./interfaces/User";
+export type {
+  SpaceInclude,
+  SpaceIncludeArray,
+  SpaceIncludeParam,
+} from "./interfaces/Space";
+export type {
+  EventInclude,
+  EventIncludeArray,
+  EventIncludeParam,
+} from "./interfaces/Event";
+export type {
+  ChatMessageListInclude,
+  ChatMessageListIncludeArray,
+  ChatMessageListIncludeParam,
+  ChatMessageInclude,
+  ChatMessageIncludeArray,
+  ChatMessageIncludeParam,
+} from "./interfaces/ChatMessage";
 export { PUSH_EVENT_TYPES, MUTE_DURATIONS } from "./interfaces/Push";
 export type {
   PushEventType,

@@ -55,7 +55,7 @@ Creates a new space. Its creator — the signed-in user, or the user a service k
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only, and required with one: the user this request acts as, who creates the space and becomes its admin, held to their own permissions. Leaving it out returns `400 space/missing-user-id`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
+  Service key only, and required with one: the user this request acts as, who creates the space and becomes its admin, held to their own permissions. Leaving it out returns `400 space/missing-user-id`. A user token always acts as its own user and must not send it (`400 space/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -96,7 +96,7 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
     }
     ```
 
-    With a user token, or with no credentials:
+    With a user token:
 
     ```json
     {

@@ -8,7 +8,7 @@ description: "Delete an entity"
   **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
 </Note>
 
-Deletes an entity and its associated data. Only the entity's author may delete it: with their own access token, or with a service key naming them in `actingUserId` — the request then runs exactly as theirs. An entity with no author belongs to your app: only a service key naming nobody may delete it, and a user token gets `403`.
+Deletes an entity and its associated data. Only the entity's author may delete it: with their own access token, or with a service key naming them in `actingUserId` — the request then runs exactly as theirs. An entity with no author belongs to your app: only a service key naming nobody may delete it, and a user token gets `403`. A draft with no author is answered as not found (`404 entity/not-found`) for every caller.
 
 **Authentication required.**
 

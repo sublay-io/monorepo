@@ -26,7 +26,7 @@ A few rules govern buckets:
 
 Reputation accrues two ways:
 
-- **Earned** — the system credits a user for what they do: creating entities and comments, and receiving votes and reactions on them. These changes are not individually recorded.
+- **Earned** — the system credits a user for what they do: creating entities (a draft earns nothing until it's published) and comments, and receiving votes and reactions on them. These changes are not individually recorded.
 - **Granted** — reputation is deliberately *given*, either by another user (a transfer that debits their bucket) or by your app (a mint that creates it from nothing, or destroys it). Every grant is persisted as a [ReputationGrant](/v8/data-models/reputation-grant) record, so a user's grant history is readable while their earned history is not.
 
 Grants ship with this bundle — every project that has reputation has them, with no separate opt-in. A transfer never moves reputation between the general bucket and a space bucket: it lands in the recipient's bucket for the same space it left. See [ReputationGrant](/v8/data-models/reputation-grant) and the [Reputation Grants SDK overview](/v8/sdk/reputation/overview).

@@ -8,7 +8,7 @@ description: "Update an entity's content and metadata"
   **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
 </Note>
 
-Updates the fields of an existing entity. Only the fields you include in the request body are updated — omitted fields are left unchanged. Only the entity's author may update it: with their own access token, or with a service key naming them in `actingUserId` — the request then runs exactly as theirs. An entity with no author belongs to your app: only a service key naming nobody may update it, and a user token gets `403`.
+Updates the fields of an existing entity. Only the fields you include in the request body are updated — omitted fields are left unchanged. Only the entity's author may update it: with their own access token, or with a service key naming them in `actingUserId` — the request then runs exactly as theirs. An entity with no author belongs to your app: only a service key naming nobody may update it, and a user token gets `403`. A draft with no author is answered as not found (`404 entity/not-found`) for every caller.
 
 **Authentication required.**
 

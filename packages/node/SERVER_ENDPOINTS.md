@@ -143,7 +143,7 @@ Base path: `/v8/:projectId/`
 | GET | `/entities/by-short-id` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntityByShortId` | yes |
 | GET | `/entities/drafts` | can access with a key | `entities.fetchDrafts` | yes |
 | GET | `/entities/is-entity-saved` | can access with a key | `entities.isEntitySaved` | yes |
-| PATCH | `/entities/:entityId/publish` | can access with a key (`actingUserId` required when the record has an author, and must name the author; omitted only for an app-owned record) | `entities.publishDraft` | yes |
+| PATCH | `/entities/:entityId/publish` | can access with a key (`actingUserId` required, and must name the draft's author; an author-less draft is 404) | `entities.publishDraft` | yes |
 | GET | `/entities/:entityId` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntity` | yes |
 | POST | `/entities/:entityId/reactions` | can access with a key | `entities.addReaction` | yes |
 | DELETE | `/entities/:entityId/reactions` | can access with a key | `entities.removeReaction` | yes |

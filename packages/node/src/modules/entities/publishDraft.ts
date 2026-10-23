@@ -4,11 +4,9 @@ import { Entity } from "../../interfaces/Entity";
 export interface PublishDraftProps {
   entityId: string;
   /**
-   * The user this publish acts as (service key only). Required when the draft
-   * has an author: name the author, and the request runs exactly as their own
-   * access token's. A draft created through this API always has an author;
-   * omit it only for a draft with none, which only an earlier API version
-   * could create.
+   * The user this publish acts as (service key only): the draft's author, and
+   * the request runs exactly as their own access token's. A draft with no
+   * author, which this API never creates, is answered as not found (404).
    */
   actingUserId?: string;
 }

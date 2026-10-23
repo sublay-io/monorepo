@@ -267,7 +267,7 @@ Base path: `/v8/:projectId/`
 |--------|------|--------------------|--------------|----------------|
 | POST | `/storage/images` | can access with a key (optional `actingUserId` = the owner; omitted = app-owned) | `storage.uploadImage` | yes |
 | POST | `/storage/` | can access with a key (optional `actingUserId` = the owner; omitted = app-owned) | `storage.uploadFile` | yes |
-| GET | `/storage/:fileId` | can't access even with a key | `storage.getFile` | no: needs user identity |
+| GET | `/storage/:fileId` | can access with a key (no user's view; `actingUserId` is ignored) | `storage.getFile` | yes |
 | DELETE | `/storage/:fileId` | can access with a key (`actingUserId` required when the record has an author, and must name the author; omitted only for an app-owned record) | `storage.deleteFile` | yes |
 
 ---
@@ -276,7 +276,7 @@ Base path: `/v8/:projectId/`
 
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
-| GET | `/utils/get-metadata` | can't access even with a key | — | — |
+| GET | `/utils/get-metadata` | can access with a key (no user's view; `actingUserId` is ignored) | — | — |
 
 ---
 

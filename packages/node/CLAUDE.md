@@ -102,7 +102,7 @@ const client = await SublayClient.init({
 
 ## API Modules & Features
 
-`SublayClient` binds **15 modules**. The source of truth is `src/index.ts` (the `bindModule` calls) and each module's `index.ts`. The full public surface and per-function props/returns are documented in `docs/v7/node-sdk/`.
+`SublayClient` binds **15 modules**. The source of truth is `src/index.ts` (the `bindModule` calls) and each module's `index.ts`. The full public surface and per-function props/returns are documented in `docs/v8/node-sdk/`.
 
 **Acting on behalf of a user**: the SDK authenticates as the project (service key), not as an end user. So user-scoped functions take `actingUserId` — the user the operation is performed as — on every v8 route, in the body or query where the server reads it. `userId` only ever names a user the request is about: a path target (`users.*ByUserId`, the follow/connection/block pairs, `spaces.fetchMutualSpaces`), a body target (`chat.createDirectConversation` / `chat.addMember`, event hosts and invites, `workspaces.createWorkspaceInvite`), or the author filter on `entities.fetchManyEntities`. The server answers an old actor `userId` with 400 `<resource>/unsupported-param`. An `actingUserId` that isn't a user in the project gets 404 `<resource>/user-not-found` on every route that takes one; a route that needs an acting user answers a missing one with 400 `<resource>/missing-user-id`. Open reads take an optional `actingUserId` to get exactly that user's view (user profiles, follower/following/connection lists and counts, `fetchCommentsByUserId`, `search.searchUsers`/`searchContent`/`askContent`, the entity and comment reads and reaction lists, the event reads and `fetchEventRsvps`, the space reads, member and team lists and child spaces, `reputation.listGrants`); without it they return exactly the anonymous view (for `listGrants`, a signed-in user in no conversation). **The owner acts**: `updateEntity`/`deleteEntity`, `updateComment`/`deleteComment` and `storage.deleteFile` need `actingUserId` naming the author when the record has one (400 `<area>/missing-user-id` without it), and omit it only for an app-owned record. `publishDraft` requires `actingUserId` (typed required), the draft's author: an author-less draft is 404 everywhere on v8. Creates without `actingUserId` (`createEntity`, uploads) make an app-owned record; a draft needs an owner. `createdAt`/`updatedAt` backdating on entity and comment create is a service-key ability, also with `actingUserId`. Routes that need the user's own access token (password change/set, account deletion, OAuth link/identities, push device register/deregister) refuse service keys, so the SDK has no methods for them.
 
@@ -242,7 +242,7 @@ out-of-the-box on Android/Web; on iOS it also needs a Notification Service
 Extension in the app (and auto-sets `mutable-content`). Android sound on 8+ is
 owned by the channel, so pair `sound` with a client-created `channelId`. The
 SDK forwards the whole body unreshaped — the server zod schema
-(`server/src/v7/validation/push-notifications/push-notifications.schema.ts`) is
+(`server/src/v8/validation/push-notifications/push-notifications.schema.ts`) is
 the source of truth.
 Fans a push out across all of the listed users' registered devices (APNs/FCM/Web
 Push); returns per-user, per-device results (`{ results: { [userId]: { platform, success, reason? }[] } }`).
@@ -362,14 +362,14 @@ Essentially any Node.js environment where you need to interact with Sublay's soc
 
 - **TypeScript**: Strict mode enabled
 - **Dependencies**: Only axios for HTTP requests
-- **API Version**: Uses v7 API endpoints
+- **API Version**: Uses v8 API endpoints (`https://api.sublay.io/v8/{projectId}`)
 - **Authentication**: Bearer token with project ID header
 - **Error Handling**: Axios error responses
 - **Type Safety**: Full TypeScript support with exported interfaces
 
 ## Important Notes
 
-- This SDK is on **v7** (v7.0.0)
+- This SDK is on **v8** (beta, `8.0.0-beta.1` on the `v8` branch)
 - Requires valid project ID and API key from Sublay dashboard
 - Credentials are verified on initialization
 - All API calls are project-scoped

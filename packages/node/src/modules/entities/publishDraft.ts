@@ -4,11 +4,12 @@ import { Entity } from "../../interfaces/Entity";
 export interface PublishDraftProps {
   entityId: string;
   /**
-   * The user this publish acts as (service key only): the draft's author, and
-   * the request runs exactly as their own access token's. A draft with no
-   * author, which this API never creates, is answered as not found (404).
+   * The user this publish acts as: the draft's author, and the request runs
+   * exactly as their own access token's. Required: a draft always has an
+   * author (one without is answered as not found, 404), and a service key
+   * that names nobody gets 400 `entity/missing-user-id`.
    */
-  actingUserId?: string;
+  actingUserId: string;
 }
 
 export async function publishDraft(

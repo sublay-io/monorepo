@@ -156,7 +156,7 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
       "endDate": "..."
     }
     ```
-    `reason` and `endDate` are `null` when the suspension carries neither.
+    `reason` is `null` when none was given; `endDate` is `null` for a suspension with no end date.
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.

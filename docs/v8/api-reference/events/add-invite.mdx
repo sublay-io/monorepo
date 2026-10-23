@@ -49,6 +49,12 @@ Returns the updated [Event](/v8/data-models/event).
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "event/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "event/user-not-found" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Event not found", "code": "event/not-found" }

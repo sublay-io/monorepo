@@ -103,6 +103,12 @@ Caller with a plain relation, reading **someone else's** standing — the four a
     ```
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }
+    ```
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+  </Accordion>
 </AccordionGroup>
 
 See also: [useFetchWorkspaceMemberStanding](/v8/hooks/workspaces/use-fetch-workspace-member-standing) · [List Members](/v8/api-reference/workspaces/members/list-members) · [Read Authority](/v8/api-reference/workspaces/fetch-authority)

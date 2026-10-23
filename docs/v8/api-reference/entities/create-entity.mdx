@@ -148,9 +148,22 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
     The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+
+    With a service key:
+
     ```json
     {
       "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "entity/unsupported-param",
+      "param": "userId"
+    }
+    ```
+
+    With a user token, or with no credentials:
+
+    ```json
+    {
+      "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
       "code": "entity/unsupported-param",
       "param": "userId"
     }
@@ -201,10 +214,10 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
-    The user named in `actingUserId` doesn't exist.
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
 
     ```json
-    { "error": "User not found", "code": "entity/user-not-found" }
+    { "error": "No user with this actingUserId exists in this project.", "code": "entity/user-not-found" }
     ```
   </Accordion>
 </AccordionGroup>

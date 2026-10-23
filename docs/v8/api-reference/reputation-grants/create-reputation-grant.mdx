@@ -74,7 +74,7 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
   </Accordion>
   <Accordion title="Missing Sender — 400">
     ```json
-    { "error": "Missing user ID", "code": "reputation-grant/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "reputation-grant/missing-user-id" }
     ```
     A service key called the endpoint without naming an `actingUserId`.
   </Accordion>
@@ -121,6 +121,12 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
     { "error": "One or both users involved in this grant do not exist.", "code": "reputation-grant/user-not-found" }
     ```
     One answer for both parties, deliberately non-disclosing — and the same answer returned when a block edge exists in either direction, for a user token and a service key alike.
+
+    A service key that names an `actingUserId` that isn't a user in this project gets the same code with its own text:
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "reputation-grant/user-not-found" }
+    ```
   </Accordion>
   <Accordion title="Target Not Found — 404">
     ```json

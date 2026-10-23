@@ -29,7 +29,7 @@ On success, returns HTTP `204` with no body.
     A service key sent no `actingUserId`.
     ```json
     {
-      "error": "Missing user ID",
+      "error": "A service key must send actingUserId: the user this request acts as.",
       "code": "follow/missing-user-id"
     }
     ```
@@ -41,6 +41,12 @@ On success, returns HTTP `204` with no body.
       "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
       "code": "follow/acting-user-not-allowed"
     }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "follow/user-not-found" }
     ```
   </Accordion>
   <Accordion title="Not Following — 404">

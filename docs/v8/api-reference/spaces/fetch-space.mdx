@@ -47,6 +47,13 @@ Returns a [SpaceDetailed](/v8/data-models/space) object including `memberPermiss
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "space/user-not-found" }
+    ```
+  </Accordion>
 </AccordionGroup>
 
 See also: [useFetchSpace](/v8/hooks/spaces/use-fetch-space)

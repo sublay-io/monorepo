@@ -154,6 +154,13 @@ See [ReputationGrant](/v8/data-models/reputation-grant) for the row shape and [G
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "reputation-grant/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "reputation-grant/user-not-found" }
+    ```
+  </Accordion>
 </AccordionGroup>
 
 **Rate limit:** 100 requests per 5 minutes per IP. Exceeding it returns `429` with a plain-text message and no `code`.

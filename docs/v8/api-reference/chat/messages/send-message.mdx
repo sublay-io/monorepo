@@ -77,11 +77,30 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "chat/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "chat/user-not-found" }
+    ```
+  </Accordion>
   <Accordion title="Unsupported Parameter — 400">
     The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+
+    With a service key:
+
     ```json
     {
       "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "chat/unsupported-param",
+      "param": "userId"
+    }
+    ```
+
+    With a user token, or with no credentials:
+
+    ```json
+    {
+      "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
       "code": "chat/unsupported-param",
       "param": "userId"
     }
@@ -90,7 +109,7 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
   <Accordion title="Missing User — 400">
     A service key sent no `actingUserId`.
     ```json
-    { "error": "Missing user ID", "code": "chat/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "chat/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="Empty Message — 400 Bad Request">

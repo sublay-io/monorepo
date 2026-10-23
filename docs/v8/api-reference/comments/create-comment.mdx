@@ -125,7 +125,7 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     Returned when a service key sends no `actingUserId`.
 
     ```json
-    { "error": "Missing user ID", "code": "comment/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "comment/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="Missing token — 401">
@@ -160,6 +160,8 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
   <Accordion title="Unsupported Parameter — 400">
     Returned when the request sends `userId`. On this route the user a service key acts as is `actingUserId`.
 
+    With a service key:
+
     ```json
     {
       "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
@@ -167,12 +169,22 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
       "param": "userId"
     }
     ```
-  </Accordion>
-  <Accordion title="User Not Found — 404">
-    Returned when a service key names an `actingUserId` that doesn't exist.
+
+    With a user token, or with no credentials:
 
     ```json
-    { "error": "User not found", "code": "comment/user-not-found" }
+    {
+      "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
+      "code": "comment/unsupported-param",
+      "param": "userId"
+    }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "comment/user-not-found" }
     ```
   </Accordion>
   <Accordion title="Invalid Timestamp — 400">

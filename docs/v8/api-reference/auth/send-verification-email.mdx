@@ -58,9 +58,10 @@ All parameters are optional.
 |------|--------|-------------|
 | `auth/not-password-user` | 400 | The authenticated user does not have an email/password account. |
 | `auth/no-user-found` | 403 | The access token is valid but no matching user record exists (e.g. the account was already deleted). |
-| `auth/missing-user-id` | 400 | A service key sent no `actingUserId`. Error text: `Missing user ID`. |
+| `auth/missing-user-id` | 400 | A service key sent no `actingUserId`. Error text: `A service key must send actingUserId: the user this request acts as.` |
+| `auth/user-not-found` | 404 | A service key named an `actingUserId` that isn't a user in this project. Error text: `No user with this actingUserId exists in this project.` |
 | `auth/acting-user-not-allowed` | 400 | A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as. Error text: `actingUserId is only accepted with a service key. A user's own token always acts as that user.` |
-| `auth/unsupported-param` | 400 | The request sent `userId`; on this route the user a service key acts as is `actingUserId`. The response carries `"param": "userId"`. |
+| `auth/unsupported-param` | 400 | The request sent `userId`; on this route the user a service key acts as is `actingUserId`. Error text with a service key: ``"`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`."``; with a user token, or with no credentials: ``"`userId` isn't accepted here: a user's own token always acts as that user."``. The response carries `"param": "userId"`. |
 
 <Note>
   Each call generates a new token. A previous unused token remains valid in

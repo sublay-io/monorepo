@@ -48,15 +48,9 @@ Marks the invite `declined` and fires `workspace.invite.declined`.
     { "error": "This invitation is no longer pending.", "code": "workspace/invite-terminal" }
     ```
   </Accordion>
-  <Accordion title="Acting User Not Found — 404">
-    ```json
-    { "error": "Acting user not found.", "code": "workspace/invalid-target" }
-    ```
-    The `actingUserId` a key named does not exist in this project. Naming is not authentication — the id is only looked up here.
-  </Accordion>
   <Accordion title="Missing Acting User — 400">
     ```json
-    { "error": "Missing user ID", "code": "workspace/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
     ```
     A service key called this route without naming an `actingUserId`. A decline is an act by the invitee; there is nobody to attribute it to.
   </Accordion>
@@ -65,6 +59,12 @@ Marks the invite `declined` and fires `workspace.invite.declined`.
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
     ```
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }
+    ```
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json

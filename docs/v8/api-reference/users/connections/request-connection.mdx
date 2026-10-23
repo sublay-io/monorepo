@@ -45,7 +45,7 @@ On success, returns HTTP `201` with the created connection record:
     A service key sent no `actingUserId`.
     ```json
     {
-      "error": "Missing user ID",
+      "error": "A service key must send actingUserId: the user this request acts as.",
       "code": "connection/missing-user-id"
     }
     ```
@@ -68,6 +68,14 @@ On success, returns HTTP `201` with the created connection record:
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
+    A service key named an `actingUserId` that isn't a user in this project:
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "connection/user-not-found" }
+    ```
+
+    Otherwise, the user to connect with doesn't exist:
+
     ```json
     {
       "error": "One or both users involved in the connection do not exist.",

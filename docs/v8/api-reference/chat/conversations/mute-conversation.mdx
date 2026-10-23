@@ -63,8 +63,17 @@ Returns `200` with the acting user's own (self-serialized) member row under `cur
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "chat/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "chat/user-not-found" }
+    ```
+  </Accordion>
   <Accordion title="Unsupported Parameter — 400">
     The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+
+    With a service key:
+
     ```json
     {
       "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
@@ -72,10 +81,20 @@ Returns `200` with the acting user's own (self-serialized) member row under `cur
       "param": "userId"
     }
     ```
+
+    With a user token, or with no credentials:
+
+    ```json
+    {
+      "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
+      "code": "chat/unsupported-param",
+      "param": "userId"
+    }
+    ```
   </Accordion>
   <Accordion title="Missing User ID — 400">
     ```json
-    { "error": "Missing user ID", "code": "chat/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "chat/missing-user-id" }
     ```
     Returned when a service key omits the required `actingUserId` (it has no implicit session user).
   </Accordion>

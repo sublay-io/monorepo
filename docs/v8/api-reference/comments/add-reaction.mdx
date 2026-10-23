@@ -80,9 +80,21 @@ Returns the updated [Comment](/v8/data-models/comment) object with the new `reac
   <Accordion title="Unsupported Parameter — 400">
     Returned when the request sends `userId`. On this route the user a service key acts as is `actingUserId`.
 
+    With a service key:
+
     ```json
     {
       "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "comment/unsupported-param",
+      "param": "userId"
+    }
+    ```
+
+    With a user token, or with no credentials:
+
+    ```json
+    {
+      "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
       "code": "comment/unsupported-param",
       "param": "userId"
     }
@@ -92,14 +104,14 @@ Returns the updated [Comment](/v8/data-models/comment) object with the new `reac
     Returned when a service key sends no `actingUserId`.
 
     ```json
-    { "error": "Missing user ID", "code": "comment/missing-user-id" }
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "comment/missing-user-id" }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
-    Returned when a service key names an `actingUserId` that doesn't exist.
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
 
     ```json
-    { "error": "User not found", "code": "comment/user-not-found" }
+    { "error": "No user with this actingUserId exists in this project.", "code": "comment/user-not-found" }
     ```
   </Accordion>
   <Accordion title="Not Found — 404">

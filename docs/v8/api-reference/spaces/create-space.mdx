@@ -55,7 +55,7 @@ Creates a new space. Its creator — the signed-in user, or the user a service k
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only, and required with one: the user this request acts as, who creates the space and becomes its admin, held to their own permissions. Leaving it out returns `400 space/missing-user-id`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
+  Service key only, and required with one: the user this request acts as, who creates the space and becomes its admin, held to their own permissions. Leaving it out returns `400 space/missing-user-id`. A user token always acts as its own user and must not send it (`400 space/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -65,6 +65,9 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Not signed in — 401 / 403">
+    Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired. Checked before any uploaded file is read, so a request with no credentials gets `401` rather than a body or acting-user error.
+  </Accordion>
   <Accordion title="Missing User ID — 400">
     A service key sent no `actingUserId`. A space needs a creator.
     ```json
@@ -96,7 +99,7 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
     }
     ```
 
-    With a user token, or with no credentials:
+    With a user token:
 
     ```json
     {
@@ -135,6 +138,12 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
   <Accordion title="File Too Large — 413">
     ```json
     { "code": "space/file-too-large", "message": "Avatar image exceeds 50MB limit." }
+    ```
+  </Accordion>
+  <Accordion title="files-images Bundle Required — 403">
+    Returned when an avatar or banner is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed.
+    ```json
+    { "error": "Space avatar/banner uploads require the files-images bundle. Enable it for this project.", "code": "space/files-images-bundle-required", "missingTables": ["Files", "Images"] }
     ```
   </Accordion>
 </AccordionGroup>

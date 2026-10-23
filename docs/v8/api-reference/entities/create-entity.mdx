@@ -227,4 +227,10 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
     { "error": "No user with this actingUserId exists in this project.", "code": "entity/user-not-found" }
     ```
   </Accordion>
+  <Accordion title="files-images Bundle Required — 403">
+    Returned when a file or image is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed.
+    ```json
+    { "error": "File and image uploads require the files-images bundle. Enable it for this project.", "code": "entity/files-images-bundle-required", "missingTables": ["Files", "Images"] }
+    ```
+  </Accordion>
 </AccordionGroup>

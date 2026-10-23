@@ -26,7 +26,7 @@ Requires a user access token whose user matches `:userId`, or a service key that
 ## Body Parameters
 
 <ParamField body="actingUserId" type="string">
-  Service key only, and required with one: the user this request acts as. It must be the user in the path (`:userId`). Not an update field. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 user/acting-user-not-allowed`). With `multipart/form-data`, send it as a form field.
+  Service key only, and required with one: the user this request acts as. It must be the user in the path (`:userId`). Not an update field. A user token always acts as its own user and must not send it (`400 user/acting-user-not-allowed`). With `multipart/form-data`, send it as a form field.
 </ParamField>
 
 All other fields are optional. Only the fields provided are updated.
@@ -167,8 +167,11 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="Not Authorized — 403">
-    A user token tried to update a different user.
+  <Accordion title="Not signed in — 401 / 403">
+    Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired. Checked before any uploaded file is read, so a request with no credentials gets `401` rather than a body or acting-user error. A valid token for a different user gets `403 user/not-authorized` instead (Signed In as Another User, below).
+  </Accordion>
+  <Accordion title="Signed In as Another User — 403">
+    A valid user token, signed in as a user other than `:userId`, tried to update that user. Returned with a JSON body, unlike the invalid-token `403` above.
 
     ```json
     {
@@ -245,7 +248,7 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
-    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. A user token always acts as its own user.
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
 
     ```json
     {
@@ -259,6 +262,12 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
 
     ```json
     { "error": "No user with this actingUserId exists in this project.", "code": "user/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="files-images Bundle Required — 403">
+    Returned when an avatar or banner is uploaded on a project without the files-images bundle.
+    ```json
+    { "error": "Avatar and banner uploads require the files-images bundle, which is not installed for this project.", "code": "user/files-images-not-installed" }
     ```
   </Accordion>
 </AccordionGroup>

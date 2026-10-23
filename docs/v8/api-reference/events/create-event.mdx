@@ -81,7 +81,7 @@ Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bu
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only, and required with one: the user this request acts as, who becomes the creator and first host, held to their own permissions. A user that doesn't exist returns `404 event/user-not-found`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
+  Service key only, and required with one: the user this request acts as, who becomes the creator and first host, held to their own permissions. A user that doesn't exist returns `404 event/user-not-found`. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField body="cover" type="file">
@@ -107,6 +107,9 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Not signed in — 401 / 403">
+    Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired. Checked before any uploaded file is read, so a request with no credentials gets `401` rather than a body or acting-user error.
+  </Accordion>
   <Accordion title="Missing User — 400">
     A service key sent no `actingUserId`.
     ```json
@@ -132,7 +135,7 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     }
     ```
 
-    With a user token, or with no credentials:
+    With a user token:
 
     ```json
     {

@@ -119,7 +119,7 @@ A complete Entity object.
   entity={{
     id: "0b9d5a3e-6c1f-4f7a-9d2e-8a4c1b7e5f30",
     projectId: "proj_456",
-    foreignId: "post-789",
+    title: "My first entity",
     // ... other entity fields
   }}
 />
@@ -191,7 +191,7 @@ The created entity has no author, so the project's **Who can create entities wit
 
 It has no effect with `entity`, `entityId` or `shortId`.
 
-The other examples on this page pass `foreignId` alone, for an entity that already exists.
+The other examples on this page identify the entity by `entityId`.
 
 ---
 
@@ -205,7 +205,7 @@ The other examples on this page pass `foreignId` alone, for an entity that alrea
 
 ```tsx
 <ThreadedCommentSection
-  foreignId="post_123"
+  entityId={entity.id}
   isVisible={canComment}
 />
 ```
@@ -222,7 +222,7 @@ ID of a specific comment to highlight when the section loads. The section opens 
 
 ```tsx
 <ThreadedCommentSection
-  foreignId="post_123"
+  entityId={entity.id}
   highlightedCommentId="comment_456"
 />
 ```
@@ -239,7 +239,7 @@ Sets the color theme for the entire comment section. On React (Web) it is **only
 
 ```tsx
 <ThreadedCommentSection
-  foreignId="post_123"
+  entityId={entity.id}
   theme={isDark ? 'dark' : 'light'}
 />
 ```
@@ -258,7 +258,7 @@ Sets the color theme for the entire comment section. On React (Web) it is **only
 
     ```tsx
     <html className={isDark ? 'dark' : ''}>
-      <ThreadedCommentSection foreignId="post_123" />
+      <ThreadedCommentSection entityId={entity.id} />
     </html>
     ```
 
@@ -275,7 +275,7 @@ Sets the color theme for the entire comment section. On React (Web) it is **only
 Content shown in place of the "no comments yet" view, when the entity has no comments. On React Native and Expo, this is the `children` of `ThreadedCommentSection`; the `children` of `ThreadedComments` is your screen.
 
 ```tsx
-<ThreadedCommentSection foreignId="post_123">
+<ThreadedCommentSection entityId={entity.id}>
   <div className="text-center text-gray-500 my-4">
     Be the first to comment!
   </div>
@@ -296,9 +296,9 @@ import {
   ThreadedCommentInput,
 } from './components/comments-threaded';
 
-function EntityScreen() {
+function EntityScreen({ entity }) {
   return (
-    <ThreadedComments foreignId="post_123" theme="dark">
+    <ThreadedComments entityId={entity.id} theme="dark">
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -356,7 +356,13 @@ To hide the comment box, don't render `ThreadedCommentInput`. It throws an error
 ### Minimal Usage
 
 ```tsx
-<ThreadedCommentSection foreignId="blog-post-123" createIfNotFound />
+<ThreadedCommentSection entityId={entity.id} />
+```
+
+For a record in your own database, use [`foreignId`](#foreignid) with [`createIfNotFound`](#createifnotfound) instead:
+
+```tsx
+<ThreadedCommentSection foreignId={article.id} createIfNotFound />
 ```
 
 ---
@@ -364,14 +370,14 @@ To hide the comment box, don't render `ThreadedCommentInput`. It throws an error
 ### With Dark Mode (Inline Styles)
 
 ```tsx
-function BlogPost({ post }) {
+function EntityPage({ entity }) {
   const [isDark, setIsDark] = useState(false);
 
   return (
     <>
       <button onClick={() => setIsDark(!isDark)}>Toggle Theme</button>
       <ThreadedCommentSection
-        foreignId={post.id}
+        entityId={entity.id}
         theme={isDark ? 'dark' : 'light'}
       />
     </>
@@ -386,12 +392,12 @@ function BlogPost({ post }) {
 ```tsx
 import { useSearchParams } from 'react-router-dom';
 
-function BlogPost({ post }) {
+function EntityPage({ entity }) {
   const [searchParams] = useSearchParams();
 
   return (
     <ThreadedCommentSection
-      foreignId={post.id}
+      entityId={entity.id}
       highlightedCommentId={searchParams.get('commentId')}
     />
   );
@@ -406,11 +412,10 @@ function BlogPost({ post }) {
 ### Full Example (Web)
 
 ```tsx
-function BlogPost({ postId }) {
+function EntityPage({ entity }) {
   const [searchParams] = useSearchParams();
   const [isDark, setIsDark] = useState(false);
   const { user } = useUser();
-  const { data: entity } = useFetchEntity({ foreignId: postId });
 
   return (
     <ThreadedCommentSection

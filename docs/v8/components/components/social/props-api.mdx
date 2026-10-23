@@ -88,7 +88,7 @@ The created entity has no author, so the project's **Who can create entities wit
 
 It has no effect with `entity`, `entityId` or `shortId`.
 
-The other examples on this page pass `foreignId` alone, for an entity that already exists.
+The other examples on this page identify the entity by `entityId`.
 
 ---
 
@@ -102,7 +102,7 @@ Controls whether the comment section is visible. Useful when rendering inside a 
 
 ```tsx
 <SocialCommentSection
-  foreignId="photo_123"
+  entityId={entity.id}
   isVisible={showComments}
 />
 ```
@@ -117,7 +117,7 @@ ID of a specific comment to highlight on load. Once it loads, the component show
 
 ```tsx
 <SocialCommentSection
-  foreignId="photo_123"
+  entityId={entity.id}
   highlightedCommentId="comment_456"
 />
 ```
@@ -132,7 +132,7 @@ Where the GIF picker opens, on React, React Native and Expo. By default it cover
 
 ```tsx
 <SocialCommentSection
-  foreignId="photo_123"
+  entityId={entity.id}
   gifPickerFullScreen
 />
 ```
@@ -151,7 +151,7 @@ Sets the color theme for the component: in both variants on React Native and Exp
   <Tab title="Inline Styles Variant">
     ```tsx
     <SocialCommentSection
-      foreignId="photo_123"
+      entityId={entity.id}
       theme={isDark ? 'dark' : 'light'}
     />
     ```
@@ -164,7 +164,7 @@ Sets the color theme for the component: in both variants on React Native and Exp
 
     ```tsx
     <html className={isDark ? 'dark' : ''}>
-      <SocialCommentSection foreignId="photo_123" />
+      <SocialCommentSection entityId={entity.id} />
     </html>
     ```
 
@@ -181,7 +181,7 @@ Sets the color theme for the component: in both variants on React Native and Exp
 Optional content rendered within the comment section.
 
 ```tsx
-<SocialCommentSection foreignId="photo_123">
+<SocialCommentSection entityId={entity.id}>
   <div className="text-center text-gray-400 text-sm my-2">
     Share your thoughts!
   </div>
@@ -195,7 +195,13 @@ Optional content rendered within the comment section.
 ### Minimal
 
 ```tsx
-<SocialCommentSection foreignId="photo_123" createIfNotFound />
+<SocialCommentSection entityId={entity.id} />
+```
+
+For a record in your own database, use [`foreignId`](#foreignid) with [`createIfNotFound`](#createifnotfound) instead:
+
+```tsx
+<SocialCommentSection foreignId={photo.id} createIfNotFound />
 ```
 
 ---
@@ -203,14 +209,14 @@ Optional content rendered within the comment section.
 ### With Dark Mode (Inline Styles)
 
 ```tsx
-function PhotoPost({ photo }) {
+function EntityPage({ entity }) {
   const [isDark, setIsDark] = useState(false);
 
   return (
     <>
-      <img src={photo.url} />
+      <p>{entity.content}</p>
       <SocialCommentSection
-        foreignId={photo.id}
+        entityId={entity.id}
         theme={isDark ? 'dark' : 'light'}
       />
     </>
@@ -225,12 +231,12 @@ function PhotoPost({ photo }) {
 ```tsx
 import { useSearchParams } from 'react-router-dom';
 
-function PhotoPost({ photo }) {
+function EntityPage({ entity }) {
   const [searchParams] = useSearchParams();
 
   return (
     <SocialCommentSection
-      foreignId={photo.id}
+      entityId={entity.id}
       highlightedCommentId={searchParams.get('commentId')}
     />
   );
@@ -244,16 +250,16 @@ function PhotoPost({ photo }) {
 ```tsx
 import BottomSheet from '@gorhom/bottom-sheet';
 
-function PhotoScreen({ photo }) {
+function EntityScreen({ entity }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      <PhotoView photo={photo} onCommentPress={() => setIsOpen(true)} />
+      <EntityView entity={entity} onCommentPress={() => setIsOpen(true)} />
 
       <BottomSheet isOpen={isOpen}>
         <SocialCommentSection
-          foreignId={photo.id}
+          entityId={entity.id}
           isVisible={isOpen}
         />
       </BottomSheet>

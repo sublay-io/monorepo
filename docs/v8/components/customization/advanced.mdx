@@ -208,11 +208,12 @@ const handleNotificationClick = (notification) => {
   }
 };
 
-// In your post page
+// In your entity page (/posts/:entityId)
+const { entityId } = useParams();
 const [searchParams] = useSearchParams();
 
 <ThreadedCommentSection
-  foreignId={post.id}
+  entityId={entityId}
   highlightedCommentId={searchParams.get('commentId')}
 />
 ```
@@ -241,14 +242,14 @@ The installed `utils/prop-comparison.ts` already handles deep equality checks fo
 ```tsx
 import { useInView } from 'react-intersection-observer';
 
-function BlogPost({ post }) {
+function EntityPage({ entity }) {
   const { ref, inView } = useInView({ triggerOnce: true });
 
   return (
     <div>
-      <article>{post.content}</article>
+      <article>{entity.content}</article>
       <div ref={ref}>
-        {inView && <ThreadedCommentSection foreignId={post.id} />}
+        {inView && <ThreadedCommentSection entityId={entity.id} />}
       </div>
     </div>
   );

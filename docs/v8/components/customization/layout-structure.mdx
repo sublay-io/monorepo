@@ -158,7 +158,7 @@ The GIF picker always covers the whole screen.
 The GIF picker opens over the comment section and covers all of it: the comment list and the form. To make it cover the whole screen instead, pass `gifPickerFullScreen` to the section:
 
 ```tsx
-<SocialCommentSection foreignId="post_123" gifPickerFullScreen />
+<SocialCommentSection entityId={entity.id} gifPickerFullScreen />
 ```
 
 The default is `false`. It works the same on React, React Native and Expo.

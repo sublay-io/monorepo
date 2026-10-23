@@ -6,7 +6,9 @@ export interface PublishDraftProps {
   /**
    * The user this publish acts as (service key only). Required when the draft
    * has an author: name the author, and the request runs exactly as their own
-   * access token's. Omit it only for an app-owned draft (no author).
+   * access token's. A draft created through this API always has an author;
+   * omit it only for a draft with none, which only an earlier API version
+   * could create.
    */
   actingUserId?: string;
 }

@@ -1,36 +1,40 @@
 ---
 title: "Introduction"
-description: "Sublay is infrastructure for user-powered applications — auth, social graph, content, chat, community spaces, and more, pre-built and ready to integrate."
+description: "Sublay is infrastructure for user-based products: a pre-modeled backend for users, content, comments, chat, notifications, spaces and more, that you build your app on from scratch."
 icon: "house"
 ---
 
-Every product eventually needs users to *do* something — comment on a post, react to content, follow a topic, send a message, join a community. Sometimes that's the core of what you're building. Sometimes it's just one part: a blog, a support page, a changelog with reactions.
+Sublay is infrastructure for user-based products — a pre-modeled backend you build your app on. Users and auth, the content they create, comments, reactions, follows and connections, notifications, moderation, chat, spaces, search and AI, and tables for your own data types: Sublay models, stores and serves all of it, so you build the product instead of the backend under it.
 
-The typical answer is a third-party tool. But third-party tools mean your users create *another* account, in someone else's UI, disconnected from your product. The experience fragments — and you lose control.
+You start from scratch: create a project, choose the [bundles](/v8/bundles) it needs, and call them from your app through the SDK or the REST API. There is no server or database of your own to set up. Each project's data is isolated, and the interface stays yours — Sublay supplies the data and the APIs, plus optional UI components you install as source code.
 
-Sublay is the alternative. It gives you the complete set of social primitives — feeds, comments, chat, notifications, and more — as infrastructure you own. Bring your existing users via a signed JWT, or let Sublay handle auth entirely. Either way: one unified user identity, your design, whether social features are the heart of your product or just one corner of it.
+Users sign up with Sublay's built-in auth or OAuth, or come from an auth system you already run through a signed JWT.
+
+<Card title="Build your first Sublay app" icon="rocket" href="/v8/quick-start">
+  Sign users up, let them create entities, list them, and add comments and reactions — a working React app with no backend of your own.
+</Card>
 
 ## What's Included
 
-Sublay ships with every building block a user-powered application needs:
+Every project is assembled from these building blocks:
 
 <CardGroup cols={3}>
   <Card title="Auth & Identity" icon="key">
     Built-in email/password auth, OAuth (Google, GitHub, and more), external JWT integration for bringing your own auth system, and multi-account support.
   </Card>
   <Card title="Entities" icon="file-lines">
-    The central content unit — posts, articles, listings, anything your users create. An optional bundle (`comments` and `collections` build on it). Comes with votes, reactions, view tracking, file attachments, drafts, and publishing workflows.
+    The central content unit — whatever your users create: posts, articles, listings, questions. An optional bundle (`comments` and `collections` build on it). Comes with votes, reactions, view tracking, file attachments, drafts, and publishing workflows.
   </Card>
   <Card title="Comments" icon="comments">
     Threaded discussions on any entity. Nested replies, votes, emoji reactions, GIF support, @mentions, and moderation built in.
   </Card>
   <Card title="Spaces" icon="layer-group">
-    Hierarchical community spaces with membership, role-based permissions, moderation tools, rules, and space-level chat.
+    Hierarchical spaces (teams, cohorts, forums, groups) with membership, role-based permissions, moderation tools, rules, and space-level chat.
   </Card>
   <Card title="Chat" icon="message">
     Real-time 1:1 and group conversations with message reactions, threaded replies, read state, typing indicators, and moderation.
   </Card>
-  <Card title="Social Graph" icon="users">
+  <Card title="Follows & Connections" icon="users">
     Unidirectional follows and bidirectional connection requests (friend-style). Full follower/following counts, status checks, and bulk queries.
   </Card>
   <Card title="Collections" icon="bookmark">
@@ -49,7 +53,10 @@ Sublay ships with every building block a user-powered application needs:
     Report flows for entities, comments, and chat messages. Space-level moderation actions, ban management, and report resolution tools.
   </Card>
   <Card title="Reactions" icon="face-smile">
-    Emoji reactions on entities and comments. Six reaction types out of the box (like, love, wow, sad, angry, funny), with counts and per-user state.
+    Reactions on entities and comments. Eight reaction types out of the box (upvote, downvote, like, love, wow, sad, angry, funny), with counts and per-user state.
+  </Card>
+  <Card title="Custom Tables" icon="table" href="/v8/custom-tables">
+    Tables for the data types only your app has, provisioned in your project next to Sublay's and read and written from the SDKs or the dashboard.
   </Card>
 </CardGroup>
 
@@ -76,7 +83,10 @@ See [Authentication](/v8/authentication) for a full conceptual overview.
 ## Get Started
 
 <CardGroup cols={2}>
-  <Card title="SDK Quick Start" icon="rocket" href="/v8/sdk/getting-started">
+  <Card title="Build your first app" icon="rocket" href="/v8/quick-start">
+    A step-by-step React app on Sublay: auth, entities, a list, comments and a like.
+  </Card>
+  <Card title="SDK Setup" icon="box" href="/v8/sdk/getting-started">
     Install `@sublay/react-js` or `@sublay/react-native` and get your first feature running in minutes.
   </Card>
   <Card title="Integration Options" icon="plug" href="/v8/integration-options">

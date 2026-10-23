@@ -166,7 +166,7 @@ Deep-link to a specific comment and open the section focused on its thread.
 
 ```tsx
 <ThreadedCommentSection
-  foreignId="post_123"
+  entityId={entity.id}
   highlightedCommentId="comment_abc"
 />
 ```
@@ -255,7 +255,7 @@ Comments automatically update when other users post. No configuration needed —
 **Inline Styles Variant:**
 ```tsx
 <ThreadedCommentSection
-  foreignId="post_123"
+  entityId={entity.id}
   theme={isDark ? 'dark' : 'light'}
 />
 ```
@@ -263,7 +263,7 @@ Comments automatically update when other users post. No configuration needed —
 **Tailwind Variant on React:**
 ```tsx
 <html className={isDark ? 'dark' : ''}>
-  <ThreadedCommentSection foreignId="post_123" />
+  <ThreadedCommentSection entityId={entity.id} />
 </html>
 ```
 

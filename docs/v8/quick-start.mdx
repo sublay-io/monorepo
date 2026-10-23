@@ -1,0 +1,352 @@
+---
+title: "Build your first Sublay app"
+description: "Build a small React app on Sublay from scratch: users sign up, create entities, browse them, comment and react. Sublay is the backend."
+icon: "rocket"
+---
+
+In this guide you build a small app where people sign up, create entities, browse them, open one, comment on it and like it. Sublay stores and serves all of it — the users, their sessions, the entities, the comments and the reactions — so the app is frontend code only. There is no server or database of your own to write.
+
+An **entity** is Sublay's content unit: whatever your users create. Your app may call entities posts, notes, listings or questions; Sublay calls them entities.
+
+The examples use React on the web. React Native and Expo work the same way — see [React Native and Expo](#react-native-and-expo) at the end.
+
+<Steps>
+  <Step title="Create a project">
+    Sign in to the [Sublay dashboard](https://dash.sublay.io) and create a project. A project is your app's backend: its own users, its own data, isolated from every other project.
+
+    When you create it, choose the bundles this guide uses: **`entities`**, **`comments`**, **`reactions`** and **`moderation`** (the comment section's report button files reports through it). Every project also has **`core`** (users and auth). You can add or remove bundles later from the project's **Database** page — see [Bundles](/v8/bundles).
+
+    Copy the project's ID. You pass it to the SDK in step 3.
+  </Step>
+
+  <Step title="Install the SDK">
+    <CodeGroup>
+      ```bash npm
+      npm install @sublay/react-js@beta
+      ```
+
+      ```bash yarn
+      yarn add @sublay/react-js@beta
+      ```
+
+      ```bash pnpm
+      pnpm add @sublay/react-js@beta
+      ```
+    </CodeGroup>
+
+    `@sublay/react-js` gives you hooks for every Sublay feature. It handles tokens, requests and local state for you.
+  </Step>
+
+  <Step title="Wrap your app in SublayProvider">
+    `SublayProvider` connects everything inside it to your project. Put your project ID in an environment variable (with Vite, `VITE_PUBLIC_SUBLAY_PROJECT_ID` in `.env`):
+
+    ```tsx main.tsx
+    import { createRoot } from "react-dom/client";
+    import { SublayProvider } from "@sublay/react-js";
+    import App from "./App";
+
+    const PROJECT_ID = import.meta.env.VITE_PUBLIC_SUBLAY_PROJECT_ID;
+
+    createRoot(document.getElementById("root")!).render(
+      <SublayProvider projectId={PROJECT_ID}>
+        <App />
+      </SublayProvider>
+    );
+    ```
+
+    The provider restores a signed-in session on page load and keeps the user's access token fresh.
+  </Step>
+
+  <Step title="Sign users up and in">
+    Sublay has built-in email and password auth. `useAuth` gives you the actions; Sublay creates the user, stores the credentials and starts a session.
+
+    ```tsx AuthForm.tsx
+    import { useState } from "react";
+    import { useAuth } from "@sublay/react-js";
+
+    export function AuthForm() {
+      const { signUpWithEmailAndPassword, signInWithEmailAndPassword } = useAuth();
+      const [mode, setMode] = useState<"sign-up" | "sign-in">("sign-up");
+      const [error, setError] = useState<string | null>(null);
+
+      const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const form = e.currentTarget;
+        setError(null);
+        try {
+          if (mode === "sign-up") {
+            await signUpWithEmailAndPassword({
+              email: form.email.value,
+              password: form.password.value,
+              username: form.username.value,
+            });
+          } else {
+            await signInWithEmailAndPassword({
+              email: form.email.value,
+              password: form.password.value,
+            });
+          }
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Something went wrong");
+        }
+      };
+
+      return (
+        <form onSubmit={handleSubmit}>
+          {mode === "sign-up" && <input name="username" placeholder="Username" required />}
+          <input name="email" type="email" placeholder="Email" required />
+          <input name="password" type="password" placeholder="Password" required />
+          <button type="submit">{mode === "sign-up" ? "Sign up" : "Sign in"}</button>
+          <button type="button" onClick={() => setMode(mode === "sign-up" ? "sign-in" : "sign-up")}>
+            {mode === "sign-up" ? "I have an account" : "Create an account"}
+          </button>
+          {error && <p>{error}</p>}
+        </form>
+      );
+    }
+    ```
+
+    Sublay doesn't require a username, but the comment section you add in step 7 does, so this form asks for one at sign-up. `useUser` returns the signed-in user anywhere in the app; the list in step 6 and the app in the last step use it.
+
+    More: [Built-in auth](/v8/sdk/authentication/built-in), [`useAuth`](/v8/hooks/auth/use-auth).
+  </Step>
+
+  <Step title="Let a user create an entity">
+    `useCreateEntity` returns a function that creates an entity. A signed-in user's entity is theirs: Sublay records them as its author.
+
+    ```tsx NewEntityForm.tsx
+    import { useState } from "react";
+    import { useCreateEntity } from "@sublay/react-js";
+
+    export function NewEntityForm({ onCreated }: { onCreated: () => void }) {
+      const createEntity = useCreateEntity();
+      const [title, setTitle] = useState("");
+      const [content, setContent] = useState("");
+
+      const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+          await createEntity({ title, content });
+          setTitle("");
+          setContent("");
+          onCreated();
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
+      return (
+        <form onSubmit={handleSubmit}>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" required />
+          <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Write something" />
+          <button type="submit">Publish</button>
+        </form>
+      );
+    }
+    ```
+
+    An entity also takes keywords, metadata, attachments, images and files, a location, a space, and can be saved as a draft. See [`useCreateEntity`](/v8/hooks/entities/use-create-entity).
+  </Step>
+
+  <Step title="List entities">
+    `useEntityList` loads a paginated list of entities. Each list has a `listId` of your choosing; here the list shows the newest entities first, with each author's profile included.
+
+    ```tsx Feed.tsx
+    import { useEffect } from "react";
+    import { useEntityList, useUser } from "@sublay/react-js";
+    import { NewEntityForm } from "./NewEntityForm";
+
+    export function Feed({ onOpen }: { onOpen: (entityId: string) => void }) {
+      const { user } = useUser();
+      const { entities, loading, hasMore, fetchEntities, loadMore } = useEntityList({
+        listId: "home-feed",
+      });
+
+      const load = () =>
+        fetchEntities(
+          {},
+          { sortBy: "createdAt", sortDir: "desc" },
+          { limit: 20, include: ["user"] },
+          { fetchImmediately: true }
+        );
+
+      useEffect(() => {
+        load();
+      }, []);
+
+      return (
+        <div>
+          {user && <NewEntityForm onCreated={load} />}
+
+          {entities.map((entity) => (
+            <button key={entity.id} onClick={() => onOpen(entity.id)}>
+              <strong>{entity.title}</strong>
+              <span> by {entity.user?.username ?? "unknown"}</span>
+              <span> · {entity.commentsCount} comments</span>
+            </button>
+          ))}
+
+          {hasMore && (
+            <button onClick={loadMore} disabled={loading}>
+              Load more
+            </button>
+          )}
+        </div>
+      );
+    }
+    ```
+
+    The same hook sorts by `"hot"`, `"top"` or `"controversial"`, and filters by keywords, metadata, author, space, time frame and location. See [Entity Lists](/v8/sdk/entity-lists/overview).
+  </Step>
+
+  <Step title="Open an entity and add comments">
+    Sublay's comment components install into your project as source files you own. Set up the CLI and add the threaded comment section:
+
+    ```bash
+    npx @sublay/cli init
+    npx @sublay/cli add comments-threaded --ref v8
+    ```
+
+    `init` asks for your platform, styling (Tailwind or inline styles) and where to put components (default `src/components`). See [Components](/v8/components/overview) for the other components.
+
+    The entity page loads one entity by its ID with `EntityProvider` and binds the comment section to the same entity:
+
+    ```tsx EntityPage.tsx
+    import { EntityProvider, useEntity } from "@sublay/react-js";
+    import { ThreadedCommentSection } from "./components/comments-threaded";
+    import { LikeButton } from "./LikeButton";
+
+    export function EntityPage({ entityId, onBack }: { entityId: string; onBack: () => void }) {
+      return (
+        <EntityProvider entityId={entityId}>
+          <button onClick={onBack}>Back</button>
+          <EntityDetail />
+          <ThreadedCommentSection entityId={entityId} />
+        </EntityProvider>
+      );
+    }
+
+    function EntityDetail() {
+      const { entity } = useEntity();
+      if (!entity) return <p>Loading...</p>;
+
+      return (
+        <article>
+          <h1>{entity.title}</h1>
+          <p>{entity.content}</p>
+          <LikeButton entity={entity} />
+        </article>
+      );
+    }
+    ```
+
+    The comment section loads the entity's comments and lets signed-in users post, reply, vote, mention other users, add GIFs (with a [Giphy API key](/v8/components/components/threaded/features#gif-support-optional)), delete their comments and report others'. Sublay stores every comment against the entity, and `commentsCount` on the entity stays current.
+
+    To build your own comment UI instead, use `CommentSectionProvider` and `useCommentSection` — see [Comments](/v8/sdk/comments/overview).
+  </Step>
+
+  <Step title="Add a like">
+    `useReactionToggle` adds and removes the signed-in user's reaction on an entity or a comment, updating the count on screen right away:
+
+    ```tsx LikeButton.tsx
+    import { useReactionToggle, type Entity } from "@sublay/react-js";
+
+    export function LikeButton({ entity }: { entity: Entity }) {
+      const { currentReaction, reactionCounts, toggleReaction, loading } = useReactionToggle({
+        targetType: "entity",
+        targetId: entity.id,
+        initialReaction: entity.userReaction,
+        initialReactionCounts: entity.reactionCounts,
+      });
+
+      return (
+        <button onClick={() => toggleReaction({ reactionType: "like" })} disabled={loading}>
+          {currentReaction === "like" ? "Liked" : "Like"} · {reactionCounts.like ?? 0}
+        </button>
+      );
+    }
+    ```
+
+    The reaction types are `upvote`, `downvote`, `like`, `love`, `wow`, `sad`, `angry` and `funny`. See [Reactions](/v8/sdk/reactions/overview).
+  </Step>
+
+  <Step title="Put it together">
+    `App` shows the sign-in form or the signed-in user, then either the list or the open entity:
+
+    ```tsx App.tsx
+    import { useState } from "react";
+    import { useAuth, useUser } from "@sublay/react-js";
+    import { AuthForm } from "./AuthForm";
+    import { Feed } from "./Feed";
+    import { EntityPage } from "./EntityPage";
+
+    export default function App() {
+      const { initialized, signOut } = useAuth();
+      const { user } = useUser();
+      const [openEntityId, setOpenEntityId] = useState<string | null>(null);
+
+      if (!initialized) return <p>Loading...</p>;
+
+      return (
+        <main>
+          {user ? (
+            <p>
+              Signed in as {user.username}{" "}
+              <button onClick={() => signOut().catch(console.error)}>Sign out</button>
+            </p>
+          ) : (
+            <AuthForm />
+          )}
+
+          {openEntityId ? (
+            <EntityPage entityId={openEntityId} onBack={() => setOpenEntityId(null)} />
+          ) : (
+            <Feed onOpen={setOpenEntityId} />
+          )}
+        </main>
+      );
+    }
+    ```
+
+    Run the app, sign up, publish an entity, open it, comment and like it. Everything you see is stored in your Sublay project: open the dashboard to find the user, the entity and the comment there.
+  </Step>
+</Steps>
+
+<Note>
+  Before you go to production, add your app's domain under **Settings → Domains → Verified Domains** in the dashboard; requests from other web origins are rejected. See [Integration Options](/v8/integration-options).
+</Note>
+
+## React Native and Expo
+
+Install `@sublay/react-native@beta` (or `@sublay/expo@beta` on Expo) instead of `@sublay/react-js`, and import from it. `SublayProvider` and every hook in this guide are the same; only your UI components change (`View`, `Text`, `TextInput`, `Pressable`).
+
+The comment components on React Native and Expo are three pieces your screen places — `ThreadedComments`, `ThreadedCommentSection` and `ThreadedCommentInput` — and they need a gesture handler root. See the [components quick start](/v8/components/installation/quick-start).
+
+## Where next
+
+<CardGroup cols={2}>
+  <Card title="Bundles" icon="cubes" href="/v8/bundles">
+    The full set of features you can switch on for a project
+  </Card>
+  <Card title="Spaces" icon="layer-group" href="/v8/sdk/spaces/overview">
+    Group users and entities into spaces with membership, roles and rules
+  </Card>
+  <Card title="Chat" icon="message" href="/v8/sdk/chat/overview">
+    Real-time 1:1 and group conversations
+  </Card>
+  <Card title="Notifications" icon="bell" href="/v8/sdk/app-notifications/overview">
+    In-app notifications for your users
+  </Card>
+  <Card title="Your own backend" icon="server" href="/v8/node-sdk/overview">
+    Call Sublay from your server with `@sublay/node` and a service key
+  </Card>
+  <Card title="Custom tables" icon="table" href="/v8/custom-tables">
+    Store your app's own data types next to Sublay's
+  </Card>
+  <Card title="Users from your own auth" icon="key" href="/v8/sdk/authentication/external">
+    Your app already has users? Sign them in to Sublay with a signed JWT
+  </Card>
+  <Card title="Entities for records you already have" icon="link" href="/v8/sdk/entities/overview#link-entities-to-records-you-already-have">
+    Give records from your own database a Sublay entity with `foreignId`
+  </Card>
+</CardGroup>

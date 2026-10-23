@@ -59,8 +59,7 @@ Use the `theme` prop on comment components:
 
 ```tsx
 <ThreadedCommentSection
-  foreignId="post_123"
-  createIfNotFound
+  entityId={entity.id}
   theme={isDarkMode ? 'dark' : 'light'}
 />
 ```

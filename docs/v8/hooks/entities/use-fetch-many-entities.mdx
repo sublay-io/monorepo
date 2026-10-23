@@ -12,7 +12,7 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 ## Overview
 
-`useFetchManyEntities` returns a function that fetches a paginated list of entities with full filtering and sorting support. This is the low-level hook underlying `EntityListProvider`. For continuous-scroll or load-more list UIs, use [`useEntityList`](/v8/hooks/entity-lists/use-entity-list) instead, which wraps this hook with built-in pagination state.
+`useFetchManyEntities` returns a function that fetches a paginated list of entities with full filtering and sorting support. It keeps no state of its own. For continuous-scroll or load-more list UIs, use [`useEntityList`](/v8/hooks/entity-lists/use-entity-list), which keeps the list and its pagination state, or [`useFetchManyEntitiesWrapper`](/v8/hooks/entities/use-fetch-many-entities-wrapper), which wraps this hook with pagination and sort state.
 
 ## Usage Example
 

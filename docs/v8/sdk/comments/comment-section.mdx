@@ -12,13 +12,13 @@ Identify the target entity with one of four mutually exclusive props:
 ```tsx
 import { CommentSectionProvider } from "@sublay/react-js";
 
-// By foreign ID (your own system's ID for the content)
-<CommentSectionProvider foreignId="your-article-id" createIfNotFound>
+// By Sublay entity ID (the entity's own `id`, a UUID)
+<CommentSectionProvider entityId="0b9d5a3e-6c1f-4f7a-9d2e-8a4c1b7e5f30">
   <CommentList />
 </CommentSectionProvider>
 
-// By Sublay entity ID (the entity's own `id`, a UUID)
-<CommentSectionProvider entityId="0b9d5a3e-6c1f-4f7a-9d2e-8a4c1b7e5f30">
+// By passing the entity object directly (no fetch needed)
+<CommentSectionProvider entity={myEntity}>
   <CommentList />
 </CommentSectionProvider>
 
@@ -27,8 +27,9 @@ import { CommentSectionProvider } from "@sublay/react-js";
   <CommentList />
 </CommentSectionProvider>
 
-// By passing the entity object directly (no fetch needed)
-<CommentSectionProvider entity={myEntity}>
+// By foreign ID: your own system's ID for a record you already have
+// (see "Link entities to records you already have" in the Entities overview)
+<CommentSectionProvider foreignId="your-article-id" createIfNotFound>
   <CommentList />
 </CommentSectionProvider>
 ```

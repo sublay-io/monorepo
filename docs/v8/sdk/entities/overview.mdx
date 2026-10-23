@@ -10,16 +10,50 @@ description: "The central content unit in Sublay — posts, articles, products, 
 An **entity** is the central content unit in Sublay. It represents whatever your app centers around — a blog post, a product listing, a forum thread, a photo, or any other item that users react to, comment on, collect or vote on.
 
 Entities can be:
-- Created from scratch in Sublay or linked to existing items in your system via a `foreignId`
-- Organized into [Spaces](/v8/sdk/spaces/overview) for community-based content
+- Created by your users (or your backend) directly in Sublay, which stores and serves them
+- Organized into [Spaces](/v8/sdk/spaces/overview)
 - Published immediately or saved as **drafts** for later publishing
 - Enriched with file attachments, images, keywords, mentions, location, and custom metadata
+- Linked to records you already keep in your own database, through a `foreignId`
+
+## Creating Entities
+
+An entity starts in Sublay. `useCreateEntity` creates one; a signed-in user's entity is theirs:
+
+```tsx
+import { useCreateEntity } from "@sublay/react-js";
+
+function NewEntityButton() {
+  const createEntity = useCreateEntity();
+
+  const handleCreate = async () => {
+    const entity = await createEntity({ title: "Hello World", content: "My first entity" });
+    console.log("Created:", entity.id);
+  };
+
+  return <button onClick={handleCreate}>Create</button>;
+}
+```
+
+Everything else then refers to the entity by its `id` — loading it, listing it, commenting on it, reacting to it. For a complete walkthrough, see [Build your first Sublay app](/v8/quick-start).
 
 ## How Entities Work
 
-The standard pattern for working with a single entity is via the `EntityProvider` + `useEntity` pair. Wrap a component tree with `EntityProvider` to load and provide entity state, then access that state from any child component using `useEntity`.
+The standard pattern for working with a single entity is via the `EntityProvider` + `useEntity` pair. Wrap a component tree with `EntityProvider` (for example `<EntityProvider entityId={entity.id}>`) to load and provide entity state, then access that state from any child component using `useEntity`.
 
-For browsing lists of entities, use `EntityListProvider` + `useEntityList`. See [Entity Lists](/v8/sdk/entity-lists/overview).
+For browsing lists of entities, use `useEntityList`. See [Entity Lists](/v8/sdk/entity-lists/overview).
+
+## Link Entities to Records You Already Have
+
+When the item your users interact with already lives in your own database — an article in your CMS, a product in your catalog — give its Sublay entity a `foreignId`: your own ID for that record. You can then find the entity by that ID instead of storing Sublay's `id` next to your record.
+
+```tsx
+<EntityProvider foreignId={article.id} createIfNotFound>
+  <ArticleReactions />
+</EntityProvider>
+```
+
+`createIfNotFound` creates the entity the first time it's looked up. That entity has no author, and the project's **Who can create entities without an author** setting decides who may create one. See [`useFetchEntityByForeignId`](/v8/hooks/entities/use-fetch-entity-by-foreign-id). Comment sections take `foreignId` and `createIfNotFound` the same way.
 
 ## In This Section
 

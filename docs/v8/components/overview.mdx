@@ -39,9 +39,11 @@ You get **source code**, not packages. You **own** your components and can modif
     ```tsx
     import { ThreadedCommentSection } from './components/comments-threaded';
 
-    <ThreadedCommentSection foreignId="my-post-123" createIfNotFound />
+    <ThreadedCommentSection entityId={entity.id} />
     ```
-    The component works out of the box. Want to customize? Edit the source files directly.
+    Pass the Sublay entity the comments belong to — its `entityId`, or the `entity` object itself. The component works out of the box. Want to customize? Edit the source files directly.
+
+    For a record in your own database, pass its ID as `foreignId` with `createIfNotFound` instead; see [Attach comments to records you already have](/v8/components/installation/quick-start#attach-comments-to-records-you-already-have).
   </Step>
 </Steps>
 
@@ -167,7 +169,7 @@ The CLI checks for these and offers to install them automatically. On Expo it in
   </Card>
 
   <Card title="Quick Start" icon="bolt" href="/v8/components/installation/quick-start">
-    Get comments working in under 5 minutes
+    Install a component and render it on your entities
   </Card>
 
   <Card title="Customization" icon="paintbrush" href="/v8/components/customization/overview">

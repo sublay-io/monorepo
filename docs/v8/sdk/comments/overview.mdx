@@ -15,19 +15,28 @@ Comments in Sublay are threaded discussions attached to entities. They support r
 
 ## The Provider Pattern
 
-The comment system uses a `CommentSectionProvider` + `useCommentSection` pair. Wrap your comment UI with `CommentSectionProvider` to load comments for an entity, then access all comment state and actions from any descendant with `useCommentSection`.
+The comment system uses a `CommentSectionProvider` + `useCommentSection` pair. Wrap your comment UI with `CommentSectionProvider` to load comments for an entity, then access all comment state and actions from any descendant with `useCommentSection`. Identify the entity by its `entityId` (or pass the `entity` object you already have):
 
 ```tsx
 import { CommentSectionProvider } from "@sublay/react-js";
 
-function ArticlePage({ articleId }: { articleId: string }) {
+function EntityPage({ entityId }: { entityId: string }) {
   return (
-    <CommentSectionProvider foreignId={articleId} createIfNotFound>
+    <CommentSectionProvider entityId={entityId}>
       <CommentList />
       <CommentInput />
     </CommentSectionProvider>
   );
 }
+```
+
+If the entity stands for a record in your own database, identify it by that record's ID instead — `foreignId`, with `createIfNotFound` to create the entity on first load. See [Link entities to records you already have](/v8/sdk/entities/overview#link-entities-to-records-you-already-have).
+
+```tsx
+<CommentSectionProvider foreignId={article.id} createIfNotFound>
+  <CommentList />
+  <CommentInput />
+</CommentSectionProvider>
 ```
 
 ## What the Provider Manages

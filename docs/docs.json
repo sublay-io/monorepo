@@ -21,6 +21,7 @@
                 "group": "Getting Started",
                 "pages": [
                   "v8/index",
+                  "v8/quick-start",
                   "v8/bundles",
                   "v8/integration-options",
                   "v8/authentication",

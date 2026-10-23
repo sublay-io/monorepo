@@ -192,16 +192,17 @@ The CLI copies 43 files into your project on React (44 with Tailwind), and 44 on
 ```tsx
 import { SocialCommentSection } from './components/comments-social';
 
-function Post({ post }) {
+function EntityPage({ entity }) {
   return (
     <div>
-      <img src={post.image} alt={post.caption} />
-      <p>{post.caption}</p>
-      <SocialCommentSection foreignId={post.id} createIfNotFound />
+      <p>{entity.content}</p>
+      <SocialCommentSection entityId={entity.id} />
     </div>
   );
 }
 ```
+
+The section is bound to a Sublay entity by `entityId` (or pass the `entity` object). For a record in your own database, pass its ID as `foreignId` with `createIfNotFound` instead; see [Attach comments to records you already have](/v8/components/installation/quick-start#attach-comments-to-records-you-already-have).
 
 <Info>
 Make sure your app is wrapped with `<SublayProvider>`. See the [Quick Start Guide](/v8/components/installation/quick-start) for setup details.

@@ -69,12 +69,14 @@ The monorepo is organized into 9 published packages across 5 groups, plus `regis
 ### Key Context Providers
 
 The framework uses React Context for state management:
-- `SublayProvider` - Root provider with project configuration
-- `EntityProvider` - Manages individual entities (posts, articles, etc.)
-- `EntityListProvider` - Manages collections of entities with filtering/sorting
-- `CommentSectionProvider` - Manages comment threads and interactions
-- `AuthProvider` - Handles authentication state
-- `ListsProvider` - Manages user-created lists and collections
+- `SublayProvider` - Root provider with project configuration; also sets up auth state (read through `useAuth` / `useUser`)
+- `SublayIntegrationProvider` - Alternative root provider for apps with their own Redux store
+- `EntityProvider` - Loads and manages a single entity
+- `CommentSectionProvider` - Manages a comment section (threads and interactions) for one entity
+- `SpaceProvider`, `EventProvider` - Load and manage a single space / event
+- `ChatProvider`, `ConversationProvider`, `MessageThreadProvider` - Chat connection, one conversation, one message thread
+
+Entity lists have no provider: `useEntityList` keeps each list in the Redux store under a `listId`.
 
 ### Development Patterns
 

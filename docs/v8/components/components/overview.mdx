@@ -137,30 +137,33 @@ npx @sublay/cli add comments-social --ref v8
 ```
 
 ```tsx
-// Blog posts — threaded
+// Articles — threaded
 import { ThreadedCommentSection } from './components/comments-threaded';
 
-function BlogPost({ post }) {
+function ArticlePage({ entity }) {
   return (
     <>
-      <Article content={post.content} />
-      <ThreadedCommentSection foreignId={post.id} createIfNotFound />
+      <h1>{entity.title}</h1>
+      <p>{entity.content}</p>
+      <ThreadedCommentSection entity={entity} />
     </>
   );
 }
 
-// Photos — social
+// Short updates — social
 import { SocialCommentSection } from './components/comments-social';
 
-function PhotoPost({ photo }) {
+function UpdatePage({ entity }) {
   return (
     <>
-      <Image src={photo.url} />
-      <SocialCommentSection foreignId={photo.id} createIfNotFound />
+      <p>{entity.content}</p>
+      <SocialCommentSection entityId={entity.id} />
     </>
   );
 }
 ```
+
+Each section is bound to a Sublay entity, by `entity` or `entityId`. For records in your own database, use `foreignId` with `createIfNotFound`; see [Attach comments to records you already have](/v8/components/installation/quick-start#attach-comments-to-records-you-already-have).
 
 <Info>
 Both components install into separate directories and won't conflict with each other.
@@ -184,6 +187,6 @@ Both components install into separate directories and won't conflict with each o
   </Card>
 
   <Card title="Quick Start" icon="rocket" href="/v8/components/installation/quick-start">
-    Get started in under 5 minutes
+    Install a component and render it on your entities
   </Card>
 </CardGroup>

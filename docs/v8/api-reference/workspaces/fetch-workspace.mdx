@@ -15,7 +15,7 @@ Returns a single [Workspace](/v8/data-models/workspace), filtered by the caller'
 ## Query Parameters
 
 <ParamField query="include" type="string">
-  Comma-separated include flags. `memberCount` adds the workspace's **direct** member count as `memberCount` on the object.
+  Include flags, as a comma-separated value or repeated params. The only value is `memberCount`: it adds the workspace's **direct** member count as `memberCount` on the object. Matching ignores case; an unknown value returns `400 workspace/invalid-query`.
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
@@ -40,6 +40,12 @@ Returns the [Workspace](/v8/data-models/workspace) object.
     { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params" }
     ```
     Every path id on the workspaces bundle is checked for UUID shape before the route runs, so a malformed one is a plain `400` rather than a `500` from the database.
+  </Accordion>
+  <Accordion title="Unknown Include — 400">
+    ```json
+    { "error": "include: Unknown include `members`. Allowed: memberCount.", "code": "workspace/invalid-query" }
+    ```
+    An `include` value outside `memberCount`. Matching ignores case.
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     ```json

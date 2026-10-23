@@ -21,7 +21,10 @@ Returns a single [ChatMessage](/v8/data-models/chat-message) by ID, fully popula
 ## Query Parameters
 
 <ParamField query="include" type="string">
-  Comma-separated list of extra fields to include. Supports `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) for this message.
+  Extra fields to include, as a comma-separated value or repeated params. The only value is:
+  - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) for this message
+
+  The message's `files` are always returned, so `files` is not an include here. Matching ignores case. An unknown value, `files` included, returns `400 chat/invalid-query`.
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
@@ -80,6 +83,12 @@ Returns a [ChatMessage](/v8/data-models/chat-message) with all populated fields 
     A service key sent no `actingUserId`.
     ```json
     { "error": "A service key must send actingUserId: the user this request acts as.", "code": "chat/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Query — 400">
+    Returned for an unknown `include` value, including `files`.
+    ```json
+    { "error": "include: Unknown include `files`. Allowed: grants.", "code": "chat/invalid-query" }
     ```
   </Accordion>
   <Accordion title="Forbidden — 403">

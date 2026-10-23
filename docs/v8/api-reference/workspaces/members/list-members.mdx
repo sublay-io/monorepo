@@ -23,7 +23,7 @@ Returns the roster as a **single unified array, one entry per distinct user**, e
 ## Query Parameters
 
 <ParamField query="include" type="string">
-  Comma-separated add-on buckets. Default returns `owner` + direct `member`s. Options: `ancestorOwners`, `reachHolders`, `descendants`.
+  Add-on buckets, as a comma-separated value or repeated params. Default returns `owner` + direct `member`s. Values: `ancestorOwners`, `reachHolders`, `descendants`. Matching ignores case; an unknown value returns `400 workspace/invalid-query`.
 </ParamField>
 
 <ParamField query="countOnly" type="boolean">
@@ -35,7 +35,7 @@ Returns the roster as a **single unified array, one entry per distinct user**, e
 </ParamField>
 
 <Note>
-  Those three, plus `projectId`, are the whole query vocabulary of this route. Any other parameter is a `400 workspace/invalid-query` — the two exceptions across the bundle are the cache-busters `_` and `_t`, which are dropped before the request is read. An unrecognized *value* inside `include` is a different matter: it is ignored, not rejected.
+  Those three, plus `projectId`, are the whole query vocabulary of this route. Any other parameter is a `400 workspace/invalid-query` — the two exceptions across the bundle are the cache-busters `_` and `_t`, which are dropped before the request is read. An unknown *value* inside `include` is a `400 workspace/invalid-query` too.
 </Note>
 
 ## Reasons
@@ -143,6 +143,12 @@ The same roster read by a caller who cannot manage people here — the `member` 
     { "error": "Unrecognized key: \"page\"", "code": "workspace/invalid-query" }
     ```
     This route declares `include`, `countOnly`, `actingUserId` and `projectId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "page", "limit"`. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+  </Accordion>
+  <Accordion title="Unknown Include — 400">
+    ```json
+    { "error": "include: Unknown include `members`. Allowed: ancestorOwners, reachHolders, descendants.", "code": "workspace/invalid-query" }
+    ```
+    An `include` value outside `ancestorOwners`, `reachHolders`, `descendants`. Matching ignores case.
   </Accordion>
   <Accordion title="Missing Acting User — 400">
     ```json

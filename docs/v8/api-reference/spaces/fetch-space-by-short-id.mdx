@@ -17,7 +17,10 @@ Fetches a space using its `shortId`. Returns the same `SpaceDetailed` shape as t
 </ParamField>
 
 <ParamField query="include" type="string">
-  Optional. Pass `"files"` to include file objects.
+  Associations to include, as a comma-separated value or repeated params. The only value is:
+  - `files` — the processed `avatarFile` and `bannerFile` objects (requires the `files-images` bundle)
+
+  Matching ignores case. An unknown value returns `400 space/invalid-query`.
 </ParamField>
 
 ## Response
@@ -30,6 +33,13 @@ Returns a [SpaceDetailed](/v8/data-models/space) object.
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Space not found.", "code": "space/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid query — 400">
+    Returned with code `space/invalid-query` for an unknown `include` value.
+
+    ```json
+    { "error": "include: Unknown include `members`. Allowed: files.", "code": "space/invalid-query" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

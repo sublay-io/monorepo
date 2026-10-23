@@ -57,7 +57,10 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
 </ParamField>
 
 <ParamField query="include" type="string">
-  Optional comma-separated includes. Pass `"files"` to include avatar file objects.
+  Associations to include, as a comma-separated value or repeated params. The only value is:
+  - `files` — the processed `avatarFile` and `bannerFile` objects on each space (requires the `files-images` bundle)
+
+  Matching ignores case. An unknown value returns `400 space/invalid-query`.
 </ParamField>
 
 ## Response
@@ -91,7 +94,11 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
     ```
   </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy` or `sortDir`. `error` names the first problem found.
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy`, `sortDir` or `include` value. `error` names the first problem found.
+
+    ```json
+    { "error": "include: Unknown include `members`. Allowed: files.", "code": "space/invalid-query" }
+    ```
   </Accordion>
   <Accordion title="Auth Required — 401">
     `memberOf=true` without a viewer: no credentials, or a service key naming nobody.

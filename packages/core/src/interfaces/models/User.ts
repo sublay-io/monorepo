@@ -52,7 +52,7 @@ export type User = Omit<
   | "updatedAt"
 >;
 
-// User include types (following Entity pattern)
+/** `include` values the user fetches (by id, foreign id, username) accept. */
 export type UserInclude = "files";
 export type UserIncludeArray = UserInclude[];
-export type UserIncludeParam = string | UserIncludeArray;
+export type UserIncludeParam = UserInclude | UserIncludeArray;

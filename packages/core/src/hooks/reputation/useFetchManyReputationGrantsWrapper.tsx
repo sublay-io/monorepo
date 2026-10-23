@@ -3,6 +3,8 @@ import {
   GrantSummary,
   NullableReputationGrantTargetFilter,
   ReputationGrant,
+  ReputationGrantInclude,
+  ReputationGrantIncludeParam,
 } from "../../interfaces/models/ReputationGrant";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import useFetchManyReputationGrants, {
@@ -17,7 +19,7 @@ interface UseFetchManyReputationGrantsWrapperBaseProps
   recipientId?: string | null;
   /** What this user sent. */
   senderId?: string | null;
-  include?: string | string[];
+  include?: ReputationGrantIncludeParam;
 }
 
 /**
@@ -119,7 +121,9 @@ function useFetchManyReputationGrantsWrapper(
         limit,
         recipientId: recipientId ?? undefined,
         senderId: senderId ?? undefined,
-        include: includeParam,
+        include: includeParam
+          ? (includeParam.split(",") as ReputationGrantInclude[])
+          : undefined,
         ...reputation,
       };
       // The target pair is attached in one branch rather than as two

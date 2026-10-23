@@ -7,7 +7,11 @@ import useCancelEvent from "./useCancelEvent";
 import useSetRsvp from "./useSetRsvp";
 import useWithdrawRsvp from "./useWithdrawRsvp";
 
-import { Event, RsvpStatus } from "../../interfaces/models/Event";
+import {
+  Event,
+  EventIncludeParam,
+  RsvpStatus,
+} from "../../interfaces/models/Event";
 import { handleError } from "../../utils/handleError";
 
 export type UseEventDataProps =
@@ -19,7 +23,7 @@ export type UseEventDataProps =
   | {
       event?: undefined;
       eventId: string;
-      include?: string | string[];
+      include?: EventIncludeParam;
     };
 
 export interface UseEventDataValues {

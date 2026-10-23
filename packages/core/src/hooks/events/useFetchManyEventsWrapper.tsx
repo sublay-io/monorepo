@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Event,
+  EventIncludeParam,
   EventStatus,
   EventType,
   RsvpStatus,
@@ -29,7 +30,7 @@ export interface UseFetchManyEventsWrapperProps {
   locationFilters?: EventLocationFilters | null;
   titleFilters?: EventTitleFilters | null;
   descriptionFilters?: EventDescriptionFilters | null;
-  include?: string | string[];
+  include?: EventIncludeParam;
   defaultSortBy?: EventSortBy;
   /**
    * Left out (null): the sort's natural direction — soonest first for

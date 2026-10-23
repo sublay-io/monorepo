@@ -3,6 +3,7 @@ import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import {
   Event,
+  EventIncludeParam,
   EventStatus,
   EventType,
   RsvpStatus,
@@ -73,8 +74,8 @@ export interface FetchManyEventsProps {
   locationFilters?: EventLocationFilters;
   titleFilters?: EventTitleFilters;
   descriptionFilters?: EventDescriptionFilters;
-  /** Associations to expand, e.g. ["user", "space", "files", "userRsvp"]. */
-  include?: string | string[];
+  /** Associations to expand: `user`, `space`, `files`, `userRsvp`. */
+  include?: EventIncludeParam;
 }
 
 type RsvpStatusFilter = "going" | "maybe" | "not_going";

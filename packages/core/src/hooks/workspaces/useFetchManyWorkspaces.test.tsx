@@ -43,14 +43,14 @@ describe("useFetchManyWorkspaces", () => {
 
     let returned: PaginatedResponse<Workspace> | undefined;
     await act(async () => {
-      returned = await result.current({ page: 2, limit: 5, include: "x" });
+      returned = await result.current({ page: 2, limit: 5, include: "memberCount" });
     });
 
     expect(returned).toEqual(page);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/project-1/workspaces");
-    expect(call.config?.params).toEqual({ page: 2, limit: 5, include: "x" });
+    expect(call.config?.params).toEqual({ page: 2, limit: 5, include: "memberCount" });
     expect(call.config?.params).not.toHaveProperty("userId");
   });
 

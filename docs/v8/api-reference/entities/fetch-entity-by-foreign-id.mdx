@@ -106,10 +106,23 @@ Returns an [Entity](/v8/data-models/entity) object.
     `createIfNotFound` was `"true"`, no entity with this `foreignId` exists, and the project's **Who can create entities without an author** setting doesn't let this caller create one: a request with no credentials under **Signed-in users only** or **No one from the client**, or a user token under **No one from the client**. The message names the caller.
 
     ```json
-    { "error": "This project doesn't allow anonymous callers to create entities without an author. A project admin can change this in the dashboard: Settings → General → SDK.", "code": "entity/authorless-creation-not-allowed" }
+    { "error": "This project doesn't allow anonymous callers to create entities without an author. A project admin can change \"Who can create entities without an author\" in the dashboard: Settings → General → SDK.", "code": "entity/authorless-creation-not-allowed" }
     ```
 
     For a user token, the message reads `signed-in users` in place of `anonymous callers`.
+  </Accordion>
+  <Accordion title="Suspended — 403">
+    `createIfNotFound` was `"true"`, no entity with this `foreignId` exists, and the caller's user is suspended: the signed-in user, or the user a service key names in `actingUserId`. Nothing is created. Reading an existing entity is not affected.
+
+    ```json
+    {
+      "error": "This account is suspended and cannot perform this action.",
+      "code": "user/suspended",
+      "reason": "...",
+      "endDate": "..."
+    }
+    ```
+    `reason` and `endDate` are `null` when the suspension carries neither.
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.

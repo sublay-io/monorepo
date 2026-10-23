@@ -142,7 +142,7 @@ const entity = await sublay.entities.fetchEntityByForeignId({
 </ParamField>
 
 <ParamField body="createIfNotFound" type="boolean">
-  When `true`, creates a stub entity if no match is found. Defaults to `false`. The new entity has no author. A service key may always create it, whatever the project's **Who can create entities without an author** setting.
+  When `true`, creates a stub entity if no match is found. Defaults to `false`. The new entity has no author. A service key may always create it, whatever the project's **Who can create entities without an author** setting, except when it names a suspended user in `actingUserId`: that returns `403 user/suspended` and nothing is created.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">

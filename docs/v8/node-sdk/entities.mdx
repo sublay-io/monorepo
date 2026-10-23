@@ -85,11 +85,11 @@ const entity = await sublay.entities.createEntity({
 </ParamField>
 
 <ParamField body="createdAt" type="Date">
-  A `Date` used to backdate the entity's creation time. A service key ability, also with `actingUserId` (for imports with original authors and dates).
+  A `Date` used to backdate the entity's creation time. A service key ability, also with `actingUserId` (for imports with original authors and dates). More than five minutes in the future returns `400 entity/invalid-body` (`createdAt can't be in the future.`).
 </ParamField>
 
 <ParamField body="updatedAt" type="Date">
-  A `Date` used to backdate the entity's last update time.
+  A `Date` used to backdate the entity's last update time. More than five minutes in the future returns `400 entity/invalid-body` (`updatedAt can't be in the future.`).
 </ParamField>
 
 **Returns** — `Promise<Entity>`

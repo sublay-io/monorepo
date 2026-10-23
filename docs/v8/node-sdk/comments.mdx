@@ -62,11 +62,11 @@ const comment = await sublay.comments.createComment({
 </ParamField>
 
 <ParamField body="createdAt" type="Date">
-  A `Date` used to backdate the comment's creation time.
+  A `Date` used to backdate the comment's creation time. More than five minutes in the future returns `400 comment/invalid-body` (`createdAt can't be in the future.`).
 </ParamField>
 
 <ParamField body="updatedAt" type="Date">
-  A `Date` used to backdate the comment's last update time.
+  A `Date` used to backdate the comment's last update time. More than five minutes in the future returns `400 comment/invalid-body` (`updatedAt can't be in the future.`).
 </ParamField>
 
 **Returns** — `Promise<Comment>`

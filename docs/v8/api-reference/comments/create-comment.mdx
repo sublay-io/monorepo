@@ -75,12 +75,14 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
   Datetime to backfill a creation timestamp. **Service key only** — with a user token the value is ignored and the comment gets the current time.
 
   Must be a UTC ISO 8601 datetime ending in `Z`, such as `2026-01-15T09:30:00Z`. A value with an offset (`+02:00`) or a date without a time returns `400 comment/invalid-body` (`createdAt: Invalid ISO datetime`), whichever credential sends it.
+
+  It can't be more than five minutes in the future: a later date returns `400 comment/invalid-body` (`createdAt can't be in the future.`).
 </ParamField>
 
 <ParamField body="updatedAt" type="string">
   Datetime for `updatedAt`, in the same format as `createdAt` — UTC ISO 8601 ending in `Z`; anything else returns `400 comment/invalid-body`. **Service key only** — with a user token the value is ignored.
 
-  Requires `createdAt`, and must be the same as or later than it; otherwise the request returns `400 comment/invalid-timestamp`. When only `createdAt` is sent, `updatedAt` is set to the same time.
+  Requires `createdAt`, and must be the same as or later than it; otherwise the request returns `400 comment/invalid-timestamp`. When only `createdAt` is sent, `updatedAt` is set to the same time. More than five minutes in the future returns `400 comment/invalid-body` (`updatedAt can't be in the future.`).
 </ParamField>
 
 ## Blocks
@@ -140,7 +142,8 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     - a `mentions` item doesn't match one of the two shapes;
     - `foreignId` is an empty string or longer than 255 characters;
     - `metadata` isn't an object, or is larger than 10 KB;
-    - `createdAt` or `updatedAt` isn't a UTC ISO 8601 datetime ending in `Z`.
+    - `createdAt` or `updatedAt` isn't a UTC ISO 8601 datetime ending in `Z`;
+    - from a service key, `createdAt` or `updatedAt` is more than five minutes in the future (`createdAt can't be in the future.` / `updatedAt can't be in the future.`).
 
     ```json
     { "error": "At least one of content, gif, or attachments must be provided", "code": "comment/invalid-body" }

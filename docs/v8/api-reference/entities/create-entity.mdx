@@ -73,11 +73,11 @@ Creates a new entity in your project. Supports optional file uploads via `multip
 </ParamField>
 
 <ParamField body="createdAt" type="string">
-  ISO 8601 datetime to backfill a creation timestamp. **Service key only**, also with `actingUserId` (importing content with its original authors and dates). Ignored from a user token.
+  ISO 8601 datetime to backfill a creation timestamp. **Service key only**, also with `actingUserId` (importing content with its original authors and dates). Ignored from a user token. More than five minutes in the future returns `400 entity/invalid-body` (`createdAt can't be in the future.`).
 </ParamField>
 
 <ParamField body="updatedAt" type="string">
-  ISO 8601 datetime for `updatedAt`. Requires `createdAt` to also be set. Must be ≥ `createdAt`. **Service key only**, also with `actingUserId`. Ignored from a user token.
+  ISO 8601 datetime for `updatedAt`. Requires `createdAt` to also be set. Must be ≥ `createdAt`. **Service key only**, also with `actingUserId`. Ignored from a user token. More than five minutes in the future returns `400 entity/invalid-body` (`updatedAt can't be in the future.`).
 </ParamField>
 
 ### File Uploads (multipart/form-data)
@@ -187,6 +187,13 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
     Also returned when `updatedAt` is earlier than `createdAt`:
     ```json
     { "error": "updatedAt must be the same or after createdAt.", "code": "entity/invalid-timestamp" }
+    ```
+  </Accordion>
+  <Accordion title="Future Timestamp — 400">
+    Returned to a service key when `createdAt` or `updatedAt` is more than five minutes ahead of the current time. `error` names the field.
+
+    ```json
+    { "error": "createdAt can't be in the future.", "code": "entity/invalid-body" }
     ```
   </Accordion>
   <Accordion title="File Too Large — 413">

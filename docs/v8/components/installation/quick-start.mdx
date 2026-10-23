@@ -1,6 +1,6 @@
 ---
 title: "Quick Start"
-description: "Get comment components running in under 5 minutes"
+description: "Install a Sublay UI component with the CLI and render it on your entities"
 icon: "rocket"
 ---
 
@@ -8,7 +8,7 @@ import { AddCommandBuilder } from "/snippets/v8/add-command-builder.jsx";
 
 # Quick Start Guide
 
-This guide will have you up and running with Sublay comment components in under 5 minutes.
+This guide installs a Sublay component into your project and renders it: a comment section bound to a Sublay entity, or the notifications bell. It focuses on the components. For a whole app built on Sublay — sign-up, creating and listing entities, comments and reactions — start with [Build your first Sublay app](/v8/quick-start).
 
 ---
 
@@ -16,7 +16,7 @@ This guide will have you up and running with Sublay comment components in under 
 
 - ✅ Node.js 20.5+ installed
 - ✅ A React, React Native, or Expo project
-- ✅ A [Sublay project](https://dash.sublay.io) created
+- ✅ A [Sublay project](https://dash.sublay.io) with the `entities` and `comments` bundles installed (and `reactions`, for votes and likes). See [Bundles](/v8/bundles).
 
 ---
 
@@ -70,19 +70,19 @@ The CLI creates a `sublay.json` configuration file and checks for required depen
 <Tabs>
   <Tab title="React (Web)">
     ```bash
-    npm install @sublay/react-js
+    npm install @sublay/react-js@beta
     ```
   </Tab>
 
   <Tab title="React Native">
     ```bash
-    npm install @sublay/react-native
+    npm install @sublay/react-native@beta
     ```
   </Tab>
 
   <Tab title="Expo">
     ```bash
-    npm install @sublay/expo
+    npm install @sublay/expo@beta
     ```
   </Tab>
 </Tabs>
@@ -161,18 +161,20 @@ If your app already has its own authentication, see [External Authentication](/v
 
 ## Step 5: Use the Component
 
+Bind the comment section to a Sublay entity: pass its `entityId`, or the `entity` object itself. Entities are what your users create — with [`useCreateEntity`](/v8/hooks/entities/use-create-entity), for example — and what you load with [`useEntityList`](/v8/sdk/entity-lists/overview) or [`EntityProvider`](/v8/sdk/entities/provider-and-hook).
+
 <Tabs>
   <Tab title="Threaded Comments">
     ```tsx
-    // BlogPost.tsx
+    // EntityPage.tsx
     import { ThreadedCommentSection } from './components/comments-threaded';
 
-    function BlogPost({ post }) {
+    function EntityPage({ entity }) {
       return (
         <div>
-          <h1>{post.title}</h1>
-          <p>{post.content}</p>
-          <ThreadedCommentSection foreignId={post.id} createIfNotFound />
+          <h1>{entity.title}</h1>
+          <p>{entity.content}</p>
+          <ThreadedCommentSection entityId={entity.id} />
         </div>
       );
     }
@@ -189,9 +191,9 @@ If your app already has its own authentication, see [External Authentication](/v
       ThreadedCommentInput,
     } from './components/comments-threaded';
 
-    function EntityScreen({ post }) {
+    function EntityScreen({ entity }) {
       return (
-        <ThreadedComments foreignId={post.id} createIfNotFound>
+        <ThreadedComments entityId={entity.id}>
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -210,15 +212,14 @@ If your app already has its own authentication, see [External Authentication](/v
 
   <Tab title="Social Comments">
     ```tsx
-    // Post.tsx
+    // EntityPage.tsx
     import { SocialCommentSection } from './components/comments-social';
 
-    function Post({ post }) {
+    function EntityPage({ entity }) {
       return (
         <div>
-          <img src={post.image} />
-          <p>{post.caption}</p>
-          <SocialCommentSection foreignId={post.id} createIfNotFound />
+          <p>{entity.content}</p>
+          <SocialCommentSection entityId={entity.id} />
         </div>
       );
     }
@@ -226,115 +227,108 @@ If your app already has its own authentication, see [External Authentication](/v
   </Tab>
 </Tabs>
 
-<Note>
-  `createIfNotFound` creates the post's entity the first time its comment section loads. That entity has no author, and the project's **Who can create entities without an author** setting decides who may create one. The default, **Everyone**, lets any visitor's section create it; under **Signed-in users only** or **No one from the client**, see `createIfNotFound` for [threaded](/v8/components/components/threaded/props-api#createifnotfound) and [social](/v8/components/components/social/props-api#createifnotfound) comments.
-</Note>
-
-That's it! You now have a fully functional comment system.
+That's it! Sublay stores each comment against the entity, and the section loads, posts, votes and reports through the SDK.
 
 ---
 
 ## Complete Example
 
-A working page with a sign-in form, using [built-in auth](/v8/sdk/authentication/built-in). Users sign up with `signUpWithEmailAndPassword` the same way. Sublay doesn't require a username, but the comment components do: as installed, they stop a user without one from posting, replying, voting or reporting. Pass a `username` at sign-up, or change `usernameRequiredCallback` in `hooks/use-threaded-comments.tsx` (or `hooks/use-social-comments.tsx`).
+A working page: a sign-in form, using [built-in auth](/v8/sdk/authentication/built-in), and a list of the newest entities, each with its own comment section. Users sign up with `signUpWithEmailAndPassword` the same way. Sublay doesn't require a username, but the comment components do: as installed, they stop a user without one from posting, replying, voting or reporting. Pass a `username` at sign-up, or change `usernameRequiredCallback` in `hooks/use-threaded-comments.tsx` (or `hooks/use-social-comments.tsx`).
+
+```tsx
+import { useEffect } from 'react';
+import { SublayProvider, useAuth, useEntityList } from '@sublay/react-js';
+import { ThreadedCommentSection } from './components/comments-threaded';
+
+const PROJECT_ID = import.meta.env.VITE_PUBLIC_SUBLAY_PROJECT_ID;
+
+function SignInForm() {
+  const { initialized, accessToken, signInWithEmailAndPassword } = useAuth();
+
+  // Hide the form until auth has loaded, and once the user is signed in
+  if (!initialized || accessToken) return null;
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    signInWithEmailAndPassword({
+      email: form.email.value,
+      password: form.password.value,
+    }).catch(console.error);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input name="email" type="email" placeholder="Email" />
+      <input name="password" type="password" placeholder="Password" />
+      <button type="submit">Sign in</button>
+    </form>
+  );
+}
+
+function Feed() {
+  const { entities, fetchEntities } = useEntityList({ listId: 'feed' });
+
+  useEffect(() => {
+    fetchEntities({}, { sortBy: 'createdAt', sortDir: 'desc' }, { limit: 10 }, { fetchImmediately: true });
+  }, []);
+
+  return (
+    <>
+      {entities.map((entity) => (
+        <article key={entity.id}>
+          <h2>{entity.title}</h2>
+          <p>{entity.content}</p>
+          <ThreadedCommentSection entity={entity} />
+        </article>
+      ))}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <SublayProvider projectId={PROJECT_ID}>
+      <div className="max-w-4xl mx-auto p-8">
+        <SignInForm />
+        <Feed />
+      </div>
+    </SublayProvider>
+  );
+}
+
+export default App;
+```
+
+For social comments, import `SocialCommentSection` from `./components/comments-social` and use it the same way. To let users create the entities in the list, see [Build your first Sublay app](/v8/quick-start).
+
+---
+
+## Attach Comments to Records You Already Have
+
+If what users comment on lives in your own database — an article in your CMS, a product in your catalog — you don't need to create its entity yourself. Pass your record's ID as `foreignId`, with `createIfNotFound`, and the section creates the entity the first time it loads and finds it by that ID afterwards:
 
 <Tabs>
   <Tab title="Threaded Comments">
     ```tsx
-    import { SublayProvider, useAuth } from '@sublay/react-js';
-    import { ThreadedCommentSection } from './components/comments-threaded';
-
-    const PROJECT_ID = import.meta.env.VITE_PUBLIC_SUBLAY_PROJECT_ID;
-
-    function SignInForm() {
-      const { initialized, accessToken, signInWithEmailAndPassword } = useAuth();
-
-      // Hide the form until auth has loaded, and once the user is signed in
-      if (!initialized || accessToken) return null;
-
-      const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const form = e.currentTarget;
-        signInWithEmailAndPassword({
-          email: form.email.value,
-          password: form.password.value,
-        }).catch(console.error);
-      };
-
-      return (
-        <form onSubmit={handleSubmit}>
-          <input name="email" type="email" placeholder="Email" />
-          <input name="password" type="password" placeholder="Password" />
-          <button type="submit">Sign in</button>
-        </form>
-      );
-    }
-
-    function App() {
-      return (
-        <SublayProvider projectId={PROJECT_ID}>
-          <div className="max-w-4xl mx-auto p-8">
-            <SignInForm />
-            <h1>My Blog Post</h1>
-            <p>This is my awesome blog post content...</p>
-            <ThreadedCommentSection foreignId="blog-post-123" createIfNotFound />
-          </div>
-        </SublayProvider>
-      );
-    }
-
-    export default App;
+    <ThreadedCommentSection foreignId={article.id} createIfNotFound />
     ```
+
+    On React Native and Expo, pass the same props to `ThreadedComments`.
   </Tab>
 
   <Tab title="Social Comments">
     ```tsx
-    import { SublayProvider, useAuth } from '@sublay/react-js';
-    import { SocialCommentSection } from './components/comments-social';
-
-    const PROJECT_ID = import.meta.env.VITE_PUBLIC_SUBLAY_PROJECT_ID;
-
-    function SignInForm() {
-      const { initialized, accessToken, signInWithEmailAndPassword } = useAuth();
-
-      // Hide the form until auth has loaded, and once the user is signed in
-      if (!initialized || accessToken) return null;
-
-      const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const form = e.currentTarget;
-        signInWithEmailAndPassword({
-          email: form.email.value,
-          password: form.password.value,
-        }).catch(console.error);
-      };
-
-      return (
-        <form onSubmit={handleSubmit}>
-          <input name="email" type="email" placeholder="Email" />
-          <input name="password" type="password" placeholder="Password" />
-          <button type="submit">Sign in</button>
-        </form>
-      );
-    }
-
-    function App() {
-      return (
-        <SublayProvider projectId={PROJECT_ID}>
-          <div className="max-w-4xl mx-auto p-8">
-            <SignInForm />
-            <h1>My Post</h1>
-            <p>Check out this amazing photo!</p>
-            <SocialCommentSection foreignId="post-456" createIfNotFound />
-          </div>
-        </SublayProvider>
-      );
-    }
-
-    export default App;
+    <SocialCommentSection foreignId={article.id} createIfNotFound />
     ```
   </Tab>
 </Tabs>
+
+<Note>
+  `createIfNotFound` creates the record's entity the first time its comment section loads. That entity has no author, and the project's **Who can create entities without an author** setting decides who may create one. The default, **Everyone**, lets any visitor's section create it; under **Signed-in users only** or **No one from the client**, see `createIfNotFound` for [threaded](/v8/components/components/threaded/props-api#createifnotfound) and [social](/v8/components/components/social/props-api#createifnotfound) comments.
+</Note>
+
+See [Link entities to records you already have](/v8/sdk/entities/overview#link-entities-to-records-you-already-have).
 
 ---
 

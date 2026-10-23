@@ -15,7 +15,7 @@ Entities are the central content objects in Sublay — posts, articles, products
 
 ### createEntity
 
-Creates a new entity, optionally as a draft or without attributing it to the logged-in user.
+Creates a new entity, optionally as a draft. A signed-in user's entity is always theirs. Without a signed-in user, the entity has no author, and the request is allowed only while the project's **Who can create entities without an author** setting is **Everyone** (the default); otherwise it fails with `403 entity/authorless-creation-not-allowed`. See [Create Entity](/v8/api-reference/entities/create-entity).
 
 ```typescript
 const entity = await sublay.entities.createEntity({
@@ -125,7 +125,7 @@ const entity = await sublay.entities.fetchEntityByForeignId({
 </ParamField>
 
 <ParamField body="createIfNotFound" type="boolean">
-  When `true`, creates a stub entity if no match is found.
+  When `true`, creates a stub entity if no match is found. The new entity has no author, so the project's **Who can create entities without an author** setting decides who may create it: everyone by default. When it is set to **Signed-in users only** (a visitor with no session is refused) or **No one from the client** (only a service key may create it), a refused caller gets `403 entity/authorless-creation-not-allowed` and nothing is created. See [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id).
 </ParamField>
 
 <ParamField body="include" type="string">

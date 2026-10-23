@@ -39,7 +39,7 @@ function ArticleSocial({ articleId }: { articleId: string }) {
 </ParamField>
 
 <ParamField path="createIfNotFound" type="boolean">
-  If `true`, automatically creates a new entity with this foreign ID when one does not exist.
+  If `true`, automatically creates a new entity with this foreign ID when one does not exist. The new entity has no author, so the project's **Who can create entities without an author** setting decides who may create it: everyone by default. When it is set to **Signed-in users only** (a visitor with no session is refused) or **No one from the client** (only a service key may create it), a refused caller gets `403 entity/authorless-creation-not-allowed` and nothing is created. See [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id).
 </ParamField>
 
 <ParamField path="include" type="string | EntityInclude[]">

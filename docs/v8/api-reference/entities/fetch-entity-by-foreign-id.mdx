@@ -22,6 +22,16 @@ Returns an entity matching the given `foreignId` within the project. Optionally 
 
 <ParamField query="createIfNotFound" type="string">
   When `"true"`, creates a blank entity with this `foreignId` if no entity is found. The new entity has no title, content, or author (an app-owned entity), whoever asks. Defaults to `"false"`.
+
+  Because the new entity has no author, the project's **Who can create entities without an author** setting decides who may create it:
+
+  | Caller | Everyone (default) | Signed-in users only | No one from the client |
+  |---|---|---|---|
+  | Service key | Creates | Creates | Creates |
+  | User token | Creates | Creates | `403` |
+  | No credentials | Creates | `403` | `403` |
+
+  A refused caller gets `403 entity/authorless-creation-not-allowed` and nothing is created. A user token that is expired or invalid counts as no credentials, so under **Signed-in users only** that caller is refused too. A suspended user can't create the entity: they get `403 user/suspended`, as on [Create Entity](/v8/api-reference/entities/create-entity). The setting only matters when the entity doesn't exist yet: reading an existing entity works for every caller. A project admin changes the setting in the dashboard under **Settings → General → SDK**.
 </ParamField>
 
 <ParamField query="include" type="string">
@@ -84,6 +94,15 @@ Returns an [Entity](/v8/data-models/entity) object.
     { "error": "Entities are created by server only", "code": "entity/webhook-validation-failed" }
     ```
     Returned when your `entity.created` [validation webhook](/v8/webhooks) rejects the entity that `createIfNotFound` would create. `error` carries the `message` your webhook returned. Nothing is stored.
+  </Accordion>
+  <Accordion title="Author-less Creation Not Allowed — 403">
+    `createIfNotFound` was `"true"`, no entity with this `foreignId` exists, and the project's **Who can create entities without an author** setting doesn't let this caller create one: a request with no credentials under **Signed-in users only** or **No one from the client**, or a user token under **No one from the client**. The message names the caller.
+
+    ```json
+    { "error": "This project doesn't allow anonymous callers to create entities without an author. A project admin can change this in the dashboard: Settings → General → SDK.", "code": "entity/authorless-creation-not-allowed" }
+    ```
+
+    For a user token, the message reads `signed-in users` in place of `anonymous callers`.
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.

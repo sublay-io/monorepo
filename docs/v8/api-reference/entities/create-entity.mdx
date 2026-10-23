@@ -8,7 +8,14 @@ description: "Create a new entity, with optional file upload support"
   **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
 </Note>
 
-Creates a new entity in your project. Supports optional file uploads via `multipart/form-data`. When no files are attached, use `application/json`. The entity's author is the signed-in user, or the user a service key names in `actingUserId`; the create then runs under that user's own checks, such as suspension. A service key naming nobody creates an app-owned entity with no author, which only a service key naming nobody can later edit, publish or delete.
+Creates a new entity in your project. Supports optional file uploads via `multipart/form-data`. When no files are attached, use `application/json`. The entity's author is the signed-in user, or the user a service key names in `actingUserId`; the create then runs under that user's own checks, such as suspension. Without a user, the entity has no author: it is app-owned, and only a service key naming nobody can later edit, publish or delete it.
+
+Who may create an entity without an author:
+
+- **A service key naming nobody** — always.
+- **A request with no credentials** — only while the project's **Who can create entities without an author** setting is **Everyone** (the default). Under **Signed-in users only** or **No one from the client** it returns `403 entity/authorless-creation-not-allowed`, also for a draft (this is checked before the draft rule). A request whose user token is expired or invalid is treated as one with no credentials. A project admin changes the setting in the dashboard under **Settings → General → SDK**.
+
+A signed-in user's request always creates that user's entity, whatever the setting.
 
 ## Body Parameters
 
@@ -66,10 +73,6 @@ Creates a new entity in your project. Supports optional file uploads via `multip
 
 <ParamField body="isDraft" type="boolean">
   When `true`, the entity is saved as a draft and excluded from public feeds. Publish it later via the [Publish Entity](/v8/api-reference/entities/publish-entity) endpoint. A draft needs an owner: send it with a user token, or with a service key and `actingUserId`. Otherwise it returns `400 entity/draft-requires-user`.
-</ParamField>
-
-<ParamField body="requireUser" type="boolean">
-  When `true`, the entity must have an author: a request with no credentials, or a service key naming nobody, returns `401 entity/user-required`. A service key with `actingUserId` passes.
 </ParamField>
 
 <ParamField body="createdAt" type="string">
@@ -135,9 +138,11 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="User Required — 401">
+  <Accordion title="Author-less Creation Not Allowed — 403">
+    A request with no credentials, on a project whose **Who can create entities without an author** setting is **Signed-in users only** or **No one from the client**. A project admin can change the setting in the dashboard under **Settings → General → SDK**.
+
     ```json
-    { "error": "Authentication required to create this entity.", "code": "entity/user-required" }
+    { "error": "This project doesn't allow anonymous callers to create entities without an author. A project admin can change this in the dashboard: Settings → General → SDK.", "code": "entity/authorless-creation-not-allowed" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
@@ -206,11 +211,18 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
     { "code": "entity/invalid-image", "message": "File \"doc.txt\" is not a valid image: ..." }
     ```
   </Accordion>
-  <Accordion title="Removed Parameter — 400">
+  <Accordion title="Removed Parameter: excludeUserId — 400">
     The request sent `excludeUserId`. To create an entity with no author, use a service key without `actingUserId`.
 
     ```json
     { "error": "`excludeUserId` isn't accepted: to create an entity with no author, use a service key without actingUserId.", "code": "entity/unsupported-param", "param": "excludeUserId" }
+    ```
+  </Accordion>
+  <Accordion title="Removed Parameter: requireUser — 400">
+    The request sent `requireUser`. A user's token always creates that user's entity, and who else may create an entity without an author is the project's **Who can create entities without an author** setting.
+
+    ```json
+    { "error": "`requireUser` isn't accepted: a user's token always creates that user's entity, and whether callers may create entities without an author is a project setting.", "code": "entity/unsupported-param", "param": "requireUser" }
     ```
   </Accordion>
   <Accordion title="Draft Requires User — 400">

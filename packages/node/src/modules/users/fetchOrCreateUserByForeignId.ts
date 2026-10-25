@@ -5,11 +5,15 @@ import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
 export interface FetchOrCreateUserByForeignIdProps
   extends SpaceReputationUserParams {
-  /** Your own id for the user. */
+  /** Your own id for the user. Trimmed; a blank one is a 400. */
   foreignId: string;
   /** Used only when the user is created. */
   name?: string;
-  /** Used only when the user is created. Must be unique in the project. */
+  /**
+   * Used only when the user is created. Must be unique in the project, 3 to 30
+   * characters after trimming, and only letters, numbers, `_` and `-` (as on
+   * sign-up and updateUser); otherwise a 400.
+   */
   username?: string;
   /** Used only when the user is created. A URL, or `null` for none. */
   avatar?: string | null;

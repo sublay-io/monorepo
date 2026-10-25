@@ -21,7 +21,7 @@ Everything goes in the JSON request body, so the profile, `secureMetadata` inclu
 ## Body Parameters
 
 <ParamField body="foreignId" type="string" required>
-  The external identifier from your system.
+  The external identifier from your system. Surrounding whitespace is trimmed; a blank value (`""`, `"   "`) returns `400 user/invalid-body` (`foreignId: Foreign ID is required`).
 </ParamField>
 
 <ParamField body="name" type="string">
@@ -29,7 +29,7 @@ Everything goes in the JSON request body, so the profile, `secureMetadata` inclu
 </ParamField>
 
 <ParamField body="username" type="string">
-  Username, unique within the project. Used only when the user is created. A username another user holds returns `409`.
+  Username, unique within the project. Used only when the user is created. The same rules as on sign-up and [Update User](/v8/api-reference/users/update-user): 3 to 30 characters after trimming, only letters, numbers, underscores (`_`) and hyphens (`-`). Anything else returns `400 user/invalid-body`. A username another user holds returns `409`.
 </ParamField>
 
 <ParamField body="avatar" type="string | null">
@@ -141,11 +141,16 @@ Returns HTTP `200` (an existing user) or `201` (a user this request created), wi
     ```
   </Accordion>
   <Accordion title="Invalid Body — 400">
-    Returned for an invalid body: a missing `foreignId`, a `metadata` or `secureMetadata` that isn't an object, or an unknown `include` value.
+    Returned for an invalid body: a missing or blank `foreignId`, a `username` that breaks the rules above, a `metadata` or `secureMetadata` that isn't an object, or an unknown `include` value. The `error` names the field, for example:
+
+    - `foreignId: Foreign ID is required`
+    - `username: Username must be at least 3 characters`
+    - `username: Username cannot exceed 30 characters`
+    - `username: Username can only contain letters, numbers, underscores, and hyphens`
 
     ```json
     {
-      "error": "include: Unknown include `avatar`. Allowed: files.",
+      "error": "username: Username must be at least 3 characters",
       "code": "user/invalid-body"
     }
     ```
@@ -179,7 +184,7 @@ Returns HTTP `200` (an existing user) or `201` (a user this request created), wi
     ```
   </Accordion>
   <Accordion title="Duplicate Field — 409">
-    Another user already holds the `username` (or another unique field) in this project.
+    No user has this `foreignId`, and another user already holds the `username` (or another unique field) in this project. Nothing is created.
 
     ```json
     {

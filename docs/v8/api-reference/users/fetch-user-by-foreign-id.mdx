@@ -23,7 +23,7 @@ Finds a user within the project by their `foreignId` — the external identifier
 </ParamField>
 
 <ParamField query="foreignId" type="string" required>
-  The external identifier from your system.
+  The external identifier from your system. Surrounding whitespace is trimmed; a blank value returns `400 user/invalid-query` (`foreignId: Foreign ID is required`).
 </ParamField>
 
 <ParamField query="include" type="string">
@@ -105,7 +105,7 @@ Returns HTTP `200` with the user object:
     ```
   </Accordion>
   <Accordion title="Invalid Query — 400">
-    Returned for an invalid query, including an unknown `include` value.
+    Returned for an invalid query: a missing or blank `foreignId` (`foreignId: Foreign ID is required`), or an unknown `include` value.
 
     ```json
     {

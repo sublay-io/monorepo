@@ -46,7 +46,7 @@ const user = await sublay.users.fetchUserByForeignId({
 ```
 
 <ParamField body="foreignId" type="string" required>
-  Your application's user identifier.
+  Your application's user identifier. It is trimmed; a blank one is refused with `400 user/invalid-query`.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -77,7 +77,7 @@ const { user, created } = await sublay.users.fetchOrCreateUserByForeignId({
 ```
 
 <ParamField body="foreignId" type="string" required>
-  Your application's user identifier.
+  Your application's user identifier. It is trimmed; a blank one is refused with `400 user/invalid-body`.
 </ParamField>
 
 <ParamField body="name" type="string">
@@ -85,7 +85,7 @@ const { user, created } = await sublay.users.fetchOrCreateUserByForeignId({
 </ParamField>
 
 <ParamField body="username" type="string">
-  Username — used only when creating a new user. A username another user already holds throws a `409` (`DUPLICATE_USER_FIELD`).
+  Username — used only when creating a new user. 3 to 30 characters after trimming, only letters, numbers, underscores (`_`) and hyphens (`-`); anything else throws a `400` (`user/invalid-body`). A username another user already holds throws a `409` (`DUPLICATE_USER_FIELD`).
 </ParamField>
 
 <ParamField body="avatar" type="string | null">

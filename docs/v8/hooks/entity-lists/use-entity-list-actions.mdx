@@ -50,8 +50,8 @@ function RefreshButton() {
     <ResponseField name="sortType" type='"auto" | "numeric" | "text" | "boolean" | "timestamp"'>
       Type hint for metadata sorts.
     </ResponseField>
-    <ResponseField name="sourceId" type="string">Filter by source ID.</ResponseField>
-    <ResponseField name="spaceId" type="string">Filter by space ID.</ResponseField>
+    <ResponseField name="sourceId" type='string | "none" | null'>Only entities from this source, or `"none"` for entities with no source. `null` or left out: any source.</ResponseField>
+    <ResponseField name="spaceId" type='string | "none" | null'>Only entities in this space, or `"none"` for entities in no space. `null` or left out: any space, or none.</ResponseField>
     <ResponseField name="userId" type="string">Filter by user ID.</ResponseField>
     <ResponseField name="followedOnly" type="boolean">Only show entities from followed users.</ResponseField>
     <ResponseField name="timeFrame" type='"day" | "week" | "month" | "year"'>Time window filter.</ResponseField>

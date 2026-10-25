@@ -59,8 +59,8 @@ function SpaceSearch() {
   When `true`, returns only spaces where the current user is an active member. `false` lists the same as leaving it out.
 </ParamField>
 
-<ParamField path="parentSpaceId" type="string | null">
-  Filter to child spaces of a specific parent. Pass `null` for root-level spaces only.
+<ParamField path="parentSpaceId" type='string | "none" | null'>
+  A space id returns that space's child spaces. `"none"` returns top-level spaces only. Left out or `null`: the default, `"none"`, so the hook returns top-level spaces unless you name a parent.
 </ParamField>
 
 <ParamField path="nsfwFilter" type='"include-all" | "exclude" | "only"'>

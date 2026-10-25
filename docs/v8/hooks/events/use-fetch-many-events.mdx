@@ -36,7 +36,7 @@ function useUpcoming() {
 <ParamField path="timeWindow" type='"upcoming" | "ongoing" | "past"'>Derived time window.</ParamField>
 <ParamField path="startsAfter" type="string">ISO datetime lower bound on `startTime`.</ParamField>
 <ParamField path="startsBefore" type="string">ISO datetime upper bound on `startTime`.</ParamField>
-<ParamField path="spaceId" type="string">Restrict to one space.</ParamField>
+<ParamField path="spaceId" type='string | "none" | null'>Only this space's events, or `"none"` for events not in any space. Left out or `null`: every event.</ParamField>
 <ParamField path="hostId" type="string">Only events this user hosts.</ParamField>
 <ParamField path="type" type='"online" | "physical" | "hybrid"'>Filter by type.</ParamField>
 <ParamField path="status" type='"active" | "cancelled"'>Defaults to `"active"`.</ParamField>

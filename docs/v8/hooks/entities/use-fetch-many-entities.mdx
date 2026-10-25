@@ -74,12 +74,12 @@ function EntityFeed() {
   Filter entities to a time window. Options: `"day"`, `"week"`, `"month"`, `"year"`.
 </ParamField>
 
-<ParamField path="sourceId" type="string">
-  Filter to entities associated with a specific source ID.
+<ParamField path="sourceId" type='string | "none" | null'>
+  Only entities from this source, or `"none"` for entities with no source. Left out or `null`: any source.
 </ParamField>
 
-<ParamField path="spaceId" type="string">
-  Filter to entities in a specific space.
+<ParamField path="spaceId" type='string | "none" | null'>
+  Only entities in this space, or `"none"` for entities in no space. Left out or `null`: any space, or none.
 </ParamField>
 
 <ParamField path="userId" type="string">

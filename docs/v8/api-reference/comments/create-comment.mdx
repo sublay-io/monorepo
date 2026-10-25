@@ -39,8 +39,8 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
   An array of generic attachment objects. At least one of `content`, `gif`, or `attachments` must be provided.
 </ParamField>
 
-<ParamField body="parentId" type="string">
-  The UUID of the parent comment. When provided, this comment is treated as a reply to that comment. The parent comment must be on the entity given in `entityId` — otherwise the request returns `404 comment/entity-not-found`. The parent comment's author receives a reply notification.
+<ParamField body="parentId" type="string | null">
+  The UUID of the parent comment. When provided, this comment is treated as a reply to that comment. For a top-level comment, send `null` or leave it out; the string `"none"` is refused with `400 comment/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). The parent comment must be on the entity given in `entityId` — otherwise the request returns `404 comment/entity-not-found`. The parent comment's author receives a reply notification.
 
   The parent comment can't be one its author deleted (`403 comment/parent-deleted`) or one a moderator removed (`403 comment/parent-removed`) — see [Deleted and removed parents and quotes](#deleted-and-removed-parents-and-quotes).
 </ParamField>

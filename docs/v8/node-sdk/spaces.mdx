@@ -137,8 +137,8 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
   When `"true"`, returns only spaces `actingUserId` is an active member of. Without `actingUserId` it returns `401 space/auth-required`. `"false"` lists the same as leaving it out.
 </ParamField>
 
-<ParamField body="parentSpaceId" type='string | "null"'>
-  Filter to children of a specific space, or pass `"null"` for top-level spaces only.
+<ParamField body="parentSpaceId" type='string | "none"'>
+  A space id returns that space's child spaces. `"none"` returns top-level spaces only. Left out: spaces at every level.
 </ParamField>
 
 <ParamField body="nsfwFilter" type='"include-all" | "exclude" | "only"'>

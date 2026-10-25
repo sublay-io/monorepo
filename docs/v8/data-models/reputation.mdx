@@ -61,7 +61,7 @@ spaceReputation: {
       - **`"none"`** — the project-general (space-less) bucket;
       - **`"context"`** — the space derived from the request context. On lists this is **per-row** (each author scored in the space *that row* belongs to); on single-space surfaces — space members/team, a chat conversation — it's that one space. **Only valid on context endpoints** (see below); user-direct endpoints **reject `"context"` with a 400**.
 
-      A bucket that doesn't exist reads as `0`. The empty string and the legacy `general` / `null` aliases are **rejected (400)** — use `"none"` for the space-less bucket.
+      A bucket that doesn't exist reads as `0`. Use `"none"` for the space-less bucket: on a GET, `spaceReputationId=null` and `spaceReputationId=undefined` are **rejected** with `400 <area>/unsupported-param`, which names `none` (see [Saying "no value"](/v8/authentication#saying-no-value)), and an empty `spaceReputationId=` is the same as leaving it out. In a request body, an empty string is rejected (400). The legacy `general` alias is **rejected (400)**.
     </ParamField>
     <ParamField name="includeDescendants" type="boolean">
       Only honored alongside an explicit space `<uuid>`. When `true`, `spaceReputation` is the **subtree sum** — the named space plus all of its descendant spaces (the root space's own bucket is included). Ignored for `"none"`; not allowed with `"context"`.

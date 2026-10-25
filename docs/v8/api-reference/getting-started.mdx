@@ -65,7 +65,7 @@ An id that isn't a UUID is refused with `400`:
 
 - **In the query string or body:** code `<area>/invalid-query` or `<area>/invalid-body`, with `error` naming the field.
 
-`foreignId` and `sourceId` are your own strings, not Sublay ids, so they accept any text.
+`foreignId` and `sourceId` are your own strings, not Sublay ids, so they accept any text, except that `sourceId` can't be `none`, `null` or `undefined`: list filters use `none` for "no source" (see [Saying "no value"](/v8/authentication#saying-no-value)).
 
 ## Authentication
 

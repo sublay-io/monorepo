@@ -66,12 +66,12 @@ function UserFeed({ userId }: { userId: string }) {
   Filter to entities created by a specific user.
 </ParamField>
 
-<ParamField body="sourceId" type="string | null" optional>
-  Filter to entities associated with a specific source ID.
+<ParamField body="sourceId" type='string | "none" | null' optional>
+  Only entities from this source, or `"none"` for entities with no source. Left out or `null`: any source.
 </ParamField>
 
-<ParamField body="spaceId" type="string | null" optional>
-  Filter to entities in a specific space.
+<ParamField body="spaceId" type='string | "none" | null' optional>
+  Only entities in this space, or `"none"` for entities in no space. Left out or `null`: any space, or none.
 </ParamField>
 
 <ParamField body="followedOnly" type="boolean" optional>

@@ -63,7 +63,7 @@ function SpaceDirectory() {
       query?: string | null; // a blank value is left out of the request
       searchFields?: "slug" | "name" | "description" | null; // null: slug, name or description
       memberOf?: boolean;
-      parentSpaceId?: string | null;
+      parentSpaceId?: string | "none" | null; // "none" (the default): top-level spaces only
     },
     config?: { limit?: number },
     options?: { fetchImmediately?: boolean; resetUnspecified?: boolean; clearImmediately?: boolean }
@@ -129,6 +129,6 @@ function SpaceDirectory() {
   Current membership filter from Redux state.
 </ResponseField>
 
-<ResponseField name="parentSpaceId" type="string | null">
-  Current parent space filter from Redux state.
+<ResponseField name="parentSpaceId" type='string | "none"'>
+  The parent filter in use: a space id (its child spaces), or `"none"` (top-level spaces only), the default. Every page, including `loadMore` and a re-sort, is fetched with it.
 </ResponseField>

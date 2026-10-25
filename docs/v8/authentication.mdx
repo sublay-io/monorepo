@@ -228,3 +228,48 @@ A field sent in the wrong place is refused with a `400` that names the right one
 ```
 
 `<area>` is the endpoint's own code prefix, for example `entity`, `space` or `chat`. A route v8 moved answers its old form with `400 <area>/unsupported-route`, whose `error` names the route to call instead.
+
+### Saying "no value"
+
+Each place has one way to say "nothing", and only that way:
+
+- **In the query string**, a filter that can match "has none" takes the word `none`. A filter left out, or sent empty (`parentSpaceId=`), doesn't filter. `null` and `undefined` are never spellings of "none" in a URL.
+- **In a body**, "nothing" is JSON `null`: no parent, the general bucket, remove the avatar. The string `"none"` in a body is ordinary text, except in the id fields listed below, where it is refused.
+
+These query filters take `none`:
+
+| Endpoint | Filter | `none` means | Left out or empty |
+|---|---|---|---|
+| [`GET /spaces`](/v8/api-reference/spaces/fetch-spaces) | `parentSpaceId` | top-level spaces only | spaces at every level |
+| [`GET /entities`](/v8/api-reference/entities/fetch-many-entities) | `sourceId` | entities with no source | any source |
+| [`GET /entities`](/v8/api-reference/entities/fetch-many-entities) | `spaceId` | entities in no space | any space, or none |
+| [`GET /entities/drafts`](/v8/api-reference/entities/fetch-drafts) | `sourceId`, `spaceId` | drafts with no source / in no space | any |
+| [`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id) | `sourceId` | comments on entities with no source | any source |
+| [`GET /events`](/v8/api-reference/events/fetch-many-events) | `spaceId` | events not in any space | every event |
+| Every GET that takes `spaceReputationId` | `spaceReputationId` | reputation earned outside any space | no space reputation |
+
+Other id filters, such as `spaceId` on search and on moderated reports, take ids only.
+
+On those filters, `null` or `undefined` in the query string (exact, case-sensitive) is refused with `400 <area>/unsupported-param`, naming what to send instead:
+
+```json
+{ "error": "`parentSpaceId=null` isn't supported. Use `parentSpaceId=none` for top-level spaces, or leave it out for every level.", "code": "space/unsupported-param", "param": "parentSpaceId" }
+```
+
+These body id fields take JSON `null`, and refuse the string `"none"` with `400 <area>/unsupported-param` naming `null`:
+
+| Endpoint | Field | `null` means |
+|---|---|---|
+| [`POST /spaces`](/v8/api-reference/spaces/create-space) | `parentSpaceId` | a top-level space |
+| [`POST /workspaces`](/v8/api-reference/workspaces/create-workspace) | `parentWorkspaceId` | a root workspace |
+| [`POST /comments`](/v8/api-reference/comments/create-comment) | `parentId` | a top-level comment |
+| [`POST /reputation-grants`](/v8/api-reference/reputation-grants/create-reputation-grant), [`POST /reputation-grants/mint`](/v8/api-reference/reputation-grants/mint-reputation-grant) | `spaceId` | the general bucket (no space) |
+| [`PATCH /chat/conversations/:conversationId`](/v8/api-reference/chat/conversations/update-conversation) | `avatarFileId` | remove the avatar |
+
+```json
+{ "error": "`parentSpaceId: \"none\"` isn't supported in a request body. For a top-level space, send `parentSpaceId: null` or leave it out.", "code": "space/unsupported-param", "param": "parentSpaceId" }
+```
+
+On `POST` routes `spaceReputationId` goes in the body, where `none` is a value (the space-less bucket), not a "no value" spelling.
+
+The SDKs follow the same rule: a filter set to `null` or `undefined` isn't set, so it's left out of the request, and `"none"` is sent only when you pass it.

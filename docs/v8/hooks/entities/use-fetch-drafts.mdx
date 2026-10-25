@@ -48,12 +48,12 @@ function DraftsList() {
   Results per page.
 </ParamField>
 
-<ParamField path="sourceId" type="string">
-  Filter drafts by source ID.
+<ParamField path="sourceId" type='string | "none" | null'>
+  Only drafts from this source, or `"none"` for drafts with no source. Left out or `null`: any source.
 </ParamField>
 
-<ParamField path="spaceId" type="string">
-  Filter drafts by space.
+<ParamField path="spaceId" type='string | "none" | null'>
+  Only drafts in this space, or `"none"` for drafts in no space. Left out or `null`: any space, or none.
 </ParamField>
 
 <ParamField path="include" type="DraftIncludeParam">

@@ -48,8 +48,8 @@ function LatestComments({ userId }: { userId: string }) {
   Only comments on this entity.
 </ParamField>
 
-<ParamField path="sourceId" type="string | null">
-  Only comments on entities with this `sourceId`.
+<ParamField path="sourceId" type='string | "none" | null'>
+  Only comments on entities from this source, or `"none"` for comments on entities with no source. Left out or `null`: any source.
 </ParamField>
 
 <ParamField path="blockedFilter" type='"exclude" | "include-outbound-blocked" | null'>

@@ -23,8 +23,8 @@ Creates a workspace. The authenticated caller becomes the `ownerId`. Omit `paren
   Optional arbitrary developer-defined data (opaque JSON). Defaults to `{}`.
 </ParamField>
 
-<ParamField body="parentWorkspaceId" type="string">
-  Optional UUID of a parent workspace. Absent → root workspace. Requires the `create-sub-workspace` capability on the parent.
+<ParamField body="parentWorkspaceId" type="string | null">
+  Optional UUID of a parent workspace. Absent or `null` → root workspace; the string `"none"` is refused with `400 workspace/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). Requires the `create-sub-workspace` capability on the parent.
 </ParamField>
 
 <ParamField body="actingUserId" type="string" required>

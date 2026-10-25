@@ -41,7 +41,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 </ParamField>
 
 <ParamField query="spaceId" type="string">
-  Restrict to events scoped to this space. Omit for all scopes.
+  Only this space's events. `none` returns events not in any space. Left out, or sent empty, every event is returned. `null` and `undefined` are refused with `400 event/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
 </ParamField>
 
 <ParamField query="hostId" type="string">
@@ -125,6 +125,17 @@ Returns a paginated response: `{ data: Event[], pagination: { page, pageSize, to
       "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
       "code": "event/unsupported-param",
       "param": "userId"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported filter value — 400">
+    `spaceId=null` or `spaceId=undefined`. The `error` names the spelling to use instead.
+
+    ```json
+    {
+      "error": "`spaceId=null` isn't supported. Use `spaceId=none` for events not in any space, or leave it out for every event.",
+      "code": "event/unsupported-param",
+      "param": "spaceId"
     }
     ```
   </Accordion>

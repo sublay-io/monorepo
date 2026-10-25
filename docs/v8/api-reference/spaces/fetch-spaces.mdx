@@ -45,7 +45,7 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
 </ParamField>
 
 <ParamField query="parentSpaceId" type="string">
-  Filter to child spaces of a specific parent. Pass `"null"` for root-level spaces only.
+  A space id lists that space's child spaces. `none` lists top-level spaces only (spaces with no parent). Left out, or sent empty, the list includes spaces at every level. `null` and `undefined` are refused with `400 space/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
 </ParamField>
 
 <ParamField query="include" type="string">
@@ -82,6 +82,17 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
       "error": "`sortBy=newest` isn't supported in v8. Use `sortBy=createdAt`, which lists newest first by default.",
       "code": "space/unsupported-param",
       "param": "sortBy"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported parentSpaceId value — 400">
+    `parentSpaceId=null` and `parentSpaceId=undefined` are rejected with the spelling to use instead.
+
+    ```json
+    {
+      "error": "`parentSpaceId=null` isn't supported. Use `parentSpaceId=none` for top-level spaces, or leave it out for every level.",
+      "code": "space/unsupported-param",
+      "param": "parentSpaceId"
     }
     ```
   </Accordion>

@@ -45,7 +45,7 @@ An unknown `userId` returns an empty page.
 </ParamField>
 
 <ParamField query="sourceId" type="string">
-  Only comments on entities with this `sourceId`. Applied whether or not `include` contains `entity`. On a project without the `entities` bundle, a request with `sourceId` returns an empty page.
+  Only comments on entities with this exact `sourceId`. `none` returns comments on entities with no source. Left out, or sent empty, comments on entities from any source. `null` and `undefined` are refused with `400 comment/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). Applied whether or not `include` contains `entity`. On a project without the `entities` bundle, a request with `sourceId` returns an empty page.
 </ParamField>
 
 <ParamField query="blockedFilter" type="string" default="exclude">
@@ -135,6 +135,17 @@ These comments are **read-and-delete only**: replying under them, reacting to th
       "error": "`page` isn't supported on this endpoint. Comments use cursor pagination: leave `cursor` out on the first request, then pass `pagination.nextCursor` from the previous response to get the next batch.",
       "code": "comment/unsupported-param",
       "param": "page"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported filter value — 400">
+    `null` or `undefined` as the value of `sourceId` or `spaceReputationId`. The `error` names the spelling to use instead.
+
+    ```json
+    {
+      "error": "`sourceId=null` isn't supported. Use `sourceId=none` for comments on entities with no source, or leave it out for any source.",
+      "code": "comment/unsupported-param",
+      "param": "sourceId"
     }
     ```
   </Accordion>

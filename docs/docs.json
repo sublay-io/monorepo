@@ -588,6 +588,7 @@
                 "pages": [
                   "v8/api-reference/users/fetch-user",
                   "v8/api-reference/users/fetch-user-by-foreign-id",
+                  "v8/api-reference/users/fetch-or-create-user-by-foreign-id",
                   "v8/api-reference/users/fetch-user-by-username",
                   "v8/api-reference/users/fetch-user-suggestions",
                   "v8/api-reference/users/fetch-comments-by-user-id",

@@ -37,14 +37,11 @@ const user = await sublay.users.fetchUserById({ userId: "usr_abc123" });
 
 ### fetchUserByForeignId
 
-Fetches a user profile by your application's own user identifier. Optionally creates the user if not found.
+Fetches a user profile by your application's own user identifier. It only reads: a user that doesn't exist throws a `404`. To create the user when missing, use [`fetchOrCreateUserByForeignId`](#fetchorcreateuserbyforeignid).
 
 ```typescript
 const user = await sublay.users.fetchUserByForeignId({
   foreignId: "external-user-42",
-  createIfNotFound: true,
-  name: "Bob Smith",
-  username: "bob",
 });
 ```
 
@@ -53,35 +50,7 @@ const user = await sublay.users.fetchUserByForeignId({
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Read as this user: the result is exactly what their own access token would get, so a profile whose owner blocked them comes back as `404`. Omit for the anonymous view. With `createIfNotFound`, it shapes only the read; a user this call creates is always created by the app.
-</ParamField>
-
-<ParamField body="createIfNotFound" type="boolean">
-  When `true`, creates the user with the provided profile fields if no match is found. Defaults to `false`.
-</ParamField>
-
-<ParamField body="name" type="string">
-  Display name — used only when creating a new user.
-</ParamField>
-
-<ParamField body="username" type="string">
-  Username — used only when creating a new user.
-</ParamField>
-
-<ParamField body="avatar" type="string">
-  Avatar URL — used only when creating a new user.
-</ParamField>
-
-<ParamField body="bio" type="string">
-  Bio text — used only when creating a new user.
-</ParamField>
-
-<ParamField body="metadata" type="object">
-  Public metadata — used only when creating a new user.
-</ParamField>
-
-<ParamField body="secureMetadata" type="object">
-  Secure metadata, used only when creating a new user. No API response returns it to any user. Users can also write their own, so don't treat it as trusted.
+  Read as this user: the result is exactly what their own access token would get, so a profile whose owner blocked them comes back as `404`. Omit for the anonymous view.
 </ParamField>
 
 <ParamField body="include" type="UserIncludeParam">
@@ -91,6 +60,61 @@ const user = await sublay.users.fetchUserByForeignId({
 <SpaceReputationParams variant="user" field="body" />
 
 **Returns** — `Promise<User>`
+
+---
+
+### fetchOrCreateUserByForeignId
+
+Returns the user with your application's identifier, or creates them with the given profile when there is none. An existing user comes back unchanged: the profile fields are used only to create. The request sends everything in the body, so the profile never appears in a URL. Props type: `FetchOrCreateUserByForeignIdProps`. See [`POST /users/by-foreign-id`](/v8/api-reference/users/fetch-or-create-user-by-foreign-id).
+
+```typescript
+const user = await sublay.users.fetchOrCreateUserByForeignId({
+  foreignId: "external-user-42",
+  name: "Bob Smith",
+  username: "bob",
+  metadata: { plan: "pro" },
+});
+```
+
+<ParamField body="foreignId" type="string" required>
+  Your application's user identifier.
+</ParamField>
+
+<ParamField body="name" type="string">
+  Display name — used only when creating a new user.
+</ParamField>
+
+<ParamField body="username" type="string">
+  Username — used only when creating a new user. A username another user already holds throws a `409` (`DUPLICATE_USER_FIELD`).
+</ParamField>
+
+<ParamField body="avatar" type="string | null">
+  Avatar URL, or `null` for none — used only when creating a new user.
+</ParamField>
+
+<ParamField body="bio" type="string">
+  Bio text — used only when creating a new user.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Public metadata, a JSON object up to 1 MB — used only when creating a new user.
+</ParamField>
+
+<ParamField body="secureMetadata" type="object">
+  Secure metadata, a JSON object up to 1 MB, used only when creating a new user. No API response returns it to any user. Users can also write their own, so don't treat it as trusted.
+</ParamField>
+
+<ParamField body="include" type="UserIncludeParam">
+  Associations to populate, as a single value or an array. The only value is `"files"`, which populates `avatarFile` and `bannerFile`.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Read as this user: a user who has blocked them comes back as `404`, and nothing is created. It never changes who creates: a user this call creates is always created by the app.
+</ParamField>
+
+<SpaceReputationParams variant="user" field="body" />
+
+**Returns** — `Promise<User>`, the same shape whether the user existed (HTTP `200`) or was created (HTTP `201`).
 
 ---
 

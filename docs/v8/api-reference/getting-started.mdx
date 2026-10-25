@@ -21,9 +21,22 @@ So every endpoint takes the form:
 https://api.sublay.io/v8/:projectId/<endpoint>
 ```
 
+The project is read from the path only. Don't send `projectId` in the query string or the body, or an `x-sublay-project-id` header: each is refused with `400 project/wrong-location`.
+
 ## Request Format
 
 Most endpoints accept `application/json`. Endpoints that support file uploads accept `multipart/form-data`. The `Content-Type` header should be set accordingly.
+
+Where each field goes is decided by the method: the path holds the resource, GET and DELETE take every other field in the query string and no body, and POST, PATCH and PUT take every other field in the body, `actingUserId` included. Each field is read from one place; sent elsewhere, it is refused with a `400` that names the right place:
+
+| Code | When |
+|---|---|
+| `<area>/body-not-allowed` | A GET or DELETE has a body. |
+| `<area>/wrong-location` | A POST, PATCH or PUT has a body field (or `actingUserId`) in its query string. |
+| `project/wrong-location` | `projectId` anywhere but the path, or a project-id header. |
+| `<area>/unsupported-route` | A route v8 moved; `error` names the one to call. |
+
+See [Where each input goes](/v8/authentication#where-each-input-goes).
 
 ```http
 POST /v8/:projectId/auth/sign-in

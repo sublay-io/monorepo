@@ -18,7 +18,7 @@ Access tokens expire after **30 minutes**.
 
 ## Service Keys and `actingUserId`
 
-Server-to-server requests can authenticate with a **service key** instead of a user's access token. A service key has no user of its own; to act as a user, it names that user in `actingUserId`, in the body or query of the request (wherever that endpoint reads it). The request then runs with that user's permissions and is recorded as theirs.
+Server-to-server requests can authenticate with a **service key** instead of a user's access token. A service key has no user of its own; to act as a user, it names that user in `actingUserId`: in the query string on a GET or DELETE, in the body on a POST, PATCH or PUT, like every other field (see [Where each input goes](/v8/authentication#where-each-input-goes)). The request then runs with that user's permissions and is recorded as theirs.
 
 - A user token always acts as its own user. Sending `actingUserId` with a user token, or with no credentials, returns `400 <resource>/acting-user-not-allowed`, even when it names the token's own user. An endpoint that requires sign-in may answer a request with no credentials with `401` first. Endpoints that always act as the app (below) answer `400 <resource>/unsupported-param` instead, to every caller.
 - A service key can only name a user who exists in the project. On every endpoint that accepts `actingUserId`, an id that isn't a user in this project returns `404 <resource>/user-not-found` (`No user with this actingUserId exists in this project.`) before the request runs.

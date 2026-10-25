@@ -59,18 +59,19 @@ For server-to-server calls, using a **service API key** is almost always the rig
 A service API key is generated once from the project dashboard and stored securely on your server. When included in a request, it grants elevated access to the API:
 
 - **No user token required** — the service key bypasses user authentication entirely. You do not need to sign in as a user or manage token refresh on the server.
-- **Act on behalf of any user** — a service key names the user it acts as in `actingUserId` (in the body or query, wherever the endpoint reads it), and the request runs as that user. Some endpoints require it, some reads take it optionally to return that user's view, edits and deletes of a user's own content require it to name the author, and a few always act as the app and refuse it. `userId` only names a user the request is about, such as a target or a filter. See [Acting as a user](/v8/authentication#acting-as-a-user).
+- **Act on behalf of any user** — a service key names the user it acts as in `actingUserId` (in the query string on a GET or DELETE, in the body on a POST, PATCH or PUT, like every other field), and the request runs as that user. Some endpoints require it, some reads take it optionally to return that user's view, edits and deletes of a user's own content require it to name the author, and a few always act as the app and refuse it. `userId` only names a user the request is about, such as a target or a filter. See [Acting as a user](/v8/authentication#acting-as-a-user).
 - **Some endpoints need the user's own token** — changing or setting a password, self-service account deletion, linking or listing OAuth identities, and registering or removing a push device refuse a service key (`403 <resource>/user-token-required`).
 - **The owner acts** — editing, deleting or publishing a user's entity, editing or deleting their comment, and deleting their file are done as that user: the key names the author in `actingUserId`, and the request runs exactly as theirs. Records created without an acting user (entities, files) belong to the app, and only a key naming nobody may change them.
 - **Open reads are what that user sees** — on entity, comment, event, space, workspace and user reads, a key naming a user gets exactly that user's view, and a key naming nobody gets exactly the anonymous view (no drafts, no comment moderation details, only public events, no workspaces).
 - **Space, workspace and event roles still apply** — on space admin, moderation and membership actions (editing a space, its rules and member roles; approving, declining, banning and unbanning members; handling reports and moderating content in a space; leaving or deleting a space), on workspace management (editing, deleting or transferring a workspace; changing its inherit flag; its invitations; listing its members and reading a member's standing) and on event management (editing, cancelling and deleting an event; managing its hosts and invites; listing its invitees), the key must send `actingUserId`, and the request has exactly that user's role in the space or on the event, or their standing in the workspace.
 
-Requests with a service key require two headers:
+Requests with a service key send it as a bearer token. The project is the one in the URL path (`/v8/:projectId/...`), so no other header is needed:
 
 ```http
 Authorization: Bearer <your-service-api-key>
-x-sublay-project-id: <your-project-id>
 ```
+
+Don't send an `x-sublay-project-id` header: v8 refuses it with `400 project/wrong-location`, whatever project it names. See [Where each input goes](/v8/authentication#where-each-input-goes).
 
 <Warning>
   The service API key has full administrative access to your project's data. Never expose it in client-side code, browser environments, or mobile apps. Only use it from your own server.

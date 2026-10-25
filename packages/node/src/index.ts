@@ -133,6 +133,10 @@ export type {
   BulkDeleteResult,
 } from "./interfaces/Table";
 export type { AddColumnProps } from "./modules/tables-management/addColumn";
+export type {
+  FetchOrCreateUserByForeignIdProps,
+  FetchOrCreateUserByForeignIdResult,
+} from "./modules/users/fetchOrCreateUserByForeignId";
 
 // Export commonly used interfaces
 export type {

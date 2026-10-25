@@ -84,6 +84,24 @@ describe("node-sdk users — profile — request shaping", () => {
     expect(config).toBeUndefined();
   });
 
+  it("fetchOrCreateUserByForeignId reports created: true on 201", async () => {
+    const { client, projectInstance } = makeClient();
+    const user = { id: "u1", foreignId: "f1" };
+    projectInstance.post.mockResolvedValueOnce({ data: user, status: 201 });
+    await expect(
+      fetchOrCreateUserByForeignId(client, { foreignId: "f1" }),
+    ).resolves.toEqual({ user, created: true });
+  });
+
+  it("fetchOrCreateUserByForeignId reports created: false on 200", async () => {
+    const { client, projectInstance } = makeClient();
+    const user = { id: "u1", foreignId: "f1" };
+    projectInstance.post.mockResolvedValueOnce({ data: user, status: 200 });
+    await expect(
+      fetchOrCreateUserByForeignId(client, { foreignId: "f1" }),
+    ).resolves.toEqual({ user, created: false });
+  });
+
   it("fetchUserByUsername hits /users/by-username with the full body as params", async () => {
     const { client, projectInstance } = makeClient();
     await fetchUserByUsername(client, { username: "alice" });

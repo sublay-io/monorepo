@@ -8,7 +8,7 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 Returns the user with this `foreignId` — the external identifier from your own system — or creates them when there is none. **Service key only**: this endpoint creates users, so only your backend may call it. To read a user without creating one, use [Fetch User by Foreign ID](/v8/api-reference/users/fetch-user-by-foreign-id) (`GET`).
 
-Everything goes in the JSON request body, so the profile, `secureMetadata` included, never appears in a URL.
+Everything goes in the JSON request body, so the profile, `secureMetadata` included, never appears in a URL. The whole request body can be at most 100 KB, `metadata` and `secureMetadata` included.
 
 - **Existing user:** `200` with the user, unchanged. The profile fields are used only to create a user; they never update one.
 - **No user:** the user is created with the body's profile, `201`.
@@ -41,11 +41,11 @@ Everything goes in the JSON request body, so the profile, `secureMetadata` inclu
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  Public custom data, a JSON object up to 1 MB. Used only when the user is created. A JSON string is refused (`400 user/invalid-body`).
+  Public custom data, a JSON object. Used only when the user is created. A JSON string is refused (`400 user/invalid-body`).
 </ParamField>
 
 <ParamField body="secureMetadata" type="object">
-  Private custom data, a JSON object up to 1 MB. Never returned by the API. Used only when the user is created.
+  Private custom data, a JSON object. Never returned by the API. Used only when the user is created.
 </ParamField>
 
 <ParamField body="include" type="string | string[]">
@@ -194,5 +194,5 @@ Returns HTTP `200` (an existing user) or `201` (a user this request created), wi
 ## See Also
 
 - [Fetch User by Foreign ID](/v8/api-reference/users/fetch-user-by-foreign-id)
-- [`fetchOrCreateUserByForeignId` (Node SDK)](/v8/node-sdk/users)
+- [`fetchOrCreateUserByForeignId` (Node SDK)](/v8/node-sdk/users), which returns `{ user, created }`, with `created` true on `201`
 - [User data model](/v8/data-models/user)

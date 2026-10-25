@@ -31,18 +31,25 @@ export interface FetchOrCreateUserByForeignIdProps
   actingUserId?: string;
 }
 
+export interface FetchOrCreateUserByForeignIdResult {
+  user: User;
+  /** `true` when this call created the user (HTTP 201), `false` when it existed (200). */
+  created: boolean;
+}
+
 /**
  * POST /users/by-foreign-id — return the user with this foreign id, or create
  * them with the given profile when there is none. An existing user comes back
  * unchanged (the profile fields never update it). Everything travels in the
  * body, so the profile never appears in a URL.
  *
- * A username another user already holds is a 409 (`DUPLICATE_USER_FIELD`).
+ * Resolves to `{ user, created }`: `created` is true when the server answered
+ * 201. A username another user already holds is a 409 (`DUPLICATE_USER_FIELD`).
  */
 export async function fetchOrCreateUserByForeignId(
   client: SublayHttpClient,
   data: FetchOrCreateUserByForeignIdProps
-): Promise<User> {
+): Promise<FetchOrCreateUserByForeignIdResult> {
   const {
     spaceReputation,
     spaceReputationId,
@@ -63,5 +70,7 @@ export async function fetchOrCreateUserByForeignId(
     }
   );
 
-  return response.data;
+  // 201 is a user this call created; 200 is an existing one (also the loser
+  // of a concurrent create).
+  return { user: response.data, created: response.status === 201 };
 }

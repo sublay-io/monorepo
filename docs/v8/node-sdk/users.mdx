@@ -68,7 +68,7 @@ const user = await sublay.users.fetchUserByForeignId({
 Returns the user with your application's identifier, or creates them with the given profile when there is none. An existing user comes back unchanged: the profile fields are used only to create. The request sends everything in the body, so the profile never appears in a URL. Props type: `FetchOrCreateUserByForeignIdProps`. See [`POST /users/by-foreign-id`](/v8/api-reference/users/fetch-or-create-user-by-foreign-id).
 
 ```typescript
-const user = await sublay.users.fetchOrCreateUserByForeignId({
+const { user, created } = await sublay.users.fetchOrCreateUserByForeignId({
   foreignId: "external-user-42",
   name: "Bob Smith",
   username: "bob",
@@ -97,11 +97,11 @@ const user = await sublay.users.fetchOrCreateUserByForeignId({
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  Public metadata, a JSON object up to 1 MB — used only when creating a new user.
+  Public metadata, a JSON object — used only when creating a new user. The whole request body can be at most 100 KB.
 </ParamField>
 
 <ParamField body="secureMetadata" type="object">
-  Secure metadata, a JSON object up to 1 MB, used only when creating a new user. No API response returns it to any user. Users can also write their own, so don't treat it as trusted.
+  Secure metadata, a JSON object, used only when creating a new user. No API response returns it to any user. Users can also write their own, so don't treat it as trusted.
 </ParamField>
 
 <ParamField body="include" type="UserIncludeParam">
@@ -114,7 +114,7 @@ const user = await sublay.users.fetchOrCreateUserByForeignId({
 
 <SpaceReputationParams variant="user" field="body" />
 
-**Returns** — `Promise<User>`, the same shape whether the user existed (HTTP `200`) or was created (HTTP `201`).
+**Returns** — `Promise<FetchOrCreateUserByForeignIdResult>`: `{ user: User; created: boolean }`. `created` is `true` when this call created the user (HTTP `201`) and `false` when the user already existed (HTTP `200`, also when another call created them concurrently).
 
 ---
 

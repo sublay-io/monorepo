@@ -132,6 +132,28 @@ describe("SublayHttpClient — host-managed mode (getToken provided)", () => {
     });
   });
 
+  it("surfaces a coded 403 without re-reading getToken or retrying", async () => {
+    const getToken = jest
+      .fn()
+      .mockResolvedValueOnce("token-1")
+      .mockResolvedValueOnce("token-2");
+    const client = new SublayHttpClient({ projectId: "proj1", getToken });
+    const adapter = jest.fn(async (config: InternalAxiosRequestConfig) => {
+      throw axiosErrorWithStatus(
+        403,
+        { error: "Forbidden", code: "space/forbidden" },
+        config
+      );
+    });
+    stubRecordingAdapter(client, adapter);
+
+    await expect(client.projectInstance.get("/a")).rejects.toMatchObject({
+      response: { status: 403, data: { code: "space/forbidden" } },
+    });
+    expect(getToken).toHaveBeenCalledTimes(1);
+    expect(adapter).toHaveBeenCalledTimes(1);
+  });
+
   describe("setTokens / setAccessToken / clearTokens are no-ops", () => {
     it("setTokens does not change what getAccessToken/getRefreshToken report and does not fire onAuthChange", () => {
       const onAuthChange = jest.fn();

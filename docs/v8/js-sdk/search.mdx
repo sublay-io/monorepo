@@ -119,7 +119,7 @@ a single result.
 
 <Note>
   `askContent` streams via `fetch` rather than axios, so it does **not** get the
-  automatic token-refresh-on-`403` retry that other calls have. In SDK-managed
+  automatic token refresh and retry that other calls get on an expired token. In SDK-managed
   mode, make sure a fresh access token is in place before starting a long stream.
 </Note>
 

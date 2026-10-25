@@ -210,7 +210,7 @@ const { user, accessToken, refreshToken } = await sublay.auth.verifyExternalUser
 
 ### requestNewAccessToken
 
-Manually rotates the access token using a refresh token. Normally this is handled automatically on a `403` in SDK-managed mode.
+Manually rotates the access token using a refresh token. In SDK-managed mode this happens automatically when a request fails with a `401` or `403` that has no error `code` (a missing or expired access token).
 
 ```typescript
 const { accessToken, refreshToken } = await sublay.auth.requestNewAccessToken();

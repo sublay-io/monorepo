@@ -30,7 +30,7 @@ const { entities } = await sublay.entities.fetchManyEntities({
 });
 ```
 
-**Two auth modes.** By default the SDK is *SDK-managed*: it stores the tokens in memory, attaches the bearer on every request, auto-refreshes on a 403, and fires `onAuthChange` so you can persist them. If your host app already owns the token (e.g. it's shared with another SDK), pass `getToken` to `init({ ... })` for *host-managed* mode — the SDK then reads the token from your hook on each request and never stores or refreshes it itself.
+**Two auth modes.** By default the SDK is *SDK-managed*: it stores the tokens in memory, attaches the bearer on every request, auto-refreshes when the access token is missing or expired (a 401/403 with no error `code`), and fires `onAuthChange` so you can persist them. If your host app already owns the token (e.g. it's shared with another SDK), pass `getToken` to `init({ ... })` for *host-managed* mode — the SDK then reads the token from your hook on each request and never stores or refreshes it itself.
 
 ### API surface
 

@@ -181,6 +181,80 @@ describe("SublayHttpClient — SDK-managed mode (default, no getToken)", () => {
     expect(refreshSpy).not.toHaveBeenCalled();
   });
 
+  it("refreshes and retries on a bare 401 (no token reached the server)", async () => {
+    const client = new SublayHttpClient({
+      projectId: "proj1",
+      initialTokens: { accessToken: "stale-token", refreshToken: "refresh-a" },
+    });
+    const adapter = jest.fn(
+      async (config: InternalAxiosRequestConfig & { _retry?: boolean }) => {
+        if (config._retry) return okAxiosResponse({ ok: true }, 200, config);
+        throw axiosErrorWithStatus(401, undefined, config);
+      }
+    );
+    stubAdapter(client.projectInstance, adapter);
+    const refreshSpy = jest
+      .spyOn(axios, "post")
+      .mockResolvedValue({ data: { accessToken: "fresh-token" } });
+
+    const res = await client.projectInstance.get("/a");
+
+    expect(res.data).toEqual({ ok: true });
+    expect(refreshSpy).toHaveBeenCalledTimes(1);
+    expect(adapter).toHaveBeenCalledTimes(2);
+  });
+
+  // A coded 401/403 is a rejection a refresh can't fix: surface it directly,
+  // without rotating the refresh token or repeating the request.
+  it.each([
+    [403, "space/forbidden"],
+    [403, "user/suspended"],
+    [403, "project/plan-required"],
+    [403, "database/tables-not-available"],
+    [401, "auth/user-required"],
+  ])(
+    "surfaces a coded %i (%s) without refreshing or retrying",
+    async (status, code) => {
+      const onAuthChange = jest.fn();
+      const client = new SublayHttpClient({
+        projectId: "proj1",
+        initialTokens: { accessToken: "good-token", refreshToken: "refresh-a" },
+        onAuthChange,
+      });
+      const adapter = jest.fn(async (config: InternalAxiosRequestConfig) => {
+        throw axiosErrorWithStatus(status, { error: "Nope", code }, config);
+      });
+      stubAdapter(client.projectInstance, adapter);
+      const refreshSpy = jest.spyOn(axios, "post");
+
+      await expect(client.projectInstance.get("/a")).rejects.toMatchObject({
+        response: { status, data: { code } },
+      });
+      expect(refreshSpy).not.toHaveBeenCalled();
+      expect(adapter).toHaveBeenCalledTimes(1);
+      expect(client.getRefreshToken()).toBe("refresh-a");
+      expect(onAuthChange).not.toHaveBeenCalled();
+    }
+  );
+
+  it("does not refresh on other statuses (e.g. 404)", async () => {
+    const client = new SublayHttpClient({
+      projectId: "proj1",
+      initialTokens: { accessToken: "good-token", refreshToken: "refresh-a" },
+    });
+    const adapter = jest.fn(async (config: InternalAxiosRequestConfig) => {
+      throw axiosErrorWithStatus(404, undefined, config);
+    });
+    stubAdapter(client.projectInstance, adapter);
+    const refreshSpy = jest.spyOn(axios, "post");
+
+    await expect(client.projectInstance.get("/a")).rejects.toMatchObject({
+      response: { status: 404 },
+    });
+    expect(refreshSpy).not.toHaveBeenCalled();
+    expect(adapter).toHaveBeenCalledTimes(1);
+  });
+
   describe("onAuthChange / setters", () => {
     it("fires onAuthChange with the full pair on setTokens", () => {
       const onAuthChange = jest.fn();

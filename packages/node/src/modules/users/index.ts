@@ -1,5 +1,6 @@
 export { fetchUserById } from "./fetchUserById";
 export { fetchUserByForeignId } from "./fetchUserByForeignId";
+export { fetchOrCreateUserByForeignId } from "./fetchOrCreateUserByForeignId";
 export { fetchUserByUsername } from "./fetchUserByUsername";
 export { fetchUserSuggestions } from "./fetchUserSuggestions";
 export { checkUsernameAvailability } from "./checkUsernameAvailability";

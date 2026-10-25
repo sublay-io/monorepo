@@ -49,6 +49,16 @@ Returns the updated [Event](/v8/data-models/event).
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "event/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="Wrong Location — 400">
+    `actingUserId` was sent in the query string. On this endpoint every field goes in the request body.
+    ```json
+    {
+      "error": "`actingUserId` goes in the request body on this endpoint.",
+      "code": "event/wrong-location",
+      "param": "actingUserId"
+    }
+    ```
+  </Accordion>
   <Accordion title="User Not Found — 404">
     Returned when a service key names an `actingUserId` that isn't a user in this project.
     ```json

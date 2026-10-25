@@ -13,8 +13,7 @@ export async function removeInvite(
 ): Promise<Event> {
   const { eventId, userId } = data;
   const response = await client.projectInstance.delete<Event>(
-    `/events/${eventId}/invites`,
-    { data: { userId } }
+    `/events/${eventId}/invites/${userId}`
   );
   return response.data;
 }

@@ -2,8 +2,10 @@ import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import { Comment, CommentIncludeParam } from "../../interfaces/models/Comment";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
+import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
+import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
 
-export interface FetchCommentByForeignIdProps {
+export interface FetchCommentByForeignIdProps extends SpaceReputationContextParams {
   foreignId: string;
   include?: CommentIncludeParam;
 }
@@ -13,7 +15,13 @@ function useFetchCommentByForeignId(): (props: FetchCommentByForeignIdProps) => 
   const axios = useAxiosPrivate();
 
   const fetchCommentByForeignId = useCallback(
-    async ({ foreignId, include }: FetchCommentByForeignIdProps) => {
+    async ({
+      foreignId,
+      include,
+      spaceReputation,
+      spaceReputationId,
+      spaceReputationDescendants,
+    }: FetchCommentByForeignIdProps) => {
       if (!projectId) {
         throw new Error("No project specified");
       }
@@ -24,6 +32,11 @@ function useFetchCommentByForeignId(): (props: FetchCommentByForeignIdProps) => 
 
       const params: Record<string, any> = {
         foreignId,
+        ...buildSpaceReputationParams({
+          spaceReputation,
+          spaceReputationId,
+          spaceReputationDescendants,
+        }),
       };
 
       if (include) {

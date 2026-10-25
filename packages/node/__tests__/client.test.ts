@@ -7,14 +7,14 @@ jest.mock("axios");
 const mockedCreate = axios.create as jest.Mock;
 
 describe("SublayHttpClient construction", () => {
-  it("configures projectInstance with the v8 project-scoped baseURL and auth headers", () => {
+  it("configures projectInstance with the v8 project-scoped baseURL and auth, and no project-id header", () => {
     new SublayHttpClient({ projectId: "proj1", apiKey: "key1" });
 
+    // v8 reads the project from the path only and refuses the header (400).
     expect(mockedCreate).toHaveBeenNthCalledWith(1, {
       baseURL: "https://api.sublay.io/v8/proj1",
       headers: {
         Authorization: "Bearer key1",
-        "X-Sublay-Project-ID": "proj1",
       },
     });
   });
@@ -46,7 +46,6 @@ describe("SublayHttpClient construction", () => {
       baseURL: "https://api.sublay.io/v8/proj1",
       headers: {
         Authorization: "Bearer key1",
-        "X-Sublay-Project-ID": "proj1",
         "X-Sublay-Internal": "true",
       },
     });

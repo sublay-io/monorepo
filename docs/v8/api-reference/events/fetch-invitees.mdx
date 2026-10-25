@@ -51,6 +51,16 @@ Returns a paginated response: `{ data: EventInvite[], pagination: {...} }`.
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "event/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="Body Not Allowed — 400">
+    The request carried a body. A GET takes no body: send `actingUserId` and every other field in the query string.
+    ```json
+    {
+      "error": "A GET request takes no body: send its fields in the query string. Received: `actingUserId`.",
+      "code": "event/body-not-allowed",
+      "params": ["actingUserId"]
+    }
+    ```
+  </Accordion>
   <Accordion title="User Not Found — 404">
     Returned when a service key names an `actingUserId` that isn't a user in this project.
     ```json

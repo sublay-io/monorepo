@@ -54,7 +54,7 @@ async function drain(
 }
 
 describe("js-sdk askContent — request shaping", () => {
-  it("POSTs to /search/ask with the body minus space-reputation fields, which go in query params", async () => {
+  it("POSTs to /search/ask with everything in the body, the space-reputation options too", async () => {
     const client = new SublayHttpClient({
       projectId: "proj1",
       initialTokens: { accessToken: "tok-a", refreshToken: "refresh-a" },
@@ -74,19 +74,19 @@ describe("js-sdk askContent — request shaping", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe(
-      "https://api.sublay.io/v8/proj1/search/ask?spaceReputationId=rep1&spaceReputationDescendants=true"
-    );
+    expect(url).toBe("https://api.sublay.io/v8/proj1/search/ask");
     expect(init.method).toBe("POST");
     expect(JSON.parse(init.body)).toEqual({
       query: "how do refunds work?",
       spaceId: "s1",
+      spaceReputationId: "rep1",
+      spaceReputationDescendants: true,
     });
     expect(init.headers.Authorization).toBe("Bearer tok-a");
     expect(init.headers["Content-Type"]).toBe("application/json");
   });
 
-  it("omits the query string entirely when no space-reputation fields are given", async () => {
+  it("sends no query string", async () => {
     const client = new SublayHttpClient({ projectId: "proj1" });
     const reader = makeReader([encodeSseBlock("done", {})]);
     const fetchMock = jest.fn().mockResolvedValue(makeStreamResponse(reader));

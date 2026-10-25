@@ -45,7 +45,7 @@ function DevAuthHelper() {
 ## Parameters
 
 <ParamField body="projectId" type="string" required>
-  Your Sublay project ID.
+  Your Sublay project ID. The hook puts it in the request path (`POST /v8/:projectId/crypto/sign-testing-jwt/v2`), never the body; the token's `iss` is set from it.
 </ParamField>
 
 <ParamField body="privateKey" type="string" required>

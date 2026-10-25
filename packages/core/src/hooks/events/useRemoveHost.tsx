@@ -20,8 +20,7 @@ function useRemoveHost(): (props: RemoveHostProps) => Promise<Event> {
       }
 
       const response = await axios.delete(
-        `/${projectId}/events/${eventId}/hosts`,
-        { data: { userId } }
+        `/${projectId}/events/${eventId}/hosts/${userId}`
       );
 
       return response.data as Event;

@@ -23,8 +23,8 @@ export interface BuildSpaceReputationParamsInput {
 }
 
 /**
- * Flat output handed to the query-string serializer (axios `params`). Both keys
- * are omitted when unset — never bracketed, never nested.
+ * Flat output merged into a GET's query (axios `params`) or a POST's body. Both
+ * keys are omitted when unset — never bracketed, never nested.
  */
 export interface SpaceReputationFlatParams {
   spaceReputationId?: string;
@@ -51,7 +51,7 @@ function isProduction(): boolean {
 
 /**
  * Normalize the `spaceReputation` object or the deprecated flat props down to
- * the flat query params the server understands
+ * the flat params the server understands
  * (`spaceReputationId` / `spaceReputationDescendants`).
  *
  * **Critical:** this is the only thing that prevents the nested

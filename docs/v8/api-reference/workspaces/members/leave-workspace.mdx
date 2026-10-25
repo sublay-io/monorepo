@@ -16,10 +16,10 @@ Removes the caller's own membership on **this node only** (self-service, no capa
   The workspace UUID.
 </ParamField>
 
-## Body Parameters
+## Query Parameters
 
-<ParamField body="actingUserId" type="string" required>
-  Service keys only — the user to act as, whose membership is removed (sent in the body so the act-as-user path works on `DELETE`). **Required for a key:** leaving is inherently self-service, so a key that names nobody is refused with `400 workspace/missing-user-id`.
+<ParamField query="actingUserId" type="string" required>
+  Service keys only — the user to act as, whose membership is removed. **Required for a key:** leaving is inherently self-service, so a key that names nobody is refused with `400 workspace/missing-user-id`.
 
   A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
@@ -52,6 +52,12 @@ Removes the caller's own membership on **this node only** (self-service, no capa
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
     ```
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+  </Accordion>
+  <Accordion title="Body Not Allowed — 400">
+    ```json
+    { "error": "A DELETE request takes no body: send its fields in the query string. Received: `actingUserId`.", "code": "workspace/body-not-allowed", "params": ["actingUserId"] }
+    ```
+    A `DELETE` takes every field, `actingUserId` included, in the query string, so any request body is refused: a JSON object with keys, a non-empty array, or a non-JSON payload such as multipart (then `params` is omitted). An absent body and `{}` pass.
   </Accordion>
   <Accordion title="User Not Found — 404">
     ```json

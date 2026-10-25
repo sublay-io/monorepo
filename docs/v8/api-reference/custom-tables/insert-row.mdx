@@ -28,6 +28,10 @@ The body is a free-form column map — one key per column you are setting. At le
 { "status": "open", "total": 42 }
 ```
 
+<Note>
+  A column named `projectId` is writable here like any other column: the body is your column map, so `projectId` in it is not refused. Outside the custom-table row bodies (Insert Row, Bulk Insert Rows and Update Row), `projectId` anywhere but the URL path is `400 project/wrong-location`, and that includes a top-level `?projectId=` on this route.
+</Note>
+
 <Warning>
   **Managed columns are rejected, unknown columns are ignored.** Writing `id`, `createdAt`, `updatedAt` or `deletedAt` fails with `database/managed-column`. A key that matches no column on the table is silently dropped — so a typo in a column name does not error, it simply does not persist. If every key is dropped, the request fails with `database/no-writable-columns`.
 </Warning>

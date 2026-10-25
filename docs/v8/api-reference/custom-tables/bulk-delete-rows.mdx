@@ -1,12 +1,14 @@
 ---
 title: "Bulk Delete Rows"
-api: "DELETE /v8/:projectId/db/:tableName"
+api: "POST /v8/:projectId/db/:tableName/bulk-delete"
 description: "Delete many custom-table rows by ID list, filter predicate, or both"
 ---
 
 Deletes multiple rows in one request and reports how many were removed.
 
 Targets are selected by an ID list, a filter predicate, or both — **at least one is required**, so an empty body cannot wipe a table by accident.
+
+It is a `POST` because the targets travel in the request body: up to 100 IDs and 50 filters can exceed URL length limits in a query string, and a `DELETE` takes no body. It sits next to [Bulk Insert Rows](/v8/api-reference/custom-tables/bulk-insert-rows) (`POST /db/:tableName/bulk`). To delete one row, use [Delete Row](/v8/api-reference/custom-tables/delete-row).
 
 <Warning>
   Row endpoints capture the caller's identity but **enforce no authorization** — any caller who can reach your project can delete these rows. See [Security: open row CRUD](/v8/custom-tables#security-open-row-crud).
@@ -62,6 +64,12 @@ Targets are selected by an ID list, a filter predicate, or both — **at least o
     { "error": "Bad Request", "code": "database/invalid-body" }
     ```
   </Accordion>
+  <Accordion title="Wrong Location — 400">
+    A body field (`rowIds`, `filters` or `force`) was sent in the query string. On this endpoint every field goes in the request body.
+    ```json
+    { "error": "`force` goes in the request body on this endpoint.", "code": "database/wrong-location", "param": "force" }
+    ```
+  </Accordion>
   <Accordion title="Invalid Filter Column — 400">
     ```json
     {
@@ -74,6 +82,15 @@ Targets are selected by an ID list, a filter predicate, or both — **at least o
   <Accordion title="Table Not Found — 404">
     ```json
     { "error": "Not Found", "code": "database/table-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Route — 400">
+    `DELETE /v8/:projectId/db/:tableName`, with the targets in a request body, is not a v8 route. It returns this error whatever the request carries.
+    ```json
+    {
+      "error": "`DELETE /db/:tableName` isn't supported in v8. Delete rows in bulk with `POST /db/:tableName/bulk-delete`, sending `rowIds` and/or `filters` (and `force`) in the body, or one row with `DELETE /db/:tableName/:rowId`.",
+      "code": "database/unsupported-route"
+    }
     ```
   </Accordion>
   <Accordion title="Server Error — 500">

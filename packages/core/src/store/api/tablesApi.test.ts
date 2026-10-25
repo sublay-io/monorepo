@@ -209,6 +209,24 @@ describe("tablesApi", () => {
     expect(url.searchParams.get("force")).toBe("true");
   });
 
+  it("deleteRow passes force=false when it is explicitly false", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(
+      jsonResponse({ deleted: true, soft: true }),
+    );
+
+    await store.dispatch(
+      tablesApi.endpoints.deleteRow.initiate({
+        projectId: "test-project",
+        tableName: "Events",
+        rowId: "1",
+        force: false,
+      }),
+    );
+
+    const url = new URL(fetchHandle.calls()[0].url);
+    expect(url.searchParams.get("force")).toBe("false");
+  });
+
   it("restoreRow issues a POST to the row's /restore route", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
       jsonResponse({ row: { id: "1", deletedAt: null } }),

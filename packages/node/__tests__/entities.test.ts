@@ -73,25 +73,21 @@ describe("node-sdk entities — request shaping", () => {
     });
   });
 
-  it("incrementEntityViews sends count as a query param, not a body field", async () => {
+  it("incrementEntityViews sends count as a JSON number in the body, no query", async () => {
     const { client, projectInstance } = makeClient();
     await incrementEntityViews(client, { entityId: "e1", count: 3 });
-    // The server reads `count` from the query string; as a body field it was
-    // ignored and every call incremented by the default of 1.
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/entities/e1/increment-views",
-      undefined,
-      { params: { count: 3 } },
+      { count: 3 },
     );
   });
 
-  it("incrementEntityViews omits count when not supplied", async () => {
+  it("incrementEntityViews sends an empty body when count is not supplied", async () => {
     const { client, projectInstance } = makeClient();
     await incrementEntityViews(client, { entityId: "e1" });
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/entities/e1/increment-views",
-      undefined,
-      { params: {} },
+      {},
     );
   });
 
@@ -183,11 +179,11 @@ describe("node-sdk entities — request shaping", () => {
     });
   });
 
-  it("removeReaction sends actingUserId via the data option", async () => {
+  it("removeReaction sends actingUserId in the query, no body", async () => {
     const { client, projectInstance } = makeClient();
     await removeReaction(client, { entityId: "e1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/entities/e1/reactions", {
-      data: { actingUserId: "u1" },
+      params: { actingUserId: "u1" },
     });
   });
 

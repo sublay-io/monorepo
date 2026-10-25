@@ -31,16 +31,14 @@ export async function searchContent(
 ): Promise<PaginatedResponse<Entity>> {
   const { spaceReputation, spaceReputationId, spaceReputationDescendants, ...body } =
     data;
-  const response = await client.projectInstance.post<PaginatedResponse<Entity>>(
-    "/search/content",
-    body,
-    {
-      params: buildSpaceReputationParams({
-        spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
-      }),
-    }
-  );
+  // Every field goes in the body on a POST, the space-reputation options too.
+  const response = await client.projectInstance.post<PaginatedResponse<Entity>>("/search/content", {
+    ...body,
+    ...buildSpaceReputationParams({
+      spaceReputation,
+      spaceReputationId,
+      spaceReputationDescendants,
+    }),
+  });
   return response.data;
 }

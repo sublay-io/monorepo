@@ -19,7 +19,7 @@ Every call is authorized against the **signed-in user's own standing** on the wo
 
 <Warning>
   **Pass only the documented fields — the props object is sent whole.**
-  `createWorkspace` and its siblings hand your object straight to the request body, and every workspaces endpoint refuses a top-level field it does not declare: `{ "error": "Unrecognized key: \"slug\"", "code": "workspace/invalid-body" }` (plural `Unrecognized keys: "a", "b"` for two or more, `workspace/invalid-query` for a query-string offender).
+  `createWorkspace` and its siblings hand your object straight to the request body, and every workspaces endpoint refuses a top-level field it does not declare: `{ "error": "Unrecognized key: \"slug\"", "code": "workspace/invalid-body" }` (plural `Unrecognized keys: "a", "b"` for two or more). On reads and deletes the fields travel in the query string, where an undeclared one is `workspace/invalid-query`.
 
   ```typescript
   // ❌ 400 — `slug` and `plan` are not fields of this endpoint.

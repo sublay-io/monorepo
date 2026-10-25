@@ -91,11 +91,9 @@ export async function* askContent(
   client: SublayHttpClient,
   data: AskContentProps
 ): AsyncGenerator<AskContentEvent, void, unknown> {
-  // The server reads the space-reputation options from `req.query`, not the
-  // request body, so they are appended to the URL as query params. The helper
-  // flattens the `spaceReputation` object (or the deprecated flat props) to the
-  // flat pair — never the nested object, which would stringify to
-  // `[object Object]` on a `URLSearchParams` and be silently ignored.
+  // Every field goes in the JSON body on a POST, the space-reputation options
+  // too. The helper flattens the `spaceReputation` object (or the deprecated
+  // flat props) to the flat pair the server reads.
   const {
     signal,
     spaceReputation,
@@ -112,26 +110,17 @@ export async function* askContent(
   };
   if (authHeader) headers.Authorization = authHeader;
 
-  const flatParams = buildSpaceReputationParams({
-    spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
-  });
-  const search = new URLSearchParams();
-  if (flatParams.spaceReputationId != null)
-    search.set("spaceReputationId", flatParams.spaceReputationId);
-  if (flatParams.spaceReputationDescendants != null)
-    search.set(
-      "spaceReputationDescendants",
-      String(flatParams.spaceReputationDescendants)
-    );
-  const queryString = search.toString();
-  const url = `${baseURL}/search/ask${queryString ? `?${queryString}` : ""}`;
-
-  const response = await fetch(url, {
+  const response = await fetch(`${baseURL}/search/ask`, {
     method: "POST",
     headers,
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      ...body,
+      ...buildSpaceReputationParams({
+        spaceReputation,
+        spaceReputationId,
+        spaceReputationDescendants,
+      }),
+    }),
     signal,
   });
 

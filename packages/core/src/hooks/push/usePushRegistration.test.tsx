@@ -253,7 +253,7 @@ describe("usePushRegistration", () => {
   });
 
   describe("unregister", () => {
-    it("fetches the identifier and DELETEs the device", async () => {
+    it("fetches the identifier and POSTs it to the deregister route", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({}));
       const adapter = makeAdapter();
       const { result, store } = renderHookWithStore(
@@ -267,8 +267,13 @@ describe("usePushRegistration", () => {
       });
 
       expect(adapter.requestPermission).not.toHaveBeenCalled();
-      const deleteCall = fetchHandle.calls().find((c) => c.method === "DELETE");
-      expect(deleteCall?.url).toContain("/test-project/push-notifications/devices");
+      const deregisterCall = fetchHandle
+        .calls()
+        .find((c) => c.method === "POST" && c.url.includes("/deregister"));
+      expect(deregisterCall?.url).toContain(
+        "/test-project/push-notifications/devices/deregister",
+      );
+      expect(fetchHandle.calls().some((c) => c.method === "DELETE")).toBe(false);
     });
 
     it("is a no-op when the adapter yields no identifier", async () => {
@@ -363,8 +368,8 @@ describe("usePushRegistration", () => {
       ).toHaveLength(0);
       expect(
         axiosPublic
-          .calls("delete")
-          .filter((c) => c.url.includes("push-notifications/devices")),
+          .calls("post")
+          .filter((c) => c.url.includes("push-notifications/devices/deregister")),
       ).toHaveLength(0);
     });
 
@@ -1201,7 +1206,7 @@ describe("usePushRegistration", () => {
       );
       seedAccounts(store, DEVICE);
 
-      // The old identifier's DELETE goes out over RTK Query.
+      // The old identifier's deregister POST goes out over RTK Query.
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({}));
       const axiosPublic = mockAxiosPublic();
       axiosPublic.mockResponse("post", {}); // the ACTIVE account re-registers

@@ -13,8 +13,7 @@ export async function removeHost(
 ): Promise<Event> {
   const { eventId, userId } = data;
   const response = await client.projectInstance.delete<Event>(
-    `/events/${eventId}/hosts`,
-    { data: { userId } }
+    `/events/${eventId}/hosts/${userId}`
   );
   return response.data;
 }

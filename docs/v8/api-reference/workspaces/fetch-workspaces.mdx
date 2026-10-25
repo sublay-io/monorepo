@@ -77,6 +77,12 @@ GET /v8/:projectId/workspaces?page=1&limit=10&include=memberCount
     ```
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
+  <Accordion title="Body Not Allowed — 400">
+    ```json
+    { "error": "A GET request takes no body: send its fields in the query string. Received: `actingUserId`.", "code": "workspace/body-not-allowed", "params": ["actingUserId"] }
+    ```
+    A `GET` takes every field, `actingUserId` included, in the query string, so any request body is refused: a JSON object with keys, a non-empty array, or a non-JSON payload such as multipart (then `params` is omitted). An absent body and `{}` pass.
+  </Accordion>
   <Accordion title="User Not Found — 404">
     ```json
     { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }
@@ -93,7 +99,7 @@ GET /v8/:projectId/workspaces?page=1&limit=10&include=memberCount
     ```json
     { "error": "Unrecognized key: \"sort\"", "code": "workspace/invalid-query" }
     ```
-    This route declares `page`, `limit`, `include`, `actingUserId` and `projectId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "sort", "order"`. The two exceptions across the bundle are the cache-busters `_` and `_t`, which are dropped before the request is read. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+    This route declares `page`, `limit`, `include` and `actingUserId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "sort", "order"`. The two exceptions across the bundle are the cache-busters `_` and `_t`, which are dropped before the request is read. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
 </AccordionGroup>
 

@@ -100,7 +100,7 @@ describe("useSendMessage", () => {
     expect(formData.getAll("files")).toHaveLength(1);
   });
 
-  it("includes spaceReputation params on the request", async () => {
+  it("sends the spaceReputation options in the JSON body, no query", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() =>
       useSendMessage({ conversationId: "conversation-1" }),
     );
@@ -116,10 +116,35 @@ describe("useSendMessage", () => {
     });
 
     const [call] = axiosPrivate.calls("post");
-    expect(call.config?.params).toMatchObject({
+    expect(call.body).toMatchObject({
+      content: "hi",
       spaceReputationId: "space-1",
       spaceReputationDescendants: true,
     });
+    expect(call.config?.params).toBeUndefined();
+  });
+
+  it("sends the spaceReputation options as form fields on a multipart send", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() =>
+      useSendMessage({ conversationId: "conversation-1" }),
+    );
+
+    axiosPrivate.mockResponse("post", makeChatMessage());
+
+    const file = new File(["binary"], "photo.png", { type: "image/png" });
+
+    await act(async () => {
+      await result.current({
+        files: [file],
+        spaceReputation: { spaceId: "space-1", includeDescendants: false },
+      });
+    });
+
+    const [call] = axiosPrivate.calls("post");
+    const formData = call.body as FormData;
+    expect(formData.get("spaceReputationId")).toBe("space-1");
+    expect(formData.get("spaceReputationDescendants")).toBe("false");
+    expect(call.config?.params).toBeUndefined();
   });
 
   it("marks the optimistic message as failed and rethrows when the request fails", async () => {

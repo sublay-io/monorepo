@@ -401,7 +401,7 @@ const entity = await sublay.entities.incrementEntityViews({
 </ParamField>
 
 <ParamField body="count" type="number">
-  Number to add to the view counter. Defaults to `1`.
+  Number to add to the view counter: an integer of at least `1`. Defaults to `1`. Sent as a JSON number in the request body.
 </ParamField>
 
 **Returns** — `Promise<Entity>`
@@ -498,7 +498,7 @@ const entity = await sublay.entities.addReaction({
 
 ### removeReaction
 
-Removes a user's existing reaction from an entity.
+Removes a user's existing reaction from an entity. It sends `DELETE /entities/:entityId/reactions` with `actingUserId` in the query and no body.
 
 ```typescript
 const entity = await sublay.entities.removeReaction({

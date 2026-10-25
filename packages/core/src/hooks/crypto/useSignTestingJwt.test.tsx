@@ -30,8 +30,8 @@ describe("useSignTestingJwt", () => {
 
     const [call] = axiosPublic.calls("post");
     expect(call.url).toBe("/test-project/crypto/sign-testing-jwt/v2");
+    // The project is read from the path only; it never goes in the body.
     expect(call.body).toEqual({
-      projectId: "test-project",
       privateKey: "secret-key",
       userData: { id: "user-1" },
     });

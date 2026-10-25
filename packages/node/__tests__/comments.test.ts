@@ -39,6 +39,18 @@ describe("node-sdk comments — request shaping", () => {
     });
   });
 
+  it("fetchCommentByForeignId flattens the space-reputation options into the query", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchCommentByForeignId(client, {
+      foreignId: "f1",
+      include: ["user"],
+      spaceReputation: { spaceId: "context" },
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/comments/by-foreign-id", {
+      params: { foreignId: "f1", include: "user", spaceReputationId: "context" },
+    });
+  });
+
   it("updateComment strips commentId into the path and patches the rest", async () => {
     const { client, projectInstance } = makeClient();
     await updateComment(client, { commentId: "c1", content: "edited" });
@@ -154,11 +166,11 @@ describe("node-sdk comments — request shaping", () => {
     });
   });
 
-  it("removeReaction sends actingUserId via the data option", async () => {
+  it("removeReaction sends actingUserId in the query, no body", async () => {
     const { client, projectInstance } = makeClient();
     await removeReaction(client, { commentId: "c1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/comments/c1/reactions", {
-      data: { actingUserId: "u1" },
+      params: { actingUserId: "u1" },
     });
   });
 

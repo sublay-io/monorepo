@@ -47,11 +47,14 @@ The `workspaces` module is the developer's **authorization-server SDK** for the 
   a missing-user error.
 
   Every workspaces endpoint also declares its fields exactly, and refuses any
-  top-level field it does not declare — in the body and in the query string
-  alike, for every caller — with
+  top-level field it does not declare, for every caller — in the body of a
+  write, with
   `{ "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body" }`
-  (plural `Unrecognized keys: "a", "b"` for two or more, and
-  `workspace/invalid-query` when the offender was in the query string). So
+  (plural `Unrecognized keys: "a", "b"` for two or more), and in the query
+  string of a read or delete, with `workspace/invalid-query`. This SDK sends
+  each call's fields where the server reads them: the query string on reads and
+  deletes (`deleteWorkspace`, `leaveWorkspace` and `removeWorkspaceMember`
+  included), the JSON body on writes. So
   `onBehalfOf`, `impersonate` and `acting_user_id` all fail at the wire rather
   than being dropped silently. A `userId` anywhere in a
   body or query is refused with a message of its own — the sole exception is the
@@ -193,7 +196,7 @@ const { message } = await sublay.workspaces.deleteWorkspace({
 Owner-only; cascades the subtree and fires `workspace.deleted` per deleted workspace — and **no** `workspace.member.removed` events for the memberships it tears down (see [Webhooks](/v8/sdk/workspaces/webhooks)).
 
 <ParamField body="workspaceId" type="string" required />
-<ParamField body="actingUserId" type="string" required>The user to act as — must own this workspace or an ancestor. This call cascade-deletes the whole subtree, so name the owner deliberately.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user to act as — must own this workspace or an ancestor. Sent as a query param. This call cascade-deletes the whole subtree, so name the owner deliberately.</ParamField>
 
 ### transferWorkspaceOwnership
 
@@ -305,7 +308,7 @@ Requires `remove-member` (rank-bounded); sole-owner protected.
 
 <ParamField body="workspaceId" type="string" required />
 <ParamField body="targetUserId" type="string" required>The member to remove.</ParamField>
-<ParamField body="actingUserId" type="string" required>The acting user.</ParamField>
+<ParamField body="actingUserId" type="string" required>The acting user. Sent as a query param.</ParamField>
 
 ### leaveWorkspace
 
@@ -316,7 +319,7 @@ await sublay.workspaces.leaveWorkspace({ workspaceId: "ws_abc", actingUserId: "u
 Removes the given user's own membership on this node only.
 
 <ParamField body="workspaceId" type="string" required />
-<ParamField body="actingUserId" type="string" required>The user leaving.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user leaving. Sent as a query param.</ParamField>
 
 ### removeWorkspaceMemberFromSubtree
 

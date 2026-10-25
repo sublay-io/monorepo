@@ -123,6 +123,8 @@ const comment = await sublay.comments.fetchCommentByForeignId({
   Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
 </ParamField>
 
+<SpaceReputationParams variant="context" field="body" />
+
 **Returns** — `Promise<Comment>`
 
 ---
@@ -300,7 +302,7 @@ const comment = await sublay.comments.addReaction({
 
 ### removeReaction
 
-Removes a user's existing reaction from a comment.
+Removes a user's existing reaction from a comment. It sends `DELETE /comments/:commentId/reactions` with `actingUserId` in the query and no body.
 
 ```typescript
 const comment = await sublay.comments.removeReaction({

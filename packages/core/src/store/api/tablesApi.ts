@@ -138,7 +138,8 @@ export const tablesApi = baseApi.injectEndpoints({
       query: ({ projectId, tableName, rowId, force }) => ({
         url: `/${projectId}/db/${tableName}/${rowId}`,
         method: "DELETE",
-        params: force ? { force: "true" } : undefined,
+        params:
+          force === undefined ? undefined : { force: force ? "true" : "false" },
       }),
       invalidatesTags: (_result, _error, { projectId, tableName, rowId }) => [
         { type: "TableRow", id: rowId },

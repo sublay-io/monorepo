@@ -17,7 +17,7 @@ Permanently deletes a space. All entities, members, child spaces, rules, and rep
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string">
-  Required with a service key: the user this request acts as. The request behaves exactly as that user's own token, so it is refused unless they created the space and are not banned from it or from a space above it. Sent in the query; an `actingUserId` in the body is not read. A user token always acts as its own user and must not send it (`400 space/acting-user-not-allowed`).
+  Required with a service key: the user this request acts as. The request behaves exactly as that user's own token, so it is refused unless they created the space and are not banned from it or from a space above it. Sent in the query; a request with a body is refused (`400 space/body-not-allowed`). A user token always acts as its own user and must not send it (`400 space/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -39,6 +39,12 @@ Permanently deletes a space. All entities, members, child spaces, rules, and rep
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Body Not Allowed — 400">
+    The request carried a body. A DELETE takes no body: send `actingUserId` in the query string.
+    ```json
+    { "error": "A DELETE request takes no body: send its fields in the query string. Received: `actingUserId`.", "code": "space/body-not-allowed", "params": ["actingUserId"] }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">

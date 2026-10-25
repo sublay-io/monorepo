@@ -1,0 +1,203 @@
+---
+title: "Fetch or Create User by Foreign ID"
+api: "POST /v8/:projectId/users/by-foreign-id"
+description: "Return the user with your external ID, or create them with a profile (service key only)"
+---
+
+import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
+
+Returns the user with this `foreignId` — the external identifier from your own system — or creates them when there is none. **Service key only**: this endpoint creates users, so only your backend may call it. To read a user without creating one, use [Fetch User by Foreign ID](/v8/api-reference/users/fetch-user-by-foreign-id) (`GET`).
+
+Everything goes in the JSON request body, so the profile, `secureMetadata` included, never appears in a URL. The whole request body can be at most 100 KB, `metadata` and `secureMetadata` included.
+
+- **Existing user:** `200` with the user, unchanged. The profile fields are used only to create a user; they never update one.
+- **No user:** the user is created with the body's profile, `201`.
+- **Two concurrent calls for the same new `foreignId`:** one user is created. The call that loses the race answers `200` with that user.
+
+<Note>
+  If the user exists and has blocked the viewer — the user named in `actingUserId` — this returns `404`, the same response as the read. Nothing is created. Requires the `moderation` bundle.
+</Note>
+
+## Body Parameters
+
+<ParamField body="foreignId" type="string" required>
+  The external identifier from your system. It is stored and matched exactly as sent. A blank or whitespace-only value (`""`, `"   "`) returns `400 user/invalid-body` (`foreignId: Foreign ID is required`).
+</ParamField>
+
+<ParamField body="name" type="string">
+  Display name. Used only when the user is created.
+</ParamField>
+
+<ParamField body="username" type="string">
+  Username, unique within the project. Used only when the user is created. The same rules as on sign-up and [Update User](/v8/api-reference/users/update-user): 3 to 30 characters after trimming, only letters, numbers, underscores (`_`) and hyphens (`-`). Anything else returns `400 user/invalid-body`. A username another user holds returns `409`.
+</ParamField>
+
+<ParamField body="avatar" type="string | null">
+  Avatar URL, or `null` for none. Used only when the user is created.
+</ParamField>
+
+<ParamField body="bio" type="string">
+  Bio text. Used only when the user is created.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Public custom data, a JSON object. Used only when the user is created. A JSON string is refused (`400 user/invalid-body`).
+</ParamField>
+
+<ParamField body="secureMetadata" type="object">
+  Private custom data, a JSON object. Never returned by the API. Used only when the user is created.
+</ParamField>
+
+<ParamField body="include" type="string | string[]">
+  Associations to include, as a comma-separated string or an array. The only value is:
+  - `files` — the processed `avatarFile` and `bannerFile` objects
+
+  Matching ignores case. An unknown value returns `400 user/invalid-body`.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user the response is read as: a user who has blocked them comes back as `404`, as on the read. It never changes who creates: a user this request creates is always created by your app. Leave it out for the anonymous view.
+</ParamField>
+
+### Space-scoped reputation
+
+This endpoint has no space in context, so the opt-in `spaceReputation` object accepts a `spaceId` of a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to the returned user, alongside the always-present `reputation` total. Send it in the body: `spaceReputationId` as a string, `spaceReputationDescendants` as a boolean (`"true"` and `"false"` are accepted too). Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation).
+
+<SpaceReputationParams variant="user" field="body" />
+
+<Note>
+  Every field goes in the body. Any of them sent in the query string returns `400 user/wrong-location`.
+</Note>
+
+## Response
+
+Returns HTTP `200` (an existing user) or `201` (a user this request created), with the same user object as the read:
+
+<ResponseField name="id" type="string">
+  Unique user ID (UUID).
+</ResponseField>
+
+<ResponseField name="foreignId" type="string | null">
+  The foreign ID you provided.
+</ResponseField>
+
+<ResponseField name="projectId" type="string">
+  Project this user belongs to.
+</ResponseField>
+
+<ResponseField name="name" type="string | null">
+  Display name.
+</ResponseField>
+
+<ResponseField name="username" type="string | null">
+  Unique username within the project.
+</ResponseField>
+
+<ResponseField name="avatar" type="string | null">
+  Avatar image URL.
+</ResponseField>
+
+<ResponseField name="bio" type="string | null">
+  Short bio text.
+</ResponseField>
+
+<ResponseField name="metadata" type="object | null">
+  Public custom key-value data.
+</ResponseField>
+
+<ResponseField name="reputation" type="number">
+  Reputation score.
+</ResponseField>
+
+<ResponseField name="avatarFile" type="object | null">
+  Processed avatar image with variants. Only present when `include=files` is
+  requested.
+</ResponseField>
+
+<ResponseField name="bannerFile" type="object | null">
+  Processed banner image with variants. Only present when `include=files` is
+  requested.
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO timestamp of account creation.
+</ResponseField>
+
+<Note>
+  **Monthly active users:** a request naming `actingUserId` counts that user, as on the read. Creating a user counts no one.
+</Note>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Service Key Required — 403">
+    A user token, even one naming an `actingUserId`, or a request with no credentials. Nothing is created.
+
+    ```json
+    {
+      "error": "Service key required: `POST /users/by-foreign-id` creates users, so only your backend may call it. To read a user by foreign id, use `GET /users/by-foreign-id`.",
+      "code": "auth/elevated-auth-required"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Body — 400">
+    Returned for an invalid body: a missing or blank `foreignId`, a `username` that breaks the rules above, a `metadata` or `secureMetadata` that isn't an object, or an unknown `include` value. The `error` names the field, for example:
+
+    - `foreignId: Foreign ID is required`
+    - `username: Username must be at least 3 characters`
+    - `username: Username cannot exceed 30 characters`
+    - `username: Username can only contain letters, numbers, underscores, and hyphens`
+
+    ```json
+    {
+      "error": "username: Username must be at least 3 characters",
+      "code": "user/invalid-body"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Wrong Location — 400">
+    A body field was sent in the query string (`foreignId`, `name`, `include`, `spaceReputationId`, `actingUserId`, …).
+
+    ```json
+    {
+      "error": "`foreignId` goes in the request body on this endpoint.",
+      "code": "user/wrong-location",
+      "param": "foreignId"
+    }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    The user exists and has blocked the `actingUserId` viewer. Nothing is created.
+
+    ```json
+    {
+      "error": "User not found",
+      "code": "user/not-found"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Found — 404">
+    `actingUserId` names a user that isn't in this project.
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "user/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Duplicate Field — 409">
+    No user has this `foreignId`, and another user already holds the `username` (or another unique field) in this project. Nothing is created.
+
+    ```json
+    {
+      "error": "A user with this username already exists in this project",
+      "field": "username",
+      "code": "DUPLICATE_USER_FIELD"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## See Also
+
+- [Fetch User by Foreign ID](/v8/api-reference/users/fetch-user-by-foreign-id)
+- [`fetchOrCreateUserByForeignId` (Node SDK)](/v8/node-sdk/users), which returns `{ user, created }`, with `created` true on `201`
+- [User data model](/v8/data-models/user)

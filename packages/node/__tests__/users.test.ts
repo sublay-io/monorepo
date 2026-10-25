@@ -16,6 +16,7 @@ import {
   fetchFollowersCountByUserId,
   fetchFollowingByUserId,
   fetchFollowingCountByUserId,
+  fetchOrCreateUserByForeignId,
   fetchUserByForeignId,
   fetchUserById,
   fetchUserByUsername,
@@ -35,29 +36,70 @@ describe("node-sdk users — profile — request shaping", () => {
     });
   });
 
-  it("fetchUserByForeignId JSON-stringifies metadata/secureMetadata", async () => {
+  it("fetchUserByForeignId is a pure read: a GET with only the read params", async () => {
     const { client, projectInstance } = makeClient();
     await fetchUserByForeignId(client, {
       foreignId: "f1",
-      metadata: { plan: "pro" },
-      secureMetadata: { internalScore: 5 },
+      include: ["files"],
+      spaceReputation: { spaceId: "none" },
     });
     expect(projectInstance.get).toHaveBeenCalledWith("/users/by-foreign-id", {
       params: {
         foreignId: "f1",
         actingUserId: undefined,
-        createIfNotFound: undefined,
-        name: undefined,
-        username: undefined,
-        avatar: undefined,
-        bio: undefined,
-        metadata: JSON.stringify({ plan: "pro" }),
-        secureMetadata: JSON.stringify({ internalScore: 5 }),
-        include: undefined,
-        spaceReputationId: undefined,
-        spaceReputationDescendants: undefined,
+        include: "files",
+        spaceReputationId: "none",
       },
     });
+  });
+
+  it("fetchOrCreateUserByForeignId POSTs everything in the body, metadata as objects", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchOrCreateUserByForeignId(client, {
+      foreignId: "f1",
+      name: "Alice",
+      username: "alice",
+      avatar: null,
+      metadata: { plan: "pro" },
+      secureMetadata: { internalScore: 5 },
+      include: ["files"],
+      spaceReputation: { spaceId: "s1", includeDescendants: true },
+      actingUserId: "viewer1",
+    });
+    expect(projectInstance.post).toHaveBeenCalledTimes(1);
+    const [url, body, config] = projectInstance.post.mock.calls[0];
+    expect(url).toBe("/users/by-foreign-id");
+    expect(body).toEqual({
+      foreignId: "f1",
+      name: "Alice",
+      username: "alice",
+      avatar: null,
+      metadata: { plan: "pro" },
+      secureMetadata: { internalScore: 5 },
+      include: ["files"],
+      spaceReputationId: "s1",
+      spaceReputationDescendants: true,
+      actingUserId: "viewer1",
+    });
+    expect(config).toBeUndefined();
+  });
+
+  it("fetchOrCreateUserByForeignId reports created: true on 201", async () => {
+    const { client, projectInstance } = makeClient();
+    const user = { id: "u1", foreignId: "f1" };
+    projectInstance.post.mockResolvedValueOnce({ data: user, status: 201 });
+    await expect(
+      fetchOrCreateUserByForeignId(client, { foreignId: "f1" }),
+    ).resolves.toEqual({ user, created: true });
+  });
+
+  it("fetchOrCreateUserByForeignId reports created: false on 200", async () => {
+    const { client, projectInstance } = makeClient();
+    const user = { id: "u1", foreignId: "f1" };
+    projectInstance.post.mockResolvedValueOnce({ data: user, status: 200 });
+    await expect(
+      fetchOrCreateUserByForeignId(client, { foreignId: "f1" }),
+    ).resolves.toEqual({ user, created: false });
   });
 
   it("fetchUserByUsername hits /users/by-username with the full body as params", async () => {
@@ -171,12 +213,11 @@ describe("node-sdk users — reads as a named user (optional actingUserId)", () 
     });
   });
 
-  it("fetchUserByForeignId forwards actingUserId alongside createIfNotFound", async () => {
+  it("fetchUserByForeignId forwards actingUserId in the query", async () => {
     const { client, projectInstance } = makeClient();
     await fetchUserByForeignId(client, {
       foreignId: "f1",
       actingUserId: "viewer1",
-      createIfNotFound: true,
     });
     expect(projectInstance.get).toHaveBeenCalledWith(
       "/users/by-foreign-id",
@@ -184,7 +225,6 @@ describe("node-sdk users — reads as a named user (optional actingUserId)", () 
         params: expect.objectContaining({
           foreignId: "f1",
           actingUserId: "viewer1",
-          createIfNotFound: true,
         }),
       }),
     );

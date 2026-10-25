@@ -161,7 +161,7 @@ describe("reconcileAccountPushBinding", () => {
       accessToken: "access-3",
       refreshToken: "refresh-3-successor",
     });
-    axiosPublic.mockResponse("delete", {});
+    axiosPublic.mockResponse("post", {});
 
     await reconcileAccountPushBinding(ctx(), "user-3");
 
@@ -169,9 +169,9 @@ describe("reconcileAccountPushBinding", () => {
     expect(mint.url).toBe("/test-project/auth/request-new-access-token");
     expect(mint.body).toEqual({ refreshToken: "refresh-3" });
 
-    const [del] = axiosPublic.calls("delete");
-    expect(del.url).toBe("/test-project/push-notifications/devices");
-    expect(del.config?.data).toEqual(DEVICE);
+    const [del] = axiosPublic.calls("post").filter((c) => c.url.endsWith("/deregister"));
+    expect(del.url).toBe("/test-project/push-notifications/devices/deregister");
+    expect(del.body).toEqual(DEVICE);
     expect(del.config?.headers.Authorization).toBe("Bearer access-3");
   });
 
@@ -181,7 +181,7 @@ describe("reconcileAccountPushBinding", () => {
       accessToken: "access-3",
       refreshToken: "refresh-3-successor",
     });
-    axiosPublic.mockResponse("delete", {});
+    axiosPublic.mockResponse("post", {});
 
     await reconcileAccountPushBinding(ctx(), "user-3");
 
@@ -199,7 +199,7 @@ describe("reconcileAccountPushBinding", () => {
     await markPushBindingsForRebind(ctx());
 
     expect(axiosPublic.calls("post")).toHaveLength(0);
-    expect(axiosPublic.calls("delete")).toHaveLength(0);
+    expect(axiosPublic.calls("post").filter((c) => c.url.endsWith("/deregister"))).toHaveLength(0);
   });
 
   it("is a no-op for an unknown account", async () => {
@@ -299,7 +299,7 @@ describe("markPushBindingsForRebind", () => {
     // would never clear, leaving "open to resume" on an account that opening
     // does not fix.
     expect(accounts["user-4"].needsPushRebind).toBeUndefined();
-    expect(axiosPublic.calls("delete")).toHaveLength(0);
+    expect(axiosPublic.calls("post").filter((c) => c.url.endsWith("/deregister"))).toHaveLength(0);
   });
 
   it("persists the marks, because the repair may be several launches away", async () => {
@@ -517,7 +517,7 @@ describe("the re-bind marker's lifecycle", () => {
 
     // Nothing went out — not the device call, not a mint.
     expect(axiosPublic.calls("post")).toHaveLength(0);
-    expect(axiosPublic.calls("delete")).toHaveLength(0);
+    expect(axiosPublic.calls("post").filter((c) => c.url.endsWith("/deregister"))).toHaveLength(0);
     // ...so the claim the marker makes about server state is still true.
     expect(
       store.getState().sublay.accounts.accounts["user-1"].needsPushRebind,
@@ -533,7 +533,7 @@ describe("the re-bind marker's lifecycle", () => {
       accessToken: "access-3",
       refreshToken: "refresh-3-successor",
     });
-    axiosPublic.mockResponse("delete", {});
+    axiosPublic.mockResponse("post", {});
 
     await reconcileAccountPushBinding(ctx(), "user-3");
 
@@ -558,7 +558,7 @@ describe("reconcileAccountPushBinding — explicit preference required", () => {
       refreshToken: "refresh-4-successor",
     });
     axiosPublic.mockResponse("post", {});
-    axiosPublic.mockResponse("delete", {});
+    axiosPublic.mockResponse("post", {});
 
     await reconcileAccountPushBinding(ctx(), "user-4");
 
@@ -569,7 +569,7 @@ describe("reconcileAccountPushBinding — explicit preference required", () => {
     expect(axiosPublic.calls("post")).toHaveLength(0);
     // ...and not UNBOUND either. Absent is "never asked", not "turn it off" —
     // an upgrading install's working binding must not be torn down.
-    expect(axiosPublic.calls("delete")).toHaveLength(0);
+    expect(axiosPublic.calls("post").filter((c) => c.url.endsWith("/deregister"))).toHaveLength(0);
   });
 
   it("still binds an account that explicitly enabled push", async () => {

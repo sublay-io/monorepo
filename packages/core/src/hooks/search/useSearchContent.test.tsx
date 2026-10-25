@@ -31,7 +31,7 @@ describe("useSearchContent", () => {
     expect(call.body).toMatchObject({ query: "hello" });
   });
 
-  it("passes sourceTypes, spaceId, includeChildSpaces, conversationId and spaceReputation params through", async () => {
+  it("sends sourceTypes, spaceId, includeChildSpaces, conversationId and the spaceReputation options in the body", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useSearchContent());
 
     axiosPrivate.mockResponse("post", []);
@@ -55,8 +55,9 @@ describe("useSearchContent", () => {
       includeChildSpaces: true,
       conversationId: "conversation-1",
       limit: 5,
+      spaceReputationId: "context",
     });
-    expect(call.config?.params).toMatchObject({ spaceReputationId: "context" });
+    expect(call.config).toBeUndefined();
   });
 
   it("sets an error and stops loading when the server returns an error response", async () => {

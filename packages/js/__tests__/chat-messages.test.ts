@@ -117,7 +117,7 @@ describe("js-sdk chat messages — request shaping", () => {
     expect(projectInstance.delete.mock.calls[0]).toHaveLength(1);
   });
 
-  it("sendMessage posts JSON to /chat/conversations/:conversationId/messages with spaceReputation params forwarded as query, not body", async () => {
+  it("sendMessage posts JSON to /chat/conversations/:conversationId/messages with the spaceReputation options in the body, no query", async () => {
     const { client, projectInstance } = makeClient();
     await sendMessage(client, {
       conversationId: "c1",
@@ -128,9 +128,13 @@ describe("js-sdk chat messages — request shaping", () => {
 
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/chat/conversations/c1/messages",
-      { content: "hello" },
-      { params: { spaceReputationId: "space1", spaceReputationDescendants: false } }
+      {
+        content: "hello",
+        spaceReputationId: "space1",
+        spaceReputationDescendants: false,
+      }
     );
+    expect(projectInstance.post.mock.calls[0]).toHaveLength(2);
   });
 
   it("sendMessage sends multipart/FormData when files are attached, JSON-stringifying object/array fields", async () => {
@@ -144,6 +148,7 @@ describe("js-sdk chat messages — request shaping", () => {
       content: "see attached",
       mentions,
       metadata: { source: "test" },
+      spaceReputation: { spaceId: "space1", includeDescendants: true },
       files: [file1, file2],
     });
 
@@ -151,7 +156,7 @@ describe("js-sdk chat messages — request shaping", () => {
     const [path, body, config] = projectInstance.post.mock.calls[0];
     expect(path).toBe("/chat/conversations/c1/messages");
     expect(body).toBeInstanceOf(FormData);
-    expect(config).toEqual({ params: { spaceReputationId: undefined, spaceReputationDescendants: undefined } });
+    expect(config).toBeUndefined();
 
     const formData = body as FormData;
     const fileEntries = formData.getAll("files");
@@ -163,6 +168,9 @@ describe("js-sdk chat messages — request shaping", () => {
     expect(fields.content).toBe("see attached");
     expect(fields.mentions).toBe(JSON.stringify(mentions));
     expect(fields.metadata).toBe(JSON.stringify({ source: "test" }));
+    // The space-reputation options are form fields on a multipart send.
+    expect(fields.spaceReputationId).toBe("space1");
+    expect(fields.spaceReputationDescendants).toBe("true");
   });
 
   it("sendMessage falls back to a generic filename for a nameless Blob attachment", async () => {

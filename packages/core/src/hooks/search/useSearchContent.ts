@@ -52,15 +52,22 @@ export default function useSearchContent(): UseSearchContentReturn {
       setLoading(true);
       setError(null);
       try {
-        const params: Record<string, any> = buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        });
+        // Every field goes in the body on a POST, the space-reputation options too.
         const response = await axios.post<ContentSearchResult[]>(
           `/${projectId}/search/content`,
-          { query, sourceTypes, spaceId, includeChildSpaces, conversationId, limit },
-          { params }
+          {
+            query,
+            sourceTypes,
+            spaceId,
+            includeChildSpaces,
+            conversationId,
+            limit,
+            ...buildSpaceReputationParams({
+              spaceReputation,
+              spaceReputationId,
+              spaceReputationDescendants,
+            }),
+          }
         );
         setResults(response.data);
       } catch (err) {

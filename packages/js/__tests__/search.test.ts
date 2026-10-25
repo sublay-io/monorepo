@@ -3,7 +3,7 @@ import type { MatchUsersResponse } from "../src/modules/search/matchUsers";
 import { makeClient } from "./helpers/client";
 
 describe("js-sdk search — request shaping", () => {
-  it("searchContent posts the body minus space-reputation fields, which go in params instead", async () => {
+  it("searchContent posts everything in the body, the space-reputation options too", async () => {
     const { client, projectInstance } = makeClient();
     await searchContent(client, {
       query: "hello",
@@ -13,19 +13,23 @@ describe("js-sdk search — request shaping", () => {
     });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/search/content",
-      { query: "hello", sourceTypes: ["entity"] },
-      { params: { spaceReputationId: "rep1", spaceReputationDescendants: true } }
+      {
+        query: "hello",
+        sourceTypes: ["entity"],
+        spaceReputationId: "rep1",
+        spaceReputationDescendants: true,
+      }
     );
+    expect(projectInstance.post.mock.calls[0]).toHaveLength(2);
   });
 
-  it("searchContent forwards spaceReputationId/Descendants as undefined params when omitted", async () => {
+  it("searchContent sends no space-reputation keys and no query when they are omitted", async () => {
     const { client, projectInstance } = makeClient();
     await searchContent(client, { query: "hello" });
-    expect(projectInstance.post).toHaveBeenCalledWith(
+    expect(projectInstance.post.mock.calls[0]).toEqual([
       "/search/content",
       { query: "hello" },
-      { params: { spaceReputationId: undefined, spaceReputationDescendants: undefined } }
-    );
+    ]);
   });
 
   it("searchUsers posts the full body to /search/users", async () => {

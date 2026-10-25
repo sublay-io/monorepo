@@ -30,6 +30,27 @@ describe("useFetchCommentByForeignId", () => {
     expect(call.config?.params).toMatchObject({ foreignId: "ext-1" });
   });
 
+  it("flattens the space-reputation options into the query", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() =>
+      useFetchCommentByForeignId(),
+    );
+
+    axiosPrivate.mockResponse("get", makeComment({ foreignId: "ext-1" }));
+
+    await act(async () => {
+      await result.current({
+        foreignId: "ext-1",
+        spaceReputation: { spaceId: "context" },
+      });
+    });
+
+    const [call] = axiosPrivate.calls("get");
+    expect(call.config?.params).toEqual({
+      foreignId: "ext-1",
+      spaceReputationId: "context",
+    });
+  });
+
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() =>
       useFetchCommentByForeignId(),

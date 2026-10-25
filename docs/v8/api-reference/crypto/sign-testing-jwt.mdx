@@ -28,9 +28,7 @@ Signs a short-lived JWT (5 minutes) using your project's RSA private key. Use th
   ```
 </ParamField>
 
-<ParamField body="projectId" type="string">
-  The project ID. Can be provided in the body or as a URL path parameter (`:projectId`). The body value takes precedence if both are provided.
-</ParamField>
+The project is the one in the URL path (`/v8/:projectId/...`); the token's `iss` is set from it. Don't send `projectId` in the body or the query string: either returns `400 project/wrong-location`.
 
 ## Response
 
@@ -42,7 +40,7 @@ eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 
 The JWT is signed with `RS256`, expires in 5 minutes, and includes:
 - `sub` — the user's `id` from the payload
-- `iss` — the project ID
+- `iss` — the project ID from the URL path
 - `aud` — `"sublay.io"`
 - `userData` — the full payload object
 
@@ -53,7 +51,17 @@ The JWT is signed with `RS256`, expires in 5 minutes, and includes:
     ```
     Missing params in request body
     ```
-    Returned when `projectId`, `privateKey`, or `payload` is missing.
+    Returned when `privateKey` or `payload` is missing.
+  </Accordion>
+  <Accordion title="Project ID in the Wrong Place — 400">
+    ```json
+    {
+      "error": "`projectId` is read from the URL path only (`/v8/:projectId/...`).",
+      "code": "project/wrong-location",
+      "param": "projectId"
+    }
+    ```
+    Returned when the request sends `projectId` in the body or the query string, or sends an `x-sublay-project-id` header.
   </Accordion>
   <Accordion title="Missing User ID — 400">
     ```json

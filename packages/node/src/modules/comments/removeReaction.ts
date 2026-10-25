@@ -14,7 +14,7 @@ export async function removeReaction(
   // The server returns the updated comment, as `actingUserId` sees it.
   const response = await client.projectInstance.delete<Comment>(
     `/comments/${commentId}/reactions`,
-    { data: { actingUserId } }
+    { params: { actingUserId } }
   );
   return response.data;
 }

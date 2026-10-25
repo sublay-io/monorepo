@@ -42,13 +42,15 @@ Performs vector-similarity search over project content (entities, comments, and 
   Maximum number of results to return. A whole number from `1` to `50`, sent as a JSON number. A value outside that range is rejected with `400 search/invalid-body` — a `limit` above `50` isn't lowered to `50`.
 </ParamField>
 
-## Query Parameters
-
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each result record's populated `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params, in the body with the other fields (`spaceReputationDescendants` as a JSON boolean). They add a `spaceReputation` field to each result record's populated `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
 
-<SpaceReputationParams variant="context" field="query" />
+<SpaceReputationParams variant="context" field="body" />
+
+<Note>
+  Every field goes in the body. A body field sent in the query string returns `400 search/wrong-location`.
+</Note>
 
 ## Response
 
@@ -93,6 +95,12 @@ Results are also filtered for the user — the signed-in user, or the `actingUse
     ```json
     { "error": "limit: Too big: expected number to be <=50", "code": "search/invalid-body" }
     ```
+  </Accordion>
+  <Accordion title="Wrong Location — 400">
+    ```json
+    { "error": "`spaceReputationId` goes in the request body on this endpoint.", "code": "search/wrong-location", "param": "spaceReputationId" }
+    ```
+    Returned when a body field — `query`, `actingUserId`, `spaceReputationId`, `spaceReputationDescendants` or any other — is sent in the query string.
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     ```json

@@ -130,28 +130,15 @@ export default function useAskContent(): UseAskContentReturn {
         ...(includeChildSpaces && { includeChildSpaces }),
         ...(conversationId && { conversationId }),
         ...(limit && { limit }),
-      });
-
-      // Run async without blocking the render cycle — errors are surfaced via state
-      // spaceReputation opt-in is read from the query string by the server,
-      // not the request body — append it to the URL.
-      const queryString = (() => {
-        const reputationParams = buildSpaceReputationParams({
+        // Every field goes in the body on a POST, the space-reputation options too.
+        ...buildSpaceReputationParams({
           spaceReputation,
           spaceReputationId,
           spaceReputationDescendants,
-        });
-        const sp = new URLSearchParams();
-        if (reputationParams.spaceReputationId !== undefined)
-          sp.set("spaceReputationId", reputationParams.spaceReputationId);
-        if (reputationParams.spaceReputationDescendants !== undefined)
-          sp.set(
-            "spaceReputationDescendants",
-            String(reputationParams.spaceReputationDescendants)
-          );
-        const s = sp.toString();
-        return s ? `?${s}` : "";
-      })();
+        }),
+      });
+
+      // Run async without blocking the render cycle — errors are surfaced via state
 
       // `reactNative.textStreaming` opts react-native-fetch-api into incremental
       // streaming, so `response.body` is a progressively-readable stream rather
@@ -171,7 +158,7 @@ export default function useAskContent(): UseAskContentReturn {
           signal: controller.signal,
           reactNative: { textStreaming: true },
         };
-        return fetch(`${BASE_URL}/${projectId}/search/ask${queryString}`, init);
+        return fetch(`${BASE_URL}/${projectId}/search/ask`, init);
       };
 
       (async () => {

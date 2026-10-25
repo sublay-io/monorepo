@@ -175,7 +175,7 @@ await sublay.table("Events").delete("a1b2c3d4-...", { force: true });
 
 ### bulkDelete
 
-Deletes many rows by an id list and/or a `filters` predicate (at least one required). Paranoid-aware and capped.
+Deletes many rows by an id list and/or a `filters` predicate (at least one required). Paranoid-aware and capped. It sends [`POST /db/:tableName/bulk-delete`](/v8/api-reference/custom-tables/bulk-delete-rows), with every field in the request body.
 
 ```typescript
 await sublay.table("Events").bulkDelete({

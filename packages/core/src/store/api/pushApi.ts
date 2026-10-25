@@ -13,10 +13,12 @@ export const pushApi = baseApi.injectEndpoints({
       }),
     }),
 
+    // A POST, not a DELETE: the device token travels in the body, never in a
+    // URL (which gets logged).
     deregisterPushDevice: builder.mutation<void, PushDeviceMutationParams>({
       query: ({ projectId, ...body }) => ({
-        url: `/${projectId}/push-notifications/devices`,
-        method: "DELETE",
+        url: `/${projectId}/push-notifications/devices/deregister`,
+        method: "POST",
         body,
       }),
     }),

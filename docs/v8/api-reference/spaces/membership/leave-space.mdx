@@ -51,6 +51,12 @@ Removes the authenticated user's membership from a space and from its child spac
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="Body Not Allowed — 400">
+    The request carried a body. A DELETE takes no body: send `actingUserId` in the query string.
+    ```json
+    { "error": "A DELETE request takes no body: send its fields in the query string. Received: `actingUserId`.", "code": "space/body-not-allowed", "params": ["actingUserId"] }
+    ```
+  </Accordion>
   <Accordion title="User Not Found — 404">
     Returned when a service key names an `actingUserId` that isn't a user in this project.
     ```json

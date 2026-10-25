@@ -24,7 +24,7 @@ Flips the workspace's `inheritsFromParent` flag — the switch controlling wheth
 <ParamField body="actingUserId" type="string" required>
   Service keys only — the user to act as. **Required with a service key:** a key that names nobody is refused with `400 workspace/missing-user-id`. **Enforced:** the owner-only guard runs against the named user, so a key naming a non-owner is refused exactly as that user would be. The `workspace/inherit-enforced` project lock is a separate gate and applies too. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 
-  Several shapes are refused rather than ignored on this path. `actingUserId: ""` or `null` is a `400` — it reads as an *attempt* to name someone, not as "nobody". So is **every top-level field this endpoint does not declare**, in the body and in the query string alike, for every caller: `onBehalfOf`, `acting_user_id` and `impersonate` all come back as `Unrecognized key: "…"` rather than being quietly dropped. A key that differs from `actingUserId` only in capitalization — `actingUserID`, `actinguserid` — is refused too, but with a "did you mean `actingUserId`?" message instead of the generic one. And when the request names nobody, so is any body whose `Content-Type` is not `application/json` — an unparsed body discards the `actingUserId` inside it just as surely as a misspelling would. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+  Several shapes are refused rather than ignored on this path. `actingUserId: ""` or `null` is a `400` — it reads as an *attempt* to name someone, not as "nobody". So is **every top-level body field this endpoint does not declare**, for every caller: `onBehalfOf`, `acting_user_id` and `impersonate` all come back as `Unrecognized key: "…"` rather than being quietly dropped. A key that differs from `actingUserId` only in capitalization — `actingUserID`, `actinguserid` — is refused too, but with a "did you mean `actingUserId`?" message instead of the generic one. And when the request names nobody, so is any body whose `Content-Type` is not `application/json` — an unparsed body discards the `actingUserId` inside it just as surely as a misspelling would. In the query string, `actingUserId` and every body field are `400 workspace/wrong-location`. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
 </ParamField>
 
 ## Response
@@ -54,7 +54,7 @@ Returns the updated [Workspace](/v8/data-models/workspace) object.
     ```json
     { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body" }
     ```
-    Every workspaces endpoint declares its fields exactly, and a top-level field it does not declare is refused rather than ignored — in the request body and in the query string alike, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. An offender in the query string carries `workspace/invalid-query` instead. Send only the fields documented above, plus `actingUserId` and `projectId`, which every workspaces route accepts. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+    Every workspaces endpoint declares its body fields exactly, and a top-level body field it does not declare is refused rather than ignored, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. Send only the fields documented above, in the JSON body. The query string carries none of them: a body field sent there is `400 workspace/wrong-location`, a `userId` or a re-cased `actingUserId` there is `400 workspace/invalid-query`, and any other query parameter is ignored. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
   <Accordion title="Unparsed Body — 400">
     ```json
@@ -76,6 +76,12 @@ Returns the updated [Workspace](/v8/data-models/workspace) object.
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
     ```
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+  </Accordion>
+  <Accordion title="Wrong Location — 400">
+    ```json
+    { "error": "`actingUserId` goes in the request body on this endpoint.", "code": "workspace/wrong-location", "param": "actingUserId" }
+    ```
+    A field this endpoint reads from the body was sent in the query string. `actingUserId` and every body field go in the JSON body.
   </Accordion>
   <Accordion title="User Not Found — 404">
     ```json

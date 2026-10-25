@@ -23,8 +23,8 @@ describe("useRemoveHost", () => {
     expect(returned).toEqual(event);
 
     const [call] = axiosPrivate.calls("delete");
-    expect(call.url).toBe("/test-project/events/event-1/hosts");
-    expect(call.config).toMatchObject({ data: { userId: "user-2" } });
+    expect(call.url).toBe("/test-project/events/event-1/hosts/user-2");
+    expect(call.config?.data).toBeUndefined();
   });
 
   it("rejects when the server returns an error response (e.g. last remaining host)", async () => {

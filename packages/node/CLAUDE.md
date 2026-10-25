@@ -83,7 +83,7 @@ The SDK uses three axios instances for different API endpoints:
 
 **Authentication Headers**:
 - `Authorization: Bearer {apiKey}`
-- `X-Sublay-Project-ID: {projectId}`
+- `X-Sublay-Project-ID: {projectId}`, on the `/internal` client only. The v8 project client never sends it: v8 reads the project from the URL path and refuses the header (400 `project/wrong-location`).
 - `X-Sublay-Internal: true` (for internal operations)
 
 ### Initialization Pattern

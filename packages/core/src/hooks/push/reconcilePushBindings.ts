@@ -196,8 +196,9 @@ export async function applyAccountPushBinding(
     await axios.post(url, identifier, config);
   } else {
     // Deregistration is idempotent server-side (Phase 1), so an unbind for an
-    // account that was never bound is a clean 200 rather than an error.
-    await axios.delete(url, { ...config, data: identifier });
+    // account that was never bound is a clean 200 rather than an error. It is a
+    // POST so the device token travels in the body, never in a URL.
+    await axios.post(`${url}/deregister`, identifier, config);
   }
 
   return true;

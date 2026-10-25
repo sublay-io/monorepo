@@ -23,8 +23,8 @@ describe("useRemoveInvite", () => {
     expect(returned).toEqual(event);
 
     const [call] = axiosPrivate.calls("delete");
-    expect(call.url).toBe("/test-project/events/event-1/invites");
-    expect(call.config).toMatchObject({ data: { userId: "user-2" } });
+    expect(call.url).toBe("/test-project/events/event-1/invites/user-2");
+    expect(call.config?.data).toBeUndefined();
   });
 
   it("rejects when the server returns an error response", async () => {

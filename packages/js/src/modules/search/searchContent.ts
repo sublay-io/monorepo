@@ -29,9 +29,9 @@ export async function searchContent(
   client: SublayHttpClient,
   data: SearchContentProps
 ): Promise<ContentSearchResult[]> {
-  // The server reads the space-reputation options from `req.query`, not the
-  // request body, so they are forwarded as query params (flattened via the
-  // helper so the `spaceReputation` object never reaches the serializer).
+  // Every field goes in the body on a POST, the space-reputation options too
+  // (flattened via the helper so the `spaceReputation` object never reaches
+  // the server nested).
   const {
     spaceReputation,
     spaceReputationId,
@@ -40,9 +40,9 @@ export async function searchContent(
   } = data;
   const response = await client.projectInstance.post<ContentSearchResult[]>(
     "/search/content",
-    body,
     {
-      params: buildSpaceReputationParams({
+      ...body,
+      ...buildSpaceReputationParams({
         spaceReputation,
         spaceReputationId,
         spaceReputationDescendants,

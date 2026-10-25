@@ -10,12 +10,9 @@ export async function incrementEntityViews(
   client: SublayHttpClient,
   data: IncrementEntityViewsProps
 ): Promise<Entity> {
-  const { entityId, ...restOfProps } = data;
+  const { entityId, ...body } = data;
   const path = `/entities/${entityId}/increment-views`;
-  // `count` is read from the query string, not the body — sending it as a body
-  // field left the server on its default of 1, silently ignoring the amount.
-  const response = await client.projectInstance.patch<Entity>(path, undefined, {
-    params: restOfProps,
-  });
+  // `count` is a JSON integer in the body (default 1 when omitted).
+  const response = await client.projectInstance.patch<Entity>(path, body);
   return response.data;
 }

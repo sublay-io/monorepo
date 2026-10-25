@@ -13,7 +13,10 @@ export async function deleteRow(
 ): Promise<DeleteResult> {
   const response = await client.projectInstance.delete<DeleteResult>(
     `/db/${tableName}/${rowId}`,
-    { params: opts.force ? { force: "true" } : {} },
+    {
+      params:
+        opts.force === undefined ? {} : { force: opts.force ? "true" : "false" },
+    },
   );
   return response.data;
 }

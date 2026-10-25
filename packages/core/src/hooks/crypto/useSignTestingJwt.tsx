@@ -32,10 +32,10 @@ function useSignTestingJwt(): (props: SignTestingJwtProps) => Promise<string | u
 
       // Warn developers about the security risks
       console.warn(WARNING);
+      // The project is the one in the path; the token's `iss` is set from it.
       const response = await axios.post(
         `/${projectId}/crypto/sign-testing-jwt/v2`,
         {
-          projectId,
           privateKey,
           userData,
         },

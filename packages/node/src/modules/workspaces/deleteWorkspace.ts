@@ -15,11 +15,10 @@ export async function deleteWorkspace(
   data: DeleteWorkspaceProps
 ): Promise<DeleteWorkspaceResponse> {
   const { workspaceId, actingUserId } = data;
-  // The owner guard resolves the acting user from the body (or query); send it
-  // in the request body so the service-key act-as-user path works on DELETE.
+  // A DELETE takes no body: the acting user goes in the query.
   const response = await client.projectInstance.delete<DeleteWorkspaceResponse>(
     `/workspaces/${workspaceId}`,
-    { data: { actingUserId } }
+    { params: { actingUserId } }
   );
   return response.data;
 }

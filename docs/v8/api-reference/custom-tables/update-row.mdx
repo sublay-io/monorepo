@@ -28,6 +28,10 @@ A free-form column map of the columns to change. At least one key is required.
 { "status": "closed" }
 ```
 
+<Note>
+  A column named `projectId` is writable here like any other column: the body is your column map, so `projectId` in it is not refused. Outside the custom-table row bodies (Insert Row, Bulk Insert Rows and Update Row), `projectId` anywhere but the URL path is `400 project/wrong-location`, and that includes a top-level `?projectId=` on this route.
+</Note>
+
 <Warning>
   **Managed columns are rejected, unknown columns are ignored.** Writing `id`, `createdAt`, `updatedAt` or `deletedAt` fails with `database/managed-column`. A key matching no column is silently dropped; if every key is dropped, the request fails with `database/no-writable-columns`.
 </Warning>

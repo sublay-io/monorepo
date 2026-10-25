@@ -20,7 +20,7 @@ import { makeClient, MockAxiosInstance } from "./helpers/mockClient";
  * serializer (`getUri`), and assert the resulting query string is the FLAT
  * `spaceReputationId=…&spaceReputationDescendants=…` — never dropped, never
  * bracketed. Each forwarding shape present in the modules is covered:
- *   - silent-drop (explicit `params: { spaceReputationId, ... }`)   → searchContent
+ *   - body spread on a POST (flat keys, never the nested object)  → searchContent
  *   - silent-drop (explicit field-assign params object)            → fetchUserByForeignId
  *   - `params: data` bracket-leak                                  → fetchManyEntities
  *   - rest-spread `const { id, ...params } = data` bracket-leak    → fetchEntity
@@ -63,13 +63,19 @@ function assertFlatRepQuery(method: jest.Mock) {
 }
 
 describe("space-reputation serialization guard — object form never drops or brackets", () => {
-  it("silent-drop shape (explicit params object): searchContent", async () => {
+  it("POST body shape: searchContent puts the flat keys in the body, no query", async () => {
     const { client, projectInstance } = makeClient();
     await searchContent(client, {
       query: "hello",
       spaceReputation: { spaceId: "rep1", includeDescendants: true },
     });
-    assertFlatRepQuery(projectInstance.post as unknown as jest.Mock);
+    const call = (projectInstance.post as unknown as jest.Mock).mock.calls[0];
+    expect(call).toHaveLength(2);
+    expect(call[1]).toEqual({
+      query: "hello",
+      spaceReputationId: "rep1",
+      spaceReputationDescendants: true,
+    });
   });
 
   it("silent-drop shape (explicit field-assign): fetchUserByForeignId", async () => {

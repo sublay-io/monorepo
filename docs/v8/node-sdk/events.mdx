@@ -218,7 +218,7 @@ const event = await sublay.events.setRsvp({
 
 ### withdrawRsvp
 
-Removes a user's RSVP. Idempotent.
+Removes a user's RSVP. Idempotent. It sends `DELETE /events/:eventId/rsvp` with `actingUserId` in the query and no body.
 
 ```typescript
 const event = await sublay.events.withdrawRsvp({
@@ -256,7 +256,7 @@ const event = await sublay.events.addHost({
 
 ### removeHost
 
-Revokes a user's host privileges. Rejected if it would leave the event with no hosts.
+Revokes a user's host privileges. Rejected if it would leave the event with no hosts. It sends `DELETE /events/:eventId/hosts/:userId`: the host in the path, `actingUserId` in the query, no body.
 
 ```typescript
 const event = await sublay.events.removeHost({
@@ -296,7 +296,7 @@ const event = await sublay.events.addInvite({
 
 ### removeInvite
 
-Removes a user's invite, revoking their access and dropping their RSVP.
+Removes a user's invite, revoking their access and dropping their RSVP. It sends `DELETE /events/:eventId/invites/:userId`: the invitee in the path, `actingUserId` in the query, no body.
 
 ```typescript
 const event = await sublay.events.removeInvite({

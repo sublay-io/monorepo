@@ -104,7 +104,7 @@ This endpoint doubles as an **upsert**, so a second call for a target who alread
 </ParamField>
 
 <ParamField body="actingUserId" type="string" required>
-  Service keys only — the **inviter** to act as. **Required with a service key:** a key that names nobody is refused with `400 workspace/missing-user-id`. Enforced: the `invite` capability, the no-escalation and rank floors above run against *that* user's resolved standing, so a key naming a rank-5 manager may only invite at rank 6+ and only with capabilities that manager holds, and the invitation's `invitedBy` records them. `actingUserId: ""` or `null` is a `400`, an attempt to name someone that names no one. Every top-level field this endpoint does not declare is a `400` too — `Unrecognized key: "…"`, in the body and the query string alike, for every caller. The fields this endpoint *does* declare are accepted on their own terms: `username` reaches the server intact and behaves identically to `email` and `userId`. The **body** `userId` is the one declared field on the bundle that names a person and is not the actor, so it carries a carve-out from the bundle-wide `userId` rejection; a query `userId` is refused here as everywhere else. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user) and [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+  Service keys only — the **inviter** to act as. **Required with a service key:** a key that names nobody is refused with `400 workspace/missing-user-id`. Enforced: the `invite` capability, the no-escalation and rank floors above run against *that* user's resolved standing, so a key naming a rank-5 manager may only invite at rank 6+ and only with capabilities that manager holds, and the invitation's `invitedBy` records them. `actingUserId: ""` or `null` is a `400`, an attempt to name someone that names no one. Every top-level body field this endpoint does not declare is a `400` too — `Unrecognized key: "…"`, for every caller — and in the query string, `actingUserId` and every body field are `400 workspace/wrong-location`. The fields this endpoint *does* declare are accepted on their own terms: `username` reaches the server intact and behaves identically to `email` and `userId`. The **body** `userId` is the one declared field on the bundle that names a person and is not the actor, so it carries a carve-out from the bundle-wide `userId` rejection; a query `userId` is refused here as everywhere else. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user) and [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
 </ParamField>
 
 ## Response
@@ -172,7 +172,7 @@ Returns the created [WorkspaceInvitation](/v8/data-models/workspace-invitation) 
     ```json
     { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body" }
     ```
-    Every workspaces endpoint declares its fields exactly, and a top-level field it does not declare is refused rather than ignored — in the request body and in the query string alike, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. An offender in the query string carries `workspace/invalid-query` instead. Send only the fields documented above, plus `actingUserId` and `projectId`, which every workspaces route accepts. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+    Every workspaces endpoint declares its body fields exactly, and a top-level body field it does not declare is refused rather than ignored, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. Send only the fields documented above, in the JSON body. The query string carries none of them: a body field sent there is `400 workspace/wrong-location`, a `userId` or a re-cased `actingUserId` there is `400 workspace/invalid-query`, and any other query parameter is ignored. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
   <Accordion title="Unparsed Body — 400">
     ```json
@@ -194,6 +194,12 @@ Returns the created [WorkspaceInvitation](/v8/data-models/workspace-invitation) 
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
     ```
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+  </Accordion>
+  <Accordion title="Wrong Location — 400">
+    ```json
+    { "error": "`actingUserId` goes in the request body on this endpoint.", "code": "workspace/wrong-location", "param": "actingUserId" }
+    ```
+    A field this endpoint reads from the body was sent in the query string. `actingUserId` and every body field go in the JSON body.
   </Accordion>
   <Accordion title="User Not Found — 404">
     ```json

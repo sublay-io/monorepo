@@ -1,10 +1,12 @@
 ---
 title: "Deregister Device"
-api: "DELETE /v8/:projectId/push-notifications/devices"
+api: "POST /v8/:projectId/push-notifications/devices/deregister"
 description: "Remove a device registration so the authenticated user stops receiving push notifications on it"
 ---
 
 Removes the calling user's push device registration. The device is identified the same way it was registered — by its token (iOS/Android) or subscription endpoint (Web).
+
+It is a `POST` with the device in the request body because a device token or web-push subscription doesn't belong in a URL, which gets logged; and your app knows its push token, not Sublay's device id.
 
 **Deregistration is idempotent.** The endpoint returns `200` whether or not a matching registration existed — the contract is "this binding is gone", and it is equally gone if an earlier call removed it or it never existed. There is no not-found error.
 
@@ -77,6 +79,25 @@ Returns `200` on success, including when no matching registration existed.
     {
       "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.",
       "code": "push-device/acting-user-not-allowed"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Wrong Location — 400">
+    A body field (`platform`, `token` or `subscription`) was sent in the query string. On this endpoint every field goes in the request body.
+    ```json
+    {
+      "error": "`token` goes in the request body on this endpoint.",
+      "code": "push-device/wrong-location",
+      "param": "token"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Route — 400">
+    `DELETE /v8/:projectId/push-notifications/devices`, with the device in a request body, is not a v8 route. Once the request passes the checks that run ahead of it (such as the bundle check and id validation), it gets this error, with or without a body.
+    ```json
+    {
+      "error": "`DELETE /push-notifications/devices` isn't supported in v8. Remove a device with `POST /push-notifications/devices/deregister`, sending `platform` and `token` (or `subscription` for web push) in the body.",
+      "code": "push-device/unsupported-route"
     }
     ```
   </Accordion>

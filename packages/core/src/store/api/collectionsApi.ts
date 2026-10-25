@@ -46,7 +46,7 @@ interface FetchCollectionEntitiesResponse {
 interface CreateCollectionParams {
   projectId: string;
   parentCollectionId: string;
-  collectionName: string;
+  name: string;
 }
 
 interface UpdateCollectionParams {
@@ -143,10 +143,10 @@ export const collectionsApi = baseApi.injectEndpoints({
 
     // Create a new sub-collection
     createCollection: builder.mutation<Collection, CreateCollectionParams>({
-      query: ({ projectId, parentCollectionId, collectionName }) => ({
+      query: ({ projectId, parentCollectionId, name }) => ({
         url: `/${projectId}/collections/${parentCollectionId}/sub-collections`,
         method: "POST",
-        body: { collectionName },
+        body: { name },
       }),
       invalidatesTags: (result, error, { projectId, parentCollectionId }) => [
         { type: "Collection" as const, id: `${projectId}-${parentCollectionId}-SUBS` },

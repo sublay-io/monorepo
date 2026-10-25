@@ -143,7 +143,7 @@ describe("useCollections", () => {
       const { result } = renderHookWithStore(() => useCollections());
 
       await act(async () => {
-        await result.current.createCollection({ collectionName: "My List" });
+        await result.current.createCollection({ name: "My List" });
       });
 
       expect(fetchHandle.calls().some((c) => c.method !== "GET")).toBe(false);
@@ -194,7 +194,7 @@ describe("useCollections", () => {
       await waitFor(() => expect(result.current.currentCollection?.id).toBe("root"));
 
       await act(async () => {
-        await result.current.createCollection({ collectionName: "My List" });
+        await result.current.createCollection({ name: "My List" });
       });
 
       expect(result.current.currentCollection?.id).toBe("child");

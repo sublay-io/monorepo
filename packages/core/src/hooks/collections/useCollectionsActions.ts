@@ -35,7 +35,7 @@ export interface UseCollectionsActionsValues {
   goToRoot: () => void;
   fetchRootCollection: ({ projectId }: { projectId: string }) => Promise<void>;
   fetchSubCollections: ({ projectId, collectionId }: { projectId: string; collectionId: string }) => Promise<void>;
-  createCollection: ({ projectId, parentCollectionId, collectionName }: { projectId: string; parentCollectionId: string; collectionName: string }) => Promise<void>;
+  createCollection: ({ projectId, parentCollectionId, name }: { projectId: string; parentCollectionId: string; name: string }) => Promise<void>;
   updateCollection: ({ projectId, collectionId, update }: { projectId: string; collectionId: string; update: { name: string } }) => Promise<void>;
   deleteCollection: ({ projectId, collection }: { projectId: string; collection: Collection }) => Promise<void>;
   addToCollection: ({ projectId, collectionId, entity }: { projectId: string; collectionId: string; entity: Entity }) => Promise<void>;
@@ -129,13 +129,13 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
   const createCollection = useCallback(async ({
     projectId,
     parentCollectionId,
-    collectionName,
+    name,
   }: {
     projectId: string;
     parentCollectionId: string;
-    collectionName: string;
+    name: string;
   }): Promise<void> => {
-    if (!projectId || !parentCollectionId || !collectionName) {
+    if (!projectId || !parentCollectionId || !name) {
       console.error("Missing required parameters for creating collection.");
       return;
     }
@@ -144,7 +144,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
       const result = await createCollectionMutation({
         projectId,
         parentCollectionId,
-        collectionName,
+        name,
       }).unwrap();
 
       if (result) {

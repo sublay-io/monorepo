@@ -19,7 +19,7 @@ import type { Collection } from "../../interfaces/models/Collection";
 export interface UseCollectionsProps {}
 
 export interface CreateCollectionProps {
-  collectionName: string;
+  name: string;
 }
 
 export interface UpdateCollectionProps {
@@ -179,9 +179,9 @@ function useCollections(_: UseCollectionsProps = {}): UseCollectionsValues {
 
   // Wrapped CRUD operations that match the original interface
   const handleCreateCollection = useCallback(
-    async ({ collectionName }: CreateCollectionProps) => {
-      if (!collectionName) {
-        console.error("No collectionName provided.");
+    async ({ name }: CreateCollectionProps) => {
+      if (!name) {
+        console.error("No name provided.");
         return;
       }
 
@@ -198,7 +198,7 @@ function useCollections(_: UseCollectionsProps = {}): UseCollectionsValues {
       await createCollectionAction({
         projectId,
         parentCollectionId: currentCollection.id,
-        collectionName,
+        name,
       });
     },
     [createCollectionAction, currentCollection, projectId],

@@ -50,6 +50,21 @@ describe("js-sdk comments — request shaping", () => {
     });
   });
 
+  it("fetchCommentByForeignId flattens the space-reputation options into the query", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchCommentByForeignId(client, {
+      foreignId: "f1",
+      spaceReputation: { spaceId: "s1", includeDescendants: true },
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/comments/by-foreign-id", {
+      params: {
+        foreignId: "f1",
+        spaceReputationId: "s1",
+        spaceReputationDescendants: true,
+      },
+    });
+  });
+
   it("updateComment patches /comments/:commentId with the rest of the body", async () => {
     const { client, projectInstance } = makeClient();
     await updateComment(client, { commentId: "c1", content: "edited" });

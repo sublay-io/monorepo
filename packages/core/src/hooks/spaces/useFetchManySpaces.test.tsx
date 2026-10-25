@@ -55,7 +55,7 @@ describe("useFetchManySpaces", () => {
     expect(second.config?.params).not.toHaveProperty("query");
   });
 
-  it("lists top-level spaces by default: parentSpaceId \"none\" when left out or null", async () => {
+  it("lists every level by default: parentSpaceId is left out when not set or null", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManySpaces());
 
     axiosPrivate.mockResponse("get", makePage([]));
@@ -75,7 +75,7 @@ describe("useFetchManySpaces", () => {
     const calls = axiosPrivate.calls("get");
     expect(calls).toHaveLength(3);
     for (const call of calls) {
-      expect(call.config?.params).toMatchObject({ parentSpaceId: "none" });
+      expect(call.config?.params ?? {}).not.toHaveProperty("parentSpaceId");
     }
   });
 

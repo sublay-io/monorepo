@@ -23,6 +23,7 @@ function SpaceSearch() {
   const fetchSpaces = useFetchManySpaces();
 
   const handleSearch = async (query: string) => {
+    // Searches spaces at every level; add parentSpaceId: "none" for top-level only.
     const result = await fetchSpaces({ query, sortBy: "createdAt" });
     console.log(result.data, result.pagination);
   };
@@ -60,7 +61,7 @@ function SpaceSearch() {
 </ParamField>
 
 <ParamField path="parentSpaceId" type='string | "none" | null'>
-  A space id returns that space's child spaces. `"none"` returns top-level spaces only. Left out or `null`: the default, `"none"`, so the hook returns top-level spaces unless you name a parent.
+  A space id returns that space's child spaces. `"none"` returns top-level spaces only. Left out or `null`: no parent filter, so spaces at every level are returned.
 </ParamField>
 
 <ParamField path="nsfwFilter" type='"include-all" | "exclude" | "only"'>

@@ -56,13 +56,15 @@ This endpoint accepts `multipart/form-data` to support file attachments alongsid
   Service key only, and required with one: the user this request acts as. The message author; must be an active member. On a multipart request, send it as a form field. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
 </ParamField>
 
-## Query Parameters
-
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to the message sender's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params, in the body with the other fields. They add a `spaceReputation` field to the message sender's `user`, alongside the always-present `reputation` total. In JSON, `spaceReputationDescendants` is a boolean; on a multipart request both are form fields, with `spaceReputationDescendants` as `"true"` or `"false"`. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
 
-<SpaceReputationParams variant="context" field="query" />
+<SpaceReputationParams variant="context" field="body" />
+
+<Note>
+  Every field goes in the body (or the multipart form). A body field sent in the query string returns `400 chat/wrong-location`.
+</Note>
 
 ## Response
 
@@ -78,6 +80,12 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "chat/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Wrong Location — 400">
+    A body field — `actingUserId`, `content`, `spaceReputationId`, `spaceReputationDescendants` or any other — was sent in the query string.
+    ```json
+    { "error": "`spaceReputationId` goes in the request body on this endpoint.", "code": "chat/wrong-location", "param": "spaceReputationId" }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">

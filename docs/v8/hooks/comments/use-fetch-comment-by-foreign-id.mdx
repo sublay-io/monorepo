@@ -4,6 +4,8 @@ description: "Fetch a single comment by its foreign ID"
 icon: "plug"
 ---
 
+import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
+
 ## Overview
 
 `useFetchCommentByForeignId` returns a function that fetches a comment using the foreign ID from your own system. Useful when you've stored your own identifier on a comment and need to retrieve it later.
@@ -41,8 +43,10 @@ function MyComment({ myCommentId }: { myCommentId: string }) {
   Populate related data, as a single value or an array. Accepted values: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
 </ParamField>
 
+<SpaceReputationParams variant="context" field="path" />
+
 ## Returns
 
 <ResponseField name="Comment" type="Comment">
-  The fetched comment. See [Comment data model](/v8/data-models/comment).
+  The fetched comment. When `spaceReputation` is requested (with `include: "user"`), the embedded author carries an added `spaceReputation` number. See [Comment data model](/v8/data-models/comment) and [Reputation](/v8/data-models/reputation).
 </ResponseField>

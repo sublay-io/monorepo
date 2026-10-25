@@ -83,6 +83,12 @@ On accept, the stored grant is applied and the `WorkspaceMember` is created **tr
     ```
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
   </Accordion>
+  <Accordion title="Wrong Location — 400">
+    ```json
+    { "error": "`actingUserId` goes in the request body on this endpoint.", "code": "workspace/wrong-location", "param": "actingUserId" }
+    ```
+    A field this endpoint reads from the body was sent in the query string. `actingUserId` and every body field go in the JSON body.
+  </Accordion>
   <Accordion title="User Not Found — 404">
     ```json
     { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }

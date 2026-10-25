@@ -4,6 +4,8 @@ api: "GET /v8/:projectId/comments/by-foreign-id"
 description: "Get a comment by its foreign ID"
 ---
 
+import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
+
 Returns a single comment matching the given `foreignId` within the project. Useful for looking up comments using your own application's identifiers.
 
 ## Query Parameters
@@ -19,6 +21,12 @@ Returns a single comment matching the given `foreignId` within the project. Usef
 <ParamField query="include" type="string">
   Associations to include, as a comma-separated value (`include=user,parent`) or repeated params. Values: `user`, `entity`, `space`, `parent`, `grants` (the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). Matching ignores case; an unknown value returns `400 comment/invalid-query`. With `entity` or `space`, `entity` is `null` when the entity isn't available to the caller (for example, removed by a moderator) — the comment is still returned, and there is no space. The included `entity` is the entity's stored record, without the fields an entity fetch computes or joins (such as `commentsCount`, `userReaction` and `nsfwEffective`) — see [The included entity](/v8/data-models/comment#the-included-entity). With `parent`, `parentComment` is `null` when the parent no longer exists or is on another entity.
 </ParamField>
+
+### Space-scoped reputation
+
+This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to the populated author `user` (with `include=user`), alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
+
+<SpaceReputationParams variant="context" field="query" />
 
 ## Response
 
@@ -41,7 +49,7 @@ An embedded `parentComment` follows the same placeholder and flag rules.
 
 <AccordionGroup>
   <Accordion title="Invalid Query — 400">
-    Returned when `foreignId` is missing or empty, or when `include` contains an unknown value.
+    Returned when `foreignId` is missing or empty, when `include` contains an unknown value, or when `spaceReputationId` or `spaceReputationDescendants` is malformed.
 
     ```json
     { "error": "foreignId: Invalid input: expected string, received undefined", "code": "comment/invalid-query" }
@@ -49,6 +57,10 @@ An embedded `parentComment` follows the same placeholder and flag rules.
 
     ```json
     { "error": "include: Unknown include `replies`. Allowed: user, entity, space, parent, grants.", "code": "comment/invalid-query" }
+    ```
+
+    ```json
+    { "error": "spaceReputationId: Invalid UUID format", "code": "comment/invalid-query" }
     ```
   </Accordion>
   <Accordion title="Not Found — 404">

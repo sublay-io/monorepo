@@ -14,9 +14,11 @@ Removes the authenticated user's reaction from a comment. The comment's `reactio
   The UUID of the comment to remove the reaction from.
 </ParamField>
 
-## Body Parameters
+## Query Parameters
 
-<ParamField body="actingUserId" type="string">
+A DELETE takes no body: every field besides the path goes in the query string.
+
+<ParamField query="actingUserId" type="string">
   Service key only, and required with one: the user this request acts as, whose reaction is removed. A key has no user of its own, so leaving it out returns `400 comment/missing-user-id`. A user token always acts as its own user and must not send it (`400 comment/acting-user-not-allowed`).
 </ParamField>
 
@@ -33,6 +35,17 @@ Returns the [Comment](/v8/data-models/comment) as you'd see it after the change 
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Body Not Allowed — 400">
+    Returned when the request carries a body. A DELETE takes no body: send `actingUserId` in the query string.
+
+    ```json
+    {
+      "error": "A DELETE request takes no body: send its fields in the query string. Received: `actingUserId`.",
+      "code": "comment/body-not-allowed",
+      "params": ["actingUserId"]
+    }
+    ```
+  </Accordion>
   <Accordion title="Invalid Params — 400">
     Returned when `commentId` isn't a valid UUID.
 
@@ -55,7 +68,7 @@ Returns the [Comment](/v8/data-models/comment) as you'd see it after the change 
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
-    Returned when the request sends `userId`. On this route the user a service key acts as is `actingUserId`.
+    Returned when the request sends `userId` in the query string. On this route the user a service key acts as is `actingUserId`.
 
     With a service key:
 

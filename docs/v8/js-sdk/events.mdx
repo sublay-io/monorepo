@@ -235,7 +235,7 @@ const event = await sublay.events.addHost({
 
 ### removeHost
 
-Revokes a user's host privileges. Host-only. Rejected if it would leave the event with no hosts.
+Revokes a user's host privileges. Host-only. Rejected if it would leave the event with no hosts. It sends `DELETE /events/:eventId/hosts/:userId`, with the host in the path and no body.
 
 ```typescript
 const event = await sublay.events.removeHost({
@@ -271,7 +271,7 @@ const event = await sublay.events.addInvite({
 
 ### removeInvite
 
-Removes a user's invite, revoking their access and dropping their RSVP. Host-only.
+Removes a user's invite, revoking their access and dropping their RSVP. Host-only. It sends `DELETE /events/:eventId/invites/:userId`, with the invitee in the path and no body.
 
 ```typescript
 const event = await sublay.events.removeInvite({

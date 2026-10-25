@@ -102,6 +102,8 @@ const comment = await sublay.comments.fetchCommentByForeignId({
   Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
 </ParamField>
 
+<SpaceReputationParams variant="context" field="body" />
+
 **Returns** — `Promise<Comment>`
 
 ---

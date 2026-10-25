@@ -22,12 +22,12 @@ Deletion **cascades** the entire subtree in one transaction, bottom-up: invitati
   The workspace UUID.
 </ParamField>
 
-## Body Parameters
+## Query Parameters
 
-<ParamField body="actingUserId" type="string" required>
-  Service keys only — the user to act as. **Required with a service key:** a key that names nobody is refused with `400 workspace/missing-user-id`. Sent in the request body so the act-as-user path works on `DELETE`. **Enforced:** the owner-only guard runs against the named user, so a key naming a non-owner is refused exactly as that user would be. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+<ParamField query="actingUserId" type="string" required>
+  Service keys only — the user to act as. **Required with a service key:** a key that names nobody is refused with `400 workspace/missing-user-id`. **Enforced:** the owner-only guard runs against the named user, so a key naming a non-owner is refused exactly as that user would be. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 
-  Several shapes are refused rather than ignored on this path. `actingUserId: ""` or `null` is a `400` — it reads as an *attempt* to name someone, not as "nobody". So is **every top-level field this endpoint does not declare**, in the body and in the query string alike, for every caller: `onBehalfOf`, `acting_user_id` and `impersonate` all come back as `Unrecognized key: "…"` rather than being quietly dropped. A key that differs from `actingUserId` only in capitalization — `actingUserID`, `actinguserid` — is refused too, but with a "did you mean `actingUserId`?" message instead of the generic one. And when the request names nobody, so is any body whose `Content-Type` is not `application/json` — an unparsed body discards the `actingUserId` inside it just as surely as a misspelling would. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+  Several shapes are refused rather than ignored on this path. `actingUserId: ""` or `null` is a `400` — it reads as an *attempt* to name someone, not as "nobody". So is **every query parameter this endpoint does not declare**, for every caller: `onBehalfOf`, `acting_user_id` and `impersonate` all come back as `Unrecognized key: "…"` rather than being quietly dropped. A key that differs from `actingUserId` only in capitalization — `actingUserID`, `actinguserid` — is refused too, but with a "did you mean `actingUserId`?" message instead of the generic one. The request takes no body: any body is `400 workspace/body-not-allowed`. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
 </ParamField>
 
 ## Response
@@ -52,18 +52,15 @@ Deletion **cascades** the entire subtree in one transaction, bottom-up: invitati
   </Accordion>
   <Accordion title="Undeclared Field — 400">
     ```json
-    { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body" }
+    { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-query" }
     ```
-    Every workspaces endpoint declares its fields exactly, and a top-level field it does not declare is refused rather than ignored — in the request body and in the query string alike, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. An offender in the query string carries `workspace/invalid-query` instead. Send only the fields documented above, plus `actingUserId` and `projectId`, which every workspaces route accepts. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+    Every workspaces endpoint declares its fields exactly, and a query parameter this `DELETE` does not declare is refused rather than ignored, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. Send only `actingUserId`. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
-  <Accordion title="Unparsed Body — 400">
+  <Accordion title="Body Not Allowed — 400">
     ```json
-    {
-      "error": "This request carries a body with content-type \"text/plain;charset=UTF-8\", which no parser reads, so any `actingUserId` inside it was discarded and this request names no acting user. Send the body as application/json.",
-      "code": "workspace/invalid-body"
-    }
+    { "error": "A DELETE request takes no body: send its fields in the query string. Received: `actingUserId`.", "code": "workspace/body-not-allowed", "params": ["actingUserId"] }
     ```
-    Returned when a service key sends a body with a `Content-Type` other than `application/json` **and** no `actingUserId` was read. Sublay parses only `application/json`, so the actor inside such a body is discarded and the request would name no acting user. `fetch()` sends `text/plain;charset=UTF-8` when you pass a stringified body and set no headers — set the header. An empty JSON body and a bodiless request both pass. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+    A `DELETE` takes every field, `actingUserId` included, in the query string, so any request body is refused: a JSON object with keys, a non-empty array, or a non-JSON payload such as multipart (then `params` is omitted). An absent body and `{}` pass.
   </Accordion>
   <Accordion title="Missing Acting User — 400">
     ```json

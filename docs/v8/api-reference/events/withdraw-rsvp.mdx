@@ -14,9 +14,11 @@ Withdrawing is idempotent — withdrawing when there is no RSVP succeeds and cha
   UUID of the event.
 </ParamField>
 
-## Body Parameters
+## Query Parameters
 
-<ParamField body="actingUserId" type="string">
+A DELETE takes no body: every field besides the path goes in the query string.
+
+<ParamField query="actingUserId" type="string">
   Service key only, and required with one: the user this request acts as, whose RSVP is withdrawn. The request is held to that user's own event visibility: an event they can't see (an `invite` event they weren't invited to, a `members` event of a space they aren't in) returns `404`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
 </ParamField>
 
@@ -27,6 +29,16 @@ Returns the [Event](/v8/data-models/event) with refreshed `rsvpCounts`.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Body Not Allowed — 400">
+    The request carried a body. A DELETE takes no body: send `actingUserId` in the query string.
+    ```json
+    {
+      "error": "A DELETE request takes no body: send its fields in the query string. Received: `actingUserId`.",
+      "code": "event/body-not-allowed",
+      "params": ["actingUserId"]
+    }
+    ```
+  </Accordion>
   <Accordion title="Missing User — 400">
     A service key sent no `actingUserId`.
     ```json
@@ -46,7 +58,7 @@ Returns the [Event](/v8/data-models/event) with refreshed `rsvpCounts`.
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
-    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    The request sent `userId` in the query string. On this route the user a service key acts as is `actingUserId`.
 
     With a service key:
 

@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useRemoveHost` returns a callable that removes a user from an event's `hostIds`. **Host-only.** Rejected with `event/last-host` (409) if the removal would leave the event with no hosts.
+`useRemoveHost` returns a callable that removes a user from an event's `hostIds`. **Host-only.** Rejected with `event/last-host` (409) if the removal would leave the event with no hosts. It sends `DELETE /events/:eventId/hosts/:userId`, with the host in the path and no body.
 
 ## Usage Example
 

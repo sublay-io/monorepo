@@ -65,7 +65,7 @@ Returns the refreshed [WorkspaceInvitation](/v8/data-models/workspace-invitation
     ```json
     { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body" }
     ```
-    Every workspaces endpoint declares its fields exactly, and a top-level field it does not declare is refused rather than ignored — in the request body and in the query string alike, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. An offender in the query string carries `workspace/invalid-query` instead. Send only the fields documented above, plus `actingUserId` and `projectId`, which every workspaces route accepts. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+    Every workspaces endpoint declares its body fields exactly, and a top-level body field it does not declare is refused rather than ignored, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. Send only the fields documented above, in the JSON body. The query string carries none of them: a body field sent there is `400 workspace/wrong-location`, a `userId` or a re-cased `actingUserId` there is `400 workspace/invalid-query`, and any other query parameter is ignored. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
   <Accordion title="Unparsed Body — 400">
     ```json
@@ -87,6 +87,12 @@ Returns the refreshed [WorkspaceInvitation](/v8/data-models/workspace-invitation
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
     ```
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+  </Accordion>
+  <Accordion title="Wrong Location — 400">
+    ```json
+    { "error": "`actingUserId` goes in the request body on this endpoint.", "code": "workspace/wrong-location", "param": "actingUserId" }
+    ```
+    A field this endpoint reads from the body was sent in the query string. `actingUserId` and every body field go in the JSON body.
   </Accordion>
   <Accordion title="User Not Found — 404">
     ```json

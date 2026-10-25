@@ -76,6 +76,12 @@ Returns `200 OK`:
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
     ```
   </Accordion>
+  <Accordion title="Wrong Location — 400">
+    `actingUserId` was sent in the query string. On this endpoint every field, `actingUserId` included, goes in the request body.
+    ```json
+    { "error": "`actingUserId` goes in the request body on this endpoint.", "code": "space/wrong-location", "param": "actingUserId" }
+    ```
+  </Accordion>
   <Accordion title="Acting User Not Found — 404">
     Returned when a service key names an `actingUserId` that isn't a user in this project.
     ```json

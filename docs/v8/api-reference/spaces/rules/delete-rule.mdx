@@ -1,7 +1,7 @@
 ---
 title: "Delete Rule"
 api: "DELETE /v8/:projectId/spaces/:spaceId/rules/:ruleId"
-description: "Delete a community rule from a space"
+description: "Delete a rule from a space"
 ---
 
 Permanently deletes a rule. Only space admins can delete rules.
@@ -57,6 +57,12 @@ Permanently deletes a rule. Only space admins can delete rules.
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Body Not Allowed — 400">
+    The request carried a body. A DELETE takes no body: send `actingUserId` in the query string.
+    ```json
+    { "error": "A DELETE request takes no body: send its fields in the query string. Received: `actingUserId`.", "code": "space/body-not-allowed", "params": ["actingUserId"] }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">

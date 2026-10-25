@@ -1,12 +1,10 @@
 ---
 title: "Remove Host"
-api: "DELETE /v8/:projectId/events/:eventId/hosts"
+api: "DELETE /v8/:projectId/events/:eventId/hosts/:userId"
 description: "Revoke a user's host privileges on an event (host-only)"
 ---
 
 Removes a user from the event's `hostIds`. **Host-only**. A service key acts as the host it names in `actingUserId`. The mutation runs under a row-level lock and enforces the **at-least-one-host invariant**: a removal that would leave the event with zero hosts is rejected with `409`.
-
-The target user is supplied in the request body (symmetric with [Withdraw RSVP](/v8/api-reference/events/withdraw-rsvp)).
 
 ## Path Parameters
 
@@ -14,13 +12,15 @@ The target user is supplied in the request body (symmetric with [Withdraw RSVP](
   UUID of the event.
 </ParamField>
 
-## Body Parameters
-
-<ParamField body="userId" type="string" required>
-  The host to remove.
+<ParamField path="userId" type="string" required>
+  The host to remove. A malformed id returns `400 event/invalid-params`.
 </ParamField>
 
-<ParamField body="actingUserId" type="string">
+## Query Parameters
+
+A DELETE takes no body: every field besides the path goes in the query string.
+
+<ParamField query="actingUserId" type="string">
   Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
@@ -31,6 +31,16 @@ Returns the updated [Event](/v8/data-models/event) with the new `hostIds`.
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Body Not Allowed — 400">
+    The request carried a body. A DELETE takes no body: the host goes in the path and `actingUserId` in the query string.
+    ```json
+    {
+      "error": "A DELETE request takes no body: send its fields in the query string. Received: `actingUserId`.",
+      "code": "event/body-not-allowed",
+      "params": ["actingUserId"]
+    }
+    ```
+  </Accordion>
   <Accordion title="Missing Acting User — 400">
     A service key sent no `actingUserId`.
     ```json
@@ -40,7 +50,7 @@ Returns the updated [Event](/v8/data-models/event) with the new `hostIds`.
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId must be a user id.", "code": "event/invalid-body" }
+    { "error": "actingUserId must be a user id.", "code": "event/invalid-query" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
@@ -68,6 +78,15 @@ Returns the updated [Event](/v8/data-models/event) with the new `hostIds`.
   <Accordion title="Last Host — 409">
     ```json
     { "error": "An event must have at least one host.", "code": "event/last-host" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Route — 400">
+    `DELETE /v8/:projectId/events/:eventId/hosts`, with the host in a request body, is not a v8 route. It returns this error whatever the request carries.
+    ```json
+    {
+      "error": "`DELETE /events/:eventId/hosts` isn't supported in v8. Remove a host with `DELETE /events/:eventId/hosts/:userId`, with the host's user id in the path.",
+      "code": "event/unsupported-route"
+    }
     ```
   </Accordion>
 </AccordionGroup>

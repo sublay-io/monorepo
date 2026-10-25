@@ -18,9 +18,11 @@ Removes the authenticated user's reaction from an entity. The entity's `reaction
   The UUID of the entity to remove the reaction from.
 </ParamField>
 
-## Body Parameters
+## Query Parameters
 
-<ParamField body="actingUserId" type="string">
+A DELETE takes no body: every field besides the path goes in the query string.
+
+<ParamField query="actingUserId" type="string">
   Service key only, and required with one: the user this request acts as, whose reaction is removed. A user token always acts as its own user and must not send it (`400 entity/acting-user-not-allowed`).
 </ParamField>
 
@@ -35,6 +37,16 @@ Returns the updated [Entity](/v8/data-models/entity) object with the new `reacti
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Body Not Allowed — 400">
+    The request carried a body. A DELETE takes no body: send `actingUserId` in the query string.
+    ```json
+    {
+      "error": "A DELETE request takes no body: send its fields in the query string. Received: `actingUserId`.",
+      "code": "entity/body-not-allowed",
+      "params": ["actingUserId"]
+    }
+    ```
+  </Accordion>
   <Accordion title="Missing User — 400">
     A service key sent no `actingUserId`.
     ```json
@@ -54,7 +66,7 @@ Returns the updated [Entity](/v8/data-models/entity) object with the new `reacti
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
-    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    The request sent `userId` in the query string. On this route the user a service key acts as is `actingUserId`.
 
     With a service key:
 

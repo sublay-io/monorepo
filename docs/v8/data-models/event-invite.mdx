@@ -22,7 +22,7 @@ Invite records are returned by the host-only invitee-list endpoint ([Fetch Invit
 ## Behavior
 
 - **Add** — `POST /events/:eventId/invites` with a `userId`. Host-only. Idempotent against the unique constraint. When the `notifications` bundle is present, the invitee receives an `event-invite` notification.
-- **Remove** — `DELETE /events/:eventId/invites` with a `userId`. Host-only. Removing an invite revokes the user's access to an `invite`-only event **and** deletes their RSVP (decrementing the count).
+- **Remove** — `DELETE /events/:eventId/invites/:userId`, with the invitee in the path. Host-only. Removing an invite revokes the user's access to an `invite`-only event **and** deletes their RSVP (decrementing the count).
 - **Visibility tie-in** — for an `invite`-visibility event, only users with an invite row (plus hosts) can see or RSVP to the event.
 
 ## Related

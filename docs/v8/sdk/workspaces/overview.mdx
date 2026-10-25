@@ -131,16 +131,43 @@ The [node SDK](/v8/node-sdk/workspaces) types `actingUserId` as required on ever
 
 ### Shapes the server rejects
 
-Eight request shapes are refused outright rather than ignored, all of them `400`s. Seven carry `workspace/invalid-body` or `workspace/invalid-query`, depending on which side of the request the offending field sat on; the eighth is a malformed path parameter, which carries `workspace/invalid-params`.
+The shapes below are refused outright rather than ignored, all of them `400`s. Most carry `workspace/invalid-body` or `workspace/invalid-query`, depending on which side of the request the offending field sat on; a field in the wrong place carries `workspace/body-not-allowed` or `workspace/wrong-location`, and a malformed path parameter carries `workspace/invalid-params`.
 
-They come from **two layers**, and knowing which one answered tells you what to fix:
+Where each field goes is decided by the HTTP method, as on the rest of the API: a `GET` or `DELETE` takes every field, `actingUserId` included, in the query string and no body; a `POST` or `PATCH` takes every field in the JSON body. The project is read from the URL path only.
 
-1. **A gate**, mounted ahead of every route on the bundle. It reads the raw request, so it behaves identically whichever endpoint you call and whatever that route declares. It refuses a `userId`, a near-miss spelling of `actingUserId`, and (when a key names nobody) a body no parser read.
-2. **Each route's own body and query schemas.** All 21 routes validate *both* sides, and every schema declares exactly the fields its endpoint accepts. A top-level field it does not declare is refused, not stripped. On the query side two checks run just ahead of the schema — the length limit and the cache-buster rule below — and the first reads the raw query string rather than the parsed one.
+They come from **three layers**, and knowing which one answered tells you what to fix:
+
+1. **The placement checks**, first of all. A body on a `GET` or `DELETE` is `400 workspace/body-not-allowed`. `actingUserId`, or any field the route reads from the body, sent in the query string of a `POST` or `PATCH` is `400 workspace/wrong-location`.
+2. **A gate**, mounted ahead of every route on the bundle. It reads the raw request, so it behaves identically whichever endpoint you call and whatever that route declares. It refuses a `userId`, a near-miss spelling of `actingUserId`, and (when a key names nobody) a body no parser read.
+3. **Each route's own schema.** A `GET` or `DELETE` validates its query string; a `POST` or `PATCH` validates its body. Every schema declares exactly the fields its endpoint accepts, and a top-level field it does not declare is refused, not stripped. On a `GET` or `DELETE` two checks run just ahead of the schema — the length limit and the cache-buster rule below — and the first reads the raw query string rather than the parsed one. On a `POST` or `PATCH`, query parameters other than the ones refused above are ignored.
 
 Between the two, on the routes that check the acting user's standing before anything else — editing, deleting or transferring a workspace, its inherit flag, the four invitation routes, and the member routes (listing members, reading, editing or removing one, removing one from the subtree) — that check runs **after the gate and before the schemas**. It refuses a malformed `actingUserId`, a key that names nobody (`400 workspace/missing-user-id`), a workspace that doesn't exist (`404`, and on listing members, reading one member's standing and editing a member also one the acting user has no relation to) and a missing role or capability (`403`, for example `Owner access required`). So on those routes a request that is refused there never reaches its schemas, and an undeclared field is only reported once the request names a user who may perform it.
 
 <AccordionGroup>
+  <Accordion title="A body on a GET or DELETE — 400">
+    ```json
+    {
+      "error": "A DELETE request takes no body: send its fields in the query string. Received: `actingUserId`.",
+      "code": "workspace/body-not-allowed",
+      "params": ["actingUserId"]
+    }
+    ```
+
+    A `GET` or `DELETE` takes `actingUserId` and every other field in the query string, so any request body is refused, whatever it holds: a JSON object with keys, a non-empty array, or a non-JSON payload such as multipart or `text/plain` (then `params` is omitted). An absent body and `{}` pass. Send `?actingUserId=<id>` instead.
+  </Accordion>
+
+  <Accordion title="A body field in the query string of a POST or PATCH — 400">
+    ```json
+    {
+      "error": "`actingUserId` goes in the request body on this endpoint.",
+      "code": "workspace/wrong-location",
+      "param": "actingUserId"
+    }
+    ```
+
+    A `POST` or `PATCH` reads `actingUserId` and every field it declares from the JSON body. Sent in the query string instead, the field is refused with its name in `param`, rather than silently missed.
+  </Accordion>
+
   <Accordion title="A body or query `userId` — 400">
     ```json
     {
@@ -191,7 +218,7 @@ Between the two, on the routes that check the acting user's standing before anyt
     { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body" }
     ```
 
-    Every workspaces endpoint declares its fields exactly and refuses a top-level field it does not declare, in the body and in the query string alike, for every caller. Two or more at once are named together — `Unrecognized keys: "onBehalfOf", "impersonate"` — and an offender in the query string carries `workspace/invalid-query`.
+    Every workspaces endpoint declares its fields exactly and refuses a top-level field it does not declare, for every caller: in the query string of a `GET` or `DELETE` (`workspace/invalid-query`), and in the body of a `POST` or `PATCH` (`workspace/invalid-body`). Two or more at once are named together — `Unrecognized keys: "onBehalfOf", "impersonate"`. The query string of a `POST` or `PATCH` is not a field channel: a field the route reads from the body is `workspace/wrong-location` there, a `userId` or a near-miss spelling of `actingUserId` is refused by the gate, and any other query parameter is ignored.
 
     That is a categorical rule, not a list of bad names. `onBehalfOf`, `impersonate`, `acting_user_id`, `ACTING-USER-ID`, `actingUserId ` with a trailing space, `requestId`, `traceId`, `sort` — none of them is a field of any workspaces route, so all of them fail at the wire, whatever they carry. The rule is the same for a service key and for a signed-in user: a request the API cannot fully read is answered rather than half-honored.
 
@@ -200,7 +227,7 @@ Between the two, on the routes that check the acting user's standing before anyt
     - **Send only the documented fields.** The SDKs pass your props object to the request body as-is, so `createWorkspace({ ...orgTemplate })` carries every extra key `orgTemplate` holds into the request and fails. Name the fields you mean; put your own data in `metadata`, which is opaque to Sublay and accepts any JSON.
     - **A field this API declares is never judged by its name.** `username` on [Create Invite](/v8/api-reference/workspaces/invitations/create-invite), `newOwnerId` on [Transfer Ownership](/v8/api-reference/workspaces/transfer-ownership), `userId` as an invitee — all real fields, all accepted on their own terms.
 
-    Two query parameters are the exception: `_` and `_t`, the automatic cache-busters some HTTP clients append, are dropped before the request is read. Nothing else is reserved — in particular tracing and correlation identifiers are *not*, because distributed tracing propagates in HTTP **headers** (`traceparent`, `X-B3-*`, `X-Amzn-Trace-Id`), never in the query string.
+    On a `GET` or `DELETE`, two query parameters are the exception: `_` and `_t`, the automatic cache-busters some HTTP clients append, are dropped before the request is read. Nothing else is reserved — in particular tracing and correlation identifiers are *not*, because distributed tracing propagates in HTTP **headers** (`traceparent`, `X-B3-*`, `X-Amzn-Trace-Id`), never in the query string.
   </Accordion>
 
   <Accordion title="A query string with 1,000 or more parameters — 400">
@@ -211,7 +238,7 @@ Between the two, on the routes that check the acting user's standing before anyt
     }
     ```
 
-    A workspaces request whose raw query string holds **1,000 or more `&`-separated segments** is refused before its parameters are checked against the route's schema. The most any workspaces request may carry is 999; the largest query vocabulary on the bundle is five parameters, so no real call comes near it.
+    A workspaces `GET` or `DELETE` whose raw query string holds **1,000 or more `&`-separated segments** is refused before its parameters are checked against the route's schema. The most any workspaces request may carry is 999; the largest query vocabulary on the bundle is five parameters, so no real call comes near it.
 
     **This is a rule about the query string's length, not about which names are in it.** The parser's budget is spent per `&`-separated segment, and a segment that parses to nothing spends it just the same — so 1,000 bare ampersands (`?&&&…`), 1,000 copies of `__proto__=1` (a name the parser discards on sight, leaving no key behind), and 1,000 copies of an ordinary *declared* parameter such as `include=` all reach the limit identically and are all refused identically. Which names you used has nothing to do with it, and neither does whether any of them is reserved.
 
@@ -241,7 +268,9 @@ Between the two, on the routes that check the acting user's standing before anyt
 
     Sublay parses `application/json` and nothing else. A body sent as `text/plain`, `application/x-www-form-urlencoded` or `application/vnd.api+json` is read off the wire and thrown away — so an `actingUserId` inside it never reaches the server, and the request names nobody through no fault of its spelling. This is the one shape the schemas cannot catch: with an unparsed content-type the server is handed an empty body, which has no unrecognized key in it.
 
-    **This is the `fetch()` default.** `fetch(url, { method: "DELETE", body: JSON.stringify({ actingUserId }) })` with no `headers` sends `text/plain;charset=UTF-8`. Set `"Content-Type": "application/json"`. Client libraries that set it for you — axios, the Sublay [node SDK](/v8/node-sdk/workspaces), [`@sublay/js`](/v8/js-sdk/workspaces) — never hit this.
+    This applies to a `POST` or `PATCH`; a `GET` or `DELETE` takes no body at all (see the first accordion).
+
+    **This is the `fetch()` default.** `fetch(url, { method: "POST", body: JSON.stringify({ actingUserId }) })` with no `headers` sends `text/plain;charset=UTF-8`. Set `"Content-Type": "application/json"`. Client libraries that set it for you — axios, the Sublay [node SDK](/v8/node-sdk/workspaces), [`@sublay/js`](/v8/js-sdk/workspaces) — never hit this.
 
     Detected by **media type**, not by "is the body empty": a legitimate `{}` sent as JSON is indistinguishable from a discarded body after the fact, so an empty JSON body and a bodiless request both pass.
   </Accordion>
@@ -269,7 +298,7 @@ Between the two, on the routes that check the acting user's standing before anyt
   **The guarantee covers TOP-LEVEL keys.** State it with that scope rather than as "unknown fields are impossible":
 
   - `metadata` is caller-owned JSON and is never inspected, so `{"metadata":{"actingUserId":"<bob>"}}` parses and names nobody (so a key gets `400 workspace/missing-user-id`, or the anonymous view on Fetch Workspace). That is correct — `metadata` is your data — but it is not an actor channel.
-  - A nested or wrapped actor is **refused**, not ignored — the wrapper itself is an undeclared top-level key: `{ data: { actingUserId } }` and `?ctx[actingUserId]=` come back `400 Unrecognized key: "data"` / `"ctx"`, and an array-wrapped body is `400 Invalid input: expected object, received array`. On the routes that check the acting user first, a key that names nobody at the top level gets `400 workspace/missing-user-id` instead, before the schema sees the wrapper. (Don't confuse this with the node SDK's `{ data: { actingUserId } }` axios *config* for DELETE bodies — that sends `{ actingUserId }` as the body and works.)
+  - A nested or wrapped actor is **refused**, not ignored — the wrapper itself is an undeclared top-level key: `{ data: { actingUserId } }` and `?ctx[actingUserId]=` come back `400 Unrecognized key: "data"` / `"ctx"`, and an array-wrapped body is `400 Invalid input: expected object, received array`. On the routes that check the acting user first, a key that names nobody at the top level gets `400 workspace/missing-user-id` instead, before the schema sees the wrapper.
 
   Spell `actingUserId` at the top level and none of this applies.
 </Note>
@@ -288,7 +317,7 @@ Between the two, on the routes that check the acting user's standing before anyt
   - `workspace/invalid-body` / `workspace/invalid-query` — **the request is malformed.** It carries a `userId`, a field the endpoint does not declare, an unreadable body, a bad `actingUserId`, or a query string that is too long or repeats a cache-buster.
   - `workspace/missing-user-id` — **the route's own rule.** On every route but Fetch Workspace a key [must name someone](#acting-on-behalf-of-a-user). Nothing about the request's shape is wrong; it is simply an operation that has to belong to a person.
 
-  The gate's refusals (a `userId`, a near-miss spelling, an unread body) always come first. After that the order depends on the route:
+  The placement refusals (`workspace/body-not-allowed`, `workspace/wrong-location`) come first, then the gate's (a `userId`, a near-miss spelling, an unread body). After that the order depends on the route:
 
   - On the routes that check the acting user first (see [the layers above](#shapes-the-server-rejects)), `workspace/missing-user-id` comes **before** the schema refusals: a key with no `actingUserId` that also carries an undeclared field, an over-long query or a repeated `_`, gets `workspace/missing-user-id`, and the malformed part is reported once a user is named.
   - On the other routes, such as `POST /workspaces`, the schemas run first: a key with no `actingUserId` and a clean request gets `workspace/missing-user-id`, but the same call carrying an undeclared field gets `workspace/invalid-body` instead, and the missing-actor error appears once the request is otherwise well formed.

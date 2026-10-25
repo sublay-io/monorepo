@@ -42,13 +42,15 @@ Answers a natural language question using content from your project as context. 
   Maximum number of content chunks to retrieve for context. Maximum `50`.
 </ParamField>
 
-## Query Parameters
-
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each source record's populated `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params, in the body with the other fields (`spaceReputationDescendants` as a JSON boolean). They add a `spaceReputation` field to each source record's populated `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
 
-<SpaceReputationParams variant="context" field="query" />
+<SpaceReputationParams variant="context" field="body" />
+
+<Note>
+  Every field goes in the body. A body field sent in the query string returns `400 search/wrong-location`.
+</Note>
 
 ## Response
 
@@ -88,6 +90,12 @@ data: {}
 <AccordionGroup>
   <Accordion title="Authentication Required — 401 / 403">
     The endpoint requires a user token or a service key. A missing token returns a bare `401`; an invalid or expired token returns a bare `403` — refresh the access token and retry. These are returned before streaming starts.
+  </Accordion>
+  <Accordion title="Wrong Location — 400">
+    ```json
+    { "error": "`spaceReputationId` goes in the request body on this endpoint.", "code": "search/wrong-location", "param": "spaceReputationId" }
+    ```
+    Returned when a body field — `query`, `actingUserId`, `spaceReputationId`, `spaceReputationDescendants` or any other — is sent in the query string.
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     ```json

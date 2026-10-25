@@ -25,7 +25,7 @@ On a **paranoid** table the row is soft-deleted (its `deletedAt` is set) and can
 ## Query Parameters
 
 <ParamField query="force" type="string">
-  `"true"` hard-deletes the row even on a paranoid table. Any other value, or omitting it, leaves the default soft-delete behavior in place.
+  `"true"` hard-deletes the row even on a paranoid table. `"false"`, or omitting it, keeps the default: soft-delete on a paranoid table. Any other value (`yes`, `1`, `TRUE`, an empty or repeated value) returns `400 database/invalid-query`.
 </ParamField>
 
 ## Response
@@ -44,6 +44,18 @@ On a **paranoid** table the row is soft-deleted (its `deletedAt` is set) and can
   <Accordion title="Invalid Parameters — 400">
     ```json
     { "error": "Bad Request", "code": "database/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Query — 400">
+    `force` is something other than `"true"` or `"false"`.
+    ```json
+    { "error": "force: Invalid option: expected one of \"true\"|\"false\"", "code": "database/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="Body Not Allowed — 400">
+    The request carried a body. A DELETE takes no body: send `force` in the query string.
+    ```json
+    { "error": "A DELETE request takes no body: send its fields in the query string. Received: `force`.", "code": "database/body-not-allowed", "params": ["force"] }
     ```
   </Accordion>
   <Accordion title="Table Not Found — 404">

@@ -16,11 +16,15 @@ Increments an entity's `views` counter and returns the updated entity.
   UUID of the entity.
 </ParamField>
 
-## Query Parameters
+## Body Parameters
 
-<ParamField query="count" type="number">
-  How much to add to the counter. Defaults to `1`. Must be a positive integer — pass a batch total to record views your backend has buffered rather than calling the endpoint once per view.
+<ParamField body="count" type="number">
+  How much to add to the counter: a JSON integer of at least `1`. Defaults to `1` (an empty body or no body increments by one). A string such as `"3"`, a fraction or `0` returns `400 entity/invalid-body`. Pass a batch total to record views your backend has buffered rather than calling the endpoint once per view.
 </ParamField>
+
+```json Example body
+{ "count": 25 }
+```
 
 ## Response
 
@@ -44,10 +48,18 @@ Returns the full updated [Entity](/v8/data-models/entity), with `views` reflecti
   </Accordion>
 
   <Accordion title="Invalid Count — 400">
-    Returned when `count` is not a positive integer.
+    Returned when `count` is not a JSON integer of at least `1` (a string, a fraction or `0`).
 
     ```json
-    { "error": "Count must be a positive integer", "code": "entity/invalid-query" }
+    { "error": "count: Count must be a positive integer", "code": "entity/invalid-body" }
+    ```
+  </Accordion>
+
+  <Accordion title="Wrong Location — 400">
+    Returned when `count` is sent in the query string. On this endpoint it goes in the request body.
+
+    ```json
+    { "error": "`count` goes in the request body on this endpoint.", "code": "entity/wrong-location", "param": "count" }
     ```
   </Accordion>
 

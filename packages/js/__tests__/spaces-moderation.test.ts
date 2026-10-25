@@ -142,12 +142,12 @@ describe("js-sdk spaces (moderation/reports) — request shaping", () => {
     await moderateSpaceChatMessage(client, {
       spaceId: "s1",
       messageId: "msg1",
-      moderationStatus: "removed",
-      moderationReason: "abuse",
+      action: "remove",
+      reason: "abuse",
     });
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/chat/messages/msg1/moderation",
-      { moderationStatus: "removed", moderationReason: "abuse" }
+      { action: "remove", reason: "abuse" }
     );
   });
 
@@ -310,13 +310,13 @@ describe("js-sdk spaces (moderation/reports) — response mapping", () => {
 
   it("moderateSpaceChatMessage returns the ModerateSpaceChatMessageResponse", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "Message moderated", moderationStatus: "removed" };
+    const result = { message: "Message moderated", moderationStatus: "removed" as const };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
 
     const response = await moderateSpaceChatMessage(client, {
       spaceId: "s1",
       messageId: "msg1",
-      moderationStatus: "removed",
+      action: "remove",
     });
 
     expect(response).toEqual(result);

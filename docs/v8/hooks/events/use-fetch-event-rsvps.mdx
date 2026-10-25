@@ -22,7 +22,7 @@ function useGuestList(eventId: string) {
 ## Parameters
 
 <ParamField path="eventId" type="string" required>The event ID.</ParamField>
-<ParamField path="status" type="RsvpStatus | RsvpStatus[]">Statuses to filter by: `"going"`, `"maybe"` or `"not_going"`, e.g. `["going", "maybe"]`. Values match exactly. Omit for all.</ParamField>
+<ParamField path="status" type="RsvpStatus | RsvpStatus[]">Statuses to filter by: `"going"`, `"maybe"` or `"not-going"`, e.g. `["going", "maybe"]`. Values match exactly. Omit for all.</ParamField>
 <ParamField path="page" type="number">Page number (1-indexed). Defaults to `1`.</ParamField>
 <ParamField path="limit" type="number">Results per page. Capped at `100`.</ParamField>
 

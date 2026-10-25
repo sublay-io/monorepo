@@ -3,7 +3,7 @@ title: "Event"
 description: "The shape of an Event object returned by the Events API and SDKs"
 ---
 
-An Event is a scheduled happening — online, physical, or hybrid — that users can RSVP to. Events support hosts, capacity limits, invite-only or space-scoped visibility, a guest list, a single cover image, and a multi-image gallery. RSVP counts are denormalized onto the event so every read carries up-to-date `going` / `maybe` / `not_going` totals without an extra query.
+An Event is a scheduled happening — online, physical, or hybrid — that users can RSVP to. Events support hosts, capacity limits, invite-only or space-scoped visibility, a guest list, a single cover image, and a multi-image gallery. RSVP counts are denormalized onto the event so every read carries up-to-date `going` / `maybe` / `not-going` totals without an extra query.
 
 Events belong to the `events` bundle. They work standalone, but some behaviors depend on other bundles: space-scoping and `members` visibility require the `spaces` bundle, cover/gallery images require the `files-images` bundle, and invite/update/cancel notifications require the `notifications` bundle. When a dependency is absent, that specific behavior is rejected or skipped — the rest of the events surface keeps working.
 
@@ -36,8 +36,8 @@ Events belong to the `events` bundle. They work standalone, but some behaviors d
 | `hostIds` | `string[]` | UUIDs of the event's hosts. The creator is always included. Always has at least one entry. |
 | `coverImageId` | `string \| null` | File ID of the single cover image. Requires the `files-images` bundle. |
 | `files` | `File[]` | Cover + gallery file objects. Only present when `include` contains `"files"`. |
-| `rsvpCounts` | `{ going: number; maybe: number; not_going: number }` | Denormalized RSVP totals, always returned. |
-| `userRsvp` | `"going" \| "maybe" \| "not_going" \| null` | The requesting user's own RSVP status. Only populated when `include` contains `"userRsvp"` and the caller is authenticated; otherwise `null`. |
+| `rsvpCounts` | `{ going: number; maybe: number; "not-going": number }` | Denormalized RSVP totals, always returned. |
+| `userRsvp` | `"going" \| "maybe" \| "not-going" \| null` | The requesting user's own RSVP status. Only populated when `include` contains `"userRsvp"` and the caller is authenticated; otherwise `null`. |
 | `metadata` | `Record<string, any>` | Arbitrary key-value data. Up to 1 MB. Use this for ticketing, tags, or any custom fields. |
 | `createdAt` | `string` | ISO timestamp when the event was created. |
 | `updatedAt` | `string` | ISO timestamp when the event was last updated. |
@@ -67,7 +67,7 @@ In every case, a **host** (a user whose ID is in `hostIds`) can always see the e
 
 ## Capacity & RSVP rules
 
-- An RSVP can be `going`, `maybe`, or `not_going`. There is one RSVP per user per event.
+- An RSVP can be `going`, `maybe`, or `not-going`. There is one RSVP per user per event.
 - RSVPs close at `startTime` and are rejected on `cancelled` events.
 - A `"maybe"` RSVP is rejected when `allowMaybe` is `false`.
 - A transition into `going` is rejected with `event/full` when `rsvpCounts.going` has reached `capacity`. Capacity is checked under a row-level lock, so concurrent RSVPs can never oversell the event.

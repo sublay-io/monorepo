@@ -106,11 +106,11 @@ describe("node-sdk workspaces (lifecycle + ownership) — request shaping", () =
     );
   });
 
-  it("deleteWorkspace sends the acting actingUserId in the request body (data)", async () => {
+  it("deleteWorkspace sends actingUserId in the query, no body", async () => {
     const { client, projectInstance } = makeClient();
     await deleteWorkspace(client, { workspaceId: "w1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/workspaces/w1", {
-      data: { actingUserId: "u1" },
+      params: { actingUserId: "u1" },
     });
   });
 
@@ -198,7 +198,7 @@ describe("node-sdk workspaces (membership) — request shaping", () => {
     expect(body).not.toHaveProperty("rank");
   });
 
-  it("removeWorkspaceMember puts target in the path and sends actor actingUserId in the body (data)", async () => {
+  it("removeWorkspaceMember puts target in the path and the actor actingUserId in the query, no body", async () => {
     const { client, projectInstance } = makeClient();
     await removeWorkspaceMember(client, {
       workspaceId: "w1",
@@ -207,16 +207,16 @@ describe("node-sdk workspaces (membership) — request shaping", () => {
     });
     expect(projectInstance.delete).toHaveBeenCalledWith(
       "/workspaces/w1/members/target1",
-      { data: { actingUserId: "actor1" } }
+      { params: { actingUserId: "actor1" } }
     );
   });
 
-  it("leaveWorkspace deletes /members/me with the acting actingUserId in the body (data)", async () => {
+  it("leaveWorkspace deletes /members/me with actingUserId in the query, no body", async () => {
     const { client, projectInstance } = makeClient();
     await leaveWorkspace(client, { workspaceId: "w1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith(
       "/workspaces/w1/members/me",
-      { data: { actingUserId: "u1" } }
+      { params: { actingUserId: "u1" } }
     );
   });
 

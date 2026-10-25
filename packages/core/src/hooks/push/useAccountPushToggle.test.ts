@@ -93,7 +93,7 @@ describe("useAccountPushToggle", () => {
       accessToken: "access-2",
       refreshToken: "refresh-2-successor",
     });
-    axiosPublic.mockResponse("delete", {});
+    axiosPublic.mockResponse("post", {});
 
     await act(async () => {
       await result.current.setAccountPushEnabled({
@@ -102,8 +102,8 @@ describe("useAccountPushToggle", () => {
       });
     });
 
-    const [del] = axiosPublic.calls("delete");
-    expect(del.url).toBe("/test-project/push-notifications/devices");
+    const [del] = axiosPublic.calls("post").filter((c) => c.url.endsWith("/deregister"));
+    expect(del.url).toBe("/test-project/push-notifications/devices/deregister");
     expect(del.config?.headers.Authorization).toBe("Bearer access-2");
 
     const state = store.getState();
@@ -133,7 +133,7 @@ describe("useAccountPushToggle", () => {
     // holding "the write" would hold the mint's and prove nothing about the
     // toggle's. Here the toggle's persist is the only write there is.
     const { result, axiosPublic } = render();
-    axiosPublic.mockResponse("delete", {});
+    axiosPublic.mockResponse("post", {});
     holdWrites = () => {};
 
     let settled = false;
@@ -163,7 +163,7 @@ describe("useAccountPushToggle", () => {
 
   it("writes the flag only AFTER the binding change succeeds", async () => {
     const { result, store, axiosPublic } = render();
-    axiosPublic.mockError("delete", 500, { message: "nope" });
+    axiosPublic.mockError("post", 500, { message: "nope" });
 
     await expect(
       result.current.setAccountPushEnabled({
@@ -245,7 +245,7 @@ describe("useAccountPushToggle", () => {
       accessToken: "access-2",
       refreshToken: "refresh-2-successor",
     });
-    axiosPublic.mockResponse("delete", {});
+    axiosPublic.mockResponse("post", {});
 
     let applied!: boolean;
     await act(async () => {
@@ -310,7 +310,7 @@ describe("useAccountPushToggle", () => {
     expect(applied).toBe(false);
 
     // Nothing went out — not even the mint a non-active account would need.
-    expect(axiosPublic.calls("delete")).toHaveLength(0);
+    expect(axiosPublic.calls("post").filter((c) => c.url.endsWith("/deregister"))).toHaveLength(0);
     expect(axiosPublic.calls("post")).toHaveLength(0);
 
     const entry = store.getState().sublay.accounts.accounts["user-2"];

@@ -20,8 +20,7 @@ function useRemoveInvite(): (props: RemoveInviteProps) => Promise<Event> {
       }
 
       const response = await axios.delete(
-        `/${projectId}/events/${eventId}/invites`,
-        { data: { userId } }
+        `/${projectId}/events/${eventId}/invites/${userId}`
       );
 
       return response.data as Event;

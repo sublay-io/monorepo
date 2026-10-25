@@ -1222,10 +1222,10 @@ describe("useAccountSync — Phase E (push reconciliation on transition)", () =>
     expect(store.getState().sublay.accounts.activeAccountId).toBe("user-1");
     expect(store.getState().sublay.user.user?.id).toBe("user-2");
 
-    const deviceCalls = [
-      ...axiosPublic.calls("post"),
-      ...axiosPublic.calls("delete"),
-    ].filter((c) => c.url.includes("push-notifications/devices"));
+    // Register and deregister are both POSTs.
+    const deviceCalls = axiosPublic
+      .calls("post")
+      .filter((c) => c.url.includes("push-notifications/devices"));
     expect(deviceCalls).toHaveLength(0);
   });
 
@@ -1258,7 +1258,7 @@ describe("useAccountSync — Phase E (push reconciliation on transition)", () =>
       {
         accessToken: "access-3",
         beforeRender: ({ axiosPublic: pub }) => {
-          pub.mockResponse("delete", {});
+          pub.mockResponse("post", {});
         },
       },
     );
@@ -1268,10 +1268,10 @@ describe("useAccountSync — Phase E (push reconciliation on transition)", () =>
     );
     store.dispatch(setUser(makeAuthUser({ id: "user-3" })));
 
-    await waitFor(() => expect(axiosPublic.calls("delete")).toHaveLength(1));
-    const [del] = axiosPublic.calls("delete");
-    expect(del.url).toBe("/test-project/push-notifications/devices");
-    expect(del.config?.data).toEqual(DEVICE);
+    await waitFor(() => expect(axiosPublic.calls("post").filter((c) => c.url.endsWith("/deregister"))).toHaveLength(1));
+    const [del] = axiosPublic.calls("post").filter((c) => c.url.endsWith("/deregister"));
+    expect(del.url).toBe("/test-project/push-notifications/devices/deregister");
+    expect(del.body).toEqual(DEVICE);
     expect(store.getState().sublay.accounts.accounts["user-3"].pushEnabled).toBe(
       false,
     );
@@ -1431,7 +1431,7 @@ describe("useAccountSync — lazy push re-binding", () => {
     ).toHaveLength(0);
     // Not silenced either — absent means "never asked", so nothing is unbound
     // out from under an upgrading install that is working fine.
-    expect(axiosPublic.calls("delete")).toHaveLength(0);
+    expect(axiosPublic.calls("post").filter((c) => c.url.endsWith("/deregister"))).toHaveLength(0);
     expect(
       store.getState().sublay.accounts.accounts["user-9"].needsPushRebind,
     ).toBeUndefined();

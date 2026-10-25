@@ -11,10 +11,10 @@ export async function withdrawRsvp(
   client: SublayHttpClient,
   data: WithdrawRsvpProps
 ): Promise<Event> {
-  const { eventId, ...body } = data;
+  const { eventId, actingUserId } = data;
   const response = await client.projectInstance.delete<Event>(
     `/events/${eventId}/rsvp`,
-    { data: body }
+    { params: { actingUserId } }
   );
   return response.data;
 }

@@ -276,13 +276,10 @@ describe("js-sdk events — request shaping", () => {
     });
   });
 
-  it("removeHost sends userId (the host target) via the data option", async () => {
+  it("removeHost puts userId (the host target) in the path, no body", async () => {
     const { client, projectInstance } = makeClient();
     await removeHost(client, { eventId: "ev1", userId: "u1" });
-    expect(projectInstance.delete).toHaveBeenCalledWith(
-      "/events/ev1/hosts",
-      { data: { userId: "u1" } }
-    );
+    expect(projectInstance.delete).toHaveBeenCalledWith("/events/ev1/hosts/u1");
   });
 
   it("addInvite posts userId (the invitee target) to /events/:eventId/invites", async () => {
@@ -293,13 +290,10 @@ describe("js-sdk events — request shaping", () => {
     });
   });
 
-  it("removeInvite sends userId (the invitee target) via the data option", async () => {
+  it("removeInvite puts userId (the invitee target) in the path, no body", async () => {
     const { client, projectInstance } = makeClient();
     await removeInvite(client, { eventId: "ev1", userId: "u1" });
-    expect(projectInstance.delete).toHaveBeenCalledWith(
-      "/events/ev1/invites",
-      { data: { userId: "u1" } }
-    );
+    expect(projectInstance.delete).toHaveBeenCalledWith("/events/ev1/invites/u1");
   });
 
   it("fetchInvitees strips eventId into the path and passes the rest as params", async () => {

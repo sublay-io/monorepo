@@ -70,12 +70,16 @@ describe("js-sdk custom-table row ops — request shaping (no DDL surface)", () 
     expect(projectInstance.delete).toHaveBeenCalledWith("/db/Events/id1", {
       params: { force: "true" },
     });
+    await deleteRow(client, "Events", "id1", { force: false });
+    expect(projectInstance.delete).toHaveBeenLastCalledWith("/db/Events/id1", {
+      params: { force: "false" },
+    });
 
     await bulkDelete(client, "Events", {
       filters: [{ column: "name", operator: "eq", value: "x" }],
     });
-    expect(projectInstance.delete).toHaveBeenCalledWith("/db/Events", {
-      data: { filters: [{ column: "name", operator: "eq", value: "x" }] },
+    expect(projectInstance.post).toHaveBeenCalledWith("/db/Events/bulk-delete", {
+      filters: [{ column: "name", operator: "eq", value: "x" }],
     });
 
     await restore(client, "Events", "id1");
@@ -156,7 +160,7 @@ describe("js-sdk custom-table row ops — response mapping", () => {
   it("bulkDelete returns the bulk delete result as-is", async () => {
     const { client, projectInstance } = makeBaseClient();
     const bulkDeleteResult = { deletedCount: 3, soft: true };
-    projectInstance.delete.mockResolvedValueOnce({ data: bulkDeleteResult });
+    projectInstance.post.mockResolvedValueOnce({ data: bulkDeleteResult });
 
     const result = await bulkDelete(client, "Events", { rowIds: ["a", "b", "c"] });
 

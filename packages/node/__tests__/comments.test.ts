@@ -154,11 +154,11 @@ describe("node-sdk comments — request shaping", () => {
     });
   });
 
-  it("removeReaction sends actingUserId via the data option", async () => {
+  it("removeReaction sends actingUserId in the query, no body", async () => {
     const { client, projectInstance } = makeClient();
     await removeReaction(client, { commentId: "c1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/comments/c1/reactions", {
-      data: { actingUserId: "u1" },
+      params: { actingUserId: "u1" },
     });
   });
 

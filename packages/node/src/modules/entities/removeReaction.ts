@@ -14,7 +14,7 @@ export async function removeReaction(
   // The server returns the updated entity, as `actingUserId` sees it.
   const response = await client.projectInstance.delete<Entity>(
     `/entities/${entityId}/reactions`,
-    { data: { actingUserId } }
+    { params: { actingUserId } }
   );
   return response.data;
 }

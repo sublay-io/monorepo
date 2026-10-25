@@ -67,20 +67,30 @@ describe("node-sdk custom-table row ops — request shaping", () => {
     });
   });
 
-  it("delete passes force as a query param", async () => {
+  it("delete passes force as a \"true\"/\"false\" query param", async () => {
     const { client, projectInstance } = makeClient();
     await deleteRow(client, "Events", "id1", { force: true });
     expect(projectInstance.delete).toHaveBeenCalledWith("/db/Events/id1", {
       params: { force: "true" },
     });
+    await deleteRow(client, "Events", "id1", { force: false });
+    expect(projectInstance.delete).toHaveBeenLastCalledWith("/db/Events/id1", {
+      params: { force: "false" },
+    });
+    await deleteRow(client, "Events", "id1");
+    expect(projectInstance.delete).toHaveBeenLastCalledWith("/db/Events/id1", {
+      params: {},
+    });
   });
 
-  it("bulkDelete sends a body via the data option", async () => {
+  it("bulkDelete POSTs the body to /db/:table/bulk-delete", async () => {
     const { client, projectInstance } = makeClient();
     await bulkDelete(client, "Events", { rowIds: ["a", "b"], force: false });
-    expect(projectInstance.delete).toHaveBeenCalledWith("/db/Events", {
-      data: { rowIds: ["a", "b"], force: false },
+    expect(projectInstance.post).toHaveBeenCalledWith("/db/Events/bulk-delete", {
+      rowIds: ["a", "b"],
+      force: false,
     });
+    expect(projectInstance.delete).not.toHaveBeenCalled();
   });
 
   it("restore posts to the restore route", async () => {
@@ -138,7 +148,7 @@ describe("node-sdk custom-table row ops — response mapping", () => {
   it("bulkDelete returns the full BulkDeleteResult", async () => {
     const { client, projectInstance } = makeClient();
     const result = { deletedCount: 2 };
-    projectInstance.delete.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
       bulkDelete(client, "Events", { rowIds: ["a", "b"] }),
     ).resolves.toEqual(result);

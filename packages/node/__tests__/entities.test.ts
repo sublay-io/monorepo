@@ -183,11 +183,11 @@ describe("node-sdk entities — request shaping", () => {
     });
   });
 
-  it("removeReaction sends actingUserId via the data option", async () => {
+  it("removeReaction sends actingUserId in the query, no body", async () => {
     const { client, projectInstance } = makeClient();
     await removeReaction(client, { entityId: "e1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/entities/e1/reactions", {
-      data: { actingUserId: "u1" },
+      params: { actingUserId: "u1" },
     });
   });
 

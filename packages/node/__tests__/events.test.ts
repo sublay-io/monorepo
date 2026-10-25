@@ -89,11 +89,11 @@ describe("node-sdk events — request shaping", () => {
     });
   });
 
-  it("withdrawRsvp sends the rest of the body via the data option", async () => {
+  it("withdrawRsvp sends the actor in the query, no body", async () => {
     const { client, projectInstance } = makeClient();
     await withdrawRsvp(client, { eventId: "ev1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith("/events/ev1/rsvp", {
-      data: { actingUserId: "u1" },
+      params: { actingUserId: "u1" },
     });
   });
 
@@ -106,11 +106,11 @@ describe("node-sdk events — request shaping", () => {
     });
   });
 
-  it("removeHost sends userId via the data option", async () => {
+  it("removeHost puts the user in the path and the actor in the query, no body", async () => {
     const { client, projectInstance } = makeClient();
     await removeHost(client, { eventId: "ev1", userId: "u1", actingUserId: "h1" });
-    expect(projectInstance.delete).toHaveBeenCalledWith("/events/ev1/hosts", {
-      data: { userId: "u1", actingUserId: "h1" },
+    expect(projectInstance.delete).toHaveBeenCalledWith("/events/ev1/hosts/u1", {
+      params: { actingUserId: "h1" },
     });
   });
 
@@ -123,11 +123,11 @@ describe("node-sdk events — request shaping", () => {
     });
   });
 
-  it("removeInvite sends userId via the data option", async () => {
+  it("removeInvite puts the user in the path and the actor in the query, no body", async () => {
     const { client, projectInstance } = makeClient();
     await removeInvite(client, { eventId: "ev1", userId: "u1", actingUserId: "h1" });
-    expect(projectInstance.delete).toHaveBeenCalledWith("/events/ev1/invites", {
-      data: { userId: "u1", actingUserId: "h1" },
+    expect(projectInstance.delete).toHaveBeenCalledWith("/events/ev1/invites/u1", {
+      params: { actingUserId: "h1" },
     });
   });
 

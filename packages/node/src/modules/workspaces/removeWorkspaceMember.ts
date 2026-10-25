@@ -14,10 +14,9 @@ export async function removeWorkspaceMember(
   data: RemoveWorkspaceMemberProps
 ): Promise<void> {
   const { workspaceId, targetUserId, actingUserId } = data;
-  // The controller resolves the acting user from the request body; send it there
-  // so the service-key act-as-user path works on DELETE.
+  // A DELETE takes no body: the acting user goes in the query.
   await client.projectInstance.delete<void>(
     `/workspaces/${workspaceId}/members/${targetUserId}`,
-    { data: { actingUserId } }
+    { params: { actingUserId } }
   );
 }

@@ -39,7 +39,7 @@ function CollectionsPanel() {
           </li>
         ))}
       </ul>
-      <button onClick={() => createCollection({ collectionName: "New Folder" })}>
+      <button onClick={() => createCollection({ name: "New Folder" })}>
         Add folder
       </button>
       {currentCollection.parentId && (
@@ -84,8 +84,8 @@ This hook accepts no required parameters. Pass an empty object or nothing.
   Check whether an entity is saved in any collection. If `collectionId` is provided, also returns `inSpecificCollection` indicating whether it is in that specific folder.
 </ResponseField>
 
-<ResponseField name="createCollection" type="({ collectionName }: CreateCollectionProps) => Promise<void>">
-  Create a new sub-collection inside the current collection.
+<ResponseField name="createCollection" type="({ name }: CreateCollectionProps) => Promise<void>">
+  Create a new sub-collection inside the current collection. `name` is trimmed and must be 1 to 255 characters after trimming.
 </ResponseField>
 
 <ResponseField name="updateCollection" type="({ collectionId, update }: UpdateCollectionProps) => Promise<void>">

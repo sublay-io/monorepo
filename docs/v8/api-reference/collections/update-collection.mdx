@@ -15,7 +15,7 @@ Updates the name of a sub-collection. The root collection cannot be renamed (it 
 ## Body Parameters
 
 <ParamField body="name" type="string" required>
-  The new name for the collection. Must be a non-empty string.
+  The new name for the collection. Trimmed; must be 1 to 255 characters after trimming.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -30,7 +30,7 @@ Returns the updated [Collection](/v8/data-models/collection) object.
 
 <AccordionGroup>
   <Accordion title="Invalid Body — 400">
-    Returned when `name` is missing or an empty string. The `error` message names the offending field.
+    Returned when `name` is missing, blank after trimming, or longer than 255 characters. The `error` message names the offending field.
     ```json
     { "error": "name: Invalid input: expected string, received undefined", "code": "collection/invalid-body" }
     ```

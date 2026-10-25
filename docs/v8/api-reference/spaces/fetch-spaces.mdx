@@ -32,24 +32,16 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
   Direction, `"asc"` or `"desc"` (either case), for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
-<ParamField query="searchSlug" type="string">
-  Filter by slug substring.
+<ParamField query="query" type="string">
+  Free-text search term, matched as a case-insensitive substring. Trimmed; a blank value returns `400 space/invalid-query`. Leave it out for no text filtering.
 </ParamField>
 
-<ParamField query="searchName" type="string">
-  Filter by name substring.
+<ParamField query="searchFields" type="string">
+  The one field `query` is matched against: `"slug"`, `"name"` or `"description"`. Left out, `query` matches the slug, the name or the description. Values match exactly; any other value returns `400 space/invalid-query`.
 </ParamField>
 
-<ParamField query="searchDescription" type="string">
-  Filter by description substring.
-</ParamField>
-
-<ParamField query="searchAny" type="string">
-  Search across name, slug, and description simultaneously.
-</ParamField>
-
-<ParamField query="memberOf" type="boolean">
-  When `true`, returns only spaces where the viewer is an active member: the signed-in user, or the user a service key names in `actingUserId`. Without a viewer — no credentials, or a service key naming nobody — it returns `401 space/auth-required`.
+<ParamField query="memberOf" type="string">
+  `"true"` returns only spaces where the viewer is an active member: the signed-in user, or the user a service key names in `actingUserId`. Without a viewer — no credentials, or a service key naming nobody — it returns `401 space/auth-required`. `"false"` lists the same as leaving it out. Any other value returns `400 space/invalid-query`.
 </ParamField>
 
 <ParamField query="parentSpaceId" type="string">
@@ -93,8 +85,25 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
     }
     ```
   </Accordion>
+  <Accordion title="Unsupported search parameter — 400">
+    `searchSlug`, `searchName`, `searchDescription` and `searchAny` are rejected with a pointer to `query` and `searchFields`. `param` names the parameter sent.
+
+    ```json
+    {
+      "error": "`searchName` isn't supported in v8. Search with `query` and `searchFields=name`.",
+      "code": "space/unsupported-param",
+      "param": "searchName"
+    }
+    ```
+
+    The `error` names the replacement for each:
+    - `searchSlug`: `query` with `searchFields=slug`
+    - `searchName`: `query` with `searchFields=name`
+    - `searchDescription`: `query` with `searchFields=description`
+    - `searchAny`: `query` without `searchFields`, which matches the slug, name and description
+  </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy`, `sortDir` or `include` value. `error` names the first problem found.
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy`, `sortDir`, `searchFields` or `include` value, a blank `query`, or a `memberOf` other than `"true"` or `"false"`. `error` names the first problem found.
 
     ```json
     { "error": "include: Unknown include `members`. Allowed: files.", "code": "space/invalid-query" }

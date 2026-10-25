@@ -114,24 +114,16 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
   Direction, `"asc"` or `"desc"`, for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
-<ParamField body="searchSlug" type="string">
-  Filter by matching slug.
+<ParamField body="query" type="string">
+  Free-text search term, matched as a case-insensitive substring. Trimmed; must not be blank.
 </ParamField>
 
-<ParamField body="searchName" type="string">
-  Filter by matching name.
+<ParamField body="searchFields" type='"slug" | "name" | "description"'>
+  The one field `query` is matched against. Leave it out to match the slug, the name or the description.
 </ParamField>
 
-<ParamField body="searchDescription" type="string">
-  Filter by matching description.
-</ParamField>
-
-<ParamField body="searchAny" type="string">
-  Filter by matching across slug, name, and description.
-</ParamField>
-
-<ParamField body="memberOf" type="string">
-  Pass `"true"` to return only spaces you belong to.
+<ParamField body="memberOf" type='"true" | "false"'>
+  `"true"` returns only spaces you belong to. `"false"` lists the same as leaving it out.
 </ParamField>
 
 <ParamField body="parentSpaceId" type="string">

@@ -60,10 +60,8 @@ function SpaceDirectory() {
     filters: {
       sortBy?: "createdAt" | "members" | "alphabetical";
       sortDir?: "asc" | "desc" | null; // null: the sort's natural direction
-      searchSlug?: string | null;
-      searchName?: string | null;
-      searchDescription?: string | null;
-      searchAny?: string | null;
+      query?: string | null; // a blank value is left out of the request
+      searchFields?: "slug" | "name" | "description" | null; // null: slug, name or description
       memberOf?: boolean;
       parentSpaceId?: string | null;
     },
@@ -119,20 +117,12 @@ function SpaceDirectory() {
   Current sort direction. `null` means the sort's natural direction: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ResponseField>
 
-<ResponseField name="searchSlug" type="string | null">
-  Current slug search query from Redux state.
+<ResponseField name="query" type="string | null">
+  Current search term from Redux state.
 </ResponseField>
 
-<ResponseField name="searchName" type="string | null">
-  Current name search query from Redux state.
-</ResponseField>
-
-<ResponseField name="searchDescription" type="string | null">
-  Current description search query from Redux state.
-</ResponseField>
-
-<ResponseField name="searchAny" type="string | null">
-  Current general search query from Redux state.
+<ResponseField name="searchFields" type='"slug" | "name" | "description" | null'>
+  The field the current search term is matched against. `null` matches the slug, the name or the description.
 </ResponseField>
 
 <ResponseField name="memberOf" type="boolean">

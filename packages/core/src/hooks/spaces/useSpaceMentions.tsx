@@ -46,7 +46,7 @@ const useSpaceMentions = ({
 
   const fetchSuggestions = useCallback(
     async (query: string) => {
-      const result = await fetchManySpaces({ searchAny: query, limit: 5 });
+      const result = await fetchManySpaces({ query, limit: 5 });
       return result.data;
     },
     [fetchManySpaces]

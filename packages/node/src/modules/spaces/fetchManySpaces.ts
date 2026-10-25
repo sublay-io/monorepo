@@ -2,18 +2,15 @@ import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
 import { Space, SpaceIncludeParam } from "../../interfaces/Space";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
+import { SpaceSearchParams } from "../../interfaces/SpaceSearch";
 
-export interface FetchManySpacesProps {
+export interface FetchManySpacesProps extends SpaceSearchParams {
   page?: number;
   limit?: number;
   sortBy?: "createdAt" | "alphabetical" | "members";
   sortDir?: "asc" | "desc";
-  searchSlug?: string;
-  searchName?: string;
-  searchDescription?: string;
-  searchAny?: string;
-  /** Only spaces the viewer is a member of. Needs a viewer (`actingUserId`). */
-  memberOf?: "true";
+  /** `"true"`: only spaces the viewer is a member of; needs a viewer (`actingUserId`). `"false"` is the same as leaving it out. */
+  memberOf?: "true" | "false";
   parentSpaceId?: string | "null";
   nsfwFilter?: "include-all" | "exclude" | "only";
   include?: SpaceIncludeParam;

@@ -44,12 +44,12 @@ describe("spaceListsSlice", () => {
         initial,
         updateFilters({
           listId: "feed",
-          filters: { searchName: "foo", memberOf: true, sortBy: "members" },
+          filters: { query: "foo", memberOf: true, sortBy: "members" },
           config: { limit: 50 },
         }),
       );
       const list = s.lists.feed;
-      expect(list.searchName).toBe("foo");
+      expect(list.query).toBe("foo");
       expect(list.memberOf).toBe(true);
       expect(list.sortBy).toBe("members");
       expect(list.limit).toBe(50);
@@ -62,9 +62,9 @@ describe("spaceListsSlice", () => {
       let s = reducer(initial, initializeList({ listId: "feed" }));
       s = reducer(
         s,
-        updateFilters({ listId: "feed", filters: { searchName: undefined, parentSpaceId: null } }),
+        updateFilters({ listId: "feed", filters: { query: undefined, parentSpaceId: null } }),
       );
-      expect(s.lists.feed.searchName).toBeNull();
+      expect(s.lists.feed.query).toBeNull();
       expect(s.lists.feed.parentSpaceId).toBeNull();
     });
 
@@ -73,7 +73,7 @@ describe("spaceListsSlice", () => {
         initial,
         updateFilters({
           listId: "feed",
-          filters: { searchName: "foo", memberOf: true, sortBy: "members" },
+          filters: { query: "foo", memberOf: true, sortBy: "members" },
         }),
       );
       s = reducer(
@@ -84,7 +84,7 @@ describe("spaceListsSlice", () => {
           options: { resetUnspecified: true },
         }),
       );
-      expect(s.lists.feed.searchName).toBeNull();
+      expect(s.lists.feed.query).toBeNull();
       expect(s.lists.feed.memberOf).toBe(false);
       expect(s.lists.feed.sortBy).toBe("alphabetical"); // new value still applied after reset
     });
@@ -234,10 +234,10 @@ describe("spaceListsSlice", () => {
 
       const s = reducer(
         initial,
-        updateFilters({ listId: "feed", filters: { searchName: "foo" }, config: { limit: 50 } }),
+        updateFilters({ listId: "feed", filters: { query: "foo" }, config: { limit: 50 } }),
       );
       const state = { sublay: { spaceLists: s } } as never;
-      expect(selectSpaceListFilters(state, "feed")?.searchName).toBe("foo");
+      expect(selectSpaceListFilters(state, "feed")?.query).toBe("foo");
       expect(selectSpaceListConfig(state, "feed")?.limit).toBe(50);
     });
   });

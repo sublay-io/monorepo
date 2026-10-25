@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
+import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import type { SortDirection } from "../../interfaces/EntityListSortByOptions";
 import { resetAccountScopedState } from "../actions";
 import type { SublayState } from '../sublayReducers';
@@ -21,10 +22,8 @@ export interface SpaceListState {
   sortBy: SpaceListSortByOptions;
   /** null: the sort's natural direction (A–Z for alphabetical, else newest / most first). */
   sortDir: SortDirection | null;
-  searchSlug: string | null;
-  searchName: string | null;
-  searchDescription: string | null;
-  searchAny: string | null;
+  query: string | null;
+  searchFields: SpaceSearchFields | null;
   memberOf: boolean;
   parentSpaceId: string | null;
 }
@@ -49,10 +48,8 @@ const createDefaultSpaceListState = (): SpaceListState => ({
   // Default filters (user-controlled only)
   sortBy: "createdAt",
   sortDir: null,
-  searchSlug: null,
-  searchName: null,
-  searchDescription: null,
-  searchAny: null,
+  query: null,
+  searchFields: null,
   memberOf: false,
   parentSpaceId: undefined as any, // Will be set when fetchSpaces is called
 });
@@ -66,10 +63,8 @@ const initialState: SpaceListsState = {
 export interface SpaceListFilters {
   sortBy?: SpaceListSortByOptions;
   sortDir?: SortDirection | null;
-  searchSlug?: string | null;
-  searchName?: string | null;
-  searchDescription?: string | null;
-  searchAny?: string | null;
+  query?: string | null;
+  searchFields?: SpaceSearchFields | null;
   memberOf?: boolean;
   parentSpaceId?: string | null;
 }
@@ -153,10 +148,8 @@ export const spaceListsSlice = createSlice({
         // Reset all filter properties to defaults
         list.sortBy = defaultState.sortBy;
         list.sortDir = defaultState.sortDir;
-        list.searchSlug = defaultState.searchSlug;
-        list.searchName = defaultState.searchName;
-        list.searchDescription = defaultState.searchDescription;
-        list.searchAny = defaultState.searchAny;
+        list.query = defaultState.query;
+        list.searchFields = defaultState.searchFields;
         list.memberOf = defaultState.memberOf;
         list.parentSpaceId = defaultState.parentSpaceId;
       }
@@ -368,10 +361,8 @@ export const selectSpaceListFilters = createSelector(
     return {
       sortBy: spaceList.sortBy,
       sortDir: spaceList.sortDir,
-      searchSlug: spaceList.searchSlug,
-      searchName: spaceList.searchName,
-      searchDescription: spaceList.searchDescription,
-      searchAny: spaceList.searchAny,
+      query: spaceList.query,
+      searchFields: spaceList.searchFields,
       memberOf: spaceList.memberOf,
       parentSpaceId: spaceList.parentSpaceId,
     };

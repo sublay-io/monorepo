@@ -919,6 +919,7 @@ export type {
   SpaceReputationUserObject,
 } from "./interfaces/SpaceReputation";
 export type { UserSearchParams } from "./interfaces/UserSearch";
+export type { SpaceSearchParams, SpaceSearchFields } from "./interfaces/SpaceSearch";
 export type {
   Rule,
   FetchManyRulesResponse,

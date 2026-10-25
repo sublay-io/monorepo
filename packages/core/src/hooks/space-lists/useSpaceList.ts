@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef } from "react";
+import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
 
 import {
@@ -60,10 +61,8 @@ export interface UseSpaceListValues {
   // Current filters
   sortBy: SpaceListSortByOptions | null;
   sortDir: SortDirection | null;
-  searchSlug: string | null;
-  searchName: string | null;
-  searchDescription: string | null;
-  searchAny: string | null;
+  query: string | null;
+  searchFields: SpaceSearchFields | null;
   memberOf: boolean;
   parentSpaceId: string | null;
 
@@ -145,10 +144,8 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
         const currentState = spaceList || {
           sortBy: "createdAt",
           sortDir: null,
-          searchSlug: null,
-          searchName: null,
-          searchDescription: null,
-          searchAny: null,
+          query: null,
+          searchFields: null,
           memberOf: false,
           parentSpaceId: null,
         };
@@ -158,10 +155,8 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
         if (options?.resetUnspecified) {
           finalFilters.sortBy = "createdAt";
           finalFilters.sortDir = null;
-          finalFilters.searchSlug = null;
-          finalFilters.searchName = null;
-          finalFilters.searchDescription = null;
-          finalFilters.searchAny = null;
+          finalFilters.query = null;
+          finalFilters.searchFields = null;
           finalFilters.memberOf = false;
           finalFilters.parentSpaceId = null;
         }
@@ -184,10 +179,8 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
             // User-controlled filters from Redux state + new filters
             sortBy: finalFilters.sortBy,
             sortDir: finalFilters.sortDir,
-            searchSlug: finalFilters.searchSlug,
-            searchName: finalFilters.searchName,
-            searchDescription: finalFilters.searchDescription,
-            searchAny: finalFilters.searchAny,
+            query: finalFilters.query,
+            searchFields: finalFilters.searchFields,
             memberOf: finalFilters.memberOf,
             parentSpaceId: finalFilters.parentSpaceId,
             // Configuration parameters from current config
@@ -246,10 +239,8 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
         // User-controlled filters from Redux state
         sortBy: spaceList.sortBy,
         sortDir: spaceList.sortDir,
-        searchSlug: spaceList.searchSlug,
-        searchName: spaceList.searchName,
-        searchDescription: spaceList.searchDescription,
-        searchAny: spaceList.searchAny,
+        query: spaceList.query,
+        searchFields: spaceList.searchFields,
         memberOf: spaceList.memberOf,
         parentSpaceId: spaceList.parentSpaceId,
         // Configuration parameters from state (single source of truth)
@@ -303,10 +294,8 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
 
       sortBy: filters?.sortBy || null,
       sortDir: filters?.sortDir || null,
-      searchSlug: filters?.searchSlug || null,
-      searchName: filters?.searchName || null,
-      searchDescription: filters?.searchDescription || null,
-      searchAny: filters?.searchAny || null,
+      query: filters?.query || null,
+      searchFields: filters?.searchFields || null,
       memberOf: filters?.memberOf || false,
       parentSpaceId: filters?.parentSpaceId || null,
 

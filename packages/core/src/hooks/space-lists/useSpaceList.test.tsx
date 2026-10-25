@@ -53,13 +53,13 @@ describe("useSpaceList", () => {
       projectId: "test-project",
     });
 
-    act(() => result.current.fetchSpaces({ searchName: "foo" }));
+    act(() => result.current.fetchSpaces({ query: "foo" }));
     expect(fetchHandle.calls()).toHaveLength(0); // not yet — debounced
 
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(1), {
       timeout: DEBOUNCE_MS + 500,
     });
-    expect(result.current.searchName).toBe("foo");
+    expect(result.current.query).toBe("foo");
   }, 10_000);
 
   it("fetchImmediately bypasses the debounce even with filters set", async () => {
@@ -69,7 +69,7 @@ describe("useSpaceList", () => {
     });
 
     await act(async () => {
-      result.current.fetchSpaces({ searchName: "foo" }, undefined, { fetchImmediately: true });
+      result.current.fetchSpaces({ query: "foo" }, undefined, { fetchImmediately: true });
       await Promise.resolve();
     });
 
@@ -86,7 +86,7 @@ describe("useSpaceList", () => {
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s2" }], false));
     act(() =>
-      result.current.fetchSpaces({ searchName: "bar" }, undefined, { clearImmediately: true }),
+      result.current.fetchSpaces({ query: "bar" }, undefined, { clearImmediately: true }),
     );
     expect(result.current.spaces).toEqual([]); // cleared synchronously, before the debounce fires
 
@@ -101,9 +101,9 @@ describe("useSpaceList", () => {
       projectId: "test-project",
     });
     act(() =>
-      result.current.fetchSpaces({ searchName: "foo" }, undefined, { fetchImmediately: true }),
+      result.current.fetchSpaces({ query: "foo" }, undefined, { fetchImmediately: true }),
     );
-    await waitFor(() => expect(result.current.searchName).toBe("foo"));
+    await waitFor(() => expect(result.current.query).toBe("foo"));
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
     act(() =>
@@ -112,7 +112,7 @@ describe("useSpaceList", () => {
         resetUnspecified: true,
       }),
     );
-    await waitFor(() => expect(result.current.searchName).toBeNull());
+    await waitFor(() => expect(result.current.query).toBeNull());
   });
 
   it("sends sortBy and sortDir, keeps them for loadMore, and resets sortDir", async () => {

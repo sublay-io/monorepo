@@ -188,6 +188,7 @@ export type {
   SpaceReputationUserParams,
 } from "./interfaces/SpaceReputation";
 export type { UserSearchParams } from "./interfaces/UserSearch";
+export type { SpaceSearchParams, SpaceSearchFields } from "./interfaces/SpaceSearch";
 export type { Collection } from "./interfaces/Collection";
 export type {
   Space,

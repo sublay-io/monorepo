@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { Space, SpaceIncludeParam } from "../../interfaces/models/Space";
@@ -11,10 +12,8 @@ export interface FetchManySpacesProps {
   limit?: number;
   sortBy?: SpaceListSortByOptions;
   sortDir?: "asc" | "desc";
-  searchSlug?: string | null;
-  searchName?: string | null;
-  searchDescription?: string | null;
-  searchAny?: string | null;
+  query?: string | null;
+  searchFields?: SpaceSearchFields | null;
   memberOf?: boolean;
   parentSpaceId?: string | null;
   nsfwFilter?: NsfwFilter | null;
@@ -37,15 +36,11 @@ function useFetchManySpaces(): (params?: FetchManySpacesProps) => Promise<Pagina
       if (params?.limit !== undefined) queryParams.limit = params.limit;
       if (params?.sortBy) queryParams.sortBy = params.sortBy;
       if (params?.sortDir) queryParams.sortDir = params.sortDir;
-      if (params?.searchSlug) queryParams.searchSlug = params.searchSlug;
-      if (params?.searchName) queryParams.searchName = params.searchName;
-      if (params?.searchDescription) queryParams.searchDescription = params.searchDescription;
-      if (params?.searchAny) queryParams.searchAny = params.searchAny;
-      // memberOf is an opt-in flag: the server only accepts the literal "true".
-      // Sending "false" (the default) fails validation with a 400. Use a strict
-      // === true check so a stray non-boolean (no runtime type enforcement) can't
-      // be coerced into wrongly opting in.
-      if (params?.memberOf === true) queryParams.memberOf = true;
+      // A blank term is left out: the server needs a non-empty `query`.
+      if (params?.query?.trim()) queryParams.query = params.query;
+      if (params?.searchFields) queryParams.searchFields = params.searchFields;
+      // Sent as "true" / "false"; "false" lists the same as leaving it out.
+      if (typeof params?.memberOf === "boolean") queryParams.memberOf = String(params.memberOf);
       if (params?.parentSpaceId !== undefined) queryParams.parentSpaceId = params.parentSpaceId || "null";
       if (params?.nsfwFilter) queryParams.nsfwFilter = params.nsfwFilter;
       if (params?.include) {

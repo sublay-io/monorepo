@@ -26,14 +26,33 @@ describe("useFetchManySpaces", () => {
 
     let returned: PaginatedResponse<Space> | undefined;
     await act(async () => {
-      returned = await result.current({ page: 1, sortBy: "createdAt", searchAny: "design" });
+      returned = await result.current({ page: 1, sortBy: "createdAt", query: "design" });
     });
 
     expect(returned).toEqual(page);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/spaces");
-    expect(call.config?.params).toMatchObject({ page: 1, sortBy: "createdAt", searchAny: "design" });
+    expect(call.config?.params).toMatchObject({ page: 1, sortBy: "createdAt", query: "design" });
+  });
+
+  it("sends searchFields, memberOf as 'true'/'false', and leaves a blank query out", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManySpaces());
+
+    axiosPrivate.mockResponse("get", makePage([]));
+    axiosPrivate.mockResponse("get", makePage([]));
+
+    await act(async () => {
+      await result.current({ query: "des", searchFields: "slug", memberOf: true });
+    });
+    await act(async () => {
+      await result.current({ query: "   ", memberOf: false });
+    });
+
+    const [first, second] = axiosPrivate.calls("get");
+    expect(first.config?.params).toMatchObject({ query: "des", searchFields: "slug", memberOf: "true" });
+    expect(second.config?.params).toMatchObject({ memberOf: "false" });
+    expect(second.config?.params).not.toHaveProperty("query");
   });
 
   it("sends parentSpaceId as the literal string 'null' when explicitly null (root spaces)", async () => {

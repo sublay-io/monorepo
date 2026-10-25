@@ -4,7 +4,8 @@ import { Collection } from "../../interfaces/Collection";
 export interface CreateNewCollectionProps {
   /** The parent collection under which to create the sub-collection. */
   collectionId: string;
-  collectionName: string;
+  /** The new collection's name. Trimmed; 1 to 255 characters after trimming. */
+  name: string;
 }
 
 export async function createNewCollection(

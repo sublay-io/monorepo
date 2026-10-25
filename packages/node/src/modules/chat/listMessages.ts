@@ -20,11 +20,14 @@ export interface ListMessagesProps extends SpaceReputationContextParams {
   conversationId: string;
   /** The user to act as (must be a member). Service key required to name a user. */
   actingUserId: string;
-  /** Restrict to replies of this message (thread view). */
-  parentId?: string;
-  /** Keyset pagination: ISO timestamp; return messages created before this. Mutually exclusive with `after`. */
+  /**
+   * List this message's thread replies (oldest first by default). Named like
+   * the chat message's own `parentMessageId` field.
+   */
+  parentMessageId?: string;
+  /** Keyset pagination: return messages created before this. UTC ISO datetime ending in `Z` (e.g. `date.toISOString()`); an offset is rejected with a 400. Mutually exclusive with `after`. */
   before?: string;
-  /** Keyset pagination: ISO timestamp; return messages created after this. Mutually exclusive with `before`. */
+  /** Keyset pagination: return messages created after this. UTC ISO datetime ending in `Z` (e.g. `date.toISOString()`); an offset is rejected with a 400. Mutually exclusive with `before`. */
   after?: string;
   limit?: number;
   sortDir?: "asc" | "desc";
@@ -44,7 +47,7 @@ export interface ListMessagesResponse {
   newestCreatedAt: string | null;
   /**
    * Present only when a filter combination can't return results — e.g.
-   * `hasReplies: true` together with `parentId` (thread replies are one level
+   * `hasReplies: true` together with `parentMessageId` (thread replies are one level
    * deep and never have their own replies).
    */
   notice?: string;

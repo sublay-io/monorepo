@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import { useSublayDispatch } from "../../store/hooks";
 import {
   setSpaceListLoading,
@@ -27,10 +28,8 @@ export interface FetchSpacesOptions {
   page: number;
   sortBy: SpaceListSortByOptions;
   sortDir?: SortDirection | null;
-  searchSlug?: string | null;
-  searchName?: string | null;
-  searchDescription?: string | null;
-  searchAny?: string | null;
+  query?: string | null;
+  searchFields?: SpaceSearchFields | null;
   memberOf?: boolean;
   parentSpaceId?: string | null;
   limit: number;
@@ -88,10 +87,8 @@ export function useSpaceListActions() {
           page: options.page,
           sortBy: options.sortBy,
           sortDir: options.sortDir ?? undefined,
-          searchSlug: options.searchSlug,
-          searchName: options.searchName,
-          searchDescription: options.searchDescription,
-          searchAny: options.searchAny,
+          query: options.query,
+          searchFields: options.searchFields,
           memberOf: options.memberOf,
           parentSpaceId: options.parentSpaceId,
           limit: options.limit,

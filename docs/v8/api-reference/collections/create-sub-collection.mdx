@@ -14,8 +14,8 @@ Creates a new named sub-collection under the specified parent collection. Return
 
 ## Body Parameters
 
-<ParamField body="collectionName" type="string" required>
-  The name for the new collection.
+<ParamField body="name" type="string" required>
+  The name for the new collection. Trimmed; must be 1 to 255 characters after trimming.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -29,6 +29,22 @@ Returns the newly created [Collection](/v8/data-models/collection) object with `
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Body — 400">
+    Returned when `name` is missing, blank after trimming, or longer than 255 characters. The `error` message names the offending field.
+    ```json
+    { "error": "name: Too small: expected string to have >=1 characters", "code": "collection/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported collectionName — 400">
+    The request sent `collectionName` (in the body or the query). The collection's name is `name`.
+    ```json
+    {
+      "error": "`collectionName` isn't supported in v8. Send the collection's name as `name`.",
+      "code": "collection/unsupported-param",
+      "param": "collectionName"
+    }
+    ```
+  </Accordion>
   <Accordion title="Invalid Parent — 400 Bad Request">
     ```json
     { "error": "Invalid parent collection ID for sub-collection", "code": "collection/invalid-parent" }

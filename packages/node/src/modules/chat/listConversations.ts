@@ -6,9 +6,9 @@ export interface ListConversationsProps {
   actingUserId: string;
   /** Comma-separated conversation types, e.g. "direct,group,space". */
   types?: string;
-  /** Cursor for keyset pagination: the `lastMessageAt` of the last item from the previous page. */
+  /** Cursor for keyset pagination: the `lastMessageAt` of the last item from the previous page. UTC ISO datetime ending in `Z` (e.g. `date.toISOString()`); an offset is rejected with a 400. */
   cursor?: string;
-  /** Tie-breaker cursor: the `createdAt` of the last item from the previous page. */
+  /** Tie-breaker cursor: the `createdAt` of the last item from the previous page. UTC ISO datetime ending in `Z` (e.g. `date.toISOString()`); an offset is rejected with a 400. */
   cursorCreatedAt?: string;
   limit?: number;
 }

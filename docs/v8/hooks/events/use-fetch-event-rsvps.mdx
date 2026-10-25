@@ -15,14 +15,14 @@ import { useFetchEventRsvps } from "@sublay/react-js";
 
 function useGuestList(eventId: string) {
   const fetchEventRsvps = useFetchEventRsvps();
-  return () => fetchEventRsvps({ eventId, status: "going,maybe", page: 1, limit: 20 });
+  return () => fetchEventRsvps({ eventId, status: ["going", "maybe"], page: 1, limit: 20 });
 }
 ```
 
 ## Parameters
 
 <ParamField path="eventId" type="string" required>The event ID.</ParamField>
-<ParamField path="status" type="string">Comma-separated statuses to filter by, e.g. `"going,maybe"`. Omit for all.</ParamField>
+<ParamField path="status" type="RsvpStatus | RsvpStatus[]">Statuses to filter by: `"going"`, `"maybe"` or `"not_going"`, e.g. `["going", "maybe"]`. Values match exactly. Omit for all.</ParamField>
 <ParamField path="page" type="number">Page number (1-indexed). Defaults to `1`.</ParamField>
 <ParamField path="limit" type="number">Results per page. Capped at `100`.</ParamField>
 

@@ -35,7 +35,7 @@ Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants
 </ParamField>
 
 <ParamField body="targetType" type="string">
-  What the grant is for: `"entity"`, `"comment"`, or `"chat-message"`. Must be supplied together with `targetId`. The target is an annotation — it never determines which bucket is used, and it does not have to be authored by the recipient.
+  What the grant is for: `"entity"`, `"comment"`, or `"message"` (a chat message). Values match exactly. Must be supplied together with `targetId`. The target is an annotation — it never determines which bucket is used, and it does not have to be authored by the recipient.
 </ParamField>
 
 <ParamField body="targetId" type="string">
@@ -50,7 +50,7 @@ Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants
 
 Returns `201` with the created [ReputationGrant](/v8/data-models/reputation-grant), written with `sourceType: "user"`.
 
-Both balances move: the sender's bucket and profile total drop by `amount`, the recipient's rise by the same. The recipient is notified (a `reputation-grant` [app notification](/v8/data-models/app-notification)), and a `chat-message`-targeted grant is broadcast to the conversation as [`message:grant`](/v8/sdk/chat/real-time).
+Both balances move: the sender's bucket and profile total drop by `amount`, the recipient's rise by the same. The recipient is notified (a `reputation-grant` [app notification](/v8/data-models/app-notification)), and a grant targeting a `message` is broadcast to the conversation as [`message:grant`](/v8/sdk/chat/real-time).
 
 ## Gating and blocks
 
@@ -108,7 +108,7 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
       "dashboardUrl": "https://…/<projectId>/database"
     }
     ```
-    The `reputation` bundle is missing — the route names both of its tables, so a project without it is told about both — or the target's bundle is missing (e.g. a `chat-message` target without `chat`), or a `spaceId` was supplied on a project without `spaces`. `missingTables` names exactly what is absent.
+    The `reputation` bundle is missing — the route names both of its tables, so a project without it is told about both — or the target's bundle is missing (e.g. a `message` target without `chat`), or a `spaceId` was supplied on a project without `spaces`. `missingTables` names exactly what is absent.
   </Accordion>
   <Accordion title="Space Not Found — 404">
     ```json
@@ -132,7 +132,7 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
     ```json
     { "error": "The grant target does not exist.", "code": "reputation-grant/target-not-found" }
     ```
-    The target record does not exist — or, for a `chat-message` target, the sender is not an active member of that conversation. The two cases are byte-identical so a caller holding a message ID cannot probe whether it exists. Mediated transfers are membership-checked on the named sender exactly as user tokens are.
+    The target record does not exist — or, for a `message` target, the sender is not an active member of that conversation. The two cases are byte-identical so a caller holding a message ID cannot probe whether it exists. Mediated transfers are membership-checked on the named sender exactly as user tokens are.
   </Accordion>
   <Accordion title="Insufficient Reputation — 409">
     ```json
@@ -145,6 +145,17 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
     { "error": "The grant conflicted with a concurrent write. Retry.", "code": "reputation-grant/conflict" }
     ```
     Retryable. Two simultaneous transfers from the same bucket can never both succeed against the same balance.
+  </Accordion>
+  <Accordion title="Unsupported targetType — 400">
+    `targetType` was `"chat-message"` in the body or the query. A chat message is `message`.
+
+    ```json
+    {
+      "error": "`targetType` \"chat-message\" isn't supported in v8. A chat message is `message`.",
+      "code": "reputation-grant/unsupported-param",
+      "param": "targetType"
+    }
+    ```
   </Accordion>
 </AccordionGroup>
 

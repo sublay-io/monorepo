@@ -106,7 +106,7 @@ function WhoRewardedThis({ commentId }) {
 `summary` is only returned on the target shape — it is exactly the block a standalone "who rewarded this" view needs, so you don't have to fetch the parent item just to print the totals.
 
 <Warning>
-  **Grants on chat messages are private to their conversation.** Every shape asks the same question — can the logged-in user see the message? With `targetType: "chat-message"` the list is populated only for a member of that conversation, and having left it still counts; everyone else gets an empty list and a zero summary rather than an error. The `recipientId` / `senderId` shapes run that same test per row, so a user's own "reputation I received" feed *does* carry the grants made on messages in their own conversations, while a caller outside the conversation loses those rows from the list and from `pagination.totalItems` together. On either shape, the grants on a message moderation has removed are hidden — from members of the conversation too.
+  **Grants on chat messages are private to their conversation.** Every shape asks the same question — can the logged-in user see the message? With `targetType: "message"` the list is populated only for a member of that conversation, and having left it still counts; everyone else gets an empty list and a zero summary rather than an error. The `recipientId` / `senderId` shapes run that same test per row, so a user's own "reputation I received" feed *does* carry the grants made on messages in their own conversations, while a caller outside the conversation loses those rows from the list and from `pagination.totalItems` together. On either shape, the grants on a message moderation has removed are hidden — from members of the conversation too.
 </Warning>
 
 <Note>

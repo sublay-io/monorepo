@@ -53,7 +53,7 @@ The hook returns a function. That function accepts:
 </ParamField>
 
 <ParamField path="query" type="string">
-  Optional search term. Filters the list to users whose username or name contains this text (case-insensitive). When omitted, no filtering is applied.
+  Optional search term. Filters the list to users whose username or name contains this text (case-insensitive). When omitted or blank, no filtering is applied: a blank `query` is left out of the request, and `searchFields` with it.
 </ParamField>
 
 <ParamField path="searchFields" type="string">

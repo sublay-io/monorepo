@@ -49,11 +49,11 @@ describe("js-sdk chat messages — request shaping", () => {
     expect(config.params).not.toHaveProperty("before");
   });
 
-  it("listMessages forwards parentId for thread views and spaceReputation params", async () => {
+  it("listMessages forwards parentMessageId for thread views and spaceReputation params", async () => {
     const { client, projectInstance } = makeClient();
     await listMessages(client, {
       conversationId: "c1",
-      parentId: "m1",
+      parentMessageId: "m1",
       spaceReputationId: "space1",
       spaceReputationDescendants: true,
     });
@@ -61,7 +61,7 @@ describe("js-sdk chat messages — request shaping", () => {
       "/chat/conversations/c1/messages",
       {
         params: {
-          parentId: "m1",
+          parentMessageId: "m1",
           spaceReputationId: "space1",
           spaceReputationDescendants: true,
         },
@@ -268,7 +268,7 @@ describe("js-sdk chat messages — response mapping", () => {
 
     const result = await listMessages(client, {
       conversationId: "c1",
-      parentId: "m1",
+      parentMessageId: "m1",
       filters: { hasReplies: true },
     });
 

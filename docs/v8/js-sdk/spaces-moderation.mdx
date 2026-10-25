@@ -228,14 +228,14 @@ const result = await sublay.spaces.moderateSpaceComment({
 
 ### moderateSpaceChatMessage
 
-Applies a moderation status to a space chat message.
+Removes a chat message in a space conversation.
 
 ```typescript
 const result = await sublay.spaces.moderateSpaceChatMessage({
   spaceId: "spc_abc123",
   messageId: "msg_222",
-  moderationStatus: "removed",
-  moderationReason: "Spam",
+  action: "remove",
+  reason: "Spam",
 });
 ```
 
@@ -247,15 +247,15 @@ const result = await sublay.spaces.moderateSpaceChatMessage({
   The ID of the chat message to moderate.
 </ParamField>
 
-<ParamField body="moderationStatus" type="string" required>
-  The moderation status to apply: `"removed"`.
+<ParamField body="action" type='"remove"' required>
+  The moderation action. Chat messages are never held for approval, so `"remove"` is the only value.
 </ParamField>
 
-<ParamField body="moderationReason" type="string">
-  The reason for the moderation action.
+<ParamField body="reason" type="string">
+  The reason for the removal. Trimmed; up to 1,000 characters.
 </ParamField>
 
-**Returns** — `Promise<{ message: string; moderationStatus: string }>`
+**Returns** — `Promise<{ message: string; moderationStatus: "removed" }>`
 
 ---
 

@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { buildSearchParams } from "../../../utils/searchParams";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
@@ -35,8 +36,7 @@ function useFetchConnections(): (props?: FetchConnectionsParams) => Promise<Pagi
           params: {
             page,
             limit,
-            query,
-            searchFields,
+            ...buildSearchParams(query, searchFields),
           },
         }
       );

@@ -6,7 +6,7 @@ description: "Fetch messages in a conversation or thread"
 
 import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
 
-Returns a cursor-paginated list of [ChatMessage](/v8/data-models/chat-message) objects. By default returns the main conversation stream (excludes thread replies). Pass `parentId` to fetch replies for a specific thread.
+Returns a cursor-paginated list of [ChatMessage](/v8/data-models/chat-message) objects. By default returns the main conversation stream (excludes thread replies). Pass `parentMessageId` to fetch replies for a specific thread.
 
 The caller must be a member. Former members (who left) can only read messages up to when they left.
 
@@ -18,16 +18,16 @@ The caller must be a member. Former members (who left) can only read messages up
 
 ## Query Parameters
 
-<ParamField query="parentId" type="string">
-  If provided, returns thread replies to this message instead of the main stream.
+<ParamField query="parentMessageId" type="string">
+  If provided, returns thread replies to this message instead of the main stream. Named like the message's own `parentMessageId` field (and like sending a reply).
 </ParamField>
 
 <ParamField query="before" type="string">
-  ISO 8601 timestamp. Returns messages created before this time. Used for loading older messages, with `sortDir=desc`. Mutually exclusive with `after`.
+  UTC ISO 8601 timestamp ending in `Z`, such as `toISOString()` output; an offset (`+02:00`) or no zone returns `400 chat/invalid-query`. Returns messages created before this time. Used for loading older messages, with `sortDir=desc`. Mutually exclusive with `after`.
 </ParamField>
 
 <ParamField query="after" type="string">
-  ISO 8601 timestamp. Returns messages created after this time. Used for loading newer messages, with `sortDir=asc` (with `desc`, the page is the newest messages after this time, not the ones right after it). Mutually exclusive with `before`.
+  UTC ISO 8601 timestamp ending in `Z`, such as `toISOString()` output; an offset (`+02:00`) or no zone returns `400 chat/invalid-query`. Returns messages created after this time. Used for loading newer messages, with `sortDir=asc` (with `desc`, the page is the newest messages after this time, not the ones right after it). Mutually exclusive with `before`.
 </ParamField>
 
 <ParamField query="limit" type="number">
@@ -51,7 +51,7 @@ The caller must be a member. Former members (who left) can only read messages up
 
   - `hasReplies` (boolean) — When `true`, returns only messages that have thread replies (`threadReplyCount > 0`). When `false`, returns only messages with no thread replies. This filters by **thread replies**, not quotings (`quotedMessageId`).
 
-  <Note>Threads are one level deep — a reply can never have its own replies. So `filters[hasReplies]=true` combined with `parentId` always returns an empty list; the response includes a `notice` field explaining why.</Note>
+  <Note>Threads are one level deep — a reply can never have its own replies. So `filters[hasReplies]=true` combined with `parentMessageId` always returns an empty list; the response includes a `notice` field explaining why.</Note>
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
@@ -83,7 +83,7 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
 </ResponseField>
 
 <ResponseField name="notice" type="string">
-  Present only when a filter combination can't return results — e.g. `hasReplies: true` together with `parentId`. Explains why the list is empty.
+  Present only when a filter combination can't return results — e.g. `hasReplies: true` together with `parentMessageId`. Explains why the list is empty.
 </ResponseField>
 
 ## Error Responses
@@ -124,6 +124,16 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
     }
     ```
   </Accordion>
+  <Accordion title="Unsupported parentId — 400">
+    The request sent `parentId`. A thread's replies are listed with `parentMessageId`.
+    ```json
+    {
+      "error": "`parentId` isn't supported in v8. To list a thread's replies, send `parentMessageId`.",
+      "code": "chat/unsupported-param",
+      "param": "parentId"
+    }
+    ```
+  </Accordion>
   <Accordion title="Missing User — 400">
     A service key sent no `actingUserId`.
     ```json
@@ -136,7 +146,10 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
     ```
   </Accordion>
   <Accordion title="Invalid Query — 400">
-    For example `sortDir` other than `asc`/`desc`, both `before` and `after`, `sort` (not accepted; use `sortDir`), or an unknown `include` value.
+    For example `sortDir` other than `asc`/`desc`, both `before` and `after`, a `before` or `after` that isn't a UTC (`Z`) datetime, `sort` (not accepted; use `sortDir`), or an unknown `include` value. `error` starts with the field name.
+    ```json
+    { "error": "before: Invalid ISO datetime", "code": "chat/invalid-query" }
+    ```
     ```json
     { "error": "sort: 'sort' is not accepted in v8; use 'sortDir'", "code": "chat/invalid-query" }
     ```

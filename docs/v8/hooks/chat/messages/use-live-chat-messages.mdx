@@ -6,7 +6,7 @@ icon: "cube"
 
 ## Overview
 
-The live, canonical view of a conversation's messages. Results are stored in Redux and kept in sync by `ChatProvider` socket events, so new messages, edits, reactions and reply-count changes appear in real time, and state is shared with `useSendMessage` (optimistic inserts), unread tracking and reconnect catch-up. Can be used for the main message stream or for a specific thread (by passing `parentId`).
+The live, canonical view of a conversation's messages. Results are stored in Redux and kept in sync by `ChatProvider` socket events, so new messages, edits, reactions and reply-count changes appear in real time, and state is shared with `useSendMessage` (optimistic inserts), unread tracking and reconnect catch-up. Can be used for the main message stream or for a specific thread (by passing `parentMessageId`).
 
 <Note>Requires `ChatProvider` in the component tree.</Note>
 
@@ -45,7 +45,7 @@ function MessageList({ conversationId }: { conversationId: string }) {
   The ID of the conversation to load messages for.
 </ParamField>
 
-<ParamField body="parentId" type="string | null">
+<ParamField body="parentMessageId" type="string | null">
   When provided, loads thread replies for this parent message ID instead of the main stream. Replies are sorted ascending (oldest first); `loadOlder` fetches newer replies.
 </ParamField>
 

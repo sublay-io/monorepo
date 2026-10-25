@@ -12,7 +12,7 @@ Two things a service key does **not** get you here:
 - **Mediated transfers still respect the sender's balance.** Only `mintGrant` can create reputation or drive a bucket below zero.
 - **Negative grants are not readable through `listGrants`.** The `amount > 0` filter applies to every caller, service keys included. Read them from the [dashboard grant-history route](/v8/api-reference/reputation-grants/fetch-user-grant-history).
 
-Requires the `reputation` bundle. A `chat-message` target additionally needs the `chat` bundle, and a `spaceId` needs the `spaces` bundle. `createGrant` and `mintGrant` validate `spaceId` identically: an ID naming no space is rejected with `404 reputation-grant/space-not-found` before anything moves, and naming a space on a project without `spaces` is rejected with `403 database/tables-not-available`.
+Requires the `reputation` bundle. A `message` target additionally needs the `chat` bundle, and a `spaceId` needs the `spaces` bundle. `createGrant` and `mintGrant` validate `spaceId` identically: an ID naming no space is rejected with `404 reputation-grant/space-not-found` before anything moves, and naming a space on a project without `spaces` is rejected with `403 database/tables-not-available`.
 
 ---
 
@@ -46,14 +46,14 @@ const grant = await sublay.reputation.createGrant({
 </ParamField>
 <ParamField body="note" type="string | null">Free-text note. Trimmed, up to 2000 characters.</ParamField>
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB. Omit when unused.</ParamField>
-<ParamField body="targetType" type='"entity" | "comment" | "chat-message"'>
+<ParamField body="targetType" type='"entity" | "comment" | "message"'>
   What the grant is for. Supplied together with `targetId`. An annotation only — it never determines which bucket is used, and need not be authored by the recipient.
 </ParamField>
 <ParamField body="targetId" type="string">The rewarded record's ID. Supplied together with `targetType`, and must exist.</ParamField>
 
 **Returns** — `Promise<ReputationGrant>` with `sourceType: "user"`.
 
-Throws `409 reputation-grant/insufficient-reputation` when the sender's bucket is short — nothing moves; that is also the answer when the named space is real but the sender holds no funded bucket in it. A mediated transfer is still checked against the sender's suspension and, for a `chat-message` target, against the sender's active membership of that conversation. A grant is **not idempotent**: a retried call moves the points a second time.
+Throws `409 reputation-grant/insufficient-reputation` when the sender's bucket is short — nothing moves; that is also the answer when the named space is real but the sender holds no funded bucket in it. A mediated transfer is still checked against the sender's suspension and, for a `message` target, against the sender's active membership of that conversation. A grant is **not idempotent**: a retried call moves the points a second time.
 
 ---
 
@@ -88,7 +88,7 @@ await sublay.reputation.mintGrant({
 </ParamField>
 <ParamField body="note" type="string | null">Free-text note. Trimmed, up to 2000 characters.</ParamField>
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB. Omit when unused.</ParamField>
-<ParamField body="targetType" type='"entity" | "comment" | "chat-message"'>What the grant is for. Supplied together with `targetId`.</ParamField>
+<ParamField body="targetType" type='"entity" | "comment" | "message"'>What the grant is for. Supplied together with `targetId`.</ParamField>
 <ParamField body="targetId" type="string">The rewarded record's ID. Supplied together with `targetType`, and must exist.</ParamField>
 
 **Returns** — `Promise<ReputationGrant>` with `sourceType: "app"`.
@@ -116,7 +116,7 @@ console.log(summary?.total, "points from", summary?.count, "people");
 
 <ParamField body="recipientId" type="string">What this user received.</ParamField>
 <ParamField body="senderId" type="string">What this user sent.</ParamField>
-<ParamField body="targetType" type='"entity" | "comment" | "chat-message"'>Who rewarded this item. Supplied together with `targetId`.</ParamField>
+<ParamField body="targetType" type='"entity" | "comment" | "message"'>Who rewarded this item. Supplied together with `targetId`.</ParamField>
 <ParamField body="targetId" type="string">The rewarded record's ID. Supplied together with `targetType`.</ParamField>
 <ParamField body="page" type="number">Page number (1-indexed). Defaults to `1`.</ParamField>
 <ParamField body="limit" type="number">Page size. Defaults to `20`; the maximum is `100`. A larger value is rejected with `400 reputation-grant/invalid-query` rather than clamped.</ParamField>
@@ -133,7 +133,7 @@ console.log(summary?.total, "points from", summary?.count, "people");
 **Returns** — `Promise<{ data: ReputationGrant[]; pagination; summary? }>`. The `summary` block (`{ total, count, viewerTotal }`) is returned **only** on the target filter shape.
 
 <Note>
-  **Grants on chat messages are private to their conversation, for a service key too.** Every shape asks whether the viewer can see the underlying message and withholds the grant if they cannot. With `actingUserId` the viewer is that user, exactly as their own token; without it, the key is treated as a signed-in user in no conversation and gets no chat-message grants.
+  **Grants on chat messages are private to their conversation, for a service key too.** Every shape asks whether the viewer can see the underlying message and withholds the grant if they cannot. With `actingUserId` the viewer is that user, exactly as their own token; without it, the key is treated as a signed-in user in no conversation and gets no grants on chat messages.
 </Note>
 
 <Warning>

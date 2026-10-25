@@ -1,4 +1,6 @@
 import { baseApi } from "./baseApi";
+import { buildSearchParams } from "../../utils/searchParams";
+import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import type {
   Space,
   DeleteSpaceResponse,
@@ -35,10 +37,8 @@ interface FetchSpacesParams {
   limit?: number;
   sortBy?: SpaceListSortByOptions;
   sortDir?: "asc" | "desc";
-  searchSlug?: string | null;
-  searchName?: string | null;
-  searchDescription?: string | null;
-  searchAny?: string | null;
+  query?: string | null;
+  searchFields?: SpaceSearchFields | null;
   // No readingPermission filter: it governs who can read a space's contents,
   // not which spaces are discoverable. The server returns all spaces
   // regardless of it — discoverability is driven by `visibility`, which the
@@ -75,15 +75,11 @@ export const spacesApi = baseApi.injectEndpoints({
         if (params.limit !== undefined) queryParams.append("limit", params.limit.toString());
         if (params.sortBy) queryParams.append("sortBy", params.sortBy);
         if (params.sortDir) queryParams.append("sortDir", params.sortDir);
-        if (params.searchSlug) queryParams.append("searchSlug", params.searchSlug);
-        if (params.searchName) queryParams.append("searchName", params.searchName);
-        if (params.searchDescription) queryParams.append("searchDescription", params.searchDescription);
-        if (params.searchAny) queryParams.append("searchAny", params.searchAny);
-        // memberOf is an opt-in flag: the server only accepts the literal "true".
-        // Sending "false" (the default) fails validation with a 400. Use a strict
-        // === true check so a stray non-boolean (no runtime type enforcement) can't
-        // be coerced into wrongly opting in.
-        if (params.memberOf === true) queryParams.append("memberOf", "true");
+        const search = buildSearchParams(params.query, params.searchFields);
+        if (search.query) queryParams.append("query", search.query);
+        if (search.searchFields) queryParams.append("searchFields", search.searchFields);
+        // Sent as "true" / "false"; "false" lists the same as leaving it out.
+        if (typeof params.memberOf === "boolean") queryParams.append("memberOf", String(params.memberOf));
         if (params.parentSpaceId !== undefined) {
           // Convert null to "null" string for API
           queryParams.append("parentSpaceId", params.parentSpaceId === null ? "null" : params.parentSpaceId);

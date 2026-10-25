@@ -17,7 +17,7 @@ Returns a paginated list of reports for spaces where the authenticated user has 
 </ParamField>
 
 <ParamField query="targetType" type="string">
-  Filter by content type. One of: `entity`, `comment`, `message`. Message
+  Filter by content type. One of: `entity`, `comment`, `message`, matched exactly (another case returns `400 report/invalid-query`). Message
   reports appear in this queue only for conversations attached to a space —
   DM and group reports have no space, so they are project-level and surface in
   the Sublay dashboard instead.
@@ -103,6 +103,13 @@ Each report includes the full reported content (`target`), the space it belongs 
       "code": "report/unsupported-param",
       "param": "sortBy"
     }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Query — 400">
+    Returned for an invalid query value, such as a `targetType` that isn't exactly `entity`, `comment` or `message`. `error` starts with the field name.
+
+    ```json
+    { "error": "targetType: Invalid option: expected one of \"comment\"|\"entity\"|\"message\"", "code": "report/invalid-query" }
     ```
   </Accordion>
   <Accordion title="Missing User — 400">

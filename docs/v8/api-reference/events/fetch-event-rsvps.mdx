@@ -35,7 +35,7 @@ Aggregate RSVP **counts** are always public via the event's `rsvpCounts` — thi
 </ParamField>
 
 <ParamField query="status" type="string">
-  Comma-separated RSVP statuses to filter by, e.g. `"going,maybe"`. When omitted, all statuses are returned.
+  Comma-separated RSVP statuses to filter by, e.g. `"going,maybe"`: any of `going`, `maybe` and `not_going`, matched exactly (another case returns `400 event/invalid-query`). When omitted, all statuses are returned.
 </ParamField>
 
 ## Response
@@ -53,6 +53,12 @@ Returns a paginated response: `{ data: EventRsvp[], pagination: {...} }`.
   <Accordion title="Guest List Hidden — 403">
     ```json
     { "error": "This event's guest list is not visible.", "code": "event/guest-list-hidden" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Query — 400">
+    Returned for an invalid query value, such as a `status` entry that isn't exactly `going`, `maybe` or `not_going`. `error` starts with the field name.
+    ```json
+    { "error": "status.0: Invalid option: expected one of \"going\"|\"maybe\"|\"not_going\"", "code": "event/invalid-query" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

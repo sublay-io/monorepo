@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { buildSearchParams } from "../../../utils/searchParams";
 import useProject from "../../projects/useProject";
 import { EstablishedConnection } from "../../../interfaces/models/Connection";
 import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
@@ -35,8 +36,7 @@ function useFetchConnectionsByUserId(): (props: FetchConnectionsByUserIdParams) 
       const params: Record<string, any> = {
         page,
         limit,
-        query,
-        searchFields,
+        ...buildSearchParams(query, searchFields),
         ...buildSpaceReputationParams({
           spaceReputation,
           spaceReputationId,

@@ -111,7 +111,7 @@ describe("useCollectionsActions", () => {
       await result.current.createCollection({
         projectId: "test-project",
         parentCollectionId: "root",
-        collectionName: "My List",
+        name: "My List",
       });
     });
 
@@ -125,7 +125,7 @@ describe("useCollectionsActions", () => {
       await result.current.createCollection({
         projectId: "",
         parentCollectionId: "root",
-        collectionName: "My List",
+        name: "My List",
       });
     });
 

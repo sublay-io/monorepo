@@ -130,7 +130,7 @@ describe("collectionsApi", () => {
       collectionsApi.endpoints.createCollection.initiate({
         projectId: "test-project",
         parentCollectionId: "root",
-        collectionName: "My List",
+        name: "My List",
       }),
     );
 

@@ -19,11 +19,11 @@ To fetch a single conversation in this same shape — one that was paginated out
 </ParamField>
 
 <ParamField query="cursor" type="string">
-  The `lastMessageAt` timestamp of the last item in the previous page. Used for cursor pagination. Omit for the first page.
+  The `lastMessageAt` timestamp of the last item in the previous page. Used for cursor pagination. Omit for the first page. A UTC ISO 8601 timestamp ending in `Z`, as the response gives it; an offset (`+02:00`) or no zone returns `400 chat/invalid-query`.
 </ParamField>
 
 <ParamField query="cursorCreatedAt" type="string">
-  The `createdAt` timestamp of the last item in the previous page. Required together with `cursor` when paginating.
+  The `createdAt` timestamp of the last item in the previous page. Required together with `cursor` when paginating. A UTC ISO 8601 timestamp ending in `Z`, as the response gives it; an offset (`+02:00`) or no zone returns `400 chat/invalid-query`.
 </ParamField>
 
 <ParamField query="limit" type="number">
@@ -57,7 +57,7 @@ To fetch a single conversation in this same shape — one that was paginated out
     </ResponseField>
 
     <ResponseField name="lastMessage" type="ChatMessage | null">
-      The most recent visible [message](/v8/data-models/chat-message) in the conversation, or `null` if there is none. The same object the `message:created` socket event delivers, so both paths render identically.
+      The most recent visible [message](/v8/data-models/chat-message) in the conversation, or `null` if there is none. A preview with only the fields below, not the full message the `message:created` socket event delivers: `content` is cut to 100 characters, `user` is set only in group and space conversations, and fields such as `mentions`, `quotedMessage`, `reactionCounts` and `parentMessageId` are not included. Its timestamps are UTC ISO strings ending in `Z`.
 
       <Expandable title="lastMessage fields">
         <ResponseField name="id" type="string">
@@ -142,6 +142,12 @@ To fetch a single conversation in this same shape — one that was paginated out
     A service key sent no `actingUserId`.
     ```json
     { "error": "A service key must send actingUserId: the user this request acts as.", "code": "chat/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Query — 400">
+    For example a `cursor` or `cursorCreatedAt` that isn't a UTC (`Z`) datetime, or a `limit` above 50. `error` starts with the field name.
+    ```json
+    { "error": "cursor: Invalid ISO datetime", "code": "chat/invalid-query" }
     ```
   </Accordion>
 </AccordionGroup>

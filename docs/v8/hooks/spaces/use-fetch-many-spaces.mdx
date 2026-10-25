@@ -23,7 +23,7 @@ function SpaceSearch() {
   const fetchSpaces = useFetchManySpaces();
 
   const handleSearch = async (query: string) => {
-    const result = await fetchSpaces({ searchAny: query, sortBy: "createdAt" });
+    const result = await fetchSpaces({ query, sortBy: "createdAt" });
     console.log(result.data, result.pagination);
   };
 }
@@ -47,24 +47,16 @@ function SpaceSearch() {
   Direction, `"asc"` or `"desc"`, for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
-<ParamField path="searchSlug" type="string | null">
-  Filter spaces whose slug contains this value.
+<ParamField path="query" type="string | null">
+  Free-text search term, matched as a case-insensitive substring. A blank value is left out of the request, and `searchFields` with it.
 </ParamField>
 
-<ParamField path="searchName" type="string | null">
-  Filter spaces whose name contains this value.
-</ParamField>
-
-<ParamField path="searchDescription" type="string | null">
-  Filter spaces whose description contains this value.
-</ParamField>
-
-<ParamField path="searchAny" type="string | null">
-  Search across name, slug, and description simultaneously.
+<ParamField path="searchFields" type='"slug" | "name" | "description" | null'>
+  The one field `query` is matched against. Leave it out to match the slug, the name or the description.
 </ParamField>
 
 <ParamField path="memberOf" type="boolean">
-  When `true`, returns only spaces where the current user is an active member.
+  When `true`, returns only spaces where the current user is an active member. `false` lists the same as leaving it out.
 </ParamField>
 
 <ParamField path="parentSpaceId" type="string | null">

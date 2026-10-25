@@ -70,7 +70,7 @@ goToRoot();
 `createCollection` creates a new sub-collection inside the current collection.
 
 ```tsx
-await createCollection({ collectionName: "To Read" });
+await createCollection({ name: "To Read" });
 ```
 
 <Note>You cannot create a collection at the root of `useCollections` — there is no concept of "creating inside root" vs "creating inside a sub-collection" from the hook's perspective. The current collection is always the parent.</Note>

@@ -3,13 +3,15 @@ import { SublayHttpClient } from "../../core/client";
 export interface ModerateSpaceChatMessageProps {
   spaceId: string;
   messageId: string;
-  moderationStatus: "removed";
-  moderationReason?: string;
+  /** Chat messages are never held for approval, so `"remove"` is the only action. */
+  action: "remove";
+  /** Why the message was removed. Trimmed; at most 1000 characters. */
+  reason?: string;
 }
 
 export interface ModerateSpaceChatMessageResponse {
   message: string;
-  moderationStatus: string;
+  moderationStatus: "removed";
 }
 
 export async function moderateSpaceChatMessage(

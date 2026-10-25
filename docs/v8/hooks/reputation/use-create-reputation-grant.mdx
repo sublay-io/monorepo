@@ -53,7 +53,7 @@ function RewardAnswer({ answer }) {
 <ParamField path="metadata" type="Record<string, any>">
   Arbitrary key-value data. Up to 1 MB. Omit when unused.
 </ParamField>
-<ParamField path="targetType" type='"entity" | "comment" | "chat-message"'>
+<ParamField path="targetType" type='"entity" | "comment" | "message"'>
   What the grant is for. Must be supplied together with `targetId`. The target is an annotation — it never determines which bucket is used, and it need not be authored by the recipient.
 </ParamField>
 <ParamField path="targetId" type="string">

@@ -141,7 +141,7 @@ describe("node-sdk events — request shaping", () => {
 
   it("fetchEventRsvps strips eventId into the path and passes the rest as params", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchEventRsvps(client, { eventId: "ev1", status: "going,maybe", actingUserId: "u1" });
+    await fetchEventRsvps(client, { eventId: "ev1", status: ["going", "maybe"], actingUserId: "u1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/events/ev1/rsvps", {
       params: { status: "going,maybe", actingUserId: "u1" },
     });

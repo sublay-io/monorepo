@@ -43,10 +43,10 @@ function SpaceDirectory() {
 
 ```tsx
 // Search by name
-fetchSpaces({ sortBy: "createdAt", searchName: "gaming" });
+fetchSpaces({ sortBy: "createdAt", query: "gaming", searchFields: "name" });
 
-// Search across all fields (name, slug, description)
-fetchSpaces({ sortBy: "createdAt", searchAny: "design" });
+// Search the slug, name and description (null clears a searchFields set by an earlier call)
+fetchSpaces({ sortBy: "createdAt", query: "design", searchFields: null });
 
 // Filter to spaces the current user is a member of
 fetchSpaces({ sortBy: "createdAt", memberOf: true });

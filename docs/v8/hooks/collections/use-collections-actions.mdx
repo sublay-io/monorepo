@@ -54,7 +54,7 @@ function QuickSaveButton({ entityId, collectionId, projectId }) {
 
 ### CRUD Operations
 
-<ResponseField name="createCollection" type="({ projectId, parentCollectionId, collectionName }: ...) => Promise<void>">
+<ResponseField name="createCollection" type="({ projectId, parentCollectionId, name }: ...) => Promise<void>">
   Create a new sub-collection under the specified parent collection. Navigates into the new collection after creation.
 </ResponseField>
 

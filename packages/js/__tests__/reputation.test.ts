@@ -76,11 +76,11 @@ describe("js-sdk reputation — request shaping", () => {
   it("listGrants passes the target filter shape through", async () => {
     const { client, projectInstance } = makeClient();
     await listGrants(client, {
-      targetType: "chat-message",
+      targetType: "message",
       targetId: "message-1",
     });
     expect(projectInstance.get).toHaveBeenCalledWith("/reputation-grants", {
-      params: { targetType: "chat-message", targetId: "message-1" },
+      params: { targetType: "message", targetId: "message-1" },
     });
   });
 });
@@ -243,7 +243,7 @@ describe("js-sdk reputation — target pair contract", () => {
     const { client, projectInstance } = makeClient();
 
     // @ts-expect-error targetType without targetId is a half-filled target.
-    await listGrants(client, { targetType: "chat-message" });
+    await listGrants(client, { targetType: "message" });
 
     // @ts-expect-error targetId without targetType is a half-filled target.
     await listGrants(client, { targetId: "message-1" });
@@ -255,12 +255,12 @@ describe("js-sdk reputation — target pair contract", () => {
 
     await listGrants(client, { recipientId: "r1" });
     await listGrants(client, {
-      targetType: "chat-message",
+      targetType: "message",
       targetId: "message-1",
     });
     const [, complete] = projectInstance.get.mock.calls[4];
     expect(complete.params).toMatchObject({
-      targetType: "chat-message",
+      targetType: "message",
       targetId: "message-1",
     });
   });

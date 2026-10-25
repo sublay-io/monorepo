@@ -39,7 +39,7 @@ describe("MessageThreadProvider", () => {
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/chat/conversations/conversation-1/messages");
-    expect(call.config?.params).toMatchObject({ parentId: "message-1" });
+    expect(call.config?.params).toMatchObject({ parentMessageId: "message-1" });
   });
 
   it("sendReply attaches the thread's messageId as parentMessageId", async () => {

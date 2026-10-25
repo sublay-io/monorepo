@@ -9,7 +9,7 @@ import { SpaceReputationContextParams } from "../../../interfaces/SpaceReputatio
 export interface UseFetchManyChatMessagesWrapperProps extends SpaceReputationContextParams {
   conversationId: string;
   /** Restrict to replies of this message (thread view). */
-  parentId?: string | null;
+  parentMessageId?: string | null;
   /** Page size. Defaults to `50`. */
   limit?: number;
   /**
@@ -49,7 +49,7 @@ function useFetchManyChatMessagesWrapper(
 ): UseFetchManyChatMessagesWrapperValues {
   const {
     conversationId,
-    parentId,
+    parentMessageId,
     limit = 50,
     sortDir = "desc",
     includeFiles,
@@ -97,7 +97,7 @@ function useFetchManyChatMessagesWrapper(
     try {
       const res = await fetchMany({
         conversationId,
-        parentId,
+        parentMessageId,
         limit,
         sortDir,
         includeFiles,
@@ -116,7 +116,7 @@ function useFetchManyChatMessagesWrapper(
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchMany, conversationId, parentId, limit, sortDir, includeFiles, includeGrants, filtersKey, reputationKey, advanceCursor]);
+  }, [fetchMany, conversationId, parentMessageId, limit, sortDir, includeFiles, includeGrants, filtersKey, reputationKey, advanceCursor]);
 
   const loadMore = useCallback(async () => {
     if (loadingRef.current || !hasMoreRef.current || !cursorRef.current) return;
@@ -125,7 +125,7 @@ function useFetchManyChatMessagesWrapper(
     try {
       const res = await fetchMany({
         conversationId,
-        parentId,
+        parentMessageId,
         limit,
         sortDir,
         includeFiles,
@@ -147,7 +147,7 @@ function useFetchManyChatMessagesWrapper(
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchMany, conversationId, parentId, limit, sortDir, includeFiles, includeGrants, filtersKey, reputationKey, advanceCursor]);
+  }, [fetchMany, conversationId, parentMessageId, limit, sortDir, includeFiles, includeGrants, filtersKey, reputationKey, advanceCursor]);
 
   useEffect(() => {
     refetch();

@@ -103,7 +103,8 @@ Fetches a paginated list of top-level spaces, with optional text search.
 const { data, pagination } = await sublay.spaces.fetchManySpaces({
   page: 1,
   limit: 20,
-  searchName: "photo",
+  query: "photo",
+  searchFields: "name",
   sortBy: "members",
 });
 ```
@@ -124,24 +125,16 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
   Direction, `"asc"` or `"desc"`, for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
-<ParamField body="searchName" type="string">
-  Filter spaces whose name matches the query.
+<ParamField body="query" type="string">
+  Free-text search term, matched as a case-insensitive substring. Trimmed; must not be blank.
 </ParamField>
 
-<ParamField body="searchSlug" type="string">
-  Filter spaces whose slug matches the query.
+<ParamField body="searchFields" type='"slug" | "name" | "description"'>
+  The one field `query` is matched against. Leave it out to match the slug, the name or the description.
 </ParamField>
 
-<ParamField body="searchDescription" type="string">
-  Filter spaces whose description matches the query.
-</ParamField>
-
-<ParamField body="searchAny" type="string">
-  Filter spaces matching the query across name, slug, or description.
-</ParamField>
-
-<ParamField body="memberOf" type='"true"'>
-  When `"true"`, returns only spaces `actingUserId` is an active member of. Without `actingUserId` it returns `401 space/auth-required`.
+<ParamField body="memberOf" type='"true" | "false"'>
+  When `"true"`, returns only spaces `actingUserId` is an active member of. Without `actingUserId` it returns `401 space/auth-required`. `"false"` lists the same as leaving it out.
 </ParamField>
 
 <ParamField body="parentSpaceId" type='string | "null"'>

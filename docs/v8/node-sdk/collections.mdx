@@ -60,7 +60,7 @@ Creates a new sub-collection under an existing parent collection.
 ```typescript
 const collection = await sublay.collections.createNewCollection({
   collectionId: "col_root123",
-  collectionName: "Recipes",
+  name: "Recipes",
   actingUserId: "usr_abc123",
 });
 ```
@@ -69,8 +69,8 @@ const collection = await sublay.collections.createNewCollection({
   The parent collection under which to create the sub-collection.
 </ParamField>
 
-<ParamField body="collectionName" type="string" required>
-  The name of the new collection.
+<ParamField body="name" type="string" required>
+  The name of the new collection. Trimmed; 1 to 255 characters after trimming.
 </ParamField>
 
 <ParamField body="actingUserId" type="string" required>

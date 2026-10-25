@@ -26,8 +26,8 @@ describe("node-sdk chat (messages) — request shaping", () => {
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/chat/conversations/conv1/messages",
       { actingUserId: "u1", content: "hi" },
-      { params: { spaceReputationId: undefined, spaceReputationDescendants: undefined } },
     );
+    expect(projectInstance.post.mock.calls[0]).toHaveLength(2);
   });
 
   it("sendMessage sends multipart FormData when files are attached", async () => {
@@ -43,9 +43,7 @@ describe("node-sdk chat (messages) — request shaping", () => {
     const [path, formData, config] = projectInstance.post.mock.calls[0];
     expect(path).toBe("/chat/conversations/conv1/messages");
     expect(formData).toBeInstanceOf(FormData);
-    expect(config).toEqual({
-      params: { spaceReputationId: undefined, spaceReputationDescendants: undefined },
-    });
+    expect(config).toBeUndefined();
 
     const fd = formData as FormData;
     expect(fd.get("actingUserId")).toBe("u1");
@@ -54,7 +52,7 @@ describe("node-sdk chat (messages) — request shaping", () => {
     expect((fd.get("files") as File).name).toBe("photo.png");
   });
 
-  it("sendMessage sends spaceReputation params via params, never in the JSON body", async () => {
+  it("sendMessage sends the spaceReputation options in the JSON body, never the query", async () => {
     const { client, projectInstance } = makeClient();
     await sendMessage(client, {
       conversationId: "conv1",
@@ -65,9 +63,29 @@ describe("node-sdk chat (messages) — request shaping", () => {
     });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/chat/conversations/conv1/messages",
-      { actingUserId: "u1", content: "hi" },
-      { params: { spaceReputationId: "rep1", spaceReputationDescendants: true } },
+      {
+        actingUserId: "u1",
+        content: "hi",
+        spaceReputationId: "rep1",
+        spaceReputationDescendants: true,
+      },
     );
+    expect(projectInstance.post.mock.calls[0]).toHaveLength(2);
+  });
+
+  it("sendMessage sends the spaceReputation options as form fields on a multipart send", async () => {
+    const { client, projectInstance } = makeClient();
+    await sendMessage(client, {
+      conversationId: "conv1",
+      actingUserId: "u1",
+      spaceReputation: { spaceId: "rep1", includeDescendants: false },
+      files: [{ file: new Uint8Array([1]), filename: "a.png", mimeType: "image/png" }],
+    });
+    const [, formData, config] = projectInstance.post.mock.calls[0];
+    expect(config).toBeUndefined();
+    const fd = formData as FormData;
+    expect(fd.get("spaceReputationId")).toBe("rep1");
+    expect(fd.get("spaceReputationDescendants")).toBe("false");
   });
 
   it("getMessage strips conversationId/messageId into the path and passes the rest as params", async () => {

@@ -58,7 +58,9 @@ function useSendMessage({
       if (!projectId) throw new Error("No projectId available.");
       if (!conversationId) throw new Error("No conversationId provided.");
 
-      const reputationParams = buildSpaceReputationParams({
+      // Body fields like everything else on a POST: JSON keys, or form fields
+      // on a multipart send.
+      const reputationFields = buildSpaceReputationParams({
         spaceReputation,
         spaceReputationId,
         spaceReputationDescendants,
@@ -111,11 +113,18 @@ function useSendMessage({
             formData.append("metadata", JSON.stringify(metadata));
           if (quotedMessageId) formData.append("quotedMessageId", quotedMessageId);
           if (parentMessageId) formData.append("parentMessageId", parentMessageId);
+          if (reputationFields.spaceReputationId !== undefined)
+            formData.append("spaceReputationId", reputationFields.spaceReputationId);
+          if (reputationFields.spaceReputationDescendants !== undefined)
+            formData.append(
+              "spaceReputationDescendants",
+              String(reputationFields.spaceReputationDescendants)
+            );
           files.forEach((file) => formData.append("files", file));
           response = await axios.post(
             `/${projectId}/chat/conversations/${conversationId}/messages`,
             formData,
-            { headers: { "Content-Type": "multipart/form-data" }, params: reputationParams }
+            { headers: { "Content-Type": "multipart/form-data" } }
           );
         } else {
           // JSON body for text/gif-only messages
@@ -129,8 +138,8 @@ function useSendMessage({
               ...(metadata !== undefined && { metadata }),
               ...(quotedMessageId !== undefined && { quotedMessageId }),
               ...(parentMessageId !== undefined && { parentMessageId }),
-            },
-            { params: reputationParams }
+              ...reputationFields,
+            }
           );
         }
 

@@ -30,21 +30,23 @@ export async function sendMessage(
   const {
     conversationId,
     files,
-    // The server reads these from `req.query`, not the body, so they are
-    // forwarded as query params (in both the JSON and multipart branches),
-    // flattened via the helper so the `spaceReputation` object never reaches
-    // the serializer.
+    // Body fields like everything else on a POST (JSON keys, or form fields on
+    // a multipart send), flattened via the helper so the `spaceReputation`
+    // object never reaches the serializer.
     spaceReputation,
     spaceReputationId,
     spaceReputationDescendants,
     ...body
   } = data;
   const path = `/chat/conversations/${conversationId}/messages`;
-  const params = buildSpaceReputationParams({
-    spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
-  });
+  const fields = {
+    ...body,
+    ...buildSpaceReputationParams({
+      spaceReputation,
+      spaceReputationId,
+      spaceReputationDescendants,
+    }),
+  };
 
   if (files && files.length > 0) {
     const formData = new FormData();
@@ -55,17 +57,14 @@ export async function sendMessage(
     // Multer delivers non-file fields as strings; the server's
     // parseChatMessageFields middleware JSON-parses gif/mentions/metadata back,
     // so object/array fields must be stringified here.
-    appendFields(formData, body);
+    appendFields(formData, fields);
     const response = await client.projectInstance.post<ChatMessage>(
       path,
-      formData,
-      { params }
+      formData
     );
     return response.data;
   }
 
-  const response = await client.projectInstance.post<ChatMessage>(path, body, {
-    params,
-  });
+  const response = await client.projectInstance.post<ChatMessage>(path, fields);
   return response.data;
 }

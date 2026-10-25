@@ -42,32 +42,32 @@ export async function sendMessage(
   } = data;
   const url = `/chat/conversations/${conversationId}/messages`;
 
-  // Space-reputation opts go as query params (never body fields), so they
-  // travel the same way for both the JSON and multipart variants.
-  const params = buildSpaceReputationParams({
-    spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
-  });
+  // Space-reputation opts are body fields, like everything else on a POST: JSON
+  // keys, or form fields on a multipart send (booleans become "true"/"false").
+  const fields = {
+    ...body,
+    ...buildSpaceReputationParams({
+      spaceReputation,
+      spaceReputationId,
+      spaceReputationDescendants,
+    }),
+  };
 
   // With attachments, send multipart: object fields are JSON-stringified (the
   // server parses them back) and the files are appended. Otherwise send JSON.
   if (files && files.length > 0) {
     const formData = new FormData();
-    appendFields(formData, body);
+    appendFields(formData, fields);
     for (const f of files) {
       appendFile(formData, "files", f.file, f.filename, f.mimeType);
     }
     const response = await client.projectInstance.post<ChatMessage>(
       url,
-      formData,
-      { params }
+      formData
     );
     return response.data;
   }
 
-  const response = await client.projectInstance.post<ChatMessage>(url, body, {
-    params,
-  });
+  const response = await client.projectInstance.post<ChatMessage>(url, fields);
   return response.data;
 }

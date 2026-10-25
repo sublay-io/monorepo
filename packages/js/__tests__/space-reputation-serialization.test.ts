@@ -25,14 +25,13 @@ import { makeClient } from "./helpers/client";
  * axios (so a surviving `spaceReputation` key fails the test), AND we run that
  * params object through axios's real default param serializer to prove the
  * wire query string is the flat `spaceReputationId=…&spaceReputationDescendants=…`
- * — never bracketed, never dropped. For `askContent` (URLSearchParams) we
- * assert the actual URL.
+ * — never bracketed, never dropped. For the POSTs (searchContent, sendMessage,
+ * askContent) the flat keys go in the body, so we assert the body.
  *
  * Coverage spans every js-sdk forwarding shape:
  *  - `params: data` bracket-leak: fetchManyEntities (context), fetchUserByForeignId (users)
  *  - rest-spread bracket-leak:    fetchEntity (context), fetchUserById (users)
- *  - silent-drop:                 searchContent (context), sendMessage (context)
- *  - URLSearchParams generator:   askContent (context)
+ *  - POST body spread:            searchContent, sendMessage, askContent (context)
  */
 
 /**
@@ -146,28 +145,34 @@ describe("space-reputation serialization guard — rest-spread bracket-leak shap
   });
 });
 
-describe("space-reputation serialization guard — silent-drop shape", () => {
-  it("searchContent (context) routes the object form into params, not dropped", async () => {
+describe("space-reputation serialization guard — POST body shape", () => {
+  it("searchContent (context) flattens the object form into the body, no query", async () => {
     const { client, projectInstance } = makeClient();
     await searchContent(client, { query: "hi", ...OBJECT_FORM });
-    expectFlatParams(getParams(projectInstance.post));
-    // And it must not have leaked into the POST body either.
-    const [, body] = projectInstance.post.mock.calls[0];
-    expect(body).not.toHaveProperty("spaceReputation");
-    expect(body).not.toHaveProperty("spaceReputationId");
+    const call = projectInstance.post.mock.calls[0];
+    expect(call).toHaveLength(2);
+    expect(call[1]).toEqual({
+      query: "hi",
+      spaceReputationId: "space-1",
+      spaceReputationDescendants: true,
+    });
   });
 
-  it("sendMessage (context) routes the object form into params, not dropped", async () => {
+  it("sendMessage (context) flattens the object form into the body, no query", async () => {
     const { client, projectInstance } = makeClient();
     await sendMessage(client, { conversationId: "c1", content: "hi", ...OBJECT_FORM });
-    expectFlatParams(getParams(projectInstance.post));
-    const [, body] = projectInstance.post.mock.calls[0];
-    expect(body).not.toHaveProperty("spaceReputation");
+    const call = projectInstance.post.mock.calls[0];
+    expect(call).toHaveLength(2);
+    expect(call[1]).toEqual({
+      content: "hi",
+      spaceReputationId: "space-1",
+      spaceReputationDescendants: true,
+    });
   });
 });
 
-describe("space-reputation serialization guard — askContent URLSearchParams path", () => {
-  it("builds a flat query string from the object form, never [object Object]", async () => {
+describe("space-reputation serialization guard — askContent body", () => {
+  it("flattens the object form into the JSON body, no query string", async () => {
     const client = new SublayHttpClient({
       projectId: "proj1",
       initialTokens: { accessToken: "tok-a", refreshToken: "refresh-a" },
@@ -179,12 +184,13 @@ describe("space-reputation serialization guard — askContent URLSearchParams pa
 
     await drain(askContent(client, { query: "hi", ...OBJECT_FORM }));
 
-    const [url] = fetchMock.mock.calls[0];
-    expect(url).toBe(
-      "https://api.sublay.io/v8/proj1/search/ask?spaceReputationId=space-1&spaceReputationDescendants=true"
-    );
-    expect(url).not.toContain("spaceReputation%5B");
-    expect(url).not.toContain("object");
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("https://api.sublay.io/v8/proj1/search/ask");
+    expect(JSON.parse(init.body)).toEqual({
+      query: "hi",
+      spaceReputationId: "space-1",
+      spaceReputationDescendants: true,
+    });
   });
 });
 

@@ -24,9 +24,8 @@ export interface BuildSpaceReputationParamsInput {
 }
 
 /**
- * Flat output handed to the query-string serializer (axios `params` or the
- * `askContent` `URLSearchParams`). Both keys are omitted when unset — never
- * bracketed, never nested.
+ * Flat output merged into a GET's query (axios `params`) or a POST's body. Both
+ * keys are omitted when unset — never bracketed, never nested.
  */
 export interface SpaceReputationFlatParams {
   spaceReputationId?: string;
@@ -52,16 +51,15 @@ function isProduction(): boolean {
 
 /**
  * Normalize the `spaceReputation` object or the deprecated flat props down to
- * the flat query params the server understands
+ * the flat params the server understands
  * (`spaceReputationId` / `spaceReputationDescendants`).
  *
  * **Critical:** this is the only thing that prevents the nested
- * `spaceReputation` object from reaching a query-string serializer. Axios would
- * bracket-encode it (`spaceReputation[spaceId]=…`) and the `askContent`
- * `URLSearchParams` path would stringify it to `[object Object]`; the server
- * ignores both — silently no-opping the new (primary) form. Every
- * reputation-consuming module must route the object through here and merge only
- * the flat output.
+ * `spaceReputation` object from reaching the server nested. In a query axios
+ * would bracket-encode it (`spaceReputation[spaceId]=…`), and in a body it would
+ * arrive as an unknown key; the server ignores both — silently no-opping the
+ * new (primary) form. Every reputation-consuming module must route the object
+ * through here and merge only the flat output.
  *
  * Rules (mirrors the `@sublay/core` / `@sublay/node` helper contract):
  * - **Object wins when present.** "Present" means the `spaceReputation` key was

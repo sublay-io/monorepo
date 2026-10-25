@@ -89,6 +89,30 @@ describe("useAskContent", () => {
     });
   });
 
+  it("sends the spaceReputation options in the body, never the query string", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(makeStreamResponse([sse("done", {})]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHookWithAxios(() => useAskContent());
+
+    act(() => {
+      result.current.ask({
+        query: "hello",
+        spaceReputation: { spaceId: "space-1", includeDescendants: true },
+      });
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("https://api.sublay.io/v8/test-project/search/ask");
+    expect(JSON.parse(init.body)).toEqual({
+      query: "hello",
+      spaceReputationId: "space-1",
+      spaceReputationDescendants: true,
+    });
+  });
+
   it("opts react-native-fetch-api into incremental streaming via reactNative.textStreaming", async () => {
     const fetchMock = vi.fn().mockResolvedValue(makeStreamResponse([sse("done", {})]));
     vi.stubGlobal("fetch", fetchMock);

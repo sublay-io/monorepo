@@ -3,7 +3,7 @@ import type { MatchUsersResponse } from "../src/modules/search/matchUsers";
 import { makeClient } from "./helpers/mockClient";
 
 describe("node-sdk search — request shaping", () => {
-  it("searchContent posts the body minus space-reputation fields, which go in params instead", async () => {
+  it("searchContent posts everything in the body, the space-reputation options too", async () => {
     const { client, projectInstance } = makeClient();
     await searchContent(client, {
       query: "hello",
@@ -13,9 +13,14 @@ describe("node-sdk search — request shaping", () => {
     });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/search/content",
-      { query: "hello", sourceTypes: ["entity"] },
-      { params: { spaceReputationId: "rep1", spaceReputationDescendants: true } },
+      {
+        query: "hello",
+        sourceTypes: ["entity"],
+        spaceReputationId: "rep1",
+        spaceReputationDescendants: true,
+      },
     );
+    expect(projectInstance.post.mock.calls[0]).toHaveLength(2);
   });
 
   it("searchUsers posts the full body to /search/users", async () => {
@@ -45,7 +50,7 @@ describe("node-sdk search — request shaping", () => {
     });
   });
 
-  it("askContent posts the body minus space-reputation fields, which go in params instead (plain request, no streaming)", async () => {
+  it("askContent posts everything in the body, the space-reputation options too (plain request, no streaming)", async () => {
     const { client, projectInstance } = makeClient();
     await askContent(client, {
       query: "what is this space about?",
@@ -55,9 +60,14 @@ describe("node-sdk search — request shaping", () => {
     });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/search/ask",
-      { query: "what is this space about?", spaceId: "s1" },
-      { params: { spaceReputationId: "rep1", spaceReputationDescendants: false } },
+      {
+        query: "what is this space about?",
+        spaceId: "s1",
+        spaceReputationId: "rep1",
+        spaceReputationDescendants: false,
+      },
     );
+    expect(projectInstance.post.mock.calls[0]).toHaveLength(2);
   });
 
   it("matchUsers POSTs the full body to /match/users", async () => {

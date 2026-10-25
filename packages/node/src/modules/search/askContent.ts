@@ -34,16 +34,14 @@ export async function askContent(
 ): Promise<AskContentResponse> {
   const { spaceReputation, spaceReputationId, spaceReputationDescendants, ...body } =
     data;
-  const response = await client.projectInstance.post<AskContentResponse>(
-    "/search/ask",
-    body,
-    {
-      params: buildSpaceReputationParams({
-        spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
-      }),
-    }
-  );
+  // Every field goes in the body on a POST, the space-reputation options too.
+  const response = await client.projectInstance.post<AskContentResponse>("/search/ask", {
+    ...body,
+    ...buildSpaceReputationParams({
+      spaceReputation,
+      spaceReputationId,
+      spaceReputationDescendants,
+    }),
+  });
   return response.data;
 }

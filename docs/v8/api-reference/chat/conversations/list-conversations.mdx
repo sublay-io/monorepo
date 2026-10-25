@@ -57,7 +57,7 @@ To fetch a single conversation in this same shape — one that was paginated out
     </ResponseField>
 
     <ResponseField name="lastMessage" type="ChatMessage | null">
-      The most recent visible [message](/v8/data-models/chat-message) in the conversation, or `null` if there is none. The same object the `message:created` socket event delivers, so both paths render identically.
+      The most recent visible [message](/v8/data-models/chat-message) in the conversation, or `null` if there is none. A preview with only the fields below, not the full message the `message:created` socket event delivers: `content` is cut to 100 characters, `user` is set only in group and space conversations, and fields such as `mentions`, `quotedMessage`, `reactionCounts` and `parentMessageId` are not included. Its timestamps are UTC ISO strings ending in `Z`.
 
       <Expandable title="lastMessage fields">
         <ResponseField name="id" type="string">

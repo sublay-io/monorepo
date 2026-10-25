@@ -57,7 +57,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 </ParamField>
 
 <ParamField query="myRsvp" type="string">
-  Comma-separated RSVP statuses the caller responded with, e.g. `"going,maybe"`. Requires an authenticated caller (or a service key sending `actingUserId`); otherwise returns `400`.
+  Comma-separated RSVP statuses the caller responded with, e.g. `"going,maybe"`: any of `going`, `maybe` and `not_going`, matched exactly (another case returns `400 event/invalid-query`). Requires an authenticated caller (or a service key sending `actingUserId`); otherwise returns `400`.
 </ParamField>
 
 <ParamField query="locationFilters" type="object">
@@ -137,7 +137,11 @@ Returns a paginated response: `{ data: Event[], pagination: { page, pageSize, to
     ```json
     { "error": "Limit must be a positive number", "code": "event/invalid-query" }
     ```
-    Also returned for an unknown `include` value:
+    Also returned for a `myRsvp` entry that isn't exactly `going`, `maybe` or `not_going`:
+    ```json
+    { "error": "myRsvp.0: Invalid option: expected one of \"going\"|\"maybe\"|\"not_going\"", "code": "event/invalid-query" }
+    ```
+    And for an unknown `include` value:
     ```json
     { "error": "include: Unknown include `rsvps`. Allowed: user, space, files, userRsvp.", "code": "event/invalid-query" }
     ```

@@ -86,7 +86,7 @@ Lists events with visibility enforced, plus filtering, sorting, geo, and free-te
 const { data, pagination } = await sublay.events.fetchManyEvents({
   timeWindow: "upcoming",
   sortBy: "startTime",
-  myRsvp: "going,maybe",
+  myRsvp: ["going", "maybe"],
   include: "userRsvp",
   page: 1,
   limit: 20,
@@ -104,7 +104,7 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
 <ParamField body="hostId" type="string">Only events this user hosts.</ParamField>
 <ParamField body="type" type='"online" | "physical" | "hybrid"'>Filter by type.</ParamField>
 <ParamField body="status" type='"active" | "cancelled"'>Defaults to `"active"`.</ParamField>
-<ParamField body="myRsvp" type="string">Comma-separated statuses the logged-in user RSVP'd with, e.g. `"going,maybe"`.</ParamField>
+<ParamField body="myRsvp" type='RsvpStatus | RsvpStatus[]'>Statuses the logged-in user RSVP'd with: `"going"`, `"maybe"` or `"not_going"`, e.g. `["going", "maybe"]`. Sent as one comma-separated value; values match exactly.</ParamField>
 <ParamField body="locationFilters" type="{ latitude: string; longitude: string; radius: string }">Proximity filter (radius in meters).</ParamField>
 <ParamField body="titleFilters" type="{ hasTitle?; includes?; doesNotInclude? }">Free-text filter on `title`.</ParamField>
 <ParamField body="descriptionFilters" type="{ hasDescription?; includes?; doesNotInclude? }">Free-text filter on `description`.</ParamField>
@@ -314,14 +314,14 @@ Named RSVP (guest) list. Returns paginated [EventRsvp](/v8/data-models/event-rsv
 ```typescript
 const { data, pagination } = await sublay.events.fetchEventRsvps({
   eventId: "evt_abc123",
-  status: "going,maybe",
+  status: ["going", "maybe"],
   page: 1,
   limit: 20,
 });
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="status" type="string">Comma-separated statuses to filter by, e.g. `"going,maybe"`. Omit for all.</ParamField>
+<ParamField body="status" type='RsvpStatus | RsvpStatus[]'>Statuses to filter by: `"going"`, `"maybe"` or `"not_going"`, e.g. `["going", "maybe"]`. Sent as one comma-separated value; values match exactly. Omit for all.</ParamField>
 <ParamField body="page" type="number">Page number (1-indexed).</ParamField>
 <ParamField body="limit" type="number">Results per page. Capped at `100`.</ParamField>
 

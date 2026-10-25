@@ -19,7 +19,7 @@ Resolved reports (`dismissed` / `actioned`) are closed: a later report of the sa
 </ParamField>
 
 <ParamField body="targetType" type="string" required>
-  The type of content being reported. One of: `entity`, `comment`, `message`.
+  The type of content being reported. One of: `entity`, `comment`, `message`. Values match exactly: another case (`"Entity"`) returns `400 report/invalid-body`.
 </ParamField>
 
 <ParamField body="reason" type="string" required>
@@ -86,8 +86,8 @@ Returns `200 OK` when the user has already reported this target:
     ```json
     { "error": "...", "code": "report/invalid-body" }
     ```
-    Returned for a malformed `targetId`, an unknown `targetType`, or a `reason`
-    outside the accepted set.
+    Returned for a malformed `targetId`, an unknown `targetType` (including one
+    in another case, such as `"Entity"`), or a `reason` outside the accepted set.
   </Accordion>
 
   <Accordion title="Missing User — 400">

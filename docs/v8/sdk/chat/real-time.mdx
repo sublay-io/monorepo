@@ -36,6 +36,12 @@ The conversation list returned by `useConversations` is fully live — you do no
 - **Removes** conversations you leave, are removed from, or that are deleted.
 - **Self-heals on reconnect.** After a dropped socket reconnects, the list and unread counts reconcile against the server automatically, correcting anything missed while offline (deep pagination resets to the first page).
 
+## Missed Messages After a Reconnect
+
+When the socket reconnects, every mounted `ConversationProvider` re-joins its conversation and loads the messages sent while it was offline, page by page from the newest loaded message until none are left, so a long disconnect doesn't drop any. If no message was loaded yet (an empty conversation, or a first load that failed), it loads the latest page instead, as on mount.
+
+Catch-up loads new messages in the main stream only. Edits, deletions and reactions made while offline, and new thread replies, show up the next time the conversation or thread loads those messages, for example when it is opened again.
+
 ## Connection State
 
 Use `useChatSocket` to read whether the socket is connected:

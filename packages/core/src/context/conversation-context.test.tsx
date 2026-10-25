@@ -79,6 +79,8 @@ describe("ConversationProvider", () => {
 
     const confirmed = makeChatMessage({ id: "message-1", conversationId: "conversation-1" });
     axiosPrivate.mockResponse("post", confirmed);
+    // The confirmed message becomes the newest one and is marked read.
+    axiosPrivate.mockResponse("post", { message: "Marked as read." });
 
     await act(async () => {
       await result.current.send!({ content: "hi" });
@@ -87,6 +89,11 @@ describe("ConversationProvider", () => {
     const postCall = axiosPrivate.calls("post")[0];
     expect(postCall.url).toBe("/test-project/chat/conversations/conversation-1/messages");
     expect(postCall.body).toMatchObject({ content: "hi" });
+    await waitFor(() =>
+      expect(axiosPrivate.calls("post")[1]?.url).toBe(
+        "/test-project/chat/conversations/conversation-1/read",
+      ),
+    );
   });
 
   it("joins the socket room on mount and leaves it on unmount", async () => {
@@ -390,6 +397,202 @@ describe("ConversationProvider", () => {
 
       await waitFor(() => expect(readCalls(axiosPrivate)).toHaveLength(2));
       expect(readCalls(axiosPrivate)[1].body).toEqual({ messageId: "message-3" });
+    });
+  });
+
+  describe("reconnect catch-up", () => {
+    const MESSAGES_URL = "/test-project/chat/conversations/conversation-1/messages";
+
+    function msg(id: string, createdAt: string) {
+      return makeChatMessage({ id, conversationId: "conversation-1", createdAt });
+    }
+
+    function page(messages: ReturnType<typeof msg>[], hasMore = false) {
+      const times = messages.map((m) => m.createdAt).sort();
+      return {
+        messages,
+        hasMore,
+        oldestCreatedAt: times[0] ?? null,
+        newestCreatedAt: times[times.length - 1] ?? null,
+      };
+    }
+
+    // Mount fetches messages, then members; every newest message is marked
+    // read. Unmocked calls reach real axios, so mock the marks generously.
+    function renderConversation(fakeSocket: FakeSocket, mountPage: ReturnType<typeof page>) {
+      const harness = makeProvidersWrapper({
+        beforeRender: ({ axiosPrivate }) => {
+          axiosPrivate.mockResponse("get", mountPage);
+          axiosPrivate.mockResponse("get", emptyMembersPage());
+          for (let i = 0; i < 5; i++) {
+            axiosPrivate.mockResponse("post", { message: "Marked as read." });
+          }
+        },
+      });
+      const chatContextValue: ChatContextValue = {
+        socket: fakeSocket as never,
+        connected: fakeSocket.connected,
+        registerActiveConversation: () => {},
+        unregisterActiveConversation: () => {},
+      };
+      const { result } = renderHook(() => useConversationContext(), {
+        wrapper: ({ children }) => (
+          <harness.Wrapper>
+            <ChatContext.Provider value={chatContextValue}>
+              <ConversationProvider conversationId="conversation-1">{children}</ConversationProvider>
+            </ChatContext.Provider>
+          </harness.Wrapper>
+        ),
+      });
+      return { ...harness, result };
+    }
+
+    // Wait for the read mark of the final newest message, so it isn't sent
+    // after the mocks are reset and doesn't reach real axios.
+    async function waitForMarked(
+      axiosPrivate: { calls: (m: "post") => { url: string; body?: unknown }[] },
+      messageId: string,
+    ) {
+      await waitFor(() => {
+        const marks = axiosPrivate
+          .calls("post")
+          .filter((c) => c.url === "/test-project/chat/conversations/conversation-1/read");
+        expect(marks[marks.length - 1]?.body).toEqual({ messageId });
+      });
+    }
+
+    // The two mount GETs come first; catch-up requests follow them.
+    function catchUpCalls(axiosPrivate: { calls: (m: "get") => { url: string; config?: any }[] }) {
+      return axiosPrivate.calls("get").slice(2);
+    }
+
+    it("does not fetch on the initial connect", async () => {
+      const fakeSocket = createFakeSocket();
+      const { result, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")]),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+
+      expect(catchUpCalls(axiosPrivate)).toHaveLength(0);
+      await waitForMarked(axiosPrivate, "message-1");
+    });
+
+    it("re-joins the room and fetches the messages after the newest loaded one", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")]),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      fakeSocket.emit.mockClear();
+
+      axiosPrivate.mockResponse(
+        "get",
+        page([
+          msg("message-2", "2024-01-01T00:00:02.000Z"),
+          msg("message-3", "2024-01-01T00:00:03.000Z"),
+        ]),
+      );
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+
+      await waitFor(() =>
+        expect(result.current.messages!.map((m) => m.id)).toEqual([
+          "message-1",
+          "message-2",
+          "message-3",
+        ]),
+      );
+      expect(fakeSocket.emit).toHaveBeenCalledWith("join:conversation", {
+        conversationId: "conversation-1",
+      });
+      const calls = catchUpCalls(axiosPrivate);
+      expect(calls).toHaveLength(1);
+      expect(calls[0].url).toBe(MESSAGES_URL);
+      expect(calls[0].config.params).toEqual({
+        after: "2024-01-01T00:00:01.000Z",
+        limit: 100,
+        sortDir: "asc",
+      });
+      await waitForMarked(axiosPrivate, "message-3");
+    });
+
+    it("keeps fetching pages until the server has no more", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")]),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+
+      axiosPrivate.mockResponse(
+        "get",
+        page(
+          [
+            msg("message-2", "2024-01-01T00:00:02.000Z"),
+            msg("message-3", "2024-01-01T00:00:03.000Z"),
+          ],
+          true,
+        ),
+      );
+      axiosPrivate.mockResponse("get", page([msg("message-4", "2024-01-01T00:00:04.000Z")]));
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+
+      await waitFor(() =>
+        expect(result.current.messages!.map((m) => m.id)).toEqual([
+          "message-1",
+          "message-2",
+          "message-3",
+          "message-4",
+        ]),
+      );
+      const calls = catchUpCalls(axiosPrivate);
+      expect(calls).toHaveLength(2);
+      expect(calls[1].url).toBe(MESSAGES_URL);
+      expect(calls[1].config.params.after).toBe("2024-01-01T00:00:03.000Z");
+      await waitForMarked(axiosPrivate, "message-4");
+    });
+
+    it("loads the latest page when no message is loaded to page from", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderConversation(fakeSocket, page([]));
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+
+      // Newest first, like the mount fetch; older history still to load.
+      axiosPrivate.mockResponse(
+        "get",
+        page(
+          [
+            msg("message-2", "2024-01-01T00:00:02.000Z"),
+            msg("message-1", "2024-01-01T00:00:01.000Z"),
+          ],
+          true,
+        ),
+      );
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+
+      await waitFor(() =>
+        expect(result.current.messages!.map((m) => m.id)).toEqual(["message-1", "message-2"]),
+      );
+      expect(result.current.hasMore).toBe(true);
+      const calls = catchUpCalls(axiosPrivate);
+      expect(calls).toHaveLength(1);
+      expect(calls[0].url).toBe(MESSAGES_URL);
+      expect(calls[0].config.params).toEqual({ limit: 50, sortDir: "desc" });
+      await waitForMarked(axiosPrivate, "message-2");
     });
   });
 });

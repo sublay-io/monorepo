@@ -79,6 +79,8 @@ describe("ConversationProvider", () => {
 
     const confirmed = makeChatMessage({ id: "message-1", conversationId: "conversation-1" });
     axiosPrivate.mockResponse("post", confirmed);
+    // The confirmed message becomes the newest one and is marked read.
+    axiosPrivate.mockResponse("post", { message: "Marked as read." });
 
     await act(async () => {
       await result.current.send!({ content: "hi" });
@@ -87,6 +89,11 @@ describe("ConversationProvider", () => {
     const postCall = axiosPrivate.calls("post")[0];
     expect(postCall.url).toBe("/test-project/chat/conversations/conversation-1/messages");
     expect(postCall.body).toMatchObject({ content: "hi" });
+    await waitFor(() =>
+      expect(axiosPrivate.calls("post")[1]?.url).toBe(
+        "/test-project/chat/conversations/conversation-1/read",
+      ),
+    );
   });
 
   it("joins the socket room on mount and leaves it on unmount", async () => {

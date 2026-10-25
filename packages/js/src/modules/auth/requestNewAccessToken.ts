@@ -12,9 +12,10 @@ export interface RequestNewAccessTokenResponse {
 }
 
 /**
- * Manually rotate the access token. The SDK auto-refreshes on 403 in
- * SDK-managed mode, so this is rarely needed directly; it's exposed for parity
- * and for host-managed callers that own their own refresh flow.
+ * Manually rotate the access token. In SDK-managed mode the SDK refreshes
+ * automatically on a 401/403 with no error `code` (a missing or expired access
+ * token), so this is rarely needed directly; it's exposed for parity and for
+ * host-managed callers that own their own refresh flow.
  */
 export async function requestNewAccessToken(
   client: SublayHttpClient,

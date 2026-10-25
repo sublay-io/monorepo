@@ -47,7 +47,7 @@ export class SublayHttpClient {
 
   private accessToken: string | null;
   private refreshToken: string | null;
-  /** Shared so concurrent 403s trigger a single refresh (mutex). */
+  /** Shared so concurrent auth failures trigger a single refresh (mutex). */
   private refreshPromise: Promise<string | null> | null = null;
 
   constructor({
@@ -80,13 +80,21 @@ export class SublayHttpClient {
       return config;
     });
 
-    // Response: on 403, refresh once and retry the original request.
+    // Response: on a bare auth failure, refresh once and retry the original
+    // request. Only a 401/403 with no error `code` means a missing or expired
+    // access token — the auth middleware sends `401` for an absent token and
+    // `403` for one that fails verification. Every other 401/403 carries a
+    // `code` (`*/forbidden`, `user/suspended`, plan errors, …): a refresh can't
+    // fix those, so they are surfaced as-is rather than rotating the token and
+    // repeating the request for nothing.
     this.projectInstance.interceptors.response.use(
       (response) => response,
       async (error) => {
         const prevRequest = error?.config as RetryableConfig | undefined;
         const status = error?.response?.status;
-        if (status !== 403 || !prevRequest || prevRequest._retry) {
+        const isBareAuthFailure =
+          (status === 401 || status === 403) && !error?.response?.data?.code;
+        if (!isBareAuthFailure || !prevRequest || prevRequest._retry) {
           return Promise.reject(error);
         }
         prevRequest._retry = true;
@@ -169,9 +177,9 @@ export class SublayHttpClient {
 
   /**
    * Refresh the access token using the in-memory refresh token. A single shared
-   * promise (mutex) means concurrent 403s trigger only one network refresh. The
-   * call goes through a bare axios (not `projectInstance`) so it never re-enters
-   * the response interceptor. Returns the new access token, or null on failure.
+   * promise (mutex) means concurrent auth failures trigger only one network
+   * refresh. The call goes through a bare axios (not `projectInstance`) so it
+   * never re-enters the response interceptor. Returns the new access token, or null on failure.
    */
   private async refreshAccessToken(): Promise<string | null> {
     if (!this.refreshToken) return null;

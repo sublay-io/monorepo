@@ -46,8 +46,8 @@ const sublay = await SublayClient.init({
 
 ### Two auth modes
 
-- **SDK-managed (default)** — the SDK keeps `accessToken`/`refreshToken` in memory, attaches `Authorization: Bearer` on every request, auto-refreshes on a `403` (single-flight mutex), and fires `onAuthChange` so the host can persist tokens. No storage is baked in (the SDK must run in any JS runtime), so persistence is the host's job via `onAuthChange` + `initialTokens`.
-- **Host-managed** — set when `getToken` is provided. The SDK never stores or refreshes; it reads the current token from `getToken()` on each request, and on a `403` re-reads it once. `setTokens`/`clearTokens`/`setAccessToken` are all no-ops in this mode.
+- **SDK-managed (default)** — the SDK keeps `accessToken`/`refreshToken` in memory, attaches `Authorization: Bearer` on every request, and fires `onAuthChange` so the host can persist tokens. It auto-refreshes and retries once (single-flight mutex) on a `401`/`403` with no error `code` — a missing or expired token; a coded `401`/`403` is surfaced as-is. No storage is baked in (the SDK must run in any JS runtime), so persistence is the host's job via `onAuthChange` + `initialTokens`.
+- **Host-managed** — set when `getToken` is provided. The SDK never stores or refreshes; it reads the current token from `getToken()` on each request, and on a `401`/`403` with no error `code` re-reads it once. `setTokens`/`clearTokens`/`setAccessToken` are all no-ops in this mode.
 
 An explicit `Authorization` header on a request always wins over both.
 

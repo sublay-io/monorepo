@@ -61,10 +61,13 @@ The SDK runs in one of two auth modes, chosen by whether you pass `getToken`.
 ### SDK-managed (default)
 
 The SDK keeps the `accessToken` / `refreshToken` pair in memory, attaches
-`Authorization: Bearer <token>` on every request, and **auto-refreshes** on a
-`403` (with a single-flight mutex so concurrent failures trigger only one
-refresh). No storage is baked in — the SDK runs in any JS runtime — so persistence
-is your job: listen to `onAuthChange` to save tokens, and pass them back via
+`Authorization: Bearer <token>` on every request, and **auto-refreshes** when a
+request fails because the access token is missing or expired — a `401` or `403`
+with no error `code` — then retries it once (with a single-flight mutex so
+concurrent failures trigger only one refresh). A `401`/`403` that carries a
+`code` (a permission, plan or suspension error, for example) is returned to you
+as-is, with no refresh. No storage is baked in — the SDK runs in any JS runtime —
+so persistence is your job: listen to `onAuthChange` to save tokens, and pass them back via
 `initialTokens` on the next load.
 
 ```typescript
@@ -103,7 +106,8 @@ sublay.clearTokens();
 
 If your app already owns the access token and its refresh lifecycle, pass a
 `getToken` hook. The SDK then never stores or refreshes tokens — it reads the
-current token from `getToken()` on each request, and on a `403` re-reads it once.
+current token from `getToken()` on each request, and on a `401`/`403` with no
+error `code` re-reads it once, retrying if it changed.
 In this mode `setTokens`, `clearTokens`, and the `onAuthChange` callback are
 no-ops.
 

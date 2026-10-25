@@ -84,8 +84,8 @@ function parseSseBlock(block: string): AskContentEvent | null {
  * Cancel by passing an `AbortSignal`, or by `break`ing out of the loop.
  *
  * Note: this request uses `fetch` (not the axios instance), so it does not get
- * the automatic 403→refresh retry. The token is read fresh at call time via the
- * client's active auth mode.
+ * the automatic refresh-and-retry on an expired token. The token is read fresh
+ * at call time via the client's active auth mode.
  */
 export async function* askContent(
   client: SublayHttpClient,

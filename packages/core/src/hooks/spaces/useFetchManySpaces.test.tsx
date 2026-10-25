@@ -55,17 +55,46 @@ describe("useFetchManySpaces", () => {
     expect(second.config?.params).not.toHaveProperty("query");
   });
 
-  it("sends parentSpaceId as the literal string 'null' when explicitly null (root spaces)", async () => {
+  it("lists top-level spaces by default: parentSpaceId \"none\" when left out or null", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManySpaces());
 
     axiosPrivate.mockResponse("get", makePage([]));
+    axiosPrivate.mockResponse("get", makePage([]));
+    axiosPrivate.mockResponse("get", makePage([]));
 
+    await act(async () => {
+      await result.current();
+    });
     await act(async () => {
       await result.current({ parentSpaceId: null });
     });
+    await act(async () => {
+      await result.current({ parentSpaceId: undefined });
+    });
 
-    const [call] = axiosPrivate.calls("get");
-    expect(call.config?.params).toMatchObject({ parentSpaceId: "null" });
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(3);
+    for (const call of calls) {
+      expect(call.config?.params).toMatchObject({ parentSpaceId: "none" });
+    }
+  });
+
+  it("sends an explicit \"none\" or a parent id as given", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManySpaces());
+
+    axiosPrivate.mockResponse("get", makePage([]));
+    axiosPrivate.mockResponse("get", makePage([]));
+
+    await act(async () => {
+      await result.current({ parentSpaceId: "none" });
+    });
+    await act(async () => {
+      await result.current({ parentSpaceId: "parent-1" });
+    });
+
+    const [first, second] = axiosPrivate.calls("get");
+    expect(first.config?.params).toMatchObject({ parentSpaceId: "none" });
+    expect(second.config?.params).toMatchObject({ parentSpaceId: "parent-1" });
   });
 
   it("rejects when the server returns an error response", async () => {

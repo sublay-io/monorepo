@@ -31,7 +31,8 @@ export interface FetchSpacesOptions {
   query?: string | null;
   searchFields?: SpaceSearchFields | null;
   memberOf?: boolean;
-  parentSpaceId?: string | null;
+  /** A space id, or `"none"` for top-level spaces. `null` or left out: `"none"`. */
+  parentSpaceId?: string | "none" | null;
   limit: number;
 }
 

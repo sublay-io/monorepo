@@ -160,6 +160,67 @@ describe("useSpaceList", () => {
     expect(last.searchParams.get("sortDir")).toBeNull();
   });
 
+  describe("parentSpaceId", () => {
+    it("lists top-level spaces by default and keeps that filter on page 2 and after a re-sort", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s1" }], true));
+      const { result } = renderHookWithStore(() => useSpaceList({ listId: "feed" }), {
+        projectId: "test-project",
+      });
+      expect(result.current.parentSpaceId).toBe("none");
+
+      act(() => result.current.fetchSpaces({}));
+      await waitFor(() => expect(result.current.spaces).toHaveLength(1));
+
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s2" }], false));
+      await act(async () => {
+        await result.current.loadMore();
+      });
+      await waitFor(() => expect(result.current.spaces).toHaveLength(2));
+
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s3" }], false));
+      act(() =>
+        result.current.fetchSpaces({ sortBy: "alphabetical" }, undefined, { fetchImmediately: true }),
+      );
+      await waitFor(() => expect(result.current.spaces.map((s) => s.id)).toEqual(["s3"]));
+
+      const urls = fetchHandle.calls().map((c) => new URL(c.url));
+      expect(urls).toHaveLength(3);
+      expect(urls[1].searchParams.get("page")).toBe("2");
+      for (const url of urls) {
+        expect(url.searchParams.get("parentSpaceId")).toBe("none");
+      }
+      expect(result.current.parentSpaceId).toBe("none");
+    });
+
+    it("sends a parent id on every page, and null puts the default back", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s1" }], true));
+      const { result } = renderHookWithStore(() => useSpaceList({ listId: "feed" }), {
+        projectId: "test-project",
+      });
+
+      act(() =>
+        result.current.fetchSpaces({ parentSpaceId: "p1" }, undefined, { fetchImmediately: true }),
+      );
+      await waitFor(() => expect(result.current.spaces).toHaveLength(1));
+      expect(result.current.parentSpaceId).toBe("p1");
+
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s2" }], false));
+      await act(async () => {
+        await result.current.loadMore();
+      });
+
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s3" }], false));
+      act(() =>
+        result.current.fetchSpaces({ parentSpaceId: null }, undefined, { fetchImmediately: true }),
+      );
+      await waitFor(() => expect(result.current.spaces.map((s) => s.id)).toEqual(["s3"]));
+
+      const sent = fetchHandle.calls().map((c) => new URL(c.url).searchParams.get("parentSpaceId"));
+      expect(sent).toEqual(["p1", "p1", "none"]);
+      expect(result.current.parentSpaceId).toBe("none");
+    });
+  });
+
   describe("loadMore", () => {
     it("is a no-op before fetchSpaces has been called (no config yet)", async () => {
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});

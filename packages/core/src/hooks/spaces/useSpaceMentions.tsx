@@ -46,7 +46,10 @@ const useSpaceMentions = ({
 
   const fetchSuggestions = useCallback(
     async (query: string) => {
-      const result = await fetchManySpaces({ query, limit: 5 });
+      // Mentions search every level. `useFetchManySpaces` lists top-level
+      // spaces by default; an empty `parentSpaceId` is the same as leaving
+      // the filter out (every level).
+      const result = await fetchManySpaces({ query, limit: 5, parentSpaceId: "" });
       return result.data;
     },
     [fetchManySpaces]

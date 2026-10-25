@@ -64,7 +64,8 @@ export interface UseSpaceListValues {
   query: string | null;
   searchFields: SpaceSearchFields | null;
   memberOf: boolean;
-  parentSpaceId: string | null;
+  /** The parent filter in use: a space id, or `"none"` (top-level, the default). */
+  parentSpaceId: string | "none";
 
   // Operations
   fetchSpaces: (
@@ -147,7 +148,7 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
           query: null,
           searchFields: null,
           memberOf: false,
-          parentSpaceId: null,
+          parentSpaceId: "none",
         };
         const finalFilters = { ...currentState };
 
@@ -158,7 +159,7 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
           finalFilters.query = null;
           finalFilters.searchFields = null;
           finalFilters.memberOf = false;
-          finalFilters.parentSpaceId = null;
+          finalFilters.parentSpaceId = "none";
         }
 
         // Apply new filters
@@ -168,6 +169,9 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
               newFilters[key as keyof typeof newFilters];
           }
         });
+
+        // `null` on the parent filter means "not set": the default, top-level.
+        finalFilters.parentSpaceId = finalFilters.parentSpaceId ?? "none";
 
         if (!finalFilters.sortBy) return; // sortBy is required
 
@@ -297,7 +301,7 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
       query: filters?.query || null,
       searchFields: filters?.searchFields || null,
       memberOf: filters?.memberOf || false,
-      parentSpaceId: filters?.parentSpaceId || null,
+      parentSpaceId: filters?.parentSpaceId ?? "none",
 
       fetchSpaces: handleFetchSpaces,
 

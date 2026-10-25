@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { getApiBaseUrl } from "../../utils/env";
 import { getAuthorizedToken } from "../../config/authGate";
+import { serializeQueryParams } from "../../utils/queryParams";
 
 // Type for state that includes sublay namespace
 // Used by prepareHeaders to access auth token from namespaced state
@@ -16,6 +17,9 @@ interface StateWithSublay {
 const createBaseQuery = () => {
   return fetchBaseQuery({
     baseUrl: getApiBaseUrl(),
+    // `null` and `undefined` params are left out (the default would send
+    // `null` as the string "null", which the API refuses on its filters).
+    paramsSerializer: serializeQueryParams,
     prepareHeaders: async (headers, { getState }) => {
       // Add Content-Type header
       headers.set('Content-Type', 'application/json');

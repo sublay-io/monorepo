@@ -137,7 +137,7 @@ Where each field goes is decided by the HTTP method, as on the rest of the API: 
 
 They come from **three layers**, and knowing which one answered tells you what to fix:
 
-1. **The placement checks**, first of all. A body on a `GET` or `DELETE` is `400 workspace/body-not-allowed`. `actingUserId`, or any field the route reads from the body, sent in the query string of a `POST` or `PATCH` is `400 workspace/wrong-location`.
+1. **The placement checks**, first of all. A body on a `GET` or `DELETE` is `400 workspace/body-not-allowed`. `actingUserId` sent in the query string of a `POST` or `PATCH` is `400 workspace/wrong-location`. Any other body field sent in a write's query string is also `400 workspace/wrong-location`, but that one comes from the route's body schema (layer 3), so it is reported only after the gate and the acting-user checks below.
 2. **A gate**, mounted ahead of every route on the bundle. It reads the raw request, so it behaves identically whichever endpoint you call and whatever that route declares. It refuses a `userId`, a near-miss spelling of `actingUserId`, and (when a key names nobody) a body no parser read.
 3. **Each route's own schema.** A `GET` or `DELETE` validates its query string; a `POST` or `PATCH` validates its body. Every schema declares exactly the fields its endpoint accepts, and a top-level field it does not declare is refused, not stripped. On a `GET` or `DELETE` two checks run just ahead of the schema — the length limit and the cache-buster rule below — and the first reads the raw query string rather than the parsed one. On a `POST` or `PATCH`, query parameters other than the ones refused above are ignored.
 
@@ -317,7 +317,7 @@ Between the two, on the routes that check the acting user's standing before anyt
   - `workspace/invalid-body` / `workspace/invalid-query` — **the request is malformed.** It carries a `userId`, a field the endpoint does not declare, an unreadable body, a bad `actingUserId`, or a query string that is too long or repeats a cache-buster.
   - `workspace/missing-user-id` — **the route's own rule.** On every route but Fetch Workspace a key [must name someone](#acting-on-behalf-of-a-user). Nothing about the request's shape is wrong; it is simply an operation that has to belong to a person.
 
-  The placement refusals (`workspace/body-not-allowed`, `workspace/wrong-location`) come first, then the gate's (a `userId`, a near-miss spelling, an unread body). After that the order depends on the route:
+  The placement refusals (`workspace/body-not-allowed`, and `workspace/wrong-location` for `actingUserId`) come first, then the gate's (a `userId`, a near-miss spelling, an unread body). Another body field in a write's query string is `workspace/wrong-location` from the body schema, so it is ordered with the schema refusals. After that the order depends on the route:
 
   - On the routes that check the acting user first (see [the layers above](#shapes-the-server-rejects)), `workspace/missing-user-id` comes **before** the schema refusals: a key with no `actingUserId` that also carries an undeclared field, an over-long query or a repeated `_`, gets `workspace/missing-user-id`, and the malformed part is reported once a user is named.
   - On the other routes, such as `POST /workspaces`, the schemas run first: a key with no `actingUserId` and a clean request gets `workspace/missing-user-id`, but the same call carrying an undeclared field gets `workspace/invalid-body` instead, and the missing-actor error appears once the request is otherwise well formed.

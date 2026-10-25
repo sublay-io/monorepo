@@ -76,7 +76,7 @@ Returns the updated [Event](/v8/data-models/event) with refreshed `rsvpCounts`.
     ```
   </Accordion>
   <Accordion title="Unsupported Route — 400">
-    `DELETE /v8/:projectId/events/:eventId/invites`, with the invitee in a request body, is not a v8 route. It returns this error whatever the request carries.
+    `DELETE /v8/:projectId/events/:eventId/invites`, with the invitee in a request body, is not a v8 route. Once the request passes the checks that run ahead of it (such as the bundle check and id validation), it gets this error, with or without a body.
     ```json
     {
       "error": "`DELETE /events/:eventId/invites` isn't supported in v8. Remove an invite with `DELETE /events/:eventId/invites/:userId`, with the invitee's user id in the path.",

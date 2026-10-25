@@ -81,7 +81,7 @@ Returns the updated [Event](/v8/data-models/event) with the new `hostIds`.
     ```
   </Accordion>
   <Accordion title="Unsupported Route — 400">
-    `DELETE /v8/:projectId/events/:eventId/hosts`, with the host in a request body, is not a v8 route. It returns this error whatever the request carries.
+    `DELETE /v8/:projectId/events/:eventId/hosts`, with the host in a request body, is not a v8 route. Once the request passes the checks that run ahead of it (such as the bundle check and id validation), it gets this error, with or without a body.
     ```json
     {
       "error": "`DELETE /events/:eventId/hosts` isn't supported in v8. Remove a host with `DELETE /events/:eventId/hosts/:userId`, with the host's user id in the path.",

@@ -5,8 +5,10 @@ import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 export interface FetchDraftsProps {
   page?: number;
   limit?: number;
-  sourceId?: string;
-  spaceId?: string;
+  /** Only drafts from this source, or `"none"` for drafts with no source. Left out: any source. */
+  sourceId?: string | "none";
+  /** Only drafts in this space, or `"none"` for drafts in no space. Left out: any space, or none. */
+  spaceId?: string | "none";
   include?: DraftIncludeParam;
 }
 

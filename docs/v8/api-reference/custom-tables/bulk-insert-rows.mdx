@@ -31,6 +31,10 @@ Inserts many rows in a single request and returns them.
 }
 ```
 
+<Note>
+  A column named `projectId` is writable in each row like any other column: the rows are your column maps, nested under `rows`, so `projectId` in them is not refused. A top-level `projectId` in the body, or `?projectId=` in the query, is `400 project/wrong-location`, as everywhere outside the custom-table row bodies (Insert Row, Bulk Insert Rows and Update Row).
+</Note>
+
 ## Response
 
 Returns `201 Created`.

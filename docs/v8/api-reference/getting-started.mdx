@@ -21,7 +21,7 @@ So every endpoint takes the form:
 https://api.sublay.io/v8/:projectId/<endpoint>
 ```
 
-The project is read from the path only. Don't send `projectId` in the query string or the body, or an `x-sublay-project-id` header: each is refused with `400 project/wrong-location`. The one exception is a custom-table column named `projectId`, which stays writable in the row bodies of [Insert Row](/v8/api-reference/custom-tables/insert-row) and [Update Row](/v8/api-reference/custom-tables/update-row).
+The project is read from the path only. Don't send `projectId` in the query string or the body, or an `x-sublay-project-id` header: each is refused with `400 project/wrong-location`. The exception is a custom-table column named `projectId`, which stays writable in the row bodies of [Insert Row](/v8/api-reference/custom-tables/insert-row), [Bulk Insert Rows](/v8/api-reference/custom-tables/bulk-insert-rows) (inside each entry of `rows`) and [Update Row](/v8/api-reference/custom-tables/update-row).
 
 ## Request Format
 

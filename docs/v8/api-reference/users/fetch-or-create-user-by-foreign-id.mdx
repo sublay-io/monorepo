@@ -21,7 +21,7 @@ Everything goes in the JSON request body, so the profile, `secureMetadata` inclu
 ## Body Parameters
 
 <ParamField body="foreignId" type="string" required>
-  The external identifier from your system. Surrounding whitespace is trimmed; a blank value (`""`, `"   "`) returns `400 user/invalid-body` (`foreignId: Foreign ID is required`).
+  The external identifier from your system. It is stored and matched exactly as sent. A blank or whitespace-only value (`""`, `"   "`) returns `400 user/invalid-body` (`foreignId: Foreign ID is required`).
 </ParamField>
 
 <ParamField body="name" type="string">

@@ -217,7 +217,7 @@ A field sent in the wrong place is refused with a `400` that names the right one
 |---|---|
 | `<area>/body-not-allowed` | A GET or DELETE has a body: a JSON object with keys, a non-empty array, or any non-JSON payload. An empty body and `{}` pass. `params` lists the JSON keys received. |
 | `<area>/wrong-location` | A POST, PATCH or PUT has a body field in its query string, or `actingUserId` there. `param` names the field. Query keys the endpoint doesn't read are ignored. |
-| `project/wrong-location` | `projectId` in the query string or the body, or an `x-sublay-project-id` header. Send no project-id header: the path names the project. A custom-table column named `projectId` stays writable in the row bodies of [Insert Row](/v8/api-reference/custom-tables/insert-row) and [Update Row](/v8/api-reference/custom-tables/update-row). |
+| `project/wrong-location` | `projectId` in the query string or the body, or an `x-sublay-project-id` header. Send no project-id header: the path names the project. A custom-table column named `projectId` stays writable in the row bodies of [Insert Row](/v8/api-reference/custom-tables/insert-row), [Bulk Insert Rows](/v8/api-reference/custom-tables/bulk-insert-rows) (inside each entry of `rows`) and [Update Row](/v8/api-reference/custom-tables/update-row). |
 
 ```json
 { "error": "A DELETE request takes no body: send its fields in the query string. Received: `actingUserId`.", "code": "entity/body-not-allowed", "params": ["actingUserId"] }

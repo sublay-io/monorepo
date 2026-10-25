@@ -67,8 +67,10 @@ interface FetchManyEntitiesBaseParams
   sortDir?: SortDirection | null;
   sortType?: SortType;
   timeFrame?: TimeFrame | null;
-  sourceId?: string | null;
-  spaceId?: string | null;
+  /** Only entities from this source, or `"none"` for entities with no source. `null` or left out: any source. */
+  sourceId?: string | "none" | null;
+  /** Only entities in this space, or `"none"` for entities in no space. `null` or left out: any space, or none. */
+  spaceId?: string | "none" | null;
   userId?: string | null;
   followedOnly?: boolean;
   keywordsFilters?: KeywordsFilters | null;

@@ -20,7 +20,8 @@ type EventTimeWindow = "upcoming" | "ongoing" | "past";
 
 export interface UseFetchManyEventsWrapperProps {
   limit?: number;
-  spaceId?: string | null;
+  /** Only this space's events, or `"none"` for events not in any space. `null` or left out: every event. */
+  spaceId?: string | "none" | null;
   hostId?: string | null;
   type?: EventType | null;
   status?: EventStatus | null;

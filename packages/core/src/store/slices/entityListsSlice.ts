@@ -29,9 +29,10 @@ export interface EntityListState {
   error: string | null;
   lastFetched: number | null;
 
-  // Configuration (set when fetchEntities is called)
-  sourceId: string | null;
-  spaceId: string | null;
+  // Configuration (set when fetchEntities is called).
+  // `sourceId` / `spaceId`: a value, `"none"` (has none), or `null` (no filter).
+  sourceId: string | "none" | null;
+  spaceId: string | "none" | null;
   limit: number;
   include: EntityIncludeParam | null;
   topCommentsLimit: number | null;
@@ -127,8 +128,16 @@ export interface EntityListFilters {
 
 // Configuration for entity list operations
 export interface EntityListConfig {
-  sourceId?: string | null;
-  spaceId?: string | null;
+  /**
+   * Only entities from this source, or `"none"` for entities with no source.
+   * `null` or left out: no source filter (the default), so every entity.
+   */
+  sourceId?: string | "none" | null;
+  /**
+   * Only entities in this space, or `"none"` for entities in no space.
+   * `null` or left out: no space filter (the default).
+   */
+  spaceId?: string | "none" | null;
   limit?: number;
   include?: EntityIncludeParam | null;
   /** With `include` containing `"topComments"`: how many per entity (default 1, max 5). */

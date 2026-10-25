@@ -51,8 +51,10 @@ interface FetchEntitiesOptions {
   nsfwFilter?: NsfwFilter | null;
 
   // Configuration
-  sourceId?: string | null;
-  spaceId?: string | null;
+  /** A source id, or `"none"` for entities with no source. `null` / left out: any source. */
+  sourceId?: string | "none" | null;
+  /** A space id, or `"none"` for entities in no space. `null` / left out: any space, or none. */
+  spaceId?: string | "none" | null;
   limit: number;
   include?: EntityIncludeParam | null;
   topCommentsLimit?: number | null;

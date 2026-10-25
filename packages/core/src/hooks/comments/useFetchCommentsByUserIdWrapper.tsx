@@ -17,7 +17,11 @@ export interface UseFetchCommentsByUserIdWrapperProps
   extends SpaceReputationContextParams {
   userId: string | null | undefined;
   entityId?: string | null;
-  sourceId?: string | null;
+  /**
+   * Only comments on entities from this source, or `"none"` for comments on
+   * entities with no source. `null` or left out: any source.
+   */
+  sourceId?: string | "none" | null;
   blockedFilter?: BlockedFilter | null;
   limit?: number;
   include?: CommentIncludeParam;

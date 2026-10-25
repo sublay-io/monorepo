@@ -65,7 +65,8 @@ export interface FetchManyEventsProps {
   timeWindow?: "upcoming" | "ongoing" | "past";
   startsAfter?: string; // ISO datetime
   startsBefore?: string; // ISO datetime
-  spaceId?: string;
+  /** Only this space's events, or `"none"` for events not in any space. `null` or left out: every event. */
+  spaceId?: string | "none" | null;
   hostId?: string;
   type?: EventType;
   status?: EventStatus;

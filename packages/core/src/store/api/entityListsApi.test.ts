@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import {
   makeRtkQueryStore,
@@ -170,7 +170,7 @@ describe("entityListsApi", () => {
       expect(url.searchParams.get("metadataFilters[category][eq]")).toBe("news");
     });
 
-    it("joins an array `include` with commas and allows explicit null sourceId/spaceId through", async () => {
+    it("joins an array `include` with commas and leaves out null sourceId/spaceId (no filter)", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(
         jsonResponse({ data: [], pagination: { page: 1, pageSize: 10, totalPages: 0, totalItems: 0, hasMore: false } }),
       );
@@ -189,9 +189,89 @@ describe("entityListsApi", () => {
 
       const url = new URL(fetchHandle.calls()[0].url);
       expect(url.searchParams.get("include")).toBe("user,space");
-      expect(url.searchParams.get("sourceId")).toBe("null");
-      expect(url.searchParams.get("spaceId")).toBe("null");
+      expect(url.searchParams.has("sourceId")).toBe(false);
+      expect(url.searchParams.has("spaceId")).toBe(false);
+      expect(url.search).not.toContain("null");
     });
+
+    it("passes an explicit \"none\" sourceId/spaceId through", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(
+        jsonResponse({ data: [], pagination: { page: 1, pageSize: 10, totalPages: 0, totalItems: 0, hasMore: false } }),
+      );
+
+      await store.dispatch(
+        entityListsApi.endpoints.fetchEntities.initiate({
+          projectId: "test-project",
+          page: 1,
+          limit: 10,
+          sortBy: "hot",
+          sourceId: "none",
+          spaceId: "none",
+        }),
+      );
+
+      const url = new URL(fetchHandle.calls()[0].url);
+      expect(url.searchParams.get("sourceId")).toBe("none");
+      expect(url.searchParams.get("spaceId")).toBe("none");
+    });
+  });
+
+  it("creating an entity with no source refetches a list fetched with sourceId \"none\"", async () => {
+    const page = () =>
+      jsonResponse({ data: [], pagination: { page: 1, pageSize: 10, totalPages: 0, totalItems: 0, hasMore: false } });
+    fetchHandle.fetchMock.mockImplementation(async (req: unknown) => {
+      const method = (req as { method?: string }).method ?? "GET";
+      return method === "POST" ? jsonResponse({ id: "e1" }, 201) : page();
+    });
+
+    const sub = store.dispatch(
+      entityListsApi.endpoints.fetchEntities.initiate({
+        projectId: "test-project",
+        page: 1,
+        limit: 10,
+        sortBy: "hot",
+        sourceId: "none",
+      }),
+    );
+    await sub;
+    expect(fetchHandle.calls().filter((c) => c.method === "GET")).toHaveLength(1);
+
+    await store.dispatch(
+      entityListsApi.endpoints.createEntity.initiate({ projectId: "test-project", title: "Hi" }),
+    );
+
+    await vi.waitFor(() =>
+      expect(fetchHandle.calls().filter((c) => c.method === "GET")).toHaveLength(2),
+    );
+    sub.unsubscribe();
+  });
+
+  it("creating an entity in a source does not refetch a list fetched with sourceId \"none\"", async () => {
+    const page = () =>
+      jsonResponse({ data: [], pagination: { page: 1, pageSize: 10, totalPages: 0, totalItems: 0, hasMore: false } });
+    fetchHandle.fetchMock.mockImplementation(async (req: unknown) => {
+      const method = (req as { method?: string }).method ?? "GET";
+      return method === "POST" ? jsonResponse({ id: "e1" }, 201) : page();
+    });
+
+    const sub = store.dispatch(
+      entityListsApi.endpoints.fetchEntities.initiate({
+        projectId: "test-project",
+        page: 1,
+        limit: 10,
+        sortBy: "hot",
+        sourceId: "none",
+      }),
+    );
+    await sub;
+
+    await store.dispatch(
+      entityListsApi.endpoints.createEntity.initiate({ projectId: "test-project", title: "Hi", sourceId: "blog" }),
+    );
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(fetchHandle.calls().filter((c) => c.method === "GET")).toHaveLength(1);
+    sub.unsubscribe();
   });
 
   it("createEntity issues a POST with the entity fields as the body", async () => {

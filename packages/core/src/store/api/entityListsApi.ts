@@ -52,8 +52,9 @@ const buildQueryParams = (params: Record<string, any>): Record<string, any> => {
   const cleanParams: Record<string, any> = {};
 
   Object.entries(params).forEach(([key, value]) => {
-    // Skip undefined values, but allow null for sourceId and spaceId
-    if (value === undefined || (value === null && !['sourceId', 'spaceId'].includes(key))) {
+    // `null` and `undefined` mean "not set": the param is left out. "Has
+    // none" is the caller's explicit `"none"` (`sourceId` / `spaceId`).
+    if (value === undefined || value === null) {
       return;
     }
 
@@ -99,8 +100,10 @@ interface FetchEntitiesParams {
   nsfwFilter?: NsfwFilter | null;
 
   // Configuration parameters
-  sourceId?: string | null;
-  spaceId?: string | null;
+  /** A source id, or `"none"` for entities with no source. `null` / left out: any source. */
+  sourceId?: string | "none" | null;
+  /** A space id, or `"none"` for entities in no space. `null` / left out: any space, or none. */
+  spaceId?: string | "none" | null;
   include?: EntityIncludeParam | null;
   topCommentsLimit?: number | null;
   topCommentsSortByReaction?: ReactionType | null;
@@ -144,6 +147,14 @@ interface DeleteEntityParams {
   projectId: string;
   entityId: string;
 }
+
+// A list's cache tag names the source and space filters it was fetched with:
+// a value, `none` (has none), or `any` (filter not set).
+const listTagId = (
+  projectId: string,
+  sourceId: string | null | undefined,
+  spaceId: string | null | undefined,
+) => `${projectId}-source:${sourceId ?? "any"}-space:${spaceId ?? "any"}-LIST`;
 
 // Extended API with entity lists endpoints
 export const entityListsApi = baseApi.injectEndpoints({
@@ -219,7 +230,7 @@ export const entityListsApi = baseApi.injectEndpoints({
         };
       },
       providesTags: (result, error, { projectId, sourceId, spaceId }) => [
-        { type: "Entity" as const, id: `${projectId}-${sourceId || 'all'}-${spaceId || 'no-space'}-LIST` },
+        { type: "Entity" as const, id: listTagId(projectId, sourceId, spaceId) },
         ...(result?.data?.map(({ id }) => ({
           type: "Entity" as const,
           id,
@@ -234,11 +245,19 @@ export const entityListsApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: (result, error, { projectId, sourceId, spaceId }) => [
-        { type: "Entity", id: `${projectId}-${sourceId || 'all'}-${spaceId || 'no-space'}-LIST` },
-        // Also invalidate the 'all' list if we're creating in a specific source
-        ...(sourceId ? [{ type: "Entity" as const, id: `${projectId}-all-no-space-LIST` }] : []),
-      ],
+      // The new entity belongs in every list whose source filter matches it
+      // (its own source, or `none` when it has none, plus `any`) and whose
+      // space filter matches it the same way.
+      invalidatesTags: (result, error, { projectId, sourceId, spaceId }) => {
+        const sources = [sourceId ?? "none", null];
+        const spaces = [spaceId ?? "none", null];
+        return sources.flatMap((source) =>
+          spaces.map((space) => ({
+            type: "Entity" as const,
+            id: listTagId(projectId, source, space),
+          })),
+        );
+      },
     }),
 
     // Update entity
@@ -248,10 +267,9 @@ export const entityListsApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: update,
       }),
-      invalidatesTags: (result, error, { projectId, entityId }) => [
+      // Every list holding the entity provides its id tag.
+      invalidatesTags: (result, error, { entityId }) => [
         { type: "Entity", id: entityId },
-        // Invalidate all lists that might contain this entity
-        { type: "Entity", id: `${projectId}-all-LIST` },
       ],
     }),
 
@@ -270,10 +288,9 @@ export const entityListsApi = baseApi.injectEndpoints({
           return response.text().then(() => undefined);
         },
       }),
-      invalidatesTags: (result, error, { projectId, entityId }) => [
+      // Every list holding the entity provides its id tag.
+      invalidatesTags: (result, error, { entityId }) => [
         { type: "Entity", id: entityId },
-        // Invalidate all lists that might have contained this entity
-        { type: "Entity", id: `${projectId}-all-LIST` },
       ],
     }),
   }),

@@ -59,6 +59,27 @@ describe("useCreateEntity", () => {
     });
   });
 
+  it("sourceId null: JSON sends null (no source); multipart leaves the field out", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useCreateEntity());
+    axiosPrivate.mockResponse("post", makeEntity(), 201);
+    axiosPrivate.mockResponse("post", makeEntity(), 201);
+
+    await act(async () => {
+      await result.current({ title: "Plain", sourceId: null });
+    });
+    await act(async () => {
+      await result.current({
+        title: "With image",
+        sourceId: null,
+        images: { files: [new File(["b"], "p.png", { type: "image/png" })] },
+      });
+    });
+
+    const [json, multipart] = axiosPrivate.calls("post");
+    expect(json.body).toMatchObject({ sourceId: null });
+    expect((multipart.body as FormData).has("sourceId")).toBe(false);
+  });
+
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useCreateEntity());
 

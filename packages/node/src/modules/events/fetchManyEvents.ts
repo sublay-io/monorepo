@@ -5,6 +5,7 @@ import {
   EventType,
   EventStatus,
   EventIncludeParam,
+  RsvpStatus,
 } from "../../interfaces/Event";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
@@ -47,10 +48,10 @@ export interface FetchManyEventsProps {
   status?: EventStatus; // defaults to "active" server-side
 
   /**
-   * Comma-separated RSVP statuses the requester RSVP'd with, e.g. "going,maybe".
+   * RSVP statuses the requester RSVP'd with, e.g. `["going", "maybe"]`.
    * Requires `actingUserId` to be set.
    */
-  myRsvp?: string;
+  myRsvp?: RsvpStatus | RsvpStatus[];
 
   // Geo proximity
   locationFilters?: EventLocationFilters;
@@ -75,7 +76,14 @@ export async function fetchManyEvents(
 ): Promise<PaginatedResponse<Event>> {
   const response = await client.projectInstance.get<PaginatedResponse<Event>>(
     `/events`,
-    { params: { ...data, include: serializeInclude(data.include) } }
+    {
+      params: {
+        ...data,
+        // One comma-separated value, like `include`.
+        myRsvp: serializeInclude(data.myRsvp),
+        include: serializeInclude(data.include),
+      },
+    }
   );
   return response.data;
 }

@@ -1,5 +1,6 @@
 import { SublayHttpClient } from "../../core/client";
-import { EventRsvp } from "../../interfaces/Event";
+import { serializeInclude } from "../../core/includeParam";
+import { EventRsvp, RsvpStatus } from "../../interfaces/Event";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface FetchEventRsvpsProps {
@@ -7,10 +8,10 @@ export interface FetchEventRsvpsProps {
   page?: number;
   limit?: number; // capped at 100 server-side
   /**
-   * Comma-separated RSVP statuses to filter by, e.g. "going,maybe". When
+   * RSVP statuses to filter by, e.g. `["going", "maybe"]`. Exact match. When
    * omitted, all statuses are returned.
    */
-  status?: string;
+  status?: RsvpStatus | RsvpStatus[];
 }
 
 /**
@@ -22,7 +23,8 @@ export async function fetchEventRsvps(
   client: SublayHttpClient,
   data: FetchEventRsvpsProps
 ): Promise<PaginatedResponse<EventRsvp>> {
-  const { eventId, ...params } = data;
+  const { eventId, ...rest } = data;
+  const params = { ...rest, status: serializeInclude(rest.status) };
   const response = await client.projectInstance.get<
     PaginatedResponse<EventRsvp>
   >(`/events/${eventId}/rsvps`, { params });

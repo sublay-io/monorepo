@@ -9,21 +9,17 @@ export interface FetchUserByForeignIdProps extends SpaceReputationUserParams {
   /**
    * Read as this user (service key only): the response is exactly what their
    * own access token would get, so a profile whose owner blocked them comes
-   * back as not found. Omit it for the anonymous view. With
-   * `createIfNotFound`, it shapes only the read; a user created by this call
-   * is always created by the app.
+   * back as not found. Omit it for the anonymous view.
    */
   actingUserId?: string;
-  createIfNotFound?: boolean;
-  name?: string;
-  username?: string;
-  avatar?: string;
-  bio?: string;
-  metadata?: Record<string, any>;
-  secureMetadata?: Record<string, any>;
   include?: UserIncludeParam;
 }
 
+/**
+ * GET /users/by-foreign-id — read a user by your own id for them. A pure read:
+ * a miss is 404. To fetch the user or create them when missing, use
+ * {@link import("./fetchOrCreateUserByForeignId").fetchOrCreateUserByForeignId}.
+ */
 export async function fetchUserByForeignId(
   client: SublayHttpClient,
   data: FetchUserByForeignIdProps
@@ -33,15 +29,6 @@ export async function fetchUserByForeignId(
   const params: Record<string, any> = {
     foreignId: data.foreignId,
     actingUserId: data.actingUserId,
-    createIfNotFound: data.createIfNotFound,
-    name: data.name,
-    username: data.username,
-    avatar: data.avatar,
-    bio: data.bio,
-    metadata: data.metadata ? JSON.stringify(data.metadata) : undefined,
-    secureMetadata: data.secureMetadata
-      ? JSON.stringify(data.secureMetadata)
-      : undefined,
     include: serializeInclude(data.include),
     ...buildSpaceReputationParams({
       spaceReputation: data.spaceReputation,

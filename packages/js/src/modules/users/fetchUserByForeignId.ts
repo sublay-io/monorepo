@@ -9,10 +9,9 @@ export interface FetchUserByForeignIdProps extends SpaceReputationUserParams {
   include?: UserIncludeParam;
 }
 
-// Note: the server's `createIfNotFound` flag (and the accompanying creation
-// fields name/username/avatar/bio/metadata/secureMetadata) is gated to
-// service keys only (checked in the controller).
-// A user token cannot use it, so it is intentionally omitted here.
+// A pure read: a miss is 404. Creating a user by foreign id is
+// `POST /users/by-foreign-id`, which takes a service key only, so it lives in
+// `@sublay/node`, not here.
 export async function fetchUserByForeignId(
   client: SublayHttpClient,
   data: FetchUserByForeignIdProps

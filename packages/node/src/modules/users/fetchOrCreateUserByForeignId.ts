@@ -1,0 +1,67 @@
+import { SublayHttpClient } from "../../core/client";
+import { User, UserIncludeParam } from "../../interfaces/User";
+import { SpaceReputationUserParams } from "../../interfaces/SpaceReputation";
+import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
+
+export interface FetchOrCreateUserByForeignIdProps
+  extends SpaceReputationUserParams {
+  /** Your own id for the user. */
+  foreignId: string;
+  /** Used only when the user is created. */
+  name?: string;
+  /** Used only when the user is created. Must be unique in the project. */
+  username?: string;
+  /** Used only when the user is created. A URL, or `null` for none. */
+  avatar?: string | null;
+  /** Used only when the user is created. */
+  bio?: string;
+  /** Used only when the user is created. A JSON object, up to 1 MB. */
+  metadata?: Record<string, any>;
+  /**
+   * Used only when the user is created. A JSON object, up to 1 MB. Never
+   * returned by the API.
+   */
+  secureMetadata?: Record<string, any>;
+  include?: UserIncludeParam;
+  /**
+   * The user the response is read as (block hide), as on
+   * `fetchUserByForeignId`. It never changes who creates: a user created by
+   * this call is always created by the app.
+   */
+  actingUserId?: string;
+}
+
+/**
+ * POST /users/by-foreign-id — return the user with this foreign id, or create
+ * them with the given profile when there is none. An existing user comes back
+ * unchanged (the profile fields never update it). Everything travels in the
+ * body, so the profile never appears in a URL.
+ *
+ * A username another user already holds is a 409 (`DUPLICATE_USER_FIELD`).
+ */
+export async function fetchOrCreateUserByForeignId(
+  client: SublayHttpClient,
+  data: FetchOrCreateUserByForeignIdProps
+): Promise<User> {
+  const {
+    spaceReputation,
+    spaceReputationId,
+    spaceReputationDescendants,
+    ...body
+  } = data;
+
+  const response = await client.projectInstance.post<User>(
+    "/users/by-foreign-id",
+    {
+      // `include` goes as given: a JSON body carries a string or an array.
+      ...body,
+      ...buildSpaceReputationParams({
+        spaceReputation,
+        spaceReputationId,
+        spaceReputationDescendants,
+      }),
+    }
+  );
+
+  return response.data;
+}

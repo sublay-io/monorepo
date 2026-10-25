@@ -258,11 +258,11 @@ Triggered when a user is granted reputation — by another user, or by the app. 
 | `spaceId` | `string \| null \| undefined` | The bucket the grant moved in. Absent/null = the project-general bucket. |
 | `spaceShortId` | `string \| null \| undefined` | Short ID of that space. |
 | `spaceSlug` | `string \| null \| undefined` | URL slug of that space. |
-| `targetType` | `"entity" \| "comment" \| "chat-message" \| null \| undefined` | What the grant was for, if anything. |
+| `targetType` | `"entity" \| "comment" \| "message" \| null \| undefined` | What the grant was for, if anything. `"message"` is a chat message. This is the value [Fetch App Notifications](/v8/api-reference/app-notifications/fetch-notifications) returns; the push and webhook payloads of this notification name a chat message `"chat-message"`. |
 | `targetId` | `string \| null \| undefined` | ID of the rewarded record. |
 | `entityId`, `entityShortId`, `entityForeignId` | `string \| null \| undefined` | Id forms of an entity target. |
 | `commentId`, `commentForeignId` | `string \| null \| undefined` | Id forms of a comment target. A comment target also carries `entityId`, since a comment can only be opened inside its entity. |
-| `messageId`, `conversationId` | `string \| null \| undefined` | Id forms of a chat-message target. Both are needed to place a message. |
+| `messageId`, `conversationId` | `string \| null \| undefined` | Id forms of a `message` target. Both are needed to place a message. |
 
 <Note>
   The granter is carried under `granter*` keys, **never** `initiatorId`. A notification whose `metadata.initiatorId` is blocked by the recipient is suppressed entirely. A grant between two users who blocked each other is refused before it is created — from a user token and from a service key acting as the sender alike — so a grant notification never comes from a user the recipient blocked.

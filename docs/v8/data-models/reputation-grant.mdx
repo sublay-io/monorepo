@@ -30,7 +30,7 @@ Grants belong to the **`reputation`** bundle — every project with reputation h
 | `recipient` | `User \| null` | Populated when the list is read with `include=user`. |
 | `amount` | `number` | Non-zero integer. Negative only when `sourceType` is `"app"`. |
 | `spaceId` | `string \| null` | The bucket both legs moved in. `null` = the project-general bucket. |
-| `targetType` | `"entity" \| "comment" \| "chat-message" \| null` | What the grant was *for*, if anything. |
+| `targetType` | `"entity" \| "comment" \| "message" \| null` | What the grant was *for*, if anything. `"message"` is a chat message. |
 | `targetId` | `string \| null` | The rewarded record's ID. Both target fields are null, or both are set. |
 | `note` | `string \| null` | Free-text note. Trimmed, up to 2000 characters. |
 | `metadata` | `Record<string, any> \| null` | Your own key-value data. Up to 1 MB. |
@@ -56,7 +56,7 @@ A grant may point at one entity, comment, or chat message, so your app can rende
 - The target must exist when the grant is issued; a grant naming a missing record is rejected.
 - The target does **not** have to be authored by the recipient.
 - The target never determines which bucket is used. An app can reward a message living in one space using reputation from a different bucket.
-- A target kind is only usable when the project has that capability. A `chat-message` target needs the `chat` bundle; `entity` and `comment` targets need their tables. Grants with no target are always available.
+- A target kind is only usable when the project has that capability. A `message` target needs the `chat` bundle; `entity` and `comment` targets need their tables. Grants with no target are always available.
 - Deleting the target does **not** reverse the grant. The points stay with the recipient; the attachment simply stops rendering.
 
 ## GrantSummary
@@ -75,10 +75,10 @@ The full per-item list of individual grants comes from [Fetch Many Reputation Gr
 
 ## Grants on chat messages are private
 
-A grant row carries its `targetType`, `targetId` and the granter's free-text `note`, and a list read can hydrate both parties. On a `chat-message` target those facts describe a private conversation — who is talking to whom, and what one of them said about it — so such a grant is exactly as private as the message it points at:
+A grant row carries its `targetType`, `targetId` and the granter's free-text `note`, and a list read can hydrate both parties. On a `message` target those facts describe a private conversation — who is talking to whom, and what one of them said about it — so such a grant is exactly as private as the message it points at:
 
-- **The target shape is gated on membership.** Listing grants by `targetType: "chat-message"` + `targetId` returns rows only to a **member** of that message's conversation. The test is the one [Fetch Message](/v8/api-reference/chat/messages/fetch-message) itself applies — any membership row counts, so a member who has since left the conversation still sees the grants on a message chat still hands them. Everyone else — a user who was never a member, any user on a project without the `chat` bundle — gets a successful empty page with the zero summary, never a `403`, so the response cannot be used to prove the message exists. A service key passes only as the user it names in `actingUserId`, exactly as that user's token; naming nobody, it gets the empty page.
-- **The user-keyed shapes carry the same test into the query.** Listing by `recipientId` or `senderId` returns a chat-message-targeted grant to a caller who can see the underlying message and withholds it from one who cannot. So a user's own "reputation I received" feed does include the grants made on messages in their own conversations, and reconciles with the reputation on their profile; a caller outside the conversation loses those rows from the page **and** from `totalItems` together, leaving nothing to infer arithmetically. A service key is filtered as the user it names in `actingUserId`; naming nobody, it gets no chat-message grants at all, like a signed-in user in no conversation.
+- **The target shape is gated on membership.** Listing grants by `targetType: "message"` + `targetId` returns rows only to a **member** of that message's conversation. The test is the one [Fetch Message](/v8/api-reference/chat/messages/fetch-message) itself applies — any membership row counts, so a member who has since left the conversation still sees the grants on a message chat still hands them. Everyone else — a user who was never a member, any user on a project without the `chat` bundle — gets a successful empty page with the zero summary, never a `403`, so the response cannot be used to prove the message exists. A service key passes only as the user it names in `actingUserId`, exactly as that user's token; naming nobody, it gets the empty page.
+- **The user-keyed shapes carry the same test into the query.** Listing by `recipientId` or `senderId` returns a grant on a chat message to a caller who can see the underlying message and withholds it from one who cannot. So a user's own "reputation I received" feed does include the grants made on messages in their own conversations, and reconciles with the reputation on their profile; a caller outside the conversation loses those rows from the page **and** from `totalItems` together, leaving nothing to infer arithmetically. A service key is filtered as the user it names in `actingUserId`; naming nobody, it gets no grants on chat messages at all, like a signed-in user in no conversation.
 - **A removed message takes its grants with it.** Once moderation removes a message it is invisible on every chat surface, so its grants are invisible on both of these shapes too — to a member of the conversation as much as to a stranger, to the grant's own sender and recipient, and to a service key.
 
 Grants targeting an entity or a comment are unaffected — those items are public — and so are grants with no target at all. The inline summary on the chat reads needs no special rule: those endpoints already refuse a non-member with `403 chat/not-a-member` before they read a message.

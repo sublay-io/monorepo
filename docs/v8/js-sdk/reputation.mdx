@@ -9,7 +9,7 @@ Because the JS SDK authenticates as an **end user** (bearer token), you never se
 
 There is deliberately **no mint function**. Creating reputation from nothing — and destroying it — is service-key only and lives in [`@sublay/node`](/v8/node-sdk/reputation).
 
-Requires the `reputation` bundle. A `chat-message` target additionally needs the `chat` bundle, and a `spaceId` needs the `spaces` bundle.
+Requires the `reputation` bundle. A `message` target additionally needs the `chat` bundle, and a `spaceId` needs the `spaces` bundle.
 
 ---
 
@@ -37,14 +37,14 @@ const grant = await sublay.reputation.createGrant({
 </ParamField>
 <ParamField body="note" type="string | null">Free-text note. Trimmed, up to 2000 characters.</ParamField>
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB. Omit when unused.</ParamField>
-<ParamField body="targetType" type='"entity" | "comment" | "chat-message"'>
+<ParamField body="targetType" type='"entity" | "comment" | "message"'>
   What the grant is for. Supplied together with `targetId`. An annotation only — it never determines which bucket is used, and need not be authored by the recipient.
 </ParamField>
 <ParamField body="targetId" type="string">The rewarded record's ID. Supplied together with `targetType`, and must exist.</ParamField>
 
 **Returns** — `Promise<ReputationGrant>` with `sourceType: "user"`.
 
-Common rejections: `409 reputation-grant/insufficient-reputation` (the chosen bucket is short — nothing moved), `400 reputation-grant/self-grant`, `403 reputation-grant/user-grants-disabled` (the project has `settings.reputationGrants.allowUserInitiated` set to `false` and routes grants through its own backend instead), `404 reputation-grant/space-not-found`, `404 reputation-grant/target-not-found` (which is also the answer when a `chat-message` target sits in a conversation the sender isn't an active member of), and `404 reputation-grant/user-not-found` (which is also the non-disclosing answer when one party has blocked the other).
+Common rejections: `409 reputation-grant/insufficient-reputation` (the chosen bucket is short — nothing moved), `400 reputation-grant/self-grant`, `403 reputation-grant/user-grants-disabled` (the project has `settings.reputationGrants.allowUserInitiated` set to `false` and routes grants through its own backend instead), `404 reputation-grant/space-not-found`, `404 reputation-grant/target-not-found` (which is also the answer when a `message` target sits in a conversation the sender isn't an active member of), and `404 reputation-grant/user-not-found` (which is also the non-disclosing answer when one party has blocked the other).
 
 <Warning>
   **Grant creation is not idempotent.** A retried call creates a second grant and moves the points a second time. Guard your submit path.
@@ -69,7 +69,7 @@ console.log(summary?.total, "points from", summary?.count, "people");
 
 <ParamField body="recipientId" type="string">What this user received.</ParamField>
 <ParamField body="senderId" type="string">What this user sent.</ParamField>
-<ParamField body="targetType" type='"entity" | "comment" | "chat-message"'>Who rewarded this item. Supplied together with `targetId`.</ParamField>
+<ParamField body="targetType" type='"entity" | "comment" | "message"'>Who rewarded this item. Supplied together with `targetId`.</ParamField>
 <ParamField body="targetId" type="string">The rewarded record's ID. Supplied together with `targetType`.</ParamField>
 <ParamField body="page" type="number">Page number (1-indexed). Defaults to `1`.</ParamField>
 <ParamField body="limit" type="number">Page size. Defaults to `20`; the maximum is `100`. A larger value is rejected with `400 reputation-grant/invalid-query` rather than clamped.</ParamField>
@@ -83,7 +83,7 @@ console.log(summary?.total, "points from", summary?.count, "people");
 **Returns** — `Promise<{ data: ReputationGrant[]; pagination; summary? }>`. The `summary` block (`{ total, count, viewerTotal }`) is returned **only** on the target filter shape — it's exactly what a standalone "who rewarded this" view needs, so you don't have to fetch the parent item to print the totals.
 
 <Note>
-  **Grants on chat messages are private to their conversation.** With `targetType: "chat-message"` the list is populated only when the token's user is a member of that conversation — having left it still counts; everyone else gets an empty list and a `{ total: 0, count: 0, viewerTotal: 0 }` summary rather than an error. The `recipientId` / `senderId` shapes run the same test per row, so the token holder's own "reputation I received" feed *does* carry the grants made on messages in their own conversations, while a grant on a conversation they are not in drops out of the page and out of `pagination.totalItems` together. On either shape, grants on a message moderation has removed are hidden.
+  **Grants on chat messages are private to their conversation.** With `targetType: "message"` the list is populated only when the token's user is a member of that conversation — having left it still counts; everyone else gets an empty list and a `{ total: 0, count: 0, viewerTotal: 0 }` summary rather than an error. The `recipientId` / `senderId` shapes run the same test per row, so the token holder's own "reputation I received" feed *does* carry the grants made on messages in their own conversations, while a grant on a conversation they are not in drops out of the page and out of `pagination.totalItems` together. On either shape, grants on a message moderation has removed are hidden.
 </Note>
 
 <Note>

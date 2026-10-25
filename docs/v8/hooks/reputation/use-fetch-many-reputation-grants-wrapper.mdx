@@ -55,7 +55,7 @@ Call `refresh` after issuing a grant to pull the new row and updated totals.
 
 <ParamField path="recipientId" type="string | null">What this user received.</ParamField>
 <ParamField path="senderId" type="string | null">What this user sent.</ParamField>
-<ParamField path="targetType" type='"entity" | "comment" | "chat-message" | null'>
+<ParamField path="targetType" type='"entity" | "comment" | "message" | null'>
   Who rewarded this item. Supplied together with `targetId`.
 </ParamField>
 <ParamField path="targetId" type="string | null">The rewarded record's ID. Supplied together with `targetType`.</ParamField>
@@ -79,7 +79,7 @@ Call `refresh` after issuing a grant to pull the new row and updated totals.
 <ResponseField name="refresh" type="() => void">Re-run the query from page 1.</ResponseField>
 
 <Note>
-  **Chat-message targets are private to their conversation.** With `targetType: "chat-message"`, the list is populated only when the logged-in user is a member of that message's conversation — someone who has left it still counts; for anyone outside it, `grants` stays empty and `summary` comes back as `{ total: 0, count: 0, viewerTotal: 0 }` rather than erroring. The `recipientId` / `senderId` shapes apply the same test per row, so a user's own feed keeps the grants made on messages in their own conversations while a caller outside them never sees those rows. Grants on a message moderation has removed are hidden on both shapes, members included. See [useFetchManyReputationGrants](/v8/hooks/reputation/use-fetch-many-reputation-grants#chat-message-targets).
+  **Chat message targets are private to their conversation.** With `targetType: "message"`, the list is populated only when the logged-in user is a member of that message's conversation — someone who has left it still counts; for anyone outside it, `grants` stays empty and `summary` comes back as `{ total: 0, count: 0, viewerTotal: 0 }` rather than erroring. The `recipientId` / `senderId` shapes apply the same test per row, so a user's own feed keeps the grants made on messages in their own conversations while a caller outside them never sees those rows. Grants on a message moderation has removed are hidden on both shapes, members included. See [useFetchManyReputationGrants](/v8/hooks/reputation/use-fetch-many-reputation-grants#chat-message-targets).
 </Note>
 
 <Note>

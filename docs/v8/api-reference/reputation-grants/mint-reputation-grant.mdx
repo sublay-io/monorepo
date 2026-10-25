@@ -8,7 +8,7 @@ Mints reputation: it is created from nothing and credited to a user, with no sen
 
 A mint may also be **negative**, which is the only way to take reputation away: a moderation clawback, a decay sweep, or a correction to a mistaken grant. A negative mint may drive a bucket below zero (buckets have no floor).
 
-**Service key only.** A user token never reaches this route. The mint always acts as the app: there is no sender, so `actingUserId` is refused (`400 reputation-grant/unsupported-param`). Blocks are ignored, suspension is not consulted, and a `chat-message` target is not membership-checked — the app is trusted.
+**Service key only.** A user token never reaches this route. The mint always acts as the app: there is no sender, so `actingUserId` is refused (`400 reputation-grant/unsupported-param`). Blocks are ignored, suspension is not consulted, and a `message` target is not membership-checked — the app is trusted.
 
 Requires the `reputation` bundle.
 
@@ -35,7 +35,7 @@ Requires the `reputation` bundle.
 </ParamField>
 
 <ParamField body="targetType" type="string">
-  What the grant is for: `"entity"`, `"comment"`, or `"chat-message"`. Must be supplied together with `targetId`.
+  What the grant is for: `"entity"`, `"comment"`, or `"message"` (a chat message). Values match exactly. Must be supplied together with `targetId`.
 </ParamField>
 
 <ParamField body="targetId" type="string">
@@ -48,7 +48,7 @@ There is deliberately **no actor field**. The grant is written with a `null` `se
 
 Returns `201` with the created [ReputationGrant](/v8/data-models/reputation-grant).
 
-A **positive** mint notifies the recipient and, for a `chat-message` target, broadcasts [`message:grant`](/v8/sdk/chat/real-time) to the conversation. A **negative** mint is entirely silent: no notification, no broadcast, and invisible on every public read surface. Read it back from [Fetch User Grant History](/v8/api-reference/reputation-grants/fetch-user-grant-history).
+A **positive** mint notifies the recipient and, for a `message` target, broadcasts [`message:grant`](/v8/sdk/chat/real-time) to the conversation. A **negative** mint is entirely silent: no notification, no broadcast, and invisible on every public read surface. Read it back from [Fetch User Grant History](/v8/api-reference/reputation-grants/fetch-user-grant-history).
 
 ## Error Responses
 
@@ -72,7 +72,7 @@ A **positive** mint notifies the recipient and, for a `chat-message` target, bro
       "dashboardUrl": "https://…/<projectId>/database"
     }
     ```
-    The `reputation` bundle is missing, a `spaceId` was supplied on a project without `spaces`, or the target's bundle is absent (e.g. a `chat-message` target without `chat`). `missingTables` names exactly what is absent.
+    The `reputation` bundle is missing, a `spaceId` was supplied on a project without `spaces`, or the target's bundle is absent (e.g. a `message` target without `chat`). `missingTables` names exactly what is absent.
   </Accordion>
   <Accordion title="User Not Found — 404">
     ```json
@@ -89,7 +89,7 @@ A **positive** mint notifies the recipient and, for a `chat-message` target, bro
     ```json
     { "error": "The grant target does not exist.", "code": "reputation-grant/target-not-found" }
     ```
-    The target record does not exist. A mint is not membership-checked, so a `chat-message` target only has to exist.
+    The target record does not exist. A mint is not membership-checked, so a `message` target only has to exist.
   </Accordion>
   <Accordion title="Conflict — 409">
     ```json
@@ -101,6 +101,17 @@ A **positive** mint notifies the recipient and, for a `chat-message` target, bro
 
     ```json
     { "error": "`actingUserId` isn't accepted here: this endpoint always acts as the app.", "code": "reputation-grant/unsupported-param", "param": "actingUserId" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported targetType — 400">
+    `targetType` was `"chat-message"` in the body or the query. A chat message is `message`.
+
+    ```json
+    {
+      "error": "`targetType` \"chat-message\" isn't supported in v8. A chat message is `message`.",
+      "code": "reputation-grant/unsupported-param",
+      "param": "targetType"
+    }
     ```
   </Accordion>
 </AccordionGroup>

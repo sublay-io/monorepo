@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import { EntityListSortByOptions, SortByReaction, SortDirection, SortType } from "../../interfaces/EntityListSortByOptions";
 import {
   Entity,
+  EntityInclude,
   EntityIncludeParam,
   TopCommentsParams,
 } from "../../interfaces/models/Entity";
@@ -93,6 +94,16 @@ function useFetchManyEntitiesWrapper(
   const reputation = { spaceReputation, spaceReputationId, spaceReputationDescendants };
   const reputationKey = JSON.stringify(reputation);
 
+  // `include` is flattened to the string the wire carries, and the string —
+  // never the raw value — goes into the dep arrays. An inline array is a fresh
+  // reference every render; raw in a dep array it re-fires the reset effect on
+  // every render, an unbounded request loop.
+  const includeKey = Array.isArray(include) ? include.join(",") : include;
+  const includeList = useMemo(
+    () => (includeKey ? (includeKey.split(",") as EntityInclude[]) : undefined),
+    [includeKey]
+  );
+
   const fetchManyEntities = useFetchManyEntities();
 
   const loading = useRef(true);
@@ -128,7 +139,7 @@ function useFetchManyEntitiesWrapper(
         sourceId,
         spaceId,
         limit,
-        include,
+        include: includeList,
         topCommentsLimit,
         topCommentsSortByReaction,
         followedOnly,
@@ -166,7 +177,7 @@ function useFetchManyEntitiesWrapper(
     sourceId,
     spaceId,
     userId,
-    include,
+    includeList,
     topCommentsLimit,
     topCommentsSortByReaction,
     followedOnly,
@@ -208,7 +219,7 @@ function useFetchManyEntitiesWrapper(
           sourceId,
           spaceId,
           limit,
-          include,
+          include: includeList,
           topCommentsLimit,
           topCommentsSortByReaction,
           followedOnly,
@@ -253,7 +264,7 @@ function useFetchManyEntitiesWrapper(
     sourceId,
     spaceId,
     limit,
-    include,
+    includeList,
     topCommentsLimit,
     topCommentsSortByReaction,
     followedOnly,

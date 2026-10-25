@@ -120,8 +120,8 @@ console.log(summary?.total, "points from", summary?.count, "people");
 <ParamField body="targetId" type="string">The rewarded record's ID. Supplied together with `targetType`.</ParamField>
 <ParamField body="page" type="number">Page number (1-indexed). Defaults to `1`.</ParamField>
 <ParamField body="limit" type="number">Page size. Defaults to `20`; the maximum is `100`. A larger value is rejected with `400 reputation-grant/invalid-query` rather than clamped.</ParamField>
-<ParamField body="include" type="string">
-  Comma-separated associations. Only `"user"` is supported — it hydrates both the sender and the recipient.
+<ParamField body="include" type="ReputationGrantIncludeParam">
+  A single value or an array. The only value is `"user"` — it hydrates both the sender and the recipient.
 </ParamField>
 <ParamField body="actingUserId" type="string">
   The user to list as: exactly what their own access token would get (grants on chat messages only where they can read the message; `summary.viewerTotal` is theirs). Omit it to list as a signed-in user in no conversation: no grants on chat messages, and `viewerTotal` is `0`.
@@ -144,7 +144,7 @@ console.log(summary?.total, "points from", summary?.count, "people");
 
 ## Reading totals inline
 
-For per-item totals, don't page through this module — ask the read that already returns the item. Entities, comments and chat messages all accept a `"grants"` token in their `include` string (combine it with others, e.g. `"files,grants"`). Each item then carries `grants: { total, count, viewerTotal }`. See [GrantSummary](/v8/data-models/reputation-grant#grantsummary).
+For per-item totals, don't page through this module — ask the read that already returns the item. Entities, comments and chat messages all accept `"grants"` in their `include` (alone or in an array with others, e.g. `["files", "grants"]`). Each item then carries `grants: { total, count, viewerTotal }`. See [GrantSummary](/v8/data-models/reputation-grant#grantsummary).
 
 ## See Also
 

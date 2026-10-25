@@ -1,5 +1,9 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { ChatMessage } from "../../interfaces/ChatMessage";
+import {
+  ChatMessage,
+  ChatMessageIncludeParam,
+} from "../../interfaces/ChatMessage";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
@@ -7,10 +11,11 @@ export interface GetMessageProps extends SpaceReputationContextParams {
   conversationId: string;
   messageId: string;
   /**
-   * Comma-separated associations to populate. Only `"grants"` is supported
-   * here — it attaches the message's reputation-grant summary.
+   * Associations to populate. Only `"grants"` is supported here — it
+   * attaches the message's reputation-grant summary. The message's files
+   * always come back.
    */
-  include?: string;
+  include?: ChatMessageIncludeParam;
 }
 
 export async function getMessage(
@@ -27,6 +32,7 @@ export async function getMessage(
   } = data;
   const params = {
     ...rest,
+    include: serializeInclude(rest.include),
     ...buildSpaceReputationParams({
       spaceReputation,
       spaceReputationId,

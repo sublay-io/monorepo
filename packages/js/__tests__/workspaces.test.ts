@@ -133,9 +133,9 @@ describe("js-sdk workspaces — lifecycle request shaping", () => {
 
   it("fetchManyWorkspaces hits /workspaces with only pagination/include params", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchManyWorkspaces(client, { page: 2, limit: 10, include: "x" });
+    await fetchManyWorkspaces(client, { page: 2, limit: 10, include: "memberCount" });
     expect(projectInstance.get).toHaveBeenCalledWith("/workspaces", {
-      params: { page: 2, limit: 10, include: "x" },
+      params: { page: 2, limit: 10, include: "memberCount" },
     });
   });
 

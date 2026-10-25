@@ -64,7 +64,7 @@ const workspace = await sublay.workspaces.fetchWorkspace({
 ```
 
 <ParamField body="workspaceId" type="string" required />
-<ParamField body="include" type="string">Comma-separated include flags. `memberCount` adds the workspace's direct member count; omit it and the field is absent. An unrecognized flag value is ignored.</ParamField>
+<ParamField body="include" type="WorkspaceIncludeParam">A single value or an array. The only value is `"memberCount"`: it adds the workspace's direct member count; omit it and the field is absent. The server rejects any other value with `400 workspace/invalid-query`.</ParamField>
 
 ### fetchManyWorkspaces
 
@@ -80,7 +80,7 @@ const { data, pagination } = await sublay.workspaces.fetchManyWorkspaces({
 
 <ParamField body="page" type="number" />
 <ParamField body="limit" type="number" />
-<ParamField body="include" type="string">Comma-separated include flags, sent as a query param. `memberCount` adds a `memberCount` to **every row** — the workspace's direct member count, resolved in one grouped query over the returned page rather than one request per row. Omit it and the field is absent from each row.</ParamField>
+<ParamField body="include" type="WorkspaceIncludeParam">A single value or an array, sent as a query param. The only value is `"memberCount"`: it adds a `memberCount` to **every row** — the workspace's direct member count, resolved in one grouped query over the returned page rather than one request per row. Omit it and the field is absent from each row.</ParamField>
 
 ### updateWorkspace
 
@@ -160,7 +160,7 @@ const counts = await sublay.workspaces.fetchWorkspaceMembers({ workspaceId: "ws_
 ```
 
 <ParamField body="workspaceId" type="string" required />
-<ParamField body="include" type="string">`ancestorOwners`, `reachHolders`, `descendants`.</ParamField>
+<ParamField body="include" type="WorkspaceMemberIncludeParam">A single value or an array of `"ancestorOwners"`, `"reachHolders"`, `"descendants"`.</ParamField>
 <ParamField body="countOnly" type="boolean" />
 
 ### fetchWorkspaceMemberStanding

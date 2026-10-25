@@ -157,7 +157,7 @@ describe("node-sdk entities — request shaping", () => {
 
   it("entity fetchers forward topCommentsLimit / topCommentsSortByReaction", async () => {
     const { client, projectInstance } = makeClient();
-    const top = { include: "topComments", topCommentsLimit: 3, topCommentsSortByReaction: "love" as const };
+    const top = { include: "topComments" as const, topCommentsLimit: 3, topCommentsSortByReaction: "love" as const };
     await fetchEntity(client, { entityId: "e1", ...top });
     await fetchEntityByShortId(client, { shortId: "s1", ...top });
     await fetchEntityByForeignId(client, { foreignId: "f1", ...top });

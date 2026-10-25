@@ -1,5 +1,6 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { Comment } from "../../interfaces/Comment";
+import { Comment, CommentIncludeParam } from "../../interfaces/Comment";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
@@ -11,7 +12,7 @@ export interface FetchCommentProps extends SpaceReputationContextParams {
    * Omit it for the anonymous view.
    */
   actingUserId?: string;
-  include?: string;
+  include?: CommentIncludeParam;
 }
 
 export async function fetchComment(
@@ -30,6 +31,7 @@ export async function fetchComment(
     {
       params: {
         ...rest,
+        include: serializeInclude(rest.include),
         ...buildSpaceReputationParams({
           spaceReputation,
           spaceReputationId,

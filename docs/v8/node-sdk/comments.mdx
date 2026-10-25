@@ -91,8 +91,8 @@ const comment = await sublay.comments.fetchComment({ commentId: "cmt_abc123" });
   The user to read as: you get exactly what their own access token would get (blocks, their own removed comments in full, moderation details only where they may see them). Omit it for the anonymous view, with no moderation details.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="CommentIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />
@@ -119,8 +119,8 @@ const comment = await sublay.comments.fetchCommentByForeignId({
   The user to read as: you get exactly what their own access token would get (blocks, their own removed comments in full, moderation details only where they may see them). Omit it for the anonymous view, with no moderation details.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="CommentIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
 </ParamField>
 
 **Returns** — `Promise<Comment>`

@@ -62,7 +62,7 @@ function DraftsList() {
 | `limit` | `number` | Results per page |
 | `sourceId` | `string` | Filter by source ID |
 | `spaceId` | `string` | Filter by space |
-| `include` | `string \| string[]` | Populate related data (`"user"`, `"space"`, etc.) |
+| `include` | `DraftIncludeParam` | Populate related data, as a single value or an array: `"user"`, `"space"`, `"files"`, `"grants"` |
 
 Returns a paginated response: `{ data: Entity[], pagination: { page, pageSize, totalPages, totalItems, hasMore } }`.
 

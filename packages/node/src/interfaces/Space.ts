@@ -147,3 +147,8 @@ export interface SpaceBreadcrumb {
   breadcrumb: SpacePreview[];
   depth: number;
 }
+
+/** `include` values every space read (single, lists, children, mutual) accepts. */
+export type SpaceInclude = "files";
+export type SpaceIncludeArray = SpaceInclude[];
+export type SpaceIncludeParam = SpaceInclude | SpaceIncludeArray;

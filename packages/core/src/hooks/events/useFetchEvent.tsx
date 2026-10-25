@@ -1,12 +1,12 @@
 import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
-import { Event } from "../../interfaces/models/Event";
+import { Event, EventIncludeParam } from "../../interfaces/models/Event";
 
 export interface FetchEventProps {
   eventId: string;
-  /** Associations to expand, e.g. ["user", "space", "files", "userRsvp"]. */
-  include?: string | string[];
+  /** Associations to expand: `user`, `space`, `files`, `userRsvp`. */
+  include?: EventIncludeParam;
 }
 
 function useFetchEvent(): (props: FetchEventProps) => Promise<Event> {

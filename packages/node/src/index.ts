@@ -138,6 +138,8 @@ export type { AddColumnProps } from "./modules/tables-management/addColumn";
 export type {
   Entity,
   EntityInclude,
+  EntityIncludeArray,
+  EntityIncludeParam,
   CollectionEntityInclude,
   CollectionEntityIncludeArray,
   CollectionEntityIncludeParam,
@@ -155,6 +157,9 @@ export type {
   EventStatus,
   RsvpStatus,
   RsvpCounts,
+  EventInclude,
+  EventIncludeArray,
+  EventIncludeParam,
 } from "./interfaces/Event";
 export type {
   Comment,
@@ -169,14 +174,30 @@ export type {
   CommentsSortBy,
   CommentReplySortBy,
 } from "./interfaces/Comment";
-export type { User, UserFull, AuthUser, UserRole } from "./interfaces/User";
+export type {
+  User,
+  UserFull,
+  AuthUser,
+  UserRole,
+  UserInclude,
+  UserIncludeArray,
+  UserIncludeParam,
+} from "./interfaces/User";
 export type {
   SpaceReputationContextParams,
   SpaceReputationUserParams,
 } from "./interfaces/SpaceReputation";
 export type { UserSearchParams } from "./interfaces/UserSearch";
 export type { Collection } from "./interfaces/Collection";
-export type { Space, SpaceDetailed, SpacePreview, SpaceBreadcrumb } from "./interfaces/Space";
+export type {
+  Space,
+  SpaceDetailed,
+  SpacePreview,
+  SpaceBreadcrumb,
+  SpaceInclude,
+  SpaceIncludeArray,
+  SpaceIncludeParam,
+} from "./interfaces/Space";
 export type { SpaceMember, SpaceMemberWithUser } from "./interfaces/SpaceMember";
 export type {
   Workspace,
@@ -197,13 +218,27 @@ export type {
   WorkspaceAuthority,
   RemoveWorkspaceMemberFromSubtreeResponse,
   SkippedWorkspace,
+  WorkspaceInclude,
+  WorkspaceIncludeArray,
+  WorkspaceIncludeParam,
+  WorkspaceMemberInclude,
+  WorkspaceMemberIncludeArray,
+  WorkspaceMemberIncludeParam,
 } from "./interfaces/Workspace";
 export type { Rule } from "./interfaces/Rule";
 export type { Follow } from "./interfaces/Follow";
 export type { Connection, ConnectionRequestResponse, EstablishedConnection, PendingConnection, ConnectionStatusResponse } from "./interfaces/Connection";
 export type { Conversation, ConversationPreview } from "./interfaces/Conversation";
 export type { ConversationMember, ConversationMemberRole } from "./interfaces/ConversationMember";
-export type { ChatMessage } from "./interfaces/ChatMessage";
+export type {
+  ChatMessage,
+  ChatMessageListInclude,
+  ChatMessageListIncludeArray,
+  ChatMessageListIncludeParam,
+  ChatMessageInclude,
+  ChatMessageIncludeArray,
+  ChatMessageIncludeParam,
+} from "./interfaces/ChatMessage";
 export type { Reaction, ReactionType, ReactionCounts } from "./interfaces/Reaction";
 export type { UnifiedAppNotification, PotentiallyPopulatedUnifiedAppNotification } from "./interfaces/AppNotification";
 export type { PushDeviceResult, SendPushResult } from "./interfaces/Push";
@@ -228,6 +263,9 @@ export type {
   ReputationGrantTargetFilter,
   GrantWriteCommonProps,
   GrantSummary,
+  ReputationGrantInclude,
+  ReputationGrantIncludeArray,
+  ReputationGrantIncludeParam,
 } from "./interfaces/ReputationGrant";
 export type { CreateGrantProps } from "./modules/reputation/createGrant";
 export type { MintGrantProps } from "./modules/reputation/mintGrant";

@@ -1,5 +1,6 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { Space } from "../../interfaces/Space";
+import { Space, SpaceIncludeParam } from "../../interfaces/Space";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface FetchChildSpacesProps {
@@ -8,7 +9,7 @@ export interface FetchChildSpacesProps {
   limit?: number;
   sortBy?: "createdAt" | "alphabetical" | "members";
   sortDir?: "asc" | "desc";
-  include?: string;
+  include?: SpaceIncludeParam;
 }
 
 export async function fetchChildSpaces(
@@ -18,7 +19,9 @@ export async function fetchChildSpaces(
   const { spaceId, ...params } = data;
   const response = await client.projectInstance.get<PaginatedResponse<Space>>(
     `/spaces/${spaceId}/children`,
-    { params }
+    {
+      params: { ...params, include: serializeInclude(params.include) },
+    }
   );
   return response.data;
 }

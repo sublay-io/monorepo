@@ -1,5 +1,6 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { Comment } from "../../interfaces/Comment";
+import { Comment, CommentIncludeParam } from "../../interfaces/Comment";
 
 export interface FetchCommentByForeignIdProps {
   foreignId: string;
@@ -9,7 +10,7 @@ export interface FetchCommentByForeignIdProps {
    * Omit it for the anonymous view.
    */
   actingUserId?: string;
-  include?: string;
+  include?: CommentIncludeParam;
 }
 
 export async function fetchCommentByForeignId(
@@ -18,7 +19,7 @@ export async function fetchCommentByForeignId(
 ): Promise<Comment> {
   const path = `/comments/by-foreign-id`;
   const response = await client.projectInstance.get<Comment>(path, {
-    params: data,
+    params: { ...data, include: serializeInclude(data.include) },
   });
   // v8 returns the comment bare (v7 wrapped it in { comment }, which the 7.x
   // SDK unwraps on main).

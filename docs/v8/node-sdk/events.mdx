@@ -73,13 +73,13 @@ Fetches a single event by ID. Pass `actingUserId` to resolve visibility for that
 ```typescript
 const event = await sublay.events.fetchEvent({
   eventId: "evt_abc123",
-  include: "user,space,files,userRsvp",
+  include: ["user", "space", "files", "userRsvp"],
   actingUserId: "usr_abc123",
 });
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="include" type="string">Comma-separated associations: `"user"`, `"space"`, `"files"`, `"userRsvp"`.</ParamField>
+<ParamField body="include" type="EventIncludeParam">Associations to expand, as a single value or an array: `"user"`, `"space"`, `"files"`, `"userRsvp"`.</ParamField>
 <ParamField body="actingUserId" type="string">The user to read as: exactly what their own access token would get (visibility, `userRsvp`). Omit it for the anonymous view: only a `public` event is returned, any other answers `404`.</ParamField>
 
 **Returns** — `Promise<Event>`
@@ -99,7 +99,7 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
   page: 1,
   limit: 20,
   actingUserId: "usr_abc123",
-  include: "user,userRsvp",
+  include: ["user", "userRsvp"],
 });
 ```
 
@@ -118,7 +118,7 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
 <ParamField body="locationFilters" type="{ latitude: string; longitude: string; radius: string }">Proximity filter (radius in meters).</ParamField>
 <ParamField body="titleFilters" type="{ hasTitle?; includes?; doesNotInclude? }">Free-text filter on `title`.</ParamField>
 <ParamField body="descriptionFilters" type="{ hasDescription?; includes?; doesNotInclude? }">Free-text filter on `description`.</ParamField>
-<ParamField body="include" type="string">Comma-separated associations.</ParamField>
+<ParamField body="include" type="EventIncludeParam">Associations to expand, as a single value or an array: `"user"`, `"space"`, `"files"`, `"userRsvp"`.</ParamField>
 <ParamField body="actingUserId" type="string">The user to list as: exactly what their own access token would get (visibility, `myRsvp`, `userRsvp`). Omit it for the anonymous view: `public` events only.</ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Event>>`

@@ -58,3 +58,8 @@ export type User = Omit<
   | "lastActive"
   | "updatedAt"
 >;
+
+/** `include` values the user fetches (by id, foreign id, username) accept. */
+export type UserInclude = "files";
+export type UserIncludeArray = UserInclude[];
+export type UserIncludeParam = UserInclude | UserIncludeArray;

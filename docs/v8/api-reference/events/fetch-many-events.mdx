@@ -73,7 +73,13 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 </ParamField>
 
 <ParamField query="include" type="string">
-  Comma-separated associations to expand: `"user"`, `"space"`, `"files"`, `"userRsvp"`.
+  Associations to expand, as a comma-separated value (`include=user,space`) or repeated params. Values:
+  - `user` — the creator's user profile
+  - `space` — the space the event belongs to
+  - `files` — the cover and gallery file objects
+  - `userRsvp` — the caller's own RSVP status (needs a viewer; otherwise `null`)
+
+  Matching ignores case. An unknown value returns `400 event/invalid-query`.
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
@@ -130,6 +136,10 @@ Returns a paginated response: `{ data: Event[], pagination: { page, pageSize, to
   <Accordion title="Invalid Query — 400">
     ```json
     { "error": "Limit must be a positive number", "code": "event/invalid-query" }
+    ```
+    Also returned for an unknown `include` value:
+    ```json
+    { "error": "include: Unknown include `rsvps`. Allowed: user, space, files, userRsvp.", "code": "event/invalid-query" }
     ```
   </Accordion>
 </AccordionGroup>

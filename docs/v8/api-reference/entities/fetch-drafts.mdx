@@ -72,6 +72,10 @@ Each item is an [Entity](/v8/data-models/entity) with `isDraft: true`. Results a
     ```json
     { "error": "page: Page must be a positive integer", "code": "entity/invalid-query" }
     ```
+
+    ```json
+    { "error": "include: Unknown include `saved`. Allowed: user, space, files, grants.", "code": "entity/invalid-query" }
+    ```
   </Accordion>
   <Accordion title="Unauthorized — 401">
     Returned when no user is authenticated.

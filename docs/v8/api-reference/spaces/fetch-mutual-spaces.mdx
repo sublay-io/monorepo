@@ -27,7 +27,10 @@ Returns a paginated list of spaces that both the authenticated user and another 
 </ParamField>
 
 <ParamField query="include" type="string">
-  Optional comma-separated includes. Pass `"files"` to include avatar and banner file objects on each space.
+  Associations to include, as a comma-separated value or repeated params. The only value is:
+  - `files` — the processed `avatarFile` and `bannerFile` objects on each space (requires the `files-images` bundle)
+
+  Matching ignores case. An unknown value returns `400 space/invalid-query`.
 </ParamField>
 
 ## Response
@@ -53,6 +56,13 @@ Returns a paginated list of spaces that both the authenticated user and another 
     A service key sent no `actingUserId`.
     ```json
     { "error": "A service key must send actingUserId: the user this request acts as.", "code": "space/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid query — 400">
+    Returned with code `space/invalid-query` for an unknown `include` value.
+
+    ```json
+    { "error": "include: Unknown include `members`. Allowed: files.", "code": "space/invalid-query" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

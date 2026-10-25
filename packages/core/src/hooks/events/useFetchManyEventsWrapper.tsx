@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Event,
+  EventInclude,
+  EventIncludeParam,
   EventStatus,
   EventType,
   RsvpStatus,
@@ -29,7 +31,7 @@ export interface UseFetchManyEventsWrapperProps {
   locationFilters?: EventLocationFilters | null;
   titleFilters?: EventTitleFilters | null;
   descriptionFilters?: EventDescriptionFilters | null;
-  include?: string | string[];
+  include?: EventIncludeParam;
   defaultSortBy?: EventSortBy;
   /**
    * Left out (null): the sort's natural direction — soonest first for
@@ -73,6 +75,21 @@ function useFetchManyEventsWrapper(
     defaultSortDir = null,
   } = props;
 
+  // `include` and `myRsvp` are flattened to the strings the wire carries, and
+  // those strings — never the raw values — go into the dep arrays. An inline
+  // array is a fresh reference every render; raw in a dep array it re-fires the
+  // reset effect on every render, an unbounded request loop.
+  const includeKey = Array.isArray(include) ? include.join(",") : include;
+  const includeList = useMemo(
+    () => (includeKey ? (includeKey.split(",") as EventInclude[]) : undefined),
+    [includeKey]
+  );
+  const myRsvpKey = Array.isArray(myRsvp) ? myRsvp.join(",") : myRsvp;
+  const myRsvpList = useMemo(
+    () => (myRsvpKey ? (myRsvpKey.split(",") as RsvpStatus[]) : undefined),
+    [myRsvpKey]
+  );
+
   const fetchManyEvents = useFetchManyEvents();
 
   const loading = useRef(true);
@@ -99,11 +116,11 @@ function useFetchManyEventsWrapper(
       timeWindow: timeWindow ?? undefined,
       startsAfter: startsAfter ?? undefined,
       startsBefore: startsBefore ?? undefined,
-      myRsvp: myRsvp ?? undefined,
+      myRsvp: myRsvpList,
       locationFilters: locationFilters ?? undefined,
       titleFilters: titleFilters ?? undefined,
       descriptionFilters: descriptionFilters ?? undefined,
-      include,
+      include: includeList,
     }),
     [
       limit,
@@ -116,11 +133,11 @@ function useFetchManyEventsWrapper(
       timeWindow,
       startsAfter,
       startsBefore,
-      myRsvp,
+      myRsvpList,
       locationFilters,
       titleFilters,
       descriptionFilters,
-      include,
+      includeList,
     ]
   );
 

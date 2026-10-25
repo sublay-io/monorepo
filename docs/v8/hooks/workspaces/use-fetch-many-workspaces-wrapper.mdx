@@ -34,8 +34,8 @@ function WorkspaceList() {
   Page size. Defaults to `10`.
 </ParamField>
 
-<ParamField path="include" type="string | string[]">
-  Include flags. `memberCount` adds each accumulated workspace's **direct** member count; omit it and the field is absent. An array is joined with commas.
+<ParamField path="include" type="WorkspaceIncludeParam">
+  A single value or an array. The only value is `"memberCount"`: it adds each accumulated workspace's **direct** member count; omit it and the field is absent.
 </ParamField>
 
 ## Returns

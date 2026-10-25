@@ -29,8 +29,8 @@ function SpacePage({ slug }: { slug: string }) {
   The URL slug of the space.
 </ParamField>
 
-<ParamField path="include" type='"files" | string[]'>
-  Optional. Pass `"files"` to include avatar and banner file objects.
+<ParamField path="include" type="SpaceIncludeParam">
+  Optional. A single value or an array; the only value is `"files"`. Pass it to include avatar and banner file objects.
 </ParamField>
 
 ## Returns

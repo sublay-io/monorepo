@@ -44,8 +44,8 @@ The hook returns a function. That function accepts:
   The username to look up.
 </ParamField>
 
-<ParamField path="include" type="string | string[]">
-  Optional. Pass `"files"` to populate `avatarFile` and `bannerFile` with full `File` objects.
+<ParamField path="include" type="UserIncludeParam">
+  Optional. A single value or an array; the only value is `"files"`. Pass it to populate `avatarFile` and `bannerFile` with full `File` objects.
 </ParamField>
 
 <SpaceReputationParams variant="user" field="path" />

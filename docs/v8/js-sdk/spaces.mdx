@@ -78,6 +78,10 @@ const space = await sublay.spaces.fetchSpace({ spaceId: "spc_abc123" });
   The Sublay space ID.
 </ParamField>
 
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
+</ParamField>
+
 **Returns** — `Promise<SpaceDetailed>`
 
 ---
@@ -138,8 +142,8 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
   Filter by each space's `nsfwEffective` (own flag OR any ancestor). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW spaces; `"only"` returns only them. `"only"` may return an NSFW child whose safe parent is omitted. See [Space NSFW flagging](/v8/data-models/space#nsfw-flagging).
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated related resources to include in the response.
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Space>>`
@@ -158,6 +162,10 @@ const space = await sublay.spaces.fetchSpaceBySlug({ slug: "photography" });
   The space slug.
 </ParamField>
 
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
+</ParamField>
+
 **Returns** — `Promise<SpaceDetailed>`
 
 ---
@@ -172,6 +180,10 @@ const space = await sublay.spaces.fetchSpaceByShortId({ shortId: "a1b2c3" });
 
 <ParamField body="shortId" type="string" required>
   The space short ID.
+</ParamField>
+
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
 **Returns** — `Promise<SpaceDetailed>`
@@ -205,8 +217,8 @@ const userSpaces = await sublay.spaces.fetchUserSpaces({
   Direction, `"asc"` or `"desc"`, for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated related resources to include in the response.
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
 <ParamField body="role" type="string">
@@ -249,8 +261,8 @@ const mutual = await sublay.spaces.fetchMutualSpaces({
   The number of spaces to return per page. Max `100`.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated related resources to include (e.g. `"files"`).
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Space>>`
@@ -374,8 +386,8 @@ const { data, pagination } = await sublay.spaces.fetchChildSpaces({
   Direction, `"asc"` or `"desc"`, for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated related resources to include in the response.
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Space>>`

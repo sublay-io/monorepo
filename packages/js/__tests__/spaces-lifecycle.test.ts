@@ -130,8 +130,17 @@ describe("js-sdk spaces (lifecycle) — request shaping", () => {
   it("fetchSpace strips spaceId into the path with no params", async () => {
     const { client, projectInstance } = makeClient();
     await fetchSpace(client, { spaceId: "s1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1");
-    expect(projectInstance.get.mock.calls[0]).toHaveLength(1);
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1", {
+      params: undefined,
+    });
+  });
+
+  it("fetchSpace forwards include=files as a param", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchSpace(client, { spaceId: "s1", include: ["files"] });
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1", {
+      params: { include: "files" },
+    });
   });
 
   it("fetchSpaceByShortId gets /spaces/by-short-id with the full data as params", async () => {

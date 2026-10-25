@@ -168,4 +168,56 @@ describe("useFetchManyEntitiesWrapper", () => {
     expect(calls[0].config?.params).toMatchObject({ page: 1, blockedFilter: "include-outbound-blocked" });
     expect(calls[1].config?.params).toMatchObject({ page: 2, blockedFilter: "include-outbound-blocked" });
   });
+
+  // REGRESSION: an inline `include` array is a fresh reference every render.
+  // Held raw in the reset/load-more deps it re-fired the fetch effect forever.
+  // The hook depends on a flattened key, so equal arrays must not refetch.
+  it("does not refetch when re-rendered with an equal inline array include", async () => {
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      () => useFetchManyEntitiesWrapper({ include: ["user", "space"] }),
+      {
+        beforeRender: ({ axiosPrivate }) => {
+          for (let i = 0; i < 10; i += 1) {
+            axiosPrivate.mockResponse("get", makePage([], false));
+          }
+        },
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    for (let i = 0; i < 5; i += 1) rerender();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(1);
+    expect(calls[0].config?.params).toMatchObject({ include: "user,space" });
+  });
+
+  it("refetches when include really changes", async () => {
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: { include: ("user" | "space" | "files")[] }) =>
+        useFetchManyEntitiesWrapper({ include: props.include }),
+      {
+        initialProps: { include: ["user", "space"] },
+        beforeRender: ({ axiosPrivate }) => {
+          for (let i = 0; i < 10; i += 1) {
+            axiosPrivate.mockResponse("get", makePage([], false));
+          }
+        },
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    rerender({ include: ["user", "files"] });
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(2));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(2);
+    expect(calls[1].config?.params).toMatchObject({ include: "user,files" });
+  });
 });

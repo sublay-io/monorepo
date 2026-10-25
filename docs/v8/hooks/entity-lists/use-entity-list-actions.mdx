@@ -55,7 +55,7 @@ function RefreshButton() {
     <ResponseField name="userId" type="string">Filter by user ID.</ResponseField>
     <ResponseField name="followedOnly" type="boolean">Only show entities from followed users.</ResponseField>
     <ResponseField name="timeFrame" type='"day" | "week" | "month" | "year"'>Time window filter.</ResponseField>
-    <ResponseField name="include" type='string | ("space" | "user" | "topComments" | "saved" | "files" | "grants")[]'>Populate related data.</ResponseField>
+    <ResponseField name="include" type="EntityIncludeParam | null">Populate related data, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`.</ResponseField>
     <ResponseField name="topCommentsLimit" type="number | null">With `"topComments"` included: top comments per entity (server default `1`, max `5`).</ResponseField>
     <ResponseField name="topCommentsSortByReaction" type="ReactionType | null">With `"topComments"` included: the reaction whose raw count ranks them (server default `"upvote"`).</ResponseField>
     <ResponseField name="keywordsFilters" type="KeywordsFilters">Filter by keywords.</ResponseField>

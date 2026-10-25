@@ -1,11 +1,12 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { User } from "../../interfaces/User";
+import { User, UserIncludeParam } from "../../interfaces/User";
 import { SpaceReputationUserParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
 export interface FetchUserByIdProps extends SpaceReputationUserParams {
   userId: string;
-  include?: string;
+  include?: UserIncludeParam;
 }
 
 export async function fetchUserById(
@@ -21,6 +22,7 @@ export async function fetchUserById(
   } = data;
   const params = {
     ...rest,
+    include: serializeInclude(rest.include),
     ...buildSpaceReputationParams({
       spaceReputation,
       spaceReputationId,

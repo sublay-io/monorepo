@@ -807,6 +807,9 @@ export type {
   EventStatus,
   RsvpStatus,
   RsvpCounts,
+  EventInclude,
+  EventIncludeArray,
+  EventIncludeParam,
 } from "./interfaces/models/Event";
 export type { Collection } from "./interfaces/models/Collection";
 export type {
@@ -816,6 +819,9 @@ export type {
   ReputationGrantTargetFilter,
   NullableReputationGrantTargetFilter,
   GrantSummary,
+  ReputationGrantInclude,
+  ReputationGrantIncludeArray,
+  ReputationGrantIncludeParam,
 } from "./interfaces/models/ReputationGrant";
 export type {
   TableRow,
@@ -876,6 +882,9 @@ export type {
   WorkspaceInclude,
   WorkspaceIncludeArray,
   WorkspaceIncludeParam,
+  WorkspaceMemberInclude,
+  WorkspaceMemberIncludeArray,
+  WorkspaceMemberIncludeParam,
   WorkspaceRosterReason,
   WorkspaceRosterEntry,
   WorkspaceRosterResponse,

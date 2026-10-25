@@ -57,7 +57,10 @@ Supplying none returns `400 reputation-grant/missing-filter`; supplying more tha
 </ParamField>
 
 <ParamField query="include" type="string">
-  Comma-separated associations to expand. Only `"user"` is supported — it hydrates **both** the sender and the recipient on every row.
+  Associations to expand, as a comma-separated value or repeated params. The only value is:
+  - `user` — hydrates **both** the sender and the recipient on every row
+
+  Matching ignores case. An unknown value returns `400 reputation-grant/invalid-query`.
 </ParamField>
 
 ## Chat-message targets are private
@@ -135,7 +138,7 @@ See [ReputationGrant](/v8/data-models/reputation-grant) for the row shape and [G
     ```json
     { "error": "limit: Too big: expected number to be <=100", "code": "reputation-grant/invalid-query" }
     ```
-    Shape failures from the query schema: a `limit` above `100`, a non-positive `page`, a malformed UUID (`"recipientId: Invalid UUID format"`), or a `targetType` outside the three accepted values. The field path prefixes the message, so `error` reads `"<path>: <message>"`.
+    Shape failures from the query schema: a `limit` above `100`, a non-positive `page`, a malformed UUID (`"recipientId: Invalid UUID format"`), a `targetType` outside the three accepted values, or an unknown `include` value (``"include: Unknown include `sender`. Allowed: user."``). The field path prefixes the message, so `error` reads `"<path>: <message>"`.
   </Accordion>
   <Accordion title="Tables Not Available — 403">
     ```json

@@ -17,7 +17,13 @@ The response always includes inline `rsvpCounts`. Authentication is optional; pa
 ## Query Parameters
 
 <ParamField query="include" type="string">
-  Comma-separated associations to expand: `"user"`, `"space"`, `"files"`, `"userRsvp"`.
+  Associations to expand, as a comma-separated value (`include=user,space`) or repeated params. Values:
+  - `user` — the creator's user profile
+  - `space` — the space the event belongs to
+  - `files` — the cover and gallery file objects
+  - `userRsvp` — the caller's own RSVP status (needs a viewer; otherwise `null`)
+
+  Matching ignores case. An unknown value returns `400 event/invalid-query`.
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
@@ -64,6 +70,12 @@ Returns the [Event](/v8/data-models/event) object.
       "code": "event/unsupported-param",
       "param": "userId"
     }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Query — 400">
+    Returned for an unknown `include` value.
+    ```json
+    { "error": "include: Unknown include `rsvps`. Allowed: user, space, files, userRsvp.", "code": "event/invalid-query" }
     ```
   </Accordion>
   <Accordion title="Not Found / No Access — 404">

@@ -41,3 +41,17 @@ export interface ChatMessage {
   quotedMessage?: ChatMessage | null;
   parentMessage?: ChatMessage | null;
 }
+
+/** `include` values the message list accepts. */
+export type ChatMessageListInclude = "files" | "grants";
+export type ChatMessageListIncludeArray = ChatMessageListInclude[];
+export type ChatMessageListIncludeParam =
+  | ChatMessageListInclude
+  | ChatMessageListIncludeArray;
+
+/** `include` values the single-message fetch accepts (its files always come back). */
+export type ChatMessageInclude = "grants";
+export type ChatMessageIncludeArray = ChatMessageInclude[];
+export type ChatMessageIncludeParam =
+  | ChatMessageInclude
+  | ChatMessageIncludeArray;

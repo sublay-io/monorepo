@@ -83,8 +83,8 @@ const space = await sublay.spaces.fetchSpace({ spaceId: "spc_abc123" });
   The Sublay space ID.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated associations to expand. Pass `"files"` for the avatar and banner file objects.
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -152,8 +152,8 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
   Filter by each space's `nsfwEffective` (own flag OR any ancestor). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW spaces; `"only"` returns only them. `"only"` may return an NSFW child whose safe parent is omitted. See [Space NSFW flagging](/v8/data-models/space#nsfw-flagging).
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -176,8 +176,8 @@ const space = await sublay.spaces.fetchSpaceBySlug({ slug: "photography" });
   The space's URL slug.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated associations to expand. Pass `"files"` for the avatar and banner file objects.
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -200,8 +200,8 @@ const space = await sublay.spaces.fetchSpaceByShortId({ shortId: "ph3x9" });
   The space's short ID.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated associations to expand. Pass `"files"` for the avatar and banner file objects.
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -256,8 +256,8 @@ const result = await sublay.spaces.fetchUserSpaces({
   When `"true"`, returns the full set of spaces rather than only the paginated page.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
 **Returns** — `Promise<UserSpacesResponse>`
@@ -293,8 +293,8 @@ const result = await sublay.spaces.fetchMutualSpaces({
   Results per page. Max `100`. Defaults to `20`.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate (e.g. `"files"`).
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Space>>`
@@ -432,8 +432,8 @@ const { data, pagination } = await sublay.spaces.fetchChildSpaces({
   Direction, `"asc"` or `"desc"`, for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
-<ParamField body="include" type="string">
-  Comma-separated list of associations to populate.
+<ParamField body="include" type="SpaceIncludeParam">
+  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">

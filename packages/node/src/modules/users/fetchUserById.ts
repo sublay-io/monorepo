@@ -1,5 +1,6 @@
+import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { User } from "../../interfaces/User";
+import { User, UserIncludeParam } from "../../interfaces/User";
 import { SpaceReputationUserParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
@@ -11,7 +12,7 @@ export interface FetchUserByIdProps extends SpaceReputationUserParams {
    * the anonymous view.
    */
   actingUserId?: string;
-  include?: string;
+  include?: UserIncludeParam;
 }
 
 export async function fetchUserById(
@@ -29,6 +30,7 @@ export async function fetchUserById(
   const response = await client.projectInstance.get<User>(path, {
     params: {
       ...rest,
+      include: serializeInclude(rest.include),
       ...buildSpaceReputationParams({
         spaceReputation,
         spaceReputationId,

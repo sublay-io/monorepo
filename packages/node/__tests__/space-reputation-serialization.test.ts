@@ -100,7 +100,7 @@ describe("space-reputation serialization guard — object form never drops or br
     const { client, projectInstance } = makeClient();
     await fetchEntity(client, {
       entityId: "e1",
-      include: "author",
+      include: "user",
       spaceReputation: { spaceId: "rep1", includeDescendants: true },
     });
     assertFlatRepQuery(projectInstance.get as unknown as jest.Mock);
@@ -108,7 +108,7 @@ describe("space-reputation serialization guard — object form never drops or br
       string,
       unknown
     >;
-    expect(params.include).toBe("author");
+    expect(params.include).toBe("user");
     expect(params).not.toHaveProperty("entityId"); // path param, not a query param
   });
 

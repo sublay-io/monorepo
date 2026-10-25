@@ -120,3 +120,10 @@ export interface ReputationGrant {
   createdAt: string;
   updatedAt: string;
 }
+
+/** `include` values the reputation-grant list accepts. */
+export type ReputationGrantInclude = "user";
+export type ReputationGrantIncludeArray = ReputationGrantInclude[];
+export type ReputationGrantIncludeParam =
+  | ReputationGrantInclude
+  | ReputationGrantIncludeArray;

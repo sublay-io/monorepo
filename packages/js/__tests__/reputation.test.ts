@@ -154,11 +154,11 @@ describe("js-sdk reputation — chat grants include", () => {
     expect(config.params.include).toBe("grants");
   });
 
-  it("listMessages accepts the composed files,grants include token", async () => {
+  it("listMessages joins a files+grants include array into one comma string", async () => {
     const { client, projectInstance } = makeClient();
     await listMessages(client, {
       conversationId: "conversation-1",
-      include: "files,grants",
+      include: ["files", "grants"],
     });
     const [, config] = projectInstance.get.mock.calls[0];
     expect(config.params.include).toBe("files,grants");

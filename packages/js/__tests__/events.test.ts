@@ -108,7 +108,7 @@ describe("js-sdk events — request shaping", () => {
 
   it("fetchEvent strips eventId into the path and passes the rest as params", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchEvent(client, { eventId: "ev1", include: "user,space" });
+    await fetchEvent(client, { eventId: "ev1", include: ["user", "space"] });
     expect(projectInstance.get).toHaveBeenCalledWith("/events/ev1", {
       params: { include: "user,space" },
     });

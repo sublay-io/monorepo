@@ -118,8 +118,8 @@ function EntityFeed() {
   Filter by **effective** NSFW status (`entity.nsfw OR its space's nsfwEffective`). `"include-all"` (default) adds no predicate; `"exclude"` drops effective-NSFW entities; `"only"` returns only effective-NSFW entities. On projects without the spaces bundle it applies against the entity's own `nsfw` flag alone. See [Entity NSFW flagging](/v8/data-models/entity#nsfw-flagging).
 </ParamField>
 
-<ParamField path="include" type="string | EntityInclude[]">
-  Populate related fields. Accepted values: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`.
+<ParamField path="include" type="EntityIncludeParam">
+  Populate related fields, as a single value or an array. Accepted values: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`.
 </ParamField>
 
 <ParamField path="topCommentsLimit" type="number">

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Workspace,
+  WorkspaceInclude,
   WorkspaceIncludeParam,
 } from "../../interfaces/models/Workspace";
 import useFetchManyWorkspaces from "./useFetchManyWorkspaces";
@@ -65,7 +66,9 @@ function useFetchManyWorkspacesWrapper(
       const response = await fetchManyWorkspaces({
         page: 1,
         limit,
-        include: includeKey,
+        include: includeKey
+          ? (includeKey.split(",") as WorkspaceInclude[])
+          : undefined,
       });
 
       if (response) {
@@ -99,7 +102,9 @@ function useFetchManyWorkspacesWrapper(
         const response = await fetchManyWorkspaces({
           page,
           limit,
-          include: includeKey,
+          include: includeKey
+          ? (includeKey.split(",") as WorkspaceInclude[])
+          : undefined,
         });
 
         if (response) {

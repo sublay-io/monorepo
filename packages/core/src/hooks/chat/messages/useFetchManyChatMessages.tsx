@@ -18,9 +18,9 @@ export interface FetchManyChatMessagesProps extends SpaceReputationContextParams
   conversationId: string;
   /** Restrict to replies of this message (thread view). */
   parentMessageId?: string | null;
-  /** Keyset cursor (ISO timestamp): messages created before this. Mutually exclusive with `after`. */
+  /** Keyset cursor: messages created before this. UTC ISO datetime ending in `Z` (e.g. `date.toISOString()`); an offset is rejected with a 400. Mutually exclusive with `after`. */
   before?: string | null;
-  /** Keyset cursor (ISO timestamp): messages created after this. Mutually exclusive with `before`. */
+  /** Keyset cursor: messages created after this. UTC ISO datetime ending in `Z` (e.g. `date.toISOString()`); an offset is rejected with a 400. Mutually exclusive with `before`. */
   after?: string | null;
   /** Page size (1–100, defaults to 50 server-side). */
   limit?: number;

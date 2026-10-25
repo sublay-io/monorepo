@@ -18,11 +18,14 @@ export interface MessageFilters {
 
 export interface ListMessagesProps extends SpaceReputationContextParams {
   conversationId: string;
-  /** Restrict to replies of this message (thread view). */
+  /**
+   * List this message's thread replies (oldest first by default). Named like
+   * the chat message's own `parentMessageId` field.
+   */
   parentMessageId?: string;
-  /** Keyset pagination: ISO timestamp; return messages created before this. Mutually exclusive with `after`. */
+  /** Keyset pagination: return messages created before this. UTC ISO datetime ending in `Z` (e.g. `date.toISOString()`); an offset is rejected with a 400. Mutually exclusive with `after`. */
   before?: string;
-  /** Keyset pagination: ISO timestamp; return messages created after this. Mutually exclusive with `before`. */
+  /** Keyset pagination: return messages created after this. UTC ISO datetime ending in `Z` (e.g. `date.toISOString()`); an offset is rejected with a 400. Mutually exclusive with `before`. */
   after?: string;
   /** Page size (default 50, max 100). */
   limit?: number;

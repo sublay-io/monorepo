@@ -4,9 +4,9 @@ import { ConversationPreview } from "../../interfaces/Conversation";
 export interface ListConversationsProps {
   /** Comma-separated conversation types, e.g. "direct,group,space". */
   types?: string;
-  /** Cursor for keyset pagination: the `lastMessageAt` of the last item from the previous page (ISO datetime). */
+  /** Cursor for keyset pagination: the `lastMessageAt` of the last item from the previous page. UTC ISO datetime ending in `Z` (e.g. `date.toISOString()`); an offset is rejected with a 400. */
   cursor?: string;
-  /** Tie-breaker cursor: the `createdAt` of the last item from the previous page (ISO datetime). */
+  /** Tie-breaker cursor: the `createdAt` of the last item from the previous page. UTC ISO datetime ending in `Z` (e.g. `date.toISOString()`); an offset is rejected with a 400. */
   cursorCreatedAt?: string;
   /** Default 20, max 50. */
   limit?: number;

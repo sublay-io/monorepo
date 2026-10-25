@@ -20,7 +20,7 @@ import useFetchManyChatMessages from "./useFetchManyChatMessages";
 
 export interface UseLiveChatMessagesProps {
   conversationId: string;
-  parentId?: string | null;
+  parentMessageId?: string | null;
   limit?: number;
   includeFiles?: boolean;
   /**
@@ -52,7 +52,7 @@ export interface UseLiveChatMessagesValues {
  */
 function useLiveChatMessages({
   conversationId,
-  parentId,
+  parentMessageId,
   limit = 50,
   includeFiles,
   includeGrants,
@@ -61,7 +61,7 @@ function useLiveChatMessages({
   const { projectId } = useProject();
   const fetchMany = useFetchManyChatMessages();
 
-  const isThread = Boolean(parentId);
+  const isThread = Boolean(parentMessageId);
 
   // Read from the correct Redux bucket
   const mainMessages = useSublaySelector(selectMessages(conversationId));
@@ -69,11 +69,11 @@ function useLiveChatMessages({
   const mainHasMore = useSublaySelector(selectMessagesHasMore(conversationId));
 
   const threadMessages = useSublaySelector(
-    selectThreadReplies(parentId ?? "")
+    selectThreadReplies(parentMessageId ?? "")
   );
-  const threadLoading = useSublaySelector(selectThreadLoading(parentId ?? ""));
+  const threadLoading = useSublaySelector(selectThreadLoading(parentMessageId ?? ""));
   const threadHasMore = useSublaySelector(
-    selectThreadHasMore(parentId ?? "")
+    selectThreadHasMore(parentMessageId ?? "")
   );
 
   const messages = isThread ? threadMessages : mainMessages;
@@ -97,7 +97,7 @@ function useLiveChatMessages({
       try {
         const { messages: items, hasMore: more } = await fetchMany({
           conversationId,
-          parentId,
+          parentMessageId,
           before,
           limit,
           sortDir: isThread ? "asc" : "desc",
@@ -109,7 +109,7 @@ function useLiveChatMessages({
           // Thread replies come back ASC — dispatch as-is
           dispatch(
             setThreadReplies({
-              parentMessageId: parentId!,
+              parentMessageId: parentMessageId!,
               messages: items,
               hasMore: more,
             })
@@ -125,7 +125,7 @@ function useLiveChatMessages({
         handleError(err, "Failed to load messages");
       }
     },
-    [projectId, conversationId, parentId, isThread, limit, includeFiles, includeGrants, fetchMany, dispatch]
+    [projectId, conversationId, parentMessageId, isThread, limit, includeFiles, includeGrants, fetchMany, dispatch]
   );
 
   // Initial fetch on mount
@@ -134,7 +134,7 @@ function useLiveChatMessages({
 
     const initialFetch = async () => {
       if (isThread) {
-        dispatch(setThreadLoading({ parentMessageId: parentId!, loading: true }));
+        dispatch(setThreadLoading({ parentMessageId: parentMessageId!, loading: true }));
       } else {
         dispatch(setMessagesLoading({ conversationId, loading: true }));
       }
@@ -142,7 +142,7 @@ function useLiveChatMessages({
       await fetchPage(null);
 
       if (isThread) {
-        dispatch(setThreadLoading({ parentMessageId: parentId!, loading: false }));
+        dispatch(setThreadLoading({ parentMessageId: parentMessageId!, loading: false }));
       } else {
         dispatch(setMessagesLoading({ conversationId, loading: false }));
       }
@@ -160,7 +160,7 @@ function useLiveChatMessages({
     // those two ever stops being stable. The two flags are primitives, so no
     // re-render can re-arm this effect on identity alone.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId, conversationId, parentId, includeFiles, includeGrants]);
+  }, [projectId, conversationId, parentMessageId, includeFiles, includeGrants]);
 
   // Load more messages:
   // - Main stream: fetch older messages using `before` cursor (oldest loaded createdAt)
@@ -171,14 +171,14 @@ function useLiveChatMessages({
     if (isThread) {
       const currentItems = threadMessagesRef.current;
       const newest = currentItems[currentItems.length - 1];
-      if (!newest || !parentId || !projectId || !conversationId) return;
+      if (!newest || !parentMessageId || !projectId || !conversationId) return;
 
       const after = new Date(newest.createdAt).toISOString();
-      dispatch(setThreadLoading({ parentMessageId: parentId, loading: true }));
+      dispatch(setThreadLoading({ parentMessageId: parentMessageId, loading: true }));
       try {
         const { messages: newItems, hasMore: more } = await fetchMany({
           conversationId,
-          parentId,
+          parentMessageId,
           after,
           limit,
           sortDir: "asc",
@@ -187,7 +187,7 @@ function useLiveChatMessages({
         });
         dispatch(
           setThreadReplies({
-            parentMessageId: parentId,
+            parentMessageId: parentMessageId,
             messages: [...currentItems, ...newItems],
             hasMore: more,
           })
@@ -195,7 +195,7 @@ function useLiveChatMessages({
       } catch (err) {
         handleError(err, "Failed to load more thread replies");
       } finally {
-        dispatch(setThreadLoading({ parentMessageId: parentId, loading: false }));
+        dispatch(setThreadLoading({ parentMessageId: parentMessageId, loading: false }));
       }
       return;
     }
@@ -207,7 +207,7 @@ function useLiveChatMessages({
     dispatch(setMessagesLoading({ conversationId, loading: true }));
     await fetchPage(before);
     dispatch(setMessagesLoading({ conversationId, loading: false }));
-  }, [loading, hasMore, isThread, parentId, projectId, conversationId, limit, includeFiles, includeGrants, fetchMany, dispatch, fetchPage]);
+  }, [loading, hasMore, isThread, parentMessageId, projectId, conversationId, limit, includeFiles, includeGrants, fetchMany, dispatch, fetchPage]);
 
   return { messages, loading, hasMore, loadOlder };
 }

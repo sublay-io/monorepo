@@ -21,7 +21,7 @@ export interface ListMessagesProps extends SpaceReputationContextParams {
   /** The user to act as (must be a member). Service key required to name a user. */
   actingUserId: string;
   /** Restrict to replies of this message (thread view). */
-  parentId?: string;
+  parentMessageId?: string;
   /** Keyset pagination: ISO timestamp; return messages created before this. Mutually exclusive with `after`. */
   before?: string;
   /** Keyset pagination: ISO timestamp; return messages created after this. Mutually exclusive with `before`. */
@@ -44,7 +44,7 @@ export interface ListMessagesResponse {
   newestCreatedAt: string | null;
   /**
    * Present only when a filter combination can't return results — e.g.
-   * `hasReplies: true` together with `parentId` (thread replies are one level
+   * `hasReplies: true` together with `parentMessageId` (thread replies are one level
    * deep and never have their own replies).
    */
   notice?: string;

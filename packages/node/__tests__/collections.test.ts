@@ -32,12 +32,12 @@ describe("node-sdk collections — request shaping", () => {
     const { client, projectInstance } = makeClient();
     await createNewCollection(client, {
       collectionId: "c1",
-      collectionName: "Favorites",
+      name: "Favorites",
       actingUserId: "u1",
     });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/collections/c1/sub-collections",
-      { collectionName: "Favorites", actingUserId: "u1" },
+      { name: "Favorites", actingUserId: "u1" },
     );
   });
 
@@ -119,7 +119,7 @@ describe("node-sdk collections — response mapping", () => {
     await expect(
       createNewCollection(client, {
         collectionId: "c1",
-        collectionName: "Favorites",
+        name: "Favorites",
         actingUserId: "u1",
       }),
     ).resolves.toEqual(collection);

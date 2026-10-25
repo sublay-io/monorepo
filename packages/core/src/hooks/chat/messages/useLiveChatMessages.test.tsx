@@ -143,7 +143,7 @@ describe("useLiveChatMessages", () => {
     expect(call.config?.params).not.toHaveProperty("include");
   });
 
-  it("fetches thread replies in ascending order when parentId is provided", async () => {
+  it("fetches thread replies in ascending order when parentMessageId is provided", async () => {
     const reply = makeChatMessage({
       id: "reply-1",
       parentMessageId: "message-1",
@@ -151,7 +151,7 @@ describe("useLiveChatMessages", () => {
     });
 
     const { result, axiosPrivate } = renderHookWithAxios(
-      () => useLiveChatMessages({ conversationId: "conversation-1", parentId: "message-1" }),
+      () => useLiveChatMessages({ conversationId: "conversation-1", parentMessageId: "message-1" }),
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
@@ -168,7 +168,7 @@ describe("useLiveChatMessages", () => {
     expect(result.current.hasMore).toBe(false);
 
     const [call] = axiosPrivate.calls("get");
-    expect(call.config?.params).toMatchObject({ sortDir: "asc", parentId: "message-1" });
+    expect(call.config?.params).toMatchObject({ sortDir: "asc", parentMessageId: "message-1" });
   });
 
   it("loadOlder fetches using the oldest loaded message as the before cursor", async () => {

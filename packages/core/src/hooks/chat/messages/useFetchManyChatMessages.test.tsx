@@ -39,7 +39,7 @@ describe("useFetchManyChatMessages", () => {
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/chat/conversations/conversation-1/messages");
     expect(call.config?.params).toMatchObject({ limit: 50 });
-    expect(call.config?.params).not.toHaveProperty("parentId");
+    expect(call.config?.params).not.toHaveProperty("parentMessageId");
     expect(call.config?.params).not.toHaveProperty("before");
     expect(call.config?.params).not.toHaveProperty("after");
   });
@@ -52,7 +52,7 @@ describe("useFetchManyChatMessages", () => {
     await act(async () => {
       await result.current({
         conversationId: "conversation-1",
-        parentId: "message-1",
+        parentMessageId: "message-1",
         before: "2024-01-02T00:00:00.000Z",
         limit: 20,
         sortDir: "asc",
@@ -67,7 +67,7 @@ describe("useFetchManyChatMessages", () => {
     expect(call.config?.params).toMatchObject({
       limit: 20,
       sortDir: "asc",
-      parentId: "message-1",
+      parentMessageId: "message-1",
       before: "2024-01-02T00:00:00.000Z",
       include: "files",
       filters: { hasReplies: true },

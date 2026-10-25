@@ -17,7 +17,7 @@ export interface MessageFilters {
 export interface FetchManyChatMessagesProps extends SpaceReputationContextParams {
   conversationId: string;
   /** Restrict to replies of this message (thread view). */
-  parentId?: string | null;
+  parentMessageId?: string | null;
   /** Keyset cursor (ISO timestamp): messages created before this. Mutually exclusive with `after`. */
   before?: string | null;
   /** Keyset cursor (ISO timestamp): messages created after this. Mutually exclusive with `before`. */
@@ -48,7 +48,7 @@ export interface FetchManyChatMessagesResponse {
   newestCreatedAt: string | null;
   /**
    * Present only when a filter combination can't return results — e.g.
-   * `hasReplies: true` together with `parentId` (thread replies are one level
+   * `hasReplies: true` together with `parentMessageId` (thread replies are one level
    * deep and never have their own replies).
    */
   notice?: string;
@@ -71,7 +71,7 @@ function useFetchManyChatMessages(): (
     async (props: FetchManyChatMessagesProps) => {
       const {
         conversationId,
-        parentId,
+        parentMessageId,
         before,
         after,
         limit = 50,
@@ -96,7 +96,7 @@ function useFetchManyChatMessages(): (
         }),
       };
       if (sortDir) params.sortDir = sortDir;
-      if (parentId) params.parentId = parentId;
+      if (parentMessageId) params.parentMessageId = parentMessageId;
       if (before) params.before = before;
       if (after) params.after = after;
       // Both tokens ride the ONE `include` param the endpoint accepts, so they

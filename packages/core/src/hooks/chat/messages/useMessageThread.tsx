@@ -21,7 +21,7 @@ function useMessageThread({
 }: UseMessageThreadProps): UseMessageThreadValues {
   const { messages, loading, hasMore, loadOlder } = useLiveChatMessages({
     conversationId,
-    parentId: messageId,
+    parentMessageId: messageId,
   });
 
   const send = useSendMessage({ conversationId });

@@ -13,9 +13,13 @@ import useConversationData, {
   UseConversationDataValues,
 } from "../hooks/chat/useConversationData";
 import useMarkConversationAsRead from "../hooks/chat/useMarkConversationAsRead";
-import useAxiosPrivate from "../config/useAxiosPrivate";
+import useFetchManyChatMessages from "../hooks/chat/messages/useFetchManyChatMessages";
 import useProject from "../hooks/projects/useProject";
-import { clearUnread, upsertMessage } from "../store/slices/chatSlice";
+import {
+  clearUnread,
+  setMessagesHasMore,
+  upsertMessage,
+} from "../store/slices/chatSlice";
 import type { ChatMessage } from "../interfaces/models/ChatMessage";
 import type { ConversationMember } from "../interfaces/models/ConversationMember";
 import { handleError } from "../utils/handleError";
@@ -50,38 +54,17 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 }) => {
   const dispatch = useSublayDispatch();
   const { projectId } = useProject();
-  const axios = useAxiosPrivate();
+  const fetchMany = useFetchManyChatMessages();
 
   const { socket, registerActiveConversation, unregisterActiveConversation } =
     useChatContext();
 
-  // Read the newest message id from Redux for reconnect catch-up
+  // The newest loaded message id drives the server read position (mark read).
   const newestMessageId = useSublaySelector(
     selectNewestMessageId(conversationId),
   );
-  const newestMessageIdRef = useRef(newestMessageId);
-  useEffect(() => {
-    newestMessageIdRef.current = newestMessageId;
-  }, [newestMessageId]);
 
   const mark = useMarkConversationAsRead({ conversationId });
-
-  const catchUpMessages = useCallback(
-    async (afterTimestamp: string) => {
-      if (!projectId || !conversationId) return;
-      try {
-        const response = await axios.get(
-          `/${projectId}/chat/conversations/${conversationId}/messages`,
-          { params: { after: afterTimestamp, limit: 100, sortDir: "asc" } },
-        );
-        const { messages } = response.data as { messages: ChatMessage[] };
-        messages.forEach((msg) => dispatch(upsertMessage(msg)));
-      } catch (err) {
-        handleError(err, "Failed to fetch missed messages");
-      }
-    },
-    [projectId, conversationId, axios, dispatch],
-  );
 
   // Keep a ref to the messages state so socket handlers can find latest messages
   const messagesRef = useRef<ChatMessage[]>([]);
@@ -91,6 +74,52 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   useEffect(() => {
     messagesRef.current = reduxMessages;
   }, [reduxMessages]);
+
+  // Fetch what arrived while the socket was down. With messages loaded, page
+  // forward from the newest one until the server has no more, so a long
+  // disconnect doesn't drop everything past the first page. With nothing to
+  // anchor on (an empty conversation, or a first load that failed), load the
+  // latest page the way the mount fetch does.
+  const catchUpMessages = useCallback(async () => {
+    if (!projectId || !conversationId) return;
+
+    let newest: ChatMessage | undefined;
+    for (let i = messagesRef.current.length - 1; i >= 0; i--) {
+      // Optimistic `temp-` messages have no server timestamp to page from.
+      if (!messagesRef.current[i].id.startsWith("temp-")) {
+        newest = messagesRef.current[i];
+        break;
+      }
+    }
+
+    try {
+      if (!newest) {
+        const page = await fetchMany({ conversationId, sortDir: "desc" });
+        // Newest first from the server; the store keeps messages ascending.
+        [...page.messages].reverse().forEach((msg) => dispatch(upsertMessage(msg)));
+        dispatch(setMessagesHasMore({ conversationId, hasMore: page.hasMore }));
+        return;
+      }
+
+      let after = new Date(newest.createdAt).toISOString();
+      while (true) {
+        const page = await fetchMany({
+          conversationId,
+          after,
+          limit: 100,
+          sortDir: "asc",
+        });
+        page.messages.forEach((msg) => dispatch(upsertMessage(msg)));
+        // Stop when the server is done, or if the cursor didn't move.
+        if (!page.hasMore || !page.newestCreatedAt || page.newestCreatedAt === after) {
+          break;
+        }
+        after = page.newestCreatedAt;
+      }
+    } catch (err) {
+      handleError(err, "Failed to fetch missed messages");
+    }
+  }, [projectId, conversationId, fetchMany, dispatch]);
 
   // ── Conversation data (messages, send, members, etc.) ─────────────────────
   // Called before the socket effects so upsertMember / removeMemberLocally are
@@ -163,13 +192,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
       // True reconnect: re-join the room and catch up on missed messages.
       socket.emit("join:conversation", { conversationId });
-      const newest = newestMessageIdRef.current;
-      if (newest) {
-        const newestMsg = messagesRef.current.find((m) => m.id === newest);
-        if (newestMsg) {
-          await catchUpMessages(new Date(newestMsg.createdAt).toISOString());
-        }
-      }
+      await catchUpMessages();
     };
 
     socket.on("connect", handleConnect);

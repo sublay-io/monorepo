@@ -122,7 +122,7 @@ describe("useFetchManyReputationGrants", () => {
     let returned: FetchManyReputationGrantsResponse | undefined;
     await act(async () => {
       returned = await result.current({
-        targetType: "chat-message",
+        targetType: "message",
         targetId: "message-1",
       });
     });
@@ -135,7 +135,7 @@ describe("useFetchManyReputationGrants", () => {
 
     const [call] = axiosPrivate.calls("get");
     expect(call.config?.params).toEqual({
-      targetType: "chat-message",
+      targetType: "message",
       targetId: "message-1",
     });
   });

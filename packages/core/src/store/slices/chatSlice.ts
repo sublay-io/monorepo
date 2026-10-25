@@ -586,7 +586,7 @@ const chatSlice = createSlice({
       action: PayloadAction<{
         conversationId: string;
         messageId: string;
-        grant: ReputationGrant;
+        grant: Pick<ReputationGrant, "senderId" | "amount">;
         summary: { total: number; count: number };
         currentUserId: string;
       }>

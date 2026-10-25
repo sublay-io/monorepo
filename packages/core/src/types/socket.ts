@@ -52,7 +52,9 @@ export interface ServerToClientEvents {
   "message:grant": (payload: {
     messageId: string;
     conversationId: string;
-    grant: ReputationGrant;
+    // The socket event names a chat message `"chat-message"`, unlike the v8
+    // REST surfaces, which say `"message"`.
+    grant: Omit<ReputationGrant, "targetType"> & { targetType: "chat-message" };
     summary: { total: number; count: number };
   }) => void;
   "thread:reply_count": (payload: {

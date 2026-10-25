@@ -1,7 +1,7 @@
 import { User } from "./User";
 
 /** The three grantable target kinds. Polymorphic — `targetId` carries no FK. */
-export type ReputationGrantTargetType = "entity" | "comment" | "chat-message";
+export type ReputationGrantTargetType = "entity" | "comment" | "message";
 
 /**
  * Who created the grant. `"user"` is a debited transfer (reputation moved out

@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { buildSearchParams } from "../../../utils/searchParams";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
@@ -38,8 +39,7 @@ function useFetchFollowing(): (params?: FetchFollowingParams) => Promise<Paginat
           params: {
             page,
             limit,
-            query,
-            searchFields,
+            ...buildSearchParams(query, searchFields),
           },
         }
       );

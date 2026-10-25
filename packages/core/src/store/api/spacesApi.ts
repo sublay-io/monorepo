@@ -1,4 +1,5 @@
 import { baseApi } from "./baseApi";
+import { buildSearchParams } from "../../utils/searchParams";
 import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import type {
   Space,
@@ -74,9 +75,9 @@ export const spacesApi = baseApi.injectEndpoints({
         if (params.limit !== undefined) queryParams.append("limit", params.limit.toString());
         if (params.sortBy) queryParams.append("sortBy", params.sortBy);
         if (params.sortDir) queryParams.append("sortDir", params.sortDir);
-        // A blank term is left out: the server needs a non-empty `query`.
-        if (params.query?.trim()) queryParams.append("query", params.query);
-        if (params.searchFields) queryParams.append("searchFields", params.searchFields);
+        const search = buildSearchParams(params.query, params.searchFields);
+        if (search.query) queryParams.append("query", search.query);
+        if (search.searchFields) queryParams.append("searchFields", search.searchFields);
         // Sent as "true" / "false"; "false" lists the same as leaving it out.
         if (typeof params.memberOf === "boolean") queryParams.append("memberOf", String(params.memberOf));
         if (params.parentSpaceId !== undefined) {

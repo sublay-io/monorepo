@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { buildSearchParams } from "../../utils/searchParams";
 import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
@@ -36,9 +37,7 @@ function useFetchManySpaces(): (params?: FetchManySpacesProps) => Promise<Pagina
       if (params?.limit !== undefined) queryParams.limit = params.limit;
       if (params?.sortBy) queryParams.sortBy = params.sortBy;
       if (params?.sortDir) queryParams.sortDir = params.sortDir;
-      // A blank term is left out: the server needs a non-empty `query`.
-      if (params?.query?.trim()) queryParams.query = params.query;
-      if (params?.searchFields) queryParams.searchFields = params.searchFields;
+      Object.assign(queryParams, buildSearchParams(params?.query, params?.searchFields));
       // Sent as "true" / "false"; "false" lists the same as leaving it out.
       if (typeof params?.memberOf === "boolean") queryParams.memberOf = String(params.memberOf);
       if (params?.parentSpaceId !== undefined) queryParams.parentSpaceId = params.parentSpaceId || "null";

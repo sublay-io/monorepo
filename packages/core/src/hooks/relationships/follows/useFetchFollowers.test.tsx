@@ -37,6 +37,26 @@ describe("useFetchFollowers", () => {
     expect(call.config?.params).toEqual({ page: 1, limit: 20 });
   });
 
+  it("sends query + searchFields, and leaves both out for a blank query", async () => {
+    const user = makeAuthUser();
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchFollowers(), { user });
+
+    axiosPrivate.mockResponse("get", makePage([]));
+    axiosPrivate.mockResponse("get", makePage([]));
+
+    await act(async () => {
+      await result.current({ query: "ann", searchFields: "username" });
+    });
+    await act(async () => {
+      await result.current({ query: "   ", searchFields: "username" });
+    });
+
+    const [first, second] = axiosPrivate.calls("get");
+    expect(first.config?.params).toEqual({ page: 1, limit: 20, query: "ann", searchFields: "username" });
+    expect(second.config?.params).not.toHaveProperty("query");
+    expect(second.config?.params).not.toHaveProperty("searchFields");
+  });
+
   it("rejects when the server returns an error response", async () => {
     const user = makeAuthUser();
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchFollowers(), { user });

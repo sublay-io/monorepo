@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { buildSearchParams } from "../../../utils/searchParams";
 import useProject from "../../projects/useProject";
 import type { User } from "../../../interfaces/models/User";
 import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
@@ -38,8 +39,7 @@ function useFetchFollowersByUserId(): (params: FetchFollowersByUserIdParams) => 
       const params: Record<string, any> = {
         page,
         limit,
-        query,
-        searchFields,
+        ...buildSearchParams(query, searchFields),
         ...buildSpaceReputationParams({
           spaceReputation,
           spaceReputationId,

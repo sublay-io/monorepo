@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { buildSearchParams } from "../../../utils/searchParams";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
@@ -35,7 +36,7 @@ function useFetchFollowers(): (params?: FetchFollowersParams) => Promise<Paginat
       const response = await axios.get<PaginatedResponse<FollowerWithFollowInfo>>(
         `/${projectId}/follows/followers`,
         {
-          params: { page, limit, query, searchFields },
+          params: { page, limit, ...buildSearchParams(query, searchFields) },
         }
       );
 

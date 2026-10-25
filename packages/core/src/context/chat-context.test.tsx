@@ -501,7 +501,7 @@ describe("ChatProvider — message-scoped socket events", () => {
 
   // message:grant is the one message-scoped event with NO omit-conversationId
   // variant below. It shipped with the field mandatory on its single emit site
-  // (`emitGrantSocketEvent` reads it off the resolved chat-message target), so
+  // (`emitGrantSocketEvent` reads it off the resolved chat message target), so
   // no deployed server omits it and the handler reads `payload.conversationId`
   // directly rather than carrying a fallback that can never run.
   it("applies message:grant scoped by the payload's conversationId", async () => {

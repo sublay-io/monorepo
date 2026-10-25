@@ -44,16 +44,16 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
   The ID of the conversation to query.
 </ParamField>
 
-<ParamField path="parentId" type="string | null">
+<ParamField path="parentMessageId" type="string | null">
   Restrict to thread replies of this message.
 </ParamField>
 
 <ParamField path="before" type="string | null">
-  Keyset cursor (ISO timestamp): messages created before this. Mutually exclusive with `after`.
+  Keyset cursor: messages created before this, as a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`. Mutually exclusive with `after`.
 </ParamField>
 
 <ParamField path="after" type="string | null">
-  Keyset cursor (ISO timestamp): messages created after this. Mutually exclusive with `before`.
+  Keyset cursor: messages created after this, as a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`. Mutually exclusive with `before`.
 </ParamField>
 
 <ParamField path="limit" type="number">
@@ -76,7 +76,7 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
 <ParamField path="filters" type="MessageFilters">
   Optional filters. `filters.hasReplies` (boolean): when `true`, returns only messages that have thread replies (`threadReplyCount > 0`); when `false`, only messages with none. Filters by thread replies, not quotings.
 
-  <Note>Threads are one level deep, so `hasReplies: true` together with `parentId` always returns an empty list — the response's `notice` field explains why.</Note>
+  <Note>Threads are one level deep, so `hasReplies: true` together with `parentMessageId` always returns an empty list — the response's `notice` field explains why.</Note>
 </ParamField>
 
 ## Returns
@@ -100,5 +100,5 @@ A `Promise` resolving to:
 </ResponseField>
 
 <ResponseField name="notice" type="string">
-  Present only when a filter combination can't return results — e.g. `hasReplies: true` together with `parentId`. Explains why the list is empty.
+  Present only when a filter combination can't return results — e.g. `hasReplies: true` together with `parentMessageId`. Explains why the list is empty.
 </ResponseField>

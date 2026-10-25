@@ -46,7 +46,7 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
   The ID of the conversation to query.
 </ParamField>
 
-<ParamField body="parentId" type="string | null">
+<ParamField body="parentMessageId" type="string | null">
   Restrict to thread replies of this message.
 </ParamField>
 
@@ -68,7 +68,7 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
 <ParamField body="filters" type="MessageFilters">
   Optional filters. `filters.hasReplies` (boolean): when `true`, returns only messages that have thread replies (`threadReplyCount > 0`); when `false`, only messages with none. Filters by thread replies, not quotings.
 
-  <Note>Threads are one level deep, so `hasReplies: true` together with `parentId` always yields an empty list. This wrapper exposes only `messages`; use the lower-level [`useFetchManyChatMessages`](/v8/hooks/chat/messages/use-fetch-many-chat-messages) if you want the `notice` explaining why.</Note>
+  <Note>Threads are one level deep, so `hasReplies: true` together with `parentMessageId` always yields an empty list. This wrapper exposes only `messages`; use the lower-level [`useFetchManyChatMessages`](/v8/hooks/chat/messages/use-fetch-many-chat-messages) if you want the `notice` explaining why.</Note>
 </ParamField>
 
 ## Returns

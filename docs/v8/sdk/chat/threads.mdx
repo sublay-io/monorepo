@@ -64,14 +64,14 @@ See [`useMessageThread`](/v8/hooks/chat/messages/use-message-thread).
 
 ## Using useLiveChatMessages Directly
 
-For more control, use `useLiveChatMessages` with a `parentId` to load thread replies:
+For more control, use `useLiveChatMessages` with a `parentMessageId` to load thread replies:
 
 ```tsx
 import { useLiveChatMessages, useSendMessage } from "@sublay/react-js";
 
 const { messages: replies, loading, hasMore, loadOlder } = useLiveChatMessages({
   conversationId,
-  parentId: messageId,   // pass parentId to load thread replies
+  parentMessageId: messageId,   // pass parentMessageId to load thread replies
 });
 
 const send = useSendMessage({ conversationId });

@@ -1,7 +1,7 @@
 ---
 title: "Moderate Message"
 api: "PATCH /v8/:projectId/spaces/:spaceId/chat/messages/:messageId/moderation"
-description: "Approve or remove a chat message within a space"
+description: "Remove a chat message within a space"
 ---
 
 Takes a direct moderation action on a chat message in a space's integrated conversation. Requires the caller to be a moderator or admin of the space.
@@ -18,12 +18,12 @@ Takes a direct moderation action on a chat message in a space's integrated conve
 
 ## Body Parameters
 
-<ParamField body="moderationStatus" type="string" required>
-  The moderation action. Only `"removed"` is supported — chat messages cannot be approved via this endpoint.
+<ParamField body="action" type="string" required>
+  The moderation action: `"remove"`, the only value. Chat messages are never held for approval, so there is nothing to approve.
 </ParamField>
 
-<ParamField body="moderationReason" type="string">
-  Optional reason for the removal. Up to 1,000 characters.
+<ParamField body="reason" type="string">
+  Optional reason for the removal. Trimmed; up to 1,000 characters. Stored as the message's `moderationReason`.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -47,6 +47,32 @@ Takes a direct moderation action on a chat message in a space's integrated conve
     Returned when `spaceId` or `messageId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
     { "error": "Invalid space id: expected a UUID.", "code": "chat/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Action — 400">
+    `action` is missing or isn't `"remove"`. `action: "approve"` gets its own message.
+    ```json
+    { "error": "action: Chat messages can only be removed: they're never held for approval, so there is nothing to approve. Send `action: \"remove\"`.", "code": "chat/invalid-body" }
+    ```
+    ```json
+    { "error": "action: Invalid action: expected \"remove\"", "code": "chat/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `moderationStatus` or `moderationReason`. The body is `{ action: "remove", reason }`. Returned whatever the caller's role.
+    ```json
+    {
+      "error": "`moderationStatus` isn't supported in v8. Send `action: \"remove\"`.",
+      "code": "chat/unsupported-param",
+      "param": "moderationStatus"
+    }
+    ```
+    ```json
+    {
+      "error": "`moderationReason` isn't supported in v8. Send the reason as `reason`.",
+      "code": "chat/unsupported-param",
+      "param": "moderationReason"
+    }
     ```
   </Accordion>
   <Accordion title="Missing Acting User — 400">

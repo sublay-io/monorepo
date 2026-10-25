@@ -47,10 +47,10 @@ const { conversations, hasMore } = await sublay.chat.listConversations({
   Comma-separated filter: any of `direct`, `group`, `space`.
 </ParamField>
 <ParamField body="cursor" type="string">
-  Keyset cursor — the `lastMessageAt` of the last item from the previous page.
+  Keyset cursor — the `lastMessageAt` of the last item from the previous page: a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`.
 </ParamField>
 <ParamField body="cursorCreatedAt" type="string">
-  Tie-breaker cursor — the `createdAt` of the last item from the previous page.
+  Tie-breaker cursor — the `createdAt` of the last item from the previous page: a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`.
 </ParamField>
 <ParamField body="limit" type="number">
   Page size, 1–50. Defaults to `20`.
@@ -289,7 +289,7 @@ await sublay.chat.leaveConversation({
 
 ### listMessages
 
-Lists messages in a conversation. Uses **cursor pagination** — pass `before` (an ISO timestamp) to page backwards, or `after` to page forwards (`before`/`after` are mutually exclusive).
+Lists messages in a conversation. Uses **cursor pagination** — pass `before` (a UTC ISO timestamp ending in `Z`) to page backwards, or `after` to page forwards (`before`/`after` are mutually exclusive).
 
 ```typescript
 const { messages, hasMore, oldestCreatedAt } = await sublay.chat.listMessages({
@@ -315,13 +315,13 @@ const withReplies = await sublay.chat.listMessages({
 
 <ParamField body="conversationId" type="string" required />
 <ParamField body="actingUserId" type="string" required>The acting user (must be a member).</ParamField>
-<ParamField body="parentId" type="string">Restrict to replies of this message (thread view).</ParamField>
-<ParamField body="before" type="string">ISO timestamp — messages created before this. Mutually exclusive with `after`.</ParamField>
-<ParamField body="after" type="string">ISO timestamp — messages created after this. Mutually exclusive with `before`.</ParamField>
+<ParamField body="parentMessageId" type="string">List this message's thread replies (thread view), oldest first by default.</ParamField>
+<ParamField body="before" type="string">Messages created before this: a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`. Mutually exclusive with `after`.</ParamField>
+<ParamField body="after" type="string">Messages created after this: a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`. Mutually exclusive with `before`.</ParamField>
 <ParamField body="limit" type="number">1–100, defaults to `50`.</ParamField>
 <ParamField body="sortDir" type='"asc" | "desc"' />
 <ParamField body="include" type="ChatMessageListIncludeParam">Associations to populate, as a single value or an array: `"files"` (message attachments) and `"grants"` (each message's [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). Pass `["files", "grants"]` for both.</ParamField>
-<ParamField body="filters" type="MessageFilters">Optional filters. `filters.hasReplies` (boolean): when `true`, returns only messages that have thread replies (`threadReplyCount > 0`); when `false`, only messages with none. Filters by thread replies, not quotings. Threads are one level deep, so `hasReplies: true` together with `parentId` always returns an empty list — the response's `notice` field explains why.</ParamField>
+<ParamField body="filters" type="MessageFilters">Optional filters. `filters.hasReplies` (boolean): when `true`, returns only messages that have thread replies (`threadReplyCount > 0`); when `false`, only messages with none. Filters by thread replies, not quotings. Threads are one level deep, so `hasReplies: true` together with `parentMessageId` always returns an empty list — the response's `notice` field explains why.</ParamField>
 <SpaceReputationParams variant="context" field="body" />
 
 **Returns** — `Promise<{ messages: ChatMessage[]; hasMore: boolean; oldestCreatedAt: string | null; newestCreatedAt: string | null }>`
@@ -611,19 +611,19 @@ Removes a message in a space conversation.
 await sublay.spaces.moderateSpaceChatMessage({
   spaceId: "spc_abc123",
   messageId: "msg_xyz",
-  moderationStatus: "removed",
-  moderationReason: "Off-topic",
+  action: "remove",
+  reason: "Off-topic",
   actingUserId: "usr_mod123",
 });
 ```
 
 <ParamField body="spaceId" type="string" required />
 <ParamField body="messageId" type="string" required />
-<ParamField body="moderationStatus" type='"removed"' required />
-<ParamField body="moderationReason" type="string" />
+<ParamField body="action" type='"remove"' required>The moderation action. Chat messages are never held for approval, so `"remove"` is the only value.</ParamField>
+<ParamField body="reason" type="string">The reason for the removal. Trimmed; up to 1,000 characters.</ParamField>
 <ParamField body="actingUserId" type="string" required>The moderator the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.</ParamField>
 
-**Returns** — `Promise<{ message: string; moderationStatus: string }>`
+**Returns** — `Promise<{ message: string; moderationStatus: "removed" }>`
 
 ---
 

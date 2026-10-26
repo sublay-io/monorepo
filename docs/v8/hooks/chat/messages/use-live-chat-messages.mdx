@@ -76,11 +76,12 @@ function MessageList({ conversationId }: { conversationId: string }) {
 
 <ResponseField name="loadOlder" type="() => Promise<void>">
   For the main stream: fetches messages older than the oldest currently loaded.
-  For threads: fetches replies newer than the newest currently loaded.
+  For threads: fetches the next page of newer replies.
   No-ops if `loading` is `true` or `hasMore` is `false`.
 </ResponseField>
 
 ## Notes
 
-- New messages that arrive via the socket (`message:created`) are appended to the store automatically — no manual refetch needed.
+- New messages that arrive via the socket (`message:created`) are added to the store automatically — no manual refetch needed. Thread replies go to their thread, never to the main stream.
+- After the socket reconnects, a thread loads the replies sent while it was offline. The main stream's catch-up is done by `ConversationProvider` (see [Missed Messages After a Reconnect](/v8/sdk/chat/real-time#missed-messages-after-a-reconnect)).
 - For integration guidance, see [Chat: Messages](/v8/sdk/chat/messages).

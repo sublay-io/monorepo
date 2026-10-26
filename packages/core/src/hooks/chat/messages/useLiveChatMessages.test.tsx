@@ -1,8 +1,15 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeChatMessage } from "../../../test-utils";
 import useLiveChatMessages from "./useLiveChatMessages";
+import { setThreadReplies, upsertMessage } from "../../../store/slices/chatSlice";
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((r) => (resolve = r));
+  return { promise, resolve };
+}
 
 afterEach(() => {
   resetAxiosMocks();
@@ -169,6 +176,104 @@ describe("useLiveChatMessages", () => {
 
     const [call] = axiosPrivate.calls("get");
     expect(call.config?.params).toMatchObject({ sortDir: "asc", parentMessageId: "message-1" });
+  });
+
+  it("thread loadOlder pages from the newest fetched reply, not a live reply beyond a gap", async () => {
+    const reply = (id: string, createdAt: string) =>
+      makeChatMessage({ id, conversationId: "conversation-1", parentMessageId: "message-1", createdAt });
+
+    const { result, store, axiosPrivate } = renderHookWithAxios(
+      () => useLiveChatMessages({ conversationId: "conversation-1", parentMessageId: "message-1" }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", {
+            messages: [reply("reply-1", "2024-01-01T00:00:01.000Z")],
+            hasMore: true,
+            oldestCreatedAt: "2024-01-01T00:00:01.000Z",
+            newestCreatedAt: "2024-01-01T00:00:01.000Z",
+          }),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    // A live reply lands past the replies not loaded yet.
+    act(() => {
+      store.dispatch(upsertMessage(reply("reply-9", "2024-01-01T00:00:09.000Z")));
+    });
+
+    axiosPrivate.mockResponse("get", {
+      messages: [reply("reply-2", "2024-01-01T00:00:02.000Z")],
+      hasMore: false,
+      oldestCreatedAt: "2024-01-01T00:00:02.000Z",
+      newestCreatedAt: "2024-01-01T00:00:02.000Z",
+    });
+    await act(async () => {
+      await result.current.loadOlder();
+    });
+
+    expect(axiosPrivate.calls("get")[1].config?.params.after).toBe("2024-01-01T00:00:01.000Z");
+    expect(result.current.messages.map((m) => m.id)).toEqual(["reply-1", "reply-2", "reply-9"]);
+    expect(result.current.hasMore).toBe(false);
+  });
+
+  it("reopening a kept thread pages on from its first page, not from a cursor that jumped a gap", async () => {
+    const reply = (id: string, createdAt: string) =>
+      makeChatMessage({ id, conversationId: "conversation-1", parentMessageId: "message-1", createdAt });
+    const firstPage = deferred<{ data: unknown }>();
+
+    // Mounted on another thread first, so the kept bucket can be seeded before
+    // message-1's thread opens.
+    const { result, store, axiosPrivate, rerender } = renderHookWithAxios(
+      ({ parentMessageId }: { parentMessageId: string }) =>
+        useLiveChatMessages({ conversationId: "conversation-1", parentMessageId }),
+      {
+        initialProps: { parentMessageId: "message-0" },
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", { messages: [], hasMore: false, oldestCreatedAt: null, newestCreatedAt: null }),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    // Kept from an earlier open: read to the end, then reply-9 arrived live and
+    // moved the cursor past replies missed while the thread was closed.
+    act(() => {
+      store.dispatch(
+        setThreadReplies({
+          parentMessageId: "message-1",
+          messages: [reply("reply-1", "2024-01-01T00:00:01.000Z"), reply("reply-9", "2024-01-01T00:00:09.000Z")],
+          hasMore: false,
+        }),
+      );
+    });
+
+    // Reopen; the first page lands only when released.
+    vi.mocked(axiosPrivate.instance.get).mockReturnValueOnce(firstPage.promise as never);
+    rerender({ parentMessageId: "message-1" });
+
+    await act(async () => {
+      firstPage.resolve({
+        data: {
+          messages: [reply("reply-1", "2024-01-01T00:00:01.000Z"), reply("reply-2", "2024-01-01T00:00:02.000Z")],
+          hasMore: true,
+          oldestCreatedAt: "2024-01-01T00:00:01.000Z",
+          newestCreatedAt: "2024-01-01T00:00:02.000Z",
+        },
+      });
+    });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    axiosPrivate.mockResponse("get", {
+      messages: [reply("reply-3", "2024-01-01T00:00:03.000Z")],
+      hasMore: false,
+      oldestCreatedAt: "2024-01-01T00:00:03.000Z",
+      newestCreatedAt: "2024-01-01T00:00:03.000Z",
+    });
+    await act(async () => {
+      await result.current.loadOlder();
+    });
+
+    expect(axiosPrivate.calls("get")[2].config?.params.after).toBe("2024-01-01T00:00:02.000Z");
+    expect(result.current.messages.map((m) => m.id)).toEqual(["reply-1", "reply-2", "reply-3", "reply-9"]);
   });
 
   it("loadOlder fetches using the oldest loaded message as the before cursor", async () => {

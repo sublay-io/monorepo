@@ -10,8 +10,11 @@ import { makeClient } from "./helpers/client";
 describe("js-sdk `none` filters", () => {
   const paramsOf = (get: jest.Mock) => get.mock.calls[0][1].params;
 
-  it("fetchManySpaces sends parentSpaceId \"none\" as given, and leaves it out by default", async () => {
+  it("fetchManySpaces sends parentSpaceId \"none\" / \"any\" as given, and leaves it out by default (the API's top-level default)", async () => {
     const { client, projectInstance } = makeClient();
+    await fetchManySpaces(client, { parentSpaceId: "any" });
+    expect(projectInstance.get.mock.calls[0][1].params.parentSpaceId).toBe("any");
+    projectInstance.get.mockClear();
     await fetchManySpaces(client, { parentSpaceId: "none" });
     await fetchManySpaces(client, { });
     expect(projectInstance.get.mock.calls[0][1].params.parentSpaceId).toBe("none");

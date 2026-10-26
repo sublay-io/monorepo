@@ -2719,5 +2719,15 @@
     "playground": {
       "display": "none"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/v8/api-reference/spaces/fetch-children",
+      "destination": "/v8/api-reference/spaces/fetch-spaces"
+    },
+    {
+      "source": "/v8/hooks/spaces/use-fetch-space-children",
+      "destination": "/v8/hooks/spaces/use-fetch-many-spaces"
+    }
+  ]
 }

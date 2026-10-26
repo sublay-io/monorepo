@@ -214,6 +214,7 @@ export type {
   ChatMessageIncludeArray,
   ChatMessageIncludeParam,
 } from "./interfaces/ChatMessage";
+export type { ConversationType } from "./interfaces/Conversation";
 export { PUSH_EVENT_TYPES, MUTE_DURATIONS } from "./interfaces/Push";
 export type {
   PushEventType,

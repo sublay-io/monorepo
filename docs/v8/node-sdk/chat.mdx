@@ -35,7 +35,7 @@ Lists the acting user's conversations, newest activity first. Uses **cursor (key
 ```typescript
 const { conversations, hasMore } = await sublay.chat.listConversations({
   actingUserId: "usr_abc123",
-  types: "direct,group",
+  types: ["direct", "group"],
   limit: 20,
 });
 ```
@@ -43,8 +43,8 @@ const { conversations, hasMore } = await sublay.chat.listConversations({
 <ParamField body="actingUserId" type="string" required>
   The user whose conversations are listed.
 </ParamField>
-<ParamField body="types" type="string">
-  Comma-separated filter: any of `direct`, `group`, `space`.
+<ParamField body="types" type="ConversationType | ConversationType[]">
+  Only conversations of these types: any of `"direct"`, `"group"`, `"space"`. Omitted, every type is listed.
 </ParamField>
 <ParamField body="cursor" type="string">
   Keyset cursor — the `lastMessageAt` of the last item from the previous page: a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`.

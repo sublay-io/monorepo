@@ -24,7 +24,7 @@ Lists the user's conversations, newest activity first, with keyset pagination.
 
 ```typescript
 const { conversations, hasMore } = await sublay.chat.listConversations({
-  types: "direct,group",
+  types: ["direct", "group"],
   limit: 20,
 });
 
@@ -36,8 +36,8 @@ const next = await sublay.chat.listConversations({
 });
 ```
 
-<ParamField body="types" type="string">
-  Comma-separated conversation types to include, e.g. `"direct,group,space"`.
+<ParamField body="types" type="ConversationType | ConversationType[]">
+  Only conversations of these types: any of `"direct"`, `"group"`, `"space"`. Omitted, every type is listed.
 </ParamField>
 
 <ParamField body="cursor" type="string">

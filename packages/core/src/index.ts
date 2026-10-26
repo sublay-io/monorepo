@@ -1033,6 +1033,7 @@ export type {
 export type {
   Conversation,
   ConversationPreview,
+  ConversationType,
 } from "./interfaces/models/Conversation";
 export type {
   ConversationMember,

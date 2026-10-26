@@ -15,7 +15,7 @@ To fetch a single conversation in this same shape — one that was paginated out
 ## Query Parameters
 
 <ParamField query="types" type="string">
-  Comma-separated list of conversation types to include. Valid values: `direct`, `group`, `space`. If omitted, all types are returned. Example: `types=direct,group`
+  Only conversations of these types. Allowed values: `direct`, `group`, `space`, matched exactly (lowercase). Send a comma-separated list (`types=direct,group`) or repeat the parameter (`types=direct&types=group`). Omitted or empty, all types are returned. Any other value, such as `DIRECT` or `dm`, returns `400 chat/invalid-query`.
 </ParamField>
 
 <ParamField query="cursor" type="string">
@@ -145,9 +145,12 @@ To fetch a single conversation in this same shape — one that was paginated out
     ```
   </Accordion>
   <Accordion title="Invalid Query — 400">
-    For example a `cursor` or `cursorCreatedAt` that isn't a UTC (`Z`) datetime, or a `limit` above 50. `error` starts with the field name.
+    For example a `types` value other than `direct`, `group` or `space`, a `cursor` or `cursorCreatedAt` that isn't a UTC (`Z`) datetime, or a `limit` above 50. `error` starts with the field name.
     ```json
     { "error": "cursor: Invalid ISO datetime", "code": "chat/invalid-query" }
+    ```
+    ```json
+    { "error": "types: Unknown type `DIRECT`. Allowed: direct, group, space.", "code": "chat/invalid-query" }
     ```
   </Accordion>
 </AccordionGroup>

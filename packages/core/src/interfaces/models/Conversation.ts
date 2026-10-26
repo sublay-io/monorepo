@@ -3,10 +3,13 @@ import { ChatMessage } from "./ChatMessage";
 import { ConversationMember } from "./ConversationMember";
 import { User } from "./User";
 
+/** A conversation's type. Also the values the conversation list's `types` filter accepts. */
+export type ConversationType = "direct" | "group" | "space";
+
 export interface Conversation {
   id: string;
   projectId: string;
-  type: "direct" | "group" | "space";
+  type: ConversationType;
   name: string | null;
   description: string | null;
   spaceId: string | null;

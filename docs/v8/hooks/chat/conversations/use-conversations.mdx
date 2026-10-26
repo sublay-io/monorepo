@@ -39,8 +39,8 @@ function ConversationList() {
 
 ## Props
 
-<ParamField body="types" type="('direct' | 'group' | 'space')[]">
-  Filter conversations by type. If omitted, all types are returned.
+<ParamField body="types" type="ConversationType[]">
+  Only conversations of these types: any of `"direct"`, `"group"`, `"space"`. If omitted, all types are returned.
 </ParamField>
 
 ## Returns

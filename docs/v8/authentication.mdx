@@ -231,10 +231,10 @@ A field sent in the wrong place is refused with a `400` that names the right one
 
 ### Saying "no value"
 
-Each place has one way to say "nothing", and only that way:
+"Nothing" is said one way for filters and one way for values you set:
 
-- **In the query string**, a filter that can match "has none" takes the word `none`. A filter left out, or sent empty (`parentSpaceId=`), doesn't filter. `null` and `undefined` are never spellings of "none" in a URL.
-- **In a body**, "nothing" is JSON `null`: no parent, the general bucket, remove the avatar. The string `"none"` in a body is ordinary text, except in the id fields listed below, where it is refused.
+- **Filters** choose which records come back. A filter that can match "has none" takes the word `none`. A filter left out, or sent empty (`parentSpaceId=`), doesn't filter. Filters are usually in the query string; on the few reads that are `POST`s (such as search) they're in the body and work the same way. `null` and `undefined` are never spellings of "none" in a URL.
+- **Values you set** on a create or update use JSON `null` for "nothing": no parent, the general bucket, remove the avatar. Leaving the field out means "don't set it" on create and "leave it unchanged" on update. The string `"none"` is ordinary text there, except in the id fields listed below, where it is refused.
 
 These query filters take `none`:
 

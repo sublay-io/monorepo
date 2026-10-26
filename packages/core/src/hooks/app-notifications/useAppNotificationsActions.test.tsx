@@ -12,6 +12,8 @@ import {
 import { setUser } from "../../store/slices/authSlice";
 import { useAppNotificationsActions } from "./useAppNotificationsActions";
 import {
+  addNotifications,
+  setUnreadCount,
   selectAppNotifications,
   selectAppNotificationsLoading,
   selectAppNotificationsPage,
@@ -29,6 +31,23 @@ const NOTIFICATION = {
   createdAt: "2024-01-01T00:00:00.000Z",
   action: "view",
 };
+
+// Two unread notifications and one read one in the slice, with an unread count
+// that also covers notifications on pages not loaded yet.
+function seedNotifications(store: { dispatch: (action: any) => unknown }) {
+  store.dispatch(
+    addNotifications({
+      notifications: [
+        { ...NOTIFICATION, id: "n1", isRead: false },
+        { ...NOTIFICATION, id: "n2", isRead: false },
+        { ...NOTIFICATION, id: "n3", isRead: true },
+      ] as any,
+      hasMore: true,
+      isFirstPage: true,
+    }),
+  );
+  store.dispatch(setUnreadCount(5));
+}
 
 beforeEach(() => {
   fetchHandle = stubFetchMock(async () => jsonResponse({}, 404));
@@ -86,6 +105,49 @@ describe("useAppNotificationsActions", () => {
       await expect(
         result.current.markNotificationAsRead({ notificationId: "n1" }),
       ).rejects.toBeTruthy();
+    });
+
+    // Not wrapped in act(): act drops the catch block's dispatch on a reject.
+    it("puts the notification back to unread when the request fails", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
+      const { result, store } = renderHookWithStore(
+        () => useAppNotificationsActions(),
+        { projectId: "test-project" },
+      );
+      act(() => {
+        store.dispatch(setUser(makeAuthUser()));
+        seedNotifications(store);
+      });
+
+      await expect(
+        result.current.markNotificationAsRead({ notificationId: "n1" }),
+      ).rejects.toBeTruthy();
+
+      expect(selectAppNotifications(store.getState()).map((n) => n.isRead)).toEqual([
+        false,
+        false,
+        true,
+      ]);
+      expect(selectUnreadCount(store.getState())).toBe(5);
+    });
+
+    it("leaves an already-read notification read when the request fails", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
+      const { result, store } = renderHookWithStore(
+        () => useAppNotificationsActions(),
+        { projectId: "test-project" },
+      );
+      act(() => {
+        store.dispatch(setUser(makeAuthUser()));
+        seedNotifications(store);
+      });
+
+      await expect(
+        result.current.markNotificationAsRead({ notificationId: "n3" }),
+      ).rejects.toBeTruthy();
+
+      expect(selectAppNotifications(store.getState())[2].isRead).toBe(true);
+      expect(selectUnreadCount(store.getState())).toBe(5);
     });
   });
 
@@ -205,6 +267,28 @@ describe("useAppNotificationsActions", () => {
 
       const patchCall = fetchHandle.calls().find((c) => c.method === "PATCH");
       expect(patchCall?.url).toContain("/test-project/app-notifications/mark-all-as-read");
+    });
+
+    // Not wrapped in act(): act drops the catch block's dispatch on a reject.
+    it("restores the unread notifications and count when the request fails", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
+      const { result, store } = renderHookWithStore(
+        () => useAppNotificationsActions(),
+        { projectId: "test-project" },
+      );
+      act(() => {
+        store.dispatch(setUser(makeAuthUser()));
+        seedNotifications(store);
+      });
+
+      await expect(result.current.markAllNotificationsAsRead()).rejects.toBeTruthy();
+
+      expect(selectAppNotifications(store.getState()).map((n) => n.isRead)).toEqual([
+        false,
+        false,
+        true,
+      ]);
+      expect(selectUnreadCount(store.getState())).toBe(5);
     });
 
     it("throws when there is no authenticated user", async () => {

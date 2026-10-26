@@ -10,6 +10,7 @@ import reducer, {
   addNotifications,
   markAsReadLocally,
   markAllAsReadLocally,
+  revertMarkAsReadLocally,
   setUnreadCount,
   handleError,
   selectAppNotifications,
@@ -164,6 +165,39 @@ describe("appNotificationsSlice", () => {
     s = reducer(s, markAllAsReadLocally());
     expect(s.notifications.every((n) => n.isRead)).toBe(true);
     expect(s.unreadCount).toBe(0);
+  });
+
+  describe("revertMarkAsReadLocally", () => {
+    const seeded = () =>
+      reducer(initial, addNotifications({
+        notifications: [
+          makeNotification({ id: "n1", isRead: true }),
+          makeNotification({ id: "n2", isRead: true }),
+          makeNotification({ id: "n3", isRead: true }),
+        ],
+        hasMore: false,
+        isFirstPage: true,
+      }));
+
+    it("turns the listed notifications back to unread and counts each one", () => {
+      let s = { ...seeded(), unreadCount: 4 };
+      s = reducer(s, revertMarkAsReadLocally({ notificationIds: ["n1", "missing"] }));
+      expect(s.notifications.map((n) => n.isRead)).toEqual([false, true, true]);
+      expect(s.unreadCount).toBe(5);
+    });
+
+    it("restores the given unread count instead of counting", () => {
+      let s = seeded();
+      s = reducer(s, revertMarkAsReadLocally({ notificationIds: ["n1", "n2"], unreadCount: 12 }));
+      expect(s.notifications.map((n) => n.isRead)).toEqual([false, false, true]);
+      expect(s.unreadCount).toBe(12);
+    });
+
+    it("does not count a notification that is already unread", () => {
+      let s = reducer(seeded(), revertMarkAsReadLocally({ notificationIds: ["n1"] }));
+      s = reducer(s, revertMarkAsReadLocally({ notificationIds: ["n1"] }));
+      expect(s.unreadCount).toBe(1);
+    });
   });
 
   it("handleError stops loading", () => {

@@ -124,6 +124,145 @@ describe("appNotificationsApi", () => {
     expect(cached.data?.data[0].isRead).toBe(true);
   });
 
+  describe("optimistic read updates", () => {
+    const PAGE = (page: number, ids: string[]) =>
+      jsonResponse({
+        data: ids.map((id) => ({ ...NOTIFICATION, id })),
+        pagination: { page, pageSize: 25, totalPages: 2, totalItems: 50, hasMore: page < 2 },
+      });
+
+    // Two pages fetched with a non-default limit, so neither is the
+    // `page: 1, limit: 10` entry the updates used to hard-code.
+    async function seedPages() {
+      fetchHandle.fetchMock.mockResolvedValueOnce(PAGE(1, ["n1"]));
+      fetchHandle.fetchMock.mockResolvedValueOnce(PAGE(2, ["n2"]));
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse(2));
+      for (const page of [1, 2]) {
+        await store.dispatch(
+          appNotificationsApi.endpoints.fetchAppNotifications.initiate({
+            projectId: "test-project",
+            page,
+            limit: 25,
+          }),
+        );
+      }
+      await store.dispatch(
+        appNotificationsApi.endpoints.countUnreadNotifications.initiate({ projectId: "test-project" }),
+      );
+    }
+
+    const readFlags = () =>
+      [1, 2].map(
+        (page) =>
+          appNotificationsApi.endpoints.fetchAppNotifications.select({
+            projectId: "test-project",
+            page,
+            limit: 25,
+          })(store.getState()).data?.data[0].isRead,
+      );
+    const cachedCount = () =>
+      appNotificationsApi.endpoints.countUnreadNotifications.select({
+        projectId: "test-project",
+      })(store.getState()).data;
+
+    // A mutation that hangs until released, so the optimistic state can be
+    // read while the request is in flight.
+    function holdNextResponse() {
+      let release!: (response: Response) => void;
+      const gate = new Promise<Response>((resolve) => (release = resolve));
+      fetchHandle.fetchMock.mockImplementationOnce(() => gate);
+      return release;
+    }
+
+    it("markNotificationAsRead patches the notification on any cached page and limit", async () => {
+      await seedPages();
+      const release = holdNextResponse();
+
+      const pending = store.dispatch(
+        appNotificationsApi.endpoints.markNotificationAsRead.initiate({
+          projectId: "test-project",
+          notificationId: "n2",
+        }),
+      );
+      await Promise.resolve();
+      expect(readFlags()).toEqual([false, true]);
+
+      release(jsonResponse({}));
+      await pending;
+    });
+
+    it("markNotificationAsRead reverts the patch when the request fails", async () => {
+      await seedPages();
+
+      await store.dispatch(
+        appNotificationsApi.endpoints.markNotificationAsRead.initiate({
+          projectId: "test-project",
+          notificationId: "n2",
+        }),
+      );
+
+      expect(readFlags()).toEqual([false, false]);
+    });
+
+    it("markAllNotificationsAsRead patches every cached page and the count", async () => {
+      await seedPages();
+      const release = holdNextResponse();
+
+      const pending = store.dispatch(
+        appNotificationsApi.endpoints.markAllNotificationsAsRead.initiate({
+          projectId: "test-project",
+        }),
+      );
+      await Promise.resolve();
+      expect(readFlags()).toEqual([true, true]);
+      expect(cachedCount()).toBe(0);
+
+      release(jsonResponse({ markedAsRead: 2 }));
+      await pending;
+    });
+
+    it("markAllNotificationsAsRead reverts the pages and the count when the request fails", async () => {
+      await seedPages();
+
+      await store.dispatch(
+        appNotificationsApi.endpoints.markAllNotificationsAsRead.initiate({
+          projectId: "test-project",
+        }),
+      );
+
+      expect(readFlags()).toEqual([false, false]);
+      expect(cachedCount()).toBe(2);
+    });
+
+    it("leaves another project's cached pages alone", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(PAGE(1, ["n1"]));
+      await store.dispatch(
+        appNotificationsApi.endpoints.fetchAppNotifications.initiate({
+          projectId: "other-project",
+          page: 1,
+          limit: 25,
+        }),
+      );
+      const release = holdNextResponse();
+
+      const pending = store.dispatch(
+        appNotificationsApi.endpoints.markAllNotificationsAsRead.initiate({
+          projectId: "test-project",
+        }),
+      );
+      await Promise.resolve();
+      const other = appNotificationsApi.endpoints.fetchAppNotifications.select({
+        projectId: "other-project",
+        page: 1,
+        limit: 25,
+      })(store.getState());
+      expect(other.data?.data[0].isRead).toBe(false);
+
+      release(jsonResponse({ markedAsRead: 0 }));
+      await pending;
+    });
+  });
+
   it("countUnreadNotifications issues a GET to the count route", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse(4));
 

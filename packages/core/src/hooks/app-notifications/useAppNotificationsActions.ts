@@ -7,7 +7,10 @@ import {
   addNotifications,
   markAsReadLocally,
   markAllAsReadLocally,
+  revertMarkAsReadLocally,
   setUnreadCount,
+  selectAppNotifications,
+  selectUnreadCount,
   selectCurrentProjectId,
   selectAppNotificationsPage,
   selectAppNotificationsLimit,
@@ -45,6 +48,8 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
   const projectIdFromSlice = useSublaySelector(selectCurrentProjectId);
   const page = useSublaySelector(selectAppNotificationsPage);
   const limit = useSublaySelector(selectAppNotificationsLimit);
+  const notifications = useSublaySelector(selectAppNotifications);
+  const unreadCount = useSublaySelector(selectUnreadCount);
 
   // Get project and user context (fallback to current hooks)
   const { projectId: projectIdFromHook } = useProject();
@@ -71,6 +76,10 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
         throw new Error("No project ID or authenticated user available");
       }
 
+      const wasUnread = notifications.some(
+        (n) => n.id === notificationId && !n.isRead
+      );
+
       try {
         // Optimistic update
         dispatch(markAsReadLocally(notificationId));
@@ -81,11 +90,14 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
           notificationId,
         }).unwrap();
       } catch (error) {
+        if (wasUnread) {
+          dispatch(revertMarkAsReadLocally({ notificationIds: [notificationId] }));
+        }
         handleError(error, "Failed to mark notification as read:");
         throw error;
       }
     },
-    [dispatch, projectId, user, markNotificationAsReadMutation]
+    [dispatch, projectId, user, notifications, markNotificationAsReadMutation]
   );
 
   // Reset notifications action
@@ -187,17 +199,20 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
       throw new Error("No project ID or authenticated user available");
     }
 
+    const unreadIds = notifications.filter((n) => !n.isRead).map((n) => n.id);
+
     try {
       // Optimistic update
       dispatch(markAllAsReadLocally());
-      
+
       // Make API call
       await markAllNotificationsAsReadMutation({ projectId }).unwrap();
     } catch (error) {
+      dispatch(revertMarkAsReadLocally({ notificationIds: unreadIds, unreadCount }));
       handleError(error, "Failed to mark all notifications as read:");
       throw error;
     }
-  }, [dispatch, projectId, user, markAllNotificationsAsReadMutation]);
+  }, [dispatch, projectId, user, notifications, unreadCount, markAllNotificationsAsReadMutation]);
 
   return {
     loadMore,

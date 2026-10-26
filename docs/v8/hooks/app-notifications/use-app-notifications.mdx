@@ -82,11 +82,11 @@ function NotificationList() {
 </ResponseField>
 
 <ResponseField name="markNotificationAsRead" type="({ notificationId: string }) => Promise<void>">
-  Marks a single notification as read with an optimistic local update.
+  Marks a single notification as read with an optimistic local update. If the request fails, the notification goes back to unread, the unread count is restored, and the promise rejects.
 </ResponseField>
 
 <ResponseField name="markAllNotificationsAsRead" type="() => Promise<void>">
-  Marks all notifications as read with an optimistic local update.
+  Marks all notifications as read with an optimistic local update. If the request fails, the notifications that were unread go back to unread, the unread count is restored, and the promise rejects.
 </ResponseField>
 
 <ResponseField name="resetAppNotifications" type="() => Promise<void>">

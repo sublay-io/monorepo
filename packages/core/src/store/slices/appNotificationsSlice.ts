@@ -116,6 +116,25 @@ export const appNotificationsSlice = createSlice({
       state.unreadCount = 0;
     },
 
+    // Undo an optimistic mark-as-read when the request fails: the listed
+    // notifications go back to unread, and the count is restored (or, without
+    // one, goes up by each notification turned back).
+    revertMarkAsReadLocally: (
+      state,
+      action: PayloadAction<{ notificationIds: string[]; unreadCount?: number }>
+    ) => {
+      const { notificationIds, unreadCount } = action.payload;
+      const ids = new Set(notificationIds);
+      let reverted = 0;
+      state.notifications.forEach((notification) => {
+        if (ids.has(notification.id) && notification.isRead) {
+          notification.isRead = false;
+          reverted += 1;
+        }
+      });
+      state.unreadCount = unreadCount ?? state.unreadCount + reverted;
+    },
+
     // Set unread count
     setUnreadCount: (state, action: PayloadAction<number>) => {
       state.unreadCount = action.payload;
@@ -145,6 +164,7 @@ export const {
   addNotifications,
   markAsReadLocally,
   markAllAsReadLocally,
+  revertMarkAsReadLocally,
   setUnreadCount,
   handleError,
 } = appNotificationsSlice.actions;

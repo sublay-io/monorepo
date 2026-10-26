@@ -30,8 +30,11 @@ export interface FetchSpacesOptions {
   sortDir?: SortDirection | null;
   query?: string | null;
   searchFields?: SpaceSearchFields | null;
-  /** A space id, or `"none"` for top-level spaces. `null` or left out: `"none"`. */
-  parentSpaceId?: string | "none" | null;
+  /**
+   * A space id (its direct sub-spaces), `"none"` (top-level spaces) or `"any"`
+   * (every level). `null` or left out: `"none"`.
+   */
+  parentSpaceId?: string | "none" | "any" | null;
   limit: number;
 }
 

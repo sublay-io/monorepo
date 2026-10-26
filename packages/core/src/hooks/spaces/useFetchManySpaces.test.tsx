@@ -55,7 +55,7 @@ describe("useFetchManySpaces", () => {
     expect(second.config?.params).not.toHaveProperty("query");
   });
 
-  it("lists every level by default: parentSpaceId is left out when not set or null", async () => {
+  it("sends nothing by default, so the API's top-level default applies: parentSpaceId is left out when not set or null", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManySpaces());
 
     axiosPrivate.mockResponse("get", makePage([]));
@@ -79,9 +79,10 @@ describe("useFetchManySpaces", () => {
     }
   });
 
-  it("sends an explicit \"none\" or a parent id as given", async () => {
+  it("sends an explicit \"none\", \"any\" or a parent id as given", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManySpaces());
 
+    axiosPrivate.mockResponse("get", makePage([]));
     axiosPrivate.mockResponse("get", makePage([]));
     axiosPrivate.mockResponse("get", makePage([]));
 
@@ -89,12 +90,16 @@ describe("useFetchManySpaces", () => {
       await result.current({ parentSpaceId: "none" });
     });
     await act(async () => {
+      await result.current({ parentSpaceId: "any" });
+    });
+    await act(async () => {
       await result.current({ parentSpaceId: "parent-1" });
     });
 
-    const [first, second] = axiosPrivate.calls("get");
+    const [first, second, third] = axiosPrivate.calls("get");
     expect(first.config?.params).toMatchObject({ parentSpaceId: "none" });
-    expect(second.config?.params).toMatchObject({ parentSpaceId: "parent-1" });
+    expect(second.config?.params).toMatchObject({ parentSpaceId: "any" });
+    expect(third.config?.params).toMatchObject({ parentSpaceId: "parent-1" });
   });
 
   it("rejects when the server returns an error response", async () => {

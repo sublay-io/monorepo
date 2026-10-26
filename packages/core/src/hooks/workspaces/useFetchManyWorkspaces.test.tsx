@@ -70,4 +70,33 @@ describe("useFetchManyWorkspaces", () => {
     const [call] = axiosPrivate.calls("get");
     expect(call.config?.params).toEqual({});
   });
+
+  it("sends parentWorkspaceId as given, and leaves it out when null", async () => {
+    const user = makeAuthUser({ id: "user-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useFetchManyWorkspaces(),
+      { projectId: "project-1", user }
+    );
+
+    for (let i = 0; i < 4; i += 1) axiosPrivate.mockResponse("get", makePage([]));
+
+    await act(async () => {
+      await result.current({ parentWorkspaceId: "none" });
+    });
+    await act(async () => {
+      await result.current({ parentWorkspaceId: "any" });
+    });
+    await act(async () => {
+      await result.current({ parentWorkspaceId: "w-parent" });
+    });
+    await act(async () => {
+      await result.current({ parentWorkspaceId: null });
+    });
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls[0].config?.params).toEqual({ parentWorkspaceId: "none" });
+    expect(calls[1].config?.params).toEqual({ parentWorkspaceId: "any" });
+    expect(calls[2].config?.params).toEqual({ parentWorkspaceId: "w-parent" });
+    expect(calls[3].config?.params).toEqual({});
+  });
 });

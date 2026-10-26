@@ -24,8 +24,11 @@ export interface SpaceListState {
   sortDir: SortDirection | null;
   query: string | null;
   searchFields: SpaceSearchFields | null;
-  /** A space id, or `"none"` (top-level spaces only, the default). */
-  parentSpaceId: string | "none";
+  /**
+   * A space id (its direct sub-spaces), `"none"` (top-level spaces only, the
+   * default) or `"any"` (every level).
+   */
+  parentSpaceId: string | "none" | "any";
 }
 
 // Root state for all space lists
@@ -66,10 +69,11 @@ export interface SpaceListFilters {
   query?: string | null;
   searchFields?: SpaceSearchFields | null;
   /**
-   * A space id (its child spaces), or `"none"` for top-level spaces only.
-   * `null` or left out: the default, `"none"`.
+   * A space id (its direct sub-spaces), `"none"` for top-level spaces only,
+   * or `"any"` for spaces at every level. `null` or left out: the default,
+   * `"none"`.
    */
-  parentSpaceId?: string | "none" | null;
+  parentSpaceId?: string | "none" | "any" | null;
 }
 
 // Configuration for space list operations

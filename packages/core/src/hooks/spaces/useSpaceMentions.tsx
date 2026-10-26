@@ -46,7 +46,13 @@ const useSpaceMentions = ({
 
   const fetchSuggestions = useCallback(
     async (query: string) => {
-      const result = await fetchManySpaces({ query, limit: 5 });
+      // `"any"`: search spaces at every level, not just top-level ones, so a
+      // sub-space can be mentioned too.
+      const result = await fetchManySpaces({
+        query,
+        limit: 5,
+        parentSpaceId: "any",
+      });
       return result.data;
     },
     [fetchManySpaces]

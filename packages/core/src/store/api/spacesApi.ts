@@ -42,10 +42,10 @@ interface FetchSpacesParams {
   // The directory lists public spaces only. A user's own spaces (any
   // visibility) come from `/spaces/user-spaces` (`useFetchUserSpaces`).
   /**
-   * A space id (its child spaces), or `"none"` for top-level spaces only.
-   * `null` or left out: the default, `"none"`.
+   * A space id (its direct sub-spaces), `"none"` for top-level spaces only,
+   * or `"any"` for spaces at every level. `null` or left out: `"none"`.
    */
-  parentSpaceId?: string | "none" | null;
+  parentSpaceId?: string | "none" | "any" | null;
 }
 
 interface DeleteSpaceParams {

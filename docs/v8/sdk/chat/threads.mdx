@@ -60,6 +60,16 @@ function ThreadPanel({
 
 Replies are loaded in ascending order (oldest first) and `loadMore` fetches newer replies.
 
+## Live Updates
+
+An open thread stays current without refetching:
+
+- New replies from anyone, including your own sends (shown optimistically, then confirmed), appear in the thread as they arrive.
+- Edits, deletions, moderator removals and reactions on a reply update it in place.
+- After a dropped connection comes back, the thread loads the replies sent while it was offline (see [Missed Messages After a Reconnect](/v8/sdk/chat/real-time#missed-messages-after-a-reconnect)).
+
+Replies live only in their thread. The main message stream holds top-level messages, the same ones the server returns for it, and shows a thread through its parent's `threadReplyCount`.
+
 See [`useMessageThread`](/v8/hooks/chat/messages/use-message-thread).
 
 ## Using useLiveChatMessages Directly

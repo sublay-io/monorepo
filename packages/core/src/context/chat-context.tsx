@@ -24,6 +24,7 @@ import {
   setSocketConnected,
   setTypingUsers,
   updateReactions,
+  patchMessage,
   updateGrants,
   setConversation,
   setUnreadSummary,
@@ -330,7 +331,27 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     // ── message:created ─────────────────────────────────────────────────────
     socket.on("message:created", (message) => {
+      // Routed by the reducer: a reply goes to its thread if that is loaded,
+      // never to the main stream.
       dispatch(upsertMessage(message));
+
+      // A thread reply moves the conversation up (the server bumps its
+      // lastMessageAt), but it isn't the conversation's last message and
+      // doesn't count as unread — the server leaves replies out of both, so
+      // the unread globals need no refetch either.
+      if (message.parentMessageId) {
+        if (conversationListRef.current.some((c) => c.id === message.conversationId)) {
+          dispatch(
+            upsertConversationPreview({
+              conversationId: message.conversationId,
+              patch: { lastMessageAt: message.createdAt },
+            })
+          );
+        } else {
+          void fetchAndInsertPreview(message.conversationId);
+        }
+        return;
+      }
 
       const isLoaded = conversationListRef.current.some(
         (c) => c.id === message.conversationId
@@ -361,51 +382,58 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     });
 
     // ── message:updated ─────────────────────────────────────────────────────
+    // These patch every loaded copy of the message — main stream and thread
+    // replies alike (see `patchMessage`). A payload without conversationId
+    // (servers predating the field) falls back to the loaded message's.
     socket.on("message:updated", (payload) => {
-      const existing = findMessage(payload.messageId, payload.conversationId);
-      if (existing) {
-        dispatch(
-          upsertMessage({
-            ...existing,
+      dispatch(
+        patchMessage({
+          conversationId:
+            payload.conversationId ??
+            findMessage(payload.messageId)?.conversationId,
+          messageId: payload.messageId,
+          patch: {
             content: payload.content,
             gif: payload.gif,
             mentions: payload.mentions,
             metadata: payload.metadata,
             editedAt: payload.editedAt,
-          })
-        );
-      }
+          },
+        })
+      );
     });
 
     // ── message:deleted ─────────────────────────────────────────────────────
     socket.on("message:deleted", (payload) => {
-      const existing = findMessage(payload.messageId, payload.conversationId);
-      if (existing) {
-        dispatch(
-          upsertMessage({
-            ...existing,
+      dispatch(
+        patchMessage({
+          conversationId:
+            payload.conversationId ??
+            findMessage(payload.messageId)?.conversationId,
+          messageId: payload.messageId,
+          patch: {
             userDeletedAt: payload.userDeletedAt,
             content: null,
             gif: null,
             mentions: [],
             metadata: {},
             files: undefined,
-          })
-        );
-      }
+          },
+        })
+      );
     });
 
     // ── message:removed ─────────────────────────────────────────────────────
     socket.on("message:removed", (payload) => {
-      const existing = findMessage(payload.messageId, payload.conversationId);
-      if (existing) {
-        dispatch(
-          upsertMessage({
-            ...existing,
-            moderationStatus: "removed" as const,
-          })
-        );
-      }
+      dispatch(
+        patchMessage({
+          conversationId:
+            payload.conversationId ??
+            findMessage(payload.messageId)?.conversationId,
+          messageId: payload.messageId,
+          patch: { moderationStatus: "removed" },
+        })
+      );
     });
 
     // ── message:reaction ────────────────────────────────────────────────────
@@ -416,7 +444,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       const conversationId =
         payload.conversationId ??
         findMessage(payload.messageId)?.conversationId;
-      if (!conversationId) return;
 
       dispatch(
         updateReactions({
@@ -457,15 +484,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     // ── thread:reply_count ──────────────────────────────────────────────────
     socket.on("thread:reply_count", (payload) => {
-      const existing = findMessage(payload.messageId, payload.conversationId);
-      if (existing) {
-        dispatch(
-          upsertMessage({
-            ...existing,
-            threadReplyCount: payload.threadReplyCount,
-          })
-        );
-      }
+      dispatch(
+        patchMessage({
+          conversationId:
+            payload.conversationId ??
+            findMessage(payload.messageId)?.conversationId,
+          messageId: payload.messageId,
+          patch: { threadReplyCount: payload.threadReplyCount },
+        })
+      );
     });
 
     // ── typing:start ────────────────────────────────────────────────────────

@@ -74,7 +74,7 @@ function ThreadPanel({
 </ResponseField>
 
 <ResponseField name="loadMore" type="() => Promise<void>">
-  Fetches more replies (newer than the newest loaded). No-ops if `loading` is `true` or `hasMore` is `false`.
+  Fetches the next page of newer replies. No-ops if `loading` is `true` or `hasMore` is `false`.
 </ResponseField>
 
 <ResponseField name="sendReply" type="(params: Omit<SendMessageParams, 'parentMessageId'>) => Promise<ChatMessage>">
@@ -83,4 +83,5 @@ function ThreadPanel({
 
 ## Notes
 
+- The thread is live: new replies (including your own), edits, deletions, removals and reactions appear as they happen, and replies sent while the socket was disconnected are loaded when it reconnects.
 - For integration guidance, see [Chat: Threads](/v8/sdk/chat/threads).

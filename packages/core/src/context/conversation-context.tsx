@@ -80,20 +80,15 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   // disconnect doesn't drop everything past the first page. With nothing to
   // anchor on (an empty conversation, or a first load that failed), load the
   // latest page the way the mount fetch does.
-  const catchUpMessages = useCallback(async () => {
+  //
+  // `anchorAt` is the newest message loaded when the socket dropped. Paging
+  // from the newest loaded *now* would skip what others sent while it was
+  // down if you sent a message meanwhile (your send still confirms over REST).
+  const catchUpMessages = useCallback(async (anchorAt: string | null) => {
     if (!projectId || !conversationId) return;
 
-    let newest: ChatMessage | undefined;
-    for (let i = messagesRef.current.length - 1; i >= 0; i--) {
-      // Optimistic `temp-` messages have no server timestamp to page from.
-      if (!messagesRef.current[i].id.startsWith("temp-")) {
-        newest = messagesRef.current[i];
-        break;
-      }
-    }
-
     try {
-      if (!newest) {
+      if (!anchorAt) {
         const page = await fetchMany({ conversationId, sortDir: "desc" });
         // Newest first from the server; the store keeps messages ascending.
         [...page.messages].reverse().forEach((msg) => dispatch(upsertMessage(msg)));
@@ -101,7 +96,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         return;
       }
 
-      let after = new Date(newest.createdAt).toISOString();
+      let after = new Date(anchorAt).toISOString();
       while (true) {
         const page = await fetchMany({
           conversationId,
@@ -183,6 +178,23 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     // it from subsequent reconnects (socket.on("connect") fires on both).
     const hasConnectedOnceRef = { current: socket.connected };
 
+    // The newest real message when the socket dropped (`undefined`: no drop
+    // seen, e.g. mounted while already disconnected).
+    const newestLoadedAt = (): string | null => {
+      for (let i = messagesRef.current.length - 1; i >= 0; i--) {
+        // Optimistic `temp-` messages have no server timestamp to page from.
+        if (!messagesRef.current[i].id.startsWith("temp-")) {
+          return messagesRef.current[i].createdAt;
+        }
+      }
+      return null;
+    };
+    let anchorAtDisconnect: string | null | undefined;
+
+    const handleDisconnect = () => {
+      anchorAtDisconnect = newestLoadedAt();
+    };
+
     const handleConnect = async () => {
       if (!hasConnectedOnceRef.current) {
         // Initial connect — the mount effect already joined the room.
@@ -192,11 +204,16 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
       // True reconnect: re-join the room and catch up on missed messages.
       socket.emit("join:conversation", { conversationId });
-      await catchUpMessages();
+      const anchorAt =
+        anchorAtDisconnect !== undefined ? anchorAtDisconnect : newestLoadedAt();
+      anchorAtDisconnect = undefined;
+      await catchUpMessages(anchorAt);
     };
 
+    socket.on("disconnect", handleDisconnect);
     socket.on("connect", handleConnect);
     return () => {
+      socket.off("disconnect", handleDisconnect);
       socket.off("connect", handleConnect);
     };
   }, [socket, conversationId, catchUpMessages]);

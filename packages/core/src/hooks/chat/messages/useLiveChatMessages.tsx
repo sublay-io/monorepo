@@ -7,15 +7,18 @@ import {
   selectThreadReplies,
   selectThreadLoading,
   selectThreadHasMore,
+  selectThreadCursor,
   upsertMessage,
   setMessagesLoading,
   setMessagesHasMore,
-  setThreadReplies,
+  mergeThreadReplies,
+  startThreadLoad,
   setThreadLoading,
 } from "../../../store/slices/chatSlice";
 import { ChatMessage } from "../../../interfaces/models/ChatMessage";
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
+import { useChatContext } from "../../../context/chat-context";
 import useFetchManyChatMessages from "./useFetchManyChatMessages";
 
 export interface UseLiveChatMessagesProps {
@@ -60,6 +63,7 @@ function useLiveChatMessages({
   const dispatch = useSublayDispatch();
   const { projectId } = useProject();
   const fetchMany = useFetchManyChatMessages();
+  const { socket } = useChatContext();
 
   const isThread = Boolean(parentMessageId);
 
@@ -75,6 +79,9 @@ function useLiveChatMessages({
   const threadHasMore = useSublaySelector(
     selectThreadHasMore(parentMessageId ?? "")
   );
+  const threadCursor = useSublaySelector(
+    selectThreadCursor(parentMessageId ?? "")
+  );
 
   const messages = isThread ? threadMessages : mainMessages;
   const loading = isThread ? threadLoading : mainLoading;
@@ -84,8 +91,10 @@ function useLiveChatMessages({
   // closing over stale state
   const mainMessagesRef = useRef(mainMessages);
   mainMessagesRef.current = mainMessages;
-  const threadMessagesRef = useRef(threadMessages);
-  threadMessagesRef.current = threadMessages;
+  const threadCursorRef = useRef(threadCursor);
+  threadCursorRef.current = threadCursor;
+  const threadHasMoreRef = useRef(threadHasMore);
+  threadHasMoreRef.current = threadHasMore;
 
   // Fetch a page of messages.
   // `before` is an ISO 8601 timestamp — the server queries messages created
@@ -106,9 +115,10 @@ function useLiveChatMessages({
         });
 
         if (isThread) {
-          // Thread replies come back ASC — dispatch as-is
+          // Thread replies come back ASC. Merged, not replaced, so a live
+          // reply that landed while this page was in flight is kept.
           dispatch(
-            setThreadReplies({
+            mergeThreadReplies({
               parentMessageId: parentMessageId!,
               messages: items,
               hasMore: more,
@@ -134,7 +144,7 @@ function useLiveChatMessages({
 
     const initialFetch = async () => {
       if (isThread) {
-        dispatch(setThreadLoading({ parentMessageId: parentMessageId!, loading: true }));
+        dispatch(startThreadLoad({ parentMessageId: parentMessageId! }));
       } else {
         dispatch(setMessagesLoading({ conversationId, loading: true }));
       }
@@ -164,16 +174,17 @@ function useLiveChatMessages({
 
   // Load more messages:
   // - Main stream: fetch older messages using `before` cursor (oldest loaded createdAt)
-  // - Thread: fetch newer replies using `after` cursor (newest loaded createdAt), append
+  // - Thread: fetch newer replies using the thread's `after` cursor (the newest
+  //   reply fetched in order — not the newest loaded, which may be a live
+  //   reply beyond a gap), merge
   const loadOlder = useCallback(async () => {
     if (loading || !hasMore) return;
 
     if (isThread) {
-      const currentItems = threadMessagesRef.current;
-      const newest = currentItems[currentItems.length - 1];
-      if (!newest || !parentMessageId || !projectId || !conversationId) return;
+      const cursor = threadCursorRef.current;
+      if (!cursor || !parentMessageId || !projectId || !conversationId) return;
 
-      const after = new Date(newest.createdAt).toISOString();
+      const after = new Date(cursor).toISOString();
       dispatch(setThreadLoading({ parentMessageId: parentMessageId, loading: true }));
       try {
         const { messages: newItems, hasMore: more } = await fetchMany({
@@ -186,9 +197,9 @@ function useLiveChatMessages({
           includeGrants,
         });
         dispatch(
-          setThreadReplies({
+          mergeThreadReplies({
             parentMessageId: parentMessageId,
-            messages: [...currentItems, ...newItems],
+            messages: newItems,
             hasMore: more,
           })
         );
@@ -208,6 +219,76 @@ function useLiveChatMessages({
     await fetchPage(before);
     dispatch(setMessagesLoading({ conversationId, loading: false }));
   }, [loading, hasMore, isThread, parentMessageId, projectId, conversationId, limit, includeFiles, includeGrants, fetchMany, dispatch, fetchPage]);
+
+  // Thread reconnect catch-up: fetch the replies sent while the socket was
+  // down. Page forward from the newest reply fetched in order until the server
+  // has no more; with none fetched yet (an empty thread, or a first load that
+  // failed), load the first page only, as on open, and leave the rest to
+  // `loadOlder`. A thread whose fetched run hasn't
+  // reached the end needs nothing: newer replies come in through `loadOlder`.
+  // The main stream's catch-up lives in ConversationProvider, which also
+  // re-joins the room; a thread shares its conversation's room.
+  const catchUpReplies = useCallback(async () => {
+    if (!projectId || !conversationId || !parentMessageId) return;
+    if (threadCursorRef.current && threadHasMoreRef.current) return;
+
+    let after = threadCursorRef.current
+      ? new Date(threadCursorRef.current).toISOString()
+      : null;
+    try {
+      while (true) {
+        const page = await fetchMany({
+          conversationId,
+          parentMessageId,
+          after,
+          limit: after === null ? limit : 100,
+          sortDir: "asc",
+          includeFiles,
+          includeGrants,
+        });
+        dispatch(
+          mergeThreadReplies({
+            parentMessageId,
+            messages: page.messages,
+            hasMore: page.hasMore,
+          })
+        );
+        // Stop after a first page, when the server is done, or if the cursor
+        // didn't move.
+        if (
+          after === null ||
+          !page.hasMore ||
+          !page.newestCreatedAt ||
+          page.newestCreatedAt === after
+        ) {
+          break;
+        }
+        after = page.newestCreatedAt;
+      }
+    } catch (err) {
+      handleError(err, "Failed to fetch missed thread replies");
+    }
+  }, [projectId, conversationId, parentMessageId, limit, includeFiles, includeGrants, fetchMany, dispatch]);
+
+  useEffect(() => {
+    if (!socket || !isThread) return;
+
+    // socket.on("connect") fires on the initial connect too; skip that one.
+    const hasConnectedOnceRef = { current: socket.connected };
+
+    const handleConnect = async () => {
+      if (!hasConnectedOnceRef.current) {
+        hasConnectedOnceRef.current = true;
+        return;
+      }
+      await catchUpReplies();
+    };
+
+    socket.on("connect", handleConnect);
+    return () => {
+      socket.off("connect", handleConnect);
+    };
+  }, [socket, isThread, catchUpReplies]);
 
   return { messages, loading, hasMore, loadOlder };
 }

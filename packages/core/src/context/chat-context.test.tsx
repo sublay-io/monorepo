@@ -10,10 +10,13 @@ import {
 import { makeProvidersWrapper, createFakeSocket, type FakeSocket } from "./testHelpers";
 import {
   selectMessages,
+  selectThreadReplies,
   selectTypingUsers,
   selectConversationList,
   setConversationList,
+  setThreadReplies,
   setUnreadSummary,
+  upsertMessage,
 } from "../store/slices/chatSlice";
 
 const fakeSocket: FakeSocket = createFakeSocket();
@@ -552,5 +555,157 @@ describe("ChatProvider — message-scoped socket events", () => {
     expect(
       selectMessages("conversation-1")(store.getState())[0].grants,
     ).toBeUndefined();
+  });
+});
+
+describe("ChatProvider — thread replies", () => {
+  const PARENT = makeChatMessage({
+    id: "parent-1",
+    conversationId: "conversation-1",
+    createdAt: "2024-01-01T00:00:00.000Z",
+  });
+
+  function reply(id: string, createdAt: string) {
+    return makeChatMessage({
+      id,
+      conversationId: "conversation-1",
+      parentMessageId: "parent-1",
+      createdAt,
+    });
+  }
+
+  /** conversation-1 is in the inbox, read, with the parent loaded and its thread open. */
+  async function renderWithOpenThread() {
+    const rendered = renderChatProvider("token-1", "user-me");
+    await waitFor(() => expect(rendered.axiosPrivate.calls("get")).toHaveLength(1));
+    await waitFor(() => expect(rendered.store.getState().sublay.chat.totalUnreadCount).toBe(0));
+
+    act(() => {
+      rendered.store.dispatch(
+        setConversationList([
+          makeConversationPreview({
+            id: "conversation-1",
+            unreadCount: 0,
+            lastMessage: PARENT,
+            lastMessageAt: PARENT.createdAt,
+          }),
+        ]),
+      );
+      // Loaded like a fetched page (a live top-level message would count as unread).
+      rendered.store.dispatch(upsertMessage(PARENT));
+      rendered.store.dispatch(
+        setThreadReplies({
+          parentMessageId: "parent-1",
+          messages: [reply("reply-1", "2024-01-01T00:00:01.000Z")],
+          hasMore: false,
+        }),
+      );
+    });
+
+    return rendered;
+  }
+
+  it("adds a live reply to its open thread and keeps it out of the main stream", async () => {
+    const { store } = await renderWithOpenThread();
+
+    act(() => {
+      fakeSocket.trigger("message:created", reply("reply-2", "2024-01-01T00:00:02.000Z"));
+    });
+
+    expect(selectThreadReplies("parent-1")(store.getState()).map((m) => m.id)).toEqual([
+      "reply-1",
+      "reply-2",
+    ]);
+    expect(selectMessages("conversation-1")(store.getState()).map((m) => m.id)).toEqual([
+      "parent-1",
+    ]);
+  });
+
+  it("moves the conversation up for a reply, without unread or a new last message", async () => {
+    const { store } = await renderWithOpenThread();
+
+    act(() => {
+      fakeSocket.trigger("message:created", reply("reply-2", "2024-01-01T00:00:02.000Z"));
+    });
+
+    const [preview] = selectConversationList(store.getState());
+    expect(preview.lastMessageAt).toBe("2024-01-01T00:00:02.000Z");
+    expect(preview.lastMessage?.id).toBe("parent-1");
+    expect(preview.unreadCount).toBe(0);
+    expect(store.getState().sublay.chat.totalUnreadCount).toBe(0);
+    expect(store.getState().sublay.chat.unreadConversationCount).toBe(0);
+  });
+
+  it("brings in a not-loaded conversation for a reply, without touching unread", async () => {
+    const { store, axiosPrivate } = await renderWithOpenThread();
+
+    axiosPrivate.mockResponse("get", makeConversationPreview({ id: "conversation-2", unreadCount: 0 }));
+    act(() => {
+      fakeSocket.trigger(
+        "message:created",
+        makeChatMessage({
+          id: "reply-x",
+          conversationId: "conversation-2",
+          parentMessageId: "parent-x",
+          createdAt: "2024-01-01T00:00:05.000Z",
+        }),
+      );
+    });
+
+    await waitFor(() =>
+      expect(selectConversationList(store.getState()).some((c) => c.id === "conversation-2")).toBe(true),
+    );
+    expect(store.getState().sublay.chat.totalUnreadCount).toBe(0);
+    // Only the preview fetch: no unread-summary refetch is scheduled for a reply.
+    await new Promise((r) => setTimeout(r, 1000));
+    expect(axiosPrivate.calls("get").filter((c) => c.url.includes("unread"))).toHaveLength(1);
+  });
+
+  it("applies edits, deletions, removals and reactions to a reply in the open thread", async () => {
+    const { store } = await renderWithOpenThread();
+    const replyOne = () => selectThreadReplies("parent-1")(store.getState())[0];
+
+    act(() => {
+      fakeSocket.trigger("message:updated", {
+        messageId: "reply-1",
+        conversationId: "conversation-1",
+        content: "edited",
+        gif: null,
+        mentions: [],
+        metadata: {},
+        editedAt: "2024-01-02T00:00:00.000Z",
+      });
+    });
+    expect(replyOne().content).toBe("edited");
+
+    act(() => {
+      fakeSocket.trigger("message:reaction", {
+        messageId: "reply-1",
+        conversationId: "conversation-1",
+        emoji: "👍",
+        userId: "user-2",
+        delta: 1,
+        reactionCounts: { "👍": 1 },
+      });
+    });
+    expect(replyOne().reactionCounts).toEqual({ "👍": 1 });
+
+    act(() => {
+      fakeSocket.trigger("message:removed", {
+        messageId: "reply-1",
+        conversationId: "conversation-1",
+      });
+    });
+    expect(replyOne().moderationStatus).toBe("removed");
+
+    act(() => {
+      fakeSocket.trigger("message:deleted", {
+        messageId: "reply-1",
+        conversationId: "conversation-1",
+        userDeletedAt: "2024-01-03T00:00:00.000Z",
+      });
+    });
+    expect(replyOne().userDeletedAt).toBe("2024-01-03T00:00:00.000Z");
+    expect(replyOne().content).toBeNull();
   });
 });

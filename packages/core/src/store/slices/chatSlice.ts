@@ -29,7 +29,14 @@ interface MessagesBucket {
 interface ThreadBucket {
   items: ChatMessage[];
   loading: boolean;
+  // Whether the server has newer replies than the fetched run (threads load
+  // oldest first, so "more" is at the newest end)
   hasMore: boolean;
+  // createdAt of the newest reply in the unbroken run fetched from the start of
+  // the thread — the `after` cursor for loading more and for reconnect
+  // catch-up. A live reply that lands while `hasMore` is true sits beyond a gap
+  // and doesn't advance it; one that lands at the end does.
+  cursor: string | null;
 }
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -114,28 +121,28 @@ function refreshCursors(bucket: MessagesBucket): void {
 /**
  * Every loaded copy of one message, across both buckets it can live in.
  *
- * The main stream (`state.messages[conversationId]`) and thread buckets
- * (`state.threads[parentMessageId]`) are populated from disjoint fetches: the
- * server's message list filters `parentMessageId: null`, so a thread reply is
- * normally reachable ONLY through its thread bucket. A reply that arrived live
- * via `message:created` is also appended to the conversation bucket though, so
- * the two copies can coexist and both must be patched — hence a list rather
- * than a first-match.
+ * The main stream (`state.messages[conversationId]`) holds top-level messages
+ * only, matching the server's message list (which filters
+ * `parentMessageId: null`); thread replies live only in their thread bucket
+ * (`state.threads[parentMessageId]`), so a message is loaded in at most one
+ * place. It returns a list so callers patch whatever is loaded without caring
+ * which bucket holds it.
  *
  * `threads` is keyed by parentMessageId, which message-scoped socket payloads
  * don't carry, so the thread side is a scan. It is bounded by the number of
- * open threads (in practice zero or one).
+ * threads opened this session (buckets are kept after a thread closes). `conversationId` is optional so a
+ * payload from a server that omits it still reaches thread replies.
  */
 function findLoadedMessages(
   state: ChatState,
-  conversationId: string,
+  conversationId: string | undefined,
   messageId: string
 ): ChatMessage[] {
   const found: ChatMessage[] = [];
 
-  const inConversation = state.messages[conversationId]?.items.find(
-    (m) => m.id === messageId
-  );
+  const inConversation = conversationId
+    ? state.messages[conversationId]?.items.find((m) => m.id === messageId)
+    : undefined;
   if (inConversation) found.push(inConversation);
 
   for (const bucket of Object.values(state.threads)) {
@@ -144,6 +151,75 @@ function findLoadedMessages(
   }
 
   return found;
+}
+
+/**
+ * Add or update a message in an ASC-ordered list.
+ *
+ * Deduplication order:
+ *  1. Match by real `id` → merge into the loaded copy (handles socket events after REST)
+ *  2. Match by `localId` → merge into the optimistic placeholder
+ *  3. Otherwise insert, maintaining chronological ASC order
+ *
+ * Merging rather than replacing matters because only the list and single-
+ * message reads compute `reactionCounts` / `userReactions`: the send and edit
+ * responses and the `message:created` payload don't carry them, so replacing
+ * would wipe a message's reactions (and break the next reaction update). A
+ * newly inserted message without them starts with none.
+ *
+ * `sendFailed` is client-only state, so a merge would keep it: a server copy
+ * (a real id) clears it, since the message was delivered after all.
+ */
+function upsertInto(items: ChatMessage[], message: ChatMessage): void {
+  const merge = (existing: ChatMessage): ChatMessage => {
+    const merged = { ...existing, ...message };
+    if (!message.id.startsWith("temp-")) delete merged.sendFailed;
+    return merged;
+  };
+
+  const byIdIndex = items.findIndex((m) => m.id === message.id);
+  if (byIdIndex !== -1) {
+    items[byIdIndex] = merge(items[byIdIndex]);
+    return;
+  }
+
+  if (message.localId) {
+    const byClientIndex = items.findIndex((m) => m.localId === message.localId);
+    if (byClientIndex !== -1) {
+      items[byClientIndex] = merge(items[byClientIndex]);
+      return;
+    }
+  }
+
+  const inserted: ChatMessage = {
+    ...message,
+    reactionCounts: message.reactionCounts ?? {},
+    userReactions: message.userReactions ?? [],
+  };
+  const insertAt = items.findIndex(
+    (m) =>
+      new Date(m.createdAt).getTime() > new Date(message.createdAt).getTime()
+  );
+  if (insertAt === -1) {
+    items.push(inserted);
+  } else {
+    items.splice(insertAt, 0, inserted);
+  }
+}
+
+/** The later of a thread cursor and the newest real reply in `messages`. */
+function advanceCursor(
+  cursor: string | null,
+  messages: ChatMessage[]
+): string | null {
+  let newest = cursor;
+  for (const m of messages) {
+    if (m.id.startsWith("temp-")) continue;
+    if (!newest || new Date(m.createdAt).getTime() > new Date(newest).getTime()) {
+      newest = m.createdAt;
+    }
+  }
+  return newest;
 }
 
 // ─── Slice ───────────────────────────────────────────────────────────────────
@@ -393,53 +469,35 @@ const chatSlice = createSlice({
     },
 
     /**
-     * Add or update a message in its conversation bucket.
-     *
-     * Deduplication order:
-     *  1. Match by real `id` → update in-place (handles socket events after REST)
-     *  2. Match by `localId` → replace optimistic placeholder with confirmed message
-     *  3. Otherwise insert, maintaining chronological ASC order
+     * Add or update a message where it belongs: a top-level message in its
+     * conversation bucket, a thread reply in its thread bucket. A reply whose
+     * thread isn't loaded is dropped — the main stream never holds replies,
+     * and the parent's `threadReplyCount` arrives on its own event. See
+     * `upsertInto` for deduplication.
      */
     upsertMessage(state, action: PayloadAction<ChatMessage>) {
       const message = action.payload;
-      const { conversationId } = message;
+      const { conversationId, parentMessageId } = message;
+
+      if (parentMessageId) {
+        const thread = state.threads[parentMessageId];
+        if (!thread) return;
+        upsertInto(thread.items, message);
+        // A reply at the end of a fully fetched thread extends the run — but
+        // only while the socket is up. With it down, others' replies may be
+        // missing before this one (your own send still confirms over REST),
+        // and reconnect catch-up has to page from before them.
+        if (!thread.hasMore && state.socketConnected) {
+          thread.cursor = advanceCursor(thread.cursor, [message]);
+        }
+        return;
+      }
 
       if (!state.messages[conversationId]) {
         state.messages[conversationId] = emptyBucket();
       }
       const bucket = state.messages[conversationId];
-      const items = bucket.items;
-
-      // 1. Match by real id
-      const byIdIndex = items.findIndex((m) => m.id === message.id);
-      if (byIdIndex !== -1) {
-        items[byIdIndex] = message;
-        refreshCursors(bucket);
-        return;
-      }
-
-      // 2. Match by localId (replace optimistic placeholder)
-      if (message.localId) {
-        const byClientIndex = items.findIndex(
-          (m) => m.localId === message.localId
-        );
-        if (byClientIndex !== -1) {
-          items[byClientIndex] = message;
-          refreshCursors(bucket);
-          return;
-        }
-      }
-
-      // 3. New message — insert at the correct chronological position
-      const insertAt = items.findIndex(
-        (m) =>
-          new Date(m.createdAt).getTime() > new Date(message.createdAt).getTime()
-      );
-      if (insertAt === -1) {
-        items.push(message);
-      } else {
-        items.splice(insertAt, 0, message);
-      }
+      upsertInto(bucket.items, message);
       refreshCursors(bucket);
     },
 
@@ -450,7 +508,12 @@ const chatSlice = createSlice({
      */
     addOptimisticMessage(state, action: PayloadAction<ChatMessage>) {
       const message = action.payload;
-      const { conversationId } = message;
+      const { conversationId, parentMessageId } = message;
+
+      if (parentMessageId) {
+        state.threads[parentMessageId]?.items.push(message);
+        return;
+      }
 
       if (!state.messages[conversationId]) {
         state.messages[conversationId] = emptyBucket();
@@ -469,12 +532,16 @@ const chatSlice = createSlice({
       action: PayloadAction<{ conversationId: string; localId: string }>
     ) {
       const { conversationId, localId } = action.payload;
-      const bucket = state.messages[conversationId];
-      if (!bucket) return;
-
-      const message = bucket.items.find((m) => m.localId === localId);
-      if (message) {
-        message.sendFailed = true;
+      const buckets = [
+        state.messages[conversationId],
+        ...Object.values(state.threads),
+      ];
+      for (const bucket of buckets) {
+        const message = bucket?.items.find((m) => m.localId === localId);
+        if (message) {
+          message.sendFailed = true;
+          return;
+        }
       }
     },
 
@@ -487,11 +554,7 @@ const chatSlice = createSlice({
       action: PayloadAction<{ conversationId: string; messageId: string }>
     ) {
       const { conversationId, messageId } = action.payload;
-      const bucket = state.messages[conversationId];
-      if (!bucket) return;
-
-      const message = bucket.items.find((m) => m.id === messageId);
-      if (message) {
+      for (const message of findLoadedMessages(state, conversationId, messageId)) {
         message.userDeletedAt = new Date().toISOString();
         message.content = null;
         message.gif = null;
@@ -502,14 +565,16 @@ const chatSlice = createSlice({
     },
 
     /**
-     * Update the reactionCounts map on a message. If userId matches the current
-     * user, add or remove the emoji from userReactions accordingly.
-     * Dispatched by ChatProvider on `message:reaction` socket events.
+     * Update the reactionCounts map on every loaded copy of a message (main
+     * stream and thread replies, see `findLoadedMessages`). If userId matches
+     * the current user, add or remove the emoji from userReactions accordingly.
+     * Dispatched by ChatProvider on `message:reaction` socket events and by
+     * `useToggleReaction` optimistically.
      */
     updateReactions(
       state,
       action: PayloadAction<{
-        conversationId: string;
+        conversationId?: string;
         messageId: string;
         reactionCounts: Record<string, number>;
         userId: string;
@@ -528,25 +593,41 @@ const chatSlice = createSlice({
         currentUserId,
       } = action.payload;
 
-      const bucket = state.messages[conversationId];
-      if (!bucket) return;
+      for (const message of findLoadedMessages(state, conversationId, messageId)) {
+        message.reactionCounts = reactionCounts;
 
-      const message = bucket.items.find((m) => m.id === messageId);
-      if (!message) return;
-
-      message.reactionCounts = reactionCounts;
-
-      // Keep userReactions in sync for the current user only
-      if (userId === currentUserId) {
-        if (delta === 1) {
-          if (!message.userReactions.includes(emoji)) {
-            message.userReactions.push(emoji);
+        // Keep userReactions in sync for the current user only
+        if (userId === currentUserId) {
+          if (delta === 1) {
+            if (!message.userReactions.includes(emoji)) {
+              message.userReactions.push(emoji);
+            }
+          } else {
+            message.userReactions = message.userReactions.filter(
+              (e) => e !== emoji
+            );
           }
-        } else {
-          message.userReactions = message.userReactions.filter(
-            (e) => e !== emoji
-          );
         }
+      }
+    },
+
+    /**
+     * Merge fields into every loaded copy of a message (see
+     * `findLoadedMessages`). Dispatched by ChatProvider for the message-scoped
+     * socket events (edit, delete, removal, reply count), so they reach thread
+     * replies as well as the main stream. No-ops when the message isn't loaded.
+     */
+    patchMessage(
+      state,
+      action: PayloadAction<{
+        conversationId?: string;
+        messageId: string;
+        patch: Partial<ChatMessage>;
+      }>
+    ) {
+      const { conversationId, messageId, patch } = action.payload;
+      for (const message of findLoadedMessages(state, conversationId, messageId)) {
+        Object.assign(message, patch);
       }
     },
 
@@ -556,7 +637,7 @@ const chatSlice = createSlice({
      * Dispatched by ChatProvider on `message:grant` socket events. Silently
      * no-ops when the message isn't loaded anywhere.
      *
-     * Unlike `updateReactions`, this looks in the thread buckets as well as the
+     * Like `updateReactions`, this looks in the thread buckets as well as the
      * conversation bucket (see `findLoadedMessages`). Thread replies are a
      * grants-rendering surface — `useLiveChatMessages` passes `includeGrants`
      * on the thread fetch path too — so a reducer that only reached
@@ -629,6 +710,55 @@ const chatSlice = createSlice({
         items: messages,
         loading: false,
         hasMore,
+        cursor: advanceCursor(null, messages),
+      };
+    },
+
+    /**
+     * Merge a fetched page of thread replies (oldest first) into the thread:
+     * upserts each reply, advances the cursor past the page and records
+     * whether the server has more. Merging rather than replacing keeps any
+     * live reply that landed while the page was in flight.
+     */
+    mergeThreadReplies(
+      state,
+      action: PayloadAction<{
+        parentMessageId: string;
+        messages: ChatMessage[];
+        hasMore: boolean;
+      }>
+    ) {
+      const { parentMessageId, messages, hasMore } = action.payload;
+      if (!state.threads[parentMessageId]) {
+        state.threads[parentMessageId] = {
+          items: [],
+          loading: false,
+          hasMore,
+          cursor: null,
+        };
+      }
+      const thread = state.threads[parentMessageId];
+      for (const message of messages) upsertInto(thread.items, message);
+      thread.cursor = advanceCursor(thread.cursor, messages);
+      thread.hasMore = hasMore;
+    },
+
+    /**
+     * Start loading a thread from its first reply (the fetch on open): marks it
+     * loading and forgets the fetched run. A bucket kept from an earlier open
+     * may hold a cursor that moved past replies missed while the thread was
+     * closed; resetting before the fetch, not when it lands, keeps a reconnect
+     * catch-up or a failed load from resuming after them. Loaded replies stay
+     * on screen; the first page and `loadMore` refresh them.
+     */
+    startThreadLoad(state, action: PayloadAction<{ parentMessageId: string }>) {
+      const { parentMessageId } = action.payload;
+      const thread = state.threads[parentMessageId];
+      state.threads[parentMessageId] = {
+        items: thread?.items ?? [],
+        loading: true,
+        hasMore: true,
+        cursor: null,
       };
     },
 
@@ -642,6 +772,7 @@ const chatSlice = createSlice({
           items: [],
           loading,
           hasMore: true,
+          cursor: null,
         };
       } else {
         state.threads[parentMessageId].loading = loading;
@@ -695,8 +826,11 @@ export const {
   failOptimisticMessage,
   removeMessage,
   updateReactions,
+  patchMessage,
   updateGrants,
   setThreadReplies,
+  mergeThreadReplies,
+  startThreadLoad,
   setThreadLoading,
   setTypingUsers,
   setSocketConnected,
@@ -770,6 +904,11 @@ export const selectThreadHasMore =
   (parentMessageId: string) =>
   (state: { sublay: SublayState }) =>
     state.sublay.chat.threads[parentMessageId]?.hasMore ?? true;
+
+export const selectThreadCursor =
+  (parentMessageId: string) =>
+  (state: { sublay: SublayState }) =>
+    state.sublay.chat.threads[parentMessageId]?.cursor ?? null;
 
 export const selectTypingUsers =
   (conversationId: string) =>

@@ -233,7 +233,11 @@ export type {
 export type { Rule } from "./interfaces/Rule";
 export type { Follow } from "./interfaces/Follow";
 export type { Connection, ConnectionRequestResponse, EstablishedConnection, PendingConnection, ConnectionStatusResponse } from "./interfaces/Connection";
-export type { Conversation, ConversationPreview } from "./interfaces/Conversation";
+export type {
+  Conversation,
+  ConversationPreview,
+  ConversationType,
+} from "./interfaces/Conversation";
 export type { ConversationMember, ConversationMemberRole } from "./interfaces/ConversationMember";
 export type {
   ChatMessage,

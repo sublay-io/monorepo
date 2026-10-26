@@ -18,14 +18,22 @@ describe("js-sdk chat conversations — request shaping", () => {
   it("listConversations gets /chat/conversations with the full query (incl. cursor params) as params", async () => {
     const { client, projectInstance } = makeClient();
     const query = {
-      types: "direct,group",
+      types: ["direct", "group"] as ("direct" | "group")[],
       cursor: "2026-06-01T00:00:00Z",
       cursorCreatedAt: "2026-05-30T00:00:00Z",
       limit: 20,
     };
     await listConversations(client, query);
     expect(projectInstance.get).toHaveBeenCalledWith("/chat/conversations", {
-      params: query,
+      params: { ...query, types: "direct,group" },
+    });
+  });
+
+  it("listConversations sends a single `types` value as-is", async () => {
+    const { client, projectInstance } = makeClient();
+    await listConversations(client, { types: "space" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/chat/conversations", {
+      params: { types: "space" },
     });
   });
 

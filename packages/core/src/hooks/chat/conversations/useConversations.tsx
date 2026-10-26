@@ -9,13 +9,16 @@ import {
   setConversationListLoading,
   setConversationListHasMore,
 } from "../../../store/slices/chatSlice";
-import { ConversationPreview } from "../../../interfaces/models/Conversation";
+import {
+  ConversationPreview,
+  ConversationType,
+} from "../../../interfaces/models/Conversation";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
 
 export interface UseConversationsProps {
-  types?: ("direct" | "group" | "space")[];
+  types?: ConversationType[];
 }
 
 export interface UseConversationsValues {

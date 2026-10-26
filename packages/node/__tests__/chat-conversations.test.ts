@@ -23,6 +23,14 @@ describe("node-sdk chat (conversations) — request shaping", () => {
     });
   });
 
+  it("listConversations joins a `types` array into a comma string", async () => {
+    const { client, projectInstance } = makeClient();
+    await listConversations(client, { actingUserId: "u1", types: ["direct", "space"] });
+    expect(projectInstance.get).toHaveBeenCalledWith("/chat/conversations", {
+      params: { actingUserId: "u1", types: "direct,space" },
+    });
+  });
+
   it("createDirectConversation posts the target userId + actingUserId to /chat/conversations/direct", async () => {
     const { client, projectInstance } = makeClient();
     await createDirectConversation(client, { userId: "target1", actingUserId: "acting1" });

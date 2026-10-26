@@ -116,7 +116,7 @@ Returns a paginated list of entities for the project. Supports rich filtering by
   ```json
   { "latitude": "40.7128", "longitude": "-74.0060", "radius": "5000" }
   ```
-  `radius` is in meters.
+  `radius` is in meters: a number greater than `0` and at most `20000000` (20,000 km, about half the Earth's circumference, which reaches any point). A value outside that range, or one that isn't a finite number (`Infinity`, `1e999`), returns `400 entity/invalid-query`.
 </ParamField>
 
 <ParamField query="metadataFilters" type="object">
@@ -135,6 +135,8 @@ Returns a paginated list of entities for the project. Supports rich filtering by
   - `doesNotInclude` — none of these key/value pairs may match
   - `exists` — keys that must be present
   - `doesNotExist` — keys that must be absent
+
+  Keys and values can't contain a NUL character (`\u0000`), which metadata can never hold; one anywhere in `metadataFilters` returns `400 entity/invalid-query`.
 </ParamField>
 
 ### Optional Associations
@@ -214,10 +216,16 @@ Each item in `data` is an [Entity](/v8/data-models/entity) object. File URLs are
     ```
   </Accordion>
   <Accordion title="Invalid Query — 400">
-    Returned when `page` or `limit` is below `1` or not a whole number.
+    Returned when `page` or `limit` is below `1` or not a whole number, when `locationFilters.radius` isn't a number greater than `0` and at most `20000000`, or when `metadataFilters` contains a NUL character. `error` starts with the field name.
 
     ```json
     { "error": "page: Page must be a positive integer", "code": "entity/invalid-query" }
+    ```
+    ```json
+    { "error": "locationFilters.radius: Radius must be a number greater than 0 and at most 20000000 (meters)", "code": "entity/invalid-query" }
+    ```
+    ```json
+    { "error": "metadataFilters: Metadata filter keys and values can't contain a NUL character (\\u0000)", "code": "entity/invalid-query" }
     ```
   </Accordion>
   <Accordion title="Invalid include — 400">

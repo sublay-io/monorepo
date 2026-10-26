@@ -133,9 +133,11 @@ Filters to entities within a geographic radius.
 interface LocationFilters {
   latitude: number;
   longitude: number;
-  radius: number;  // in meters
+  radius: number;  // in meters, greater than 0 and at most 20,000,000
 }
 ```
+
+A `radius` outside that range, or one that isn't a finite number, is rejected with `400 entity/invalid-query`. 20,000 km is about half the Earth's circumference, so the largest radius already reaches any point.
 
 ```tsx
 fetchEntities(
@@ -165,6 +167,8 @@ interface MetadataFilters {
   doesNotExist?: string[];                   // These metadata keys must not exist
 }
 ```
+
+Keys and values can't contain a NUL character (`\u0000`), which metadata can never hold. A filter with one anywhere is rejected with `400 entity/invalid-query`.
 
 ```tsx
 // Only "tutorial" category entities

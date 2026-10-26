@@ -61,7 +61,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 </ParamField>
 
 <ParamField query="locationFilters" type="object">
-  Proximity filter `{ latitude, longitude, radius }` (radius in meters). Uses `ST_DWithin`.
+  Proximity filter `{ latitude, longitude, radius }`. Uses `ST_DWithin`. `radius` is in meters: a number greater than `0` and at most `20000000` (20,000 km, about half the Earth's circumference, which reaches any point). A value outside that range, or one that isn't a finite number (`Infinity`, `1e999`), returns `400 event/invalid-query`.
 </ParamField>
 
 <ParamField query="titleFilters" type="object">
@@ -165,6 +165,10 @@ Returns a paginated response: `{ data: Event[], pagination: { page, pageSize, to
     And for an unknown `include` value:
     ```json
     { "error": "include: Unknown include `rsvps`. Allowed: user, space, files, userRsvp.", "code": "event/invalid-query" }
+    ```
+    And for a `locationFilters.radius` that isn't a number greater than `0` and at most `20000000`:
+    ```json
+    { "error": "locationFilters.radius: Radius must be a number greater than 0 and at most 20000000 (meters)", "code": "event/invalid-query" }
     ```
   </Accordion>
 </AccordionGroup>

@@ -140,6 +140,52 @@ describe("useFetchManyWorkspacesWrapper", () => {
     expect(axiosPrivate.calls("get")).toHaveLength(1);
   });
 
+  it("sends parentWorkspaceId on every page, and refetches from page 1 when it changes", async () => {
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: { parentWorkspaceId: string }) =>
+        useFetchManyWorkspacesWrapper({ limit: 10, parentWorkspaceId: props.parentWorkspaceId }),
+      {
+        initialProps: { parentWorkspaceId: "none" },
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeWorkspace({ id: "w1" })], true)),
+      }
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    axiosPrivate.mockResponse("get", makePage([makeWorkspace({ id: "w2" })], false));
+    act(() => {
+      result.current.loadMore();
+    });
+    await waitFor(() => expect(result.current.hasMore).toBe(false));
+
+    axiosPrivate.mockResponse("get", makePage([makeWorkspace({ id: "w3" })], false));
+    rerender({ parentWorkspaceId: "w-parent" });
+    await waitFor(() =>
+      expect(result.current.workspaces.map((w) => w.id)).toEqual(["w3"])
+    );
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(3);
+    expect(calls[0].config?.params).toMatchObject({ page: 1, parentWorkspaceId: "none" });
+    expect(calls[1].config?.params).toMatchObject({ page: 2, parentWorkspaceId: "none" });
+    expect(calls[2].config?.params).toMatchObject({ page: 1, parentWorkspaceId: "w-parent" });
+  });
+
+  it("leaves parentWorkspaceId out by default", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useFetchManyWorkspacesWrapper({}),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([], false)),
+      }
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    const [call] = axiosPrivate.calls("get");
+    expect(call.config?.params).not.toHaveProperty("parentWorkspaceId");
+  });
+
   it("stops loading without throwing when the request fails", async () => {
     const { result } = renderHookWithAxios(
       () => useFetchManyWorkspacesWrapper({}),

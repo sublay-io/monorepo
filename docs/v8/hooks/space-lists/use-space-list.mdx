@@ -62,7 +62,7 @@ function SpaceDirectory() {
       sortDir?: "asc" | "desc" | null; // null: the sort's natural direction
       query?: string | null; // a blank value is left out of the request
       searchFields?: "slug" | "name" | "description" | null; // null: slug, name or description
-      parentSpaceId?: string | "none" | null; // "none" (the default): top-level spaces only
+      parentSpaceId?: string | "none" | "any" | null; // "none" (the default; null resets to it): top-level only; "any": every level
     },
     config?: { limit?: number },
     options?: { fetchImmediately?: boolean; resetUnspecified?: boolean; clearImmediately?: boolean }
@@ -124,6 +124,6 @@ function SpaceDirectory() {
   The field the current search term is matched against. `null` matches the slug, the name or the description.
 </ResponseField>
 
-<ResponseField name="parentSpaceId" type='string | "none"'>
-  The parent filter in use: a space id (its public child spaces), or `"none"` (top-level spaces only), the default. Every page, including `loadMore` and a re-sort, is fetched with it.
+<ResponseField name="parentSpaceId" type='string | "none" | "any"'>
+  The parent filter in use: a space id (its public direct sub-spaces), `"none"` (top-level spaces only, the default) or `"any"` (spaces at every level). Every page, including `loadMore` and a re-sort, is fetched with it.
 </ResponseField>

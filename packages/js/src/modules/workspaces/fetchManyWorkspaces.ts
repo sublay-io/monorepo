@@ -11,6 +11,11 @@ export interface FetchManyWorkspacesProps {
   // switcher UI does not need a follow-up read per workspace. Omit it and the
   // field is absent from every row. An unknown flag is a 400.
   include?: WorkspaceIncludeParam;
+  // Narrows the list by where each workspace sits in the tree: "none" returns
+  // top-level workspaces only; a workspace id returns the user's workspaces
+  // directly under that workspace; "any" returns every level. Left out: every
+  // level.
+  parentWorkspaceId?: string | "none" | "any";
 }
 
 /**

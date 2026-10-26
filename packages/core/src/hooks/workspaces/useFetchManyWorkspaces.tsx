@@ -17,6 +17,13 @@ export interface FetchManyWorkspacesParams {
    * Omitted, the field is absent from every row.
    */
   include?: WorkspaceIncludeParam;
+  /**
+   * Narrows the list by where each workspace sits in the tree: `"none"`
+   * returns the caller's top-level workspaces only; a workspace id returns
+   * their workspaces directly under that workspace; `"any"` returns every
+   * level. Left out or `null`: every level (`null` is never sent).
+   */
+  parentWorkspaceId?: string | "none" | "any" | null;
 }
 
 /**
@@ -46,6 +53,9 @@ function useFetchManyWorkspaces(): (
         queryParams.include = Array.isArray(params.include)
           ? params.include.join(",")
           : params.include;
+      // `null` means not set: left out.
+      if (params?.parentWorkspaceId != null)
+        queryParams.parentWorkspaceId = params.parentWorkspaceId;
 
       const response = await axios.get<PaginatedResponse<Workspace>>(
         `/${projectId}/workspaces`,

@@ -78,6 +78,19 @@ describe("node-sdk workspaces (lifecycle + ownership) — request shaping", () =
     });
   });
 
+  it("fetchManyWorkspaces forwards parentWorkspaceId (\"none\", \"any\" or an id) as given, and leaves it out by default", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchManyWorkspaces(client, { actingUserId: "u1", parentWorkspaceId: "none" });
+    await fetchManyWorkspaces(client, { actingUserId: "u1", parentWorkspaceId: "any" });
+    await fetchManyWorkspaces(client, { actingUserId: "u1", parentWorkspaceId: "w-parent" });
+    await fetchManyWorkspaces(client, { actingUserId: "u1" });
+    const params = projectInstance.get.mock.calls.map((c: any[]) => c[1].params);
+    expect(params[0]).toMatchObject({ actingUserId: "u1", parentWorkspaceId: "none" });
+    expect(params[1].parentWorkspaceId).toBe("any");
+    expect(params[2].parentWorkspaceId).toBe("w-parent");
+    expect(params[3].parentWorkspaceId).toBeUndefined();
+  });
+
   it("updateWorkspace strips workspaceId into the path and patches the rest", async () => {
     const { client, projectInstance } = makeClient();
     await updateWorkspace(client, {

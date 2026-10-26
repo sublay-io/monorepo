@@ -74,12 +74,14 @@ Lists the bearer-token user's direct-membership + owned workspaces (paginated). 
 const { data, pagination } = await sublay.workspaces.fetchManyWorkspaces({
   page: 1,
   limit: 20,
+  parentWorkspaceId: "none", // top-level workspaces only
   include: "memberCount", // each row gains a `memberCount`
 });
 ```
 
 <ParamField body="page" type="number" />
 <ParamField body="limit" type="number" />
+<ParamField body="parentWorkspaceId" type='string | "none" | "any"'>Narrows the list by where each workspace sits in the tree. `"none"`: top-level workspaces only. A workspace id: the user's workspaces directly under that workspace; an id that matches no workspace returns an empty page, not a 404. `"any"` or left out: workspaces at every level (the default).</ParamField>
 <ParamField body="include" type="WorkspaceIncludeParam">A single value or an array, sent as a query param. The only value is `"memberCount"`: it adds a `memberCount` to **every row** — the workspace's direct member count, resolved in one grouped query over the returned page rather than one request per row. Omit it and the field is absent from each row.</ParamField>
 
 ### updateWorkspace

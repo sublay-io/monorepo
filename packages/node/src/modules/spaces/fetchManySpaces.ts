@@ -10,10 +10,11 @@ export interface FetchManySpacesProps extends SpaceSearchParams {
   sortBy?: "createdAt" | "alphabetical" | "members";
   sortDir?: "asc" | "desc";
   /**
-   * A space id (its child spaces), or `"none"` for top-level spaces only.
-   * Left out: spaces at every level.
+   * Which level of the space tree to list. Left out or `"none"`: top-level
+   * spaces only (the default). A space id: that space's direct sub-spaces.
+   * `"any"`: spaces at every level.
    */
-  parentSpaceId?: string | "none";
+  parentSpaceId?: string | "none" | "any";
   nsfwFilter?: "include-all" | "exclude" | "only";
   include?: SpaceIncludeParam;
   /**

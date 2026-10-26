@@ -38,7 +38,8 @@ describe("useSpaceMentions", () => {
     await waitFor(() => expect(result.current.spaceMentionSuggestions).toEqual(suggestions));
 
     const [call] = axiosPrivate.calls("get");
-    expect(call.config?.params).toMatchObject({ query: "des", limit: 5 });
+    // Every level, so sub-spaces can be mentioned too.
+    expect(call.config?.params).toMatchObject({ query: "des", limit: 5, parentSpaceId: "any" });
 
     act(() => {
       result.current.handleSpaceMentionClick(suggestions[0]);

@@ -219,6 +219,29 @@ describe("useSpaceList", () => {
       expect(sent).toEqual(["p1", "p1", "none"]);
       expect(result.current.parentSpaceId).toBe("none");
     });
+
+    it("passes \"any\" through on every page", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s1" }], true));
+      const { result } = renderHookWithStore(() => useSpaceList({ listId: "feed" }), {
+        projectId: "test-project",
+      });
+
+      act(() =>
+        result.current.fetchSpaces({ parentSpaceId: "any" }, undefined, { fetchImmediately: true }),
+      );
+      await waitFor(() => expect(result.current.spaces).toHaveLength(1));
+      expect(result.current.parentSpaceId).toBe("any");
+
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s2" }], false));
+      await act(async () => {
+        await result.current.loadMore();
+      });
+      await waitFor(() => expect(result.current.spaces).toHaveLength(2));
+
+      const sent = fetchHandle.calls().map((c) => new URL(c.url).searchParams.get("parentSpaceId"));
+      expect(sent).toEqual(["any", "any"]);
+      expect(result.current.parentSpaceId).toBe("any");
+    });
   });
 
   describe("loadMore", () => {

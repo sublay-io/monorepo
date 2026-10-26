@@ -14,6 +14,12 @@ export interface UseFetchManyWorkspacesWrapperProps {
    * each accumulated workspace's DIRECT member count.
    */
   include?: WorkspaceIncludeParam;
+  /**
+   * `"none"`: top-level workspaces only; a workspace id: the caller's
+   * workspaces directly under it; `"any"`, `null` or left out: every level.
+   * Changing it refetches from page 1.
+   */
+  parentWorkspaceId?: string | "none" | "any" | null;
 }
 
 export interface UseFetchManyWorkspacesWrapperValues {
@@ -32,7 +38,7 @@ export interface UseFetchManyWorkspacesWrapperValues {
 function useFetchManyWorkspacesWrapper(
   props: UseFetchManyWorkspacesWrapperProps = {}
 ): UseFetchManyWorkspacesWrapperValues {
-  const { limit = 10, include } = props;
+  const { limit = 10, include, parentWorkspaceId = null } = props;
 
   // Normalized ONCE to the string the wire actually carries, and it is the
   // string — never `include` itself — that goes into the dep arrays below and
@@ -69,6 +75,7 @@ function useFetchManyWorkspacesWrapper(
         include: includeKey
           ? (includeKey.split(",") as WorkspaceInclude[])
           : undefined,
+        parentWorkspaceId,
       });
 
       if (response) {
@@ -83,7 +90,7 @@ function useFetchManyWorkspacesWrapper(
       loading.current = false;
       setLoadingState(false);
     }
-  }, [fetchManyWorkspaces, limit, includeKey]);
+  }, [fetchManyWorkspaces, limit, includeKey, parentWorkspaceId]);
 
   const loadMore = () => {
     if (loading.current || !hasMore.current) return;
@@ -105,6 +112,7 @@ function useFetchManyWorkspacesWrapper(
           include: includeKey
           ? (includeKey.split(",") as WorkspaceInclude[])
           : undefined,
+          parentWorkspaceId,
         });
 
         if (response) {
@@ -124,7 +132,7 @@ function useFetchManyWorkspacesWrapper(
     if (page > 1 && hasMore.current && !loading.current) {
       loadMoreWorkspaces();
     }
-  }, [page, fetchManyWorkspaces, limit, includeKey]);
+  }, [page, fetchManyWorkspaces, limit, includeKey, parentWorkspaceId]);
 
   return {
     workspaces,

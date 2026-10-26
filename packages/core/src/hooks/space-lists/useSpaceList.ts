@@ -63,8 +63,11 @@ export interface UseSpaceListValues {
   sortDir: SortDirection | null;
   query: string | null;
   searchFields: SpaceSearchFields | null;
-  /** The parent filter in use: a space id, or `"none"` (top-level, the default). */
-  parentSpaceId: string | "none";
+  /**
+   * The parent filter in use: a space id (its direct sub-spaces), `"none"`
+   * (top-level, the default) or `"any"` (every level).
+   */
+  parentSpaceId: string | "none" | "any";
 
   // Operations
   fetchSpaces: (

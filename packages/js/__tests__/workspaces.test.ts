@@ -139,6 +139,19 @@ describe("js-sdk workspaces — lifecycle request shaping", () => {
     });
   });
 
+  it("fetchManyWorkspaces forwards parentWorkspaceId (\"none\", \"any\" or an id) as given, and leaves it out by default", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchManyWorkspaces(client, { parentWorkspaceId: "none" });
+    await fetchManyWorkspaces(client, { parentWorkspaceId: "any" });
+    await fetchManyWorkspaces(client, { parentWorkspaceId: "w-parent", page: 2 });
+    await fetchManyWorkspaces(client, {});
+    const params = projectInstance.get.mock.calls.map((c: any[]) => c[1].params);
+    expect(params[0].parentWorkspaceId).toBe("none");
+    expect(params[1].parentWorkspaceId).toBe("any");
+    expect(params[2]).toMatchObject({ parentWorkspaceId: "w-parent", page: 2 });
+    expect(params[3].parentWorkspaceId).toBeUndefined();
+  });
+
   it("fetchManyWorkspaces works with no args (defaults to {})", async () => {
     const { client, projectInstance } = makeClient();
     await fetchManyWorkspaces(client);

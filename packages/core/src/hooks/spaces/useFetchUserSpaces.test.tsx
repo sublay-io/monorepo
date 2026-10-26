@@ -77,6 +77,34 @@ describe("useFetchUserSpaces", () => {
     expect(second.config?.params).not.toHaveProperty("searchFields");
   });
 
+  it("passes parentSpaceId through, sends \"none\" as given, and leaves null out", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchUserSpaces());
+
+    axiosPrivate.mockResponse("get", makeResponse());
+    axiosPrivate.mockResponse("get", makeResponse());
+    axiosPrivate.mockResponse("get", makeResponse());
+    axiosPrivate.mockResponse("get", makeResponse());
+
+    await act(async () => {
+      await result.current({ parentSpaceId: "space-1" });
+    });
+    await act(async () => {
+      await result.current({ parentSpaceId: "none" });
+    });
+    await act(async () => {
+      await result.current({ parentSpaceId: null });
+    });
+    await act(async () => {
+      await result.current({});
+    });
+
+    const [byId, none, nulled, omitted] = axiosPrivate.calls("get");
+    expect(byId.config?.params).toMatchObject({ parentSpaceId: "space-1" });
+    expect(none.config?.params).toMatchObject({ parentSpaceId: "none" });
+    expect(nulled.config?.params).not.toHaveProperty("parentSpaceId");
+    expect(omitted.config?.params).not.toHaveProperty("parentSpaceId");
+  });
+
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchUserSpaces());
 

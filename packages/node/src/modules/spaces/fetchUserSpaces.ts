@@ -19,6 +19,14 @@ export interface FetchUserSpacesProps extends SpaceSearchParams {
    * they were removed from.
    */
   status?: "active" | "pending" | "banned";
+  /**
+   * Narrows the list by where each space sits in the tree:
+   * `"none"` returns the user's memberships in top-level spaces only; a space
+   * id returns their memberships in that space's direct sub-spaces. Left out:
+   * memberships at every level. A membership in a sub-space whose parent the
+   * user isn't in is not top-level, so `"none"` leaves it out.
+   */
+  parentSpaceId?: string | "none";
 }
 
 export async function fetchUserSpaces(

@@ -99,6 +99,18 @@ describe("node-sdk spaces (lifecycle) — request shaping", () => {
     });
   });
 
+  it("fetchUserSpaces forwards parentSpaceId, a space id or \"none\" as given", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchUserSpaces(client, { actingUserId: "u1", parentSpaceId: "s1" });
+    await fetchUserSpaces(client, { actingUserId: "u1", parentSpaceId: "none" });
+    expect(projectInstance.get).toHaveBeenNthCalledWith(1, "/spaces/user-spaces", {
+      params: { actingUserId: "u1", parentSpaceId: "s1" },
+    });
+    expect(projectInstance.get).toHaveBeenNthCalledWith(2, "/spaces/user-spaces", {
+      params: { actingUserId: "u1", parentSpaceId: "none" },
+    });
+  });
+
   it("fetchSpaceBreadcrumb hits the breadcrumb route with no params", async () => {
     const { client, projectInstance } = makeClient();
     await fetchSpaceBreadcrumb(client, { spaceId: "s1" });

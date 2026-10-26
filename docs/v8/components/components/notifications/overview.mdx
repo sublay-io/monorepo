@@ -74,9 +74,22 @@ For a full notifications page, use the `useAppNotifications` hook from `@sublay/
 | `comment-mention` | @ | Mentioned in comment |
 | `entity-upvote` | Heart | Upvote on entity |
 | `comment-upvote` | Heart | Upvote on comment |
+| `entity-reaction` | Smile (or the reaction's own icon) | Reaction on entity |
+| `comment-reaction` | Smile (or the reaction's own icon) | Reaction on comment |
+| `entity-reaction-milestone-specific` | Trophy | Entity reached a milestone for one reaction |
+| `entity-reaction-milestone-total` | Trophy | Entity reached a total-reactions milestone |
+| `comment-reaction-milestone-specific` | Trophy | Comment reached a milestone for one reaction |
+| `comment-reaction-milestone-total` | Trophy | Comment reached a total-reactions milestone |
 | `new-follow` | UserPlus | New follower |
 | `connection-accepted` | UserPlus | Connection accepted |
 | `connection-request` | UserPlus | Connection request |
+| `space-membership-approved` | UserPlus | Space membership request approved |
+| `event-invite` | Calendar | Invited to an event |
+| `event-updated` | CalendarClock | An event you RSVP'd to changed time or location |
+| `event-cancelled` | CalendarX | An event you RSVP'd to was cancelled |
+| `reputation-grant` | Award | Received reputation |
+
+A type the installed component doesn't know shows the `system` icon.
 
 Icons are from **lucide-react**.
 

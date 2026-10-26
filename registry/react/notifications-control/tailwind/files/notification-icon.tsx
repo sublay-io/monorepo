@@ -19,11 +19,11 @@
  * ```
  *
  * COLORS USED:
- * - Blue (comments): bg-blue-100 dark:bg-blue-500/15, text-blue-600 dark:text-blue-400
+ * - Blue (comments, events): bg-blue-100 dark:bg-blue-500/15, text-blue-600 dark:text-blue-400
  * - Purple (mentions): bg-purple-100 dark:bg-purple-500/15, text-purple-600 dark:text-purple-400
- * - Red (upvotes): bg-red-100 dark:bg-red-500/15, text-red-600 dark:text-red-400
+ * - Red (upvotes, cancelled events): bg-red-100 dark:bg-red-500/15, text-red-600 dark:text-red-400
  * - Green (follows): bg-green-100 dark:bg-green-500/15, text-green-600 dark:text-green-400
- * - Amber (milestones): bg-amber-100 dark:bg-amber-500/15, text-amber-600 dark:text-amber-400
+ * - Amber (milestones, reputation): bg-amber-100 dark:bg-amber-500/15, text-amber-600 dark:text-amber-400
  */
 import {
   MessageCircle,
@@ -41,6 +41,10 @@ import {
   Laugh,
   ThumbsUp,
   ThumbsDown,
+  Calendar,
+  CalendarClock,
+  CalendarX,
+  Award,
 } from "lucide-react";
 import { AppNotification } from "@sublay/react-js";
 import { cn } from "~shared/react/cn";
@@ -160,11 +164,33 @@ const getIconConfig = (): Record<
     colorClass: "text-green-600 dark:text-green-400",
     bgClass: "bg-green-100 dark:bg-green-500/15",
   },
+  "event-invite": {
+    Icon: Calendar,
+    colorClass: "text-blue-600 dark:text-blue-400",
+    bgClass: "bg-blue-100 dark:bg-blue-500/15",
+  },
+  "event-updated": {
+    Icon: CalendarClock,
+    colorClass: "text-blue-600 dark:text-blue-400",
+    bgClass: "bg-blue-100 dark:bg-blue-500/15",
+  },
+  "event-cancelled": {
+    Icon: CalendarX,
+    colorClass: "text-red-600 dark:text-red-400",
+    bgClass: "bg-red-100 dark:bg-red-500/15",
+  },
+  "reputation-grant": {
+    Icon: Award,
+    colorClass: "text-amber-600 dark:text-amber-400",
+    bgClass: "bg-amber-100 dark:bg-amber-500/15",
+  },
 });
 
 function NotificationIcon({ type, reactionType, className }: NotificationIconProps) {
   const iconConfig = getIconConfig();
-  const config = iconConfig[type];
+  // A type added on the server after this component was installed falls back
+  // to the system icon rather than crashing.
+  const config = iconConfig[type] ?? iconConfig.system;
   const { colorClass, bgClass } = config;
 
   // For reaction types, use reaction-specific icon

@@ -238,6 +238,49 @@ Triggered when a space moderator approves the user's pending membership request.
 | `spaceSlug` | `string \| null \| undefined` | URL slug of the space. |
 | `spaceAvatar` | `string \| null \| undefined` | Avatar URL of the space. |
 
+### `event-invite`
+
+Triggered when someone invites the user to an event.
+
+**Action**: `"open-event"`
+
+| Metadata Field | Type | Description |
+|----------------|------|-------------|
+| `eventId` | `string` | ID of the [event](/v8/data-models/event). |
+| `eventShortId` | `string \| undefined` | Short ID for sharing links. |
+| `eventTitle` | `string \| null \| undefined` | Event title. |
+| `eventStartTime` | `string \| null \| undefined` | When the event starts (UTC ISO timestamp). |
+| `spaceId` | `string \| null \| undefined` | The space the event is in, if any. |
+| `spaceShortId` | `string \| null \| undefined` | Short ID of that space. |
+| `spaceSlug` | `string \| null \| undefined` | URL slug of that space. |
+| `initiatorId` | `string` | ID of the user who sent the invite. |
+| `initiatorName` | `string \| null \| undefined` | Display name. |
+| `initiatorUsername` | `string \| null \| undefined` | Username. |
+| `initiatorForeignId` | `string \| null \| undefined` | Your system's ID for the inviter. |
+| `initiatorAvatar` | `string \| null \| undefined` | Avatar URL. |
+
+### `event-updated`
+
+Triggered for every user who RSVP'd `going` or `maybe` when an event's time or location changes. Other edits don't notify.
+
+**Action**: `"open-event"`
+
+The same metadata fields as `event-invite`, without `eventStartTime`, plus:
+
+| Metadata Field | Type | Description |
+|----------------|------|-------------|
+| `changedFields` | `("time" \| "location")[]` | What changed: the time, the location, or both. |
+
+The `initiator*` fields describe the user who edited the event.
+
+### `event-cancelled`
+
+Triggered for every user who RSVP'd `going` or `maybe` when an event is cancelled.
+
+**Action**: `"open-event"`
+
+The same metadata fields as `event-invite`, without `eventStartTime`. The `initiator*` fields describe the user who cancelled the event.
+
 ### `reputation-grant`
 
 Triggered when a user is granted reputation — by another user, or by the app. **Only positive grants notify**; a negative grant (an app deduction) is silent.

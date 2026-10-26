@@ -136,8 +136,13 @@ interface UnifiedAppNotification {
   isRead: boolean;
   createdAt: string;
   type: "system" | "entity-comment" | "comment-reply" | "entity-mention" |
-        "comment-mention" | "entity-upvote" | "comment-upvote" | "new-follow" |
-        "connection-accepted" | "connection-request";
+        "comment-mention" | "entity-upvote" | "comment-upvote" |
+        "entity-reaction" | "comment-reaction" |
+        "entity-reaction-milestone-specific" | "entity-reaction-milestone-total" |
+        "comment-reaction-milestone-specific" | "comment-reaction-milestone-total" |
+        "new-follow" | "connection-accepted" | "connection-request" |
+        "space-membership-approved" | "event-invite" | "event-updated" |
+        "event-cancelled" | "reputation-grant";
   title: string;
   content: string | null;
   metadata: {

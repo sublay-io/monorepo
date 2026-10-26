@@ -46,7 +46,7 @@ Fetches a paginated list of public spaces: the space directory. By default it li
   - A space id: that space's public direct sub-spaces. This is how to page through a space's sub-spaces (add `sortBy=alphabetical` to order them A–Z by name). An id that matches no space returns an empty page, not a 404.
   - `any`: spaces at every level.
 
-  `null` and `undefined` are refused with `400 space/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). Any other value that isn't a space id returns `400 space/invalid-query`.
+  `null` and `undefined` are refused with `400 space/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). `none` and `any` match exactly (`ANY` is refused). Any other value that isn't a space id returns `400 space/invalid-query`.
 </ParamField>
 
 <ParamField query="nsfwFilter" type="string">
@@ -95,7 +95,7 @@ Fetches a paginated list of public spaces: the space directory. By default it li
 
     ```json
     {
-      "error": "`parentSpaceId=null` isn't supported. Use `parentSpaceId=none` for top-level spaces, or `parentSpaceId=any` for every level.",
+      "error": "`parentSpaceId=null` isn't supported. Use `parentSpaceId=none` for top-level spaces (the default), or `parentSpaceId=any` for every level.",
       "code": "space/unsupported-param",
       "param": "parentSpaceId"
     }

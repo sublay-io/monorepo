@@ -263,7 +263,7 @@ Other id filters, such as `spaceId` on search and on moderated reports, take ids
 On those filters, `null` or `undefined` in the query string (exact, case-sensitive) is refused with `400 <area>/unsupported-param`, naming what to send instead:
 
 ```json
-{ "error": "`parentSpaceId=null` isn't supported. Use `parentSpaceId=none` for top-level spaces, or `parentSpaceId=any` for every level.", "code": "space/unsupported-param", "param": "parentSpaceId" }
+{ "error": "`parentSpaceId=null` isn't supported. Use `parentSpaceId=none` for top-level spaces (the default), or `parentSpaceId=any` for every level.", "code": "space/unsupported-param", "param": "parentSpaceId" }
 ```
 
 These body id fields take JSON `null`, and refuse the string `"none"` with `400 <area>/unsupported-param` naming `null`:

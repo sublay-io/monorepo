@@ -23,10 +23,10 @@ Returns a paginated list of workspaces scoped to the caller's **direct membershi
 <ParamField query="parentWorkspaceId" type="string">
   Narrows the list by where each workspace sits in the tree:
   - `none`: top-level workspaces only (workspaces with no parent).
-  - A workspace id: the caller's workspaces directly under that workspace. An id that matches no workspace returns an empty page, not a 404.
+  - A workspace id: the caller's workspaces directly under that workspace, whether or not the caller is in that workspace itself. An id that matches no workspace returns an empty page, not a 404.
   - `any`, left out, or sent empty: workspaces at every level. This is the default.
 
-  The list still holds only the caller's direct-membership and owned workspaces, so a workspace id lists the ones of its direct sub-workspaces the caller belongs to or owns, and `none` leaves out a sub-workspace the caller belongs to even when they aren't in its parent. It works with `page`, `limit` and `include`. `null` and `undefined` are refused with `400 workspace/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
+  The list still holds only the caller's direct-membership and owned workspaces, so a workspace id lists the ones of its direct sub-workspaces the caller belongs to or owns, and `none` leaves out a sub-workspace the caller belongs to even when they aren't in its parent. It works with `page`, `limit` (the pagination counts reflect the filter) and `include`. `null` and `undefined` are refused with `400 workspace/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). `none` and `any` match exactly (`ANY` is refused). Any other value that isn't a workspace id returns `400 workspace/invalid-query`.
 </ParamField>
 
 <ParamField query="include" type="string">
@@ -100,7 +100,7 @@ GET /v8/:projectId/workspaces?parentWorkspaceId=none&page=1&limit=10&include=mem
   </Accordion>
   <Accordion title="Unsupported parentWorkspaceId value — 400">
     ```json
-    { "error": "`parentWorkspaceId=null` isn't supported. Use `parentWorkspaceId=none` for top-level workspaces, or `parentWorkspaceId=any` for every level.", "code": "workspace/unsupported-param", "param": "parentWorkspaceId" }
+    { "error": "`parentWorkspaceId=null` isn't supported. Use `parentWorkspaceId=none` for top-level workspaces, or `parentWorkspaceId=any` for every level (the default).", "code": "workspace/unsupported-param", "param": "parentWorkspaceId" }
     ```
     `parentWorkspaceId=null` and `parentWorkspaceId=undefined` are rejected with the spelling to use instead.
   </Accordion>

@@ -88,7 +88,7 @@ const space = await sublay.spaces.fetchSpace({ spaceId: "spc_abc123" });
 
 ### fetchManySpaces
 
-Fetches a paginated, filterable list of spaces.
+Fetches a paginated, filterable list of public spaces (the space directory). For the spaces the logged-in user belongs to, whatever their visibility, use [fetchUserSpaces](#fetchuserspaces).
 
 ```typescript
 const { data, pagination } = await sublay.spaces.fetchManySpaces({
@@ -122,12 +122,8 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
   The one field `query` is matched against. Leave it out to match the slug, the name or the description.
 </ParamField>
 
-<ParamField body="memberOf" type='"true" | "false"'>
-  `"true"` returns only spaces you belong to. `"false"` lists the same as leaving it out.
-</ParamField>
-
 <ParamField body="parentSpaceId" type='string | "none"'>
-  A space id returns that space's child spaces. `"none"` returns top-level spaces only. Left out: spaces at every level.
+  A space id returns that space's public child spaces; this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). `"none"` returns top-level spaces only. Left out: spaces at every level.
 </ParamField>
 
 <ParamField body="nsfwFilter" type='"include-all" | "exclude" | "only"'>
@@ -184,12 +180,13 @@ const space = await sublay.spaces.fetchSpaceByShortId({ shortId: "a1b2c3" });
 
 ### fetchUserSpaces
 
-Fetches the spaces the logged-in user belongs to.
+Fetches the spaces the logged-in user belongs to, whatever their visibility, with the user's membership on each. It can search within them and sort them.
 
 ```typescript
 const userSpaces = await sublay.spaces.fetchUserSpaces({
   role: "admin,moderator",
-  sortBy: "createdAt",
+  query: "design",
+  sortBy: "alphabetical",
 });
 ```
 
@@ -199,6 +196,14 @@ const userSpaces = await sublay.spaces.fetchUserSpaces({
 
 <ParamField body="limit" type="number">
   The number of spaces to return per page.
+</ParamField>
+
+<ParamField body="query" type="string">
+  Free-text search term within the user's spaces, matched as a case-insensitive substring. Trimmed; must not be blank.
+</ParamField>
+
+<ParamField body="searchFields" type='"slug" | "name" | "description"'>
+  The one field `query` is matched against. Leave it out to match the slug, the name or the description.
 </ParamField>
 
 <ParamField body="sortBy" type="string">
@@ -344,45 +349,6 @@ const { available } = await sublay.spaces.checkSlugAvailability({
 </ParamField>
 
 **Returns** — `Promise<{ available: boolean }>`
-
----
-
-### fetchChildSpaces
-
-Fetches a paginated list of child spaces under a parent.
-
-```typescript
-const { data, pagination } = await sublay.spaces.fetchChildSpaces({
-  spaceId: "spc_abc123",
-  sortBy: "alphabetical",
-});
-```
-
-<ParamField body="spaceId" type="string" required>
-  The parent space ID.
-</ParamField>
-
-<ParamField body="page" type="number">
-  The page number to fetch.
-</ParamField>
-
-<ParamField body="limit" type="number">
-  The number of spaces to return per page.
-</ParamField>
-
-<ParamField body="sortBy" type="string">
-  Sort order: `"createdAt"` (when the space was created), `"alphabetical"` (by name) or `"members"` (by active member count). Defaults to `"alphabetical"`.
-</ParamField>
-
-<ParamField body="sortDir" type="string">
-  Direction, `"asc"` or `"desc"`, for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
-</ParamField>
-
-<ParamField body="include" type="SpaceIncludeParam">
-  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
-</ParamField>
-
-**Returns** — `Promise<PaginatedResponse<Space>>`
 
 ---
 

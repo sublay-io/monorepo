@@ -97,7 +97,7 @@ const space = await sublay.spaces.fetchSpace({ spaceId: "spc_abc123" });
 
 ### fetchManySpaces
 
-Fetches a paginated list of top-level spaces, with optional text search.
+Fetches a paginated list of public spaces (the space directory), with optional text search. For the spaces a user belongs to, whatever their visibility, use [fetchUserSpaces](#fetchuserspaces).
 
 ```typescript
 const { data, pagination } = await sublay.spaces.fetchManySpaces({
@@ -133,12 +133,8 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
   The one field `query` is matched against. Leave it out to match the slug, the name or the description.
 </ParamField>
 
-<ParamField body="memberOf" type='"true" | "false"'>
-  When `"true"`, returns only spaces `actingUserId` is an active member of. Without `actingUserId` it returns `401 space/auth-required`. `"false"` lists the same as leaving it out.
-</ParamField>
-
 <ParamField body="parentSpaceId" type='string | "none"'>
-  A space id returns that space's child spaces. `"none"` returns top-level spaces only. Left out: spaces at every level.
+  A space id returns that space's public child spaces; this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). `"none"` returns top-level spaces only. Left out: spaces at every level.
 </ParamField>
 
 <ParamField body="nsfwFilter" type='"include-all" | "exclude" | "only"'>
@@ -150,7 +146,7 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  The user to list as: exactly what their own access token would get (`memberOf` and their membership on each space). Omit it for the anonymous view.
+  The user to list as: exactly what their own access token would get (their membership on each space). Omit it for the anonymous view.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<Space>>`
@@ -207,11 +203,13 @@ const space = await sublay.spaces.fetchSpaceByShortId({ shortId: "ph3x9" });
 
 ### fetchUserSpaces
 
-Fetches the spaces a specific user is a member of.
+Fetches the spaces a specific user is a member of, whatever their visibility, with their membership on each. It can search within them and sort them.
 
 ```typescript
 const result = await sublay.spaces.fetchUserSpaces({
   actingUserId: "usr_abc123",
+  query: "design",
+  sortBy: "alphabetical",
   page: 1,
   limit: 20,
 });
@@ -227,6 +225,14 @@ const result = await sublay.spaces.fetchUserSpaces({
 
 <ParamField body="limit" type="number">
   Results per page. Defaults to `20`.
+</ParamField>
+
+<ParamField body="query" type="string">
+  Free-text search term within the user's spaces, matched as a case-insensitive substring. Trimmed; must not be blank.
+</ParamField>
+
+<ParamField body="searchFields" type='"slug" | "name" | "description"'>
+  The one field `query` is matched against. Leave it out to match the slug, the name or the description.
 </ParamField>
 
 <ParamField body="sortBy" type="string">
@@ -390,50 +396,6 @@ const { available } = await sublay.spaces.checkSlugAvailability({
 </ParamField>
 
 **Returns** — `Promise<{ available: boolean }>`
-
----
-
-### fetchChildSpaces
-
-Fetches the direct child spaces of a given parent space.
-
-```typescript
-const { data, pagination } = await sublay.spaces.fetchChildSpaces({
-  spaceId: "spc_abc123",
-  page: 1,
-  limit: 20,
-});
-```
-
-<ParamField body="spaceId" type="string" required>
-  The parent Sublay space ID.
-</ParamField>
-
-<ParamField body="page" type="number">
-  Page number (1-indexed). Defaults to `1`.
-</ParamField>
-
-<ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
-</ParamField>
-
-<ParamField body="sortBy" type="string">
-  Sort order: `"createdAt"` (when the space was created), `"alphabetical"` (by name) or `"members"` (by active member count). Defaults to `"alphabetical"`.
-</ParamField>
-
-<ParamField body="sortDir" type="string">
-  Direction, `"asc"` or `"desc"`, for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
-</ParamField>
-
-<ParamField body="include" type="SpaceIncludeParam">
-  A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
-</ParamField>
-
-<ParamField body="actingUserId" type="string">
-  The user to list as: `isMember` on each child is theirs, exactly as their own access token. Omit it for the anonymous view.
-</ParamField>
-
-**Returns** — `Promise<PaginatedResponse<Space>>`
 
 ---
 

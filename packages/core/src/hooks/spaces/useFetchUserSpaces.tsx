@@ -24,6 +24,15 @@ export interface FetchUserSpacesProps {
   sortBy?: UserSpacesSortByOptions;
   sortDir?: "asc" | "desc";
   include?: SpaceIncludeParam;
+  /**
+   * Narrows the list by where each space sits in the tree:
+   * `"none"` returns the user's memberships in top-level spaces only; a space
+   * id returns their memberships in that space's direct sub-spaces. Left out
+   * or `null`: memberships at every level (`null` is never sent as `"none"`).
+   * A membership in a sub-space whose parent the user isn't in is not
+   * top-level, so `"none"` leaves it out.
+   */
+  parentSpaceId?: string | "none" | null;
 }
 
 function useFetchUserSpaces(): (params?: FetchUserSpacesProps) => Promise<UserSpacesResponse> {
@@ -36,7 +45,7 @@ function useFetchUserSpaces(): (params?: FetchUserSpacesProps) => Promise<UserSp
         throw new Error("No projectId available.");
       }
 
-      const { include, role, query, searchFields, ...rest } = params;
+      const { include, role, query, searchFields, parentSpaceId, ...rest } = params;
 
       const response = await axios.get<UserSpacesResponse>(
         `/${projectId}/spaces/user-spaces`,
@@ -46,6 +55,8 @@ function useFetchUserSpaces(): (params?: FetchUserSpacesProps) => Promise<UserSp
             ...buildSearchParams(query, searchFields),
             include: Array.isArray(include) ? include.join(",") : include,
             role: Array.isArray(role) ? role.join(",") : role,
+            // `null` means not set: left out, never turned into "none".
+            ...(parentSpaceId != null ? { parentSpaceId } : {}),
           },
         }
       );

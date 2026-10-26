@@ -34,6 +34,10 @@ function WorkspaceList() {
   Page size. Defaults to `10`.
 </ParamField>
 
+<ParamField path="parentWorkspaceId" type='string | "none" | "any" | null'>
+  Narrows the list by where each workspace sits in the tree. `"none"`: top-level workspaces only. A workspace id: the caller's workspaces directly under that workspace. `"any"`, left out or `null`: workspaces at every level (the default). Changing it refetches from page 1.
+</ParamField>
+
 <ParamField path="include" type="WorkspaceIncludeParam">
   A single value or an array. The only value is `"memberCount"`: it adds each accumulated workspace's **direct** member count; omit it and the field is absent.
 </ParamField>

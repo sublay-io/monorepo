@@ -133,8 +133,8 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
   The one field `query` is matched against. Leave it out to match the slug, the name or the description.
 </ParamField>
 
-<ParamField body="parentSpaceId" type='string | "none"'>
-  A space id returns that space's public child spaces; this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `"none"` returns top-level spaces only. Left out: spaces at every level.
+<ParamField body="parentSpaceId" type='string | "none" | "any"'>
+  Which level of the space tree to return. Left out or `"none"`: top-level spaces only (the default). A space id returns that space's public direct sub-spaces; this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `"any"` returns spaces at every level.
 </ParamField>
 
 <ParamField body="nsfwFilter" type='"include-all" | "exclude" | "only"'>
@@ -255,8 +255,8 @@ const result = await sublay.spaces.fetchUserSpaces({
   When `"true"`, returns the full set of spaces rather than only the paginated page.
 </ParamField>
 
-<ParamField body="parentSpaceId" type='string | "none"'>
-  Narrows the list by where each space sits in the tree. `"none"` returns the user's memberships in top-level spaces only. A space id returns their memberships in that space's direct sub-spaces; an id that matches no space returns an empty page, not a 404. Left out: memberships at every level.
+<ParamField body="parentSpaceId" type='string | "none" | "any"'>
+  Narrows the list by where each space sits in the tree. `"none"` returns the user's memberships in top-level spaces only. A space id returns their memberships in that space's direct sub-spaces; an id that matches no space returns an empty page, not a 404. `"any"` or left out: memberships at every level (the default).
 
   A membership in a sub-space whose parent the user isn't a member of is not top-level, so `"none"` leaves it out.
 </ParamField>

@@ -75,6 +75,8 @@ Separately, each space has a **`visibility`** setting — `"public"` (default), 
 
 Spaces can be nested up to 10 levels deep. A child space is created by passing a `parentSpaceId` to `useCreateSpace`. Only admins of the parent space can create child spaces. Parent admins and moderators are automatically cascaded into new child spaces with their existing roles.
 
+The space directory lists top-level spaces by default. Pass a space id as `parentSpaceId` to list that space's direct sub-spaces, or `"any"` to list spaces at every level. See [Space Lists](/v8/sdk/spaces/space-lists).
+
 ## What's Next
 
 Start with the [Provider & Hook](/v8/sdk/spaces/provider-and-hook) to learn how to set up a space in your component tree, then explore membership and moderation features.

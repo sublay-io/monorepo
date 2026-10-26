@@ -66,8 +66,8 @@ function MySpaces() {
   Direction, `"asc"` or `"desc"`, for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
-<ParamField path="parentSpaceId" type='string | "none" | null'>
-  Narrows the list by where each space sits in the tree. `"none"`: the user's memberships in top-level spaces only. A space id: their memberships in that space's direct sub-spaces. Left out or `null`: memberships at every level. `null` is left out of the request, never sent as `"none"`.
+<ParamField path="parentSpaceId" type='string | "none" | "any" | null'>
+  Narrows the list by where each space sits in the tree. `"none"`: the user's memberships in top-level spaces only. A space id: their memberships in that space's direct sub-spaces. `"any"`, left out or `null`: memberships at every level (the default). `null` is left out of the request, never sent as `"none"`.
 
   A membership in a sub-space whose parent the user isn't a member of is not top-level, so `"none"` leaves it out.
 </ParamField>

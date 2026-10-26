@@ -20,6 +20,15 @@ Returns a paginated list of workspaces scoped to the caller's **direct membershi
   Page size.
 </ParamField>
 
+<ParamField query="parentWorkspaceId" type="string">
+  Narrows the list by where each workspace sits in the tree:
+  - `none`: top-level workspaces only (workspaces with no parent).
+  - A workspace id: the caller's workspaces directly under that workspace. An id that matches no workspace returns an empty page, not a 404.
+  - `any`, left out, or sent empty: workspaces at every level. This is the default.
+
+  The list still holds only the caller's direct-membership and owned workspaces, so a workspace id lists the ones of its direct sub-workspaces the caller belongs to or owns, and `none` leaves out a sub-workspace the caller belongs to even when they aren't in its parent. It works with `page`, `limit` and `include`. `null` and `undefined` are refused with `400 workspace/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
+</ParamField>
+
 <ParamField query="include" type="string">
   Include flags, as a comma-separated value or repeated params. The only value is `memberCount`: it adds a `memberCount` to **every row** — the workspace's **direct** member count, the same number [Fetch Workspace](/v8/api-reference/workspaces/fetch-workspace) returns for one workspace, counting neither descendants nor reach-holders.
 
@@ -37,7 +46,7 @@ Returns a paginated list of workspaces scoped to the caller's **direct membershi
 Returns a paginated response of [Workspace](/v8/data-models/workspace) objects.
 
 ```
-GET /v8/:projectId/workspaces?page=1&limit=10&include=memberCount
+GET /v8/:projectId/workspaces?parentWorkspaceId=none&page=1&limit=10&include=memberCount
 ```
 
 ```json
@@ -89,6 +98,12 @@ GET /v8/:projectId/workspaces?page=1&limit=10&include=memberCount
     ```
     Returned when a service key names an `actingUserId` that isn't a user in this project.
   </Accordion>
+  <Accordion title="Unsupported parentWorkspaceId value — 400">
+    ```json
+    { "error": "`parentWorkspaceId=null` isn't supported. Use `parentWorkspaceId=none` for top-level workspaces, or `parentWorkspaceId=any` for every level.", "code": "workspace/unsupported-param", "param": "parentWorkspaceId" }
+    ```
+    `parentWorkspaceId=null` and `parentWorkspaceId=undefined` are rejected with the spelling to use instead.
+  </Accordion>
   <Accordion title="Unknown Include — 400">
     ```json
     { "error": "include: Unknown include `members`. Allowed: memberCount.", "code": "workspace/invalid-query" }
@@ -99,7 +114,7 @@ GET /v8/:projectId/workspaces?page=1&limit=10&include=memberCount
     ```json
     { "error": "Unrecognized key: \"sort\"", "code": "workspace/invalid-query" }
     ```
-    This route declares `page`, `limit`, `include` and `actingUserId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "sort", "order"`. The two exceptions across the bundle are the cache-busters `_` and `_t`, which are dropped before the request is read. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+    This route declares `page`, `limit`, `parentWorkspaceId`, `include` and `actingUserId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "sort", "order"`. The two exceptions across the bundle are the cache-busters `_` and `_t`, which are dropped before the request is read. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
 </AccordionGroup>
 

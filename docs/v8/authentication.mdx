@@ -233,15 +233,16 @@ A field sent in the wrong place is refused with a `400` that names the right one
 
 "Nothing" is said one way for filters and one way for values you set:
 
-- **Filters** choose which records come back. A filter that can match "has none" takes the word `none`. A filter left out, or sent empty (`parentSpaceId=`), doesn't filter. Filters are usually in the query string; on the few reads that are `POST`s (such as search) they're in the body, where leaving one out means no filter. `null` and `undefined` are never spellings of "none" in a URL.
+- **Filters** choose which records come back. A filter that can match "has none" takes the word `none`. A filter left out, or sent empty (`spaceId=`), takes its default, which is no filtering except where the table below says otherwise. The tree filters on lists (`parentSpaceId`, `parentWorkspaceId`) also take the word `any`, meaning every level. Filters are usually in the query string; on the few reads that are `POST`s (such as search) they're in the body, where leaving one out means no filter. `null` and `undefined` are never spellings of "none" in a URL.
 - **Values you set** on a create or update use JSON `null` for "nothing": no parent, the general bucket, remove the avatar. Leaving the field out means "don't set it" on create and "leave it unchanged" on update. The string `"none"` is ordinary text there, except in the id fields listed below, where it is refused.
 
 These query filters take `none`:
 
 | Endpoint | Filter | `none` means | Left out or empty |
 |---|---|---|---|
-| [`GET /spaces`](/v8/api-reference/spaces/fetch-spaces) | `parentSpaceId` | top-level spaces only | spaces at every level |
+| [`GET /spaces`](/v8/api-reference/spaces/fetch-spaces) | `parentSpaceId` | top-level spaces only | top-level spaces only |
 | [`GET /spaces/user-spaces`](/v8/api-reference/spaces/fetch-user-spaces) | `parentSpaceId` | the user's memberships in top-level spaces only | memberships at every level |
+| [`GET /workspaces`](/v8/api-reference/workspaces/fetch-workspaces) | `parentWorkspaceId` | the user's top-level workspaces only | workspaces at every level |
 | [`GET /entities`](/v8/api-reference/entities/fetch-many-entities) | `sourceId` | entities with no source | any source |
 | [`GET /entities`](/v8/api-reference/entities/fetch-many-entities) | `spaceId` | entities in no space | any space, or none |
 | [`GET /entities/drafts`](/v8/api-reference/entities/fetch-drafts) | `sourceId`, `spaceId` | drafts with no source / in no space | any |
@@ -249,12 +250,20 @@ These query filters take `none`:
 | [`GET /events`](/v8/api-reference/events/fetch-many-events) | `spaceId` | events not in any space | every event |
 | Every GET that takes `spaceReputationId` | `spaceReputationId` | reputation earned outside any space | no space reputation |
 
+These filters also take `any`:
+
+| Endpoint | Filter | `any` means |
+|---|---|---|
+| [`GET /spaces`](/v8/api-reference/spaces/fetch-spaces) | `parentSpaceId` | spaces at every level |
+| [`GET /spaces/user-spaces`](/v8/api-reference/spaces/fetch-user-spaces) | `parentSpaceId` | memberships at every level (the same as leaving it out) |
+| [`GET /workspaces`](/v8/api-reference/workspaces/fetch-workspaces) | `parentWorkspaceId` | workspaces at every level (the same as leaving it out) |
+
 Other id filters, such as `spaceId` on search and on moderated reports, take ids only.
 
 On those filters, `null` or `undefined` in the query string (exact, case-sensitive) is refused with `400 <area>/unsupported-param`, naming what to send instead:
 
 ```json
-{ "error": "`parentSpaceId=null` isn't supported. Use `parentSpaceId=none` for top-level spaces, or leave it out for every level.", "code": "space/unsupported-param", "param": "parentSpaceId" }
+{ "error": "`parentSpaceId=null` isn't supported. Use `parentSpaceId=none` for top-level spaces, or `parentSpaceId=any` for every level.", "code": "space/unsupported-param", "param": "parentSpaceId" }
 ```
 
 These body id fields take JSON `null`, and refuse the string `"none"` with `400 <area>/unsupported-param` naming `null`:

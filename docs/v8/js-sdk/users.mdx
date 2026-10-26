@@ -228,8 +228,8 @@ const next = await sublay.users.fetchCommentsByUserId({
   Only comments on this entity.
 </ParamField>
 
-<ParamField body="sourceId" type="string">
-  Only comments on entities with this `sourceId`.
+<ParamField body="sourceId" type='string | "none"'>
+  Only comments on entities from this source, or `"none"` for comments on entities with no source. Left out: any source.
 </ParamField>
 
 <ParamField body="blockedFilter" type='"exclude" | "include-outbound-blocked"'>

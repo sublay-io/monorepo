@@ -25,8 +25,10 @@ export interface UseFetchManyEntitiesWrapperProps
     TopCommentsParams {
   userId?: string | null;
   limit?: number;
-  sourceId?: string | null;
-  spaceId?: string | null;
+  /** Only entities from this source, or `"none"` for entities with no source. `null` or left out: any source. */
+  sourceId?: string | "none" | null;
+  /** Only entities in this space, or `"none"` for entities in no space. `null` or left out: any space, or none. */
+  spaceId?: string | "none" | null;
   followedOnly?: boolean;
   include?: EntityIncludeParam;
   defaultSortBy?: EntityListSortByOptions;

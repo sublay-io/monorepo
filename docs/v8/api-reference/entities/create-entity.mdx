@@ -23,8 +23,8 @@ A signed-in user's request always creates that user's entity, whatever the setti
   Your application's identifier for this entity (URL, slug, database ID, etc.). Used to fetch or create entities without knowing the Sublay ID.
 </ParamField>
 
-<ParamField body="sourceId" type="string">
-  Groups entities by source. Use a topic ID or page ID to scope feeds to a specific context.
+<ParamField body="sourceId" type="string | null">
+  Groups entities by source. Use a topic ID or page ID to scope feeds to a specific context. For no source, leave it out or send `null`. `none`, `null` and `undefined` (as strings, exact and case-sensitive) are reserved: list filters use `none` to mean "no source", so an entity can't be stored with one of them. They are refused with `400 entity/invalid-body`.
 </ParamField>
 
 <ParamField body="spaceId" type="string">
@@ -185,6 +185,13 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
       "code": "entity/unsupported-param",
       "param": "userId"
     }
+    ```
+  </Accordion>
+  <Accordion title="Reserved sourceId — 400">
+    `sourceId` is `"none"`, `"null"` or `"undefined"`. Other spellings, such as `"None"`, are ordinary values.
+
+    ```json
+    { "error": "sourceId: `none` is a reserved value. For no source, leave `sourceId` out or send null.", "code": "entity/invalid-body" }
     ```
   </Accordion>
   <Accordion title="Rejected by Validation Webhook — 400">

@@ -35,6 +35,10 @@ import { KeywordsFilters } from "../../interfaces/entity-filters/KeywordsFilters
 
 import { handleError } from "../../utils/handleError";
 
+/** A list filter value as an entity field: `"none"` and no filter both mean no value. */
+const noneToUnset = (value: string | null | undefined): string | undefined =>
+  value && value !== "none" ? value : undefined;
+
 export interface UseEntityListProps {
   listId: string;
   infuseData?: (foreignId: string) => Promise<Record<string, any> | null>;
@@ -74,7 +78,11 @@ export interface UseEntityListValues {
 
   // Filter properties
   timeFrame: TimeFrame | null;
-  sourceId: string | null;
+  /**
+   * The source filter in use: a source id, `"none"` (entities with no
+   * source), or `null` when no source filter is set (every entity).
+   */
+  sourceId: string | "none" | null;
   userId: string | null;
   followedOnly: boolean;
   keywordsFilters: KeywordsFilters | null;
@@ -385,8 +393,10 @@ function useEntityList({
       try {
         const newEntity = await entityActions.createEntity(listId, {
           ...restOfProps,
-          sourceId: config?.sourceId || undefined,
-          spaceId: config?.spaceId || undefined,
+          // A new entity takes the list's source and space. A list filtered
+          // to `"none"` (has none) creates it with no source / no space.
+          sourceId: noneToUnset(config?.sourceId),
+          spaceId: noneToUnset(config?.spaceId),
           insertPosition,
         });
 
@@ -459,7 +469,7 @@ function useEntityList({
 
       // Filter properties
       timeFrame: filters?.timeFrame || null,
-      sourceId: config?.sourceId || null,
+      sourceId: config?.sourceId ?? null,
       userId: filters?.userId || null,
       followedOnly: filters?.followedOnly || false,
 

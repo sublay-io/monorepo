@@ -7,8 +7,10 @@ import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 interface FetchDraftsParams {
   page?: number;
   limit?: number;
-  sourceId?: string;
-  spaceId?: string;
+  /** Only drafts from this source, or `"none"` for drafts with no source. `null` or left out: any source. */
+  sourceId?: string | "none" | null;
+  /** Only drafts in this space, or `"none"` for drafts in no space. `null` or left out: any space, or none. */
+  spaceId?: string | "none" | null;
   include?: DraftIncludeParam;
 }
 

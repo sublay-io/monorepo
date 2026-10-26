@@ -41,7 +41,7 @@ function EventsList() {
 ## Parameters
 
 <ParamField path="limit" type="number">Page size. Defaults to `10`.</ParamField>
-<ParamField path="spaceId" type="string | null">Restrict to one space.</ParamField>
+<ParamField path="spaceId" type='string | "none" | null'>Only this space's events, or `"none"` for events not in any space. Left out or `null`: every event.</ParamField>
 <ParamField path="hostId" type="string | null">Only events this user hosts.</ParamField>
 <ParamField path="type" type='"online" | "physical" | "hybrid" | null'>Filter by type.</ParamField>
 <ParamField path="status" type='"active" | "cancelled" | null'>Filter by status.</ParamField>

@@ -31,8 +31,8 @@ const entity = await sublay.entities.createEntity({
   Your application's identifier for this entity. Used for idempotent lookups via `fetchEntityByForeignId`.
 </ParamField>
 
-<ParamField body="sourceId" type="string">
-  An optional secondary identifier for grouping or filtering entities.
+<ParamField body="sourceId" type="string | null">
+  An optional secondary identifier for grouping or filtering entities. For no source, leave it out or pass `null`. `"none"`, `"null"` and `"undefined"` are reserved and refused with `400 entity/invalid-body`.
 </ParamField>
 
 <ParamField body="spaceId" type="string">
@@ -210,12 +210,12 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 });
 ```
 
-<ParamField body="sourceId" type="string">
-  Filter by source ID.
+<ParamField body="sourceId" type='string | "none"'>
+  Only entities from this source, or `"none"` for entities with no source. Left out: any source.
 </ParamField>
 
-<ParamField body="spaceId" type="string">
-  Filter to entities within a specific space.
+<ParamField body="spaceId" type='string | "none"'>
+  Only entities in this space, or `"none"` for entities in no space. Left out: any space, or none.
 </ParamField>
 
 <ParamField body="sortBy" type="string">
@@ -432,12 +432,12 @@ const { data, pagination } = await sublay.entities.fetchDrafts({
   Results per page. Defaults to `20`.
 </ParamField>
 
-<ParamField body="sourceId" type="string">
-  Filter drafts by source ID.
+<ParamField body="sourceId" type='string | "none"'>
+  Only drafts from this source, or `"none"` for drafts with no source. Left out: any source.
 </ParamField>
 
-<ParamField body="spaceId" type="string">
-  Filter drafts to a specific space.
+<ParamField body="spaceId" type='string | "none"'>
+  Only drafts in this space, or `"none"` for drafts in no space. Left out: any space, or none.
 </ParamField>
 
 <ParamField body="include" type="DraftIncludeParam">

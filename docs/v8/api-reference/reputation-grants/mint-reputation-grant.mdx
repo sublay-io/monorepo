@@ -23,7 +23,7 @@ Requires the `reputation` bundle.
 </ParamField>
 
 <ParamField body="spaceId" type="string | null">
-  UUID of the space whose bucket is credited. Omitted or `null` means the project-general bucket. The space is validated before anything is written — a bucket for a space that does not exist would count toward its owner's profile total while being invisible in every space-scoped view. An ID that names no space is rejected with `404 reputation-grant/space-not-found`, and naming a space on a project without the `spaces` bundle is rejected with `403 database/tables-not-available`. [Transfers](/v8/api-reference/reputation-grants/create-reputation-grant) are validated the same way.
+  UUID of the space whose bucket is credited. Omitted or `null` means the project-general bucket; the string `"none"` is refused with `400 reputation-grant/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). The space is validated before anything is written — a bucket for a space that does not exist would count toward its owner's profile total while being invisible in every space-scoped view. An ID that names no space is rejected with `404 reputation-grant/space-not-found`, and naming a space on a project without the `spaces` bundle is rejected with `403 database/tables-not-available`. [Transfers](/v8/api-reference/reputation-grants/create-reputation-grant) are validated the same way.
 </ParamField>
 
 <ParamField body="note" type="string | null">

@@ -60,11 +60,11 @@ Returns a paginated list of entities for the project. Supports rich filtering by
 </ParamField>
 
 <ParamField query="sourceId" type="string">
-  Filter by `sourceId`. Pass `"null"` to return entities with no `sourceId`.
+  Only entities with this exact `sourceId`. `none` returns entities with no source. Left out, or sent empty, entities from any source (or none) are returned. `null` and `undefined` are refused with `400 entity/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
 </ParamField>
 
 <ParamField query="spaceId" type="string">
-  Filter by space ID. `null` means no space filter.
+  Only entities in this space. `none` returns entities in no space. Left out, or sent empty, entities in any space or in none are returned. `null` and `undefined` are refused with `400 entity/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
 </ParamField>
 
 <ParamField query="userId" type="string">
@@ -199,6 +199,17 @@ Each item in `data` is an [Entity](/v8/data-models/entity) object. File URLs are
       "error": "`sortBy=new` isn't supported in v8. Use `sortBy=createdAt`, which lists newest first by default.",
       "code": "entity/unsupported-param",
       "param": "sortBy"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported filter value — 400">
+    `null` or `undefined` as the value of `sourceId`, `spaceId` or `spaceReputationId`. The `error` names the spelling to use instead; for `spaceId` it reads ``Use `spaceId=none` for entities in no space, or leave it out for any space.``
+
+    ```json
+    {
+      "error": "`sourceId=null` isn't supported. Use `sourceId=none` for entities with no source, or leave it out for any source.",
+      "code": "entity/unsupported-param",
+      "param": "sourceId"
     }
     ```
   </Accordion>

@@ -11,7 +11,11 @@ export interface FetchManySpacesProps extends SpaceSearchParams {
   sortDir?: "asc" | "desc";
   /** `"true"`: only spaces the viewer is a member of; needs a viewer (`actingUserId`). `"false"` is the same as leaving it out. */
   memberOf?: "true" | "false";
-  parentSpaceId?: string | "null";
+  /**
+   * A space id (its child spaces), or `"none"` for top-level spaces only.
+   * Left out: spaces at every level.
+   */
+  parentSpaceId?: string | "none";
   nsfwFilter?: "include-all" | "exclude" | "only";
   include?: SpaceIncludeParam;
   /**

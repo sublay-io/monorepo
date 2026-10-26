@@ -51,8 +51,8 @@ const entity = await createEntity({
   An ID from your own system to link this entity to an existing item.
 </ParamField>
 
-<ParamField path="sourceId" type="string">
-  An identifier for grouping entities by source (e.g., a section of your app).
+<ParamField path="sourceId" type="string | null">
+  An identifier for grouping entities by source (e.g., a section of your app). For no source, leave it out or pass `null`. `"none"`, `"null"` and `"undefined"` are reserved and refused with `400 entity/invalid-body`.
 </ParamField>
 
 <ParamField path="spaceId" type="string">

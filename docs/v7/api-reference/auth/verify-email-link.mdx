@@ -4,7 +4,7 @@ api: "GET /v7/:projectId/auth/verify-email-link"
 description: "The page a verification email's link opens: confirm to verify"
 ---
 
-The page a verification email's link opens (emails sent with `mode: "link"`). Opening it doesn't verify anything: it shows a Sublay page asking the user to confirm — "Only confirm if you created an account with {your app's name}" — with a **Confirm my email** button. Clicking it verifies the email (`isVerified` becomes `true`) and invalidates the token.
+The page a verification email's link opens (emails sent with `mode: "link"`). Opening it doesn't verify anything: it shows a Sublay page asking the user to confirm — "Only confirm if you created an account with \{your app's name\}" — with a **Confirm my email** button. Clicking it verifies the email (`isVerified` becomes `true`) and invalidates the token.
 
 The confirm step exists because work email scanners open every link in incoming mail. If opening the link verified the account, a scanner could verify an account someone else created with that person's email.
 

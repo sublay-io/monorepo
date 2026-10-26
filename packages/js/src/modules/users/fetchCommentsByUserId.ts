@@ -14,8 +14,11 @@ export interface FetchCommentsByUserIdBaseProps extends SpaceReputationContextPa
   userId: string;
   /** Only comments on this entity. */
   entityId?: string;
-  /** Only comments on entities from this source. */
-  sourceId?: string;
+  /**
+   * Only comments on entities from this source, or `"none"` for comments on
+   * entities with no source. Left out: any source.
+   */
+  sourceId?: string | "none";
   /**
    * Comments by users block-edged with the viewer are hidden by default
    * ("exclude"). "include-outbound-blocked" re-includes ONLY the viewer's own

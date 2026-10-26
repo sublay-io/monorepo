@@ -139,6 +139,66 @@ describe("useEntityList", () => {
     expect(result.current.sortBy).toBe("hot");
   });
 
+  describe("source and space filters", () => {
+    it("shows every entity by default: no sourceId or spaceId is sent, on any page", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e1" }], true));
+      const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+        projectId: "test-project",
+      });
+      act(() => result.current.fetchEntities({}));
+      await waitFor(() => expect(result.current.entities).toHaveLength(1));
+      expect(result.current.sourceId).toBeNull();
+
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e2" }], false));
+      await act(async () => {
+        await result.current.loadMore();
+      });
+
+      const urls = fetchHandle.calls().map((c) => new URL(c.url));
+      expect(urls).toHaveLength(2);
+      for (const url of urls) {
+        expect(url.searchParams.has("sourceId")).toBe(false);
+        expect(url.searchParams.has("spaceId")).toBe(false);
+        expect(url.search).not.toContain("null");
+      }
+    });
+
+    it("null sourceId/spaceId are left out; an explicit \"none\" is sent as given, on every page", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e1" }], false));
+      const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+        projectId: "test-project",
+      });
+      act(() =>
+        result.current.fetchEntities({}, undefined, { sourceId: null, spaceId: null }, { fetchImmediately: true }),
+      );
+      await waitFor(() => expect(fetchHandle.calls()).toHaveLength(1));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e2" }], true));
+      act(() =>
+        result.current.fetchEntities({}, undefined, { sourceId: "none", spaceId: "none" }, { fetchImmediately: true }),
+      );
+      await waitFor(() => expect(fetchHandle.calls()).toHaveLength(2));
+      await waitFor(() => expect(result.current.hasMore).toBe(true));
+      expect(result.current.sourceId).toBe("none");
+
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e3" }], false));
+      await act(async () => {
+        await result.current.loadMore();
+      });
+      await waitFor(() => expect(fetchHandle.calls()).toHaveLength(3));
+
+      const [first, second, third] = fetchHandle.calls().map((c) => new URL(c.url).searchParams);
+      expect(first.has("sourceId")).toBe(false);
+      expect(first.has("spaceId")).toBe(false);
+      expect(second.get("sourceId")).toBe("none");
+      expect(second.get("spaceId")).toBe("none");
+      expect(third.get("page")).toBe("2");
+      expect(third.get("sourceId")).toBe("none");
+      expect(third.get("spaceId")).toBe("none");
+    });
+  });
+
   describe("loadMore", () => {
     it("is a no-op before fetchEntities has been called (no config yet)", async () => {
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -209,6 +269,37 @@ describe("useEntityList", () => {
 
       expect(created?.id).toBe("e1");
       expect(result.current.entities.map((e) => e.id)).toEqual(["e1"]);
+    });
+
+    it("createEntity on a list filtered to \"none\" creates the entity with no source and no space", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
+      const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+        projectId: "test-project",
+      });
+      act(() =>
+        result.current.fetchEntities(
+          {},
+          undefined,
+          { sourceId: "none", spaceId: "none" },
+          { fetchImmediately: true },
+        ),
+      );
+      await waitFor(() => expect(result.current.sourceId).toBe("none"));
+
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ id: "e1", sourceId: null }, 201));
+      await act(async () => {
+        await result.current.createEntity({ title: "Hello" });
+      });
+
+      // The test Request shim keeps the fetch init (with the JSON body) on `init`.
+      const createReq = fetchHandle.fetchMock.mock.calls[1][0] as unknown as {
+        method: string;
+        init: { body?: string };
+      };
+      expect(createReq.method).toBe("POST");
+      const body = JSON.parse(createReq.init.body ?? "{}");
+      expect(body).not.toHaveProperty("sourceId");
+      expect(body).not.toHaveProperty("spaceId");
     });
 
     it("deleteEntity removes the entity from the list", async () => {
@@ -308,12 +399,11 @@ describe("useEntityList", () => {
 
   it("each fetchEntities call sets the whole config: an omitted spaceId isn't kept for loadMore", async () => {
     const [first, second, third] = await fetchTwiceThenLoadMore({ spaceId: "s1" }, {});
-    // No space filter: absent, or the explicit `null` the list sends (the
-    // server treats `spaceId=null` as unfiltered).
+    // No space filter: the param is left out.
     expect(first.get("spaceId")).toBe("s1");
-    expect(second.get("spaceId") ?? "null").toBe("null");
+    expect(second.has("spaceId")).toBe(false);
     expect(third.get("page")).toBe("2");
-    expect(third.get("spaceId") ?? "null").toBe("null");
+    expect(third.has("spaceId")).toBe(false);
   });
 
   it("an omitted spaceReputationId isn't kept for loadMore", async () => {

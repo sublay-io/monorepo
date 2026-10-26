@@ -93,7 +93,7 @@ Fetches a paginated, filterable list of spaces.
 ```typescript
 const { data, pagination } = await sublay.spaces.fetchManySpaces({
   sortBy: "members",
-  parentSpaceId: "null",
+  parentSpaceId: "none", // top-level spaces only
   limit: 20,
 });
 ```
@@ -126,8 +126,8 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
   `"true"` returns only spaces you belong to. `"false"` lists the same as leaving it out.
 </ParamField>
 
-<ParamField body="parentSpaceId" type="string">
-  Filter by parent space. Pass `"null"` for top-level spaces.
+<ParamField body="parentSpaceId" type='string | "none"'>
+  A space id returns that space's child spaces. `"none"` returns top-level spaces only. Left out: spaces at every level.
 </ParamField>
 
 <ParamField body="nsfwFilter" type='"include-all" | "exclude" | "only"'>

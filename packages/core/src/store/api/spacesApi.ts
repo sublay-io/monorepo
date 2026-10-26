@@ -44,7 +44,11 @@ interface FetchSpacesParams {
   // regardless of it — discoverability is driven by `visibility`, which the
   // server derives from the caller rather than accepting as a filter.
   memberOf?: boolean;
-  parentSpaceId?: string | null;
+  /**
+   * A space id (its child spaces), or `"none"` for top-level spaces only.
+   * `null` or left out: the default, `"none"`.
+   */
+  parentSpaceId?: string | "none" | null;
 }
 
 interface DeleteSpaceParams {
@@ -80,10 +84,8 @@ export const spacesApi = baseApi.injectEndpoints({
         if (search.searchFields) queryParams.append("searchFields", search.searchFields);
         // Sent as "true" / "false"; "false" lists the same as leaving it out.
         if (typeof params.memberOf === "boolean") queryParams.append("memberOf", String(params.memberOf));
-        if (params.parentSpaceId !== undefined) {
-          // Convert null to "null" string for API
-          queryParams.append("parentSpaceId", params.parentSpaceId === null ? "null" : params.parentSpaceId);
-        }
+        // Top-level spaces unless a parent is named; sent on every page.
+        queryParams.append("parentSpaceId", params.parentSpaceId ?? "none");
 
         return {
           url: `/${projectId}/spaces?${queryParams.toString()}`,

@@ -42,8 +42,8 @@ Creates a new space. Its creator — the signed-in user, or the user a service k
   Optional arbitrary key-value data. Up to 1 MB.
 </ParamField>
 
-<ParamField body="parentSpaceId" type="string">
-  Optional UUID of a parent space. The caller must be an admin of the parent space; when a service key creates the space for a user (`actingUserId`), that user must be.
+<ParamField body="parentSpaceId" type="string | null">
+  Optional UUID of a parent space. The caller must be an admin of the parent space; when a service key creates the space for a user (`actingUserId`), that user must be. For a top-level space, send `null` or leave it out; the string `"none"` is refused with `400 space/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
 </ParamField>
 
 <ParamField body="avatarFile" type="file">

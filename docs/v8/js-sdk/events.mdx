@@ -100,7 +100,7 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
 <ParamField body="timeWindow" type='"upcoming" | "ongoing" | "past"'>Derived time window.</ParamField>
 <ParamField body="startsAfter" type="string">ISO datetime lower bound on `startTime`.</ParamField>
 <ParamField body="startsBefore" type="string">ISO datetime upper bound on `startTime`.</ParamField>
-<ParamField body="spaceId" type="string">Restrict to one space.</ParamField>
+<ParamField body="spaceId" type='string | "none"'>Only this space's events, or `"none"` for events not in any space. Left out: every event.</ParamField>
 <ParamField body="hostId" type="string">Only events this user hosts.</ParamField>
 <ParamField body="type" type='"online" | "physical" | "hybrid"'>Filter by type.</ParamField>
 <ParamField body="status" type='"active" | "cancelled"'>Defaults to `"active"`.</ParamField>

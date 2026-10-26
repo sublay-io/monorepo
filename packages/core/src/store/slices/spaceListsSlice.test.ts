@@ -60,12 +60,21 @@ describe("spaceListsSlice", () => {
 
     it("ignores undefined filter values but applies explicit nulls", () => {
       let s = reducer(initial, initializeList({ listId: "feed" }));
-      s = reducer(
-        s,
-        updateFilters({ listId: "feed", filters: { query: undefined, parentSpaceId: null } }),
-      );
+      s = reducer(s, updateFilters({ listId: "feed", filters: { query: "x" } }));
+      s = reducer(s, updateFilters({ listId: "feed", filters: { query: null, memberOf: undefined } }));
       expect(s.lists.feed.query).toBeNull();
-      expect(s.lists.feed.parentSpaceId).toBeNull();
+      expect(s.lists.feed.memberOf).toBe(false);
+    });
+
+    it("parentSpaceId defaults to \"none\" (top-level), and null puts it back to the default", () => {
+      let s = reducer(initial, initializeList({ listId: "feed" }));
+      expect(s.lists.feed.parentSpaceId).toBe("none");
+      s = reducer(s, updateFilters({ listId: "feed", filters: { parentSpaceId: "p1" } }));
+      expect(s.lists.feed.parentSpaceId).toBe("p1");
+      s = reducer(s, updateFilters({ listId: "feed", filters: { parentSpaceId: undefined } }));
+      expect(s.lists.feed.parentSpaceId).toBe("p1");
+      s = reducer(s, updateFilters({ listId: "feed", filters: { parentSpaceId: null } }));
+      expect(s.lists.feed.parentSpaceId).toBe("none");
     });
 
     it("resetUnspecified resets all filter fields to defaults before applying new ones", () => {

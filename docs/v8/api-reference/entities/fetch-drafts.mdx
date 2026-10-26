@@ -23,11 +23,11 @@ Returns a paginated list of draft entities belonging to the authenticated user. 
 </ParamField>
 
 <ParamField query="sourceId" type="string">
-  Filter drafts by `sourceId`. Pass `"null"` to return drafts with no `sourceId`.
+  Only drafts with this exact `sourceId`. `none` returns drafts with no source. Left out, or sent empty, drafts from any source (or none) are returned. `null` and `undefined` are refused with `400 entity/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
 </ParamField>
 
 <ParamField query="spaceId" type="string">
-  Filter drafts by space ID. `null` means no space filter.
+  Only drafts in this space. `none` returns drafts in no space. Left out, or sent empty, drafts in any space or in none are returned. `null` and `undefined` are refused with `400 entity/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
 </ParamField>
 
 <ParamField query="include" type="string">
@@ -75,6 +75,17 @@ Each item is an [Entity](/v8/data-models/entity) with `isDraft: true`. Results a
 
     ```json
     { "error": "include: Unknown include `saved`. Allowed: user, space, files, grants.", "code": "entity/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported filter value — 400">
+    `null` or `undefined` as the value of `sourceId` or `spaceId`. The `error` names the spelling to use instead; for `spaceId` it reads ``Use `spaceId=none` for drafts in no space, or leave it out for any space.``
+
+    ```json
+    {
+      "error": "`sourceId=null` isn't supported. Use `sourceId=none` for drafts with no source, or leave it out for any source.",
+      "code": "entity/unsupported-param",
+      "param": "sourceId"
+    }
     ```
   </Accordion>
   <Accordion title="Unauthorized — 401">

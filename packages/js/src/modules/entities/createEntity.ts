@@ -4,7 +4,12 @@ import { Mention } from "../../interfaces/Mention";
 
 export interface CreateEntityProps {
   foreignId?: string;
-  sourceId?: string;
+  /**
+   * Where the entity comes from (free text, e.g. `"blog"`). `"none"`,
+   * `"null"` and `"undefined"` are reserved and refused. For no source, leave
+   * it out or pass `null`.
+   */
+  sourceId?: string | null;
   spaceId?: string;
   title?: string;
   content?: string;

@@ -58,8 +58,8 @@ function ProfileComments({ userId }: { userId: string }) {
   Only comments on this entity.
 </ParamField>
 
-<ParamField body="sourceId" type="string | null" optional>
-  Only comments on entities with this `sourceId`.
+<ParamField body="sourceId" type='string | "none" | null' optional>
+  Only comments on entities from this source, or `"none"` for comments on entities with no source. Left out or `null`: any source.
 </ParamField>
 
 <ParamField body="blockedFilter" type='"exclude" | "include-outbound-blocked" | null' optional>

@@ -54,9 +54,11 @@ fetchSpaces({ sortBy: "createdAt", memberOf: true });
 // Fetch only child spaces of a parent
 fetchSpaces({ sortBy: "createdAt", parentSpaceId: "parent-space-id" });
 
-// Fetch top-level spaces only
-fetchSpaces({ sortBy: "createdAt", parentSpaceId: null });
+// Back to top-level spaces only (the default; null does the same)
+fetchSpaces({ sortBy: "createdAt", parentSpaceId: "none" });
 ```
+
+A space list shows top-level spaces by default: it sends `parentSpaceId: "none"` on every page, including `loadMore` and a re-sort, until you name a parent.
 
 ### Sort Options
 

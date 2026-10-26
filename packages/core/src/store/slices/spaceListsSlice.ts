@@ -25,7 +25,8 @@ export interface SpaceListState {
   query: string | null;
   searchFields: SpaceSearchFields | null;
   memberOf: boolean;
-  parentSpaceId: string | null;
+  /** A space id, or `"none"` (top-level spaces only, the default). */
+  parentSpaceId: string | "none";
 }
 
 // Root state for all space lists
@@ -51,7 +52,8 @@ const createDefaultSpaceListState = (): SpaceListState => ({
   query: null,
   searchFields: null,
   memberOf: false,
-  parentSpaceId: undefined as any, // Will be set when fetchSpaces is called
+  // Top-level spaces. Sent on every page, so later pages and re-sorts keep it.
+  parentSpaceId: "none",
 });
 
 // Initial state
@@ -66,7 +68,11 @@ export interface SpaceListFilters {
   query?: string | null;
   searchFields?: SpaceSearchFields | null;
   memberOf?: boolean;
-  parentSpaceId?: string | null;
+  /**
+   * A space id (its child spaces), or `"none"` for top-level spaces only.
+   * `null` or left out: the default, `"none"`.
+   */
+  parentSpaceId?: string | "none" | null;
 }
 
 // Configuration for space list operations
@@ -160,6 +166,10 @@ export const spaceListsSlice = createSlice({
           (list as any)[key] = filters[key as keyof typeof filters];
         }
       });
+      // `null` on the parent filter means "not set": back to the default.
+      if (filters.parentSpaceId === null) {
+        list.parentSpaceId = createDefaultSpaceListState().parentSpaceId;
+      }
 
       // Update config if provided
       if (action.payload.config) {

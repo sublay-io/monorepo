@@ -42,7 +42,8 @@ export interface FetchManyEventsProps {
   startsBefore?: string; // ISO datetime
 
   // Scope / attribute filters
-  spaceId?: string;
+  /** Only this space's events, or `"none"` for events not in any space. Left out: every event. */
+  spaceId?: string | "none";
   hostId?: string;
   type?: EventType;
   status?: EventStatus; // defaults to "active" server-side

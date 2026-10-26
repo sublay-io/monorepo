@@ -48,6 +48,20 @@ function Feed() {
   Optional. A function called for each entity with a `foreignId`. Its result is merged into the entity under an `infusion` key. See [Infusing Data](/v8/sdk/entity-lists/infuse-data).
 </ParamField>
 
+## Source and space
+
+By default the list has no source or space filter, so it shows every entity. The `config` object passed to `fetchEntities` narrows it:
+
+<ParamField path="config.sourceId" type='string | "none" | null'>
+  Only entities from this source, or `"none"` for entities with no source. `null` or left out: no source filter (the default), so entities from any source, or none.
+</ParamField>
+
+<ParamField path="config.spaceId" type='string | "none" | null'>
+  Only entities in this space, or `"none"` for entities in no space. `null` or left out: no space filter (the default).
+</ParamField>
+
+A filter set to `null` is left out of the request; `"none"` is sent only when you pass it (see [Saying "no value"](/v8/authentication#saying-no-value)). `createEntity` gives the new entity the list's source and space; a list filtered to `"none"` creates it with no source or no space.
+
 ## Reputation
 
 The `config` object passed to `fetchEntities` accepts an optional `spaceReputation` object that opts each row's embedded author into an added `spaceReputation` number. See [Reputation](/v8/data-models/reputation).
@@ -127,8 +141,8 @@ The `config` object passed to `fetchEntities` accepts an optional `spaceReputati
   Active time frame filter.
 </ResponseField>
 
-<ResponseField name="sourceId" type="string | null">
-  Active source ID filter (from config).
+<ResponseField name="sourceId" type='string | "none" | null'>
+  The source filter in use (from config): a source id, `"none"` (entities with no source), or `null` when no source filter is set (every entity).
 </ResponseField>
 
 <ResponseField name="userId" type="string | null">

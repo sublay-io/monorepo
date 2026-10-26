@@ -19,8 +19,11 @@ export interface FetchCommentsByUserIdBaseProps extends SpaceReputationContextPa
   userId: string;
   /** Only comments on this entity. */
   entityId?: string | null;
-  /** Only comments on entities from this source. */
-  sourceId?: string | null;
+  /**
+   * Only comments on entities from this source, or `"none"` for comments on
+   * entities with no source. `null` or left out: any source.
+   */
+  sourceId?: string | "none" | null;
   /** Server default: `"exclude"`. */
   blockedFilter?: BlockedFilter | null;
   /** Server default: `"createdAt"`. */

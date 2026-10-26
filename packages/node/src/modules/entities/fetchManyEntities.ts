@@ -42,8 +42,10 @@ export interface LocationFilters {
 export interface FetchManyEntitiesBaseProps
   extends SpaceReputationContextParams,
     TopCommentsParams {
-  sourceId?: string;
-  spaceId?: string;
+  /** Only entities from this source, or `"none"` for entities with no source. Left out: any source. */
+  sourceId?: string | "none";
+  /** Only entities in this space, or `"none"` for entities in no space. Left out: any space, or none. */
+  spaceId?: string | "none";
 
   // Sorting & Pagination
   // `metadata.<prop>` sorts by a metadata field.

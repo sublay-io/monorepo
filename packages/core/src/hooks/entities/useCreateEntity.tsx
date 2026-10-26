@@ -36,7 +36,12 @@ interface FileUploadConfig {
 
 export interface CreateEntityProps {
   foreignId?: string;
-  sourceId?: string;
+  /**
+   * Where the entity comes from (free text, e.g. `"blog"`). `"none"`,
+   * `"null"` and `"undefined"` are reserved and refused. For no source, leave
+   * it out or pass `null`.
+   */
+  sourceId?: string | null;
   spaceId?: string;
   title?: string;
   content?: string;
@@ -91,7 +96,8 @@ function useCreateEntity(): (props: CreateEntityProps) => Promise<Entity> {
 
         // Append standard entity fields
         if (foreignId !== undefined) formData.append("foreignId", foreignId);
-        if (sourceId !== undefined) formData.append("sourceId", sourceId);
+        // Multipart has no null: "no source" is the field left out.
+        if (sourceId != null) formData.append("sourceId", sourceId);
         if (spaceId !== undefined) formData.append("spaceId", spaceId);
         if (title !== undefined) formData.append("title", title);
         if (content !== undefined) formData.append("content", content);

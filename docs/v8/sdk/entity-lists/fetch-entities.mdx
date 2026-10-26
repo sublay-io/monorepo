@@ -79,11 +79,13 @@ fetchEntities(
 | Param | Type | Description |
 |-------|------|-------------|
 | `limit` | `number` | Results per page. Default: `10` |
-| `sourceId` | `string` | Filter to a specific source section |
-| `spaceId` | `string` | Filter to a specific space |
+| `sourceId` | `string \| "none"` | Only entities from this source, or `"none"` for entities with no source. Default: no source filter, so every entity |
+| `spaceId` | `string \| "none"` | Only entities in this space, or `"none"` for entities in no space. Default: no space filter |
 | `include` | `EntityIncludeParam` | Populate related data, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"` |
 | `topCommentsLimit` | `number` | With `"topComments"` included: top comments per entity. Server default `1`, max `5`. Not sent when `include` doesn't contain `"topComments"` |
 | `topCommentsSortByReaction` | `ReactionType` | With `"topComments"` included: the reaction whose raw count ranks them. Server default `"upvote"`. Not sent when `include` doesn't contain `"topComments"` |
+
+A filter set to `null` is left out of the request, the same as leaving it out; `"none"` is sent only when you pass it (see [Saying "no value"](/v8/authentication#saying-no-value)).
 
 Each `fetchEntities` call sets the whole list config: a field you leave out goes back to its default (`limit` 10, the others unset) rather than keeping the value from the previous call, and `loadMore` uses the config of the last `fetchEntities` call.
 

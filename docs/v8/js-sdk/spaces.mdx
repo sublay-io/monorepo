@@ -115,7 +115,7 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
 </ParamField>
 
 <ParamField body="query" type="string">
-  Free-text search term, matched as a case-insensitive substring. Trimmed; must not be blank.
+  Free-text search term, matched as a case-insensitive substring. Trimmed; a blank value returns `400 space/invalid-query`.
 </ParamField>
 
 <ParamField body="searchFields" type='"slug" | "name" | "description"'>
@@ -123,7 +123,7 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
 </ParamField>
 
 <ParamField body="parentSpaceId" type='string | "none"'>
-  A space id returns that space's public child spaces; this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). `"none"` returns top-level spaces only. Left out: spaces at every level.
+  A space id returns that space's public child spaces; this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `"none"` returns top-level spaces only. Left out: spaces at every level.
 </ParamField>
 
 <ParamField body="nsfwFilter" type='"include-all" | "exclude" | "only"'>
@@ -199,7 +199,7 @@ const userSpaces = await sublay.spaces.fetchUserSpaces({
 </ParamField>
 
 <ParamField body="query" type="string">
-  Free-text search term within the user's spaces, matched as a case-insensitive substring. Trimmed; must not be blank.
+  Free-text search term within the user's spaces, matched as a case-insensitive substring. Trimmed; a blank value returns `400 space/invalid-query`.
 </ParamField>
 
 <ParamField body="searchFields" type='"slug" | "name" | "description"'>

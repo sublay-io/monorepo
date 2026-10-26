@@ -57,7 +57,7 @@ function SpaceSearch() {
 </ParamField>
 
 <ParamField path="parentSpaceId" type='string | "none" | null'>
-  A space id returns that space's public child spaces; this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). `"none"` returns top-level spaces only. Left out or `null`: no parent filter, so spaces at every level are returned.
+  A space id returns that space's public child spaces; this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `"none"` returns top-level spaces only. Left out or `null`: no parent filter, so spaces at every level are returned.
 </ParamField>
 
 <ParamField path="nsfwFilter" type='"include-all" | "exclude" | "only"'>

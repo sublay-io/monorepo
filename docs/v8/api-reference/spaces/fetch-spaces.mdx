@@ -41,7 +41,7 @@ Fetches a paginated list of public spaces: the space directory. Supports text se
 </ParamField>
 
 <ParamField query="parentSpaceId" type="string">
-  A space id lists that space's public child spaces: this is how to page through a space's sub-spaces (add `sortBy=alphabetical` to order them A–Z by name). `none` lists top-level spaces only (spaces with no parent). Left out, or sent empty, the list includes spaces at every level. `null` and `undefined` are refused with `400 space/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
+  A space id lists that space's public child spaces: this is how to page through a space's sub-spaces (add `sortBy=alphabetical` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `none` lists top-level spaces only (spaces with no parent). Left out, or sent empty, the list includes spaces at every level. `null` and `undefined` are refused with `400 space/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
 </ParamField>
 
 <ParamField query="nsfwFilter" type="string">

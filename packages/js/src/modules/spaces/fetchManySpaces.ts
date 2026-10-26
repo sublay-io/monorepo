@@ -9,8 +9,6 @@ export interface FetchManySpacesProps extends SpaceSearchParams {
   limit?: number;
   sortBy?: "createdAt" | "alphabetical" | "members";
   sortDir?: "asc" | "desc";
-  /** `"true"`: only spaces the signed-in user is a member of. `"false"` is the same as leaving it out. */
-  memberOf?: "true" | "false";
   /**
    * A space id (its child spaces), or `"none"` for top-level spaces only.
    * Left out: spaces at every level.

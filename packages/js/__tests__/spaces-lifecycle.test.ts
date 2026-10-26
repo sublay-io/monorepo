@@ -2,7 +2,6 @@ import {
   checkSlugAvailability,
   createSpace,
   deleteSpace,
-  fetchChildSpaces,
   fetchManySpaces,
   fetchMutualSpaces,
   fetchSpace,
@@ -175,11 +174,16 @@ describe("js-sdk spaces (lifecycle) — request shaping", () => {
     });
   });
 
-  it("fetchChildSpaces strips spaceId into the path and passes the rest as params", async () => {
+  it("fetchUserSpaces forwards query, searchFields, sortBy and sortDir", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchChildSpaces(client, { spaceId: "s1", page: 2, limit: 10 });
-    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/children", {
-      params: { page: 2, limit: 10 },
+    await fetchUserSpaces(client, {
+      query: "design",
+      searchFields: "name",
+      sortBy: "members",
+      sortDir: "asc",
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/user-spaces", {
+      params: { query: "design", searchFields: "name", sortBy: "members", sortDir: "asc" },
     });
   });
 
@@ -377,25 +381,6 @@ describe("js-sdk spaces (lifecycle) — response mapping", () => {
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
 
     const result = await fetchUserSpaces(client, {});
-
-    expect(result).toEqual(envelope);
-  });
-
-  it("fetchChildSpaces returns the full PaginatedResponse envelope", async () => {
-    const { client, projectInstance } = makeClient();
-    const envelope = {
-      data: [{ id: "s2" }],
-      pagination: {
-        page: 1,
-        pageSize: 20,
-        totalPages: 1,
-        totalItems: 1,
-        hasMore: false,
-      },
-    };
-    projectInstance.get.mockResolvedValueOnce({ data: envelope });
-
-    const result = await fetchChildSpaces(client, { spaceId: "s1" });
 
     expect(result).toEqual(envelope);
   });

@@ -52,6 +52,31 @@ describe("useFetchUserSpaces", () => {
     expect(call.config?.params).toMatchObject({ role: "admin,moderator", all: true });
   });
 
+  it("sends query, searchFields, sortBy and sortDir, and leaves a blank query out", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchUserSpaces());
+
+    axiosPrivate.mockResponse("get", makeResponse());
+    axiosPrivate.mockResponse("get", makeResponse());
+
+    await act(async () => {
+      await result.current({ query: "des", searchFields: "name", sortBy: "alphabetical", sortDir: "desc" });
+    });
+    await act(async () => {
+      await result.current({ query: "  ", searchFields: "slug", sortBy: "members" });
+    });
+
+    const [first, second] = axiosPrivate.calls("get");
+    expect(first.config?.params).toMatchObject({
+      query: "des",
+      searchFields: "name",
+      sortBy: "alphabetical",
+      sortDir: "desc",
+    });
+    expect(second.config?.params).toMatchObject({ sortBy: "members" });
+    expect(second.config?.params).not.toHaveProperty("query");
+    expect(second.config?.params).not.toHaveProperty("searchFields");
+  });
+
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchUserSpaces());
 

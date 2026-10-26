@@ -1,12 +1,14 @@
 import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
 import { UserSpacesResponse, SpaceIncludeParam } from "../../interfaces/Space";
+import { SpaceSearchParams } from "../../interfaces/SpaceSearch";
 
-export interface FetchUserSpacesProps {
+export interface FetchUserSpacesProps extends SpaceSearchParams {
   actingUserId: string;
   page?: number;
   limit?: number;
-  sortBy?: "createdAt" | "alphabetical" | "members" | "joinedAt";
+  /** Left out: `"joinedAt"` (when the user joined each space, most recent first). */
+  sortBy?: "joinedAt" | "createdAt" | "alphabetical" | "members";
   sortDir?: "asc" | "desc";
   include?: SpaceIncludeParam;
   role?: string; // single role or comma-separated, e.g. "admin,moderator"

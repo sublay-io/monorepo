@@ -4,6 +4,8 @@ import { UserSpacesResponse, SpaceIncludeParam } from "../../interfaces/models/S
 import { SpaceMemberRole } from "../../interfaces/models/SpaceMember";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { UserSpacesSortByOptions } from "../../interfaces/SpaceListSortByOptions";
+import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
+import { buildSearchParams } from "../../utils/searchParams";
 
 export interface FetchUserSpacesProps {
   page?: number;
@@ -11,6 +13,13 @@ export interface FetchUserSpacesProps {
   status?: "active" | "pending" | "banned";
   role?: SpaceMemberRole | SpaceMemberRole[];
   all?: boolean;
+  /**
+   * Text search over the user's spaces. Blank or left out: no filter, and
+   * `searchFields` is left out with it.
+   */
+  query?: string | null;
+  /** The space field `query` matches. Left out: `slug`, `name` or `description`. */
+  searchFields?: SpaceSearchFields | null;
   /** Server default `"joinedAt"` (most recently joined first). */
   sortBy?: UserSpacesSortByOptions;
   sortDir?: "asc" | "desc";
@@ -27,13 +36,14 @@ function useFetchUserSpaces(): (params?: FetchUserSpacesProps) => Promise<UserSp
         throw new Error("No projectId available.");
       }
 
-      const { include, role, ...rest } = params;
+      const { include, role, query, searchFields, ...rest } = params;
 
       const response = await axios.get<UserSpacesResponse>(
         `/${projectId}/spaces/user-spaces`,
         {
           params: {
             ...rest,
+            ...buildSearchParams(query, searchFields),
             include: Array.isArray(include) ? include.join(",") : include,
             role: Array.isArray(role) ? role.join(",") : role,
           },

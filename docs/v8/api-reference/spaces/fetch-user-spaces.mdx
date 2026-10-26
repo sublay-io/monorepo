@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/spaces/user-spaces"
 description: "Get the spaces a user is a member of"
 ---
 
-Returns a paginated list of spaces a user has a membership in — the signed-in user, or with a service key the user named by `actingUserId` — along with their membership details for each space. By default only active memberships are returned; use `status` to list pending join requests or spaces the user was banned from.
+Returns a paginated list of spaces a user has a membership in — the signed-in user, or with a service key the user named by `actingUserId` — along with their membership details for each space. Spaces of every visibility are listed (`public`, `unlisted` and `private`), so this is the endpoint for a "my spaces" screen; [Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) lists public spaces only. By default only active memberships are returned; use `status` to list pending join requests or spaces the user was banned from. `query` searches within the user's spaces.
 
 ## Query Parameters
 
@@ -26,8 +26,16 @@ Returns a paginated list of spaces a user has a membership in — the signed-in 
   Results per page. Max `100`.
 </ParamField>
 
+<ParamField query="query" type="string">
+  Free-text search term, matched as a case-insensitive substring, the same way as on [Fetch Spaces](/v8/api-reference/spaces/fetch-spaces). Trimmed; a blank value returns `400 space/invalid-query`. Leave it out for no text filtering.
+</ParamField>
+
+<ParamField query="searchFields" type="string">
+  The one field `query` is matched against: `"slug"`, `"name"` or `"description"`. Left out, `query` matches the slug, the name or the description. Values match exactly; any other value returns `400 space/invalid-query`.
+</ParamField>
+
 <ParamField query="sortBy" type="string">
-  Sort order: `"joinedAt"` (when the user joined), `"createdAt"` (when the space was created), `"alphabetical"` (by name) or `"members"` (by active member count). Defaults to `"joinedAt"`.
+  Sort order: `"joinedAt"` (when the user joined), `"createdAt"` (when the space was created), `"alphabetical"` (by name) or `"members"` (by active member count). Defaults to `"joinedAt"`. Ties are broken by a stable order, so pages neither repeat nor skip a space.
 </ParamField>
 
 <ParamField query="sortDir" type="string">
@@ -84,7 +92,7 @@ Returns a paginated list of spaces a user has a membership in — the signed-in 
     ```
   </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy`, `sortDir` or `include` value, or an `actingUserId` that isn't a valid UUID. `error` names the first problem found.
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy`, `sortDir`, `searchFields` or `include` value, a blank `query`, or an `actingUserId` that isn't a valid UUID. `error` names the first problem found.
 
     ```json
     { "error": "include: Unknown include `members`. Allowed: files.", "code": "space/invalid-query" }

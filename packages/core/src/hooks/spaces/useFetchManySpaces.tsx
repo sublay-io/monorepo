@@ -15,7 +15,6 @@ export interface FetchManySpacesProps {
   sortDir?: "asc" | "desc";
   query?: string | null;
   searchFields?: SpaceSearchFields | null;
-  memberOf?: boolean;
   /**
    * A space id (its child spaces), or `"none"` for top-level spaces only.
    * `null` or left out: no parent filter, so spaces at every level.
@@ -42,8 +41,6 @@ function useFetchManySpaces(): (params?: FetchManySpacesProps) => Promise<Pagina
       if (params?.sortBy) queryParams.sortBy = params.sortBy;
       if (params?.sortDir) queryParams.sortDir = params.sortDir;
       Object.assign(queryParams, buildSearchParams(params?.query, params?.searchFields));
-      // Sent as "true" / "false"; "false" lists the same as leaving it out.
-      if (typeof params?.memberOf === "boolean") queryParams.memberOf = String(params.memberOf);
       if (params?.parentSpaceId != null) queryParams.parentSpaceId = params.parentSpaceId;
       if (params?.nsfwFilter) queryParams.nsfwFilter = params.nsfwFilter;
       if (params?.include) {

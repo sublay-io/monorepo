@@ -270,7 +270,6 @@
                   "v8/hooks/spaces/use-fetch-many-spaces",
                   "v8/hooks/spaces/use-fetch-user-spaces",
                   "v8/hooks/spaces/use-fetch-mutual-spaces",
-                  "v8/hooks/spaces/use-fetch-space-children",
                   "v8/hooks/spaces/use-fetch-space-breadcrumb",
                   "v8/hooks/spaces/use-fetch-space-members",
                   "v8/hooks/spaces/use-fetch-space-team",
@@ -785,7 +784,6 @@
                   "v8/api-reference/spaces/check-slug",
                   "v8/api-reference/spaces/update-space",
                   "v8/api-reference/spaces/delete-space",
-                  "v8/api-reference/spaces/fetch-children",
                   "v8/api-reference/spaces/fetch-breadcrumb"
                 ]
               },
@@ -2721,5 +2719,15 @@
     "playground": {
       "display": "none"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/v8/api-reference/spaces/fetch-children",
+      "destination": "/v8/api-reference/spaces/fetch-spaces"
+    },
+    {
+      "source": "/v8/hooks/spaces/use-fetch-space-children",
+      "destination": "/v8/hooks/spaces/use-fetch-many-spaces"
+    }
+  ]
 }

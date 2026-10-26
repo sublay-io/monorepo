@@ -12,8 +12,6 @@ export { default as useFetchSpaceBySlug } from "./useFetchSpaceBySlug";
 export type { FetchSpaceBySlugProps } from "./useFetchSpaceBySlug";
 export { default as useFetchSpaceBreadcrumb } from "./useFetchSpaceBreadcrumb";
 export type { FetchSpaceBreadcrumbProps } from "./useFetchSpaceBreadcrumb";
-export { default as useFetchSpaceChildren } from "./useFetchSpaceChildren";
-export type { FetchSpaceChildrenProps } from "./useFetchSpaceChildren";
 export { default as useFetchManySpaces } from "./useFetchManySpaces";
 export type { FetchManySpacesProps } from "./useFetchManySpaces";
 

@@ -44,13 +44,13 @@ describe("spaceListsSlice", () => {
         initial,
         updateFilters({
           listId: "feed",
-          filters: { query: "foo", memberOf: true, sortBy: "members" },
+          filters: { query: "foo", searchFields: "name", sortBy: "members" },
           config: { limit: 50 },
         }),
       );
       const list = s.lists.feed;
       expect(list.query).toBe("foo");
-      expect(list.memberOf).toBe(true);
+      expect(list.searchFields).toBe("name");
       expect(list.sortBy).toBe("members");
       expect(list.limit).toBe(50);
       expect(list.page).toBe(1);
@@ -61,9 +61,9 @@ describe("spaceListsSlice", () => {
     it("ignores undefined filter values but applies explicit nulls", () => {
       let s = reducer(initial, initializeList({ listId: "feed" }));
       s = reducer(s, updateFilters({ listId: "feed", filters: { query: "x" } }));
-      s = reducer(s, updateFilters({ listId: "feed", filters: { query: null, memberOf: undefined } }));
+      s = reducer(s, updateFilters({ listId: "feed", filters: { query: null, searchFields: undefined } }));
       expect(s.lists.feed.query).toBeNull();
-      expect(s.lists.feed.memberOf).toBe(false);
+      expect(s.lists.feed.searchFields).toBeNull();
     });
 
     it("parentSpaceId defaults to \"none\" (top-level), and null puts it back to the default", () => {
@@ -82,7 +82,7 @@ describe("spaceListsSlice", () => {
         initial,
         updateFilters({
           listId: "feed",
-          filters: { query: "foo", memberOf: true, sortBy: "members" },
+          filters: { query: "foo", searchFields: "name", sortBy: "members" },
         }),
       );
       s = reducer(
@@ -94,7 +94,7 @@ describe("spaceListsSlice", () => {
         }),
       );
       expect(s.lists.feed.query).toBeNull();
-      expect(s.lists.feed.memberOf).toBe(false);
+      expect(s.lists.feed.searchFields).toBeNull();
       expect(s.lists.feed.sortBy).toBe("alphabetical"); // new value still applied after reset
     });
   });

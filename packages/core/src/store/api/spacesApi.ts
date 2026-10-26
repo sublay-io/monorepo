@@ -39,11 +39,8 @@ interface FetchSpacesParams {
   sortDir?: "asc" | "desc";
   query?: string | null;
   searchFields?: SpaceSearchFields | null;
-  // No readingPermission filter: it governs who can read a space's contents,
-  // not which spaces are discoverable. The server returns all spaces
-  // regardless of it — discoverability is driven by `visibility`, which the
-  // server derives from the caller rather than accepting as a filter.
-  memberOf?: boolean;
+  // The directory lists public spaces only. A user's own spaces (any
+  // visibility) come from `/spaces/user-spaces` (`useFetchUserSpaces`).
   /**
    * A space id (its child spaces), or `"none"` for top-level spaces only.
    * `null` or left out: the default, `"none"`.
@@ -82,8 +79,6 @@ export const spacesApi = baseApi.injectEndpoints({
         const search = buildSearchParams(params.query, params.searchFields);
         if (search.query) queryParams.append("query", search.query);
         if (search.searchFields) queryParams.append("searchFields", search.searchFields);
-        // Sent as "true" / "false"; "false" lists the same as leaving it out.
-        if (typeof params.memberOf === "boolean") queryParams.append("memberOf", String(params.memberOf));
         // Top-level spaces unless a parent is named; sent on every page.
         queryParams.append("parentSpaceId", params.parentSpaceId ?? "none");
 

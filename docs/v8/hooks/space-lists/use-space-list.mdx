@@ -6,7 +6,7 @@ icon: "cube"
 
 ## Overview
 
-`useSpaceList` provides a stateful, paginated list of spaces with support for filtering, sorting, search, and creation. Each list is identified by a `listId` and maintains independent Redux state, allowing multiple lists on the same page.
+`useSpaceList` provides a stateful, paginated list of public spaces (the space directory) with support for filtering, sorting, search, and creation. For the spaces the current user is a member of, whatever their visibility, use [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces). Each list is identified by a `listId` and maintains independent Redux state, allowing multiple lists on the same page.
 
 For full integration guidance, see [Space Lists](/v8/sdk/spaces/space-lists).
 
@@ -62,7 +62,6 @@ function SpaceDirectory() {
       sortDir?: "asc" | "desc" | null; // null: the sort's natural direction
       query?: string | null; // a blank value is left out of the request
       searchFields?: "slug" | "name" | "description" | null; // null: slug, name or description
-      memberOf?: boolean;
       parentSpaceId?: string | "none" | null; // "none" (the default): top-level spaces only
     },
     config?: { limit?: number },
@@ -125,10 +124,6 @@ function SpaceDirectory() {
   The field the current search term is matched against. `null` matches the slug, the name or the description.
 </ResponseField>
 
-<ResponseField name="memberOf" type="boolean">
-  Current membership filter from Redux state.
-</ResponseField>
-
 <ResponseField name="parentSpaceId" type='string | "none"'>
-  The parent filter in use: a space id (its child spaces), or `"none"` (top-level spaces only), the default. Every page, including `loadMore` and a re-sort, is fetched with it.
+  The parent filter in use: a space id (its public child spaces), or `"none"` (top-level spaces only), the default. Every page, including `loadMore` and a re-sort, is fetched with it.
 </ResponseField>

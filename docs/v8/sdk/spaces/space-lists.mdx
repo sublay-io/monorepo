@@ -3,7 +3,7 @@ title: "Space Lists"
 description: "Browse, search, and paginate spaces with filtering and sorting"
 ---
 
-The `useSpaceList` hook provides a Redux-backed, paginated list of spaces with support for filtering, sorting, and search. It is designed for discovery pages, community browsers, and admin dashboards.
+The `useSpaceList` hook provides a Redux-backed, paginated list of spaces with support for filtering, sorting, and search. It lists public spaces only (the space directory), for discovery and browse pages. For the spaces the current user is a member of, see [My spaces](#my-spaces) below.
 
 ## Basic Usage
 
@@ -48,11 +48,8 @@ fetchSpaces({ sortBy: "createdAt", query: "gaming", searchFields: "name" });
 // Search the slug, name and description (null clears a searchFields set by an earlier call)
 fetchSpaces({ sortBy: "createdAt", query: "design", searchFields: null });
 
-// Filter to spaces the current user is a member of
-fetchSpaces({ sortBy: "createdAt", memberOf: true });
-
-// Fetch only child spaces of a parent
-fetchSpaces({ sortBy: "createdAt", parentSpaceId: "parent-space-id" });
+// A space's public sub-spaces, A–Z
+fetchSpaces({ sortBy: "alphabetical", parentSpaceId: "parent-space-id" });
 
 // Back to top-level spaces only (the default; null does the same)
 fetchSpaces({ sortBy: "createdAt", parentSpaceId: "none" });
@@ -95,12 +92,23 @@ await deleteSpace({ spaceId: "space-id" });
 Each `useSpaceList` call uses a `listId` to maintain independent Redux state. You can have multiple lists on the same page without interference:
 
 ```tsx
-const allSpaces = useSpaceList({ listId: "all" });
-const mySpaces = useSpaceList({ listId: "my-spaces" });
+const newest = useSpaceList({ listId: "newest" });
+const subSpaces = useSpaceList({ listId: "sub-spaces" });
 
 // Both lists are independent
-allSpaces.fetchSpaces({ sortBy: "createdAt" });
-mySpaces.fetchSpaces({ sortBy: "createdAt", memberOf: true });
+newest.fetchSpaces({ sortBy: "createdAt" });
+subSpaces.fetchSpaces({ sortBy: "alphabetical", parentSpaceId: "parent-space-id" });
+```
+
+## My Spaces
+
+A space list never includes `unlisted` or `private` spaces, even ones the user belongs to. For a "my spaces" screen, use [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces): it lists the spaces the current user is a member of, whatever their visibility, with their membership on each, and takes its own `query`, `searchFields`, `sortBy` (`"joinedAt"`, the default, `"createdAt"`, `"members"` or `"alphabetical"`) and `sortDir`.
+
+```tsx
+const fetchUserSpaces = useFetchUserSpaces();
+
+const { data } = await fetchUserSpaces({ query: "design", sortBy: "alphabetical" });
+// data: { space, membership }[]
 ```
 
 ## Return Values
@@ -140,4 +148,4 @@ mySpaces.fetchSpaces({ sortBy: "createdAt", memberOf: true });
 | [`useSpaceList`](/v8/hooks/space-lists/use-space-list) | Main hook for paginated space lists |
 | [`useSpaceListActions`](/v8/hooks/space-lists/use-space-list-actions) | Low-level list actions (used internally by `useSpaceList`) |
 | [`useFetchManySpaces`](/v8/hooks/spaces/use-fetch-many-spaces) | One-off fetch of multiple spaces |
-| [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces) | Fetch spaces the current user is a member of |
+| [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces) | Fetch, search and sort the spaces the current user is a member of |

@@ -63,7 +63,6 @@ export interface UseSpaceListValues {
   sortDir: SortDirection | null;
   query: string | null;
   searchFields: SpaceSearchFields | null;
-  memberOf: boolean;
   /** The parent filter in use: a space id, or `"none"` (top-level, the default). */
   parentSpaceId: string | "none";
 
@@ -147,7 +146,6 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
           sortDir: null,
           query: null,
           searchFields: null,
-          memberOf: false,
           parentSpaceId: "none",
         };
         const finalFilters = { ...currentState };
@@ -158,7 +156,6 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
           finalFilters.sortDir = null;
           finalFilters.query = null;
           finalFilters.searchFields = null;
-          finalFilters.memberOf = false;
           finalFilters.parentSpaceId = "none";
         }
 
@@ -185,7 +182,6 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
             sortDir: finalFilters.sortDir,
             query: finalFilters.query,
             searchFields: finalFilters.searchFields,
-            memberOf: finalFilters.memberOf,
             parentSpaceId: finalFilters.parentSpaceId,
             // Configuration parameters from current config
             limit: currentConfig.limit,
@@ -245,7 +241,6 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
         sortDir: spaceList.sortDir,
         query: spaceList.query,
         searchFields: spaceList.searchFields,
-        memberOf: spaceList.memberOf,
         parentSpaceId: spaceList.parentSpaceId,
         // Configuration parameters from state (single source of truth)
         limit: config.limit,
@@ -300,7 +295,6 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
       sortDir: filters?.sortDir || null,
       query: filters?.query || null,
       searchFields: filters?.searchFields || null,
-      memberOf: filters?.memberOf || false,
       parentSpaceId: filters?.parentSpaceId ?? "none",
 
       fetchSpaces: handleFetchSpaces,

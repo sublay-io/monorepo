@@ -36,22 +36,22 @@ describe("useFetchManySpaces", () => {
     expect(call.config?.params).toMatchObject({ page: 1, sortBy: "createdAt", query: "design" });
   });
 
-  it("sends searchFields, memberOf as 'true'/'false', and leaves a blank query out", async () => {
+  it("sends searchFields with a query, and leaves a blank query out", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManySpaces());
 
     axiosPrivate.mockResponse("get", makePage([]));
     axiosPrivate.mockResponse("get", makePage([]));
 
     await act(async () => {
-      await result.current({ query: "des", searchFields: "slug", memberOf: true });
+      await result.current({ query: "des", searchFields: "slug" });
     });
     await act(async () => {
-      await result.current({ query: "   ", memberOf: false });
+      await result.current({ query: "   ", searchFields: "name" });
     });
 
     const [first, second] = axiosPrivate.calls("get");
-    expect(first.config?.params).toMatchObject({ query: "des", searchFields: "slug", memberOf: "true" });
-    expect(second.config?.params).toMatchObject({ memberOf: "false" });
+    expect(first.config?.params).toMatchObject({ query: "des", searchFields: "slug" });
+    expect(second.config?.params).not.toHaveProperty("searchFields");
     expect(second.config?.params).not.toHaveProperty("query");
   });
 

@@ -221,7 +221,6 @@ Base path: `/v8/:projectId/`
 | PATCH | `/spaces/:spaceId/reports/comment/:reportId` | can access with a key | `spaces.handleCommentReport` | yes |
 | PATCH | `/spaces/:spaceId/entities/:entityId/moderation` | can access with a key | `spaces.moderateSpaceEntity` | yes |
 | PATCH | `/spaces/:spaceId/comments/:commentId/moderation` | can access with a key | `spaces.moderateSpaceComment` | yes |
-| GET | `/spaces/:spaceId/children` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchChildSpaces` | yes |
 | GET | `/spaces/:spaceId/breadcrumb` | no key needed | `spaces.fetchSpaceBreadcrumb` | yes |
 | GET | `/spaces/:spaceId/rules` | no key needed | `spaces.fetchManyRules` | yes |
 | PATCH | `/spaces/:spaceId/rules/reorder` | can access with a key | `spaces.reorderRules` | yes |

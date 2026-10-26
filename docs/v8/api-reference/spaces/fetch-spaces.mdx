@@ -1,19 +1,19 @@
 ---
 title: "Fetch Spaces"
 api: "GET /v8/:projectId/spaces"
-description: "Get a paginated list of spaces with filtering and sorting"
+description: "Get a paginated list of public spaces with filtering and sorting"
 ---
 
-Fetches a paginated list of spaces. Supports filtering by search query, membership, and parent space. Authentication is optional — if provided, member-only spaces the user belongs to are included.
+Fetches a paginated list of public spaces: the space directory. Supports text search and a parent filter. Authentication is optional; when there is a viewer (the signed-in user, or the user a service key names in `actingUserId`), each space carries their `isMember` flag.
 
 <Note>
-  This is a discovery surface: only `public` spaces are listed. Spaces with `visibility` of `"unlisted"` or `"private"` are excluded for non-members (they remain reachable by direct link/slug via [Fetch Space by Slug](/v8/api-reference/spaces/fetch-space-by-slug) or [by Short ID](/v8/api-reference/spaces/fetch-space-by-short-id)). The exception is `memberOf=true`, which returns the caller's own spaces regardless of visibility. See [Space visibility](/v8/data-models/space#visibility).
+  This is a discovery surface: only `public` spaces are listed, for every caller. Spaces with `visibility` of `"unlisted"` or `"private"` are never listed here, not even to their members (they stay reachable by direct link via [Fetch Space by Slug](/v8/api-reference/spaces/fetch-space-by-slug) or [by Short ID](/v8/api-reference/spaces/fetch-space-by-short-id)). To list the spaces a user is a member of, whatever their visibility, use [Fetch User Spaces](/v8/api-reference/spaces/fetch-user-spaces). See [Space visibility](/v8/data-models/space#visibility).
 </Note>
 
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string">
-  Service key only: the user to list as. The page is exactly what that user's own access token would get (`memberOf` and their membership on each space). Leave it out for the anonymous view (`memberOf=true` then returns `401`). A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
+  Service key only: the user to list as. The page is exactly what that user's own access token would get (their membership on each space). Leave it out for the anonymous view. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField query="page" type="number">
@@ -40,12 +40,12 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
   The one field `query` is matched against: `"slug"`, `"name"` or `"description"`. Left out, `query` matches the slug, the name or the description. Values match exactly; any other value returns `400 space/invalid-query`.
 </ParamField>
 
-<ParamField query="memberOf" type="string">
-  `"true"` returns only spaces where the viewer is an active member: the signed-in user, or the user a service key names in `actingUserId`. Without a viewer — no credentials, or a service key naming nobody — it returns `401 space/auth-required`. `"false"` lists the same as leaving it out. Any other value returns `400 space/invalid-query`.
+<ParamField query="parentSpaceId" type="string">
+  A space id lists that space's public child spaces: this is how to page through a space's sub-spaces (add `sortBy=alphabetical` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `none` lists top-level spaces only (spaces with no parent). Left out, or sent empty, the list includes spaces at every level. `null` and `undefined` are refused with `400 space/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
 </ParamField>
 
-<ParamField query="parentSpaceId" type="string">
-  A space id lists that space's child spaces. `none` lists top-level spaces only (spaces with no parent). Left out, or sent empty, the list includes spaces at every level. `null` and `undefined` are refused with `400 space/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
+<ParamField query="nsfwFilter" type="string">
+  Filter by each space's `nsfwEffective` (its own flag or any ancestor's): `"include-all"` (default) lists every space, `"exclude"` leaves effective-NSFW spaces out, and `"only"` lists only them. See [Space NSFW flagging](/v8/data-models/space#nsfw-flagging).
 </ParamField>
 
 <ParamField query="include" type="string">
@@ -96,6 +96,27 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
     }
     ```
   </Accordion>
+  <Accordion title="Unsupported memberOf — 400">
+    `memberOf`, in any form, is rejected with a pointer to [Fetch User Spaces](/v8/api-reference/spaces/fetch-user-spaces), which lists the spaces a user is a member of.
+
+    ```json
+    {
+      "error": "`memberOf` isn't supported in v8. To list the spaces a user is a member of, use `GET /spaces/user-spaces`.",
+      "code": "space/unsupported-param",
+      "param": "memberOf"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported child-spaces route — 400">
+    `GET /spaces/:spaceId/children` is not a route. It answers with a pointer to this endpoint's `parentSpaceId` filter.
+
+    ```json
+    {
+      "error": "`GET /spaces/:spaceId/children` isn't supported in v8. List a space's sub-spaces with `GET /spaces?parentSpaceId=<spaceId>`, adding `sortBy=alphabetical` to order them A–Z by name.",
+      "code": "space/unsupported-route"
+    }
+    ```
+  </Accordion>
   <Accordion title="Unsupported search parameter — 400">
     `searchSlug`, `searchName`, `searchDescription` and `searchAny` are rejected with a pointer to `query` and `searchFields`. `param` names the parameter sent.
 
@@ -114,17 +135,10 @@ Fetches a paginated list of spaces. Supports filtering by search query, membersh
     - `searchAny`: `query` without `searchFields`, which matches the slug, name and description
   </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy`, `sortDir`, `searchFields` or `include` value, a blank `query`, or a `memberOf` other than `"true"` or `"false"`. `error` names the first problem found.
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy`, `sortDir`, `searchFields` or `include` value, or a blank `query`. `error` names the first problem found.
 
     ```json
     { "error": "include: Unknown include `members`. Allowed: files.", "code": "space/invalid-query" }
-    ```
-  </Accordion>
-  <Accordion title="Auth Required — 401">
-    `memberOf=true` without a viewer: no credentials, or a service key naming nobody.
-
-    ```json
-    { "error": "Authentication required to filter by membership.", "code": "space/auth-required" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

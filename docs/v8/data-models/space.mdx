@@ -88,14 +88,14 @@ Included in `SpaceDetailed.memberPermissions` for a viewer with a membership in 
 | Value | Behavior |
 |-------|----------|
 | `public` | **Default.** Listed in discovery and search, and resolvable by anyone. Matches all prior behavior. |
-| `unlisted` | Excluded from discovery lists and from search for non-members, but still reachable by direct link/slug. Joining works exactly as before (governed by the existing join/approval rules). |
+| `unlisted` | Excluded from the space directory ([Fetch Spaces](/v8/api-reference/spaces/fetch-spaces)) for everyone, and from search for non-members, but still reachable by direct link/slug. Joining works exactly as before (governed by the existing join/approval rules). |
 | `private` | Reserved for a future stage where the space's existence and metadata are hidden from non-members. **In this release, `private` behaves exactly like `unlisted`** — full existence-hiding is not yet implemented. |
 
 <Note>
   `unlisted` is **not access control.** It only affects discoverability — it does not restrict who can read the content inside the space. To gate content, use `readingPermission`.
 </Note>
 
-Visibility can be set on [create](/v8/api-reference/spaces/create-space) and [update](/v8/api-reference/spaces/update-space), and changes take effect immediately and are freely reversible in both directions. A member of a space always continues to see it in surfaces that list their own spaces (e.g. `memberOf=true`, user spaces, mutual spaces) regardless of its visibility.
+Visibility can be set on [create](/v8/api-reference/spaces/create-space) and [update](/v8/api-reference/spaces/update-space), and changes take effect immediately and are freely reversible in both directions. A member of a space always continues to see it in surfaces that list their own spaces ([user spaces](/v8/api-reference/spaces/fetch-user-spaces) and mutual spaces) regardless of its visibility.
 
 ## NSFW flagging
 

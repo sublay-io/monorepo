@@ -9,8 +9,6 @@ export interface FetchManySpacesProps extends SpaceSearchParams {
   limit?: number;
   sortBy?: "createdAt" | "alphabetical" | "members";
   sortDir?: "asc" | "desc";
-  /** `"true"`: only spaces the viewer is a member of; needs a viewer (`actingUserId`). `"false"` is the same as leaving it out. */
-  memberOf?: "true" | "false";
   /**
    * A space id (its child spaces), or `"none"` for top-level spaces only.
    * Left out: spaces at every level.
@@ -20,7 +18,7 @@ export interface FetchManySpacesProps extends SpaceSearchParams {
   include?: SpaceIncludeParam;
   /**
    * List as this user (service key only): exactly what their own access token
-   * would get (`memberOf`, their role and member permissions). Omit it for the anonymous view.
+   * would get (their membership flags, role and member permissions). Omit it for the anonymous view.
    */
   actingUserId?: string;
 }

@@ -1,12 +1,12 @@
 ---
 title: "Fetch user spaces"
-description: "Fetch spaces where the current user is a member"
+description: "Fetch, search and sort the spaces the current user is a member of"
 icon: "plug"
 ---
 
 ## Overview
 
-`useFetchUserSpaces` returns a callable function that fetches all spaces where the authenticated user has an active membership. The response includes membership metadata alongside each space.
+`useFetchUserSpaces` returns a callable function that fetches the spaces where the authenticated user has a membership (active by default). The response includes membership metadata alongside each space. Spaces of every visibility are listed, so this is the hook for a "my spaces" screen; [`useFetchManySpaces`](/v8/hooks/spaces/use-fetch-many-spaces) lists public spaces only. It can search within the user's spaces and sort them.
 
 ## Usage Example
 
@@ -18,6 +18,7 @@ function MySpaces() {
 
   const loadSpaces = async () => {
     const result = await fetchUserSpaces({ page: 1, limit: 20 });
+    // Search within them, A–Z: fetchUserSpaces({ query: "design", sortBy: "alphabetical" })
     // result.data: UserSpaceItem[]
     result.data.forEach(({ space, membership }) => {
       console.log(space.name, membership.role, membership.status);
@@ -38,6 +39,22 @@ function MySpaces() {
 
 <ParamField path="limit" type="number">
   Number of results per page.
+</ParamField>
+
+<ParamField path="role" type="SpaceMemberRole | SpaceMemberRole[]">
+  Only memberships with this role: `"admin"`, `"moderator"` or `"member"`, or an array of them.
+</ParamField>
+
+<ParamField path="all" type="boolean">
+  `true` returns every matching membership without pagination; the response then has no `pagination`.
+</ParamField>
+
+<ParamField path="query" type="string | null">
+  Free-text search term, matched as a case-insensitive substring. A blank value is left out of the request, and `searchFields` with it.
+</ParamField>
+
+<ParamField path="searchFields" type='"slug" | "name" | "description" | null'>
+  The one field `query` is matched against. Leave it out to match the slug, the name or the description.
 </ParamField>
 
 <ParamField path="sortBy" type="string">

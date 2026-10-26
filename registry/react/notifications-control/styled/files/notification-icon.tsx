@@ -14,6 +14,10 @@ import {
   Laugh,
   ThumbsUp,
   ThumbsDown,
+  Calendar,
+  CalendarClock,
+  CalendarX,
+  Award,
 } from "lucide-react";
 import { AppNotification } from "@sublay/react-js";
 
@@ -134,6 +138,26 @@ const getIconConfig = (isDark = false) => {
       color: { light: "#16a34a", dark: "#22c55e" },
       backgroundColor: { light: "#dcfce7", dark: "rgba(34, 197, 94, 0.15)" },
     },
+    "event-invite": {
+      Icon: Calendar,
+      color: { light: "#2563eb", dark: "#3b82f6" },
+      backgroundColor: { light: "#dbeafe", dark: "rgba(59, 130, 246, 0.15)" },
+    },
+    "event-updated": {
+      Icon: CalendarClock,
+      color: { light: "#2563eb", dark: "#3b82f6" },
+      backgroundColor: { light: "#dbeafe", dark: "rgba(59, 130, 246, 0.15)" },
+    },
+    "event-cancelled": {
+      Icon: CalendarX,
+      color: { light: "#dc2626", dark: "#ef4444" },
+      backgroundColor: { light: "#fee2e2", dark: "rgba(239, 68, 68, 0.15)" },
+    },
+    "reputation-grant": {
+      Icon: Award,
+      color: { light: "#d97706", dark: "#fbbf24" },
+      backgroundColor: { light: "#fef3c7", dark: "rgba(251, 191, 36, 0.15)" },
+    },
   };
 
   // Convert to theme-specific format
@@ -166,7 +190,9 @@ function NotificationIcon({
   isDarkTheme,
 }: NotificationIconProps) {
   const iconConfig = getIconConfig(isDarkTheme);
-  const config = iconConfig[type];
+  // A type added on the server after this component was installed falls back
+  // to the system icon rather than crashing.
+  const config = iconConfig[type] ?? iconConfig.system;
   const { color, backgroundColor } = config;
 
   // For reaction types, use reaction-specific icon

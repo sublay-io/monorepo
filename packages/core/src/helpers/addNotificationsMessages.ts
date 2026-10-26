@@ -8,6 +8,10 @@ import {
   ConnectionAcceptedTemplateVars,
   ConnectionRequestTemplateVars,
   SpaceMembershipApprovedTemplateVars,
+  EventInviteTemplateVars,
+  EventUpdatedTemplateVars,
+  EventCancelledTemplateVars,
+  ReputationGrantTemplateVars,
   EntityCommentTemplateVars,
   EntityMentionTemplateVars,
   EntityReactionMilestoneSpecificTemplateVars,
@@ -351,6 +355,72 @@ export default (
           `Your request to join $spaceName has been approved`,
           ``,
           notificationTemplates?.spaceMembershipApproved
+        ));
+        break;
+      }
+
+      case "event-invite": {
+        const vars: EventInviteTemplateVars = {
+          ...getInitiatorVars(notification),
+          eventTitle: notification.metadata.eventTitle || "",
+        };
+        ({ title, content } = configureMessage(
+          vars,
+          `$initiatorUsername invited you to $eventTitle`,
+          ``,
+          notificationTemplates?.eventInvite
+        ));
+        break;
+      }
+
+      case "event-updated": {
+        const vars: EventUpdatedTemplateVars = {
+          ...getInitiatorVars(notification),
+          eventTitle: notification.metadata.eventTitle || "",
+        };
+        ({ title, content } = configureMessage(
+          vars,
+          `$eventTitle was updated`,
+          ``,
+          notificationTemplates?.eventUpdated
+        ));
+        break;
+      }
+
+      case "event-cancelled": {
+        const vars: EventCancelledTemplateVars = {
+          ...getInitiatorVars(notification),
+          eventTitle: notification.metadata.eventTitle || "",
+        };
+        ({ title, content } = configureMessage(
+          vars,
+          `$eventTitle was cancelled`,
+          ``,
+          notificationTemplates?.eventCancelled
+        ));
+        break;
+      }
+
+      case "reputation-grant": {
+        const { metadata } = notification;
+        const granter = {
+          id: metadata.granterId ?? "",
+          name: metadata.granterName,
+          username: metadata.granterUsername,
+        };
+        const vars: ReputationGrantTemplateVars = {
+          amount: String(metadata.amount),
+          granterName: metadata.granterId ? getUserName(granter, "name") : "",
+          granterUsername: metadata.granterId
+            ? getUserName(granter, "username")
+            : "",
+          note: metadata.note || "",
+        };
+        ({ title, content } = configureMessage(
+          vars,
+          `You received $amount reputation`,
+          `$note`,
+          notificationTemplates?.reputationGrant
         ));
         break;
       }

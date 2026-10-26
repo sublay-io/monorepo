@@ -22,7 +22,11 @@ type AppNotificationType =
   | "new-follow"
   | "connection-request"
   | "connection-accepted"
-  | "space-membership-approved";
+  | "space-membership-approved"
+  | "event-invite"
+  | "event-updated"
+  | "event-cancelled"
+  | "reputation-grant";
 // | "followRequest"
 // | "followRequestAccepted"
 // | "friendRequest"
@@ -325,6 +329,114 @@ export interface SpaceMembershipApprovedNotification extends BaseAppNotification
   };
 }
 
+export interface EventInviteNotification extends BaseAppNotification {
+  type: "event-invite";
+  action: "open-event";
+  metadata: {
+    eventId: string;
+    eventShortId?: string;
+    eventTitle: string | null | undefined;
+    eventStartTime: string | null | undefined;
+
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
+
+    initiatorId: string;
+    initiatorName: string | null | undefined;
+    initiatorUsername: string | null | undefined;
+    initiatorForeignId?: string | null | undefined;
+    initiatorAvatar: string | null | undefined;
+  };
+}
+
+export interface EventUpdatedNotification extends BaseAppNotification {
+  type: "event-updated";
+  action: "open-event";
+  metadata: {
+    eventId: string;
+    eventShortId?: string;
+    eventTitle: string | null | undefined;
+    /** What changed: the event's time, its location, or both. */
+    changedFields: ("time" | "location")[];
+
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
+
+    initiatorId: string;
+    initiatorName: string | null | undefined;
+    initiatorUsername: string | null | undefined;
+    initiatorForeignId?: string | null | undefined;
+    initiatorAvatar: string | null | undefined;
+  };
+}
+
+export interface EventCancelledNotification extends BaseAppNotification {
+  type: "event-cancelled";
+  action: "open-event";
+  metadata: {
+    eventId: string;
+    eventShortId?: string;
+    eventTitle: string | null | undefined;
+
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
+
+    initiatorId: string;
+    initiatorName: string | null | undefined;
+    initiatorUsername: string | null | undefined;
+    initiatorForeignId?: string | null | undefined;
+    initiatorAvatar: string | null | undefined;
+  };
+}
+
+export interface ReputationGrantNotification extends BaseAppNotification {
+  type: "reputation-grant";
+  /**
+   * Depends on the grant: the target's action when the grant rewards an
+   * entity, comment or message; `open-profile` (the granter) for a user grant
+   * with no target; `do-nothing` for an app grant with no target.
+   */
+  action:
+    | "open-entity"
+    | "open-comment"
+    | "open-message"
+    | "open-profile"
+    | "do-nothing";
+  metadata: {
+    grantId: string;
+    amount: number;
+    /** `"user"`: transferred from another user. `"app"`: granted by the app. */
+    sourceType: "user" | "app";
+    note?: string | null | undefined;
+
+    // The user who gave the reputation. Absent or null for an app grant.
+    granterId?: string | null | undefined;
+    granterName?: string | null | undefined;
+    granterUsername?: string | null | undefined;
+    granterForeignId?: string | null | undefined;
+    granterAvatar?: string | null | undefined;
+
+    // The space the reputation is in; null for project-wide reputation.
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
+
+    // The rewarded item, when there is one.
+    targetType?: "entity" | "comment" | "message" | null | undefined;
+    targetId?: string | null | undefined;
+    entityId?: string | null | undefined;
+    entityShortId?: string | null | undefined;
+    entityForeignId?: string | null | undefined;
+    commentId?: string | null | undefined;
+    commentForeignId?: string | null | undefined;
+    messageId?: string | null | undefined;
+    conversationId?: string | null | undefined;
+  };
+}
+
 // export interface FollowRequestNotification extends BaseAppNotification {
 //   type: "followRequest";
 //   metadata: {
@@ -424,7 +536,11 @@ export type UnifiedAppNotification =
   | NewFollowNotification
   | ConnectionRequestNotification
   | ConnectionAcceptedNotification
-  | SpaceMembershipApprovedNotification;
+  | SpaceMembershipApprovedNotification
+  | EventInviteNotification
+  | EventUpdatedNotification
+  | EventCancelledNotification
+  | ReputationGrantNotification;
 // | LikeNotification
 // | ReplyNotification
 // | MentionNotification
@@ -556,6 +672,31 @@ export interface SpaceMembershipApprovedTemplateVars {
   spaceSlug: string;
 }
 
+export interface EventInviteTemplateVars {
+  initiatorName: string;
+  initiatorUsername: string;
+  eventTitle: string;
+}
+
+export interface EventUpdatedTemplateVars {
+  initiatorName: string;
+  initiatorUsername: string;
+  eventTitle: string;
+}
+
+export interface EventCancelledTemplateVars {
+  initiatorName: string;
+  initiatorUsername: string;
+  eventTitle: string;
+}
+
+export interface ReputationGrantTemplateVars {
+  amount: string;
+  granterName: string;
+  granterUsername: string;
+  note: string;
+}
+
 // A template field is either a string with $variable placeholders, or a function
 // receiving the typed vars for that notification type and returning a string.
 export type TemplateField<TVars> = string | ((vars: TVars) => string);
@@ -582,6 +723,10 @@ export type NotificationTemplates = {
   connectionRequest: TypedNotificationTemplate<ConnectionRequestTemplateVars>;
   connectionAccepted: TypedNotificationTemplate<ConnectionAcceptedTemplateVars>;
   spaceMembershipApproved: TypedNotificationTemplate<SpaceMembershipApprovedTemplateVars>;
+  eventInvite: TypedNotificationTemplate<EventInviteTemplateVars>;
+  eventUpdated: TypedNotificationTemplate<EventUpdatedTemplateVars>;
+  eventCancelled: TypedNotificationTemplate<EventCancelledTemplateVars>;
+  reputationGrant: TypedNotificationTemplate<ReputationGrantTemplateVars>;
 };
 
 export type PotentiallyPopulatedUnifiedAppNotification =

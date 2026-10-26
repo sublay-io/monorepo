@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { act, fireEvent, render, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 
 import { makeAuthUser, makeSublayStore, resetAxiosMocks } from "../test-utils";
@@ -289,7 +289,12 @@ function makeProviders() {
   };
 }
 
-afterEach(() => resetAxiosMocks());
+// Unmount before the API mocks go, so a request a still-mounted section fires
+// late can't reach the real API.
+afterEach(() => {
+  cleanup();
+  resetAxiosMocks();
+});
 
 describe.each(VARIANTS)("registry $dir — $hook", (variant) => {
   it("keeps the section mounted when the entity object, the highlight or the entity itself changes", async () => {
@@ -479,5 +484,6 @@ describe.each(VARIANTS)("registry $dir — $hook", (variant) => {
     render(<Section foreignId="article-2" createIfNotFound />, { wrapper: Providers });
     await waitFor(() => expect(lookups()).toHaveLength(3));
     expect(lookups()[2]).toMatchObject({ foreignId: "article-2", createIfNotFound: true });
+    await waitFor(() => expect(listCalls()).toHaveLength(2));
   });
 });

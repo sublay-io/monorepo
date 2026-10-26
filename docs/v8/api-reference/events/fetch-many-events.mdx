@@ -57,7 +57,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 </ParamField>
 
 <ParamField query="myRsvp" type="string">
-  Comma-separated RSVP statuses the caller responded with, e.g. `"going,maybe"`: any of `going`, `maybe` and `not_going`, matched exactly (another case returns `400 event/invalid-query`). Requires an authenticated caller (or a service key sending `actingUserId`); otherwise returns `400`.
+  Comma-separated RSVP statuses the caller responded with, e.g. `"going,maybe"`: any of `going`, `maybe` and `not-going`, matched exactly (another case returns `400 event/invalid-query`; `not_going` returns `400 event/unsupported-param`). Requires an authenticated caller (or a service key sending `actingUserId`); otherwise returns `400`.
 </ParamField>
 
 <ParamField query="locationFilters" type="object">
@@ -127,6 +127,16 @@ Returns a paginated response: `{ data: Event[], pagination: { page, pageSize, to
       "param": "userId"
     }
     ```
+
+    Also returned when a `myRsvp` entry is `not_going`. Not going is `not-going`:
+
+    ```json
+    {
+      "error": "`myRsvp` \"not_going\" isn't supported in v8. Use \"not-going\".",
+      "code": "event/unsupported-param",
+      "param": "myRsvp"
+    }
+    ```
   </Accordion>
   <Accordion title="Unsupported filter value — 400">
     `spaceId=null` or `spaceId=undefined`. The `error` names the spelling to use instead.
@@ -148,9 +158,9 @@ Returns a paginated response: `{ data: Event[], pagination: { page, pageSize, to
     ```json
     { "error": "Limit must be a positive number", "code": "event/invalid-query" }
     ```
-    Also returned for a `myRsvp` entry that isn't exactly `going`, `maybe` or `not_going`:
+    Also returned for a `myRsvp` entry that isn't exactly `going`, `maybe` or `not-going`:
     ```json
-    { "error": "myRsvp.0: Invalid option: expected one of \"going\"|\"maybe\"|\"not_going\"", "code": "event/invalid-query" }
+    { "error": "myRsvp.0: Invalid option: expected one of \"going\"|\"maybe\"|\"not-going\"", "code": "event/invalid-query" }
     ```
     And for an unknown `include` value:
     ```json

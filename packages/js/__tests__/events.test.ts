@@ -421,7 +421,7 @@ describe("js-sdk events — response mapping", () => {
 
   it("setRsvp returns the updated Event", async () => {
     const { client, projectInstance } = makeClient();
-    const event = { id: "ev1", rsvpCounts: { going: 1, maybe: 0, not_going: 0 } };
+    const event = { id: "ev1", rsvpCounts: { going: 1, maybe: 0, "not-going": 0 } };
     projectInstance.post.mockResolvedValueOnce({ data: event });
 
     const result = await setRsvp(client, { eventId: "ev1", status: "going" });
@@ -431,7 +431,7 @@ describe("js-sdk events — response mapping", () => {
 
   it("withdrawRsvp returns the updated Event", async () => {
     const { client, projectInstance } = makeClient();
-    const event = { id: "ev1", rsvpCounts: { going: 0, maybe: 0, not_going: 0 } };
+    const event = { id: "ev1", rsvpCounts: { going: 0, maybe: 0, "not-going": 0 } };
     projectInstance.delete.mockResolvedValueOnce({ data: event });
 
     const result = await withdrawRsvp(client, { eventId: "ev1" });

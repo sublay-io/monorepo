@@ -5,12 +5,12 @@ import { File } from "./File";
 export type EventType = "online" | "physical" | "hybrid";
 export type EventVisibility = "public" | "members" | "invite";
 export type EventStatus = "active" | "cancelled";
-export type RsvpStatus = "going" | "maybe" | "not_going";
+export type RsvpStatus = "going" | "maybe" | "not-going";
 
 export interface RsvpCounts {
   going: number;
   maybe: number;
-  not_going: number;
+  "not-going": number;
 }
 
 export interface Event {

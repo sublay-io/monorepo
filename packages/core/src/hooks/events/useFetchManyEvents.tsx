@@ -79,7 +79,7 @@ export interface FetchManyEventsProps {
   include?: EventIncludeParam;
 }
 
-type RsvpStatusFilter = "going" | "maybe" | "not_going";
+type RsvpStatusFilter = "going" | "maybe" | "not-going";
 
 function useFetchManyEvents(): (
   props?: FetchManyEventsProps

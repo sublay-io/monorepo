@@ -97,7 +97,7 @@ function EventDetail() {
 </ResponseField>
 
 <ResponseField name="setRsvp" type="(status: RsvpStatus) => Promise<Event | undefined>">
-  Set/change the caller's RSVP (`"going" | "maybe" | "not_going"`). Capacity-checked for `going`.
+  Set/change the caller's RSVP (`"going" | "maybe" | "not-going"`). Capacity-checked for `going`.
 </ResponseField>
 
 <ResponseField name="withdrawRsvp" type="() => Promise<Event | undefined>">

@@ -66,7 +66,7 @@ describe("EventProvider", () => {
   });
 
   it("updates the exposed event when setRsvp is called", async () => {
-    const event = makeEvent({ id: "event-1", rsvpCounts: { going: 0, maybe: 0, not_going: 0 } });
+    const event = makeEvent({ id: "event-1", rsvpCounts: { going: 0, maybe: 0, "not-going": 0 } });
     const { Wrapper, axiosPrivate } = makeProvidersWrapper();
 
     const { result } = renderHook(() => useContext(EventContext), {
@@ -77,7 +77,7 @@ describe("EventProvider", () => {
       ),
     });
 
-    const updated = { ...event, rsvpCounts: { going: 1, maybe: 0, not_going: 0 } };
+    const updated = { ...event, rsvpCounts: { going: 1, maybe: 0, "not-going": 0 } };
     axiosPrivate.mockResponse("post", updated);
 
     await act(async () => {

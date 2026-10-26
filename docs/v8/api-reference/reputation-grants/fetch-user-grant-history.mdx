@@ -70,8 +70,6 @@ Returns `200` with the dashboard list shape. `grants` is always an array, never 
 
 Both counterparties are hydrated with a display-only projection — `id`, `name`, `username`, `avatar`. No sensitive user columns are returned. See [ReputationGrant](/v8/data-models/reputation-grant) for the row shape.
 
-The rows are returned as stored, so a grant on a chat message has `targetType: "chat-message"` here, where the `/v8` routes say `"message"`.
-
 ## Error Responses
 
 <AccordionGroup>

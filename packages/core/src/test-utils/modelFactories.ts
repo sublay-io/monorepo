@@ -228,7 +228,7 @@ export function makeEvent(overrides: Partial<Event> = {}): Event {
     capacity: null,
     hostIds: ["user-1"],
     coverImageId: null,
-    rsvpCounts: { going: 0, maybe: 0, not_going: 0 },
+    rsvpCounts: { going: 0, maybe: 0, "not-going": 0 },
     metadata: {},
     createdAt: "2024-01-01T00:00:00.000Z",
     updatedAt: "2024-01-01T00:00:00.000Z",

@@ -24,7 +24,7 @@ Transitions into `going` are capacity-checked under a row-level lock, so an even
 ## Body Parameters
 
 <ParamField body="status" type="string" required>
-  `"going"`, `"maybe"`, or `"not_going"`.
+  `"going"`, `"maybe"`, or `"not-going"`. The spelling `"not_going"` returns `400 event/unsupported-param`.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -57,7 +57,17 @@ Returns the [Event](/v8/data-models/event) with refreshed `rsvpCounts` and the c
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
-    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+    `status` was `"not_going"`. Not going is `"not-going"`.
+
+    ```json
+    {
+      "error": "`status` \"not_going\" isn't supported in v8. Use \"not-going\".",
+      "code": "event/unsupported-param",
+      "param": "status"
+    }
+    ```
+
+    Or the request sent `userId`. On this route the user a service key acts as is `actingUserId`.
 
     With a service key:
 

@@ -15,7 +15,7 @@ Individual RSVP records are returned by the named guest-list endpoint ([Fetch Ev
 | `eventId` | `string` | The event this RSVP belongs to. |
 | `userId` | `string` | The user who RSVP'd. |
 | `user` | `User \| null` | Populated user object. Present on guest-list reads. |
-| `status` | `"going" \| "maybe" \| "not_going"` | The RSVP response. |
+| `status` | `"going" \| "maybe" \| "not-going"` | The RSVP response. |
 | `createdAt` | `string` | ISO timestamp when the RSVP was first created. |
 | `updatedAt` | `string` | ISO timestamp when the RSVP was last changed. |
 
@@ -27,7 +27,7 @@ The set of valid RSVP values, which also map to the keys of `Event.rsvpCounts`:
 |-------|-------------|
 | `"going"` | The user plans to attend. Counts toward `capacity`. |
 | `"maybe"` | The user might attend. Only allowed when the event's `allowMaybe` is `true`. |
-| `"not_going"` | The user has declined. |
+| `"not-going"` | The user has declined. |
 
 ## Lifecycle
 

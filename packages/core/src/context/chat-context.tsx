@@ -436,7 +436,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       // No conversationId fallback here, unlike message:reaction directly
       // above. That one guards against servers predating the conversationId
       // fix; `message:grant` shipped with the field mandatory from its first
-      // release — `emitGrantSocketEvent` reads it off the resolved chat-message
+      // release — `emitGrantSocketEvent` reads it off the resolved chat message
       // target and sets it unconditionally on the single emit site, and the
       // server's own socket typings declare it required across the whole
       // message-scoped family. There is no deployed server that omits it, so a

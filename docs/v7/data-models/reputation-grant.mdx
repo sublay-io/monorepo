@@ -30,7 +30,7 @@ Grants belong to the **`reputation`** bundle — every project with reputation h
 | `recipient` | `User \| null` | Populated when the list is read with `include=user`. |
 | `amount` | `number` | Non-zero integer. Negative only when `sourceType` is `"app"`. |
 | `spaceId` | `string \| null` | The bucket both legs moved in. `null` = the project-general bucket. |
-| `targetType` | `"entity" \| "comment" \| "chat-message" \| null` | What the grant was *for*, if anything. |
+| `targetType` | `"entity" \| "comment" \| "chat-message" \| null` | What the grant was *for*, if anything. The [`message:grant`](/v7/sdk/chat/real-time) socket event and the `reputation-grant` [notification](/v7/data-models/app-notification#reputation-grant) name a chat message `"message"`. |
 | `targetId` | `string \| null` | The rewarded record's ID. Both target fields are null, or both are set. |
 | `note` | `string \| null` | Free-text note. Trimmed, up to 2000 characters. |
 | `metadata` | `Record<string, any> \| null` | Your own key-value data. Up to 1 MB. |

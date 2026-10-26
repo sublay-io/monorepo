@@ -96,7 +96,7 @@ On endpoints that **require** auth, a missing header and a bad one are answered 
 
   Both responses are `text/plain` with no JSON body and no `code` field. Every
   *other* `401`/`403` the API returns comes from a controller and **does** carry
-  a `code` (`auth/user-required`, `project/plan-required`, `user/suspended`, …).
+  a `code` (`auth/elevated-auth-required`, `project/plan-required`, `user/suspended`, …).
   Those describe a decision no token refresh can change, so the presence of a
   `code` is a reliable way to tell "retry after refreshing" apart from "stop and
   surface this to the user".

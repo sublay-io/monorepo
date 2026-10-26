@@ -124,13 +124,13 @@ function refreshCursors(bucket: MessagesBucket): void {
  * The main stream (`state.messages[conversationId]`) holds top-level messages
  * only, matching the server's message list (which filters
  * `parentMessageId: null`); thread replies live only in their thread bucket
- * (`state.threads[parentMessageId]`). A thread's parent message can be loaded
- * in both — as a main-stream message and as the head of an open thread view —
- * so this returns a list rather than a first match.
+ * (`state.threads[parentMessageId]`), so a message is loaded in at most one
+ * place. It returns a list so callers patch whatever is loaded without caring
+ * which bucket holds it.
  *
  * `threads` is keyed by parentMessageId, which message-scoped socket payloads
  * don't carry, so the thread side is a scan. It is bounded by the number of
- * open threads (in practice zero or one). `conversationId` is optional so a
+ * threads opened this session (buckets are kept after a thread closes). `conversationId` is optional so a
  * payload from a server that omits it still reaches thread replies.
  */
 function findLoadedMessages(
@@ -157,33 +157,53 @@ function findLoadedMessages(
  * Add or update a message in an ASC-ordered list.
  *
  * Deduplication order:
- *  1. Match by real `id` → update in-place (handles socket events after REST)
- *  2. Match by `localId` → replace optimistic placeholder with confirmed message
+ *  1. Match by real `id` → merge into the loaded copy (handles socket events after REST)
+ *  2. Match by `localId` → merge into the optimistic placeholder
  *  3. Otherwise insert, maintaining chronological ASC order
+ *
+ * Merging rather than replacing matters because only the list and single-
+ * message reads compute `reactionCounts` / `userReactions`: the send and edit
+ * responses and the `message:created` payload don't carry them, so replacing
+ * would wipe a message's reactions (and break the next reaction update). A
+ * newly inserted message without them starts with none.
+ *
+ * `sendFailed` is client-only state, so a merge would keep it: a server copy
+ * (a real id) clears it, since the message was delivered after all.
  */
 function upsertInto(items: ChatMessage[], message: ChatMessage): void {
+  const merge = (existing: ChatMessage): ChatMessage => {
+    const merged = { ...existing, ...message };
+    if (!message.id.startsWith("temp-")) delete merged.sendFailed;
+    return merged;
+  };
+
   const byIdIndex = items.findIndex((m) => m.id === message.id);
   if (byIdIndex !== -1) {
-    items[byIdIndex] = message;
+    items[byIdIndex] = merge(items[byIdIndex]);
     return;
   }
 
   if (message.localId) {
     const byClientIndex = items.findIndex((m) => m.localId === message.localId);
     if (byClientIndex !== -1) {
-      items[byClientIndex] = message;
+      items[byClientIndex] = merge(items[byClientIndex]);
       return;
     }
   }
 
+  const inserted: ChatMessage = {
+    ...message,
+    reactionCounts: message.reactionCounts ?? {},
+    userReactions: message.userReactions ?? [],
+  };
   const insertAt = items.findIndex(
     (m) =>
       new Date(m.createdAt).getTime() > new Date(message.createdAt).getTime()
   );
   if (insertAt === -1) {
-    items.push(message);
+    items.push(inserted);
   } else {
-    items.splice(insertAt, 0, message);
+    items.splice(insertAt, 0, inserted);
   }
 }
 
@@ -463,7 +483,11 @@ const chatSlice = createSlice({
         const thread = state.threads[parentMessageId];
         if (!thread) return;
         upsertInto(thread.items, message);
-        if (!thread.hasMore) {
+        // A reply at the end of a fully fetched thread extends the run — but
+        // only while the socket is up. With it down, others' replies may be
+        // missing before this one (your own send still confirms over REST),
+        // and reconnect catch-up has to page from before them.
+        if (!thread.hasMore && state.socketConnected) {
           thread.cursor = advanceCursor(thread.cursor, [message]);
         }
         return;

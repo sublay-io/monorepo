@@ -193,13 +193,14 @@ describe("MessageThreadProvider", () => {
       expect(result.current.hasMore).toBe(false);
     });
 
-    it("fetches from the start of the thread when no reply was loaded", async () => {
+    it("loads only the first page of the thread when no reply was loaded", async () => {
       const fakeSocket = createFakeSocket();
       fakeSocket.connected = true;
       const { result, axiosPrivate } = renderThread(fakeSocket, page([]));
       await waitFor(() => expect(result.current.loading).toBe(false));
 
-      axiosPrivate.mockResponse("get", page([reply("reply-1", "2024-01-01T00:00:01.000Z")]));
+      // More replies exist, but the rest is left to loadMore.
+      axiosPrivate.mockResponse("get", page([reply("reply-1", "2024-01-01T00:00:01.000Z")], true));
       await act(async () => {
         fakeSocket.trigger("connect");
       });
@@ -210,9 +211,10 @@ describe("MessageThreadProvider", () => {
       expect(calls[0].url).toBe(MESSAGES_URL);
       expect(calls[0].config.params).toEqual({
         parentMessageId: "message-1",
-        limit: 100,
+        limit: 50,
         sortDir: "asc",
       });
+      expect(result.current.hasMore).toBe(true);
     });
 
     it("leaves a thread that isn't loaded to its end to loadMore", async () => {

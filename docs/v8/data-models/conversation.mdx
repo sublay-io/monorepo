@@ -33,7 +33,7 @@ When listing conversations (e.g. in an inbox), the API returns `ConversationPrev
 | Property | Type | Description |
 |----------|------|-------------|
 | `unreadCount` | `number` | Number of messages sent after the current user's `lastReadAt`. |
-| `lastMessage` | `ChatMessage \| null` | The most recent message in the conversation, truncated to 100 characters. `null` if no messages have been sent. |
+| `lastMessage` | `ChatMessage \| null` | The most recent top-level message in the conversation (thread replies are never the last message), truncated to 100 characters. `null` if there is no visible top-level message. |
 | `otherMembers` | `{ id, name, username, avatar }[]` | Up to 5 active members other than the current user. Populated for `direct` and `group` conversations (a DM/group has no `name`, so the counterparty supplies the title/avatar); capped at 5 (use `memberCount` for the group total); empty for `space` conversations. |
 
 ## Conversation Types

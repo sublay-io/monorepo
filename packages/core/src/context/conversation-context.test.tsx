@@ -563,6 +563,44 @@ describe("ConversationProvider", () => {
       await waitForMarked(axiosPrivate, "message-4");
     });
 
+    it("pages from the newest message loaded when the socket dropped, not from one sent while it was down", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, store, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")]),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      await waitForMarked(axiosPrivate, "message-1");
+
+      act(() => {
+        fakeSocket.trigger("disconnect");
+      });
+      // Your own send confirms over REST while the socket is down.
+      act(() => {
+        store.dispatch(upsertMessage(msg("message-5", "2024-01-01T00:00:05.000Z")));
+      });
+      await waitForMarked(axiosPrivate, "message-5");
+
+      axiosPrivate.mockResponse(
+        "get",
+        page([
+          msg("message-2", "2024-01-01T00:00:02.000Z"),
+          msg("message-5", "2024-01-01T00:00:05.000Z"),
+        ]),
+      );
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+
+      await waitFor(() =>
+        expect(result.current.messages!.map((m) => m.id)).toEqual(["message-1", "message-2", "message-5"]),
+      );
+      const calls = catchUpCalls(axiosPrivate);
+      expect(calls).toHaveLength(1);
+      expect(calls[0].config.params.after).toBe("2024-01-01T00:00:01.000Z");
+    });
+
     it("loads the latest page when no message is loaded to page from", async () => {
       const fakeSocket = createFakeSocket();
       fakeSocket.connected = true;

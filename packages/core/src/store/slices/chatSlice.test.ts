@@ -572,8 +572,9 @@ describe("chatSlice — thread replies", () => {
   }
 
   // The main stream holds the parent; the thread is open with one reply.
-  function openThread(hasMore = false) {
+  function openThread(hasMore = false, socketConnected = true) {
     return baseState({
+      socketConnected,
       messages: {
         [CONV]: {
           items: [parent()],
@@ -623,6 +624,74 @@ describe("chatSlice — thread replies", () => {
   it("a live reply advances the cursor when the thread is loaded to its end", () => {
     const state = reducer(openThread(false), upsertMessage(reply("reply-2", "2024-01-01T00:00:02.000Z")));
     expect(state.threads["parent-1"].cursor).toBe("2024-01-01T00:00:02.000Z");
+  });
+
+  it("a reply confirmed while the socket is down leaves the cursor, so catch-up covers what was missed", () => {
+    const state = reducer(
+      openThread(false, false),
+      upsertMessage(reply("reply-6", "2024-01-01T00:00:06.000Z")),
+    );
+
+    expect(state.threads["parent-1"].items.map((m) => m.id)).toEqual(["reply-1", "reply-6"]);
+    expect(state.threads["parent-1"].cursor).toBe("2024-01-01T00:00:01.000Z");
+  });
+
+  it("confirming a send or an edit keeps the reactions the server response leaves out", () => {
+    let state = reducer(
+      openThread(),
+      addOptimisticMessage(reply("temp-abc", "2024-01-01T00:00:05.000Z", { localId: "abc" })),
+    );
+    // Server-shaped: the send response has no reactionCounts / userReactions.
+    const confirmed = reply("reply-2", "2024-01-01T00:00:05.000Z", { localId: "abc" }) as unknown as Record<string, unknown>;
+    delete confirmed.reactionCounts;
+    delete confirmed.userReactions;
+    state = reducer(state, upsertMessage(confirmed as never));
+
+    // Reacting to your own fresh reply works.
+    state = reducer(
+      state,
+      updateReactions({
+        conversationId: CONV,
+        messageId: "reply-2",
+        reactionCounts: { "👍": 1 },
+        userId: "user-1",
+        emoji: "👍",
+        delta: 1,
+        currentUserId: "user-1",
+      }),
+    );
+    expect(state.threads["parent-1"].items[1].userReactions).toEqual(["👍"]);
+
+    // An edit response (also without reaction fields) keeps them.
+    const edited = { ...confirmed, content: "edited" };
+    state = reducer(state, upsertMessage(edited as never));
+    expect(state.threads["parent-1"].items[1].content).toBe("edited");
+    expect(state.threads["parent-1"].items[1].reactionCounts).toEqual({ "👍": 1 });
+    expect(state.threads["parent-1"].items[1].userReactions).toEqual(["👍"]);
+  });
+
+  it("a send marked failed that the server delivered anyway is no longer failed", () => {
+    let state = reducer(
+      openThread(),
+      addOptimisticMessage(reply("temp-abc", "2024-01-01T00:00:05.000Z", { localId: "abc" })),
+    );
+    state = reducer(state, failOptimisticMessage({ conversationId: CONV, localId: "abc" }));
+    expect(state.threads["parent-1"].items[1].sendFailed).toBe(true);
+
+    // The message:created echo arrives with the same localId.
+    state = reducer(state, upsertMessage(reply("reply-2", "2024-01-01T00:00:05.000Z", { localId: "abc" })));
+    expect(state.threads["parent-1"].items[1].id).toBe("reply-2");
+    expect(state.threads["parent-1"].items[1].sendFailed).toBeUndefined();
+  });
+
+  it("a message inserted without reaction fields starts with none", () => {
+    const incoming = reply("reply-2", "2024-01-01T00:00:02.000Z") as unknown as Record<string, unknown>;
+    delete incoming.reactionCounts;
+    delete incoming.userReactions;
+    const state = reducer(openThread(), upsertMessage(incoming as never));
+
+    expect(state.threads["parent-1"].items[1].reactionCounts).toEqual({});
+    expect(state.threads["parent-1"].items[1].userReactions).toEqual([]);
   });
 
   it("a live reply beyond unloaded replies leaves the cursor where the fetched run ends", () => {

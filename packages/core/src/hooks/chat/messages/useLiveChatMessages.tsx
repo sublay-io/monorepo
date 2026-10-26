@@ -223,7 +223,8 @@ function useLiveChatMessages({
   // Thread reconnect catch-up: fetch the replies sent while the socket was
   // down. Page forward from the newest reply fetched in order until the server
   // has no more; with none fetched yet (an empty thread, or a first load that
-  // failed), from the start of the thread. A thread whose fetched run hasn't
+  // failed), load the first page only, as on open, and leave the rest to
+  // `loadOlder`. A thread whose fetched run hasn't
   // reached the end needs nothing: newer replies come in through `loadOlder`.
   // The main stream's catch-up lives in ConversationProvider, which also
   // re-joins the room; a thread shares its conversation's room.
@@ -240,7 +241,7 @@ function useLiveChatMessages({
           conversationId,
           parentMessageId,
           after,
-          limit: 100,
+          limit: after === null ? limit : 100,
           sortDir: "asc",
           includeFiles,
           includeGrants,
@@ -252,8 +253,14 @@ function useLiveChatMessages({
             hasMore: page.hasMore,
           })
         );
-        // Stop when the server is done, or if the cursor didn't move.
-        if (!page.hasMore || !page.newestCreatedAt || page.newestCreatedAt === after) {
+        // Stop after a first page, when the server is done, or if the cursor
+        // didn't move.
+        if (
+          after === null ||
+          !page.hasMore ||
+          !page.newestCreatedAt ||
+          page.newestCreatedAt === after
+        ) {
           break;
         }
         after = page.newestCreatedAt;
@@ -261,7 +268,7 @@ function useLiveChatMessages({
     } catch (err) {
       handleError(err, "Failed to fetch missed thread replies");
     }
-  }, [projectId, conversationId, parentMessageId, includeFiles, includeGrants, fetchMany, dispatch]);
+  }, [projectId, conversationId, parentMessageId, limit, includeFiles, includeGrants, fetchMany, dispatch]);
 
   useEffect(() => {
     if (!socket || !isThread) return;

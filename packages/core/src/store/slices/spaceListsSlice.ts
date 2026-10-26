@@ -24,7 +24,6 @@ export interface SpaceListState {
   sortDir: SortDirection | null;
   query: string | null;
   searchFields: SpaceSearchFields | null;
-  memberOf: boolean;
   /** A space id, or `"none"` (top-level spaces only, the default). */
   parentSpaceId: string | "none";
 }
@@ -51,7 +50,6 @@ const createDefaultSpaceListState = (): SpaceListState => ({
   sortDir: null,
   query: null,
   searchFields: null,
-  memberOf: false,
   // Top-level spaces. Sent on every page, so later pages and re-sorts keep it.
   parentSpaceId: "none",
 });
@@ -67,7 +65,6 @@ export interface SpaceListFilters {
   sortDir?: SortDirection | null;
   query?: string | null;
   searchFields?: SpaceSearchFields | null;
-  memberOf?: boolean;
   /**
    * A space id (its child spaces), or `"none"` for top-level spaces only.
    * `null` or left out: the default, `"none"`.
@@ -156,7 +153,6 @@ export const spaceListsSlice = createSlice({
         list.sortDir = defaultState.sortDir;
         list.query = defaultState.query;
         list.searchFields = defaultState.searchFields;
-        list.memberOf = defaultState.memberOf;
         list.parentSpaceId = defaultState.parentSpaceId;
       }
 
@@ -373,7 +369,6 @@ export const selectSpaceListFilters = createSelector(
       sortDir: spaceList.sortDir,
       query: spaceList.query,
       searchFields: spaceList.searchFields,
-      memberOf: spaceList.memberOf,
       parentSpaceId: spaceList.parentSpaceId,
     };
   }

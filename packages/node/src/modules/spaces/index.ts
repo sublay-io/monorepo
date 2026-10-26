@@ -8,7 +8,6 @@ export { fetchMutualSpaces } from "./fetchMutualSpaces";
 export { checkSlugAvailability } from "./checkSlugAvailability";
 export { updateSpace } from "./updateSpace";
 export { deleteSpace } from "./deleteSpace";
-export { fetchChildSpaces } from "./fetchChildSpaces";
 export { fetchSpaceBreadcrumb } from "./fetchSpaceBreadcrumb";
 export { joinSpace } from "./joinSpace";
 export { leaveSpace } from "./leaveSpace";

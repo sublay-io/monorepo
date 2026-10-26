@@ -2,7 +2,6 @@ import {
   checkSlugAvailability,
   createSpace,
   deleteSpace,
-  fetchChildSpaces,
   fetchManySpaces,
   fetchMutualSpaces,
   fetchSpace,
@@ -86,11 +85,17 @@ describe("node-sdk spaces (lifecycle) — request shaping", () => {
     });
   });
 
-  it("fetchChildSpaces strips spaceId into the path and passes the rest as params", async () => {
+  it("fetchUserSpaces forwards query, searchFields, sortBy and sortDir", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchChildSpaces(client, { spaceId: "s1", page: 2 });
-    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/children", {
-      params: { page: 2 },
+    await fetchUserSpaces(client, {
+      actingUserId: "u1",
+      query: "design",
+      searchFields: "slug",
+      sortBy: "createdAt",
+      sortDir: "desc",
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/user-spaces", {
+      params: { actingUserId: "u1", query: "design", searchFields: "slug", sortBy: "createdAt", sortDir: "desc" },
     });
   });
 
@@ -197,15 +202,6 @@ describe("node-sdk spaces (lifecycle) — response mapping", () => {
     await expect(fetchUserSpaces(client, { actingUserId: "u1" })).resolves.toEqual(result);
   });
 
-  it("fetchChildSpaces returns the full PaginatedResponse envelope", async () => {
-    const { client, projectInstance } = makeClient();
-    const envelope = { data: [{ id: "s2" }], pagination: { page: 1, limit: 10, total: 1 } };
-    projectInstance.get.mockResolvedValueOnce({ data: envelope });
-    await expect(
-      fetchChildSpaces(client, { spaceId: "s1" }),
-    ).resolves.toEqual(envelope);
-  });
-
   it("fetchSpaceBreadcrumb returns response.data", async () => {
     const { client, projectInstance } = makeClient();
     const breadcrumb = [{ id: "s1", name: "Root" }];
@@ -244,10 +240,9 @@ describe("node-sdk spaces (lifecycle) — response mapping", () => {
 describe("node-sdk spaces — reads as a user", () => {
   it("space reads send actingUserId as a query param", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchManySpaces(client, { memberOf: "true", actingUserId: "u1" });
+    await fetchManySpaces(client, { parentSpaceId: "none", actingUserId: "u1" });
     await fetchSpaceBySlug(client, { slug: "my-space", actingUserId: "u1" });
     await fetchSpaceByShortId(client, { shortId: "sh1", actingUserId: "u1" });
-    await fetchChildSpaces(client, { spaceId: "s1", actingUserId: "u1" });
     for (const [, config] of projectInstance.get.mock.calls) {
       expect(config.params.actingUserId).toBe("u1");
     }

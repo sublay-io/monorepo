@@ -30,7 +30,6 @@ export interface FetchSpacesOptions {
   sortDir?: SortDirection | null;
   query?: string | null;
   searchFields?: SpaceSearchFields | null;
-  memberOf?: boolean;
   /** A space id, or `"none"` for top-level spaces. `null` or left out: `"none"`. */
   parentSpaceId?: string | "none" | null;
   limit: number;
@@ -90,7 +89,6 @@ export function useSpaceListActions() {
           sortDir: options.sortDir ?? undefined,
           query: options.query,
           searchFields: options.searchFields,
-          memberOf: options.memberOf,
           parentSpaceId: options.parentSpaceId,
           limit: options.limit,
         }).unwrap();

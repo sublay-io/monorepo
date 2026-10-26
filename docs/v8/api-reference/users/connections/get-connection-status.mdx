@@ -6,6 +6,10 @@ description: "Check the connection status between the authenticated user and ano
 
 Returns the connection status between the authenticated user and the specified user. The response shape varies depending on whether there is no connection, a pending request, an accepted connection, or a declined request.
 
+<Note>
+  **Requires the `connections` bundle.** A project without the connections bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
+</Note>
+
 ## Path Parameters
 
 <ParamField path="userId" type="string" required>

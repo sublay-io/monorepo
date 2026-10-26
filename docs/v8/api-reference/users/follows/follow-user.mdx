@@ -6,6 +6,10 @@ description: "Follow a user by their ID"
 
 Creates a follow relationship from the authenticated user to the specified user. A notification is sent to the followed user.
 
+<Note>
+  **Requires the `follows` bundle.** A project without the follows bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
+</Note>
+
 ## Path Parameters
 
 <ParamField path="userId" type="string" required>

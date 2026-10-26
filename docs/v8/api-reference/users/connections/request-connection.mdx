@@ -6,6 +6,10 @@ description: "Send a connection request to a user"
 
 Sends a connection request from the authenticated user to the specified user. An optional message can be included. A notification is sent to the receiving user.
 
+<Note>
+  **Requires the `connections` bundle.** A project without the connections bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
+</Note>
+
 ## Path Parameters
 
 <ParamField path="userId" type="string" required>

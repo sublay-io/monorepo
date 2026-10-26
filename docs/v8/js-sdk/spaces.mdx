@@ -214,6 +214,12 @@ const userSpaces = await sublay.spaces.fetchUserSpaces({
   Direction, `"asc"` or `"desc"`, for any `sortBy`. Left out: A–Z for `"alphabetical"`, otherwise newest / most first.
 </ParamField>
 
+<ParamField body="parentSpaceId" type='string | "none"'>
+  Narrows the list by where each space sits in the tree. `"none"` returns the user's memberships in top-level spaces only. A space id returns their memberships in that space's direct sub-spaces; an id that matches no space returns an empty page, not a 404. Left out: memberships at every level.
+
+  A membership in a sub-space whose parent the user isn't a member of is not top-level, so `"none"` leaves it out.
+</ParamField>
+
 <ParamField body="include" type="SpaceIncludeParam">
   A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>

@@ -241,6 +241,7 @@ These query filters take `none`:
 | Endpoint | Filter | `none` means | Left out or empty |
 |---|---|---|---|
 | [`GET /spaces`](/v8/api-reference/spaces/fetch-spaces) | `parentSpaceId` | top-level spaces only | spaces at every level |
+| [`GET /spaces/user-spaces`](/v8/api-reference/spaces/fetch-user-spaces) | `parentSpaceId` | the user's memberships in top-level spaces only | memberships at every level |
 | [`GET /entities`](/v8/api-reference/entities/fetch-many-entities) | `sourceId` | entities with no source | any source |
 | [`GET /entities`](/v8/api-reference/entities/fetch-many-entities) | `spaceId` | entities in no space | any space, or none |
 | [`GET /entities/drafts`](/v8/api-reference/entities/fetch-drafts) | `sourceId`, `spaceId` | drafts with no source / in no space | any |

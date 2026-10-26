@@ -46,6 +46,12 @@ Returns a paginated list of spaces a user has a membership in — the signed-in 
   Filter by role. Single value (`"admin"`, `"moderator"`, `"member"`) or comma-separated list (e.g. `"admin,moderator"`).
 </ParamField>
 
+<ParamField query="parentSpaceId" type="string">
+  Narrows the list by where each space sits in the tree. `none` lists the user's memberships in top-level spaces only (spaces with no parent). A space id lists their memberships in that space's direct sub-spaces; an id that matches no space returns an empty page, not a 404. Left out, or sent empty, memberships at every level are listed. `null` and `undefined` are refused with `400 space/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)).
+
+  `none` goes by the space, not by what the user belongs to: a membership in a sub-space whose parent the user isn't a member of is still not top-level, so `none` leaves it out. To show such a sub-space too, list every level and group the results yourself.
+</ParamField>
+
 <ParamField query="include" type="string">
   Associations to include, as a comma-separated value or repeated params. The only value is:
   - `files` — the processed `avatarFile` and `bannerFile` objects on each space (requires the `files-images` bundle)
@@ -88,6 +94,17 @@ Returns a paginated list of spaces a user has a membership in — the signed-in 
       "error": "`sortBy=newest` isn't supported in v8. Use `sortBy=createdAt` to list the newest spaces first, or `sortBy=joinedAt` (the default) to list the spaces the user joined most recently first.",
       "code": "space/unsupported-param",
       "param": "sortBy"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported parentSpaceId value — 400">
+    `parentSpaceId=null` and `parentSpaceId=undefined` are rejected with the spelling to use instead.
+
+    ```json
+    {
+      "error": "`parentSpaceId=null` isn't supported. Use `parentSpaceId=none` for top-level spaces, or leave it out for every level.",
+      "code": "space/unsupported-param",
+      "param": "parentSpaceId"
     }
     ```
   </Accordion>

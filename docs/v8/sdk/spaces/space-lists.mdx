@@ -104,11 +104,17 @@ subSpaces.fetchSpaces({ sortBy: "alphabetical", parentSpaceId: "parent-space-id"
 
 A space list never includes `unlisted` or `private` spaces, even ones the user belongs to. For a "my spaces" screen, use [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces): it lists the spaces the current user is a member of, whatever their visibility, with their membership on each, and takes its own `query`, `searchFields`, `sortBy` (`"joinedAt"`, the default, `"createdAt"`, `"members"` or `"alphabetical"`) and `sortDir`.
 
+It also takes `parentSpaceId`: `"none"` for the user's memberships in top-level spaces only, or a space id for their memberships in that space's direct sub-spaces. Left out (or `null`), it lists memberships at every level. `"none"` goes by where the space sits, not by what the user belongs to: a membership in a sub-space whose parent the user isn't in is not top-level, so `"none"` leaves it out.
+
 ```tsx
 const fetchUserSpaces = useFetchUserSpaces();
 
 const { data } = await fetchUserSpaces({ query: "design", sortBy: "alphabetical" });
 // data: { space, membership }[]
+
+// The user's top-level spaces, then their sub-spaces of one of them
+const topLevel = await fetchUserSpaces({ parentSpaceId: "none" });
+const children = await fetchUserSpaces({ parentSpaceId: "parent-space-id" });
 ```
 
 ## Return Values

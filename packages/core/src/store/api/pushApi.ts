@@ -1,11 +1,12 @@
 import { baseApi } from "./baseApi";
 import type { PushDeviceIdentifier } from "../../interfaces/PushTokenAdapter";
+import type { PushDevice } from "../../interfaces/models/PushDevice";
 
 type PushDeviceMutationParams = PushDeviceIdentifier & { projectId: string };
 
 export const pushApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    registerPushDevice: builder.mutation<void, PushDeviceMutationParams>({
+    registerPushDevice: builder.mutation<PushDevice, PushDeviceMutationParams>({
       query: ({ projectId, ...body }) => ({
         url: `/${projectId}/push-notifications/devices`,
         method: "POST",

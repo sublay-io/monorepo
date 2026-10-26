@@ -271,6 +271,7 @@ export type {
   PushDevicePlatform,
   PushWebSubscriptionPayload,
 } from "./interfaces/PushTokenAdapter";
+export type { PushDevice } from "./interfaces/models/PushDevice";
 export { PUSH_EVENT_TYPES, type PushEventType } from "./interfaces/PushEventType";
 export { MUTE_DURATIONS, type MuteDuration } from "./interfaces/MuteDuration";
 export type {

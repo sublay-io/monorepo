@@ -10,6 +10,10 @@ Removes the connection relationship between the authenticated user and the speci
 - **Pending (sent by other user)** — declines the request (status updated to `"declined"`).
 - **Accepted** — disconnects both users (record is deleted).
 
+<Note>
+  **Requires the `connections` bundle.** A project without the connections bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
+</Note>
+
 ## Path Parameters
 
 <ParamField path="userId" type="string" required>

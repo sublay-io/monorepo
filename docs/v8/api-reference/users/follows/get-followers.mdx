@@ -8,6 +8,10 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 Returns a paginated list of users who follow the specified user. Authentication is optional — the endpoint works without a token. When the request has a viewer — the signed-in user, or the user a service key names in `actingUserId` — any user with a block between them and the viewer, in either direction, is excluded from the results. Block filtering requires the `moderation` bundle.
 
+<Note>
+  **Requires the `follows` bundle.** A project without the follows bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
+</Note>
+
 ## Path Parameters
 
 <ParamField path="userId" type="string" required>

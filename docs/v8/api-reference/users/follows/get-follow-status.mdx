@@ -6,6 +6,10 @@ description: "Check whether the authenticated user follows a specific user"
 
 Returns the follow status between the authenticated user and the specified user. If the authenticated user is following, the response includes the follow record ID and timestamp.
 
+<Note>
+  **Requires the `follows` bundle.** A project without the follows bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
+</Note>
+
 ## Path Parameters
 
 <ParamField path="userId" type="string" required>

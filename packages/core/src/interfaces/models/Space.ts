@@ -142,6 +142,21 @@ export interface ApproveMemberResponse {
   };
 }
 
+export interface AddMemberResponse {
+  /** "User added to the space." or, when they were already an active member, "User is already a member of this space." */
+  message: string;
+  membership: {
+    id: string;
+    spaceId: string;
+    userId: string;
+    /** `member` for a user just added; an existing active member keeps their role. */
+    role: SpaceMemberRole;
+    status: "active";
+    joinedAt: string;
+    createdAt: string;
+  };
+}
+
 export interface DeclineMemberResponse {
   message: string;
   membership: {

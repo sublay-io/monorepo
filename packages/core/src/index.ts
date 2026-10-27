@@ -419,6 +419,7 @@ export {
   useFetchMutualSpaces,
   useUpdateMemberRole,
   useApproveMember,
+  useAddMember,
   useDeclineMember,
   useBanMember,
   useUnbanMember,
@@ -455,6 +456,7 @@ export {
   type CheckMyMembershipProps,
   type UpdateMemberRoleProps,
   type ApproveMemberProps,
+  type AddMemberProps,
   type DeclineMemberProps,
   type BanMemberProps,
   type UnbanMemberProps,
@@ -875,6 +877,7 @@ export type {
   LeaveSpaceResponse,
   UpdateMemberRoleResponse,
   ApproveMemberResponse,
+  AddMemberResponse,
   DeclineMemberResponse,
   DeleteSpaceResponse,
   SpaceInclude,
@@ -929,7 +932,12 @@ export type {
   WorkspaceListConfig,
   WorkspaceListFetchOptions,
 } from "./store/slices/workspaceListsSlice";
-export type { SpaceBreadcrumb } from "./interfaces/SpaceBreadcrumb";
+export type {
+  SpaceBreadcrumb,
+  SpaceBreadcrumbEntry,
+  VisibleSpaceBreadcrumbEntry,
+  HiddenSpaceBreadcrumbEntry,
+} from "./interfaces/SpaceBreadcrumb";
 export type {
   SpaceReputationContextParams,
   SpaceReputationUserParams,

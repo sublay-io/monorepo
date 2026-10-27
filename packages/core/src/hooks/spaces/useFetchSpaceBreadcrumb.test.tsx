@@ -16,7 +16,20 @@ describe("useFetchSpaceBreadcrumb", () => {
     );
 
     const breadcrumb: SpaceBreadcrumb = {
-      breadcrumb: [{ id: "root-space", shortId: "root", name: "Root", slug: "root", avatarFileId: null }],
+      breadcrumb: [
+        { hidden: true },
+        {
+          id: "space-1",
+          shortId: "child",
+          name: "Child",
+          slug: "child",
+          avatarFileId: null,
+          visibility: "public",
+          parentSpaceId: "root-space",
+          depth: 1,
+          hidden: false,
+        },
+      ],
       depth: 1,
     };
     axiosPrivate.mockResponse("get", breadcrumb);

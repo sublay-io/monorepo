@@ -16,6 +16,7 @@ export { fetchSpaceMembers } from "./fetchSpaceMembers";
 export { fetchSpaceTeam } from "./fetchSpaceTeam";
 export { updateMemberRole } from "./updateMemberRole";
 export { approveMembership } from "./approveMembership";
+export { addMember } from "./addMember";
 export { declineMembership } from "./declineMembership";
 export { banMember } from "./banMember";
 export { unbanMember } from "./unbanMember";

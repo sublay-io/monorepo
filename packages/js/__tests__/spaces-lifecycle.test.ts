@@ -404,7 +404,20 @@ describe("js-sdk spaces (lifecycle) — response mapping", () => {
   it("fetchSpaceBreadcrumb returns the SpaceBreadcrumb", async () => {
     const { client, projectInstance } = makeClient();
     const breadcrumb = {
-      breadcrumb: [{ id: "s0", shortId: "sh0", name: "Root", slug: null, avatarFileId: null }],
+      breadcrumb: [
+        { hidden: true },
+        {
+          id: "s1",
+          shortId: "sh1",
+          name: "Child",
+          slug: null,
+          avatarFileId: null,
+          visibility: "public",
+          parentSpaceId: "s0",
+          depth: 1,
+          hidden: false,
+        },
+      ],
       depth: 1,
     };
     projectInstance.get.mockResolvedValueOnce({ data: breadcrumb });

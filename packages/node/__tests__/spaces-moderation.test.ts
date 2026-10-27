@@ -148,16 +148,28 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
     });
   });
 
-  it("fetchRule hits /spaces/:id/rules/:ruleId with no params", async () => {
+  it("fetchRule hits /spaces/:id/rules/:ruleId, actingUserId as a param", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchRule(client, { spaceId: "s1", ruleId: "r1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/rules/r1");
+    await fetchRule(client, { spaceId: "s1", ruleId: "r1", actingUserId: "u1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/rules/r1", {
+      params: { actingUserId: "u1" },
+    });
   });
 
-  it("fetchManyRules hits /spaces/:id/rules with no params", async () => {
+  it("fetchManyRules hits /spaces/:id/rules, actingUserId as a param", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchManyRules(client, { spaceId: "s1", actingUserId: "u1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/rules", {
+      params: { actingUserId: "u1" },
+    });
+  });
+
+  it("fetchManyRules without actingUserId sends no actingUserId (the anonymous view)", async () => {
     const { client, projectInstance } = makeClient();
     await fetchManyRules(client, { spaceId: "s1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/rules");
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/rules", {
+      params: { actingUserId: undefined },
+    });
   });
 
   it("reorderRules patches the reorder route with ruleIds and actingUserId in the body", async () => {

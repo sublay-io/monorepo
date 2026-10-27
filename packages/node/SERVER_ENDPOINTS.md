@@ -209,6 +209,7 @@ Base path: `/v8/:projectId/`
 | DELETE | `/spaces/:spaceId` | can access with a key (required `actingUserId`, the creator) | `spaces.deleteSpace` | yes |
 | POST | `/spaces/:spaceId/join` | can access with a key | `spaces.joinSpace` | yes |
 | GET | `/spaces/:spaceId/members` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceMembers` | yes |
+| POST | `/spaces/:spaceId/members` | can access with a key (required `actingUserId`, a moderator or admin) | `spaces.addMember` | yes |
 | GET | `/spaces/:spaceId/team` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceTeam` | yes |
 | GET | `/spaces/:spaceId/membership/me` | can access with a key | `spaces.checkMyMembership` | yes |
 | PATCH | `/spaces/:spaceId/members/:memberId/role` | can access with a key | `spaces.updateMemberRole` | yes |
@@ -221,10 +222,10 @@ Base path: `/v8/:projectId/`
 | PATCH | `/spaces/:spaceId/reports/comment/:reportId` | can access with a key | `spaces.handleCommentReport` | yes |
 | PATCH | `/spaces/:spaceId/entities/:entityId/moderation` | can access with a key | `spaces.moderateSpaceEntity` | yes |
 | PATCH | `/spaces/:spaceId/comments/:commentId/moderation` | can access with a key | `spaces.moderateSpaceComment` | yes |
-| GET | `/spaces/:spaceId/breadcrumb` | no key needed | `spaces.fetchSpaceBreadcrumb` | yes |
-| GET | `/spaces/:spaceId/rules` | no key needed | `spaces.fetchManyRules` | yes |
+| GET | `/spaces/:spaceId/breadcrumb` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceBreadcrumb` | yes |
+| GET | `/spaces/:spaceId/rules` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchManyRules` | yes |
 | PATCH | `/spaces/:spaceId/rules/reorder` | can access with a key | `spaces.reorderRules` | yes |
-| GET | `/spaces/:spaceId/rules/:ruleId` | no key needed | `spaces.fetchRule` | yes |
+| GET | `/spaces/:spaceId/rules/:ruleId` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchRule` | yes |
 | POST | `/spaces/:spaceId/rules` | can access with a key | `spaces.createRule` | yes |
 | PATCH | `/spaces/:spaceId/rules/:ruleId` | can access with a key | `spaces.updateRule` | yes |
 | DELETE | `/spaces/:spaceId/rules/:ruleId` | can access with a key | `spaces.deleteRule` | yes |

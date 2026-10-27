@@ -103,3 +103,31 @@ describe("addNotificationsMessages — event and reputation-grant notifications"
     expect(n.title).toBe("Cancelled: Launch party");
   });
 });
+
+describe("addNotificationsMessages — space-member-added", () => {
+  const added: PotentiallyPopulatedUnifiedAppNotification = {
+    ...base,
+    type: "space-member-added",
+    action: "open-space",
+    metadata: {
+      spaceId: "s1",
+      spaceName: "Design",
+      spaceShortId: "abc123",
+      spaceSlug: "design",
+      spaceAvatar: null,
+    },
+  };
+
+  it("default title names the space", () => {
+    const n = one(added);
+    expect(n.title).toBe("You were added to Design");
+    expect(n.content).toBe("");
+  });
+
+  it("the spaceMemberAdded template overrides it", () => {
+    const [n] = addNotificationsMessages([added], {
+      spaceMemberAdded: { title: "Welcome to $spaceName ($spaceSlug)" },
+    });
+    expect(n.title).toBe("Welcome to Design (design)");
+  });
+});

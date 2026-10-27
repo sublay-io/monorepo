@@ -115,6 +115,21 @@ export interface ApproveMemberResponse {
   };
 }
 
+export interface AddMemberResponse {
+  /** "User added to the space." or, when they were already an active member, "User is already a member of this space." */
+  message: string;
+  membership: {
+    id: string;
+    spaceId: string;
+    userId: string;
+    /** `member` for a user just added; an existing active member keeps their role. */
+    role: SpaceMemberRole;
+    status: "active";
+    joinedAt: string;
+    createdAt: string;
+  };
+}
+
 export interface DeclineMemberResponse {
   message: string;
   membership: {
@@ -143,8 +158,34 @@ export interface DeleteSpaceResponse {
   message: string;
 }
 
+/** A space on the path that the viewer can see. */
+export interface VisibleSpaceBreadcrumbEntry {
+  id: string;
+  shortId: string;
+  name: string;
+  slug: string | null;
+  avatarFileId: string | null;
+  visibility: SpaceVisibility;
+  parentSpaceId: string | null;
+  depth: number;
+  hidden: false;
+}
+
+/**
+ * A space above the requested one that the viewer can't see (a private space
+ * they aren't an active member of, or one under it). Carries nothing else.
+ */
+export interface HiddenSpaceBreadcrumbEntry {
+  hidden: true;
+}
+
+export type SpaceBreadcrumbEntry =
+  | VisibleSpaceBreadcrumbEntry
+  | HiddenSpaceBreadcrumbEntry;
+
 export interface SpaceBreadcrumb {
-  breadcrumb: SpacePreview[];
+  /** The path from the top-level space down to the requested one, root first. */
+  breadcrumb: SpaceBreadcrumbEntry[];
   depth: number;
 }
 

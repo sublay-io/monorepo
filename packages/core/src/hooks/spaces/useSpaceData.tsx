@@ -4,6 +4,7 @@ import useFetchSpace from "./useFetchSpace";
 import useFetchSpaceByShortId from "./useFetchSpaceByShortId";
 import useFetchSpaceBySlug from "./useFetchSpaceBySlug";
 import useFetchSpaceBreadcrumb from "./useFetchSpaceBreadcrumb";
+import type { SpaceBreadcrumbEntry } from "../../interfaces/SpaceBreadcrumb";
 import useUpdateSpace, { UpdateSpaceProps } from "./useUpdateSpace";
 import useDeleteSpace from "./useDeleteSpace";
 import useJoinSpace from "./useJoinSpace";
@@ -42,7 +43,8 @@ export interface UseSpaceDataValues {
   isBanned: boolean;
 
   // Hierarchy
-  breadcrumb: SpacePreview[];
+  // Root first. A space above that the viewer can't see is `{ hidden: true }`.
+  breadcrumb: SpaceBreadcrumbEntry[];
   parentSpace: SpacePreview | null;
   childSpaces: SpacePreview[];
 
@@ -69,7 +71,7 @@ function useSpaceData({
   const [space, setSpace] = useState<SpaceDetailed | undefined | null>(spaceProp);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [breadcrumb, setBreadcrumb] = useState<SpacePreview[]>([]);
+  const [breadcrumb, setBreadcrumb] = useState<SpaceBreadcrumbEntry[]>([]);
 
   // Cache to store fetched spaces keyed by unique identifier
   const spaceCache = useRef<Record<string, SpaceDetailed>>({});

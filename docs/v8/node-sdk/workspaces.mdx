@@ -364,7 +364,7 @@ if (result.skippedCount > 0) {
 }
 ```
 
-If the target owns this workspace or **any** descendant — including sealed ones outside the acting user's reach — it is refused with `409 workspace/owns-descendants` and nothing is removed. The 409 body lists them in `ownedWorkspaces` (`{ id, name }`, both `null` where the acting user has no standing on that workspace; named entries first) with the total in `ownedCount`; an owner of each workspace (or an ancestor owner) must transfer or delete it before a retry. See [Remove From Subtree](/v8/api-reference/workspaces/members/remove-from-subtree).
+If the target owns this workspace or a descendant, it is refused with `409 workspace/owns-descendants` and nothing is removed. Owned workspaces the acting user has standing on always count and are named in `ownedWorkspaces`. Ones the acting user has no standing on (for example sealed sub-workspaces) count only when the target holds a membership this call would remove, and are listed as `{ id: null, name: null }` after the named ones. `ownedCount` is the number of entries. An owner of each workspace (or an ancestor owner) must transfer or delete it before a retry. See [Remove From Subtree](/v8/api-reference/workspaces/members/remove-from-subtree).
 
 <Note>
   **`skippedCount` reflects the acting user, not the key.** The sweep is partial for a **non-owner** actor, and `actingUserId` is **required** on this call — a key always names someone, and is bound by their reach and their per-node rank. Name a non-owner admin and you can get a partial sweep, exactly as that admin would; name the owner for the god-path that clears every descendant. Always assert on `skippedCount` rather than assuming `removedCount` means the user is fully offboarded.

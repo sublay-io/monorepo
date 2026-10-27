@@ -565,7 +565,7 @@ Creating a workspace from the switcher with the list's [`createWorkspace`](/v8/h
 | [`useFetchWorkspaceMemberStanding`](/v8/hooks/workspaces/use-fetch-workspace-member-standing) | One user's resolved standing | Visibility |
 | [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member) | Edit a member's access / profile | `edit-member-access` or `edit-member-profile`, rank-bounded |
 | [`useRemoveWorkspaceMember`](/v8/hooks/workspaces/use-remove-workspace-member) | Remove a member from this node | `remove-member`, rank-bounded |
-| [`useRemoveWorkspaceMemberFromSubtree`](/v8/hooks/workspaces/use-remove-workspace-member-from-subtree) | Offboard a user across the subtree | `remove-member`, rank-bounded per node |
+| [`useRemoveWorkspaceMemberFromSubtree`](/v8/hooks/workspaces/use-remove-workspace-member-from-subtree) | Offboard a user across the subtree (refused while they own a workspace in it) | `remove-member`, rank-bounded per node |
 | [`useLeaveWorkspace`](/v8/hooks/workspaces/use-leave-workspace) | Leave a workspace yourself | Self-service |
 
 ### Invitations

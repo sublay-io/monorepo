@@ -73,6 +73,12 @@ jobs:
         # checks the other ~99% of both packages.
         run: pnpm --filter @sublay/ui-core-react-js --filter @sublay/ui-core-react-native run build
 
+      - name: Typecheck ui-core packages
+        # Each package's tsconfig.json covers its tests, which the build's
+        # tsconfig.esm.json / tsconfig.cjs.json exclude and vitest does not
+        # typecheck.
+        run: pnpm --filter @sublay/ui-core-react-js --filter @sublay/ui-core-react-native run typecheck
+
       - name: Run ui-core test suites
         run: pnpm --filter @sublay/ui-core-react-js --filter @sublay/ui-core-react-native --if-present run test
 

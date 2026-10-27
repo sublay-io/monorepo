@@ -13,9 +13,18 @@
   "include": [
     "packages/*/src/**/*"
   ],
+  // Test files are left to each package's own tsconfig (`pnpm -r run
+  // typecheck`). This project compiles every package's source as one
+  // program, so the web packages' tests see React Native's global
+  // declarations (e.g. its FormData, which has no `.get()`) and fail here
+  // while passing under their own package's config, which is the one that
+  // matches how they run.
   "exclude": [
     "node_modules",
     "recycle_bin",
-    "packages/*/dist"
+    "packages/*/dist",
+    "packages/*/src/**/*.test.ts",
+    "packages/*/src/**/*.test.tsx",
+    "packages/*/src/**/__tests__/**"
   ]
 }

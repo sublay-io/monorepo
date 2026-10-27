@@ -21,12 +21,10 @@
 # identical case and was only ever watched by cli.yml; playground now
 # matches it.
 #
-# tsconfig.json is the exception: it is watched defensively, for
-# completeness, not because it currently affects this job. Every package
-# has its own tsconfig.json and none of them `extends` the root one, and
-# no workflow runs the root `pnpm typecheck` — so a root tsconfig change
-# cannot redden any build today. It stays in the filters so that if
-# something ever does start consuming it, the coverage is already there.
+# tsconfig.json is watched because this job runs the root `pnpm typecheck`
+# (see the Typecheck step), which is the only thing that reads it: every
+# package has its own tsconfig.json and none of them `extends` the root
+# one. The other group workflows still list it defensively.
 #
 # Every group's install runs with --ignore-scripts, and every group builds
 # what it needs explicitly. See the install step below for why.
@@ -122,6 +120,24 @@ jobs:
         # is the only thing standing between those suites and "Failed to
         # resolve entry for package @sublay/core".
         run: pnpm react:build-all
+
+      - name: Typecheck
+        # Nothing else checks these types. The builds above compile through
+        # tsconfig.esm.json / tsconfig.cjs.json, which exclude test files,
+        # and vitest strips types without checking them — so a type error in
+        # a test passes both build and test unless this step runs. Each
+        # package's `typecheck` uses its own tsconfig.json, which covers its
+        # tests. It runs after the build because react-js, react-native and
+        # expo resolve `@sublay/core` through its dist/ types.
+        #
+        # The root `pnpm typecheck` compiles every package's non-test source
+        # as one program (tests are excluded there; see the root
+        # tsconfig.json). It spans packages outside this group, but those
+        # need no build, and each other group's own workflow still owns its
+        # package's checks.
+        run: |
+          pnpm typecheck
+          pnpm --filter @sublay/core --filter @sublay/react-js --filter @sublay/react-native --filter @sublay/expo run typecheck
 
       - name: Run package test suites
         run: pnpm --filter @sublay/core --filter @sublay/react-js --filter @sublay/react-native --filter @sublay/expo run test

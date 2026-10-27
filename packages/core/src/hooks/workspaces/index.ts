@@ -5,11 +5,8 @@ export { default as useFetchWorkspace } from "./useFetchWorkspace";
 export type { FetchWorkspaceProps } from "./useFetchWorkspace";
 export { default as useFetchManyWorkspaces } from "./useFetchManyWorkspaces";
 export type { FetchManyWorkspacesParams } from "./useFetchManyWorkspaces";
-export { default as useFetchManyWorkspacesWrapper } from "./useFetchManyWorkspacesWrapper";
-export type {
-  UseFetchManyWorkspacesWrapperProps,
-  UseFetchManyWorkspacesWrapperValues,
-} from "./useFetchManyWorkspacesWrapper";
+export { default as useFetchMutualWorkspaces } from "./useFetchMutualWorkspaces";
+export type { FetchMutualWorkspacesProps } from "./useFetchMutualWorkspaces";
 export { default as useUpdateWorkspace } from "./useUpdateWorkspace";
 export type { UpdateWorkspaceProps } from "./useUpdateWorkspace";
 export { default as useUpdateWorkspaceInheritFlag } from "./useUpdateWorkspaceInheritFlag";

@@ -5,6 +5,7 @@ import collectionsReducer from "./slices/collectionsSlice";
 import { userReducer } from "./slices/userSlice";
 import entityListsReducer from "./slices/entityListsSlice";
 import spaceListsReducer from "./slices/spaceListsSlice";
+import workspaceListsReducer from "./slices/workspaceListsSlice";
 import accountsReducer from "./slices/accountsSlice";
 import chatReducer from "./slices/chatSlice";
 import tablesReducer from "./slices/tablesSlice";
@@ -36,6 +37,7 @@ export const sublayReducers = combineReducers({
   user: userReducer,
   entityLists: entityListsReducer,
   spaceLists: spaceListsReducer,
+  workspaceLists: workspaceListsReducer,
   accounts: accountsReducer,
   chat: chatReducer,
   tables: tablesReducer,

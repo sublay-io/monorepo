@@ -82,7 +82,21 @@ export interface Workspace {
   // `include=memberCount` is requested, on either the single-workspace read or
   // the list; absent otherwise (not `null`, not `0`).
   memberCount?: number;
+  /**
+   * Why the caller can open this workspace: their full standing on it, one
+   * entry per grant (`owner`, `member`, `ancestor-owner`, `reach-holder`), the
+   * same entries `useFetchWorkspaceAuthority` returns. Present on the list,
+   * mutual-workspaces and single-workspace reads; absent on the rows other
+   * routes return (create, update, transfer).
+   */
+  reasons?: WorkspaceAuthorityReasonDetail[];
 }
+
+/** Which workspaces a workspace list holds. */
+export type WorkspaceListRelation = "direct" | "reachable";
+
+/** The order of a workspace list: by creation time, oldest or newest first. */
+export type WorkspaceListSortDir = "asc" | "desc";
 
 // A direct membership row on one workspace node.
 export interface WorkspaceMember {

@@ -19,13 +19,13 @@ Returns a paginated list of the workspaces that both the caller and another user
   - `reachable` (the default): each user can open the workspace, by any reason — owner, member, owner of an ancestor, or a capability that reaches down from an ancestor.
   - `direct`: each user owns the workspace or has a member row on it.
 
-  Left out or sent empty: `reachable`. `null` and `undefined` are refused with `400 workspace/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)); any other value returns `400 workspace/invalid-query`.
+  Left out or sent empty: `reachable`. Values match exactly. `null` and `undefined` are refused with `400 workspace/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)); any other value returns `400 workspace/invalid-query`.
 </ParamField>
 
 <ParamField query="sortDir" type="string">
   The order, by creation time: `desc` (the default) newest first, `asc` oldest first, which lists every parent before its children. Rows created at the same moment are ordered by id in the same direction, so pages neither repeat nor skip a row.
 
-  Left out or sent empty: `desc`. `null` and `undefined` are refused with `400 workspace/unsupported-param`; any other value returns `400 workspace/invalid-query`.
+  Left out or sent empty: `desc`. Case is ignored (`DESC` works). `null` and `undefined` are refused with `400 workspace/unsupported-param`; any other value returns `400 workspace/invalid-query`.
 </ParamField>
 
 <ParamField query="page" type="number">

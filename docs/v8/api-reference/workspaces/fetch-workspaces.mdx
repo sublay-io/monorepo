@@ -21,7 +21,7 @@ Returns a paginated list of the caller's workspaces. By default that is **every 
 
   A workspace can't be moved to another parent, so a sub-workspace is always newer than its parent: `asc` lists every parent before its children. See [Building a workspace switcher](/v8/sdk/workspaces/overview#building-a-workspace-switcher).
 
-  Left out or sent empty: `desc`. `null` and `undefined` are refused with `400 workspace/unsupported-param`; any other value returns `400 workspace/invalid-query`.
+  Left out or sent empty: `desc`. Case is ignored (`DESC` works). `null` and `undefined` are refused with `400 workspace/unsupported-param`; any other value returns `400 workspace/invalid-query`.
 </ParamField>
 
 <ParamField query="page" type="number">
@@ -122,7 +122,7 @@ GET /v8/:projectId/workspaces?parentWorkspaceId=none&page=1&limit=10&include=mem
     `null` and `undefined` as the value of `parentWorkspaceId`, `relation` or `sortDir` are rejected with the values to use instead, and `param` names the parameter. To use a default, leave the parameter out.
   </Accordion>
   <Accordion title="Unknown relation or sortDir — 400">
-    Returned with code `workspace/invalid-query` for a `relation` other than `direct` or `reachable`, or a `sortDir` other than `asc` or `desc`. Values match exactly.
+    Returned with code `workspace/invalid-query` for a `relation` other than `direct` or `reachable`, or a `sortDir` other than `asc` or `desc`. `relation` values match exactly (`Direct` is refused); `sortDir` ignores case.
   </Accordion>
   <Accordion title="Unknown Include — 400">
     ```json

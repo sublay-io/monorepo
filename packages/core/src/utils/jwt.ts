@@ -46,7 +46,17 @@ function base64UrlDecode(value: string): string | null {
   }
 
   // React Native without an `atob` polyfill: Buffer via Hermes/Node shim.
-  const GlobalBuffer = (globalThis as { Buffer?: typeof Buffer }).Buffer;
+  // Typed locally (like `process` in env.ts): this package doesn't depend on
+  // @types/node, and only needs the one decode call.
+  const GlobalBuffer = (
+    globalThis as {
+      Buffer?: (new (...args: never[]) => unknown) & {
+        from(input: string, encoding: "base64"): {
+          toString(encoding: "utf-8"): string;
+        };
+      };
+    }
+  ).Buffer;
   if (typeof GlobalBuffer === "function") {
     return GlobalBuffer.from(padded, "base64").toString("utf-8");
   }

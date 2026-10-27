@@ -11,5 +11,5 @@
     "moduleResolution": "node",
     "ignoreDeprecations": "6.0"
   },
-  "exclude": ["recycle_bin", "**/*.test.ts", "**/*.test.tsx", "src/test-utils/**"]
+  "exclude": ["recycle_bin", "**/*.test.ts", "**/*.test.tsx", "src/test-utils/**", "**/testHelpers.tsx"]
 }

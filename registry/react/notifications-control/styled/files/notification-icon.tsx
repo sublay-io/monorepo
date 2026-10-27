@@ -138,6 +138,11 @@ const getIconConfig = (isDark = false) => {
       color: { light: "#16a34a", dark: "#22c55e" },
       backgroundColor: { light: "#dcfce7", dark: "rgba(34, 197, 94, 0.15)" },
     },
+    "space-member-added": {
+      Icon: UserPlus,
+      color: { light: "#16a34a", dark: "#22c55e" },
+      backgroundColor: { light: "#dcfce7", dark: "rgba(34, 197, 94, 0.15)" },
+    },
     "event-invite": {
       Icon: Calendar,
       color: { light: "#2563eb", dark: "#3b82f6" },

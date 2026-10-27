@@ -164,6 +164,11 @@ const getIconConfig = (): Record<
     colorClass: "text-green-600 dark:text-green-400",
     bgClass: "bg-green-100 dark:bg-green-500/15",
   },
+  "space-member-added": {
+    Icon: UserPlus,
+    colorClass: "text-green-600 dark:text-green-400",
+    bgClass: "bg-green-100 dark:bg-green-500/15",
+  },
   "event-invite": {
     Icon: Calendar,
     colorClass: "text-blue-600 dark:text-blue-400",

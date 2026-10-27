@@ -15,7 +15,7 @@ icon: "plug"
 </Warning>
 
 <Warning>
-  **Owned descendants block, they do not cascade.** Because owners have no member row, this sweep does not cover descendant workspaces the target *owns*. It fails with `409 workspace/owns-descendants` and reports them, rather than silently orphaning ownership. Reassign each via [`useTransferWorkspaceOwnership`](/v8/hooks/workspaces/use-transfer-workspace-ownership) or delete it, then retry.
+  **Owned workspaces block, they do not cascade.** Because owners have no member row, this sweep cannot offboard the target from a workspace they *own*. If they own this workspace or **any** descendant — including sealed ones you cannot reach — the call fails with `409 workspace/owns-descendants` and nothing is removed, whoever runs it. An owner of each workspace (or an ancestor owner) reassigns it via [`useTransferWorkspaceOwnership`](/v8/hooks/workspaces/use-transfer-workspace-ownership) or deletes it, then retry.
 </Warning>
 
 ## Usage Example
@@ -80,11 +80,32 @@ Each entry names a descendant where the target is **still a member** after this 
 - `reason` is currently always `"out-of-reach"`.
 - Only descendants where the target **actually still holds a direct membership** are listed — unreachable descendants they were never in are never disclosed.
 
+### Reading the owned-workspaces block
+
+The 409 body carries `ownedWorkspaces: { id: string | null; name: string | null }[]` and `ownedCount: number` (equal to `ownedWorkspaces.length`). Entries for workspaces you have standing on carry `id` and `name`; the rest are `{ id: null, name: null }`, under the same fence as `skipped`. Named entries come first, in tree order, then the anonymous ones. Only an owner can transfer ownership, so anonymous entries mean you need an owner of this workspace to resolve them.
+
+```tsx
+try {
+  await removeWorkspaceMemberFromSubtree({ workspaceId, targetUserId });
+} catch (err: any) {
+  const body = err.response?.data;
+  if (body?.code === "workspace/owns-descendants") {
+    const named = body.ownedWorkspaces.filter((w: any) => w.id !== null);
+    const hidden = body.ownedCount - named.length;
+    console.warn(
+      `Owns ${body.ownedCount} workspace(s)` +
+        (named.length ? `: ${named.map((w: any) => w.name).join(", ")}` : "") +
+        (hidden ? ` (${hidden} you can't see — ask an owner)` : "")
+    );
+  }
+}
+```
+
 ## Error codes
 
 | Code | Status | Meaning |
 |------|--------|---------|
-| `workspace/owns-descendants` | 409 | The target owns workspaces in this subtree; the response includes `ownedWorkspaces`. |
+| `workspace/owns-descendants` | 409 | The target owns this workspace or a descendant, reachable or not. Nothing was removed. See [Reading the owned-workspaces block](#reading-the-owned-workspaces-block). |
 | `workspace/insufficient-rank` | 403 | You are outranked by the target at some node in the sweep. |
 | `workspace/unauthorized` | 403 | You lack the `remove-member` capability. |
 

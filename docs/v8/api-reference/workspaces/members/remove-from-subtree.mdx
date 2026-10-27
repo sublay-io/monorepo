@@ -6,7 +6,7 @@ description: "Offboarding convenience — remove a user from this workspace and 
 
 Removes the target user's **direct** memberships on this workspace and every descendant **you can reach**, in one action. An **owner** (or ancestor owner) reaches the whole subtree via the god-path; a **non-owner** reaches a descendant when they hold `remove-member` there — which they may hold either by reaching in through an unbroken open inherit chain, or by holding a direct member row on that node. So sealing (`inheritsFromParent = false`) stops authority reaching in **from above**; it does not stop authority held **locally**. A non-owner who is a direct member of a sealed child with `remove-member` there does sweep it. **The credential does not widen this** — `actingUserId` is *required* here, so a service key always sweeps as the user it names, with that user's reach; act as the owner for a full sweep. Reach-based access auto-revokes with the relevant ancestor membership. Each membership-row deletion fires `workspace.member.removed`. Rank rules apply **per node** — the sweep is refused (`403 workspace/insufficient-rank`) if you are outranked by the target at any node where you both hold a direct member row.
 
-**Owned-descendant handling — block + report.** Because owners have no member row, this sweep does **not** cover descendant workspaces the user *owns*. Instead it **blocks and reports** them (`409 workspace/owns-descendants`) rather than silently orphaning ownership. An admin or any ancestor owner then reassigns each via [transfer-ownership](/v8/api-reference/workspaces/transfer-ownership) or deletes it. **No silent ownership change.**
+**Owned workspaces — block + report.** Because owners have no member row, this sweep cannot offboard a user from a workspace they *own*. If the target owns this workspace or **any** descendant — including sealed descendants outside your reach — the whole sweep is refused with `409 workspace/owns-descendants` and nothing is removed, whoever runs it. The 409 lists the owned workspaces in `ownedWorkspaces` (named only where you have standing) with the total in `ownedCount`. An owner of each workspace, or an ancestor owner, then reassigns it via [transfer-ownership](/v8/api-reference/workspaces/transfer-ownership) or deletes it, and the sweep can be retried. **No silent ownership change.**
 
 <Warning>
   **A non-owner's sweep may be partial — check `skipped` before you call someone offboarded.** If the target still holds a membership in a descendant you cannot reach, the `200` reports it in `skippedCount` / `skipped`. `removedCount` alone does **not** mean the user is gone from the subtree: treat any `skippedCount > 0` as "still a member somewhere" and escalate to an owner or ancestor owner of that node. Only an **owner or ancestor owner** is guaranteed `skippedCount: 0`. A service key is **not** — it must name an `actingUserId` on this route, and inherits that user's reach, so a key acting as a mid-level admin can absolutely come back with `skippedCount > 0`. See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
@@ -70,7 +70,7 @@ Removes the target user's **direct** memberships on this workspace and every des
 </ResponseField>
 
 <Note>
-  `skipped` covers surviving **memberships** only. Descendants the target *owns* are handled by the separate `409 workspace/owns-descendants` block, and an owned descendant outside a non-owner's reach is neither swept nor reported here — an owner re-running the sweep will surface it as the 409.
+  `skipped` covers surviving **memberships** only. Workspaces the target *owns* never reach the `200`: anywhere in the subtree, reachable or not, they block the sweep with `409 workspace/owns-descendants`.
 </Note>
 
 ## Error Responses
@@ -79,11 +79,21 @@ Removes the target user's **direct** memberships on this workspace and every des
   <Accordion title="Owns Descendants — 409">
     ```json
     {
-      "error": "The user owns workspaces in this subtree. Transfer or delete them first.",
+      "error": "The user owns workspaces in this subtree, including some you can't see. Ask an owner of this workspace to transfer or delete them first.",
       "code": "workspace/owns-descendants",
-      "ownedWorkspaces": [{ "id": "ws_d", "name": "Client X" }]
+      "ownedWorkspaces": [
+        { "id": "ws_d", "name": "Client X" },
+        { "id": null, "name": null }
+      ],
+      "ownedCount": 2
     }
     ```
+    The target owns this workspace or one or more of its descendants. Nothing was removed. The check covers the **whole** subtree, not only the workspaces you can reach.
+
+    - `ownedWorkspaces` — one entry per owned workspace. `id` / `name` are given where you have standing on that workspace and are **both `null`** where you do not — the same fence `skipped` uses. Named entries come first, in tree order (this workspace, then its descendants level by level); the anonymous ones follow.
+    - `ownedCount` — the total number of owned workspaces. Equals `ownedWorkspaces.length`.
+
+    When every entry is named, `error` reads `"The user owns workspaces in this subtree. Transfer or delete them first."` Only an owner of a workspace (or an ancestor owner) can transfer it, so anonymous entries mean you need an owner of this workspace to resolve them.
   </Accordion>
   <Accordion title="Insufficient Rank — 403">
     ```json

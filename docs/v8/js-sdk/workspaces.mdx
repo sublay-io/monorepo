@@ -249,7 +249,7 @@ await sublay.workspaces.removeWorkspaceMember({
 
 ### removeWorkspaceMemberFromSubtree
 
-Removes the target's direct memberships on this workspace and every descendant you can reach. Requires `remove-member`, rank-bounded **per node**. Blocks with `409 workspace/owns-descendants` (and reports them) if the target owns any descendant workspace.
+Removes the target's direct memberships on this workspace and every descendant you can reach. Requires `remove-member`, rank-bounded **per node**. If the target owns this workspace or **any** descendant — including sealed ones outside your reach — it is refused with `409 workspace/owns-descendants` and nothing is removed. The 409 body lists them in `ownedWorkspaces` (`{ id, name }`, both `null` where you have no standing on that workspace; named entries first) with the total in `ownedCount`; an owner of each workspace (or an ancestor owner) must transfer or delete it before you retry. See [Remove From Subtree](/v8/api-reference/workspaces/members/remove-from-subtree).
 
 ```typescript
 const { removedCount, removed, skippedCount, skipped } =

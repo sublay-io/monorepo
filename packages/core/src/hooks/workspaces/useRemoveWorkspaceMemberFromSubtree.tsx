@@ -52,9 +52,12 @@ export interface RemoveWorkspaceMemberFromSubtreeResponse {
 
 /**
  * Remove the target user's direct memberships on this workspace AND every
- * descendant. Requires `remove-member` (rank-bounded per node). Blocks with 409
- * `workspace/owns-descendants` if the user OWNS any descendant workspace —
- * transfer or delete those first.
+ * descendant. Requires `remove-member` (rank-bounded per node). Rejects with
+ * 409 `workspace/owns-descendants` (nothing removed) if the user OWNS this
+ * workspace or ANY descendant, reachable or not. The 409 body carries
+ * `ownedWorkspaces: { id: string | null; name: string | null }[]` (both null
+ * where the actor has no standing; named entries first) and `ownedCount`. An
+ * owner must transfer or delete those first.
  *
  * A NON-owner's sweep can be PARTIAL: it stops at sealed sub-workspaces. Always
  * check `skippedCount` / `skipped` before treating someone as fully offboarded.

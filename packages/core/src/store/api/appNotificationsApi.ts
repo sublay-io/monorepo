@@ -73,24 +73,22 @@ export const appNotificationsApi = baseApi.injectEndpoints({
       // Optimistically update the cache
       async onQueryStarted(
         { projectId, notificationId },
-        { dispatch, queryFulfilled }
+        { dispatch, getState, queryFulfilled }
       ) {
-        // Update all relevant queries in cache
-        const patches: any[] = [];
-
-        dispatch(
-          appNotificationsApi.util.updateQueryData(
-            "fetchAppNotifications",
-            // We need to find all queries for this projectId - this is a simplified approach
-            { projectId, page: 1, limit: 10 }, // This should be more dynamic in practice
-            (draft) => {
-              const notification = draft.data.find(
-                (n) => n.id === notificationId
-              );
-              if (notification) {
-                notification.isRead = true;
+        const patches = cachedListArgs(getState(), projectId).map((args) =>
+          dispatch(
+            appNotificationsApi.util.updateQueryData(
+              "fetchAppNotifications",
+              args,
+              (draft) => {
+                const notification = draft.data.find(
+                  (n) => n.id === notificationId
+                );
+                if (notification) {
+                  notification.isRead = true;
+                }
               }
-            }
+            )
           )
         );
 
@@ -132,30 +130,32 @@ export const appNotificationsApi = baseApi.injectEndpoints({
         body: {},
       }),
       // Optimistically update the cache
-      async onQueryStarted({ projectId }, { dispatch, queryFulfilled }) {
-        // Update all relevant queries in cache
-        const patches: any[] = [];
-
-        // Update all notifications to be marked as read
-        dispatch(
-          appNotificationsApi.util.updateQueryData(
-            "fetchAppNotifications",
-            // We need to find all queries for this projectId - this is a simplified approach
-            { projectId, page: 1, limit: 10 }, // This should be more dynamic in practice
-            (draft) => {
-              draft.data.forEach((notification) => {
-                notification.isRead = true;
-              });
-            }
+      async onQueryStarted(
+        { projectId },
+        { dispatch, getState, queryFulfilled }
+      ) {
+        const patches = cachedListArgs(getState(), projectId).map((args) =>
+          dispatch(
+            appNotificationsApi.util.updateQueryData(
+              "fetchAppNotifications",
+              args,
+              (draft) => {
+                draft.data.forEach((notification) => {
+                  notification.isRead = true;
+                });
+              }
+            )
           )
         );
 
         // Update unread count to 0
-        dispatch(
-          appNotificationsApi.util.updateQueryData(
-            "countUnreadNotifications",
-            { projectId },
-            () => 0
+        patches.push(
+          dispatch(
+            appNotificationsApi.util.updateQueryData(
+              "countUnreadNotifications",
+              { projectId },
+              () => 0
+            )
           )
         );
 
@@ -173,6 +173,17 @@ export const appNotificationsApi = baseApi.injectEndpoints({
     }),
   }),
 });
+
+// Every cached notifications page of this project, whatever its page and
+// limit, so an optimistic update reaches each list a component has fetched.
+function cachedListArgs(
+  state: Parameters<typeof appNotificationsApi.util.selectCachedArgsForQuery>[0],
+  projectId: string
+): FetchAppNotificationsParams[] {
+  return appNotificationsApi.util
+    .selectCachedArgsForQuery(state, "fetchAppNotifications")
+    .filter((args) => args.projectId === projectId);
+}
 
 // Export hooks for use in components
 export const {

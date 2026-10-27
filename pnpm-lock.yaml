@@ -161,7 +161,7 @@ importers:
   packages/expo:
     dependencies:
       '@reduxjs/toolkit':
-        specifier: ^2.0.0
+        specifier: ^2.9.0
         version: 2.13.0(react-redux@9.3.0(@types/react@19.3.0)(react@19.2.5)(redux@5.0.1))(react@19.2.5)
       '@sublay/core':
         specifier: workspace:*
@@ -272,7 +272,7 @@ importers:
   packages/react-js:
     dependencies:
       '@reduxjs/toolkit':
-        specifier: ^2.0.0
+        specifier: ^2.9.0
         version: 2.13.0(react-redux@9.3.0(@types/react@19.3.0)(react@19.2.5)(redux@5.0.1))(react@19.2.5)
       '@sublay/core':
         specifier: workspace:*
@@ -315,7 +315,7 @@ importers:
   packages/react-native:
     dependencies:
       '@reduxjs/toolkit':
-        specifier: ^2.0.0
+        specifier: ^2.9.0
         version: 2.13.0(react-redux@9.3.0(@types/react@19.3.0)(react@19.2.5)(redux@5.0.1))(react@19.2.5)
       '@sublay/core':
         specifier: workspace:*

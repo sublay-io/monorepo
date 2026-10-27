@@ -184,4 +184,57 @@ describe("useFetchManyEventsWrapper", () => {
     expect(calls).toHaveLength(2);
     expect(calls[1].config?.params).toMatchObject({ include: "user,userRsvp" });
   });
+
+  // REGRESSION (#202): inline filter objects are fresh references every render,
+  // the same loop as `include` above. The hook depends on their serialized form.
+  it("does not refetch when re-rendered with equal inline filter objects", async () => {
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      () =>
+        useFetchManyEventsWrapper({
+          titleFilters: { hasTitle: "true", includes: ["launch"] },
+          descriptionFilters: { doesNotInclude: "draft" },
+        }),
+      {
+        beforeRender: ({ axiosPrivate }) => {
+          for (let i = 0; i < 10; i += 1) {
+            axiosPrivate.mockResponse("get", makePage([], false));
+          }
+        },
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    for (let i = 0; i < 5; i += 1) rerender();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+  });
+
+  it("refetches when a filter object really changes", async () => {
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: { word: string }) =>
+        useFetchManyEventsWrapper({ titleFilters: { includes: props.word } }),
+      {
+        initialProps: { word: "launch" },
+        beforeRender: ({ axiosPrivate }) => {
+          for (let i = 0; i < 10; i += 1) {
+            axiosPrivate.mockResponse("get", makePage([], false));
+          }
+        },
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    rerender({ word: "meetup" });
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(2));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(2);
+    expect(JSON.stringify(calls[1].config?.params)).toContain("meetup");
+  });
 });

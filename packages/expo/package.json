@@ -68,7 +68,7 @@
     "vitest": "^3.2.7"
   },
   "peerDependencies": {
-    "@reduxjs/toolkit": "^2.0.0",
+    "@reduxjs/toolkit": "^2.9.0",
     "@types/react": "^18.0.0 || ^19.0.0",
     "expo": "*",
     "expo-linking": ">=8",

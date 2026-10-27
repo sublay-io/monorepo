@@ -11,7 +11,7 @@ The space membership functions let the logged-in user join and leave spaces, and
 
 ### joinSpace
 
-Joins a space as the logged-in user, or requests to join if the space requires approval.
+Joins a space as the logged-in user, or requests to join if the space requires approval. A private space can't be joined: joining a space the user can't see answers `404 space/not-found`. Its moderators and admins add members with [addMember](#addmember).
 
 ```typescript
 const result = await sublay.spaces.joinSpace({ spaceId: "spc_abc123" });
@@ -43,7 +43,7 @@ const result = await sublay.spaces.leaveSpace({ spaceId: "spc_abc123" });
 
 ### checkMyMembership
 
-Checks the logged-in user's membership status in a space.
+Checks the logged-in user's membership status in a space. A user with a membership gets it back whatever its status (a banned user learns they're banned); a user with no membership in a space they can't see gets `404 space/not-found`.
 
 ```typescript
 const membership = await sublay.spaces.checkMyMembership({
@@ -140,6 +140,31 @@ const result = await sublay.spaces.updateMemberRole({
 </ParamField>
 
 **Returns** — `Promise<UpdateMemberRoleResponse>`
+
+---
+
+### addMember
+
+Adds a user to a space directly: they become an active member at once, with no request or approval step. The logged-in user must be an active moderator or admin of the space. This is how users get into a private space, which can't be joined.
+
+A user with a `pending` or `rejected` membership becomes active; one who is already an active member is left as they are (`message` says so). A banned user can't be added until unbanned (`409 space/member-banned`), nor can a user banned in a parent space (`409 space/banned-in-parent`). The added user gets a `space-member-added` notification. See [Add Member](/v8/api-reference/spaces/membership/add-member) for every case and error.
+
+```typescript
+const result = await sublay.spaces.addMember({
+  spaceId: "spc_abc123",
+  userId: "usr_xyz789",
+});
+```
+
+<ParamField body="spaceId" type="string" required>
+  The Sublay space ID.
+</ParamField>
+
+<ParamField body="userId" type="string" required>
+  The user to add.
+</ParamField>
+
+**Returns** — `Promise<AddMemberResponse>`: `{ message, membership }`, where `membership` has `id`, `spaceId`, `userId`, `role`, `status: "active"`, `joinedAt` and `createdAt`.
 
 ---
 

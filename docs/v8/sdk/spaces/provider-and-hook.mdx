@@ -140,16 +140,16 @@ function SpaceContent() {
 
 ### Hierarchy
 
-<ResponseField name="breadcrumb" type="SpacePreview[]">
-  Ordered list of ancestor spaces from root to direct parent. Empty for root-level spaces.
+<ResponseField name="breadcrumb" type="SpaceBreadcrumbEntry[]">
+  The path from the top-level space down to this space, root first. A space above that the user can't see (a private space they aren't an active member of, or a space under one) is exactly `{ hidden: true }`; every other entry has the space's `id`, `name`, `slug` and so on, with `hidden: false`. Skip hidden entries, show "…", or start after the last hidden one.
 </ResponseField>
 
 <ResponseField name="parentSpace" type="SpacePreview | null">
-  Preview of the immediate parent space. `null` for root spaces.
+  Preview of the immediate parent space. `null` for root spaces, and when the user can't see the parent (`space.parentSpaceId` still names it).
 </ResponseField>
 
 <ResponseField name="childSpaces" type="SpacePreview[]">
-  Previews of direct child spaces (up to 10 returned by the API).
+  Previews of direct child spaces (up to 10 returned by the API), only those listed in the directory (`public`, with every space above them `public`).
 </ResponseField>
 
 ### Operations

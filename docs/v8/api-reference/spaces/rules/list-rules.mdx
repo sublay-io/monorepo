@@ -4,12 +4,18 @@ api: "GET /v8/:projectId/spaces/:spaceId/rules"
 description: "Get all community rules for a space"
 ---
 
-Returns all community rules for a space, ordered by their `order` field. This endpoint is publicly accessible — no authentication is required.
+Returns all community rules for a space, ordered by their `order` field. No sign-in is required. The rules of a space the viewer (the signed-in user, or the user a service key names in `actingUserId`) can't see answer `404 space/not-found`, like a space that doesn't exist.
 
 ## Path Parameters
 
 <ParamField path="spaceId" type="string" required>
   UUID of the space.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to read as. The response is exactly what that user's own access token would get. Leave it out for the anonymous view. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -31,6 +37,30 @@ Each rule has: `id`, `spaceId`, `projectId`, `title`, `description`, `order`, `l
     Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
     { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Space Not Found — 404">
+    The space doesn't exist, or the viewer can't see it (see [Space visibility](/v8/data-models/space#visibility)).
+    ```json
+    { "error": "Space not found.", "code": "space/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`. Only a service key names the user it acts as.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Query — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "…", "code": "rule/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    A service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "space/user-not-found" }
     ```
   </Accordion>
 </AccordionGroup>

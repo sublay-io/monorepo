@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/spaces/mutual/:userId"
 description: "Get spaces shared between the authenticated user and another user"
 ---
 
-Returns a paginated list of spaces that both the authenticated user and another user are active members of — i.e. their spaces in common. Requires an authenticated user.
+Returns a paginated list of spaces that both the authenticated user and another user are active members of — i.e. their spaces in common. Requires an authenticated user. Only spaces the authenticated user can see are listed; as an active member, they can see every space they share. Sub-spaces are counted in each space's `childSpacesCount` only when the user can see them.
 
 ## Path Parameters
 

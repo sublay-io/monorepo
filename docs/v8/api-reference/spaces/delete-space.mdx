@@ -71,6 +71,7 @@ Permanently deletes a space. All entities, members, child spaces, rules, and rep
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    The space doesn't exist, or the caller didn't create it and can't see it (see [Space visibility](/v8/data-models/space#visibility)).
     ```json
     { "error": "Space not found.", "code": "space/not-found" }
     ```

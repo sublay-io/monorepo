@@ -1,26 +1,66 @@
 ---
 title: "Fetch Space Breadcrumb"
 api: "GET /v8/:projectId/spaces/:spaceId/breadcrumb"
-description: "Get the ancestor chain of a space for breadcrumb navigation"
+description: "Get the path from the top-level space down to a space, for breadcrumb navigation"
 ---
 
-Returns an ordered list of spaces from the root ancestor down to and including the specified space itself, suitable for breadcrumb navigation.
+Returns every space on the path from the top-level space down to and including the requested space, root first, as the viewer (the signed-in user, or the user a service key names in `actingUserId`) may see it.
+
+- A space the viewer can't see answers `404 space/not-found`, exactly like one that doesn't exist. See [Space visibility](/v8/data-models/space#visibility).
+- Otherwise the whole path is returned. Each entry carries `hidden`. A space above that the viewer can't see — a private space they aren't an active member of, or a space under one — is exactly `{ "hidden": true }`, with no id, name, slug or avatar. A member of a sub-space can see it while a private space above it stays hidden from them.
+
+How to render hidden entries is up to the app: skip them, show a placeholder such as "…", or start the breadcrumb after the last hidden one.
 
 ## Path Parameters
 
 <ParamField path="spaceId" type="string" required>
-  UUID of the space whose ancestors to fetch.
+  UUID of the space.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user to read as. The response is exactly what that user's own access token would get. Leave it out for the anonymous view. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
 
-<ResponseField name="breadcrumb" type="SpacePreview[]">
-  Ordered array of ancestor [SpacePreview](/v8/data-models/space) objects from the root down to the space itself. For a root-level space this array contains only that space. Each item includes: `id`, `shortId`, `name`, `slug`, `avatarFileId`, `parentSpaceId`, `depth`.
+<ResponseField name="breadcrumb" type="array">
+  The path from the top-level space down to the requested space, root first. For a top-level space it holds only that space. Each entry is one of:
+
+  <Expandable title="a space the viewer can see">
+    <ResponseField name="id" type="string">Space UUID.</ResponseField>
+    <ResponseField name="shortId" type="string">Short identifier.</ResponseField>
+    <ResponseField name="name" type="string">Display name.</ResponseField>
+    <ResponseField name="slug" type="string | null">URL slug.</ResponseField>
+    <ResponseField name="avatarFileId" type="string | null">Avatar file ID.</ResponseField>
+    <ResponseField name="visibility" type="'public' | 'unlisted' | 'private'">The space's visibility.</ResponseField>
+    <ResponseField name="parentSpaceId" type="string | null">Parent space ID; `null` for the top-level space.</ResponseField>
+    <ResponseField name="depth" type="number">Nesting depth, `0` for the top-level space.</ResponseField>
+    <ResponseField name="hidden" type="false">Always `false`.</ResponseField>
+  </Expandable>
+
+  <Expandable title="a space the viewer can't see">
+    <ResponseField name="hidden" type="true">Always `true`. The entry has no other field.</ResponseField>
+  </Expandable>
 </ResponseField>
 
 <ResponseField name="depth" type="number">
-  Nesting depth of the requested space. `0` for root-level spaces.
+  Nesting depth of the requested space. `0` for a top-level space.
 </ResponseField>
+
+```json Example: the viewer is a member of Archive, under a private Design they aren't in
+{
+  "breadcrumb": [
+    { "id": "…", "shortId": "…", "name": "Acme", "slug": "acme", "avatarFileId": null, "visibility": "public", "parentSpaceId": null, "depth": 0, "hidden": false },
+    { "hidden": true },
+    { "hidden": true },
+    { "id": "…", "shortId": "…", "name": "Archive", "slug": "archive", "avatarFileId": null, "visibility": "private", "parentSpaceId": "…", "depth": 3, "hidden": false },
+    { "id": "…", "shortId": "…", "name": "Old", "slug": "old", "avatarFileId": null, "visibility": "public", "parentSpaceId": "…", "depth": 4, "hidden": false }
+  ],
+  "depth": 4
+}
+```
 
 ## Error Responses
 
@@ -29,6 +69,32 @@ Returns an ordered list of spaces from the root ancestor down to and including t
     Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
     { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Not Found — 404">
+    The space doesn't exist, or the viewer can't see it.
+    ```json
+    { "error": "Space not found.", "code": "space/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Query — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "…", "code": "space/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "space/user-not-found" }
     ```
   </Accordion>
 </AccordionGroup>

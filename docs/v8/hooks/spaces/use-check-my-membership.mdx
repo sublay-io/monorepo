@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useCheckMyMembership` returns a callable function that checks the authenticated user's membership in a specific space without loading the full space object.
+`useCheckMyMembership` returns a callable function that checks the authenticated user's membership in a specific space without loading the full space object. A user with a membership gets it back whatever its status (a banned user learns they're banned); a user with no membership in a space they can't see gets `404 space/not-found`.
 
 ## Usage Example
 

@@ -230,7 +230,7 @@ Rules are community guidelines displayed to members. They are ordered and each c
 
 ### fetchManyRules
 
-Fetches all rules for a space.
+Fetches all rules for a space. The rules of a space the viewer can't see are answered `404 space/not-found`.
 
 ```typescript
 const result = await sublay.spaces.fetchManyRules({ spaceId: "spc_abc123" });
@@ -240,13 +240,17 @@ const result = await sublay.spaces.fetchManyRules({ spaceId: "spc_abc123" });
   The Sublay space ID.
 </ParamField>
 
+<ParamField body="actingUserId" type="string">
+  Read as this user: exactly what their own access token would get. Omit it for the anonymous view.
+</ParamField>
+
 **Returns** — `Promise<FetchManyRulesResponse>`
 
 ---
 
 ### fetchRule
 
-Fetches a single rule by its ID.
+Fetches a single rule by its ID. A rule of a space the viewer can't see is answered `404 space/not-found`.
 
 ```typescript
 const rule = await sublay.spaces.fetchRule({
@@ -261,6 +265,10 @@ const rule = await sublay.spaces.fetchRule({
 
 <ParamField body="ruleId" type="string" required>
   The Sublay rule ID.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Read as this user: exactly what their own access token would get. Omit it for the anonymous view.
 </ParamField>
 
 **Returns** — `Promise<Rule>`

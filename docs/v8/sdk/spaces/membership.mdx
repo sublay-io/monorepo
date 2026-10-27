@@ -23,6 +23,8 @@ function MembershipButton() {
 
 When a space has `requireJoinApproval: true`, `joinSpace()` creates a `pending` membership that must be approved by a moderator or admin before the user becomes `active`.
 
+A private space can't be joined, and has no join requests: joining a space the user can't see answers `404 space/not-found`, as if it didn't exist. Its moderators and admins add its members instead (see [Adding Members Directly](#adding-members-directly)).
+
 ## Fetching Members
 
 Use standalone hooks to fetch member lists:
@@ -53,6 +55,8 @@ const result = await checkMembership({ spaceId });
 // result: { isMember, role, status, joinedAt, permissions }
 ```
 
+A user with a membership in the space gets it back whatever its status (`pending`, `banned`, `rejected`), so a banned user learns they are banned. A user with no membership in a space they can't see gets `404 space/not-found`.
+
 ## Approving and Declining Requests
 
 Moderators and admins can process pending membership requests:
@@ -68,6 +72,20 @@ await decline({ spaceId, memberId });
 ```
 
 <Note>Both `useApproveMember` and `useDeclineMember` require the caller to be a moderator or admin of the space.</Note>
+
+## Adding Members Directly
+
+A moderator or admin can add a user to a space directly with `useAddMember`. The user becomes an active member at once, with no request or approval step, and gets a `space-member-added` notification. This is how users get into a private space, which can't be joined.
+
+```tsx
+import { useAddMember } from "@sublay/react-js";
+
+const addMember = useAddMember();
+
+await addMember({ spaceId, userId });
+```
+
+A `pending` or `rejected` membership becomes active, and an active member is left as they are. A banned user must be unbanned first (`409 space/member-banned`); a user banned in a parent space can't be added either (`409 space/banned-in-parent`).
 
 ## Role Management
 
@@ -108,6 +126,7 @@ When a child space is created, all admins and moderators of the parent space are
 | [`useFetchSpaceMembers`](/v8/hooks/spaces/use-fetch-space-members) | Paginated list of space members |
 | [`useFetchSpaceTeam`](/v8/hooks/spaces/use-fetch-space-team) | All admins and moderators (no pagination) |
 | [`useCheckMyMembership`](/v8/hooks/spaces/use-check-my-membership) | Current user's membership status |
+| [`useAddMember`](/v8/hooks/spaces/use-add-member) | Add a user to the space directly |
 | [`useApproveMember`](/v8/hooks/spaces/use-approve-member) | Approve a pending join request |
 | [`useDeclineMember`](/v8/hooks/spaces/use-decline-member) | Decline a pending join request |
 | [`useUpdateMemberRole`](/v8/hooks/spaces/use-update-member-role) | Change a member's role |

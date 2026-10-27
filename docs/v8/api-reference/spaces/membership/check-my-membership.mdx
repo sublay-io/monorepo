@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/spaces/:spaceId/membership/me"
 description: "Get the current user's membership status and permissions in a space"
 ---
 
-Returns the authenticated user's membership status and resolved permissions in a space. Returns membership info even for `pending` or `banned` states.
+Returns the authenticated user's membership status and resolved permissions in a space. A user with a membership gets it whatever its status (`pending`, `banned` or `rejected` included), so a banned user learns they're banned, even in a space they can no longer see. A user with no membership in a space they can't see (a private space, or one under it) gets `404 space/not-found`, like a space that doesn't exist; in a space they can see, they get `status: null`.
 
 ## Path Parameters
 
@@ -94,6 +94,12 @@ Returns the authenticated user's membership status and resolved permissions in a
       "code": "space/unsupported-param",
       "param": "userId"
     }
+    ```
+  </Accordion>
+  <Accordion title="Space Not Found — 404">
+    The space doesn't exist, or the user has no membership in it and can't see it.
+    ```json
+    { "error": "Space not found.", "code": "space/not-found" }
     ```
   </Accordion>
 </AccordionGroup>

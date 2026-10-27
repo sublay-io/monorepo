@@ -48,7 +48,7 @@ const space = await sublay.spaces.createSpace({
 </ParamField>
 
 <ParamField body="visibility" type="string">
-  Listing/discoverability: `"public"` (default), `"unlisted"`, or `"private"`. Independent of `readingPermission` (which governs content). `"unlisted"` hides the space from discovery and search but keeps it reachable by direct link; `"private"` currently behaves like `"unlisted"`.
+  Who can find and see the space: `"public"` (default), `"unlisted"`, or `"private"`. Independent of `readingPermission` (which governs content). `"unlisted"` keeps the space out of the directory, search and sub-space previews but reachable by id, short id or slug; `"private"` makes it seen only by its active members (everyone else gets `404`), and it can't be joined: members are [added](/v8/api-reference/spaces/membership/add-member) by its moderators and admins. See [Space visibility](/v8/data-models/space#visibility).
 </ParamField>
 
 <ParamField body="requireJoinApproval" type="boolean">
@@ -134,7 +134,7 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
 </ParamField>
 
 <ParamField body="parentSpaceId" type='string | "none" | "any"'>
-  Which level of the space tree to return. Left out or `"none"`: top-level spaces only (the default). A space id returns that space's public direct sub-spaces; this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `"any"` returns spaces at every level.
+  Which level of the space tree to return. Left out or `"none"`: top-level spaces only (the default). A space id returns that space's direct sub-spaces that are public, with every space above them public too (so an unlisted or private space, or one under it, gives an empty page); this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `"any"` returns spaces at every level.
 </ParamField>
 
 <ParamField body="nsfwFilter" type='"include-all" | "exclude" | "only"'>
@@ -203,7 +203,7 @@ const space = await sublay.spaces.fetchSpaceByShortId({ shortId: "ph3x9" });
 
 ### fetchUserSpaces
 
-Fetches the spaces a specific user is a member of, whatever their visibility, with their membership on each. It can search within them and sort them.
+Fetches the spaces a specific user is a member of, with their membership on each. Every space the user is an active member of is listed, whatever its visibility; a `pending`, `banned` or `rejected` membership of a space the user can't see (a private space, or one under it) is left out. It can search within them and sort them.
 
 ```typescript
 const result = await sublay.spaces.fetchUserSpaces({
@@ -349,7 +349,7 @@ const space = await sublay.spaces.updateSpace({
 </ParamField>
 
 <ParamField body="visibility" type="string">
-  Updated visibility: `"public"`, `"unlisted"`, or `"private"`. Controls listing/discoverability, independent of `readingPermission`.
+  Updated visibility: `"public"`, `"unlisted"`, or `"private"`. Controls who can find and see the space, independent of `readingPermission`. See [Space visibility](/v8/data-models/space#visibility).
 </ParamField>
 
 <ParamField body="nsfw" type="boolean">
@@ -407,17 +407,22 @@ const { available } = await sublay.spaces.checkSlugAvailability({
 
 ### fetchSpaceBreadcrumb
 
-Returns the full ancestor chain from the root down to the specified space. Useful for rendering breadcrumb navigation.
+Returns the path from the top-level space down to and including the specified space, root first, as the viewer may see it. Useful for rendering breadcrumb navigation. A space the viewer can't see is answered `404 space/not-found`. Each entry carries `hidden`: a space above that the viewer can't see (a private space they aren't an active member of, or a space under one) is exactly `{ hidden: true }`, with no other field. Apps can skip those entries, show "…", or start after the last hidden one. See [Fetch Space Breadcrumb](/v8/api-reference/spaces/fetch-breadcrumb).
 
 ```typescript
-const breadcrumb = await sublay.spaces.fetchSpaceBreadcrumb({
+const { breadcrumb, depth } = await sublay.spaces.fetchSpaceBreadcrumb({
   spaceId: "spc_abc123",
+  actingUserId: "usr_abc123",
 });
-// [{ id: "root", name: "Root" }, { id: "spc_parent", name: "Parent" }, { id: "spc_abc123", name: "Photography" }]
+// breadcrumb: [{ id: "spc_root", name: "Root", hidden: false, … }, { hidden: true }, { id: "spc_abc123", name: "Photography", hidden: false, … }]
 ```
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID to get the breadcrumb for.
 </ParamField>
 
-**Returns** — `Promise<SpaceBreadcrumb>`
+<ParamField body="actingUserId" type="string">
+  Read as this user: exactly what their own access token would get. Omit it for the anonymous view.
+</ParamField>
+
+**Returns** — `Promise<SpaceBreadcrumb>`: `{ breadcrumb, depth }`, where each `breadcrumb` entry is either a visible space (`id`, `shortId`, `name`, `slug`, `avatarFileId`, `visibility`, `parentSpaceId`, `depth`, `hidden: false`) or `{ hidden: true }`.

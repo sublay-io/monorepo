@@ -11,7 +11,7 @@ icon: "plug"
 For paginated, stateful lists with load-more support, use [`useSpaceList`](/v8/hooks/space-lists/use-space-list) instead.
 
 <Note>
-  This is a discovery surface: only `public` spaces are listed, for every caller. `unlisted` and `private` spaces are never listed here, not even to their members (they stay reachable by direct link). To list the spaces the current user is a member of, whatever their visibility, use [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces). See [Space visibility](/v8/data-models/space#visibility).
+  This is a discovery surface: a space is listed only if it **and every space above it** are `public`, for every caller. `unlisted` and `private` spaces, and every space under one, are never listed here, not even to their members (whoever can see them reaches them by id, slug or short id). To list the spaces the current user is a member of, whatever their visibility, use [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces). See [Space visibility](/v8/data-models/space#visibility).
 </Note>
 
 ## Usage Example
@@ -57,7 +57,7 @@ function SpaceSearch() {
 </ParamField>
 
 <ParamField path="parentSpaceId" type='string | "none" | "any" | null'>
-  Which level of the space tree to return. A space id returns that space's public direct sub-spaces; this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `"none"` returns top-level spaces only. `"any"` returns spaces at every level. Left out or `null`: nothing is sent, so the API's default applies: top-level spaces only.
+  Which level of the space tree to return. A space id returns that space's direct sub-spaces that are public, with every space above them public too (so an unlisted or private space, or one under it, gives an empty page); this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `"none"` returns top-level spaces only. `"any"` returns spaces at every level. Left out or `null`: nothing is sent, so the API's default applies: top-level spaces only.
 </ParamField>
 
 <ParamField path="nsfwFilter" type='"include-all" | "exclude" | "only"'>

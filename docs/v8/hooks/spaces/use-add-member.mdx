@@ -1,0 +1,47 @@
+---
+title: "Add member"
+description: "Add a user to a space directly"
+icon: "plug"
+---
+
+## Overview
+
+`useAddMember` returns a callable function that adds a user to a space directly. The user becomes an active member at once, with no request or approval step. The signed-in user must be an active moderator or admin of the space.
+
+This is how users get into a private space, which can't be joined. A user with a `pending` or `rejected` membership becomes active; a user who is already an active member is left as they are. A banned user can't be added until they are unbanned (`409 space/member-banned`), nor can a user banned in a parent space (`409 space/banned-in-parent`). The added user gets a `space-member-added` notification. See [Add Member](/v8/api-reference/spaces/membership/add-member) for every case and error.
+
+## Usage Example
+
+```tsx
+import { useAddMember } from "@sublay/react-js";
+
+function AddToSpaceButton({ spaceId, userId }: { spaceId: string; userId: string }) {
+  const addMember = useAddMember();
+
+  return (
+    <button onClick={() => addMember({ spaceId, userId })}>
+      Add to space
+    </button>
+  );
+}
+```
+
+## Parameters
+
+<ParamField path="spaceId" type="string" required>
+  UUID of the space.
+</ParamField>
+
+<ParamField path="userId" type="string" required>
+  UUID of the user to add.
+</ParamField>
+
+## Returns
+
+<ResponseField name="message" type="string">
+  `"User added to the space."`, or `"User is already a member of this space."` when nothing changed.
+</ResponseField>
+
+<ResponseField name="membership" type="object">
+  The user's membership: `id`, `spaceId`, `userId`, `role` (`member` for a user just added; an existing active member keeps their role), `status: "active"`, `joinedAt` and `createdAt`.
+</ResponseField>

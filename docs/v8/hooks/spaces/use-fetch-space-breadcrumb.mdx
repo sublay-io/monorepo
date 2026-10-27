@@ -1,27 +1,46 @@
 ---
 title: "Fetch space breadcrumb"
-description: "Fetch the ancestor chain of a space for breadcrumb navigation"
+description: "Fetch the path from the top-level space down to a space, for breadcrumb navigation"
 icon: "plug"
 ---
 
 ## Overview
 
-`useFetchSpaceBreadcrumb` returns a callable function that fetches the ordered list of ancestor spaces from root to the direct parent of the given space. Useful for breadcrumb navigation in hierarchical space structures.
+`useFetchSpaceBreadcrumb` returns a callable function that fetches every space on the path from the top-level space down to and including the given space, root first, as the current user may see it. Useful for breadcrumb navigation in hierarchical space structures.
+
+A space the current user can't see is answered `404 space/not-found`, like one that doesn't exist. Otherwise the whole path comes back, and each entry carries `hidden`: a space above that the user can't see (a private space they aren't an active member of, or a space under one) is exactly `{ hidden: true }`, with no id, name or slug. See [Space visibility](/v8/data-models/space#visibility).
 
 ## Usage Example
 
 ```tsx
-import { useFetchSpaceBreadcrumb } from "@sublay/react-js";
+import { useEffect, useState } from "react";
+import { useFetchSpaceBreadcrumb, type SpaceBreadcrumbEntry } from "@sublay/react-js";
 
 function Breadcrumbs({ spaceId }: { spaceId: string }) {
   const fetchBreadcrumb = useFetchSpaceBreadcrumb();
+  const [entries, setEntries] = useState<SpaceBreadcrumbEntry[]>([]);
 
-  const loadBreadcrumb = async () => {
-    const result = await fetchBreadcrumb({ spaceId });
-    // result.breadcrumb: SpacePreview[]  (root → ... → parent)
-  };
+  useEffect(() => {
+    fetchBreadcrumb({ spaceId }).then((result) => setEntries(result.breadcrumb));
+  }, [spaceId]);
+
+  return (
+    <nav>
+      {entries.map((entry, i) =>
+        entry.hidden ? (
+          <span key={i}>…</span>
+        ) : (
+          <a key={entry.id} href={`/spaces/${entry.slug ?? entry.id}`}>
+            {entry.name}
+          </a>
+        )
+      )}
+    </nav>
+  );
 }
 ```
+
+How to render hidden entries is up to you: skip them, show "…" as above, or start the breadcrumb after the last hidden one.
 
 ## Parameters
 
@@ -31,8 +50,12 @@ function Breadcrumbs({ spaceId }: { spaceId: string }) {
 
 ## Returns
 
-<ResponseField name="breadcrumb" type="SpacePreview[]">
-  Ordered array of [SpacePreview](/v8/data-models/space) objects from the root space to the direct parent. Empty for root-level spaces.
+<ResponseField name="breadcrumb" type="SpaceBreadcrumbEntry[]">
+  The path from the top-level space down to the given space, root first. A space the user can see has `id`, `shortId`, `name`, `slug`, `avatarFileId`, `visibility`, `parentSpaceId`, `depth` and `hidden: false`; one they can't see is exactly `{ hidden: true }`. For a top-level space the array holds only that space. See [Fetch Space Breadcrumb](/v8/api-reference/spaces/fetch-breadcrumb).
+</ResponseField>
+
+<ResponseField name="depth" type="number">
+  Nesting depth of the given space. `0` for a top-level space.
 </ResponseField>
 
 <Tip>The `useSpace` hook automatically fetches and exposes the `breadcrumb` field — you only need this hook when fetching breadcrumbs outside of a `SpaceProvider`.</Tip>

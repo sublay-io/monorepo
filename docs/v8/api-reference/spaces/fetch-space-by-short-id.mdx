@@ -6,6 +6,8 @@ description: "Get a single space by its short identifier"
 
 Fetches a space using its `shortId`. Returns the same `SpaceDetailed` shape as the UUID fetch endpoint.
 
+A space the viewer can't see — a private space they aren't an active member of, or a space under one — answers `404 space/not-found`, exactly like one that doesn't exist. `parentSpace` is `null` when the viewer can't see the parent, `childSpaces` lists only sub-spaces that are public all the way up, and `childSpacesCount` counts the sub-spaces the viewer can see. See [Space visibility](/v8/data-models/space#visibility).
+
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string">
@@ -31,6 +33,7 @@ Returns a [SpaceDetailed](/v8/data-models/space) object.
 
 <AccordionGroup>
   <Accordion title="Not Found — 404">
+    The space doesn't exist, or the viewer can't see it.
     ```json
     { "error": "Space not found.", "code": "space/not-found" }
     ```

@@ -105,7 +105,7 @@ subSpaces.fetchSpaces({ sortBy: "alphabetical", parentSpaceId: "parent-space-id"
 
 ## My Spaces
 
-A space list never includes `unlisted` or `private` spaces, even ones the user belongs to. For a "my spaces" screen, use [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces): it lists the spaces the current user is a member of, whatever their visibility, with their membership on each, and takes its own `query`, `searchFields`, `sortBy` (`"joinedAt"`, the default, `"createdAt"`, `"members"` or `"alphabetical"`) and `sortDir`.
+A space list includes a space only if it and every space above it are `public`: it never includes `unlisted` or `private` spaces, or any space under one, even ones the user belongs to. For a "my spaces" screen, use [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces): it lists the spaces the current user is a member of, whatever their visibility, with their membership on each, and takes its own `query`, `searchFields`, `sortBy` (`"joinedAt"`, the default, `"createdAt"`, `"members"` or `"alphabetical"`) and `sortDir`.
 
 It also takes `parentSpaceId`: `"none"` for the user's memberships in top-level spaces only, or a space id for their memberships in that space's direct sub-spaces. `"any"`, left out or `null`: memberships at every level (the default, because membership is per space). `"none"` goes by where the space sits, not by what the user belongs to: a membership in a sub-space whose parent the user isn't in is not top-level, so `"none"` leaves it out.
 

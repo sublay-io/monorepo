@@ -42,7 +42,7 @@ const grant = await sublay.reputation.createGrant({
   Whole number from `1` to `2147483647` (the signed 32-bit maximum). Never zero, negative, or fractional — use `mintGrant` to create or destroy reputation. It can never exceed what the sender holds in the source bucket.
 </ParamField>
 <ParamField body="spaceId" type="string | null">
-  The bucket both legs move in. Omitted or `null` = the project-general bucket. Reputation never crosses between the general bucket and a space bucket. Validated: an unknown space is rejected with `404 reputation-grant/space-not-found`.
+  The bucket both legs move in. Omitted or `null` = the project-general bucket. Reputation never crosses between the general bucket and a space bucket. Validated: an unknown space, or one the sender (`actingUserId`) can't see, is rejected with `404 reputation-grant/space-not-found`.
 </ParamField>
 <ParamField body="note" type="string | null">Free-text note. Trimmed, up to 2000 characters.</ParamField>
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB. Omit when unused.</ParamField>

@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useJoinSpace` returns a callable function for joining a space. If the space has `requireJoinApproval: true`, the membership is created with `status: "pending"` until approved by a moderator or admin. Otherwise, it is immediately `active`.
+`useJoinSpace` returns a callable function for joining a space. If the space has `requireJoinApproval: true`, the membership is created with `status: "pending"` until approved by a moderator or admin. Otherwise, it is immediately `active`. A private space can't be joined: joining a space the user can't see answers `404 space/not-found`, and its moderators and admins add members with [`useAddMember`](/v8/hooks/spaces/use-add-member).
 
 <Note>When using `SpaceProvider`, call `joinSpace` from `useSpace` — it handles optimistic state updates automatically.</Note>
 

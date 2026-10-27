@@ -108,7 +108,7 @@ Each space keeps its own `visibility`; nothing is changed or refused when you ne
 - **Embedded spaces** — `parentSpace` on a space, and the `space` included on entities, comments and events — are `null` when the viewer can't see that space. The rest of the response is unchanged, and `parentSpaceId` / `spaceId` still name it.
 
 <Note>
-  Visibility hides the space itself. Entities, comments and other content posted inside a hidden space are not filtered out of content lists and search by the space's visibility.
+  Visibility hides the space itself. Entities, comments and other content posted inside a hidden space are not filtered out of content lists and search by the space's visibility. Creating an entity in a hidden space isn't refused either.
 </Note>
 
 ## NSFW flagging

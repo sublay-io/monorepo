@@ -99,4 +99,33 @@ describe("useFetchManyWorkspaces", () => {
     expect(calls[2].config?.params).toEqual({ parentWorkspaceId: "w-parent" });
     expect(calls[3].config?.params).toEqual({});
   });
+
+  it("sends relation and sortDir as given, and leaves them out when null", async () => {
+    const user = makeAuthUser({ id: "user-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useFetchManyWorkspaces(),
+      { projectId: "project-1", user }
+    );
+
+    for (let i = 0; i < 3; i += 1) axiosPrivate.mockResponse("get", makePage([]));
+
+    await act(async () => {
+      await result.current({ relation: "direct", sortDir: "asc", parentWorkspaceId: "any" });
+    });
+    await act(async () => {
+      await result.current({ relation: "reachable", sortDir: "desc" });
+    });
+    await act(async () => {
+      await result.current({ relation: null, sortDir: null });
+    });
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls[0].config?.params).toEqual({
+      relation: "direct",
+      sortDir: "asc",
+      parentWorkspaceId: "any",
+    });
+    expect(calls[1].config?.params).toEqual({ relation: "reachable", sortDir: "desc" });
+    expect(calls[2].config?.params).toEqual({});
+  });
 });

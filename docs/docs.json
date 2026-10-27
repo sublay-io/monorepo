@@ -311,12 +311,19 @@
                 ]
               },
               {
+                "group": "Workspace Lists",
+                "pages": [
+                  "v8/hooks/workspace-lists/use-workspace-list",
+                  "v8/hooks/workspace-lists/use-workspace-list-actions"
+                ]
+              },
+              {
                 "group": "Workspaces",
                 "pages": [
                   "v8/hooks/workspaces/use-create-workspace",
                   "v8/hooks/workspaces/use-fetch-workspace",
                   "v8/hooks/workspaces/use-fetch-many-workspaces",
-                  "v8/hooks/workspaces/use-fetch-many-workspaces-wrapper",
+                  "v8/hooks/workspaces/use-fetch-mutual-workspaces",
                   "v8/hooks/workspaces/use-update-workspace",
                   "v8/hooks/workspaces/use-update-workspace-inherit-flag",
                   "v8/hooks/workspaces/use-delete-workspace",
@@ -834,6 +841,7 @@
                 "pages": [
                   "v8/api-reference/workspaces/create-workspace",
                   "v8/api-reference/workspaces/fetch-workspaces",
+                  "v8/api-reference/workspaces/fetch-mutual-workspaces",
                   "v8/api-reference/workspaces/fetch-workspace",
                   "v8/api-reference/workspaces/update-workspace",
                   "v8/api-reference/workspaces/update-inherit-flag",
@@ -2728,6 +2736,10 @@
     {
       "source": "/v8/hooks/spaces/use-fetch-space-children",
       "destination": "/v8/hooks/spaces/use-fetch-many-spaces"
+    },
+    {
+      "source": "/v8/hooks/workspaces/use-fetch-many-workspaces-wrapper",
+      "destination": "/v8/hooks/workspace-lists/use-workspace-list"
     }
   ]
 }

@@ -5,6 +5,7 @@ import { resetAccountScopedState } from "./actions";
 import { setUnreadSummary } from "./slices/chatSlice";
 import { initializeList as initializeEntityList } from "./slices/entityListsSlice";
 import { initializeList as initializeSpaceList } from "./slices/spaceListsSlice";
+import { initializeList as initializeWorkspaceList } from "./slices/workspaceListsSlice";
 import { setCurrentCollection, resetCollections } from "./slices/collectionsSlice";
 import {
   setUnreadCount,
@@ -54,6 +55,16 @@ describe("resetAccountScopedState", () => {
     store.dispatch(resetAccountScopedState());
 
     expect(store.getState().sublay.spaceLists.lists).toEqual({});
+  });
+
+  it("resets the workspaceLists slice", () => {
+    const store = makeSublayStore();
+    store.dispatch(initializeWorkspaceList({ listId: "workspaces" }));
+    expect(store.getState().sublay.workspaceLists.lists.workspaces).toBeDefined();
+
+    store.dispatch(resetAccountScopedState());
+
+    expect(store.getState().sublay.workspaceLists.lists).toEqual({});
   });
 
   it("resets the collections slice", () => {

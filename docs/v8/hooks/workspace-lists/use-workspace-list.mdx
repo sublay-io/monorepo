@@ -1,0 +1,140 @@
+---
+title: "Use workspace list"
+description: "Paginated list of the current user's workspaces, backed by Redux state"
+icon: "cube"
+---
+
+## Overview
+
+`useWorkspaceList` provides a stateful, paginated list of the current user's workspaces, with filters, load-more, and creating and deleting workspaces in place. By default the list holds **every workspace the user can open**, newest first, at every level of the tree; each row's [`reasons`](/v8/data-models/workspace) says why it is there.
+
+Each list is identified by a `listId` and keeps its own Redux state, so several lists can sit on the same page, and two components that use the same `listId` share one list.
+
+For the common setups — a workspace switcher, and the full list — see [Workspace lists](/v8/sdk/workspaces/overview#workspace-lists).
+
+## Usage Example
+
+```tsx
+import { useWorkspaceList } from "@sublay/react-js";
+import { useEffect } from "react";
+
+function WorkspaceSwitcher() {
+  const { workspaces, loading, hasMore, fetchWorkspaces, loadMore } =
+    useWorkspaceList({ listId: "switcher" });
+
+  useEffect(() => {
+    fetchWorkspaces(
+      { relation: "direct", parentWorkspaceId: "any", sortDir: "asc", include: ["memberCount"] },
+      { limit: 50 },
+      { fetchImmediately: true }
+    );
+  }, []);
+
+  return (
+    <div>
+      {workspaces.map((w) => (
+        <div key={w.id} style={{ paddingInlineStart: w.depth * 16 }}>
+          {w.name} — {w.memberCount} members
+        </div>
+      ))}
+      {hasMore && <button onClick={loadMore} disabled={loading}>Load more</button>}
+    </div>
+  );
+}
+```
+
+## Parameters
+
+<ParamField path="listId" type="string" required>
+  Unique identifier for this list's Redux state. Use distinct IDs for independent lists, and the same ID to share one list between components.
+</ParamField>
+
+## Returns
+
+<ResponseField name="workspaces" type="Workspace[]">
+  Currently loaded workspaces, each with `reasons` (and `memberCount` when the list includes it).
+</ResponseField>
+
+<ResponseField name="loading" type="boolean">
+  `true` while fetching.
+</ResponseField>
+
+<ResponseField name="hasMore" type="boolean">
+  `true` if more pages are available.
+</ResponseField>
+
+<ResponseField name="fetchWorkspaces" type="function">
+  Fetch page 1 with new filters. A filter you leave out (`undefined`) keeps its current value; `null` puts it back to its default. The fetch runs right away when `filters` is empty or `fetchImmediately` is set, and after an 800 ms pause otherwise, so typing into a filter fires one request.
+
+  ```ts
+  fetchWorkspaces(
+    filters: {
+      relation?: "reachable" | "direct" | null;          // default "reachable"
+      parentWorkspaceId?: string | "none" | "any" | null; // default "any": every level
+      sortDir?: "desc" | "asc" | null;                    // default "desc": newest first
+      include?: "memberCount" | "memberCount"[] | null;   // default none
+    },
+    config?: { limit?: number }, // page size, default 20
+    options?: {
+      fetchImmediately?: boolean; // skip the 800 ms pause
+      resetUnspecified?: boolean; // put every filter you leave out back to its default
+      clearImmediately?: boolean; // empty the list before the fetch starts
+    }
+  ) => void
+  ```
+
+  Every page, including `loadMore` and `refetch`, is fetched with the filters in use.
+</ResponseField>
+
+<ResponseField name="loadMore" type="() => void">
+  Fetch the next page and append it. Does nothing before the first `fetchWorkspaces`, while a fetch is running, or when `hasMore` is `false`.
+</ResponseField>
+
+<ResponseField name="refetch" type="() => void">
+  Fetch page 1 again with the current filters and page size, replacing the list. Does nothing before the first `fetchWorkspaces`.
+</ResponseField>
+
+<ResponseField name="createWorkspace" type="function">
+  Create a workspace, owned by the current user, and add it to the list where the server would list it.
+
+  ```ts
+  createWorkspace(props: {
+    name: string;
+    metadata?: Record<string, any>;
+    parentWorkspaceId?: string | null; // a sub-workspace of this workspace; left out or null: a root workspace
+  }) => Promise<Workspace | undefined>
+  ```
+
+  The hook reads the new workspace back after creating it, so its row carries `reasons` (and `memberCount` when the list includes it) like every other row; that is a second request. The new workspace is the newest one, so it goes first when the list is newest first (`sortDir: "desc"`), and last when it is oldest first (`"asc"`) — under `"asc"` only once every page is loaded, since until then its place is on a page not fetched yet. A workspace outside the list's `parentWorkspaceId` filter is created but not added. The creator owns it, so it belongs under both `relation` values.
+
+  Resolves to the new workspace, or `undefined` if the create failed (the error is logged).
+</ResponseField>
+
+<ResponseField name="deleteWorkspace" type="function">
+  Delete a workspace and remove it from the list. Deleting a workspace deletes its whole subtree; sub-workspaces already in the list stay there until the next fetch.
+
+  ```ts
+  deleteWorkspace(props: { workspaceId: string }) => Promise<void>
+  ```
+</ResponseField>
+
+<ResponseField name="relation" type='"reachable" | "direct"'>
+  The relation in use. `"reachable"` (the default): every workspace the user can open — owned, a member of, under a workspace they own, or reached by a capability held on an ancestor. `"direct"`: only the workspaces the user owns or has a member row on.
+</ResponseField>
+
+<ResponseField name="parentWorkspaceId" type='string | "none" | "any"'>
+  The parent filter in use: a workspace id (the workspaces directly under it), `"none"` (top-level workspaces only) or `"any"` (every level, the default). It applies within `relation`.
+</ResponseField>
+
+<ResponseField name="sortDir" type='"desc" | "asc"'>
+  The order in use, by creation time: `"desc"` (newest first, the default) or `"asc"` (oldest first, which puts every parent before its children).
+</ResponseField>
+
+<ResponseField name="include" type='"memberCount"[] | null'>
+  The include flags sent with every page, or `null`.
+</ResponseField>
+
+## Related
+
+- [useWorkspaceListActions](/v8/hooks/workspace-lists/use-workspace-list-actions)
+- [List Workspaces API](/v8/api-reference/workspaces/fetch-workspaces)

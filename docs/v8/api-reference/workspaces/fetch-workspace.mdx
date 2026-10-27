@@ -24,7 +24,28 @@ Returns a single [Workspace](/v8/data-models/workspace), filtered by the caller'
 
 ## Response
 
-Returns the [Workspace](/v8/data-models/workspace) object.
+Returns the [Workspace](/v8/data-models/workspace) object, with `reasons`.
+
+<ResponseField name="reasons" type="{ type, viaWorkspaceId? }[]">
+  The caller's full standing on the workspace, one entry per grant: `owner`, `member`, `ancestor-owner` (with the ancestor they own as `viaWorkspaceId`) and `reach-holder` (with the ancestor whose capability reaches here). The same entries, in the same order, as the [authority read](/v8/api-reference/workspaces/fetch-authority). A workspace is returned only when the caller has at least one, so it is never empty.
+</ResponseField>
+
+```json
+{
+  "id": "6b2d9e40-1f3a-4c7e-9a85-2e4f0c1d7b62",
+  "name": "Client: Globex",
+  "metadata": {},
+  "ownerId": "8c41f2a7-5d0e-4b19-a3c6-7e9f1b2d4a50",
+  "parentWorkspaceId": "0f1c7a6e-9d4b-4f2a-8c31-5b6e2a7d1c04",
+  "depth": 1,
+  "inheritsFromParent": true,
+  "createdAt": "2026-02-03T15:40:12.118Z",
+  "updatedAt": "2026-02-03T15:40:12.118Z",
+  "reasons": [
+    { "type": "ancestor-owner", "viaWorkspaceId": "0f1c7a6e-9d4b-4f2a-8c31-5b6e2a7d1c04" }
+  ]
+}
+```
 
 ## Error Responses
 

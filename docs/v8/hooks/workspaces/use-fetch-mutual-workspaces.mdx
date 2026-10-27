@@ -1,0 +1,62 @@
+---
+title: "Fetch mutual workspaces"
+description: "Fetch the workspaces the current user and another user have in common"
+icon: "plug"
+---
+
+## Overview
+
+`useFetchMutualWorkspaces` returns a callable that fetches one page of the workspaces both the current user and another user are in — their workspaces in common. The actor is derived from the bearer token — no `actingUserId` is sent. Each row's `reasons` is the **current user's** standing on it.
+
+## Usage Example
+
+```tsx
+import { useFetchMutualWorkspaces } from "@sublay/react-js";
+
+function SharedWorkspaces({ otherUserId }: { otherUserId: string }) {
+  const fetchMutualWorkspaces = useFetchMutualWorkspaces();
+
+  const load = async () => {
+    const { data } = await fetchMutualWorkspaces({
+      userId: otherUserId,
+      relation: "direct", // workspaces you're both owners or members of
+      limit: 20,
+    });
+    data.forEach((workspace) => console.log(workspace.name, workspace.reasons));
+  };
+}
+```
+
+## Parameters
+
+<ParamField path="userId" type="string" required>
+  The other user's ID. An ID that matches no user returns an empty page; your own ID returns your own workspaces.
+</ParamField>
+
+<ParamField path="relation" type='"reachable" | "direct" | null'>
+  `"reachable"` (the default): workspaces each of you can open, by any reason. `"direct"`: workspaces each of you owns or has a member row on. `null` is left out of the request.
+</ParamField>
+
+<ParamField path="sortDir" type='"desc" | "asc" | null'>
+  Order by creation time: `"desc"` (the default) newest first, `"asc"` oldest first. `null` is left out of the request.
+</ParamField>
+
+<ParamField path="page" type="number">
+  Page number. Defaults to `1`.
+</ParamField>
+
+<ParamField path="limit" type="number">
+  Results per page. Defaults to `20`.
+</ParamField>
+
+<ParamField path="include" type="WorkspaceIncludeParam">
+  A single value or an array. The only value is `"memberCount"`: it adds each row's **direct** member count.
+</ParamField>
+
+## Returns
+
+Returns a `PaginatedResponse<Workspace>` (`{ data, pagination }`).
+
+## Related
+
+- [Fetch Mutual Workspaces API](/v8/api-reference/workspaces/fetch-mutual-workspaces)

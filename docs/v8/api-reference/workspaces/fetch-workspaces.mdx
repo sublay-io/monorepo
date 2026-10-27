@@ -1,16 +1,28 @@
 ---
 title: "List Workspaces"
 api: "GET /v8/:projectId/workspaces"
-description: "List the caller's direct-membership + owned workspaces"
+description: "List the workspaces the caller can open, or only the ones they own or are a member of"
 ---
 
-Returns a paginated list of workspaces scoped to the caller's **direct memberships + owned workspaces** (both index-backed, no ancestor climb).
-
-<Note>
-  This is deliberately **not** an "everything I can reach" tree listing — that per-row reach resolution is deferred. Use this for the common "my workspaces" UI call.
-</Note>
+Returns a paginated list of the caller's workspaces. By default that is **every workspace the caller can open** — every workspace [Fetch Workspace](/v8/api-reference/workspaces/fetch-workspace) would return for them. With `relation=direct` it is only the workspaces they own or have a member row on. Every row carries `reasons`: why the caller can open it.
 
 ## Query Parameters
+
+<ParamField query="relation" type="string">
+  Which workspaces the list holds:
+  - `reachable` (the default): every workspace the caller can open. That is a workspace they own, one they have a member row on, one under a workspace they own (at any depth, whatever the [inherit flags](/v8/data-models/workspace#reach-and-the-wall-door-rule) say), and one a capability they hold on an ancestor reaches through an unbroken chain of `inheritsFromParent: true`.
+  - `direct`: only the workspaces the caller owns or has a member row on.
+
+  Left out or sent empty: `reachable`. Values match exactly. `null` and `undefined` are refused with `400 workspace/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)); any other value returns `400 workspace/invalid-query`.
+</ParamField>
+
+<ParamField query="sortDir" type="string">
+  The order, by creation time: `desc` (the default) newest first, `asc` oldest first. Rows created at the same moment are ordered by id in the same direction, so the order is the same on every request and pages neither repeat nor skip a row.
+
+  A workspace can't be moved to another parent, so a sub-workspace is always newer than its parent: `asc` lists every parent before its children. See [Building a workspace switcher](/v8/sdk/workspaces/overview#building-a-workspace-switcher).
+
+  Left out or sent empty: `desc`. Case is ignored (`DESC` works). `null` and `undefined` are refused with `400 workspace/unsupported-param`; any other value returns `400 workspace/invalid-query`.
+</ParamField>
 
 <ParamField query="page" type="number">
   Page number for pagination.
@@ -23,10 +35,10 @@ Returns a paginated list of workspaces scoped to the caller's **direct membershi
 <ParamField query="parentWorkspaceId" type="string">
   Narrows the list by where each workspace sits in the tree:
   - `none`: top-level workspaces only (workspaces with no parent).
-  - A workspace id: the caller's workspaces directly under that workspace, whether or not the caller is in that workspace itself. An id that matches no workspace returns an empty page, not a 404.
+  - A workspace id: the caller's workspaces directly under that workspace. An id that matches no workspace returns an empty page, not a 404.
   - `any`, left out, or sent empty: workspaces at every level. This is the default.
 
-  The list still holds only the caller's direct-membership and owned workspaces, so a workspace id lists the ones of its direct sub-workspaces the caller belongs to or owns, and `none` leaves out a sub-workspace the caller belongs to even when they aren't in its parent. It works with `page`, `limit` (the pagination counts reflect the filter) and `include`. `null` and `undefined` are refused with `400 workspace/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). `none` and `any` match exactly (`ANY` is refused). Any other value that isn't a workspace id returns `400 workspace/invalid-query`.
+  The filter applies within `relation`: a workspace id lists the direct sub-workspaces of that workspace that are in the caller's list, and `none` lists the top-level workspaces in it. So `none` leaves out a sub-workspace the caller is a member of even when they aren't in its parent; `any` includes it. It works with `page`, `limit` (the pagination counts reflect the filter) and `include`. `null` and `undefined` are refused with `400 workspace/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). `none` and `any` match exactly (`ANY` is refused). Any other value that isn't a workspace id returns `400 workspace/invalid-query`.
 </ParamField>
 
 <ParamField query="include" type="string">
@@ -36,14 +48,18 @@ Returns a paginated list of workspaces scoped to the caller's **direct membershi
 </ParamField>
 
 <ParamField query="actingUserId" type="string" required>
-  Service keys only — the user to act as, whose workspaces are listed. **Required for a key:** the list is defined as *somebody's* memberships, so a key that names nobody is refused with `400 workspace/missing-user-id`.
+  Service keys only — the user to act as, whose workspaces are listed and whose `reasons` each row carries. **Required for a key:** the list is defined as *somebody's* workspaces, so a key that names nobody is refused with `400 workspace/missing-user-id`.
 
   A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
 
-Returns a paginated response of [Workspace](/v8/data-models/workspace) objects.
+Returns a paginated response of [Workspace](/v8/data-models/workspace) objects, each with `reasons`.
+
+<ResponseField name="data[].reasons" type="{ type, viaWorkspaceId? }[]">
+  The caller's full standing on the workspace, one entry per grant: `owner`, `member`, `ancestor-owner` (with the ancestor they own as `viaWorkspaceId`) and `reach-holder` (with the ancestor whose capability reaches here). These are the same entries, in the same order, that the [authority read](/v8/api-reference/workspaces/fetch-authority) returns for that workspace. They describe all of the caller's standing even under `relation=direct`: `relation` picks the rows, not the reasons, so a workspace the caller is a member of and also owns an ancestor of carries both `member` and `ancestor-owner`.
+</ResponseField>
 
 ```
 GET /v8/:projectId/workspaces?parentWorkspaceId=none&page=1&limit=10&include=memberCount
@@ -62,7 +78,8 @@ GET /v8/:projectId/workspaces?parentWorkspaceId=none&page=1&limit=10&include=mem
       "inheritsFromParent": false,
       "createdAt": "2026-01-14T09:12:44.001Z",
       "updatedAt": "2026-01-14T09:12:44.001Z",
-      "memberCount": 12
+      "memberCount": 12,
+      "reasons": [{ "type": "member" }]
     }
   ],
   "pagination": { "page": 1, "pageSize": 10, "totalPages": 1, "totalItems": 1, "hasMore": false }
@@ -98,11 +115,14 @@ GET /v8/:projectId/workspaces?parentWorkspaceId=none&page=1&limit=10&include=mem
     ```
     Returned when a service key names an `actingUserId` that isn't a user in this project.
   </Accordion>
-  <Accordion title="Unsupported parentWorkspaceId value — 400">
+  <Accordion title="Unsupported parentWorkspaceId, relation or sortDir value — 400">
     ```json
     { "error": "`parentWorkspaceId=null` isn't supported. Use `parentWorkspaceId=none` for top-level workspaces, or `parentWorkspaceId=any` for every level (the default).", "code": "workspace/unsupported-param", "param": "parentWorkspaceId" }
     ```
-    `parentWorkspaceId=null` and `parentWorkspaceId=undefined` are rejected with the spelling to use instead.
+    `null` and `undefined` as the value of `parentWorkspaceId`, `relation` or `sortDir` are rejected with the values to use instead, and `param` names the parameter. To use a default, leave the parameter out.
+  </Accordion>
+  <Accordion title="Unknown relation or sortDir — 400">
+    Returned with code `workspace/invalid-query` for a `relation` other than `direct` or `reachable`, or a `sortDir` other than `asc` or `desc`. `relation` values match exactly (`Direct` is refused); `sortDir` ignores case.
   </Accordion>
   <Accordion title="Unknown Include — 400">
     ```json
@@ -114,8 +134,8 @@ GET /v8/:projectId/workspaces?parentWorkspaceId=none&page=1&limit=10&include=mem
     ```json
     { "error": "Unrecognized key: \"sort\"", "code": "workspace/invalid-query" }
     ```
-    This route declares `page`, `limit`, `parentWorkspaceId`, `include` and `actingUserId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "sort", "order"`. The two exceptions across the bundle are the cache-busters `_` and `_t`, which are dropped before the request is read. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
+    This route declares `page`, `limit`, `relation`, `parentWorkspaceId`, `sortDir`, `include` and `actingUserId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "sort", "order"`. The two exceptions across the bundle are the cache-busters `_` and `_t`, which are dropped before the request is read. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>
 </AccordionGroup>
 
-See also: [useFetchManyWorkspaces](/v8/hooks/workspaces/use-fetch-many-workspaces) · [useFetchManyWorkspacesWrapper](/v8/hooks/workspaces/use-fetch-many-workspaces-wrapper)
+See also: [useWorkspaceList](/v8/hooks/workspace-lists/use-workspace-list) · [useFetchManyWorkspaces](/v8/hooks/workspaces/use-fetch-many-workspaces) · [Fetch Mutual Workspaces](/v8/api-reference/workspaces/fetch-mutual-workspaces)

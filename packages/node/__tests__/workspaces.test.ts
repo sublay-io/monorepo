@@ -2,6 +2,7 @@ import {
   createWorkspace,
   fetchWorkspace,
   fetchManyWorkspaces,
+  fetchMutualWorkspaces,
   updateWorkspace,
   updateWorkspaceInheritFlag,
   deleteWorkspace,
@@ -89,6 +90,31 @@ describe("node-sdk workspaces (lifecycle + ownership) — request shaping", () =
     expect(params[1].parentWorkspaceId).toBe("any");
     expect(params[2].parentWorkspaceId).toBe("w-parent");
     expect(params[3].parentWorkspaceId).toBeUndefined();
+  });
+
+  it("fetchManyWorkspaces forwards relation and sortDir, and leaves them out by default", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchManyWorkspaces(client, { actingUserId: "u1", relation: "direct", sortDir: "asc" });
+    await fetchManyWorkspaces(client, { actingUserId: "u1" });
+    const params = projectInstance.get.mock.calls.map((c: any[]) => c[1].params);
+    expect(params[0]).toMatchObject({ actingUserId: "u1", relation: "direct", sortDir: "asc" });
+    expect(params[1].relation).toBeUndefined();
+    expect(params[1].sortDir).toBeUndefined();
+  });
+
+  it("fetchMutualWorkspaces puts the OTHER user's id in the path and the rest (incl. actingUserId) as params", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchMutualWorkspaces(client, {
+      userId: "target1",
+      actingUserId: "u1",
+      page: 2,
+      include: "memberCount",
+      relation: "reachable",
+      sortDir: "desc",
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/workspaces/mutual/target1", {
+      params: { actingUserId: "u1", page: 2, include: "memberCount", relation: "reachable", sortDir: "desc" },
+    });
   });
 
   it("updateWorkspace strips workspaceId into the path and patches the rest", async () => {

@@ -478,7 +478,7 @@ export {
   useCreateWorkspace,
   useFetchWorkspace,
   useFetchManyWorkspaces,
-  useFetchManyWorkspacesWrapper,
+  useFetchMutualWorkspaces,
   useUpdateWorkspace,
   useUpdateWorkspaceInheritFlag,
   useDeleteWorkspace,
@@ -500,8 +500,7 @@ export {
   type CreateWorkspaceProps,
   type FetchWorkspaceProps,
   type FetchManyWorkspacesParams,
-  type UseFetchManyWorkspacesWrapperProps,
-  type UseFetchManyWorkspacesWrapperValues,
+  type FetchMutualWorkspacesProps,
   type UpdateWorkspaceProps,
   type UpdateWorkspaceInheritFlagProps,
   type DeleteWorkspaceProps,
@@ -541,6 +540,19 @@ export {
   type CreateSpaceOptions,
   type DeleteSpaceOptions,
 } from "./hooks/space-lists";
+
+// -- workspace lists
+export {
+  useWorkspaceList,
+  useWorkspaceListActions,
+  type UseWorkspaceListProps,
+  type UseWorkspaceListValues,
+  type WorkspaceListCreateWorkspaceProps,
+  type WorkspaceListDeleteWorkspaceProps,
+  type FetchWorkspacesOptions,
+  type CreateWorkspaceOptions,
+  type DeleteWorkspaceOptions,
+} from "./hooks/workspace-lists";
 
 // -- comments
 export {
@@ -892,6 +904,8 @@ export type {
   WorkspaceStandingUser,
   WorkspaceMemberStanding,
   WorkspaceAuthority,
+  WorkspaceListRelation,
+  WorkspaceListSortDir,
 } from "./interfaces/models/Workspace";
 export type {
   SpaceMember,
@@ -910,6 +924,11 @@ export type {
 // `interfaces/SpaceListSortByOptions.ts` and was the one exported here — its
 // shape (`search`, `visibility`) matched no real filter.
 export type { SpaceListFilters } from "./store/slices/spaceListsSlice";
+export type {
+  WorkspaceListFilters,
+  WorkspaceListConfig,
+  WorkspaceListFetchOptions,
+} from "./store/slices/workspaceListsSlice";
 export type { SpaceBreadcrumb } from "./interfaces/SpaceBreadcrumb";
 export type {
   SpaceReputationContextParams,

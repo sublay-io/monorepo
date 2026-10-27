@@ -1,0 +1,46 @@
+---
+title: "Use workspace list actions"
+description: "Low-level actions for fetching, creating, and deleting workspaces in a list"
+icon: "cube"
+---
+
+## Overview
+
+`useWorkspaceListActions` provides the low-level fetch, create, and delete operations used internally by `useWorkspaceList`. In most cases you should use [`useWorkspaceList`](/v8/hooks/workspace-lists/use-workspace-list) directly, which wraps these actions with filter state, debouncing and load-more.
+
+Use this hook only when you need direct control over fetching a list's pages.
+
+## Usage Example
+
+```tsx
+import { useWorkspaceListActions } from "@sublay/react-js";
+
+function CustomWorkspaceLoader({ listId }: { listId: string }) {
+  const actions = useWorkspaceListActions();
+
+  const loadWorkspaces = async () => {
+    await actions.fetchWorkspaces(listId, {
+      page: 1,
+      limit: 20,
+      relation: "direct",
+      sortDir: "asc",
+    });
+  };
+}
+```
+
+## Methods
+
+<ResponseField name="fetchWorkspaces" type="(listId: string, params: FetchWorkspacesOptions) => Promise<Workspace[] | null>">
+  Fetch one page for the given list and store it in Redux state: page 1 replaces the list, a later page is appended. `params` takes `page` and `limit` (both required) and the optional filters `relation`, `parentWorkspaceId`, `sortDir` and `include` (an array). A filter that is `null` or left out isn't sent, so the server's default applies. Throws on a failed request, after recording the error on the list.
+</ResponseField>
+
+<ResponseField name="createWorkspace" type="(listId: string, props: CreateWorkspaceOptions) => Promise<Workspace | undefined>">
+  Create a workspace (`name`, optional `metadata` and `parentWorkspaceId`), read it back with the optional `include` flags so it carries `reasons`, and add it to the given list where the server would list it — see [`createWorkspace`](/v8/hooks/workspace-lists/use-workspace-list) on `useWorkspaceList`. If the read-back fails, the workspace the create returned is added, without `reasons`. Throws if the create fails.
+</ResponseField>
+
+<ResponseField name="deleteWorkspace" type="(listId: string, props: { workspaceId: string }) => Promise<void>">
+  Delete a workspace and remove it from the given list's state. Throws on a failed request, leaving the list as it was.
+</ResponseField>
+
+<Tip>Prefer `useWorkspaceList` for most use cases — it handles filter state, pagination, debouncing and load-more.</Tip>

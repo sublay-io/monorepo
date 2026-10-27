@@ -2,6 +2,7 @@
 export { createWorkspace } from "./createWorkspace";
 export { fetchWorkspace } from "./fetchWorkspace";
 export { fetchManyWorkspaces } from "./fetchManyWorkspaces";
+export { fetchMutualWorkspaces } from "./fetchMutualWorkspaces";
 export { updateWorkspace } from "./updateWorkspace";
 export { updateWorkspaceInheritFlag } from "./updateWorkspaceInheritFlag";
 export { deleteWorkspace } from "./deleteWorkspace";

@@ -9,7 +9,7 @@ description: "Build SaaS/team workspaces with invitations, per-member authority,
   **Requires the `workspaces` bundle.** See [Bundles](/v8/bundles) to add it.
 </Note>
 
-The React/React Native surface is a set of plain hooks re-exported from `@sublay/core` (there is **no** `WorkspaceProvider` and **no** Redux slice — the list uses the [Wrapper pattern](/v8/hooks/workspaces/use-fetch-many-workspaces-wrapper), matching house style).
+The React/React Native surface is a set of plain hooks re-exported from `@sublay/core` (there is **no** `WorkspaceProvider`). The one stateful hook is the workspace list, [`useWorkspaceList`](/v8/hooks/workspace-lists/use-workspace-list), which keeps each list in the Redux store under a `listId`.
 
 ## Key concepts
 
@@ -50,9 +50,9 @@ Three project-level settings configure this bundle. They live under `workspaces`
 
 ## What a client app can do
 
-**All 21 workspace endpoints are callable from a browser or mobile app with a normal signed-in user's bearer token** — including every management operation: editing a workspace, deleting it, transferring ownership, flipping the inherit flag, editing a member's capabilities/rank, removing a member, offboarding across a subtree, and the full invite lifecycle (create, list, revoke, resend). Every one of these is exposed as a `@sublay/core` hook and as a `@sublay/js` function. **A members-management panel needs no server-side code and no hand-rolled `fetch`.**
+**All 22 workspace endpoints are callable from a browser or mobile app with a normal signed-in user's bearer token** — including every management operation: editing a workspace, deleting it, transferring ownership, flipping the inherit flag, editing a member's capabilities/rank, removing a member, offboarding across a subtree, and the full invite lifecycle (create, list, revoke, resend). Every one of these is exposed as a `@sublay/core` hook and as a `@sublay/js` function. **A members-management panel needs no server-side code and no hand-rolled `fetch`.**
 
-With a client token, every endpoint in the bundle resolves the actor from that token and authorizes the action against **that user's own standing** on the workspace. Most routes enforce this in guard middleware ahead of the controller; the self-scoped ones (create a workspace, list your own, leave, accept or decline an invite, read your own invites or your own authority) carry no guard middleware and authorize inside the controller instead. The one endpoint that does not require a token at all is the single-workspace read, [`GET /workspaces/:id`](/v8/api-reference/workspaces/fetch-workspace) — it takes an *optional* token and returns the workspace when visibility permits. Everything else requires a signed-in user, and whether the call then succeeds depends on their standing:
+With a client token, every endpoint in the bundle resolves the actor from that token and authorizes the action against **that user's own standing** on the workspace. Most routes enforce this in guard middleware ahead of the controller; the self-scoped ones (create a workspace, list your own, list the ones you share with another user, leave, accept or decline an invite, read your own invites or your own authority) carry no guard middleware and authorize inside the controller instead. The one endpoint that does not require a token at all is the single-workspace read, [`GET /workspaces/:id`](/v8/api-reference/workspaces/fetch-workspace) — it takes an *optional* token and returns the workspace when visibility permits. Everything else requires a signed-in user, and whether the call then succeeds depends on their standing:
 
 | Rule | Meaning |
 |------|---------|
@@ -432,6 +432,115 @@ function CreateTeam() {
 }
 ```
 
+## Workspace lists
+
+[`GET /workspaces`](/v8/api-reference/workspaces/fetch-workspaces) lists the caller's workspaces, and [`useWorkspaceList`](/v8/hooks/workspace-lists/use-workspace-list) keeps such a list in the Redux store with load-more. Three filters shape it:
+
+- **`relation`** — which workspaces. `reachable` (the default) is every workspace the user can open: one they own, one they are a member of, one under a workspace they own, and one a capability they hold on an ancestor [reaches](/v8/data-models/workspace#reach-and-the-wall-door-rule). `direct` is only the workspaces they own or have a member row on.
+- **`parentWorkspaceId`** — where in the tree, within that relation: `none` (top-level only), a workspace id (the workspaces directly under it) or `any` (every level, the default).
+- **`sortDir`** — by creation time, `desc` (newest first, the default) or `asc` (oldest first).
+
+Every row carries `reasons`, the user's standing on it: `owner`, `member`, `ancestor-owner` or `reach-holder`, with `viaWorkspaceId` naming the ancestor for the last two. They are the same entries the [authority read](/v8/hooks/workspaces/use-fetch-workspace-authority) returns, so a list can show *why* each workspace is there without a request per row.
+
+### Everything you can open
+
+The defaults — `relation: "reachable"`, every level, newest first — list every workspace the user can open. Use `reasons` to group or label the rows: a workspace whose only reason is `ancestor-owner` is one the user oversees from above but was never added to, and one whose only reason is `reach-holder` is one they work in through a capability granted on a parent.
+
+```tsx
+import { useWorkspaceList } from "@sublay/react-js";
+import { useEffect } from "react";
+
+function AllWorkspaces() {
+  const { workspaces, hasMore, loading, fetchWorkspaces, loadMore } =
+    useWorkspaceList({ listId: "all-workspaces" });
+
+  useEffect(() => {
+    fetchWorkspaces({});
+  }, []);
+
+  return (
+    <ul>
+      {workspaces.map((w) => {
+        const types = w.reasons?.map((r) => r.type) ?? [];
+        const direct = types.includes("owner") || types.includes("member");
+        return (
+          <li key={w.id}>
+            {w.name} {direct ? "" : "(via a parent workspace)"}
+          </li>
+        );
+      })}
+      {hasMore && <button onClick={loadMore} disabled={loading}>Load more</button>}
+    </ul>
+  );
+}
+```
+
+### Building a workspace switcher
+
+A switcher usually shows the workspaces the user is actually **in** — the ones they own or were added to — not every workspace they could open from above. That is `relation: "direct"` with `parentWorkspaceId: "any"`, so sub-workspaces they were added to show up even when they aren't in the parent.
+
+To show those workspaces as a tree, fetch them **oldest first** (`sortDir: "asc"`). A workspace can't be moved to another parent, so a sub-workspace is always created after its parent, and oldest first always lists a parent before its children. Building the tree on the client is then one pass in the order the rows arrive: by the time a row comes, its parent's node already exists, so the row attaches to it straight away, and that stays true across pages. With the default, newest first, children come before their parents, and a client has to hold every row until it has loaded all of them before it can attach anything.
+
+Under `direct`, a row's parent may not be in the list at all (the user is in the sub-workspace but not in its parent). Treat a row whose parent you haven't seen as a root of its own.
+
+```tsx
+import { useWorkspaceList, type Workspace } from "@sublay/react-js";
+import { useEffect, useMemo } from "react";
+
+type Node = { workspace: Workspace; children: Node[] };
+
+function WorkspaceSwitcher() {
+  const { workspaces, hasMore, loading, fetchWorkspaces, loadMore } =
+    useWorkspaceList({ listId: "switcher" });
+
+  useEffect(() => {
+    fetchWorkspaces(
+      { relation: "direct", parentWorkspaceId: "any", sortDir: "asc" },
+      { limit: 50 },
+      { fetchImmediately: true }
+    );
+  }, []);
+
+  // One pass: oldest first means a parent's node exists before its children arrive.
+  const roots = useMemo(() => {
+    const nodes = new Map<string, Node>();
+    const top: Node[] = [];
+    for (const workspace of workspaces) {
+      const node: Node = { workspace, children: [] };
+      nodes.set(workspace.id, node);
+      const parent = workspace.parentWorkspaceId && nodes.get(workspace.parentWorkspaceId);
+      if (parent) parent.children.push(node);
+      else top.push(node); // a root, or a sub-workspace whose parent the user isn't in
+    }
+    return top;
+  }, [workspaces]);
+
+  const render = (nodes: Node[]) => (
+    <ul>
+      {nodes.map((n) => (
+        <li key={n.workspace.id}>
+          {n.workspace.name}
+          {n.children.length > 0 && render(n.children)}
+        </li>
+      ))}
+    </ul>
+  );
+
+  return (
+    <nav>
+      {render(roots)}
+      {hasMore && <button onClick={loadMore} disabled={loading}>Load more</button>}
+    </nav>
+  );
+}
+```
+
+Creating a workspace from the switcher with the list's [`createWorkspace`](/v8/hooks/workspace-lists/use-workspace-list) adds it in the right place: last under oldest first (once every page is loaded), first under newest first.
+
+### Workspaces in common
+
+[`useFetchMutualWorkspaces`](/v8/hooks/workspaces/use-fetch-mutual-workspaces) lists the workspaces the current user shares with another user, under the same `relation` and `sortDir` — for example, on a profile page, "Workspaces you share". Each row's `reasons` is the current user's standing.
+
 ## Hooks
 
 ### Workspace lifecycle & ownership
@@ -440,8 +549,9 @@ function CreateTeam() {
 |------|---------|---------------|
 | [`useCreateWorkspace`](/v8/hooks/workspaces/use-create-workspace) | Create a root or child workspace | Verified email (root) / `create-sub-workspace` on the parent (child) |
 | [`useFetchWorkspace`](/v8/hooks/workspaces/use-fetch-workspace) | Read a single workspace | Visibility |
-| [`useFetchManyWorkspaces`](/v8/hooks/workspaces/use-fetch-many-workspaces) | Leaf fetcher for the caller's workspaces | Self-service |
-| [`useFetchManyWorkspacesWrapper`](/v8/hooks/workspaces/use-fetch-many-workspaces-wrapper) | Paginated list with load-more | Self-service |
+| [`useWorkspaceList`](/v8/hooks/workspace-lists/use-workspace-list) | Paginated, filterable list with load-more, kept in Redux | Self-service |
+| [`useFetchManyWorkspaces`](/v8/hooks/workspaces/use-fetch-many-workspaces) | Fetch one page of the caller's workspaces | Self-service |
+| [`useFetchMutualWorkspaces`](/v8/hooks/workspaces/use-fetch-mutual-workspaces) | Workspaces the caller shares with another user | Self-service |
 | [`useUpdateWorkspace`](/v8/hooks/workspaces/use-update-workspace) | Edit name / metadata | `edit-workspace` (or owner) |
 | [`useUpdateWorkspaceInheritFlag`](/v8/hooks/workspaces/use-update-workspace-inherit-flag) | Flip `inheritsFromParent` | Owner-only |
 | [`useDeleteWorkspace`](/v8/hooks/workspaces/use-delete-workspace) | Delete a workspace (cascades the subtree) | Owner-only |

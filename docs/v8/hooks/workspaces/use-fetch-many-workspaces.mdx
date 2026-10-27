@@ -1,12 +1,12 @@
 ---
 title: "Fetch many workspaces"
-description: "Leaf fetcher for the caller's direct-membership + owned workspaces"
+description: "Fetch one page of the current user's workspaces"
 icon: "plug"
 ---
 
 ## Overview
 
-`useFetchManyWorkspaces` returns a callable that fetches one page of the caller's **direct-membership + owned** workspaces. The actor is derived from the bearer token — no `actingUserId` is sent. For a managed paginated list with load-more, prefer [`useFetchManyWorkspacesWrapper`](/v8/hooks/workspaces/use-fetch-many-workspaces-wrapper).
+`useFetchManyWorkspaces` returns a callable that fetches one page of the current user's workspaces: by default every workspace they can open, or with `relation: "direct"` only the ones they own or are a member of. Each row carries `reasons`, why the user can open it. The actor is derived from the bearer token — no `actingUserId` is sent. For a managed paginated list with load-more, use [`useWorkspaceList`](/v8/hooks/workspace-lists/use-workspace-list).
 
 ## Usage Example
 
@@ -32,9 +32,11 @@ function useMyWorkspaces() {
 
 The callable takes an optional params object:
 
+<ParamField path="relation" type='"reachable" | "direct" | null'>Which workspaces the list holds. `"reachable"`, left out or `null` (the default): every workspace the user can open — owned, a member of, under a workspace they own, or reached by a capability held on an ancestor. `"direct"`: only the workspaces they own or have a member row on. `null` is left out of the request.</ParamField>
+<ParamField path="sortDir" type='"desc" | "asc" | null'>Order by creation time. `"desc"`, left out or `null` (the default): newest first. `"asc"`: oldest first, which puts every parent before its children. `null` is left out of the request.</ParamField>
 <ParamField path="page" type="number">Page number.</ParamField>
 <ParamField path="limit" type="number">Page size.</ParamField>
-<ParamField path="parentWorkspaceId" type='string | "none" | "any" | null'>Narrows the list by where each workspace sits in the tree. `"none"`: top-level workspaces only. A workspace id: the caller's workspaces directly under that workspace. `"any"`, left out or `null`: workspaces at every level (the default). `null` is left out of the request.</ParamField>
+<ParamField path="parentWorkspaceId" type='string | "none" | "any" | null'>Narrows the list by where each workspace sits in the tree. `"none"`: top-level workspaces only. A workspace id: the workspaces directly under that workspace. `"any"`, left out or `null`: workspaces at every level (the default). It applies within `relation`. `null` is left out of the request.</ParamField>
 <ParamField path="include" type="WorkspaceIncludeParam">A single value or an array. The only value is `"memberCount"`: it adds each row's **direct** member count, resolved in one grouped query over the returned page rather than one request per workspace; omit it and the field is absent from each row.</ParamField>
 
 ## Returns
@@ -43,4 +45,5 @@ Returns a `PaginatedResponse<Workspace>` (`{ data, pagination }`).
 
 ## Related
 
+- [useWorkspaceList](/v8/hooks/workspace-lists/use-workspace-list)
 - [List Workspaces API](/v8/api-reference/workspaces/fetch-workspaces)

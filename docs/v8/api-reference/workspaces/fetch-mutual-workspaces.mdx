@@ -1,0 +1,96 @@
+---
+title: "Fetch Mutual Workspaces"
+api: "GET /v8/:projectId/workspaces/mutual/:userId"
+description: "List the workspaces both the caller and another user can open"
+---
+
+Returns a paginated list of the workspaces that both the caller and another user are in — their workspaces in common. Requires an authenticated user. Each row carries `reasons`: the **caller's** standing on it.
+
+## Path Parameters
+
+<ParamField path="userId" type="string" required>
+  The other user's Sublay ID. Mutual workspaces are computed between this user and the caller. An ID that matches no user returns an empty page. Your own ID returns your own workspaces, as [List Workspaces](/v8/api-reference/workspaces/fetch-workspaces) would.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="relation" type="string">
+  What "in a workspace" means, for both users:
+  - `reachable` (the default): each user can open the workspace, by any reason — owner, member, owner of an ancestor, or a capability that reaches down from an ancestor.
+  - `direct`: each user owns the workspace or has a member row on it.
+
+  Left out or sent empty: `reachable`. `null` and `undefined` are refused with `400 workspace/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)); any other value returns `400 workspace/invalid-query`.
+</ParamField>
+
+<ParamField query="sortDir" type="string">
+  The order, by creation time: `desc` (the default) newest first, `asc` oldest first, which lists every parent before its children. Rows created at the same moment are ordered by id in the same direction, so pages neither repeat nor skip a row.
+
+  Left out or sent empty: `desc`. `null` and `undefined` are refused with `400 workspace/unsupported-param`; any other value returns `400 workspace/invalid-query`.
+</ParamField>
+
+<ParamField query="page" type="number">
+  Page number. Defaults to `1`.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Results per page. Defaults to `20`.
+</ParamField>
+
+<ParamField query="include" type="string">
+  Include flags, as a comma-separated value or repeated params. The only value is `memberCount`: it adds each workspace's **direct** member count as `memberCount`. Matching ignores case; an unknown value returns `400 workspace/invalid-query`.
+</ParamField>
+
+<ParamField query="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as, whose workspaces are compared with the user in the path and whose `reasons` each row carries. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`).
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="Workspace[]">
+  The workspaces both users are in ([Workspace](/v8/data-models/workspace)). Each row's `reasons` is the caller's standing on it, the same entries the [authority read](/v8/api-reference/workspaces/fetch-authority) returns; the other user's standing isn't included.
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Standard pagination metadata (`page`, `pageSize`, `totalPages`, `totalItems`, `hasMore`).
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Id — 400">
+    Returned when `userId` isn't a valid UUID. Checked before sign-in and the endpoint's other checks.
+    ```json
+    { "error": "Invalid user id: expected a UUID.", "code": "workspace/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported relation or sortDir value — 400">
+    `null` and `undefined` as the value of `relation` or `sortDir` are rejected with code `workspace/unsupported-param`, naming the values to use instead. To use a default, leave the parameter out.
+  </Accordion>
+  <Accordion title="Invalid query — 400">
+    Returned with code `workspace/invalid-query` for an unknown `include`, `relation` or `sortDir` value, or a query parameter this route doesn't declare (`parentWorkspaceId` included).
+
+    ```json
+    { "error": "include: Unknown include `members`. Allowed: memberCount.", "code": "workspace/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+See also: [useFetchMutualWorkspaces](/v8/hooks/workspaces/use-fetch-mutual-workspaces)

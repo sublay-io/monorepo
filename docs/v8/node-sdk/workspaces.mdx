@@ -10,7 +10,7 @@ The `workspaces` module is the developer's **authorization-server SDK** for the 
 </Note>
 
 <Note>
-  **This SDK is not required in order to manage workspaces.** All 21 endpoints are equally available to a browser or mobile app through the [`@sublay/core` hooks](/v8/sdk/workspaces/overview) and [`@sublay/js`](/v8/js-sdk/workspaces), acting as the signed-in user and subject to the same ownership / capability / rank rules. What the node SDK adds is performing an action **as some other named user** through `actingUserId`, which only a service key may send.
+  **This SDK is not required in order to manage workspaces.** All 22 endpoints are equally available to a browser or mobile app through the [`@sublay/core` hooks](/v8/sdk/workspaces/overview) and [`@sublay/js`](/v8/js-sdk/workspaces), acting as the signed-in user and subject to the same ownership / capability / rank rules. What the node SDK adds is performing an action **as some other named user** through `actingUserId`, which only a service key may send.
 </Note>
 
 <Warning>
@@ -135,23 +135,47 @@ const workspace = await sublay.workspaces.fetchWorkspace({
 
 ### fetchManyWorkspaces
 
-Lists a user's direct-membership + owned workspaces (paginated).
+Lists a user's workspaces (paginated): by default every workspace they can open, or with `relation: "direct"` only the ones they own or are a member of. Each row carries `reasons`, why that user can open it.
 
 ```typescript
 const { data, pagination } = await sublay.workspaces.fetchManyWorkspaces({
   actingUserId: "usr_owner",
+  relation: "direct", // only workspaces the user owns or is a member of
+  parentWorkspaceId: "any", // every level
+  sortDir: "asc", // oldest first: parents before their children
   page: 1,
   limit: 20,
-  parentWorkspaceId: "none", // top-level workspaces only
   include: "memberCount", // each row gains a `memberCount`
 });
 ```
 
-<ParamField body="actingUserId" type="string" required>The user whose workspaces to list.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user whose workspaces to list, and whose `reasons` each row carries.</ParamField>
+<ParamField body="relation" type='"reachable" | "direct"'>Which workspaces the list holds. `"reachable"` or left out (the default): every workspace the user can open — owned, a member of, under a workspace they own, or reached by a capability held on an ancestor. `"direct"`: only the workspaces they own or have a member row on.</ParamField>
+<ParamField body="parentWorkspaceId" type='string | "none" | "any"'>Narrows the list by where each workspace sits in the tree, within `relation`. `"none"`: top-level workspaces only. A workspace id: the workspaces directly under that workspace; an id that matches no workspace returns an empty page, not a 404. `"any"` or left out: workspaces at every level (the default).</ParamField>
+<ParamField body="sortDir" type='"desc" | "asc"'>Order by creation time. `"desc"` or left out (the default): newest first. `"asc"`: oldest first, which puts every parent before its children — see [Building a workspace switcher](/v8/sdk/workspaces/overview#building-a-workspace-switcher).</ParamField>
 <ParamField body="page" type="number" />
 <ParamField body="limit" type="number" />
-<ParamField body="parentWorkspaceId" type='string | "none" | "any"'>Narrows the list by where each workspace sits in the tree. `"none"`: top-level workspaces only. A workspace id: the user's workspaces directly under that workspace; an id that matches no workspace returns an empty page, not a 404. `"any"` or left out: workspaces at every level (the default).</ParamField>
 <ParamField body="include" type="WorkspaceIncludeParam">A single value or an array, sent as a query param. The only value is `"memberCount"`: it adds a `memberCount` to **every row** — the workspace's direct member count, resolved in one grouped query over the returned page rather than one request per row. Omit it and the field is absent from each row.</ParamField>
+
+### fetchMutualWorkspaces
+
+Lists the workspaces the acting user and another user have in common (paginated). Each row's `reasons` is the acting user's standing on it.
+
+```typescript
+const { data } = await sublay.workspaces.fetchMutualWorkspaces({
+  actingUserId: "usr_pat",
+  userId: "usr_other",
+  relation: "direct",
+});
+```
+
+<ParamField body="actingUserId" type="string" required>The user to act as, whose workspaces are compared with `userId`'s.</ParamField>
+<ParamField body="userId" type="string" required>The other user, sent in the path. An ID that matches no user returns an empty page.</ParamField>
+<ParamField body="relation" type='"reachable" | "direct"'>`"reachable"` or left out (the default): workspaces each user can open. `"direct"`: workspaces each user owns or has a member row on.</ParamField>
+<ParamField body="sortDir" type='"desc" | "asc"'>Order by creation time: `"desc"` (the default) or `"asc"`.</ParamField>
+<ParamField body="page" type="number" />
+<ParamField body="limit" type="number" />
+<ParamField body="include" type="WorkspaceIncludeParam">The only value is `"memberCount"`.</ParamField>
 
 ### updateWorkspace
 

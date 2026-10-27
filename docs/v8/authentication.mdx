@@ -266,6 +266,8 @@ On those filters, `null` or `undefined` in the query string (exact, case-sensiti
 { "error": "`parentSpaceId=null` isn't supported. Use `parentSpaceId=none` for top-level spaces (the default), or `parentSpaceId=any` for every level.", "code": "space/unsupported-param", "param": "parentSpaceId" }
 ```
 
+`relation` and `sortDir` on [`GET /workspaces`](/v8/api-reference/workspaces/fetch-workspaces) and [`GET /workspaces/mutual/:userId`](/v8/api-reference/workspaces/fetch-mutual-workspaces) take neither word, but refuse `null` and `undefined` the same way, with `400 workspace/unsupported-param` naming their values. Leave them out, or send them empty, for their defaults (`reachable` and `desc`).
+
 These body id fields take JSON `null`, and refuse the string `"none"` with `400 <area>/unsupported-param` naming `null`:
 
 | Endpoint | Field | `null` means |

@@ -29,6 +29,7 @@ A workspace can optionally contain copies of itself:
 | `createdAt` | `string` | ISO timestamp when the workspace was created. |
 | `updatedAt` | `string` | ISO timestamp when the workspace was last updated. |
 | `memberCount` | `number \| undefined` | The workspace's **direct** member count — descendants and reach-holders excluded. Present only when `include=memberCount` is requested, on the single-workspace read or the list alike; absent otherwise, not `null` or `0`. |
+| `reasons` | `{ type, viaWorkspaceId? }[] \| undefined` | Why the caller can open the workspace: their full standing on it, one entry per grant — `owner`, `member`, `ancestor-owner` and `reach-holder`, the last two with the ancestor responsible as `viaWorkspaceId`. The same entries as the [authority read](/v8/api-reference/workspaces/fetch-authority). Present on the [list](/v8/api-reference/workspaces/fetch-workspaces), [mutual-workspaces](/v8/api-reference/workspaces/fetch-mutual-workspaces) and [single-workspace](/v8/api-reference/workspaces/fetch-workspace) reads; absent from the workspace that create, update and transfer return. |
 
 ## Ownership
 

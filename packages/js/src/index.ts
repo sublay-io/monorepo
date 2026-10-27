@@ -190,6 +190,8 @@ export type {
   WorkspaceMemberInclude,
   WorkspaceMemberIncludeArray,
   WorkspaceMemberIncludeParam,
+  WorkspaceListRelation,
+  WorkspaceListSortDir,
 } from "./interfaces/Workspace";
 export type {
   UserInclude,

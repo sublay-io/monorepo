@@ -229,6 +229,8 @@ export type {
   WorkspaceMemberInclude,
   WorkspaceMemberIncludeArray,
   WorkspaceMemberIncludeParam,
+  WorkspaceListRelation,
+  WorkspaceListSortDir,
 } from "./interfaces/Workspace";
 export type { Rule } from "./interfaces/Rule";
 export type { Follow } from "./interfaces/Follow";

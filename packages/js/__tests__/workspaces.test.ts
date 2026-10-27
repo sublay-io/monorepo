@@ -2,6 +2,7 @@ import {
   createWorkspace,
   fetchWorkspace,
   fetchManyWorkspaces,
+  fetchMutualWorkspaces,
   updateWorkspace,
   updateWorkspaceInheritFlag,
   deleteWorkspace,
@@ -71,6 +72,7 @@ describe("js-sdk workspaces — surface", () => {
         "declineWorkspaceInvite",
         "deleteWorkspace",
         "fetchManyWorkspaces",
+        "fetchMutualWorkspaces",
         "fetchMyWorkspaceInvites",
         "fetchWorkspace",
         "fetchWorkspaceAuthority",
@@ -150,6 +152,35 @@ describe("js-sdk workspaces — lifecycle request shaping", () => {
     expect(params[1].parentWorkspaceId).toBe("any");
     expect(params[2]).toMatchObject({ parentWorkspaceId: "w-parent", page: 2 });
     expect(params[3].parentWorkspaceId).toBeUndefined();
+  });
+
+  it("fetchManyWorkspaces forwards relation and sortDir, and leaves them out by default", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchManyWorkspaces(client, { relation: "direct", sortDir: "asc", parentWorkspaceId: "any" });
+    await fetchManyWorkspaces(client, { relation: "reachable", sortDir: "desc" });
+    await fetchManyWorkspaces(client, {});
+    const params = projectInstance.get.mock.calls.map((c: any[]) => c[1].params);
+    expect(params[0]).toMatchObject({ relation: "direct", sortDir: "asc", parentWorkspaceId: "any" });
+    expect(params[1]).toMatchObject({ relation: "reachable", sortDir: "desc" });
+    expect(params[2].relation).toBeUndefined();
+    expect(params[2].sortDir).toBeUndefined();
+    expectNoActorUserIdAnywhere(projectInstance);
+  });
+
+  it("fetchMutualWorkspaces puts the OTHER user's id in the path and the rest as params (no actor)", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchMutualWorkspaces(client, {
+      userId: "target1",
+      page: 2,
+      limit: 10,
+      include: ["memberCount"],
+      relation: "direct",
+      sortDir: "asc",
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/workspaces/mutual/target1", {
+      params: { page: 2, limit: 10, include: "memberCount", relation: "direct", sortDir: "asc" },
+    });
+    expectNoActorUserIdAnywhere(projectInstance);
   });
 
   it("fetchManyWorkspaces works with no args (defaults to {})", async () => {

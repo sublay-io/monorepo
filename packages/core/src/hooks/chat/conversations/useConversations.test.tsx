@@ -1,8 +1,10 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { act, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeConversationPreview } from "../../../test-utils";
-import useConversations from "./useConversations";
+import { makeProvidersWrapper } from "../../../context/testHelpers";
+import { setSocketConnected } from "../../../store/slices/chatSlice";
+import useConversations, { type UseConversationsProps } from "./useConversations";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -101,5 +103,123 @@ describe("useConversations", () => {
     const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/chat/conversations");
     expect(call.body).toEqual({ type: "group", name: "Team", memberIds: ["user-2"] });
+  });
+
+  // ── Reconnect reconciliation ────────────────────────────────────────────────
+  // `socketConnected` is written to the store by ChatProvider from the socket's
+  // own connect/disconnect events; here it is dispatched directly.
+  describe("reconnect refresh", () => {
+    function renderWithStore(props: UseConversationsProps = {}) {
+      const { Wrapper, store, axiosPrivate } = makeProvidersWrapper({
+        accessToken: "token-1",
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", {
+            conversations: [
+              makeConversationPreview({
+                id: "conversation-1",
+                lastMessageAt: "2024-01-02T00:00:00.000Z",
+                createdAt: "2024-01-01T00:00:00.000Z",
+              }),
+            ],
+            hasMore: true,
+          }),
+      });
+      const rendered = renderHook(() => useConversations(props), { wrapper: Wrapper });
+      return { ...rendered, store, axiosPrivate };
+    }
+
+    it("does not refetch on the first connect (the mount fetch already loaded page 1)", async () => {
+      const { result, store, axiosPrivate } = renderWithStore();
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(axiosPrivate.calls("get")).toHaveLength(1);
+
+      act(() => {
+        store.dispatch(setSocketConnected(true));
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(axiosPrivate.calls("get")).toHaveLength(1);
+    });
+
+    it("reloads page 1 (cursor reset, list replaced) when the socket goes disconnected → connected", async () => {
+      const { result, store, axiosPrivate } = renderWithStore({ types: ["group"] });
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      // Paginate past page 1 so a reconnect has a cursor to reset.
+      axiosPrivate.mockResponse("get", {
+        conversations: [makeConversationPreview({ id: "conversation-2" })],
+        hasMore: false,
+      });
+      await act(async () => {
+        await result.current.loadMore();
+      });
+      expect(result.current.conversations.map((c) => c.id)).toEqual([
+        "conversation-1",
+        "conversation-2",
+      ]);
+
+      act(() => {
+        store.dispatch(setSocketConnected(true));
+      });
+      act(() => {
+        store.dispatch(setSocketConnected(false));
+      });
+      // Disconnecting alone fetches nothing.
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(axiosPrivate.calls("get")).toHaveLength(2);
+
+      // While offline, a new conversation moved to the top.
+      const fresh = makeConversationPreview({ id: "conversation-3" });
+      axiosPrivate.mockResponse("get", {
+        conversations: [fresh, makeConversationPreview({ id: "conversation-1" })],
+        hasMore: true,
+      });
+      act(() => {
+        store.dispatch(setSocketConnected(true));
+      });
+
+      await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(3));
+      await waitFor(() =>
+        expect(result.current.conversations.map((c) => c.id)).toEqual([
+          "conversation-3",
+          "conversation-1",
+        ]),
+      );
+      expect(result.current.hasMore).toBe(true);
+
+      const refreshCall = axiosPrivate.calls("get")[2];
+      expect(refreshCall.url).toBe("/test-project/chat/conversations");
+      // First page: no cursor, and the `types` filter is kept.
+      expect(refreshCall.config?.params).toEqual({ limit: "20", types: "group" });
+    });
+
+    // Known bug (#225): when the hook mounts while the socket is ALREADY
+    // connected (ChatProvider at the app root, inbox screen opened later), the
+    // first disconnected → connected transition after mount is treated as the
+    // "first connect" and skipped, so events missed during that outage are never
+    // reconciled. `hasConnectedOnceRef` starts false regardless of the mount-time
+    // `socketConnected`. Turn this into a real test once the hook is fixed.
+    it.todo("reloads page 1 on the first reconnect when mounted while the socket was already connected");
+
+    it("reloads page 1 again on each later reconnect", async () => {
+      const { result, store, axiosPrivate } = renderWithStore();
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      act(() => {
+        store.dispatch(setSocketConnected(true));
+      });
+
+      for (let n = 2; n <= 3; n++) {
+        act(() => {
+          store.dispatch(setSocketConnected(false));
+        });
+        axiosPrivate.mockResponse("get", { conversations: [], hasMore: false });
+        act(() => {
+          store.dispatch(setSocketConnected(true));
+        });
+        await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(n));
+        expect(axiosPrivate.calls("get")[n - 1].config?.params).toEqual({ limit: "20" });
+      }
+    });
   });
 });

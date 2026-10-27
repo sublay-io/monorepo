@@ -109,7 +109,7 @@ describe("useConversations", () => {
   // `socketConnected` is written to the store by ChatProvider from the socket's
   // own connect/disconnect events; here it is dispatched directly.
   describe("reconnect refresh", () => {
-    function renderWithStore(props: UseConversationsProps = {}) {
+    function renderWithStore(props: UseConversationsProps = {}, { connectedAtMount = false } = {}) {
       const { Wrapper, store, axiosPrivate } = makeProvidersWrapper({
         accessToken: "token-1",
         beforeRender: ({ axiosPrivate }) =>
@@ -124,6 +124,7 @@ describe("useConversations", () => {
             hasMore: true,
           }),
       });
+      if (connectedAtMount) store.dispatch(setSocketConnected(true));
       const rendered = renderHook(() => useConversations(props), { wrapper: Wrapper });
       return { ...rendered, store, axiosPrivate };
     }
@@ -193,13 +194,24 @@ describe("useConversations", () => {
       expect(refreshCall.config?.params).toEqual({ limit: "20", types: "group" });
     });
 
-    // Known bug (#225): when the hook mounts while the socket is ALREADY
-    // connected (ChatProvider at the app root, inbox screen opened later), the
-    // first disconnected → connected transition after mount is treated as the
-    // "first connect" and skipped, so events missed during that outage are never
-    // reconciled. `hasConnectedOnceRef` starts false regardless of the mount-time
-    // `socketConnected`. Turn this into a real test once the hook is fixed.
-    it.todo("reloads page 1 on the first reconnect when mounted while the socket was already connected");
+    // ChatProvider at the app root, inbox screen opened later: the socket is
+    // already connected when the hook mounts.
+    it("reloads page 1 on the first reconnect when mounted while the socket was already connected", async () => {
+      const { result, store, axiosPrivate } = renderWithStore({}, { connectedAtMount: true });
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(axiosPrivate.calls("get")).toHaveLength(1);
+
+      act(() => {
+        store.dispatch(setSocketConnected(false));
+      });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(axiosPrivate.calls("get")).toHaveLength(1);
+
+      act(() => {
+        store.dispatch(setSocketConnected(true));
+      });
+      await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(2));
+    });
 
     it("reloads page 1 again on each later reconnect", async () => {
       const { result, store, axiosPrivate } = renderWithStore();

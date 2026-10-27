@@ -144,9 +144,10 @@ function useConversations({
   // resets to the first page — acceptable per the PRD's "self-heal" contract.
   // The *first* connect is skipped (the mount effect already loaded page 1), and
   // we only react to real connected-state changes — not `refresh` identity churn
-  // when `types` changes.
+  // when `types` changes. Mounting while already connected counts as that first
+  // connect, so the next reconnect reloads.
   const prevConnectedRef = useRef(socketConnected);
-  const hasConnectedOnceRef = useRef(false);
+  const hasConnectedOnceRef = useRef(socketConnected);
   useEffect(() => {
     const prev = prevConnectedRef.current;
     if (prev === socketConnected) return;

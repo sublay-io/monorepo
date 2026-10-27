@@ -196,4 +196,43 @@ describe("useSpaceData", () => {
 
     expect(result.current.space).toBeUndefined();
   });
+
+  // REGRESSION (#233): an inline `space` object is a fresh reference every
+  // render. Held raw in the sync effect's deps, any re-render set state, which
+  // re-rendered, which set state again: an endless loop. (Mount alone didn't
+  // loop: the first sync sets the same object the state started with.)
+  it("does not loop when re-rendered with an inline space prop", async () => {
+    const base = makeSpaceDetailed({ id: "space-1" });
+    let renders = 0;
+    const { result, rerender } = renderHookWithAxios(() => {
+      renders += 1;
+      // The old code looped synchronously; fail instead of hanging.
+      if (renders > 50) throw new Error("render loop");
+      return useSpaceData({ space: { ...base } });
+    }, { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) });
+
+    for (let i = 0; i < 3; i += 1) rerender();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    expect(renders).toBeLessThan(10);
+    expect(result.current.space).toEqual(base);
+  });
+
+  it("still takes a space prop whose content really changes", async () => {
+    const base = makeSpaceDetailed({ id: "space-1" });
+    let renders = 0;
+    const { result, rerender } = renderHookWithAxios(
+      (props: { value: string }) => {
+        renders += 1;
+        if (renders > 50) throw new Error("render loop");
+        return useSpaceData({ space: { ...base, name: props.value } });
+      },
+      { initialProps: { value: "first" }, beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+    );
+
+    rerender({ value: "second" });
+    await waitFor(() => expect(result.current.space?.name).toBe("second"));
+  });
 });

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useStableObject } from "../useStableObject";
 
 import useFetchSpace from "./useFetchSpace";
 import useFetchSpaceByShortId from "./useFetchSpaceByShortId";
@@ -270,9 +271,12 @@ function useSpaceData({
   }, [space?.id, fetchSpaceBreadcrumb]);
 
   // Update space when prop changes
+  // Stable while its content is the same, so an object created again on every
+  // render (an inline `space={{ ... }}`) isn't a change.
+  const stableSpaceProp = useStableObject(spaceProp);
   useEffect(() => {
-    if (spaceProp) setSpace(spaceProp);
-  }, [spaceProp]);
+    if (stableSpaceProp) setSpace(stableSpaceProp);
+  }, [stableSpaceProp]);
 
   return {
     space,

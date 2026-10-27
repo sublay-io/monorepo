@@ -90,6 +90,9 @@ function useFetchManyEventsWrapper(
     () => (myRsvpKey ? (myRsvpKey.split(",") as RsvpStatus[]) : undefined),
     [myRsvpKey]
   );
+  // Same for the filter objects: an inline `{ ... }` is a fresh reference every
+  // render, so the dep array carries their serialized form, not the raw objects.
+  const filtersKey = JSON.stringify([locationFilters, titleFilters, descriptionFilters]);
 
   const fetchManyEvents = useFetchManyEvents();
 
@@ -135,11 +138,9 @@ function useFetchManyEventsWrapper(
       startsAfter,
       startsBefore,
       myRsvpList,
-      locationFilters,
-      titleFilters,
-      descriptionFilters,
+      filtersKey,
       includeList,
-    ]
+    ] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const resetEvents = useCallback(async () => {

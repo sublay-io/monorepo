@@ -96,6 +96,17 @@ function useFetchManyEntitiesWrapper(
   const reputation = { spaceReputation, spaceReputationId, spaceReputationDescendants };
   const reputationKey = JSON.stringify(reputation);
 
+  // Same for the filter objects: an inline `{ ... }` is a fresh reference every
+  // render, so the dep arrays carry their serialized form, not the raw objects.
+  const filtersKey = JSON.stringify([
+    keywordsFilters,
+    titleFilters,
+    contentFilters,
+    attachmentsFilters,
+    locationFilters,
+    metadataFilters,
+  ]);
+
   // `include` is flattened to the string the wire carries, and the string —
   // never the raw value — goes into the dep arrays. An inline array is a fresh
   // reference every render; raw in a dep array it re-fires the reset effect on
@@ -183,12 +194,7 @@ function useFetchManyEntitiesWrapper(
     topCommentsLimit,
     topCommentsSortByReaction,
     followedOnly,
-    keywordsFilters,
-    titleFilters,
-    contentFilters,
-    attachmentsFilters,
-    locationFilters,
-    metadataFilters,
+    filtersKey,
     nsfwFilter,
     blockedFilter,
     reputationKey,
@@ -270,12 +276,7 @@ function useFetchManyEntitiesWrapper(
     topCommentsLimit,
     topCommentsSortByReaction,
     followedOnly,
-    keywordsFilters,
-    titleFilters,
-    contentFilters,
-    attachmentsFilters,
-    locationFilters,
-    metadataFilters,
+    filtersKey,
     nsfwFilter,
     blockedFilter,
     reputationKey,

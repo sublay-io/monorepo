@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useStableObject } from "../useStableObject";
 
 import useFetchEvent from "./useFetchEvent";
 import useUpdateEvent, { UpdateEventProps } from "./useUpdateEvent";
@@ -150,9 +151,12 @@ function useEventData(props: UseEventDataProps): UseEventDataValues {
     handleFetchEvent();
   }, [fetchEvent, eventId, includeKey, event]);
 
+  // Stable while its content is the same, so an object created again on every
+  // render (an inline `event={{ ... }}`) isn't a change.
+  const stableEventProp = useStableObject(eventProp);
   useEffect(() => {
-    if (eventProp) setEvent(eventProp);
-  }, [eventProp]);
+    if (stableEventProp) setEvent(stableEventProp);
+  }, [stableEventProp]);
 
   return {
     event,

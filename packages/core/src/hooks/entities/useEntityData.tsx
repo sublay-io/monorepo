@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useStableObject } from "../useStableObject";
 
 import useFetchEntity from "./useFetchEntity";
 import useFetchEntityByForeignId from "./useFetchEntityByForeignId";
@@ -167,9 +168,12 @@ function useEntityData({
     userId,
   ]);
 
+  // Stable while its content is the same, so an object created again on every
+  // render (an inline `entity={{ ... }}`) isn't a change.
+  const stableEntityProp = useStableObject(entityProp);
   useEffect(() => {
-    if (entityProp) setEntity(entityProp);
-  }, [entityProp]);
+    if (stableEntityProp) setEntity(stableEntityProp);
+  }, [stableEntityProp]);
 
   return {
     entity,

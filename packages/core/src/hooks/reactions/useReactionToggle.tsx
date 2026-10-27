@@ -5,6 +5,7 @@ import { ReactionType, ReactionCounts } from "../../interfaces/models/Reaction";
 import useAddReaction from "./useAddReaction";
 import useRemoveReaction from "./useRemoveReaction";
 import { handleError } from "../../utils/handleError";
+import { useStableObject } from "../useStableObject";
 
 export interface UseReactionToggleProps {
   targetType: "entity" | "comment";
@@ -41,11 +42,15 @@ function useReactionToggle({
   );
   const [loading, setLoading] = useState(false);
 
+  // Stable while its content is the same, so an object created again on every
+  // render (an inline `{ upvote: 3 }`) isn't a change.
+  const stableInitialReactionCounts = useStableObject(initialReactionCounts ?? undefined);
+
   // Reset state when target changes
   useEffect(() => {
     setCurrentReaction(initialReaction ?? null);
-    setReactionCounts(initialReactionCounts ?? {});
-  }, [targetId, initialReaction, initialReactionCounts]);
+    setReactionCounts(stableInitialReactionCounts ?? {});
+  }, [targetId, initialReaction, stableInitialReactionCounts]);
 
   const toggleReaction = useCallback(
     async (props: ToggleReactionProps): Promise<Entity | Comment | null> => {

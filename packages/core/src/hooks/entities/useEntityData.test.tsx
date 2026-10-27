@@ -215,3 +215,44 @@ describe("useEntityData — signed-in user changes", () => {
     expect(axiosPrivate.calls("get")).toHaveLength(0);
   });
 });
+
+describe("useEntityData — entity prop", () => {
+  // REGRESSION (#233): an inline `entity` object is a fresh reference every
+  // render. Held raw in the sync effect's deps, any re-render set state, which
+  // re-rendered, which set state again: an endless loop. (Mount alone didn't
+  // loop: the first sync sets the same object the state started with.)
+  it("does not loop when re-rendered with an inline entity prop", async () => {
+    const base = makeEntity({ id: "entity-1" });
+    let renders = 0;
+    const { result, rerender } = renderHookWithAxios(() => {
+      renders += 1;
+      // The old code looped synchronously; fail instead of hanging.
+      if (renders > 50) throw new Error("render loop");
+      return useEntityData({ entity: { ...base } } as UseEntityDataProps);
+    });
+
+    for (let i = 0; i < 3; i += 1) rerender();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    expect(renders).toBeLessThan(10);
+    expect(result.current.entity).toEqual(base);
+  });
+
+  it("still takes an entity prop whose content really changes", async () => {
+    const base = makeEntity({ id: "entity-1" });
+    let renders = 0;
+    const { result, rerender } = renderHookWithAxios(
+      (props: { value: string }) => {
+        renders += 1;
+        if (renders > 50) throw new Error("render loop");
+        return useEntityData({ entity: { ...base, title: props.value } } as UseEntityDataProps);
+      },
+      { initialProps: { value: "first" } },
+    );
+
+    rerender({ value: "second" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("second"));
+  });
+});

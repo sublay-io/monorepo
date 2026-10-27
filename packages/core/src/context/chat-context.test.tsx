@@ -13,6 +13,7 @@ import {
   selectThreadReplies,
   selectTypingUsers,
   selectConversationList,
+  selectSocketConnected,
   setConversationList,
   setThreadReplies,
   setUnreadSummary,
@@ -150,6 +151,86 @@ describe("ChatProvider", () => {
 
     expect(fakeSocket.removeAllListeners).toHaveBeenCalled();
     expect(fakeSocket.disconnect).toHaveBeenCalled();
+  });
+});
+
+// ─── Connection lifecycle (server-fired connect / disconnect) ────────────────
+// These paths only run when the socket itself fires "connect"/"disconnect", so
+// they are driven through the fake socket's `trigger`, not the client methods.
+describe("ChatProvider — connection lifecycle", () => {
+  const UNREAD_URL = "/test-project/chat/conversations/unread-count";
+  const unreadCalls = (axiosPrivate: { calls: (m: "get") => { url: string }[] }) =>
+    axiosPrivate.calls("get").filter((c) => c.url === UNREAD_URL);
+
+  it("a server-fired disconnect clears `connected` and the store's socketConnected", async () => {
+    const { result, store, axiosPrivate } = renderChatProvider("token-1");
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+    act(() => {
+      fakeSocket.trigger("connect");
+    });
+    expect(result.current.connected).toBe(true);
+    expect(selectSocketConnected(store.getState())).toBe(true);
+
+    act(() => {
+      fakeSocket.trigger("disconnect");
+    });
+    expect(result.current.connected).toBe(false);
+    expect(selectSocketConnected(store.getState())).toBe(false);
+    // The socket is kept (socket.io reconnects on its own) — not torn down.
+    expect(result.current.socket).toBe(fakeSocket);
+    expect(fakeSocket.disconnect).not.toHaveBeenCalled();
+  });
+
+  it("does not refetch the unread summary on the first connect (mount already fetched it)", async () => {
+    const { axiosPrivate } = renderChatProvider("token-1");
+    await waitFor(() => expect(unreadCalls(axiosPrivate)).toHaveLength(1));
+
+    act(() => {
+      fakeSocket.trigger("connect");
+    });
+
+    // Give any (wrongly) fired refetch a chance to land before asserting.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(unreadCalls(axiosPrivate)).toHaveLength(1);
+  });
+
+  it("refetches the authoritative unread summary on every reconnect after the first connect", async () => {
+    const { result, store, axiosPrivate } = renderChatProvider("token-1");
+    await waitFor(() => expect(unreadCalls(axiosPrivate)).toHaveLength(1));
+    await waitFor(() => expect(store.getState().sublay.chat.totalUnreadCount).toBe(0));
+
+    act(() => {
+      fakeSocket.trigger("connect");
+    });
+    act(() => {
+      fakeSocket.trigger("disconnect");
+    });
+    expect(result.current.connected).toBe(false);
+
+    // Messages arrived while the socket was down; the server's summary moved.
+    axiosPrivate.mockResponse("get", { totalUnread: 4, unreadConversationCount: 2 });
+    act(() => {
+      fakeSocket.trigger("connect");
+    });
+
+    expect(result.current.connected).toBe(true);
+    await waitFor(() => expect(unreadCalls(axiosPrivate)).toHaveLength(2));
+    await waitFor(() => expect(store.getState().sublay.chat.totalUnreadCount).toBe(4));
+    expect(store.getState().sublay.chat.unreadConversationCount).toBe(2);
+
+    // A later reconnect refetches again — not only the second connect.
+    act(() => {
+      fakeSocket.trigger("disconnect");
+    });
+    axiosPrivate.mockResponse("get", { totalUnread: 1, unreadConversationCount: 1 });
+    act(() => {
+      fakeSocket.trigger("connect");
+    });
+
+    await waitFor(() => expect(unreadCalls(axiosPrivate)).toHaveLength(3));
+    await waitFor(() => expect(store.getState().sublay.chat.totalUnreadCount).toBe(1));
+    expect(store.getState().sublay.chat.unreadConversationCount).toBe(1);
   });
 });
 

@@ -23,7 +23,7 @@ Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants
 <ParamField body="spaceId" type="string | null">
   UUID of the space whose bucket pays. Omitted or `null` means the project-general bucket. The reputation always lands in the recipient's bucket for the same space — reputation never crosses between the general bucket and a space bucket.
 
-  The space is validated before anything moves: an ID that names no space is rejected with `404 reputation-grant/space-not-found`, and naming a space on a project without the `spaces` bundle is rejected with `403 database/tables-not-available`.
+  The space is validated before anything moves: an ID that names no space, or a space the sender can't see (a `private` space they aren't an active member of, or one under it), is rejected with `404 reputation-grant/space-not-found`, and naming a space on a project without the `spaces` bundle is rejected with `403 database/tables-not-available`.
 </ParamField>
 
 <ParamField body="note" type="string | null">
@@ -114,7 +114,7 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
     ```json
     { "error": "The space this grant targets does not exist.", "code": "reputation-grant/space-not-found" }
     ```
-    The `spaceId` names no space in this project. Checked before any balance is touched, so nothing moves.
+    The `spaceId` names no space in this project, or one the sender can't see. Checked before any balance is touched, so nothing moves.
   </Accordion>
   <Accordion title="User Not Found — 404">
     ```json

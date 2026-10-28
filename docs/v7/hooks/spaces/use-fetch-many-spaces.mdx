@@ -11,7 +11,7 @@ icon: "plug"
 For paginated, stateful lists with load-more support, use [`useSpaceList`](/v7/hooks/space-lists/use-space-list) instead.
 
 <Note>
-  This is a discovery surface: only `public` spaces are listed. `unlisted` and `private` spaces are excluded for non-members (they stay reachable by direct link/slug). The `memberOf=true` filter is the exception — it returns the caller's own spaces regardless of visibility. See [Space visibility](/v7/data-models/space#visibility).
+  Without `parentSpaceId` (or with `parentSpaceId=null`) this is a discovery surface: only spaces that are `public` themselves and have only `public` spaces above them are listed, for every caller. With `parentSpaceId=<id>`, the list shows the direct sub-spaces of that space the caller can see that are `public` or that the caller is an active member of — so an `unlisted` sub-space appears only to its members, and a `private` one only to its active members. `memberOf=true` returns the caller's own spaces regardless of visibility. See [Space visibility](/v7/data-models/space#visibility).
 </Note>
 
 ## Usage Example
@@ -64,7 +64,7 @@ function SpaceSearch() {
 </ParamField>
 
 <ParamField path="parentSpaceId" type="string | null">
-  Filter to child spaces of a specific parent. Pass `null` for root-level spaces only.
+  Filter to child spaces of a specific parent. Pass `null` for root-level spaces only. A specific parent lists the sub-spaces the caller can see that are `public` or that the caller is an active member of.
 </ParamField>
 
 <ParamField path="nsfwFilter" type='"include-all" | "exclude" | "only"'>

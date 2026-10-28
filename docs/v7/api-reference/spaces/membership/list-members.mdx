@@ -6,7 +6,7 @@ description: "Get a paginated list of members in a space"
 
 import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
-Returns a paginated list of space members with embedded user details.
+Returns a paginated list of space members with embedded user details. A space the caller can't see (a `private` space they aren't an active member of, or a space under one) answers `404`, exactly like a nonexistent space. See [Space visibility](/v7/data-models/space#visibility).
 
 ## Path Parameters
 

@@ -4,7 +4,7 @@ api: "GET /v7/:projectId/spaces/:spaceId/rules"
 description: "Get all community rules for a space"
 ---
 
-Returns all community rules for a space, ordered by their `order` field. This endpoint is publicly accessible — no authentication is required.
+Returns all rules for a space, ordered by their `order` field. Authentication is optional. A space the caller can't see (a `private` space they aren't an active member of, or one under it) has no rules to show: the list is empty, as for a nonexistent space.
 
 ## Path Parameters
 

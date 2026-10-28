@@ -6,7 +6,7 @@ description: "Get the direct child spaces of a parent space"
 
 Returns a paginated list of child spaces for a given parent space. Authentication is optional — when provided, each child carries an `isMember` flag for the authenticated user.
 
-Only children with `visibility: "public"` are listed, for every caller. Unlike [Fetch Spaces](/v7/api-reference/spaces/fetch-spaces), authenticating does not surface unlisted or private children the caller belongs to.
+The list holds the sub-spaces the caller can see that are `public` or that the caller is an active member of, so an `unlisted` sub-space appears only to its members and a `private` one only to its active members. A parent space the caller can't see answers `404`, exactly like a nonexistent one. These are the same sub-spaces a space's `childSpaces` preview shows and its `childSpacesCount` counts. A service key that doesn't act as a user gets the `public` sub-spaces.
 
 ## Path Parameters
 

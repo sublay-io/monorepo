@@ -6,7 +6,7 @@ description: "Get all admins and moderators of a space"
 
 import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
-Returns all admins and moderators of a space in a single non-paginated response.
+Returns all admins and moderators of a space in a single non-paginated response. A space the caller can't see (a `private` space they aren't an active member of, or a space under one) answers `404`, exactly like a nonexistent space. See [Space visibility](/v7/data-models/space#visibility).
 
 ## Path Parameters
 

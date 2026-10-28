@@ -126,6 +126,7 @@ Returns `201` with the created [Event](/v7/data-models/event) object, including 
     ```json
     { "error": "Space not found", "code": "event/space-not-found" }
     ```
+    The `spaceId` names no space, or a space the creator can't see (a `private` space they aren't an active member of, or one under it). Checked before the membership check.
   </Accordion>
   <Accordion title="Not a Space Member — 403">
     ```json

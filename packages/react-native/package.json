@@ -24,14 +24,42 @@
     "react-native",
     "typescript"
   ],
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
-  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "react-native": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./push": {
+      "react-native": {
+        "types": "./dist/push.d.ts",
+        "default": "./dist/push.js"
+      },
+      "import": {
+        "types": "./dist/push.d.mts",
+        "default": "./dist/push.mjs"
+      },
+      "require": {
+        "types": "./dist/push.d.ts",
+        "default": "./dist/push.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build": "rimraf dist && pnpm run build:esm && pnpm run build:cjs",
+    "build": "tsup",
     "prepare": "pnpm run build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
@@ -42,6 +70,8 @@
   },
   "files": [
     "dist",
+    "push.js",
+    "push.d.ts",
     "NOTICE"
   ],
   "bugs": {
@@ -58,6 +88,7 @@
     "react": "^19.2.3",
     "react-native": "^0.79.7",
     "react-native-keychain": "^9.2.2",
+    "tsup": "^8.5.1",
     "typescript": "^6.0.3",
     "vitest": "^3.2.7"
   },
@@ -70,6 +101,14 @@
     "react-native": "*",
     "react-native-keychain": "^9",
     "react-redux": "^9.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@react-native-firebase/app": {
+      "optional": true
+    },
+    "@react-native-firebase/messaging": {
+      "optional": true
+    }
   },
   "repository": {
     "type": "git",

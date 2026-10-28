@@ -17,6 +17,10 @@ This is how users get into a [private space](/v8/data-models/space#visibility): 
 
 A user banned in a parent of this space can't be added either (`409 space/banned-in-parent`): a ban in a space covers every space under it.
 
+A user can't be added when there is a block between them and the caller, in either direction, or when they are suspended: `403 space/user-cannot-be-added`. The response is the same for both reasons and doesn't say which applies. Nothing is written and no notification is sent. This is checked before the cases in the table, so such a user gets this answer whatever their membership.
+
+A user who left the space can be added again.
+
 When the membership is created or becomes active, the added user gets a [`space-member-added`](/v8/data-models/app-notification) notification ("You were added to {spaceName}"). Nothing is sent when they were already an active member.
 
 ## Path Parameters
@@ -118,6 +122,12 @@ The body takes no other fields: any other field is refused with `400 space/inval
     The user in `userId` isn't a user in this project, or a service key names an `actingUserId` that isn't one. Both use the same code; the message tells them apart.
     ```json
     { "error": "User not found.", "code": "space/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="User Can't Be Added — 403">
+    There is a block between the caller (or the user named by `actingUserId`) and the user in `userId`, in either direction, or that user is suspended. The response doesn't say which.
+    ```json
+    { "error": "This user can't be added to this space.", "code": "space/user-cannot-be-added" }
     ```
   </Accordion>
   <Accordion title="Member Banned — 409">

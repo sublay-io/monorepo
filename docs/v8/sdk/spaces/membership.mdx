@@ -85,7 +85,7 @@ const addMember = useAddMember();
 await addMember({ spaceId, userId });
 ```
 
-A `pending` or `rejected` membership becomes active, and an active member is left as they are. A banned user must be unbanned first (`409 space/member-banned`); a user banned in a parent space can't be added either (`409 space/banned-in-parent`).
+A `pending` or `rejected` membership becomes active, and an active member is left as they are. A banned user must be unbanned first (`409 space/member-banned`); a user banned in a parent space can't be added either (`409 space/banned-in-parent`). A user can't be added when there is a block between them and the adder, in either direction, or when they are suspended (`403 space/user-cannot-be-added`; the response doesn't say which).
 
 ## Role Management
 

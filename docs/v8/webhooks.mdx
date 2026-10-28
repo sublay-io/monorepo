@@ -39,6 +39,8 @@ These fire after an operation completes. Your server is notified but the origina
 
 The `notification.created` event is the primary mechanism for bridging Sublay's in-app notification system to push notifications, email, or any other delivery channel your app uses.
 
+The `message.created.complete` event's `data` carries the `message`, its `sender`, the `conversationType`, and who it's for: `recipientIds` lists the conversation's active members who can see the conversation, other than the sender and anyone who had it open over a real-time connection when the message was sent. In a space chat, members who can't see the space ([visibility](/v8/data-models/space#visibility)) aren't included. Muted members are included. `recipientIds` holds at most 500 ids; `totalRecipientCount` is the full count.
+
 ### Validation Events (Blocking)
 
 These fire before an operation is committed. Sublay waits for your response. If you respond with `{ "valid": true }`, the operation proceeds. Any other response (or no response) causes the operation to be rejected.

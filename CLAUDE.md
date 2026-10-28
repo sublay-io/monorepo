@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Building
 - `pnpm run react:build-all` - Builds the react-family packages (core, react-js, react-native, expo) in dependency order
 - Individual package builds: `pnpm --filter @sublay/[package-name] run build`
-- Each package builds to ESM and CJS formats using TypeScript
+- The react family (core, react-js, react-native, expo) builds with `tsup` (each package's `tsup.config.ts`) into one bundled file per entry and format: `dist/index.js` (CJS) + `dist/index.mjs` (ESM), with `.d.ts` / `.d.mts` declarations. ui-core still builds with `tsc` (see below)
 
 ### Publishing
 Scripts are grouped by publish group, and every group carries a `{group}:` prefix — no group is the unprefixed default. There are five groups: `react`, `ui-core`, `cli`, `node`, `js`.
@@ -81,8 +81,9 @@ Entity lists have no provider: `useEntityList` keeps each list in the Redux stor
 ### Development Patterns
 
 - **Workspace Dependencies**: Packages use `workspace:*` for internal dependencies
-- **Build Process**: Each package compiles to both ESM (`dist/esm`) and CJS (`dist/cjs`) formats
-- **TypeScript**: All packages use TypeScript with separate configs for ESM/CJS builds
+- **Build Process**: The react family is bundled by `tsup` (config: `tsup.config.ts`, compiling `tsconfig.build.json`, which leaves the tests out). Every `dependencies` / `peerDependencies` package stays an import, never inlined — so react-js/react-native/expo import the one `@sublay/core` and React/Redux come from the app
+- **Package entry points**: each of the four has an `exports` map. Every entry lists `react-native` first, pointing at the CJS file, then `import` (`.mjs`) and `require` (`.js`). The `react-native` condition is load-bearing: Metro (RN 0.79+) picks `import` or `require` per call site, so without it an app that both imports and `require()`s the SDK would load two copies of core (two Redux stores/contexts); with it, Metro loads the CJS build for everything, as it always did through `main`. `exports` also blocks deep imports (`@sublay/core/dist/...`)
+- **Push adapters**: `reactNativePushTokenAdapter` / `expoPushTokenAdapter` are not in the barrels; they are the `@sublay/react-native/push` / `@sublay/expo/push` entries (`src/push.ts`), so the push libraries (`@react-native-firebase/*`, `expo-notifications`) are optional peers. The root `push.js` / `push.d.ts` files exist for tools that ignore `exports` (Metro with package exports off, TypeScript `node` resolution). Not a `push/package.json` folder: Metro reads a nested package.json before `exports` and would load the CJS file for an ESM import. `webPushTokenAdapter` stays in the `@sublay/react-js` barrel (no native dependency)
 - **Context-Hook Pattern**: UI components get state through context providers and custom hooks
 - **Platform Abstraction**: Shared core logic with platform-specific implementations
 
@@ -97,7 +98,7 @@ All social features (comments, votes, follows, lists, notifications) follow this
 
 ## `@sublay/ui-core-react-js` / `@sublay/ui-core-react-native`
 
-Presentational components the CLI registry imports: `GiphyContainer` (Giphy picker), `UserAvatar`, `Modal`, `FromNow` (relative time), `EmojiSuggestions`, `InfiniteScrollTrigger`, `Skeleton`. Both packages compile via the same dual ESM+CJS `tsc` pattern as the react family above (`tsconfig.esm.json` / `tsconfig.cjs.json`).
+Presentational components the CLI registry imports: `GiphyContainer` (Giphy picker), `UserAvatar`, `Modal`, `FromNow` (relative time), `EmojiSuggestions`, `InfiniteScrollTrigger`, `Skeleton`. Both packages compile via a dual ESM+CJS `tsc` build (`tsconfig.esm.json` / `tsconfig.cjs.json`).
 
 - `ui-core-react-js` depends on `@giphy/js-fetch-api` + `@giphy/react-components`; `ui-core-react-native` depends on `@giphy/js-fetch-api` + `expo-image` + `react-native-gesture-handler` + `react-native-svg`.
 - Both peer on `@sublay/core` and `moment`. `ui-core-react-native` also peers on `react-native` (`>=0.83.0`, which forces React 19 in every stable release — its own `react` peer is narrowed to `^19.0.0` to match, not `^18||^19`).

@@ -198,7 +198,7 @@ jobs:
         # --ignore-scripts is blocking here).
         # registry/ and playground/web/ link them through workspace:* and
         # read their dist/ type entries (every one declares
-        # "types": "dist/esm/index.d.ts"), so the next two steps cannot
+        # a "types" entry under dist/), so the next two steps cannot
         # compile without them.
         #
         # Exactly what is built and why: registry/ imports @sublay/react-js,

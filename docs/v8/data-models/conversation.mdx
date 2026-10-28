@@ -42,7 +42,7 @@ When listing conversations (e.g. in an inbox), the API returns `ConversationPrev
 |------|-------------|
 | `direct` | A private 1:1 DM between two users. Only one direct conversation can exist per user pair per project. |
 | `group` | A multi-member chat created by a user. Members can have `admin` or `member` roles. |
-| `space` | The shared chat channel for a Space. Exactly one space conversation exists per Space. Created automatically when the Space is created. |
+| `space` | The shared chat channel for a Space. Exactly one space conversation exists per Space. Created automatically when the Space is created. Only someone who can see the space can use it: a space chat in a space the caller can't see answers like a conversation they aren't in (see [Visibility](/v8/data-models/space#visibility)). |
 
 ## Related
 

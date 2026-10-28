@@ -89,7 +89,7 @@ Included in `SpaceDetailed.memberPermissions` for a viewer with a membership in 
 |-------|----------|
 | `public` | **Default.** Listed in the directory and search, and reachable by anyone who can see the space above it. |
 | `unlisted` | Not listed in the directory ([Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) across levels) or search, for anyone, and listed under its parent (sub-space lists and previews) only for its active members. Reachable by id, short id or slug by anyone who can see the space above it. Joining works as for a public space. |
-| `private` | Seen only by its **active** members. To everyone else — users with a `pending`, `banned` or `rejected` membership, other users, signed-out callers, and a service key without `actingUserId` — it answers exactly like a space that doesn't exist (`404 space/not-found`). It can't be joined; its moderators and admins [add](/v8/api-reference/spaces/membership/add-member) its members. |
+| `private` | Seen only by its **active** members. To everyone else — users with a `pending`, `banned` or `rejected` membership, other users, signed-out callers, and a service key without `actingUserId` — it answers exactly like a space that doesn't exist (`404 space/not-found`), apart from the exceptions under [Where it applies](#where-it-applies). It can't be joined; its moderators and admins [add](/v8/api-reference/spaces/membership/add-member) its members. |
 
 ### Who sees a space
 
@@ -105,10 +105,11 @@ Each space keeps its own `visibility`; nothing is changed or refused when you ne
 - **Lists across levels** — [Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) with `parentSpaceId` left out, `none` or `any`, and [space search](/v8/api-reference/search/search-spaces) — show a space only if it **and every space above it** are `public`, whoever asks.
 - **Lists under one parent** — [Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) with `parentSpaceId=<id>` and the `childSpaces` preview — show the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of. So an `unlisted` sub-space shows only to its active members, and a `private` one only to its active members. `childSpacesCount` counts exactly these sub-spaces, so it always matches what the viewer can list.
 - **[User spaces](/v8/api-reference/spaces/fetch-user-spaces)** and **[mutual spaces](/v8/api-reference/spaces/fetch-mutual-spaces)** list only spaces the viewer can see. An active membership always counts; a `pending`, `banned` or `rejected` membership of a space the user can't see is left out.
+- **Space chat** — [Get Space Conversation](/v8/api-reference/spaces/chat/get-space-conversation) is for active members only; anyone else gets `403`: `chat/not-a-member`, or `chat/membership-pending` / `chat/banned` for their own pending or banned membership. The chat routes that take a conversation id answer a space chat in a space the viewer can't see the way they answer someone who isn't in the conversation — including a former member, who otherwise keeps the history from before they left. It's also left out of the viewer's conversation list, unread count and chat-message search, and their real-time connection isn't subscribed to it when it connects or joins the conversation.
 - **Embedded spaces** — `parentSpace` on a space, and the `space` included on entities, comments and events — are `null` when the viewer can't see that space. The rest of the response is unchanged, and `parentSpaceId` / `spaceId` still name it.
 
 <Note>
-  Visibility hides the space itself. Entities, comments and other content posted inside a hidden space are not filtered out of content lists and search by the space's visibility. Creating an entity in a hidden space isn't refused either.
+  Visibility hides the space itself. Entities, comments and other content posted inside a hidden space are not filtered out of content lists and search by the space's visibility. Space chat messages are the exception (see Space chat above). Creating an entity in a hidden space isn't refused either.
 </Note>
 
 ## NSFW flagging

@@ -4,7 +4,7 @@ api: "GET /v7/:projectId/spaces/:spaceId/breadcrumb"
 description: "Get the ancestor chain of a space for breadcrumb navigation"
 ---
 
-Returns an ordered list of spaces from the root ancestor down to and including the specified space itself, suitable for breadcrumb navigation.
+Returns an ordered list of spaces from the root ancestor down to and including the specified space itself, suitable for breadcrumb navigation. Authentication is optional; the path depends on who asks. A space the caller can't see (a `private` space they aren't an active member of, or a space under one) answers `404`, exactly like a nonexistent space. See [Space visibility](/v7/data-models/space#visibility). When the caller can see the space but not every space above it (they're an active member of a `private` space nested under another `private` space they aren't in), the list starts just below the lowest space above they can't see, so it never names a hidden space and each entry is the parent of the next. `depth` is always the space's own depth.
 
 ## Path Parameters
 

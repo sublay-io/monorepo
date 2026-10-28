@@ -4,7 +4,7 @@ api: "GET /v7/:projectId/spaces/:spaceId/rules/:ruleId"
 description: "Get a single community rule by its ID"
 ---
 
-Fetches a single rule by ID. Publicly accessible.
+Fetches a single rule by ID. Authentication is optional. In a space the caller can't see (a `private` space they aren't an active member of, or one under it), the rule answers `404`, exactly like a nonexistent rule.
 
 ## Path Parameters
 

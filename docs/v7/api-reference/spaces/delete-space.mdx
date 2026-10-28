@@ -4,7 +4,7 @@ api: "DELETE /v7/:projectId/spaces/:spaceId"
 description: "Delete a space and all its associated data"
 ---
 
-Permanently deletes a space. All entities, members, child spaces, rules, and reports belonging to the space are also deleted. Only the space's **creator** (the original owner) can perform this action, and not while they are banned from the space or from a space above it. A service key can delete any space.
+Permanently deletes a space. All entities, members, child spaces, rules, and reports belonging to the space are also deleted. Only the space's **creator** (the original owner) can perform this action, and not while they are banned from the space or from a space above it. A service key can delete any space. Anyone else who can't see the space (a `private` space they aren't an active member of, or one under it) gets `404`, exactly like a nonexistent space, rather than the creator-only `403`.
 
 <Warning>This operation is irreversible. All associated data including child spaces will be permanently deleted.</Warning>
 

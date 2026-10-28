@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchUserSpaces` returns a callable function that fetches the spaces where the authenticated user has a membership (active by default). The response includes membership metadata alongside each space. Spaces of every visibility are listed, so this is the hook for a "my spaces" screen; [`useFetchManySpaces`](/v8/hooks/spaces/use-fetch-many-spaces) lists public spaces only. It can search within the user's spaces and sort them.
+`useFetchUserSpaces` returns a callable function that fetches the spaces where the authenticated user has a membership (active by default). The response includes membership metadata alongside each space. Every space the user is an active member of is listed, whatever its visibility, so this is the hook for a "my spaces" screen (a `pending`, `banned` or `rejected` membership of a space the user can't see is left out); [`useFetchManySpaces`](/v8/hooks/spaces/use-fetch-many-spaces) lists public spaces only. It can search within the user's spaces and sort them.
 
 ## Usage Example
 

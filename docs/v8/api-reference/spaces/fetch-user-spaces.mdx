@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/spaces/user-spaces"
 description: "Get the spaces a user is a member of"
 ---
 
-Returns a paginated list of spaces a user has a membership in — the signed-in user, or with a service key the user named by `actingUserId` — along with their membership details for each space. Spaces of every visibility are listed (`public`, `unlisted` and `private`), so this is the endpoint for a "my spaces" screen; [Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) lists public spaces only. By default only active memberships are returned; use `status` to list pending join requests or spaces the user was banned from. `query` searches within the user's spaces.
+Returns a paginated list of spaces a user has a membership in — the signed-in user, or with a service key the user named by `actingUserId` — along with their membership details for each space. Every space the user is an active member of is listed, whatever its visibility (`public`, `unlisted` or `private`), so this is the endpoint for a "my spaces" screen. A `pending`, `banned` or `rejected` membership of a space the user can't see (a private space, or one under a private space they aren't a member of) is left out, and doesn't count toward the total; [Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) lists public spaces only. By default only active memberships are returned; use `status` to list pending join requests or spaces the user was banned from. `query` searches within the user's spaces.
 
 ## Query Parameters
 

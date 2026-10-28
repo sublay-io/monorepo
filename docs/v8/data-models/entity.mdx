@@ -19,7 +19,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `projectId` | `string` | The project this entity belongs to. |
 | `sourceId` | `string \| null` | Groups entities by content type within a project. Useful when one project hosts multiple distinct categories of content (e.g. `"user-post"` vs `"blog-post"`), allowing you to filter and separate them without creating separate projects. `null` means no source. The strings `"none"`, `"null"` and `"undefined"` are reserved and can't be stored. |
 | `spaceId` | `string \| null` | The space this entity belongs to, if any. |
-| `space` | `Space \| null` | Populated space object when `include` contains `"space"`. |
+| `space` | `Space \| null` | Populated space object when `include` contains `"space"`; `null` when the viewer can't see the space (`spaceId` still names it). See [Space visibility](/v8/data-models/space#visibility). |
 | `userId` | `string \| null` | The author: the user whose token created it, or the user a service key named in `actingUserId`. `null` for an app-owned entity — created by a service key naming nobody, by a request with no credentials, or by [`createIfNotFound`](/v8/api-reference/entities/fetch-entity-by-foreign-id) (who may create one is the project's **Who can create entities without an author** setting) — and for a published entity whose author was deleted; only a service key naming nobody may edit or delete it. |
 | `user` | `User \| null` | The author. Populated when `include` contains `"user"`. |
 | `title` | `string \| null` | Optional title. |

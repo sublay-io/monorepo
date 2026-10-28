@@ -8,7 +8,7 @@ import { SpaceReputationParams } from "/snippets/space-reputation-params.mdx";
 
 Returns a cursor-paginated list of [ChatMessage](/v7/data-models/chat-message) objects. By default returns the main conversation stream (excludes thread replies). Pass `parentId` to fetch replies for a specific thread.
 
-The caller must be a member. Former members (who left) can only read messages up to when they left.
+The caller must be a member. Former members (who left) can only read messages up to when they left. In a space chat, the caller must also be able to see the space ([visibility](/v7/data-models/space#visibility)); otherwise the answer is `403 chat/not-a-member`, as for a non-member.
 
 ## Path Parameters
 

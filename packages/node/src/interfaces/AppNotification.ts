@@ -16,6 +16,7 @@ type AppNotificationType =
   | "connection-request"
   | "connection-accepted"
   | "space-membership-approved"
+  | "space-member-added"
   | "event-invite"
   | "event-updated"
   | "event-cancelled"
@@ -272,6 +273,19 @@ export interface SpaceMembershipApprovedNotification extends BaseAppNotification
   };
 }
 
+// A space moderator or admin added the user to the space directly.
+export interface SpaceMemberAddedNotification extends BaseAppNotification {
+  type: "space-member-added";
+  action: "open-space";
+  metadata: {
+    spaceId: string;
+    spaceName: string;
+    spaceShortId: string;
+    spaceSlug: string | null | undefined;
+    spaceAvatar: string | null | undefined;
+  };
+}
+
 export interface EventInviteNotification extends BaseAppNotification {
   type: "event-invite";
   action: "open-event";
@@ -514,6 +528,7 @@ export type UnifiedAppNotification =
   | ConnectionRequestNotification
   | ConnectionAcceptedNotification
   | SpaceMembershipApprovedNotification
+  | SpaceMemberAddedNotification
   | EventInviteNotification
   | EventUpdatedNotification
   | EventCancelledNotification

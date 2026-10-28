@@ -37,7 +37,7 @@ All fields are optional. Only provided fields are updated.
 </ParamField>
 
 <ParamField body="visibility" type="string">
-  `"public"`, `"unlisted"`, or `"private"`. Controls listing/discoverability, independent of `readingPermission`. Changes take effect immediately and are freely reversible. See [Space visibility](/v7/data-models/space#visibility).
+  `"public"`, `"unlisted"`, or `"private"`. Controls who can find and see the space, independent of `readingPermission`. `"private"` hides it, and the spaces under it, from everyone except its active members. Changes take effect immediately and are freely reversible. See [Space visibility](/v7/data-models/space#visibility).
 </ParamField>
 
 <ParamField body="requireJoinApproval" type="boolean">

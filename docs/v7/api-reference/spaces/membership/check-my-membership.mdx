@@ -4,7 +4,7 @@ api: "GET /v7/:projectId/spaces/:spaceId/membership/me"
 description: "Get the current user's membership status and permissions in a space"
 ---
 
-Returns the authenticated user's membership status and resolved permissions in a space. Returns membership info even for `pending` or `banned` states.
+Returns the authenticated user's membership status and resolved permissions in a space. Returns membership info even for `pending` or `banned` states. Without any membership row, a space the user can't see (a `private` space, or one under it) answers `404`, exactly like a nonexistent space. A service key asks about the user it names in `userId`.
 
 ## Path Parameters
 

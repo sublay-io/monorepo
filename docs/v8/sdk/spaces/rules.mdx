@@ -1,13 +1,13 @@
 ---
 title: "Rules"
-description: "Create and manage community rules visible to all space members"
+description: "Create and manage a space's rules"
 ---
 
-Spaces can define community rules — titled and optionally described guidelines that are publicly visible to all users. Rules are ordered and can be reordered by admins. They are read-only for regular members.
+Spaces can define rules — titled and optionally described guidelines that anyone who can see the space can read. Rules are ordered and can be reordered by admins. They are read-only for regular members.
 
 ## Fetching Rules
 
-Rules are publicly readable without authentication:
+Rules are readable without authentication. The rules of a space the user can't see (a private space they aren't an active member of, or a space under one) are answered `404 space/not-found`:
 
 ```tsx
 import { useFetchManyRules, useFetchRule } from "@sublay/react-js";

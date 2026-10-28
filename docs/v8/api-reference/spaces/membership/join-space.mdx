@@ -6,6 +6,8 @@ description: "Join a space or submit a membership request"
 
 Joins a space. If the space has `requireJoinApproval: true`, the membership is created with `status: "pending"` until approved. Otherwise it is immediately `active`.
 
+A private space can't be joined and takes no join requests: joining a space the user can't see answers `404 space/not-found`, like a space that doesn't exist. A private space's moderators and admins [add](/v8/api-reference/spaces/membership/add-member) its members instead. See [Space visibility](/v8/data-models/space#visibility).
+
 ## Path Parameters
 
 <ParamField path="spaceId" type="string" required>
@@ -92,6 +94,7 @@ Joins a space. If the space has `requireJoinApproval: true`, the membership is c
     ```
   </Accordion>
   <Accordion title="Space Not Found — 404">
+    The space doesn't exist, or the viewer can't see it (a private space they aren't an active member of, or a space under one). Both answer the same way, before any permission check. See [Space visibility](/v8/data-models/space#visibility).
     ```json
     { "error": "Space not found.", "code": "space/not-found" }
     ```
@@ -106,9 +109,18 @@ Joins a space. If the space has `requireJoinApproval: true`, the membership is c
     ```
   </Accordion>
   <Accordion title="Already a Member — 409">
+    The user already has an active membership, or a pending request; `membership` is that membership.
     ```json
-    { "error": "You are already a member of this space.", "code": "space/already-member" }
+    { "error": "You are already a member of this space.", "code": "space/already-member", "membership": { "…": "…" } }
     ```
+    ```json
+    { "error": "You already have a pending membership request.", "code": "space/already-member", "membership": { "…": "…" } }
+    ```
+    Also returned when the user's membership was written or changed by another request while this one ran (a parallel join, or a moderator adding them); the message then names the membership's current state, or asks to try again.
+    ```json
+    { "error": "Your membership changed meanwhile. Try again.", "code": "space/already-member" }
+    ```
+    A ban that lands meanwhile answers `403 space/banned` instead.
   </Accordion>
 </AccordionGroup>
 

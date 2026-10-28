@@ -45,7 +45,7 @@ A user's reputation lives in [buckets](/v8/data-models/reputation) — one per s
 - The general bucket is its own lane. Reputation cannot move between the general bucket and a space bucket in either direction.
 - Consequently, the total reputation held within a given space is unchanged by a transfer — it only changes hands.
 
-The named space must exist. Both write paths check it before touching a balance — an unknown `spaceId` is rejected with `404 reputation-grant/space-not-found`, and naming a space on a project without the `spaces` bundle with `403 database/tables-not-available`. Without that check a grant could fund a bucket for a space that does not exist: its score would still count toward its owner's profile total while being invisible in every space-scoped view.
+The named space must exist. Both write paths check it before touching a balance — an unknown `spaceId` is rejected with `404 reputation-grant/space-not-found` (on a transfer, so is a space the sender can't see), and naming a space on a project without the `spaces` bundle with `403 database/tables-not-available`. Without that check a grant could fund a bucket for a space that does not exist: its score would still count toward its owner's profile total while being invisible in every space-scoped view.
 
 A transfer is rejected unless the source bucket holds at least the amount, evaluated at the moment of the transfer. A mint has no source, so it may drive a bucket below zero (buckets have no floor — downvotes can already take one negative).
 

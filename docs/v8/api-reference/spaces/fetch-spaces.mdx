@@ -7,7 +7,7 @@ description: "Get a paginated list of public spaces with filtering and sorting"
 Fetches a paginated list of public spaces: the space directory. By default it lists top-level spaces (spaces with no parent); the `parentSpaceId` filter lists a space's sub-spaces or every level instead. Supports text search. Authentication is optional; when there is a viewer (the signed-in user, or the user a service key names in `actingUserId`), each space carries their `isMember` flag.
 
 <Note>
-  This is a discovery surface: only `public` spaces are listed, for every caller. Spaces with `visibility` of `"unlisted"` or `"private"` are never listed here, not even to their members (they stay reachable by direct link via [Fetch Space by Slug](/v8/api-reference/spaces/fetch-space-by-slug) or [by Short ID](/v8/api-reference/spaces/fetch-space-by-short-id)). To list the spaces a user is a member of, whatever their visibility, use [Fetch User Spaces](/v8/api-reference/spaces/fetch-user-spaces). See [Space visibility](/v8/data-models/space#visibility).
+  Across levels (`parentSpaceId` left out, `none` or `any`) this is a discovery surface: a space is listed only if it **and every space above it** are `public`, for every caller. Under one parent (`parentSpaceId=<id>`) the list holds the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of — the same sub-spaces that space's `childSpaces` preview shows and its `childSpacesCount` counts. So an `unlisted` sub-space appears only to its active members, and a `private` one only to its active members. To list the spaces a user is a member of, whatever their visibility, use [Fetch User Spaces](/v8/api-reference/spaces/fetch-user-spaces). See [Space visibility](/v8/data-models/space#visibility).
 </Note>
 
 ## Query Parameters
@@ -43,7 +43,7 @@ Fetches a paginated list of public spaces: the space directory. By default it li
 <ParamField query="parentSpaceId" type="string">
   Which level of the space tree to list:
   - Left out, sent empty, or `none`: top-level spaces only (spaces with no parent). This is the default.
-  - A space id: that space's public direct sub-spaces. This is how to page through a space's sub-spaces (add `sortBy=alphabetical` to order them A–Z by name). An id that matches no space returns an empty page, not a 404.
+  - A space id: that space's direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of. This is how to page through a space's sub-spaces (add `sortBy=alphabetical` to order them A–Z by name). An id that matches no space returns an empty page, not a 404.
   - `any`: spaces at every level.
 
   `null` and `undefined` are refused with `400 space/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). `none` and `any` match exactly (`ANY` is refused). Any other value that isn't a space id returns `400 space/invalid-query`.

@@ -4,7 +4,7 @@ api: "POST /v7/:projectId/spaces/:spaceId/join"
 description: "Join a space or submit a membership request"
 ---
 
-Joins a space. If the space has `requireJoinApproval: true`, the membership is created with `status: "pending"` until approved. Otherwise it is immediately `active`.
+Joins a space. If the space has `requireJoinApproval: true`, the membership is created with `status: "pending"` until approved. Otherwise it is immediately `active`. A space the joining user can't see (a `private` space they aren't an active member of, or a space under one) answers `404`, exactly like a nonexistent space. See [Space visibility](/v7/data-models/space#visibility). That includes a `private` space's pending, banned and rejected members: a `private` space can't be joined, and people get into it only by already being active members. A service key joins the user it names in `userId`, and that user's view applies.
 
 ## Path Parameters
 

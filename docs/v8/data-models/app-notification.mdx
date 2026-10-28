@@ -238,6 +238,14 @@ Triggered when a space moderator approves the user's pending membership request.
 | `spaceSlug` | `string \| null \| undefined` | URL slug of the space. |
 | `spaceAvatar` | `string \| null \| undefined` | Avatar URL of the space. |
 
+### `space-member-added`
+
+Triggered when a space moderator or admin [adds the user to the space](/v8/api-reference/spaces/membership/add-member) directly. Not sent when the user was already an active member.
+
+**Action**: `"open-space"`
+
+Same metadata fields as `space-membership-approved`.
+
 ### `event-invite`
 
 Triggered when someone invites the user to an event.

@@ -75,7 +75,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 <ParamField query="include" type="string">
   Associations to expand, as a comma-separated value (`include=user,space`) or repeated params. Values:
   - `user` — the creator's user profile
-  - `space` — the space the event belongs to
+  - `space` — the space the event belongs to (`null` when the viewer can't see that space; see [Space visibility](/v8/data-models/space#visibility))
   - `files` — the cover and gallery file objects
   - `userRsvp` — the caller's own RSVP status (needs a viewer; otherwise `null`)
 

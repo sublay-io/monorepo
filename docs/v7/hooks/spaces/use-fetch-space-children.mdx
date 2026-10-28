@@ -10,8 +10,7 @@ icon: "plug"
 
 <Note>
   Authentication is optional. When the caller is signed in, each child carries
-  an `isMember` flag. Only children with `visibility: "public"` are listed for
-  every caller — signing in does not surface unlisted or private children.
+  an `isMember` flag. The list holds the sub-spaces the caller can see that are `public` or that the caller is an active member of, so an `unlisted` sub-space appears only to its members and a `private` one only to its active members. A parent space the caller can't see answers `404`, exactly like a nonexistent one. These are the same sub-spaces a space's `childSpaces` preview shows and its `childSpacesCount` counts.
 </Note>
 
 ## Usage Example

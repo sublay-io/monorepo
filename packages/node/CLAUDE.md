@@ -160,13 +160,13 @@ A user's mutual connections and pending requests. All take `actingUserId`.
 
 `fetchConnections`, `fetchConnectionsCount`, `fetchSentPendingConnections`, `fetchReceivedPendingConnections`, `acceptConnection`, `declineConnection`, `removeConnection`
 
-### 8. Spaces Module (31 functions)
+### 8. Spaces Module (32 functions)
 
 Space lifecycle, membership, moderation, and rules — documented across three pages (`spaces`, `spaces-members`, `spaces-moderation`).
 
 Lifecycle: `createSpace`, `fetchManySpaces`, `fetchSpace`, `fetchSpaceByShortId`, `fetchSpaceBySlug`, `fetchUserSpaces`, `checkSlugAvailability`, `updateSpace`, `deleteSpace`, `fetchSpaceBreadcrumb`
 
-Members: `joinSpace`, `leaveSpace`, `checkMyMembership`, `fetchSpaceMembers`, `fetchSpaceTeam`, `updateMemberRole`, `approveMembership`, `declineMembership`, `banMember`, `unbanMember`
+Members: `joinSpace`, `leaveSpace`, `checkMyMembership`, `fetchSpaceMembers`, `fetchSpaceTeam`, `updateMemberRole`, `addMember`, `approveMembership`, `declineMembership`, `banMember`, `unbanMember`
 
 Moderation/rules: `handleEntityReport`, `handleCommentReport` (both take an `actions` array), `moderateSpaceEntity`, `moderateSpaceComment`, `fetchManyRules`, `fetchRule`, `createRule`, `updateRule`, `deleteRule`, `reorderRules`
 

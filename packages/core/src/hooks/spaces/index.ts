@@ -44,6 +44,8 @@ export { default as useUpdateMemberRole } from "./useUpdateMemberRole";
 export type { UpdateMemberRoleProps } from "./useUpdateMemberRole";
 export { default as useApproveMember } from "./useApproveMember";
 export type { ApproveMemberProps } from "./useApproveMember";
+export { default as useAddMember } from "./useAddMember";
+export type { AddMemberProps } from "./useAddMember";
 export { default as useDeclineMember } from "./useDeclineMember";
 export type { DeclineMemberProps } from "./useDeclineMember";
 export { default as useBanMember } from "./useBanMember";

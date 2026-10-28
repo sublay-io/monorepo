@@ -1,4 +1,5 @@
 import {
+  addMember,
   approveMembership,
   banMember,
   checkMyMembership,
@@ -91,6 +92,32 @@ describe("js-sdk spaces (membership) — request shaping", () => {
       "/spaces/s1/members/m1/role",
       { role: "moderator" }
     );
+  });
+
+  it("addMember posts the target userId to /spaces/:id/members (no actingUserId — actor derived from token)", async () => {
+    const { client, projectInstance } = makeClient();
+    await addMember(client, { spaceId: "s1", userId: "u-target" });
+    expect(projectInstance.post).toHaveBeenCalledWith("/spaces/s1/members", {
+      userId: "u-target",
+    });
+  });
+
+  it("addMember returns the AddMemberResponse", async () => {
+    const { client, projectInstance } = makeClient();
+    const result = {
+      message: "User added to the space.",
+      membership: {
+        id: "m1",
+        spaceId: "s1",
+        userId: "u-target",
+        role: "member",
+        status: "active",
+        joinedAt: "2026-01-01T00:00:00.000Z",
+        createdAt: "2026-01-01T00:00:00.000Z",
+      },
+    };
+    projectInstance.post.mockResolvedValueOnce({ data: result });
+    await expect(addMember(client, { spaceId: "s1", userId: "u-target" })).resolves.toEqual(result);
   });
 
   it("approveMembership patches the approve route for the memberId target with no body", async () => {

@@ -11,7 +11,7 @@ Returns state and a `search` function for finding spaces by natural language que
 For integration guidance, see [Semantic Search](/v8/sdk/search/semantic-search).
 
 <Note>
-  Only `public` spaces are returned. `unlisted` and `private` spaces are never surfaced in search results for non-members. Hidden spaces stay indexed but filtered out, so re-listing a space (setting it back to `"public"`) makes it searchable again immediately. See [Space visibility](/v8/data-models/space#visibility).
+  Only spaces that are `public`, with every space above them `public` too, are returned, whoever searches. `unlisted` and `private` spaces, and every space under one, are never surfaced in search results. Hidden spaces stay indexed but filtered out, so re-listing a space (setting it back to `"public"`) makes it searchable again immediately. See [Space visibility](/v8/data-models/space#visibility).
 </Note>
 
 ## Usage Example

@@ -8,6 +8,7 @@ import {
   ConnectionAcceptedTemplateVars,
   ConnectionRequestTemplateVars,
   SpaceMembershipApprovedTemplateVars,
+  SpaceMemberAddedTemplateVars,
   EventInviteTemplateVars,
   EventUpdatedTemplateVars,
   EventCancelledTemplateVars,
@@ -355,6 +356,21 @@ export default (
           `Your request to join $spaceName has been approved`,
           ``,
           notificationTemplates?.spaceMembershipApproved
+        ));
+        break;
+      }
+
+      case "space-member-added": {
+        const vars: SpaceMemberAddedTemplateVars = {
+          spaceName: notification.metadata.spaceName || "",
+          spaceShortId: notification.metadata.spaceShortId || "",
+          spaceSlug: notification.metadata.spaceSlug || "",
+        };
+        ({ title, content } = configureMessage(
+          vars,
+          `You were added to $spaceName`,
+          ``,
+          notificationTemplates?.spaceMemberAdded
         ));
         break;
       }

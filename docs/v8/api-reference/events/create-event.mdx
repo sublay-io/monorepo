@@ -161,6 +161,7 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     ```
   </Accordion>
   <Accordion title="Space Not Found — 404">
+    The `spaceId` names no space, or one the creator can't see (a private space they aren't an active member of, or a space under one). Checked before the membership check. See [Space visibility](/v8/data-models/space#visibility).
     ```json
     { "error": "Space not found", "code": "event/space-not-found" }
     ```

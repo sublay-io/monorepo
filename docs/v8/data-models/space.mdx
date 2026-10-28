@@ -28,7 +28,7 @@ The API returns three space shapes depending on context:
 | `bannerFile` | `File \| undefined` | Populated banner file object. Only present when `include: "files"` is requested. |
 | `readingPermission` | `"anyone" \| "members"` | Who can read content in the space. |
 | `postingPermission` | `"anyone" \| "members" \| "admins"` | Who can post content in the space. |
-| `visibility` | `"public" \| "unlisted" \| "private"` | Controls whether the space is *listed and discoverable* — independent of `readingPermission`, which controls who can read the content. `public` (the default) is listed in discovery and search; `unlisted` is hidden from discovery and search for non-members but still reachable by direct link/slug; `private` currently behaves exactly like `unlisted` (full existence-hiding is planned but not yet implemented). See [Visibility](#visibility) below. |
+| `visibility` | `"public" \| "unlisted" \| "private"` | Who can find and see the space — independent of `readingPermission`, which controls who can read the content. `public` (the default) is listed in the directory and search; `unlisted` isn't listed but is reachable by id, short id or slug; `private` is seen only by its active members, and answers `404` to everyone else. See [Visibility](#visibility) below. |
 | `nsfw` | `boolean` | The space's **own** NSFW flag. `false` by default. Set by space admins on [create](/v8/hooks/spaces/use-create-space)/[update](/v8/hooks/spaces/use-update-space) or by a project admin from the dashboard. See [NSFW flagging](#nsfw-flagging). |
 | `nsfwEffective` | `boolean` | **Denormalized, read-only.** `true` when this space's own `nsfw` is `true` **or** any ancestor space is NSFW. Maintained top-down on write and cascaded to descendants. This is the value the space `nsfwFilter` keys off, and it feeds each entity's live `nsfwEffective`. See [NSFW flagging](#nsfw-flagging). |
 | `requireJoinApproval` | `boolean` | Whether joining requires moderator/admin approval. When `true`, new joins enter `pending` status. |
@@ -37,7 +37,7 @@ The API returns three space shapes depending on context:
 | `metadata` | `Record<string, any>` | Arbitrary key-value data attached to the space. Up to 1 MB. |
 | `isMember` | `boolean \| undefined` | Whether the viewer is a member of this space. Only present when there is a viewer: the signed-in user, or the user a service key names in `actingUserId`. |
 | `membersCount` | `number` | Computed count of active members. |
-| `childSpacesCount` | `number` | Computed count of direct child spaces. |
+| `childSpacesCount` | `number` | Computed count of the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of — the same sub-spaces `childSpaces` and `parentSpaceId=<id>` list (see [Visibility](#visibility)). |
 | `createdAt` | `Date` | Timestamp when the space was created. |
 | `updatedAt` | `Date` | Timestamp when the space was last updated. |
 
@@ -48,8 +48,8 @@ Returned when fetching a single space by ID, shortId, or slug. Includes all `Spa
 | Property | Type | Description |
 |----------|------|-------------|
 | `memberPermissions` | `SpaceMemberPermissions \| null` | The viewer's resolved permissions in this space (the signed-in user, or the user a service key names in `actingUserId`). `null` if the user has no membership in this space. A pending, banned or rejected user gets it with `isMember: false` and their `status`. |
-| `parentSpace` | `SpacePreview \| null` | Preview of the parent space. `null` for root-level spaces. |
-| `childSpaces` | `SpacePreview[]` | Preview of up to 10 immediate child spaces. |
+| `parentSpace` | `SpacePreview \| null` | Preview of the parent space. `null` for root-level spaces, and when the viewer can't see the parent (`parentSpaceId` still names it). |
+| `childSpaces` | `SpacePreview[]` | Preview of up to 10 immediate child spaces, A–Z by name: the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of. |
 
 ## SpacePreview
 
@@ -83,19 +83,34 @@ Included in `SpaceDetailed.memberPermissions` for a viewer with a membership in 
 
 ## Visibility
 
-`visibility` is a distinct axis from `readingPermission`. **Visibility governs whether the space object is *listed and discoverable*; reading permission governs who can *read the content* inside it.** The two are fully independent — you can have a `public` space that only members can read, or an `unlisted` space that anyone can read once they have the link.
+`visibility` is a distinct axis from `readingPermission`. **Visibility governs who can find and see the space; reading permission governs who can *read the content* inside it.** You can have a `public` space that only members can read, or an `unlisted` space that anyone can read once they have the link.
 
 | Value | Behavior |
 |-------|----------|
-| `public` | **Default.** Listed in discovery and search, and resolvable by anyone. Matches all prior behavior. |
-| `unlisted` | Excluded from the space directory ([Fetch Spaces](/v8/api-reference/spaces/fetch-spaces)) for everyone, and from search for non-members, but still reachable by direct link/slug. Joining works exactly as before (governed by the existing join/approval rules). |
-| `private` | Reserved for a future stage where the space's existence and metadata are hidden from non-members. **In this release, `private` behaves exactly like `unlisted`** — full existence-hiding is not yet implemented. |
+| `public` | **Default.** Listed in the directory and search, and reachable by anyone who can see the space above it. |
+| `unlisted` | Not listed in the directory ([Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) across levels) or search, for anyone, and listed under its parent (sub-space lists and previews) only for its active members. Reachable by id, short id or slug by anyone who can see the space above it. Joining works as for a public space. |
+| `private` | Seen only by its **active** members. To everyone else — users with a `pending`, `banned` or `rejected` membership, other users, signed-out callers, and a service key without `actingUserId` — it answers exactly like a space that doesn't exist (`404 space/not-found`), apart from the exceptions under [Where it applies](#where-it-applies). It can't be joined; its moderators and admins [add](/v8/api-reference/spaces/membership/add-member) its members. |
+
+### Who sees a space
+
+A viewer — the signed-in user, or the user a service key names in `actingUserId` — sees a space when they are an active member of it, **or** when it isn't `private` and they can see the space above it. A top-level space that isn't `private` is seen by everyone.
+
+So a private space hides everything under it from non-members, whatever those spaces' own visibility. A member of a sub-space still sees that sub-space (and the non-private spaces under it) even when they can't see a private space above it; they don't see that private space.
+
+Each space keeps its own `visibility`; nothing is changed or refused when you nest spaces. Visibility changes take effect immediately and are freely reversible.
+
+### Where it applies
+
+- **Single reads** of a space the viewer can't see answer `404 space/not-found` — [by id](/v8/api-reference/spaces/fetch-space), [short id](/v8/api-reference/spaces/fetch-space-by-short-id) and [slug](/v8/api-reference/spaces/fetch-space-by-slug) — and so do its [breadcrumb](/v8/api-reference/spaces/fetch-breadcrumb), [rules](/v8/api-reference/spaces/rules/list-rules), [members](/v8/api-reference/spaces/membership/list-members), [team](/v8/api-reference/spaces/membership/list-team), [join](/v8/api-reference/spaces/membership/join-space), [delete](/v8/api-reference/spaces/delete-space), the moderator and admin actions, creating a sub-space in it (`404 space/parent-not-found`), and creating an event in it (`404 event/space-not-found`). The `404` comes before any permission check, so it never confirms the space exists. [Check my membership](/v8/api-reference/spaces/membership/check-my-membership) is the exception: a user with any membership in the space gets it back.
+- **Lists across levels** — [Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) with `parentSpaceId` left out, `none` or `any`, and [space search](/v8/api-reference/search/search-spaces) — show a space only if it **and every space above it** are `public`, whoever asks.
+- **Lists under one parent** — [Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) with `parentSpaceId=<id>` and the `childSpaces` preview — show the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of. So an `unlisted` sub-space shows only to its active members, and a `private` one only to its active members. `childSpacesCount` counts exactly these sub-spaces, so it always matches what the viewer can list.
+- **[User spaces](/v8/api-reference/spaces/fetch-user-spaces)** and **[mutual spaces](/v8/api-reference/spaces/fetch-mutual-spaces)** list only spaces the viewer can see. An active membership always counts; a `pending`, `banned` or `rejected` membership of a space the user can't see is left out.
+- **Space chat** — [Get Space Conversation](/v8/api-reference/spaces/chat/get-space-conversation) is for active members only; anyone else gets `403`: `chat/not-a-member`, or `chat/membership-pending` / `chat/banned` for their own pending or banned membership. The chat routes that take a conversation id answer a space chat in a space the viewer can't see the way they answer someone who isn't in the conversation — including a former member, who otherwise keeps the history from before they left. It's also left out of the viewer's conversation list, unread count and chat-message search, their real-time connection isn't subscribed to it when it connects or joins the conversation, and they get no push notifications for its new messages. Reporting a message in it, or a reputation grant on one, answers them the same way it answers someone who isn't in the conversation.
+- **Embedded spaces** — `parentSpace` on a space, and the `space` included on entities, comments and events — are `null` when the viewer can't see that space. The rest of the response is unchanged, and `parentSpaceId` / `spaceId` still name it.
 
 <Note>
-  `unlisted` is **not access control.** It only affects discoverability — it does not restrict who can read the content inside the space. To gate content, use `readingPermission`.
+  Visibility hides the space itself. Entities, comments and other content posted inside a hidden space are not filtered out of content lists and search by the space's visibility. Space chat messages are the exception (see Space chat above). Creating an entity in a hidden space isn't refused either.
 </Note>
-
-Visibility can be set on [create](/v8/api-reference/spaces/create-space) and [update](/v8/api-reference/spaces/update-space), and changes take effect immediately and are freely reversible in both directions. A member of a space always continues to see it in surfaces that list their own spaces ([user spaces](/v8/api-reference/spaces/fetch-user-spaces) and mutual spaces) regardless of its visibility.
 
 ## NSFW flagging
 

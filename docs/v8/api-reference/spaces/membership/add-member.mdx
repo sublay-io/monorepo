@@ -1,0 +1,147 @@
+---
+title: "Add Member"
+api: "POST /v8/:projectId/spaces/:spaceId/members"
+description: "Add a user to a space directly"
+---
+
+Makes a user an active member of the space at once. There is no request and no approval step: the user is a member as soon as this returns. The caller must be an active moderator or admin of the space.
+
+This is how users get into a [private space](/v8/data-models/space#visibility): a private space can't be joined, so its moderators and admins add its members.
+
+| The user's membership before | Result | Status |
+|---|---|---|
+| None | A new active membership with role `member` | `201` |
+| `pending` or `rejected` | Becomes active, with role `member` | `200` |
+| `active` | Nothing changes; the existing membership is returned | `200` |
+| `banned` | Refused: unban them first | `409 space/member-banned` |
+
+A user banned in a parent of this space can't be added either (`409 space/banned-in-parent`): a ban in a space covers every space under it.
+
+A user can't be added when there is a block between them and the caller, in either direction, or when they are suspended: `403 space/user-cannot-be-added`. The response is the same for both reasons and doesn't say which applies. Nothing is written and no notification is sent. This is checked before the cases in the table, so such a user gets this answer whatever their membership.
+
+A user who left the space can be added again.
+
+When the membership is created or becomes active, the added user gets a [`space-member-added`](/v8/data-models/app-notification) notification ("You were added to {spaceName}"). Nothing is sent when they were already an active member.
+
+## Path Parameters
+
+<ParamField path="spaceId" type="string" required>
+  UUID of the space.
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="userId" type="string" required>
+  UUID of the user to add.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Required with a service key: the user this request acts as. The request has exactly that user's permissions, so it is refused unless they are an active moderator or admin of the space, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 space/acting-user-not-allowed`).
+</ParamField>
+
+The body takes no other fields: any other field is refused with `400 space/invalid-body`.
+
+## Response
+
+<ResponseField name="message" type="string">
+  `"User added to the space."`, or `"User is already a member of this space."` when nothing changed.
+</ResponseField>
+
+<ResponseField name="membership" type="object">
+  The user's membership.
+
+  <Expandable title="properties">
+    <ResponseField name="id" type="string">Membership id.</ResponseField>
+    <ResponseField name="spaceId" type="string">The space.</ResponseField>
+    <ResponseField name="userId" type="string">The added user.</ResponseField>
+    <ResponseField name="role" type="'admin' | 'moderator' | 'member'">`member` for a user just added. A user who was already an active member keeps their role.</ResponseField>
+    <ResponseField name="status" type="'active'">Always `active`.</ResponseField>
+    <ResponseField name="joinedAt" type="string">When the membership became active (ISO 8601).</ResponseField>
+    <ResponseField name="createdAt" type="string">When the membership record was created (ISO 8601).</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Errors
+
+<AccordionGroup>
+  <Accordion title="Invalid Id — 400">
+    Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
+    ```json
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "space/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Wrong Location — 400">
+    `userId` or `actingUserId` was sent in the query string. On this endpoint every field goes in the request body.
+    ```json
+    { "error": "`userId` goes in the request body on this endpoint.", "code": "space/wrong-location", "param": "userId" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Body — 400">
+    `userId` is missing or isn't a UUID, or the body has a field this endpoint doesn't take.
+    ```json
+    { "error": "…", "code": "space/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Space Not Found — 404">
+    The space doesn't exist, or the caller can't see it (a private space they aren't an active member of, or a space under one). Both answer the same way, before any permission check.
+    ```json
+    { "error": "Space not found", "code": "space/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Not a Moderator — 403">
+    The caller (or the user named by `actingUserId`) is not an active moderator or admin of the space.
+    ```json
+    { "error": "Moderator access required", "code": "space/moderator-required" }
+    ```
+  </Accordion>
+  <Accordion title="Suspended — 403">
+    The caller (or the user named by `actingUserId`) is suspended.
+    ```json
+    { "error": "This account is suspended and cannot perform this action.", "code": "user/suspended", "reason": null, "endDate": null }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    The user in `userId` isn't a user in this project, or a service key names an `actingUserId` that isn't one. Both use the same code; the message tells them apart.
+    ```json
+    { "error": "User not found.", "code": "space/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="User Can't Be Added — 403">
+    There is a block between the caller (or the user named by `actingUserId`) and the user in `userId`, in either direction, or that user is suspended. The response doesn't say which.
+    ```json
+    { "error": "This user can't be added to this space.", "code": "space/user-cannot-be-added" }
+    ```
+  </Accordion>
+  <Accordion title="Member Banned — 409">
+    The user is banned from this space. Unban them first ([Unban Member](/v8/api-reference/spaces/membership/unban-member)), then add them.
+    ```json
+    { "error": "This user is banned from this space. Unban them first.", "code": "space/member-banned" }
+    ```
+  </Accordion>
+  <Accordion title="Banned in a Parent Space — 409">
+    The user is banned in a parent of this space; `bannedSpaceIds` lists where, nearest first.
+    ```json
+    { "error": "This user is banned in a parent of this space. Lift that ban first.", "code": "space/banned-in-parent", "bannedSpaceIds": ["…"] }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+See also: [useAddMember](/v8/hooks/spaces/use-add-member)

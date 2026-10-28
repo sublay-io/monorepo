@@ -27,7 +27,7 @@ Events belong to the `events` bundle. They work standalone, but some behaviors d
 | `address` | `string \| null` | Street address. Required (with or instead of `location`) for `physical` and `hybrid` events. |
 | `location` | `{ type: "Point"; coordinates: [number, number] } \| null` | GeoJSON point as `[longitude, latitude]` (PostGIS). Set from the `latitude`/`longitude` you pass on create/update. Powers proximity search. |
 | `spaceId` | `string \| null` | Optional soft reference to a Space. Required when `visibility` is `"members"`. No enforced cross-bundle FK. |
-| `space` | `Space \| null` | Populated space object. Only present when `include` contains `"space"`. |
+| `space` | `Space \| null` | Populated space object. Only present when `include` contains `"space"`; `null` when the viewer can't see the space (`spaceId` still names it). See [Space visibility](/v8/data-models/space#visibility). |
 | `visibility` | `"public" \| "members" \| "invite"` | Who can see the event. See [Visibility](#visibility) below. Defaults to `"public"`. |
 | `status` | `"active" \| "cancelled"` | Lifecycle status. A cancelled event stays fetchable but rejects new RSVPs. Defaults to `"active"`. |
 | `allowMaybe` | `boolean` | Whether a `"maybe"` RSVP is permitted. Defaults to `true`. |

@@ -29,6 +29,7 @@ const SERVER_PUSH_EVENT_TYPES = [
   "connection-request",
   "connection-accepted",
   "space-membership-approved",
+  "space-member-added",
   "event-invite",
   "event-updated",
   "event-cancelled",

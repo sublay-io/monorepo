@@ -3,7 +3,7 @@ title: "Space Lists"
 description: "Browse, search, and paginate spaces with filtering and sorting"
 ---
 
-The `useSpaceList` hook provides a Redux-backed, paginated list of spaces with support for filtering, sorting, and search. It lists public spaces only (the space directory), for discovery and browse pages. For the spaces the current user is a member of, see [My spaces](#my-spaces) below.
+The `useSpaceList` hook provides a Redux-backed, paginated list of spaces with support for filtering, sorting, and search. It lists the space directory, for discovery and browse pages. For the spaces the current user is a member of, see [My spaces](#my-spaces) below.
 
 ## Basic Usage
 
@@ -48,7 +48,7 @@ fetchSpaces({ sortBy: "createdAt", query: "gaming", searchFields: "name" });
 // Search the slug, name and description (null clears a searchFields set by an earlier call)
 fetchSpaces({ sortBy: "createdAt", query: "design", searchFields: null });
 
-// A space's public sub-spaces, A–Z
+// A space's sub-spaces the user can see (public ones, plus ones they're an active member of), A–Z
 fetchSpaces({ sortBy: "alphabetical", parentSpaceId: "parent-space-id" });
 
 // Spaces at every level, top-level and sub-spaces together
@@ -105,7 +105,7 @@ subSpaces.fetchSpaces({ sortBy: "alphabetical", parentSpaceId: "parent-space-id"
 
 ## My Spaces
 
-A space list never includes `unlisted` or `private` spaces, even ones the user belongs to. For a "my spaces" screen, use [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces): it lists the spaces the current user is a member of, whatever their visibility, with their membership on each, and takes its own `query`, `searchFields`, `sortBy` (`"joinedAt"`, the default, `"createdAt"`, `"members"` or `"alphabetical"`) and `sortDir`.
+Across levels (`parentSpaceId` `"none"` or `"any"`), a space list includes a space only if it and every space above it are `public`. Under one parent (a space id), it includes the sub-spaces the user can see that are `public` or that they're an active member of — the same ones the parent's `childSpaces` preview shows and its `childSpacesCount` counts. For a "my spaces" screen, use [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces): it lists the spaces the current user is a member of, whatever their visibility, with their membership on each, and takes its own `query`, `searchFields`, `sortBy` (`"joinedAt"`, the default, `"createdAt"`, `"members"` or `"alphabetical"`) and `sortDir`.
 
 It also takes `parentSpaceId`: `"none"` for the user's memberships in top-level spaces only, or a space id for their memberships in that space's direct sub-spaces. `"any"`, left out or `null`: memberships at every level (the default, because membership is per space). `"none"` goes by where the space sits, not by what the user belongs to: a membership in a sub-space whose parent the user isn't in is not top-level, so `"none"` leaves it out.
 

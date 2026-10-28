@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchManyRules` returns a callable function that fetches all community rules for a space. Rules are publicly readable — no authentication is required.
+`useFetchManyRules` returns a callable function that fetches all community rules for a space. No sign-in is required. The rules of a space the user can't see (a private space they aren't an active member of, or a space under one) are answered `404 space/not-found`.
 
 ## Usage Example
 

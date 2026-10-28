@@ -4,7 +4,7 @@ api: "GET /v7/:projectId/spaces/user-spaces"
 description: "Get spaces the authenticated user is a member of"
 ---
 
-Returns a paginated list of spaces the authenticated user has a membership in, along with their membership details for each space. By default only active memberships are returned; use `status` to list pending join requests or spaces the user was banned from.
+Returns a paginated list of spaces the authenticated user has a membership in, along with their membership details for each space. By default only active memberships are returned; use `status` to list pending join requests or spaces the user was banned from. Only spaces the user can see are listed: a pending or banned membership in a `private` space (or in a space under one the user isn't an active member of) is left out, and totals match.
 
 ## Query Parameters
 

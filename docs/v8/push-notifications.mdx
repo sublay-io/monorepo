@@ -381,7 +381,7 @@ Which of those apply depends on the event type:
 | `entity-mention`, `entity-reaction`, `entity-reaction-milestone-specific`, `entity-reaction-milestone-total` | `open-entity` | Entity + Space keys (+ Initiator, except on milestones) |
 | `new-follow` | `open-profile` | Initiator keys |
 | `connection-request`, `connection-accepted` | `open-profile` | `connectionId` + Initiator keys |
-| `space-membership-approved` | `open-space` | Space keys |
+| `space-membership-approved`, `space-member-added` | `open-space` | Space keys |
 | `event-invite`, `event-updated`, `event-cancelled` | `open-event` | RSVP-event + parent-Space keys + Initiator keys |
 | `reputation-grant` | `open-entity` / `open-comment` / `open-message` / `open-profile` / `do-nothing` | Granter keys + whichever target's keys apply (Entity, Comment, or Chat message) + Space keys |
 | `message` (chat) | `open-conversation` | `conversationId`, `messageId` |

@@ -61,6 +61,12 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
     { "error": "No user with this actingUserId exists in this project.", "code": "space/user-not-found" }
     ```
   </Accordion>
+  <Accordion title="Space Not Found — 404">
+    The space doesn't exist, or the viewer can't see it (a private space they aren't an active member of, or a space under one). Both answer the same way, before any permission check. See [Space visibility](/v8/data-models/space#visibility).
+    ```json
+    { "error": "Space not found.", "code": "space/not-found" }
+    ```
+  </Accordion>
 </AccordionGroup>
 
 See also: [useFetchSpaceTeam](/v8/hooks/spaces/use-fetch-space-team)

@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchRule` returns a callable function that fetches a single community rule by ID. Rules are publicly readable — no authentication is required.
+`useFetchRule` returns a callable function that fetches a single community rule by ID. No sign-in is required. A rule of a space the user can't see (a private space they aren't an active member of, or a space under one) is answered `404 space/not-found`.
 
 ## Usage Example
 

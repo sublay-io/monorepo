@@ -31,7 +31,7 @@ Creates a new space. Its creator — the signed-in user, or the user a service k
 </ParamField>
 
 <ParamField body="visibility" type="string">
-  Whether the space is listed and discoverable: `"public"`, `"unlisted"`, or `"private"`. Defaults to `"public"`. Governs discoverability only — independent of `readingPermission`, which governs content. `"unlisted"` hides the space from discovery and search but keeps it reachable by direct link; `"private"` currently behaves like `"unlisted"`. See [Space visibility](/v8/data-models/space#visibility).
+  Who can find and see the space: `"public"`, `"unlisted"`, or `"private"`. Defaults to `"public"`. Independent of `readingPermission`, which governs content. `"unlisted"` keeps the space out of the directory and search, and out of sub-space lists for non-members, but reachable by id, short id or slug; `"private"` makes it seen only by its active members (everyone else gets `404`), and it can't be joined: members are [added](/v8/api-reference/spaces/membership/add-member) by its moderators and admins. See [Space visibility](/v8/data-models/space#visibility).
 </ParamField>
 
 <ParamField body="requireJoinApproval" type="boolean">
@@ -121,6 +121,7 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
     ```
   </Accordion>
   <Accordion title="Parent Not Found — 404">
+    The parent space doesn't exist, or the caller can't see it (see [Space visibility](/v8/data-models/space#visibility)). Checked before the parent-admin check.
     ```json
     { "error": "Parent space not found.", "code": "space/parent-not-found" }
     ```

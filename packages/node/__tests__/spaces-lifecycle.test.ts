@@ -115,10 +115,20 @@ describe("node-sdk spaces (lifecycle) — request shaping", () => {
     });
   });
 
-  it("fetchSpaceBreadcrumb hits the breadcrumb route with no params", async () => {
+  it("fetchSpaceBreadcrumb hits the breadcrumb route, actingUserId as a param", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchSpaceBreadcrumb(client, { spaceId: "s1", actingUserId: "acting1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/breadcrumb", {
+      params: { actingUserId: "acting1" },
+    });
+  });
+
+  it("fetchSpaceBreadcrumb without actingUserId sends no actingUserId (the anonymous view)", async () => {
     const { client, projectInstance } = makeClient();
     await fetchSpaceBreadcrumb(client, { spaceId: "s1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/breadcrumb");
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/breadcrumb", {
+      params: { actingUserId: undefined },
+    });
   });
 
   it("fetchMutualSpaces puts the target userId in the path, actingUserId as a param", async () => {
@@ -220,7 +230,23 @@ describe("node-sdk spaces (lifecycle) — response mapping", () => {
 
   it("fetchSpaceBreadcrumb returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const breadcrumb = [{ id: "s1", name: "Root" }];
+    const breadcrumb = {
+      breadcrumb: [
+        { hidden: true },
+        {
+          id: "s1",
+          shortId: "sh1",
+          name: "Child",
+          slug: null,
+          avatarFileId: null,
+          visibility: "public",
+          parentSpaceId: "s0",
+          depth: 1,
+          hidden: false,
+        },
+      ],
+      depth: 1,
+    };
     projectInstance.get.mockResolvedValueOnce({ data: breadcrumb });
     await expect(
       fetchSpaceBreadcrumb(client, { spaceId: "s1" }),

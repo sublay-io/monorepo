@@ -33,7 +33,7 @@ Returns a paginated list of draft entities belonging to the authenticated user. 
 <ParamField query="include" type="string">
   Associations to include. Pass it as one comma-separated value (`include=user,space`) or as repeated params (`include=user&include=space`). Values:
   - `user` — the author's user profile
-  - `space` — the space the entity belongs to
+  - `space` — the space the entity belongs to (`null` when the viewer can't see that space; see [Space visibility](/v8/data-models/space#visibility))
   - `files` — uploaded file/image attachments
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) for the entity
 

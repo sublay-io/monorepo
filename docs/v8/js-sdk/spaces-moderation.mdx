@@ -261,7 +261,7 @@ const result = await sublay.spaces.moderateSpaceChatMessage({
 
 ### fetchManyRules
 
-Fetches all rules for a space.
+Fetches all rules for a space. The rules of a space the logged-in user can't see are answered `404 space/not-found`.
 
 ```typescript
 const rules = await sublay.spaces.fetchManyRules({ spaceId: "spc_abc123" });
@@ -277,7 +277,7 @@ const rules = await sublay.spaces.fetchManyRules({ spaceId: "spc_abc123" });
 
 ### fetchRule
 
-Fetches a single rule by ID.
+Fetches a single rule by ID. A rule of a space the logged-in user can't see is answered `404 space/not-found`.
 
 ```typescript
 const rule = await sublay.spaces.fetchRule({

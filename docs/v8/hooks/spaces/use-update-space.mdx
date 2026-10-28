@@ -54,7 +54,7 @@ function SpaceSettings({ spaceId }: { spaceId: string }) {
       Updated posting permission.
     </ParamField>
     <ParamField path="visibility" type='"public" | "unlisted" | "private"'>
-      Updated visibility (listing/discoverability). Independent of `readingPermission`. See [Space visibility](/v8/data-models/space#visibility).
+      Updated visibility: who can find and see the space (and the spaces under it). Independent of `readingPermission`. See [Space visibility](/v8/data-models/space#visibility).
     </ParamField>
     <ParamField path="nsfw" type="boolean">
       Updated NSFW own-flag. Toggling it recomputes this space's effective NSFW and cascades it top-down to every descendant space (and, live, to their entities) in the same transaction. See [Space NSFW flagging](/v8/data-models/space#nsfw-flagging).

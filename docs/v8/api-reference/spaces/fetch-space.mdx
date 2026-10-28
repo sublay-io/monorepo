@@ -6,6 +6,8 @@ description: "Get a single space by its UUID"
 
 Fetches a space by UUID. Returns full space details including membership permissions for the viewer (the signed-in user, or the user a service key names in `actingUserId`), parent space, and child space previews.
 
+A space the viewer can't see — a private space they aren't an active member of, or a space under one — answers `404 space/not-found`, exactly like one that doesn't exist. `parentSpace` is `null` when the viewer can't see the parent, `childSpaces` lists the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of, and `childSpacesCount` counts exactly those. See [Space visibility](/v8/data-models/space#visibility).
+
 ## Path Parameters
 
 <ParamField path="spaceId" type="string" required>
@@ -39,6 +41,7 @@ Returns a [SpaceDetailed](/v8/data-models/space) object including `memberPermiss
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    The space doesn't exist, or the viewer can't see it.
     ```json
     { "error": "Space not found.", "code": "space/not-found" }
     ```

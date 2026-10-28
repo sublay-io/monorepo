@@ -68,7 +68,7 @@ Pass `include` to populate optional fields. What each endpoint accepts:
 | `"user"` | `user` — the comment author | ✓ | ✓ |
 | `"grants"` | `grants` — the reputation-grant summary | ✓ | ✓ |
 | `"entity"` | `entity` — the entity the comment is on | | ✓ |
-| `"space"` | `entity` with its `space` populated | | ✓ |
+| `"space"` | `entity` with its `space` populated (`null` when the viewer can't see the space) | | ✓ |
 | `"parent"` | `parentComment` — the parent comment, for replies | | ✓ |
 
 On a thread fetch, `include` applies at every nested level.

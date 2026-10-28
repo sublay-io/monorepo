@@ -1,4 +1,5 @@
 import {
+  addMember,
   approveMembership,
   banMember,
   checkMyMembership,
@@ -74,6 +75,27 @@ describe("node-sdk spaces (membership) — request shaping", () => {
       "/spaces/s1/members/m1/role",
       { role: "moderator", actingUserId: "u-actor" },
     );
+  });
+
+  it("addMember posts the target userId and actingUserId to /spaces/:id/members", async () => {
+    const { client, projectInstance } = makeClient();
+    await addMember(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" });
+    expect(projectInstance.post).toHaveBeenCalledWith("/spaces/s1/members", {
+      userId: "u-target",
+      actingUserId: "u-actor",
+    });
+  });
+
+  it("addMember returns response.data", async () => {
+    const { client, projectInstance } = makeClient();
+    const result = {
+      message: "User added to the space.",
+      membership: { id: "m1", spaceId: "s1", userId: "u-target", role: "member", status: "active" },
+    };
+    projectInstance.post.mockResolvedValueOnce({ data: result });
+    await expect(
+      addMember(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" }),
+    ).resolves.toEqual(result);
   });
 
   it("approveMembership patches the approve route sending actingUserId in the body", async () => {

@@ -30,7 +30,6 @@
   },
   "homepage": "https://docs.sublay.io",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {

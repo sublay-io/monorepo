@@ -57,7 +57,7 @@ function SpaceSearch() {
 </ParamField>
 
 <ParamField path="parentSpaceId" type='string | "none" | "any" | null'>
-  Which level of the space tree to return. A space id returns that space's direct sub-spaces that are public, with every space above them public too (so an unlisted or private space, or one under it, gives an empty page); this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `"none"` returns top-level spaces only. `"any"` returns spaces at every level. Left out or `null`: nothing is sent, so the API's default applies: top-level spaces only.
+  Which level of the space tree to return. A space id returns that space's direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of — the same ones its `childSpaces` preview shows and its `childSpacesCount` counts; this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `"none"` returns top-level spaces only. `"any"` returns spaces at every level. Left out or `null`: nothing is sent, so the API's default applies: top-level spaces only.
 </ParamField>
 
 <ParamField path="nsfwFilter" type='"include-all" | "exclude" | "only"'>

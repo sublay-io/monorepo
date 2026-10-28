@@ -71,7 +71,7 @@ When the current user is authenticated and is a member, `useSpace` exposes their
 
 Separately, each space has a **`visibility`** setting — `"public"` (default), `"unlisted"`, or `"private"` — that controls who can find and see the space, independent of the permission model above:
 
-- `"unlisted"` keeps a space out of the directory, search and sub-space previews, but anyone who can see the space above it reaches it by id, short id or slug.
+- `"unlisted"` keeps a space out of the directory and search, and out of sub-space lists for non-members, but anyone who can see the space above it reaches it by id, short id or slug.
 - `"private"` makes a space seen only by its active members. Everyone else — including users with a pending, banned or rejected membership, and a service key without `actingUserId` — gets `404`, as if it didn't exist, and so do the spaces under it (unless they are a member of one of those). A private space can't be joined: its moderators and admins add its members with [`useAddMember`](/v8/hooks/spaces/use-add-member).
 - Listings show a space only if it and every space above it are `"public"`. Where a space the viewer can't see would be embedded (`parentSpace`, an entity's `space`), it is `null`.
 

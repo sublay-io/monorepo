@@ -48,7 +48,7 @@ const space = await sublay.spaces.createSpace({
 </ParamField>
 
 <ParamField body="visibility" type="string">
-  Who can find and see the space: `"public"` (default), `"unlisted"`, or `"private"`. Independent of `readingPermission` (which governs content). `"unlisted"` keeps the space out of the directory, search and sub-space previews but reachable by id, short id or slug; `"private"` makes it seen only by its active members (everyone else gets `404`), and it can't be joined: members are [added](/v8/api-reference/spaces/membership/add-member) by its moderators and admins. See [Space visibility](/v8/data-models/space#visibility).
+  Who can find and see the space: `"public"` (default), `"unlisted"`, or `"private"`. Independent of `readingPermission` (which governs content). `"unlisted"` keeps the space out of the directory and search, and out of sub-space lists for non-members, but reachable by id, short id or slug; `"private"` makes it seen only by its active members (everyone else gets `404`), and it can't be joined: members are [added](/v8/api-reference/spaces/membership/add-member) by its moderators and admins. See [Space visibility](/v8/data-models/space#visibility).
 </ParamField>
 
 <ParamField body="requireJoinApproval" type="boolean">
@@ -134,7 +134,7 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
 </ParamField>
 
 <ParamField body="parentSpaceId" type='string | "none" | "any"'>
-  Which level of the space tree to return. Left out or `"none"`: top-level spaces only (the default). A space id returns that space's direct sub-spaces that are public, with every space above them public too (so an unlisted or private space, or one under it, gives an empty page); this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `"any"` returns spaces at every level.
+  Which level of the space tree to return. Left out or `"none"`: top-level spaces only (the default). A space id returns that space's direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of — the same ones its `childSpaces` preview shows and its `childSpacesCount` counts; this is how to page through a space's sub-spaces (add `sortBy: "alphabetical"` to order them A–Z by name). An id that matches no space returns an empty page, not a 404. `"any"` returns spaces at every level.
 </ParamField>
 
 <ParamField body="nsfwFilter" type='"include-all" | "exclude" | "only"'>

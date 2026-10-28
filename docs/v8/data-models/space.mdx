@@ -37,7 +37,7 @@ The API returns three space shapes depending on context:
 | `metadata` | `Record<string, any>` | Arbitrary key-value data attached to the space. Up to 1 MB. |
 | `isMember` | `boolean \| undefined` | Whether the viewer is a member of this space. Only present when there is a viewer: the signed-in user, or the user a service key names in `actingUserId`. |
 | `membersCount` | `number` | Computed count of active members. |
-| `childSpacesCount` | `number` | Computed count of the direct child spaces the viewer can see (see [Visibility](#visibility)). |
+| `childSpacesCount` | `number` | Computed count of the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of — the same sub-spaces `childSpaces` and `parentSpaceId=<id>` list (see [Visibility](#visibility)). |
 | `createdAt` | `Date` | Timestamp when the space was created. |
 | `updatedAt` | `Date` | Timestamp when the space was last updated. |
 
@@ -49,7 +49,7 @@ Returned when fetching a single space by ID, shortId, or slug. Includes all `Spa
 |----------|------|-------------|
 | `memberPermissions` | `SpaceMemberPermissions \| null` | The viewer's resolved permissions in this space (the signed-in user, or the user a service key names in `actingUserId`). `null` if the user has no membership in this space. A pending, banned or rejected user gets it with `isMember: false` and their `status`. |
 | `parentSpace` | `SpacePreview \| null` | Preview of the parent space. `null` for root-level spaces, and when the viewer can't see the parent (`parentSpaceId` still names it). |
-| `childSpaces` | `SpacePreview[]` | Preview of up to 10 immediate child spaces, A–Z by name. Lists only sub-spaces that are listed in the directory: `public`, with every space above them `public` too. |
+| `childSpaces` | `SpacePreview[]` | Preview of up to 10 immediate child spaces, A–Z by name: the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of. |
 
 ## SpacePreview
 
@@ -88,7 +88,7 @@ Included in `SpaceDetailed.memberPermissions` for a viewer with a membership in 
 | Value | Behavior |
 |-------|----------|
 | `public` | **Default.** Listed in the directory and search, and reachable by anyone who can see the space above it. |
-| `unlisted` | Not listed in the directory ([Fetch Spaces](/v8/api-reference/spaces/fetch-spaces)), search or sub-space previews, for anyone. Reachable by id, short id or slug by anyone who can see the space above it. Joining works as for a public space. |
+| `unlisted` | Not listed in the directory ([Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) across levels) or search, for anyone, and listed under its parent (sub-space lists and previews) only for its active members. Reachable by id, short id or slug by anyone who can see the space above it. Joining works as for a public space. |
 | `private` | Seen only by its **active** members. To everyone else — users with a `pending`, `banned` or `rejected` membership, other users, signed-out callers, and a service key without `actingUserId` — it answers exactly like a space that doesn't exist (`404 space/not-found`). It can't be joined; its moderators and admins [add](/v8/api-reference/spaces/membership/add-member) its members. |
 
 ### Who sees a space
@@ -102,9 +102,9 @@ Each space keeps its own `visibility`; nothing is changed or refused when you ne
 ### Where it applies
 
 - **Single reads** of a space the viewer can't see answer `404 space/not-found` — [by id](/v8/api-reference/spaces/fetch-space), [short id](/v8/api-reference/spaces/fetch-space-by-short-id) and [slug](/v8/api-reference/spaces/fetch-space-by-slug) — and so do its [breadcrumb](/v8/api-reference/spaces/fetch-breadcrumb), [rules](/v8/api-reference/spaces/rules/list-rules), [members](/v8/api-reference/spaces/membership/list-members), [team](/v8/api-reference/spaces/membership/list-team), [join](/v8/api-reference/spaces/membership/join-space), [delete](/v8/api-reference/spaces/delete-space), the moderator and admin actions, creating a sub-space in it (`404 space/parent-not-found`), and creating an event in it (`404 event/space-not-found`). The `404` comes before any permission check, so it never confirms the space exists. [Check my membership](/v8/api-reference/spaces/membership/check-my-membership) is the exception: a user with any membership in the space gets it back.
-- **Listings** — [Fetch Spaces](/v8/api-reference/spaces/fetch-spaces), [space search](/v8/api-reference/search/search-spaces) and the `childSpaces` preview — show a space only if it **and every space above it** are `public`, whoever asks. Sub-spaces of an unlisted or private space are never listed, even to members; reach them by id, short id or slug, or through the user's own spaces.
+- **Lists across levels** — [Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) with `parentSpaceId` left out, `none` or `any`, and [space search](/v8/api-reference/search/search-spaces) — show a space only if it **and every space above it** are `public`, whoever asks.
+- **Lists under one parent** — [Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) with `parentSpaceId=<id>` and the `childSpaces` preview — show the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of. So an `unlisted` sub-space shows only to its active members, and a `private` one only to its active members. `childSpacesCount` counts exactly these sub-spaces, so it always matches what the viewer can list.
 - **[User spaces](/v8/api-reference/spaces/fetch-user-spaces)** and **[mutual spaces](/v8/api-reference/spaces/fetch-mutual-spaces)** list only spaces the viewer can see. An active membership always counts; a `pending`, `banned` or `rejected` membership of a space the user can't see is left out.
-- **`childSpacesCount`** counts the direct sub-spaces the viewer can see, so it can be higher than the number listed in `childSpaces`.
 - **Embedded spaces** — `parentSpace` on a space, and the `space` included on entities, comments and events — are `null` when the viewer can't see that space. The rest of the response is unchanged, and `parentSpaceId` / `spaceId` still name it.
 
 <Note>

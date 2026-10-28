@@ -6,7 +6,7 @@ description: "Get a single space by its URL slug"
 
 Fetches a space using its `slug`. Slugs are optional and unique per project.
 
-A space the viewer can't see — a private space they aren't an active member of, or a space under one — answers `404 space/not-found`, exactly like one that doesn't exist. `parentSpace` is `null` when the viewer can't see the parent, `childSpaces` lists only sub-spaces that are public all the way up, and `childSpacesCount` counts the sub-spaces the viewer can see. See [Space visibility](/v8/data-models/space#visibility).
+A space the viewer can't see — a private space they aren't an active member of, or a space under one — answers `404 space/not-found`, exactly like one that doesn't exist. `parentSpace` is `null` when the viewer can't see the parent, `childSpaces` lists the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of, and `childSpacesCount` counts exactly those. See [Space visibility](/v8/data-models/space#visibility).
 
 ## Query Parameters
 

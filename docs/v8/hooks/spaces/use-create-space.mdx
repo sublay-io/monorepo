@@ -61,7 +61,7 @@ function CreateSpaceForm() {
 </ParamField>
 
 <ParamField path="visibility" type='"public" | "unlisted" | "private"'>
-  Who can find and see the space. Defaults to `"public"`. Independent of `readingPermission` (which governs content). `"unlisted"` keeps the space out of the directory, search and sub-space previews but reachable by id, short id or slug; `"private"` makes it seen only by its active members (everyone else gets `404`), and it can't be joined: members are [added](/v8/api-reference/spaces/membership/add-member) by its moderators and admins. See [Space visibility](/v8/data-models/space#visibility).
+  Who can find and see the space. Defaults to `"public"`. Independent of `readingPermission` (which governs content). `"unlisted"` keeps the space out of the directory and search, and out of sub-space lists for non-members, but reachable by id, short id or slug; `"private"` makes it seen only by its active members (everyone else gets `404`), and it can't be joined: members are [added](/v8/api-reference/spaces/membership/add-member) by its moderators and admins. See [Space visibility](/v8/data-models/space#visibility).
 </ParamField>
 
 <ParamField path="nsfw" type="boolean">

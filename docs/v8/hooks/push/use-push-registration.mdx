@@ -54,8 +54,8 @@ The hook accepts a **platform adapter** that abstracts the platform-specific per
 
 | Adapter | Package | Platform |
 |---------|---------|----------|
-| `expoPushTokenAdapter` | `@sublay/expo` | Expo (iOS + Android) |
-| `reactNativePushTokenAdapter` | `@sublay/react-native` | Bare React Native (iOS + Android) |
+| `expoPushTokenAdapter` | `@sublay/expo/push` | Expo (iOS + Android) |
+| `reactNativePushTokenAdapter` | `@sublay/react-native/push` | Bare React Native (iOS + Android) |
 | `webPushTokenAdapter` | `@sublay/react-js` | Browser (Web Push) |
 
 ## Usage Example
@@ -67,7 +67,7 @@ smallest shape that satisfies both is one root-level hook whose handlers are sha
 // App root — mounted for the whole session, so rotation handling is always installed.
 import { createContext, useContext } from "react";
 import { usePushRegistration, type UsePushRegistrationValues } from "@sublay/core";
-import { expoPushTokenAdapter } from "@sublay/expo";
+import { expoPushTokenAdapter } from "@sublay/expo/push";
 
 const PushContext = createContext<UsePushRegistrationValues | null>(null);
 export const usePush = () => {
@@ -98,7 +98,7 @@ mounted, and loses rotation coverage otherwise — see the warning above.
 
 ```tsx
 import { usePushRegistration } from "@sublay/core";
-import { expoPushTokenAdapter } from "@sublay/expo";
+import { expoPushTokenAdapter } from "@sublay/expo/push";
 
 function NotificationOptIn() {
   const { register, unregister, registering } = usePushRegistration(expoPushTokenAdapter);
@@ -182,29 +182,29 @@ Only the **active** account is bound by this call, and the return value reports 
 
 ## Platform Adapters
 
-### `expoPushTokenAdapter` (`@sublay/expo`)
+### `expoPushTokenAdapter` (`@sublay/expo/push`)
 
 Uses `expo-notifications` to request permission and retrieve the raw APNs/FCM device token directly (not the Expo relay token — Sublay dispatches to APNs and FCM using the project's own credentials).
 
 ```tsx
-import { expoPushTokenAdapter } from "@sublay/expo";
+import { expoPushTokenAdapter } from "@sublay/expo/push";
 
 const { register } = usePushRegistration(expoPushTokenAdapter);
 ```
 
-Works in Expo managed and bare workflow. Requires `expo-notifications` in your project.
+Works in Expo managed and bare workflow. Requires `expo-notifications`, which your app installs itself (`npx expo install expo-notifications`); `@sublay/expo` doesn't install it, so apps without push don't carry it.
 
-### `reactNativePushTokenAdapter` (`@sublay/react-native`)
+### `reactNativePushTokenAdapter` (`@sublay/react-native/push`)
 
 Uses `@react-native-firebase/messaging` for both iOS and Android. On iOS, `getAPNSToken()` returns the raw APNs token; on Android, `getToken()` returns the FCM registration token.
 
 ```tsx
-import { reactNativePushTokenAdapter } from "@sublay/react-native";
+import { reactNativePushTokenAdapter } from "@sublay/react-native/push";
 
 const { register } = usePushRegistration(reactNativePushTokenAdapter);
 ```
 
-Requires `@react-native-firebase/messaging` and the native Firebase setup for your platform (GoogleService-Info.plist / google-services.json).
+Requires `@react-native-firebase/app` and `@react-native-firebase/messaging`, which your app installs itself (`@sublay/react-native` doesn't install them, so apps without push don't carry them), and the native Firebase setup for your platform (GoogleService-Info.plist / google-services.json).
 
 ### `webPushTokenAdapter` (`@sublay/react-js`)
 

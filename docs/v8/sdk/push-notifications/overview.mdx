@@ -15,10 +15,22 @@ Use `usePushRegistration` with the adapter for your platform. Call `register()` 
 
 You only need to call it **once per device**, not on every launch. The SDK stores the device identifier and keeps the bindings in step on its own: wherever `usePushRegistration` is mounted, it watches for OS token rotations, re-binds the active account onto the new token and marks the other push-enabled accounts for repair on their next activation. See [Automatic token rotation](#automatic-token-rotation).
 
+The Expo and bare React Native adapters come from the package's `/push` entry point, and use a push library your app installs itself. An app that doesn't use push installs neither.
+
+<CodeGroup>
+  ```bash Expo
+  npx expo install expo-notifications
+  ```
+
+  ```bash React Native
+  npm install @react-native-firebase/app @react-native-firebase/messaging
+  ```
+</CodeGroup>
+
 ```tsx
 // Expo
 import { usePushRegistration } from "@sublay/core";
-import { expoPushTokenAdapter } from "@sublay/expo";
+import { expoPushTokenAdapter } from "@sublay/expo/push";
 
 function SettingsScreen() {
   const { register, registering } = usePushRegistration(expoPushTokenAdapter);
@@ -29,7 +41,7 @@ function SettingsScreen() {
 ```tsx
 // Bare React Native
 import { usePushRegistration } from "@sublay/core";
-import { reactNativePushTokenAdapter } from "@sublay/react-native";
+import { reactNativePushTokenAdapter } from "@sublay/react-native/push";
 
 const { register } = usePushRegistration(reactNativePushTokenAdapter);
 ```

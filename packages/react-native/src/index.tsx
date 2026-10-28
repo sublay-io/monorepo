@@ -8,8 +8,9 @@ import {
 export * from "@sublay/core";
 import AccountManager from "./AccountManager";
 
-// React Native-specific PushTokenAdapter (@react-native-firebase/messaging)
-export { reactNativePushTokenAdapter } from "./PushTokenAdapter";
+// The push adapter is not exported here: it is imported from
+// `@sublay/react-native/push` (src/push.ts), so that apps that don't use push
+// don't need @react-native-firebase installed.
 
 // Override SublayProvider
 export const SublayProvider: React.FC<{

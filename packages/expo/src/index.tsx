@@ -11,8 +11,9 @@ import AccountManager from "./AccountManager";
 // Expo-specific OAuth hook (system browser + deep-link return)
 export { default as useOAuthSignIn, type UseOAuthSignInReturn } from "./hooks/useOAuthSignIn";
 
-// Expo-specific PushTokenAdapter (expo-notifications)
-export { expoPushTokenAdapter } from "./PushTokenAdapter";
+// The push adapter is not exported here: it is imported from
+// `@sublay/expo/push` (src/push.ts), so that apps that don't use push don't
+// need expo-notifications installed.
 
 // Override SublayProvider
 export const SublayProvider: React.FC<{

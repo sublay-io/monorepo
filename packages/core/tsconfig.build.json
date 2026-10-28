@@ -1,0 +1,10 @@
+{
+  // What tsup compiles and generates declarations from (see tsup.config.ts).
+  // tsconfig.json itself also covers the tests, for `pnpm typecheck`.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // tsup's declaration build sets `baseUrl`, which TypeScript 6 deprecates.
+    "ignoreDeprecations": "6.0"
+  },
+  "exclude": ["recycle_bin", "**/*.test.ts", "**/*.test.tsx", "src/test-utils/**", "**/testHelpers.tsx"]
+}

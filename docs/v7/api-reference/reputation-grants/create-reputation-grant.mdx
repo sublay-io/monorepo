@@ -126,7 +126,7 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
     ```json
     { "error": "The grant target does not exist.", "code": "reputation-grant/target-not-found" }
     ```
-    The target record does not exist — or, for a `chat-message` target, the sender is not an active member of that conversation. The two cases are byte-identical so a caller holding a message ID cannot probe whether it exists. Mediated transfers are membership-checked on the named sender exactly as user tokens are.
+    The target record does not exist — or, for a `chat-message` target, the sender is not an active member of that conversation, or it is a space chat in a space the sender can't see. The two cases are byte-identical so a caller holding a message ID cannot probe whether it exists. Mediated transfers are membership-checked on the named sender exactly as user tokens are.
   </Accordion>
   <Accordion title="Insufficient Reputation — 409">
     ```json

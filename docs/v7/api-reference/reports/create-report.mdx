@@ -74,8 +74,9 @@ Returns `200 OK` when the user has already reported this target:
     ```json
     { "error": "You are not a member of this conversation.", "code": "chat/not-a-member" }
     ```
-    Only members of a conversation may report a message in it. Applies to
-    `targetType: "message"` only.
+    Only members of a conversation may report a message in it. In a space chat, the
+    reporter must also be able to see the space ([visibility](/v7/data-models/space#visibility)).
+    Applies to `targetType: "message"` only.
   </Accordion>
 
   <Accordion title="Invalid Body — 400">

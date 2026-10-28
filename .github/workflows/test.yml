@@ -123,7 +123,7 @@ jobs:
 
       - name: Typecheck
         # Nothing else checks these types. The builds above compile through
-        # tsconfig.esm.json / tsconfig.cjs.json, which exclude test files,
+        # tsconfig.build.json (via tsup), which excludes test files,
         # and vitest strips types without checking them — so a type error in
         # a test passes both build and test unless this step runs. Each
         # package's `typecheck` uses its own tsconfig.json, which covers its

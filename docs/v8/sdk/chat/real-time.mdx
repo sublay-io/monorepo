@@ -22,7 +22,7 @@ description: "Typing indicators, unread counts, and marking conversations as rea
 | `thread:reply_count` | Updates `threadReplyCount` on the parent message |
 | `typing:start` | Adds the user to the typing list for that conversation |
 | `typing:stop` | Removes the user from the typing list |
-| `conversation:updated` | Merges the updated conversation fields into the store |
+| `conversation:updated` | Merges the updated conversation fields into the store. On a space chat, `postingPermission` is `"members"` or `"team"` |
 | `conversation:created` | Inserts a newly created conversation (a new DM, group, or one you were added to) into the conversation list |
 | `member:left` | When it's the current user leaving or being removed, removes the conversation from the list |
 | `conversation:deleted` | Removes the conversation from the list |

@@ -8,7 +8,7 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 Creates a new message in a conversation. The caller must be an active member. At least one of `content`, `gif`, or a file attachment is required.
 
-For space conversations with `postingPermission: "admins"`, only users with `admin` or `moderator` role in the parent Space can send messages.
+For space conversations with `postingPermission: "team"`, only users with `admin` or `moderator` role in the parent Space can send messages.
 
 This endpoint accepts `multipart/form-data` to support file attachments alongside message content.
 

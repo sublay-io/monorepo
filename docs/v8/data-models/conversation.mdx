@@ -19,7 +19,7 @@ A `Conversation` represents a messaging thread between two or more participants.
 | `avatarFileId` | `string \| null` | ID of the uploaded avatar file for this conversation. |
 | `avatarFile` | `File \| undefined` | Populated avatar file object, if `avatarFileId` is set. |
 | `lastMessageAt` | `Date \| null` | Timestamp of the most recent message. Used for conversation list sorting. `null` if no messages have been sent. |
-| `postingPermission` | `"members" \| "admins" \| null` | Who can post in the conversation. Only set for `space` conversations. `null` for direct and group conversations. |
+| `postingPermission` | `"members" \| "team" \| null` | Who can post in the conversation: any active member (`"members"`), or only the space's active admins and moderators (`"team"`). Only set for `space` conversations. `null` for direct and group conversations. |
 | `metadata` | `Record<string, any>` | Custom key-value data. Limited to 1 MB. |
 | `memberCount` | `number` | Total number of active members. |
 | `currentMember` | `ConversationMember \| undefined` | The requesting user's own membership row. Included in API responses when applicable. |

@@ -27,7 +27,7 @@ Creates a new space. Its creator — the signed-in user, or the user a service k
 </ParamField>
 
 <ParamField body="postingPermission" type="string">
-  Who can post entities: `"anyone"`, `"members"`, or `"admins"`. Defaults to `"members"`.
+  Who can post entities: `"anyone"`, `"members"` (active members), or `"team"` (the space's active admins and moderators). Defaults to `"members"`. Any other value, `"admins"` included, is refused with `400 space/invalid-body`.
 </ParamField>
 
 <ParamField body="visibility" type="string">

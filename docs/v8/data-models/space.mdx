@@ -27,7 +27,7 @@ The API returns three space shapes depending on context:
 | `bannerFileId` | `string \| null` | ID of the space's banner image file. |
 | `bannerFile` | `File \| undefined` | Populated banner file object. Only present when `include: "files"` is requested. |
 | `readingPermission` | `"anyone" \| "members"` | Who can read content in the space. |
-| `postingPermission` | `"anyone" \| "members" \| "admins"` | Who can post content in the space. |
+| `postingPermission` | `"anyone" \| "members" \| "team"` | Who can post content in the space: `"anyone"`, its active members (`"members"`), or only its active admins and moderators (`"team"`). |
 | `visibility` | `"public" \| "unlisted" \| "private"` | Who can find and see the space — independent of `readingPermission`, which controls who can read the content. `public` (the default) is listed in the directory and search; `unlisted` isn't listed but is reachable by id, short id or slug; `private` is seen only by its active members, and answers `404` to everyone else. See [Visibility](#visibility) below. |
 | `nsfw` | `boolean` | The space's **own** NSFW flag. `false` by default. Set by space admins on [create](/v8/hooks/spaces/use-create-space)/[update](/v8/hooks/spaces/use-update-space) or by a project admin from the dashboard. See [NSFW flagging](#nsfw-flagging). |
 | `nsfwEffective` | `boolean` | **Denormalized, read-only.** `true` when this space's own `nsfw` is `true` **or** any ancestor space is NSFW. Maintained top-down on write and cascaded to descendants. This is the value the space `nsfwFilter` keys off, and it feeds each entity's live `nsfwEffective`. See [NSFW flagging](#nsfw-flagging). |

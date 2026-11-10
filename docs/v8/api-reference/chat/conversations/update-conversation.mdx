@@ -33,7 +33,7 @@ All fields are optional. Only provided fields are updated.
 </ParamField>
 
 <ParamField body="postingPermission" type="string">
-  Who can post messages. Only valid for `space` conversations. Accepted values: `"members"` (any active member), `"admins"` (only space admins and moderators).
+  Who can post messages. Only valid for `space` conversations. Accepted values: `"members"` (any active member), `"team"` (only the space's active admins and moderators). Any other value, `"admins"` included, is refused with `400 chat/invalid-body`.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">

@@ -4,9 +4,18 @@ api: "POST /v8/:projectId/events/:eventId/invites"
 description: "Invite a user to an event (host-only)"
 ---
 
-Creates an [EventInvite](/v8/data-models/event-invite) for a user. **Host-only**. A service key acts as the host it names in `actingUserId`. The invite is keyed on a Sublay `userId` (never a foreign ID) and is idempotent against the unique `(eventId, userId)` constraint — re-inviting an already-invited user is a no-op success.
+Creates an [EventInvite](/v8/data-models/event-invite) for a user. **Host-only**: the caller must be the owner or in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it. A service key acts as the host it names in `actingUserId`. The invite is keyed on a Sublay `userId` (never a foreign ID) and is idempotent against the unique `(eventId, userId)` constraint — re-inviting an already-invited user who can still be invited is a no-op success.
 
 For an `invite`-visibility event, the invited user can now see and RSVP to the event. When the `notifications` bundle is present, the invitee receives an `event-invite` notification (best-effort).
+
+**Who can be invited.** For an event in a space, the invitee must be able to take part in that space:
+
+- They must be able to read the space, and not be banned in it or in any space above it.
+- When the space is private or members-only, or sits under such a space, or the event itself is `members`-only, they must be an active member of the **event's space itself**. Members of a space above it must join the event's space first.
+
+One refusal covers every case — `409 event/invitee-not-invitable` — so the answer doesn't say which rule applied; in a space everyone can read, that can still tell you the invitee is banned there. Re-inviting someone already invited who no longer qualifies gets the same `409`, and their existing invite is kept. Events with no space accept any invitee.
+
+People who take part in an open sub-space through membership of a space above it (commenting, reacting, RSVPing) can be seen doing so, even though they can't be invited until they join the sub-space.
 
 ## Path Parameters
 
@@ -66,13 +75,27 @@ Returns the updated [Event](/v8/data-models/event).
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    The event doesn't exist, or the caller can't [see it](/v8/data-models/event#visibility) and isn't one of its hosts.
     ```json
     { "error": "Event not found", "code": "event/not-found" }
     ```
   </Accordion>
   <Accordion title="Forbidden (not a host) — 403">
+    The caller isn't a host. The space's admins and moderators can see the invite list but can't change it.
     ```json
     { "error": "Only a host of this event may manage its invites.", "code": "event/forbidden" }
+    ```
+  </Accordion>
+  <Accordion title="Host Not an Active Member — 403">
+    The caller is a host, but the event is in a space they aren't an active member of, or they are banned in it or a space above it. One body for every case.
+    ```json
+    { "error": "Hosts must be active members of this event's space, and not banned from it or a space above it, to do this.", "code": "event/not-space-member" }
+    ```
+  </Accordion>
+  <Accordion title="Invitee Not Invitable — 409">
+    The invitee can't take part in the event's space (see **Who can be invited** above). One body for every cause.
+    ```json
+    { "error": "This user can't be invited to this event.", "code": "event/invitee-not-invitable" }
     ```
   </Accordion>
 </AccordionGroup>

@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/events/:eventId/invites/:userId"
 description: "Revoke a user's invite to an event (host-only)"
 ---
 
-Removes a user's [EventInvite](/v8/data-models/event-invite). **Host-only**. A service key acts as the host it names in `actingUserId`. Removing the invite **revokes access** to an `invite`-only event and also **deletes that user's RSVP** (decrementing the matching `rsvpCounts` entry), all under a row-level lock. Removing a non-invited user is an idempotent no-op success.
+Removes a user's [EventInvite](/v8/data-models/event-invite). **Host-only**: the caller must be the owner or in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it; the space's admins and moderators can't. A service key acts as the host it names in `actingUserId`. Removing the invite **revokes access** to an `invite`-only event. The user's RSVP is deleted (decrementing the matching `rsvpCounts` entry) only when an invite was actually removed and the user can no longer RSVP to the event: on an `invite` event, a host who is an active member of the event's space keeps their RSVP, and anyone else — a space admin or moderator who isn't a host included — loses it. On `public` and `members` events the RSVP is never touched. Everything runs under a row-level lock. Removing a non-invited user is an idempotent no-op success.
 
 ## Path Parameters
 
@@ -66,13 +66,21 @@ Returns the updated [Event](/v8/data-models/event) with refreshed `rsvpCounts`.
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    The event doesn't exist, or the caller can't [see it](/v8/data-models/event#visibility) and isn't one of its hosts.
     ```json
     { "error": "Event not found", "code": "event/not-found" }
     ```
   </Accordion>
   <Accordion title="Forbidden (not a host) — 403">
+    The caller isn't a host. The space's admins and moderators can see the invite list but can't change it.
     ```json
     { "error": "Only a host of this event may manage its invites.", "code": "event/forbidden" }
+    ```
+  </Accordion>
+  <Accordion title="Host Not an Active Member — 403">
+    The caller is a host, but the event is in a space they aren't an active member of, or they are banned in it or a space above it. One body for every case.
+    ```json
+    { "error": "Hosts must be active members of this event's space, and not banned from it or a space above it, to do this.", "code": "event/not-space-member" }
     ```
   </Accordion>
   <Accordion title="Unsupported Route — 400">

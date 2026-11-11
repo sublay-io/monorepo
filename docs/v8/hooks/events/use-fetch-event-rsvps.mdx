@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchEventRsvps` returns a callable that fetches the paginated named RSVP (guest) list. Each item is an [EventRsvp](/v8/data-models/event-rsvp) with the `user` populated. The named list is visible to hosts always, and to any viewer when the event's `guestListVisible` is `true` (otherwise `403`). Aggregate counts are always available on the event's `rsvpCounts`.
+`useFetchEventRsvps` returns a callable that fetches the paginated named RSVP (guest) list. Each item is an [EventRsvp](/v8/data-models/event-rsvp) with the `user` populated. The named list is visible to any viewer when the event's `guestListVisible` is `true`; when it's `false`, only to hosts who are active members of the event's space (any host, for an event with no space) and the space's active admins and moderators (otherwise `403`). Aggregate counts are always available on the event's `rsvpCounts`.
 
 ## Usage Example
 

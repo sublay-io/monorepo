@@ -4,9 +4,9 @@ api: "POST /v8/:projectId/events/:eventId/hosts"
 description: "Grant a user host privileges on an event (host-only)"
 ---
 
-Adds a user to the event's `hostIds`. **Host-only**: the caller must already be a host. A service key acts as the host it names in `actingUserId`. The operation is idempotent (adding an existing host is a no-op) and takes a row-level lock to serialize concurrent host changes.
+Adds a user to the event's `hostIds`. **Owner-only**: the caller must be the event's [owner](/v8/data-models/event#owner-and-hosts) (`userId`), and, for an event in a space, an active member of that space who isn't banned in it or a space above it. A service key acts as the user it names in `actingUserId`. The operation is idempotent (adding an existing host is a no-op) and takes a row-level lock to serialize concurrent host changes.
 
-There is no requirement that the target be a space member or invitee — any user can be made a host.
+For an event in a space, the target must be an active member of that space (`409 event/host-not-member`). For an event with no space, any user can be made a host. The owner is always kept in the stored `hostIds`.
 
 ## Path Parameters
 
@@ -21,7 +21,7 @@ There is no requirement that the target be a space member or invitee — any use
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
+  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are the event's owner, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -66,13 +66,27 @@ Returns the updated [Event](/v8/data-models/event) with the new `hostIds`.
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    The event doesn't exist, or the caller can't [see it](/v8/data-models/event#visibility) and isn't one of its hosts.
     ```json
     { "error": "Event not found", "code": "event/not-found" }
     ```
   </Accordion>
-  <Accordion title="Forbidden (not a host) — 403">
+  <Accordion title="Forbidden (not the owner) — 403">
+    The caller isn't the event's owner. Other hosts can't add or remove hosts; on an event whose owner's account was deleted, nobody can.
     ```json
-    { "error": "Only a host of this event may manage its hosts.", "code": "event/forbidden" }
+    { "error": "Only the event's owner may add or remove hosts.", "code": "event/forbidden" }
+    ```
+  </Accordion>
+  <Accordion title="Host Not an Active Member — 403">
+    The caller is the owner, but the event is in a space they aren't an active member of, or they are banned in it or a space above it. One body for every case.
+    ```json
+    { "error": "Hosts must be active members of this event's space, and not banned from it or a space above it, to do this.", "code": "event/not-space-member" }
+    ```
+  </Accordion>
+  <Accordion title="Host Not a Member — 409">
+    The target isn't an active member of the event's space (not a member, pending or banned — the same body for each).
+    ```json
+    { "error": "This user isn't an active member of this space.", "code": "event/host-not-member" }
     ```
   </Accordion>
 </AccordionGroup>

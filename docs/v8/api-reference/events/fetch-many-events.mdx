@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/events"
 description: "List events with visibility enforcement, filtering, sorting, geo, and free-text search"
 ---
 
-Returns a paginated list of events. The [server-side visibility predicate](/v8/data-models/event#visibility) is always applied: anonymous callers see only `public` events; authenticated callers additionally see `members` events of spaces they belong to, `invite` events they were invited to, and any event they host. A service key sees exactly what the user it names in `actingUserId` sees, and only `public` events when it names nobody.
+Returns a paginated list of events. The [server-side visibility predicate](/v8/data-models/event#visibility) is always applied, to the rows and to `totalItems` alike: anonymous callers see only `public` events; authenticated callers additionally see `members` events of spaces they belong to, `invite` events they were invited to, the events they host while they are active members of the event's space (a host who isn't sees only what a regular viewer would), and, as an active admin or moderator of a space, every event in that space (`invite` events included). Events in a space the caller can't read are left out, and so are events kept after the `spaces` bundle was uninstalled. A service key sees exactly what the user it names in `actingUserId` sees, and only what an anonymous caller sees when it names nobody.
 
 Each event includes inline `rsvpCounts`, and—with the `userRsvp` include and an authenticated caller—the caller's own `userRsvp`.
 
@@ -45,7 +45,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 </ParamField>
 
 <ParamField query="hostId" type="string">
-  Only events hosted by this user (array containment on `hostIds`).
+  Only events hosted by this user: events whose `hostIds` contain them, and events they own (`userId`). It filters by who hosts, not by what that user may do; visibility still applies to the caller.
 </ParamField>
 
 <ParamField query="type" type="string">
@@ -75,7 +75,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 <ParamField query="include" type="string">
   Associations to expand, as a comma-separated value (`include=user,space`) or repeated params. Values:
   - `user` — the creator's user profile
-  - `space` — the space the event belongs to (`null` when the viewer can't see that space; see [Space visibility](/v8/data-models/space#visibility))
+  - `space` — the space the event belongs to
   - `files` — the cover and gallery file objects
   - `userRsvp` — the caller's own RSVP status (needs a viewer; otherwise `null`)
 
@@ -83,7 +83,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
-  Service key only: the user to list as. The page is exactly what that user's own access token would get (visibility, `userRsvp`, the `myRsvp` filter). Leave it out for the anonymous view: `public` events only. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
+  Service key only: the user to list as. The page is exactly what that user's own access token would get (visibility, `userRsvp`, the `myRsvp` filter). Leave it out for the anonymous view: `public` events in no space or in a space anyone can read. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response

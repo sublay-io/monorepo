@@ -21,7 +21,7 @@ Requires the `events` bundle. Space-scoping needs the `spaces` bundle; images ne
 
 ### createEvent
 
-Creates an event. The `actingUserId` you pass becomes the creator and is auto-added to `hostIds`. Returns the event with inline `rsvpCounts`.
+Creates an event. The `actingUserId` you pass becomes the event's [owner](/v8/data-models/event#owner-and-hosts) and is auto-added to `hostIds`. For an event in a space it's refused when that user isn't an active member of the space, banned in it included (`403 event/not-space-member`), when they're banned in a space above it or the space's `postingPermission` is `"team"` and they aren't one of its admins or moderators (`403 space/posting-not-allowed`), or when a user in `hostIds` isn't an active member of the space (`409 event/host-not-member`). Returns the event with inline `rsvpCounts`.
 
 ```typescript
 const event = await sublay.events.createEvent({
@@ -59,7 +59,7 @@ const event = await sublay.events.createEvent({
 <ParamField body="capacity" type="number">Max `going` RSVPs. Omit for unlimited.</ParamField>
 <ParamField body="allowMaybe" type="boolean">Allow `"maybe"` RSVPs. Defaults to `true`.</ParamField>
 <ParamField body="guestListVisible" type="boolean">Expose the named guest list to non-hosts. Defaults to `true`.</ParamField>
-<ParamField body="hostIds" type="string[]">Additional host user IDs (the creator is always added).</ParamField>
+<ParamField body="hostIds" type="string[]">Additional host user IDs (the creator is always added). For an event in a space, each must be an active member of it.</ParamField>
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB.</ParamField>
 
 **Returns** — `Promise<Event>`
@@ -68,7 +68,7 @@ const event = await sublay.events.createEvent({
 
 ### fetchEvent
 
-Fetches a single event by ID. Pass `actingUserId` to resolve visibility for that user and to populate `userRsvp` (with the `userRsvp` include).
+Fetches a single event by ID. Pass `actingUserId` to resolve visibility for that user and to populate `userRsvp` (with the `userRsvp` include). The space's active admins and moderators see every event in their space, `invite` events included; a host who isn't an active member of the event's space sees only what a regular viewer would; events in a space the viewer can't read are hidden. See [Event visibility](/v8/data-models/event#visibility).
 
 ```typescript
 const event = await sublay.events.fetchEvent({
@@ -88,7 +88,7 @@ const event = await sublay.events.fetchEvent({
 
 ### fetchManyEvents
 
-Lists events with visibility enforced, plus filtering, sorting, geo, and free-text search. Pass `actingUserId` to resolve member/invite/host visibility and to use the `myRsvp` filter.
+Lists events with visibility enforced, plus filtering, sorting, geo, and free-text search. Pass `actingUserId` to resolve member/invite/host/space-team visibility and to use the `myRsvp` filter. Visibility applies to the rows and the totals alike. The space's active admins and moderators see every event in their space, `invite` events included; a host who isn't an active member of the event's space sees only what a regular viewer would; events in a space the viewer can't read are hidden. See [Event visibility](/v8/data-models/event#visibility).
 
 ```typescript
 const { data, pagination } = await sublay.events.fetchManyEvents({
@@ -111,7 +111,7 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
 <ParamField body="startsAfter" type="string">ISO datetime lower bound on `startTime`.</ParamField>
 <ParamField body="startsBefore" type="string">ISO datetime upper bound on `startTime`.</ParamField>
 <ParamField body="spaceId" type='string | "none"'>Only this space's events, or `"none"` for events not in any space. Left out: every event.</ParamField>
-<ParamField body="hostId" type="string">Only events this user hosts.</ParamField>
+<ParamField body="hostId" type="string">Only events this user hosts: events whose `hostIds` contain them, and events they own.</ParamField>
 <ParamField body="type" type='"online" | "physical" | "hybrid"'>Filter by type.</ParamField>
 <ParamField body="status" type='"active" | "cancelled"'>Defaults to `"active"`.</ParamField>
 <ParamField body="myRsvp" type='RsvpStatus | RsvpStatus[]'>Statuses the requester RSVP'd with: `"going"`, `"maybe"` or `"not-going"`, e.g. `["going", "maybe"]`. Sent as one comma-separated value; values match exactly. Requires `actingUserId`.</ParamField>
@@ -198,7 +198,7 @@ await sublay.events.deleteEvent({
 
 ### setRsvp
 
-Sets or changes a user's RSVP. Transitions into `going` are capacity-checked.
+Sets or changes a user's RSVP. Transitions into `going` are capacity-checked. Refused with `404 event/not-found` when the user can't see the event (for example a `members` event once a ban ends their active membership), `403 space/posting-not-allowed` when they can see it but are banned in its space or a space above it, and `403 event/not-invited` on an `invite` event they see only as an admin or moderator of its space, without an invite.
 
 ```typescript
 const event = await sublay.events.setRsvp({
@@ -296,7 +296,7 @@ const event = await sublay.events.addInvite({
 
 ### removeInvite
 
-Removes a user's invite, revoking their access and dropping their RSVP. It sends `DELETE /events/:eventId/invites/:userId`: the invitee in the path, `actingUserId` in the query, no body.
+Removes a user's invite, revoking their access to an `invite` event. Their RSVP is dropped only when an invite was actually removed and the user can no longer RSVP to the event: on an `invite` event, a host who is an active member of the event's space keeps it, and anyone else (a space admin or moderator who isn't a host included) loses it; on `public` and `members` events the RSVP is never touched. It sends `DELETE /events/:eventId/invites/:userId`: the invitee in the path, `actingUserId` in the query, no body.
 
 ```typescript
 const event = await sublay.events.removeInvite({
@@ -316,7 +316,7 @@ const event = await sublay.events.removeInvite({
 
 ### fetchInvitees
 
-Host-only invitee (guest) list. Returns paginated [EventInvite](/v8/data-models/event-invite) records with the invited user populated.
+Invitee (guest) list, open to the event's hosts — for an event in a space, while they are active members of it (otherwise `403 event/not-space-member`) — and to the space's active admins and moderators; anyone else who can see the event gets `403 event/forbidden`. Returns paginated [EventInvite](/v8/data-models/event-invite) records with the invited user populated.
 
 ```typescript
 const { data, pagination } = await sublay.events.fetchInvitees({
@@ -338,7 +338,7 @@ const { data, pagination } = await sublay.events.fetchInvitees({
 
 ### fetchEventRsvps
 
-Named RSVP (guest) list. Returns paginated [EventRsvp](/v8/data-models/event-rsvp) records with the user populated. Visible to hosts always, and to anyone who can see the event when `guestListVisible` is `true`; otherwise `403 event/guest-list-hidden`. Pass `actingUserId` to read as that user. RSVP counts themselves are public via the event's `rsvpCounts`.
+Named RSVP (guest) list. Returns paginated [EventRsvp](/v8/data-models/event-rsvp) records with the user populated. Visible to anyone who can see the event when `guestListVisible` is `true`; when it's `false`, only to hosts who are active members of the event's space (any host, for an event with no space) and the space's active admins and moderators; otherwise `403 event/guest-list-hidden`. Pass `actingUserId` to read as that user. RSVP counts themselves are public via the event's `rsvpCounts`.
 
 ```typescript
 const { data, pagination } = await sublay.events.fetchEventRsvps({

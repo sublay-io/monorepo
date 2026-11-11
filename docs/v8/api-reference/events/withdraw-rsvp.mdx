@@ -4,9 +4,9 @@ api: "DELETE /v8/:projectId/events/:eventId/rsvp"
 description: "Remove the caller's RSVP from an event"
 ---
 
-Removes the caller's RSVP. The RSVP row is deleted and the matching `rsvpCounts` entry is decremented. Requires authentication, and the caller must be able to [see the event](/v8/data-models/event#visibility) (otherwise `404`).
+Removes the caller's RSVP. The RSVP row is deleted and the matching `rsvpCounts` entry is decremented. Requires authentication.
 
-Withdrawing is idempotent — withdrawing when there is no RSVP succeeds and changes nothing.
+The caller can always withdraw their own RSVP, also from an event they can no longer [see](/v8/data-models/event#visibility) (for example after leaving its space). Withdrawing when there is no RSVP succeeds and changes nothing if the caller can see the event, and answers `404` if they can't.
 
 ## Path Parameters
 
@@ -19,12 +19,16 @@ Withdrawing is idempotent — withdrawing when there is no RSVP succeeds and cha
 A DELETE takes no body: every field besides the path goes in the query string.
 
 <ParamField query="actingUserId" type="string">
-  Service key only, and required with one: the user this request acts as, whose RSVP is withdrawn. The request is held to that user's own event visibility: an event they can't see (an `invite` event they weren't invited to, a `members` event of a space they aren't in) returns `404`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
+  Service key only, and required with one: the user this request acts as, whose RSVP is withdrawn. The request is held to that user's own RSVP and event visibility. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
 
-Returns the [Event](/v8/data-models/event) with refreshed `rsvpCounts`.
+Returns the [Event](/v8/data-models/event) with refreshed `rsvpCounts`. When the caller can't see the event, the response is only:
+
+```json
+{ "id": "<eventId>", "userRsvp": null }
+```
 
 ## Error Responses
 

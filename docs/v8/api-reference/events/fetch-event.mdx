@@ -6,6 +6,8 @@ description: "Fetch a single event by ID, with visibility enforced"
 
 Returns a single event by UUID. The [server-side visibility predicate](/v8/data-models/event#visibility) is applied: if the event does not exist **or** the caller cannot see it, the response is `404` (existence is never leaked).
 
+Who sees an event: anyone for `public`, the space's active members for `members`, invited users for `invite` — and in every case only if they can read the event's space. The space's active admins and moderators see every event in it, `invite` events included. Hosts see their events while they are active members of the event's space; a host who isn't sees the event only as a regular viewer would. An event whose `spaceId` points at no space is never returned.
+
 The response always includes inline `rsvpCounts`. Authentication is optional; pass the `userRsvp` include with an authenticated caller to populate `userRsvp`.
 
 ## Path Parameters
@@ -19,7 +21,7 @@ The response always includes inline `rsvpCounts`. Authentication is optional; pa
 <ParamField query="include" type="string">
   Associations to expand, as a comma-separated value (`include=user,space`) or repeated params. Values:
   - `user` — the creator's user profile
-  - `space` — the space the event belongs to (`null` when the viewer can't see that space; see [Space visibility](/v8/data-models/space#visibility))
+  - `space` — the space the event belongs to
   - `files` — the cover and gallery file objects
   - `userRsvp` — the caller's own RSVP status (needs a viewer; otherwise `null`)
 
@@ -27,7 +29,7 @@ The response always includes inline `rsvpCounts`. Authentication is optional; pa
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
-  Service key only: the user to read as. The response is exactly what that user's own access token would get (visibility, `userRsvp`). Leave it out for the anonymous view: only a `public` event is returned, and any other answers `404`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
+  Service key only: the user to read as. The response is exactly what that user's own access token would get (visibility, `userRsvp`). Leave it out for the anonymous view: only a `public` event in no space or in a space anyone can read is returned, and any other answers `404`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response

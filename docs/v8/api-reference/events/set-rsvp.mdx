@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/events/:eventId/rsvp"
 description: "Set or change the caller's RSVP to an event"
 ---
 
-Sets or changes the caller's RSVP. A new RSVP is created, or an existing one is switched, and the event's `rsvpCounts` are updated atomically. Requires authentication, and the caller must be able to [see the event](/v8/data-models/event#visibility) (otherwise `404`).
+Sets or changes the caller's RSVP. A new RSVP is created, or an existing one is switched, and the event's `rsvpCounts` are updated atomically. Requires authentication, and the caller must be able to [see the event](/v8/data-models/event#visibility) (otherwise `404`) — for example, a `members` event once a ban ends the caller's active membership answers `404`.
 
 Transitions into `going` are capacity-checked under a row-level lock, so an event can never be oversold.
 
@@ -14,6 +14,8 @@ Transitions into `going` are capacity-checked under a row-level lock, so an even
 - A `cancelled` event rejects RSVPs.
 - `"maybe"` is rejected when the event's `allowMaybe` is `false`.
 - `"going"` (new or switched into) is rejected when `rsvpCounts.going` has reached `capacity`.
+- On an event in a space, a caller banned in the space or any space above it can't RSVP, even to an event they can still see (`403 space/posting-not-allowed`).
+- On an `invite` event, only invited users and hosts can RSVP. The space's admins and moderators can see every `invite` event in their space, but can't RSVP to one unless invited (`403 event/not-invited`).
 
 ## Path Parameters
 
@@ -92,6 +94,18 @@ Returns the [Event](/v8/data-models/event) with refreshed `rsvpCounts` and the c
   <Accordion title="Not Found / No Access — 404">
     ```json
     { "error": "Event not found", "code": "event/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Posting Not Allowed — 403">
+    The caller can see the event but is banned in its space or a space above it.
+    ```json
+    { "error": "You can't post or take part in this space.", "code": "space/posting-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Not Invited — 403">
+    An `invite` event the caller can see only as an admin or moderator of its space, without an invite.
+    ```json
+    { "error": "Only invited users can RSVP to this event.", "code": "event/not-invited" }
     ```
   </Accordion>
   <Accordion title="Event Cancelled — 409">

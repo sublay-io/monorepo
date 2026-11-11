@@ -14,7 +14,7 @@ Events belong to the `events` bundle. They work standalone, but some behaviors d
 | `id` | `string` | Unique event identifier (UUID). |
 | `shortId` | `string` | Short, URL-safe identifier generated automatically. |
 | `projectId` | `string` | The project this event belongs to. |
-| `userId` | `string \| null` | ID of the event creator. Set to `null` if the creator's account is deleted (the event survives). |
+| `userId` | `string \| null` | ID of the event's **owner**: the user who created it. Set to `null` if the owner's account is deleted (the event survives, with no owner). See [Owner and hosts](#owner-and-hosts). |
 | `user` | `User \| null` | Populated creator object. Only present when `include` contains `"user"`. |
 | `title` | `string` | Event title (1–300 characters). |
 | `description` | `string \| null` | Optional description. Empty strings are normalized to `null`. |
@@ -27,13 +27,13 @@ Events belong to the `events` bundle. They work standalone, but some behaviors d
 | `address` | `string \| null` | Street address. Required (with or instead of `location`) for `physical` and `hybrid` events. |
 | `location` | `{ type: "Point"; coordinates: [number, number] } \| null` | GeoJSON point as `[longitude, latitude]` (PostGIS). Set from the `latitude`/`longitude` you pass on create/update. Powers proximity search. |
 | `spaceId` | `string \| null` | Optional soft reference to a Space. Required when `visibility` is `"members"`. No enforced cross-bundle FK. |
-| `space` | `Space \| null` | Populated space object. Only present when `include` contains `"space"`; `null` when the viewer can't see the space (`spaceId` still names it). See [Space visibility](/v8/data-models/space#visibility). |
+| `space` | `Space \| null` | Populated space object. Only present when `include` contains `"space"`. An event in a space the viewer can't read isn't returned at all (see [Visibility](#visibility)), so it's never hidden here. |
 | `visibility` | `"public" \| "members" \| "invite"` | Who can see the event. See [Visibility](#visibility) below. Defaults to `"public"`. |
 | `status` | `"active" \| "cancelled"` | Lifecycle status. A cancelled event stays fetchable but rejects new RSVPs. Defaults to `"active"`. |
 | `allowMaybe` | `boolean` | Whether a `"maybe"` RSVP is permitted. Defaults to `true`. |
-| `guestListVisible` | `boolean` | Whether non-hosts can see the named RSVP/guest list (counts are always public). Defaults to `true`. |
+| `guestListVisible` | `boolean` | Whether everyone who can see the event can see the named RSVP/guest list (counts are always public). When `false`, the list is visible only to hosts who are active members of the event's space (any host, for an event with no space) and to the space's admins and moderators. Defaults to `true`. |
 | `capacity` | `number \| null` | Maximum number of `going` RSVPs. `null` means unlimited. Enforced under a row lock so it can't be oversold. |
-| `hostIds` | `string[]` | UUIDs of the event's hosts. The creator is always included. Always has at least one entry. |
+| `hostIds` | `string[]` | UUIDs of the event's hosts. Always includes the owner (`userId`) when the event has one, and always has at least one entry. |
 | `coverImageId` | `string \| null` | File ID of the single cover image. Requires the `files-images` bundle. |
 | `files` | `File[]` | Cover + gallery file objects. Only present when `include` contains `"files"`. |
 | `rsvpCounts` | `{ going: number; maybe: number; "not-going": number }` | Denormalized RSVP totals, always returned. |
@@ -55,7 +55,7 @@ The `type` field controls which location fields are required on create and updat
 
 ## Visibility
 
-Visibility is enforced **server-side** on every read — an event you can't see returns `404` (its existence is never leaked).
+Visibility is enforced **server-side** on every read — an event you can't see returns `404` (its existence is never leaked), and lists leave it out with totals that match.
 
 | Value | Who can see it |
 |-------|----------------|
@@ -63,7 +63,33 @@ Visibility is enforced **server-side** on every read — an event you can't see 
 | `"members"` | Active members of the event's `spaceId`. Requires a `spaceId` and the `spaces` bundle. |
 | `"invite"` | Users with an `EventInvite` row for the event. |
 
-In every case, a **host** (a user whose ID is in `hostIds`) can always see the event regardless of visibility. A service key sees exactly what the user it names in `actingUserId` sees, and only public events when it names nobody: there is no key bypass.
+Two more groups see an event whatever its `visibility`:
+
+- **Its hosts** (the owner and everyone in `hostIds`), while they are active members of the event's space. For an event with no space, hosts always see it. A host who isn't an active member of the event's space (they left, were removed, are pending or are banned) sees the event only as a regular viewer would.
+- **The space's admins and moderators**: active admins and moderators of the event's space see every event in it, `invite` events they weren't invited to included. This is the event's own space only: an admin or moderator of a space above it doesn't see it unless they also hold that role in the event's space.
+
+On top of that, an event in a space follows the space's reading rules: you see it only if you can read its space — you're an active member of it, or its `readingPermission` is `"anyone"` and you can read the space above it, and the space isn't [hidden from you](/v8/data-models/space#visibility) (see [Who can read content](/v8/data-models/space#who-can-read-content)). An event in a space you can't read is hidden from everyone it would otherwise be shown to, hosts included. An event whose `spaceId` points at no space (for example, one kept after the `spaces` bundle was uninstalled) is left out of every read.
+
+A service key sees exactly what the user it names in `actingUserId` sees, and only what an anonymous caller sees when it names nobody: there is no key bypass.
+
+## Owner and hosts
+
+The user who creates an event is its **owner** (`userId`). The owner is always one of its hosts: they appear in `hostIds`, can't step down and can't be removed. Other hosts are added by the owner.
+
+| Action | Owner | Other hosts | Space admins and moderators |
+|--------|-------|-------------|-----------------------------|
+| See the event, its hidden guest list and its invite list | Yes | Yes | Yes |
+| Edit the event | Yes | Yes | No |
+| Invite and uninvite users | Yes | Yes | No |
+| Add or remove other hosts | Yes | No | No |
+| Step down as host | No | Yes | — |
+| Cancel or delete the event | Yes | No (yes on an event with no owner) | Yes |
+
+**Active membership.** On an event in a space, every host power needs active membership of that space and no ban in it or in any space above it. A host who loses it keeps the role (they stay in `hostIds`) but loses its powers until they are an active member again: the owner may then only cancel or delete the event, and another host may only step down. Every other host action answers `403` `event/not-space-member`. Anyone made a host of an event in a space, at create or later, must be an active member of that space (`409` `event/host-not-member`).
+
+**Events with no owner.** When the owner's account is deleted, `userId` becomes `null` and the event keeps its other hosts. They can still edit it and manage invites (with active membership), and any of them may cancel or delete it. Nobody can add or remove hosts. The last remaining host can't step down (`409` `event/last-host`); they can cancel the event instead. An event whose only host's account is deleted is cancelled automatically.
+
+**Events with no space** follow the same owner rules, with no membership requirement and no space admins or moderators.
 
 ## Capacity & RSVP rules
 

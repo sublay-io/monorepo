@@ -4,9 +4,9 @@ api: "POST /v8/:projectId/events/:eventId/cancel"
 description: "Cancel an event without deleting it (host-only)"
 ---
 
-Cancels an event by setting its `status` to `"cancelled"`. The event remains fetchable, but new and changed RSVPs are rejected. Allowed for a host of the event, or an active admin or moderator of the event's space. A service key acts as the user it names in `actingUserId`, with that user's powers.
+Cancels an event by setting its `status` to `"cancelled"`. The event remains fetchable, but new and changed RSVPs are rejected. Allowed for the event's **owner** (also when they are no longer an active member of its space) and for an active admin or moderator of the event's space. Other hosts can't cancel an event that has an owner. When the owner's account was deleted, any of its hosts may cancel it — for an event in a space, only while an active member of that space (an event kept after the `spaces` bundle was uninstalled counts as having no space here). A service key acts as the user it names in `actingUserId`, with that user's powers.
 
-On cancel, an `event-cancelled` notification is fanned out to all `going`/`maybe` RSVPs (best-effort, requires the `notifications` bundle).
+On cancel, an `event-cancelled` notification is fanned out to the `going`/`maybe` RSVP holders who can still see the event (best-effort, requires the `notifications` bundle).
 
 To remove an event entirely, use [Delete Event](/v8/api-reference/events/delete-event).
 
@@ -19,12 +19,16 @@ To remove an event entirely, use [Delete Event](/v8/api-reference/events/delete-
 ## Body Parameters
 
 <ParamField body="actingUserId" type="string">
-  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, or an active admin or moderator of its space, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
+  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are the event's owner, an active admin or moderator of its space, or (on an event with no owner) one of its hosts, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
 
-Returns the updated [Event](/v8/data-models/event) object with `status: "cancelled"`.
+Returns the updated [Event](/v8/data-models/event) object with `status: "cancelled"`. When the caller can't [see the event](/v8/data-models/event#visibility) (for example an owner who is no longer an active member of its space), the response is only:
+
+```json
+{ "id": "<eventId>", "status": "cancelled" }
+```
 
 ## Error Responses
 
@@ -64,13 +68,21 @@ Returns the updated [Event](/v8/data-models/event) object with `status: "cancell
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    The event doesn't exist, or the caller can't [see it](/v8/data-models/event#visibility) and isn't one of its hosts.
     ```json
     { "error": "Event not found", "code": "event/not-found" }
     ```
   </Accordion>
-  <Accordion title="Forbidden (not a host) — 403">
+  <Accordion title="Forbidden — 403">
+    The caller isn't the owner or an admin or moderator of the event's space (other hosts included), and the event has an owner — or the event has no owner and the caller isn't one of its hosts.
     ```json
-    { "error": "Only a host of this event or an admin/moderator of its space may cancel it.", "code": "event/forbidden" }
+    { "error": "Only the event's owner or an admin or moderator of its space may cancel it.", "code": "event/forbidden" }
+    ```
+  </Accordion>
+  <Accordion title="Host Not an Active Member — 403">
+    On an event with no owner, the caller is a host, but the event is in a space they aren't an active member of, or they are banned in it or a space above it. One body for every case.
+    ```json
+    { "error": "Hosts must be active members of this event's space, and not banned from it or a space above it, to do this.", "code": "event/not-space-member" }
     ```
   </Accordion>
 </AccordionGroup>

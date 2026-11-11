@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchEvent` returns a callable that fetches one event by ID. Visibility is enforced server-side: if the event doesn't exist or the logged-in user can't see it, the request returns `404`. Pass `include` to expand associations and populate `userRsvp`.
+`useFetchEvent` returns a callable that fetches one event by ID. Visibility is enforced server-side: if the event doesn't exist or the logged-in user can't see it (including an event in a space they can't read), the request returns `404`. The space's active admins and moderators see every event in their space, `invite` events included; a host who isn't an active member of the event's space sees only what a regular viewer would. See [Event visibility](/v8/data-models/event#visibility). Pass `include` to expand associations and populate `userRsvp`.
 
 ## Usage Example
 

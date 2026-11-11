@@ -401,6 +401,10 @@ Which of those apply depends on the event type:
 | `message` (chat) | `open-conversation` | `conversationId`, `messageId` |
 
 <Note>
+  **Event notifications follow the event.** `event-updated` and `event-cancelled` go only to users with a `going` or `maybe` RSVP who can still [see the event](/v8/data-models/event#visibility); the space's admins and moderators get them only for events they RSVPed to. `event-invite` goes only to a user who [can be invited](/v8/api-reference/events/add-invite) to the event.
+</Note>
+
+<Note>
   **Content and RSVP-event notifications also carry the parent space.** A notification *about* an Entity or Comment (a "content notification") or an RSVP-event notification additionally forwards the parent **Space** id set (`spaceId`, `spaceShortId`, `spaceSlug`) when the subject lives in a space, so you can route within a space. Don't confuse the `message` **event type** or an RSVP **Event** (the data model) with the generic idea of a "notification event."
 </Note>
 

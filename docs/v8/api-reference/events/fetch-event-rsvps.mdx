@@ -8,8 +8,8 @@ Returns a paginated list of [EventRsvp](/v8/data-models/event-rsvp) records, eac
 
 Authentication is optional. The viewer is the signed-in user, or the user a service key names in `actingUserId`; a service key naming nobody is treated as anonymous, with no bypass. The event is first loaded behind the [visibility predicate](/v8/data-models/event#visibility), so a caller without access to the event gets `404`. The named list itself is then gated:
 
-- **Hosts** can always see it.
 - **Any viewer** (including anonymous) can see it when the event's `guestListVisible` is `true`.
+- When it's `false`: **hosts** who are active members of the event's space (any host, for an event with no space) and the **space's active admins and moderators** can see it.
 - Otherwise the response is `403`.
 
 Aggregate RSVP **counts** are always public via the event's `rsvpCounts` — this endpoint only governs the per-user list.
@@ -23,7 +23,7 @@ Aggregate RSVP **counts** are always public via the event's `rsvpCounts` — thi
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string">
-  Service key only: the user to read as, exactly as their own access token: their event visibility and whether they host it. Leave it out for the anonymous view (a `public` event's list, and only when `guestListVisible` is `true`). A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
+  Service key only: the user to read as, exactly as their own access token: their event visibility, whether they host it and whether they're on the event's space team. Leave it out for the anonymous view (a `public` event's list, and only when `guestListVisible` is `true`). A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField query="page" type="number">

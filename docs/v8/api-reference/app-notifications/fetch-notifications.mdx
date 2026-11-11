@@ -8,6 +8,8 @@ Returns a paginated list of app notifications for the currently authenticated us
 
 A notification about content in a space is created only for a recipient who can read that space when it's sent, so the list never holds one they couldn't read at the time (see [Who receives notifications about space content](/v8/sdk/app-notifications/overview#who-receives-notifications-about-space-content)). Notifications already in the list stay there if the user later loses access.
 
+Event notifications follow the event: `event-updated` and `event-cancelled` go only to users with a `going` or `maybe` RSVP who can still [see the event](/v8/data-models/event#visibility), and `event-invite` only to a user who [can be invited](/v8/api-reference/events/add-invite) to it.
+
 <Note>
   This endpoint requires an authenticated user. Include a valid `Authorization: Bearer <accessToken>` header, or use a service key and name the user in `actingUserId`.
 </Note>

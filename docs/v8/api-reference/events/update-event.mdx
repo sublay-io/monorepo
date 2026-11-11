@@ -4,13 +4,13 @@ api: "PATCH /v8/:projectId/events/:eventId"
 description: "Edit an event's mutable fields and curate its images (host-only)"
 ---
 
-Updates an event. **Host-only**: the caller must be in `hostIds`. A service key acts as the host it names in `actingUserId`. Every provided field is updated; omitted fields are left untouched. Type-conditional location validation is re-applied when `type` is present.
+Updates an event. **Host-only**: the caller must be the owner or in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it. The space's admins and moderators can't edit events they don't host. A service key acts as the host it names in `actingUserId`. Every provided field is updated; omitted fields are left untouched. Type-conditional location validation is re-applied when `type` is present.
 
 `hostIds`, `status`, and `spaceId` are **not** editable here — manage hosts via the [host endpoints](/v8/api-reference/events/add-host), cancel via [Cancel Event](/v8/api-reference/events/cancel-event); the space is immutable.
 
 Images can be curated in one request: a new `cover` **replaces** the existing cover, `gallery` files are **appended**, and `removeImageIds` deletes existing event images by File ID. Any image operation requires the `files-images` bundle.
 
-When a time field (`startTime`/`endTime`/`timezone`) or a location field (`location`/`url`/`venueName`/`address`) actually changes, an `event-updated` notification is fanned out to all `going`/`maybe` RSVPs (best-effort, requires the `notifications` bundle).
+When a time field (`startTime`/`endTime`/`timezone`) or a location field (`location`/`url`/`venueName`/`address`) actually changes, an `event-updated` notification is fanned out to the `going`/`maybe` RSVP holders who can still see the event (best-effort, requires the `notifications` bundle).
 
 ## Path Parameters
 
@@ -33,7 +33,7 @@ When a time field (`startTime`/`endTime`/`timezone`) or a location field (`locat
 <ParamField body="visibility" type="string">`"public"`, `"members"`, or `"invite"`.</ParamField>
 <ParamField body="capacity" type="number">New capacity (positive integer).</ParamField>
 <ParamField body="allowMaybe" type="boolean">Whether `"maybe"` RSVPs are allowed.</ParamField>
-<ParamField body="guestListVisible" type="boolean">Whether non-hosts can view the guest list.</ParamField>
+<ParamField body="guestListVisible" type="boolean">Whether everyone who can see the event can view the guest list. When `false`, only hosts who are active members of the event's space and the space's admins and moderators can.</ParamField>
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB.</ParamField>
 
 <ParamField body="removeImageIds" type="string[]">
@@ -57,7 +57,7 @@ When a time field (`startTime`/`endTime`/`timezone`) or a location field (`locat
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
+  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event with active membership of its space, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -105,6 +105,7 @@ Returns the updated [Event](/v8/data-models/event) object.
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    The event doesn't exist, or the caller can't [see it](/v8/data-models/event#visibility) and isn't one of its hosts.
     ```json
     { "error": "Event not found", "code": "event/not-found" }
     ```
@@ -112,6 +113,12 @@ Returns the updated [Event](/v8/data-models/event) object.
   <Accordion title="Forbidden (not a host) — 403">
     ```json
     { "error": "Only a host of this event may update it.", "code": "event/forbidden" }
+    ```
+  </Accordion>
+  <Accordion title="Host Not an Active Member — 403">
+    The caller is a host, but the event is in a space they aren't an active member of, or they are banned in it or a space above it. One body for every case.
+    ```json
+    { "error": "Hosts must be active members of this event's space, and not banned from it or a space above it, to do this.", "code": "event/not-space-member" }
     ```
   </Accordion>
   <Accordion title="files-images Bundle Required — 403">

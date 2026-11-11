@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useCreateEvent` returns a callable that creates an event. The logged-in user becomes the creator and is auto-added to `hostIds`. Pass `cover` and/or `gallery` to upload images inline — the hook sends `multipart/form-data` automatically (requires the `files-images` bundle).
+`useCreateEvent` returns a callable that creates an event. The logged-in user becomes the event's [owner](/v8/data-models/event#owner-and-hosts) (`userId`) and is auto-added to `hostIds`. For an event in a space, the request is refused when the user isn't an active member of the space, banned in it included (`403 event/not-space-member`), when they are banned in a space above it or the space's `postingPermission` is `"team"` and they aren't one of its admins or moderators (`403 space/posting-not-allowed`), or when a user in `hostIds` isn't an active member of the space (`409 event/host-not-member`). Pass `cover` and/or `gallery` to upload images inline — the hook sends `multipart/form-data` automatically (requires the `files-images` bundle).
 
 ## Usage Example
 
@@ -50,8 +50,8 @@ function CreateEvent() {
 <ParamField path="visibility" type='"public" | "members" | "invite"'>Defaults to `"public"`.</ParamField>
 <ParamField path="capacity" type="number">Max `going` RSVPs. Omit for unlimited.</ParamField>
 <ParamField path="allowMaybe" type="boolean">Allow `"maybe"` RSVPs. Defaults to `true`.</ParamField>
-<ParamField path="guestListVisible" type="boolean">Expose the named guest list. Defaults to `true`.</ParamField>
-<ParamField path="hostIds" type="string[]">Additional host user IDs (the logged-in user is auto-added).</ParamField>
+<ParamField path="guestListVisible" type="boolean">Expose the named guest list to everyone who can see the event. When `false`, only hosts who are active members of the event's space and the space's admins and moderators see it. Defaults to `true`.</ParamField>
+<ParamField path="hostIds" type="string[]">Additional host user IDs (the logged-in user is auto-added). For an event in a space, each must be an active member of it.</ParamField>
 <ParamField path="metadata" type="Record<string, any>">Arbitrary key-value data. Up to 1 MB.</ParamField>
 <ParamField path="cover" type="{ file: File | RNFile; options?: UploadImageOptions }">
   Single cover image to upload. Sends multipart. Requires the `files-images` bundle.

@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/events/:eventId"
 description: "Permanently or soft-delete an event and clean up its children (host-only)"
 ---
 
-Deletes an event. Allowed for a host of the event, or an active admin or moderator of the event's space. A service key acts as the user it names in `actingUserId`, with that user's powers. The event's child `EventRsvps` and `EventInvites` are cleaned up, and—depending on settings—its files.
+Deletes an event. Allowed for the event's **owner** (also when they are no longer an active member of its space) and for an active admin or moderator of the event's space. Other hosts can't delete an event that has an owner. When the owner's account was deleted, any of its hosts may delete it — for an event in a space, only while an active member of that space (an event kept after the `spaces` bundle was uninstalled counts as having no space here). A service key acts as the user it names in `actingUserId`, with that user's powers. The event's child `EventRsvps` and `EventInvites` are cleaned up, and—depending on settings—its files.
 
 Deletion honors the project's `eventDeletion` settings:
 
@@ -20,7 +20,7 @@ Deletion honors the project's `eventDeletion` settings:
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string">
-  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, or an active admin or moderator of its space, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
+  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are the event's owner, an active admin or moderator of its space, or (on an event with no owner) one of its hosts, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -65,13 +65,21 @@ Returns `204 No Content` on success.
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    The event doesn't exist, or the caller can't [see it](/v8/data-models/event#visibility) and isn't one of its hosts.
     ```json
     { "error": "Event not found", "code": "event/not-found" }
     ```
   </Accordion>
-  <Accordion title="Forbidden (not a host) — 403">
+  <Accordion title="Forbidden — 403">
+    The caller isn't the owner or an admin or moderator of the event's space (other hosts included), and the event has an owner — or the event has no owner and the caller isn't one of its hosts.
     ```json
-    { "error": "Only a host of this event or an admin/moderator of its space may delete it.", "code": "event/forbidden" }
+    { "error": "Only the event's owner or an admin or moderator of its space may delete it.", "code": "event/forbidden" }
+    ```
+  </Accordion>
+  <Accordion title="Host Not an Active Member — 403">
+    On an event with no owner, the caller is a host, but the event is in a space they aren't an active member of, or they are banned in it or a space above it. One body for every case.
+    ```json
+    { "error": "Hosts must be active members of this event's space, and not banned from it or a space above it, to do this.", "code": "event/not-space-member" }
     ```
   </Accordion>
   <Accordion title="Already Deleted — 404">

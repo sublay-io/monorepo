@@ -4,11 +4,11 @@ api: "POST /v8/:projectId/events"
 description: "Create an event, optionally with a cover image and gallery"
 ---
 
-Creates an event. The acting user (the token's own user, or the `actingUserId` a service key sends) becomes the creator (`userId`) and is automatically added to `hostIds`. Supports inline cover and gallery image upload via `multipart/form-data`.
+Creates an event. The acting user (the token's own user, or the `actingUserId` a service key sends) becomes the event's **owner** (`userId`) and is automatically added to `hostIds`. See [Owner and hosts](/v8/data-models/event#owner-and-hosts). Supports inline cover and gallery image upload via `multipart/form-data`.
 
 The required location fields depend on `type`: `online` needs a `url`; `physical` needs an `address` or `location`; `hybrid` needs both a `url` and an `address`/`location`.
 
-Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bundle and active membership of the space — for a service key, the membership of the user it names in `actingUserId`, exactly as that user's own request. Image upload requires the `files-images` bundle.
+Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bundle and active membership of the space, no ban in any space above it, and, in a space whose `postingPermission` is `"team"`, the admin or moderator role there — for a service key, the membership of the user it names in `actingUserId`, exactly as that user's own request. Every user in `hostIds` must be an active member of the space too. Image upload requires the `files-images` bundle.
 
 ## Body Parameters
 
@@ -69,11 +69,11 @@ Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bu
 </ParamField>
 
 <ParamField body="guestListVisible" type="boolean">
-  Whether non-hosts can view the named guest list. Defaults to `true`.
+  Whether everyone who can see the event can view the named guest list. When `false`, only hosts who are active members of the event's space and the space's admins and moderators can. Defaults to `true`.
 </ParamField>
 
 <ParamField body="hostIds" type="string[]">
-  Additional host user IDs. The creator is always added automatically. On multipart requests, send as a JSON string.
+  Additional host user IDs. The creator is always added automatically. For an event in a space, each one must be an active member of that space (`409 event/host-not-member`); events with no space accept anyone. On multipart requests, send as a JSON string.
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -167,8 +167,21 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     ```
   </Accordion>
   <Accordion title="Not a Space Member — 403">
+    The creator isn't an active member of the space — including anyone banned in the space itself.
     ```json
     { "error": "You must be an active member of this space to create an event in it.", "code": "event/not-space-member" }
+    ```
+  </Accordion>
+  <Accordion title="Posting Not Allowed — 403">
+    The creator is an active member, but is banned in a space above it, or the space's `postingPermission` is `"team"` and they aren't one of its admins or moderators. One body for every cause.
+    ```json
+    { "error": "You can't post or take part in this space.", "code": "space/posting-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Host Not a Member — 409">
+    A user in `hostIds` isn't an active member of the event's space (not a member, pending or banned — the same body for each).
+    ```json
+    { "error": "This user isn't an active member of this space.", "code": "event/host-not-member" }
     ```
   </Accordion>
   <Accordion title="File Too Large — 413">

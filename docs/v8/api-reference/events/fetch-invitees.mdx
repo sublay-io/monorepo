@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/events/:eventId/invites"
 description: "List an event's invited users (host-only)"
 ---
 
-Returns a paginated list of [EventInvite](/v8/data-models/event-invite) records, each with the invited `user` populated. **Host-only** — a non-host receives `403`, and a non-existent event receives `404`. A service key acts as the host it names in `actingUserId`. Results are ordered by `invitedAt` descending.
+Returns a paginated list of [EventInvite](/v8/data-models/event-invite) records, each with the invited `user` populated. Open to the event's hosts — for an event in a space, while they are active members of it and not banned in it or a space above it — and to the space's active admins and moderators. Anyone else who can see the event receives `403`; a missing event, or one the caller can't see and doesn't host, receives `404`. A service key acts as the user it names in `actingUserId`. Results are ordered by `invitedAt` descending.
 
 ## Path Parameters
 
@@ -23,7 +23,7 @@ Returns a paginated list of [EventInvite](/v8/data-models/event-invite) records,
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
-  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
+  Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event or an admin or moderator of its space, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -68,13 +68,21 @@ Returns a paginated response: `{ data: EventInvite[], pagination: {...} }`.
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    The event doesn't exist, or the caller can't [see it](/v8/data-models/event#visibility) and isn't one of its hosts.
     ```json
     { "error": "Event not found", "code": "event/not-found" }
     ```
   </Accordion>
-  <Accordion title="Forbidden (not a host) — 403">
+  <Accordion title="Forbidden — 403">
+    The caller can see the event but isn't one of its hosts or an admin or moderator of its space.
     ```json
-    { "error": "Only a host of this event may view its invite list.", "code": "event/forbidden" }
+    { "error": "Only the event's hosts or an admin or moderator of its space may view its invite list.", "code": "event/forbidden" }
+    ```
+  </Accordion>
+  <Accordion title="Host Not an Active Member — 403">
+    The caller is a host, but the event is in a space they aren't an active member of, or they are banned in it or a space above it. One body for every case.
+    ```json
+    { "error": "Hosts must be active members of this event's space, and not banned from it or a space above it, to do this.", "code": "event/not-space-member" }
     ```
   </Accordion>
 </AccordionGroup>

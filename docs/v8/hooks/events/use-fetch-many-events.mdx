@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchManyEvents` returns a callable that fetches a single page of events with all filters, sorting, geo, and free-text search. Visibility is enforced server-side. This is the low-level query — for a stateful list with sort state and load-more, use [`useFetchManyEventsWrapper`](/v8/hooks/events/use-fetch-many-events-wrapper).
+`useFetchManyEvents` returns a callable that fetches a single page of events with all filters, sorting, geo, and free-text search. Visibility is enforced server-side, on the rows and the totals alike. The space's active admins and moderators see every event in their space, `invite` events included; a host who isn't an active member of the event's space sees only what a regular viewer would. See [Event visibility](/v8/data-models/event#visibility). This is the low-level query — for a stateful list with sort state and load-more, use [`useFetchManyEventsWrapper`](/v8/hooks/events/use-fetch-many-events-wrapper).
 
 ## Usage Example
 
@@ -37,7 +37,7 @@ function useUpcoming() {
 <ParamField path="startsAfter" type="string">ISO datetime lower bound on `startTime`.</ParamField>
 <ParamField path="startsBefore" type="string">ISO datetime upper bound on `startTime`.</ParamField>
 <ParamField path="spaceId" type='string | "none" | null'>Only this space's events, or `"none"` for events not in any space. Left out or `null`: every event.</ParamField>
-<ParamField path="hostId" type="string">Only events this user hosts.</ParamField>
+<ParamField path="hostId" type="string">Only events this user hosts: events whose `hostIds` contain them, and events they own.</ParamField>
 <ParamField path="type" type='"online" | "physical" | "hybrid"'>Filter by type.</ParamField>
 <ParamField path="status" type='"active" | "cancelled"'>Defaults to `"active"`.</ParamField>
 <ParamField path="myRsvp" type="RsvpStatus | RsvpStatus[]">Statuses the logged-in user RSVP'd with, e.g. `["going","maybe"]`.</ParamField>

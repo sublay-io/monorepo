@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchManyEventsWrapper` wraps [`useFetchManyEvents`](/v8/hooks/events/use-fetch-many-events) into a ready-to-render list: it holds the accumulated `events`, tracks `loading`/`hasMore`, manages sort state, and exposes `loadMore` and `refresh`. It mirrors `useFetchManyEntitiesWrapper`. Visibility is enforced server-side, so the list only contains events the current user may see.
+`useFetchManyEventsWrapper` wraps [`useFetchManyEvents`](/v8/hooks/events/use-fetch-many-events) into a ready-to-render list: it holds the accumulated `events`, tracks `loading`/`hasMore`, manages sort state, and exposes `loadMore` and `refresh`. It mirrors `useFetchManyEntitiesWrapper`. Visibility is enforced server-side, so the list only contains events the current user may see. The space's active admins and moderators see every event in their space, `invite` events included; a host who isn't an active member of the event's space sees only what a regular viewer would. See [Event visibility](/v8/data-models/event#visibility).
 
 Changing any filter prop (or calling `refresh`) resets the list to page 1.
 
@@ -42,7 +42,7 @@ function EventsList() {
 
 <ParamField path="limit" type="number">Page size. Defaults to `10`.</ParamField>
 <ParamField path="spaceId" type='string | "none" | null'>Only this space's events, or `"none"` for events not in any space. Left out or `null`: every event.</ParamField>
-<ParamField path="hostId" type="string | null">Only events this user hosts.</ParamField>
+<ParamField path="hostId" type="string | null">Only events this user hosts: events whose `hostIds` contain them, and events they own.</ParamField>
 <ParamField path="type" type='"online" | "physical" | "hybrid" | null'>Filter by type.</ParamField>
 <ParamField path="status" type='"active" | "cancelled" | null'>Filter by status.</ParamField>
 <ParamField path="timeWindow" type='"upcoming" | "ongoing" | "past" | null'>Derived time window.</ParamField>

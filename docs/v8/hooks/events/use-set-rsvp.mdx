@@ -8,6 +8,12 @@ icon: "plug"
 
 `useSetRsvp` returns a callable that sets or changes the logged-in user's RSVP. The event's `rsvpCounts` update atomically. A transition into `going` is capacity-checked. RSVPs close at `startTime`, are rejected on cancelled events, and `"maybe"` is rejected when `allowMaybe` is `false`.
 
+The request is refused when:
+
+- the logged-in user can't [see the event](/v8/data-models/event#visibility) — `404 event/not-found` (for example a `members` event once a ban ends their active membership);
+- they can see it but are banned in its space or a space above it — `403 space/posting-not-allowed`;
+- it's an `invite` event they see only as an admin or moderator of its space, without an invite — `403 event/not-invited`.
+
 ## Usage Example
 
 ```tsx

@@ -81,6 +81,8 @@ Returns the updated [Entity](/v8/data-models/entity) object with the new `reacti
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    Returned when the entity doesn't exist, its author and the user have blocked each other (either direction), or it is in a space the user can't read (see [who can read content](/v8/data-models/space#who-can-read-content)). Nothing is written.
+
     ```json
     { "error": "Entity not found.", "code": "entity/not-found" }
     ```

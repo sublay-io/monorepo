@@ -30,6 +30,10 @@ A DELETE takes no body: every field besides the path goes in the query string.
 
 When the `moderation` bundle is installed and the entity's author has blocked the user, the request returns `404 entity/not-found` — identical to a missing entity — and nothing changes. The user's own block on the author doesn't stop them removing their reaction.
 
+## Reading
+
+An entity in a space the user can no longer read (see [who can read content](/v8/data-models/space#who-can-read-content)), for example after leaving a members-only space, returns `404 entity/not-found` too, and the reaction stays.
+
 ## Response
 
 Returns the updated [Entity](/v8/data-models/entity) object with the new `reactionCounts`.
@@ -89,7 +93,7 @@ Returns the updated [Entity](/v8/data-models/entity) object with the new `reacti
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
-    Returned when the entity doesn't exist, or its author has blocked the user (see [Blocks](#blocks)).
+    Returned when the entity doesn't exist, its author has blocked the user (see [Blocks](#blocks)), or it is in a space the user can't read (see [Reading](#reading)).
 
     ```json
     { "error": "Entity not found.", "code": "entity/not-found" }

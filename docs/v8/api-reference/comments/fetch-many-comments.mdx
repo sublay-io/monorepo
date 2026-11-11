@@ -199,6 +199,10 @@ Every comment carries two flags, `isAuthorBlocked` and `isUnavailable`. Both are
 
 When the **entity's** author has blocked the caller, the whole thread is unavailable to them: a request with that `entityId`, or with the `parentId` of any comment on that entity, returns an empty page — exactly what an entity that doesn't exist returns.
 
+## Reading
+
+A thread follows its entity's space. When the entity is in a space the caller can't read (see [who can read content](/v8/data-models/space#who-can-read-content)), a request with that `entityId`, or with the `parentId` of any comment on that entity, returns the same empty page. A service key without `actingUserId` reads as a signed-out caller, so threads on entities in members-only and private spaces come back empty; name a member in `actingUserId` to read them.
+
 ## Cursors
 
 A cursor is an opaque string. It records the sort it was created under and the last comment you received, and the next request continues right after that comment. Comments posted in the meantime don't shift what you get.

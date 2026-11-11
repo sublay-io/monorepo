@@ -12,6 +12,8 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 Returns a paginated list of entities for the project. Supports rich filtering by source, space, user, keywords, metadata, title, content, location, and time. Excludes drafts — use [Fetch Drafts](/v8/api-reference/entities/fetch-drafts) for those.
 
+Entities in spaces the viewer can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) are left out in every mode and sort, and `totalItems` counts only the entities the viewer can read. A `spaceId` naming a space the viewer can't read returns an empty page with `totalItems: 0`. A service key without `actingUserId` lists as a signed-out caller, so entities in members-only and private spaces are left out; name a member in `actingUserId` to include them.
+
 ## Query Parameters
 
 ### Acting user
@@ -144,7 +146,7 @@ Returns a paginated list of entities for the project. Supports rich filtering by
 <ParamField query="include" type="string">
   Associations to include in each entity. Pass it as one comma-separated value (`include=user,space`) or as repeated params (`include=user&include=space`). Values:
   - `user` — the author's user profile
-  - `space` — the space the entity belongs to (`null` when the viewer can't see that space; see [Space visibility](/v8/data-models/space#visibility))
+  - `space` — the space the entity belongs to
   - `topComments` — the entity's best top-level comments, as full [Comment](/v8/data-models/comment) objects (see [Top comments](/v8/data-models/entity#top-comments))
   - `saved` — whether the authenticated user has saved this entity
   - `files` — uploaded file/image attachments

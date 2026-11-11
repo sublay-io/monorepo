@@ -8,7 +8,7 @@ description: "Get the authenticated user's reaction on an entity"
   **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
 </Note>
 
-Returns the authenticated user's current reaction on the specified entity, or `null` if they have not reacted.
+Returns the authenticated user's current reaction on the specified entity, or `null` if they have not reacted. An entity that doesn't exist, or is in a space the user can't read (see [who can read content](/v8/data-models/space#who-can-read-content)), answers `404 entity/not-found`.
 
 **Authentication required.**
 
@@ -55,6 +55,12 @@ or, if the user has no reaction:
     Returned when a service key names an `actingUserId` that isn't a user in this project.
     ```json
     { "error": "No user with this actingUserId exists in this project.", "code": "entity/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Not Found — 404">
+    Returned when the entity doesn't exist, or is in a space the user can't read.
+    ```json
+    { "error": "Entity not found.", "code": "entity/not-found" }
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">

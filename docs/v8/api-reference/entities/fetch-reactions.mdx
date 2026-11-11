@@ -12,6 +12,8 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 Returns a paginated list of reactions for an entity, each with the reacting user's profile. Useful for displaying "liked by" lists or reaction breakdowns.
 
+An entity in a space the viewer can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) answers `404 entity/not-found`, exactly like an entity that doesn't exist.
+
 Authentication is optional — the endpoint works without a token. When there is a viewer (the signed-in user, or the user a service key names in `actingUserId`), reactions from users with a block between them and the viewer, in either direction, are excluded from both the results and the count. Block filtering requires the `moderation` bundle.
 
 ## Path Parameters
@@ -91,6 +93,8 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    Returned when the entity doesn't exist, or is in a space the viewer can't read.
+
     ```json
     { "error": "Entity not found.", "code": "entity/not-found" }
     ```

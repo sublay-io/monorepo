@@ -33,7 +33,9 @@ export const SpaceReputationParams = ({ variant = "context", field = "path" }) =
         pass this object. <strong>This object is the primary form</strong> — it
         replaces the deprecated flat props below. See the{" "}
         <a href="/v8/data-models/reputation">Reputation data model</a> for the
-        full contract.
+        full contract. Only spaces the viewer can read count: a space they
+        can't read reads <code>0</code> (see{" "}
+        <a href="/v8/data-models/reputation#who-sees-space-reputation">Who sees space reputation</a>).
 
         <Expandable title="spaceReputation">
           {isUser ? (
@@ -62,7 +64,8 @@ export const SpaceReputationParams = ({ variant = "context", field = "path" }) =
             Only honored when <code>spaceId</code> is an explicit space <code>&lt;uuid&gt;</code>.
             When <code>true</code>, <code>spaceReputation</code> is the{" "}
             <strong>subtree sum</strong> — the named space plus all of its
-            descendant spaces (the root space's own bucket included). Ignored for{" "}
+            descendant spaces (the root space's own bucket included), counting
+            only the spaces the viewer can read. Ignored for{" "}
             <code>"none"</code>; not allowed with <code>"context"</code>.
           </ParamField>
         </Expandable>

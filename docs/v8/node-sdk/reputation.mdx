@@ -42,7 +42,7 @@ const grant = await sublay.reputation.createGrant({
   Whole number from `1` to `2147483647` (the signed 32-bit maximum). Never zero, negative, or fractional — use `mintGrant` to create or destroy reputation. It can never exceed what the sender holds in the source bucket.
 </ParamField>
 <ParamField body="spaceId" type="string | null">
-  The bucket both legs move in. Omitted or `null` = the project-general bucket. Reputation never crosses between the general bucket and a space bucket. Validated: an unknown space, or one the sender (`actingUserId`) can't see, is rejected with `404 reputation-grant/space-not-found`.
+  The bucket both legs move in. Omitted or `null` = the project-general bucket. Reputation never crosses between the general bucket and a space bucket. Validated: an unknown space, or one whose content the sender (`actingUserId`) can't read, is rejected with `404 reputation-grant/space-not-found`.
 </ParamField>
 <ParamField body="note" type="string | null">Free-text note. Trimmed, up to 2000 characters.</ParamField>
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB. Omit when unused.</ParamField>
@@ -127,13 +127,13 @@ console.log(summary?.total, "points from", summary?.count, "people");
   The user to list as: exactly what their own access token would get (grants on chat messages only where they can read the message; `summary.viewerTotal` is theirs). Omit it to list as a signed-in user in no conversation: no grants on chat messages, and `viewerTotal` is `0`.
 </ParamField>
 <ParamField body="spaceReputation" type="object">
-  Opt-in per-user space reputation on the hydrated users. `{ spaceId: "context" }` scores each user against that grant's own space. See [Reputation](/v8/data-models/reputation#reading-space-scoped-reputation).
+  Opt-in per-user space reputation on the hydrated users. `{ spaceId: "context" }` scores each user against that grant's own space. Only spaces the viewer can read count; others read `0`. See [Reputation](/v8/data-models/reputation#who-sees-space-reputation).
 </ParamField>
 
 **Returns** — `Promise<{ data: ReputationGrant[]; pagination; summary? }>`. The `summary` block (`{ total, count, viewerTotal }`) is returned **only** on the target filter shape.
 
 <Note>
-  **Grants on chat messages are private to their conversation, for a service key too.** Every shape asks whether the viewer can see the underlying message and withholds the grant if they cannot. With `actingUserId` the viewer is that user, exactly as their own token; without it, the key is treated as a signed-in user in no conversation and gets no grants on chat messages.
+  **Grants on chat messages are private to their conversation, for a service key too.** Every shape asks whether the viewer can see the underlying message and withholds the grant if they cannot. With `actingUserId` the viewer is that user, exactly as their own token; without it, the key is treated as a signed-in user in no conversation and gets no grants on chat messages. Grants tied to a space the viewer can't read, or given on an entity or comment they can't read, are left out of every shape and its `summary` — see [Grants follow space reading](/v8/data-models/reputation-grant#grants-follow-space-reading).
 </Note>
 
 <Warning>

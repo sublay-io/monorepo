@@ -45,7 +45,7 @@ A user's reputation lives in [buckets](/v8/data-models/reputation) — one per s
 - The general bucket is its own lane. Reputation cannot move between the general bucket and a space bucket in either direction.
 - Consequently, the total reputation held within a given space is unchanged by a transfer — it only changes hands.
 
-The named space must exist. Both write paths check it before touching a balance — an unknown `spaceId` is rejected with `404 reputation-grant/space-not-found` (on a transfer, so is a space the sender can't see), and naming a space on a project without the `spaces` bundle with `403 database/tables-not-available`. Without that check a grant could fund a bucket for a space that does not exist: its score would still count toward its owner's profile total while being invisible in every space-scoped view.
+The named space must exist. Both write paths check it before touching a balance — an unknown `spaceId` is rejected with `404 reputation-grant/space-not-found` (on a transfer, so is a space whose content the sender can't read), and naming a space on a project without the `spaces` bundle with `403 database/tables-not-available`. Without that check a grant could fund a bucket for a space that does not exist: its score would still count toward its owner's profile total while being invisible in every space-scoped view.
 
 A transfer is rejected unless the source bucket holds at least the amount, evaluated at the moment of the transfer. A mint has no source, so it may drive a bucket below zero (buckets have no floor — downvotes can already take one negative).
 
@@ -69,7 +69,7 @@ Reading entities, comments, or chat messages with the `grants` include attaches 
 | `count` | `number` | Number of positive grants on the item. |
 | `viewerTotal` | `number` | The calling user's own summed positive grants on the item. A user may grant the same item more than once, so this is an amount, not a yes/no. |
 
-The summary covers **positive grants only**. When the token is requested on a project whose schema has no grants table, the server returns a zero-filled summary (`{ total: 0, count: 0, viewerTotal: 0 }`) rather than omitting the key — so `grants` being `undefined` always means "nobody asked", never "this project has no grants".
+The summary covers **positive grants only**, and only the grants the viewer could list (see [Grants follow space reading](#grants-follow-space-reading)), so it always matches the list. When the token is requested on a project whose schema has no grants table, the server returns a zero-filled summary (`{ total: 0, count: 0, viewerTotal: 0 }`) rather than omitting the key — so `grants` being `undefined` always means "nobody asked", never "this project has no grants".
 
 The full per-item list of individual grants comes from [Fetch Many Reputation Grants](/v8/api-reference/reputation-grants/fetch-many-reputation-grants), not from the summary.
 
@@ -81,7 +81,17 @@ A grant row carries its `targetType`, `targetId` and the granter's free-text `no
 - **The user-keyed shapes carry the same test into the query.** Listing by `recipientId` or `senderId` returns a grant on a chat message to a caller who can see the underlying message and withholds it from one who cannot. So a user's own "reputation I received" feed does include the grants made on messages in their own conversations, and reconciles with the reputation on their profile; a caller outside the conversation loses those rows from the page **and** from `totalItems` together, leaving nothing to infer arithmetically. A service key is filtered as the user it names in `actingUserId`; naming nobody, it gets no grants on chat messages at all, like a signed-in user in no conversation.
 - **A removed message takes its grants with it.** Once moderation removes a message it is invisible on every chat surface, so its grants are invisible on both of these shapes too — to a member of the conversation as much as to a stranger, to the grant's own sender and recipient, and to a service key.
 
-Grants targeting an entity or a comment are unaffected — those items are public — and so are grants with no target at all. The inline summary on the chat reads needs no special rule: those endpoints already refuse a non-member with `403 chat/not-a-member` before they read a message.
+The inline summary on the chat reads needs no special rule: those endpoints already refuse a non-member with `403 chat/not-a-member` before they read a message.
+
+## Grants follow space reading
+
+A grant tied to a space, or given on an entity or comment in a space, says something about that space, so grants follow the space's [reading rules](/v8/data-models/space#who-can-read-content):
+
+- **Creating** a transfer into a space whose content the sender can't read answers `404 reputation-grant/space-not-found`, and one on an entity or comment the sender can't read `404 reputation-grant/target-not-found` — both exactly like a missing space or target. A comment goes by its entity's space. [Mints](/v8/api-reference/reputation-grants/mint-reputation-grant) aren't checked: your app may grant into any space and on any target.
+- **Listing** leaves out, on every shape, a grant whose own `spaceId` is in a space the viewer can't read, and a grant on an entity or comment that sits in a space the viewer can't read. The rows and `totalItems` move together. A grant whose `spaceId` names a space that no longer exists — the space was deleted, or the `spaces` bundle uninstalled — is left out for everyone. Grants on deleted entities and comments, and on entities and comments in no space, are still listed. Reputation totals don't change.
+- **Summaries** — the target shape's `summary` and the `grants` include on entities and comments — count exactly the grants the list would show. On an entity or comment in a space the viewer can't read, the target shape answers the empty page with the zero summary.
+
+Grants with no space and no target are listed for every caller.
 
 ## Negative grants are private
 

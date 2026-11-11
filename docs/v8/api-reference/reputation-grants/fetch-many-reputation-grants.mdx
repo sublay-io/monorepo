@@ -73,15 +73,26 @@ A grant row carries `targetType`, `targetId` and the granter's free-text `note`,
 
 A service key gets no exemption: it is tested as the user it names in `actingUserId`, exactly as that user's token. Naming nobody, it is tested as a signed-in user in no conversation, so it gets no grants on chat messages on either shape.
 
-Entity and comment targets are unaffected — those items are public, and both shapes return them normally. Grants with no target at all are returned by every shape.
+Grants with no target at all are returned by every shape, subject only to [space reading](#grants-follow-space-reading).
 
 <Note>
   The inline `grants` summary on the chat surfaces needs none of this. [List Messages](/v8/api-reference/chat/messages/list-messages) and [Fetch Message](/v8/api-reference/chat/messages/fetch-message) already refuse a non-member with `403 chat/not-a-member` before they read a message, so `include=grants` there is behind the conversation gate already.
 </Note>
 
+## Grants follow space reading
+
+Every shape also leaves out grants that would reveal content of a space the viewer can't read (see [Who can read content](/v8/data-models/space#who-can-read-content)):
+
+- a grant whose own `spaceId` is in a space the viewer can't read;
+- a grant on an entity or comment that sits in a space the viewer can't read (a comment goes by its entity's space).
+
+The filter rides the same query as `totalItems`, so the page and the total always agree. A grant whose `spaceId` names a space that no longer exists — the space was deleted, or the `spaces` bundle uninstalled — is left out for everyone; reputation totals don't change. Grants on deleted entities and comments, and on entities and comments in no space, are still listed.
+
+On the target shape, an entity or comment in a space the viewer can't read answers `200` with an empty `data` array, `totalItems: 0` and the zero summary, the same as a hidden chat message. On a target the viewer can read, the `summary` counts exactly the grants the list shows.
+
 ### Space-scoped reputation
 
-Grants carry their own `spaceId`, so this is a **context** endpoint: `spaceReputation: { spaceId: "context" }` scores each hydrated user against *that grant's own* space. The same granter appearing on two grants in different spaces therefore gets two correct numbers rather than one overwriting the other. Requires the `reputation` bundle — which this endpoint already does.
+Grants carry their own `spaceId`, so this is a **context** endpoint: `spaceReputation: { spaceId: "context" }` scores each hydrated user against *that grant's own* space. The same granter appearing on two grants in different spaces therefore gets two correct numbers rather than one overwriting the other. Only spaces the viewer can read count; others read `0` (see [Who sees space reputation](/v8/data-models/reputation#who-sees-space-reputation)). Requires the `reputation` bundle — which this endpoint already does.
 
 <SpaceReputationParams variant="context" field="query" />
 

@@ -329,6 +329,8 @@ Three of these need setup in **your app** — Sublay forwards the field but cann
 
 Whenever Sublay writes an in-app notification (a new comment, reply, mention, reaction, milestone, follow, connection request/accept, RSVP-event invite/update/cancel, or space-membership approval) or a chat message is sent, it can fan a native push out to the recipient's registered devices **automatically** — you don't call `push.send()` for these. What each automatic push looks like is configured per project on the **Settings → Push Notifications** page.
 
+A push follows its in-app notification: a recipient who can't read the space a mention, comment, reply, reaction, milestone or reputation grant belongs to gets neither the notification nor its push (see [Who receives notifications about space content](/v8/sdk/app-notifications/overview#who-receives-notifications-about-space-content)).
+
 <Note>
   Everything in this section applies to the **automatic** path only. The manual [`push.send()`](#server-sdk--sending-notifications) call takes `title`, `body`, `data`, `sound`, `channelId`, `priority`, and the [rich fields](#rich-notification-payloads) directly and is unchanged.
 </Note>

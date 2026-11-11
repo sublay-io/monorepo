@@ -58,7 +58,7 @@ This endpoint accepts `multipart/form-data` to support file attachments alongsid
 
 ### Space-scoped reputation
 
-This endpoint has a space in context, so it accepts the opt-in reputation params, in the body with the other fields. They add a `spaceReputation` field to the message sender's `user`, alongside the always-present `reputation` total. In JSON, `spaceReputationDescendants` is a boolean; on a multipart request both are form fields, with `spaceReputationDescendants` as `"true"` or `"false"`. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
+This endpoint has a space in context, so it accepts the opt-in reputation params, in the body with the other fields. They add a `spaceReputation` field to the message sender's `user`, alongside the always-present `reputation` total. In JSON, `spaceReputationDescendants` is a boolean; on a multipart request both are form fields, with `spaceReputationDescendants` as `"true"` or `"false"`. Only spaces the viewer can read count: a space they can't read reads `0` (see [Who sees space reputation](/v8/data-models/reputation#who-sees-space-reputation)). Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
 
 <SpaceReputationParams variant="context" field="body" />
 

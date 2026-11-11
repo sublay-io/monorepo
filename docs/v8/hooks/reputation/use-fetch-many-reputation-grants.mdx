@@ -12,7 +12,7 @@ Exactly one filter shape per call — by recipient, by sender, or by target. The
 
 Only **positive** grants are ever returned. Negative grants are your app's private moderation deductions and are unreadable from every SDK surface.
 
-Grants pointing at a **chat message** are private to their conversation — see [Chat message targets](#chat-message-targets) below.
+Grants pointing at a **chat message** are private to their conversation — see [Chat message targets](#chat-message-targets) below. Grants tied to a space the viewer can't read, or given on an entity or comment they can't read, are left out of the list and its `summary` — see [Grants follow space reading](/v8/data-models/reputation-grant#grants-follow-space-reading).
 
 Requires the `reputation` bundle.
 
@@ -51,7 +51,7 @@ function useRecentRewards(userId: string) {
   Associations to expand, as a single value or an array. The only value is `"user"` — it hydrates **both** the sender and the recipient on every row.
 </ParamField>
 <ParamField path="spaceReputation" type="object">
-  Opt-in per-user space reputation on the hydrated users. This is a context surface, so `spaceReputation: { spaceId: "context" }` scores each user against *that grant's own* space. See [Reputation](/v8/data-models/reputation#reading-space-scoped-reputation).
+  Opt-in per-user space reputation on the hydrated users. This is a context surface, so `spaceReputation: { spaceId: "context" }` scores each user against *that grant's own* space. Only spaces the viewer can read count; others read `0`. See [Reputation](/v8/data-models/reputation#who-sees-space-reputation).
 </ParamField>
 
 ## Returns

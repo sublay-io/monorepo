@@ -47,11 +47,11 @@ A key acting as a user gets exactly the matches that user's own token would get.
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  Restrict candidates to users active in this space.
+  Restrict candidates to users active in this space. Without `includeChildSpaces`, a space the asker can't read (see [Spaces the asker can't read](#spaces-the-asker-cant-read)), or one that doesn't exist, gives `{ "results": [] }`, not an error.
 </ParamField>
 
 <ParamField body="includeChildSpaces" type="boolean" default="false">
-  Only applies with `spaceId`. When `true`, candidates active anywhere in the space's subtree are eligible. Ignored without `spaceId`.
+  Only applies with `spaceId`. When `true`, candidates active anywhere in the space's subtree are eligible, counting only the spaces in it the asker can read. A sub-space the asker can read counts even when they can't read the named space itself; activity in a space they can't read never counts. Ignored without `spaceId`.
 </ParamField>
 
 <ParamField body="includeSampleContent" type="boolean" default="false">
@@ -98,9 +98,19 @@ Returns the `{ results: [...] }` envelope (a deliberate divergence from `search/
 - `matchedFacets[].similarity` — cosine similarity of the facet pair.
 - `matchedFacets[].askerFacet` — the asker's side of the pair. Present in `passive` mode; **omitted in `directed` mode** (there is no asker facet — the query is the anchor) and for the cold-start bio fallback.
 - `matchedFacets[].candidateFacet` — the candidate's facet: its `id` and lazily-decayed `hotness`.
-- `matchedFacets[].sampleContent` — present **only** when both sample gates are satisfied. Never contains moderation-removed, soft-deleted, or private-DM content. A chat message is included only from a group or space chat the asker can read: one they're an active member of, or one they left after the message was sent.
+- `matchedFacets[].sampleContent` — present **only** when both sample gates are satisfied. Never contains moderation-removed, soft-deleted, or private-DM content, or entities and comments from a space the asker can't read. A chat message is included only from a group or space chat the asker can read: one they're an active member of, or one they left after the message was sent.
 
 The always-returned breakdown (users, scores, facet ids, similarities, hotness) carries **no readable content** — raw content appears only behind the two gates.
+
+## Spaces the asker can't read
+
+Match shows nothing from spaces the asker can't read. The asker can read a space when they can see it and either are an active member of it, or its `readingPermission` is `"anyone"` and they can read the space above it (see [Who can read content](/v8/data-models/space#who-can-read-content)). A comment counts as being in its entity's space; content in no space is always readable.
+
+- Without `includeChildSpaces`, a `spaceId` the asker can't read matches nobody.
+- With `includeChildSpaces`, only the spaces in the subtree the asker can read count. A readable sub-space still counts when the named space can't be read; the named space's own activity then doesn't.
+- Sample content leaves out entities and comments from spaces the asker can't read.
+
+Interest facets are learned from all of a user's content, including content in private and members-only spaces. So a candidate can be ranked on interests that come from activity in spaces the asker can't see. Match never shows that content: the breakdown carries no content, and samples follow the rules above.
 
 ## Cold-start fallback
 

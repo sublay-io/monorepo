@@ -36,6 +36,8 @@ Facet building runs inside the existing embedding cron (every few minutes), so t
 
 Building is **moderation-, soft-delete-, and DM-safe**: an embedding row surviving admin removal is not treated as live content, and private-DM content never feeds a facet.
 
+Facets are built from all of a user's other content, including content in private and members-only spaces. See [Spaces the asker can't read](#spaces-the-asker-cant-read) for what that means for matching.
+
 ---
 
 ## Project Settings
@@ -79,9 +81,19 @@ Sample content — the raw text that illustrates why two people overlap — is e
 | off | off | No samples |
 | off | on | `403 match/sample-content-disabled` |
 | on | off | No samples |
-| on | on | Samples attached (minus removed / soft-deleted / DM content, and chat messages from conversations the asker can't read) |
+| on | on | Samples attached (minus removed / soft-deleted / DM content, entities and comments from spaces the asker can't read, and chat messages from conversations the asker can't read) |
 
 Gate 1 is a project-owner-level consent; Gate 2 is a per-request opt-in. The always-returned match breakdown (scores, facet ids, hotness) never carries readable content on its own.
+
+### Spaces the asker can't read
+
+Match shows nothing from spaces the asker can't read. The asker can read a space when they can see it and either are an active member of it, or its `readingPermission` is `"anyone"` and they can read the space above it (see [Who can read content](/v8/data-models/space#who-can-read-content)). A comment counts as being in its entity's space.
+
+- Without `includeChildSpaces`, a `spaceId` the asker can't read gives an empty result, not an error.
+- With `includeChildSpaces`, only activity in the spaces of the subtree the asker can read makes someone a candidate. A readable sub-space still counts when the asker can't read the named space itself; activity in a space they can't read never does.
+- Samples never include entities or comments from spaces the asker can't read.
+
+A user's interests can still reflect activity in spaces the asker can't see, because facets learn from all of a user's content. So two people can be matched on a topic one of them only discusses in a private or members-only space. Match never shows that content itself.
 
 ---
 

@@ -43,6 +43,7 @@ Searches across entities, comments, and chat messages. You can filter by source 
 
 - **Parameters:** `query`, `sourceTypes` (array of `"entity" | "comment" | "message"`), `spaceId` (optional), `conversationId` (optional), `limit`
 - **Returns:** Array of results, each with `sourceType`, `similarity` score (0–1), and the full hydrated `record` (entity, comment, or message object)
+- **Who sees what:** entities and comments come only from spaces the user can read (a comment counts as being in its entity's space), and chat messages only from conversations they can read. A `spaceId` they can't read gives an empty array, unless `includeChildSpaces` is set and they can read some of its sub-spaces, which are then searched. See [Search Content → What's left out](/v8/api-reference/search/search-content#whats-left-out).
 
 ### Search Users
 
@@ -73,7 +74,7 @@ The ask endpoint takes a natural-language question, retrieves the most relevant 
     The question is embedded into a vector using the same model used for content.
   </Step>
   <Step title="Retrieval">
-    The most semantically similar content is retrieved from your project's embeddings. Results can be scoped to a specific space or conversation.
+    The most semantically similar content is retrieved from your project's embeddings. Results can be scoped to a specific space or conversation. Only content the user can read is retrieved — the same rules as Search Content — so the answer and its sources never draw on spaces they can't read.
   </Step>
   <Step title="Generation">
     The retrieved content is used as context for the LLM, which synthesizes an answer grounded in your data. If the context does not contain enough information to answer, the model says so.
@@ -129,7 +130,7 @@ for await (const chunk of readLines(reader, decoder)) {
 |-----------|------|----------|-------------|
 | `query` | `string` | Yes | The natural-language question |
 | `sourceTypes` | `string[]` | Yes | Content types to search: `"entity"`, `"comment"`, `"message"` |
-| `spaceId` | `string` | No | Scope retrieval to a specific space |
+| `spaceId` | `string` | No | Scope retrieval to a specific space. Without `includeChildSpaces`, a space the user can't read gives no context and no sources |
 | `conversationId` | `string` | No | Scope retrieval to a specific conversation |
 | `limit` | `number` | No | Max number of source records to return |
 

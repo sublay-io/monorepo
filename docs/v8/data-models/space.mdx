@@ -47,7 +47,7 @@ Returned when fetching a single space by ID, shortId, or slug. Includes all `Spa
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `memberPermissions` | `SpaceMemberPermissions \| null` | The viewer's resolved permissions in this space (the signed-in user, or the user a service key names in `actingUserId`). `null` if the user has no membership in this space. A pending, banned or rejected user gets it with `isMember: false` and their `status`. |
+| `memberPermissions` | `SpaceMemberPermissions` | What the viewer may do in this space (the signed-in user, or the user a service key names in `actingUserId`). Always present: a user with no membership gets it with `isMember: false` and `status: null`, and a pending, banned or rejected user with `isMember: false` and their `status`. A signed-out caller, and a service key naming nobody, get the anonymous view. See [How permissions are calculated](#how-permissions-are-calculated). |
 | `parentSpace` | `SpacePreview \| null` | Preview of the parent space. `null` for root-level spaces, and when the viewer can't see the parent (`parentSpaceId` still names it). |
 | `childSpaces` | `SpacePreview[]` | Preview of up to 10 immediate child spaces, A–Z by name: the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of. |
 
@@ -69,7 +69,7 @@ A minimal space shape used only as an embedded reference — never returned dire
 
 ## SpaceMemberPermissions
 
-Included in `SpaceDetailed.memberPermissions` for a viewer with a membership in the space, whatever its status.
+Always included in `SpaceDetailed.memberPermissions`, and returned as `memberPermissions` by [Create Space](/v8/api-reference/spaces/create-space), [Update Space](/v8/api-reference/spaces/update-space), [Join Space](/v8/api-reference/spaces/membership/join-space) and [Leave Space](/v8/api-reference/spaces/membership/leave-space). [Check My Membership](/v8/api-reference/spaces/membership/check-my-membership) returns the same values as `permissions`. Lists of spaces don't carry it.
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -85,7 +85,10 @@ Included in `SpaceDetailed.memberPermissions` for a viewer with a membership in 
 
 - **`canRead`** — the user can see the space (see [Who sees a space](#who-sees-a-space)), and either is an active member of it, or its `readingPermission` is `"anyone"` and they can read the space above it. A top-level `"anyone"` space can be read by anyone who can see it. Reading is inherited: below a `"members"` space, every space is members-only too, even one set to `"anyone"`. Such a sub-space can be read by active members of the sub-space itself, of the `"members"` space above it, or of any space in between. A pending, banned or rejected user isn't an active member, so they read a space only where `"anyone"` reading reaches it.
 - **`canPost`** — `canRead`, no ban in this space or in any space above it, and the space's `postingPermission`: `"anyone"` lets every user who can read the space post, `"members"` its active members, and `"team"` its active admins and moderators. A ban in a space above counts even when the user has no membership, or a pending one, in this space.
-- **`isMember`, `isAdmin`, `isModerator`, `canModerate`** — come from the user's membership of this space only. An admin or moderator of a space above isn't an admin or moderator here.
+- **`canPost` for the anonymous view** — a signed-out caller, or a service key naming nobody: `true` only when the project's **Who can create entities without an author** setting is **Everyone**, the space's `postingPermission` is `"anyone"`, and anyone can read the space. Otherwise `false`.
+- **`isMember`, `isAdmin`, `isModerator`, `canModerate`** — come from the user's membership of this space only. An admin or moderator of a space above isn't an admin or moderator here. With no membership (and for the anonymous view) they are `false`, and `status` is `null`.
+
+`memberPermissions` describes a viewer, not what your backend may write. A service key naming nobody gets the anonymous view, so it can report `canPost: false` (or `canRead: false`) for a space where that key may still create entities without an author (see [Acting as a user](/v8/authentication#acting-as-a-user)). To learn what a user may do, name them in `actingUserId`.
 
 ## Visibility
 

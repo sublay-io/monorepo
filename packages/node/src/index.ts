@@ -131,6 +131,7 @@ export type {
   BulkDeleteProps,
   DeleteResult,
   BulkDeleteResult,
+  BulkCreateResult,
 } from "./interfaces/Table";
 export type { AddColumnProps } from "./modules/tables-management/addColumn";
 export type {
@@ -240,8 +241,14 @@ export type {
   WorkspaceListSortDir,
 } from "./interfaces/Workspace";
 export type { Rule } from "./interfaces/Rule";
-export type { Follow } from "./interfaces/Follow";
-export type { Connection, ConnectionRequestResponse, EstablishedConnection, PendingConnection, ConnectionStatusResponse } from "./interfaces/Connection";
+export type { FollowRow, FollowStatusResponse } from "./interfaces/Follow";
+export type { BlockRow, BlockStatusResponse } from "./interfaces/Block";
+export type {
+  AcceptedConnectionRow,
+  ConnectionRow,
+  ConnectionStatus,
+  ConnectionStatusResponse,
+} from "./interfaces/Connection";
 export type {
   Conversation,
   ConversationPreview,

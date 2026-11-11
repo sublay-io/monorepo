@@ -417,7 +417,7 @@ describe("js-sdk entities — response mapping", () => {
   it("isEntitySaved returns the saved status with collections", async () => {
     const { client, projectInstance } = makeClient();
     const saved = {
-      saved: true,
+      isSaved: true,
       collections: [{ id: "col1", name: "Favorites" }],
     };
     projectInstance.get.mockResolvedValueOnce({ data: saved });

@@ -8,6 +8,10 @@ export interface FetchBlockStatusProps {
   actingUserId: string;
 }
 
+/**
+ * GET /users/:userId/block — `{ isBlocking }`, plus the block row (`user` =
+ * `:userId`) when the acting user blocks them. Outbound only.
+ */
 export async function fetchBlockStatus(
   client: SublayHttpClient,
   data: FetchBlockStatusProps

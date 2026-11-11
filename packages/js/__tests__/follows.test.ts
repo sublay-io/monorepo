@@ -58,14 +58,14 @@ describe("js-sdk follows (own graph) — request shaping", () => {
 });
 
 describe("js-sdk follows (own graph) — response mapping", () => {
-  it("fetchFollowers returns the full PaginatedResponse<FollowListItem> envelope", async () => {
+  it("fetchFollowers returns the full PaginatedResponse<FollowRow> envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
       data: [
         {
-          followId: "f1",
+          id: "f1",
           user: { id: "u1", username: "alice" },
-          followedAt: "2026-01-01T00:00:00.000Z",
+          createdAt: "2026-01-01T00:00:00.000Z",
         },
       ],
       pagination: {
@@ -83,14 +83,14 @@ describe("js-sdk follows (own graph) — response mapping", () => {
     expect(result).toEqual(envelope);
   });
 
-  it("fetchFollowing returns the full PaginatedResponse<FollowListItem> envelope", async () => {
+  it("fetchFollowing returns the full PaginatedResponse<FollowRow> envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
       data: [
         {
-          followId: "f2",
+          id: "f2",
           user: { id: "u2", username: "bob" },
-          followedAt: "2026-01-02T00:00:00.000Z",
+          createdAt: "2026-01-02T00:00:00.000Z",
         },
       ],
       pagination: {

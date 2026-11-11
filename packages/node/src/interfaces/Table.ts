@@ -74,6 +74,11 @@ export interface CreateTableProps {
   paranoid?: boolean;
 }
 
+/** What `bulkCreate` returns: the inserted rows. */
+export interface BulkCreateResult<T = TableRow> {
+  data: T[];
+}
+
 export interface DeleteResult {
   deleted: boolean;
   soft: boolean;
@@ -99,7 +104,9 @@ export interface TableAccessor<T = TableRow> {
   find(query?: TableQuery): Promise<PaginatedResponse<T>>;
   findOne(rowId: string): Promise<T>;
   create(data: Partial<T> | Record<string, unknown>): Promise<T>;
-  bulkCreate(rows: Array<Partial<T> | Record<string, unknown>>): Promise<T[]>;
+  bulkCreate(
+    rows: Array<Partial<T> | Record<string, unknown>>,
+  ): Promise<BulkCreateResult<T>>;
   update(rowId: string, data: Partial<T> | Record<string, unknown>): Promise<T>;
   delete(rowId: string, opts?: { force?: boolean }): Promise<DeleteResult>;
   bulkDelete(params: BulkDeleteProps): Promise<BulkDeleteResult>;

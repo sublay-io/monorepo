@@ -1,5 +1,4 @@
 import { SublayHttpClient } from "../../core/client";
-import { HandleReportResponse } from "./handleEntityReport";
 
 export type CommentReportAction = "remove-comment" | "ban-user" | "dismiss";
 
@@ -19,14 +18,14 @@ export interface HandleCommentReportProps {
   actingUserId: string;
 }
 
+/** PATCH /spaces/:spaceId/reports/comment/:reportId — answers 204, no body. */
 export async function handleCommentReport(
   client: SublayHttpClient,
   data: HandleCommentReportProps
-): Promise<HandleReportResponse> {
+): Promise<void> {
   const { spaceId, reportId, ...body } = data;
-  const response = await client.projectInstance.patch<HandleReportResponse>(
+  await client.projectInstance.patch(
     `/spaces/${spaceId}/reports/comment/${reportId}`,
     body
   );
-  return response.data;
 }

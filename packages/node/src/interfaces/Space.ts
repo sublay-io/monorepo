@@ -153,11 +153,16 @@ export interface DeclineMemberResponse {
   };
 }
 
+/**
+ * The caller's standing in a space. A field that describes a relationship the
+ * caller doesn't have is absent (never `null`): `status` only when a
+ * membership row exists, `role` and `joinedAt` only when `isMember` is true.
+ */
 export interface CheckMyMembershipResponse {
   isMember: boolean;
-  role: "admin" | "moderator" | "member" | null;
-  status: "pending" | "active" | "banned" | "rejected" | null;
-  joinedAt: string | null;
+  role?: "admin" | "moderator" | "member";
+  status?: "pending" | "active" | "banned" | "rejected";
+  joinedAt?: string;
   permissions: {
     canPost: boolean;
     canModerate: boolean;

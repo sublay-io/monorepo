@@ -243,4 +243,13 @@ export type {
   BulkDeleteProps,
   DeleteResult,
   BulkDeleteResult,
+  BulkCreateResult,
 } from "./interfaces/Table";
+export type { FollowRow, FollowStatusResponse } from "./interfaces/Follow";
+export type { BlockRow, BlockStatusResponse } from "./interfaces/Block";
+export type {
+  AcceptedConnectionRow,
+  ConnectionRow,
+  ConnectionStatus,
+  ConnectionStatusResponse,
+} from "./interfaces/Connection";

@@ -50,7 +50,7 @@ export interface CreateWorkspaceInviteProps {
   // The INVITER: the user this request acts as. Required. The request is
   // BOUND by that user exactly as their own token would be: the invited grant
   // is floored by THEIR capabilities/permissions, the invited rank must be
-  // strictly below theirs, and the invitation's `invitedBy` records them.
+  // strictly below theirs, and the invitation's `invitedById` records them.
   //
   // ⚠️ Distinct from `userId` above, which addresses the INVITEE.
   actingUserId: string;
@@ -58,7 +58,7 @@ export interface CreateWorkspaceInviteProps {
 
 /**
  * Create an invitation (requires the `invite` capability on the workspace). The
- * inviter is `actingUserId`, recorded as the invitation's `invitedBy`.
+ * inviter is `actingUserId`, recorded as the invitation's `invitedById`.
  *
  * The invited rank comes in either coordinate — `rank` (absolute) or
  * `relativeRank` (an offset from the inviter) — never both. Omitting both

@@ -1,23 +1,21 @@
 import { User } from "./User";
 
-/** A directed block edge: `blockerId` has blocked `blockedId`. */
-export interface Block {
+/**
+ * A block, seen from the blocker: `{ id, user, createdAt }`, where `user` is
+ * the blocked user. The same shape on the block create, the block status and
+ * the block list.
+ */
+export interface BlockRow {
   id: string;
-  blockerId: string;
-  blockedId: string;
+  user: User | null;
   createdAt: string;
 }
 
-/** Outbound-only block status: does the acting user block the target? */
-export interface BlockStatusResponse {
-  blocked: boolean;
-  blockId?: string;
-  createdAt?: string;
-}
-
-/** A row in the acting user's own block list, carrying the blocked user's summary. */
-export interface BlockedUser {
-  id: string;
-  blockedUser: User | null;
-  createdAt: string;
-}
+/**
+ * Outbound-only block status: does the acting user block the target? `block`
+ * (with `user` = the target) is present only when they do. It never says
+ * whether the target blocks the acting user.
+ */
+export type BlockStatusResponse =
+  | { isBlocking: false }
+  | { isBlocking: true; block: BlockRow };

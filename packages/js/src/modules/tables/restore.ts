@@ -9,8 +9,8 @@ export async function restore<T = TableRow>(
   tableName: string,
   rowId: string,
 ): Promise<T> {
-  const response = await client.projectInstance.post<{ row: T }>(
+  const response = await client.projectInstance.post<T>(
     `/db/${tableName}/${rowId}/restore`,
   );
-  return response.data.row;
+  return response.data;
 }

@@ -18,19 +18,14 @@ export interface HandleEntityReportProps {
   actingUserId: string;
 }
 
-export interface HandleReportResponse {
-  message: string;
-  code: string;
-}
-
+/** PATCH /spaces/:spaceId/reports/entity/:reportId — answers 204, no body. */
 export async function handleEntityReport(
   client: SublayHttpClient,
   data: HandleEntityReportProps
-): Promise<HandleReportResponse> {
+): Promise<void> {
   const { spaceId, reportId, ...body } = data;
-  const response = await client.projectInstance.patch<HandleReportResponse>(
+  await client.projectInstance.patch(
     `/spaces/${spaceId}/reports/entity/${reportId}`,
     body
   );
-  return response.data;
 }

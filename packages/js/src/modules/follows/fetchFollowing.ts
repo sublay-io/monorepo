@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { FollowListItem } from "../../interfaces/Follow";
+import { FollowRow } from "../../interfaces/Follow";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 import { UserSearchParams } from "../../interfaces/UserSearch";
 
@@ -8,12 +8,13 @@ export interface FetchFollowingProps extends UserSearchParams {
   limit?: number;
 }
 
+/** Each row is a follow whose `user` is the followed user. */
 export async function fetchFollowing(
   client: SublayHttpClient,
   data: FetchFollowingProps
-): Promise<PaginatedResponse<FollowListItem>> {
+): Promise<PaginatedResponse<FollowRow>> {
   const response = await client.projectInstance.get<
-    PaginatedResponse<FollowListItem>
+    PaginatedResponse<FollowRow>
   >("/follows/following", { params: data });
   return response.data;
 }

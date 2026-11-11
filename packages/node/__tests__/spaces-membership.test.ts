@@ -161,7 +161,13 @@ describe("node-sdk spaces (membership) — response mapping", () => {
 
   it("checkMyMembership returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { isMember: true, role: "member" };
+    const result = {
+      isMember: true,
+      role: "member",
+      status: "active",
+      joinedAt: "now",
+      permissions: { canPost: true, canModerate: false, canRead: true, isAdmin: false, isModerator: false },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: result });
     await expect(
       checkMyMembership(client, { spaceId: "s1", actingUserId: "u1" }),

@@ -10,8 +10,8 @@ export async function findOne<T = TableRow>(
   tableName: string,
   rowId: string,
 ): Promise<T> {
-  const response = await client.projectInstance.get<{ row: T }>(
+  const response = await client.projectInstance.get<T>(
     `/db/${tableName}/${rowId}`,
   );
-  return response.data.row;
+  return response.data;
 }

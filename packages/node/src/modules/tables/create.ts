@@ -7,9 +7,9 @@ export async function create<T = TableRow>(
   tableName: string,
   data: Partial<T> | Record<string, unknown>,
 ): Promise<T> {
-  const response = await client.projectInstance.post<{ row: T }>(
+  const response = await client.projectInstance.post<T>(
     `/db/${tableName}`,
     data,
   );
-  return response.data.row;
+  return response.data;
 }

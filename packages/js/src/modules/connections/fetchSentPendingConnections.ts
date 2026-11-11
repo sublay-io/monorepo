@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { PendingConnection } from "../../interfaces/Connection";
+import { ConnectionRow } from "../../interfaces/Connection";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface FetchSentPendingConnectionsProps {
@@ -7,12 +7,16 @@ export interface FetchSentPendingConnectionsProps {
   limit?: number;
 }
 
+/**
+ * The caller's pending sent connection requests; each row's `user` is the
+ * receiver and its `type` is `"sent"`.
+ */
 export async function fetchSentPendingConnections(
   client: SublayHttpClient,
   data: FetchSentPendingConnectionsProps
-): Promise<PaginatedResponse<PendingConnection>> {
+): Promise<PaginatedResponse<ConnectionRow>> {
   const response =
-    await client.projectInstance.get<PaginatedResponse<PendingConnection>>(
+    await client.projectInstance.get<PaginatedResponse<ConnectionRow>>(
       "/connections/pending/sent",
       { params: data }
     );

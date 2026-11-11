@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { BlockedUser } from "../../interfaces/Block";
+import { BlockRow } from "../../interfaces/Block";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface FetchBlockedUsersProps {
@@ -9,12 +9,13 @@ export interface FetchBlockedUsersProps {
   limit?: number;
 }
 
+/** GET /blocks — the acting user's own block list; each row's `user` is the blocked user. */
 export async function fetchBlockedUsers(
   client: SublayHttpClient,
   data: FetchBlockedUsersProps
-): Promise<PaginatedResponse<BlockedUser>> {
+): Promise<PaginatedResponse<BlockRow>> {
   const response = await client.projectInstance.get<
-    PaginatedResponse<BlockedUser>
+    PaginatedResponse<BlockRow>
   >(`/blocks`, {
     params: data,
   });

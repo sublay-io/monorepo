@@ -326,7 +326,7 @@ describe("node-sdk entities — response mapping", () => {
 
   it("isEntitySaved returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { isSaved: true };
+    const result = { isSaved: true, collections: [{ id: "col1", name: "Saved" }] };
     projectInstance.get.mockResolvedValueOnce({ data: result });
     await expect(
       isEntitySaved(client, { entityId: "e1", actingUserId: "u1" }),

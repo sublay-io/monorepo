@@ -73,7 +73,12 @@ describe("node-sdk connections — request shaping", () => {
 describe("node-sdk connections — response mapping", () => {
   it("fetchConnections returns the full PaginatedResponse envelope", async () => {
     const { client, projectInstance } = makeClient();
-    const envelope = { data: [{ id: "c1" }], pagination: { page: 1, limit: 10, total: 1 } };
+    const envelope = {
+      data: [
+        { id: "c1", user: { id: "u2" }, status: "accepted", createdAt: "then", respondedAt: "now" },
+      ],
+      pagination: { page: 1, limit: 10, total: 1 },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
     await expect(fetchConnections(client, { actingUserId: "u1" })).resolves.toEqual(envelope);
   });
@@ -89,7 +94,12 @@ describe("node-sdk connections — response mapping", () => {
 
   it("fetchSentPendingConnections returns the full PaginatedResponse envelope", async () => {
     const { client, projectInstance } = makeClient();
-    const envelope = { data: [{ id: "p1" }], pagination: { page: 1, limit: 10, total: 1 } };
+    const envelope = {
+      data: [
+        { id: "p1", user: { id: "u2" }, type: "sent", message: null, status: "pending", createdAt: "now", respondedAt: null },
+      ],
+      pagination: { page: 1, limit: 10, total: 1 },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
     await expect(
       fetchSentPendingConnections(client, { actingUserId: "u1" }),
@@ -98,7 +108,12 @@ describe("node-sdk connections — response mapping", () => {
 
   it("fetchReceivedPendingConnections returns the full PaginatedResponse envelope", async () => {
     const { client, projectInstance } = makeClient();
-    const envelope = { data: [{ id: "p2" }], pagination: { page: 1, limit: 10, total: 1 } };
+    const envelope = {
+      data: [
+        { id: "p2", user: { id: "u3" }, type: "received", message: "hi", status: "pending", createdAt: "now", respondedAt: null },
+      ],
+      pagination: { page: 1, limit: 10, total: 1 },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
     await expect(
       fetchReceivedPendingConnections(client, { actingUserId: "u1" }),
@@ -107,7 +122,15 @@ describe("node-sdk connections — response mapping", () => {
 
   it("acceptConnection returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { id: "conn1", status: "accepted" };
+    const result = {
+      id: "conn1",
+      user: { id: "u2" },
+      type: "received",
+      message: null,
+      status: "accepted",
+      createdAt: "then",
+      respondedAt: "now",
+    };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
       acceptConnection(client, { connectionId: "conn1", actingUserId: "u1" }),
@@ -116,15 +139,24 @@ describe("node-sdk connections — response mapping", () => {
 
   it("declineConnection returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { id: "conn1", status: "declined" };
+    const result = {
+      id: "conn1",
+      user: { id: "u2" },
+      type: "received",
+      message: null,
+      status: "declined",
+      createdAt: "then",
+      respondedAt: "now",
+    };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
       declineConnection(client, { connectionId: "conn1", actingUserId: "u1" }),
     ).resolves.toEqual(result);
   });
 
-  it("removeConnection resolves to undefined", async () => {
-    const { client } = makeClient();
+  it("removeConnection resolves to undefined on the 204 empty body", async () => {
+    const { client, projectInstance } = makeClient();
+    projectInstance.delete.mockResolvedValueOnce({ status: 204, data: "" });
     await expect(
       removeConnection(client, { connectionId: "conn1", actingUserId: "u1" }),
     ).resolves.toBeUndefined();

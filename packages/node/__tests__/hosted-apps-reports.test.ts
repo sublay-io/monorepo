@@ -67,8 +67,15 @@ describe("node-sdk reports — request shaping", () => {
 describe("node-sdk reports — response mapping", () => {
   it("createReport returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { id: "rep1", status: "pending" };
-    projectInstance.post.mockResolvedValueOnce({ data: result });
+    const result = {
+      id: "ur1",
+      targetId: "e1",
+      targetType: "entity",
+      reason: "spam",
+      details: null,
+      createdAt: "now",
+    };
+    projectInstance.post.mockResolvedValueOnce({ status: 201, data: result });
     await expect(
       createReport(client, {
         actingUserId: "u1",

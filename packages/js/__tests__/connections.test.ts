@@ -84,14 +84,16 @@ describe("js-sdk connections (own graph) — request shaping", () => {
 });
 
 describe("js-sdk connections (own graph) — response mapping", () => {
-  it("fetchConnections returns the full PaginatedResponse<EstablishedConnection> envelope", async () => {
+  it("fetchConnections returns the full PaginatedResponse<AcceptedConnectionRow> envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
       data: [
         {
           id: "conn1",
-          connectedUser: { id: "u1", username: "alice" },
-          connectedAt: "2026-01-01T00:00:00.000Z",
+          user: { id: "u1", username: "alice" },
+          status: "accepted",
+          createdAt: "2025-12-31T00:00:00.000Z",
+          respondedAt: "2026-01-01T00:00:00.000Z",
         },
       ],
       pagination: {
@@ -118,7 +120,7 @@ describe("js-sdk connections (own graph) — response mapping", () => {
     expect(result).toEqual({ count: 3 });
   });
 
-  it("fetchReceivedPendingConnections returns the full PaginatedResponse<PendingConnection> envelope", async () => {
+  it("fetchReceivedPendingConnections returns the full PaginatedResponse<ConnectionRow> envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
       data: [
@@ -126,7 +128,10 @@ describe("js-sdk connections (own graph) — response mapping", () => {
           id: "conn2",
           user: { id: "u2", username: "bob" },
           type: "received",
+          message: "hi",
+          status: "pending",
           createdAt: "2026-01-01T00:00:00.000Z",
+          respondedAt: null,
         },
       ],
       pagination: {
@@ -144,7 +149,7 @@ describe("js-sdk connections (own graph) — response mapping", () => {
     expect(result).toEqual(envelope);
   });
 
-  it("fetchSentPendingConnections returns the full PaginatedResponse<PendingConnection> envelope", async () => {
+  it("fetchSentPendingConnections returns the full PaginatedResponse<ConnectionRow> envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
       data: [
@@ -152,7 +157,10 @@ describe("js-sdk connections (own graph) — response mapping", () => {
           id: "conn3",
           user: { id: "u3", username: "carol" },
           type: "sent",
+          message: null,
+          status: "pending",
           createdAt: "2026-01-01T00:00:00.000Z",
+          respondedAt: null,
         },
       ],
       pagination: {
@@ -170,11 +178,15 @@ describe("js-sdk connections (own graph) — response mapping", () => {
     expect(result).toEqual(envelope);
   });
 
-  it("acceptConnection returns the ConnectionActionResponse", async () => {
+  it("acceptConnection returns the ConnectionRow", async () => {
     const { client, projectInstance } = makeClient();
     const actionResponse = {
       id: "conn1",
-      status: "connected",
+      user: { id: "u2", username: "bob" },
+      type: "received",
+      message: null,
+      status: "accepted",
+      createdAt: "2025-12-31T00:00:00.000Z",
       respondedAt: "2026-01-01T00:00:00.000Z",
     };
     projectInstance.patch.mockResolvedValueOnce({ data: actionResponse });
@@ -184,11 +196,15 @@ describe("js-sdk connections (own graph) — response mapping", () => {
     expect(result).toEqual(actionResponse);
   });
 
-  it("declineConnection returns the ConnectionActionResponse", async () => {
+  it("declineConnection returns the ConnectionRow", async () => {
     const { client, projectInstance } = makeClient();
     const actionResponse = {
       id: "conn1",
+      user: { id: "u2", username: "bob" },
+      type: "received",
+      message: null,
       status: "declined",
+      createdAt: "2025-12-31T00:00:00.000Z",
       respondedAt: "2026-01-01T00:00:00.000Z",
     };
     projectInstance.patch.mockResolvedValueOnce({ data: actionResponse });

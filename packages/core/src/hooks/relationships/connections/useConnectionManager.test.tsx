@@ -178,6 +178,24 @@ describe("useConnectionManager", () => {
     await waitFor(() => expect(result.current.connectionStatus).toBe("declined-received"));
   });
 
+  it("removeConnectionSmart does nothing for a request already declined", async () => {
+    for (const type of ["sent", "received"] as const) {
+      const { result, axiosPrivate } = renderWithStatus({
+        isConnected: false,
+        connection: makeRow({ type, status: "declined", respondedAt: "2024-01-02T00:00:00.000Z" }),
+      });
+
+      await waitFor(() => expect(result.current.connectionStatus).toBe(`declined-${type}`));
+
+      await act(async () => {
+        await result.current.removeConnectionSmart();
+      });
+
+      expect(axiosPrivate.calls("delete")).toHaveLength(0);
+      resetAxiosMocks();
+    }
+  });
+
   it("removeConnectionSmart clears the state after withdrawing a sent request", async () => {
     const { result, axiosPrivate } = renderWithStatus({
       isConnected: false,

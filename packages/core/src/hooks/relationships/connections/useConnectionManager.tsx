@@ -161,6 +161,8 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
     if (
       connectionStatus === "none" ||
       connectionStatus === "declined-sent" ||
+      // Already declined: the server has nothing left to remove (404).
+      connectionStatus === "declined-received" ||
       isLoading ||
       user?.id === userId
     )

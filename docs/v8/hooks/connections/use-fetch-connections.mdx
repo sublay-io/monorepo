@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-Returns a function that fetches the paginated list of accepted connections for the currently authenticated user. Each entry includes the connected user's profile and timestamps.
+Returns a function that fetches the paginated list of accepted connections for the currently authenticated user. Each entry includes the other user's profile and the connection's timestamps.
 
 For fetching another user's connections, see `useFetchConnectionsByUserId`.
 
@@ -32,8 +32,8 @@ function ConnectionsList() {
 
   return (
     <ul>
-      {connections.map(({ id, connectedUser }) => (
-        <li key={id}>{connectedUser.name}</li>
+      {connections.map(({ id, user }) => (
+        <li key={id}>{user.name}</li>
       ))}
     </ul>
   );
@@ -62,19 +62,25 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-Returns a `PaginatedResponse` containing an array of established connections:
+A `PaginatedResponse<AcceptedConnectionRow>`:
 
-<ResponseField name="data" type="EstablishedConnection[]">
-  Array of accepted connection entries.
-  <Expandable title="EstablishedConnection properties">
+<ResponseField name="data" type="AcceptedConnectionRow[]">
+  Array of accepted connections. See [AcceptedConnectionRow](/v8/data-models/connection#acceptedconnectionrow).
+  <Expandable title="AcceptedConnectionRow properties">
     <ResponseField name="id" type="string">
       ID of the connection record.
     </ResponseField>
-    <ResponseField name="connectedUser" type="User">
-      The other user's profile. See [User data model](/v8/data-models/user).
+    <ResponseField name="user" type="User">
+      The other user in the connection. Public profile fields only. See [User data model](/v8/data-models/user).
     </ResponseField>
-    <ResponseField name="connectedAt" type="string">
-      ISO timestamp when the connection was established.
+    <ResponseField name="status" type='"accepted"'>
+      Always `"accepted"` in this list.
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO timestamp of when the request was sent.
+    </ResponseField>
+    <ResponseField name="respondedAt" type="string">
+      ISO timestamp of when the connection was accepted.
     </ResponseField>
   </Expandable>
 </ResponseField>

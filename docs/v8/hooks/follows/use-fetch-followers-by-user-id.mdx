@@ -29,8 +29,8 @@ function UserFollowers({ userId }: { userId: string }) {
 
   return (
     <ul>
-      {followers.map(({ followId, user }) => (
-        <li key={followId}>{user.name}</li>
+      {followers.map(({ id, user }) => (
+        <li key={id}>{user.name}</li>
       ))}
     </ul>
   );
@@ -65,25 +65,25 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-Returns a `PaginatedResponse` containing an array of follower entries:
+Returns a `PaginatedResponse<FollowRow>`. Each entry is a [`FollowRow`](/v8/data-models/follow#followrow):
 
-<ResponseField name="data" type="FollowerWithFollowInfo[]">
+<ResponseField name="data" type="FollowRow[]">
   Array of follower entries.
-  <Expandable title="FollowerWithFollowInfo properties">
-    <ResponseField name="followId" type="string">
+  <Expandable title="FollowRow properties">
+    <ResponseField name="id" type="string">
       ID of the follow record.
     </ResponseField>
     <ResponseField name="user" type="User">
       The follower's user profile. When `spaceReputation` is requested, it carries an added `spaceReputation` number. See [User data model](/v8/data-models/user) and [Reputation](/v8/data-models/reputation).
     </ResponseField>
-    <ResponseField name="followedAt" type="string">
+    <ResponseField name="createdAt" type="string">
       ISO timestamp of when the follow was created.
     </ResponseField>
   </Expandable>
 </ResponseField>
 
 <ResponseField name="pagination" type="object">
-  Pagination metadata including `currentPage`, `totalPages`, `totalCount`, `hasNextPage`, and `hasPreviousPage`.
+  Pagination metadata: `page`, `pageSize`, `totalPages`, `totalItems` and `hasMore`.
 </ResponseField>
 
 ## Related

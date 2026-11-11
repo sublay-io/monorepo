@@ -39,16 +39,34 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
+A `Promise<ConnectionRow>` that resolves to the new request, seen from the signed-in user's side (the requester). See [ConnectionRow](/v8/data-models/connection#connectionrow).
+
 <ResponseField name="id" type="string">
-  The ID of the newly created connection record.
+  The connection's ID. Accept, decline and remove take it.
 </ResponseField>
 
-<ResponseField name="status" type="string">
-  The status of the connection, e.g. `"pending"`.
+<ResponseField name="user" type="User">
+  The user the request was sent to. Public profile fields only.
 </ResponseField>
 
-<ResponseField name="createdAt" type="string | undefined">
-  ISO timestamp when the request was created.
+<ResponseField name="type" type='"sent" | "received"'>
+  Always `"sent"`: the signed-in user sent the request.
+</ResponseField>
+
+<ResponseField name="message" type="string | null">
+  The note sent with the request, or `null`.
+</ResponseField>
+
+<ResponseField name="status" type='"pending" | "accepted" | "declined"'>
+  `"pending"` until the receiver responds.
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO timestamp of when the request was sent.
+</ResponseField>
+
+<ResponseField name="respondedAt" type="string | null">
+  `null` while the request is pending.
 </ResponseField>
 
 ## Related

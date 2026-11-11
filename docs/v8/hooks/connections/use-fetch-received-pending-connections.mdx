@@ -57,25 +57,31 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-Returns a `PaginatedResponse` containing pending connection entries:
+A `PaginatedResponse<ConnectionRow>`:
 
-<ResponseField name="data" type="PendingConnection[]">
-  Array of pending connection entries.
-  <Expandable title="PendingConnection properties">
+<ResponseField name="data" type="ConnectionRow[]">
+  Array of pending requests. See [ConnectionRow](/v8/data-models/connection#connectionrow).
+  <Expandable title="ConnectionRow properties">
     <ResponseField name="id" type="string">
       ID of the connection record.
     </ResponseField>
     <ResponseField name="user" type="User">
-      The user who sent the request. See [User data model](/v8/data-models/user).
+      The user who sent the request. Public profile fields only. See [User data model](/v8/data-models/user).
     </ResponseField>
     <ResponseField name="type" type='"received"'>
-      Always `"received"` for this endpoint.
+      Always `"received"` in this list.
     </ResponseField>
-    <ResponseField name="message" type="string | undefined">
-      Optional message included with the request.
+    <ResponseField name="message" type="string | null">
+      The note sent with the request, or `null`.
+    </ResponseField>
+    <ResponseField name="status" type='"pending"'>
+      Always `"pending"` in this list.
     </ResponseField>
     <ResponseField name="createdAt" type="string">
-      ISO timestamp when the request was created.
+      ISO timestamp of when the request was sent.
+    </ResponseField>
+    <ResponseField name="respondedAt" type="null">
+      Always `null` while the request is pending.
     </ResponseField>
   </Expandable>
 </ResponseField>

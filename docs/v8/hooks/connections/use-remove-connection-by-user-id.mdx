@@ -6,7 +6,11 @@ icon: "plug"
 
 ## Overview
 
-Returns a function that removes a connection with another user by their `userId`, without needing the connection record ID. The server determines the correct action (withdraw, disconnect, or decline) based on the current state. The current user must be authenticated.
+Returns a function that removes a connection with another user by their `userId`, without needing the connection record ID. The server picks the action from the current state. The current user must be authenticated.
+
+- **Pending, sent by the current user** — withdraws the request (the record is deleted).
+- **Pending, sent by the other user** — declines the request (the record stays, with `status: "declined"`).
+- **Accepted** — disconnects both users (the record is deleted).
 
 <Note>
   This hook is used internally by `useConnectionManager`'s `removeConnectionSmart` function.
@@ -38,17 +42,7 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-<ResponseField name="id" type="string | undefined">
-  The connection record ID, if applicable.
-</ResponseField>
-
-<ResponseField name="action" type='"withdraw" | "disconnect" | "decline" | undefined'>
-  The action performed by the server.
-</ResponseField>
-
-<ResponseField name="message" type="string | undefined">
-  A confirmation message.
-</ResponseField>
+A `Promise<void>`. It resolves with no value once the server has acted (it answers `204 No Content`), and rejects if the request fails. To read the resulting state — for example the declined request — call [useFetchConnectionStatus](/v8/hooks/connections/use-fetch-connection-status).
 
 ## Related
 

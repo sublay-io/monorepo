@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-Returns a function that fetches the full connection status between the current authenticated user and a target user. Returns a discriminated union based on the current state: `"none"`, `"pending"`, `"connected"`, or `"declined"`.
+Returns a function that fetches the connection between the current authenticated user and a target user. The result says whether the two users are connected and, whenever a connection record exists between them (pending, accepted or declined), includes it.
 
 `useConnectionManager` calls this automatically on mount. Use this hook directly when you need one-off status checks without managing state.
 
@@ -19,8 +19,15 @@ function ProfilePage({ userId }: { userId: string }) {
   const fetchConnectionStatus = useFetchConnectionStatus();
 
   useEffect(() => {
-    fetchConnectionStatus({ userId }).then((status) => {
-      console.log(status.status); // "none" | "pending" | "connected" | "declined"
+    fetchConnectionStatus({ userId }).then((result) => {
+      if (result.isConnected) {
+        console.log("Connected since", result.connection.respondedAt);
+      } else if ("connection" in result) {
+        // A pending or declined request; `type` says who sent it.
+        console.log(result.connection.status, result.connection.type);
+      } else {
+        console.log("No connection");
+      }
     });
   }, [userId]);
 }
@@ -36,57 +43,24 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-Returns a `ConnectionStatusResponse` — a discriminated union based on `status`:
+A `Promise<ConnectionStatus>` (see [ConnectionStatus](/v8/data-models/connection#connectionstatus)):
 
-**When `status === "none"`:**
+```ts
+type ConnectionStatus =
+  | { isConnected: false }
+  | {
+      isConnected: false;
+      connection: ConnectionRow & { status: "pending" | "declined" };
+    }
+  | { isConnected: true; connection: ConnectionRow & { status: "accepted" } };
+```
 
-<ResponseField name="status" type='"none"'>
-  No connection exists.
-</ResponseField>
-
-**When `status === "pending"`:**
-
-<ResponseField name="status" type='"pending"'>
-  A connection request is pending.
-</ResponseField>
-<ResponseField name="type" type='"sent" | "received"'>
-  Direction from the current user's perspective.
-</ResponseField>
-<ResponseField name="connectionId" type="string">
-  The connection record ID.
-</ResponseField>
-<ResponseField name="createdAt" type="string">
-  ISO timestamp when the request was created.
+<ResponseField name="isConnected" type="boolean">
+  `true` only when the connection is accepted.
 </ResponseField>
 
-**When `status === "connected"`:**
-
-<ResponseField name="status" type='"connected"'>
-  Connection is established.
-</ResponseField>
-<ResponseField name="connectionId" type="string">
-  The connection record ID.
-</ResponseField>
-<ResponseField name="connectedAt" type="string">
-  ISO timestamp when the connection was established.
-</ResponseField>
-<ResponseField name="requestedAt" type="string">
-  ISO timestamp when the request was originally sent.
-</ResponseField>
-
-**When `status === "declined"`:**
-
-<ResponseField name="status" type='"declined"'>
-  A connection request was declined.
-</ResponseField>
-<ResponseField name="type" type='"sent" | "received"'>
-  Direction of the original request.
-</ResponseField>
-<ResponseField name="connectionId" type="string">
-  The connection record ID.
-</ResponseField>
-<ResponseField name="respondedAt" type="string">
-  ISO timestamp when the request was declined.
+<ResponseField name="connection" type="ConnectionRow | undefined">
+  Present whenever a connection record exists between the two users, pending and declined included. `user` is the target user; `type` is `"sent"` when the current user sent the request and `"received"` when the target did; `status` is `"pending"`, `"accepted"` or `"declined"`. Absent when there is no connection record. See [ConnectionRow](/v8/data-models/connection#connectionrow).
 </ResponseField>
 
 ## Related

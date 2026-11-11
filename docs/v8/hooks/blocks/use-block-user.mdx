@@ -20,7 +20,12 @@ import { useBlockUser } from "@sublay/react-js";
 function BlockAction({ userId }: { userId: string }) {
   const blockUser = useBlockUser();
 
-  return <button onClick={() => blockUser({ userId })}>Block</button>;
+  const handleBlock = async () => {
+    const block = await blockUser({ userId });
+    console.log("Blocked", block.user.username);
+  };
+
+  return <button onClick={handleBlock}>Block</button>;
 }
 ```
 
@@ -34,7 +39,19 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-The returned function resolves to `void` on success.
+The returned function resolves to the block row, a [`BlockRow`](/v8/data-models/block#blockrow). Blocking a user the current user already blocks resolves to the existing row.
+
+<ResponseField name="id" type="string">
+  ID of the block record.
+</ResponseField>
+
+<ResponseField name="user" type="User">
+  The blocked user. Public profile fields only. See [User data model](/v8/data-models/user).
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO timestamp of when the block was created.
+</ResponseField>
 
 ## Related
 

@@ -84,7 +84,7 @@ const user = await sublay.users.fetchUserByUsername({ username: "alice" });
 Returns users whose name or username matches a partial query string. Useful for mention autocomplete.
 
 ```typescript
-const users = await sublay.users.fetchUserSuggestions({ query: "ali" });
+const { data: users } = await sublay.users.fetchUserSuggestions({ query: "ali" });
 ```
 
 <ParamField body="query" type="string" required>
@@ -93,7 +93,7 @@ const users = await sublay.users.fetchUserSuggestions({ query: "ali" });
 
 <SpaceReputationParams variant="user" field="body" />
 
-**Returns** — `Promise<User[]>`
+**Returns** — `Promise<{ data: User[] }>`
 
 ---
 
@@ -268,7 +268,7 @@ const next = await sublay.users.fetchCommentsByUserId({
 
 ### fetchFollowersByUserId
 
-Returns a paginated list of users following the target user.
+Returns a paginated list of the target user's followers.
 
 ```typescript
 const { data, pagination } = await sublay.users.fetchFollowersByUserId({
@@ -300,7 +300,7 @@ const { data, pagination } = await sublay.users.fetchFollowersByUserId({
 
 <SpaceReputationParams variant="user" field="body" />
 
-**Returns** — `Promise<PaginatedResponse<FollowListItem>>`
+**Returns** — `Promise<PaginatedResponse<FollowRow>>` — each [`FollowRow`](/v8/data-models/follow#followrow) is `{ id, user, createdAt }`, where `user` is the follower.
 
 ---
 
@@ -356,7 +356,7 @@ const { data, pagination } = await sublay.users.fetchFollowingByUserId({
 
 <SpaceReputationParams variant="user" field="body" />
 
-**Returns** — `Promise<PaginatedResponse<FollowListItem>>`
+**Returns** — `Promise<PaginatedResponse<FollowRow>>` — each [`FollowRow`](/v8/data-models/follow#followrow) is `{ id, user, createdAt }`, where `user` is the followed user.
 
 ---
 
@@ -380,7 +380,7 @@ const { count } = await sublay.users.fetchFollowingCountByUserId({
 
 ### fetchConnectionsByUserId
 
-Returns a paginated list of the target user's established connections.
+Returns a paginated list of the target user's accepted connections.
 
 ```typescript
 const { data, pagination } = await sublay.users.fetchConnectionsByUserId({
@@ -403,7 +403,7 @@ const { data, pagination } = await sublay.users.fetchConnectionsByUserId({
 </ParamField>
 
 <ParamField body="query" type="string">
-  Optional search term. Filters the list to connections whose connected user's username or name contains this text (case-insensitive). When omitted, no filtering is applied.
+  Optional search term. Filters the list to connections whose other user's username or name contains this text (case-insensitive). When omitted, no filtering is applied.
 </ParamField>
 
 <ParamField body="searchFields" type="string">
@@ -412,13 +412,13 @@ const { data, pagination } = await sublay.users.fetchConnectionsByUserId({
 
 <SpaceReputationParams variant="user" field="body" />
 
-**Returns** — `Promise<PaginatedResponse<EstablishedConnection>>`
+**Returns** — `Promise<PaginatedResponse<AcceptedConnectionRow>>` — each [`AcceptedConnectionRow`](/v8/data-models/connection#acceptedconnectionrow) is `{ id, user, status, createdAt, respondedAt }`, where `user` is the target user's connection.
 
 ---
 
 ### fetchConnectionsCountByUserId
 
-Returns the number of established connections for the target user.
+Returns the number of accepted connections for the target user.
 
 ```typescript
 const { count } = await sublay.users.fetchConnectionsCountByUserId({
@@ -446,7 +446,7 @@ const follow = await sublay.users.createFollow({ userId: "usr_target" });
   The user being followed (the target).
 </ParamField>
 
-**Returns** — `Promise<Follow>`
+**Returns** — `Promise<FollowRow>` — `{ id, user, createdAt }`, where `user` is the followed user. Following a user the logged-in user already follows is rejected with `409 follow/already-exists`.
 
 ---
 
@@ -477,16 +477,25 @@ await sublay.users.deleteFollow({ userId: "usr_target" });
 Returns whether the logged-in user follows the target user.
 
 ```typescript
-const { isFollowing, followId } = await sublay.users.fetchFollowStatus({
-  userId: "usr_target",
-});
+const status = await sublay.users.fetchFollowStatus({ userId: "usr_target" });
+if (status.isFollowing) {
+  console.log("Following since", status.follow.createdAt);
+}
 ```
 
 <ParamField body="userId" type="string" required>
   The user whose follow relationship is being checked (the target).
 </ParamField>
 
-**Returns** — `Promise<{ isFollowing: boolean; followId?: string; followedAt?: string }>`
+**Returns** — `Promise<FollowStatus>`
+
+```typescript
+type FollowStatus =
+  | { isFollowing: false }
+  | { isFollowing: true; follow: FollowRow };
+```
+
+`follow` is present only when the logged-in user follows the target; its `user` is the target. See [FollowStatus](/v8/data-models/follow#followstatus).
 
 ---
 
@@ -509,7 +518,7 @@ const connection = await sublay.users.requestConnection({
   Optional message to include with the request.
 </ParamField>
 
-**Returns** — `Promise<ConnectionRequestResponse>` — the created/pending connection.
+**Returns** — `Promise<ConnectionRow>` — the pending request, with `type: "sent"` and `user` = the target. See [ConnectionRow](/v8/data-models/connection#connectionrow).
 
 ---
 
@@ -527,16 +536,28 @@ const status = await sublay.users.fetchConnectionStatus({
   The other user in the connection (the target).
 </ParamField>
 
-**Returns** — `Promise<ConnectionStatusResponse>`
+**Returns** — `Promise<ConnectionStatus>`
+
+```typescript
+type ConnectionStatus =
+  | { isConnected: false }
+  | {
+      isConnected: false;
+      connection: ConnectionRow & { status: "pending" | "declined" };
+    }
+  | { isConnected: true; connection: ConnectionRow & { status: "accepted" } };
+```
+
+`isConnected` is `true` only once the connection is accepted. `connection` is present whenever a connection exists between the two users, pending and declined included; read its `status` and `type` to tell a request the logged-in user sent from one they received. See [ConnectionStatus](/v8/data-models/connection#connectionstatus).
 
 ---
 
 ### removeConnectionByUserId
 
-Removes the connection with the target user — withdrawing a sent request, declining a received one, or disconnecting an established connection, depending on the current state.
+Removes the connection with the target user — withdrawing a sent request, declining a received one, or disconnecting an accepted connection, depending on the current state. Withdrawing and disconnecting delete the connection; a received request is declined and kept as declined.
 
 ```typescript
-const result = await sublay.users.removeConnectionByUserId({
+await sublay.users.removeConnectionByUserId({
   userId: "usr_target",
 });
 ```
@@ -545,7 +566,7 @@ const result = await sublay.users.removeConnectionByUserId({
   The other user in the connection (the target).
 </ParamField>
 
-**Returns** — `Promise<RemoveConnectionByUserIdResponse>`
+**Returns** — `Promise<void>`. It resolves with no value in every case.
 
 ## Blocking
 
@@ -569,7 +590,7 @@ const block = await sublay.users.createBlock({ userId: "usr_target" });
   The user being blocked (the target). The blocker is the token holder.
 </ParamField>
 
-**Returns** — `Promise<BlockResponse>` — `{ id, blockerId, blockedId, createdAt }`.
+**Returns** — `Promise<BlockRow>` — `{ id, user, createdAt }`, where `user` is the blocked user. Re-blocking returns the existing block. See [BlockRow](/v8/data-models/block#blockrow).
 
 ---
 
@@ -594,7 +615,7 @@ await sublay.users.deleteBlock({ userId: "usr_target" });
 Checks whether the token holder blocks the target user. **Outbound-only** — it never reveals whether the target has blocked the token holder.
 
 ```typescript
-const { blocked, blockId } = await sublay.users.fetchBlockStatus({
+const { isBlocking } = await sublay.users.fetchBlockStatus({
   userId: "usr_target",
 });
 ```
@@ -603,7 +624,15 @@ const { blocked, blockId } = await sublay.users.fetchBlockStatus({
   The user whose block relationship is being checked (the target).
 </ParamField>
 
-**Returns** — `Promise<BlockStatusResponse>` — `{ blocked: boolean; blockId?: string; createdAt?: string }`.
+**Returns** — `Promise<BlockStatus>`
+
+```typescript
+type BlockStatus =
+  | { isBlocking: false }
+  | { isBlocking: true; block: BlockRow };
+```
+
+`block` is present only when the token holder blocks the target; its `user` is the target. See [BlockStatus](/v8/data-models/block#blockstatus).
 
 ---
 
@@ -626,4 +655,4 @@ const { data, pagination } = await sublay.users.fetchBlockedUsers({
   Results per page. Defaults to `20`. Max `100`.
 </ParamField>
 
-**Returns** — `Promise<PaginatedResponse<BlockedUserListItem>>`, where each `BlockedUserListItem` is `{ id, blockedUser, createdAt }`.
+**Returns** — `Promise<PaginatedResponse<BlockRow>>`, where each [`BlockRow`](/v8/data-models/block#blockrow) is `{ id, user, createdAt }` and `user` is the blocked user.

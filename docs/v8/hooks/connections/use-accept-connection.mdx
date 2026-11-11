@@ -34,16 +34,34 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
+A `Promise<ConnectionRow>` that resolves to the accepted connection, seen from the signed-in user's side (the receiver). See [ConnectionRow](/v8/data-models/connection#connectionrow).
+
 <ResponseField name="id" type="string">
-  The connection record ID.
+  The connection's ID. Accept, decline and remove take it.
 </ResponseField>
 
-<ResponseField name="status" type="string">
-  The updated status, e.g. `"connected"`.
+<ResponseField name="user" type="User">
+  The user who sent the request. Public profile fields only.
 </ResponseField>
 
-<ResponseField name="respondedAt" type="string | undefined">
-  ISO timestamp when the request was accepted.
+<ResponseField name="type" type='"sent" | "received"'>
+  Always `"received"`: the signed-in user received the request.
+</ResponseField>
+
+<ResponseField name="message" type="string | null">
+  The note sent with the request, or `null`.
+</ResponseField>
+
+<ResponseField name="status" type='"pending" | "accepted" | "declined"'>
+  Always `"accepted"`.
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO timestamp of when the request was sent.
+</ResponseField>
+
+<ResponseField name="respondedAt" type="string | null">
+  ISO timestamp of when the request was accepted.
 </ResponseField>
 
 ## Related

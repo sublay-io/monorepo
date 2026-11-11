@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-Returns a function that fetches the paginated list of users the currently authenticated user follows. Each entry includes the follow record ID, the followed user's profile, and the timestamp.
+Returns a function that fetches the paginated list of users the currently authenticated user follows. Each entry is a follow row: the follow record's `id`, the followed user as `user`, and `createdAt`.
 
 For fetching another user's following list, see `useFetchFollowingByUserId`.
 
@@ -32,8 +32,8 @@ function FollowingList() {
 
   return (
     <ul>
-      {following.map(({ followId, user }) => (
-        <li key={followId}>{user.name}</li>
+      {following.map(({ id, user }) => (
+        <li key={id}>{user.name}</li>
       ))}
     </ul>
   );
@@ -62,25 +62,25 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-Returns a `PaginatedResponse` containing an array of following entries:
+Returns a `PaginatedResponse<FollowRow>`. Each entry is a [`FollowRow`](/v8/data-models/follow#followrow):
 
-<ResponseField name="data" type="FollowingWithFollowInfo[]">
+<ResponseField name="data" type="FollowRow[]">
   Array of following entries.
-  <Expandable title="FollowingWithFollowInfo properties">
-    <ResponseField name="followId" type="string">
+  <Expandable title="FollowRow properties">
+    <ResponseField name="id" type="string">
       ID of the follow record.
     </ResponseField>
     <ResponseField name="user" type="User">
       The followed user's profile. See [User data model](/v8/data-models/user).
     </ResponseField>
-    <ResponseField name="followedAt" type="string">
+    <ResponseField name="createdAt" type="string">
       ISO timestamp of when the follow was created.
     </ResponseField>
   </Expandable>
 </ResponseField>
 
 <ResponseField name="pagination" type="object">
-  Pagination metadata including `currentPage`, `totalPages`, `totalCount`, `hasNextPage`, and `hasPreviousPage`.
+  Pagination metadata: `page`, `pageSize`, `totalPages`, `totalItems` and `hasMore`.
 </ResponseField>
 
 ## Related

@@ -18,7 +18,7 @@ function BlockList() {
 
   useEffect(() => {
     fetchBlockedUsers({ page: 1, limit: 20 }).then(({ data }) => {
-      data.forEach((row) => console.log(row.blockedUser?.username));
+      data.forEach((row) => console.log(row.user.username));
     });
   }, []);
 }
@@ -38,19 +38,21 @@ The hook returns a function. That function accepts an optional object:
 
 ## Returns
 
-A `PaginatedResponse<BlockedUser>`, where each `BlockedUser` is:
+A `PaginatedResponse<BlockRow>`, newest block first. Each entry is a [`BlockRow`](/v8/data-models/block#blockrow):
 
 <ResponseField name="id" type="string">
   ID of the block record.
 </ResponseField>
 
-<ResponseField name="blockedUser" type="User | null">
-  Public profile of the blocked user.
+<ResponseField name="user" type="User">
+  The blocked user. Public profile fields only. See [User data model](/v8/data-models/user).
 </ResponseField>
 
 <ResponseField name="createdAt" type="string">
   ISO timestamp of when the block was created.
 </ResponseField>
+
+The response also carries `pagination`: `page`, `pageSize`, `totalPages`, `totalItems` and `hasMore`.
 
 ## Related
 

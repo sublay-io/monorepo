@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-Returns a function that declines a pending incoming connection request. After declining, the connection status from the current user's perspective becomes `"declined-received"`. The current user must be authenticated and must be the recipient.
+Returns a function that declines a pending incoming connection request. The connection stays, with `status: "declined"`; in [useConnectionManager](/v8/hooks/connections/use-connection-manager) it reads as `"declined-received"`. The current user must be authenticated and must be the recipient.
 
 ## Usage Example
 
@@ -34,16 +34,34 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
+A `Promise<ConnectionRow>` that resolves to the declined connection, seen from the signed-in user's side (the receiver). See [ConnectionRow](/v8/data-models/connection#connectionrow).
+
 <ResponseField name="id" type="string">
-  The connection record ID.
+  The connection's ID. Accept, decline and remove take it.
 </ResponseField>
 
-<ResponseField name="status" type="string">
-  The updated status, e.g. `"declined"`.
+<ResponseField name="user" type="User">
+  The user who sent the request. Public profile fields only.
 </ResponseField>
 
-<ResponseField name="respondedAt" type="string | undefined">
-  ISO timestamp when the request was declined.
+<ResponseField name="type" type='"sent" | "received"'>
+  Always `"received"`: the signed-in user received the request.
+</ResponseField>
+
+<ResponseField name="message" type="string | null">
+  The note sent with the request, or `null`.
+</ResponseField>
+
+<ResponseField name="status" type='"pending" | "accepted" | "declined"'>
+  Always `"declined"`.
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO timestamp of when the request was sent.
+</ResponseField>
+
+<ResponseField name="respondedAt" type="string | null">
+  ISO timestamp of when the request was declined.
 </ResponseField>
 
 ## Related

@@ -127,7 +127,7 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
 
 ### updateEvent
 
-Edits an event's mutable fields. Host-only: `actingUserId` must be one of the event's hosts. `hostIds`, `status`, and `spaceId` are not editable here.
+Edits an event's mutable fields. Host-only (`403 event/forbidden`): `actingUserId` must be the owner or in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member`). The space's admins and moderators can't edit events they don't host. `hostIds`, `status`, and `spaceId` are not editable here.
 
 ```typescript
 const event = await sublay.events.updateEvent({
@@ -139,7 +139,7 @@ const event = await sublay.events.updateEvent({
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as: one of the event's hosts. It has exactly their powers on the event, and the action is recorded as theirs.</ParamField>
 <ParamField body="title" type="string">New title.</ParamField>
 <ParamField body="description" type="string">New description.</ParamField>
 <ParamField body="startTime" type="string">New ISO start datetime.</ParamField>
@@ -162,7 +162,7 @@ const event = await sublay.events.updateEvent({
 
 ### cancelEvent
 
-Cancels an event (sets `status: "cancelled"`). The event stays fetchable but rejects new RSVPs. `actingUserId` must be a host, or an active admin or moderator of the event's space.
+Cancels an event (sets `status: "cancelled"`). The event stays fetchable but rejects new RSVPs. `actingUserId` must be the event's [owner](/v8/data-models/event#owner-and-hosts) (also when they are no longer an active member of its space) or an active admin or moderator of its space; other hosts of an event that has an owner get `403 event/forbidden`. When the owner's account was deleted (`userId` is `null`), any of its hosts may cancel it — for an event in a space, only while an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member` otherwise).
 
 ```typescript
 const event = await sublay.events.cancelEvent({
@@ -172,15 +172,15 @@ const event = await sublay.events.cancelEvent({
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as: the event's owner, an admin or moderator of its space, or, on an event whose owner's account was deleted, one of its hosts. It has exactly their powers on the event, and the action is recorded as theirs.</ParamField>
 
-**Returns** — `Promise<Event>`
+**Returns** — `Promise<Event | { id: string; status: "cancelled" }>`: the cancelled event, or only `{ id, status }` when `actingUserId` can't see the event (for example its owner who is no longer an active member of its space).
 
 ---
 
 ### deleteEvent
 
-Permanently (or soft-, per the project's `eventDeletion` settings) deletes an event and cleans up its RSVPs and invites. `actingUserId` must be a host, or an active admin or moderator of the event's space.
+Permanently (or soft-, per the project's `eventDeletion` settings) deletes an event and cleans up its RSVPs and invites. `actingUserId` must be one of the users who may [cancel](#cancelevent) it: the event's owner, an active admin or moderator of its space, or, when the owner's account was deleted, one of its hosts.
 
 ```typescript
 await sublay.events.deleteEvent({
@@ -190,7 +190,7 @@ await sublay.events.deleteEvent({
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as: the event's owner, an admin or moderator of its space, or, on an event whose owner's account was deleted, one of its hosts. It has exactly their powers on the event, and the action is recorded as theirs.</ParamField>
 
 **Returns** — `Promise<void>`
 
@@ -218,7 +218,7 @@ const event = await sublay.events.setRsvp({
 
 ### withdrawRsvp
 
-Removes a user's RSVP. Idempotent. It sends `DELETE /events/:eventId/rsvp` with `actingUserId` in the query and no body.
+Removes a user's RSVP, also from an event they can no longer see. Withdrawing with no RSVP succeeds and changes nothing if they can see the event, and answers `404` if they can't. It sends `DELETE /events/:eventId/rsvp` with `actingUserId` in the query and no body.
 
 ```typescript
 const event = await sublay.events.withdrawRsvp({
@@ -230,13 +230,13 @@ const event = await sublay.events.withdrawRsvp({
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
 <ParamField body="actingUserId" type="string" required>The user the service key acts as, whose RSVP is withdrawn, held to their own event visibility.</ParamField>
 
-**Returns** — `Promise<Event>`
+**Returns** — `Promise<Event | { id: string; userRsvp: null }>`: the event, or only `{ id, userRsvp: null }` when `actingUserId` can no longer see it.
 
 ---
 
 ### addHost
 
-Grants a user host privileges. The `userId` is the **target** host; `actingUserId` must be an existing host.
+Makes a user a host. **Owner-only**: `actingUserId` must be the event's [owner](/v8/data-models/event#owner-and-hosts), and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member` otherwise); other hosts get `403 event/forbidden`. The `userId` is the **target** host, and for an event in a space must be an active member of it (`409 event/host-not-member`).
 
 ```typescript
 const event = await sublay.events.addHost({
@@ -247,8 +247,8 @@ const event = await sublay.events.addHost({
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
-<ParamField body="userId" type="string" required>The user to grant host on the event.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as: the event's owner. It has exactly their powers on the event, and the action is recorded as theirs.</ParamField>
+<ParamField body="userId" type="string" required>The user to make a host.</ParamField>
 
 **Returns** — `Promise<Event>`
 
@@ -256,7 +256,7 @@ const event = await sublay.events.addHost({
 
 ### removeHost
 
-Revokes a user's host privileges. Rejected if it would leave the event with no hosts. It sends `DELETE /events/:eventId/hosts/:userId`: the host in the path, `actingUserId` in the query, no body.
+Removes a host. Removing another host is **owner-only** (`actingUserId` is the owner, for an event in a space while an active member of that space who isn't banned in it or a space above it; `403 event/not-space-member` otherwise); other hosts get `403 event/forbidden`. Any host other than the owner may step down by passing their own id as both `userId` and `actingUserId`, active member or not. The owner can't step down or be removed (`409 event/owner-is-host`). On an event whose owner's account was deleted, nobody can remove another host and its last host can't step down (`409 event/last-host`). It sends `DELETE /events/:eventId/hosts/:userId`: the host in the path, `actingUserId` in the query, no body.
 
 ```typescript
 const event = await sublay.events.removeHost({
@@ -267,16 +267,16 @@ const event = await sublay.events.removeHost({
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
-<ParamField body="userId" type="string" required>The host to remove.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as: the event's owner, or the host stepping down. It has exactly their powers on the event, and the action is recorded as theirs.</ParamField>
+<ParamField body="userId" type="string" required>The host to remove, or `actingUserId` itself to step down.</ParamField>
 
-**Returns** — `Promise<Event>`
+**Returns** — `Promise<Event | { id: string }>`: the event, or only `{ id }` after stepping down from an event `actingUserId` can no longer see.
 
 ---
 
 ### addInvite
 
-Invites a user to the event. Idempotent. The `userId` is the **target** invitee.
+Invites a user to the event. Host-only: `actingUserId` must be the owner or in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member`); the space's admins and moderators can't (`403 event/forbidden`). The `userId` is the **target** invitee. Re-inviting someone already invited is a no-op. For an event in a space the invitee must be able to read it and not be banned in it or a space above it, and, when the space is private or members-only (or sits under such a space) or the event is `members`-only, be an active member of the event's space itself; one `409 event/invitee-not-invitable` covers every case.
 
 ```typescript
 const event = await sublay.events.addInvite({
@@ -287,7 +287,7 @@ const event = await sublay.events.addInvite({
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as: one of the event's hosts. It has exactly their powers on the event, and the action is recorded as theirs.</ParamField>
 <ParamField body="userId" type="string" required>The user to invite (userId only — never a foreign ID).</ParamField>
 
 **Returns** — `Promise<Event>`
@@ -307,7 +307,7 @@ const event = await sublay.events.removeInvite({
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as: one of the event's hosts. It has exactly their powers on the event, and the action is recorded as theirs.</ParamField>
 <ParamField body="userId" type="string" required>The invitee to remove.</ParamField>
 
 **Returns** — `Promise<Event>`
@@ -328,7 +328,7 @@ const { data, pagination } = await sublay.events.fetchInvitees({
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="actingUserId" type="string" required>The user the call acts as, with exactly their powers on the event; the action is recorded as theirs.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user the call acts as: one of the event's hosts, or an admin or moderator of its space. It has exactly their powers on the event, and the action is recorded as theirs.</ParamField>
 <ParamField body="page" type="number">Page number (1-indexed).</ParamField>
 <ParamField body="limit" type="number">Results per page. Capped at `100`.</ParamField>
 

@@ -1,6 +1,6 @@
 import { SublayHttpClient } from "../../core/client";
 import {
-  Space,
+  SpaceWithPermissions,
   ReadingPermission,
   PostingPermission,
   SpaceVisibility,
@@ -28,7 +28,7 @@ export interface CreateSpaceProps {
 export async function createSpace(
   client: SublayHttpClient,
   data: CreateSpaceProps
-): Promise<Space> {
-  const response = await client.projectInstance.post<Space>("/spaces", data);
+): Promise<SpaceWithPermissions> {
+  const response = await client.projectInstance.post<SpaceWithPermissions>("/spaces", data);
   return response.data;
 }

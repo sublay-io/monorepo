@@ -21,7 +21,7 @@ const result = await sublay.spaces.joinSpace({ spaceId: "spc_abc123" });
   The Sublay space ID.
 </ParamField>
 
-**Returns** — `Promise<JoinSpaceResponse>`
+**Returns** — `Promise<JoinSpaceResponse>`: `{ message, membership, memberPermissions }`, where [`memberPermissions`](/v8/data-models/space#spacememberpermissions) is what the user may do in the space now (a request awaiting approval reports `status: "pending"` and `isMember: false`).
 
 ---
 
@@ -37,7 +37,7 @@ const result = await sublay.spaces.leaveSpace({ spaceId: "spc_abc123" });
   The Sublay space ID.
 </ParamField>
 
-**Returns** — `Promise<LeaveSpaceResponse>`
+**Returns** — `Promise<LeaveSpaceResponse>`: `{ message, memberPermissions }`, where [`memberPermissions`](/v8/data-models/space#spacememberpermissions) is what the user may still do in the space as a non-member.
 
 ---
 
@@ -55,7 +55,7 @@ const membership = await sublay.spaces.checkMyMembership({
   The Sublay space ID.
 </ParamField>
 
-**Returns** — `Promise<CheckMyMembershipResponse>`
+**Returns** — `Promise<CheckMyMembershipResponse>`. Its `permissions` come from the same calculation as a fetched space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions).
 
 ---
 
@@ -70,6 +70,8 @@ const members = await sublay.spaces.fetchSpaceMembers({
   status: "active",
 });
 ```
+
+Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/members-access-denied` to a user who isn't an active member of that members-only space or of a space between it and this one.
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
@@ -104,6 +106,8 @@ Fetches the team (admins and moderators) of a space.
 ```typescript
 const team = await sublay.spaces.fetchSpaceTeam({ spaceId: "spc_abc123" });
 ```
+
+Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/members-access-denied` to a user who isn't an active member of that members-only space or of a space between it and this one.
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.

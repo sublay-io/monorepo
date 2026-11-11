@@ -44,7 +44,7 @@ const space = await sublay.spaces.createSpace({
 </ParamField>
 
 <ParamField body="postingPermission" type="string">
-  Who can post content: `"anyone"`, `"members"` (default), or `"admins"`.
+  Who can post content: `"anyone"`, `"members"` (default), or `"team"` (the space's active admins and moderators).
 </ParamField>
 
 <ParamField body="visibility" type="string">
@@ -67,7 +67,7 @@ const space = await sublay.spaces.createSpace({
   Arbitrary metadata attached to the space.
 </ParamField>
 
-**Returns** — `Promise<Space>`
+**Returns** — `Promise<SpaceWithPermissions>`: the created space plus [`memberPermissions`](/v8/data-models/space#spacememberpermissions), what the creator may do in it.
 
 ---
 
@@ -91,7 +91,7 @@ const space = await sublay.spaces.fetchSpace({ spaceId: "spc_abc123" });
   The user to read as: exactly what their own access token would get (their role, `memberPermissions` and membership). Omit it for the anonymous view.
 </ParamField>
 
-**Returns** — `Promise<SpaceDetailed>`
+**Returns** — `Promise<SpaceDetailed>`. Its [`memberPermissions`](/v8/data-models/space#spacememberpermissions) is always present, also for a user with no membership (`isMember: false`, `status: null`); without `actingUserId` the service key gets the anonymous view, which describes a viewer, not what your backend may write. See [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated).
 
 ---
 
@@ -173,7 +173,7 @@ const space = await sublay.spaces.fetchSpaceBySlug({ slug: "photography" });
   The user to read as: exactly what their own access token would get (their role, `memberPermissions` and membership). Omit it for the anonymous view.
 </ParamField>
 
-**Returns** — `Promise<SpaceDetailed>`
+**Returns** — `Promise<SpaceDetailed>`. Its [`memberPermissions`](/v8/data-models/space#spacememberpermissions) is always present, also for a user with no membership (`isMember: false`, `status: null`); without `actingUserId` the service key gets the anonymous view, which describes a viewer, not what your backend may write. See [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated).
 
 ---
 
@@ -197,7 +197,7 @@ const space = await sublay.spaces.fetchSpaceByShortId({ shortId: "ph3x9" });
   The user to read as: exactly what their own access token would get (their role, `memberPermissions` and membership). Omit it for the anonymous view.
 </ParamField>
 
-**Returns** — `Promise<SpaceDetailed>`
+**Returns** — `Promise<SpaceDetailed>`. Its [`memberPermissions`](/v8/data-models/space#spacememberpermissions) is always present, also for a user with no membership (`isMember: false`, `status: null`); without `actingUserId` the service key gets the anonymous view, which describes a viewer, not what your backend may write. See [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated).
 
 ---
 
@@ -315,7 +315,7 @@ const space = await sublay.spaces.updateSpace({
   spaceId: "spc_abc123",
   actingUserId: "usr_admin123",
   name: "Photography Community",
-  postingPermission: "admins",
+  postingPermission: "team",
   requireJoinApproval: true,
 });
 ```
@@ -345,7 +345,7 @@ const space = await sublay.spaces.updateSpace({
 </ParamField>
 
 <ParamField body="postingPermission" type="string">
-  Updated posting permission: `"anyone"`, `"members"`, or `"admins"`.
+  Updated posting permission: `"anyone"`, `"members"`, or `"team"` (the space's active admins and moderators).
 </ParamField>
 
 <ParamField body="visibility" type="string">
@@ -360,7 +360,7 @@ const space = await sublay.spaces.updateSpace({
   Updated metadata. Merged with existing values.
 </ParamField>
 
-**Returns** — `Promise<Space>`
+**Returns** — `Promise<SpaceWithPermissions>`: the updated space plus [`memberPermissions`](/v8/data-models/space#spacememberpermissions), what the acting user may do in it after the update (no `parentSpace` or `childSpaces`).
 
 ---
 

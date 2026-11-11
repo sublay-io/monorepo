@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeEvent } from "../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks, makeEvent, makeUser } from "../../test-utils";
 import useEventData, { type UseEventDataProps } from "./useEventData";
 
 afterEach(() => {
@@ -84,7 +84,7 @@ describe("useEventData", () => {
     expect(axiosPrivate.calls("patch")).toHaveLength(0);
   });
 
-  it("deletes the event via deleteEvent and clears local state", async () => {
+  it("deletes the event via deleteEvent and sets it to null", async () => {
     const event = makeEvent({ id: "event-1" });
     const { result, axiosPrivate } = renderHookWithAxios(() => useEventData({ event }));
 
@@ -94,7 +94,7 @@ describe("useEventData", () => {
       await result.current.deleteEvent();
     });
 
-    expect(result.current.event).toBeUndefined();
+    expect(result.current.event).toBeNull();
     const [call] = axiosPrivate.calls("delete");
     expect(call.url).toBe("/test-project/events/event-1");
   });
@@ -134,6 +134,158 @@ describe("useEventData", () => {
       await result.current.withdrawRsvp();
     });
     expect(result.current.event).toEqual(withdrawnEvent);
+  });
+
+  it("merges a full mutation response onto the event, keeping fetched includes", async () => {
+    const event = makeEvent({
+      id: "event-1",
+      status: "active",
+      space: { id: "space-1" } as any,
+      files: [{ id: "file-1" }] as any,
+      user: makeUser({ id: "user-1", avatarFile: { id: "avatar-1" } as any }),
+    });
+    const { result, axiosPrivate } = renderHookWithAxios(() => useEventData({ event }));
+
+    // Cancel's full body carries `user` (without its files) and no `space` / `files`.
+    const { space: _space, files: _files, ...base } = event;
+    const response = {
+      ...base,
+      status: "cancelled" as const,
+      user: makeUser({ id: "user-1", name: "Renamed" }),
+    };
+    delete (response.user as any).avatarFile;
+    axiosPrivate.mockResponse("post", response);
+
+    await act(async () => {
+      await result.current.cancelEvent();
+    });
+
+    expect(result.current.event?.status).toBe("cancelled");
+    expect(result.current.event?.space).toEqual({ id: "space-1" });
+    expect(result.current.event?.files).toEqual([{ id: "file-1" }]);
+    expect(result.current.event?.user?.name).toBe("Renamed");
+    expect(result.current.event?.user?.avatarFile).toEqual({ id: "avatar-1" });
+  });
+
+  describe("an event that is gone for the caller (opened by eventId)", () => {
+    async function openByEventId() {
+      const event = makeEvent({ id: "event-1" });
+      const harness = renderHookWithAxios(
+        (props: UseEventDataProps) => useEventData(props),
+        {
+          initialProps: { eventId: "event-1" } as UseEventDataProps,
+          beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", event),
+        },
+      );
+      await waitFor(() => expect(harness.result.current.event).toEqual(event));
+      return harness;
+    }
+
+    async function settle() {
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+    }
+
+    it("sets null after delete and doesn't refetch", async () => {
+      const { result, axiosPrivate } = await openByEventId();
+
+      axiosPrivate.mockResponse("delete", undefined, 204);
+      await act(async () => {
+        await result.current.deleteEvent();
+      });
+      await settle();
+
+      expect(result.current.event).toBeNull();
+      expect(axiosPrivate.calls("get")).toHaveLength(1);
+    });
+
+    it("sets null on a short cancel body and doesn't refetch", async () => {
+      const { result, axiosPrivate } = await openByEventId();
+
+      const short = { id: "event-1", status: "cancelled" as const };
+      axiosPrivate.mockResponse("post", short);
+      let returned;
+      await act(async () => {
+        returned = await result.current.cancelEvent();
+      });
+      await settle();
+
+      expect(returned).toEqual(short);
+      expect(result.current.event).toBeNull();
+      expect(axiosPrivate.calls("get")).toHaveLength(1);
+    });
+
+    it("sets null on a short withdraw body and doesn't refetch", async () => {
+      const { result, axiosPrivate } = await openByEventId();
+
+      const short = { id: "event-1", userRsvp: null };
+      axiosPrivate.mockResponse("delete", short);
+      let returned;
+      await act(async () => {
+        returned = await result.current.withdrawRsvp();
+      });
+      await settle();
+
+      expect(returned).toEqual(short);
+      expect(result.current.event).toBeNull();
+      expect(axiosPrivate.calls("get")).toHaveLength(1);
+    });
+
+    it("shows null for a deleted event after switching to another and back, without a fetch", async () => {
+      const { result, rerender, axiosPrivate } = await openByEventId();
+
+      axiosPrivate.mockResponse("delete", undefined, 204);
+      await act(async () => {
+        await result.current.deleteEvent();
+      });
+
+      const eventTwo = makeEvent({ id: "event-2" });
+      axiosPrivate.mockResponse("get", eventTwo);
+      rerender({ eventId: "event-2" } as UseEventDataProps);
+      await waitFor(() => expect(result.current.event).toEqual(eventTwo));
+
+      rerender({ eventId: "event-1" } as UseEventDataProps);
+      await waitFor(() => expect(result.current.event).toBeNull());
+      await settle();
+
+      expect(result.current.event).toBeNull();
+      const urls = axiosPrivate.calls("get").map((c) => c.url);
+      expect(urls).toEqual([
+        "/test-project/events/event-1",
+        "/test-project/events/event-2",
+      ]);
+    });
+  });
+
+  it("shows the updated event after switching to another and back", async () => {
+    const eventOne = makeEvent({ id: "event-1", title: "Old" });
+    const eventTwo = makeEvent({ id: "event-2" });
+
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEventDataProps) => useEventData(props),
+      {
+        initialProps: { eventId: "event-1" } as UseEventDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", eventOne),
+      },
+    );
+    await waitFor(() => expect(result.current.event).toEqual(eventOne));
+
+    axiosPrivate.mockResponse("patch", { ...eventOne, title: "New" });
+    await act(async () => {
+      await result.current.updateEvent({ update: { title: "New" } });
+    });
+    expect(result.current.event?.title).toBe("New");
+
+    axiosPrivate.mockResponse("get", eventTwo);
+    rerender({ eventId: "event-2" } as UseEventDataProps);
+    await waitFor(() => expect(result.current.event).toEqual(eventTwo));
+
+    rerender({ eventId: "event-1" } as UseEventDataProps);
+    await waitFor(() => expect(result.current.event?.id).toBe("event-1"));
+
+    expect(result.current.event?.title).toBe("New");
+    expect(axiosPrivate.calls("get")).toHaveLength(2);
   });
 
   it("does not throw when updateEvent's request fails", async () => {

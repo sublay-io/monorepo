@@ -50,8 +50,8 @@ The hook returns a function. That function accepts:
   File ID for the avatar image. Pass `null` to remove the current avatar.
 </ParamField>
 
-<ParamField body="postingPermission" type="'members' | 'admins'">
-  Who can post messages. Only applicable to space conversations.
+<ParamField body="postingPermission" type="'members' | 'team'">
+  Who can post messages: `'members'` (any active member) or `'team'` (only the space's active admins and moderators). Only applicable to space conversations.
 </ParamField>
 
 ## Returns

@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useRemoveInvite` returns a callable that removes a user's invite. **Host-only.** Removing the invite revokes access to an `invite`-only event and also deletes that user's RSVP (decrementing the count). Removing a non-invited user is an idempotent no-op. It sends `DELETE /events/:eventId/invites/:userId`, with the invitee in the path and no body.
+`useRemoveInvite` returns a callable that removes a user's invite. **Host-only**: the logged-in user must be the owner or in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member`); the space's admins and moderators can't (`403 event/forbidden`). Removing the invite revokes access to an `invite` event. The user's RSVP is deleted (decrementing the count) only when an invite was actually removed and they can no longer RSVP to the event: on an `invite` event, a host who is an active member of the event's space keeps it, and anyone else (a space admin or moderator who isn't a host included) loses it; on `public` and `members` events the RSVP is never touched. Removing a non-invited user is an idempotent no-op. It sends `DELETE /events/:eventId/invites/:userId`, with the invitee in the path and no body.
 
 ## Usage Example
 

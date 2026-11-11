@@ -1,12 +1,14 @@
 ---
 title: "useCancelEvent"
-description: "Cancel an event without deleting it (host-only)"
+description: "Cancel an event without deleting it (owner or the space's admins and moderators)"
 icon: "plug"
 ---
 
 ## Overview
 
-`useCancelEvent` returns a callable that cancels an event by setting its `status` to `"cancelled"`. **Host-only.** The event stays fetchable but rejects new RSVPs. When the `notifications` bundle is enabled, all `going`/`maybe` attendees receive an `event-cancelled` notification.
+`useCancelEvent` returns a callable that cancels an event by setting its `status` to `"cancelled"`. The event stays fetchable but rejects new RSVPs. When the `notifications` bundle is enabled, the `going`/`maybe` attendees who can still see the event receive an `event-cancelled` notification.
+
+Allowed for the event's [owner](/v8/data-models/event#owner-and-hosts) (also when they are no longer an active member of its space) and for the active admins and moderators of its space. Other hosts can't cancel an event that has an owner (`403 event/forbidden`). When the owner's account was deleted (`userId` is `null`), any of its hosts may cancel it — for an event in a space, only while an active member of that space and not banned in it or a space above it (`403 event/not-space-member` otherwise). A user who can't see the event and isn't one of its hosts gets `404 event/not-found`.
 
 ## Usage Example
 
@@ -25,7 +27,7 @@ function CancelButton({ eventId }: { eventId: string }) {
 
 ## Returns
 
-Returns a `Promise<Event>` — the [Event](/v8/data-models/event) with `status: "cancelled"`.
+Returns a `Promise<CancelEventResponse>`: the [Event](/v8/data-models/event) with `status: "cancelled"`, or, when the logged-in user can't see the event (for example its owner who is no longer an active member of its space), only `{ id, status: "cancelled" }`.
 
 ## See Also
 

@@ -16,6 +16,7 @@ import {
   SpaceDetailed,
   SpaceIncludeParam,
   SpacePreview,
+  SpaceWithPermissions,
 } from "../../interfaces/models/Space";
 import { SpaceMemberStatus } from "../../interfaces/models/SpaceMember";
 import { handleError } from "../../utils/handleError";
@@ -52,7 +53,7 @@ export interface UseSpaceDataValues {
   // Operations
   updateSpace(
     props: Pick<UpdateSpaceProps, "update">
-  ): Promise<SpaceDetailed | undefined>;
+  ): Promise<SpaceWithPermissions | undefined>;
   deleteSpace: () => Promise<void>;
   joinSpace: () => Promise<void>;
   leaveSpace: () => Promise<void>;
@@ -96,12 +97,22 @@ function useSpaceData({
     [JSON.stringify(include)]
   );
 
-  // Compute permissions
+  // Compute permissions. The setting defaults only satisfy the props' types;
+  // the flags come from the server's `memberPermissions` alone.
   const permissions = useSpacePermissions({
     memberPermissions: space?.memberPermissions,
     postingPermission: space?.postingPermission || "members",
     readingPermission: space?.readingPermission || "anyone",
   });
+
+  // Show a changed space and keep the cache in step, so switching to another
+  // space and back shows the change rather than the space as first fetched.
+  const applySpace = useCallback((next: SpaceDetailed) => {
+    for (const key of Object.keys(spaceCache.current)) {
+      if (spaceCache.current[key].id === next.id) spaceCache.current[key] = next;
+    }
+    setSpace(next);
+  }, []);
 
   // Handle space update
   const handleUpdateSpace = useCallback(
@@ -112,14 +123,17 @@ function useSpaceData({
           spaceId: space.id,
           update,
         });
-        if (newSpace) setSpace(newSpace);
+        // The response is the space with the caller's server permissions, but
+        // without `parentSpace` / `childSpaces`: keep those from the current
+        // state.
+        if (newSpace) applySpace({ ...space, ...newSpace });
         return newSpace;
       } catch (err) {
         handleError(err, "Failed to update space");
         setError("Failed to update space");
       }
     },
-    [space, updateSpaceHook]
+    [space, updateSpaceHook, applySpace]
   );
 
   // Handle space delete
@@ -141,53 +155,38 @@ function useSpaceData({
 
     try {
       const response = await joinSpaceHook({ spaceId: space.id });
-      const member = response.membership;
 
-      // Update space with new memberPermissions and member count
-      // Note: When joining, role is always "member", status is "pending" or "active"
-      setSpace((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          membersCount: prev.membersCount + 1,
-          memberPermissions: {
-            isAdmin: false,
-            isModerator: false,
-            isMember: member.status === "active",
-            status: member.status,
-            canPost: member.status === "active",
-            canModerate: false,
-            canRead: true,
-          },
-        };
+      // The server's permissions after joining (never guessed from the
+      // membership status), and the member count
+      applySpace({
+        ...space,
+        membersCount: space.membersCount + 1,
+        memberPermissions: response.memberPermissions,
       });
     } catch (err) {
       handleError(err, "Failed to join space");
       setError("Failed to join space");
     }
-  }, [space, joinSpaceHook]);
+  }, [space, joinSpaceHook, applySpace]);
 
   // Handle leave space
   const handleLeaveSpace = useCallback(async () => {
     if (!space) return;
 
     try {
-      await leaveSpaceHook({ spaceId: space.id });
+      const response = await leaveSpaceHook({ spaceId: space.id });
 
-      // Update space to remove memberPermissions and decrement member count
-      setSpace((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          membersCount: Math.max(0, prev.membersCount - 1),
-          memberPermissions: null,
-        };
+      // The server's permissions now as a non-member, and the member count
+      applySpace({
+        ...space,
+        membersCount: Math.max(0, space.membersCount - 1),
+        memberPermissions: response.memberPermissions,
       });
     } catch (err) {
       handleError(err, "Failed to leave space");
       setError("Failed to leave space");
     }
-  }, [space, leaveSpaceHook]);
+  }, [space, leaveSpaceHook, applySpace]);
 
   // Fetch space effect
   useEffect(() => {

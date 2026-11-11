@@ -86,11 +86,11 @@ describe("js-sdk chat conversations — request shaping", () => {
     await updateConversation(client, {
       conversationId: "c1",
       name: "New name",
-      postingPermission: "admins",
+      postingPermission: "team",
     });
     expect(projectInstance.patch).toHaveBeenCalledWith("/chat/conversations/c1", {
       name: "New name",
-      postingPermission: "admins",
+      postingPermission: "team",
     });
   });
 

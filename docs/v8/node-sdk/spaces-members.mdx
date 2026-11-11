@@ -28,7 +28,7 @@ const result = await sublay.spaces.joinSpace({
   The user the service key acts as: the user who joins.
 </ParamField>
 
-**Returns** — `Promise<JoinSpaceResponse>`
+**Returns** — `Promise<JoinSpaceResponse>`: `{ message, membership, memberPermissions }`, where [`memberPermissions`](/v8/data-models/space#spacememberpermissions) is what the user may do in the space now (a request awaiting approval reports `status: "pending"` and `isMember: false`).
 
 ---
 
@@ -51,7 +51,7 @@ const result = await sublay.spaces.leaveSpace({
   The member who leaves: the request acts as them, and they must be an active member of the space.
 </ParamField>
 
-**Returns** — `Promise<LeaveSpaceResponse>`
+**Returns** — `Promise<LeaveSpaceResponse>`: `{ message, memberPermissions }`, where [`memberPermissions`](/v8/data-models/space#spacememberpermissions) is what the user may still do in the space as a non-member.
 
 ---
 
@@ -74,7 +74,7 @@ const result = await sublay.spaces.checkMyMembership({
   The user the service key acts as, whose membership is checked.
 </ParamField>
 
-**Returns** — `Promise<CheckMyMembershipResponse>`
+**Returns** — `Promise<CheckMyMembershipResponse>`. Its `permissions` come from the same calculation as a fetched space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions).
 
 ---
 
@@ -89,6 +89,8 @@ const result = await sublay.spaces.fetchSpaceMembers({
   limit: 20,
 });
 ```
+
+Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/members-access-denied` to a user who isn't an active member of that members-only space or of a space between it and this one.
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
@@ -127,6 +129,8 @@ Returns the admin and moderator members of a space (the "team").
 ```typescript
 const result = await sublay.spaces.fetchSpaceTeam({ spaceId: "spc_abc123" });
 ```
+
+Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/members-access-denied` to a user who isn't an active member of that members-only space or of a space between it and this one.
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.

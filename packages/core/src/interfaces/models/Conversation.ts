@@ -16,8 +16,8 @@ export interface Conversation {
   createdById: string | null;
   avatarFileId: string | null;
   lastMessageAt: string | null;
-  // Null for DMs and groups; 'members' | 'admins' for space chats
-  postingPermission: "members" | "admins" | null;
+  // Null for DMs and groups; 'members' | 'team' for space chats ('team' = the space's admins and moderators)
+  postingPermission: "members" | "team" | null;
   metadata: Record<string, any>;
   createdAt: string;
   updatedAt: string;

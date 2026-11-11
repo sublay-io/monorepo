@@ -3,6 +3,7 @@ import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeEvent } from "../../test-utils";
 import useRemoveHost from "./useRemoveHost";
+import type { RemoveHostResponse } from "../../interfaces/models/Event";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -15,7 +16,7 @@ describe("useRemoveHost", () => {
     const event = makeEvent({ hostIds: ["user-1"] });
     axiosPrivate.mockResponse("delete", event);
 
-    let returned: typeof event | undefined;
+    let returned: RemoveHostResponse | undefined;
     await act(async () => {
       returned = await result.current({ eventId: "event-1", userId: "user-2" });
     });
@@ -25,6 +26,22 @@ describe("useRemoveHost", () => {
     const [call] = axiosPrivate.calls("delete");
     expect(call.url).toBe("/test-project/events/event-1/hosts/user-2");
     expect(call.config?.data).toBeUndefined();
+  });
+
+  it("returns the short body after stepping down from an event the caller can no longer see", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useRemoveHost());
+
+    const short = { id: "event-1" };
+    axiosPrivate.mockResponse("delete", short);
+
+    let returned: RemoveHostResponse | undefined;
+    await act(async () => {
+      returned = await result.current({ eventId: "event-1", userId: "user-2" });
+    });
+
+    expect(returned).toEqual(short);
+    const [call] = axiosPrivate.calls("delete");
+    expect(call.url).toBe("/test-project/events/event-1/hosts/user-2");
   });
 
   it("rejects when the server returns an error response (e.g. last remaining host)", async () => {

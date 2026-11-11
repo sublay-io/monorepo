@@ -106,6 +106,8 @@ function SpaceContent() {
 
 ### Membership & Permissions
 
+These flags come from the space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions), which the server always returns, for members and non-members alike, and recalculates on join, leave and update. Until the space has loaded they are all `false`; the SDK never works them out from the space's settings.
+
 <ResponseField name="isMember" type="boolean">
   `true` if the current user has an active membership in this space.
 </ResponseField>
@@ -119,15 +121,19 @@ function SpaceContent() {
 </ResponseField>
 
 <ResponseField name="canPost" type="boolean">
-  `true` if the current user can post entities in this space, based on the space's `postingPermission` and the user's membership status.
+  `true` if the current user can post entities in this space, as the server reports it (see [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated)).
+</ResponseField>
+
+<ResponseField name="canRead" type="boolean">
+  `true` if the current user can read content in this space.
 </ResponseField>
 
 <ResponseField name="canModerate" type="boolean">
   `true` if the current user can perform moderation actions in this space.
 </ResponseField>
 
-<ResponseField name="membershipStatus" type='"pending" | "active" | "banned" | null'>
-  The current user's raw membership status. `null` if not a member.
+<ResponseField name="membershipStatus" type='"pending" | "active" | "banned" | "rejected" | null'>
+  The current user's raw membership status. `null` if they have no membership.
 </ResponseField>
 
 <ResponseField name="isPending" type="boolean">
@@ -155,15 +161,15 @@ function SpaceContent() {
 ### Operations
 
 <ResponseField name="joinSpace" type="() => Promise<void>">
-  Join the current space. If the space requires approval, the membership enters `pending` status.
+  Join the current space. If the space requires approval, the membership enters `pending` status. `memberPermissions` becomes the server's answer for the new membership.
 </ResponseField>
 
 <ResponseField name="leaveSpace" type="() => Promise<void>">
-  Leave the current space.
+  Leave the current space. `memberPermissions` becomes the server's answer for the user as a non-member.
 </ResponseField>
 
-<ResponseField name="updateSpace" type="(props: { update }) => Promise<SpaceDetailed | undefined>">
-  Update space settings. Only available to admins.
+<ResponseField name="updateSpace" type="(props: { update }) => Promise<SpaceWithPermissions | undefined>">
+  Update space settings. Only available to admins. Resolves with the updated space and the user's `memberPermissions` after the update; the local space takes both and keeps its `parentSpace` and `childSpaces`.
 </ResponseField>
 
 <ResponseField name="deleteSpace" type="() => Promise<void>">

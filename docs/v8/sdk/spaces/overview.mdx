@@ -65,9 +65,9 @@ function SpaceContent() {
 Each space has two independent permission settings:
 
 - **`readingPermission`** — `"anyone"` or `"members"`. Controls who can see content.
-- **`postingPermission`** — `"anyone"`, `"members"`, or `"admins"`. Controls who can post.
+- **`postingPermission`** — `"anyone"`, `"members"`, or `"team"` (the space's active admins and moderators). Controls who can post.
 
-When the current user is authenticated and is a member, `useSpace` exposes their resolved permissions (`canPost`, `canRead`, `canModerate`, `isAdmin`, `isModerator`).
+`useSpace` exposes the current user's resolved permissions (`canPost`, `canRead`, `canModerate`, `isAdmin`, `isModerator`) from the space's `memberPermissions`, which the server always returns, for members, non-members and signed-out users alike. The server works them out from these settings, the spaces above, bans and the user's membership (see [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated)); the SDK never guesses them.
 
 Separately, each space has a **`visibility`** setting — `"public"` (default), `"unlisted"`, or `"private"` — that controls who can find and see the space, independent of the permission model above:
 

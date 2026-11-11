@@ -6,7 +6,7 @@ icon: "cube"
 
 ## Overview
 
-`useSpacePermissions` is a utility hook that computes derived permission flags from a user's raw membership permissions and the space's permission settings. It is used internally by `useSpaceData` and exposed for cases where you need to compute permissions outside of a `SpaceProvider`.
+`useSpacePermissions` is a utility hook that turns a space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions) into flat permission flags. Every flag comes from the server's calculation (see [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated)); the hook never works them out from the space's settings. When `memberPermissions` is missing (for example while the space is loading), every flag is `false`. It is used internally by `useSpaceData` and exposed for cases where you need the flags outside of a `SpaceProvider`.
 
 <Tip>In most cases, you should use `useSpace` instead — it exposes `isMember`, `isAdmin`, `canPost`, etc. directly. Use `useSpacePermissions` only when working outside a SpaceProvider context.</Tip>
 
@@ -27,15 +27,15 @@ console.log(permissions.canPost, permissions.isAdmin);
 ## Parameters
 
 <ParamField path="memberPermissions" type="SpaceMemberPermissions | null | undefined" required>
-  The raw membership permissions object from the space. `null` or `undefined` if the user is not a member.
+  The space's `memberPermissions`, which every single-space fetch returns, for members and non-members alike. `null` or `undefined` makes every flag `false`.
 </ParamField>
 
-<ParamField path="postingPermission" type='"anyone" | "members" | "admins"' required>
-  The space's posting permission setting.
+<ParamField path="postingPermission" type='"anyone" | "members" | "team"' required>
+  The space's posting permission setting. It doesn't change the flags.
 </ParamField>
 
 <ParamField path="readingPermission" type='"anyone" | "members"'>
-  The space's reading permission setting. Defaults to `"anyone"`.
+  The space's reading permission setting. Defaults to `"anyone"`. It doesn't change the flags.
 </ParamField>
 
 ## Returns
@@ -53,7 +53,7 @@ console.log(permissions.canPost, permissions.isAdmin);
 </ResponseField>
 
 <ResponseField name="canPost" type="boolean">
-  Whether the user can post, given the space's posting permission and their membership status.
+  Whether the user can post entities in the space, as the server reports it.
 </ResponseField>
 
 <ResponseField name="canModerate" type="boolean">
@@ -61,7 +61,7 @@ console.log(permissions.canPost, permissions.isAdmin);
 </ResponseField>
 
 <ResponseField name="canRead" type="boolean">
-  Whether the user can read content, given the space's reading permission.
+  Whether the user can read content in the space, as the server reports it.
 </ResponseField>
 
 <ResponseField name="isPending" type="boolean">

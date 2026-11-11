@@ -3,7 +3,7 @@ title: "Space Lists"
 description: "Browse, search, and paginate spaces with filtering and sorting"
 ---
 
-The `useSpaceList` hook provides a Redux-backed, paginated list of spaces with support for filtering, sorting, and search. It lists the space directory, for discovery and browse pages. For the spaces the current user is a member of, see [My spaces](#my-spaces) below.
+The `useSpaceList` hook provides a Redux-backed, paginated list of spaces with support for filtering, sorting, and search. It lists the space directory, for discovery and browse pages. For the spaces the current user is a member of, see [My spaces](#my-spaces) below. Spaces in a list carry no `memberPermissions`; to show what the current user may do in one, load it with [`SpaceProvider`](/v8/sdk/spaces/provider-and-hook) or [`useFetchSpace`](/v8/hooks/spaces/use-fetch-space).
 
 ## Basic Usage
 

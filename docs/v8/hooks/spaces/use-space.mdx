@@ -8,6 +8,8 @@ icon: "cube"
 
 `useSpace` returns the current space state and all operations from the nearest `SpaceProvider`. It is the primary way to interact with a space in your component tree.
 
+The permission flags (`isMember`, `canPost`, `canRead`, …) come from the space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions), which the server always returns and recalculates on join, leave and update. They are all `false` until the space has loaded.
+
 <Note>This hook must be used inside a `SpaceProvider`.</Note>
 
 ## Usage Example
@@ -73,12 +75,16 @@ function SpaceHeader() {
   `true` if the current user can post entities in this space.
 </ResponseField>
 
+<ResponseField name="canRead" type="boolean">
+  `true` if the current user can read content in this space.
+</ResponseField>
+
 <ResponseField name="canModerate" type="boolean">
   `true` if the current user can perform moderation actions.
 </ResponseField>
 
-<ResponseField name="membershipStatus" type='"pending" | "active" | "banned" | null'>
-  Raw membership status. `null` if not a member.
+<ResponseField name="membershipStatus" type='"pending" | "active" | "banned" | "rejected" | null'>
+  Raw membership status. `null` if the user has no membership.
 </ResponseField>
 
 <ResponseField name="isPending" type="boolean">
@@ -102,15 +108,15 @@ function SpaceHeader() {
 </ResponseField>
 
 <ResponseField name="joinSpace" type="() => Promise<void>">
-  Join the space. Creates a `pending` membership when approval is required.
+  Join the space. Creates a `pending` membership when approval is required. The space's `memberPermissions` becomes the server's answer for the new membership.
 </ResponseField>
 
 <ResponseField name="leaveSpace" type="() => Promise<void>">
-  Leave the space.
+  Leave the space. The space's `memberPermissions` becomes the server's answer for the user as a non-member.
 </ResponseField>
 
-<ResponseField name="updateSpace" type="(props: { update }) => Promise<SpaceDetailed | undefined>">
-  Update space settings (admin only).
+<ResponseField name="updateSpace" type="(props: { update }) => Promise<SpaceWithPermissions | undefined>">
+  Update space settings (admin only). Resolves with the updated space and the user's `memberPermissions` after the update; the local space takes both and keeps its `parentSpace` and `childSpaces`.
 </ResponseField>
 
 <ResponseField name="deleteSpace" type="() => Promise<void>">

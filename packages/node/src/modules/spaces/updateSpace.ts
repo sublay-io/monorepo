@@ -1,6 +1,6 @@
 import { SublayHttpClient } from "../../core/client";
 import {
-  Space,
+  SpaceWithPermissions,
   ReadingPermission,
   PostingPermission,
   SpaceVisibility,
@@ -26,9 +26,9 @@ export interface UpdateSpaceProps {
 export async function updateSpace(
   client: SublayHttpClient,
   data: UpdateSpaceProps
-): Promise<Space> {
+): Promise<SpaceWithPermissions> {
   const { spaceId, ...body } = data;
-  const response = await client.projectInstance.patch<Space>(
+  const response = await client.projectInstance.patch<SpaceWithPermissions>(
     `/spaces/${spaceId}`,
     body
   );

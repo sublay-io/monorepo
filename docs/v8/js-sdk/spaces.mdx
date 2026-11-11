@@ -39,7 +39,7 @@ const space = await sublay.spaces.createSpace({
 </ParamField>
 
 <ParamField body="postingPermission" type="string">
-  Who can post content: `"anyone"`, `"members"`, or `"admins"`.
+  Who can post content: `"anyone"`, `"members"`, or `"team"` (the space's active admins and moderators).
 </ParamField>
 
 <ParamField body="visibility" type="string">
@@ -62,7 +62,7 @@ const space = await sublay.spaces.createSpace({
   Arbitrary metadata attached to the space.
 </ParamField>
 
-**Returns** — `Promise<Space>`
+**Returns** — `Promise<SpaceWithPermissions>`: the created space plus [`memberPermissions`](/v8/data-models/space#spacememberpermissions), what the creator may do in it.
 
 ---
 
@@ -82,7 +82,7 @@ const space = await sublay.spaces.fetchSpace({ spaceId: "spc_abc123" });
   A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
-**Returns** — `Promise<SpaceDetailed>`
+**Returns** — `Promise<SpaceDetailed>`. Its [`memberPermissions`](/v8/data-models/space#spacememberpermissions) is always present, also for a user with no membership (`isMember: false`, `status: null`); a signed-out user gets the anonymous view. See [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated).
 
 ---
 
@@ -154,7 +154,7 @@ const space = await sublay.spaces.fetchSpaceBySlug({ slug: "photography" });
   A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
-**Returns** — `Promise<SpaceDetailed>`
+**Returns** — `Promise<SpaceDetailed>`. Its [`memberPermissions`](/v8/data-models/space#spacememberpermissions) is always present, also for a user with no membership (`isMember: false`, `status: null`); a signed-out user gets the anonymous view. See [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated).
 
 ---
 
@@ -174,7 +174,7 @@ const space = await sublay.spaces.fetchSpaceByShortId({ shortId: "a1b2c3" });
   A single value or an array. The only value is `"files"`, which populates the avatar and banner file objects.
 </ParamField>
 
-**Returns** — `Promise<SpaceDetailed>`
+**Returns** — `Promise<SpaceDetailed>`. Its [`memberPermissions`](/v8/data-models/space#spacememberpermissions) is always present, also for a user with no membership (`isMember: false`, `status: null`); a signed-out user gets the anonymous view. See [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated).
 
 ---
 
@@ -280,7 +280,7 @@ Updates a space's settings.
 const space = await sublay.spaces.updateSpace({
   spaceId: "spc_abc123",
   description: "An updated description",
-  postingPermission: "admins",
+  postingPermission: "team",
 });
 ```
 
@@ -305,7 +305,7 @@ const space = await sublay.spaces.updateSpace({
 </ParamField>
 
 <ParamField body="postingPermission" type="string">
-  Who can post content: `"anyone"`, `"members"`, or `"admins"`.
+  Who can post content: `"anyone"`, `"members"`, or `"team"` (the space's active admins and moderators).
 </ParamField>
 
 <ParamField body="visibility" type="string">
@@ -320,7 +320,7 @@ const space = await sublay.spaces.updateSpace({
   Arbitrary metadata attached to the space.
 </ParamField>
 
-**Returns** — `Promise<Space>`
+**Returns** — `Promise<SpaceWithPermissions>`: the updated space plus [`memberPermissions`](/v8/data-models/space#spacememberpermissions), what the user may do in it after the update (no `parentSpace` or `childSpaces`).
 
 ---
 

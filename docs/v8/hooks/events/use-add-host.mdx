@@ -1,12 +1,12 @@
 ---
 title: "useAddHost"
-description: "Grant a user host privileges on an event (host-only)"
+description: "Make a user a host of an event (owner-only)"
 icon: "plug"
 ---
 
 ## Overview
 
-`useAddHost` returns a callable that adds a user to an event's `hostIds`. **Host-only** — the logged-in user must already be a host. The operation is idempotent.
+`useAddHost` returns a callable that adds a user to an event's `hostIds`. **Owner-only**: the logged-in user must be the event's [owner](/v8/data-models/event#owner-and-hosts), and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member` otherwise). Other hosts get `403 event/forbidden`. For an event in a space, the new host must be an active member of it (`409 event/host-not-member`). The operation is idempotent.
 
 ## Usage Example
 
@@ -26,7 +26,7 @@ function AddCoHost({ eventId }: { eventId: string }) {
 ## Parameters
 
 <ParamField path="eventId" type="string" required>The event ID.</ParamField>
-<ParamField path="userId" type="string" required>The user to grant host on the event.</ParamField>
+<ParamField path="userId" type="string" required>The user to make a host. For an event in a space, an active member of it.</ParamField>
 
 ## Returns
 

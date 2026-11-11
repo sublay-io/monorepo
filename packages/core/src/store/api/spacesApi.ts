@@ -4,6 +4,7 @@ import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import type {
   Space,
   DeleteSpaceResponse,
+  PostingPermission,
 } from "../../interfaces/models/Space";
 import type { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions";
 import type { PaginatedResponse } from "../../interfaces/PaginatedResponse";
@@ -24,7 +25,7 @@ interface CreateSpaceParams {
   // Query layer cannot send (baseApi pins Content-Type to application/json).
   // Use `useCreateSpace` / `useUpdateSpace` to set space images.
   readingPermission?: "anyone" | "members";
-  postingPermission?: "anyone" | "members" | "admins";
+  postingPermission?: PostingPermission;
   visibility?: "public" | "unlisted" | "private";
   requireJoinApproval?: boolean;
   metadata?: Record<string, any>;

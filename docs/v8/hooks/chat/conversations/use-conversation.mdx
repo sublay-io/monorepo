@@ -48,7 +48,7 @@ function ConversationHeader({ conversationId }: { conversationId: string }) {
   `true` while the initial fetch is in progress.
 </ResponseField>
 
-<ResponseField name="update" type="(params: { name?: string; description?: string; avatarFileId?: string | null; postingPermission?: 'members' | 'admins' }) => Promise<Conversation | undefined>">
+<ResponseField name="update" type="(params: { name?: string; description?: string; avatarFileId?: string | null; postingPermission?: 'members' | 'team' }) => Promise<Conversation | undefined>">
   Updates the conversation. Dispatches the updated conversation to Redux on success. `conversationId` is already bound from the hook props and should not be passed here.
 
   | Field | Type | Description |
@@ -56,7 +56,7 @@ function ConversationHeader({ conversationId }: { conversationId: string }) {
   | `name` | `string` | New conversation name |
   | `description` | `string` | New description |
   | `avatarFileId` | `string \| null` | File ID for the avatar image |
-  | `postingPermission` | `'members' \| 'admins'` | Who can post (space chats only) |
+  | `postingPermission` | `'members' \| 'team'` | Who can post (space chats only): any active member, or only the space's active admins and moderators |
 </ResponseField>
 
 <ResponseField name="deleteConversation" type="() => Promise<void>">

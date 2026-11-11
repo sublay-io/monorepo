@@ -1,13 +1,20 @@
 import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
-import { Event } from "../../interfaces/models/Event";
+import { WithdrawRsvpResponse } from "../../interfaces/models/Event";
 
 export interface WithdrawRsvpProps {
   eventId: string;
 }
 
-function useWithdrawRsvp(): (props: WithdrawRsvpProps) => Promise<Event> {
+/**
+ * Withdraws the logged-in user's RSVP. Works whenever they hold one, also on
+ * an event they can no longer see. Returns the full event, or
+ * `{ id, userRsvp: null }` when they can't see the event.
+ */
+function useWithdrawRsvp(): (
+  props: WithdrawRsvpProps
+) => Promise<WithdrawRsvpResponse> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
 
@@ -21,7 +28,7 @@ function useWithdrawRsvp(): (props: WithdrawRsvpProps) => Promise<Event> {
         `/${projectId}/events/${eventId}/rsvp`
       );
 
-      return response.data as Event;
+      return response.data as WithdrawRsvpResponse;
     },
     [projectId, axios]
   );

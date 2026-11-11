@@ -56,8 +56,8 @@ function CreateSpaceForm() {
   Who can read content. Defaults to `"anyone"`.
 </ParamField>
 
-<ParamField path="postingPermission" type='"anyone" | "members" | "admins"'>
-  Who can post entities. Defaults to `"members"`.
+<ParamField path="postingPermission" type='"anyone" | "members" | "team"'>
+  Who can post entities: `"anyone"`, `"members"` (active members), or `"team"` (the space's active admins and moderators). Defaults to `"members"`.
 </ParamField>
 
 <ParamField path="visibility" type='"public" | "unlisted" | "private"'>
@@ -82,6 +82,6 @@ function CreateSpaceForm() {
 
 ## Returns
 
-Returns the created [Space](/v8/data-models/space) object.
+Returns the created [Space](/v8/data-models/space) object plus `memberPermissions`: what the creator may do in the new space (see [SpaceMemberPermissions](/v8/data-models/space#spacememberpermissions)).
 
 <Note>When creating a child space, all admins and moderators of the parent space are automatically added to the new child space with their same roles.</Note>

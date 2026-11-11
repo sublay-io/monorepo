@@ -156,6 +156,9 @@ export type {
   Event,
   EventRsvp,
   EventInvite,
+  CancelEventResponse,
+  WithdrawRsvpResponse,
+  RemoveHostResponse,
   EventType,
   EventVisibility,
   EventStatus,
@@ -197,6 +200,7 @@ export type { Collection } from "./interfaces/Collection";
 export type {
   Space,
   SpaceDetailed,
+  SpaceWithPermissions,
   SpacePreview,
   SpaceBreadcrumb,
   SpaceBreadcrumbEntry,

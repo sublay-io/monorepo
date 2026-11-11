@@ -227,6 +227,29 @@ describe("node-sdk events — response mapping", () => {
     ).resolves.toEqual(event);
   });
 
+  it("cancelEvent returns the short body for a caller who can't see the event", async () => {
+    const { client, projectInstance } = makeClient();
+    const short = { id: "ev1", status: "cancelled" };
+    projectInstance.post.mockResolvedValueOnce({ data: short });
+    await expect(cancelEvent(client, { eventId: "ev1", actingUserId: "h1" })).resolves.toEqual(short);
+  });
+
+  it("withdrawRsvp returns the short body for a caller who can no longer see the event", async () => {
+    const { client, projectInstance } = makeClient();
+    const short = { id: "ev1", userRsvp: null };
+    projectInstance.delete.mockResolvedValueOnce({ data: short });
+    await expect(withdrawRsvp(client, { eventId: "ev1", actingUserId: "u1" })).resolves.toEqual(short);
+  });
+
+  it("removeHost returns the short body after stepping down from an event the caller can't see", async () => {
+    const { client, projectInstance } = makeClient();
+    const short = { id: "ev1" };
+    projectInstance.delete.mockResolvedValueOnce({ data: short });
+    await expect(
+      removeHost(client, { eventId: "ev1", userId: "h1", actingUserId: "h1" }),
+    ).resolves.toEqual(short);
+  });
+
   it("addInvite returns response.data", async () => {
     const { client, projectInstance } = makeClient();
     const event = { id: "ev1" };

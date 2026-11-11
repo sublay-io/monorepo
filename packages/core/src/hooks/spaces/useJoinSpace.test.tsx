@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks } from "../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks, makeMemberPermissions } from "../../test-utils";
 import useJoinSpace from "./useJoinSpace";
 import type { JoinSpaceResponse } from "../../interfaces/models/Space";
 
@@ -16,6 +16,7 @@ describe("useJoinSpace", () => {
     const response: JoinSpaceResponse = {
       message: "Joined",
       membership: { id: "membership-1", spaceId: "space-1", userId: "user-1", role: "member", status: "active", joinedAt: "2024-01-01T00:00:00.000Z" },
+      memberPermissions: makeMemberPermissions({ isMember: true, status: "active", canPost: true }),
     };
     axiosPrivate.mockResponse("post", response);
 

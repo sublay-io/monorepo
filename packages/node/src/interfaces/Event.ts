@@ -17,7 +17,7 @@ export interface Event {
   id: string;
   shortId: string;
   projectId: string;
-  userId: string | null; // creator (SET NULL on user delete)
+  userId: string | null; // the event's owner (its creator); null after the owner's account is deleted
   user?: User | null; // Populated when include contains "user"
   title: string;
   description: string | null;
@@ -39,7 +39,7 @@ export interface Event {
   allowMaybe: boolean;
   guestListVisible: boolean;
   capacity: number | null;
-  hostIds: string[];
+  hostIds: string[]; // always includes the owner
   coverImageId: string | null;
   files?: File[]; // Populated when include contains "files"
   rsvpCounts: RsvpCounts;
@@ -59,6 +59,25 @@ export interface EventRsvp {
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * What cancelling an event returns: the full event, or `{ id, status }` when
+ * the caller can't see the event (e.g. its owner, without active membership
+ * of its space).
+ */
+export type CancelEventResponse = Event | { id: string; status: "cancelled" };
+
+/**
+ * What withdrawing an RSVP returns: the full event, or `{ id, userRsvp }`
+ * when the caller can no longer see the event.
+ */
+export type WithdrawRsvpResponse = Event | { id: string; userRsvp: null };
+
+/**
+ * What removing a host returns: the full event, or `{ id }` when the caller
+ * stepped down from an event they can no longer see.
+ */
+export type RemoveHostResponse = Event | { id: string };
 
 export interface EventInvite {
   id: string;

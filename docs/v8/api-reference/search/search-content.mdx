@@ -10,7 +10,7 @@ Performs vector-similarity search over project content (entities, comments, and 
 
 **Requires a paid plan with semantic search enabled.**
 
-**Authentication required.** Send a user's access token as `Authorization: Bearer <token>` — missing token → `401`, invalid/expired token → `403` (refresh and retry). A service key is accepted too: with `actingUserId` it gets exactly what that user's own token would get, and without it exactly the anonymous view — no chat messages, no block filtering under [What's left out](#whats-left-out), and no [comment moderation details](/v8/data-models/comment#moderation-fields).
+**Authentication required.** Send a user's access token as `Authorization: Bearer <token>` — missing token → `401`, invalid/expired token → `403` (refresh and retry). A service key is accepted too: with `actingUserId` it gets exactly what that user's own token would get, and without it exactly the anonymous view — no chat messages, only content from spaces anyone can read, no block filtering under [What's left out](#whats-left-out), and no [comment moderation details](/v8/data-models/comment#moderation-fields).
 
 ## Body Parameters
 
@@ -23,11 +23,11 @@ Performs vector-similarity search over project content (entities, comments, and 
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  Restrict search to a specific space.
+  Restrict search to a specific space. It narrows the search; it never widens what the user can read. Without `includeChildSpaces`, a space the user can't read (see [Spaces they can't read](#spaces-they-cant-read)), or one that doesn't exist, gives an empty array, not an error.
 </ParamField>
 
 <ParamField body="includeChildSpaces" type="boolean" default="false">
-  Only applies with a `spaceId`. When `true`, the search also includes every space nested under it — children, grandchildren, the whole subtree at any depth — not just the named space. Ignored without a `spaceId`.
+  Only applies with a `spaceId`. When `true`, the search also includes every space nested under it — children, grandchildren, the whole subtree at any depth — not just the named space. Only the spaces in the subtree the user can read are searched: a readable sub-space is searched even when the user can't read the named space itself, whose own content is then left out. Ignored without a `spaceId`.
 </ParamField>
 
 <ParamField body="conversationId" type="string">
@@ -35,7 +35,7 @@ Performs vector-similarity search over project content (entities, comments, and 
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only: the user to search as. Results follow that user's access — their chats, their blocks. Without it, a service key gets the anonymous view: entities and comments, but no chat messages. A user token always acts as its own user and must not send it (`400 search/acting-user-not-allowed`).
+  Service key only: the user to search as. Results follow that user's access — their chats, their blocks. Without it, a service key gets the anonymous view: entities and comments from spaces anyone can read, but no chat messages. A user token always acts as its own user and must not send it (`400 search/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField body="limit" type="number" default="20">
@@ -72,6 +72,14 @@ Each result includes:
 - `record` — the fully populated entity, comment, or chat message object. Entity records carry `commentsCount`. A record's `user` is the author's public [User](/v8/data-models/user) — no email or other private fields.
 
 ### What's left out
+
+#### Spaces they can't read
+
+Entities and comments come only from spaces the user can read: they can see the space and either are an active member of it, or its `readingPermission` is `"anyone"` and they can read the space above it (see [Who can read content](/v8/data-models/space#who-can-read-content)). A comment counts as being in its entity's space. Content in no space is always included. With no user (a service key without `actingUserId`), only spaces anyone can read count.
+
+The filter runs inside the similarity search, so a heavily filtered query can return fewer results than `limit`.
+
+#### Deleted, removed and blocked content
 
 Comments their author deleted are never returned. Comments a moderator removed are never returned either — to anyone, including the removed comment's author and requests made with a service key.
 

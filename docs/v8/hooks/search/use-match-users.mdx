@@ -50,11 +50,11 @@ Call `match` with:
 </ParamField>
 
 <ParamField path="spaceId" type="string">
-  Restrict candidates to users active in this space.
+  Restrict candidates to users active in this space. Without `includeChildSpaces`, a space the current user can't read (see [Who can read content](/v8/data-models/space#who-can-read-content)), or one that doesn't exist, matches nobody: `results` is empty, with no error.
 </ParamField>
 
 <ParamField path="includeChildSpaces" type="boolean">
-  With `spaceId`, also include users active in the space's subtree.
+  With `spaceId`, also include users active in the space's subtree, counting only the spaces in it the current user can read. A sub-space they can read counts even when they can't read the named space itself; activity in a space they can't read never counts.
 </ParamField>
 
 <ParamField path="includeSampleContent" type="boolean">

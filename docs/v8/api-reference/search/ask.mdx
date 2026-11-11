@@ -10,7 +10,7 @@ Answers a natural language question using content from your project as context. 
 
 **Requires a paid plan with semantic search enabled.**
 
-**Authentication required.** Send the user's access token as `Authorization: Bearer <token>`. Requests without a valid token are rejected before any work is done — missing token → `401`, invalid/expired token → `403` (refresh the access token and retry). A service key is accepted too: with `actingUserId` it gets exactly what that user's own token would get, and without it exactly the anonymous view — no chat messages as context, no block filtering, and no [comment moderation details](/v8/data-models/comment#moderation-fields) on the sources.
+**Authentication required.** Send the user's access token as `Authorization: Bearer <token>`. Requests without a valid token are rejected before any work is done — missing token → `401`, invalid/expired token → `403` (refresh the access token and retry). A service key is accepted too: with `actingUserId` it gets exactly what that user's own token would get, and without it exactly the anonymous view — no chat messages as context, only content from spaces anyone can read, no block filtering, and no [comment moderation details](/v8/data-models/comment#moderation-fields) on the sources.
 
 ## Body Parameters
 
@@ -23,11 +23,11 @@ Answers a natural language question using content from your project as context. 
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  Restrict the context lookup to a specific space.
+  Restrict the context lookup to a specific space. It narrows the lookup; it never widens what the user can read. Without `includeChildSpaces`, a space the user can't read, or one that doesn't exist, gives no context and an empty `sources` array, not an error.
 </ParamField>
 
 <ParamField body="includeChildSpaces" type="boolean" default="false">
-  Only applies with a `spaceId`. When `true`, the context lookup also includes every space nested under it — children, grandchildren, the whole subtree at any depth — not just the named space. Use it to ask across a community and all of its channels at once. Ignored without a `spaceId`.
+  Only applies with a `spaceId`. When `true`, the context lookup also includes every space nested under it — children, grandchildren, the whole subtree at any depth — not just the named space. Use it to ask across a space and all of its sub-spaces at once. Only the spaces in the subtree the user can read are used: a readable sub-space is used even when the user can't read the named space itself, whose own content is then left out. Ignored without a `spaceId`.
 </ParamField>
 
 <ParamField body="conversationId" type="string">
@@ -35,7 +35,7 @@ Answers a natural language question using content from your project as context. 
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service key only: the user to search as. Results follow that user's access — their chats, their blocks. Without it, a service key gets the anonymous view: entities and comments, but no chat messages. A user token always acts as its own user and must not send it (`400 search/acting-user-not-allowed`).
+  Service key only: the user to search as. Results follow that user's access — their chats, their blocks. Without it, a service key gets the anonymous view: entities and comments from spaces anyone can read, but no chat messages. A user token always acts as its own user and must not send it (`400 search/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField body="limit" type="number" default="20">
@@ -73,7 +73,7 @@ data: [{"sourceType": "entity", "similarity": 0.87, "record": {...}}, ...]
 
 Each source object follows the same shape as the [Search Content](/v8/api-reference/search/search-content) response — `sourceType`, `similarity`, and a fully populated `record`. An empty array is sent when no relevant context was found.
 
-The answer is generated only from content the user (the signed-in user, or the `actingUserId` a service key sends) can see: content by users they are block-edged with (in either direction), comments on an entity whose author has blocked them, and comments their author deleted, are never used as context or returned as sources. Chat messages come only from conversations the user can read in the chat itself: ones they're an active member of, and, for a conversation they left or were removed or banned from, messages sent before they left. `conversationId` narrows the search; it never widens what the user can read. Messages their author deleted or a moderator removed are never returned.
+The answer is generated only from content the user (the signed-in user, or the `actingUserId` a service key sends) can see: content by users they are block-edged with (in either direction), comments on an entity whose author has blocked them, and comments their author deleted, are never used as context or returned as sources. Entities and comments come only from spaces the user can read: they can see the space and either are an active member of it, or its `readingPermission` is `"anyone"` and they can read the space above it (see [Who can read content](/v8/data-models/space#who-can-read-content)). A comment counts as being in its entity's space; content in no space is always included. Chat messages come only from conversations the user can read in the chat itself: ones they're an active member of, and, for a conversation they left or were removed or banned from, messages sent before they left. `conversationId` narrows the search; it never widens what the user can read. Messages their author deleted or a moderator removed are never returned.
 
 **`done`** — signals the stream is finished:
 ```

@@ -34,7 +34,7 @@ function defaultResponder(...args: unknown[]) {
       : (req as Request).method) ?? "GET";
 
   if (method === "GET" && url.includes("/app-notifications/count")) {
-    return jsonResponse(2);
+    return jsonResponse({ count: 2 });
   }
   if (method === "GET" && url.includes("/app-notifications")) {
     return jsonResponse({
@@ -77,7 +77,7 @@ describe("useAppNotifications", () => {
     fetchHandle.fetchMock.mockImplementation(async (...args: unknown[]) => {
       const req = args[0] as Request | string;
       const url = typeof req === "string" ? req : req.url;
-      if (url.includes("/app-notifications/count")) return jsonResponse(0);
+      if (url.includes("/app-notifications/count")) return jsonResponse({ count: 0 });
       if (url.includes("/app-notifications")) {
         return jsonResponse({
           data: [notification("n1", { metadata: { title: "Custom title", content: "Custom body", buttonData: null } })],
@@ -106,7 +106,7 @@ describe("useAppNotifications", () => {
     fetchHandle.fetchMock.mockImplementation(async (...args: unknown[]) => {
       const req = args[0] as Request | string;
       const url = typeof req === "string" ? req : req.url;
-      if (url.includes("/app-notifications/count")) return jsonResponse(0);
+      if (url.includes("/app-notifications/count")) return jsonResponse({ count: 0 });
       if (url.includes("/app-notifications")) {
         const page = new URL(url).searchParams.get("page");
         if (page === "2") {

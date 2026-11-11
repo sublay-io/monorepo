@@ -48,7 +48,7 @@ describe("tablesApi", () => {
   it("fetchTableRow builds a GET to the exact single-row route", async () => {
     const rowId = "3f0d9f2e-1c4a-4b7e-9f11-0a2b3c4d5e6f";
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      jsonResponse({ row: { id: rowId, name: "alpha" } }),
+      jsonResponse({ id: rowId, name: "alpha" }),
     );
 
     await store.dispatch(
@@ -138,7 +138,7 @@ describe("tablesApi", () => {
 
   it("createRow issues a POST with the row data as the body", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      jsonResponse({ row: { id: "1" } }, 201),
+      jsonResponse({ id: "1" }, 201),
     );
 
     await store.dispatch(
@@ -156,7 +156,7 @@ describe("tablesApi", () => {
 
   it("updateRow issues a PATCH to the row's own URL", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      jsonResponse({ row: { id: "1", name: "bravo" } }),
+      jsonResponse({ id: "1", name: "bravo" }),
     );
 
     await store.dispatch(
@@ -229,7 +229,7 @@ describe("tablesApi", () => {
 
   it("restoreRow issues a POST to the row's /restore route", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      jsonResponse({ row: { id: "1", deletedAt: null } }),
+      jsonResponse({ id: "1", deletedAt: null }),
     );
 
     await store.dispatch(

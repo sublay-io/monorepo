@@ -172,25 +172,25 @@ export function useTable<T extends TableRow = TableRow>(
 
   const createRow = useCallback(
     async (rowData: Record<string, unknown>) => {
-      const res = await createRowMutation({
+      const row = await createRowMutation({
         projectId: projectId as string,
         tableName,
         data: rowData,
       }).unwrap();
-      return res.row as T;
+      return row as T;
     },
     [createRowMutation, projectId, tableName],
   );
 
   const updateRow = useCallback(
     async (rowId: string, rowData: Record<string, unknown>) => {
-      const res = await updateRowMutation({
+      const row = await updateRowMutation({
         projectId: projectId as string,
         tableName,
         rowId,
         data: rowData,
       }).unwrap();
-      return res.row as T;
+      return row as T;
     },
     [updateRowMutation, projectId, tableName],
   );
@@ -208,12 +208,12 @@ export function useTable<T extends TableRow = TableRow>(
 
   const restoreRow = useCallback(
     async (rowId: string) => {
-      const res = await restoreRowMutation({
+      const row = await restoreRowMutation({
         projectId: projectId as string,
         tableName,
         rowId,
       }).unwrap();
-      return res.row as T;
+      return row as T;
     },
     [restoreRowMutation, projectId, tableName],
   );

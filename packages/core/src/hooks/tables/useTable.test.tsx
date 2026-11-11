@@ -96,13 +96,13 @@ beforeEach(() => {
       });
     }
     if (method === "POST" && url.includes("/restore")) {
-      return jsonResponse({ row: { id: "1", name: "alpha", deletedAt: null } });
+      return jsonResponse({ id: "1", name: "alpha", deletedAt: null });
     }
     if (method === "POST" && url.includes("/db/Events")) {
-      return jsonResponse({ row: { id: "3", name: "charlie" } }, 201);
+      return jsonResponse({ id: "3", name: "charlie" }, 201);
     }
     if (method === "PATCH" && url.includes("/db/Events/1")) {
-      return jsonResponse({ row: { id: "1", name: "updated" } });
+      return jsonResponse({ id: "1", name: "updated" });
     }
     if (method === "DELETE" && url.includes("/db/Events/1")) {
       return jsonResponse({ deleted: true, soft: !url.includes("force=true") });

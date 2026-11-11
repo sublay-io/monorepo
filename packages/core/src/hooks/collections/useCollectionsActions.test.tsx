@@ -89,7 +89,7 @@ describe("useCollectionsActions", () => {
 
   it("fetchSubCollections maps the result under the parent collection", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      jsonResponse([{ ...ROOT, id: "child", parentId: "root" }]),
+      jsonResponse({ data: [{ ...ROOT, id: "child", parentId: "root" }] }),
     );
     const { result, store } = renderHookWithStore(() => useCollectionsActions());
 

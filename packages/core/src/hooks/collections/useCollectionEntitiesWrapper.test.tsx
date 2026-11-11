@@ -73,7 +73,7 @@ describe("useCollectionEntitiesWrapper", () => {
         });
       }
       if (url.includes("/sub-collections")) {
-        return jsonResponse([]);
+        return jsonResponse({ data: [] });
       }
       return jsonResponse({}, 404);
     });

@@ -59,7 +59,7 @@ function defaultCollectionsResponder(...args: unknown[]) {
   }
   const subsMatch = url.match(/\/collections\/([^/]+)\/sub-collections$/);
   if (method === "GET" && subsMatch) {
-    return jsonResponse(SUBCOLLECTIONS[subsMatch[1]] ?? []);
+    return jsonResponse({ data: SUBCOLLECTIONS[subsMatch[1]] ?? [] });
   }
   return jsonResponse({}, 404);
 }
@@ -93,9 +93,9 @@ describe("useCollections", () => {
   });
 
   describe("isEntitySaved", () => {
-    it("returns saved + collections from the response, and inSpecificCollection when asked", async () => {
+    it("returns isSaved + collections from the response, and inSpecificCollection when asked", async () => {
       axiosPrivate.mockResponse("get", {
-        saved: true,
+        isSaved: true,
         collections: [{ id: "root", name: "Root" }],
       });
       const { result } = renderHookWithStore(() => useCollections());
@@ -106,7 +106,7 @@ describe("useCollections", () => {
       });
 
       expect(saved).toEqual({
-        saved: true,
+        isSaved: true,
         inSpecificCollection: true,
         collections: [{ id: "root", name: "Root" }],
       });
@@ -122,7 +122,7 @@ describe("useCollections", () => {
 
       const saved = await result.current.isEntitySaved({ entityId: "entity-1" });
 
-      expect(saved).toEqual({ saved: false, inSpecificCollection: undefined, collections: [] });
+      expect(saved).toEqual({ isSaved: false, inSpecificCollection: undefined, collections: [] });
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
@@ -132,7 +132,7 @@ describe("useCollections", () => {
 
       const saved = await result.current.isEntitySaved({ entityId: "" });
 
-      expect(saved).toEqual({ saved: false, inSpecificCollection: undefined, collections: [] });
+      expect(saved).toEqual({ isSaved: false, inSpecificCollection: undefined, collections: [] });
       expect(axiosPrivate.calls("get")).toHaveLength(0);
     });
   });

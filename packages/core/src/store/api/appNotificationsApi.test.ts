@@ -60,7 +60,7 @@ describe("appNotificationsApi", () => {
 
   it("markNotificationAsRead issues a PATCH to the notification's mark-as-read route", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      new Response("OK", { status: 200, headers: { "content-type": "text/plain" } }),
+      new Response(null, { status: 204 }),
     );
 
     await store.dispatch(
@@ -75,9 +75,9 @@ describe("appNotificationsApi", () => {
     expect(call.url).toContain("/test-project/app-notifications/n1/mark-as-read");
   });
 
-  it("markNotificationAsRead's text-response handler returns void instead of throwing", async () => {
+  it("markNotificationAsRead resolves without data on the server's empty 204", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      new Response("OK", { status: 200, headers: { "content-type": "text/plain" } }),
+      new Response(null, { status: 204 }),
     );
 
     const result = await store.dispatch(
@@ -88,7 +88,8 @@ describe("appNotificationsApi", () => {
     );
 
     expect(result.error).toBeUndefined();
-    expect(result.data).toBeUndefined();
+    // fetchBaseQuery reads an empty body as null; no JSON parse error.
+    expect(result.data).toBeNull();
   });
 
   it("markNotificationAsRead optimistically marks the cached first page as read", async () => {
@@ -107,7 +108,7 @@ describe("appNotificationsApi", () => {
     );
 
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      new Response("OK", { status: 200, headers: { "content-type": "text/plain" } }),
+      new Response(null, { status: 204 }),
     );
     await store.dispatch(
       appNotificationsApi.endpoints.markNotificationAsRead.initiate({
@@ -136,7 +137,7 @@ describe("appNotificationsApi", () => {
     async function seedPages() {
       fetchHandle.fetchMock.mockResolvedValueOnce(PAGE(1, ["n1"]));
       fetchHandle.fetchMock.mockResolvedValueOnce(PAGE(2, ["n2"]));
-      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse(2));
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ count: 2 }));
       for (const page of [1, 2]) {
         await store.dispatch(
           appNotificationsApi.endpoints.fetchAppNotifications.initiate({
@@ -187,7 +188,7 @@ describe("appNotificationsApi", () => {
       await Promise.resolve();
       expect(readFlags()).toEqual([false, true]);
 
-      release(jsonResponse({}));
+      release(new Response(null, { status: 204 }));
       await pending;
     });
 
@@ -264,7 +265,7 @@ describe("appNotificationsApi", () => {
   });
 
   it("countUnreadNotifications issues a GET to the count route", async () => {
-    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse(4));
+    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ count: 4 }));
 
     const result = await store.dispatch(
       appNotificationsApi.endpoints.countUnreadNotifications.initiate({
@@ -277,7 +278,7 @@ describe("appNotificationsApi", () => {
   });
 
   it("markAllNotificationsAsRead issues a PATCH and optimistically zeroes the cached unread count", async () => {
-    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse(3));
+    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ count: 3 }));
     await store.dispatch(
       appNotificationsApi.endpoints.countUnreadNotifications.initiate({ projectId: "test-project" }),
     );

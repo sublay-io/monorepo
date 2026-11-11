@@ -69,7 +69,7 @@ describe("useAppNotificationsActions", () => {
 
   describe("markNotificationAsRead", () => {
     it("optimistically marks read locally, then calls the API", async () => {
-      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({}));
+      fetchHandle.fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
       const { result, store } = renderHookWithStore(
         () => useAppNotificationsActions(),
         { projectId: "test-project" },
@@ -222,7 +222,7 @@ describe("useAppNotificationsActions", () => {
 
   describe("updateUnreadCount", () => {
     it("stores the fetched unread count", async () => {
-      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse(7));
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ count: 7 }));
       const { result, store } = renderHookWithStore(
         () => useAppNotificationsActions(),
         { projectId: "test-project" },

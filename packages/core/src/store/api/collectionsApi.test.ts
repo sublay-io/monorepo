@@ -49,10 +49,10 @@ describe("collectionsApi", () => {
     expect(result.data).toEqual(ROOT);
   });
 
-  it("fetchSubCollections issues a GET scoped to the parent collection", async () => {
-    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse([ROOT]));
+  it("fetchSubCollections issues a GET scoped to the parent collection and unwraps { data }", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ data: [ROOT] }));
 
-    await store.dispatch(
+    const result = await store.dispatch(
       collectionsApi.endpoints.fetchSubCollections.initiate({
         projectId: "test-project",
         collectionId: "root",
@@ -60,6 +60,7 @@ describe("collectionsApi", () => {
     );
 
     expect(fetchHandle.calls()[0].url).toContain("/test-project/collections/root/sub-collections");
+    expect(result.data).toEqual([ROOT]);
   });
 
   it("fetchCollectionEntities serializes pagination/sort params and joins array `include`", async () => {

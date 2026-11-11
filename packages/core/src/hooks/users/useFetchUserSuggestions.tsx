@@ -28,11 +28,13 @@ function useFetchUserSuggestions(): (props: FetchUserSuggestionsProps) => Promis
         }),
       };
 
-      const response = await axios.get(`/${projectId}/users/suggestions`, {
-        params,
-      });
+      // The server answers `{ data: User[] }`; the hook returns the array.
+      const response = await axios.get<{ data: User[] }>(
+        `/${projectId}/users/suggestions`,
+        { params }
+      );
 
-      return response.data as User[];
+      return response.data.data;
     },
     [axios, projectId]
   );

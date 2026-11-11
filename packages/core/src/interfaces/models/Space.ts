@@ -194,11 +194,17 @@ export interface UnbanMemberResponse {
   };
 }
 
+/**
+ * `GET /spaces/:spaceId/membership/me`. Fields that describe a membership the
+ * caller doesn't have are left out, never sent as null: `status` is present
+ * only when a membership row exists (whatever its status), `role` and
+ * `joinedAt` only when `isMember` is true.
+ */
 export interface CheckMyMembershipResponse {
   isMember: boolean;
-  role: "admin" | "moderator" | "member" | null;
-  status: "pending" | "active" | "banned" | "rejected" | null;
-  joinedAt: string | null;
+  role?: "admin" | "moderator" | "member";
+  status?: "pending" | "active" | "banned" | "rejected";
+  joinedAt?: string;
   permissions: {
     canPost: boolean;
     canModerate: boolean;

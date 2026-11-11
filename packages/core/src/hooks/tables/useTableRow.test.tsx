@@ -79,11 +79,11 @@ beforeEach(() => {
           400,
         );
       }
-      return jsonResponse({ row: { ...ROW_A, name: rowAName } });
+      return jsonResponse({ ...ROW_A, name: rowAName });
     }
     if (method === "GET" && url.endsWith(`/db/Events/${ID_B}`)) {
       if (gateB) await gateB.opened;
-      return jsonResponse({ row: ROW_B });
+      return jsonResponse(ROW_B);
     }
     if (method === "GET" && url.endsWith(`/db/Events/${ID_GONE}`)) {
       return jsonResponse(
@@ -92,14 +92,14 @@ beforeEach(() => {
       );
     }
     if (method === "PATCH" && url.endsWith(`/db/Events/${ID_B}`)) {
-      return jsonResponse({ row: ROW_B });
+      return jsonResponse(ROW_B);
     }
     if (method === "DELETE" && url.endsWith(`/db/Events/${ID_A}`)) {
       return jsonResponse({ deleted: true, soft: false });
     }
     if (method === "PATCH" && url.endsWith(`/db/Events/${ID_A}`)) {
       rowAName = "renamed";
-      return jsonResponse({ row: { ...ROW_A, name: rowAName } });
+      return jsonResponse({ ...ROW_A, name: rowAName });
     }
     if (method === "GET" && url.includes("/db/Events")) {
       return jsonResponse({

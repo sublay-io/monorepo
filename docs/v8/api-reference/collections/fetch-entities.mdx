@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/collections/:collectionId/entities"
 description: "Get paginated entities saved in a collection"
 ---
 
-Returns a paginated list of entities saved in the specified collection. The collection must belong to the authenticated user.
+Returns a paginated list of entities saved in the specified collection. The collection must belong to the authenticated user. Entities in a space the user can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) are left out, though they stay saved.
 
 ## Path Parameters
 
@@ -78,7 +78,7 @@ Returns a paginated list of entities saved in the specified collection. The coll
     <ResponseField name="page" type="number">Current page.</ResponseField>
     <ResponseField name="pageSize" type="number">Page size.</ResponseField>
     <ResponseField name="totalPages" type="number">Total number of pages.</ResponseField>
-    <ResponseField name="totalItems" type="number">Number of saved entities the list can return. Entities deleted, removed by moderation, or turned back into drafts after being saved are not counted.</ResponseField>
+    <ResponseField name="totalItems" type="number">Number of saved entities the list can return. Entities deleted, removed by moderation, turned back into drafts after being saved, or in a space the user can't read are not counted. Always equal to the collection's [`entityCount`](/v8/data-models/collection#entitycount).</ResponseField>
     <ResponseField name="hasMore" type="boolean">`true` if more pages exist.</ResponseField>
   </Expandable>
 </ResponseField>

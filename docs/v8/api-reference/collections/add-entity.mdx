@@ -6,6 +6,8 @@ description: "Save an entity into a collection"
 
 Saves an entity into the specified collection. This operation is idempotent — if the entity is already in the collection, it returns success without creating a duplicate.
 
+An entity in a space the user can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) can't be saved: it answers `404 entity/not-found`, the same as a missing entity.
+
 ## Path Parameters
 
 <ParamField path="collectionId" type="string" required>
@@ -33,7 +35,7 @@ Saves an entity into the specified collection. This operation is idempotent — 
 
   <Expandable>
     <ResponseField name="id" type="string">Collection ID.</ResponseField>
-    <ResponseField name="entityCount" type="number">New entity count after the save.</ResponseField>
+    <ResponseField name="entityCount" type="number">The collection's [`entityCount`](/v8/data-models/collection#entitycount) after the save (also when the entity was already saved).</ResponseField>
   </Expandable>
 </ResponseField>
 
@@ -46,6 +48,8 @@ Saves an entity into the specified collection. This operation is idempotent — 
     ```
   </Accordion>
   <Accordion title="Entity Not Found — 404">
+    The entity doesn't exist, or it's in a space the user can't read.
+
     ```json
     { "error": "Entity not found", "code": "entity/not-found" }
     ```

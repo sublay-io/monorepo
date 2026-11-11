@@ -10,6 +10,10 @@ The `collections` module manages a user's saved-content collections. Every user 
   [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user), the user your service key acts as, on every call.
 </Note>
 
+<Note>
+  A collection's `entityCount` counts the entities that user can see in it, by the same rule as the `totalItems` of its entities list, so the two always match: entities that are deleted, removed by moderation, back in drafts, or in a space they can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) aren't counted or listed, though they stay saved. Saving an entity in a space they can't read fails with `404 entity/not-found`. See [Collection → entityCount](/v8/data-models/collection#entitycount).
+</Note>
+
 ---
 
 ### fetchRootCollection

@@ -26,6 +26,10 @@ All deletes are soft-deletes: the comment's content, gif, mentions, and attachme
 
 A comment on an entity whose author has blocked the caller is hidden from them, so when the caller isn't the comment's author, the delete is refused with `404 comment/not-found` — the same response as a missing comment. This check runs before the others, so such a caller gets `comment/not-found` rather than `comment/already-deleted` or a `403`. A comment's author can always delete their own comment, also through a service key acting as them, and an app-owned comment deleted by a service key naming nobody isn't subject to this check. It applies only when the `moderation` bundle is installed.
 
+## Spaces
+
+A comment's author may delete their own comment even after losing read access to its entity's space, or while banned there. Anyone else gets `404 comment/not-found` for a comment in a space they can't read, the same as a missing comment, ahead of `comment/already-deleted` and the `403`.
+
 ## Response
 
 Returns `204 No Content` on success.
@@ -41,7 +45,7 @@ Returns `204 No Content` on success.
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
-    Returned when the comment doesn't exist, or when the caller isn't the comment's author and the author of the comment's entity has blocked them (see [Blocks](#blocks)).
+    Returned when the comment doesn't exist, or when the caller isn't the comment's author and the author of the comment's entity has blocked them (see [Blocks](#blocks)) or its entity is in a space they can't read (see [Spaces](#spaces)).
 
     ```json
     { "error": "Comment not found", "code": "comment/not-found" }

@@ -28,7 +28,7 @@ A signed-in user's request always creates that user's entity, whatever the setti
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  The ID of the space this entity belongs to. The space must exist in the same project.
+  The ID of the space this entity belongs to. The space must exist in the same project, and the author must be allowed to post in it (see [Who can post and take part](/v8/data-models/space#who-can-post-and-take-part)): they can read the space's content, aren't banned in it or any space above it, and its `postingPermission` lets them in (`"anyone"`; `"members"`: its active members; `"team"`: its active admins and moderators). The same applies to a draft. A request with no credentials may post only in an `"anyone"` space whose content signed-out callers can read. A service key naming nobody may create an app-owned entity in any space, private ones included.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -214,8 +214,17 @@ Returns the created [Entity](/v8/data-models/entity) object. When files are uplo
     ```
   </Accordion>
   <Accordion title="Space Not Found — 404">
+    The space doesn't exist, or the author can't see it (for example a `private` space they aren't an active member of, banned there included). Both answer the same way. Nothing is created.
+
     ```json
-    { "error": "Space not found", "code": "entity/space-not-found" }
+    { "error": "Space not found", "message": "Space with id 4f7c… does not exist or has been deleted", "code": "entity/space-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Posting Not Allowed — 403">
+    The author can see the space but may not post in it: they can't read its content, they're banned in it or in a space above it, or its `postingPermission` doesn't include them. One answer for every cause. Nothing is created. Checked before the suspension check.
+
+    ```json
+    { "error": "You can't post or take part in this space.", "code": "space/posting-not-allowed" }
     ```
   </Accordion>
   <Accordion title="Invalid Timestamp — 400">

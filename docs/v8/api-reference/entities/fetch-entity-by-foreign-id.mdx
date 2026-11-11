@@ -10,6 +10,8 @@ description: "Get an entity by its foreign ID, optionally creating it if not fou
 
 Returns an entity matching the given `foreignId` within the project. Optionally creates a blank entity if none exists — useful for automatically bootstrapping entities when a user first visits a page or URL in your application.
 
+An entity in a space the viewer can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) answers `404 entity/not-found`, exactly like an entity that doesn't exist. A service key without `actingUserId` reads as a signed-out caller, so it gets `404` for entities in members-only and private spaces; name a member in `actingUserId` to read them. With `createIfNotFound`, that `404` still comes back for an existing entity the viewer can't read, and nothing is created; only a `foreignId` with no entity creates one. So on this route an entity the viewer can't read answers differently from a missing one.
+
 ## Query Parameters
 
 <ParamField query="foreignId" type="string" required>
@@ -37,7 +39,7 @@ Returns an entity matching the given `foreignId` within the project. Optionally 
 <ParamField query="include" type="string">
   Associations to include. Pass it as one comma-separated value (`include=user,space`) or as repeated params (`include=user&include=space`). Values:
   - `user` — the author's user profile
-  - `space` — the space the entity belongs to (`null` when the viewer can't see that space; see [Space visibility](/v8/data-models/space#visibility))
+  - `space` — the space the entity belongs to
   - `topComments` — the entity's best top-level comments, as full [Comment](/v8/data-models/comment) objects (see [Top comments](/v8/data-models/entity#top-comments))
   - `saved` — whether the authenticated user has saved this entity
   - `files` — uploaded file/image attachments
@@ -87,7 +89,7 @@ Returns an [Entity](/v8/data-models/entity) object.
     ```json
     { "error": "Entity not found", "code": "entity/not-found" }
     ```
-    Returned when no entity with this `foreignId` exists and `createIfNotFound` is not `"true"`.
+    Returned when no entity with this `foreignId` exists and `createIfNotFound` is not `"true"`, and, whatever `createIfNotFound` is, for an existing entity in a space the viewer can't read.
   </Accordion>
   <Accordion title="Foreign ID Taken — 409">
     `createIfNotFound` was `"true"` and the entity with this `foreignId` was deleted. A `foreignId` is unique across the project's entities, deleted ones included, so a deleted entity's `foreignId` can't be reused. Nothing is created.

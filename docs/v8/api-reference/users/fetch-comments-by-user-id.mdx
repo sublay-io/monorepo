@@ -22,6 +22,7 @@ An unknown `userId` returns an empty page.
 
 - **Deleted comments** are left out.
 - **Moderator-removed comments** are left out of other people's history. In the caller's **own** history they are included in full, marked `moderationStatus: "removed"`.
+- **Reading:** comments on entities in spaces the caller can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) are left out, the user's own included, and the page and `hasMore` count only what's left. A service key without `actingUserId` reads as a signed-out caller, so comments on entities in members-only and private spaces are left out; name a member in `actingUserId` to include them.
 - **Blocks:** comments by a user the caller is [block-edged](/v8/sdk/moderation/overview#blocking) with are left out by default (see `blockedFilter`). Comments on an entity whose author has blocked the caller are left out too — except the caller's own (see [Your own comments on an unavailable entity](#your-own-comments-on-an-unavailable-entity)).
 
 ## Path Parameters

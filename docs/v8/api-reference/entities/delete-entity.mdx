@@ -12,6 +12,8 @@ Deletes an entity and its associated data. Only the entity's author may delete i
 
 **Authentication required.**
 
+The author may delete their own entity even after losing read access to its space, or while banned there. Anyone else gets `404 entity/not-found` for an entity in a space they can't read, the same as a missing entity, and `403` otherwise.
+
 Deletion behavior depends on your project's `entityDeletion` settings:
 - **Hard delete** (default): The entity and all its files are permanently removed.
 - **Soft delete**: The entity is marked as deleted but retained in the database. File preservation is configurable separately.
@@ -36,6 +38,8 @@ Returns `204 No Content` on success.
 
 <AccordionGroup>
   <Accordion title="Not Found — 404">
+    The entity doesn't exist, or the caller isn't its author and can't read its space.
+
     ```json
     { "error": "Entity not found.", "code": "entity/not-found" }
     ```
@@ -47,6 +51,8 @@ Returns `204 No Content` on success.
     Returned when the entity record exists but could not be deleted (e.g., it was already soft-deleted).
   </Accordion>
   <Accordion title="Unauthorized — 403">
+    The caller isn't the author, and can read the entity.
+
     ```json
     { "error": "Not authorized to delete this entity.", "code": "entity/not-authorized" }
     ```

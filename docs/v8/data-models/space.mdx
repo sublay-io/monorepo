@@ -26,8 +26,8 @@ The API returns three space shapes depending on context:
 | `avatarFile` | `File \| undefined` | Populated avatar file object. Only present when `include: "files"` is requested. |
 | `bannerFileId` | `string \| null` | ID of the space's banner image file. |
 | `bannerFile` | `File \| undefined` | Populated banner file object. Only present when `include: "files"` is requested. |
-| `readingPermission` | `"anyone" \| "members"` | Who can read content in the space. |
-| `postingPermission` | `"anyone" \| "members" \| "team"` | Who can post content in the space: `"anyone"`, its active members (`"members"`), or only its active admins and moderators (`"team"`). |
+| `readingPermission` | `"anyone" \| "members"` | Who can read content in the space: `"anyone"` who can read the space above it, or only its active members (`"members"`). Inherited by sub-spaces; see [Who can read content](#who-can-read-content). |
+| `postingPermission` | `"anyone" \| "members" \| "team"` | Who can post entities in the space: `"anyone"`, its active members (`"members"`), or only its active admins and moderators (`"team"`). Commenting and reacting don't follow it; see [Who can post and take part](#who-can-post-and-take-part). |
 | `visibility` | `"public" \| "unlisted" \| "private"` | Who can find and see the space — independent of `readingPermission`, which controls who can read the content. `public` (the default) is listed in the directory and search; `unlisted` isn't listed but is reachable by id, short id or slug; `private` is seen only by its active members, and answers `404` to everyone else. See [Visibility](#visibility) below. |
 | `nsfw` | `boolean` | The space's **own** NSFW flag. `false` by default. Set by space admins on [create](/v8/hooks/spaces/use-create-space)/[update](/v8/hooks/spaces/use-update-space) or by a project admin from the dashboard. See [NSFW flagging](#nsfw-flagging). |
 | `nsfwEffective` | `boolean` | **Denormalized, read-only.** `true` when this space's own `nsfw` is `true` **or** any ancestor space is NSFW. Maintained top-down on write and cascaded to descendants. This is the value the space `nsfwFilter` keys off, and it feeds each entity's live `nsfwEffective`. See [NSFW flagging](#nsfw-flagging). |
@@ -112,11 +112,63 @@ Each space keeps its own `visibility`; nothing is changed or refused when you ne
 - **Lists under one parent** — [Fetch Spaces](/v8/api-reference/spaces/fetch-spaces) with `parentSpaceId=<id>` and the `childSpaces` preview — show the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of. So an `unlisted` sub-space shows only to its active members, and a `private` one only to its active members. `childSpacesCount` counts exactly these sub-spaces, so it always matches what the viewer can list.
 - **[User spaces](/v8/api-reference/spaces/fetch-user-spaces)** and **[mutual spaces](/v8/api-reference/spaces/fetch-mutual-spaces)** list only spaces the viewer can see. An active membership always counts; a `pending`, `banned` or `rejected` membership of a space the user can't see is left out.
 - **Space chat** — [Get Space Conversation](/v8/api-reference/spaces/chat/get-space-conversation) is for active members only; anyone else gets `403`: `chat/not-a-member`, or `chat/membership-pending` / `chat/banned` for their own pending or banned membership. The chat routes that take a conversation id answer a space chat in a space the viewer can't see the way they answer someone who isn't in the conversation — including a former member, who otherwise keeps the history from before they left. It's also left out of the viewer's conversation list, unread count and chat-message search, their real-time connection isn't subscribed to it when it connects or joins the conversation, and they get no push notifications for its new messages. Reporting a message in it, or a reputation grant on one, answers them the same way it answers someone who isn't in the conversation.
-- **Embedded spaces** — `parentSpace` on a space, and the `space` included on entities, comments and events — are `null` when the viewer can't see that space. The rest of the response is unchanged, and `parentSpaceId` / `spaceId` still name it.
+- **Embedded spaces** — `parentSpace` on a space, the `space` included on events, and the `space` on your own drafts in [Fetch Drafts](/v8/api-reference/entities/fetch-drafts) — are `null` when the viewer can't see that space. The rest of the response is unchanged, and `parentSpaceId` / `spaceId` still name it. An entity or comment in a space the viewer can't see isn't returned at all (see Content below).
+- **Content** — entities, the comments on them and their reactions follow [who can read content](#who-can-read-content), which includes seeing the space: content in a space the viewer can't see is never readable. Creating or publishing an entity in a space the caller can't see answers `404 entity/space-not-found` (see [Who can post and take part](#who-can-post-and-take-part)).
+- **Reports and collections** — reporting an entity or comment the user can't read answers `404 report/target-not-found`, and saving such an entity to a collection `404 entity/not-found`, both like a missing target. A collection's entities list and its `entityCount` leave out entities the owner can't read.
 
 <Note>
-  Visibility hides the space itself. Entities, comments and other content posted inside a hidden space are not filtered out of content lists and search by the space's visibility. Space chat messages are the exception (see Space chat above). Creating an entity in a hidden space isn't refused either.
+  [Search Content](/v8/api-reference/search/search-content), [Ask](/v8/api-reference/search/ask) and [Match Users](/v8/api-reference/match/match-users) don't filter entities and comments by a space's visibility or reading rules (chat messages in their results follow the Space chat rules above). Reputation, notifications and events in a space don't follow its reading rules either.
 </Note>
+
+## Who can read content
+
+`readingPermission` decides who can read the content inside a space: its entities, the comments on them, and the reactions on both. A viewer — the signed-in user, or the user a service key names in `actingUserId` — reads a space's content when they can [see the space](#who-sees-a-space) **and**:
+
+- they're an active member of the space, **or**
+- the space's `readingPermission` is `"anyone"` and they can read the space above it (a top-level `"anyone"` space is read by everyone who sees it).
+
+So reading is inherited: a `"members"` space keeps its content, and the content of every `"anyone"` space under it, from anyone who isn't an active member of it or of one of those sub-spaces. An active member of an `"anyone"` sub-space reads that sub-space even when they aren't a member of the `"members"` space above it. A space below another `"members"` space starts the rule again: only its own active members read it.
+
+Only an **active** membership counts. A `pending`, `banned` or `rejected` user reads exactly what a non-member reads: a banned user still reads an `"anyone"` space they can see, and can't read a `"members"` one. Signed-out callers, and a service key without `actingUserId`, read only content in spaces where every space from the top down to this one is `"anyone"` and none is `private`. To read members-only or private content with a service key, name a member with `actingUserId`.
+
+| Where | What a viewer who can't read the content gets |
+|-------|----------------------------------------------|
+| A single entity or comment (by id, short id or foreign id) and its reactions | `404` with the route's not-found code (`entity/not-found`, `comment/not-found`), exactly like an item that doesn't exist. |
+| [Fetch Many Entities](/v8/api-reference/entities/fetch-many-entities) | The entity is left out, and `totalItems` counts only what the viewer can read. `spaceId` of a space they can't read is an empty page with `totalItems: 0`. |
+| A comment thread ([Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments)) | The empty page, as for an unknown `entityId` or `parentId`. |
+| A user's comments ([Fetch Comments by User ID](/v8/api-reference/users/fetch-comments-by-user-id)) | Comments on entities in spaces the viewer can't read are left out, the user's own included. |
+
+A comment is read through its entity's space. Content in no space is read by everyone.
+
+## Who can post and take part
+
+**Posting** — creating an entity in a space (a draft included), publishing a draft in it, and editing an entity in it — needs all three:
+
+- reading the space's content ([who can read content](#who-can-read-content));
+- no ban in the space or in any space above it, including spaces where the user has no membership;
+- the space's `postingPermission`: `"anyone"` lets everyone in, `"members"` its active members, `"team"` its active admins and moderators.
+
+A signed-out caller (allowed only while the project lets anonymous callers create entities without an author) posts only in an `"anyone"` space whose content signed-out callers can read. A service key without `actingUserId` creates app-owned entities in any space, private ones included, and edits them anywhere; reading that content back still needs `actingUserId` naming a member. A service key with `actingUserId` gets exactly that user's answer.
+
+**Taking part** — commenting, replying, reacting to an entity or a comment, and editing your own comment — needs reading the content and no ban in its space or any space above it. `postingPermission` isn't consulted, so a `"team"` space still takes comments and reactions from everyone who reads it. A comment goes by its entity's space.
+
+| Situation | Answer |
+|-----------|--------|
+| Creating or publishing an entity in a space the caller can't see (a ban in a `private` space hides it) | `404 entity/space-not-found`, the same as a space that doesn't exist |
+| Creating, publishing or editing an entity in a space the caller can see but may not post in: can't read it, banned in it or above, or not let in by `postingPermission` | `403 space/posting-not-allowed` |
+| Editing an entity, or commenting, reacting or editing a comment, on content the caller can't read (for example after being banned in a `"members"` space) | `404` with the route's not-found code (`entity/not-found`, `comment/entity-not-found`, `comment/not-found`) |
+| Commenting, reacting or editing a comment on content the caller can read while banned in its space or above | `403 space/posting-not-allowed` |
+| Deleting your own entity or comment | Allowed (`204`), also while banned or after losing read access |
+| Removing your own reaction | Allowed while banned; `404` on content you can no longer read |
+| Editing or deleting someone else's entity or comment you can't read | `404`, like a missing one, never `403` |
+
+Every `space/posting-not-allowed` refusal has the same body, whatever the cause:
+
+```json
+{ "error": "You can't post or take part in this space.", "code": "space/posting-not-allowed" }
+```
+
+When a space response carries `memberPermissions`, its `canPost` is this posting rule for the viewer.
 
 ## NSFW flagging
 

@@ -28,6 +28,10 @@ Removing your own reaction is undoing your own action, so a block doesn't stop i
 
 When the comment isn't visible to you at all — it sits on an entity whose author has blocked you — the request returns `404 comment/not-found` and nothing changes. The exception is your **own** comment on such an entity: it stays visible to you, so removing your reaction from it works.
 
+## Reading
+
+A comment on an entity in a space you can no longer read (see [who can read content](/v8/data-models/space#who-can-read-content)), for example after leaving a members-only space, isn't visible to you either: the request returns `404 comment/not-found`, your own comments included, and the reaction stays. A ban doesn't stop you removing your reaction from a comment you can still read.
+
 ## Response
 
 Returns the [Comment](/v8/data-models/comment) as you'd see it after the change — in full, flagged with `isAuthorBlocked`, or as a [placeholder](/v8/data-models/comment#placeholders) — with the updated `reactionCounts`. If you had no reaction on the comment, the comment is returned unchanged.
@@ -98,6 +102,8 @@ Returns the [Comment](/v8/data-models/comment) as you'd see it after the change 
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    Returned when the comment doesn't exist or isn't visible to you (see [Blocks](#blocks) and [Reading](#reading)).
+
     ```json
     { "error": "Comment not found.", "code": "comment/not-found" }
     ```

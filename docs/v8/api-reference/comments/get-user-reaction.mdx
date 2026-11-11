@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/comments/:commentId/reactions/me"
 description: "Get the authenticated user's reaction on a comment"
 ---
 
-Returns the authenticated user's current reaction on the specified comment, or `null` if they have not reacted.
+Returns the authenticated user's current reaction on the specified comment, or `null` if they have not reacted. A comment on an entity in a space the user can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) answers `404 comment/not-found`.
 
 **Authentication required.**
 
@@ -87,7 +87,7 @@ or, if the user has no reaction:
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
-    Returned when the comment doesn't exist, or is on an entity whose author has blocked the user (the user's own comments excepted).
+    Returned when the comment doesn't exist, is on an entity whose author has blocked the user (the user's own comments excepted), or is on an entity in a space the user can't read.
 
     ```json
     { "error": "Comment not found.", "code": "comment/not-found" }

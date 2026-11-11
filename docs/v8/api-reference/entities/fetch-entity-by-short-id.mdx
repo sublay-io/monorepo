@@ -10,6 +10,8 @@ description: "Get an entity by its short ID"
 
 Returns a single entity matching the given `shortId`. Short IDs are compact, URL-friendly identifiers automatically assigned to each entity. They are useful for building shareable deep links.
 
+An entity in a space the viewer can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) answers `404 entity/not-found`, exactly like an entity that doesn't exist. A service key without `actingUserId` reads as a signed-out caller, so it gets `404` for entities in members-only and private spaces; name a member in `actingUserId` to read them.
+
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string">
@@ -23,7 +25,7 @@ Returns a single entity matching the given `shortId`. Short IDs are compact, URL
 <ParamField query="include" type="string">
   Associations to include. Pass it as one comma-separated value (`include=user,space`) or as repeated params (`include=user&include=space`). Values:
   - `user` — the author's user profile
-  - `space` — the space the entity belongs to (`null` when the viewer can't see that space; see [Space visibility](/v8/data-models/space#visibility))
+  - `space` — the space the entity belongs to
   - `topComments` — the entity's best top-level comments, as full [Comment](/v8/data-models/comment) objects (see [Top comments](/v8/data-models/entity#top-comments))
   - `saved` — whether the authenticated user has saved this entity
   - `files` — uploaded file/image attachments
@@ -69,6 +71,7 @@ Returns an [Entity](/v8/data-models/entity) object.
     ```json
     { "error": "Entity not found", "code": "entity/not-found" }
     ```
+    Returned when no entity has this `shortId`, for another user's draft, and for an entity in a space the viewer can't read.
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.

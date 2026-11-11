@@ -32,6 +32,10 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
 
 Returns a [Comment](/v8/data-models/comment) object, with `isAuthorBlocked` and `isUnavailable` flags. A deleted comment, or a moderator-removed one viewed by anyone but its author, is returned as a [placeholder](/v8/data-models/comment#placeholders) — the author and content are blanked, and the comment's `id`, `parentId`, timestamps and counts are kept.
 
+## Reading
+
+A comment is read through its entity's space: a comment on an entity in a space the caller can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) returns `404 comment/not-found`, identical to a comment that doesn't exist. This includes the caller's own comments there. A service key without `actingUserId` reads as a signed-out caller, so comments on entities in members-only and private spaces return `404`; name a member in `actingUserId` to read them.
+
 ## Blocks
 
 When the caller is signed in and the `moderation` bundle is installed, the comment comes back the same way a thread shows it:
@@ -67,6 +71,7 @@ An embedded `parentComment` follows the same placeholder and flag rules.
     ```json
     { "error": "Comment not found", "code": "comment/not-found" }
     ```
+    Also returned for a comment the caller can't read (see [Reading](#reading)) or on an entity whose author has blocked the caller (see [Blocks](#blocks)).
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     A user token, or a request with no credentials, sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.

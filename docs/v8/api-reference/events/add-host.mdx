@@ -1,7 +1,7 @@
 ---
 title: "Add Host"
 api: "POST /v8/:projectId/events/:eventId/hosts"
-description: "Grant a user host privileges on an event (host-only)"
+description: "Grant a user host privileges on an event (owner-only)"
 ---
 
 Adds a user to the event's `hostIds`. **Owner-only**: the caller must be the event's [owner](/v8/data-models/event#owner-and-hosts) (`userId`), and, for an event in a space, an active member of that space who isn't banned in it or a space above it. A service key acts as the user it names in `actingUserId`. The operation is idempotent (adding an existing host is a no-op) and takes a row-level lock to serialize concurrent host changes.

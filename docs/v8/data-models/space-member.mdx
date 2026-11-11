@@ -24,7 +24,7 @@ A SpaceMember record represents a user's membership in a specific space. It trac
 |--------|-------------|
 | `pending` | Join request submitted but awaiting moderator/admin approval. Only applies when the space has `requireJoinApproval: true`. |
 | `active` | Full membership granted — user can read and post according to space permissions. |
-| `banned` | User has been banned from the space. Banned users cannot access or post. |
+| `banned` | User has been banned from the space and the spaces under it where they were active. They can't post, comment, react or use the space chat there, and they read only what a non-member reads: an `"anyone"` space they can see, not a `"members"` one (see [Who can read content](/v8/data-models/space#who-can-read-content)). |
 | `rejected` | Join request was declined by a moderator or admin. |
 
 ## Roles

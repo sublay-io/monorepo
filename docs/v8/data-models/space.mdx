@@ -159,7 +159,7 @@ A signed-out caller (allowed only while the project lets anonymous callers creat
 |-----------|--------|
 | Creating or publishing an entity in a space the caller can't see (a ban in a `private` space hides it) | `404 entity/space-not-found`, the same as a space that doesn't exist |
 | Creating, publishing or editing an entity in a space the caller can see but may not post in: can't read it, banned in it or above, or not let in by `postingPermission` | `403 space/posting-not-allowed` |
-| Editing an entity, or commenting, reacting or editing a comment, on content the caller can't read (for example after being banned in a `"members"` space) | `404` with the route's not-found code (`entity/not-found`, `comment/entity-not-found`, `comment/not-found`) |
+| Editing an entity, or commenting, reacting or editing a comment, on content the caller can't read (for example after being banned in a space whose `readingPermission` is `"members"`) | `404` with the route's not-found code (`entity/not-found`, `comment/entity-not-found`, `comment/not-found`) |
 | Commenting, reacting or editing a comment on content the caller can read while banned in its space or above | `403 space/posting-not-allowed` |
 | Deleting your own entity or comment | Allowed (`204`), also while banned or after losing read access |
 | Removing your own reaction | Allowed while banned; `404` on content you can no longer read |

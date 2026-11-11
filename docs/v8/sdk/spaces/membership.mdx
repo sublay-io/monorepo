@@ -59,7 +59,7 @@ const result = await checkMembership({ spaceId });
 
 A user with a membership in the space gets it back whatever its status (`pending`, `banned`, `rejected`), so a banned user learns they are banned. A user with no membership in a space they can't see gets `404 space/not-found`. `permissions` is the same calculation as a fetched space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions).
 
-`joinSpace` and `leaveSpace` (from `useSpace`, or `useJoinSpace` / `useLeaveSpace`) also return the user's `memberPermissions` after the change, and `useSpace` takes them, so `canPost` and `canRead` stay the server's answer: a pending request isn't membership, so in a `"members"` space it can't post yet, and a user who leaves keeps reading only what non-members may read.
+`useJoinSpace` and `useLeaveSpace` return the user's `memberPermissions` after the change, and `joinSpace` / `leaveSpace` from `useSpace` put them on the space, so `canPost` and `canRead` stay the server's answer: a pending request isn't membership, so in a `"members"` space it can't post yet, and a user who leaves keeps reading only what non-members may read.
 
 ## Approving and Declining Requests
 

@@ -35,7 +35,7 @@ console.log(permissions.canPost, permissions.isAdmin);
 </ParamField>
 
 <ParamField path="readingPermission" type='"anyone" | "members"'>
-  The space's reading permission setting. Defaults to `"anyone"`.
+  The space's reading permission setting. Defaults to `"anyone"`. The v7 API doesn't enforce it on content; your app uses `canRead` to do so (see [Content inside a space](/v7/data-models/space#content-inside-a-space) and the [v8 rules](/v8/data-models/space#who-can-read-content)).
 </ParamField>
 
 ## Returns
@@ -53,7 +53,7 @@ console.log(permissions.canPost, permissions.isAdmin);
 </ResponseField>
 
 <ResponseField name="canPost" type="boolean">
-  Whether the user can post, given the space's posting permission and their membership status.
+  Whether the user may post, given the space's posting permission and their membership status. For your app to enforce: the v7 API doesn't refuse entities because of it (see [Content inside a space](/v7/data-models/space#content-inside-a-space) and the [v8 rules](/v8/data-models/space#who-can-post-and-take-part)).
 </ResponseField>
 
 <ResponseField name="canModerate" type="boolean">
@@ -61,7 +61,7 @@ console.log(permissions.canPost, permissions.isAdmin);
 </ResponseField>
 
 <ResponseField name="canRead" type="boolean">
-  Whether the user can read content, given the space's reading permission.
+  Whether the user may read content, given the space's reading permission. For your app to enforce: the v7 API doesn't hide content because of it (see [Content inside a space](/v7/data-models/space#content-inside-a-space) and the [v8 rules](/v8/data-models/space#who-can-read-content)).
 </ResponseField>
 
 <ResponseField name="isPending" type="boolean">

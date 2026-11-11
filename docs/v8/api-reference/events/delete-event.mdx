@@ -1,7 +1,7 @@
 ---
 title: "Delete Event"
 api: "DELETE /v8/:projectId/events/:eventId"
-description: "Permanently or soft-delete an event and clean up its children (host-only)"
+description: "Permanently or soft-delete an event and clean up its children (the owner or the space's admins and moderators)"
 ---
 
 Deletes an event. Allowed for the event's **owner** (also when they are no longer an active member of its space) and for an active admin or moderator of the event's space. Other hosts can't delete an event that has an owner. When the owner's account was deleted, any of its hosts may delete it — for an event in a space, only while an active member of that space (an event kept after the `spaces` bundle was uninstalled counts as having no space here). A service key acts as the user it names in `actingUserId`, with that user's powers. The event's child `EventRsvps` and `EventInvites` are cleaned up, and—depending on settings—its files.

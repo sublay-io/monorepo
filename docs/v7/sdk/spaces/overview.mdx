@@ -62,14 +62,16 @@ function SpaceContent() {
 
 ## Permission Model
 
-Each space has two independent permission settings:
+Each space has two independent permission settings, which your app enforces:
 
-- **`readingPermission`** — `"anyone"` or `"members"`. Controls who can see content.
-- **`postingPermission`** — `"anyone"`, `"members"`, or `"admins"`. Controls who can post.
+- **`readingPermission`** — `"anyone"` or `"members"`. Who may read content.
+- **`postingPermission`** — `"anyone"`, `"members"`, or `"admins"`. Who may post.
+
+The v7 API stores both and reports them in the user's resolved permissions, but doesn't hide or refuse content because of them; see [Content inside a space](/v7/data-models/space#content-inside-a-space) and the [v8 rules](/v8/data-models/space#who-can-read-content).
 
 When the current user is authenticated and is a member, `useSpace` exposes their resolved permissions (`canPost`, `canRead`, `canModerate`, `isAdmin`, `isModerator`).
 
-Separately, each space has a **`visibility`** setting — `"public"` (default), `"unlisted"`, or `"private"` — that controls who can find and see the space, independent of the permission model above. `"unlisted"` hides a space from discovery and search but keeps it reachable by direct link; it is **not access control** (use `readingPermission` to gate content). `"private"` hides the space, and the spaces under it, from everyone except its active members — it answers `404` like a nonexistent space and can't be joined. See the [Space data model](/v7/data-models/space#visibility).
+Separately, each space has a **`visibility`** setting — `"public"` (default), `"unlisted"`, or `"private"` — that controls who can find and see the space, independent of the permission model above. `"unlisted"` hides a space from discovery and search but keeps it reachable by direct link; it is **not access control**. `"private"` hides the space, and the spaces under it, from everyone except its active members — it answers `404` like a nonexistent space and can't be joined. The content inside a space stays readable in v7 whatever its `visibility` and `readingPermission`; in v8, private spaces and `readingPermission: "members"` protect it too ([v8 Space data model](/v8/data-models/space#who-can-read-content)). See the [Space data model](/v7/data-models/space#visibility).
 
 ## Hierarchy
 

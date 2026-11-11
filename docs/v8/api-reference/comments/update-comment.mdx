@@ -36,7 +36,7 @@ A comment its author deleted, and a comment a moderator removed, can't be edited
 
 ## Spaces
 
-Editing a comment takes part in its entity's space (see [Who can post and take part](/v8/data-models/space#who-can-post-and-take-part)). The comment's author must still be able to read the space's content — otherwise `404 comment/not-found`, for example after leaving a `"members"` space or being banned in one — and must not be banned in the space or any space above it (`403 space/posting-not-allowed`). The space's `postingPermission` isn't consulted. Deleting the comment stays allowed. Anyone other than the author gets `404 comment/not-found` for a comment in a space they can't read, not a `403`.
+Editing a comment takes part in its entity's space (see [Who can post and take part](/v8/data-models/space#who-can-post-and-take-part)). The comment's author must still be able to read the space's content — otherwise `404 comment/not-found`, for example after leaving a space whose `readingPermission` is `"members"`, or being banned in one — and must not be banned in the space or any space above it (`403 space/posting-not-allowed`). The space's `postingPermission` isn't consulted. Deleting the comment stays allowed. Anyone other than the author gets `404 comment/not-found` for a comment in a space they can't read, not a `403`. An app-owned comment, edited by a service key naming nobody, is checked as a signed-out caller: on an entity in a members-only or private space it answers `404 comment/not-found`.
 
 ## Blocks
 

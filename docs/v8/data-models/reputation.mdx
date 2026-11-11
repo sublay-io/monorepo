@@ -64,7 +64,7 @@ spaceReputation: {
       A bucket that doesn't exist reads as `0`. Use `"none"` for the space-less bucket: on a GET, `spaceReputationId=null` and `spaceReputationId=undefined` are **rejected** with `400 <area>/unsupported-param`, which names `none` (see [Saying "no value"](/v8/authentication#saying-no-value)), and an empty `spaceReputationId=` is the same as leaving it out. In a request body, an empty string is rejected (400). The legacy `general` alias is **rejected (400)**.
     </ParamField>
     <ParamField name="includeDescendants" type="boolean">
-      Only honored alongside an explicit space `<uuid>`. When `true`, `spaceReputation` is the **subtree sum** — the named space plus all of its descendant spaces (the root space's own bucket is included). Ignored for `"none"`; not allowed with `"context"`.
+      Only honored alongside an explicit space `<uuid>`. When `true`, `spaceReputation` is the **subtree sum** — the named space plus all of its descendant spaces (the root space's own bucket is included), counting only the spaces the viewer can read (see [Who sees space reputation](#who-sees-space-reputation)). Ignored for `"none"`; not allowed with `"context"`.
     </ParamField>
   </Expandable>
 </ParamField>
@@ -91,7 +91,7 @@ The object **replaces** two flat props that travelled together. They still work 
 The resulting field appears on each user object as:
 
 <ResponseField name="spaceReputation" type="number">
-  The user's reputation in the requested space (or the space-less bucket). Present only when the `spaceReputation` object (or the deprecated `spaceReputationId`) was supplied. Missing buckets read as `0`.
+  The user's reputation in the requested space (or the space-less bucket), as the viewer may see it. Present only when the `spaceReputation` object (or the deprecated `spaceReputationId`) was supplied. Missing buckets, and spaces the viewer can't read, read as `0`.
 </ResponseField>
 
 ### Where the params apply
@@ -115,6 +115,17 @@ The `spaceReputation` object is accepted on **every** user-returning endpoint, b
 - Connections list (by user ID)
 
 Project-wide user search (`search-users`) and the self-relative follows/connections lists are **not** enriched and ignore the param.
+
+### Who sees space reputation
+
+A user's reputation in a space shows what they did there, so it follows the space's [reading rules](/v8/data-models/space#who-can-read-content). The viewer — the signed-in user, or the user a service key names in `actingUserId` — gets a space's bucket only when they can read that space's content:
+
+- **A space `<uuid>`** the viewer can't read reads `0` for every user, the same as a space with no buckets. It's not an error.
+- **With `includeDescendants`**, the sum counts only the spaces of the subtree the viewer can read, the named space included when they can read it. A sub-space they can read still counts when they can't read the space above it.
+- **With `"context"`**, each row's space counts only when the viewer can read it; other rows read `0`.
+- **`"none"`** is the space-less bucket, read by everyone.
+
+The rule has no exception for the viewer's own reputation. Signed-out callers, and a service key without `actingUserId`, read only spaces whose content signed-out callers can read. Without the `spaces` bundle, every space id reads `0`, including the id of a space that existed before the bundle was uninstalled. The `reputation` total is never filtered.
 
 ## Uninstalling is lossy
 

@@ -293,6 +293,8 @@ The same metadata fields as `event-invite`, without `eventStartTime`. The `initi
 
 Triggered when a user is granted reputation — by another user, or by the app. **Only positive grants notify**; a negative grant (an app deduction) is silent.
 
+A positive grant notifies the recipient only when they can [read the content](/v8/data-models/space#who-can-read-content) of the grant's space and, for an entity or comment target, of the space that target is in (a comment goes by its entity's space). A grant or target in no space passes that check. Otherwise the recipient gets nothing: no notification record, no push notification and no `notificationCreated` webhook. This holds for transfers and mints alike.
+
 **Action**: computed per grant. With a target it is that target's action (`"open-entity"`, `"open-comment"`, or `"open-message"`). With no target it is `"open-profile"` for a user grant (opening the granter) and `"do-nothing"` for an app mint, which has no granter to open.
 
 | Metadata Field | Type | Description |

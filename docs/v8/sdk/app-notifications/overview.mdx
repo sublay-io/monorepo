@@ -63,3 +63,7 @@ Sublay generates notifications for the following events:
 | `event-cancelled` | An event you RSVP'd `going` or `maybe` to is cancelled |
 | `reputation-grant` | You receive reputation, from another user or from the app |
 | `system` | A custom message sent from the dashboard |
+
+### Who receives notifications about space content
+
+Notifications about content in a space — `entity-mention`, `entity-comment`, `comment-reply`, `comment-mention`, `entity-reaction`, `comment-reaction` and their milestones, and `reputation-grant` for a grant tied to a space or given on an entity or comment in one — go only to recipients who can read that space's content when the notification is sent (see [Who can read content](/v8/data-models/space#who-can-read-content)). A comment goes by its entity's space. Anyone else gets nothing: no notification record, no push notification and no `notificationCreated` webhook. Content in no space notifies as usual. Notifications already sent aren't taken back if the recipient later loses access.

@@ -64,7 +64,7 @@ Call `refresh` after issuing a grant to pull the new row and updated totals.
   Associations to expand, as a single value or an array. The only value is `"user"` — it hydrates both the sender and the recipient.
 </ParamField>
 <ParamField path="spaceReputation" type="object">
-  Opt-in per-user space reputation on the hydrated users. `{ spaceId: "context" }` scores each user against that grant's own space. See [Reputation](/v8/data-models/reputation#reading-space-scoped-reputation).
+  Opt-in per-user space reputation on the hydrated users. `{ spaceId: "context" }` scores each user against that grant's own space. Only spaces the viewer can read count; others read `0`. See [Reputation](/v8/data-models/reputation#who-sees-space-reputation).
 </ParamField>
 
 ## Returns
@@ -79,7 +79,7 @@ Call `refresh` after issuing a grant to pull the new row and updated totals.
 <ResponseField name="refresh" type="() => void">Re-run the query from page 1.</ResponseField>
 
 <Note>
-  **Chat message targets are private to their conversation.** With `targetType: "message"`, the list is populated only when the logged-in user is a member of that message's conversation — someone who has left it still counts; for anyone outside it, `grants` stays empty and `summary` comes back as `{ total: 0, count: 0, viewerTotal: 0 }` rather than erroring. The `recipientId` / `senderId` shapes apply the same test per row, so a user's own feed keeps the grants made on messages in their own conversations while a caller outside them never sees those rows. Grants on a message moderation has removed are hidden on both shapes, members included. See [useFetchManyReputationGrants](/v8/hooks/reputation/use-fetch-many-reputation-grants#chat-message-targets).
+  **Chat message targets are private to their conversation.** With `targetType: "message"`, the list is populated only when the logged-in user is a member of that message's conversation — someone who has left it still counts; for anyone outside it, `grants` stays empty and `summary` comes back as `{ total: 0, count: 0, viewerTotal: 0 }` rather than erroring. The `recipientId` / `senderId` shapes apply the same test per row, so a user's own feed keeps the grants made on messages in their own conversations while a caller outside them never sees those rows. Grants on a message moderation has removed are hidden on both shapes, members included. Grants tied to a space the viewer can't read, or given on an entity or comment they can't read, are left out of every shape and its `summary` — see [Grants follow space reading](/v8/data-models/reputation-grant#grants-follow-space-reading). See [useFetchManyReputationGrants](/v8/hooks/reputation/use-fetch-many-reputation-grants#chat-message-targets).
 </Note>
 
 <Note>

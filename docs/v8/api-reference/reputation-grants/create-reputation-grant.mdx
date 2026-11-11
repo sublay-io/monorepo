@@ -23,7 +23,7 @@ Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants
 <ParamField body="spaceId" type="string | null">
   UUID of the space whose bucket pays. Omitted or `null` means the project-general bucket; the string `"none"` is refused with `400 reputation-grant/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). The reputation always lands in the recipient's bucket for the same space — reputation never crosses between the general bucket and a space bucket.
 
-  The space is validated before anything moves: an ID that names no space, or a space the sender can't see (a private space they aren't an active member of, or a space under one), is rejected with `404 reputation-grant/space-not-found`, and naming a space on a project without the `spaces` bundle is rejected with `403 database/tables-not-available`.
+  The space is validated before anything moves: an ID that names no space, or a space whose content the sender can't read (see [Who can read content](/v8/data-models/space#who-can-read-content): a private or members-only space they aren't an active member of, or a space under one), is rejected with `404 reputation-grant/space-not-found`, and naming a space on a project without the `spaces` bundle is rejected with `403 database/tables-not-available`.
 </ParamField>
 
 <ParamField body="note" type="string | null">
@@ -35,7 +35,7 @@ Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants
 </ParamField>
 
 <ParamField body="targetType" type="string">
-  What the grant is for: `"entity"`, `"comment"`, or `"message"` (a chat message). Values match exactly. Must be supplied together with `targetId`. The target is an annotation — it never determines which bucket is used, and it does not have to be authored by the recipient.
+  What the grant is for: `"entity"`, `"comment"`, or `"message"` (a chat message). Values match exactly. Must be supplied together with `targetId`. The target is an annotation — it never determines which bucket is used, and it does not have to be authored by the recipient. The sender must be able to read it: an entity or comment in a space whose content they can't read answers `404 reputation-grant/target-not-found`, like a missing target.
 </ParamField>
 
 <ParamField body="targetId" type="string">
@@ -50,7 +50,7 @@ Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants
 
 Returns `201` with the created [ReputationGrant](/v8/data-models/reputation-grant), written with `sourceType: "user"`.
 
-Both balances move: the sender's bucket and profile total drop by `amount`, the recipient's rise by the same. The recipient is notified (a `reputation-grant` [app notification](/v8/data-models/app-notification)), and a grant targeting a `message` is broadcast to the conversation as [`message:grant`](/v8/sdk/chat/real-time).
+Both balances move: the sender's bucket and profile total drop by `amount`, the recipient's rise by the same. The recipient is notified (a `reputation-grant` [app notification](/v8/data-models/app-notification)) when they can [read the content](/v8/data-models/space#who-can-read-content) of the grant's space and, for an `entity` or `comment` target, of the space that target is in (a comment goes by its entity's space). A grant or target in no space passes that check. A grant targeting a `message` is broadcast to the conversation as [`message:grant`](/v8/sdk/chat/real-time).
 
 ## Gating and blocks
 
@@ -114,7 +114,7 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
     ```json
     { "error": "The space this grant targets does not exist.", "code": "reputation-grant/space-not-found" }
     ```
-    The `spaceId` names no space in this project, or one the sender can't see (answered exactly like a missing space). Checked before any balance is touched, so nothing moves.
+    The `spaceId` names no space in this project, or one whose content the sender can't read (answered exactly like a missing space). Checked before any balance is touched, so nothing moves.
   </Accordion>
   <Accordion title="User Not Found — 404">
     ```json
@@ -132,7 +132,7 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
     ```json
     { "error": "The grant target does not exist.", "code": "reputation-grant/target-not-found" }
     ```
-    The target record does not exist — or, for a `message` target, the sender is not an active member of that conversation, or it is a space chat in a space the sender can't see. The two cases are byte-identical so a caller holding a message ID cannot probe whether it exists. Mediated transfers are membership-checked on the named sender exactly as user tokens are.
+    The target record does not exist — or, for an `entity` or `comment` target, it sits in a space whose content the sender can't read (a comment goes by its entity's space) — or, for a `message` target, the sender is not an active member of that conversation, or it is a space chat in a space the sender can't see. The cases are byte-identical so a caller holding an ID cannot probe whether it exists. Mediated transfers are membership-checked on the named sender exactly as user tokens are.
   </Accordion>
   <Accordion title="Insufficient Reputation — 409">
     ```json

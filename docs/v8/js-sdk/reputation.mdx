@@ -33,7 +33,7 @@ const grant = await sublay.reputation.createGrant({
   Whole number from `1` to `2147483647` (the signed 32-bit maximum). Never zero, negative, or fractional, and never more than the sender holds in the source bucket.
 </ParamField>
 <ParamField body="spaceId" type="string | null">
-  The bucket both legs move in. Omitted or `null` = the project-general bucket. Validated before anything moves: an ID naming no space, or a space the sender can't see (a private space they aren't an active member of, or a space under one), is rejected with `404 reputation-grant/space-not-found`, and naming a space at all on a project without the `spaces` bundle is rejected with `403 database/tables-not-available`.
+  The bucket both legs move in. Omitted or `null` = the project-general bucket. Validated before anything moves: an ID naming no space, or a space whose content the sender can't read (a private or members-only space they aren't an active member of, or a space under one), is rejected with `404 reputation-grant/space-not-found`, and naming a space at all on a project without the `spaces` bundle is rejected with `403 database/tables-not-available`.
 </ParamField>
 <ParamField body="note" type="string | null">Free-text note. Trimmed, up to 2000 characters.</ParamField>
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB. Omit when unused.</ParamField>
@@ -44,7 +44,7 @@ const grant = await sublay.reputation.createGrant({
 
 **Returns** — `Promise<ReputationGrant>` with `sourceType: "user"`.
 
-Common rejections: `409 reputation-grant/insufficient-reputation` (the chosen bucket is short — nothing moved), `400 reputation-grant/self-grant`, `403 reputation-grant/user-grants-disabled` (the project has `settings.reputationGrants.allowUserInitiated` set to `false` and routes grants through its own backend instead), `404 reputation-grant/space-not-found`, `404 reputation-grant/target-not-found` (which is also the answer when a `message` target sits in a conversation the sender isn't an active member of), and `404 reputation-grant/user-not-found` (which is also the non-disclosing answer when one party has blocked the other).
+Common rejections: `409 reputation-grant/insufficient-reputation` (the chosen bucket is short — nothing moved), `400 reputation-grant/self-grant`, `403 reputation-grant/user-grants-disabled` (the project has `settings.reputationGrants.allowUserInitiated` set to `false` and routes grants through its own backend instead), `404 reputation-grant/space-not-found`, `404 reputation-grant/target-not-found` (which is also the answer when an `entity` or `comment` target sits in a space whose content the sender can't read, or a `message` target in a conversation the sender isn't an active member of), and `404 reputation-grant/user-not-found` (which is also the non-disclosing answer when one party has blocked the other).
 
 <Warning>
   **Grant creation is not idempotent.** A retried call creates a second grant and moves the points a second time. Guard your submit path.
@@ -77,13 +77,13 @@ console.log(summary?.total, "points from", summary?.count, "people");
   A single value or an array. The only value is `"user"` — it hydrates both the sender and the recipient.
 </ParamField>
 <ParamField body="spaceReputation" type="object">
-  Opt-in per-user space reputation on the hydrated users. `{ spaceId: "context" }` scores each user against that grant's own space. See [Reputation](/v8/data-models/reputation#reading-space-scoped-reputation).
+  Opt-in per-user space reputation on the hydrated users. `{ spaceId: "context" }` scores each user against that grant's own space. Only spaces the viewer can read count; others read `0`. See [Reputation](/v8/data-models/reputation#who-sees-space-reputation).
 </ParamField>
 
 **Returns** — `Promise<{ data: ReputationGrant[]; pagination; summary? }>`. The `summary` block (`{ total, count, viewerTotal }`) is returned **only** on the target filter shape — it's exactly what a standalone "who rewarded this" view needs, so you don't have to fetch the parent item to print the totals.
 
 <Note>
-  **Grants on chat messages are private to their conversation.** With `targetType: "message"` the list is populated only when the token's user is a member of that conversation — having left it still counts; everyone else gets an empty list and a `{ total: 0, count: 0, viewerTotal: 0 }` summary rather than an error. The `recipientId` / `senderId` shapes run the same test per row, so the token holder's own "reputation I received" feed *does* carry the grants made on messages in their own conversations, while a grant on a conversation they are not in drops out of the page and out of `pagination.totalItems` together. On either shape, grants on a message moderation has removed are hidden.
+  **Grants on chat messages are private to their conversation.** With `targetType: "message"` the list is populated only when the token's user is a member of that conversation — having left it still counts; everyone else gets an empty list and a `{ total: 0, count: 0, viewerTotal: 0 }` summary rather than an error. The `recipientId` / `senderId` shapes run the same test per row, so the token holder's own "reputation I received" feed *does* carry the grants made on messages in their own conversations, while a grant on a conversation they are not in drops out of the page and out of `pagination.totalItems` together. On either shape, grants on a message moderation has removed are hidden. Grants tied to a space the viewer can't read, or given on an entity or comment they can't read, are left out of every shape and its `summary` — see [Grants follow space reading](/v8/data-models/reputation-grant#grants-follow-space-reading).
 </Note>
 
 <Note>

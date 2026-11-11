@@ -7,7 +7,7 @@ import { User } from "./User";
  */
 export interface BlockRow {
   id: string;
-  user: User | null;
+  user: User;
   createdAt: string;
 }
 
@@ -16,6 +16,6 @@ export interface BlockRow {
  * (with `user` = the target) is present only when they do. It never says
  * whether the target blocks the signed-in user.
  */
-export type BlockStatusResponse =
+export type BlockStatus =
   | { isBlocking: false }
   | { isBlocking: true; block: BlockRow };

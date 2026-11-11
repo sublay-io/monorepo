@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { FollowStatusResponse } from "../../interfaces/Follow";
+import { FollowStatus } from "../../interfaces/Follow";
 
 export interface FetchFollowStatusProps {
   /**
@@ -16,9 +16,9 @@ export interface FetchFollowStatusProps {
 export async function fetchFollowStatus(
   client: SublayHttpClient,
   data: FetchFollowStatusProps
-): Promise<FollowStatusResponse> {
+): Promise<FollowStatus> {
   const { userId } = data;
-  const response = await client.projectInstance.get<FollowStatusResponse>(
+  const response = await client.projectInstance.get<FollowStatus>(
     `/users/${userId}/follow`
   );
   return response.data;

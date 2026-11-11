@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { FollowStatusResponse } from "../../interfaces/Follow";
+import { FollowStatus } from "../../interfaces/Follow";
 
 export interface FetchFollowStatusProps {
   /** The user whose follow relationship is being checked (the target). */
@@ -15,9 +15,9 @@ export interface FetchFollowStatusProps {
 export async function fetchFollowStatus(
   client: SublayHttpClient,
   data: FetchFollowStatusProps
-): Promise<FollowStatusResponse> {
+): Promise<FollowStatus> {
   const { userId, actingUserId } = data;
-  const response = await client.projectInstance.get<FollowStatusResponse>(
+  const response = await client.projectInstance.get<FollowStatus>(
     `/users/${userId}/follow`,
     { params: { actingUserId } }
   );

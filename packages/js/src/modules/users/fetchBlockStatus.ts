@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { BlockStatusResponse } from "../../interfaces/Block";
+import { BlockStatus } from "../../interfaces/Block";
 
 export interface FetchBlockStatusProps {
   /**
@@ -18,9 +18,9 @@ export interface FetchBlockStatusProps {
 export async function fetchBlockStatus(
   client: SublayHttpClient,
   data: FetchBlockStatusProps
-): Promise<BlockStatusResponse> {
+): Promise<BlockStatus> {
   const { userId } = data;
-  const response = await client.projectInstance.get<BlockStatusResponse>(
+  const response = await client.projectInstance.get<BlockStatus>(
     `/users/${userId}/block`
   );
   return response.data;

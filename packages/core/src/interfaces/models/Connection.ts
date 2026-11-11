@@ -33,9 +33,9 @@ export interface ConnectionRow {
 export interface AcceptedConnectionRow {
   id: string;
   user: User;
-  status: ConnectionRowStatus;
+  status: "accepted";
   createdAt: string;
-  respondedAt: string | null;
+  respondedAt: string;
 }
 
 /**
@@ -45,7 +45,11 @@ export interface AcceptedConnectionRow {
  */
 export type ConnectionStatus =
   | { isConnected: false }
-  | { isConnected: boolean; connection: ConnectionRow };
+  | {
+      isConnected: false;
+      connection: ConnectionRow & { status: "pending" | "declined" };
+    }
+  | { isConnected: true; connection: ConnectionRow & { status: "accepted" } };
 
 export interface ConnectionRequestParams {
   userId: string;

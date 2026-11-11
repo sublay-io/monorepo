@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { ConnectionStatusResponse } from "../../interfaces/Connection";
+import { ConnectionStatus } from "../../interfaces/Connection";
 
 export interface FetchConnectionStatusProps {
   /** The other user in the connection (the target). */
@@ -16,10 +16,10 @@ export interface FetchConnectionStatusProps {
 export async function fetchConnectionStatus(
   client: SublayHttpClient,
   data: FetchConnectionStatusProps
-): Promise<ConnectionStatusResponse> {
+): Promise<ConnectionStatus> {
   const { userId, actingUserId } = data;
   const response =
-    await client.projectInstance.get<ConnectionStatusResponse>(
+    await client.projectInstance.get<ConnectionStatus>(
       `/users/${userId}/connection`,
       { params: { actingUserId } }
     );

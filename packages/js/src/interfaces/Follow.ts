@@ -20,6 +20,6 @@ export interface FollowRow {
  * Does the signed-in user follow the target? `follow` (with `user` = the target)
  * is present only when they do.
  */
-export type FollowStatusResponse =
+export type FollowStatus =
   | { isFollowing: false }
   | { isFollowing: true; follow: FollowRow };

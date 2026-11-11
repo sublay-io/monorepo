@@ -1,7 +1,7 @@
 import { User } from "./User";
 
 /** A connection's stored state. */
-export type ConnectionStatus = "pending" | "accepted" | "declined";
+export type ConnectionRowStatus = "pending" | "accepted" | "declined";
 
 /**
  * A connection in an accepted-connections list, seen from the side of the user
@@ -14,21 +14,27 @@ export type ConnectionStatus = "pending" | "accepted" | "declined";
 export interface AcceptedConnectionRow {
   id: string;
   user: User;
-  status: ConnectionStatus;
+  status: "accepted";
   createdAt: string;
-  respondedAt: string | null;
+  respondedAt: string;
 }
 
 /**
- * A connection request seen from the caller's side: the accepted-row fields
- * plus `type` (`sent` when the caller made the request, `received` when the
- * other user did) and `message` (the request's note, or `null`). Returned by
- * the pending lists, request / accept / decline and the connection status.
+ * A connection request seen from the caller's side: `user` is the
+ * counterpart, `type` is `sent` when the caller made the request and
+ * `received` when the other user did, and `message` is the request's note (or
+ * `null`). Returned by the pending lists, request / accept / decline and the
+ * connection status.
  * `respondedAt` is `null` while the request is pending.
  */
-export interface ConnectionRow extends AcceptedConnectionRow {
+export interface ConnectionRow {
+  id: string;
+  user: User;
   type: "sent" | "received";
   message: string | null;
+  status: ConnectionRowStatus;
+  createdAt: string;
+  respondedAt: string | null;
 }
 
 export interface ConnectionRequestParams {
@@ -47,7 +53,7 @@ export interface ConnectionCountResponse {
  * declined included (its `status` and `type` tell them apart); with no row
  * there is no `connection`.
  */
-export type ConnectionStatusResponse =
+export type ConnectionStatus =
   | { isConnected: false }
   | {
       isConnected: false;

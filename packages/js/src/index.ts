@@ -245,11 +245,11 @@ export type {
   BulkDeleteResult,
   BulkCreateResult,
 } from "./interfaces/Table";
-export type { FollowRow, FollowStatusResponse } from "./interfaces/Follow";
-export type { BlockRow, BlockStatusResponse } from "./interfaces/Block";
+export type { FollowRow, FollowStatus } from "./interfaces/Follow";
+export type { BlockRow, BlockStatus } from "./interfaces/Block";
 export type {
   AcceptedConnectionRow,
   ConnectionRow,
+  ConnectionRowStatus,
   ConnectionStatus,
-  ConnectionStatusResponse,
 } from "./interfaces/Connection";

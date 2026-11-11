@@ -15,7 +15,7 @@ Returned wherever a connection is read as a request by one of its two users: [Re
 | `user` | `User` | The other user in the connection (the counterpart of the caller). Public profile fields only. |
 | `type` | `"sent" \| "received"` | Whether the caller sent or received the request. |
 | `message` | `string \| null` | The note sent with the request, or `null`. |
-| `status` | `"pending" \| "accepted" \| "declined"` | The connection's state. |
+| `status` | `ConnectionRowStatus` | The connection's state: `"pending"`, `"accepted"` or `"declined"`. |
 | `createdAt` | `string` | ISO timestamp of when the request was sent. |
 | `respondedAt` | `string \| null` | ISO timestamp of when the receiver accepted or declined; `null` while pending. |
 
@@ -38,7 +38,11 @@ Returned by the [connection status check](/v8/api-reference/users/connections/ge
 ```ts
 type ConnectionStatus =
   | { isConnected: false }
-  | { isConnected: boolean; connection: ConnectionRow };
+  | {
+      isConnected: false;
+      connection: ConnectionRow & { status: "pending" | "declined" };
+    }
+  | { isConnected: true; connection: ConnectionRow & { status: "accepted" } };
 ```
 
 `isConnected` is `true` only when `connection.status` is `"accepted"`. A pending or declined request comes back as `isConnected: false` **with** a `connection`, so check for `connection` to tell whether the two users have any connection record; read its `status` and `type` to tell a request you sent from one you received.

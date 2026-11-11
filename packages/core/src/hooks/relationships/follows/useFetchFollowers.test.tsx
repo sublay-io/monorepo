@@ -4,13 +4,13 @@ import { act } from "@testing-library/react";
 import { renderHookWithAxios, resetAxiosMocks, makeAuthUser, makeUser } from "../../../test-utils";
 import useFetchFollowers from "./useFetchFollowers";
 import type { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
-import type { FollowerWithFollowInfo } from "./useFetchFollowers";
+import type { FollowRow } from "../../../interfaces/models/Follow";
 
 afterEach(() => {
   resetAxiosMocks();
 });
 
-function makePage(items: FollowerWithFollowInfo[]): PaginatedResponse<FollowerWithFollowInfo> {
+function makePage(items: FollowRow[]): PaginatedResponse<FollowRow> {
   return {
     data: items,
     pagination: { page: 1, pageSize: 20, totalPages: 1, totalItems: items.length, hasMore: false },
@@ -22,10 +22,10 @@ describe("useFetchFollowers", () => {
     const user = makeAuthUser();
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchFollowers(), { user });
 
-    const page = makePage([{ followId: "follow-1", user: makeUser(), followedAt: "2024-01-01T00:00:00.000Z" }]);
+    const page = makePage([{ id: "follow-1", user: makeUser(), createdAt: "2024-01-01T00:00:00.000Z" }]);
     axiosPrivate.mockResponse("get", page);
 
-    let returned: PaginatedResponse<FollowerWithFollowInfo> | undefined;
+    let returned: PaginatedResponse<FollowRow> | undefined;
     await act(async () => {
       returned = await result.current({ page: 1, limit: 20 });
     });

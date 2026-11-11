@@ -24,5 +24,6 @@ export type { FetchSentPendingConnectionsParams } from "./useFetchSentPendingCon
 export type { FetchReceivedPendingConnectionsParams } from "./useFetchReceivedPendingConnections";
 export type {
   UseConnectionManagerProps,
-  ConnectionData,
+  UseConnectionManagerValues,
+  ConnectionState,
 } from "./useConnectionManager";

@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
-import { User } from "../../../interfaces/models/User";
+import type { BlockRow } from "../../../interfaces/models/Block";
 import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
 
 export interface FetchBlockedUsersParams {
@@ -10,15 +10,7 @@ export interface FetchBlockedUsersParams {
   limit?: number;
 }
 
-// One row of the acting user's own block list (GET /blocks). Field names mirror
-// the server response verbatim.
-export interface BlockedUser {
-  id: string;
-  blockedUser: User | null;
-  createdAt: string;
-}
-
-function useFetchBlockedUsers(): (props?: FetchBlockedUsersParams) => Promise<PaginatedResponse<BlockedUser>> {
+function useFetchBlockedUsers(): (props?: FetchBlockedUsersParams) => Promise<PaginatedResponse<BlockRow>> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
@@ -26,7 +18,7 @@ function useFetchBlockedUsers(): (props?: FetchBlockedUsersParams) => Promise<Pa
   const fetchBlockedUsers = useCallback(
     async (
       props: FetchBlockedUsersParams = {}
-    ): Promise<PaginatedResponse<BlockedUser>> => {
+    ): Promise<PaginatedResponse<BlockRow>> => {
       const { page = 1, limit = 20 } = props;
       if (!projectId) {
         throw new Error("No project specified");
@@ -36,7 +28,7 @@ function useFetchBlockedUsers(): (props?: FetchBlockedUsersParams) => Promise<Pa
         throw new Error("No user is logged in");
       }
 
-      const response = await axios.get<PaginatedResponse<BlockedUser>>(
+      const response = await axios.get<PaginatedResponse<BlockRow>>(
         `/${projectId}/blocks`,
         {
           params: {

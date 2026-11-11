@@ -6,28 +6,31 @@ import useRemoveConnection from "./useRemoveConnection";
 import useRemoveConnectionByUserId from "./useRemoveConnectionByUserId";
 import useGetConnectionStatus from "./useFetchConnectionStatus";
 import useUser from "../../user/useUser";
-import {
-  ConnectionStatus,
-  ConnectionStatusResponse,
-} from "../../../interfaces/models/Connection";
+import type { ConnectionRow } from "../../../interfaces/models/Connection";
 
 export interface UseConnectionManagerProps {
   userId: string;
 }
 
-export interface ConnectionData {
-  connectionId: string | null;
-  connectedAt?: string;
-  requestedAt?: string;
-  createdAt?: string;
-  respondedAt?: string;
-  type?: "sent" | "received";
-}
+/**
+ * The signed-in user's connection with `userId`, as one value: the
+ * connection's `status`, joined with its `type` while it is pending or
+ * declined (`"pending-sent"`: the signed-in user sent the request), or
+ * `"none"` when no connection exists.
+ */
+export type ConnectionState =
+  | "none"
+  | "pending-sent"
+  | "pending-received"
+  | "accepted"
+  | "declined-sent"
+  | "declined-received";
 
 export interface UseConnectionManagerValues {
-  connectionStatus: ConnectionStatus;
+  connectionStatus: ConnectionState;
   connectionId: string | null;
-  connectionData: ConnectionData;
+  /** The connection row (`user` = `userId`), or null when there is none. */
+  connection: ConnectionRow | null;
   isLoading: boolean;
   sendConnectionRequest: (message?: string) => Promise<void>;
   acceptConnectionRequest: () => Promise<void>;
@@ -38,15 +41,20 @@ export interface UseConnectionManagerValues {
   refreshConnectionStatus: () => Promise<void>;
 }
 
+function stateOf(connection: ConnectionRow | null): ConnectionState {
+  if (!connection) return "none";
+  if (connection.status === "accepted") return "accepted";
+  return `${connection.status}-${connection.type}`;
+}
+
 function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnectionManagerValues {
   const { user } = useUser();
 
-  const [connectionStatus, setConnectionStatus] =
-    useState<ConnectionStatus>("none");
-  const [connectionData, setConnectionData] = useState<ConnectionData>({
-    connectionId: null,
-  });
+  const [connection, setConnection] = useState<ConnectionRow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const connectionStatus = stateOf(connection);
+  const connectionId = connection?.id ?? null;
 
   const requestConnection = useRequestConnection();
   const acceptConnection = useAcceptConnection();
@@ -57,58 +65,18 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
 
   const loadConnectionStatus = useCallback(async () => {
     if (!userId || user?.id === userId) {
-      setConnectionStatus("none");
-      setConnectionData({ connectionId: null });
+      setConnection(null);
       setIsLoading(false);
       return;
     }
 
     try {
       setIsLoading(true);
-      const statusResponse: ConnectionStatusResponse =
-        await getConnectionStatus({ userId });
-
-      switch (statusResponse.status) {
-        case "none":
-          setConnectionStatus("none");
-          setConnectionData({ connectionId: null });
-          break;
-        case "pending":
-          setConnectionStatus(
-            statusResponse.type === "sent" ? "pending-sent" : "pending-received"
-          );
-          setConnectionData({
-            connectionId: statusResponse.connectionId,
-            createdAt: statusResponse.createdAt,
-            type: statusResponse.type,
-          });
-          break;
-        case "connected":
-          setConnectionStatus("connected");
-          setConnectionData({
-            connectionId: statusResponse.connectionId,
-            connectedAt: statusResponse.connectedAt,
-            requestedAt: statusResponse.requestedAt,
-          });
-          break;
-        case "declined":
-          setConnectionStatus(
-            statusResponse.type === "sent" ? "declined-sent" : "declined-received"
-          );
-          setConnectionData({
-            connectionId: statusResponse.connectionId,
-            respondedAt: statusResponse.respondedAt,
-            type: statusResponse.type,
-          });
-          break;
-        default:
-          setConnectionStatus("none");
-          setConnectionData({ connectionId: null });
-      }
+      const status = await getConnectionStatus({ userId });
+      setConnection("connection" in status ? status.connection : null);
     } catch (error) {
       console.error("Failed to fetch connection status:", error);
-      setConnectionStatus("none");
-      setConnectionData({ connectionId: null });
+      setConnection(null);
     } finally {
       setIsLoading(false);
     }
@@ -129,12 +97,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
 
       try {
         const result = await requestConnection({ userId, message });
-        setConnectionStatus("pending-sent");
-        setConnectionData({
-          connectionId: result.id,
-          type: "sent",
-          createdAt: result.createdAt,
-        });
+        setConnection(result);
       } catch (error) {
         console.error("Failed to send connection request:", error);
         throw error;
@@ -144,106 +107,55 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
   );
 
   const acceptConnectionRequest = useCallback(async () => {
-    if (
-      connectionStatus !== "pending-received" ||
-      !connectionData.connectionId ||
-      isLoading
-    )
+    if (connectionStatus !== "pending-received" || !connectionId || isLoading)
       return;
 
     try {
-      await acceptConnection({
-        connectionId: connectionData.connectionId,
-      });
-      setConnectionStatus("connected");
-      // Reload to get the updated connection data with dates
-      await loadConnectionStatus();
+      const result = await acceptConnection({ connectionId });
+      setConnection(result);
     } catch (error) {
       console.error("Failed to accept connection request:", error);
       throw error;
     }
-  }, [
-    connectionStatus,
-    connectionData.connectionId,
-    isLoading,
-    acceptConnection,
-    loadConnectionStatus,
-  ]);
+  }, [connectionStatus, connectionId, isLoading, acceptConnection]);
 
   const declineConnectionRequest = useCallback(async () => {
-    if (
-      connectionStatus !== "pending-received" ||
-      !connectionData.connectionId ||
-      isLoading
-    )
+    if (connectionStatus !== "pending-received" || !connectionId || isLoading)
       return;
 
     try {
-      const result = await declineConnection({ connectionId: connectionData.connectionId });
-      // When you decline someone, from your perspective it's "declined-received"
-      // (you received and declined their request)
-      setConnectionStatus("declined-received");
-      setConnectionData({
-        connectionId: connectionData.connectionId,
-        respondedAt: result.respondedAt,
-        type: "received",
-      });
+      const result = await declineConnection({ connectionId });
+      setConnection(result);
     } catch (error) {
       console.error("Failed to decline connection request:", error);
       throw error;
     }
-  }, [
-    connectionStatus,
-    connectionData.connectionId,
-    isLoading,
-    declineConnection,
-  ]);
+  }, [connectionStatus, connectionId, isLoading, declineConnection]);
 
   const withdrawConnectionRequest = useCallback(async () => {
-    if (
-      connectionStatus !== "pending-sent" ||
-      !connectionData.connectionId ||
-      isLoading
-    )
+    if (connectionStatus !== "pending-sent" || !connectionId || isLoading)
       return;
 
     try {
-      await removeConnection({ connectionId: connectionData.connectionId });
-      setConnectionStatus("none");
-      setConnectionData({ connectionId: null });
+      await removeConnection({ connectionId });
+      setConnection(null);
     } catch (error) {
       console.error("Failed to withdraw connection request:", error);
       throw error;
     }
-  }, [
-    connectionStatus,
-    connectionData.connectionId,
-    isLoading,
-    removeConnection,
-  ]);
+  }, [connectionStatus, connectionId, isLoading, removeConnection]);
 
   const disconnectUser = useCallback(async () => {
-    if (
-      connectionStatus !== "connected" ||
-      !connectionData.connectionId ||
-      isLoading
-    )
-      return;
+    if (connectionStatus !== "accepted" || !connectionId || isLoading) return;
 
     try {
-      await removeConnection({ connectionId: connectionData.connectionId });
-      setConnectionStatus("none");
-      setConnectionData({ connectionId: null });
+      await removeConnection({ connectionId });
+      setConnection(null);
     } catch (error) {
       console.error("Failed to disconnect user:", error);
       throw error;
     }
-  }, [
-    connectionStatus,
-    connectionData.connectionId,
-    isLoading,
-    removeConnection,
-  ]);
+  }, [connectionStatus, connectionId, isLoading, removeConnection]);
 
   const removeConnectionSmart = useCallback(async () => {
     if (
@@ -256,18 +168,30 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
 
     try {
       await removeConnectionByUserId({ userId });
-      setConnectionStatus("none");
-      setConnectionData({ connectionId: null });
+      if (connectionStatus === "pending-received") {
+        // The server declines a request it received rather than deleting it,
+        // and answers 204 with no body: read the declined row back.
+        await loadConnectionStatus();
+      } else {
+        setConnection(null);
+      }
     } catch (error) {
       console.error("Failed to remove connection:", error);
       throw error;
     }
-  }, [connectionStatus, isLoading, userId, user?.id, removeConnectionByUserId]);
+  }, [
+    connectionStatus,
+    isLoading,
+    userId,
+    user?.id,
+    removeConnectionByUserId,
+    loadConnectionStatus,
+  ]);
 
   return {
     connectionStatus,
-    connectionId: connectionData.connectionId,
-    connectionData,
+    connectionId,
+    connection,
     isLoading,
     sendConnectionRequest,
     acceptConnectionRequest,

@@ -2,19 +2,18 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
-import { ConnectionWithdrawResponse } from "../../../interfaces/models/Connection";
 
 export interface RemoveConnectionProps {
   connectionId: string;
 }
 
-function useRemoveConnection(): (props: RemoveConnectionProps) => Promise<ConnectionWithdrawResponse> {
+function useRemoveConnection(): (props: RemoveConnectionProps) => Promise<void> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
 
   const removeConnection = useCallback(
-    async (props: RemoveConnectionProps): Promise<ConnectionWithdrawResponse> => {
+    async (props: RemoveConnectionProps): Promise<void> => {
       const { connectionId } = props;
       if (!projectId) {
         throw new Error("No project specified");
@@ -28,11 +27,9 @@ function useRemoveConnection(): (props: RemoveConnectionProps) => Promise<Connec
         throw new Error("No connection ID was provided");
       }
 
-      const response = await axios.delete(
-        `/${projectId}/connections/${connectionId}`
-      );
-
-      return response.data as ConnectionWithdrawResponse;
+      // Withdraws a pending request or removes an accepted connection. The
+      // server answers 204 with no body.
+      await axios.delete(`/${projectId}/connections/${connectionId}`);
     },
     [axios, projectId, user]
   );

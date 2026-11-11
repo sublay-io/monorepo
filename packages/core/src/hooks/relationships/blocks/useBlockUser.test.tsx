@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks } from "../../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks, makeUser } from "../../../test-utils";
 import useBlockUser from "./useBlockUser";
 
 afterEach(() => {
@@ -12,11 +12,16 @@ describe("useBlockUser", () => {
   it("blocks a user", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useBlockUser());
 
-    axiosPrivate.mockResponse("post", undefined, 201);
+    const row = { id: "block-1", user: makeUser({ id: "user-2" }), createdAt: "2024-01-01T00:00:00.000Z" };
+    axiosPrivate.mockResponse("post", row, 201);
 
+    let returned: unknown;
     await act(async () => {
-      await result.current({ userId: "user-2" });
+      returned = await result.current({ userId: "user-2" });
     });
+
+    // The block row: `user` is the blocked user.
+    expect(returned).toEqual(row);
 
     const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/users/user-2/block");

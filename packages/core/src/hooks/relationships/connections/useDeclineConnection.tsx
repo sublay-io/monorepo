@@ -2,19 +2,19 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
-import { ConnectionActionResponse } from "../../../interfaces/models/Connection";
+import type { ConnectionRow } from "../../../interfaces/models/Connection";
 
 export interface DeclineConnectionProps {
   connectionId: string;
 }
 
-function useDeclineConnection(): (props: DeclineConnectionProps) => Promise<ConnectionActionResponse> {
+function useDeclineConnection(): (props: DeclineConnectionProps) => Promise<ConnectionRow> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
 
   const declineConnection = useCallback(
-    async (props: DeclineConnectionProps): Promise<ConnectionActionResponse> => {
+    async (props: DeclineConnectionProps): Promise<ConnectionRow> => {
       const { connectionId } = props;
       if (!projectId) {
         throw new Error("No project specified");
@@ -28,12 +28,13 @@ function useDeclineConnection(): (props: DeclineConnectionProps) => Promise<Conn
         throw new Error("No connection ID was provided");
       }
 
-      const response = await axios.patch(
+      // The row from the receiver's (caller's) side: `user` is the requester.
+      const response = await axios.patch<ConnectionRow>(
         `/${projectId}/connections/${connectionId}/decline`,
         {}
       );
 
-      return response.data as ConnectionActionResponse;
+      return response.data;
     },
     [axios, projectId, user]
   );

@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks } from "../../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks, makeUser } from "../../../test-utils";
 import useRequestConnection from "./useRequestConnection";
 
 afterEach(() => {
@@ -12,7 +12,15 @@ describe("useRequestConnection", () => {
   it("sends a connection request with an optional message", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useRequestConnection());
 
-    const response = { id: "connection-1", status: "pending", createdAt: "2024-01-01T00:00:00.000Z" };
+    const response = {
+      id: "connection-1",
+      user: makeUser({ id: "user-2" }),
+      type: "sent",
+      message: "Let's connect",
+      status: "pending",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      respondedAt: null,
+    };
     axiosPrivate.mockResponse("post", response);
 
     let returned;

@@ -654,12 +654,9 @@ export {
   type UnfollowByFollowIdProps,
   type UnfollowUserByUserIdProps,
   type FetchFollowStatusProps,
-  type FollowStatusResponse,
-  type FollowerWithFollowInfo,
   type FetchFollowersParams,
   type FetchFollowersByUserIdParams,
   type FetchFollowersCountByUserIdProps,
-  type FollowingWithFollowInfo,
   type FetchFollowingParams,
   type FetchFollowingByUserIdParams,
   type FetchFollowingCountByUserIdProps,
@@ -692,7 +689,8 @@ export {
   type FetchSentPendingConnectionsParams,
   type FetchReceivedPendingConnectionsParams,
   type UseConnectionManagerProps,
-  type ConnectionData,
+  type UseConnectionManagerValues,
+  type ConnectionState,
 } from "./hooks/relationships/connections";
 
 // -- blocks
@@ -705,9 +703,7 @@ export {
   type BlockUserProps,
   type UnblockUserProps,
   type FetchBlockStatusProps,
-  type BlockStatusResponse,
   type FetchBlockedUsersParams,
-  type BlockedUser,
   type UseBlockManagerProps,
   type UseBlockManagerValues,
 } from "./hooks/relationships/blocks";
@@ -974,17 +970,15 @@ export type { TimeFrame } from "./interfaces/TimeFrame";
 export type { NsfwFilter } from "./interfaces/NsfwFilter";
 export type { BlockedFilter } from "./interfaces/BlockedFilter";
 export type {
-  Connection,
-  EstablishedConnection,
-  PendingConnection,
-  ConnectionRequestParams,
-  ConnectionActionResponse,
-  ConnectionWithdrawResponse,
-  ConnectionCountResponse,
-  RemoveConnectionByUserIdResponse,
-  ConnectionStatusResponse,
+  ConnectionRow,
+  AcceptedConnectionRow,
+  ConnectionRowStatus,
   ConnectionStatus,
+  ConnectionRequestParams,
+  ConnectionCountResponse,
 } from "./interfaces/models/Connection";
+export type { FollowRow, FollowStatus } from "./interfaces/models/Follow";
+export type { BlockRow, BlockStatus } from "./interfaces/models/Block";
 export type {
   Image,
   ImageVariant,

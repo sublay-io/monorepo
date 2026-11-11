@@ -3,22 +3,16 @@ import { buildSearchParams } from "../../../utils/searchParams";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
-import type { User } from "../../../interfaces/models/User";
+import type { FollowRow } from "../../../interfaces/models/Follow";
 import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
 import { UserSearchParams } from "../../../interfaces/UserSearch";
-
-export interface FollowingWithFollowInfo {
-  followId: string;
-  user: User;
-  followedAt: string;
-}
 
 export interface FetchFollowingParams extends UserSearchParams {
   page?: number;
   limit?: number;
 }
 
-function useFetchFollowing(): (params?: FetchFollowingParams) => Promise<PaginatedResponse<FollowingWithFollowInfo>> {
+function useFetchFollowing(): (params?: FetchFollowingParams) => Promise<PaginatedResponse<FollowRow>> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
@@ -33,7 +27,7 @@ function useFetchFollowing(): (params?: FetchFollowingParams) => Promise<Paginat
         throw new Error("No user is logged in.");
       }
 
-      const response = await axios.get<PaginatedResponse<FollowingWithFollowInfo>>(
+      const response = await axios.get<PaginatedResponse<FollowRow>>(
         `/${projectId}/follows/following`,
         {
           params: {

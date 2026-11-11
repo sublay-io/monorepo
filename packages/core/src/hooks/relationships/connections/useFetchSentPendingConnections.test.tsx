@@ -3,14 +3,14 @@ import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeAuthUser, makeUser } from "../../../test-utils";
 import useFetchSentPendingConnections from "./useFetchSentPendingConnections";
-import type { PendingConnection } from "../../../interfaces/models/Connection";
+import type { ConnectionRow } from "../../../interfaces/models/Connection";
 import type { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
 
 afterEach(() => {
   resetAxiosMocks();
 });
 
-function makePage(connections: PendingConnection[]): PaginatedResponse<PendingConnection> {
+function makePage(connections: ConnectionRow[]): PaginatedResponse<ConnectionRow> {
   return {
     data: connections,
     pagination: { page: 1, pageSize: 20, totalPages: 1, totalItems: connections.length, hasMore: false },
@@ -26,11 +26,19 @@ describe("useFetchSentPendingConnections", () => {
     );
 
     const page = makePage([
-      { id: "connection-1", user: makeUser(), createdAt: "2024-01-01T00:00:00.000Z", type: "sent" },
+      {
+        id: "connection-1",
+        user: makeUser(),
+        type: "sent",
+        message: null,
+        status: "pending",
+        createdAt: "2024-01-01T00:00:00.000Z",
+        respondedAt: null,
+      },
     ]);
     axiosPrivate.mockResponse("get", page);
 
-    let returned: PaginatedResponse<PendingConnection> | undefined;
+    let returned: PaginatedResponse<ConnectionRow> | undefined;
     await act(async () => {
       returned = await result.current({ page: 1, limit: 10 });
     });

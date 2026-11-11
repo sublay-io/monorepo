@@ -9,7 +9,8 @@ export interface UseBlockManagerProps {
 }
 
 export interface UseBlockManagerValues {
-  isBlocked: boolean | null;
+  /** Whether the signed-in user blocks `userId` (null until loaded). */
+  isBlocking: boolean | null;
   isLoading: boolean;
   toggleBlock: () => Promise<void>;
 }
@@ -17,7 +18,7 @@ export interface UseBlockManagerValues {
 function useBlockManager({ userId }: UseBlockManagerProps): UseBlockManagerValues {
   const { user } = useUser();
 
-  const [isBlocked, setIsBlocked] = useState<boolean | null>(null);
+  const [isBlocking, setIsBlocking] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const blockUser = useBlockUser();
@@ -33,10 +34,10 @@ function useBlockManager({ userId }: UseBlockManagerProps): UseBlockManagerValue
       try {
         setIsLoading(true);
         const result = await fetchBlockStatusRef.current({ userId });
-        setIsBlocked(result.blocked);
+        setIsBlocking(result.isBlocking);
       } catch (error) {
         console.error("Failed to fetch block status:", error);
-        setIsBlocked(false);
+        setIsBlocking(false);
       } finally {
         setIsLoading(false);
       }
@@ -48,23 +49,23 @@ function useBlockManager({ userId }: UseBlockManagerProps): UseBlockManagerValue
   }, [userId, user?.id]);
 
   const toggleBlock = useCallback(async () => {
-    if (isBlocked === null || isLoading || user?.id === userId) return;
+    if (isBlocking === null || isLoading || user?.id === userId) return;
 
     try {
-      if (isBlocked) {
+      if (isBlocking) {
         await unblockUser({ userId });
-        setIsBlocked(false);
+        setIsBlocking(false);
       } else {
         await blockUser({ userId });
-        setIsBlocked(true);
+        setIsBlocking(true);
       }
     } catch (error) {
       console.error("Failed to toggle block status:", error);
     }
-  }, [isBlocked, isLoading, userId, blockUser, unblockUser]);
+  }, [isBlocking, isLoading, userId, blockUser, unblockUser]);
 
   return {
-    isBlocked,
+    isBlocking,
     isLoading,
     toggleBlock,
   };

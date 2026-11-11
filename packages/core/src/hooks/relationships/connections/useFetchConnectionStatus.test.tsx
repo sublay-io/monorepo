@@ -1,9 +1,9 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeAuthUser } from "../../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks, makeAuthUser, makeUser } from "../../../test-utils";
 import useFetchConnectionStatus from "./useFetchConnectionStatus";
-import type { ConnectionStatusResponse } from "../../../interfaces/models/Connection";
+import type { ConnectionStatus } from "../../../interfaces/models/Connection";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -14,15 +14,21 @@ describe("useFetchConnectionStatus", () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchConnectionStatus(), { user });
 
-    const response: ConnectionStatusResponse = {
-      status: "connected",
-      connectionId: "connection-1",
-      connectedAt: "2024-01-01T00:00:00.000Z",
-      requestedAt: "2023-12-31T00:00:00.000Z",
+    const response: ConnectionStatus = {
+      isConnected: true,
+      connection: {
+        id: "connection-1",
+        user: makeUser({ id: "user-2" }),
+        type: "sent",
+        message: null,
+        status: "accepted",
+        createdAt: "2023-12-31T00:00:00.000Z",
+        respondedAt: "2024-01-01T00:00:00.000Z",
+      },
     };
     axiosPrivate.mockResponse("get", response);
 
-    let returned: ConnectionStatusResponse | undefined;
+    let returned: ConnectionStatus | undefined;
     await act(async () => {
       returned = await result.current({ userId: "user-2" });
     });

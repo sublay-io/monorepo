@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeAuthUser } from "../../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks, makeAuthUser, makeUser } from "../../../test-utils";
 import useFollowManager from "./useFollowManager";
 
 afterEach(() => {
@@ -17,7 +17,10 @@ describe("useFollowManager", () => {
       {
         user,
         beforeRender: ({ axiosPrivate }) =>
-          axiosPrivate.mockResponse("get", { isFollowing: true }),
+          axiosPrivate.mockResponse("get", {
+            isFollowing: true,
+            follow: { id: "follow-1", user: makeUser({ id: "user-2" }), createdAt: "2024-01-01T00:00:00.000Z" },
+          }),
       },
     );
 
@@ -49,7 +52,11 @@ describe("useFollowManager", () => {
 
     await waitFor(() => expect(result.current.isFollowing).toBe(false));
 
-    axiosPrivate.mockResponse("post", undefined, 201);
+    axiosPrivate.mockResponse(
+      "post",
+      { id: "follow-1", user: makeUser({ id: "user-2" }), createdAt: "2024-01-01T00:00:00.000Z" },
+      201,
+    );
 
     await act(async () => {
       await result.current.toggleFollow();

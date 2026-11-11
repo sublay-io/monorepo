@@ -6,14 +6,8 @@ export { default as useBlockManager } from "./useBlockManager";
 
 export type { BlockUserProps } from "./useBlockUser";
 export type { UnblockUserProps } from "./useUnblockUser";
-export type {
-  FetchBlockStatusProps,
-  BlockStatusResponse,
-} from "./useFetchBlockStatus";
-export type {
-  FetchBlockedUsersParams,
-  BlockedUser,
-} from "./useFetchBlockedUsers";
+export type { FetchBlockStatusProps } from "./useFetchBlockStatus";
+export type { FetchBlockedUsersParams } from "./useFetchBlockedUsers";
 export type {
   UseBlockManagerProps,
   UseBlockManagerValues,

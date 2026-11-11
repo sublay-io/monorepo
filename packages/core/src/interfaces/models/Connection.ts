@@ -1,85 +1,57 @@
 import { User } from "./User";
 
-export interface Connection {
-  id: string;
-  message?: string;
-  createdAt: string;
-}
+/** A connection's stored state. */
+export type ConnectionRowStatus = "pending" | "accepted" | "declined";
 
-export interface EstablishedConnection {
+/**
+ * A connection request, seen from the caller's side — what the pending lists,
+ * request / accept / decline responses and the status check return.
+ *
+ * - `id` is the connection's own id (what `/connections/:connectionId/…` takes).
+ * - `user` is the counterpart: the receiver on a request the caller sent, the
+ *   requester on one they received.
+ * - `type` is whether the caller sent or received the request; `message` is
+ *   the request's note, or null.
+ * - `respondedAt` is when the receiver accepted or declined (null while
+ *   pending).
+ */
+export interface ConnectionRow {
   id: string;
-  connectedUser: User;
-  connectedAt: string;
-}
-
-export interface PendingConnection extends Connection {
   user: User;
-  type: "received" | "sent";
+  type: "sent" | "received";
+  message: string | null;
+  status: ConnectionRowStatus;
+  createdAt: string;
+  respondedAt: string | null;
 }
+
+/**
+ * An accepted connection, as the connection lists (`GET /connections`,
+ * `GET /users/:userId/connections`) return it: `user` is the other user from
+ * the list owner's side. No `type` or `message`, for every caller.
+ */
+export interface AcceptedConnectionRow {
+  id: string;
+  user: User;
+  status: ConnectionRowStatus;
+  createdAt: string;
+  respondedAt: string | null;
+}
+
+/**
+ * `GET /users/:userId/connection`. `isConnected` is true only once accepted;
+ * `connection` is present whenever a connection exists between the two users,
+ * pending and declined included (its `status` and `type` tell them apart).
+ */
+export type ConnectionStatus =
+  | { isConnected: false }
+  | { isConnected: boolean; connection: ConnectionRow };
 
 export interface ConnectionRequestParams {
   userId: string;
   message?: string;
 }
 
-export interface ConnectionActionResponse {
-  id: string;
-  status: string;
-  createdAt?: string;
-  respondedAt?: string;
-}
-
-export interface ConnectionWithdrawResponse {
-  message: string;
-}
-
 export interface ConnectionCountResponse {
   count: number;
 }
-
-export interface RemoveConnectionByUserIdResponse {
-  id?: string;
-  status?: string;
-  respondedAt?: string;
-  message?: string;
-  action?: "withdraw" | "disconnect" | "decline";
-}
-
-export interface ConnectionStatusNone {
-  status: "none";
-}
-
-export interface ConnectionStatusPending {
-  status: "pending";
-  type: "sent" | "received";
-  connectionId: string;
-  createdAt: string;
-}
-
-export interface ConnectionStatusConnected {
-  status: "connected";
-  connectionId: string;
-  connectedAt: string;
-  requestedAt: string;
-}
-
-export interface ConnectionStatusDeclined {
-  status: "declined";
-  type: "sent" | "received";
-  connectionId: string;
-  respondedAt: string;
-}
-
-export type ConnectionStatusResponse =
-  | ConnectionStatusNone
-  | ConnectionStatusPending
-  | ConnectionStatusConnected
-  | ConnectionStatusDeclined;
-
-export type ConnectionStatus =
-  | "none"
-  | "pending-sent"
-  | "pending-received"
-  | "connected"
-  | "declined-sent"
-  | "declined-received";

@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeAuthUser } from "../../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks, makeAuthUser, makeUser } from "../../../test-utils";
 import useDeclineConnection from "./useDeclineConnection";
 
 afterEach(() => {
@@ -13,7 +13,15 @@ describe("useDeclineConnection", () => {
     const user = makeAuthUser();
     const { result, axiosPrivate } = renderHookWithAxios(() => useDeclineConnection(), { user });
 
-    const response = { id: "connection-1", status: "declined", respondedAt: "2024-01-01T00:00:00.000Z" };
+    const response = {
+      id: "connection-1",
+      user: makeUser({ id: "user-2" }),
+      type: "received",
+      message: null,
+      status: "declined",
+      createdAt: "2024-01-01T00:00:00.000Z",
+      respondedAt: "2024-01-02T00:00:00.000Z",
+    };
     axiosPrivate.mockResponse("patch", response);
 
     let returned;

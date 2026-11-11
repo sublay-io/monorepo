@@ -37,12 +37,13 @@ Returns the authenticated user's membership status and resolved permissions in a
 </ResponseField>
 
 <ResponseField name="permissions" type="object">
+  The same calculation as `memberPermissions` on a fetched space; see [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated).
   <Expandable title="properties">
-    <ResponseField name="canPost" type="boolean">Whether the user can post.</ResponseField>
-    <ResponseField name="canModerate" type="boolean">Whether the user can moderate.</ResponseField>
-    <ResponseField name="canRead" type="boolean">Whether the user can read content.</ResponseField>
-    <ResponseField name="isAdmin" type="boolean">Whether the user is an admin.</ResponseField>
-    <ResponseField name="isModerator" type="boolean">Whether the user is a moderator.</ResponseField>
+    <ResponseField name="canPost" type="boolean">Whether the user can post entities: they can read the space, aren't banned in it or in any space above it, and its `postingPermission` lets them post.</ResponseField>
+    <ResponseField name="canModerate" type="boolean">Whether the user can moderate (an active admin or moderator of this space).</ResponseField>
+    <ResponseField name="canRead" type="boolean">Whether the user can read content in the space, following the reading rules of the spaces above it.</ResponseField>
+    <ResponseField name="isAdmin" type="boolean">Whether the user is an active admin of this space.</ResponseField>
+    <ResponseField name="isModerator" type="boolean">Whether the user is an active moderator of this space.</ResponseField>
   </Expandable>
 </ResponseField>
 

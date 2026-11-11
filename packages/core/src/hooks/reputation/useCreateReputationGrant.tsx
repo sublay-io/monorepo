@@ -15,7 +15,11 @@ interface CreateReputationGrantBaseProps {
    * unreachable from this SDK, may be negative.
    */
   amount: number;
-  /** The bucket both legs move in. Omitted/null = the project-general bucket. */
+  /**
+   * The bucket both legs move in. Omitted/null = the project-general bucket.
+   * With a target, it must be the target's space (or omitted): any other
+   * space answers `400 reputation-grant/space-mismatch`.
+   */
   spaceId?: string | null;
   /**
    * Free-text reason. Trimmed and capped at 2000 characters server-side.

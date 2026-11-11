@@ -54,7 +54,7 @@ function RewardAnswer({ answer }) {
   Arbitrary key-value data. Up to 1 MB. Omit when unused.
 </ParamField>
 <ParamField path="targetType" type='"entity" | "comment" | "message"'>
-  What the grant is for. Must be supplied together with `targetId`. The target is an annotation — it never determines which bucket is used, and it need not be authored by the recipient.
+  What the grant is for. Must be supplied together with `targetId`. It need not be authored by the recipient. A grant with a `spaceId` must use the target's space (an entity's space, a comment's entity's space, a message's space chat's space; none for a target in no space), or it is rejected with `400 reputation-grant/space-mismatch` — see [The target is an annotation](/v8/data-models/reputation-grant#the-target-is-an-annotation).
 </ParamField>
 <ParamField path="targetId" type="string">
   The rewarded record's ID. Must be supplied together with `targetType`, and must exist.
@@ -74,6 +74,7 @@ Server rejections surface as the axios error, most usefully:
 |--------|------|---------|
 | `400` | `reputation-grant/invalid-body` | The body failed schema validation. `error` is the field path followed by the message, e.g. `"amount: Too small: expected number to be >=1"`. |
 | `400` | `reputation-grant/self-grant` | The recipient is the logged-in user. |
+| `400` | `reputation-grant/space-mismatch` | The grant names a target and a `spaceId` that isn't the target's space (or any `spaceId` when the target is in no space). Omit `spaceId`, or send the target's own. |
 | `403` | `reputation-grant/user-grants-disabled` | The project has `settings.reputationGrants.allowUserInitiated` set to `false` (**Settings → SDK** in the dashboard). Route the grant through your backend with a service key instead. |
 | `403` | `database/tables-not-available` | The project lacks a table the grant needs — `spaces` for a `spaceId`, or the target's bundle for a `targetType`. `missingTables` names them. |
 | `403` | `user/suspended` | A suspended user cannot send grants (they can still receive them). |

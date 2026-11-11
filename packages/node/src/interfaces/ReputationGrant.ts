@@ -63,6 +63,8 @@ export interface GrantWriteCommonProps {
   /**
    * The bucket the reputation moves in — both legs on a transfer, the credited
    * (or debited) leg on a mint. Omitted/null = the project-general bucket.
+   * With a target, it must be the target's space (or omitted): any other
+   * space answers `400 reputation-grant/space-mismatch`.
    */
   spaceId?: string | null;
   /**

@@ -47,7 +47,7 @@ const grant = await sublay.reputation.createGrant({
 <ParamField body="note" type="string | null">Free-text note. Trimmed, up to 2000 characters.</ParamField>
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB. Omit when unused.</ParamField>
 <ParamField body="targetType" type='"entity" | "comment" | "message"'>
-  What the grant is for. Supplied together with `targetId`. An annotation only — it never determines which bucket is used, and need not be authored by the recipient.
+  What the grant is for. Supplied together with `targetId`. Need not be authored by the recipient. A grant with a `spaceId` must use the target's space (an entity's space, a comment's entity's space, a message's space chat's space; none for a target in no space), or it is rejected with `400 reputation-grant/space-mismatch` — see [The target is an annotation](/v8/data-models/reputation-grant#the-target-is-an-annotation).
 </ParamField>
 <ParamField body="targetId" type="string">The rewarded record's ID. Supplied together with `targetType`, and must exist.</ParamField>
 
@@ -88,7 +88,7 @@ await sublay.reputation.mintGrant({
 </ParamField>
 <ParamField body="note" type="string | null">Free-text note. Trimmed, up to 2000 characters.</ParamField>
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB. Omit when unused.</ParamField>
-<ParamField body="targetType" type='"entity" | "comment" | "message"'>What the grant is for. Supplied together with `targetId`.</ParamField>
+<ParamField body="targetType" type='"entity" | "comment" | "message"'>What the grant is for. Supplied together with `targetId`. A grant with a `spaceId` must use the target's space (an entity's space, a comment's entity's space, a message's space chat's space; none for a target in no space), or it is rejected with `400 reputation-grant/space-mismatch` — see [The target is an annotation](/v8/data-models/reputation-grant#the-target-is-an-annotation).</ParamField>
 <ParamField body="targetId" type="string">The rewarded record's ID. Supplied together with `targetType`, and must exist.</ParamField>
 
 **Returns** — `Promise<ReputationGrant>` with `sourceType: "app"`.

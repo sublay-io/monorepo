@@ -116,7 +116,7 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
 
 ### updateEvent
 
-Edits an event's mutable fields. Host-only. `hostIds`, `status`, and `spaceId` are not editable here.
+Edits an event's mutable fields. Host-only (`403 event/forbidden`): the logged-in user must be the owner or in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member`). The space's admins and moderators can't edit events they don't host. `hostIds`, `status`, and `spaceId` are not editable here.
 
 <Note>
   The JS SDK `updateEvent` accepts a flat JSON body. To curate images on update
@@ -157,7 +157,7 @@ const event = await sublay.events.updateEvent({
 
 ### cancelEvent
 
-Cancels an event (sets `status: "cancelled"`). Host-only. The event stays fetchable but rejects new RSVPs.
+Cancels an event (sets `status: "cancelled"`). The event stays fetchable but rejects new RSVPs. Allowed for the event's [owner](/v8/data-models/event#owner-and-hosts) (also when they are no longer an active member of its space) and for the active admins and moderators of its space; other hosts of an event that has an owner get `403 event/forbidden`. When the owner's account was deleted (`userId` is `null`), any of its hosts may cancel it — for an event in a space, only while an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member` otherwise).
 
 ```typescript
 const event = await sublay.events.cancelEvent({ eventId: "evt_abc123" });
@@ -165,13 +165,13 @@ const event = await sublay.events.cancelEvent({ eventId: "evt_abc123" });
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
 
-**Returns** — `Promise<Event>`
+**Returns** — `Promise<Event | { id: string; status: "cancelled" }>`: the cancelled event, or only `{ id, status }` when the logged-in user can't see the event (for example its owner who is no longer an active member of its space).
 
 ---
 
 ### deleteEvent
 
-Deletes an event (soft or hard per the project's `eventDeletion` settings). Host-only.
+Deletes an event (soft or hard per the project's `eventDeletion` settings). Allowed for the same users as [cancelEvent](#cancelevent): the event's owner and the active admins and moderators of its space, and, when the owner's account was deleted, its hosts.
 
 ```typescript
 await sublay.events.deleteEvent({ eventId: "evt_abc123" });
@@ -203,7 +203,7 @@ const event = await sublay.events.setRsvp({
 
 ### withdrawRsvp
 
-Removes the logged-in user's RSVP. Idempotent.
+Removes the logged-in user's RSVP, also from an event they can no longer see. Withdrawing with no RSVP succeeds and changes nothing if they can see the event, and answers `404` if they can't.
 
 ```typescript
 const event = await sublay.events.withdrawRsvp({ eventId: "evt_abc123" });
@@ -211,13 +211,13 @@ const event = await sublay.events.withdrawRsvp({ eventId: "evt_abc123" });
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
 
-**Returns** — `Promise<Event>`
+**Returns** — `Promise<Event | { id: string; userRsvp: null }>`: the event, or only `{ id, userRsvp: null }` when the logged-in user can no longer see it.
 
 ---
 
 ### addHost
 
-Grants a user host privileges. Host-only. The `userId` is the **target** host.
+Makes a user a host. **Owner-only**: the logged-in user must be the event's [owner](/v8/data-models/event#owner-and-hosts), and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member` otherwise); other hosts get `403 event/forbidden`. The `userId` is the **target** host, and for an event in a space must be an active member of it (`409 event/host-not-member`).
 
 ```typescript
 const event = await sublay.events.addHost({
@@ -227,7 +227,7 @@ const event = await sublay.events.addHost({
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="userId" type="string" required>The user to grant host on the event.</ParamField>
+<ParamField body="userId" type="string" required>The user to make a host.</ParamField>
 
 **Returns** — `Promise<Event>`
 
@@ -235,7 +235,7 @@ const event = await sublay.events.addHost({
 
 ### removeHost
 
-Revokes a user's host privileges. Host-only. Rejected if it would leave the event with no hosts. It sends `DELETE /events/:eventId/hosts/:userId`, with the host in the path and no body.
+Removes a host. Removing another host is **owner-only** (the owner, for an event in a space, while an active member of that space who isn't banned in it or a space above it; `403 event/not-space-member` otherwise); other hosts get `403 event/forbidden`. Any host other than the owner may step down by passing their own `userId`, active member or not. The owner can't step down or be removed (`409 event/owner-is-host`). On an event whose owner's account was deleted, nobody can remove another host and its last host can't step down (`409 event/last-host`). It sends `DELETE /events/:eventId/hosts/:userId`, with the host in the path and no body.
 
 ```typescript
 const event = await sublay.events.removeHost({
@@ -245,15 +245,15 @@ const event = await sublay.events.removeHost({
 ```
 
 <ParamField body="eventId" type="string" required>The event ID.</ParamField>
-<ParamField body="userId" type="string" required>The host to remove.</ParamField>
+<ParamField body="userId" type="string" required>The host to remove, or the logged-in user to step down.</ParamField>
 
-**Returns** — `Promise<Event>`
+**Returns** — `Promise<Event | { id: string }>`: the event, or only `{ id }` after stepping down from an event the logged-in user can no longer see.
 
 ---
 
 ### addInvite
 
-Invites a user to the event. Host-only. Idempotent. The `userId` is the **target** invitee.
+Invites a user to the event. Host-only: the owner or a user in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member`); the space's admins and moderators can't (`403 event/forbidden`). The `userId` is the **target** invitee. Re-inviting someone already invited is a no-op. For an event in a space the invitee must be able to read it and not be banned in it or a space above it, and, when the space is private or members-only (or sits under such a space) or the event is `members`-only, be an active member of the event's space itself; one `409 event/invitee-not-invitable` covers every case.
 
 ```typescript
 const event = await sublay.events.addInvite({

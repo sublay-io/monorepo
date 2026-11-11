@@ -43,6 +43,12 @@ export interface UpdateEventProps {
   gallery?: EventGalleryUpload;
 }
 
+/**
+ * Edits an event. Hosts only (403 `event/forbidden`), and on an event in a
+ * space only while they are active members of it and not banned in it or a
+ * space above it (403 `event/not-space-member`). The space's admins and
+ * moderators can't edit events they don't host.
+ */
 export async function updateEvent(
   client: SublayHttpClient,
   data: UpdateEventProps

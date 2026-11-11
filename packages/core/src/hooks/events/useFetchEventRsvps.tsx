@@ -13,9 +13,11 @@ export interface FetchEventRsvpsProps {
 }
 
 /**
- * Named RSVP (guest) list. Visible to hosts always, or to any viewer when the
- * event's `guestListVisible` is true; otherwise 403. RSVP counts themselves are
- * public via the event's `rsvpCounts`.
+ * Named RSVP (guest) list. Visible to any viewer of the event when its
+ * `guestListVisible` is true; otherwise only to hosts who are active members
+ * of the event's space (any host, for an event with no space) and the active
+ * admins and moderators of its space (403 `event/guest-list-hidden` for anyone
+ * else). RSVP counts themselves are public via the event's `rsvpCounts`.
  */
 function useFetchEventRsvps(): (
   props: FetchEventRsvpsProps

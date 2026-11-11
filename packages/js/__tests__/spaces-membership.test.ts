@@ -169,6 +169,15 @@ describe("js-sdk spaces (membership) — response mapping", () => {
         status: "active" as const,
         joinedAt: "now",
       },
+      memberPermissions: {
+        isAdmin: false,
+        isModerator: false,
+        isMember: true,
+        status: "active" as const,
+        canPost: true,
+        canModerate: false,
+        canRead: true,
+      },
     };
     projectInstance.post.mockResolvedValueOnce({ data: result });
 
@@ -179,7 +188,18 @@ describe("js-sdk spaces (membership) — response mapping", () => {
 
   it("leaveSpace returns the LeaveSpaceResponse", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "Left space" };
+    const result = {
+      message: "Left space",
+      memberPermissions: {
+        isAdmin: false,
+        isModerator: false,
+        isMember: false,
+        status: null,
+        canPost: false,
+        canModerate: false,
+        canRead: true,
+      },
+    };
     projectInstance.delete.mockResolvedValueOnce({ data: result });
 
     const response = await leaveSpace(client, { spaceId: "s1" });

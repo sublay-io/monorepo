@@ -3,6 +3,7 @@ import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeEvent } from "../../test-utils";
 import useCancelEvent from "./useCancelEvent";
+import type { CancelEventResponse } from "../../interfaces/models/Event";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -15,13 +16,29 @@ describe("useCancelEvent", () => {
     const event = makeEvent({ status: "cancelled" });
     axiosPrivate.mockResponse("post", event);
 
-    let returned: typeof event | undefined;
+    let returned: CancelEventResponse | undefined;
     await act(async () => {
       returned = await result.current({ eventId: "event-1" });
     });
 
     expect(returned).toEqual(event);
 
+    const [call] = axiosPrivate.calls("post");
+    expect(call.url).toBe("/test-project/events/event-1/cancel");
+  });
+
+  it("returns the short body when the caller can no longer see the event", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useCancelEvent());
+
+    const short = { id: "event-1", status: "cancelled" as const };
+    axiosPrivate.mockResponse("post", short);
+
+    let returned: CancelEventResponse | undefined;
+    await act(async () => {
+      returned = await result.current({ eventId: "event-1" });
+    });
+
+    expect(returned).toEqual(short);
     const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/events/event-1/cancel");
   });

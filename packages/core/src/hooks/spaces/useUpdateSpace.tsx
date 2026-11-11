@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import {
-  SpaceDetailed,
+  SpaceWithPermissions,
   ReadingPermission,
   PostingPermission,
   SpaceVisibility,
@@ -33,7 +33,9 @@ export interface UpdateSpaceProps {
   }>;
 }
 
-function useUpdateSpace(): (props: UpdateSpaceProps) => Promise<SpaceDetailed> {
+function useUpdateSpace(): (
+  props: UpdateSpaceProps,
+) => Promise<SpaceWithPermissions> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { setSpace } = useSpace();
@@ -112,7 +114,7 @@ function useUpdateSpace(): (props: UpdateSpaceProps) => Promise<SpaceDetailed> {
           },
         );
 
-        return response.data as SpaceDetailed;
+        return response.data as SpaceWithPermissions;
       } else {
         // No files - use JSON request (backward compatibility)
         const response = await axios.patch(
@@ -120,8 +122,14 @@ function useUpdateSpace(): (props: UpdateSpaceProps) => Promise<SpaceDetailed> {
           update,
         );
 
-        const updatedSpace = response.data as SpaceDetailed;
-        setSpace?.(updatedSpace);
+        const updatedSpace = response.data as SpaceWithPermissions;
+        // The response carries the caller's server permissions but not
+        // `parentSpace` / `childSpaces`, so merge it onto the provider's space.
+        setSpace?.((prev) =>
+          prev && prev.id === updatedSpace.id
+            ? { ...prev, ...updatedSpace }
+            : prev,
+        );
         return updatedSpace;
       }
     },

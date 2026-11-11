@@ -6,6 +6,13 @@ export interface SetRsvpProps {
   status: RsvpStatus;
 }
 
+/**
+ * Sets or changes the caller's RSVP. Refused with 404 `event/not-found` when
+ * they can't see the event, 403 `space/posting-not-allowed` when they can but
+ * are banned in its space or a space above it, and 403 `event/not-invited` on
+ * an `invite` event they see only as an admin or moderator of its space,
+ * without an invite.
+ */
 export async function setRsvp(
   client: SublayHttpClient,
   data: SetRsvpProps

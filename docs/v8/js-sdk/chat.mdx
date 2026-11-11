@@ -154,8 +154,8 @@ const conversation = await sublay.chat.updateConversation({
   File ID for the conversation avatar, or `null` to clear it.
 </ParamField>
 
-<ParamField body="postingPermission" type='"members" | "admins"'>
-  Space conversations only: who may post.
+<ParamField body="postingPermission" type='"members" | "team"'>
+  Space conversations only: who may post — any active member (`"members"`) or only the space's active admins and moderators (`"team"`).
 </ParamField>
 
 **Returns** — `Promise<Conversation>`

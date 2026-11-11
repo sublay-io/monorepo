@@ -9,12 +9,38 @@ import useSetRsvp from "./useSetRsvp";
 import useWithdrawRsvp from "./useWithdrawRsvp";
 
 import {
+  CancelEventResponse,
   Event,
   EventInclude,
   EventIncludeParam,
   RsvpStatus,
+  WithdrawRsvpResponse,
 } from "../../interfaces/models/Event";
 import { handleError } from "../../utils/handleError";
+
+// A short body (`{ id, status }`, `{ id, userRsvp }`) answers a caller who
+// can no longer see the event; a full event always carries its `shortId`.
+function isFullEvent(
+  body: Event | CancelEventResponse | WithdrawRsvpResponse
+): body is Event {
+  return "shortId" in body;
+}
+
+// Mutation responses carry only `user` and `userRsvp` of the includes, so
+// they're merged onto the current event rather than replacing it: the
+// `space` / `files` the hook fetched stay, and so do the owner's
+// `avatarFile` / `bannerFile` (`user` is merged one level deep).
+function mergeEventResponse(
+  current: Event | null | undefined,
+  response: Event
+): Event {
+  if (!current || current.id !== response.id) return response;
+  const merged: Event = { ...current, ...response };
+  if (current.user && response.user) {
+    merged.user = { ...current.user, ...response.user };
+  }
+  return merged;
+}
 
 export type UseEventDataProps =
   | {
@@ -35,9 +61,9 @@ export interface UseEventDataValues {
     props: Pick<UpdateEventProps, "update">
   ): Promise<Event | undefined>;
   deleteEvent: () => Promise<void>;
-  cancelEvent: () => Promise<Event | undefined>;
+  cancelEvent: () => Promise<CancelEventResponse | undefined>;
   setRsvp: (status: RsvpStatus) => Promise<Event | undefined>;
-  withdrawRsvp: () => Promise<Event | undefined>;
+  withdrawRsvp: () => Promise<WithdrawRsvpResponse | undefined>;
 }
 
 function useEventData(props: UseEventDataProps): UseEventDataValues {
@@ -52,6 +78,10 @@ function useEventData(props: UseEventDataProps): UseEventDataValues {
 
   // Cache fetched events keyed by id.
   const eventCache = useRef<Record<string, Event>>({});
+  // Ids of events deleted here, or answered with a short body (the caller
+  // can no longer see them). The fetch effect shows `null` for them instead of
+  // refilling them from the cache or the server.
+  const goneIds = useRef<Set<string>>(new Set());
 
   const fetchEvent = useFetchEvent();
   const updateEvent = useUpdateEvent();
@@ -60,70 +90,101 @@ function useEventData(props: UseEventDataProps): UseEventDataValues {
   const setRsvp = useSetRsvp();
   const withdrawRsvp = useWithdrawRsvp();
 
+  // Merge a full-event response onto the current state and keep the cache in
+  // step, so switching away and back shows it.
+  const applyEvent = useCallback(
+    (response: Event) => {
+      const merged = mergeEventResponse(event, response);
+      eventCache.current[merged.id] = merged;
+      setEvent(merged);
+    },
+    [event]
+  );
+
+  // The event is gone for this caller (deleted, or no longer visible).
+  const markGone = useCallback((id: string) => {
+    delete eventCache.current[id];
+    goneIds.current.add(id);
+    setEvent(null);
+  }, []);
+
   const handleUpdateEvent = useCallback(
     async ({ update }: Pick<UpdateEventProps, "update">) => {
       if (!event) return;
       try {
         const newEvent = await updateEvent({ eventId: event.id, update });
-        if (newEvent) setEvent(newEvent);
+        if (newEvent) applyEvent(newEvent);
         return newEvent;
       } catch (err) {
         handleError(err, "Failed to update event");
       }
     },
-    [event, updateEvent]
+    [event, updateEvent, applyEvent]
   );
 
   const handleDeleteEvent = useCallback(async () => {
     if (!event) return;
     try {
       await deleteEvent({ eventId: event.id });
-      setEvent(undefined);
+      markGone(event.id);
     } catch (err) {
       handleError(err, "Failed to delete event");
     }
-  }, [event, deleteEvent]);
+  }, [event, deleteEvent, markGone]);
 
   const handleCancelEvent = useCallback(async () => {
     if (!event) return;
     try {
-      const newEvent = await cancelEvent({ eventId: event.id });
-      if (newEvent) setEvent(newEvent);
-      return newEvent;
+      const response = await cancelEvent({ eventId: event.id });
+      if (response) {
+        if (isFullEvent(response)) applyEvent(response);
+        else markGone(event.id);
+      }
+      return response;
     } catch (err) {
       handleError(err, "Failed to cancel event");
     }
-  }, [event, cancelEvent]);
+  }, [event, cancelEvent, applyEvent, markGone]);
 
   const handleSetRsvp = useCallback(
     async (status: RsvpStatus) => {
       if (!event) return;
       try {
         const newEvent = await setRsvp({ eventId: event.id, status });
-        if (newEvent) setEvent(newEvent);
+        if (newEvent) applyEvent(newEvent);
         return newEvent;
       } catch (err) {
         handleError(err, "Failed to set RSVP");
       }
     },
-    [event, setRsvp]
+    [event, setRsvp, applyEvent]
   );
 
   const handleWithdrawRsvp = useCallback(async () => {
     if (!event) return;
     try {
-      const newEvent = await withdrawRsvp({ eventId: event.id });
-      if (newEvent) setEvent(newEvent);
-      return newEvent;
+      const response = await withdrawRsvp({ eventId: event.id });
+      if (response) {
+        if (isFullEvent(response)) applyEvent(response);
+        else markGone(event.id);
+      }
+      return response;
     } catch (err) {
       handleError(err, "Failed to withdraw RSVP");
     }
-  }, [event, withdrawRsvp]);
+  }, [event, withdrawRsvp, applyEvent, markGone]);
 
   useEffect(() => {
     const handleFetchEvent = async () => {
       if (!eventId) return;
       if (event && event.id === eventId) return;
+
+      // Gone (deleted or no longer visible): show nothing, never a refetch or
+      // the previous id's event.
+      if (goneIds.current.has(eventId)) {
+        if (event !== null) setEvent(null);
+        return;
+      }
 
       if (eventCache.current[eventId]) {
         setEvent(eventCache.current[eventId]);

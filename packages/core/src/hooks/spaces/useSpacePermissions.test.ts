@@ -18,45 +18,62 @@ function makePermissions(overrides: Partial<SpaceMemberPermissions> = {}): Space
 }
 
 describe("useSpacePermissions", () => {
-  it("derives non-member defaults from the space's open posting/reading permissions when there are no memberPermissions", () => {
-    const { result } = renderHook(() =>
+  it("allows nothing when there are no memberPermissions, whatever the space's settings", () => {
+    const allFalse = {
+      isMember: false,
+      isAdmin: false,
+      isModerator: false,
+      canPost: false,
+      canModerate: false,
+      canRead: false,
+      isPending: false,
+      isBanned: false,
+    };
+
+    const { result: nullResult } = renderHook(() =>
       useSpacePermissions({
         memberPermissions: null,
         postingPermission: "anyone",
         readingPermission: "anyone",
       }),
     );
+    expect(nullResult.current).toEqual(allFalse);
 
-    expect(result.current).toEqual({
-      isMember: false,
-      isAdmin: false,
-      isModerator: false,
-      canPost: true,
-      canModerate: false,
-      canRead: true,
-      isPending: false,
-      isBanned: false,
-    });
-  });
-
-  it("denies posting/reading for a non-member when the space restricts to members", () => {
-    const { result } = renderHook(() =>
+    const { result: undefinedResult } = renderHook(() =>
       useSpacePermissions({
         memberPermissions: undefined,
-        postingPermission: "members",
-        readingPermission: "members",
+        postingPermission: "anyone",
+      }),
+    );
+    expect(undefinedResult.current).toEqual(allFalse);
+  });
+
+  it("follows the server for a non-member, not the space's settings", () => {
+    // An open space whose server answer still denies posting (e.g. a banned
+    // ancestor, or reading inherited from a members-only parent).
+    const { result } = renderHook(() =>
+      useSpacePermissions({
+        memberPermissions: makePermissions({
+          isMember: false,
+          status: null,
+          canPost: false,
+          canRead: false,
+        }),
+        postingPermission: "anyone",
+        readingPermission: "anyone",
       }),
     );
 
     expect(result.current.canPost).toBe(false);
     expect(result.current.canRead).toBe(false);
+    expect(result.current.isMember).toBe(false);
   });
 
   it("passes server-computed booleans through directly when memberPermissions is present", () => {
     const { result } = renderHook(() =>
       useSpacePermissions({
         memberPermissions: makePermissions({ isAdmin: true, isModerator: true, canModerate: true }),
-        postingPermission: "admins",
+        postingPermission: "team",
       }),
     );
 

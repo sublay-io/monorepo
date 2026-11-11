@@ -36,7 +36,7 @@ function MembershipBadge({ spaceId }: { spaceId: string }) {
 </ResponseField>
 
 <ResponseField name="role" type='"admin" | "moderator" | "member" | null'>
-  The user's role. `null` if not a member.
+  The user's role. `null` unless they are an active member.
 </ResponseField>
 
 <ResponseField name="status" type='"pending" | "active" | "banned" | "rejected" | null'>
@@ -44,9 +44,9 @@ function MembershipBadge({ spaceId }: { spaceId: string }) {
 </ResponseField>
 
 <ResponseField name="joinedAt" type="Date | null">
-  When the membership was created. `null` if not a member.
+  When the membership was created. `null` unless they are an active member.
 </ResponseField>
 
 <ResponseField name="permissions" type="object">
-  Resolved permissions: `canPost`, `canModerate`, `canRead`, `isAdmin`, `isModerator`.
+  Resolved permissions: `canPost`, `canModerate`, `canRead`, `isAdmin`, `isModerator`, from the same calculation as a fetched space's `memberPermissions` (see [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated)). Present for a user with no membership too.
 </ResponseField>

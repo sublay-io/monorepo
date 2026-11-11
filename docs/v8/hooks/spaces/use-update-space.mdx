@@ -50,8 +50,8 @@ function SpaceSettings({ spaceId }: { spaceId: string }) {
     <ParamField path="readingPermission" type='"anyone" | "members"'>
       Updated reading permission.
     </ParamField>
-    <ParamField path="postingPermission" type='"anyone" | "members" | "admins"'>
-      Updated posting permission.
+    <ParamField path="postingPermission" type='"anyone" | "members" | "team"'>
+      Updated posting permission: `"anyone"`, `"members"` (active members), or `"team"` (the space's active admins and moderators).
     </ParamField>
     <ParamField path="visibility" type='"public" | "unlisted" | "private"'>
       Updated visibility: who can find and see the space (and the spaces under it). Independent of `readingPermission`. See [Space visibility](/v8/data-models/space#visibility).
@@ -76,4 +76,4 @@ function SpaceSettings({ spaceId }: { spaceId: string }) {
 
 ## Returns
 
-Returns the updated [SpaceDetailed](/v8/data-models/space) object.
+Returns the updated [Space](/v8/data-models/space) object plus `memberPermissions`: what the user may do in the space after the update (see [SpaceMemberPermissions](/v8/data-models/space#spacememberpermissions)). It carries no `parentSpace` or `childSpaces`. Inside a `SpaceProvider` for the same space, the provider's space takes the update and the new `memberPermissions`, keeping its hierarchy.

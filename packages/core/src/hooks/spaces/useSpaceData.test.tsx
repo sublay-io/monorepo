@@ -1,7 +1,12 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeSpaceDetailed } from "../../test-utils";
+import {
+  renderHookWithAxios,
+  resetAxiosMocks,
+  makeSpaceDetailed,
+  makeMemberPermissions,
+} from "../../test-utils";
 import useSpaceData from "./useSpaceData";
 
 afterEach(() => {
@@ -97,8 +102,8 @@ describe("useSpaceData", () => {
     expect(result.current.error).toBe("Failed to fetch space");
   });
 
-  it("joins the space and optimistically updates membership/member count", async () => {
-    const space = makeSpaceDetailed({ id: "space-1", membersCount: 5, memberPermissions: null });
+  it("joins the space and takes the server's permissions from the join response", async () => {
+    const space = makeSpaceDetailed({ id: "space-1", membersCount: 5 });
 
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useSpaceData({ space }),
@@ -106,9 +111,17 @@ describe("useSpaceData", () => {
     );
     await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
 
+    // An active member who still can't post (e.g. a "team" space): the hook
+    // must not guess `canPost` from the membership status.
+    const memberPermissions = makeMemberPermissions({
+      isMember: true,
+      status: "active",
+      canPost: false,
+    });
     axiosPrivate.mockResponse("post", {
       message: "Joined",
       membership: { id: "membership-1", spaceId: "space-1", userId: "user-1", role: "member", status: "active", joinedAt: "2024-01-01T00:00:00.000Z" },
+      memberPermissions,
     });
 
     await act(async () => {
@@ -116,13 +129,15 @@ describe("useSpaceData", () => {
     });
 
     expect(result.current.space?.membersCount).toBe(6);
+    expect(result.current.space?.memberPermissions).toEqual(memberPermissions);
     expect(result.current.isMember).toBe(true);
+    expect(result.current.canPost).toBe(false);
 
     const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/spaces/space-1/join");
   });
 
-  it("leaves the space and clears membership/decrements member count", async () => {
+  it("leaves the space and takes the server's permissions from the leave response", async () => {
     const space = makeSpaceDetailed({
       id: "space-1",
       membersCount: 5,
@@ -143,21 +158,27 @@ describe("useSpaceData", () => {
     );
     await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
 
-    axiosPrivate.mockResponse("delete", { message: "Left" });
+    // Now a non-member of an open space: still reads, no longer posts.
+    const memberPermissions = makeMemberPermissions({ canRead: true });
+    axiosPrivate.mockResponse("delete", { message: "Left", memberPermissions });
 
     await act(async () => {
       await result.current.leaveSpace();
     });
 
     expect(result.current.space?.membersCount).toBe(4);
+    expect(result.current.space?.memberPermissions).toEqual(memberPermissions);
     expect(result.current.isMember).toBe(false);
+    expect(result.current.canRead).toBe(true);
+    expect(result.current.canPost).toBe(false);
 
     const [call] = axiosPrivate.calls("delete");
     expect(call.url).toBe("/test-project/spaces/space-1/leave");
   });
 
-  it("updates the space via updateSpace", async () => {
-    const space = makeSpaceDetailed({ id: "space-1", name: "Old" });
+  it("updates the space via updateSpace, keeping the server's permissions and the hierarchy", async () => {
+    const parentSpace = { id: "parent-1", shortId: "p1", name: "Parent", slug: null, avatarFileId: null };
+    const space = makeSpaceDetailed({ id: "space-1", name: "Old", parentSpace });
 
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useSpaceData({ space }),
@@ -165,7 +186,17 @@ describe("useSpaceData", () => {
     );
     await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
 
-    const updated = { ...space, name: "New" };
+    // The update response: the space plus memberPermissions, without
+    // parentSpace / childSpaces.
+    const { parentSpace: _p, childSpaces: _c, ...base } = space;
+    const memberPermissions = makeMemberPermissions({
+      isMember: true,
+      isAdmin: true,
+      status: "active",
+      canPost: true,
+      canModerate: true,
+    });
+    const updated = { ...base, name: "New", memberPermissions };
     axiosPrivate.mockResponse("patch", updated);
 
     let returned;
@@ -175,6 +206,60 @@ describe("useSpaceData", () => {
 
     expect(returned).toEqual(updated);
     expect(result.current.space?.name).toBe("New");
+    expect(result.current.space?.memberPermissions).toEqual(memberPermissions);
+    expect(result.current.isAdmin).toBe(true);
+    expect(result.current.parentSpace).toEqual(parentSpace);
+  });
+
+  it("shows the left space's new permissions after switching to another space and back", async () => {
+    const spaceA = makeSpaceDetailed({
+      id: "space-a",
+      membersCount: 5,
+      memberPermissions: makeMemberPermissions({ isMember: true, status: "active", canPost: true }),
+    });
+    const spaceB = makeSpaceDetailed({ id: "space-b" });
+
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: { spaceId: string }) => useSpaceData(props),
+      {
+        initialProps: { spaceId: "space-a" },
+        beforeRender: ({ axiosPrivate }) => {
+          axiosPrivate.mockResponse("get", spaceA);
+          mockBreadcrumb(axiosPrivate);
+        },
+      },
+    );
+    await waitFor(() => expect(result.current.space?.id).toBe("space-a"));
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(2));
+
+    const left = makeMemberPermissions({ canRead: true });
+    axiosPrivate.mockResponse("delete", { message: "Left", memberPermissions: left });
+    await act(async () => {
+      await result.current.leaveSpace();
+    });
+    expect(result.current.isMember).toBe(false);
+
+    axiosPrivate.mockResponse("get", spaceB);
+    mockBreadcrumb(axiosPrivate);
+    mockBreadcrumb(axiosPrivate);
+    rerender({ spaceId: "space-b" });
+    await waitFor(() => expect(result.current.space?.id).toBe("space-b"));
+
+    rerender({ spaceId: "space-a" });
+    await waitFor(() => expect(result.current.space?.id).toBe("space-a"));
+
+    expect(result.current.isMember).toBe(false);
+    expect(result.current.canPost).toBe(false);
+    expect(result.current.space?.memberPermissions).toEqual(left);
+    expect(result.current.space?.membersCount).toBe(4);
+    // Space A came from the cache: one fetch each for A and B.
+    const spaceFetches = axiosPrivate
+      .calls("get")
+      .filter((c) => !c.url.endsWith("/breadcrumb"));
+    expect(spaceFetches.map((c) => c.url)).toEqual([
+      "/test-project/spaces/space-a",
+      "/test-project/spaces/space-b",
+    ]);
   });
 
   it("deletes the space via deleteSpace and clears local state", async () => {

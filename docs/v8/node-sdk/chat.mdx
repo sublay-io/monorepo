@@ -135,7 +135,7 @@ const conversation = await sublay.chat.updateConversation({
   conversationId: "cnv_abc123",
   actingUserId: "usr_abc123",
   name: "Project Falcon (Q3)",
-  postingPermission: "admins",
+  postingPermission: "team",
 });
 ```
 
@@ -144,7 +144,7 @@ const conversation = await sublay.chat.updateConversation({
 <ParamField body="name" type="string" />
 <ParamField body="description" type="string" />
 <ParamField body="avatarFileId" type="string | null">File id for the avatar, or `null` to clear it.</ParamField>
-<ParamField body="postingPermission" type='"members" | "admins"'>Space conversations only.</ParamField>
+<ParamField body="postingPermission" type='"members" | "team"'>Space conversations only: who may post — any active member (`"members"`) or only the space's active admins and moderators (`"team"`).</ParamField>
 
 **Returns** — `Promise<Conversation>`
 

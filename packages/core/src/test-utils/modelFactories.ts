@@ -2,7 +2,11 @@ import type { Comment } from "../interfaces/models/Comment";
 import type { Entity } from "../interfaces/models/Entity";
 import type { Event } from "../interfaces/models/Event";
 import type { Reaction } from "../interfaces/models/Reaction";
-import type { Space, SpaceDetailed } from "../interfaces/models/Space";
+import type {
+  Space,
+  SpaceDetailed,
+  SpaceMemberPermissions,
+} from "../interfaces/models/Space";
 import type { User } from "../interfaces/models/User";
 import type { Conversation, ConversationPreview } from "../interfaces/models/Conversation";
 import type { ConversationMember } from "../interfaces/models/ConversationMember";
@@ -88,10 +92,26 @@ export function makeChatMessage(overrides: Partial<ChatMessage> = {}): ChatMessa
   };
 }
 
+// Defaults to the view of a signed-in non-member of an open space.
+export function makeMemberPermissions(
+  overrides: Partial<SpaceMemberPermissions> = {}
+): SpaceMemberPermissions {
+  return {
+    isAdmin: false,
+    isModerator: false,
+    isMember: false,
+    status: null,
+    canPost: false,
+    canModerate: false,
+    canRead: true,
+    ...overrides,
+  };
+}
+
 export function makeSpaceDetailed(overrides: Partial<SpaceDetailed> = {}): SpaceDetailed {
   return {
     ...makeSpace(),
-    memberPermissions: null,
+    memberPermissions: makeMemberPermissions(),
     parentSpace: null,
     childSpaces: [],
     ...overrides,

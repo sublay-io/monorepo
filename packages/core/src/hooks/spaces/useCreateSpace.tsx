@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import {
-  Space,
+  SpaceWithPermissions,
   ReadingPermission,
   PostingPermission,
   SpaceVisibility,
@@ -30,7 +30,9 @@ export interface CreateSpaceProps {
   parentSpaceId?: string | null;
 }
 
-function useCreateSpace(): (props: CreateSpaceProps) => Promise<Space> {
+function useCreateSpace(): (
+  props: CreateSpaceProps
+) => Promise<SpaceWithPermissions> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -96,7 +98,7 @@ function useCreateSpace(): (props: CreateSpaceProps) => Promise<Space> {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
-        return response.data as Space;
+        return response.data as SpaceWithPermissions;
       } else {
         // No files - use JSON request (backward compatibility)
         const response = await axios.post(`/${projectId}/spaces`, {
@@ -112,7 +114,7 @@ function useCreateSpace(): (props: CreateSpaceProps) => Promise<Space> {
           parentSpaceId: props.parentSpaceId,
         });
 
-        return response.data as Space;
+        return response.data as SpaceWithPermissions;
       }
     },
     [projectId, axios]

@@ -1,12 +1,12 @@
 ---
 title: "useDeleteEvent"
-description: "Delete an event and clean up its RSVPs and invites (host-only)"
+description: "Delete an event and clean up its RSVPs and invites (owner or the space's admins and moderators)"
 icon: "plug"
 ---
 
 ## Overview
 
-`useDeleteEvent` returns a callable that deletes an event. **Host-only.** The event's RSVPs and invites are cleaned up; whether the event is soft- or hard-deleted (and whether its files are preserved) follows the project's `eventDeletion` settings.
+`useDeleteEvent` returns a callable that deletes an event. Allowed for the same users as [cancelling](/v8/hooks/events/use-cancel-event): the event's [owner](/v8/data-models/event#owner-and-hosts) (also when they are no longer an active member of its space) and the active admins and moderators of its space; when the owner's account was deleted, any of its hosts while an active member of the event's space and not banned in it or a space above it (`403 event/not-space-member` otherwise). Other hosts of an event that has an owner get `403 event/forbidden`. The event's RSVPs and invites are cleaned up; whether the event is soft- or hard-deleted (and whether its files are preserved) follows the project's `eventDeletion` settings.
 
 ## Usage Example
 

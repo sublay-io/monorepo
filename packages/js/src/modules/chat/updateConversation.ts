@@ -8,7 +8,7 @@ export interface UpdateConversationProps {
   /** File id for the conversation avatar, or null to clear it. */
   avatarFileId?: string | null;
   /** Space conversations only: who may post. */
-  postingPermission?: "members" | "admins";
+  postingPermission?: "members" | "team";
 }
 
 export async function updateConversation(

@@ -35,6 +35,6 @@ function SpacePage({ slug }: { slug: string }) {
 
 ## Returns
 
-Returns a [SpaceDetailed](/v8/data-models/space) object.
+Returns a [SpaceDetailed](/v8/data-models/space) object, which includes `memberPermissions`, `parentSpace`, and `childSpaces` in addition to all base space fields. `memberPermissions` is always present and reports what the current user may do in the space, also when they have no membership (`isMember: false`, `status: null`); a signed-out user gets the anonymous view. See [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated).
 
 For most use cases, prefer [`SpaceProvider slug`](/v8/sdk/spaces/provider-and-hook) prop over calling this hook directly.

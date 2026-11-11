@@ -8,7 +8,7 @@ export interface UpdateConversationParams {
   name?: string;
   description?: string;
   avatarFileId?: string | null;
-  postingPermission?: "members" | "admins";
+  postingPermission?: "members" | "team";
 }
 
 function useUpdateConversation(): (

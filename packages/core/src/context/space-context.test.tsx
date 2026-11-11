@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { describe, it, expect, afterEach } from "vitest";
 import { render, renderHook, act, waitFor } from "@testing-library/react";
 
-import { resetAxiosMocks, makeSpaceDetailed } from "../test-utils";
+import { resetAxiosMocks, makeSpaceDetailed, makeMemberPermissions } from "../test-utils";
 import { makeProvidersWrapper } from "./testHelpers";
 import { SpaceProvider, SpaceContext } from "./space-context";
 
@@ -32,7 +32,7 @@ describe("SpaceProvider", () => {
 
     expect(result.current.space).toEqual(space);
     expect(result.current.isMember).toBe(false);
-    expect(result.current.canPost).toBe(true);
+    expect(result.current.canPost).toBe(false);
     expect(result.current.canRead).toBe(true);
 
     await waitFor(() => expect(result.current.breadcrumb).toEqual([]));
@@ -107,6 +107,7 @@ describe("SpaceProvider", () => {
         status: "active",
         joinedAt: "2024-01-01T00:00:00.000Z",
       },
+      memberPermissions: makeMemberPermissions({ isMember: true, status: "active", canPost: true }),
     });
 
     await act(async () => {

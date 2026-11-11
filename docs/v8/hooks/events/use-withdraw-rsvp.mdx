@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useWithdrawRsvp` returns a callable that removes the logged-in user's RSVP. The RSVP row is deleted and the matching count decremented. It is idempotent — withdrawing with no RSVP succeeds and changes nothing.
+`useWithdrawRsvp` returns a callable that removes the logged-in user's RSVP. The RSVP row is deleted and the matching count decremented. The user can always withdraw their own RSVP, also from an event they can no longer [see](/v8/data-models/event#visibility) (for example after leaving its space). Withdrawing with no RSVP succeeds and changes nothing if they can see the event, and answers `404` if they can't.
 
 ## Usage Example
 
@@ -25,7 +25,7 @@ function WithdrawButton({ eventId }: { eventId: string }) {
 
 ## Returns
 
-Returns a `Promise<Event>` — the [Event](/v8/data-models/event) with refreshed `rsvpCounts`.
+Returns a `Promise<WithdrawRsvpResponse>`: the [Event](/v8/data-models/event) with refreshed `rsvpCounts`, or, when the logged-in user can no longer see the event, only `{ id, userRsvp: null }`.
 
 ## See Also
 

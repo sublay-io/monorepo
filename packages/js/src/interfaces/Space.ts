@@ -2,7 +2,8 @@ import { PaginatedResponse } from "./IPaginatedResponse";
 import { File } from "./File";
 
 export type ReadingPermission = "anyone" | "members";
-export type PostingPermission = "anyone" | "members" | "admins";
+// "team" = the space's active admins and moderators.
+export type PostingPermission = "anyone" | "members" | "team";
 export type SpaceVisibility = "public" | "unlisted" | "private";
 
 export type SpaceMemberRole = "admin" | "moderator" | "member";
@@ -60,9 +61,19 @@ export interface Space {
   bannerFile?: File;
 }
 
+// Returned from create and update — the space plus the caller's permissions in it
+export interface SpaceWithPermissions extends Space {
+  /**
+   * What the viewer may do in the space, from the same calculation the
+   * server's routes enforce. Always present. It describes a viewer, not what
+   * an app backend may write: signed out, or a service key naming no user,
+   * gets the anonymous view.
+   */
+  memberPermissions: SpaceMemberPermissions;
+}
+
 // Returned from single-space fetch endpoints — extends Space with extra context
-export interface SpaceDetailed extends Space {
-  memberPermissions: SpaceMemberPermissions | null;
+export interface SpaceDetailed extends SpaceWithPermissions {
   parentSpace: SpacePreview | null;
   childSpaces: SpacePreview[];
 }
@@ -89,10 +100,14 @@ export interface JoinSpaceResponse {
     status: "pending" | "active";
     joinedAt: string;
   };
+  /** The joiner's permissions in the space after joining. */
+  memberPermissions: SpaceMemberPermissions;
 }
 
 export interface LeaveSpaceResponse {
   message: string;
+  /** The caller's permissions in the space after leaving, now as a non-member. */
+  memberPermissions: SpaceMemberPermissions;
 }
 
 export interface UpdateMemberRoleResponse {

@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { Space, ReadingPermission, PostingPermission, SpaceVisibility } from "../../interfaces/Space";
+import { SpaceWithPermissions, ReadingPermission, PostingPermission, SpaceVisibility } from "../../interfaces/Space";
 import { ImageOptions } from "../../interfaces/ImageProcessing";
 import { appendField, appendFields, appendFile } from "../../core/multipart";
 
@@ -33,7 +33,7 @@ export interface CreateSpaceProps {
 export async function createSpace(
   client: SublayHttpClient,
   data: CreateSpaceProps
-): Promise<Space> {
+): Promise<SpaceWithPermissions> {
   const { avatarFile, bannerFile, ...body } = data;
 
   if (avatarFile || bannerFile) {
@@ -54,13 +54,13 @@ export async function createSpace(
 
     appendFields(formData, body);
 
-    const response = await client.projectInstance.post<Space>(
+    const response = await client.projectInstance.post<SpaceWithPermissions>(
       "/spaces",
       formData
     );
     return response.data;
   }
 
-  const response = await client.projectInstance.post<Space>("/spaces", body);
+  const response = await client.projectInstance.post<SpaceWithPermissions>("/spaces", body);
   return response.data;
 }

@@ -9,7 +9,11 @@ export interface FetchInviteesProps {
 }
 
 /**
- * Host-only invitee (guest) list. Non-hosts get 403.
+ * Invitee (guest) list. Open to the event's hosts — on an event in a space,
+ * while they are active members of it and not banned in it or a space above
+ * it (403 `event/not-space-member` otherwise) — and to the active admins and
+ * moderators of its space. Anyone else who can see the event gets 403
+ * `event/forbidden`.
  */
 export async function fetchInvitees(
   client: SublayHttpClient,

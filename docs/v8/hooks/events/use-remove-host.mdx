@@ -1,12 +1,16 @@
 ---
 title: "useRemoveHost"
-description: "Revoke a user's host privileges on an event (host-only)"
+description: "Remove a host from an event (owner-only), or step down as host"
 icon: "plug"
 ---
 
 ## Overview
 
-`useRemoveHost` returns a callable that removes a user from an event's `hostIds`. **Host-only.** Rejected with `event/last-host` (409) if the removal would leave the event with no hosts. It sends `DELETE /events/:eventId/hosts/:userId`, with the host in the path and no body.
+`useRemoveHost` returns a callable that removes a user from an event's `hostIds`. It sends `DELETE /events/:eventId/hosts/:userId`, with the host in the path and no body.
+
+- **Removing another host** is **owner-only**: the logged-in user must be the event's [owner](/v8/data-models/event#owner-and-hosts), and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member` otherwise). Other hosts get `403 event/forbidden`.
+- **Stepping down** (`userId` is the logged-in user): any host other than the owner may step down, active member of the event's space or not. The owner is always one of the event's hosts and can't step down or be removed (`409 event/owner-is-host`).
+- On an event whose owner's account was deleted, nobody can remove another host, and its last remaining host can't step down (`409 event/last-host`); they can [cancel](/v8/hooks/events/use-cancel-event) the event instead.
 
 ## Usage Example
 
@@ -26,11 +30,11 @@ function RemoveCoHost({ eventId }: { eventId: string }) {
 ## Parameters
 
 <ParamField path="eventId" type="string" required>The event ID.</ParamField>
-<ParamField path="userId" type="string" required>The host to remove.</ParamField>
+<ParamField path="userId" type="string" required>The host to remove, or the logged-in user to step down.</ParamField>
 
 ## Returns
 
-Returns a `Promise<Event>` — the [Event](/v8/data-models/event) with the new `hostIds`.
+Returns a `Promise<RemoveHostResponse>`: the [Event](/v8/data-models/event) with the new `hostIds`, or, after stepping down from an event the logged-in user can no longer see, only `{ id }`.
 
 ## See Also
 

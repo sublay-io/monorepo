@@ -8,7 +8,7 @@ icon: "plug"
 
 `useLeaveSpace` returns a callable function for leaving a space. The user's membership record is removed.
 
-<Note>When using `SpaceProvider`, call `leaveSpace` from `useSpace` — it handles optimistic state updates automatically.</Note>
+<Note>When using `SpaceProvider`, call `leaveSpace` from `useSpace` — it updates the space's member count and takes `memberPermissions` from the response.</Note>
 
 ## Usage Example
 
@@ -36,4 +36,8 @@ function LeaveButton({ spaceId }: { spaceId: string }) {
 
 <ResponseField name="message" type="string">
   Confirmation message.
+</ResponseField>
+
+<ResponseField name="memberPermissions" type="SpaceMemberPermissions">
+  What the user may still do in the space, now as a non-member (`isMember: false`, `status: null`), from the server's calculation (see [SpaceMemberPermissions](/v8/data-models/space#spacememberpermissions)).
 </ResponseField>

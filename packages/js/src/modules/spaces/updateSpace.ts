@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { Space, ReadingPermission, PostingPermission, SpaceVisibility } from "../../interfaces/Space";
+import { SpaceWithPermissions, ReadingPermission, PostingPermission, SpaceVisibility } from "../../interfaces/Space";
 import { appendField, appendFields, appendFile } from "../../core/multipart";
 import type { SpaceImageUpload } from "./createSpace";
 
@@ -25,7 +25,7 @@ export interface UpdateSpaceProps {
 export async function updateSpace(
   client: SublayHttpClient,
   data: UpdateSpaceProps
-): Promise<Space> {
+): Promise<SpaceWithPermissions> {
   const { spaceId, avatarFile, bannerFile, ...body } = data;
   const path = `/spaces/${spaceId}`;
 
@@ -43,10 +43,10 @@ export async function updateSpace(
 
     appendFields(formData, body);
 
-    const response = await client.projectInstance.patch<Space>(path, formData);
+    const response = await client.projectInstance.patch<SpaceWithPermissions>(path, formData);
     return response.data;
   }
 
-  const response = await client.projectInstance.patch<Space>(path, body);
+  const response = await client.projectInstance.patch<SpaceWithPermissions>(path, body);
   return response.data;
 }

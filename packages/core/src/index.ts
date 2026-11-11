@@ -815,6 +815,9 @@ export type {
   Event,
   EventRsvp,
   EventInvite,
+  CancelEventResponse,
+  WithdrawRsvpResponse,
+  RemoveHostResponse,
   EventType,
   EventVisibility,
   EventStatus,
@@ -866,6 +869,7 @@ export type {
 export type {
   Space,
   SpaceDetailed,
+  SpaceWithPermissions,
   SpacePreview,
   SpaceMemberPermissions,
   ReadingPermission,

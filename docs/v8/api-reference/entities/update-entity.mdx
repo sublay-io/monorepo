@@ -12,7 +12,7 @@ Updates the fields of an existing entity. Only the fields you include in the req
 
 **Authentication required.**
 
-Editing an entity in a space is posting there, so the author must still be allowed to post in it, by the same rules as [creating](/v8/api-reference/entities/create-entity) (see [Who can post and take part](/v8/data-models/space#who-can-post-and-take-part)). An author who can no longer read the space's content (they left a `"members"` space, or were banned in it) gets `404 entity/not-found`. An author who can still read it but may not post — banned in the space or a space above it, or left out by its `postingPermission` (for example after it changed to `"team"`) — gets `403 space/posting-not-allowed`. Deleting stays allowed. App-owned entities, edited by a service key naming nobody, aren't checked.
+Editing an entity in a space is posting there, so the author must still be allowed to post in it, by the same rules as [creating](/v8/api-reference/entities/create-entity) (see [Who can post and take part](/v8/data-models/space#who-can-post-and-take-part)). An author who can no longer read the space's content (they left a space whose `readingPermission` is `"members"`, or were banned in one) gets `404 entity/not-found`. An author who can still read it but may not post — banned in the space or a space above it, or left out by its `postingPermission` (for example after it changed to `"team"`) — gets `403 space/posting-not-allowed`. Deleting stays allowed. App-owned entities, edited by a service key naming nobody, aren't checked.
 
 Anyone other than the author gets `404 entity/not-found` for an entity in a space they can't read, the same as a missing entity, and `403` otherwise.
 

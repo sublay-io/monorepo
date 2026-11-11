@@ -253,7 +253,7 @@ const event = await sublay.events.removeHost({
 
 ### addInvite
 
-Invites a user to the event. Host-only: the owner or a user in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member`); the space's admins and moderators can't (`403 event/forbidden`). The `userId` is the **target** invitee. Re-inviting someone already invited is a no-op. For an event in a space the invitee must be able to read it and not be banned in it or a space above it, and, when the space is private or members-only (or sits under such a space) or the event is `members`-only, be an active member of the event's space itself; one `409 event/invitee-not-invitable` covers every case.
+Invites a user to the event. Host-only: the owner or a user in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member`); the space's admins and moderators can't (`403 event/forbidden`). The `userId` is the **target** invitee. Re-inviting someone already invited who can still be invited is a no-op; one who no longer qualifies gets the same `409` and keeps their invite. For an event in a space the invitee must be able to read it and not be banned in it or a space above it, and, when the space is private or members-only (or sits under such a space) or the event is `members`-only, be an active member of the event's space itself; one `409 event/invitee-not-invitable` covers every case.
 
 ```typescript
 const event = await sublay.events.addInvite({
@@ -289,7 +289,7 @@ const event = await sublay.events.removeInvite({
 
 ### fetchInvitees
 
-Invitee (guest) list, open to the event's hosts — for an event in a space, while they are active members of it (otherwise `403 event/not-space-member`) — and to the space's active admins and moderators; anyone else who can see the event gets `403 event/forbidden`. Returns paginated [EventInvite](/v8/data-models/event-invite) records with the invited user populated.
+Invitee (guest) list, open to the event's hosts — for an event in a space, while they are active members of it and not banned in it or a space above it (otherwise `403 event/not-space-member`) — and to the space's active admins and moderators; anyone else who can see the event gets `403 event/forbidden`. Returns paginated [EventInvite](/v8/data-models/event-invite) records with the invited user populated.
 
 ```typescript
 const { data, pagination } = await sublay.events.fetchInvitees({
@@ -309,7 +309,7 @@ const { data, pagination } = await sublay.events.fetchInvitees({
 
 ### fetchEventRsvps
 
-Named RSVP (guest) list. Returns paginated [EventRsvp](/v8/data-models/event-rsvp) records with the user populated. Visible to anyone who can see the event when `guestListVisible` is `true`; when it's `false`, only to hosts who are active members of the event's space (any host, for an event with no space) and the space's active admins and moderators. RSVP counts themselves are public via the event's `rsvpCounts`.
+Named RSVP (guest) list. Returns paginated [EventRsvp](/v8/data-models/event-rsvp) records with the user populated. Visible to anyone who can see the event when `guestListVisible` is `true`; when it's `false`, only to hosts who are active members of the event's space and not banned in it or a space above it (any host, for an event with no space) and the space's active admins and moderators. RSVP counts themselves are public via the event's `rsvpCounts`.
 
 ```typescript
 const { data, pagination } = await sublay.events.fetchEventRsvps({

@@ -48,10 +48,10 @@ function SpaceSettings({ spaceId }: { spaceId: string }) {
       New description. Pass `null` to remove.
     </ParamField>
     <ParamField path="readingPermission" type='"anyone" | "members"'>
-      Updated reading permission.
+      Updated reading permission, for your app to enforce. The v7 API doesn't hide the content inside the space because of it; see [Content inside a space](/v7/data-models/space#content-inside-a-space) and the [v8 rules](/v8/data-models/space#who-can-read-content).
     </ParamField>
     <ParamField path="postingPermission" type='"anyone" | "members" | "admins"'>
-      Updated posting permission.
+      Updated posting permission, for your app to enforce. The v7 API doesn't refuse entities because of it (see [Content inside a space](/v7/data-models/space#content-inside-a-space) and the [v8 rules](/v8/data-models/space#who-can-post-and-take-part)).
     </ParamField>
     <ParamField path="visibility" type='"public" | "unlisted" | "private"'>
       Updated visibility (listing/discoverability). Independent of `readingPermission`. See [Space visibility](/v7/data-models/space#visibility).

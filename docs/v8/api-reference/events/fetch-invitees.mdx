@@ -1,7 +1,7 @@
 ---
 title: "Fetch Invitees"
 api: "GET /v8/:projectId/events/:eventId/invites"
-description: "List an event's invited users (host-only)"
+description: "List an event's invited users (hosts and the space's admins and moderators)"
 ---
 
 Returns a paginated list of [EventInvite](/v8/data-models/event-invite) records, each with the invited `user` populated. Open to the event's hosts — for an event in a space, while they are active members of it and not banned in it or a space above it — and to the space's active admins and moderators. Anyone else who can see the event receives `403`; a missing event, or one the caller can't see and doesn't host, receives `404`. A service key acts as the user it names in `actingUserId`. Results are ordered by `invitedAt` descending.

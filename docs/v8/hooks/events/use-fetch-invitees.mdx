@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchInvitees` returns a callable that fetches the paginated invitee (guest) list for an event. Open to the event's hosts — for an event in a space, while they are active members of it (otherwise `403 event/not-space-member`) — and to the space's active admins and moderators. Anyone else who can see the event receives `403 event/forbidden`, and anyone who can't see it `404`. Each item is an [EventInvite](/v8/data-models/event-invite) with the invited `user` populated.
+`useFetchInvitees` returns a callable that fetches the paginated invitee (guest) list for an event. Open to the event's hosts — for an event in a space, while they are active members of it and not banned in it or a space above it (otherwise `403 event/not-space-member`) — and to the space's active admins and moderators. Anyone else who can see the event receives `403 event/forbidden`, and anyone who can't see it `404`. Each item is an [EventInvite](/v8/data-models/event-invite) with the invited `user` populated.
 
 ## Usage Example
 

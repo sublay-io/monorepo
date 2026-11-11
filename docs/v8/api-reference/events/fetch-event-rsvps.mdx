@@ -9,7 +9,7 @@ Returns a paginated list of [EventRsvp](/v8/data-models/event-rsvp) records, eac
 Authentication is optional. The viewer is the signed-in user, or the user a service key names in `actingUserId`; a service key naming nobody is treated as anonymous, with no bypass. The event is first loaded behind the [visibility predicate](/v8/data-models/event#visibility), so a caller without access to the event gets `404`. The named list itself is then gated:
 
 - **Any viewer** (including anonymous) can see it when the event's `guestListVisible` is `true`.
-- When it's `false`: **hosts** who are active members of the event's space (any host, for an event with no space) and the **space's active admins and moderators** can see it.
+- When it's `false`: **hosts** who are active members of the event's space and not banned in it or a space above it (any host, for an event with no space) and the **space's active admins and moderators** can see it.
 - Otherwise the response is `403`.
 
 Aggregate RSVP **counts** are always public via the event's `rsvpCounts` — this endpoint only governs the per-user list.

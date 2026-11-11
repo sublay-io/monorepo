@@ -33,7 +33,7 @@ When a time field (`startTime`/`endTime`/`timezone`) or a location field (`locat
 <ParamField body="visibility" type="string">`"public"`, `"members"`, or `"invite"`.</ParamField>
 <ParamField body="capacity" type="number">New capacity (positive integer).</ParamField>
 <ParamField body="allowMaybe" type="boolean">Whether `"maybe"` RSVPs are allowed.</ParamField>
-<ParamField body="guestListVisible" type="boolean">Whether everyone who can see the event can view the guest list. When `false`, only hosts who are active members of the event's space and the space's admins and moderators can.</ParamField>
+<ParamField body="guestListVisible" type="boolean">Whether everyone who can see the event can view the guest list. When `false`, only hosts who are active members of the event's space and not banned in it or a space above it and the space's admins and moderators can.</ParamField>
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB.</ParamField>
 
 <ParamField body="removeImageIds" type="string[]">

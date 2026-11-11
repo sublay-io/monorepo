@@ -31,7 +31,7 @@ Events belong to the `events` bundle. They work standalone, but some behaviors d
 | `visibility` | `"public" \| "members" \| "invite"` | Who can see the event. See [Visibility](#visibility) below. Defaults to `"public"`. |
 | `status` | `"active" \| "cancelled"` | Lifecycle status. A cancelled event stays fetchable but rejects new RSVPs. Defaults to `"active"`. |
 | `allowMaybe` | `boolean` | Whether a `"maybe"` RSVP is permitted. Defaults to `true`. |
-| `guestListVisible` | `boolean` | Whether everyone who can see the event can see the named RSVP/guest list (counts are always public). When `false`, the list is visible only to hosts who are active members of the event's space (any host, for an event with no space) and to the space's admins and moderators. Defaults to `true`. |
+| `guestListVisible` | `boolean` | Whether everyone who can see the event can see the named RSVP/guest list (counts are always public). When `false`, the list is visible only to hosts who are active members of the event's space and not banned in it or a space above it (any host, for an event with no space) and to the space's admins and moderators. Defaults to `true`. |
 | `capacity` | `number \| null` | Maximum number of `going` RSVPs. `null` means unlimited. Enforced under a row lock so it can't be oversold. |
 | `hostIds` | `string[]` | UUIDs of the event's hosts. Always includes the owner (`userId`) when the event has one, and always has at least one entry. |
 | `coverImageId` | `string \| null` | File ID of the single cover image. Requires the `files-images` bundle. |

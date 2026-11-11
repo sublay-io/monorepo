@@ -50,7 +50,7 @@ function CreateEvent() {
 <ParamField path="visibility" type='"public" | "members" | "invite"'>Defaults to `"public"`.</ParamField>
 <ParamField path="capacity" type="number">Max `going` RSVPs. Omit for unlimited.</ParamField>
 <ParamField path="allowMaybe" type="boolean">Allow `"maybe"` RSVPs. Defaults to `true`.</ParamField>
-<ParamField path="guestListVisible" type="boolean">Expose the named guest list to everyone who can see the event. When `false`, only hosts who are active members of the event's space and the space's admins and moderators see it. Defaults to `true`.</ParamField>
+<ParamField path="guestListVisible" type="boolean">Expose the named guest list to everyone who can see the event. When `false`, only hosts who are active members of the event's space and not banned in it or a space above it and the space's admins and moderators see it. Defaults to `true`.</ParamField>
 <ParamField path="hostIds" type="string[]">Additional host user IDs (the logged-in user is auto-added). For an event in a space, each must be an active member of it.</ParamField>
 <ParamField path="metadata" type="Record<string, any>">Arbitrary key-value data. Up to 1 MB.</ParamField>
 <ParamField path="cover" type="{ file: File | RNFile; options?: UploadImageOptions }">

@@ -1,7 +1,7 @@
 ---
 title: "Cancel Event"
 api: "POST /v8/:projectId/events/:eventId/cancel"
-description: "Cancel an event without deleting it (host-only)"
+description: "Cancel an event without deleting it (the owner or the space's admins and moderators)"
 ---
 
 Cancels an event by setting its `status` to `"cancelled"`. The event remains fetchable, but new and changed RSVPs are rejected. Allowed for the event's **owner** (also when they are no longer an active member of its space) and for an active admin or moderator of the event's space. Other hosts can't cancel an event that has an owner. When the owner's account was deleted, any of its hosts may cancel it — for an event in a space, only while an active member of that space (an event kept after the `spaces` bundle was uninstalled counts as having no space here). A service key acts as the user it names in `actingUserId`, with that user's powers.

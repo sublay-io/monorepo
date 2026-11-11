@@ -1,7 +1,7 @@
 ---
 title: "Remove Host"
 api: "DELETE /v8/:projectId/events/:eventId/hosts/:userId"
-description: "Revoke a user's host privileges on an event (host-only)"
+description: "Revoke a user's host privileges on an event (owner-only), or step down as host"
 ---
 
 Removes a user from the event's `hostIds`. A service key acts as the user it names in `actingUserId`. The mutation runs under a row-level lock.

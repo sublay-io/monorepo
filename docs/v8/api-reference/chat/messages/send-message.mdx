@@ -138,6 +138,12 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
     { "error": "You are not a member of this conversation.", "code": "chat/not-a-member" }
     ```
   </Accordion>
+  <Accordion title="Team Only — 403">
+    The space chat's `postingPermission` is `"team"` and the caller isn't an active admin or moderator of the space.
+    ```json
+    { "error": "Only space admins and moderators can post in this conversation.", "code": "chat/not-a-member" }
+    ```
+  </Accordion>
   <Accordion title="Banned — 403">
     The caller is an active member of the chat's space but is banned in a space above it. Banned in the space itself answers `403 chat/not-a-member` instead.
     ```json

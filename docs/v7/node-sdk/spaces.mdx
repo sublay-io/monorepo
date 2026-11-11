@@ -40,15 +40,15 @@ const space = await sublay.spaces.createSpace({
 </ParamField>
 
 <ParamField body="readingPermission" type="string">
-  Who can read content: `"anyone"` (default) or `"members"`.
+  Who may read content, for your app to enforce: `"anyone"` (default) or `"members"`. The v7 API reports it in `memberPermissions.canRead` but doesn't hide the content inside the space; see [Content inside a space](/v7/data-models/space#content-inside-a-space) and the [v8 rules](/v8/data-models/space#who-can-read-content).
 </ParamField>
 
 <ParamField body="postingPermission" type="string">
-  Who can post content: `"anyone"`, `"members"` (default), or `"admins"`.
+  Who may post entities, for your app to enforce: `"anyone"`, `"members"` (default), or `"admins"`. The v7 API reports it in `memberPermissions.canPost` but doesn't refuse entities that don't match it; see [Content inside a space](/v7/data-models/space#content-inside-a-space) and the [v8 rules](/v8/data-models/space#who-can-post-and-take-part).
 </ParamField>
 
 <ParamField body="visibility" type="string">
-  Listing/discoverability: `"public"` (default), `"unlisted"`, or `"private"`. Independent of `readingPermission` (which governs content). `"unlisted"` hides the space from discovery and search but keeps it reachable by direct link; `"private"` hides the space, and the spaces under it, from everyone except its active members — it answers `404` like a nonexistent space and can't be joined.
+  Listing/discoverability: `"public"` (default), `"unlisted"`, or `"private"`. Independent of `readingPermission`. `"unlisted"` hides the space from discovery and search but keeps it reachable by direct link; `"private"` hides the space, and the spaces under it, from everyone except its active members — it answers `404` like a nonexistent space and can't be joined. The content inside it stays readable in v7; see [Content inside a space](/v7/data-models/space#content-inside-a-space) and the [v8 rules](/v8/data-models/space#who-can-read-content).
 </ParamField>
 
 <ParamField body="requireJoinApproval" type="boolean">

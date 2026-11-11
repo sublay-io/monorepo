@@ -113,7 +113,7 @@ function ConnectionButton({ userId }: { userId: string }) {
 </ResponseField>
 
 <ResponseField name="removeConnectionSmart" type="() => Promise<void>">
-  Acts on the connection by user ID, whatever its state: withdraws a sent request, declines a received one, or disconnects an accepted connection. Does nothing when status is `"none"` or `"declined-sent"`. After declining a received request it re-reads the status, so `connection` holds the declined record. Useful as a generic "remove" action when the exact state doesn't matter.
+  Acts on the connection by user ID, whatever its state: withdraws a sent request, declines a received one, or disconnects an accepted connection. Does nothing when status is `"none"`, `"declined-sent"` or `"declined-received"`. After declining a received request it re-reads the status, so `connection` holds the declined record. Useful as a generic "remove" action when the exact state doesn't matter.
 </ResponseField>
 
 <ResponseField name="refreshConnectionStatus" type="() => Promise<void>">

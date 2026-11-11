@@ -12,6 +12,8 @@ Publishes a draft entity. After publishing, the entity appears in normal feeds a
 
 **Authentication required.** Only the draft's author may publish it: with their own access token, or with a service key naming them in `actingUserId` — the request then runs exactly as theirs. A draft always has an author here: one without an author, which this API never creates, is answered as not found (`404 entity/not-found`) for every caller.
 
+A draft in a space is checked again at publish, since rights can change after the draft was saved: the author must still be allowed to post in the space (see [Who can post and take part](/v8/data-models/space#who-can-post-and-take-part)). A draft that's refused stays a draft.
+
 ## Path Parameters
 
 <ParamField path="entityId" type="string" required>
@@ -48,6 +50,20 @@ Returns the published [Entity](/v8/data-models/entity) object with `isDraft: fal
   <Accordion title="Unauthorized — 403">
     ```json
     { "error": "Not authorized to publish this draft.", "code": "entity/unauthorized" }
+    ```
+  </Accordion>
+  <Accordion title="Space Not Found — 404">
+    The draft's space is one the author can't see anymore (for example a `private` space they're no longer an active member of). The same body as a space that doesn't exist.
+
+    ```json
+    { "error": "Space not found", "message": "Space with id 4f7c… does not exist or has been deleted", "code": "entity/space-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Posting Not Allowed — 403">
+    The author can see the draft's space but may no longer post in it: they can't read its content, they're banned in it or in a space above it, or its `postingPermission` doesn't include them. One answer for every cause.
+
+    ```json
+    { "error": "You can't post or take part in this space.", "code": "space/posting-not-allowed" }
     ```
   </Accordion>
   <Accordion title="Rejected by Validation Webhook — 400">

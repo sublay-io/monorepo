@@ -10,6 +10,8 @@ Resolved reports (`dismissed` / `actioned`) are closed: a later report of the sa
 
 **Authentication required.** **Rate limit**: 25 requests per 5 minutes.
 
+An entity, or a comment, in a space the reporter can't read (see [who can read content](/v8/data-models/space#who-can-read-content); a comment goes by its entity's space) answers `404 report/target-not-found`, exactly like a target that doesn't exist. A ban doesn't stop a user reporting content they can still read.
+
 ## Body Parameters
 
 <ParamField body="targetId" type="string" required>
@@ -64,7 +66,7 @@ Returns `200 OK` when the user has already reported this target:
     ```json
     { "error": "<targetType> not found", "code": "report/target-not-found" }
     ```
-    The error message reflects the reported type, e.g. `"entity not found"` or `"comment not found"`.
+    The target doesn't exist, or it's an entity or comment in a space the reporter can't read. The error message reflects the reported type, e.g. `"entity not found"` or `"comment not found"`.
   </Accordion>
 
   <Accordion title="Self Report — 400">

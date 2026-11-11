@@ -34,6 +34,10 @@ Updates a comment's content, its metadata, or both. Only the comment's author ma
 
 A comment its author deleted, and a comment a moderator removed, can't be edited: the request returns `404 comment/not-found`. This includes the author of a moderator-removed comment, who still sees it in full.
 
+## Spaces
+
+Editing a comment takes part in its entity's space (see [Who can post and take part](/v8/data-models/space#who-can-post-and-take-part)). The comment's author must still be able to read the space's content — otherwise `404 comment/not-found`, for example after leaving a `"members"` space or being banned in one — and must not be banned in the space or any space above it (`403 space/posting-not-allowed`). The space's `postingPermission` isn't consulted. Deleting the comment stays allowed. Anyone other than the author gets `404 comment/not-found` for a comment in a space they can't read, not a `403`.
+
 ## Blocks
 
 Editing changes content in someone else's space, so when the `moderation` bundle is installed, editing is refused with `404 comment/not-found` when the author of the comment's entity, or the author of the comment it replies to, has blocked the comment's author. Deleting the comment is still allowed.
@@ -72,7 +76,7 @@ Returns the updated [Comment](/v8/data-models/comment) object in full, as the ca
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
-    Returned when the comment doesn't exist, when its author deleted it or a moderator removed it (see [Deleted and removed comments](#deleted-and-removed-comments)), or when a block refuses the edit — including when the caller isn't the comment's author and the author of the comment's entity has blocked them (see [Blocks](#blocks)).
+    Returned when the comment doesn't exist, when its author deleted it or a moderator removed it (see [Deleted and removed comments](#deleted-and-removed-comments)), when it's in a space the caller can't read (see [Spaces](#spaces)), or when a block refuses the edit — including when the caller isn't the comment's author and the author of the comment's entity has blocked them (see [Blocks](#blocks)).
 
     ```json
     { "error": "Comment not found", "code": "comment/not-found" }
@@ -83,6 +87,13 @@ Returns the updated [Comment](/v8/data-models/comment) object in full, as the ca
 
     ```json
     { "error": "You do not have permission to update this comment.", "code": "comment/forbidden" }
+    ```
+  </Accordion>
+  <Accordion title="Posting Not Allowed — 403">
+    The comment's author can read it but is banned in its entity's space or in a space above it. Nothing is written.
+
+    ```json
+    { "error": "You can't post or take part in this space.", "code": "space/posting-not-allowed" }
     ```
   </Accordion>
   <Accordion title="Missing User ID — 400">

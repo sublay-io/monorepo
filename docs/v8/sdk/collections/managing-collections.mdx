@@ -106,6 +106,12 @@ await addToCollection({ entityId: entity.id });
 await removeFromCollection({ entityId: entity.id });
 ```
 
+An entity in a space the user can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) can't be saved: the request fails with `404 entity/not-found`, like a missing entity.
+
+### Entity counts
+
+A collection's `entityCount` counts the entities the user can see in it, by the same rule as the total of its entities list, so the two always match: entities that are deleted, removed by moderation, back in drafts, or in a space the user can no longer read aren't counted or listed, though they stay saved. See [Collection → entityCount](/v8/data-models/collection#entitycount).
+
 ## Checking If an Entity Is Saved
 
 `isEntitySaved` queries whether a specific entity is saved anywhere in the user's collections. Optionally pass a `collectionId` to check a specific folder.

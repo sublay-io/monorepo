@@ -5,6 +5,10 @@ description: "Organize the logged-in user's saved entities into a tree of collec
 
 The `collections` module organizes the logged-in user's saved content. Every user has a single **root collection**, under which they can nest sub-collections and into which they can save entities.
 
+<Note>
+  A collection's `entityCount` counts the entities the user can see in it, by the same rule as the `totalItems` of its entities list, so the two always match: entities that are deleted, removed by moderation, back in drafts, or in a space they can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) aren't counted or listed, though they stay saved. Saving an entity in a space they can't read fails with `404 entity/not-found`. See [Collection → entityCount](/v8/data-models/collection#entitycount).
+</Note>
+
 ---
 
 ### fetchRootCollection

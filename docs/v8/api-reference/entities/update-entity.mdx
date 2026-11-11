@@ -12,6 +12,10 @@ Updates the fields of an existing entity. Only the fields you include in the req
 
 **Authentication required.**
 
+Editing an entity in a space is posting there, so the author must still be allowed to post in it, by the same rules as [creating](/v8/api-reference/entities/create-entity) (see [Who can post and take part](/v8/data-models/space#who-can-post-and-take-part)). An author who can no longer read the space's content (they left a `"members"` space, or were banned in it) gets `404 entity/not-found`. An author who can still read it but may not post — banned in the space or a space above it, or left out by its `postingPermission` (for example after it changed to `"team"`) — gets `403 space/posting-not-allowed`. Deleting stays allowed. App-owned entities, edited by a service key naming nobody, aren't checked.
+
+Anyone other than the author gets `404 entity/not-found` for an entity in a space they can't read, the same as a missing entity, and `403` otherwise.
+
 ## Path Parameters
 
 <ParamField path="entityId" type="string" required>
@@ -69,13 +73,24 @@ Returns the updated [Entity](/v8/data-models/entity) object, populated with the 
 
 <AccordionGroup>
   <Accordion title="Not Found — 404">
+    The entity doesn't exist, or it's in a space the caller can't read (the author included).
+
     ```json
     { "error": "Entity not found.", "code": "entity/not-found" }
     ```
   </Accordion>
   <Accordion title="Unauthorized — 403">
+    The caller isn't the author, and can read the entity.
+
     ```json
     { "error": "Not authorized to update this entity.", "code": "entity/not-authorized" }
+    ```
+  </Accordion>
+  <Accordion title="Posting Not Allowed — 403">
+    The author can read the entity's space but may not post in it anymore: banned in it or a space above it, or its `postingPermission` doesn't include them. One answer for every cause. The entity is unchanged.
+
+    ```json
+    { "error": "You can't post or take part in this space.", "code": "space/posting-not-allowed" }
     ```
   </Accordion>
   <Accordion title="Rejected by Validation Webhook — 400">

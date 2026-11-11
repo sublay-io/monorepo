@@ -12,6 +12,8 @@ Adds a reaction of the specified type to an entity. If the user already has a re
 
 **Authentication required.**
 
+Reacting to an entity in a space takes part in it (see [Who can post and take part](/v8/data-models/space#who-can-post-and-take-part)): the user must be able to read the space's content, and not be banned in it or any space above it. The space's `postingPermission` isn't consulted.
+
 ## Path Parameters
 
 <ParamField path="entityId" type="string" required>
@@ -85,6 +87,13 @@ Returns the updated [Entity](/v8/data-models/entity) object with the new `reacti
 
     ```json
     { "error": "Entity not found.", "code": "entity/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Posting Not Allowed — 403">
+    The user can read the entity but is banned in its space or in a space above it. Nothing is written.
+
+    ```json
+    { "error": "You can't post or take part in this space.", "code": "space/posting-not-allowed" }
     ```
   </Accordion>
 </AccordionGroup>

@@ -73,13 +73,19 @@ Included in `SpaceDetailed.memberPermissions` for a viewer with a membership in 
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `isAdmin` | `boolean` | Whether the user is an admin of this space. |
-| `isModerator` | `boolean` | Whether the user is a moderator of this space. |
+| `isAdmin` | `boolean` | Whether the user is an active admin of this space. |
+| `isModerator` | `boolean` | Whether the user is an active moderator of this space. |
 | `isMember` | `boolean` | Whether the user has an active membership. |
 | `status` | `"pending" \| "active" \| "banned" \| "rejected" \| null` | The user's membership status. |
-| `canPost` | `boolean` | Whether the user can post entities in this space. |
-| `canModerate` | `boolean` | Whether the user can perform moderation actions. |
-| `canRead` | `boolean` | Whether the user can read content in this space. |
+| `canPost` | `boolean` | Whether the user can post entities in this space: they can read it, aren't banned in it or in any space above it, and its `postingPermission` lets them post. |
+| `canModerate` | `boolean` | Whether the user can perform moderation actions (an active admin or moderator of this space). |
+| `canRead` | `boolean` | Whether the user can read content in this space, following the reading rules of the spaces above it. |
+
+### How permissions are calculated
+
+- **`canRead`** — the user can see the space (see [Who sees a space](#who-sees-a-space)), and either is an active member of it, or its `readingPermission` is `"anyone"` and they can read the space above it. A top-level `"anyone"` space can be read by anyone who can see it. Reading is inherited: below a `"members"` space, every space is members-only too, even one set to `"anyone"`. Such a sub-space can be read by active members of the sub-space itself, of the `"members"` space above it, or of any space in between. A pending, banned or rejected user isn't an active member, so they read a space only where `"anyone"` reading reaches it.
+- **`canPost`** — `canRead`, no ban in this space or in any space above it, and the space's `postingPermission`: `"anyone"` lets every user who can read the space post, `"members"` its active members, and `"team"` its active admins and moderators. A ban in a space above counts even when the user has no membership, or a pending one, in this space.
+- **`isMember`, `isAdmin`, `isModerator`, `canModerate`** — come from the user's membership of this space only. An admin or moderator of a space above isn't an admin or moderator here.
 
 ## Visibility
 

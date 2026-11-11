@@ -50,7 +50,7 @@ Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants
 
 Returns `201` with the created [ReputationGrant](/v8/data-models/reputation-grant), written with `sourceType: "user"`.
 
-Both balances move: the sender's bucket and profile total drop by `amount`, the recipient's rise by the same. The recipient is notified (a `reputation-grant` [app notification](/v8/data-models/app-notification)) when they can [read the content](/v8/data-models/space#who-can-read-content) of the grant's space and, for an `entity` or `comment` target, of the space that target is in (a comment goes by its entity's space). A grant or target in no space passes that check. A grant targeting a `message` is broadcast to the conversation as [`message:grant`](/v8/sdk/chat/real-time).
+Both balances move: the sender's bucket and profile total drop by `amount`, the recipient's rise by the same. The recipient is notified (a `reputation-grant` [app notification](/v8/data-models/app-notification)) when they can [read the content](/v8/data-models/space#who-can-read-content) of the grant's space and, for an `entity` or `comment` target, of the space that target is in (a comment goes by its entity's space). A grant or target in no space passes that check. For a `message` target in a space chat, the recipient must also be an active member of the chat's space who can see it. A grant targeting a `message` is broadcast to the conversation as [`message:grant`](/v8/sdk/chat/real-time).
 
 ## Gating and blocks
 

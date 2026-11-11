@@ -83,7 +83,7 @@ The filter runs inside the similarity search, so a heavily filtered query can re
 
 Comments their author deleted are never returned. Comments a moderator removed are never returned either — to anyone, including the removed comment's author and requests made with a service key.
 
-Chat messages come only from conversations the user can read in the chat itself: ones they're an active member of, and, for a conversation they left or were removed or banned from, messages sent before they left. `conversationId` narrows the search; it never widens what the user can read. Messages their author deleted or a moderator removed are never returned. A request with no user (a service key without `actingUserId`) gets no chat messages.
+Chat messages come only from conversations the user can read in the chat itself: ones they're an active member of, and, for a conversation they left or were removed or banned from, messages sent before they left. A space chat counts only while the user is an active member of its space and can see it, so a former member of the space gets none of its messages. `conversationId` narrows the search; it never widens what the user can read. Messages their author deleted or a moderator removed are never returned. A request with no user (a service key without `actingUserId`) gets no chat messages.
 
 Results are also filtered for the user — the signed-in user, or the `actingUserId` a service key sends (with the `moderation` bundle installed):
 

@@ -8,6 +8,8 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 Returns a single [ChatMessage](/v8/data-models/chat-message) by ID, fully populated with `user`, `quotedMessage`, `files`, `reactionCounts`, and `userReactions`. The caller must be a member of the conversation.
 
+In a space chat, the caller must also be an active member of the chat's space and able to see it ([visibility](/v8/data-models/space#visibility)). Anyone else, including a pending, rejected or banned member and someone who left or was removed from the space, gets `403 chat/not-a-member`, as a non-member does, even while they still hold a conversation membership. Deleting their own messages, leaving the conversation and muting it stay allowed: they need the conversation membership and sight of the space, not an active space membership.
+
 ## Path Parameters
 
 <ParamField path="conversationId" type="string" required>

@@ -36,6 +36,12 @@ Roles only apply to `group` conversations.
   For space conversations, posting permissions are controlled by the conversation's `postingPermission` field and the user's `SpaceMember` role — not by `ConversationMember.role`.
 </Note>
 
+## Space conversations
+
+In a `space` conversation, a membership row gives access only while the user is an active member of the space and can see it ([visibility](/v8/data-models/space#visibility)). Everything that returns or writes the chat's content (reading messages, members and reactions, sending, editing, reacting, marking as read, the conversation list, previews and unread counts) answers anyone else as it answers a non-member, even if their row is still `isActive`: a pending, rejected or banned member of the space, and someone who left or was removed from it. A former space member keeps no access to the history from before they left. Deleting their own messages, leaving the conversation and muting it stay allowed: they need the conversation membership and sight of the space, not an active space membership.
+
+Sending, editing and reacting are also refused while the user is banned: banned in the space itself, `403 chat/not-a-member` (the ban ends the space membership and the chat membership); an active member of the space who is banned in a space above it, `403 chat/banned`.
+
 ## Related
 
 - [Conversation](/v8/data-models/conversation) — the conversation this membership belongs to

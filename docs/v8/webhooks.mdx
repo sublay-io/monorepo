@@ -39,7 +39,7 @@ These fire after an operation completes. Your server is notified but the origina
 
 The `notification.created` event is the primary mechanism for bridging Sublay's in-app notification system to push notifications, email, or any other delivery channel your app uses.
 
-The `message.created.complete` event's `data` carries the `message`, its `sender`, the `conversationType`, and who it's for: `recipientIds` lists the conversation's active members who can see the conversation, other than the sender and anyone who had it open over a real-time connection when the message was sent. In a space chat, members who can't see the space ([visibility](/v8/data-models/space#visibility)) aren't included. Muted members are included. `recipientIds` holds at most 500 ids; `totalRecipientCount` is the full count.
+The `message.created.complete` event's `data` carries the `message`, its `sender`, the `conversationType`, and who it's for: `recipientIds` lists the conversation's active members who can see the conversation, other than the sender and anyone who had it open over a real-time connection when the message was sent. In a space chat, `recipientIds` lists only active members of the space who can see it ([visibility](/v8/data-models/space#visibility)), even if someone else still holds an active conversation membership. Muted members are included. `recipientIds` holds at most 500 ids; `totalRecipientCount` is the full count.
 
 The space events' `data` carries the space's fields, `postingPermission` among them: `"anyone"`, `"members"`, or `"team"` (only the space's admins and moderators may post).
 

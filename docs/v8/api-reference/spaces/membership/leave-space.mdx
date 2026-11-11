@@ -24,6 +24,10 @@ Removes the authenticated user's membership from a space and from its child spac
   Confirmation message.
 </ResponseField>
 
+<ResponseField name="memberPermissions" type="SpaceMemberPermissions">
+  What the user may still do in the space, now as a non-member (`isMember: false`, `status: null`), as a [SpaceMemberPermissions](/v8/data-models/space#spacememberpermissions) object.
+</ResponseField>
+
 ## Errors
 
 <AccordionGroup>

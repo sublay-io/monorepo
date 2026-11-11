@@ -60,7 +60,7 @@ Creates a new space. Its creator — the signed-in user, or the user a service k
 
 ## Response
 
-Returns the created [Space](/v8/data-models/space) object with `membersCount`, `childSpacesCount`, and optional file associations.
+Returns the created [Space](/v8/data-models/space) object with `membersCount`, `childSpacesCount`, optional file associations, and `memberPermissions`: what the creator may do in the new space, as a [SpaceMemberPermissions](/v8/data-models/space#spacememberpermissions) object.
 
 ## Error Responses
 

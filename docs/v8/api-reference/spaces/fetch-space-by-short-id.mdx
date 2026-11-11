@@ -8,7 +8,7 @@ Fetches a space using its `shortId`. Returns the same `SpaceDetailed` shape as t
 
 A space the viewer can't see — a private space they aren't an active member of, or a space under one — answers `404 space/not-found`, exactly like one that doesn't exist. `parentSpace` is `null` when the viewer can't see the parent, `childSpaces` lists the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of, and `childSpacesCount` counts exactly those. See [Space visibility](/v8/data-models/space#visibility).
 
-For a viewer with a membership in the space, whatever its status, `memberPermissions` reports what they may do there: `canRead` follows the reading rules of the spaces above it, and `canPost` also needs no ban in the space or above it and a `postingPermission` that lets them post. See [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated).
+`memberPermissions` is always present and reports what the viewer may do there, also for a user with no membership, a signed-out caller and a service key naming nobody (the last two get the anonymous view): `canRead` follows the reading rules of the spaces above it, and `canPost` also needs no ban in the space or above it and a `postingPermission` that lets them post. See [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated).
 
 ## Query Parameters
 

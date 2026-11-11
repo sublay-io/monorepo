@@ -37,6 +37,10 @@ A private space can't be joined and takes no join requests: joining a space the 
   </Expandable>
 </ResponseField>
 
+<ResponseField name="memberPermissions" type="SpaceMemberPermissions">
+  What the user may do in the space now, as a [SpaceMemberPermissions](/v8/data-models/space#spacememberpermissions) object. Returned on both successes: a new membership (`201`) and a rejoin after a declined request (`200`). A request awaiting approval reports `status: "pending"` and `isMember: false`.
+</ResponseField>
+
 ## Error Responses
 
 <AccordionGroup>

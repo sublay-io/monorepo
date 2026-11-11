@@ -17,7 +17,7 @@ Returns a paginated list of space members with embedded user details.
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string">
-  Service key only: the user to list as. The page is exactly what that user's own access token would get (their membership, so a members-only space's list is open to them only as an active member). Leave it out for the anonymous view: a members-only space's list returns `403`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
+  Service key only: the user to list as. The page is exactly what that user's own access token would get (their memberships, so the list of a members-only space, or of a space under one, is open to them only when they can read the space). Leave it out for the anonymous view: such a list returns `403`. A user token always acts as its own user and must not send it, and neither may a request with no credentials (`400 space/acting-user-not-allowed`).
 </ParamField>
 
 <ParamField query="page" type="number">
@@ -62,7 +62,7 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
     ```
   </Accordion>
   <Accordion title="Members Only — 403">
-    The space has `readingPermission: "members"` and the caller is not an active member (no membership, or one that is pending, banned or rejected).
+    The caller can't read the space: it, or a space above it, has `readingPermission: "members"`, and the caller isn't an active member of that members-only space or of a space between it and this one, this one included (no membership, or one that is pending, banned or rejected, doesn't count). See [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated).
     ```json
     { "error": "This space requires membership. You must be a member to view members.", "code": "space/members-access-denied" }
     ```

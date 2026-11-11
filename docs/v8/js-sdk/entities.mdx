@@ -504,7 +504,7 @@ const { reactionType } = await sublay.entities.getUserReaction({
 Checks whether the logged-in user has saved an entity, and in which collections.
 
 ```typescript
-const { saved, collections } = await sublay.entities.isEntitySaved({
+const { isSaved, collections } = await sublay.entities.isEntitySaved({
   entityId: "ent_xyz789",
 });
 ```
@@ -513,4 +513,4 @@ const { saved, collections } = await sublay.entities.isEntitySaved({
   The Sublay entity ID.
 </ParamField>
 
-**Returns** — `Promise<{ saved: boolean; collections: { id: string; name: string }[] }>`
+**Returns** — `Promise<{ isSaved: boolean; collections: { id: string; name: string }[] }>`

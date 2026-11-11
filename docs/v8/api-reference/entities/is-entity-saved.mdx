@@ -22,7 +22,7 @@ Returns whether the specified entity is saved in any collection belonging to the
 
 ## Response
 
-<ResponseField name="saved" type="boolean">
+<ResponseField name="isSaved" type="boolean">
   `true` if the entity is saved in at least one collection.
 </ResponseField>
 
@@ -32,7 +32,7 @@ Returns whether the specified entity is saved in any collection belonging to the
 
 ```json
 {
-  "saved": true,
+  "isSaved": true,
   "collections": [
     { "id": "col_abc", "name": "To Read" },
     { "id": "col_xyz", "name": "Favorites" }

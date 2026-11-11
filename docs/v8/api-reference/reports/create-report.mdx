@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/reports"
 description: "Submit a content report for an entity, comment, or chat message"
 ---
 
-Submits a report on an entity, comment, or chat message. If an **open** report already exists for the target, the authenticated user's report is added to it (increments `reporterCount`). If the same user already reported that open report, a `200` is returned without creating a duplicate.
+Submits a report on an entity, comment, or chat message. If an **open** report already exists for the target, the authenticated user's report is added to it (increments `reporterCount`). If the same user already reported that open report, nothing new is created and their existing report comes back with `200`.
 
 Resolved reports (`dismissed` / `actioned`) are closed: a later report of the same target creates a **new** report rather than reopening the old one. A target therefore has at most one open report at a time, alongside any number of resolved ones.
 
@@ -41,23 +41,47 @@ An entity, or a comment, in a space the reporter can't read (see [who can read c
 
 ## Response
 
-Returns `201 Created` when a new report is created:
+Returns the authenticated user's own report of the target: their submission, not the shared report that collects every reporter.
+
+- `201 Created` when this call records the user's report, whether it opens a new report or joins an open one other users already filed.
+- `200 OK` when the user already reported this open report. The body is their existing record, and nothing is changed.
+
+<ResponseField name="id" type="string">
+  ID of this user's report (UUID).
+</ResponseField>
+
+<ResponseField name="targetId" type="string">
+  The reported entity, comment or message.
+</ResponseField>
+
+<ResponseField name="targetType" type="string">
+  `entity`, `comment` or `message`.
+</ResponseField>
+
+<ResponseField name="reason" type="string">
+  The reason the user gave.
+</ResponseField>
+
+<ResponseField name="details" type="string | null">
+  The context the user gave, or `null`.
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO timestamp of when the user reported the target.
+</ResponseField>
 
 ```json
-{ "message": "Report submitted successfully", "code": "report/created" }
+{
+  "id": "6f1c2b8e-4a3d-4f8e-9c1a-2b7d5e0f9a13",
+  "targetId": "b2a4c6e8-1d3f-4a5b-8c7d-9e0f1a2b3c4d",
+  "targetType": "comment",
+  "reason": "spam",
+  "details": "Posted the same link in five threads",
+  "createdAt": "2026-11-10T14:22:05.000Z"
+}
 ```
 
-Returns `200 OK` when an existing report is updated with a new reporter:
-
-```json
-{ "message": "Report updated successfully", "code": "report/updated" }
-```
-
-Returns `200 OK` when the user has already reported this target:
-
-```json
-{ "message": "Report already registered by this user", "code": "report/already-reported" }
-```
+The response never shows how many users reported the target or the report's moderation status.
 
 ## Error Responses
 

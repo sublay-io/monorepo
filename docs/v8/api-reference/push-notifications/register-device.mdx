@@ -39,7 +39,7 @@ Requires the `push` bundle.
 
 ## Response
 
-Returns `200` with the stored device record on success.
+Returns the stored device record: HTTP `201` when this call registers the device for the user, `200` when the user already had it registered and the call refreshes it.
 
 ```json
 {

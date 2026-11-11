@@ -43,11 +43,7 @@ Resolves a filed report against a chat message in a space's integrated conversat
 
 ## Response
 
-Returns `200 OK`:
-
-```json
-{ "message": "Report handled successfully.", "code": "report/handled" }
-```
+Returns `204 No Content` with no body.
 
 ## Error Responses
 
@@ -86,6 +82,12 @@ Returns `200 OK`:
     Returned when a service key names an `actingUserId` that isn't a user in this project.
     ```json
     { "error": "No user with this actingUserId exists in this project.", "code": "space/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Body — 400">
+    The body failed validation, such as an unknown action or a field of the wrong type. `error` describes the problem.
+    ```json
+    { "error": "...", "code": "report/invalid-body" }
     ```
   </Accordion>
   <Accordion title="Report Not Found — 404">

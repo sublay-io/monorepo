@@ -392,7 +392,7 @@ const invite = await sublay.workspaces.createWorkspaceInvite({
 });
 ```
 
-Requires the `invite` capability. Here `userId`/`username` (if used) address the invite **target**; the **inviter** is `actingUserId`, which is required and recorded as the invitation's `invitedBy`. Email matching against existing accounts is **case-insensitive**.
+Requires the `invite` capability. Here `userId`/`username` (if used) address the invite **target**; the **inviter** is `actingUserId`, which is required and recorded as the invitation's `invitedById`. Email matching against existing accounts is **case-insensitive**.
 
 The invited grant is floored by the inviter's own standing: no-escalation on `capabilities`/`permissions`, and a rank strictly below the inviter's own. Both floors are skipped for an owner.
 
@@ -415,7 +415,7 @@ The invited rank is named in **either coordinate** — `rank` (absolute) or `rel
 <ParamField body="rank" type="number">Absolute. **Not required** — mutually exclusive with `relativeRank`, and omitting both applies the `relativeRank: 1` default.</ParamField>
 <ParamField body="relativeRank" type="number" default="1">An offset from the inviter — `1` = one rung below them. Must be `>= 1`. Anchored on the inviter's member row on this workspace if they hold one, apex otherwise. A **snapshot**: resolved to an absolute rank here and frozen, so a later promotion or demotion of the inviter does not move the pending invite. Note the collision caveat, which is at its sharpest here: an inviter with no member row on this workspace — typically the owner — anchors at **apex**, so the default mints **rank 0** — the most senior rung — for every invitee. A backend invite flow that wants people at the *bottom* of the ladder must name an absolute `rank`, or name an `actingUserId` who actually sits in the ladder. For an in-ladder inviter the default instead puts a whole cohort on one rung, where equals cannot manage each other. See [choosing a rank](/v8/sdk/workspaces/overview#choosing-a-rank).</ParamField>
 <ParamField body="title" type="string" />
-<ParamField body="actingUserId" type="string" required>The **inviter** to act as. The `invite` capability, the no-escalation and rank floors run against their standing, and the invitation's `invitedBy` records them. Distinct from `userId`, which is the invitee.</ParamField>
+<ParamField body="actingUserId" type="string" required>The **inviter** to act as. The `invite` capability, the no-escalation and rank floors run against their standing, and the invitation's `invitedById` records them. Distinct from `userId`, which is the invitee.</ParamField>
 
 ### fetchWorkspaceInvites
 

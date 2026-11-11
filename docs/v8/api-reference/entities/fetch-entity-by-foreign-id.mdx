@@ -58,7 +58,7 @@ An entity in a space the viewer can't read (see [who can read content](/v8/data-
 
 ## Response
 
-Returns an [Entity](/v8/data-models/entity) object.
+Returns an [Entity](/v8/data-models/entity) object: HTTP `201` when `createIfNotFound` made it in this call, `200` when it already existed (including when a concurrent request created it first).
 
 <Note>
   This endpoint returns entities regardless of moderation status, so the client can display the appropriate moderation state. Draft entities are only returned to their author: a user token, or a service key naming the author in `actingUserId`.

@@ -28,7 +28,7 @@ If the user was previously a member who left or was removed, they are re-activat
 
 ## Response
 
-Returns the [ConversationMember](/v8/data-models/conversation-member) record for the added user.
+Returns the [ConversationMember](/v8/data-models/conversation-member) record for the user: HTTP `201` when this call made them a member (a first-time member, or one re-activated after leaving or being removed), `200` when they were already an active member and nothing changed.
 
 ## Error Responses
 

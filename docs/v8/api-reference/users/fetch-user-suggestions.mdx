@@ -35,42 +35,47 @@ This endpoint has no space in context, so the opt-in `spaceReputation` object ac
 
 ## Response
 
-On success, returns HTTP `200` with an array of up to 5 user objects:
+On success, returns HTTP `200` with up to 5 user objects under `data`:
 
-<ResponseField name="id" type="string">
-  Unique user ID (UUID).
-</ResponseField>
+<ResponseField name="data" type="User[]">
+  The suggested users.
+  <Expandable title="User properties">
+    <ResponseField name="id" type="string">
+      Unique user ID (UUID).
+    </ResponseField>
 
-<ResponseField name="foreignId" type="string | null">
-  External identifier from your system.
-</ResponseField>
+    <ResponseField name="foreignId" type="string | null">
+      External identifier from your system.
+    </ResponseField>
 
-<ResponseField name="name" type="string | null">
-  Display name.
-</ResponseField>
+    <ResponseField name="name" type="string | null">
+      Display name.
+    </ResponseField>
 
-<ResponseField name="username" type="string | null">
-  The user's username.
-</ResponseField>
+    <ResponseField name="username" type="string | null">
+      The user's username.
+    </ResponseField>
 
-<ResponseField name="avatar" type="string | null">
-  Avatar image URL.
-</ResponseField>
+    <ResponseField name="avatar" type="string | null">
+      Avatar image URL.
+    </ResponseField>
 
-<ResponseField name="bio" type="string | null">
-  Short bio text.
-</ResponseField>
+    <ResponseField name="bio" type="string | null">
+      Short bio text.
+    </ResponseField>
 
-<ResponseField name="metadata" type="object | null">
-  Public custom key-value data.
-</ResponseField>
+    <ResponseField name="metadata" type="object | null">
+      Public custom key-value data.
+    </ResponseField>
 
-<ResponseField name="reputation" type="number">
-  Reputation score.
-</ResponseField>
+    <ResponseField name="reputation" type="number">
+      Reputation score.
+    </ResponseField>
 
-<ResponseField name="createdAt" type="string">
-  ISO timestamp of account creation.
+    <ResponseField name="createdAt" type="string">
+      ISO timestamp of account creation.
+    </ResponseField>
+  </Expandable>
 </ResponseField>
 
 ## Error Responses

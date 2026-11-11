@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/spaces/:spaceId/membership/me"
 description: "Get the current user's membership status and permissions in a space"
 ---
 
-Returns the authenticated user's membership status and resolved permissions in a space. A user with a membership gets it whatever its status (`pending`, `banned` or `rejected` included), so a banned user learns they're banned, even in a space they can no longer see. A user with no membership in a space they can't see (a private space, or one under it) gets `404 space/not-found`, like a space that doesn't exist; in a space they can see, they get `status: null`.
+Returns the authenticated user's membership status and resolved permissions in a space. A user with a membership gets it whatever its status (`pending`, `banned` or `rejected` included), so a banned user learns they're banned, even in a space they can no longer see. A user with no membership in a space they can't see (a private space, or one under it) gets `404 space/not-found`, like a space that doesn't exist; in a space they can see, the response has no `status`.
 
 ## Path Parameters
 
@@ -20,20 +20,22 @@ Returns the authenticated user's membership status and resolved permissions in a
 
 ## Response
 
+A flat object. `isMember` and `permissions` are always present; a field that describes a membership the user doesn't have is left out, not sent as `null`.
+
 <ResponseField name="isMember" type="boolean">
   Whether the user has an active membership.
 </ResponseField>
 
-<ResponseField name="role" type="string | null">
-  `"admin"`, `"moderator"`, `"member"`, or `null` if not an active member.
+<ResponseField name="role" type="string">
+  `"admin"`, `"moderator"` or `"member"`. Present only when `isMember` is `true`.
 </ResponseField>
 
-<ResponseField name="status" type="string | null">
-  `"pending"`, `"active"`, `"banned"`, `"rejected"`, or `null` if no membership record exists.
+<ResponseField name="status" type="string">
+  `"pending"`, `"active"`, `"banned"` or `"rejected"`. Present only when the user has a membership record in the space.
 </ResponseField>
 
-<ResponseField name="joinedAt" type="Date | null">
-  When the membership was created. `null` if not an active member.
+<ResponseField name="joinedAt" type="Date">
+  When the membership was created. Present only when `isMember` is `true`.
 </ResponseField>
 
 <ResponseField name="permissions" type="object">
@@ -46,6 +48,15 @@ Returns the authenticated user's membership status and resolved permissions in a
     <ResponseField name="isModerator" type="boolean">Whether the user is an active moderator of this space.</ResponseField>
   </Expandable>
 </ResponseField>
+
+```json
+// A user with a pending join request
+{
+  "isMember": false,
+  "status": "pending",
+  "permissions": { "canPost": false, "canModerate": false, "canRead": true, "isAdmin": false, "isModerator": false }
+}
+```
 
 ## Error Responses
 

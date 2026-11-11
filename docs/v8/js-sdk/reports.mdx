@@ -48,7 +48,20 @@ const { message, code } = await sublay.reports.createReport({
   project-level and appear only in the Sublay dashboard.
 </Note>
 
-**Returns** — `Promise<{ message: string; code: "report/created" | "report/updated" | "report/already-reported" }>`
+**Returns** — `Promise<CreateReportResponse>`
+
+```typescript
+{
+  id: string;          // this user's report
+  targetId: string;
+  targetType: "entity" | "comment" | "message";
+  reason: ReportReason;
+  details: string | null;
+  createdAt: string;
+}
+```
+
+The user's own report of the target, never the shared report other reporters joined: the same record whether this call filed it or the user had already reported the open report. See [Create Report](/v8/api-reference/reports/create-report).
 
 ---
 

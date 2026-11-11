@@ -590,10 +590,10 @@ const { reactionType } = await sublay.entities.getUserReaction({
 
 ### isEntitySaved
 
-Checks whether a user has saved an entity to any of their collections.
+Checks whether a user has saved an entity to any of their collections, and in which ones.
 
 ```typescript
-const { isSaved } = await sublay.entities.isEntitySaved({
+const { isSaved, collections } = await sublay.entities.isEntitySaved({
   entityId: "ent_xyz789",
   actingUserId: "usr_abc123",
 });
@@ -607,4 +607,4 @@ const { isSaved } = await sublay.entities.isEntitySaved({
   The user the service key acts as, whose saved state is checked.
 </ParamField>
 
-**Returns** — `Promise<{ isSaved: boolean }>`
+**Returns** — `Promise<{ isSaved: boolean; collections: { id: string; name: string }[] }>`

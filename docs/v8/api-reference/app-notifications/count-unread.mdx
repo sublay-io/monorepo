@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/app-notifications/count"
 description: "Get the number of unread app notifications for the authenticated user"
 ---
 
-Returns a single integer representing the total number of unread app notifications for the currently authenticated user. Use this to populate notification badge counts in your UI.
+Returns the total number of unread app notifications for the currently authenticated user. Use this to populate notification badge counts in your UI.
 
 <Note>
   This endpoint requires an authenticated user. Include a valid `Authorization: Bearer <accessToken>` header, or use a service key and name the user in `actingUserId`.
@@ -18,10 +18,14 @@ Returns a single integer representing the total number of unread app notificatio
 
 ## Response
 
-Returns HTTP `200` with a plain integer (not a JSON object):
+Returns HTTP `200`:
+
+<ResponseField name="count" type="number">
+  The number of unread app notifications.
+</ResponseField>
 
 ```json
-7
+{ "count": 7 }
 ```
 
 ## Error Responses

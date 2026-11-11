@@ -47,7 +47,7 @@ Each notification is a discriminated union on `type` (e.g. `"entity-comment"`, `
 Returns the number of unread notifications for a user.
 
 ```typescript
-const count = await sublay.appNotifications.countUnreadNotifications({
+const { count } = await sublay.appNotifications.countUnreadNotifications({
   actingUserId: "usr_abc123",
 });
 ```
@@ -56,7 +56,7 @@ const count = await sublay.appNotifications.countUnreadNotifications({
   The user the service key acts as.
 </ParamField>
 
-**Returns** — `Promise<number>`
+**Returns** — `Promise<{ count: number }>`
 
 ---
 

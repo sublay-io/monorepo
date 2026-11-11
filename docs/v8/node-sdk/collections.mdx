@@ -39,7 +39,7 @@ const root = await sublay.collections.fetchRootCollection({
 Fetches the direct child collections nested under a given collection.
 
 ```typescript
-const subCollections = await sublay.collections.fetchSubCollections({
+const { data: subCollections } = await sublay.collections.fetchSubCollections({
   collectionId: "col_root123",
   actingUserId: "usr_abc123",
 });
@@ -53,7 +53,7 @@ const subCollections = await sublay.collections.fetchSubCollections({
   The user the service key acts as, who owns the collection.
 </ParamField>
 
-**Returns** — `Promise<Collection[]>`
+**Returns** — `Promise<{ data: Collection[] }>` — the direct children, oldest first, each with its `entityCount`.
 
 ---
 

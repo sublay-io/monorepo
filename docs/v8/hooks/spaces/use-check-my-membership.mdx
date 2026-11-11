@@ -35,16 +35,16 @@ function MembershipBadge({ spaceId }: { spaceId: string }) {
   Whether the user has an active membership.
 </ResponseField>
 
-<ResponseField name="role" type='"admin" | "moderator" | "member" | null'>
-  The user's role. `null` unless they are an active member.
+<ResponseField name="role" type='"admin" | "moderator" | "member" | undefined'>
+  The user's role. Present only when `isMember` is `true`.
 </ResponseField>
 
-<ResponseField name="status" type='"pending" | "active" | "banned" | "rejected" | null'>
-  The user's membership status. `null` if no membership record exists.
+<ResponseField name="status" type='"pending" | "active" | "banned" | "rejected" | undefined'>
+  The user's membership status. Present only when a membership record exists, whatever its status.
 </ResponseField>
 
-<ResponseField name="joinedAt" type="Date | null">
-  When the membership was created. `null` unless they are an active member.
+<ResponseField name="joinedAt" type="string | undefined">
+  ISO timestamp of when the membership was created. Present only when `isMember` is `true`.
 </ResponseField>
 
 <ResponseField name="permissions" type="object">

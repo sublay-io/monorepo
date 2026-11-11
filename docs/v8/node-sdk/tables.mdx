@@ -116,7 +116,7 @@ const event = await sublay.table<EventRow>("Events").create({
 Inserts many rows in one call. Capped at **100 rows** per request.
 
 ```typescript
-const rows = await sublay.table<EventRow>("Events").bulkCreate([
+const { data: rows } = await sublay.table<EventRow>("Events").bulkCreate([
   { name: "Workshop A", capacity: 40 },
   { name: "Workshop B", capacity: 40 },
 ]);
@@ -126,7 +126,7 @@ const rows = await sublay.table<EventRow>("Events").bulkCreate([
   The rows to insert (max 100).
 </ParamField>
 
-**Returns** — `Promise<T[]>`
+**Returns** — `Promise<{ data: T[] }>` — the inserted rows.
 
 ---
 

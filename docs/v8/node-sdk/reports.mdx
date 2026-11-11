@@ -17,10 +17,10 @@ The `reports` module lets a user report an entity, comment, or chat message, and
 
 ### createReport
 
-Files a report against an entity, comment, or chat message on behalf of a user. If the same user has already reported the same target, the existing report is updated rather than duplicated.
+Files a report against an entity, comment, or chat message on behalf of a user. A user has at most one open report of a target: reporting it again returns that same report.
 
 ```typescript
-const result = await sublay.reports.createReport({
+const report = await sublay.reports.createReport({
   actingUserId: "usr_abc123",
   targetType: "comment",
   targetId: "cmt_abc123",

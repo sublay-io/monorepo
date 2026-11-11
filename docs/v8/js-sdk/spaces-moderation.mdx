@@ -46,7 +46,7 @@ const result = await sublay.spaces.handleEntityReport({
   Reason for the ban, kept in the space's ban log. Required when `actions` includes `ban-user`.
 </ParamField>
 
-**Returns** — `Promise<{ message: string; code: string }>`
+**Returns** — `Promise<void>`. It resolves with no value once the actions are applied.
 
 ---
 
@@ -88,7 +88,7 @@ const result = await sublay.spaces.handleCommentReport({
   Reason for the ban, kept in the space's ban log. Required when `actions` includes `ban-user`.
 </ParamField>
 
-**Returns** — `Promise<{ message: string; code: string }>`
+**Returns** — `Promise<void>`. It resolves with no value once the actions are applied.
 
 ---
 
@@ -129,7 +129,7 @@ const result = await sublay.spaces.handleSpaceChatReport({
   The message to remove. Required when `actions` includes `"remove-message"`.
 </ParamField>
 
-**Returns** — `Promise<{ message: string; code: string }>`
+**Returns** — `Promise<void>`. It resolves with no value once the actions are applied.
 
 ---
 

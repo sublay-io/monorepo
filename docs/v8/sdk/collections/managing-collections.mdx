@@ -118,7 +118,7 @@ A collection's `entityCount` counts the entities the user can see in it, by the 
 
 ```tsx
 const result = await isEntitySaved({ entityId: entity.id });
-// result.saved — true if saved in any collection
+// result.isSaved — true if saved in any collection
 // result.collections — list of { id, name } for each collection containing it
 
 const specificResult = await isEntitySaved({ entityId: entity.id, collectionId: collection.id });

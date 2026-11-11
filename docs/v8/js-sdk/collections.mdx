@@ -28,7 +28,7 @@ const root = await sublay.collections.fetchRootCollection();
 Fetches the immediate sub-collections of a collection.
 
 ```typescript
-const subCollections = await sublay.collections.fetchSubCollections({
+const { data: subCollections } = await sublay.collections.fetchSubCollections({
   collectionId: "col_root123",
 });
 ```
@@ -37,7 +37,7 @@ const subCollections = await sublay.collections.fetchSubCollections({
   The parent collection ID.
 </ParamField>
 
-**Returns** — `Promise<Collection[]>`
+**Returns** — `Promise<{ data: Collection[] }>` — the direct children, oldest first, each with its `entityCount`.
 
 ---
 

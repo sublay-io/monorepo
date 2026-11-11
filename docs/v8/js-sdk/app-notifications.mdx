@@ -41,10 +41,10 @@ The whole argument is optional.
 Returns the number of unread notifications.
 
 ```typescript
-const count = await sublay.appNotifications.countUnreadNotifications();
+const { count } = await sublay.appNotifications.countUnreadNotifications();
 ```
 
-**Returns** — `Promise<number>`
+**Returns** — `Promise<{ count: number }>`
 
 ---
 

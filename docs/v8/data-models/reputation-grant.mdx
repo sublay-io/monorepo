@@ -55,7 +55,7 @@ A grant may point at one entity, comment, or chat message, so your app can rende
 
 - The target must exist when the grant is issued; a grant naming a missing record is rejected.
 - The target does **not** have to be authored by the recipient.
-- The target never determines which bucket is used. An app can reward a message living in one space using reputation from a different bucket.
+- The target doesn't choose the bucket — `spaceId` does — but the two must agree. A grant that names a target counts toward that target's space or toward general reputation, never toward another space: its `spaceId` is the target's space (an entity's space; a comment's entity's space; a message's space chat's space), or omitted for the general bucket. A target in no space — an entity outside any space, a message in a group chat or DM — takes only a grant with no `spaceId`. Anything else is rejected with `400 reputation-grant/space-mismatch`, on transfers and mints alike. A grant with a `spaceId` and no target has nothing to compare and is allowed.
 - A target kind is only usable when the project has that capability. A `message` target needs the `chat` bundle; `entity` and `comment` targets need their tables. Grants with no target are always available.
 - Deleting the target does **not** reverse the grant. The points stay with the recipient; the attachment simply stops rendering.
 
@@ -87,7 +87,7 @@ The inline summary on the chat reads needs no special rule: those endpoints alre
 
 A grant tied to a space, or given on an entity or comment in a space, says something about that space, so grants follow the space's [reading rules](/v8/data-models/space#who-can-read-content):
 
-- **Creating** a transfer into a space whose content the sender can't read answers `404 reputation-grant/space-not-found`, and one on an entity or comment the sender can't read `404 reputation-grant/target-not-found` — both exactly like a missing space or target. A comment goes by its entity's space. [Mints](/v8/api-reference/reputation-grants/mint-reputation-grant) aren't checked: your app may grant into any space and on any target.
+- **Creating** a transfer into a space whose content the sender can't read answers `404 reputation-grant/space-not-found`, and one on an entity or comment the sender can't read `404 reputation-grant/target-not-found` — both exactly like a missing space or target. A comment goes by its entity's space. [Mints](/v8/api-reference/reputation-grants/mint-reputation-grant) aren't checked for reading: your app may grant into any space and on any target, as long as the grant's space matches its target's (see [The target is an annotation](#the-target-is-an-annotation)).
 - **Listing** leaves out, on every shape, a grant whose own `spaceId` is in a space the viewer can't read, and a grant on an entity or comment that sits in a space the viewer can't read. The rows and `totalItems` move together. A grant whose `spaceId` names a space that no longer exists — the space was deleted, or the `spaces` bundle uninstalled — is left out for everyone. Grants on deleted entities and comments, and on entities and comments in no space, are still listed. Reputation totals don't change.
 - **Summaries** — the target shape's `summary` and the `grants` include on entities and comments — count exactly the grants the list would show. On an entity or comment in a space the viewer can't read, the target shape answers the empty page with the zero summary.
 

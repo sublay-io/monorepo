@@ -51,9 +51,9 @@ function RewardButton({ answer }) {
 Two rules are worth internalizing before you build a UI around this:
 
 - **The sender chooses which of their buckets pays, never where it lands.** The reputation always arrives in the recipient's bucket for the same space. Reputation never crosses between the project-general bucket and a space bucket.
-- **The target is an annotation.** It says what the grant was *for*, not who gets paid or from which bucket. It doesn't even have to be authored by the recipient.
+- **The target is an annotation.** It says what the grant was *for*, not who gets paid. It doesn't even have to be authored by the recipient. It doesn't choose the bucket either, but the two must agree: a grant with a `spaceId` must use the target's space — or omit `spaceId` to pay from the general bucket.
 
-If the sender's chosen bucket is short, the request rejects with `409 reputation-grant/insufficient-reputation` and nothing moves. A `spaceId` naming no space rejects earlier still, with `404 reputation-grant/space-not-found`. Grant creation is **not idempotent** — guard your button against double-submits, because a retry moves the points twice.
+If the sender's chosen bucket is short, the request rejects with `409 reputation-grant/insufficient-reputation` and nothing moves. A `spaceId` naming no space rejects earlier still, with `404 reputation-grant/space-not-found`, and one that isn't the target's space with `400 reputation-grant/space-mismatch` (see [The target is an annotation](/v8/data-models/reputation-grant#the-target-is-an-annotation)). Grant creation is **not idempotent** — guard your button against double-submits, because a retry moves the points twice.
 
 ## Showing totals on an item
 

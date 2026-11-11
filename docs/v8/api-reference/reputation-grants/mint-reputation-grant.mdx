@@ -35,7 +35,7 @@ Requires the `reputation` bundle.
 </ParamField>
 
 <ParamField body="targetType" type="string">
-  What the grant is for: `"entity"`, `"comment"`, or `"message"` (a chat message). Values match exactly. Must be supplied together with `targetId`.
+  What the grant is for: `"entity"`, `"comment"`, or `"message"` (a chat message). Values match exactly. Must be supplied together with `targetId`. A grant with a `spaceId` must use the target's space — an entity's space, a comment's entity's space, or a message's space chat's space; a target in no space takes no `spaceId` — or it is rejected with `400 reputation-grant/space-mismatch` (see [The target is an annotation](/v8/data-models/reputation-grant#the-target-is-an-annotation)). Omit `spaceId` to credit the general bucket on any target.
 </ParamField>
 
 <ParamField body="targetId" type="string">
@@ -58,6 +58,12 @@ A **positive** mint notifies the recipient when they can [read the content](/v8/
     { "error": "amount: amount must be non-zero", "code": "reputation-grant/invalid-body" }
     ```
     Also returned for a fractional amount (`"amount: Invalid input: expected int, received number"`) or one outside the signed 32-bit range (`"amount: Too big: expected number to be <=2147483647"`). Field-level failures are prefixed with the field path, so `error` reads `"<path>: <message>"`. The one whole-body rule has no path and so no prefix: supplying `targetType` without `targetId` (or the reverse) returns `"targetType and targetId must be supplied together"`.
+  </Accordion>
+  <Accordion title="Space Mismatch — 400">
+    ```json
+    { "error": "A grant that names a target must use the target's space as its spaceId. Omit spaceId to count the grant toward general reputation.", "code": "reputation-grant/space-mismatch" }
+    ```
+    The grant names a target and a `spaceId` that isn't the target's space: another space, or any space when the target is in none (an entity outside any space, a message in a group chat or DM). Omit `spaceId`, or send the target's own.
   </Accordion>
   <Accordion title="Elevated Auth Required — 403">
     ```json

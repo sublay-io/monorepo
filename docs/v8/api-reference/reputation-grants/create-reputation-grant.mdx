@@ -35,7 +35,7 @@ Requires the `reputation` bundle (both `ReputationBuckets` and `ReputationGrants
 </ParamField>
 
 <ParamField body="targetType" type="string">
-  What the grant is for: `"entity"`, `"comment"`, or `"message"` (a chat message). Values match exactly. Must be supplied together with `targetId`. The target is an annotation — it never determines which bucket is used, and it does not have to be authored by the recipient. The sender must be able to read it: an entity or comment in a space whose content they can't read answers `404 reputation-grant/target-not-found`, like a missing target.
+  What the grant is for: `"entity"`, `"comment"`, or `"message"` (a chat message). Values match exactly. Must be supplied together with `targetId`. The target does not have to be authored by the recipient. A grant with a `spaceId` must use the target's space — an entity's space, a comment's entity's space, or a message's space chat's space; a target in no space takes no `spaceId` — or it is rejected with `400 reputation-grant/space-mismatch` (see [The target is an annotation](/v8/data-models/reputation-grant#the-target-is-an-annotation)). Omit `spaceId` to reward any target from the general bucket. The sender must be able to read it: an entity or comment in a space whose content they can't read answers `404 reputation-grant/target-not-found`, like a missing target.
 </ParamField>
 
 <ParamField body="targetId" type="string">
@@ -71,6 +71,12 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
     ```json
     { "error": "A user cannot grant reputation to themselves.", "code": "reputation-grant/self-grant" }
     ```
+  </Accordion>
+  <Accordion title="Space Mismatch — 400">
+    ```json
+    { "error": "A grant that names a target must use the target's space as its spaceId. Omit spaceId to count the grant toward general reputation.", "code": "reputation-grant/space-mismatch" }
+    ```
+    The grant names a target and a `spaceId` that isn't the target's space: another space, or any space when the target is in none (an entity outside any space, a message in a group chat or DM). Omit `spaceId`, or send the target's own. Checked after the target is found, so a target the sender can't read still answers `404 reputation-grant/target-not-found`.
   </Accordion>
   <Accordion title="Missing Sender — 400">
     ```json

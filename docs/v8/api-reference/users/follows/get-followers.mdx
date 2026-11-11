@@ -53,15 +53,15 @@ This endpoint has no space in context, so the opt-in `spaceReputation` object ac
 On success, returns HTTP `200` with a paginated response:
 
 <ResponseField name="data" type="array">
-  Array of follow entries.
+  Array of [follow rows](/v8/data-models/follow#followrow).
   <Expandable title="item properties">
-    <ResponseField name="followId" type="string">
-      ID of the follow record.
+    <ResponseField name="id" type="string">
+      ID of the follow record. Pass it to [Delete Follow](/v8/api-reference/follows/delete-follow) to remove the follow.
     </ResponseField>
     <ResponseField name="user" type="object">
       Public profile of the follower user. Sensitive fields (email, hash, secureMetadata, etc.) are excluded.
     </ResponseField>
-    <ResponseField name="followedAt" type="string">
+    <ResponseField name="createdAt" type="string">
       ISO timestamp of when the follow was created.
     </ResponseField>
   </Expandable>

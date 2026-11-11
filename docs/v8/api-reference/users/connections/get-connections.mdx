@@ -53,15 +53,21 @@ This endpoint has no space in context, so the opt-in `spaceReputation` object ac
 On success, returns HTTP `200` with a paginated response:
 
 <ResponseField name="data" type="array">
-  Array of connection entries.
+  Array of [accepted connection rows](/v8/data-models/connection#acceptedconnectionrow). The rows carry no `type` or `message`.
   <Expandable title="item properties">
     <ResponseField name="id" type="string">
-      Connection record ID.
+      ID of the connection record.
     </ResponseField>
-    <ResponseField name="connectedUser" type="object">
-      Public profile of the connected user (the user who is not `:userId`). Sensitive fields are excluded.
+    <ResponseField name="user" type="object">
+      Public profile of the connected user (the user who is not `:userId`). Sensitive fields (email, hash, secureMetadata, etc.) are excluded.
     </ResponseField>
-    <ResponseField name="connectedAt" type="string">
+    <ResponseField name="status" type="string">
+      Always `"accepted"` for this endpoint.
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO timestamp of when the request was sent.
+    </ResponseField>
+    <ResponseField name="respondedAt" type="string">
       ISO timestamp of when the connection was accepted.
     </ResponseField>
   </Expandable>

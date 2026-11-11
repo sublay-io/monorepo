@@ -28,10 +28,22 @@ Sends a connection request from the authenticated user to the specified user. An
 
 ## Response
 
-On success, returns HTTP `201` with the created connection record:
+On success, returns HTTP `201` with the created [connection row](/v8/data-models/connection#connectionrow):
 
 <ResponseField name="id" type="string">
-  Unique connection record ID (UUID).
+  ID of the connection record. Pass it to [Remove Connection](/v8/api-reference/connections/remove-connection) to withdraw the request.
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  Public profile of the user the request was sent to (the user in the path). Sensitive fields (email, hash, secureMetadata, etc.) are excluded.
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  Always `"sent"` here: the authenticated user sent the request.
+</ResponseField>
+
+<ResponseField name="message" type="string | null">
+  The note sent with the request, or `null`.
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -40,6 +52,10 @@ On success, returns HTTP `201` with the created connection record:
 
 <ResponseField name="createdAt" type="string">
   ISO timestamp of when the request was sent.
+</ResponseField>
+
+<ResponseField name="respondedAt" type="string | null">
+  Always `null` for a new request.
 </ResponseField>
 
 ## Error Responses

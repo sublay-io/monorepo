@@ -31,22 +31,28 @@ Returns a paginated list of connection requests that the authenticated user has 
 On success, returns HTTP `200` with a paginated response:
 
 <ResponseField name="data" type="array">
-  Array of pending connection request entries.
+  Array of [connection rows](/v8/data-models/connection#connectionrow).
   <Expandable title="item properties">
     <ResponseField name="id" type="string">
-      Connection record ID.
+      ID of the connection record. Pass it to [Remove Connection](/v8/api-reference/connections/remove-connection) to withdraw the request.
+    </ResponseField>
+    <ResponseField name="user" type="object">
+      Public profile of the user who received the request. Sensitive fields (email, hash, secureMetadata, etc.) are excluded.
     </ResponseField>
     <ResponseField name="type" type="string">
       Always `"sent"` for this endpoint.
     </ResponseField>
-    <ResponseField name="user" type="object">
-      Public profile of the user who received the request. Sensitive fields are excluded.
-    </ResponseField>
     <ResponseField name="message" type="string | null">
-      Optional message included with the request.
+      The note sent with the request, or `null`.
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Always `"pending"` for this endpoint.
     </ResponseField>
     <ResponseField name="createdAt" type="string">
       ISO timestamp of when the request was sent.
+    </ResponseField>
+    <ResponseField name="respondedAt" type="string | null">
+      Always `null` for this endpoint: the request has no response yet.
     </ResponseField>
   </Expandable>
 </ResponseField>

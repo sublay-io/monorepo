@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/users/:userId/connection"
 description: "Check the connection status between the authenticated user and another user"
 ---
 
-Returns the connection status between the authenticated user and the specified user. The response shape varies depending on whether there is no connection, a pending request, an accepted connection, or a declined request.
+Returns the connection status between the authenticated user and the specified user. `isConnected` is `true` only for an accepted connection. Whenever a connection record exists between the two users, pending and declined included, the response also carries it under `connection`; whether a relationship exists at all is shown by the presence of `connection`, not by `isConnected`.
 
 <Note>
   **Requires the `connections` bundle.** A project without the connections bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
@@ -24,67 +24,66 @@ Returns the connection status between the authenticated user and the specified u
 
 ## Response
 
-On success, returns HTTP `200`. The shape depends on the connection state:
+On success, returns HTTP `200`:
 
-**No connection:**
-
-<ResponseField name="status" type="string">
-  `"none"`.
+<ResponseField name="isConnected" type="boolean">
+  `true` only when the two users have an accepted connection. `false` when there is no connection record, and also when there is a pending or declined one.
 </ResponseField>
 
-**Pending request:**
-
-<ResponseField name="status" type="string">
-  `"pending"`.
+<ResponseField name="connection" type="object">
+  The [connection row](/v8/data-models/connection#connectionrow) between the two users, seen from the authenticated user's side. Present whenever a connection record exists (pending, accepted or declined); absent when there is none.
+  <Expandable title="properties">
+    <ResponseField name="id" type="string">
+      ID of the connection record.
+    </ResponseField>
+    <ResponseField name="user" type="object">
+      Public profile of the other user (the user in the path).
+    </ResponseField>
+    <ResponseField name="type" type="string">
+      `"sent"` if the authenticated user sent the request; `"received"` if they received it.
+    </ResponseField>
+    <ResponseField name="message" type="string | null">
+      The note sent with the request, or `null`.
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      `"pending"`, `"accepted"` or `"declined"`.
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO timestamp of when the request was sent.
+    </ResponseField>
+    <ResponseField name="respondedAt" type="string | null">
+      ISO timestamp of when the request was accepted or declined; `null` while pending.
+    </ResponseField>
+  </Expandable>
 </ResponseField>
 
-<ResponseField name="type" type="string">
-  `"sent"` if the authenticated user sent the request; `"received"` if they received it.
-</ResponseField>
+| State | `isConnected` | `connection` |
+|-------|---------------|--------------|
+| No connection record | `false` | absent |
+| Pending request (either direction) | `false` | present, `status: "pending"`, `type` gives the direction |
+| Accepted | `true` | present, `status: "accepted"` |
+| Declined | `false` | present, `status: "declined"` |
 
-<ResponseField name="connectionId" type="string">
-  ID of the connection record.
-</ResponseField>
+```json
+// A pending request the authenticated user sent
+{
+  "isConnected": false,
+  "connection": {
+    "id": "c3d4e5f6-...",
+    "user": { "id": "9f8e7d6c-...", "username": "jane", "name": "Jane", "avatar": null },
+    "type": "sent",
+    "message": "Great meeting you at the event!",
+    "status": "pending",
+    "createdAt": "2026-03-01T12:00:00.000Z",
+    "respondedAt": null
+  }
+}
+```
 
-<ResponseField name="createdAt" type="string">
-  ISO timestamp of when the request was sent.
-</ResponseField>
-
-**Accepted (connected):**
-
-<ResponseField name="status" type="string">
-  `"connected"`.
-</ResponseField>
-
-<ResponseField name="connectionId" type="string">
-  ID of the connection record.
-</ResponseField>
-
-<ResponseField name="connectedAt" type="string">
-  ISO timestamp of when the connection was accepted.
-</ResponseField>
-
-<ResponseField name="requestedAt" type="string">
-  ISO timestamp of the original request.
-</ResponseField>
-
-**Declined:**
-
-<ResponseField name="status" type="string">
-  `"declined"`.
-</ResponseField>
-
-<ResponseField name="type" type="string">
-  `"sent"` or `"received"` — perspective of the authenticated user.
-</ResponseField>
-
-<ResponseField name="connectionId" type="string">
-  ID of the connection record.
-</ResponseField>
-
-<ResponseField name="respondedAt" type="string">
-  ISO timestamp of when the request was declined.
-</ResponseField>
+```json
+// No connection record
+{ "isConnected": false }
+```
 
 ## Error Responses
 

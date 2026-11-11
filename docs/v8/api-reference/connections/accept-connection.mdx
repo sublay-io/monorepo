@@ -20,14 +20,30 @@ Accepts a pending connection request. Only the receiver of the original request 
 
 ## Response
 
-On success, returns HTTP `200`:
+On success, returns HTTP `200` with the accepted [connection row](/v8/data-models/connection#connectionrow), seen from the authenticated user's side:
 
 <ResponseField name="id" type="string">
-  Connection record ID.
+  ID of the connection record. Pass it to [Remove Connection](/v8/api-reference/connections/remove-connection) to disconnect.
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  Public profile of the user who sent the request. Sensitive fields (email, hash, secureMetadata, etc.) are excluded.
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  Always `"received"` here: the authenticated user received the request.
+</ResponseField>
+
+<ResponseField name="message" type="string | null">
+  The note sent with the request, or `null`.
 </ResponseField>
 
 <ResponseField name="status" type="string">
   `"accepted"`.
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO timestamp of when the request was sent.
 </ResponseField>
 
 <ResponseField name="respondedAt" type="string">

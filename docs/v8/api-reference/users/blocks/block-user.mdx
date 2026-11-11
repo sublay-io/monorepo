@@ -26,18 +26,14 @@ On a **new** block, Sublay retroactively tears down the existing relationship be
 
 ## Response
 
-On a **new** block, returns HTTP `201` with the created block record. Re-blocking an already-blocked user is an idempotent success and returns HTTP `200` with the existing record.
+On a **new** block, returns HTTP `201` with the created [block row](/v8/data-models/block#blockrow). Re-blocking an already-blocked user is an idempotent success and returns HTTP `200` with the existing row.
 
 <ResponseField name="id" type="string">
-  Unique block record ID (UUID).
+  ID of the block record (UUID).
 </ResponseField>
 
-<ResponseField name="blockerId" type="string">
-  ID of the user who created the block (the acting user).
-</ResponseField>
-
-<ResponseField name="blockedId" type="string">
-  ID of the user being blocked (the target).
+<ResponseField name="user" type="object">
+  Public profile of the blocked user (the user in the path). Sensitive fields (email, hash, secureMetadata, etc.) are excluded.
 </ResponseField>
 
 <ResponseField name="createdAt" type="string">

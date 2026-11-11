@@ -1,24 +1,35 @@
 ---
 title: "Follow"
-description: "The Follow interface shape representing a user following another user"
+description: "The follow row and follow status shapes for one user following another"
 ---
 
-A follow record represents a directional relationship where one user follows another. Follows are one-way — unlike connections, following someone does not require the other person to accept.
+A follow is a directional relationship where one user follows another. Follows are one-way — unlike connections, following someone does not require the other person to accept.
 
-## Properties
+## FollowRow
+
+Every follow the API returns has this shape: the follow create, the follow status check and the followers / following lists.
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `id` | `string` | Unique follow identifier (UUID). |
-| `projectId` | `string` | The project this follow relationship belongs to. |
-| `followerId` | `string` | The ID of the user who is doing the following. |
-| `followedId` | `string` | The ID of the user being followed. |
-| `createdAt` | `Date` | When the follow was created. |
+| `id` | `string` | The follow record's ID (UUID). [Delete Follow](/v8/api-reference/follows/delete-follow) takes it. |
+| `user` | `User` | The other user, seen from the caller: the followed user on a follow create, a status check and a following list; the follower on a followers list. Public profile fields only. |
+| `createdAt` | `string` | ISO timestamp of when the follow was created. |
+
+## FollowStatus
+
+Returned by [Get Follow Status](/v8/api-reference/users/follows/get-follow-status): whether the acting user follows the user in the path.
+
+```ts
+type FollowStatus =
+  | { isFollowing: false }
+  | { isFollowing: true; follow: FollowRow };
+```
 
 ## See Also
 
 - [useFollowManager hook](/v8/hooks/follows/use-follow-manager)
 - [useFollowUser hook](/v8/hooks/follows/use-follow-user)
+- [Follow User](/v8/api-reference/users/follows/follow-user)
 - [Fetch Follow Status](/v8/api-reference/users/follows/get-follow-status)
 - [Fetch Followers](/v8/api-reference/users/follows/get-followers)
 - [Fetch Following](/v8/api-reference/users/follows/get-following)

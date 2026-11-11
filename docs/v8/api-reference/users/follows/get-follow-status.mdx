@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/users/:userId/follow"
 description: "Check whether the authenticated user follows a specific user"
 ---
 
-Returns the follow status between the authenticated user and the specified user. If the authenticated user is following, the response includes the follow record ID and timestamp.
+Returns the follow status between the authenticated user and the specified user. If the authenticated user is following, the response includes the follow row under `follow`.
 
 <Note>
   **Requires the `follows` bundle.** A project without the follows bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
@@ -24,27 +24,43 @@ Returns the follow status between the authenticated user and the specified user.
 
 ## Response
 
-On success, returns HTTP `200`. The shape differs based on follow status:
-
-**When following:**
+On success, returns HTTP `200`:
 
 <ResponseField name="isFollowing" type="boolean">
-  `true` — the authenticated user follows this user.
+  `true` if the authenticated user follows this user; otherwise `false`.
 </ResponseField>
 
-<ResponseField name="followId" type="string">
-  ID of the follow record.
+<ResponseField name="follow" type="object">
+  The [follow row](/v8/data-models/follow#followrow). Present only when `isFollowing` is `true`.
+  <Expandable title="properties">
+    <ResponseField name="id" type="string">
+      ID of the follow record. Pass it to [Delete Follow](/v8/api-reference/follows/delete-follow) to remove the follow.
+    </ResponseField>
+    <ResponseField name="user" type="object">
+      Public profile of the followed user (the user in the path).
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO timestamp of when the follow was created.
+    </ResponseField>
+  </Expandable>
 </ResponseField>
 
-<ResponseField name="followedAt" type="string">
-  ISO timestamp of when the follow was created.
-</ResponseField>
+```json
+// Following
+{
+  "isFollowing": true,
+  "follow": {
+    "id": "a1b2c3d4-...",
+    "user": { "id": "9f8e7d6c-...", "username": "jane", "name": "Jane", "avatar": null },
+    "createdAt": "2026-03-01T12:00:00.000Z"
+  }
+}
+```
 
-**When not following:**
-
-<ResponseField name="isFollowing" type="boolean">
-  `false`.
-</ResponseField>
+```json
+// Not following
+{ "isFollowing": false }
+```
 
 ## Error Responses
 

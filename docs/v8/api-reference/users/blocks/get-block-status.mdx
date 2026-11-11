@@ -30,17 +30,41 @@ Returns **only the acting user's outbound block state** — whether *I* block `:
 
 On success, returns HTTP `200`.
 
-<ResponseField name="blocked" type="boolean">
+<ResponseField name="isBlocking" type="boolean">
   `true` if the acting user blocks the target user; otherwise `false`.
 </ResponseField>
 
-<ResponseField name="blockId" type="string">
-  ID of the block record. Present only when `blocked` is `true`.
+<ResponseField name="block" type="object">
+  The [block row](/v8/data-models/block#blockrow). Present only when `isBlocking` is `true`.
+  <Expandable title="properties">
+    <ResponseField name="id" type="string">
+      ID of the block record.
+    </ResponseField>
+    <ResponseField name="user" type="object">
+      Public profile of the blocked user (the user in the path).
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO timestamp of when the block was created.
+    </ResponseField>
+  </Expandable>
 </ResponseField>
 
-<ResponseField name="createdAt" type="string">
-  ISO timestamp of when the block was created. Present only when `blocked` is `true`.
-</ResponseField>
+```json
+// Blocking
+{
+  "isBlocking": true,
+  "block": {
+    "id": "b2c3d4e5-...",
+    "user": { "id": "9f8e7d6c-...", "username": "jane", "name": "Jane", "avatar": null },
+    "createdAt": "2026-03-01T12:00:00.000Z"
+  }
+}
+```
+
+```json
+// Not blocking
+{ "isBlocking": false }
+```
 
 ## Error Responses
 

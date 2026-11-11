@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/chat/conversations"
 description: "Get the current user's conversations, ordered by most recent activity"
 ---
 
-Returns a cursor-paginated list of `ConversationPreview` objects for the acting user. Only active memberships are included. Results are ordered by `lastMessageAt` descending (conversations with no messages appear last, ordered by `createdAt`).
+Returns a cursor-paginated list of `ConversationPreview` objects for the acting user. Only active memberships are included. A space chat is included only while the acting user is an active member of its space and can see it ([visibility](/v8/data-models/space#visibility)); a pending, rejected or banned member, or someone who left the space, doesn't get it even while they still hold a conversation membership. Results are ordered by `lastMessageAt` descending (conversations with no messages appear last, ordered by `createdAt`).
 
 <Note>
   A `direct` conversation stays out of both parties' lists until it has a visible last message, so an opened-but-never-sent DM is invisible to the other side. If a DM's only message is later deleted or moderated away, it drops back out of the list and reappears when either party sends again. `group` and `space` conversations appear from creation.

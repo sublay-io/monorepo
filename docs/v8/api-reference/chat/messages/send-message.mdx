@@ -10,6 +10,10 @@ Creates a new message in a conversation. The caller must be an active member. At
 
 For space conversations with `postingPermission: "team"`, only users with `admin` or `moderator` role in the parent Space can send messages.
 
+In a space chat, the caller must also be an active member of the chat's space and able to see it ([visibility](/v8/data-models/space#visibility)). Anyone else, including a pending, rejected or banned member and someone who left or was removed from the space, gets `403 chat/not-a-member`, as a non-member does, even while they still hold a conversation membership. Deleting their own messages, leaving the conversation and muting it stay allowed: they need the conversation membership and sight of the space, not an active space membership.
+
+Sending is refused while the caller is banned. Banned in the space itself: `403 chat/not-a-member` (a ban ends the space membership and the chat membership). An active member of the space who is banned in a space above it: `403 chat/banned`.
+
 This endpoint accepts `multipart/form-data` to support file attachments alongside message content.
 
 ## Path Parameters
@@ -129,8 +133,15 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
     ```
   </Accordion>
   <Accordion title="Forbidden — 403">
+    Also returned in a space chat to anyone who isn't an active member of its space or can't see it, including someone banned in the space itself.
     ```json
     { "error": "You are not a member of this conversation.", "code": "chat/not-a-member" }
+    ```
+  </Accordion>
+  <Accordion title="Banned — 403">
+    The caller is an active member of the chat's space but is banned in a space above it. Banned in the space itself answers `403 chat/not-a-member` instead.
+    ```json
+    { "error": "You are banned from this space or a space above it.", "code": "chat/banned" }
     ```
   </Accordion>
   <Accordion title="Invalid Parent — 400 Bad Request">

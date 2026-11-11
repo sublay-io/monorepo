@@ -8,6 +8,8 @@ Returns two aggregate counts across all of the current user's active conversatio
 
 Thread replies are excluded from unread counts. Only main-stream messages are counted.
 
+A space chat counts only while the user is an active member of its space and can see it ([visibility](/v8/data-models/space#visibility)); a pending, rejected or banned member, or someone who left the space, gets no unread count from it even while they still hold a conversation membership.
+
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string">

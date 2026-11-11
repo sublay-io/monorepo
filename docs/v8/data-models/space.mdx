@@ -143,6 +143,8 @@ Only an **active** membership counts. A `pending`, `banned` or `rejected` user r
 
 A comment is read through its entity's space. Content in no space is read by everyone.
 
+A space's [rules](/v8/api-reference/spaces/rules/list-rules) don't follow `readingPermission`: anyone who can see the space reads them, members-only or not. Its [members](/v8/api-reference/spaces/membership/list-members) and [team](/v8/api-reference/spaces/membership/list-team) lists do follow it.
+
 ## Who can post and take part
 
 **Posting** — creating an entity in a space (a draft included), publishing a draft in it, and editing an entity in it — needs all three:

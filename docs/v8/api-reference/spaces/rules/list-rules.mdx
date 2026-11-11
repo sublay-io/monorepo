@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/spaces/:spaceId/rules"
 description: "Get all community rules for a space"
 ---
 
-Returns all community rules for a space, ordered by their `order` field. No sign-in is required. The rules of a space the viewer (the signed-in user, or the user a service key names in `actingUserId`) can't see answer `404 space/not-found`, like a space that doesn't exist.
+Returns all community rules for a space, ordered by their `order` field. No sign-in is required. The rules of a space the viewer (the signed-in user, or the user a service key names in `actingUserId`) can't see answer `404 space/not-found`, like a space that doesn't exist. `readingPermission` doesn't apply: anyone who can see the space reads its rules, including a non-member of a members-only space, unlike its [members](/v8/api-reference/spaces/membership/list-members) and [team](/v8/api-reference/spaces/membership/list-team).
 
 ## Path Parameters
 

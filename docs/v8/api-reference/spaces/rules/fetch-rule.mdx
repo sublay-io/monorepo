@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/spaces/:spaceId/rules/:ruleId"
 description: "Get a single community rule by its ID"
 ---
 
-Fetches a single rule by ID. No sign-in is required. A rule of a space the viewer (the signed-in user, or the user a service key names in `actingUserId`) can't see answers `404 space/not-found`, like a space that doesn't exist.
+Fetches a single rule by ID. No sign-in is required. A rule of a space the viewer (the signed-in user, or the user a service key names in `actingUserId`) can't see answers `404 space/not-found`, like a space that doesn't exist. `readingPermission` doesn't apply: anyone who can see the space reads its rules, including a non-member of a members-only space.
 
 ## Path Parameters
 

@@ -14,10 +14,9 @@ describe("useHandleSpaceEntityReport", () => {
       useHandleSpaceEntityReport(),
     );
 
-    const response = { message: "Report handled", code: "OK" };
-    axiosPrivate.mockResponse("patch", response);
+    axiosPrivate.mockResponse("patch", "", 204);
 
-    let returned: typeof response | undefined;
+    let returned: unknown = "unset";
     await act(async () => {
       returned = await result.current({
         spaceId: "space-1",
@@ -29,7 +28,8 @@ describe("useHandleSpaceEntityReport", () => {
       });
     });
 
-    expect(returned).toEqual(response);
+    // 204, no body: the hook resolves with nothing.
+    expect(returned).toBeUndefined();
 
     const [call] = axiosPrivate.calls("patch");
     expect(call.url).toBe("/test-project/spaces/space-1/reports/entity/report-1");

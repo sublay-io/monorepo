@@ -720,12 +720,12 @@ export {
   type CreateCommentReportProps,
   type CreateEntityReportProps,
   type CreateMessageReportProps,
+  type CreateReportResponse,
   type ReportTargetType,
   type FetchModeratedReportsParams,
   type ReportUserReport,
   type Report,
   type HandleSpaceEntityReportParams,
-  type HandleReportResponse,
   type HandleSpaceCommentReportParams,
   type HandleSpaceChatReportParams,
 } from "./hooks/reports";

@@ -10,6 +10,7 @@ export type {
   CreateCommentReportProps,
   CreateEntityReportProps,
   CreateMessageReportProps,
+  CreateReportResponse,
   ReportTargetType,
 } from "./useCreateReport";
 export type {
@@ -17,9 +18,6 @@ export type {
   ReportUserReport,
   Report,
 } from "./useFetchModeratedReports";
-export type {
-  HandleSpaceEntityReportParams,
-  HandleReportResponse,
-} from "./useHandleSpaceEntityReport";
+export type { HandleSpaceEntityReportParams } from "./useHandleSpaceEntityReport";
 export type { HandleSpaceCommentReportParams } from "./useHandleSpaceCommentReport";
 export type { HandleSpaceChatReportParams } from "./useHandleSpaceChatReport";

@@ -11,11 +11,6 @@ export interface HandleSpaceEntityReportParams {
   reason?: string;
 }
 
-export interface HandleReportResponse {
-  message: string;
-  code: string;
-}
-
 /**
  * Hook to handle entity reports at the space level
  * Space moderators can: remove entity, ban user from space, dismiss
@@ -32,7 +27,7 @@ export interface HandleReportResponse {
  *   reason: "Spamming"
  * });
  */
-function useHandleSpaceEntityReport(): (params: HandleSpaceEntityReportParams) => Promise<HandleReportResponse> {
+function useHandleSpaceEntityReport(): (params: HandleSpaceEntityReportParams) => Promise<void> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -53,7 +48,8 @@ function useHandleSpaceEntityReport(): (params: HandleSpaceEntityReportParams) =
         throw new Error("spaceId and reportId are required");
       }
 
-      const response = await axios.patch(
+      // The server answers 204 with no body.
+      await axios.patch(
         `/${projectId}/spaces/${spaceId}/reports/entity/${reportId}`,
         {
           entityId,
@@ -62,8 +58,6 @@ function useHandleSpaceEntityReport(): (params: HandleSpaceEntityReportParams) =
           reason,
         }
       );
-
-      return response.data as HandleReportResponse;
     },
     [projectId, axios]
   );

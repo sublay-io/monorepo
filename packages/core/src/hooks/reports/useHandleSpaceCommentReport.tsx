@@ -11,11 +11,6 @@ export interface HandleSpaceCommentReportParams {
   reason?: string;
 }
 
-export interface HandleReportResponse {
-  message: string;
-  code: string;
-}
-
 /**
  * Hook to handle comment reports at the space level
  * Space moderators can: remove comment, ban user from space, dismiss
@@ -31,7 +26,7 @@ export interface HandleReportResponse {
  *   summary: "Removed inappropriate comment"
  * });
  */
-function useHandleSpaceCommentReport(): (params: HandleSpaceCommentReportParams) => Promise<HandleReportResponse> {
+function useHandleSpaceCommentReport(): (params: HandleSpaceCommentReportParams) => Promise<void> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -52,7 +47,8 @@ function useHandleSpaceCommentReport(): (params: HandleSpaceCommentReportParams)
         throw new Error("spaceId and reportId are required");
       }
 
-      const response = await axios.patch(
+      // The server answers 204 with no body.
+      await axios.patch(
         `/${projectId}/spaces/${spaceId}/reports/comment/${reportId}`,
         {
           commentId,
@@ -61,8 +57,6 @@ function useHandleSpaceCommentReport(): (params: HandleSpaceCommentReportParams)
           reason,
         }
       );
-
-      return response.data as HandleReportResponse;
     },
     [projectId, axios]
   );

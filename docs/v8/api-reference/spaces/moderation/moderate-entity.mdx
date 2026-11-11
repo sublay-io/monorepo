@@ -85,6 +85,12 @@ Takes a direct moderation action on an entity in a space. Requires the caller to
     { "error": "Moderator access required", "code": "space/moderator-required" }
     ```
   </Accordion>
+  <Accordion title="Entity Not Found — 404">
+    No entity with this id is in this space: the id names nothing, or names an entity in another space. Both answer the same way.
+    ```json
+    { "error": "Entity not found.", "code": "moderation/entity-not-found" }
+    ```
+  </Accordion>
 </AccordionGroup>
 
 See also: [useModerateSpaceEntity](/v8/hooks/spaces/use-moderate-space-entity)

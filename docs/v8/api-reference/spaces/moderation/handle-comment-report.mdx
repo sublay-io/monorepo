@@ -95,13 +95,9 @@ Returns `201 Created`:
     ```
   </Accordion>
   <Accordion title="Report Not Found — 404">
+    No report with this id is in this space: the id names nothing, or names a report in another space. Both answer the same way.
     ```json
     { "error": "Report not found", "code": "report/not-found" }
-    ```
-  </Accordion>
-  <Accordion title="Report Not in Space — 404">
-    ```json
-    { "error": "Report does not belong to this space", "code": "report/not-found-in-space" }
     ```
   </Accordion>
   <Accordion title="Comment Not Found — 404">

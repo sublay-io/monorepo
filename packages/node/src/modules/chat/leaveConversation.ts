@@ -12,7 +12,7 @@ export async function leaveConversation(
 ): Promise<void> {
   const { conversationId, actingUserId } = data;
   await client.projectInstance.delete(
-    `/chat/conversations/${conversationId}/leave`,
+    `/chat/conversations/${conversationId}/members/me`,
     { params: { actingUserId } }
   );
 }

@@ -13,7 +13,7 @@ export async function markAllNotificationsAsRead(
   data: MarkAllNotificationsAsReadProps
 ): Promise<MarkAllNotificationsAsReadResponse> {
   const response =
-    await client.projectInstance.patch<MarkAllNotificationsAsReadResponse>(
+    await client.projectInstance.post<MarkAllNotificationsAsReadResponse>(
       "/app-notifications/mark-all-as-read",
       { actingUserId: data.actingUserId }
     );

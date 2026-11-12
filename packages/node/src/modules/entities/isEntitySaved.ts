@@ -11,13 +11,15 @@ export interface IsEntitySavedResponse {
   collections: { id: string; name: string }[];
 }
 
+/** GET /entities/:entityId/saved — whether the acting user saved the entity. */
 export async function isEntitySaved(
   client: SublayHttpClient,
   data: IsEntitySavedProps
 ): Promise<IsEntitySavedResponse> {
+  const { entityId, actingUserId } = data;
   const response = await client.projectInstance.get<IsEntitySavedResponse>(
-    "/entities/is-entity-saved",
-    { params: data }
+    `/entities/${entityId}/saved`,
+    { params: { actingUserId } }
   );
   return response.data;
 }

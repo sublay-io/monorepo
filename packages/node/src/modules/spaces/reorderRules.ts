@@ -16,7 +16,7 @@ export async function reorderRules(
   data: ReorderRulesProps
 ): Promise<Rule[]> {
   const { spaceId, ruleIds, actingUserId } = data;
-  const response = await client.projectInstance.patch<Rule[]>(
+  const response = await client.projectInstance.post<Rule[]>(
     `/spaces/${spaceId}/rules/reorder`,
     { ruleIds, actingUserId }
   );

@@ -13,7 +13,7 @@ export async function leaveSpace(
 ): Promise<LeaveSpaceResponse> {
   const { spaceId, actingUserId } = data;
   const response = await client.projectInstance.delete<LeaveSpaceResponse>(
-    `/spaces/${spaceId}/leave`,
+    `/spaces/${spaceId}/members/me`,
     { params: { actingUserId } }
   );
   return response.data;

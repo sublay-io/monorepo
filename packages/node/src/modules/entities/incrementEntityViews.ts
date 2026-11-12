@@ -13,6 +13,6 @@ export async function incrementEntityViews(
   const { entityId, ...body } = data;
   const path = `/entities/${entityId}/increment-views`;
   // `count` is a JSON integer in the body (default 1 when omitted).
-  const response = await client.projectInstance.patch<Entity>(path, body);
+  const response = await client.projectInstance.post<Entity>(path, body);
   return response.data;
 }

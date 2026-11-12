@@ -231,7 +231,7 @@ export interface WorkspaceRosterCountsResponse {
   distinctUsers: number;
 }
 
-// The per-user standing read (`GET /workspaces/:id/members/:userId`).
+// The per-user standing read (`GET /workspaces/:workspaceId/members/:userId`).
 /**
  * The `user` carried by a standing read. Normally the full user record, but the
  * server falls back to `{ id }` alone when the user row is gone (a deleted user
@@ -265,7 +265,7 @@ export interface WorkspaceMemberStanding {
   metadata: Record<string, any>;
 }
 
-// The authority-as-a-service read (`GET /workspaces/:id/authority/me`).
+// The authority-as-a-service read (`GET /workspaces/:workspaceId/authority/me`).
 export interface WorkspaceAuthority {
   reasons: WorkspaceAuthorityReasonDetail[];
   capabilities: string[];
@@ -327,7 +327,7 @@ export type WorkspaceInclude = "memberCount";
 export type WorkspaceIncludeArray = WorkspaceInclude[];
 export type WorkspaceIncludeParam = WorkspaceInclude | WorkspaceIncludeArray;
 
-/** `include` values the workspace roster (`GET /workspaces/:id/members`) accepts. */
+/** `include` values the workspace roster (`GET /workspaces/:workspaceId/members`) accepts. */
 export type WorkspaceMemberInclude =
   | "ancestorOwners"
   | "reachHolders"

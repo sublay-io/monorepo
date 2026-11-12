@@ -3,7 +3,8 @@ import { DeclineMemberResponse } from "../../interfaces/Space";
 
 export interface DeclineMembershipProps {
   spaceId: string;
-  memberId: string;
+  /** The member's user id. Your own id is refused (400 `space/own-member-id`). */
+  userId: string;
   /**
    * The user this request acts as. The request has exactly that user's
    * permissions in the space and is recorded as theirs. Required.
@@ -15,9 +16,9 @@ export async function declineMembership(
   client: SublayHttpClient,
   data: DeclineMembershipProps
 ): Promise<DeclineMemberResponse> {
-  const { spaceId, memberId, actingUserId } = data;
-  const response = await client.projectInstance.patch<DeclineMemberResponse>(
-    `/spaces/${spaceId}/members/${memberId}/decline`,
+  const { spaceId, userId, actingUserId } = data;
+  const response = await client.projectInstance.post<DeclineMemberResponse>(
+    `/spaces/${spaceId}/members/${userId}/decline`,
     { actingUserId }
   );
   return response.data;

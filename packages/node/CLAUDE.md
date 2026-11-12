@@ -69,9 +69,9 @@ src/
 > meaningful server-to-server contract — the directory stays on disk but is not
 > exposed on `SublayClient`.
 >
-> The space-scoped chat endpoints (`getSpaceConversation`, `moderateSpaceChatMessage`,
-> `handleSpaceChatReport`) live on **`client.spaces`** (they're `/spaces/...` routes),
-> not on `client.chat`.
+> The space-scoped chat endpoints (`getSpaceConversation`, `moderateSpaceChatMessage`)
+> and the one report handler (`handleSpaceReport`, every report type) live on
+> **`client.spaces`** (they're `/spaces/...` routes), not on `client.chat`.
 
 ### HTTP Client Configuration
 
@@ -160,15 +160,15 @@ A user's mutual connections and pending requests. All take `actingUserId`.
 
 `fetchConnections`, `fetchConnectionsCount`, `fetchSentPendingConnections`, `fetchReceivedPendingConnections`, `acceptConnection`, `declineConnection`, `removeConnection`
 
-### 8. Spaces Module (32 functions)
+### 8. Spaces Module (34 functions)
 
 Space lifecycle, membership, moderation, and rules — documented across three pages (`spaces`, `spaces-members`, `spaces-moderation`).
 
 Lifecycle: `createSpace`, `fetchManySpaces`, `fetchSpace`, `fetchSpaceByShortId`, `fetchSpaceBySlug`, `fetchUserSpaces`, `checkSlugAvailability`, `updateSpace`, `deleteSpace`, `fetchSpaceBreadcrumb`
 
-Members: `joinSpace`, `leaveSpace`, `checkMyMembership`, `fetchSpaceMembers`, `fetchSpaceTeam`, `updateMemberRole`, `addMember`, `approveMembership`, `declineMembership`, `banMember`, `unbanMember`
+Members: `joinSpace`, `leaveSpace`, `checkMyMembership`, `fetchSpaceMembers`, `fetchSpaceTeam`, `updateMemberRole`, `addMember`, `approveMembership`, `declineMembership`, `banMember`, `unbanMember` (member actions take the member's `userId`)
 
-Moderation/rules: `handleEntityReport`, `handleCommentReport` (both take an `actions` array), `moderateSpaceEntity`, `moderateSpaceComment`, `fetchManyRules`, `fetchRule`, `createRule`, `updateRule`, `deleteRule`, `reorderRules`
+Moderation/rules: `handleSpaceReport` (one handler for entity, comment and chat message reports; takes an `actions` array, the target is read from the report), `moderateSpaceEntity`, `moderateSpaceComment`, `fetchManyRules`, `fetchRule`, `createRule`, `updateRule`, `deleteRule`, `reorderRules`
 
 ### 9. Search Module (5 functions)
 
@@ -206,12 +206,12 @@ File and image uploads, plus read/delete. `uploadFile`, `uploadImage`, `getFile`
   follows "the owner acts"**: a file with an owner is deleted only as that owner (`actingUserId`
   required, 400 `storage/missing-user-id` without it), an app-owned file only by a key naming nobody.
 
-### 15. Chat Module (20 functions)
+### 15. Chat Module (22 functions)
 
 Conversations, messages, members, reactions, read state, and reporting.
 
 Conversations: `listConversations`, `createDirectConversation`, `createGroupConversation`, `getConversation`, `updateConversation`, `deleteConversation`, `getUnreadCount`
-Members: `listMembers`, `addMember`, `removeMember`, `changeMemberRole`, `leaveConversation`
+Members: `listMembers`, `addMember`, `removeMember`, `changeMemberRole`, `leaveConversation`, `checkMyConversationMembership`
 Messages: `listMessages`, `sendMessage`, `getMessage`, `editMessage`, `deleteMessage`
 (Reporting a message is not a chat fn — use `reports.createReport` with `targetType: "message"`.)
 Reactions: `toggleReaction`, `listReactions` · Read state: `markAsRead`
@@ -228,8 +228,9 @@ Reactions: `toggleReaction`, `listReactions` · Read state: `markAsRead`
   JSON-stringified, like `storage`); otherwise a JSON body. Don't hand-set
   Content-Type.
 - **Space chat lives on `client.spaces`:** `getSpaceConversation`,
-  `moderateSpaceChatMessage`, `handleSpaceChatReport`. The two moderation routes
-  require `actingUserId`, held to that user's moderator role in the space.
+  `moderateSpaceChatMessage`; chat message reports go through
+  `handleSpaceReport`. Both moderation routes require `actingUserId`, held to
+  that user's moderator role in the space.
 
 ### 16. Push Notifications Module (1 function)
 

@@ -11,6 +11,7 @@ import {
   fetchWorkspaceMemberStanding,
   fetchMyWorkspaceMembership,
   updateWorkspaceMember,
+  updateMyWorkspaceMembership,
   removeWorkspaceMember,
   leaveWorkspace,
   removeWorkspaceMemberFromSubtree,
@@ -64,7 +65,7 @@ function expectNoActorUserIdAnywhere(
 }
 
 describe("js-sdk workspaces — surface", () => {
-  it("exports all 23 canonical workspace functions and nothing else", () => {
+  it("exports all 24 canonical workspace functions and nothing else", () => {
     expect(Object.keys(Workspaces).sort()).toEqual(
       [
         "acceptWorkspaceInvite",
@@ -90,6 +91,7 @@ describe("js-sdk workspaces — surface", () => {
         "updateWorkspace",
         "updateWorkspaceInheritFlag",
         "updateWorkspaceMember",
+        "updateMyWorkspaceMembership",
       ].sort()
     );
   });
@@ -280,6 +282,17 @@ describe("js-sdk workspaces — membership request shaping", () => {
     const { client, projectInstance } = makeClient();
     await fetchMyWorkspaceMembership(client, { workspaceId: "w1" });
     expect(projectInstance.get.mock.calls[0]).toEqual(["/workspaces/w1/members/me"]);
+    expectNoActorUserIdAnywhere(projectInstance);
+  });
+
+  it("updateMyWorkspaceMembership PATCHes /workspaces/:workspaceId/members/me with only the title", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateMyWorkspaceMembership(client, { workspaceId: "w1", title: "Scout" });
+    await updateMyWorkspaceMembership(client, { workspaceId: "w1", title: null });
+    expect(projectInstance.patch.mock.calls).toEqual([
+      ["/workspaces/w1/members/me", { title: "Scout" }],
+      ["/workspaces/w1/members/me", { title: null }],
+    ]);
     expectNoActorUserIdAnywhere(projectInstance);
   });
 

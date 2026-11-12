@@ -248,6 +248,7 @@ export type {
   WorkspaceListRelation,
   WorkspaceListSortDir,
 } from "./interfaces/Workspace";
+export type { UpdateMyWorkspaceMembershipProps } from "./modules/workspaces/updateMyWorkspaceMembership";
 export type { Rule } from "./interfaces/Rule";
 export type { FollowRow, FollowStatus } from "./interfaces/Follow";
 export type { BlockRow, BlockStatus } from "./interfaces/Block";

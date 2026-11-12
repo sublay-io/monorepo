@@ -11,6 +11,7 @@ import {
   fetchWorkspaceMemberStanding,
   fetchMyWorkspaceMembership,
   updateWorkspaceMember,
+  updateMyWorkspaceMembership,
   removeWorkspaceMember,
   leaveWorkspace,
   removeWorkspaceMemberFromSubtree,
@@ -210,6 +211,16 @@ describe("node-sdk workspaces (membership) — request shaping", () => {
     expect(projectInstance.get).toHaveBeenCalledWith("/workspaces/w1/members/me", {
       params: { actingUserId: "actor1" },
     });
+  });
+
+  it("updateMyWorkspaceMembership PATCHes /workspaces/:workspaceId/members/me with actingUserId and title in the body", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateMyWorkspaceMembership(client, { workspaceId: "w1", actingUserId: "actor1", title: "Scout" });
+    await updateMyWorkspaceMembership(client, { workspaceId: "w1", actingUserId: "actor1", title: null });
+    expect(projectInstance.patch.mock.calls).toEqual([
+      ["/workspaces/w1/members/me", { actingUserId: "actor1", title: "Scout" }],
+      ["/workspaces/w1/members/me", { actingUserId: "actor1", title: null }],
+    ]);
   });
 
   it("updateWorkspaceMember puts target in the path, actor actingUserId in the body", async () => {

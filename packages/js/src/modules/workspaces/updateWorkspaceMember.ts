@@ -24,7 +24,7 @@ export interface UpdateWorkspaceMemberProps {
    * ladder.
    */
   relativeRank?: number;
-  // Cosmetic fields (require `edit-member-profile`). Another member only: your own id is refused (400 `workspace/own-member-id`).
+  // Cosmetic fields (require `edit-member-profile`). Another member only: your own id is refused (400 `workspace/own-member-id`); edit your own title with `updateMyWorkspaceMembership`.
   title?: string | null;
   metadata?: Record<string, any>;
 }

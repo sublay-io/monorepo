@@ -201,6 +201,7 @@ export type {
   WorkspaceListRelation,
   WorkspaceListSortDir,
 } from "./interfaces/Workspace";
+export type { UpdateMyWorkspaceMembershipProps } from "./modules/workspaces/updateMyWorkspaceMembership";
 export type {
   UserInclude,
   UserIncludeArray,

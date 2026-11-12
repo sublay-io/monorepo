@@ -13,6 +13,7 @@ export { fetchWorkspaceMembers } from "./fetchWorkspaceMembers";
 export { fetchWorkspaceMemberStanding } from "./fetchWorkspaceMemberStanding";
 export { fetchMyWorkspaceMembership } from "./fetchMyWorkspaceMembership";
 export { updateWorkspaceMember } from "./updateWorkspaceMember";
+export { updateMyWorkspaceMembership } from "./updateMyWorkspaceMembership";
 export { removeWorkspaceMember } from "./removeWorkspaceMember";
 export { leaveWorkspace } from "./leaveWorkspace";
 export { removeWorkspaceMemberFromSubtree } from "./removeWorkspaceMemberFromSubtree";

@@ -99,8 +99,9 @@ function LinkGitHub() {
 
 <ResponseField name="linkOAuthProvider" type="function">
   Links an additional OAuth provider to the currently authenticated user. The
-  user must already be signed in. Redirects the browser to the provider's
-  authorization page.
+  user must already be signed in. Redirects the browser to a Sublay page naming
+  the account the provider will be connected to; when the user continues, on to
+  the provider's authorization page.
 
   **Parameters:**
   - `provider` (required) — OAuth provider identifier (e.g. `"google"`, `"github"`).

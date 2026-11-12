@@ -29,8 +29,18 @@ The authenticated user's ID is taken from the access token — it cannot be spec
 ## Response
 
 <ResponseField name="authorizationUrl" type="string">
-  The provider's authorization URL. Redirect the user's browser to this URL.
+  The URL to send the user's browser to. It is a one-time Sublay URL; it
+  expires after 10 minutes.
 </ResponseField>
+
+Before going to the provider, Sublay shows the user a page naming the account the provider will be connected to (its verified email, or else its username or name), with **Continue** and **Cancel**. Continue goes on to the provider; Cancel returns to `redirectAfterAuth` with `error=access_denied`. The page is in English.
+
+<Note>
+  Open `authorizationUrl` as-is, in the browser (or auth session) that should
+  end up signed in. It points to Sublay first, which ties the sign-in to that
+  browser and then sends it on to the provider. A sign-in that returns to a
+  different browser is refused with `error=state_mismatch`.
+</Note>
 
 ## Callback
 

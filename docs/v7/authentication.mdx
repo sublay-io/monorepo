@@ -130,10 +130,10 @@ Each provider must be configured in the project dashboard with:
 
 <Steps>
   <Step title="Request an authorization URL">
-    Call the authorize endpoint with the provider name and the `redirectAfterAuth` URL. Sublay creates a short-lived state record (10-minute TTL) and returns an authorization URL pointing to the provider. For Google, a PKCE code verifier and challenge are generated automatically.
+    Call the authorize endpoint with the provider name and the `redirectAfterAuth` URL. Sublay creates a short-lived state record (10-minute TTL) and returns a one-time authorization URL. For Google, a PKCE code verifier and challenge are generated automatically.
   </Step>
   <Step title="Redirect the user to the provider">
-    Redirect the user to the authorization URL. They authenticate with the provider and are sent back to Sublay's callback endpoint.
+    Redirect the user to the authorization URL. Sublay ties the sign-in to that browser and sends it on to the provider; the user authenticates there and is sent back to Sublay's callback endpoint. The callback only completes the sign-in in the same browser (otherwise it redirects with `error=state_mismatch`).
   </Step>
   <Step title="Sublay processes the callback">
     Sublay exchanges the authorization code for the provider's tokens, fetches the user profile, and resolves which Sublay user to return using this priority:
@@ -153,7 +153,7 @@ Each provider must be configured in the project dashboard with:
 
 ### Account Linking
 
-A user can link multiple OAuth providers (and a password account) to a single Sublay user record. To link an additional provider, the user must be signed in, and the OAuth flow is initiated via the link endpoint rather than the authorize endpoint. The new identity is attached to the existing account.
+A user can link multiple OAuth providers (and a password account) to a single Sublay user record. To link an additional provider, the user must be signed in, and the OAuth flow is initiated via the link endpoint rather than the authorize endpoint. Sublay first shows the user a page naming the account the provider will be connected to, and continues to the provider only when they confirm. The new identity is attached to the existing account.
 
 This enables scenarios like "sign in with Google on a laptop and GitHub on another device" — both map to the same user.
 

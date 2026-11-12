@@ -22,7 +22,7 @@ Supported providers (`OAuthProvider`): `"google"`, `"github"`, `"apple"`, `"face
 ### authorize
 
 Begins an **unauthenticated** OAuth sign-in / sign-up flow and returns the
-provider's authorization URL.
+URL to send the browser to (Sublay redirects it on to the provider).
 
 ```typescript
 const { authorizationUrl } = await sublay.oauth.authorize({
@@ -49,7 +49,9 @@ window.location.href = authorizationUrl; // hand off to the provider
 ### linkIdentity
 
 Links a new OAuth provider to the **current authenticated user** and returns the
-provider's authorization URL. The user is taken from the auth token, never the body.
+URL to send the browser to. Sublay first shows a page naming the account the
+provider will be connected to, then continues to the provider. The user is taken
+from the auth token, never the body.
 
 ```typescript
 const { authorizationUrl } = await sublay.oauth.linkIdentity({

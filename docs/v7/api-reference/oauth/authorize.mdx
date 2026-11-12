@@ -4,7 +4,7 @@ api: "POST /v7/:projectId/oauth/authorize"
 description: "Initiate an OAuth sign-in or sign-up flow"
 ---
 
-Initiates an OAuth 2.0 authorization flow for unauthenticated users (sign-in or sign-up). Returns a provider authorization URL that the client should redirect to. After the user authenticates with the provider, they are redirected back to the `redirectAfterAuth` URL with tokens in the URL fragment.
+Initiates an OAuth 2.0 authorization flow for unauthenticated users (sign-in or sign-up). Returns an authorization URL that the client should redirect the browser to. Sublay sends the browser on to the provider, and after the user authenticates there, back to the `redirectAfterAuth` URL with tokens in the URL fragment.
 
 <Note>
   The OAuth provider must be configured and enabled in the Sublay dashboard
@@ -27,9 +27,17 @@ Initiates an OAuth 2.0 authorization flow for unauthenticated users (sign-in or 
 ## Response
 
 <ResponseField name="authorizationUrl" type="string">
-  The provider's authorization URL. Redirect the user's browser to this URL
-  to begin the OAuth flow.
+  The URL to send the user's browser to, to begin the OAuth flow. It is a
+  one-time Sublay URL that redirects to the provider; it expires after 10
+  minutes.
 </ResponseField>
+
+<Note>
+  Open `authorizationUrl` as-is, in the browser (or auth session) that should
+  end up signed in. It points to Sublay first, which ties the sign-in to that
+  browser and then sends it on to the provider. A sign-in that returns to a
+  different browser is refused with `error=state_mismatch`.
+</Note>
 
 ## Callback
 
@@ -44,6 +52,8 @@ https://yourapp.com/callback#accessToken=...&refreshToken=...
 ```
 https://yourapp.com/callback?error=access_denied&error_description=...
 ```
+
+`error=state_mismatch` means the browser that returned from the provider isn't the one that opened `authorizationUrl` (for example, the return link was opened somewhere else), so the sign-in is refused. Start the sign-in again. `error=state_expired` means more than 10 minutes passed.
 
 `error=email_not_verified` means the provider's email belongs to an existing user but the provider hasn't verified it, so the sign-in can't be connected to that account. `error_description` says so in words you can show the user: verify the email with the provider, or sign in the way they originally signed up.
 

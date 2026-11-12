@@ -58,6 +58,52 @@ describe("useFetchWorkspaceMembers", () => {
     expect(call.config?.params).toEqual({});
   });
 
+  it("returns the roster as an array, not the server's { data, total } envelope", async () => {
+    const user = makeAuthUser({ id: "user-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useFetchWorkspaceMembers(),
+      { projectId: "project-1", user }
+    );
+
+    const entries = [{ user: { id: "user-2" }, reasons: [] }];
+    axiosPrivate.mockResponse("get", { data: entries, total: 1 });
+
+    let returned: unknown;
+    await act(async () => {
+      returned = await result.current({ workspaceId: "w1" });
+    });
+
+    expect(returned).toEqual(entries);
+  });
+
+  it("returns the counts record as-is with countOnly", async () => {
+    const user = makeAuthUser({ id: "user-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useFetchWorkspaceMembers(),
+      { projectId: "project-1", user }
+    );
+
+    const counts = {
+      counts: {
+        owner: 1,
+        member: 2,
+        ancestorOwner: 0,
+        reachHolder: 0,
+        descendantMember: 0,
+      },
+      total: 3,
+      distinctUsers: 3,
+    };
+    axiosPrivate.mockResponse("get", counts);
+
+    let returned: unknown;
+    await act(async () => {
+      returned = await result.current({ workspaceId: "w1", countOnly: true });
+    });
+
+    expect(returned).toEqual(counts);
+  });
+
   it("throws before requesting when workspaceId is missing", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(

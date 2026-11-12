@@ -7,10 +7,6 @@ export interface FetchWorkspaceInvitesProps {
   workspaceId: string;
 }
 
-export interface FetchWorkspaceInvitesResponse {
-  data: WorkspaceInvitation[];
-}
-
 /**
  * List the LIVE pending invites a workspace has ISSUED (`status='pending' AND
  * expiresAt > now`). Requires the `invite` capability (or owner). Returned in
@@ -21,7 +17,7 @@ export interface FetchWorkspaceInvitesResponse {
  */
 function useFetchWorkspaceInvites(): (
   props: FetchWorkspaceInvitesProps
-) => Promise<FetchWorkspaceInvitesResponse> {
+) => Promise<WorkspaceInvitation[]> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -34,11 +30,11 @@ function useFetchWorkspaceInvites(): (
         throw new Error("Please pass a workspaceId");
       }
 
-      const response = await axios.get<FetchWorkspaceInvitesResponse>(
+      const response = await axios.get<{ data: WorkspaceInvitation[] }>(
         `/${projectId}/workspaces/${workspaceId}/invites`
       );
 
-      return response.data;
+      return response.data.data;
     },
     [projectId, axios]
   );

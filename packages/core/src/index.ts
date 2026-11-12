@@ -518,11 +518,9 @@ export {
   type SkippedWorkspace,
   type CreateWorkspaceInviteProps,
   type FetchWorkspaceInvitesProps,
-  type FetchWorkspaceInvitesResponse,
   type RevokeWorkspaceInviteProps,
   type RevokeWorkspaceInviteResponse,
   type ResendWorkspaceInviteProps,
-  type FetchMyWorkspaceInvitesResponse,
   type AcceptWorkspaceInviteProps,
   type AcceptWorkspaceInviteResponse,
   type DeclineWorkspaceInviteProps,
@@ -901,7 +899,6 @@ export type {
   WorkspaceMemberIncludeParam,
   WorkspaceRosterReason,
   WorkspaceRosterEntry,
-  WorkspaceRosterResponse,
   WorkspaceRosterCountsResponse,
   WorkspaceMember,
   WorkspaceStandingUser,
@@ -916,7 +913,6 @@ export type {
   SpaceMemberStatus,
   SpaceMemberWithUser,
   SpaceMembersResponse,
-  SpaceTeamResponse,
 } from "./interfaces/models/SpaceMember";
 export type {
   SpaceListSortByOptions,
@@ -933,7 +929,6 @@ export type {
   WorkspaceListFetchOptions,
 } from "./store/slices/workspaceListsSlice";
 export type {
-  SpaceBreadcrumb,
   SpaceBreadcrumbEntry,
   VisibleSpaceBreadcrumbEntry,
   HiddenSpaceBreadcrumbEntry,
@@ -948,7 +943,6 @@ export type { UserSearchParams } from "./interfaces/UserSearch";
 export type { SpaceSearchParams, SpaceSearchFields } from "./interfaces/SpaceSearch";
 export type {
   Rule,
-  FetchManyRulesResponse,
   DeleteRuleResponse,
 } from "./interfaces/models/Rule";
 export type {
@@ -975,7 +969,6 @@ export type {
   ConnectionRowStatus,
   ConnectionStatus,
   ConnectionRequestParams,
-  ConnectionCountResponse,
 } from "./interfaces/models/Connection";
 export type { FollowRow, FollowStatus } from "./interfaces/models/Follow";
 export type { BlockRow, BlockStatus } from "./interfaces/models/Block";

@@ -41,10 +41,7 @@ export type {
 export { default as useCreateWorkspaceInvite } from "./useCreateWorkspaceInvite";
 export type { CreateWorkspaceInviteProps } from "./useCreateWorkspaceInvite";
 export { default as useFetchWorkspaceInvites } from "./useFetchWorkspaceInvites";
-export type {
-  FetchWorkspaceInvitesProps,
-  FetchWorkspaceInvitesResponse,
-} from "./useFetchWorkspaceInvites";
+export type { FetchWorkspaceInvitesProps } from "./useFetchWorkspaceInvites";
 export { default as useRevokeWorkspaceInvite } from "./useRevokeWorkspaceInvite";
 export type {
   RevokeWorkspaceInviteProps,
@@ -53,7 +50,6 @@ export type {
 export { default as useResendWorkspaceInvite } from "./useResendWorkspaceInvite";
 export type { ResendWorkspaceInviteProps } from "./useResendWorkspaceInvite";
 export { default as useFetchMyWorkspaceInvites } from "./useFetchMyWorkspaceInvites";
-export type { FetchMyWorkspaceInvitesResponse } from "./useFetchMyWorkspaceInvites";
 export { default as useAcceptWorkspaceInvite } from "./useAcceptWorkspaceInvite";
 export type {
   AcceptWorkspaceInviteProps,

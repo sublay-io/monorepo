@@ -2,15 +2,14 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
-import { ConnectionCountResponse } from "../../../interfaces/models/Connection";
 
-function useFetchConnectionsCount(): () => Promise<ConnectionCountResponse> {
+function useFetchConnectionsCount(): () => Promise<number> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
 
   const fetchConnectionsCount = useCallback(
-    async (): Promise<ConnectionCountResponse> => {
+    async (): Promise<number> => {
       if (!projectId) {
         throw new Error("No project specified");
       }
@@ -19,11 +18,11 @@ function useFetchConnectionsCount(): () => Promise<ConnectionCountResponse> {
         throw new Error("No user is logged in");
       }
 
-      const response = await axios.get(
+      const response = await axios.get<{ count: number }>(
         `/${projectId}/connections/count`
       );
 
-      return response.data as ConnectionCountResponse;
+      return response.data.count;
     },
     [axios, projectId, user]
   );

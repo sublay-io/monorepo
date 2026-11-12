@@ -16,12 +16,12 @@ describe("useCheckSlugAvailability", () => {
 
     axiosPrivate.mockResponse("get", { available: true });
 
-    let returned: { available: boolean } | undefined;
+    let returned: boolean | undefined;
     await act(async () => {
       returned = await result.current({ slug: "design" });
     });
 
-    expect(returned).toEqual({ available: true });
+    expect(returned).toBe(true);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/spaces/check-slug?slug=design");

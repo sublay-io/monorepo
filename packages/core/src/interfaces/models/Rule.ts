@@ -10,11 +10,6 @@ export interface Rule {
   updatedAt: string;
 }
 
-export interface FetchManyRulesResponse {
-  data: Rule[];
-  count: number;
-}
-
 export interface DeleteRuleResponse {
   message: string;
   deletedRule: {

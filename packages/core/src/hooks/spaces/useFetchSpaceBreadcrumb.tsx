@@ -1,13 +1,18 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
-import { SpaceBreadcrumb } from "../../interfaces/SpaceBreadcrumb";
+import { SpaceBreadcrumbEntry } from "../../interfaces/SpaceBreadcrumb";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 
 export interface FetchSpaceBreadcrumbProps {
   spaceId: string;
 }
 
-function useFetchSpaceBreadcrumb(): (props: FetchSpaceBreadcrumbProps) => Promise<SpaceBreadcrumb> {
+/**
+ * The path from the top-level space down to the requested one, root first.
+ * The requested space is always the last entry, and always visible; spaces
+ * above it the viewer can't see are `{ hidden: true }` entries.
+ */
+function useFetchSpaceBreadcrumb(): (props: FetchSpaceBreadcrumbProps) => Promise<SpaceBreadcrumbEntry[]> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -21,13 +26,16 @@ function useFetchSpaceBreadcrumb(): (props: FetchSpaceBreadcrumbProps) => Promis
         throw new Error("Please pass a spaceId");
       }
 
-      const response = await axios.get(
+      const response = await axios.get<{
+        breadcrumb: SpaceBreadcrumbEntry[];
+        depth: number;
+      }>(
         `/${projectId}/spaces/${spaceId}/breadcrumb`
       );
 
-      return response.data as SpaceBreadcrumb;
+      return response.data.breadcrumb;
     },
-    [projectId]
+    [projectId, axios]
   );
 
   return fetchSpaceBreadcrumb;

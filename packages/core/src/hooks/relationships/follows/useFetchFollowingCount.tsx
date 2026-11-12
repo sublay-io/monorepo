@@ -3,7 +3,7 @@ import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
 
-function useFetchFollowingCount(): () => Promise<{ count: number }> {
+function useFetchFollowingCount(): () => Promise<number> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
@@ -18,11 +18,11 @@ function useFetchFollowingCount(): () => Promise<{ count: number }> {
         throw new Error("No user is logged in.");
       }
 
-      const response = await axios.get(
+      const response = await axios.get<{ count: number }>(
         `/${projectId}/follows/following-count`
       );
 
-      return response.data as { count: number };
+      return response.data.count;
     },
     [axios, projectId, user]
   );

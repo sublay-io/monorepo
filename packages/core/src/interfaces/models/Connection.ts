@@ -55,7 +55,3 @@ export interface ConnectionRequestParams {
   userId: string;
   message?: string;
 }
-
-export interface ConnectionCountResponse {
-  count: number;
-}

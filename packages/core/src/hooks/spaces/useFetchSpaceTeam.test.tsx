@@ -3,7 +3,7 @@ import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks } from "../../test-utils";
 import useFetchSpaceTeam from "./useFetchSpaceTeam";
-import type { SpaceTeamResponse, SpaceMemberWithUser } from "../../interfaces/models/SpaceMember";
+import type { SpaceMemberWithUser } from "../../interfaces/models/SpaceMember";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -21,18 +21,18 @@ function makeMember(overrides: Partial<SpaceMemberWithUser> = {}): SpaceMemberWi
 }
 
 describe("useFetchSpaceTeam", () => {
-  it("fetches the space's admins and moderators", async () => {
+  it("returns the space's admins and moderators as an array", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchSpaceTeam());
 
-    const response: SpaceTeamResponse = { data: [makeMember()] };
-    axiosPrivate.mockResponse("get", response);
+    const member = makeMember();
+    axiosPrivate.mockResponse("get", { data: [member] });
 
-    let returned: SpaceTeamResponse | undefined;
+    let returned: SpaceMemberWithUser[] | undefined;
     await act(async () => {
       returned = await result.current({ spaceId: "space-1" });
     });
 
-    expect(returned).toEqual(response);
+    expect(returned).toEqual([member]);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/spaces/space-1/team");

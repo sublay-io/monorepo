@@ -3,17 +3,13 @@ import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { MyWorkspaceInvitation } from "../../interfaces/models/Workspace";
 
-export interface FetchMyWorkspaceInvitesResponse {
-  data: MyWorkspaceInvitation[];
-}
-
 /**
  * The bearer-token user's LIVE pending invites (`status='pending' AND expiresAt
  * > now`), matched by `userId` from the token. Surfacing is NOT
  * verification-gated (the verified check applies when the user ACTS on an
  * invite — accept or decline).
  */
-function useFetchMyWorkspaceInvites(): () => Promise<FetchMyWorkspaceInvitesResponse> {
+function useFetchMyWorkspaceInvites(): () => Promise<MyWorkspaceInvitation[]> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -22,11 +18,11 @@ function useFetchMyWorkspaceInvites(): () => Promise<FetchMyWorkspaceInvitesResp
       throw new Error("No projectId available.");
     }
 
-    const response = await axios.get<FetchMyWorkspaceInvitesResponse>(
+    const response = await axios.get<{ data: MyWorkspaceInvitation[] }>(
       `/${projectId}/me/workspace-invites`
     );
 
-    return response.data;
+    return response.data.data;
   }, [projectId, axios]);
 
   return fetchMyWorkspaceInvites;

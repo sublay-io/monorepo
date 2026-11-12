@@ -20,15 +20,15 @@ describe("useFetchMyWorkspaceInvites", () => {
       { projectId: "project-1", user }
     );
 
-    const envelope = { data: [{ id: "i1" }] };
-    axiosPrivate.mockResponse("get", envelope);
+    axiosPrivate.mockResponse("get", { data: [{ id: "i1" }] });
 
-    let returned: { data: unknown[] } | undefined;
+    let returned: unknown[] | undefined;
     await act(async () => {
       returned = await result.current();
     });
 
-    expect(returned).toEqual(envelope);
+    // The invites themselves, not the server's `{ data }` envelope.
+    expect(returned).toEqual([{ id: "i1" }]);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/project-1/me/workspace-invites");

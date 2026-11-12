@@ -16,12 +16,12 @@ describe("useCheckUsernameAvailability", () => {
 
     axiosPublic.mockResponse("get", { available: true });
 
-    let returned: { available: boolean } | undefined;
+    let returned: boolean | undefined;
     await act(async () => {
       returned = await result.current({ username: "newuser" });
     });
 
-    expect(returned).toEqual({ available: true });
+    expect(returned).toBe(true);
 
     const [call] = axiosPublic.calls("get");
     expect(call.url).toBe("/test-project/users/check-username");

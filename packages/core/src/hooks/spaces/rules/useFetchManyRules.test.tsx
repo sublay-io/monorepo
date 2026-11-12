@@ -3,7 +3,7 @@ import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks } from "../../../test-utils";
 import useFetchManyRules from "./useFetchManyRules";
-import type { FetchManyRulesResponse, Rule } from "../../../interfaces/models/Rule";
+import type { Rule } from "../../../interfaces/models/Rule";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -25,18 +25,18 @@ function makeRule(overrides: Partial<Rule> = {}): Rule {
 }
 
 describe("useFetchManyRules", () => {
-  it("fetches all rules for a space", async () => {
+  it("returns the space's rules as an array", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyRules());
 
-    const response: FetchManyRulesResponse = { data: [makeRule()], count: 1 };
-    axiosPrivate.mockResponse("get", response);
+    const rule = makeRule();
+    axiosPrivate.mockResponse("get", { data: [rule], count: 1 });
 
-    let returned: FetchManyRulesResponse | undefined;
+    let returned: Rule[] | undefined;
     await act(async () => {
       returned = await result.current({ spaceId: "space-1" });
     });
 
-    expect(returned).toEqual(response);
+    expect(returned).toEqual([rule]);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/spaces/space-1/rules");

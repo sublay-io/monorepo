@@ -16,12 +16,12 @@ describe("useFetchFollowingCountByUserId", () => {
 
     axiosPrivate.mockResponse("get", { count: 4 });
 
-    let returned;
+    let returned: number | undefined;
     await act(async () => {
       returned = await result.current({ userId: "user-2" });
     });
 
-    expect(returned).toEqual({ count: 4 });
+    expect(returned).toBe(4);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/users/user-2/following-count");

@@ -6,7 +6,7 @@ export interface FetchFollowersCountByUserIdProps {
   userId: string;
 }
 
-function useFetchFollowersCountByUserId(): (props: FetchFollowersCountByUserIdProps) => Promise<{ count: number }> {
+function useFetchFollowersCountByUserId(): (props: FetchFollowersCountByUserIdProps) => Promise<number> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -20,11 +20,11 @@ function useFetchFollowersCountByUserId(): (props: FetchFollowersCountByUserIdPr
         throw new Error("No projectId available.");
       }
 
-      const response = await axios.get(
+      const response = await axios.get<{ count: number }>(
         `/${projectId}/users/${userId}/followers-count`
       );
 
-      return response.data as { count: number };
+      return response.data.count;
     },
     [axios, projectId]
   );

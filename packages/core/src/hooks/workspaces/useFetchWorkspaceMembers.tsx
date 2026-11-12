@@ -3,7 +3,7 @@ import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import {
   WorkspaceMemberIncludeParam,
-  WorkspaceRosterResponse,
+  WorkspaceRosterEntry,
   WorkspaceRosterCountsResponse,
 } from "../../interfaces/models/Workspace";
 
@@ -18,8 +18,8 @@ export interface FetchWorkspaceMembersProps {
 
 /**
  * Unified roster read — one entry per distinct user, each with a `reasons`
- * array. Always returned in full (never paginated). With `countOnly` the shape
- * is `WorkspaceRosterCountsResponse`.
+ * array. Always returned in full (never paginated), as an array. With
+ * `countOnly` it returns the counts instead (`WorkspaceRosterCountsResponse`).
  *
  * Same-node `member` reasons carry both rank coordinates: absolute `rank` and
  * `relativeRank`, the offset from you (`1` = one rung below you, `-3` = three
@@ -28,7 +28,7 @@ export interface FetchWorkspaceMembersProps {
  */
 function useFetchWorkspaceMembers(): (
   props: FetchWorkspaceMembersProps
-) => Promise<WorkspaceRosterResponse | WorkspaceRosterCountsResponse> {
+) => Promise<WorkspaceRosterEntry[] | WorkspaceRosterCountsResponse> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -48,10 +48,14 @@ function useFetchWorkspaceMembers(): (
       if (countOnly !== undefined) params.countOnly = countOnly;
 
       const response = await axios.get<
-        WorkspaceRosterResponse | WorkspaceRosterCountsResponse
+        | { data: WorkspaceRosterEntry[]; total: number }
+        | WorkspaceRosterCountsResponse
       >(`/${projectId}/workspaces/${workspaceId}/members`, { params });
 
-      return response.data;
+      if (countOnly) {
+        return response.data as WorkspaceRosterCountsResponse;
+      }
+      return (response.data as { data: WorkspaceRosterEntry[] }).data;
     },
     [projectId, axios]
   );

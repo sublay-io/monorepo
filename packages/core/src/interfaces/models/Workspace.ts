@@ -220,11 +220,6 @@ export interface WorkspaceRosterEntry {
   reasons: WorkspaceRosterReason[];
 }
 
-export interface WorkspaceRosterResponse {
-  data: WorkspaceRosterEntry[];
-  total: number;
-}
-
 export interface WorkspaceRosterCountsResponse {
   counts: {
     owner: number;

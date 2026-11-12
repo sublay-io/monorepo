@@ -28,8 +28,16 @@ export async function fetchEntityByForeignId(
   data: FetchEntityByForeignIdProps
 ): Promise<Entity> {
   const path = `/entities/by-foreign-id`;
-  const response = await client.projectInstance.get<Entity>(path, {
-    params: { ...data, include: serializeInclude(data.include) },
-  });
+  // Params are listed explicitly (not spread from `data`) so an untyped extra
+  // such as `createIfNotFound` never reaches the server and turns this read
+  // into a create.
+  const params: Record<string, any> = {
+    foreignId: data.foreignId,
+    actingUserId: data.actingUserId,
+    include: serializeInclude(data.include),
+    topCommentsLimit: data.topCommentsLimit,
+    topCommentsSortByReaction: data.topCommentsSortByReaction,
+  };
+  const response = await client.projectInstance.get<Entity>(path, { params });
   return response.data;
 }

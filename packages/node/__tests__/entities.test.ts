@@ -36,12 +36,24 @@ describe("node-sdk entities — request shaping", () => {
     });
   });
 
-  it("fetchEntityByForeignId hits /entities/by-foreign-id with the full body as params", async () => {
+  it("fetchEntityByForeignId hits /entities/by-foreign-id with its declared params", async () => {
     const { client, projectInstance } = makeClient();
     await fetchEntityByForeignId(client, { foreignId: "f1", actingUserId: "u1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/entities/by-foreign-id", {
       params: { foreignId: "f1", actingUserId: "u1" },
     });
+  });
+
+  it("fetchEntityByForeignId does not forward an untyped createIfNotFound", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchEntityByForeignId(client, {
+      foreignId: "f1",
+      actingUserId: "u1",
+      createIfNotFound: true,
+    } as any);
+    const [, config] = projectInstance.get.mock.calls[0];
+    expect(config.params).not.toHaveProperty("createIfNotFound");
+    expect(config.params).toMatchObject({ foreignId: "f1", actingUserId: "u1" });
   });
 
   it("fetchEntityByForeignId returns the bare Entity", async () => {

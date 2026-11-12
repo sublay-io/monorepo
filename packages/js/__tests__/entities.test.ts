@@ -43,7 +43,7 @@ describe("js-sdk entities — request shaping", () => {
     });
   });
 
-  it("fetchEntityByForeignId gets /entities/by-foreign-id with the full data as params", async () => {
+  it("fetchEntityByForeignId gets /entities/by-foreign-id with its declared params", async () => {
     const { client, projectInstance } = makeClient();
     await fetchEntityByForeignId(client, {
       foreignId: "f1",
@@ -55,6 +55,17 @@ describe("js-sdk entities — request shaping", () => {
         params: { foreignId: "f1", include: "user" },
       }
     );
+  });
+
+  it("fetchEntityByForeignId does not forward an untyped createIfNotFound", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchEntityByForeignId(client, {
+      foreignId: "f1",
+      createIfNotFound: true,
+    } as any);
+    const [, config] = projectInstance.get.mock.calls[0];
+    expect(config.params).not.toHaveProperty("createIfNotFound");
+    expect(config.params.foreignId).toBe("f1");
   });
 
   it("fetchOrCreateEntityByForeignId sends createIfNotFound=true with the rest as params", async () => {

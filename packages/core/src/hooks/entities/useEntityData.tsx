@@ -3,6 +3,7 @@ import { useStableObject } from "../useStableObject";
 
 import useFetchEntity from "./useFetchEntity";
 import useFetchEntityByForeignId from "./useFetchEntityByForeignId";
+import useFetchOrCreateEntityByForeignId from "./useFetchOrCreateEntityByForeignId";
 import useFetchEntityByShortId from "./useFetchEntityByShortId";
 import useUpdateEntity, { UpdateEntityProps } from "./useUpdateEntity";
 import useDeleteEntity from "./useDeleteEntity";
@@ -70,6 +71,7 @@ function useEntityData({
 
   const fetchEntity = useFetchEntity();
   const fetchEntityByForeignId = useFetchEntityByForeignId();
+  const fetchOrCreateEntityByForeignId = useFetchOrCreateEntityByForeignId();
   const fetchEntityByShortId = useFetchEntityByShortId();
 
   const updateEntity = useUpdateEntity();
@@ -133,10 +135,9 @@ function useEntityData({
             entityId,
           });
         } else if (foreignId) {
-          fetchedEntity = await fetchEntityByForeignId({
-            foreignId,
-            createIfNotFound,
-          });
+          fetchedEntity = createIfNotFound
+            ? (await fetchOrCreateEntityByForeignId({ foreignId })).entity
+            : await fetchEntityByForeignId({ foreignId });
         } else if (shortId) {
           fetchedEntity = await fetchEntityByShortId({
             shortId,
@@ -159,6 +160,7 @@ function useEntityData({
   }, [
     fetchEntity,
     fetchEntityByForeignId,
+    fetchOrCreateEntityByForeignId,
     fetchEntityByShortId,
     entityId,
     foreignId,

@@ -29,7 +29,7 @@ describe("useFetchEntityByForeignId", () => {
     expect(call.config?.params).toMatchObject({ foreignId: "ext-1" });
   });
 
-  it("passes createIfNotFound through to the request params", async () => {
+  it("never asks the server to create", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() =>
       useFetchEntityByForeignId(),
     );
@@ -37,11 +37,11 @@ describe("useFetchEntityByForeignId", () => {
     axiosPrivate.mockResponse("get", makeEntity());
 
     await act(async () => {
-      await result.current({ foreignId: "ext-1", createIfNotFound: true });
+      await result.current({ foreignId: "ext-1" });
     });
 
     const [call] = axiosPrivate.calls("get");
-    expect(call.config?.params).toMatchObject({ createIfNotFound: true });
+    expect(call.config?.params?.createIfNotFound).toBeUndefined();
   });
 
   it("rejects when the server returns an error response", async () => {

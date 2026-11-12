@@ -205,7 +205,7 @@ const updatedUser = await sublay.users.updateUser({
 
 ### deleteUser
 
-Permanently deletes a user and cascades cleanup across all of their related data — reactions, files, follows, connections, notifications, collections, reports, and mentions are removed, and their drafts are deleted with everything attached to them. Their published entities and comments stay, with no author and stripped of authored content. Their chat messages stay in their conversations as deleted, the same as if the user had deleted each one: content, GIF and mentions cleared and `userDeletedAt` set. This mirrors the full-cascade delete performed from the dashboard.
+Permanently deletes a user and cascades cleanup across all of their related data — reactions, files, follows, connections, notifications, collections and reports are removed, and their drafts are deleted with everything attached to them. Their published entities and comments stay, with no author and stripped of authored content. Their chat messages stay in their conversations as deleted, the same as if the user had deleted each one: content, GIF and mentions cleared and `userDeletedAt` set. Mentions of the user in other entities, comments and chat messages keep their text, but their `id` and `foreignId` become `null`. This mirrors the full-cascade delete performed from the dashboard.
 
 <Warning>
   This is a hard, irreversible delete — the user and their related data cannot be recovered.

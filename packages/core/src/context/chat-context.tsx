@@ -416,7 +416,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             content: null,
             gif: null,
             mentions: [],
-            metadata: {},
             files: undefined,
           },
         })

@@ -794,9 +794,15 @@ describe("chatSlice — thread replies", () => {
     expect(state.threads["parent-1"].items[0].reactionCounts).toEqual({ "👍": 1 });
     expect(state.threads["parent-1"].items[0].userReactions).toEqual(["👍"]);
 
+    state = reducer(
+      state,
+      patchMessage({ conversationId: CONV, messageId: "reply-1", patch: { metadata: { pinned: true } } }),
+    );
     state = reducer(state, removeMessage({ conversationId: CONV, messageId: "reply-1" }));
     expect(state.threads["parent-1"].items[0].userDeletedAt).not.toBeNull();
     expect(state.threads["parent-1"].items[0].content).toBeNull();
+    // The server keeps a deleted message's metadata, so the store does too.
+    expect(state.threads["parent-1"].items[0].metadata).toEqual({ pinned: true });
   });
 
   it("patchMessage reaches a thread reply when the payload has no conversationId", () => {

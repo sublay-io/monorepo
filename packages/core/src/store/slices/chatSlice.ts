@@ -559,7 +559,6 @@ const chatSlice = createSlice({
         message.content = null;
         message.gif = null;
         message.mentions = [];
-        message.metadata = {};
         message.files = undefined;
       }
     },

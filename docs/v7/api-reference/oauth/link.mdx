@@ -33,7 +33,7 @@ The authenticated user's ID is taken from the access token — it cannot be spec
   expires after 10 minutes.
 </ResponseField>
 
-Before going to the provider, Sublay shows the user a page naming the account the provider will be connected to (its verified email, or else its username or name), with **Continue** and **Cancel**. Continue goes on to the provider; Cancel returns to `redirectAfterAuth` with `error=access_denied`. The page is in English.
+Before going to the provider, Sublay shows the user a page naming the account the provider will be connected to (its verified email, or else its username or name), with **Continue** and **Cancel**. Continue goes on to the provider; Cancel returns to `redirectAfterAuth` with `error=access_denied`. The page only works in the browser that opened `authorizationUrl`, where it can be reloaded; anywhere else it shows that the link has expired. The page is in English.
 
 <Note>
   Open `authorizationUrl` as-is, in the browser (or auth session) that should

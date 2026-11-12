@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useLeaveSpace` returns a callable function for leaving a space. The user's membership record is removed.
+`useLeaveSpace` returns a callable function for leaving a space (`DELETE /spaces/:spaceId/members/me`). The user's membership record is removed. The space creator can't leave (`400 space/creator-cannot-leave`).
 
 <Note>When using `SpaceProvider`, call `leaveSpace` from `useSpace` — it updates the space's member count and takes `memberPermissions` from the response.</Note>
 

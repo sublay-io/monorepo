@@ -22,19 +22,19 @@ describe("node-sdk spaces (membership) — request shaping", () => {
     });
   });
 
-  it("leaveSpace sends actingUserId as a param to /spaces/:id/leave", async () => {
+  it("leaveSpace sends actingUserId as a param to /spaces/:id/members/me", async () => {
     const { client, projectInstance } = makeClient();
     await leaveSpace(client, { spaceId: "s1", actingUserId: "u1" });
-    expect(projectInstance.delete).toHaveBeenCalledWith("/spaces/s1/leave", {
+    expect(projectInstance.delete).toHaveBeenCalledWith("/spaces/s1/members/me", {
       params: { actingUserId: "u1" },
     });
   });
 
-  it("checkMyMembership sends actingUserId as a param to /spaces/:id/membership/me", async () => {
+  it("checkMyMembership sends actingUserId as a param to /spaces/:id/members/me", async () => {
     const { client, projectInstance } = makeClient();
     await checkMyMembership(client, { spaceId: "s1", actingUserId: "u1" });
     expect(projectInstance.get).toHaveBeenCalledWith(
-      "/spaces/s1/membership/me",
+      "/spaces/s1/members/me",
       { params: { actingUserId: "u1" } },
     );
   });
@@ -67,12 +67,12 @@ describe("node-sdk spaces (membership) — request shaping", () => {
     const { client, projectInstance } = makeClient();
     await updateMemberRole(client, {
       spaceId: "s1",
-      memberId: "m1",
+      userId: "u-target",
       role: "moderator",
       actingUserId: "u-actor",
     });
     expect(projectInstance.patch).toHaveBeenCalledWith(
-      "/spaces/s1/members/m1/role",
+      "/spaces/s1/members/u-target/role",
       { role: "moderator", actingUserId: "u-actor" },
     );
   });
@@ -98,43 +98,43 @@ describe("node-sdk spaces (membership) — request shaping", () => {
     ).resolves.toEqual(result);
   });
 
-  it("approveMembership patches the approve route sending actingUserId in the body", async () => {
+  it("approveMembership posts the approve route sending actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await approveMembership(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
-      "/spaces/s1/members/m1/approve",
+    await approveMembership(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" });
+    expect(projectInstance.post).toHaveBeenCalledWith(
+      "/spaces/s1/members/u-target/approve",
       { actingUserId: "u-actor" },
     );
   });
 
-  it("declineMembership patches the decline route sending actingUserId in the body", async () => {
+  it("declineMembership posts the decline route sending actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await declineMembership(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
-      "/spaces/s1/members/m1/decline",
+    await declineMembership(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" });
+    expect(projectInstance.post).toHaveBeenCalledWith(
+      "/spaces/s1/members/u-target/decline",
       { actingUserId: "u-actor" },
     );
   });
 
-  it("banMember patches the ban route, sending the optional reason and actingUserId", async () => {
+  it("banMember posts the ban route, sending the optional reason and actingUserId", async () => {
     const { client, projectInstance } = makeClient();
     await banMember(client, {
       spaceId: "s1",
-      memberId: "m1",
+      userId: "u-target",
       reason: "spam",
       actingUserId: "u-actor",
     });
-    expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1/members/m1/ban", {
+    expect(projectInstance.post).toHaveBeenCalledWith("/spaces/s1/members/u-target/ban", {
       reason: "spam",
       actingUserId: "u-actor",
     });
   });
 
-  it("unbanMember patches the unban route sending actingUserId in the body", async () => {
+  it("unbanMember posts the unban route sending actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
-    await unbanMember(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
-      "/spaces/s1/members/m1/unban",
+    await unbanMember(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" });
+    expect(projectInstance.post).toHaveBeenCalledWith(
+      "/spaces/s1/members/u-target/unban",
       { actingUserId: "u-actor" },
     );
   });
@@ -195,7 +195,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
     await expect(
       updateMemberRole(client, {
         spaceId: "s1",
-        memberId: "m1",
+        userId: "u-target",
         role: "moderator",
         actingUserId: "u-actor",
       }),
@@ -205,36 +205,36 @@ describe("node-sdk spaces (membership) — response mapping", () => {
   it("approveMembership returns response.data", async () => {
     const { client, projectInstance } = makeClient();
     const result = { message: "approved", membership: { id: "m1", status: "active" } };
-    projectInstance.patch.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
-      approveMembership(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" }),
+      approveMembership(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" }),
     ).resolves.toEqual(result);
   });
 
   it("declineMembership returns response.data", async () => {
     const { client, projectInstance } = makeClient();
     const result = { message: "declined", membership: { id: "m1", status: "rejected" } };
-    projectInstance.patch.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
-      declineMembership(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" }),
+      declineMembership(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" }),
     ).resolves.toEqual(result);
   });
 
   it("banMember returns response.data", async () => {
     const { client, projectInstance } = makeClient();
     const result = { message: "banned", membership: { id: "m1", status: "banned" as const } };
-    projectInstance.patch.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
-      banMember(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" }),
+      banMember(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" }),
     ).resolves.toEqual(result);
   });
 
   it("unbanMember returns response.data", async () => {
     const { client, projectInstance } = makeClient();
     const result = { message: "unbanned", membership: { id: "m1", status: "active" as const } };
-    projectInstance.patch.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
-      unbanMember(client, { spaceId: "s1", memberId: "m1", actingUserId: "u-actor" }),
+      unbanMember(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" }),
     ).resolves.toEqual(result);
   });
 });

@@ -1,6 +1,6 @@
 ---
 title: "Leave Workspace"
-api: "DELETE /v8/:projectId/workspaces/:id/members/me"
+api: "DELETE /v8/:projectId/workspaces/:workspaceId/members/me"
 description: "Remove your own membership on this node"
 ---
 
@@ -12,7 +12,7 @@ Removes the caller's own membership on **this node only** (self-service, no capa
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID.
 </ParamField>
 

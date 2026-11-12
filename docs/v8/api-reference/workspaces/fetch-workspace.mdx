@@ -1,6 +1,6 @@
 ---
 title: "Fetch Workspace"
-api: "GET /v8/:projectId/workspaces/:id"
+api: "GET /v8/:projectId/workspaces/:workspaceId"
 description: "Read a single workspace, visibility-filtered"
 ---
 
@@ -8,7 +8,7 @@ Returns a single [Workspace](/v8/data-models/workspace), filtered by the caller'
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID.
 </ParamField>
 

@@ -131,7 +131,7 @@ describe("node-sdk entities — request shaping", () => {
   it("incrementEntityViews sends count as a JSON number in the body, no query", async () => {
     const { client, projectInstance } = makeClient();
     await incrementEntityViews(client, { entityId: "e1", count: 3 });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
+    expect(projectInstance.post).toHaveBeenCalledWith(
       "/entities/e1/increment-views",
       { count: 3 },
     );
@@ -140,7 +140,7 @@ describe("node-sdk entities — request shaping", () => {
   it("incrementEntityViews sends an empty body when count is not supplied", async () => {
     const { client, projectInstance } = makeClient();
     await incrementEntityViews(client, { entityId: "e1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
+    expect(projectInstance.post).toHaveBeenCalledWith(
       "/entities/e1/increment-views",
       {},
     );
@@ -170,10 +170,10 @@ describe("node-sdk entities — request shaping", () => {
     });
   });
 
-  it("publishDraft patches the publish route with actingUserId in the body", async () => {
+  it("publishDraft posts the publish route with actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
     await publishDraft(client, { entityId: "e1", actingUserId: "u1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith("/entities/e1/publish", {
+    expect(projectInstance.post).toHaveBeenCalledWith("/entities/e1/publish", {
       actingUserId: "u1",
     });
   });
@@ -258,11 +258,11 @@ describe("node-sdk entities — request shaping", () => {
     });
   });
 
-  it("isEntitySaved hits /entities/is-entity-saved with the full body as params", async () => {
+  it("isEntitySaved puts entityId in the path and sends only actingUserId as a param", async () => {
     const { client, projectInstance } = makeClient();
     await isEntitySaved(client, { entityId: "e1", actingUserId: "u1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/entities/is-entity-saved", {
-      params: { entityId: "e1", actingUserId: "u1" },
+    expect(projectInstance.get).toHaveBeenCalledWith("/entities/e1/saved", {
+      params: { actingUserId: "u1" },
     });
   });
 });
@@ -319,7 +319,7 @@ describe("node-sdk entities — response mapping", () => {
   it("incrementEntityViews returns response.data", async () => {
     const { client, projectInstance } = makeClient();
     const entity = { id: "e1", views: 4 };
-    projectInstance.patch.mockResolvedValueOnce({ data: entity });
+    projectInstance.post.mockResolvedValueOnce({ data: entity });
     await expect(
       incrementEntityViews(client, { entityId: "e1" }),
     ).resolves.toEqual(entity);
@@ -341,7 +341,7 @@ describe("node-sdk entities — response mapping", () => {
   it("publishDraft returns response.data", async () => {
     const { client, projectInstance } = makeClient();
     const entity = { id: "e1", isDraft: false };
-    projectInstance.patch.mockResolvedValueOnce({ data: entity });
+    projectInstance.post.mockResolvedValueOnce({ data: entity });
     await expect(publishDraft(client, { entityId: "e1", actingUserId: "u1" })).resolves.toEqual(entity);
   });
 

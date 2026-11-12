@@ -1,6 +1,6 @@
 ---
 title: "Update Workspace"
-api: "PATCH /v8/:projectId/workspaces/:id"
+api: "PATCH /v8/:projectId/workspaces/:workspaceId"
 description: "Edit a workspace's name and metadata"
 ---
 
@@ -12,7 +12,7 @@ Edits a workspace's own `name` and/or `metadata`. Gated by the `edit-workspace` 
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID.
 </ParamField>
 

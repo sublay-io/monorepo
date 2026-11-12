@@ -1,6 +1,6 @@
 ---
 title: "Flip Inherit Flag"
-api: "PATCH /v8/:projectId/workspaces/:id/inherit-flag"
+api: "PATCH /v8/:projectId/workspaces/:workspaceId/inherit-flag"
 description: "Owner-only flip of the reach/inherit flag"
 ---
 
@@ -11,7 +11,7 @@ Flips the workspace's `inheritsFromParent` flag — the switch controlling wheth
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID.
 </ParamField>
 

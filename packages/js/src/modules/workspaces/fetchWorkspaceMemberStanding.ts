@@ -4,7 +4,9 @@ import { WorkspaceMemberStanding } from "../../interfaces/Workspace";
 export interface FetchWorkspaceMemberStandingProps {
   workspaceId: string;
   // The TARGET user whose standing to read (path param — not the actor; the
-  // actor is always the bearer-token user).
+  // actor is always the bearer-token user). Another member only: your own id
+  // is refused (400 `workspace/own-member-id`); read your own with
+  // `fetchMyWorkspaceMembership`.
   targetUserId: string;
 }
 

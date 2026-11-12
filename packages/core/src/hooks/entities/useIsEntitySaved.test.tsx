@@ -26,8 +26,9 @@ describe("useIsEntitySaved", () => {
     expect(returned).toEqual(response);
 
     const [call] = axiosPrivate.calls("get");
-    expect(call.url).toBe("/test-project/entities/is-entity-saved");
-    expect(call.config?.params).toEqual({ entityId: "entity-1" });
+    expect(call.url).toBe("/test-project/entities/entity-1/saved");
+    // The entity id is in the path, never a query param.
+    expect(call.config?.params).toBeUndefined();
   });
 
   it("rejects when the server returns an error response", async () => {

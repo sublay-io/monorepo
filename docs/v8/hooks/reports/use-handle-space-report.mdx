@@ -1,0 +1,97 @@
+---
+title: "Handle space report"
+description: "Act on a report filed in a space as a space moderator: an entity, comment or chat message report"
+icon: "plug"
+---
+
+## Overview
+
+`useHandleSpaceReport` returns a function that lets a space moderator act on a report filed in their space, whatever was reported: an entity, a comment, or a message in the space's conversation.
+
+You name only the report. The server reads what was reported from the report itself and acts on that content, and `ban-user` bans that content's author. Which actions a report takes depends on what was reported:
+
+| Report about | Actions |
+| --- | --- |
+| An entity | `remove-entity`, `ban-user`, `dismiss` |
+| A comment | `remove-comment`, `ban-user`, `dismiss` |
+| A chat message | `remove-message`, `ban-user`, `dismiss` |
+
+An action that doesn't fit the report is refused (`400 report/invalid-actions`). Several actions can be combined in one call (for example, remove the content and ban its author); `dismiss` can't be combined with any other.
+
+<Note>Requires the signed-in user to have the `admin` or `moderator` role in the space. Reports need the `moderation` bundle; a chat message report also needs the `chat` bundle.</Note>
+
+<Info>
+  `ban-user` here is **space-scoped**: it bans the author from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats. Project-wide suspension is a separate, dashboard-only action; a space moderator cannot suspend a user across the whole project. You can't ban yourself: when you are the author of the reported content, the call is refused (`400 report/cannot-ban-self`) and nothing changes.
+</Info>
+
+## Usage Example
+
+```tsx
+import { useHandleSpaceReport } from "@sublay/react-js";
+
+function ReportActions({ report }) {
+  const handleSpaceReport = useHandleSpaceReport();
+
+  const removeAndBan = async () => {
+    await handleSpaceReport({
+      spaceId: report.spaceId,
+      reportId: report.id,
+      actions: ["remove-entity", "ban-user"],
+      summary: "Removed spam content and banned the author from the space",
+      reason: "Spam",
+    });
+  };
+
+  const dismiss = async () => {
+    await handleSpaceReport({
+      spaceId: report.spaceId,
+      reportId: report.id,
+      actions: ["dismiss"],
+      summary: "Content reviewed — no violation found",
+    });
+  };
+
+  return (
+    <div>
+      <button onClick={removeAndBan}>Remove & Ban</button>
+      <button onClick={dismiss}>Dismiss</button>
+    </div>
+  );
+}
+```
+
+## Parameters
+
+<ParamField body="spaceId" type="string" required>
+  The ID of the space the report belongs to.
+</ParamField>
+
+<ParamField body="reportId" type="string" required>
+  The ID of the report to act on.
+</ParamField>
+
+<ParamField body="actions" type="SpaceReportAction[]" required>
+  One or more actions, from the ones the report's type allows (see the table above). `SpaceReportAction` is `"remove-entity" | "remove-comment" | "remove-message" | "ban-user" | "dismiss"`.
+
+  - `remove-entity`, `remove-comment`, `remove-message` — removes the reported content.
+  - `ban-user` — bans the author of the reported content from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats (requires `reason`). The same rules as [`useBanMember`](/v8/hooks/spaces/use-ban-member) apply.
+  - `dismiss` — marks the report as dismissed without acting on the content.
+</ParamField>
+
+<ParamField body="summary" type="string">
+  A moderator note describing what was done, up to 1000 characters. Stored on the report. Required for entity and comment reports; optional for chat message reports.
+</ParamField>
+
+<ParamField body="reason" type="string">
+  Why the author is banned, up to 1000 characters; kept in the space's ban log. Required with `ban-user`.
+</ParamField>
+
+## Returns
+
+Returns `Promise<void>`. It resolves with no value once the actions are applied.
+
+## Notes
+
+- Reports are created with [`useCreateReport`](/v8/hooks/reports/use-create-report). To fetch the reports waiting in a space, use [`useFetchModeratedReports`](/v8/hooks/reports/use-fetch-moderated-reports).
+- To moderate content directly, without a report, see [`useModerateSpaceEntity`](/v8/hooks/spaces/use-moderate-space-entity) and [`useModerateSpaceComment`](/v8/hooks/spaces/use-moderate-space-comment).
+- Every error the call can return is listed on [Handle Report](/v8/api-reference/spaces/moderation/handle-report).

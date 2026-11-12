@@ -146,6 +146,10 @@ function MemberList({ conversationId }: { conversationId: string }) {
 
 See [`useConversationMembers`](/v8/hooks/chat/conversations/use-conversation-members).
 
+<Note>
+  **Your own membership and other members' are separate routes.** Your own membership is `/chat/conversations/:conversationId/members/me`: `GET` to check it ([`useCheckMyConversationMembership`](/v8/hooks/chat/conversations/use-check-my-conversation-membership)), `DELETE` to leave (`leave` above). `/chat/conversations/:conversationId/members/:userId` (remove, change role) is for acting on **another** member and refuses your own id with `400 chat/own-member-id`.
+</Note>
+
 ## Space Conversations
 
 Every Space has a single associated conversation. Use `useFetchSpaceConversation` to retrieve it:

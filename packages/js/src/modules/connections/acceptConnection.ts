@@ -6,7 +6,7 @@ export interface AcceptConnectionProps {
 }
 
 /**
- * PATCH /connections/:connectionId/accept — accept a request the caller
+ * POST /connections/:connectionId/accept — accept a request the caller
  * received. Answers with the connection row (`user` = the requester, `type`
  * `"received"`).
  */
@@ -15,7 +15,7 @@ export async function acceptConnection(
   data: AcceptConnectionProps
 ): Promise<ConnectionRow> {
   const { connectionId } = data;
-  const response = await client.projectInstance.patch<ConnectionRow>(
+  const response = await client.projectInstance.post<ConnectionRow>(
     `/connections/${connectionId}/accept`,
     {}
   );

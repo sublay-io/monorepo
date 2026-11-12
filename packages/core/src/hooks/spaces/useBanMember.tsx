@@ -5,7 +5,8 @@ import type { BanMemberResponse } from "../../interfaces/models/Space";
 
 export interface BanMemberProps {
   spaceId: string;
-  memberId: string;
+  /** The member's user id. */
+  userId: string;
   /** Why the member is banned; kept in the space's ban log. */
   reason?: string;
 }
@@ -15,17 +16,17 @@ function useBanMember(): (props: BanMemberProps) => Promise<BanMemberResponse> {
   const axios = useAxiosPrivate();
 
   const banMember = useCallback(
-    async ({ spaceId, memberId, reason }: BanMemberProps) => {
+    async ({ spaceId, userId, reason }: BanMemberProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
 
-      if (!spaceId || !memberId) {
-        throw new Error("spaceId and memberId are required");
+      if (!spaceId || !userId) {
+        throw new Error("spaceId and userId are required");
       }
 
-      const response = await axios.patch(
-        `/${projectId}/spaces/${spaceId}/members/${memberId}/ban`,
+      const response = await axios.post(
+        `/${projectId}/spaces/${spaceId}/members/${userId}/ban`,
         { reason }
       );
 

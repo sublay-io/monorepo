@@ -30,9 +30,7 @@ function useIsEntitySaved(): UseIsEntitySavedValues {
       const response = await axios.get<{
         isSaved: boolean;
         collections: Array<{ id: string; name: string }>;
-      }>(`/${projectId}/entities/is-entity-saved`, {
-        params: { entityId },
-      });
+      }>(`/${projectId}/entities/${entityId}/saved`);
 
       return response.data;
     },

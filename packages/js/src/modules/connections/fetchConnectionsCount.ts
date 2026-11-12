@@ -5,7 +5,7 @@ export async function fetchConnectionsCount(
   client: SublayHttpClient
 ): Promise<ConnectionCountResponse> {
   const response = await client.projectInstance.get<ConnectionCountResponse>(
-    "/connections/count"
+    "/connections/connections-count"
   );
   return response.data;
 }

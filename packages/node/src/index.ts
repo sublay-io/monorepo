@@ -248,6 +248,7 @@ export type {
   WorkspaceListRelation,
   WorkspaceListSortDir,
 } from "./interfaces/Workspace";
+export type { UpdateMyWorkspaceMembershipProps } from "./modules/workspaces/updateMyWorkspaceMembership";
 export type { Rule } from "./interfaces/Rule";
 export type { FollowRow, FollowStatus } from "./interfaces/Follow";
 export type { BlockRow, BlockStatus } from "./interfaces/Block";
@@ -262,7 +263,12 @@ export type {
   ConversationPreview,
   ConversationType,
 } from "./interfaces/Conversation";
-export type { ConversationMember, ConversationMemberRole } from "./interfaces/ConversationMember";
+export type {
+  ConversationMember,
+  ConversationMemberRole,
+  CheckMyConversationMembershipResponse,
+} from "./interfaces/ConversationMember";
+export type { SpaceReportAction } from "./modules/spaces/handleSpaceReport";
 export type {
   ChatMessage,
   ChatMessageListInclude,

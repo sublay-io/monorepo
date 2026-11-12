@@ -111,7 +111,7 @@ function useConversationMembers({
     if (!projectId || !conversationId) return;
     try {
       await axios.delete(
-        `/${projectId}/chat/conversations/${conversationId}/leave`
+        `/${projectId}/chat/conversations/${conversationId}/members/me`
       );
     } catch (err) {
       handleError(err, "Failed to leave conversation");

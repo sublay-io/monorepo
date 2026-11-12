@@ -3,14 +3,15 @@ import { WorkspaceMemberStanding } from "../../interfaces/Workspace";
 
 export interface FetchWorkspaceMemberStandingProps {
   workspaceId: string;
-  // The target user whose standing to read (path param).
+  // The target user whose standing to read (path param). Another member
+  // only: naming the acting user is refused (400 `workspace/own-member-id`);
+  // read your own with `fetchMyWorkspaceMembership`.
   targetUserId: string;
   // The user this request acts as. Required: the request resolves and is
   // checked against THEIR authority, exactly as their own token would be.
   //
   // Here that means the same authority-field fence as the roster read: a key
-  // acting as a member who does not operate people (and is not asking about
-  // themselves) receives the standing WITHOUT
+  // acting as a member who does not operate people receives the standing WITHOUT
   // `rank`/`relativeRank`/`capabilities`/`permissions`.
   actingUserId: string;
 }

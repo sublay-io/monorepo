@@ -201,6 +201,7 @@ export type {
   WorkspaceListRelation,
   WorkspaceListSortDir,
 } from "./interfaces/Workspace";
+export type { UpdateMyWorkspaceMembershipProps } from "./modules/workspaces/updateMyWorkspaceMembership";
 export type {
   UserInclude,
   UserIncludeArray,
@@ -225,6 +226,8 @@ export type {
   ChatMessageIncludeParam,
 } from "./interfaces/ChatMessage";
 export type { ConversationType } from "./interfaces/Conversation";
+export type { CheckMyConversationMembershipResponse } from "./interfaces/ConversationMember";
+export type { SpaceReportAction } from "./modules/spaces/handleSpaceReport";
 export { PUSH_EVENT_TYPES, MUTE_DURATIONS } from "./interfaces/Push";
 export type {
   PushEventType,

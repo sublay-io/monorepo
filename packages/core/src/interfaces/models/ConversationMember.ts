@@ -24,3 +24,22 @@ export interface ConversationMember {
   // Populated
   user?: User;
 }
+
+/**
+ * `GET /chat/conversations/:conversationId/members/me`. Fields that describe a
+ * membership the caller doesn't have are left out, never sent as null: `role`,
+ * `lastReadAt`, `mutedForever` and `mutedUntil` are present only when
+ * `isMember` is true; `leftAt` only when the caller left or was removed (an
+ * inactive membership row). A caller with no row at all (a space chat they
+ * haven't opened yet) gets `{ isMember: false }`.
+ */
+export interface CheckMyConversationMembershipResponse {
+  isMember: boolean;
+  role?: ConversationMemberRole | null;
+  lastReadAt?: string | null;
+  /** `true` when muted with no end; `mutedUntil` is then `null`. */
+  mutedForever?: boolean;
+  /** End of a timed mute; `null` when not muted or muted forever. */
+  mutedUntil?: string | null;
+  leftAt?: string | null;
+}

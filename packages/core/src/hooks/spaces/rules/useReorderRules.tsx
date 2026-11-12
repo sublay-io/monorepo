@@ -26,7 +26,7 @@ function useReorderRules(): (props: ReorderRulesProps) => Promise<Rule[]> {
         throw new Error("Please pass at least one ruleId");
       }
 
-      const response = await axios.patch(
+      const response = await axios.post(
         `/${projectId}/spaces/${spaceId}/rules/reorder`,
         { ruleIds }
       );

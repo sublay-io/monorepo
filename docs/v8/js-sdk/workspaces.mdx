@@ -187,12 +187,26 @@ const counts = await sublay.workspaces.fetchWorkspaceMembers({ workspaceId: "ws_
 <ParamField body="include" type="WorkspaceMemberIncludeParam">A single value or an array of `"ancestorOwners"`, `"reachHolders"`, `"descendants"`.</ParamField>
 <ParamField body="countOnly" type="boolean" />
 
+### fetchMyWorkspaceMembership
+
+The logged-in user's own resolved standing on a workspace (`GET /workspaces/:workspaceId/members/me`): the same `WorkspaceMemberStanding` record [fetchWorkspaceMemberStanding](#fetchworkspacememberstanding) returns for another user. Your own access is never fenced, so `capabilities`, `permissions`, `rank` and `relativeRank` are always present; `relativeRank` is `0` when you hold a member row on this workspace and `null` when you don't (an owner or ancestor owner without one). It needs no relation to the workspace: with none, the record comes back with `reasons: []`. See [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
+
+```typescript
+const me = await sublay.workspaces.fetchMyWorkspaceMembership({
+  workspaceId: "ws_abc",
+});
+```
+
+<ParamField body="workspaceId" type="string" required />
+
+Returns `WorkspaceMemberStanding`.
+
 ### fetchWorkspaceMemberStanding
 
-One user's resolved standing, addressed by user id — works for any relation, including users with no direct member row. Requires roster visibility — **any relation** to the workspace.
+Another user's resolved standing, addressed by user id — works for any relation, including users with no direct member row. Requires roster visibility — **any relation** to the workspace. Passing your own user id as `targetUserId` is refused with `400 workspace/own-member-id`: read your own with [fetchMyWorkspaceMembership](#fetchmyworkspacemembership).
 
 <Warning>
-  **`capabilities`, `permissions`, `rank` and `relativeRank` are fenced.** They are omitted unless the bearer-token user holds one of the four people-operating capabilities (`invite`, `remove-member`, `edit-member-access`, `edit-member-profile`), is the `owner` / an `ancestor-owner`, or is reading **their own** standing — all judged on **this** workspace, a per-node verdict that says nothing about any other node. `user`, `reasons`, `title` and `metadata` are always returned. `relativeRank` is the target's rank as an offset from you (negative = senior to you), `null` exactly when `rank` is.
+  **`capabilities`, `permissions`, `rank` and `relativeRank` are fenced.** They are omitted unless the bearer-token user holds one of the four people-operating capabilities (`invite`, `remove-member`, `edit-member-access`, `edit-member-profile`) or is the `owner` / an `ancestor-owner` — all judged on **this** workspace, a per-node verdict that says nothing about any other node. `user`, `reasons`, `title` and `metadata` are always returned. `relativeRank` is the target's rank as an offset from you (negative = senior to you), `null` exactly when `rank` is.
 </Warning>
 
 ```typescript
@@ -211,7 +225,7 @@ Returns `WorkspaceMemberStanding`. On its `user` field **only `id` is guaranteed
 
 ### updateWorkspaceMember
 
-Two capability tiers: **powerful** fields (`capabilities`, `permissions`, and rank as either `rank` or `relativeRank`) need `edit-member-access` plus the rank rule and [no-escalation](/v8/data-models/workspace-member#no-privilege-escalation); **cosmetic** fields (`title`, `metadata`) need only `edit-member-profile`, and a member editing their own `title` needs nothing.
+Two capability tiers: **powerful** fields (`capabilities`, `permissions`, and rank as either `rank` or `relativeRank`) need `edit-member-access` plus the rank rule and [no-escalation](/v8/data-models/workspace-member#no-privilege-escalation); **cosmetic** fields (`title`, `metadata`) need only `edit-member-profile`. It edits another member: passing your own user id as `targetUserId` is refused with `400 workspace/own-member-id`. Edit your own `title`, with no capability, with [updateMyWorkspaceMembership](#updatemyworkspacemembership).
 
 Rank moves in **either coordinate**, never both; omitting both means **rank unchanged**. See [choosing a rank](/v8/sdk/workspaces/overview#choosing-a-rank).
 
@@ -233,9 +247,25 @@ const member = await sublay.workspaces.updateWorkspaceMember({
 <ParamField body="title" type="string" />
 <ParamField body="metadata" type="object" />
 
+### updateMyWorkspaceMembership
+
+The logged-in user edits their own `title` on a workspace (`PATCH /workspaces/:workspaceId/members/me`). Needs no capability. Only `title` is editable here; a member's other fields are edited by a member with the capability, through [updateWorkspaceMember](#updateworkspacemember). You must hold a member row on the workspace: the owner has none, so has no title, and gets `404 workspace/not-found`. See [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership).
+
+```typescript
+const member = await sublay.workspaces.updateMyWorkspaceMembership({
+  workspaceId: "ws_abc",
+  title: "Frontend Lead",
+});
+```
+
+<ParamField body="workspaceId" type="string" required />
+<ParamField body="title" type="string | null" required>Trimmed, up to 100 characters. `null` clears it.</ParamField>
+
+Returns `WorkspaceMember`, the same record [updateWorkspaceMember](#updateworkspacemember) returns.
+
 ### removeWorkspaceMember
 
-Removes a member from **this node only**. Requires `remove-member` and is **rank-bounded**; sole-owner protected.
+Removes another member from **this node only**. Requires `remove-member` and is **rank-bounded**; sole-owner protected. Passing your own user id as `targetUserId` is refused with `400 workspace/own-member-id`: to leave, use [leaveWorkspace](#leaveworkspace).
 
 ```typescript
 await sublay.workspaces.removeWorkspaceMember({
@@ -249,7 +279,7 @@ await sublay.workspaces.removeWorkspaceMember({
 
 ### removeWorkspaceMemberFromSubtree
 
-Removes the target's direct memberships on this workspace and every descendant you can reach. Requires `remove-member`, rank-bounded **per node**. If the target owns this workspace or a descendant, it is refused with `409 workspace/owns-descendants` and nothing is removed. Owned workspaces you have standing on always count and are named in `ownedWorkspaces`. Ones you have no standing on (for example sealed sub-workspaces) count only when the target holds a membership this call would remove, and are listed as `{ id: null, name: null }` after the named ones. `ownedCount` is the number of entries. An owner of each workspace (or an ancestor owner) must transfer or delete it before you retry. See [Remove From Subtree](/v8/api-reference/workspaces/members/remove-from-subtree).
+Removes the target's direct memberships on this workspace and every descendant you can reach. Passing your own user id as `targetUserId` is refused with `400 workspace/own-member-id`. Requires `remove-member`, rank-bounded **per node**. If the target owns this workspace or a descendant, it is refused with `409 workspace/owns-descendants` and nothing is removed. Owned workspaces you have standing on always count and are named in `ownedWorkspaces`. Ones you have no standing on (for example sealed sub-workspaces) count only when the target holds a membership this call would remove, and are listed as `{ id: null, name: null }` after the named ones. `ownedCount` is the number of entries. An owner of each workspace (or an ancestor owner) must transfer or delete it before you retry. See [Remove From Subtree](/v8/api-reference/workspaces/members/remove-from-subtree).
 
 ```typescript
 const { removedCount, removed, skippedCount, skipped } =

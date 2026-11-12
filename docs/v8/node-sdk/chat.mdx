@@ -229,7 +229,7 @@ await sublay.chat.addMember({
 
 ### removeMember
 
-Removes a member from a group. Requires the acting caller to be a group admin.
+Removes another member from a group. Requires the acting caller to be a group admin. A `userId` equal to `actingUserId` is refused with `400 chat/own-member-id`: to leave, use [leaveConversation](#leaveconversation).
 
 ```typescript
 await sublay.chat.removeMember({
@@ -249,7 +249,7 @@ await sublay.chat.removeMember({
 
 ### changeMemberRole
 
-Promotes or demotes a member. Requires the acting caller to be a group admin.
+Promotes or demotes another member. Requires the acting caller to be a group admin. A `userId` equal to `actingUserId` is refused with `400 chat/own-member-id`.
 
 ```typescript
 await sublay.chat.changeMemberRole({
@@ -269,7 +269,33 @@ await sublay.chat.changeMemberRole({
 
 ---
 
+### checkMyConversationMembership
+
+Reads the acting user's own membership in a conversation (`GET /chat/conversations/:conversationId/members/me`).
+
+```typescript
+const membership = await sublay.chat.checkMyConversationMembership({
+  conversationId: "cnv_abc123",
+  actingUserId: "usr_abc123",
+});
+```
+
+<ParamField body="conversationId" type="string" required />
+<ParamField body="actingUserId" type="string" required>The user whose membership is checked: the request acts as them.</ParamField>
+
+**Returns** — `Promise<CheckMyConversationMembershipResponse>`, a flat object where a field that doesn't apply is left out:
+
+- an active member: `{ isMember: true, role, lastReadAt, mutedForever, mutedUntil }`
+- a user who left or was removed: `{ isMember: false, leftAt }`
+- a user with no membership yet (a space conversation they haven't opened): `{ isMember: false }`
+
+A user who can't read the conversation gets the same error as reading it (`404 chat/not-found` or `403 chat/not-a-member`). See [Check My Membership](/v8/api-reference/chat/members/check-my-membership).
+
+---
+
 ### leaveConversation
+
+The acting user leaves a conversation (`DELETE /chat/conversations/:conversationId/members/me`).
 
 ```typescript
 await sublay.chat.leaveConversation({
@@ -281,7 +307,7 @@ await sublay.chat.leaveConversation({
 <ParamField body="conversationId" type="string" required />
 <ParamField body="actingUserId" type="string" required>The user leaving.</ParamField>
 
-**Returns** — `Promise<void>`
+**Returns** — `Promise<void>`. It resolves with no value once the user has left.
 
 ---
 
@@ -627,29 +653,6 @@ await sublay.spaces.moderateSpaceChatMessage({
 
 ---
 
-### spaces.handleSpaceChatReport
+### Handling chat message reports
 
-Resolves a report against a space-conversation message: remove the message, ban the user, and/or dismiss.
-
-```typescript
-await sublay.spaces.handleSpaceChatReport({
-  spaceId: "spc_abc123",
-  reportId: "rpt_abc123",
-  actions: ["remove-message", "ban-user"],
-  messageId: "msg_xyz",
-  reason: "Repeated harassment",
-  actingUserId: "usr_mod123",
-});
-```
-
-<ParamField body="spaceId" type="string" required />
-<ParamField body="reportId" type="string" required />
-<ParamField body="actions" type='("remove-message" | "ban-user" | "dismiss")[]' required>
-  `dismiss` cannot be combined with the other actions. `ban-user` bans the author of the reported message and requires `reason`.
-</ParamField>
-<ParamField body="messageId" type="string">Optional. The message is read from the report; if sent, it must be the reported message.</ParamField>
-<ParamField body="reason" type="string" />
-<ParamField body="summary" type="string">Stored as the report's resolution note.</ParamField>
-<ParamField body="actingUserId" type="string" required>The moderator the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.</ParamField>
-
-**Returns** — `Promise<void>`. It resolves with no value once the actions are applied.
+A report against a space-conversation message is handled with [`spaces.handleSpaceReport`](/v8/node-sdk/spaces-moderation#handlespacereport), the one function for every report type in a space. A chat message report takes the actions `"remove-message"`, `"ban-user"` and `"dismiss"`; its `summary` is optional.

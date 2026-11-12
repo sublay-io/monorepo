@@ -9,16 +9,15 @@ This page covers the moderation and administrative functions on the `spaces` mod
 
 ## Reports
 
-### handleEntityReport
+### handleSpaceReport
 
-Resolves a report filed against an entity in a space by applying one or more moderation actions.
+Handles a report filed in a space, whatever was reported: an entity, a comment or a chat message in the space's conversation (`PATCH /spaces/:spaceId/reports/:reportId`). The server reads the reported content and its author from the report, so the call names neither. See [Handle Report](/v8/api-reference/spaces/moderation/handle-report) for every rule and error.
 
 ```typescript
-await sublay.spaces.handleEntityReport({
+await sublay.spaces.handleSpaceReport({
   spaceId: "spc_abc123",
   actingUserId: "usr_mod123",
   reportId: "rpt_xyz789",
-  entityId: "ent_xyz789",
   actions: ["remove-entity", "ban-user"],
   reason: "Repeated spam",
   summary: "Removed and banned for spam",
@@ -37,78 +36,30 @@ await sublay.spaces.handleEntityReport({
   The Sublay report ID.
 </ParamField>
 
-<ParamField body="entityId" type="string" required>
-  The Sublay entity ID the report targets.
-</ParamField>
+<ParamField body="actions" type="SpaceReportAction[]" required>
+  One or more actions to apply. Which ones a report takes depends on what was reported:
 
-<ParamField body="actions" type="string[]" required>
-  One or more actions to apply: `"remove-entity"`, `"ban-user"`, and/or `"dismiss"`. `"ban-user"` bans the author of the reported content and requires `reason`.
+  - an entity report: `"remove-entity"`, `"ban-user"`, `"dismiss"`
+  - a comment report: `"remove-comment"`, `"ban-user"`, `"dismiss"`
+  - a chat message report: `"remove-message"`, `"ban-user"`, `"dismiss"`
+
+  An action the report's type doesn't take is refused with `400 report/invalid-actions`, and `"dismiss"` can't be combined with other actions. `"ban-user"` bans the author of the reported content from the space and requires `reason`; it is refused with `400 report/cannot-ban-self` when that author is the acting user.
 </ParamField>
 
 <ParamField body="summary" type="string">
-  The resolution note stored on the report. Required, whatever the actions.
+  The resolution note stored on the report, up to 1000 characters. Required for entity and comment reports; optional for chat message reports.
 </ParamField>
 
 <ParamField body="reason" type="string">
-  Reason for the ban, kept in the space's ban log. Required when `actions` includes `ban-user`.
+  Reason for the ban, kept in the space's ban log, up to 1000 characters. Required when `actions` includes `"ban-user"`.
 </ParamField>
 
 **Returns** — `Promise<void>`. It resolves with no value once the actions are applied.
 
----
-
-### handleCommentReport
-
-Resolves a report filed against a comment in a space by applying one or more moderation actions.
-
-```typescript
-await sublay.spaces.handleCommentReport({
-  spaceId: "spc_abc123",
-  actingUserId: "usr_mod123",
-  reportId: "rpt_abc456",
-  commentId: "cmt_abc123",
-  actions: ["dismiss"],
-  summary: "No violation found",
-});
-```
-
-<ParamField body="spaceId" type="string" required>
-  The Sublay space ID where the report was filed.
-</ParamField>
-
-<ParamField body="actingUserId" type="string" required>
-  The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
-</ParamField>
-
-<ParamField body="reportId" type="string" required>
-  The Sublay report ID.
-</ParamField>
-
-<ParamField body="commentId" type="string" required>
-  The Sublay comment ID the report targets.
-</ParamField>
-
-<ParamField body="actions" type="string[]" required>
-  One or more actions to apply: `"remove-comment"`, `"ban-user"`, and/or `"dismiss"`. `"ban-user"` bans the author of the reported content and requires `reason`.
-</ParamField>
-
-<ParamField body="summary" type="string">
-  The resolution note stored on the report. Required, whatever the actions.
-</ParamField>
-
-<ParamField body="reason" type="string">
-  Reason for the ban, kept in the space's ban log. Required when `actions` includes `ban-user`.
-</ParamField>
-
-**Returns** — `Promise<void>`. It resolves with no value once the actions are applied.
-
----
+`SpaceReportAction` is `"remove-entity" | "remove-comment" | "remove-message" | "ban-user" | "dismiss"`.
 
 <Note>
-  Chat message reports are handled by **`spaces.handleSpaceChatReport`**, which
-  is documented with the other space-conversation functions in
-  [Chat → Space conversations](/v8/node-sdk/chat#space-conversations). Reports on
-  DM and group conversations are project-level and are resolved in the Sublay
+  Reports on DM and group conversations are project-level and are resolved in the Sublay
   dashboard, not through this SDK.
 </Note>
 

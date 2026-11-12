@@ -10,7 +10,7 @@ export async function leaveConversation(
 ): Promise<{ message: string }> {
   const { conversationId } = data;
   const response = await client.projectInstance.delete<{ message: string }>(
-    `/chat/conversations/${conversationId}/leave`
+    `/chat/conversations/${conversationId}/members/me`
   );
   return response.data;
 }

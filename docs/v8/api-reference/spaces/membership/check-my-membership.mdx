@@ -1,10 +1,14 @@
 ---
 title: "Check My Membership"
-api: "GET /v8/:projectId/spaces/:spaceId/membership/me"
+api: "GET /v8/:projectId/spaces/:spaceId/members/me"
 description: "Get the current user's membership status and permissions in a space"
 ---
 
-Returns the authenticated user's membership status and resolved permissions in a space. A user with a membership gets it whatever its status (`pending`, `banned` or `rejected` included), so a banned user learns they're banned, even in a space they can no longer see. A user with no membership in a space they can't see (a private space, or one under it) gets `404 space/not-found`, like a space that doesn't exist; in a space they can see, the response has no `status`.
+Returns the acting user's membership status and resolved permissions in a space: the token's user, or the user a service key names in `actingUserId`. `me` in the path always means that user. A user with a membership gets it whatever its status (`pending`, `banned` or `rejected` included), so a banned user learns they're banned, even in a space they can no longer see. A user with no membership in a space they can't see (a private space, or one under it) gets `404 space/not-found`, like a space that doesn't exist; in a space they can see, the response has no `status`.
+
+<Note>
+  **Your own membership is `/spaces/:spaceId/members/me`**: `GET` to check it, [`DELETE`](/v8/api-reference/spaces/membership/leave-space) to leave. The `/spaces/:spaceId/members/:userId/…` routes ([role](/v8/api-reference/spaces/membership/update-member-role), [approve](/v8/api-reference/spaces/membership/approve-member), [decline](/v8/api-reference/spaces/membership/decline-member), [ban](/v8/api-reference/spaces/membership/ban-member), [unban](/v8/api-reference/spaces/membership/unban-member)) act on other members, addressed by user id, and refuse your own id with `400 space/own-member-id`. The space creator always stays an admin: they can't step down, leave the space, or be banned.
+</Note>
 
 ## Path Parameters
 
@@ -66,8 +70,11 @@ A flat object. `isMember` and `permissions` are always present; a field that des
     { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
     ```
   </Accordion>
+  <Accordion title="Missing token — 401">
+    The request had no credentials: no `Authorization` header and no service key. The body is `text/plain` (`Unauthorized`), not JSON. An expired or invalid token returns `403` instead — see [Authentication](/v8/api-reference/authentication).
+  </Accordion>
   <Accordion title="Missing User — 400">
-    A service key sent no `actingUserId`, or the request had no credentials.
+    A service key sent no `actingUserId`.
     ```json
     { "error": "A service key must send actingUserId: the user this request acts as.", "code": "space/missing-user-id" }
     ```

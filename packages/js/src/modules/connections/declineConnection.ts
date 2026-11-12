@@ -6,7 +6,7 @@ export interface DeclineConnectionProps {
 }
 
 /**
- * PATCH /connections/:connectionId/decline — decline a request the caller
+ * POST /connections/:connectionId/decline — decline a request the caller
  * received. Answers with the connection row (`user` = the requester, `type`
  * `"received"`).
  */
@@ -15,7 +15,7 @@ export async function declineConnection(
   data: DeclineConnectionProps
 ): Promise<ConnectionRow> {
   const { connectionId } = data;
-  const response = await client.projectInstance.patch<ConnectionRow>(
+  const response = await client.projectInstance.post<ConnectionRow>(
     `/connections/${connectionId}/decline`,
     {}
   );

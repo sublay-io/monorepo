@@ -1,12 +1,14 @@
 ---
 title: "Fetch Member Standing"
-api: "GET /v8/:projectId/workspaces/:id/members/:userId"
+api: "GET /v8/:projectId/workspaces/:workspaceId/members/:userId"
 description: "A user's full resolved standing on a workspace, addressed by userId"
 ---
 
-Returns a single user's full standing on a workspace, addressed by **`userId`** (not a membership-row id, so it works for users with no direct row). Returns the same unified shape as one roster row, computed on demand for **any** relation — direct `member`, this workspace's `owner`, an `ancestor-owner`, or a `reach-holder`. Returns empty/none **only** if the user has no relation at all.
+Returns another user's full standing on a workspace, addressed by **`userId`** (not a membership-row id, so it works for users with no direct row). Returns the same unified shape as one roster row, computed on demand for **any** relation — direct `member`, this workspace's `owner`, an `ancestor-owner`, or a `reach-holder`. Returns empty/none **only** if the user has no relation at all.
 
 Requires **roster visibility** — any relation to the workspace (owner, ancestor-owner, member, or reach-holder).
+
+This route reads **another** member. Your own id is refused with `400 workspace/own-member-id`: read your own standing with [`GET /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/fetch-my-membership), which returns the same record, never fenced.
 
 `reasons` is an array of **structured entries** — `{ type, viaWorkspaceId? }` — the same object shape a [roster](/v8/api-reference/workspaces/members/list-members) entry's `reasons` carries. `viaWorkspaceId` names the granting ancestor and appears on `ancestor-owner` / `reach-holder` only.
 
@@ -14,8 +16,7 @@ Requires **roster visibility** — any relation to the workspace (owner, ancesto
   **The authority-bearing fields are fenced, and the gate is scoped to THIS workspace.** `capabilities`, `permissions`, `rank` and `relativeRank` are **omitted from the response** (absent — not `null`) unless the caller:
 
   - holds one of the four people-operating capabilities on this workspace — `invite`, `remove-member`, `edit-member-access`, `edit-member-profile`; **or**
-  - is this workspace's `owner` or an `ancestor-owner`; **or**
-  - is asking about **themselves** (a caller always sees their own access).
+  - is this workspace's `owner` or an `ancestor-owner`.
 
   A service key names the user it reads as and is fenced exactly as that user is — see [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 
@@ -28,23 +29,23 @@ Requires **roster visibility** — any relation to the workspace (owner, ancesto
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID.
 </ParamField>
 
 <ParamField path="userId" type="string" required>
-  The target user whose standing to read.
+  The target user whose standing to read. Must not be the acting user (`400 workspace/own-member-id`).
 </ParamField>
 
 ## Query Parameters
 
 <ParamField query="actingUserId" type="string" required>
-  Service keys only — the user to act as. **Required with a service key:** a key that names nobody is refused with `400 workspace/missing-user-id`. Enforced: roster visibility **and** the authority-field fence above both evaluate against the named user, so a key acting as a plain member receives the fenced standing (and the full one when asking about that user themselves). A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  Service keys only — the user to act as. **Required with a service key:** a key that names nobody is refused with `400 workspace/missing-user-id`. Enforced: roster visibility **and** the authority-field fence above both evaluate against the named user, so a key acting as a plain member receives the fenced standing. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
 
-Caller who may see authority fields (a people-operator, an owner, or the user themselves):
+Caller who may see authority fields (a people-operator or an owner):
 
 ```json
 {
@@ -96,6 +97,12 @@ Caller with a plain relation, reading **someone else's** standing — the four a
     { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
     ```
     A service key sent no `actingUserId`. This read needs a user: the key names the user whose view it gets.
+  </Accordion>
+  <Accordion title="Own Member Id — 400">
+    ```json
+    { "error": "`GET /workspaces/:workspaceId/members/:userId` acts on another member, not on yourself. Your own membership is at `/workspaces/:workspaceId/members/me`: GET to check it, PATCH to edit your title, DELETE to leave.", "code": "workspace/own-member-id" }
+    ```
+    `userId` is the acting user (the token's user, or the user named by `actingUserId`). Read your own standing with [`GET /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/fetch-my-membership).
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     ```json

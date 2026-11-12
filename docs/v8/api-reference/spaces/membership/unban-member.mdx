@@ -1,6 +1,6 @@
 ---
 title: "Unban Member"
-api: "PATCH /v8/:projectId/spaces/:spaceId/members/:memberId/unban"
+api: "POST /v8/:projectId/spaces/:spaceId/members/:userId/unban"
 description: "Unban a previously banned member"
 ---
 
@@ -12,8 +12,8 @@ Sets a banned member's status back to `"active"`, in this space and in the child
   UUID of the space.
 </ParamField>
 
-<ParamField path="memberId" type="string" required>
-  UUID of the membership record to unban.
+<ParamField path="userId" type="string" required>
+  UUID of the banned user to unban. Your own id is refused (`400 space/own-member-id`): your own membership is [`/spaces/:spaceId/members/me`](/v8/api-reference/spaces/membership/check-my-membership).
 </ParamField>
 
 ## Body Parameters
@@ -36,9 +36,15 @@ Sets a banned member's status back to `"active"`, in this space and in the child
 
 <AccordionGroup>
   <Accordion title="Invalid Id — 400">
-    Returned when `spaceId` or `memberId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
+    Returned when `spaceId` or `userId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
     { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Own Member Id — 400">
+    `userId` is the acting user (the token's user, or the user named by `actingUserId`). This route acts on another member; check your own membership with `GET /spaces/:spaceId/members/me` and leave with `DELETE /spaces/:spaceId/members/me`.
+    ```json
+    { "error": "`POST /spaces/:spaceId/members/:userId/unban` acts on another member, not on yourself. Your own membership is at `/spaces/:spaceId/members/me`: GET to check it, DELETE to leave.", "code": "space/own-member-id" }
     ```
   </Accordion>
   <Accordion title="Missing Acting User — 400">
@@ -78,6 +84,7 @@ Sets a banned member's status back to `"active"`, in this space and in the child
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    `userId` has no banned membership in this space.
     ```json
     { "error": "Banned membership not found.", "code": "space/membership-not-found" }
     ```

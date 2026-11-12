@@ -9,7 +9,9 @@ import {
   transferWorkspaceOwnership,
   fetchWorkspaceMembers,
   fetchWorkspaceMemberStanding,
+  fetchMyWorkspaceMembership,
   updateWorkspaceMember,
+  updateMyWorkspaceMembership,
   removeWorkspaceMember,
   leaveWorkspace,
   removeWorkspaceMemberFromSubtree,
@@ -201,6 +203,24 @@ describe("node-sdk workspaces (membership) — request shaping", () => {
       "/workspaces/w1/members/target1",
       { params: { actingUserId: "actor1" } }
     );
+  });
+
+  it("fetchMyWorkspaceMembership GETs /workspaces/:workspaceId/members/me with actingUserId in the query", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchMyWorkspaceMembership(client, { workspaceId: "w1", actingUserId: "actor1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/workspaces/w1/members/me", {
+      params: { actingUserId: "actor1" },
+    });
+  });
+
+  it("updateMyWorkspaceMembership PATCHes /workspaces/:workspaceId/members/me with actingUserId and title in the body", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateMyWorkspaceMembership(client, { workspaceId: "w1", actingUserId: "actor1", title: "Scout" });
+    await updateMyWorkspaceMembership(client, { workspaceId: "w1", actingUserId: "actor1", title: null });
+    expect(projectInstance.patch.mock.calls).toEqual([
+      ["/workspaces/w1/members/me", { actingUserId: "actor1", title: "Scout" }],
+      ["/workspaces/w1/members/me", { actingUserId: "actor1", title: null }],
+    ]);
   });
 
   it("updateWorkspaceMember puts target in the path, actor actingUserId in the body", async () => {
@@ -452,6 +472,22 @@ describe("node-sdk workspaces — response mapping", () => {
         actingUserId: "actor1",
       })
     ).resolves.toEqual(counts);
+  });
+
+  it("fetchMyWorkspaceMembership returns response.data (the caller's standing record)", async () => {
+    const { client, projectInstance } = makeClient();
+    const standing = {
+      user: { id: "u1" },
+      reasons: ["member"],
+      capabilities: [],
+      permissions: [],
+      rank: 2,
+      relativeRank: 0,
+      title: null,
+      metadata: {},
+    };
+    projectInstance.get.mockResolvedValueOnce({ data: standing });
+    await expect(fetchMyWorkspaceMembership(client, { workspaceId: "w1", actingUserId: "actor1" })).resolves.toEqual(standing);
   });
 
   it("acceptWorkspaceInvite returns response.data", async () => {

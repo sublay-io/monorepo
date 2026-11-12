@@ -18,10 +18,10 @@ describe("node-sdk connections — request shaping", () => {
     });
   });
 
-  it("fetchConnectionsCount hits /connections/count with the full body as params", async () => {
+  it("fetchConnectionsCount hits /connections/connections-count with the full body as params", async () => {
     const { client, projectInstance } = makeClient();
     await fetchConnectionsCount(client, { actingUserId: "u1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/connections/count", {
+    expect(projectInstance.get).toHaveBeenCalledWith("/connections/connections-count", {
       params: { actingUserId: "u1" },
     });
   });
@@ -43,19 +43,19 @@ describe("node-sdk connections — request shaping", () => {
     );
   });
 
-  it("acceptConnection patches /connections/:id/accept with actingUserId in the body", async () => {
+  it("acceptConnection posts /connections/:id/accept with actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
     await acceptConnection(client, { connectionId: "conn1", actingUserId: "u1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
+    expect(projectInstance.post).toHaveBeenCalledWith(
       "/connections/conn1/accept",
       { actingUserId: "u1" },
     );
   });
 
-  it("declineConnection patches /connections/:id/decline with actingUserId in the body", async () => {
+  it("declineConnection posts /connections/:id/decline with actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
     await declineConnection(client, { connectionId: "conn1", actingUserId: "u1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
+    expect(projectInstance.post).toHaveBeenCalledWith(
       "/connections/conn1/decline",
       { actingUserId: "u1" },
     );
@@ -131,7 +131,7 @@ describe("node-sdk connections — response mapping", () => {
       createdAt: "then",
       respondedAt: "now",
     };
-    projectInstance.patch.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
       acceptConnection(client, { connectionId: "conn1", actingUserId: "u1" }),
     ).resolves.toEqual(result);
@@ -148,7 +148,7 @@ describe("node-sdk connections — response mapping", () => {
       createdAt: "then",
       respondedAt: "now",
     };
-    projectInstance.patch.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
       declineConnection(client, { connectionId: "conn1", actingUserId: "u1" }),
     ).resolves.toEqual(result);

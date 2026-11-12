@@ -21,7 +21,7 @@ The API returns three space shapes depending on context:
 | `slug` | `string \| null` | Optional URL-friendly slug. Unique per project when set. |
 | `name` | `string` | Display name of the space (3–100 characters). |
 | `description` | `string \| null` | Optional description (up to 1,000 characters). |
-| `userId` | `string` | ID of the space creator/owner. |
+| `userId` | `string` | ID of the space creator/owner. A child space's `userId` is its root space's creator, and that user is the space creator in every rule that names one. |
 | `avatarFileId` | `string \| null` | ID of the space's avatar image file. |
 | `avatarFile` | `File \| undefined` | Populated avatar file object. Only present when `include: "files"` is requested. |
 | `bannerFileId` | `string \| null` | ID of the space's banner image file. |

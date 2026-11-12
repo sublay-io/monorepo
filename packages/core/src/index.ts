@@ -490,6 +490,8 @@ export {
   useTransferWorkspaceOwnership,
   useFetchWorkspaceMembers,
   useFetchWorkspaceMemberStanding,
+  useFetchMyWorkspaceMembership,
+  useUpdateMyWorkspaceMembership,
   useUpdateWorkspaceMember,
   useRemoveWorkspaceMember,
   useLeaveWorkspace,
@@ -514,7 +516,9 @@ export {
   type FetchWorkspaceMembersProps,
   type FetchWorkspaceMembers,
   type FetchWorkspaceMemberStandingProps,
+  type FetchMyWorkspaceMembershipProps,
   type UpdateWorkspaceMemberProps,
+  type UpdateMyWorkspaceMembershipProps,
   type RemoveWorkspaceMemberProps,
   type LeaveWorkspaceProps,
   type RemoveWorkspaceMemberFromSubtreeProps,
@@ -714,9 +718,7 @@ export {
 export {
   useCreateReport,
   useFetchModeratedReports,
-  useHandleSpaceEntityReport,
-  useHandleSpaceCommentReport,
-  useHandleSpaceChatReport,
+  useHandleSpaceReport,
   type UseCreateReportProps,
   type CreateReportProps,
   type CreateCommentReportProps,
@@ -727,9 +729,8 @@ export {
   type FetchModeratedReportsParams,
   type ReportUserReport,
   type Report,
-  type HandleSpaceEntityReportParams,
-  type HandleSpaceCommentReportParams,
-  type HandleSpaceChatReportParams,
+  type HandleSpaceReportProps,
+  type SpaceReportAction,
 } from "./hooks/reports";
 
 // -- general
@@ -995,6 +996,7 @@ export {
   useFetchSpaceConversation,
   useConversationMembers,
   useMuteConversation,
+  useCheckMyConversationMembership,
   useLiveChatMessages,
   useChatMessages,
   useFetchManyChatMessages,
@@ -1028,6 +1030,7 @@ export type {
   UseConversationMembersValues,
   MuteConversationProps,
   UseMuteConversationValues,
+  CheckMyConversationMembershipProps,
   UseLiveChatMessagesProps,
   UseLiveChatMessagesValues,
   UseChatMessagesProps,
@@ -1062,6 +1065,7 @@ export type {
 export type {
   ConversationMember,
   ConversationMemberRole,
+  CheckMyConversationMembershipResponse,
 } from "./interfaces/models/ConversationMember";
 export type { ChatMessage } from "./interfaces/models/ChatMessage";
 

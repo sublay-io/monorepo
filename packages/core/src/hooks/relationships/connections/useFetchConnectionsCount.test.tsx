@@ -23,7 +23,7 @@ describe("useFetchConnectionsCount", () => {
     expect(returned).toBe(5);
 
     const [call] = axiosPrivate.calls("get");
-    expect(call.url).toBe("/test-project/connections/count");
+    expect(call.url).toBe("/test-project/connections/connections-count");
   });
 
   it("rejects when the server returns an error response", async () => {

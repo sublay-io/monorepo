@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe("useUpdateWorkspace", () => {
-  it("patches /workspaces/:id with the rest of the props as the body", async () => {
+  it("patches /workspaces/:workspaceId with the rest of the props as the body", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useUpdateWorkspace(),

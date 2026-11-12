@@ -1,10 +1,10 @@
 ---
 title: "Leave Conversation"
-api: "DELETE /v8/:projectId/chat/conversations/:conversationId/leave"
+api: "DELETE /v8/:projectId/chat/conversations/:conversationId/members/me"
 description: "Leave a group or space conversation"
 ---
 
-Removes the current user from a conversation. Direct conversations (`type: "direct"`) cannot be left.
+Removes the acting user (the token's user, or the user a service key names in `actingUserId`) from a conversation. Direct conversations (`type: "direct"`) cannot be left.
 
 For group conversations, if the caller is the last `admin`, they must promote another member before leaving. The caller is evicted from the real-time room immediately.
 

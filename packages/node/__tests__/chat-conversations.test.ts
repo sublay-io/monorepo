@@ -7,6 +7,7 @@ import {
   getConversation,
   getUnreadCount,
   leaveConversation,
+  checkMyConversationMembership,
   listConversations,
   listMembers,
   removeMember,
@@ -111,11 +112,20 @@ describe("node-sdk chat (conversations) — request shaping", () => {
     );
   });
 
-  it("leaveConversation sends actingUserId as a param to the leave route", async () => {
+  it("checkMyConversationMembership GETs /chat/conversations/:conversationId/members/me with actingUserId as a param", async () => {
+    const { client, projectInstance } = makeClient();
+    await checkMyConversationMembership(client, { conversationId: "conv1", actingUserId: "u1" });
+    expect(projectInstance.get).toHaveBeenCalledWith(
+      "/chat/conversations/conv1/members/me",
+      { params: { actingUserId: "u1" } },
+    );
+  });
+
+  it("leaveConversation sends actingUserId as a param to /chat/conversations/:conversationId/members/me", async () => {
     const { client, projectInstance } = makeClient();
     await leaveConversation(client, { conversationId: "conv1", actingUserId: "u1" });
     expect(projectInstance.delete).toHaveBeenCalledWith(
-      "/chat/conversations/conv1/leave",
+      "/chat/conversations/conv1/members/me",
       { params: { actingUserId: "u1" } },
     );
   });
@@ -225,6 +235,16 @@ describe("node-sdk chat (conversations) — response mapping", () => {
     await expect(
       removeMember(client, { conversationId: "conv1", userId: "target1", actingUserId: "admin1" }),
     ).resolves.toBeUndefined();
+  });
+
+  it.each([
+    ["an active member", { isMember: true, role: "member", lastReadAt: null, mutedForever: false, mutedUntil: null }],
+    ["a member who left", { isMember: false, leftAt: "2026-01-01T00:00:00.000Z" }],
+    ["a user with no membership row", { isMember: false }],
+  ])("checkMyConversationMembership returns response.data for %s", async (_label, body) => {
+    const { client, projectInstance } = makeClient();
+    projectInstance.get.mockResolvedValueOnce({ data: body });
+    await expect(checkMyConversationMembership(client, { conversationId: "conv1", actingUserId: "u1" })).resolves.toEqual(body);
   });
 
   it("leaveConversation resolves to undefined", async () => {

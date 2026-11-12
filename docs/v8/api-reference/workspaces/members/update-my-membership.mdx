@@ -1,0 +1,112 @@
+---
+title: "Update My Membership"
+api: "PATCH /v8/:projectId/workspaces/:workspaceId/members/me"
+description: "Edit your own title on a workspace"
+---
+
+Edits the acting user's own `title` on a workspace: the token's user, or the user a service key names in `actingUserId`. `me` in the path always means that user. It is self-service: **no capability is needed**.
+
+Only `title` can be edited here. A member's other fields (`metadata`, `capabilities`, `permissions`, `rank`, `relativeRank`) are edited by a member with the capability, through [Update Member](/v8/api-reference/workspaces/members/update-member); sending one here is refused with `400 workspace/unsupported-param`.
+
+The route edits the acting user's own **direct member row** on this workspace. The workspace **owner has no member row**, so they have no title and this route answers them `404 workspace/not-found`. The same `404` goes to a user who only reaches in from an ancestor workspace and holds no row here. A user with no relation to the workspace at all gets the roster-visibility `404`.
+
+<Note>
+  **Your own membership is `/workspaces/:workspaceId/members/me`**: [`GET`](/v8/api-reference/workspaces/members/fetch-my-membership) to read it, `PATCH` to edit your title, [`DELETE`](/v8/api-reference/workspaces/members/leave-workspace) to leave. The `/workspaces/:workspaceId/members/:userId` routes act on other members and refuse your own id with `400 workspace/own-member-id`.
+</Note>
+
+## Path Parameters
+
+<ParamField path="workspaceId" type="string" required>
+  The workspace UUID.
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="title" type="string | null" required>
+  Your new title: trimmed, up to 100 characters. `null` clears it. A cosmetic label with no authority.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Service keys only, and **required** with one: the user whose own title is edited. A key that names nobody is refused with `400 workspace/missing-user-id`. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+</ParamField>
+
+## Response
+
+Returns the updated [WorkspaceMember](/v8/data-models/workspace-member) object, the same record [Update Member](/v8/api-reference/workspaces/members/update-member) returns.
+
+```json
+{
+  "id": "6f1c2b0e-8d4a-4f7e-9b3a-2c5d1e0f9a87",
+  "workspaceId": "ws_abc",
+  "userId": "u_pat",
+  "capabilities": ["view", "invite"],
+  "permissions": ["deploy"],
+  "rank": 3,
+  "title": "Frontend Lead",
+  "metadata": {},
+  "joinedAt": "2026-11-01T09:00:00.000Z",
+  "createdAt": "2026-11-01T09:00:00.000Z"
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Field Not Editable Here — 400">
+    ```json
+    { "error": "`metadata` can't be edited on your own membership: only `title` can. A member with the capability edits `metadata` through `PATCH /workspaces/:workspaceId/members/:userId`.", "code": "workspace/unsupported-param", "param": "metadata" }
+    ```
+    Sent for `metadata`, `capabilities`, `permissions`, `rank` or `relativeRank`, whoever sends it; `param` names the field. Nothing is written.
+  </Accordion>
+  <Accordion title="Invalid Body — 400">
+    `title` is missing, the wrong type or longer than 100 characters:
+    ```json
+    { "error": "title: Invalid input: expected string, received undefined", "code": "workspace/invalid-body" }
+    ```
+    Any other unknown key is refused too:
+    ```json
+    { "error": "Unrecognized key: \"nickname\"", "code": "workspace/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Path Parameter — 400">
+    ```json
+    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Acting User — 400">
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
+    ```
+    A service key sent no `actingUserId`. `me` is the acting user, so the key must name one.
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
+    ```
+    A user token sent `actingUserId`, even naming its own user.
+  </Accordion>
+  <Accordion title="Wrong Location — 400">
+    ```json
+    { "error": "`actingUserId` goes in the request body on this endpoint.", "code": "workspace/wrong-location", "param": "actingUserId" }
+    ```
+    A field this endpoint reads from the body was sent in the query string.
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }
+    ```
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+  </Accordion>
+  <Accordion title="Not Found — 404">
+    The workspace doesn't exist, or the acting user has no relation to it:
+    ```json
+    { "error": "Workspace not found", "code": "workspace/not-found" }
+    ```
+    The acting user has no direct member row on this workspace (the owner, or a user who only reaches in from an ancestor), including when the row was removed while this request was being handled:
+    ```json
+    { "error": "The target user is not a direct member of this workspace.", "code": "workspace/not-found" }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+See also: [useUpdateMyWorkspaceMembership](/v8/hooks/workspaces/use-update-my-workspace-membership) · [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership) · [Update Member](/v8/api-reference/workspaces/members/update-member)

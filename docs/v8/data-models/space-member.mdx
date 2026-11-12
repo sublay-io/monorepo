@@ -31,7 +31,7 @@ A SpaceMember record represents a user's membership in a specific space. It trac
 
 | Role | Description |
 |------|-------------|
-| `admin` | Full control: can update the space, manage all members and roles, create rules, and moderate all content. Deleting the space is reserved for its creator. |
+| `admin` | Full control: can update the space, manage all members and roles, create rules, and moderate all content. Deleting the space is reserved for its creator, who is always an admin: the creator can't step down, leave, or be banned. |
 | `moderator` | Can approve/decline/ban members, moderate content and reports, but cannot change space settings or manage admin accounts. |
 | `member` | Regular participant. Can read and post according to the space's `postingPermission` setting: a `"team"` space lets only its admins and moderators post. |
 
@@ -41,7 +41,7 @@ Returned by the list members and list team endpoints. Includes embedded public u
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `membershipId` | `string` | The membership record ID. |
+| `membershipId` | `string` | The membership record ID. Member routes don't take it: they address a member by user id (`user.id`). |
 | `role` | `"admin" \| "moderator" \| "member"` | Member's role. |
 | `status` | `"pending" \| "active" \| "banned" \| "rejected"` | Member's status. |
 | `joinedAt` | `Date` | When the user joined. |

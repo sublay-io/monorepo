@@ -14,7 +14,7 @@ afterEach(() => {
 });
 
 describe("useFetchWorkspace", () => {
-  it("gets /workspaces/:id with no include param and returns the workspace", async () => {
+  it("gets /workspaces/:workspaceId with no include param and returns the workspace", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useFetchWorkspace(),

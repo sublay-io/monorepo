@@ -16,26 +16,26 @@ describe("useDeclineMember", () => {
       message: "Declined",
       membership: { id: "membership-1", status: "rejected" as const },
     };
-    axiosPrivate.mockResponse("patch", response);
+    axiosPrivate.mockResponse("post", response);
 
     let returned;
     await act(async () => {
-      returned = await result.current({ spaceId: "space-1", memberId: "membership-1" });
+      returned = await result.current({ spaceId: "space-1", userId: "user-2" });
     });
 
     expect(returned).toEqual(response);
 
-    const [call] = axiosPrivate.calls("patch");
-    expect(call.url).toBe("/test-project/spaces/space-1/members/membership-1/decline");
+    const [call] = axiosPrivate.calls("post");
+    expect(call.url).toBe("/test-project/spaces/space-1/members/user-2/decline");
   });
 
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useDeclineMember());
 
-    axiosPrivate.mockError("patch", 403, { message: "Forbidden" });
+    axiosPrivate.mockError("post", 403, { message: "Forbidden" });
 
     await expect(
-      result.current({ spaceId: "space-1", memberId: "membership-1" }),
+      result.current({ spaceId: "space-1", userId: "user-2" }),
     ).rejects.toMatchObject({ response: { status: 403 } });
   });
 
@@ -43,8 +43,8 @@ describe("useDeclineMember", () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useDeclineMember());
 
     await expect(
-      result.current({ spaceId: "", memberId: "membership-1" }),
-    ).rejects.toThrow("spaceId and memberId are required");
-    expect(axiosPrivate.calls("patch")).toHaveLength(0);
+      result.current({ spaceId: "", userId: "user-2" }),
+    ).rejects.toThrow("spaceId and userId are required");
+    expect(axiosPrivate.calls("post")).toHaveLength(0);
   });
 });

@@ -9,7 +9,9 @@ import {
   transferWorkspaceOwnership,
   fetchWorkspaceMembers,
   fetchWorkspaceMemberStanding,
+  fetchMyWorkspaceMembership,
   updateWorkspaceMember,
+  updateMyWorkspaceMembership,
   removeWorkspaceMember,
   leaveWorkspace,
   removeWorkspaceMemberFromSubtree,
@@ -63,7 +65,7 @@ function expectNoActorUserIdAnywhere(
 }
 
 describe("js-sdk workspaces — surface", () => {
-  it("exports all 21 canonical workspace functions and nothing else", () => {
+  it("exports all 24 canonical workspace functions and nothing else", () => {
     expect(Object.keys(Workspaces).sort()).toEqual(
       [
         "acceptWorkspaceInvite",
@@ -78,6 +80,7 @@ describe("js-sdk workspaces — surface", () => {
         "fetchWorkspaceAuthority",
         "fetchWorkspaceInvites",
         "fetchWorkspaceMemberStanding",
+        "fetchMyWorkspaceMembership",
         "fetchWorkspaceMembers",
         "leaveWorkspace",
         "removeWorkspaceMember",
@@ -88,6 +91,7 @@ describe("js-sdk workspaces — surface", () => {
         "updateWorkspace",
         "updateWorkspaceInheritFlag",
         "updateWorkspaceMember",
+        "updateMyWorkspaceMembership",
       ].sort()
     );
   });
@@ -270,6 +274,24 @@ describe("js-sdk workspaces — membership request shaping", () => {
     });
     expect(projectInstance.get.mock.calls[0]).toEqual([
       "/workspaces/w1/members/u-target",
+    ]);
+    expectNoActorUserIdAnywhere(projectInstance);
+  });
+
+  it("fetchMyWorkspaceMembership GETs /workspaces/:workspaceId/members/me with no config", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchMyWorkspaceMembership(client, { workspaceId: "w1" });
+    expect(projectInstance.get.mock.calls[0]).toEqual(["/workspaces/w1/members/me"]);
+    expectNoActorUserIdAnywhere(projectInstance);
+  });
+
+  it("updateMyWorkspaceMembership PATCHes /workspaces/:workspaceId/members/me with only the title", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateMyWorkspaceMembership(client, { workspaceId: "w1", title: "Scout" });
+    await updateMyWorkspaceMembership(client, { workspaceId: "w1", title: null });
+    expect(projectInstance.patch.mock.calls).toEqual([
+      ["/workspaces/w1/members/me", { title: "Scout" }],
+      ["/workspaces/w1/members/me", { title: null }],
     ]);
     expectNoActorUserIdAnywhere(projectInstance);
   });
@@ -683,6 +705,22 @@ describe("js-sdk workspaces — response mapping", () => {
         targetUserId: "u-t",
       })
     ).resolves.toEqual(standing);
+  });
+
+  it("fetchMyWorkspaceMembership returns response.data (the caller's standing record)", async () => {
+    const { client, projectInstance } = makeClient();
+    const standing = {
+      user: { id: "u1" },
+      reasons: ["member"],
+      capabilities: [],
+      permissions: [],
+      rank: 2,
+      relativeRank: 0,
+      title: null,
+      metadata: {},
+    };
+    projectInstance.get.mockResolvedValueOnce({ data: standing });
+    await expect(fetchMyWorkspaceMembership(client, { workspaceId: "w1" })).resolves.toEqual(standing);
   });
 
   it("removeWorkspaceMemberFromSubtree returns the removal report", async () => {

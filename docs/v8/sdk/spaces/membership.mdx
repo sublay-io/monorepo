@@ -5,6 +5,12 @@ description: "Join and leave spaces, manage members, handle approval workflows, 
 
 Each space has its own membership list. Members can be regular users, moderators, or admins. Spaces can require join approval, and moderators/admins can approve, decline, ban, or unban members.
 
+<Note>
+  **Your own membership and other members' are separate routes.** Your own membership is `/spaces/:spaceId/members/me`: `GET` to check it ([`useCheckMyMembership`](/v8/hooks/spaces/use-check-my-membership)), `DELETE` to leave ([`useLeaveSpace`](/v8/hooks/spaces/use-leave-space)). `/spaces/:spaceId/members/:userId/…` (approve, decline, role, ban, unban) is for acting on **another** member, addressed by their **user id** (`user.id` on a member list entry), and refuses your own id with `400 space/own-member-id`.
+
+  **The space creator stays an admin.** They can't step down, leave the space, or be banned — not by another admin, and not by a report on their own content.
+</Note>
+
 ## Joining and Leaving
 
 The simplest membership operations are exposed directly from `useSpace`:
@@ -73,9 +79,11 @@ import { useApproveMember, useDeclineMember } from "@sublay/react-js";
 const approve = useApproveMember();
 const decline = useDeclineMember();
 
-await approve({ spaceId, memberId });
-await decline({ spaceId, memberId });
+await approve({ spaceId, userId });
+await decline({ spaceId, userId });
 ```
+
+`userId` is the requesting user's id (`user.id` on an entry from `useFetchSpaceMembers`).
 
 <Note>Both `useApproveMember` and `useDeclineMember` require the caller to be a moderator or admin of the space.</Note>
 
@@ -101,9 +109,11 @@ Admins can change a member's role:
 import { useUpdateMemberRole } from "@sublay/react-js";
 
 const updateRole = useUpdateMemberRole();
-await updateRole({ spaceId, memberId, role: "moderator" });
+await updateRole({ spaceId, userId, role: "moderator" });
 // Valid roles: "admin" | "moderator" | "member"
 ```
+
+Only the space creator can promote or demote admins, so the creator's own admin role can't be lowered.
 
 ## Banning and Unbanning
 
@@ -115,15 +125,15 @@ import { useBanMember, useUnbanMember } from "@sublay/react-js";
 const banMember = useBanMember();
 const unban = useUnbanMember();
 
-await banMember({ spaceId, memberId });
-await unban({ spaceId, memberId });
+await banMember({ spaceId, userId });
+await unban({ spaceId, userId });
 ```
 
-<Warning>Banning a member sets their status to `"banned"`. Moderators can only ban regular members. Admins can ban moderators and regular members. Only the space creator can ban admins.</Warning>
+<Warning>Banning a member sets their status to `"banned"`. Moderators can only ban regular members. Admins can ban moderators and regular members. Only the space creator can ban admins, and the creator themselves can't be banned.</Warning>
 
 ## Sub-space Cascade
 
-When a child space is created, all admins and moderators of the parent space are automatically added to the child space with their same roles. This ensures governance cascades to sub-communities without manual setup.
+When a child space is created, all admins and moderators of the parent space are automatically added to the child space with their same roles. This ensures governance cascades to child spaces without manual setup.
 
 ## Hook Reference
 

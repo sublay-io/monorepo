@@ -15,7 +15,7 @@ The caller must be an active `admin`.
 </ParamField>
 
 <ParamField path="userId" type="string" required>
-  The ID of the member whose role is being changed.
+  The ID of the member whose role is being changed. Your own id is refused (`400 chat/own-member-id`): an admin can't change their own role. Your own membership is [`/chat/conversations/:conversationId/members/me`](/v8/api-reference/chat/members/check-my-membership).
 </ParamField>
 
 ## Body Parameters
@@ -35,6 +35,12 @@ Returns the updated [ConversationMember](/v8/data-models/conversation-member) re
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Own Member Id — 400">
+    `userId` is the acting user (the token's user, or the user named by `actingUserId`). This route acts on another member; check your own membership with `GET /chat/conversations/:conversationId/members/me` and leave with `DELETE /chat/conversations/:conversationId/members/me`.
+    ```json
+    { "error": "`PATCH /chat/conversations/:conversationId/members/:userId/role` acts on another member, not on yourself. Your own membership is at `/chat/conversations/:conversationId/members/me`: GET to check it, DELETE to leave.", "code": "chat/own-member-id" }
+    ```
+  </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json

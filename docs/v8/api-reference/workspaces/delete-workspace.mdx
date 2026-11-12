@@ -1,6 +1,6 @@
 ---
 title: "Delete Workspace"
-api: "DELETE /v8/:projectId/workspaces/:id"
+api: "DELETE /v8/:projectId/workspaces/:workspaceId"
 description: "Owner-only delete that cascades the subtree"
 ---
 
@@ -18,7 +18,7 @@ Deletion **cascades** the entire subtree in one transaction, bottom-up: invitati
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID.
 </ParamField>
 

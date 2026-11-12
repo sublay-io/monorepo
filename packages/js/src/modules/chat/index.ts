@@ -12,6 +12,7 @@ export { listMembers } from "./listMembers";
 export { addMember } from "./addMember";
 export { removeMember } from "./removeMember";
 export { leaveConversation } from "./leaveConversation";
+export { checkMyConversationMembership } from "./checkMyConversationMembership";
 export { changeMemberRole } from "./changeMemberRole";
 
 // Messages

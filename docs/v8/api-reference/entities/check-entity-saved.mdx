@@ -1,6 +1,6 @@
 ---
-title: "Is Entity Saved"
-api: "GET /v8/:projectId/entities/is-entity-saved"
+title: "Check Entity Saved"
+api: "GET /v8/:projectId/entities/:entityId/saved"
 description: "Check whether an entity is saved in any of the current user's collections"
 ---
 
@@ -10,11 +10,13 @@ description: "Check whether an entity is saved in any of the current user's coll
 
 Returns whether the specified entity is saved in any collection belonging to the authenticated user, along with the list of matching collections.
 
-## Query Parameters
+## Path Parameters
 
-<ParamField query="entityId" type="string" required>
+<ParamField path="entityId" type="string" required>
   The ID of the entity to check.
 </ParamField>
+
+## Query Parameters
 
 <ParamField query="actingUserId" type="string">
   Service key only, and required with one: the user this request acts as, whose collections are checked. A user token always acts as its own user and must not send it (`400 collection/acting-user-not-allowed`).
@@ -43,6 +45,22 @@ Returns whether the specified entity is saved in any collection belonging to the
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Params — 400">
+    Returned when `entityId` isn't a valid UUID.
+    ```json
+    { "error": "Invalid entity id: expected a UUID.", "code": "entity/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Entity Id in the Query — 400">
+    The request sent `entityId` in the query string. The entity is the one in the path.
+    ```json
+    {
+      "error": "`entityId` isn't accepted here: the entity is the one in the path.",
+      "code": "entity/unsupported-param",
+      "param": "entityId"
+    }
+    ```
+  </Accordion>
   <Accordion title="Missing User — 400">
     A service key sent no `actingUserId`.
     ```json

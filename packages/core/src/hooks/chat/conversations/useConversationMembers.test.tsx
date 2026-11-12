@@ -112,7 +112,7 @@ describe("useConversationMembers", () => {
     });
 
     const [call] = axiosPrivate.calls("delete");
-    expect(call.url).toBe("/test-project/chat/conversations/conversation-1/leave");
+    expect(call.url).toBe("/test-project/chat/conversations/conversation-1/members/me");
   });
 
   it("upsertMember and removeMemberLocally manage state without an API call", async () => {

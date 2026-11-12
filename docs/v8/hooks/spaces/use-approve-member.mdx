@@ -13,11 +13,11 @@ icon: "plug"
 ```tsx
 import { useApproveMember } from "@sublay/react-js";
 
-function PendingMemberRow({ spaceId, memberId }: { spaceId: string; memberId: string }) {
+function PendingMemberRow({ spaceId, userId }: { spaceId: string; userId: string }) {
   const approve = useApproveMember();
 
   return (
-    <button onClick={() => approve({ spaceId, memberId })}>
+    <button onClick={() => approve({ spaceId, userId })}>
       Approve
     </button>
   );
@@ -30,8 +30,8 @@ function PendingMemberRow({ spaceId, memberId }: { spaceId: string; memberId: st
   UUID of the space.
 </ParamField>
 
-<ParamField path="memberId" type="string" required>
-  UUID of the membership record to approve.
+<ParamField path="userId" type="string" required>
+  UUID of the user whose pending request to approve — their user id, not a membership id. Must be another member: your own id is refused (`400 space/own-member-id`). Your own membership is [`useCheckMyMembership`](/v8/hooks/spaces/use-check-my-membership) / [`useLeaveSpace`](/v8/hooks/spaces/use-leave-space).
 </ParamField>
 
 ## Returns

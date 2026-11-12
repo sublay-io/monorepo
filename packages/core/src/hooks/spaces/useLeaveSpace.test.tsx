@@ -23,7 +23,7 @@ describe("useLeaveSpace", () => {
     expect(returned).toEqual(response);
 
     const [call] = axiosPrivate.calls("delete");
-    expect(call.url).toBe("/test-project/spaces/space-1/leave");
+    expect(call.url).toBe("/test-project/spaces/space-1/members/me");
   });
 
   it("rejects when the server returns an error response", async () => {

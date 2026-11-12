@@ -7,6 +7,8 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 The `spaces` module includes a full set of membership management functions. Use these to build admin tools, automate onboarding flows, or enforce membership policies server-side.
 
+Members are addressed by their **user id**. The acting user's own membership is checked with [checkMyMembership](#checkmymembership) and left with [leaveSpace](#leavespace) (`GET` / `DELETE /spaces/:spaceId/members/me`); the functions that take a `userId` (`updateMemberRole`, `approveMembership`, `declineMembership`, `banMember`, `unbanMember`) act on **another** member, and a `userId` equal to `actingUserId` is refused with `400 space/own-member-id`. The space creator stays an admin for good: they can't step down, leave the space, or be banned.
+
 ---
 
 ### joinSpace
@@ -34,7 +36,7 @@ const result = await sublay.spaces.joinSpace({
 
 ### leaveSpace
 
-Removes a member from a space, acting as that member.
+Removes a member from a space, acting as that member (`DELETE /spaces/:spaceId/members/me`). The space creator can't leave (`400 space/creator-cannot-leave`).
 
 ```typescript
 const result = await sublay.spaces.leaveSpace({
@@ -57,7 +59,7 @@ const result = await sublay.spaces.leaveSpace({
 
 ### checkMyMembership
 
-Returns the membership status of a user in a space. A user with a membership gets it back whatever its status (a banned user learns they're banned); a user with no membership in a space they can't see gets `404 space/not-found`.
+Returns the membership status of a user in a space (`GET /spaces/:spaceId/members/me`). A user with a membership gets it back whatever its status (a banned user learns they're banned); a user with no membership in a space they can't see gets `404 space/not-found`.
 
 ```typescript
 const result = await sublay.spaces.checkMyMembership({
@@ -148,13 +150,13 @@ Open to anyone who can read the space. A members-only space, or a space under on
 
 ### updateMemberRole
 
-Updates a member's role within a space.
+Updates another member's role within a space. Only the space creator can promote or demote admins, and nobody can demote the creator.
 
 ```typescript
 const result = await sublay.spaces.updateMemberRole({
   spaceId: "spc_abc123",
   actingUserId: "usr_admin123",
-  memberId: "mem_xyz789",
+  userId: "usr_xyz789",
   role: "moderator",
 });
 ```
@@ -167,8 +169,8 @@ const result = await sublay.spaces.updateMemberRole({
   The user the request acts as: they must be an admin of the space, and the action is recorded as theirs.
 </ParamField>
 
-<ParamField body="memberId" type="string" required>
-  The Sublay space member ID (not the user ID).
+<ParamField body="userId" type="string" required>
+  The user id of the member to update. An id equal to `actingUserId` is refused (`400 space/own-member-id`).
 </ParamField>
 
 <ParamField body="role" type="string" required>
@@ -217,7 +219,7 @@ Approves a pending membership request. Only relevant when the space has `require
 const result = await sublay.spaces.approveMembership({
   spaceId: "spc_abc123",
   actingUserId: "usr_mod123",
-  memberId: "mem_xyz789",
+  userId: "usr_xyz789",
 });
 ```
 
@@ -229,8 +231,8 @@ const result = await sublay.spaces.approveMembership({
   The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
-<ParamField body="memberId" type="string" required>
-  The Sublay space member ID of the pending member.
+<ParamField body="userId" type="string" required>
+  The user id of the pending member. An id equal to `actingUserId` is refused (`400 space/own-member-id`).
 </ParamField>
 
 **Returns** — `Promise<ApproveMemberResponse>`
@@ -245,7 +247,7 @@ Declines and removes a pending membership request.
 const result = await sublay.spaces.declineMembership({
   spaceId: "spc_abc123",
   actingUserId: "usr_mod123",
-  memberId: "mem_xyz789",
+  userId: "usr_xyz789",
 });
 ```
 
@@ -257,8 +259,8 @@ const result = await sublay.spaces.declineMembership({
   The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
-<ParamField body="memberId" type="string" required>
-  The Sublay space member ID of the pending member.
+<ParamField body="userId" type="string" required>
+  The user id of the pending member. An id equal to `actingUserId` is refused (`400 space/own-member-id`).
 </ParamField>
 
 **Returns** — `Promise<DeclineMemberResponse>`
@@ -267,13 +269,13 @@ const result = await sublay.spaces.declineMembership({
 
 ### banMember
 
-Bans a member from a space, preventing them from rejoining.
+Bans another member from a space, preventing them from rejoining. A moderator can ban only regular members; only the space creator can ban an admin, and the creator can't be banned.
 
 ```typescript
 const result = await sublay.spaces.banMember({
   spaceId: "spc_abc123",
   actingUserId: "usr_mod123",
-  memberId: "mem_xyz789",
+  userId: "usr_xyz789",
 });
 ```
 
@@ -285,8 +287,8 @@ const result = await sublay.spaces.banMember({
   The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
-<ParamField body="memberId" type="string" required>
-  The Sublay space member ID to ban.
+<ParamField body="userId" type="string" required>
+  The user id of the member to ban. An id equal to `actingUserId` is refused (`400 space/own-member-id`).
 </ParamField>
 
 <ParamField body="reason" type="string">
@@ -305,7 +307,7 @@ Removes a ban, allowing the user to rejoin the space.
 const result = await sublay.spaces.unbanMember({
   spaceId: "spc_abc123",
   actingUserId: "usr_mod123",
-  memberId: "mem_xyz789",
+  userId: "usr_xyz789",
 });
 ```
 
@@ -317,8 +319,8 @@ const result = await sublay.spaces.unbanMember({
   The user the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.
 </ParamField>
 
-<ParamField body="memberId" type="string" required>
-  The Sublay space member ID to unban.
+<ParamField body="userId" type="string" required>
+  The user id of the member to unban. An id equal to `actingUserId` is refused (`400 space/own-member-id`).
 </ParamField>
 
 **Returns** — `Promise<UnbanMemberResponse>`

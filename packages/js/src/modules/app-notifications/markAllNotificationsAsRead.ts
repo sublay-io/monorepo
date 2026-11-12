@@ -8,7 +8,7 @@ export async function markAllNotificationsAsRead(
   client: SublayHttpClient
 ): Promise<MarkAllNotificationsAsReadResponse> {
   const response =
-    await client.projectInstance.patch<MarkAllNotificationsAsReadResponse>(
+    await client.projectInstance.post<MarkAllNotificationsAsReadResponse>(
       "/app-notifications/mark-all-as-read"
     );
   return response.data;

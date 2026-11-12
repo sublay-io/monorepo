@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe("useDeleteWorkspace", () => {
-  it("deletes /workspaces/:id with no request body at all", async () => {
+  it("deletes /workspaces/:workspaceId with no request body at all", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useDeleteWorkspace(),

@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useBanMember` returns a callable function for banning a member from a space by setting their status to `"banned"`. Requires the caller to be a moderator or admin. Moderators can only ban regular members — banning an admin requires being the space creator, and the last remaining admin cannot be banned.
+`useBanMember` returns a callable function for banning a member from a space by setting their status to `"banned"`. Requires the caller to be a moderator or admin. Moderators can only ban regular members — banning an admin requires being the space creator, and the last remaining admin cannot be banned. The space creator can't be banned at all.
 
 A ban is a standing bar: the member stays out until someone calls [`useUnbanMember`](/v8/hooks/spaces/use-unban-member). It also cascades to the space's child spaces and removes the member from the space chat.
 
@@ -15,11 +15,11 @@ A ban is a standing bar: the member stays out until someone calls [`useUnbanMemb
 ```tsx
 import { useBanMember } from "@sublay/react-js";
 
-function MemberActions({ spaceId, memberId }: { spaceId: string; memberId: string }) {
+function MemberActions({ spaceId, userId }: { spaceId: string; userId: string }) {
   const banMember = useBanMember();
 
   return (
-    <button onClick={() => banMember({ spaceId, memberId })}>
+    <button onClick={() => banMember({ spaceId, userId })}>
       Ban Member
     </button>
   );
@@ -32,8 +32,8 @@ function MemberActions({ spaceId, memberId }: { spaceId: string; memberId: strin
   UUID of the space.
 </ParamField>
 
-<ParamField path="memberId" type="string" required>
-  UUID of the membership record to ban.
+<ParamField path="userId" type="string" required>
+  UUID of the user to ban — their user id, not a membership id. Must be another member: your own id is refused (`400 space/own-member-id`). Your own membership is [`useCheckMyMembership`](/v8/hooks/spaces/use-check-my-membership) / [`useLeaveSpace`](/v8/hooks/spaces/use-leave-space).
 </ParamField>
 
 <ParamField body="reason" type="string">

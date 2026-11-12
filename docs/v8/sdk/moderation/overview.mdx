@@ -85,7 +85,7 @@ A block is invisible to the blocked user. There is no notification, no "you have
     - **Space-level moderators** see only reports for content within their space.
   </Step>
   <Step title="Moderator takes action">
-    Use [`useHandleSpaceEntityReport`](/v8/hooks/reports/use-handle-space-entity-report) or [`useHandleSpaceCommentReport`](/v8/hooks/reports/use-handle-space-comment-report) to remove content, ban the author, or dismiss the report. Space-level moderators can only act on content within their space.
+    Use [`useHandleSpaceReport`](/v8/hooks/reports/use-handle-space-report) to remove content, ban the author, or dismiss the report. Space-level moderators can only act on content within their space.
   </Step>
 </Steps>
 
@@ -147,14 +147,8 @@ The hooks below are used for **space-level moderation** integrated in your app. 
   <Card title="useFetchModeratedReports" href="/v8/hooks/reports/use-fetch-moderated-reports">
     Fetch pending reports for spaces the current user moderates.
   </Card>
-  <Card title="useHandleSpaceEntityReport" href="/v8/hooks/reports/use-handle-space-entity-report">
-    Action an entity report as a space moderator.
-  </Card>
-  <Card title="useHandleSpaceCommentReport" href="/v8/hooks/reports/use-handle-space-comment-report">
-    Action a comment report as a space moderator.
-  </Card>
-  <Card title="useHandleSpaceChatReport" href="/v8/hooks/reports/use-handle-space-chat-report">
-    Action a chat message report as a space moderator.
+  <Card title="useHandleSpaceReport" href="/v8/hooks/reports/use-handle-space-report">
+    Act on an entity, comment or chat message report as a space moderator.
   </Card>
 </CardGroup>
 

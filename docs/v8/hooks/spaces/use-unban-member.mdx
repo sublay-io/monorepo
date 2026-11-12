@@ -13,11 +13,11 @@ icon: "plug"
 ```tsx
 import { useUnbanMember } from "@sublay/react-js";
 
-function BannedMemberRow({ spaceId, memberId }: { spaceId: string; memberId: string }) {
+function BannedMemberRow({ spaceId, userId }: { spaceId: string; userId: string }) {
   const unban = useUnbanMember();
 
   return (
-    <button onClick={() => unban({ spaceId, memberId })}>
+    <button onClick={() => unban({ spaceId, userId })}>
       Unban
     </button>
   );
@@ -30,8 +30,8 @@ function BannedMemberRow({ spaceId, memberId }: { spaceId: string; memberId: str
   UUID of the space.
 </ParamField>
 
-<ParamField path="memberId" type="string" required>
-  UUID of the membership record to unban.
+<ParamField path="userId" type="string" required>
+  UUID of the banned user to unban — their user id, not a membership id. Must be another member: your own id is refused (`400 space/own-member-id`). Your own membership is [`useCheckMyMembership`](/v8/hooks/spaces/use-check-my-membership) / [`useLeaveSpace`](/v8/hooks/spaces/use-leave-space).
 </ParamField>
 
 ## Returns

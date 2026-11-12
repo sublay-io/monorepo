@@ -132,6 +132,6 @@ const { data, pagination } = await sublay.reports.fetchModeratedReports({
 
 <Note>
   To act on a report (remove content, ban the author, or dismiss it), use
-  `handleEntityReport` / `handleCommentReport` on the
-  [Space Moderation](/v8/node-sdk/spaces-moderation) module.
+  [`spaces.handleSpaceReport`](/v8/node-sdk/spaces-moderation#handlespacereport),
+  which handles every report type in a space.
 </Note>

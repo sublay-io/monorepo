@@ -44,9 +44,9 @@ Base path: `/v8/:projectId/`
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
 | GET | `/app-notifications/` | can access with a key | `appNotifications.fetchNotifications` | yes |
-| GET | `/app-notifications/count` | can access with a key | `appNotifications.countUnreadNotifications` | yes |
-| PATCH | `/app-notifications/:notificationId/mark-as-read` | can access with a key | `appNotifications.markNotificationAsRead` | yes |
-| PATCH | `/app-notifications/mark-all-as-read` | can access with a key | `appNotifications.markAllNotificationsAsRead` | yes |
+| GET | `/app-notifications/unread-count` | can access with a key | `appNotifications.countUnreadNotifications` | yes |
+| POST | `/app-notifications/:notificationId/mark-as-read` | can access with a key | `appNotifications.markNotificationAsRead` | yes |
+| POST | `/app-notifications/mark-all-as-read` | can access with a key | `appNotifications.markAllNotificationsAsRead` | yes |
 
 ---
 
@@ -73,7 +73,8 @@ Base path: `/v8/:projectId/`
 | GET | `/chat/conversations/:conversationId/members` | can access with a key | `chat.listMembers` | yes |
 | POST | `/chat/conversations/:conversationId/members` | can access with a key | `chat.addMember` | yes |
 | DELETE | `/chat/conversations/:conversationId/members/:userId` | can access with a key | `chat.removeMember` | yes |
-| DELETE | `/chat/conversations/:conversationId/leave` | can access with a key | `chat.leaveConversation` | yes |
+| GET | `/chat/conversations/:conversationId/members/me` | can access with a key | `chat.checkMyConversationMembership` | yes |
+| DELETE | `/chat/conversations/:conversationId/members/me` | can access with a key | `chat.leaveConversation` | yes |
 | PATCH | `/chat/conversations/:conversationId/members/:userId/role` | can access with a key | `chat.changeMemberRole` | yes |
 
 ## Chat — Messages
@@ -124,11 +125,11 @@ Base path: `/v8/:projectId/`
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
 | GET | `/connections/` | can access with a key | `connections.fetchConnections` | yes |
-| GET | `/connections/count` | can access with a key | `connections.fetchConnectionsCount` | yes |
+| GET | `/connections/connections-count` | can access with a key | `connections.fetchConnectionsCount` | yes |
 | GET | `/connections/pending/sent` | can access with a key | `connections.fetchSentPendingConnections` | yes |
 | GET | `/connections/pending/received` | can access with a key | `connections.fetchReceivedPendingConnections` | yes |
-| PATCH | `/connections/:connectionId/accept` | can access with a key | `connections.acceptConnection` | yes |
-| PATCH | `/connections/:connectionId/decline` | can access with a key | `connections.declineConnection` | yes |
+| POST | `/connections/:connectionId/accept` | can access with a key | `connections.acceptConnection` | yes |
+| POST | `/connections/:connectionId/decline` | can access with a key | `connections.declineConnection` | yes |
 | DELETE | `/connections/:connectionId` | can access with a key | `connections.removeConnection` | yes |
 
 ---
@@ -142,14 +143,14 @@ Base path: `/v8/:projectId/`
 | GET | `/entities/by-foreign-id` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntityByForeignId`, `entities.fetchOrCreateEntityByForeignId` (`createIfNotFound=true`) | yes |
 | GET | `/entities/by-short-id` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntityByShortId` | yes |
 | GET | `/entities/drafts` | can access with a key | `entities.fetchDrafts` | yes |
-| GET | `/entities/is-entity-saved` | can access with a key | `entities.isEntitySaved` | yes |
-| PATCH | `/entities/:entityId/publish` | can access with a key (`actingUserId` required, and must name the draft's author; an author-less draft is 404) | `entities.publishDraft` | yes |
+| GET | `/entities/:entityId/saved` | can access with a key | `entities.isEntitySaved` | yes |
+| POST | `/entities/:entityId/publish` | can access with a key (`actingUserId` required, and must name the draft's author; an author-less draft is 404) | `entities.publishDraft` | yes |
 | GET | `/entities/:entityId` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntity` | yes |
 | POST | `/entities/:entityId/reactions` | can access with a key | `entities.addReaction` | yes |
 | DELETE | `/entities/:entityId/reactions` | can access with a key | `entities.removeReaction` | yes |
 | GET | `/entities/:entityId/reactions` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchReactions` | yes |
 | GET | `/entities/:entityId/reactions/me` | can access with a key | `entities.getUserReaction` | yes |
-| PATCH | `/entities/:entityId/increment-views` | can access with a key *(requires service key; acts as the app, refuses `actingUserId`)* | `entities.incrementEntityViews` | yes |
+| POST | `/entities/:entityId/increment-views` | can access with a key *(requires service key; acts as the app, refuses `actingUserId`)* | `entities.incrementEntityViews` | yes |
 | PATCH | `/entities/:entityId` | can access with a key (`actingUserId` required when the record has an author, and must name the author; omitted only for an app-owned record) | `entities.updateEntity` | yes |
 | DELETE | `/entities/:entityId` | can access with a key (`actingUserId` required when the record has an author, and must name the author; omitted only for an app-owned record) | `entities.deleteEntity` | yes |
 
@@ -211,27 +212,25 @@ Base path: `/v8/:projectId/`
 | GET | `/spaces/:spaceId/members` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceMembers` | yes |
 | POST | `/spaces/:spaceId/members` | can access with a key (required `actingUserId`, a moderator or admin) | `spaces.addMember` | yes |
 | GET | `/spaces/:spaceId/team` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceTeam` | yes |
-| GET | `/spaces/:spaceId/membership/me` | can access with a key | `spaces.checkMyMembership` | yes |
-| PATCH | `/spaces/:spaceId/members/:memberId/role` | can access with a key | `spaces.updateMemberRole` | yes |
-| PATCH | `/spaces/:spaceId/members/:memberId/approve` | can access with a key | `spaces.approveMembership` | yes |
-| PATCH | `/spaces/:spaceId/members/:memberId/decline` | can access with a key | `spaces.declineMembership` | yes |
-| PATCH | `/spaces/:spaceId/members/:memberId/ban` | can access with a key | `spaces.banMember` | yes |
-| PATCH | `/spaces/:spaceId/members/:memberId/unban` | can access with a key | `spaces.unbanMember` | yes |
-| DELETE | `/spaces/:spaceId/leave` | can access with a key | `spaces.leaveSpace` | yes |
-| PATCH | `/spaces/:spaceId/reports/entity/:reportId` | can access with a key | `spaces.handleEntityReport` | yes |
-| PATCH | `/spaces/:spaceId/reports/comment/:reportId` | can access with a key | `spaces.handleCommentReport` | yes |
+| GET | `/spaces/:spaceId/members/me` | can access with a key | `spaces.checkMyMembership` | yes |
+| PATCH | `/spaces/:spaceId/members/:userId/role` | can access with a key | `spaces.updateMemberRole` | yes |
+| POST | `/spaces/:spaceId/members/:userId/approve` | can access with a key | `spaces.approveMembership` | yes |
+| POST | `/spaces/:spaceId/members/:userId/decline` | can access with a key | `spaces.declineMembership` | yes |
+| POST | `/spaces/:spaceId/members/:userId/ban` | can access with a key | `spaces.banMember` | yes |
+| POST | `/spaces/:spaceId/members/:userId/unban` | can access with a key | `spaces.unbanMember` | yes |
+| DELETE | `/spaces/:spaceId/members/me` | can access with a key | `spaces.leaveSpace` | yes |
+| PATCH | `/spaces/:spaceId/reports/:reportId` | can access with a key (required `actingUserId`, held to that user's moderator role) | `spaces.handleSpaceReport` | yes |
 | PATCH | `/spaces/:spaceId/entities/:entityId/moderation` | can access with a key | `spaces.moderateSpaceEntity` | yes |
 | PATCH | `/spaces/:spaceId/comments/:commentId/moderation` | can access with a key | `spaces.moderateSpaceComment` | yes |
 | GET | `/spaces/:spaceId/breadcrumb` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceBreadcrumb` | yes |
 | GET | `/spaces/:spaceId/rules` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchManyRules` | yes |
-| PATCH | `/spaces/:spaceId/rules/reorder` | can access with a key | `spaces.reorderRules` | yes |
+| POST | `/spaces/:spaceId/rules/reorder` | can access with a key | `spaces.reorderRules` | yes |
 | GET | `/spaces/:spaceId/rules/:ruleId` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchRule` | yes |
 | POST | `/spaces/:spaceId/rules` | can access with a key | `spaces.createRule` | yes |
 | PATCH | `/spaces/:spaceId/rules/:ruleId` | can access with a key | `spaces.updateRule` | yes |
 | DELETE | `/spaces/:spaceId/rules/:ruleId` | can access with a key | `spaces.deleteRule` | yes |
 | GET | `/spaces/:spaceId/conversation` | can access with a key (required `actingUserId`) | `spaces.getSpaceConversation` | yes |
 | PATCH | `/spaces/:spaceId/chat/messages/:messageId/moderation` | can access with a key (required `actingUserId`, held to that user's moderator role) | `spaces.moderateSpaceChatMessage` | yes |
-| PATCH | `/spaces/:spaceId/chat/reports/:reportId` | can access with a key (required `actingUserId`, held to that user's moderator role) | `spaces.handleSpaceChatReport` | yes |
 
 ---
 

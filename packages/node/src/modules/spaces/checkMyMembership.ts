@@ -12,7 +12,7 @@ export async function checkMyMembership(
 ): Promise<CheckMyMembershipResponse> {
   const { spaceId, actingUserId } = data;
   const response = await client.projectInstance.get<CheckMyMembershipResponse>(
-    `/spaces/${spaceId}/membership/me`,
+    `/spaces/${spaceId}/members/me`,
     { params: { actingUserId } }
   );
   return response.data;

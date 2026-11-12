@@ -45,3 +45,6 @@ export type {
   MuteConversationProps,
   UseMuteConversationValues,
 } from "./useMuteConversation";
+
+export { default as useCheckMyConversationMembership } from "./useCheckMyConversationMembership";
+export type { CheckMyConversationMembershipProps } from "./useCheckMyConversationMembership";

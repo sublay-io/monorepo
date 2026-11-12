@@ -1,0 +1,89 @@
+---
+title: "Fetch My Membership"
+api: "GET /v8/:projectId/workspaces/:workspaceId/members/me"
+description: "The acting user's own full standing on a workspace"
+---
+
+Returns the acting user's own standing on a workspace: the token's user, or the user a service key names in `actingUserId`. `me` in the path always means that user. The response is the same record [Fetch Member Standing](/v8/api-reference/workspaces/members/fetch-member-standing) returns for another user, and the same shape as one roster row.
+
+Any signed-in user may call it for any workspace. It is **not** gated by roster visibility: a user with no relation to the workspace gets `200` with `reasons: []`, so "am I a member here?" always has an answer. Your own access is **never fenced** — `capabilities`, `permissions`, `rank` and `relativeRank` are always present.
+
+<Note>
+  **Your own membership is `/workspaces/:workspaceId/members/me`**: `GET` to read it, [`PATCH`](/v8/api-reference/workspaces/members/update-my-membership) to edit your title, [`DELETE`](/v8/api-reference/workspaces/members/leave-workspace) to leave. The `/workspaces/:workspaceId/members/:userId` routes ([read](/v8/api-reference/workspaces/members/fetch-member-standing), [edit](/v8/api-reference/workspaces/members/update-member), [remove](/v8/api-reference/workspaces/members/remove-member), [remove from subtree](/v8/api-reference/workspaces/members/remove-from-subtree)) act on other members and refuse your own id with `400 workspace/own-member-id`.
+</Note>
+
+## Path Parameters
+
+<ParamField path="workspaceId" type="string" required>
+  The workspace UUID.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service keys only, and **required** with one: the user whose standing is returned. A key that names nobody is refused with `400 workspace/missing-user-id`. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+</ParamField>
+
+## Response
+
+```json
+{
+  "user": { "id": "u_pat" },
+  "reasons": [{ "type": "member" }],
+  "capabilities": ["view", "invite"],
+  "permissions": ["deploy"],
+  "rank": 3,
+  "relativeRank": 0,
+  "title": "Frontend Lead",
+  "metadata": {}
+}
+```
+
+- `reasons` — structured `{ type, viaWorkspaceId? }` entries; `viaWorkspaceId` appears on `ancestor-owner` / `reach-holder` entries only. Empty when the user has no relation to the workspace.
+- `capabilities` — the **resolved** set (direct + reach + ownership). **`view` is implied by every other capability.** Empty when the user has no relation.
+- `permissions` — **per-node** (the direct membership on this workspace only; may be empty).
+- `rank` — the direct-membership rank, or `null` when the user holds no member row here (an owner, an ancestor-owner or a reach-only holder).
+- `relativeRank` — `0` when the user holds a member row here (they are measured from themselves), `null` when they don't.
+- `title` / `metadata` — from the direct member row; `null` / `{}` without one.
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Path Parameter — 400">
+    ```json
+    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Acting User — 400">
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "workspace/missing-user-id" }
+    ```
+    A service key sent no `actingUserId`. `me` is the acting user, so the key must name one.
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "workspace/acting-user-not-allowed" }
+    ```
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+  </Accordion>
+  <Accordion title="Body Not Allowed — 400">
+    ```json
+    { "error": "A GET request takes no body: send its fields in the query string. Received: `actingUserId`.", "code": "workspace/body-not-allowed", "params": ["actingUserId"] }
+    ```
+    A `GET` takes every field, `actingUserId` included, in the query string.
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }
+    ```
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+  </Accordion>
+  <Accordion title="Not Found — 404">
+    ```json
+    { "error": "Workspace not found.", "code": "workspace/not-found" }
+    ```
+    No workspace with this id exists in this project.
+  </Accordion>
+</AccordionGroup>
+
+See also: [useFetchMyWorkspaceMembership](/v8/hooks/workspaces/use-fetch-my-workspace-membership) · [Fetch Member Standing](/v8/api-reference/workspaces/members/fetch-member-standing) · [Read Authority](/v8/api-reference/workspaces/fetch-authority)

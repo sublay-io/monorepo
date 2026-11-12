@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe("useRemoveWorkspaceMember", () => {
-  it("deletes /workspaces/:id/members/:targetUserId with no request body", async () => {
+  it("deletes /workspaces/:workspaceId/members/:targetUserId with no request body", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useRemoveWorkspaceMember(),

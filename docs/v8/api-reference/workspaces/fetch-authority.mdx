@@ -1,6 +1,6 @@
 ---
 title: "Read Authority"
-api: "GET /v8/:projectId/workspaces/:id/authority/me"
+api: "GET /v8/:projectId/workspaces/:workspaceId/authority/me"
 description: "The resolved standing of a user on a workspace — permissions as a service"
 ---
 
@@ -21,7 +21,7 @@ This read is inherently a **self** read (or a privileged-key read of a named use
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID.
 </ParamField>
 

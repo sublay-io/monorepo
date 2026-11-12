@@ -15,27 +15,27 @@ describe("node-sdk appNotifications — request shaping", () => {
     });
   });
 
-  it("countUnreadNotifications hits /app-notifications/count with the full body as params", async () => {
+  it("countUnreadNotifications hits /app-notifications/unread-count with the full body as params", async () => {
     const { client, projectInstance } = makeClient();
     await countUnreadNotifications(client, { actingUserId: "u1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/app-notifications/count", {
+    expect(projectInstance.get).toHaveBeenCalledWith("/app-notifications/unread-count", {
       params: { actingUserId: "u1" },
     });
   });
 
-  it("markNotificationAsRead patches the mark-as-read route with actingUserId in the body", async () => {
+  it("markNotificationAsRead posts the mark-as-read route with actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
     await markNotificationAsRead(client, { notificationId: "n1", actingUserId: "u1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
+    expect(projectInstance.post).toHaveBeenCalledWith(
       "/app-notifications/n1/mark-as-read",
       { actingUserId: "u1" },
     );
   });
 
-  it("markAllNotificationsAsRead patches the mark-all-as-read route with actingUserId in the body", async () => {
+  it("markAllNotificationsAsRead posts the mark-all-as-read route with actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
     await markAllNotificationsAsRead(client, { actingUserId: "u1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
+    expect(projectInstance.post).toHaveBeenCalledWith(
       "/app-notifications/mark-all-as-read",
       { actingUserId: "u1" },
     );
@@ -70,7 +70,7 @@ describe("node-sdk appNotifications — response mapping", () => {
   it("markAllNotificationsAsRead returns response.data", async () => {
     const { client, projectInstance } = makeClient();
     const result = { markedAsRead: 5 };
-    projectInstance.patch.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
       markAllNotificationsAsRead(client, { actingUserId: "u1" }),
     ).resolves.toEqual(result);

@@ -1,6 +1,6 @@
 ---
 title: "Create Invite"
-api: "POST /v8/:projectId/workspaces/:id/invites"
+api: "POST /v8/:projectId/workspaces/:workspaceId/invites"
 description: "Invite a user by email, userId, or username"
 ---
 
@@ -53,7 +53,7 @@ This endpoint doubles as an **upsert**, so a second call for a target who alread
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID.
 </ParamField>
 

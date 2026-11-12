@@ -13,7 +13,7 @@ icon: "plug"
 <Warning>
   **Inbox, not outbox.** `useFetchMyWorkspaceInvites` (`GET /me/workspace-invites`) lists the invites **addressed to the signed-in user**, spanning every workspace, with no capability required.
 
-  [`useFetchWorkspaceInvites`](/v8/hooks/workspaces/use-fetch-workspace-invites) (`GET /workspaces/:id/invites`) lists the invites **one workspace has issued**, and requires the `invite` capability there.
+  [`useFetchWorkspaceInvites`](/v8/hooks/workspaces/use-fetch-workspace-invites) (`GET /workspaces/:workspaceId/invites`) lists the invites **one workspace has issued**, and requires the `invite` capability there.
 
   These are the two most confusable hooks in the bundle. A members/admin panel wants the **other** hook; a personal notifications screen wants this one.
 </Warning>

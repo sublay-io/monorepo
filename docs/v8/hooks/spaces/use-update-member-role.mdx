@@ -8,16 +8,18 @@ icon: "plug"
 
 `useUpdateMemberRole` returns a callable function for changing a space member's role. Only admins can update roles.
 
+The space creator always stays an admin: only the creator can promote or demote admins, and the creator can't change their own role.
+
 ## Usage Example
 
 ```tsx
 import { useUpdateMemberRole } from "@sublay/react-js";
 
-function RoleSelector({ spaceId, memberId }: { spaceId: string; memberId: string }) {
+function RoleSelector({ spaceId, userId }: { spaceId: string; userId: string }) {
   const updateRole = useUpdateMemberRole();
 
   return (
-    <select onChange={(e) => updateRole({ spaceId, memberId, role: e.target.value as any })}>
+    <select onChange={(e) => updateRole({ spaceId, userId, role: e.target.value as any })}>
       <option value="member">Member</option>
       <option value="moderator">Moderator</option>
       <option value="admin">Admin</option>
@@ -32,8 +34,8 @@ function RoleSelector({ spaceId, memberId }: { spaceId: string; memberId: string
   UUID of the space.
 </ParamField>
 
-<ParamField path="memberId" type="string" required>
-  UUID of the membership record to update.
+<ParamField path="userId" type="string" required>
+  UUID of the member's user — their user id, not a membership id. Must be another member: your own id is refused (`400 space/own-member-id`). Your own membership is [`useCheckMyMembership`](/v8/hooks/spaces/use-check-my-membership) / [`useLeaveSpace`](/v8/hooks/spaces/use-leave-space).
 </ParamField>
 
 <ParamField path="role" type='"admin" | "moderator" | "member"' required>

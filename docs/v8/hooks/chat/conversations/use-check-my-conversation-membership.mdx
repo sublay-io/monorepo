@@ -1,0 +1,62 @@
+---
+title: "Check my conversation membership"
+description: "Read the signed-in user's own membership in a conversation"
+icon: "plug"
+---
+
+## Overview
+
+`useCheckMyConversationMembership` returns a callable that reads the signed-in user's own membership in a conversation (`GET /chat/conversations/:conversationId/members/me`), without loading the member list.
+
+Who may ask is exactly who may read the conversation: anyone else gets the same `404 chat/not-found` or `403 chat/not-a-member` that reading it gives them.
+
+Your own membership is `…/members/me`: this hook reads it, and `leave` from [`useConversationMembers`](/v8/hooks/chat/conversations/use-conversation-members) leaves it. `removeMember` and `changeRole` act on other members and refuse your own id.
+
+## Usage Example
+
+```tsx
+import { useCheckMyConversationMembership } from "@sublay/react-js";
+
+function ChatHeader({ conversationId }: { conversationId: string }) {
+  const checkMyConversationMembership = useCheckMyConversationMembership();
+
+  const load = async () => {
+    const me = await checkMyConversationMembership({ conversationId });
+    if (me.isMember) {
+      console.log(me.role, me.mutedForever, me.mutedUntil);
+    } else if (me.leftAt) {
+      console.log("You left this conversation on", me.leftAt);
+    }
+  };
+}
+```
+
+## Parameters
+
+<ParamField path="conversationId" type="string" required>
+  The ID of the conversation.
+</ParamField>
+
+## Returns
+
+`Promise<CheckMyConversationMembershipResponse>` — a flat record. `isMember` is always present; a field that describes a membership you don't have is left out, not sent as `null`.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `isMember` | `boolean` | Whether you are an active member. |
+| `role` | `"admin" \| "member" \| null` (optional) | Your role in a group conversation; `null` in direct and space conversations. Present only when `isMember` is `true`. |
+| `lastReadAt` | `string \| null` (optional) | When you last marked the conversation as read. Present only when `isMember` is `true`. |
+| `mutedForever` | `boolean` (optional) | `true` when muted with no end. Present only when `isMember` is `true`. |
+| `mutedUntil` | `string \| null` (optional) | End of a timed mute; `null` when not muted or muted forever. Present only when `isMember` is `true`. |
+| `leftAt` | `string \| null` (optional) | When you left or were removed. Present only when you have a membership that is no longer active. |
+
+The three shapes:
+
+- Active member: `{ isMember: true, role, lastReadAt, mutedForever, mutedUntil }`
+- Left or removed: `{ isMember: false, leftAt }`
+- No membership yet (a space conversation you haven't opened): `{ isMember: false }`
+
+## Related
+
+- [`useConversationMembers`](/v8/hooks/chat/conversations/use-conversation-members) — the member list, and `leave`
+- [Check My Membership API](/v8/api-reference/chat/members/check-my-membership)

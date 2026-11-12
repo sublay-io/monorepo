@@ -1,0 +1,139 @@
+---
+title: "Check My Membership"
+api: "GET /v8/:projectId/chat/conversations/:conversationId/members/me"
+description: "Get the acting user's own membership in a conversation"
+---
+
+Returns the acting user's membership in a conversation: the token's user, or the user a service key names in `actingUserId`. `me` in the path always means that user.
+
+Who may ask is exactly who may [read the conversation](/v8/api-reference/chat/conversations/fetch-conversation): anyone else gets the same `404` or `403` that read gives them.
+
+<Note>
+  **Your own membership is `/chat/conversations/:conversationId/members/me`**: `GET` to check it, [`DELETE`](/v8/api-reference/chat/members/leave-conversation) to leave. The `/chat/conversations/:conversationId/members/:userId` routes ([remove](/v8/api-reference/chat/members/remove-member), [change role](/v8/api-reference/chat/members/update-member-role)) act on other members and refuse your own id with `400 chat/own-member-id`.
+</Note>
+
+## Path Parameters
+
+<ParamField path="conversationId" type="string" required>
+  The ID of the conversation.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only, and required with one: the user this request acts as, whose membership is returned. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
+</ParamField>
+
+## Response
+
+A flat object. `isMember` is always present; a field that describes a membership the user doesn't have is left out, not sent as `null`. There are three shapes:
+
+<ResponseField name="isMember" type="boolean">
+  Whether the user is an active member of the conversation.
+</ResponseField>
+
+<ResponseField name="role" type="string | null">
+  `"admin"` or `"member"` in a group conversation; `null` in direct and space conversations, which have no roles. Present only when `isMember` is `true`.
+</ResponseField>
+
+<ResponseField name="lastReadAt" type="string | null">
+  When the user last marked the conversation as read, or `null` if never. Present only when `isMember` is `true`.
+</ResponseField>
+
+<ResponseField name="mutedForever" type="boolean">
+  `true` when the user muted the conversation with no end. Present only when `isMember` is `true`.
+</ResponseField>
+
+<ResponseField name="mutedUntil" type="string | null">
+  When a timed mute ends; `null` when the conversation isn't muted or is muted forever. Present only when `isMember` is `true`.
+</ResponseField>
+
+<ResponseField name="leftAt" type="string | null">
+  When the user left the conversation or was removed from it. Present only when the user has a membership that is no longer active.
+</ResponseField>
+
+```json An active member
+{
+  "isMember": true,
+  "role": "admin",
+  "lastReadAt": "2026-11-10T09:12:44.000Z",
+  "mutedForever": false,
+  "mutedUntil": null
+}
+```
+
+```json A user who left or was removed
+{ "isMember": false, "leftAt": "2026-11-08T17:03:10.000Z" }
+```
+
+```json A user with no membership yet (a space conversation they haven't opened)
+{ "isMember": false }
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Params — 400">
+    Returned when `conversationId` isn't a valid UUID.
+    ```json
+    { "error": "Invalid conversation id: expected a UUID.", "code": "chat/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Missing token — 401">
+    The request had no credentials. The body is `text/plain` (`Unauthorized`), not JSON. An expired or invalid token returns `403` instead — see [Authentication](/v8/api-reference/authentication).
+  </Accordion>
+  <Accordion title="Missing User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "chat/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "chat/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "chat/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
+
+    With a service key:
+
+    ```json
+    {
+      "error": "`userId` was renamed to `actingUserId`: send the user this service key acts as in `actingUserId`.",
+      "code": "chat/unsupported-param",
+      "param": "userId"
+    }
+    ```
+
+    With a user token:
+
+    ```json
+    {
+      "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
+      "code": "chat/unsupported-param",
+      "param": "userId"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Not Found — 404">
+    ```json
+    { "error": "Conversation not found.", "code": "chat/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Not a Member — 403">
+    The user can't read the conversation: a direct or group conversation they were never in, or a space conversation whose space they can't take part in (see [List Members](/v8/api-reference/chat/members/list-members)).
+    ```json
+    { "error": "You are not a member of this conversation.", "code": "chat/not-a-member" }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+See also: [useCheckMyConversationMembership](/v8/hooks/chat/conversations/use-check-my-conversation-membership) · [Leave Conversation](/v8/api-reference/chat/members/leave-conversation)

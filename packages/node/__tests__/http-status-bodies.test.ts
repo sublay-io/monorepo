@@ -3,11 +3,7 @@ import { SublayHttpClient } from "../src/core/client";
 import { markNotificationAsRead } from "../src/modules/app-notifications";
 import { removeConnection } from "../src/modules/connections";
 import { createReport } from "../src/modules/reports";
-import {
-  handleCommentReport,
-  handleEntityReport,
-  handleSpaceChatReport,
-} from "../src/modules/spaces";
+import { handleSpaceReport } from "../src/modules/spaces";
 import { createFollow, removeConnectionByUserId } from "../src/modules/users";
 
 /**
@@ -35,36 +31,8 @@ describe("node-sdk — 204 empty bodies resolve to undefined", () => {
     ["removeConnectionByUserId", (c) => removeConnectionByUserId(c, { userId: "u2", actingUserId: "u1" })],
     ["markNotificationAsRead", (c) => markNotificationAsRead(c, { notificationId: "n1", actingUserId: "u1" })],
     [
-      "handleEntityReport",
-      (c) =>
-        handleEntityReport(c, {
-          spaceId: "s1",
-          reportId: "r1",
-          entityId: "e1",
-          actions: ["dismiss"],
-          actingUserId: "u1",
-        }),
-    ],
-    [
-      "handleCommentReport",
-      (c) =>
-        handleCommentReport(c, {
-          spaceId: "s1",
-          reportId: "r1",
-          commentId: "cm1",
-          actions: ["dismiss"],
-          actingUserId: "u1",
-        }),
-    ],
-    [
-      "handleSpaceChatReport",
-      (c) =>
-        handleSpaceChatReport(c, {
-          spaceId: "s1",
-          reportId: "r1",
-          actions: ["dismiss"],
-          actingUserId: "u1",
-        }),
+      "handleSpaceReport",
+      (c) => handleSpaceReport(c, { spaceId: "s1", reportId: "r1", actions: ["dismiss"], actingUserId: "u1" }),
     ],
   ];
 

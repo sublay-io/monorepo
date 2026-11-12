@@ -21,7 +21,7 @@ export const OAUTH_BASE_URL = "https://api.sublay.io/v8";
 
 /**
  * Server-call head: POST to `/{projectId}/oauth/{authorize|link}` and return the
- * provider `authorizationUrl`.
+ * `authorizationUrl` (a one-time Sublay URL that forwards to the provider).
  *
  * - `authorize` is unauthenticated; `link` requires the caller's access token,
  *   passed via `accessToken` (sent as a Bearer header only when present).

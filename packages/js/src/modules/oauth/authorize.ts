@@ -14,9 +14,11 @@ export interface AuthorizeProps {
 
 export interface AuthorizeResponse {
   /**
-   * The provider's authorization URL. The host app redirects the browser here;
-   * the provider then bounces to the server's `/oauth/callback`, which finishes
-   * auth and redirects back to `redirectAfterAuth` with the session.
+   * A one-time Sublay URL. The host app redirects the browser here; Sublay ties
+   * the sign-in to that browser and sends it on to the provider, which bounces
+   * to the server's `/oauth/callback`. That finishes auth and redirects back to
+   * `redirectAfterAuth` with the session. Open it as-is, in the browser that
+   * should end up signed in.
    */
   authorizationUrl: string;
 }

@@ -70,7 +70,7 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
           accessToken: endpoint === "link" ? accessToken ?? null : null,
         });
 
-        // Redirect browser to provider's authorization page.
+        // Redirect the browser to Sublay, which forwards it to the provider.
         // isLoading intentionally stays true since we're navigating away.
         window.location.href = authorizationUrl;
       } catch (err: any) {

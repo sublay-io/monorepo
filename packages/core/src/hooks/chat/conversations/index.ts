@@ -23,7 +23,10 @@ export { default as useDeleteConversation } from "./useDeleteConversation";
 export type { DeleteConversationProps } from "./useDeleteConversation";
 
 export { default as useCreateDirectConversation } from "./useCreateDirectConversation";
-export type { CreateDirectConversationProps } from "./useCreateDirectConversation";
+export type {
+  CreateDirectConversationProps,
+  CreateDirectConversationResult,
+} from "./useCreateDirectConversation";
 
 export { default as useFetchSpaceConversation } from "./useFetchSpaceConversation";
 export type {

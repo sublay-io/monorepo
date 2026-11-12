@@ -53,7 +53,7 @@ function ConnectionControls({ userId }: { userId: string }) {
 </ResponseField>
 
 <ResponseField name="sendConnectionRequest" type="(message?: string) => Promise<void>">
-  Sends a connection request. Only active when status is `"none"` or `"declined-received"`.
+  Sends a connection request. Only active when status is `"none"` or `"declined-received"`; the server rejects a new request while a declined one exists between the two users (`409 connection/request-declined`), so in `"declined-received"` the call fails.
 </ResponseField>
 
 <ResponseField name="acceptConnectionRequest" type="() => Promise<void>">

@@ -40,7 +40,7 @@ function ConnectionButton({ userId }: { userId: string }) {
     case "declined-sent":
       return <span>Request Declined</span>;
     case "declined-received":
-      return <button onClick={() => sendConnectionRequest()}>Connect Again</button>;
+      return <span>You declined this request</span>;
   }
 }
 ```
@@ -93,7 +93,7 @@ function ConnectionButton({ userId }: { userId: string }) {
 </ResponseField>
 
 <ResponseField name="sendConnectionRequest" type="(message?: string) => Promise<void>">
-  Sends a connection request to the target user. Accepts an optional message string. Only active when status is `"none"` or `"declined-received"`.
+  Sends a connection request to the target user. Accepts an optional message string. Only active when status is `"none"` or `"declined-received"`; the server rejects a new request while a declined one exists between the two users (`409 connection/request-declined`), so in `"declined-received"` the call fails.
 </ResponseField>
 
 <ResponseField name="acceptConnectionRequest" type="() => Promise<void>">

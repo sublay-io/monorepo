@@ -29,7 +29,7 @@ describe("useReorderRules", () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useReorderRules());
 
     const reordered = [makeRule({ id: "rule-2", order: 0 }), makeRule({ id: "rule-1", order: 1 })];
-    axiosPrivate.mockResponse("patch", reordered);
+    axiosPrivate.mockResponse("post", reordered);
 
     let returned: Rule[] | undefined;
     await act(async () => {
@@ -38,7 +38,7 @@ describe("useReorderRules", () => {
 
     expect(returned).toEqual(reordered);
 
-    const [call] = axiosPrivate.calls("patch");
+    const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/spaces/space-1/rules/reorder");
     expect(call.body).toEqual({ ruleIds: ["rule-2", "rule-1"] });
   });
@@ -46,7 +46,7 @@ describe("useReorderRules", () => {
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useReorderRules());
 
-    axiosPrivate.mockError("patch", 403, { message: "Forbidden" });
+    axiosPrivate.mockError("post", 403, { message: "Forbidden" });
 
     await expect(
       result.current({ spaceId: "space-1", ruleIds: ["rule-1"] }),
@@ -59,6 +59,6 @@ describe("useReorderRules", () => {
     await expect(
       result.current({ spaceId: "space-1", ruleIds: [] }),
     ).rejects.toThrow("Please pass at least one ruleId");
-    expect(axiosPrivate.calls("patch")).toHaveLength(0);
+    expect(axiosPrivate.calls("post")).toHaveLength(0);
   });
 });

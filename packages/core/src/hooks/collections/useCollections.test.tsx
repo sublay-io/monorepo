@@ -111,8 +111,9 @@ describe("useCollections", () => {
         collections: [{ id: "root", name: "Root" }],
       });
       const call = axiosPrivate.calls("get")[0];
-      expect(call.url).toContain("/test-project/entities/is-entity-saved");
-      expect(call.config?.params).toEqual({ entityId: "entity-1" });
+      expect(call.url).toBe("/test-project/entities/entity-1/saved");
+      // The entity id is in the path, never a query param.
+      expect(call.config?.params).toBeUndefined();
     });
 
     it("falls back to a safe default and logs on failure, without throwing", async () => {

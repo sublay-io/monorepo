@@ -22,7 +22,7 @@ function useCheckMyMembership(): (props: CheckMyMembershipProps) => Promise<Chec
       }
 
       const response = await axios.get<CheckMyMembershipResponse>(
-        `/${projectId}/spaces/${spaceId}/membership/me`
+        `/${projectId}/spaces/${spaceId}/members/me`
       );
 
       return response.data;

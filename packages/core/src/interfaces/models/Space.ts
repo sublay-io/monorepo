@@ -195,7 +195,7 @@ export interface UnbanMemberResponse {
 }
 
 /**
- * `GET /spaces/:spaceId/membership/me`. Fields that describe a membership the
+ * `GET /spaces/:spaceId/members/me`. Fields that describe a membership the
  * caller doesn't have are left out, never sent as null: `status` is present
  * only when a membership row exists (whatever its status), `role` and
  * `joinedAt` only when `isMember` is true.

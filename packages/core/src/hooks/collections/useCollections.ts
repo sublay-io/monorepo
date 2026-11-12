@@ -151,9 +151,9 @@ function useCollections(_: UseCollectionsProps = {}): UseCollectionsValues {
         const response = await axios.get<{
           isSaved: boolean;
           collections: Array<{ id: string; name: string }>;
-        }>(`/${projectId}/entities/is-entity-saved`, {
-          params: { entityId: selectedEntityId },
-        });
+        }>(
+          `/${projectId}/entities/${selectedEntityId}/saved`
+        );
 
         // If specific collection ID provided, check if entity is in that collection
         const inSpecificCollection = collectionId

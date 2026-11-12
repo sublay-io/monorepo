@@ -12,7 +12,7 @@ describe("useBanMember", () => {
   it("bans a member from the space", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useBanMember());
 
-    axiosPrivate.mockResponse("patch", {
+    axiosPrivate.mockResponse("post", {
       message: "Member has been banned from the space.",
       membership: { id: "membership-1", status: "banned" },
     });
@@ -21,7 +21,7 @@ describe("useBanMember", () => {
     await act(async () => {
       returned = await result.current({
         spaceId: "space-1",
-        memberId: "membership-1",
+        userId: "user-2",
         reason: "spam",
       });
     });
@@ -31,18 +31,18 @@ describe("useBanMember", () => {
       membership: { id: "membership-1", status: "banned" },
     });
 
-    const [call] = axiosPrivate.calls("patch");
-    expect(call.url).toBe("/test-project/spaces/space-1/members/membership-1/ban");
+    const [call] = axiosPrivate.calls("post");
+    expect(call.url).toBe("/test-project/spaces/space-1/members/user-2/ban");
     expect(call.body).toEqual({ reason: "spam" });
   });
 
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useBanMember());
 
-    axiosPrivate.mockError("patch", 403, { message: "Forbidden" });
+    axiosPrivate.mockError("post", 403, { message: "Forbidden" });
 
     await expect(
-      result.current({ spaceId: "space-1", memberId: "membership-1" }),
+      result.current({ spaceId: "space-1", userId: "user-2" }),
     ).rejects.toMatchObject({ response: { status: 403 } });
   });
 
@@ -50,8 +50,8 @@ describe("useBanMember", () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useBanMember());
 
     await expect(
-      result.current({ spaceId: "space-1", memberId: "" }),
-    ).rejects.toThrow("spaceId and memberId are required");
-    expect(axiosPrivate.calls("patch")).toHaveLength(0);
+      result.current({ spaceId: "space-1", userId: "" }),
+    ).rejects.toThrow("spaceId and userId are required");
+    expect(axiosPrivate.calls("post")).toHaveLength(0);
   });
 });

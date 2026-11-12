@@ -20,13 +20,13 @@ describe("useUpdateMemberRole", () => {
 
     let returned;
     await act(async () => {
-      returned = await result.current({ spaceId: "space-1", memberId: "membership-1", role: "moderator" });
+      returned = await result.current({ spaceId: "space-1", userId: "user-2", role: "moderator" });
     });
 
     expect(returned).toEqual(response);
 
     const [call] = axiosPrivate.calls("patch");
-    expect(call.url).toBe("/test-project/spaces/space-1/members/membership-1/role");
+    expect(call.url).toBe("/test-project/spaces/space-1/members/user-2/role");
     expect(call.body).toEqual({ role: "moderator" });
   });
 
@@ -36,7 +36,7 @@ describe("useUpdateMemberRole", () => {
     axiosPrivate.mockError("patch", 403, { message: "Forbidden" });
 
     await expect(
-      result.current({ spaceId: "space-1", memberId: "membership-1", role: "admin" }),
+      result.current({ spaceId: "space-1", userId: "user-2", role: "admin" }),
     ).rejects.toMatchObject({ response: { status: 403 } });
   });
 
@@ -44,8 +44,8 @@ describe("useUpdateMemberRole", () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateMemberRole());
 
     await expect(
-      result.current({ spaceId: "space-1", memberId: "", role: "admin" }),
-    ).rejects.toThrow("spaceId, memberId, and role are required");
+      result.current({ spaceId: "space-1", userId: "", role: "admin" }),
+    ).rejects.toThrow("spaceId, userId, and role are required");
     expect(axiosPrivate.calls("patch")).toHaveLength(0);
   });
 });

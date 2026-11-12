@@ -5,7 +5,8 @@ import type { UnbanMemberResponse } from "../../interfaces/models/Space";
 
 export interface UnbanMemberProps {
   spaceId: string;
-  memberId: string;
+  /** The member's user id. */
+  userId: string;
 }
 
 function useUnbanMember(): (props: UnbanMemberProps) => Promise<UnbanMemberResponse> {
@@ -13,17 +14,17 @@ function useUnbanMember(): (props: UnbanMemberProps) => Promise<UnbanMemberRespo
   const axios = useAxiosPrivate();
 
   const unbanMember = useCallback(
-    async ({ spaceId, memberId }: UnbanMemberProps) => {
+    async ({ spaceId, userId }: UnbanMemberProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
 
-      if (!spaceId || !memberId) {
-        throw new Error("spaceId and memberId are required");
+      if (!spaceId || !userId) {
+        throw new Error("spaceId and userId are required");
       }
 
-      const response = await axios.patch(
-        `/${projectId}/spaces/${spaceId}/members/${memberId}/unban`
+      const response = await axios.post(
+        `/${projectId}/spaces/${spaceId}/members/${userId}/unban`
       );
 
       return response.data as UnbanMemberResponse;

@@ -13,7 +13,7 @@ describe("usePublishDraft", () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => usePublishDraft());
 
     const published = makeEntity({ isDraft: false });
-    axiosPrivate.mockResponse("patch", published);
+    axiosPrivate.mockResponse("post", published);
 
     let returned: typeof published | undefined;
     await act(async () => {
@@ -22,7 +22,7 @@ describe("usePublishDraft", () => {
 
     expect(returned).toEqual(published);
 
-    const [call] = axiosPrivate.calls("patch");
+    const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/entities/entity-1/publish");
     expect(call.body).toEqual({});
   });
@@ -30,7 +30,7 @@ describe("usePublishDraft", () => {
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => usePublishDraft());
 
-    axiosPrivate.mockError("patch", 500, { message: "Internal error" });
+    axiosPrivate.mockError("post", 500, { message: "Internal error" });
 
     await expect(
       result.current({ entityId: "entity-1" }),
@@ -43,7 +43,7 @@ describe("usePublishDraft", () => {
     await expect(result.current({ entityId: "" })).rejects.toThrow(
       "No entityId provided.",
     );
-    expect(axiosPrivate.calls("patch")).toHaveLength(0);
+    expect(axiosPrivate.calls("post")).toHaveLength(0);
   });
 
   it("throws before making a request when there is no project", async () => {
@@ -54,6 +54,6 @@ describe("usePublishDraft", () => {
     await expect(result.current({ entityId: "entity-1" })).rejects.toThrow(
       "No projectId available.",
     );
-    expect(axiosPrivate.calls("patch")).toHaveLength(0);
+    expect(axiosPrivate.calls("post")).toHaveLength(0);
   });
 });

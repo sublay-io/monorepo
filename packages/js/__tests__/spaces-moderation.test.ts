@@ -34,9 +34,10 @@ describe("js-sdk spaces (moderation/reports) — request shaping", () => {
     "handleSpaceReport sends the %s action to the same route",
     async (action) => {
       const { client, projectInstance } = makeClient();
-      await handleSpaceReport(client, { spaceId: "s1", reportId: "r1", actions: [action] });
+      await handleSpaceReport(client, { spaceId: "s1", reportId: "r1", actions: [action], summary: "handled" });
       expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1/reports/r1", {
         actions: [action],
+        summary: "handled",
       });
     },
   );
@@ -47,6 +48,7 @@ describe("js-sdk spaces (moderation/reports) — request shaping", () => {
       spaceId: "s1",
       reportId: "r1",
       actions: ["ban-user"],
+      summary: "banned",
       reason: "spam",
     });
     const [, body] = projectInstance.patch.mock.calls[0];
@@ -168,7 +170,7 @@ describe("js-sdk spaces (moderation/reports) — response mapping", () => {
     const { client, projectInstance } = makeClient();
     projectInstance.patch.mockResolvedValueOnce({ status: 204, data: "" });
     await expect(
-      handleSpaceReport(client, { spaceId: "s1", reportId: "r1", actions: ["dismiss"] }),
+      handleSpaceReport(client, { spaceId: "s1", reportId: "r1", actions: ["dismiss"], summary: "dismissed" }),
     ).resolves.toBeUndefined();
   });
 

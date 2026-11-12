@@ -32,7 +32,7 @@ describe("node-sdk — 204 empty bodies resolve to undefined", () => {
     ["markNotificationAsRead", (c) => markNotificationAsRead(c, { notificationId: "n1", actingUserId: "u1" })],
     [
       "handleSpaceReport",
-      (c) => handleSpaceReport(c, { spaceId: "s1", reportId: "r1", actions: ["dismiss"], actingUserId: "u1" }),
+      (c) => handleSpaceReport(c, { spaceId: "s1", reportId: "r1", actions: ["dismiss"], summary: "dismissed", actingUserId: "u1" }),
     ],
   ];
 

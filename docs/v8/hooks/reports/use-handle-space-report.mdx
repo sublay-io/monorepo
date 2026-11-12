@@ -78,8 +78,8 @@ function ReportActions({ report }) {
   - `dismiss` — marks the report as dismissed without acting on the content.
 </ParamField>
 
-<ParamField body="summary" type="string">
-  A moderator note describing what was done, up to 1000 characters. Stored on the report. Required for entity and comment reports; optional for chat message reports.
+<ParamField body="summary" type="string" required>
+  A moderator note describing what was done, up to 1000 characters. Stored on the report. Required for every report type; without it (or with only whitespace) the request is refused with `400 report/missing-fields`.
 </ParamField>
 
 <ParamField body="reason" type="string">

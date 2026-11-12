@@ -32,8 +32,8 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `metadata` | `Record<string, any> \| null` | Custom key-value data, up to 10 KB (10,240 bytes) as JSON. `null` on placeholders. |
 | `moderationStatus` | `"approved" \| "removed" \| null` | Space moderation status. Visible to everyone. |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
-| `moderatedById` | `string \| null` | ID of the moderator. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
-| `moderatedByType` | `"client" \| "user" \| null` | Whether a client (admin) or user performed moderation. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
+| `moderatedById` | `string \| null` | ID of who took the action: the space moderator's user ID when `moderatedByType` is `"user"`, the dashboard account's ID when it is `"client"`. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
+| `moderatedByType` | `"client" \| "user" \| null` | `"user"` when a space moderator took the action (through a report or directly); `"client"` when it was taken from the dashboard. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
 | `moderationReason` | `string \| null` | Reason provided for moderation. Visible only to some requesters, including the comment's author — see [Moderation fields](#moderation-fields); `null` for everyone else. |
 | `userDeletedAt` | `Date \| null` | Set when the author deletes their own comment. The comment stays in threads as a [placeholder](#placeholders), so the replies under it remain. |
 | `createdAt` | `Date` | When the comment was created. |

@@ -18,8 +18,9 @@ export interface HandleSpaceReportProps {
   spaceId: string;
   reportId: string;
   actions: SpaceReportAction[];
-  /** Up to 1000 characters. Required for entity and comment reports. */
-  summary?: string;
+  /** What the moderator did, stored on the report. Required for every report
+   * type; up to 1000 characters. */
+  summary: string;
   /** Why the user is banned (up to 1000 characters), required when actions
    * include `ban-user`. The banned user is always the author of the reported
    * content, read from the report. */

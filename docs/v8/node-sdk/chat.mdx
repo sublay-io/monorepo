@@ -655,4 +655,4 @@ await sublay.spaces.moderateSpaceChatMessage({
 
 ### Handling chat message reports
 
-A report against a space-conversation message is handled with [`spaces.handleSpaceReport`](/v8/node-sdk/spaces-moderation#handlespacereport), the one function for every report type in a space. A chat message report takes the actions `"remove-message"`, `"ban-user"` and `"dismiss"`; its `summary` is optional.
+A report against a space-conversation message is handled with [`spaces.handleSpaceReport`](/v8/node-sdk/spaces-moderation#handlespacereport), the one function for every report type in a space. A chat message report takes the actions `"remove-message"`, `"ban-user"` and `"dismiss"`, and requires a `summary` like every other report type.

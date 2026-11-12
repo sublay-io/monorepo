@@ -47,8 +47,8 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `nsfwEffective` | `boolean` | **Computed live, read-only.** `true` when the entity's own `nsfw` is `true` **or** its space is effectively NSFW: `entity.nsfw OR (space?.nsfwEffective ?? false)`. This is the value the `nsfwFilter` query param keys off. See [NSFW flagging](#nsfw-flagging). |
 | `moderationStatus` | `"approved" \| "removed" \| null` | Current space moderation status. |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
-| `moderatedById` | `string \| null` | ID of the moderator who took the action. |
-| `moderatedByType` | `"client" \| "user" \| null` | Whether a client (admin) or user performed moderation. |
+| `moderatedById` | `string \| null` | ID of who took the action: the space moderator's user ID when `moderatedByType` is `"user"`, the dashboard account's ID when it is `"client"`. |
+| `moderatedByType` | `"client" \| "user" \| null` | `"user"` when a space moderator took the action (through a report or directly); `"client"` when it was taken from the dashboard. |
 | `moderationReason` | `string \| null` | Reason provided for moderation. |
 | `createdAt` | `Date` | When the entity was created. |
 | `updatedAt` | `Date` | When the entity was last updated. |

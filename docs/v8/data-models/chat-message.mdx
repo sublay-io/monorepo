@@ -31,8 +31,8 @@ A `ChatMessage` represents a single message in a conversation. Messages support 
 | `userDeletedAt` | `Date \| null` | Timestamp when the sender deleted the message. Deleted messages are soft-deleted — the row is kept as a `[Message deleted]` placeholder with content cleared. |
 | `moderationStatus` | `"approved" \| "removed" \| null` | Moderation status. `"removed"` messages are excluded from default queries. |
 | `moderatedAt` | `Date \| null` | Timestamp when moderation action was taken. |
-| `moderatedById` | `string \| null` | ID of the moderator (user or client). |
-| `moderatedByType` | `"client" \| "user" \| null` | Whether the moderator was a client (dashboard/API key) or a user. |
+| `moderatedById` | `string \| null` | ID of who removed the message: a user ID when `moderatedByType` is `"user"`, the dashboard account's ID when it is `"client"`. |
+| `moderatedByType` | `"client" \| "user" \| null` | `"user"` when a user removed the message: a space moderator (through a report or directly) or a group conversation admin deleting another member's message. `"client"` when it was removed from the dashboard. A message a space moderator removed through the v7 API also carries `"client"`, with that moderator's user ID (or `null`) in `moderatedById`. |
 | `moderationReason` | `string \| null` | Optional reason recorded with the moderation action. |
 | `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when the read asks for grants (`includeGrants: true` on the React message hooks, or `"grants"` in `include` on the REST API and the `@sublay/js` / `@sublay/node` SDKs). Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
 | `createdAt` | `Date` | Timestamp when the message was sent. |

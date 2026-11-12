@@ -551,6 +551,40 @@ describe("ChatProvider — message-scoped socket events", () => {
     );
   });
 
+  it("message:deleted clears the content but keeps the metadata, as a refetch would", async () => {
+    const { store } = await renderWithLoadedMessage();
+    act(() => {
+      fakeSocket.trigger(
+        "message:created",
+        makeChatMessage({
+          id: "message-2",
+          conversationId: "conversation-1",
+          content: "with metadata",
+          metadata: { pinned: true },
+        }),
+      );
+    });
+
+    act(() => {
+      fakeSocket.trigger("message:deleted", {
+        messageId: "message-2",
+        conversationId: "conversation-1",
+        userDeletedAt: "2024-01-02T00:00:00.000Z",
+      });
+    });
+
+    const deleted = selectMessages("conversation-1")(store.getState()).find(
+      (m) => m.id === "message-2",
+    )!;
+    expect(deleted).toMatchObject({
+      userDeletedAt: "2024-01-02T00:00:00.000Z",
+      content: null,
+      gif: null,
+      mentions: [],
+      metadata: { pinned: true },
+    });
+  });
+
   it("applies thread:reply_count scoped by conversationId", async () => {
     const { store } = await renderWithLoadedMessage();
 

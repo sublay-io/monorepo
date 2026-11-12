@@ -22,3 +22,26 @@ export interface ConversationMember {
   updatedAt: string;
   user?: User;
 }
+
+/**
+ * `GET /chat/conversations/:conversationId/members/me`: the caller's own
+ * membership in a conversation. A field that describes a relationship the
+ * caller doesn't have is omitted, not null:
+ * - active member: `{ isMember: true, role, lastReadAt, mutedForever, mutedUntil }`
+ * - left or removed: `{ isMember: false, leftAt }`
+ * - never a member (a space chat not opened yet): `{ isMember: false }`
+ */
+export interface CheckMyConversationMembershipResponse {
+  isMember: boolean;
+  /** Present when `isMember` is true. */
+  role?: ConversationMemberRole | null;
+  /** Present when `isMember` is true. */
+  lastReadAt?: string | null;
+  /** Present when `isMember` is true. */
+  mutedForever?: boolean;
+  /** Present when `isMember` is true. A timed mute's ISO end; `null` when not
+   * muted or muted forever (see `mutedForever`). */
+  mutedUntil?: string | null;
+  /** Present when the caller left or was removed. */
+  leftAt?: string | null;
+}

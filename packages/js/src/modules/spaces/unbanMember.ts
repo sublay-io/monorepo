@@ -2,7 +2,8 @@ import { SublayHttpClient } from "../../core/client";
 
 export interface UnbanMemberProps {
   spaceId: string;
-  memberId: string;
+  /** The member's user id. Your own id is refused (400 `space/own-member-id`). */
+  userId: string;
 }
 
 export interface UnbanMemberResponse {
@@ -17,9 +18,9 @@ export async function unbanMember(
   client: SublayHttpClient,
   data: UnbanMemberProps
 ): Promise<UnbanMemberResponse> {
-  const { spaceId, memberId } = data;
-  const response = await client.projectInstance.patch<UnbanMemberResponse>(
-    `/spaces/${spaceId}/members/${memberId}/unban`
+  const { spaceId, userId } = data;
+  const response = await client.projectInstance.post<UnbanMemberResponse>(
+    `/spaces/${spaceId}/members/${userId}/unban`
   );
   return response.data;
 }

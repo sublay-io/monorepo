@@ -31,7 +31,8 @@ function MessageList({ conversationId }: { conversationId: string }) {
       )}
       {messages.map((msg) => (
         <div key={msg.id}>
-          <strong>{msg.user?.name ?? "Deleted user"}</strong>: {msg.content}
+          <strong>{msg.user?.name ?? "Deleted user"}</strong>:{" "}
+          {msg.userDeletedAt ? <em>Message deleted</em> : msg.content}
         </div>
       ))}
     </div>

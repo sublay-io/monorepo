@@ -5,7 +5,8 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 
 export interface ApproveMemberProps {
   spaceId: string;
-  memberId: string;
+  /** The member's user id. */
+  userId: string;
 }
 
 function useApproveMember(): (props: ApproveMemberProps) => Promise<ApproveMemberResponse> {
@@ -13,17 +14,17 @@ function useApproveMember(): (props: ApproveMemberProps) => Promise<ApproveMembe
   const axios = useAxiosPrivate();
 
   const approveMember = useCallback(
-    async ({ spaceId, memberId }: ApproveMemberProps) => {
+    async ({ spaceId, userId }: ApproveMemberProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
 
-      if (!spaceId || !memberId) {
-        throw new Error("spaceId and memberId are required");
+      if (!spaceId || !userId) {
+        throw new Error("spaceId and userId are required");
       }
 
-      const response = await axios.patch(
-        `/${projectId}/spaces/${spaceId}/members/${memberId}/approve`
+      const response = await axios.post(
+        `/${projectId}/spaces/${spaceId}/members/${userId}/approve`
       );
 
       return response.data as ApproveMemberResponse;

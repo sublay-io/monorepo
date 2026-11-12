@@ -22,7 +22,7 @@ function useLeaveSpace(): (props: LeaveSpaceProps) => Promise<LeaveSpaceResponse
       }
 
       const response = await axios.delete(
-        `/${projectId}/spaces/${spaceId}/leave`
+        `/${projectId}/spaces/${spaceId}/members/me`
       );
 
       return response.data as LeaveSpaceResponse;

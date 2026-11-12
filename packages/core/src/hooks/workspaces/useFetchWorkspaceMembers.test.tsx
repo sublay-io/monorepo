@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe("useFetchWorkspaceMembers", () => {
-  it("gets /workspaces/:id/members forwarding include + countOnly params", async () => {
+  it("gets /workspaces/:workspaceId/members forwarding include + countOnly params", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useFetchWorkspaceMembers(),

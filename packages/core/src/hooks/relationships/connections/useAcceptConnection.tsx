@@ -29,7 +29,7 @@ function useAcceptConnection(): (props: AcceptConnectionProps) => Promise<Connec
       }
 
       // The row from the receiver's (caller's) side: `user` is the requester.
-      const response = await axios.patch<ConnectionRow>(
+      const response = await axios.post<ConnectionRow>(
         `/${projectId}/connections/${connectionId}/accept`,
         {}
       );

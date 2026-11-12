@@ -27,6 +27,8 @@ export type {
 } from "./useFetchWorkspaceMembers";
 export { default as useFetchWorkspaceMemberStanding } from "./useFetchWorkspaceMemberStanding";
 export type { FetchWorkspaceMemberStandingProps } from "./useFetchWorkspaceMemberStanding";
+export { default as useFetchMyWorkspaceMembership } from "./useFetchMyWorkspaceMembership";
+export type { FetchMyWorkspaceMembershipProps } from "./useFetchMyWorkspaceMembership";
 export { default as useUpdateWorkspaceMember } from "./useUpdateWorkspaceMember";
 export type { UpdateWorkspaceMemberProps } from "./useUpdateWorkspaceMember";
 export { default as useRemoveWorkspaceMember } from "./useRemoveWorkspaceMember";

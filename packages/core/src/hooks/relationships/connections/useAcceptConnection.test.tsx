@@ -22,7 +22,7 @@ describe("useAcceptConnection", () => {
       createdAt: "2024-01-01T00:00:00.000Z",
       respondedAt: "2024-01-02T00:00:00.000Z",
     };
-    axiosPrivate.mockResponse("patch", response);
+    axiosPrivate.mockResponse("post", response);
 
     let returned;
     await act(async () => {
@@ -31,7 +31,7 @@ describe("useAcceptConnection", () => {
 
     expect(returned).toEqual(response);
 
-    const [call] = axiosPrivate.calls("patch");
+    const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/connections/connection-1/accept");
     expect(call.body).toEqual({});
   });
@@ -40,7 +40,7 @@ describe("useAcceptConnection", () => {
     const user = makeAuthUser();
     const { result, axiosPrivate } = renderHookWithAxios(() => useAcceptConnection(), { user });
 
-    axiosPrivate.mockError("patch", 500, { message: "Internal error" });
+    axiosPrivate.mockError("post", 500, { message: "Internal error" });
 
     await expect(
       result.current({ connectionId: "connection-1" }),
@@ -54,7 +54,7 @@ describe("useAcceptConnection", () => {
     await expect(result.current({ connectionId: "" })).rejects.toThrow(
       "No connection ID was provided",
     );
-    expect(axiosPrivate.calls("patch")).toHaveLength(0);
+    expect(axiosPrivate.calls("post")).toHaveLength(0);
   });
 
   it("throws before making a request when there is no authenticated user", async () => {
@@ -63,6 +63,6 @@ describe("useAcceptConnection", () => {
     await expect(result.current({ connectionId: "connection-1" })).rejects.toThrow(
       "No user is logged in",
     );
-    expect(axiosPrivate.calls("patch")).toHaveLength(0);
+    expect(axiosPrivate.calls("post")).toHaveLength(0);
   });
 });

@@ -30,7 +30,7 @@ describe("useCheckMyMembership", () => {
     expect(returned).toEqual(response);
 
     const [call] = axiosPrivate.calls("get");
-    expect(call.url).toBe("/test-project/spaces/space-1/membership/me");
+    expect(call.url).toBe("/test-project/spaces/space-1/members/me");
   });
 
   it("rejects when the server returns an error response", async () => {

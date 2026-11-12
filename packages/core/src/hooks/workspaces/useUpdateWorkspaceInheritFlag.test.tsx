@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe("useUpdateWorkspaceInheritFlag", () => {
-  it("patches /workspaces/:id/inherit-flag with only the flag in the body", async () => {
+  it("patches /workspaces/:workspaceId/inherit-flag with only the flag in the body", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useUpdateWorkspaceInheritFlag(),

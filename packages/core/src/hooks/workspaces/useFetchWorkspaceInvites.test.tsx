@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe("useFetchWorkspaceInvites", () => {
-  it("gets the invites a workspace ISSUED — /workspaces/:id/invites", async () => {
+  it("gets the invites a workspace ISSUED — /workspaces/:workspaceId/invites", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useFetchWorkspaceInvites(),

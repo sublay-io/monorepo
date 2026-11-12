@@ -14,7 +14,7 @@ afterEach(() => {
 });
 
 describe("useFetchWorkspaceMemberStanding", () => {
-  it("gets /workspaces/:id/members/:targetUserId with no query params", async () => {
+  it("gets /workspaces/:workspaceId/members/:targetUserId with no query params", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useFetchWorkspaceMemberStanding(),

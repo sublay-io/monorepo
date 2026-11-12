@@ -58,7 +58,7 @@ describe("appNotificationsApi", () => {
     expect(result.data?.data).toEqual([NOTIFICATION]);
   });
 
-  it("markNotificationAsRead issues a PATCH to the notification's mark-as-read route", async () => {
+  it("markNotificationAsRead issues a POST to the notification's mark-as-read route", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
       new Response(null, { status: 204 }),
     );
@@ -71,7 +71,7 @@ describe("appNotificationsApi", () => {
     );
 
     const call = fetchHandle.calls()[0];
-    expect(call.method).toBe("PATCH");
+    expect(call.method).toBe("POST");
     expect(call.url).toContain("/test-project/app-notifications/n1/mark-as-read");
   });
 
@@ -264,7 +264,7 @@ describe("appNotificationsApi", () => {
     });
   });
 
-  it("countUnreadNotifications issues a GET to the count route", async () => {
+  it("countUnreadNotifications issues a GET to the unread-count route", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ count: 4 }));
 
     const result = await store.dispatch(
@@ -273,11 +273,11 @@ describe("appNotificationsApi", () => {
       }),
     );
 
-    expect(fetchHandle.calls()[0].url).toContain("/test-project/app-notifications/count");
+    expect(fetchHandle.calls()[0].url).toContain("/test-project/app-notifications/unread-count");
     expect(result.data).toBe(4);
   });
 
-  it("markAllNotificationsAsRead issues a PATCH and optimistically zeroes the cached unread count", async () => {
+  it("markAllNotificationsAsRead issues a POST and optimistically zeroes the cached unread count", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ count: 3 }));
     await store.dispatch(
       appNotificationsApi.endpoints.countUnreadNotifications.initiate({ projectId: "test-project" }),
@@ -290,8 +290,8 @@ describe("appNotificationsApi", () => {
       }),
     );
 
-    const patchCall = fetchHandle.calls().find((c) => c.method === "PATCH");
-    expect(patchCall?.url).toContain("/test-project/app-notifications/mark-all-as-read");
+    const postCall = fetchHandle.calls().find((c) => c.method === "POST");
+    expect(postCall?.url).toContain("/test-project/app-notifications/mark-all-as-read");
 
     const cachedCount = appNotificationsApi.endpoints.countUnreadNotifications.select({
       projectId: "test-project",

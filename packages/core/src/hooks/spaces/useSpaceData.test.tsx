@@ -173,7 +173,7 @@ describe("useSpaceData", () => {
     expect(result.current.canPost).toBe(false);
 
     const [call] = axiosPrivate.calls("delete");
-    expect(call.url).toBe("/test-project/spaces/space-1/leave");
+    expect(call.url).toBe("/test-project/spaces/space-1/members/me");
   });
 
   it("updates the space via updateSpace, keeping the server's permissions and the hierarchy", async () => {

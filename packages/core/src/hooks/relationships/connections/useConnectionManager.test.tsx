@@ -86,7 +86,7 @@ describe("useConnectionManager", () => {
       status: "accepted",
       respondedAt: "2024-01-02T00:00:00.000Z",
     });
-    axiosPrivate.mockResponse("patch", accepted);
+    axiosPrivate.mockResponse("post", accepted);
 
     await act(async () => {
       await result.current.acceptConnectionRequest();
@@ -95,8 +95,8 @@ describe("useConnectionManager", () => {
     expect(result.current.connectionStatus).toBe("accepted");
     expect(result.current.connection).toEqual(accepted);
 
-    const patchCall = axiosPrivate.calls("patch")[0];
-    expect(patchCall.url).toBe("/test-project/connections/connection-1/accept");
+    const postCall = axiosPrivate.calls("post")[0];
+    expect(postCall.url).toBe("/test-project/connections/connection-1/accept");
   });
 
   it("declines a received pending request", async () => {
@@ -108,7 +108,7 @@ describe("useConnectionManager", () => {
     await waitFor(() => expect(result.current.connectionStatus).toBe("pending-received"));
 
     axiosPrivate.mockResponse(
-      "patch",
+      "post",
       makeRow({ type: "received", status: "declined", respondedAt: "2024-01-02T00:00:00.000Z" }),
     );
 

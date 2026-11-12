@@ -80,8 +80,8 @@ describe("useAppNotificationsActions", () => {
         await result.current.markNotificationAsRead({ notificationId: "n1" });
       });
 
-      const patchCall = fetchHandle.calls().find((c) => c.method === "PATCH");
-      expect(patchCall?.url).toContain("/test-project/app-notifications/n1/mark-as-read");
+      const postCall = fetchHandle.calls().find((c) => c.method === "POST");
+      expect(postCall?.url).toContain("/test-project/app-notifications/n1/mark-as-read");
     });
 
     it("throws when there is no authenticated user", async () => {
@@ -265,8 +265,8 @@ describe("useAppNotificationsActions", () => {
         await result.current.markAllNotificationsAsRead();
       });
 
-      const patchCall = fetchHandle.calls().find((c) => c.method === "PATCH");
-      expect(patchCall?.url).toContain("/test-project/app-notifications/mark-all-as-read");
+      const postCall = fetchHandle.calls().find((c) => c.method === "POST");
+      expect(postCall?.url).toContain("/test-project/app-notifications/mark-all-as-read");
     });
 
     // Not wrapped in act(): act drops the catch block's dispatch on a reject.

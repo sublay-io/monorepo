@@ -21,7 +21,7 @@ function usePublishDraft(): (props: PublishDraftProps) => Promise<Entity> {
         throw new Error("No entityId provided.");
       }
 
-      const response = await axios.patch<Entity>(
+      const response = await axios.post<Entity>(
         `/${projectId}/entities/${entityId}/publish`,
         {}
       );

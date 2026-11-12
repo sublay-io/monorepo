@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe("useTransferWorkspaceOwnership", () => {
-  it("posts to /workspaces/:id/transfer-ownership with the disposition body", async () => {
+  it("posts to /workspaces/:workspaceId/transfer-ownership with the disposition body", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useTransferWorkspaceOwnership(),

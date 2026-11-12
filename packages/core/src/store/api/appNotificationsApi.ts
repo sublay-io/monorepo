@@ -58,7 +58,7 @@ export const appNotificationsApi = baseApi.injectEndpoints({
     >({
       query: ({ projectId, notificationId }) => ({
         url: `/${projectId}/app-notifications/${notificationId}/mark-as-read`,
-        method: "PATCH",
+        method: "POST",
         body: {},
       }),
       // Optimistically update the cache
@@ -102,7 +102,7 @@ export const appNotificationsApi = baseApi.injectEndpoints({
       CountUnreadNotificationsParams
     >({
       query: ({ projectId }) => ({
-        url: `/${projectId}/app-notifications/count`,
+        url: `/${projectId}/app-notifications/unread-count`,
         method: "GET",
       }),
       // The server answers `{ count }`; the cache keeps the number.
@@ -119,7 +119,7 @@ export const appNotificationsApi = baseApi.injectEndpoints({
     >({
       query: ({ projectId }) => ({
         url: `/${projectId}/app-notifications/mark-all-as-read`,
-        method: "PATCH",
+        method: "POST",
         body: {},
       }),
       // Optimistically update the cache

@@ -10,6 +10,7 @@ export {
   useFetchSpaceConversation,
   useConversationMembers,
   useMuteConversation,
+  useCheckMyConversationMembership,
 } from "./conversations";
 export type {
   UseConversationsProps,
@@ -28,6 +29,7 @@ export type {
   UseConversationMembersValues,
   MuteConversationProps,
   UseMuteConversationValues,
+  CheckMyConversationMembershipProps,
 } from "./conversations";
 
 // Message hooks

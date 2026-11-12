@@ -2,16 +2,16 @@ import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks } from "../../test-utils";
-import useHandleSpaceChatReport from "./useHandleSpaceChatReport";
+import useHandleSpaceReport from "./useHandleSpaceReport";
 
 afterEach(() => {
   resetAxiosMocks();
 });
 
-describe("useHandleSpaceChatReport", () => {
-  it("submits a moderation decision for a chat report", async () => {
+describe("useHandleSpaceReport", () => {
+  it("submits a moderation decision to the one space report route", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() =>
-      useHandleSpaceChatReport(),
+      useHandleSpaceReport(),
     );
 
     axiosPrivate.mockResponse("patch", "", 204);
@@ -21,9 +21,9 @@ describe("useHandleSpaceChatReport", () => {
       returned = await result.current({
         spaceId: "space-1",
         reportId: "report-1",
-        messageId: "message-1",
-        actions: ["remove-message"],
-        summary: "Removed abusive message",
+        actions: ["remove-entity", "ban-user"],
+        summary: "Removed spam",
+        reason: "Spamming",
       });
     });
 
@@ -31,17 +31,17 @@ describe("useHandleSpaceChatReport", () => {
     expect(returned).toBeUndefined();
 
     const [call] = axiosPrivate.calls("patch");
-    expect(call.url).toBe("/test-project/spaces/space-1/chat/reports/report-1");
-    expect(call.body).toMatchObject({
-      messageId: "message-1",
-      actions: ["remove-message"],
-      summary: "Removed abusive message",
+    expect(call.url).toBe("/test-project/spaces/space-1/reports/report-1");
+    expect(call.body).toEqual({
+      actions: ["remove-entity", "ban-user"],
+      summary: "Removed spam",
+      reason: "Spamming",
     });
   });
 
-  it("supports combining ban-user with remove-message, never sending actingUserId (the moderator comes from the user token)", async () => {
+  it("sends no target ids, user id or actingUserId (the server reads them from the report and token)", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() =>
-      useHandleSpaceChatReport(),
+      useHandleSpaceReport(),
     );
 
     axiosPrivate.mockResponse("patch", "", 204);
@@ -50,46 +50,41 @@ describe("useHandleSpaceChatReport", () => {
       await result.current({
         spaceId: "space-1",
         reportId: "report-1",
-        messageId: "message-1",
-        actions: ["remove-message", "ban-user"],
-        reason: "Repeated harassment",
+        actions: ["remove-message"],
       });
     });
 
     const [call] = axiosPrivate.calls("patch");
-    expect(call.body).toMatchObject({
-      actions: ["remove-message", "ban-user"],
-      reason: "Repeated harassment",
-    });
-    expect(call.body).not.toHaveProperty("actingUserId");
-    expect(call.body).not.toHaveProperty("userId");
+    for (const key of ["entityId", "commentId", "messageId", "userId", "actingUserId"]) {
+      expect(call.body).not.toHaveProperty(key);
+    }
   });
 
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() =>
-      useHandleSpaceChatReport(),
+      useHandleSpaceReport(),
     );
 
-    axiosPrivate.mockError("patch", 403, { message: "Forbidden" });
+    axiosPrivate.mockError("patch", 400, { code: "report/invalid-actions" });
 
     await expect(
       result.current({
         spaceId: "space-1",
         reportId: "report-1",
-        actions: ["dismiss"],
+        actions: ["remove-comment"],
       }),
-    ).rejects.toMatchObject({ response: { status: 403 } });
+    ).rejects.toMatchObject({ response: { status: 400 } });
   });
 
   it("throws before making a request when spaceId or reportId is missing", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() =>
-      useHandleSpaceChatReport(),
+      useHandleSpaceReport(),
     );
 
     await expect(
       result.current({
-        spaceId: "",
-        reportId: "report-1",
+        spaceId: "space-1",
+        reportId: "",
         actions: ["dismiss"],
       }),
     ).rejects.toThrow("spaceId and reportId are required");

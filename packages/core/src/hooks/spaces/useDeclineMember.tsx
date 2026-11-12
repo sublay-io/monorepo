@@ -5,7 +5,8 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 
 export interface DeclineMemberProps {
   spaceId: string;
-  memberId: string;
+  /** The member's user id. */
+  userId: string;
 }
 
 function useDeclineMember(): (props: DeclineMemberProps) => Promise<DeclineMemberResponse> {
@@ -13,17 +14,17 @@ function useDeclineMember(): (props: DeclineMemberProps) => Promise<DeclineMembe
   const axios = useAxiosPrivate();
 
   const declineMember = useCallback(
-    async ({ spaceId, memberId }: DeclineMemberProps) => {
+    async ({ spaceId, userId }: DeclineMemberProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
 
-      if (!spaceId || !memberId) {
-        throw new Error("spaceId and memberId are required");
+      if (!spaceId || !userId) {
+        throw new Error("spaceId and userId are required");
       }
 
-      const response = await axios.patch(
-        `/${projectId}/spaces/${spaceId}/members/${memberId}/decline`
+      const response = await axios.post(
+        `/${projectId}/spaces/${spaceId}/members/${userId}/decline`
       );
 
       return response.data as DeclineMemberResponse;

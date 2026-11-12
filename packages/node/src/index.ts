@@ -138,6 +138,10 @@ export type {
   FetchOrCreateUserByForeignIdProps,
   FetchOrCreateUserByForeignIdResult,
 } from "./modules/users/fetchOrCreateUserByForeignId";
+export type {
+  FetchOrCreateEntityByForeignIdProps,
+  FetchOrCreateEntityByForeignIdResult,
+} from "./modules/entities/fetchOrCreateEntityByForeignId";
 
 // Export commonly used interfaces
 export type {

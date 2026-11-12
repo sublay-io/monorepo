@@ -113,6 +113,10 @@ function bindModule<
 
 export type { ClientConfig, AuthTokens } from "./core/client";
 export type {
+  FetchOrCreateEntityByForeignIdProps,
+  FetchOrCreateEntityByForeignIdResult,
+} from "./modules/entities/fetchOrCreateEntityByForeignId";
+export type {
   PaginatedResponse,
   PaginationMetadata,
   CursorPaginatedResponse,

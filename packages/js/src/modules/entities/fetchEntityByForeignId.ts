@@ -8,10 +8,11 @@ import {
 
 export interface FetchEntityByForeignIdProps extends TopCommentsParams {
   foreignId: string;
-  createIfNotFound?: boolean;
   include?: EntityIncludeParam;
 }
 
+// A pure read: a miss is 404. To create the entity when it is missing, use
+// `fetchOrCreateEntityByForeignId`.
 export async function fetchEntityByForeignId(
   client: SublayHttpClient,
   data: FetchEntityByForeignIdProps

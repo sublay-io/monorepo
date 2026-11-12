@@ -139,7 +139,7 @@ Base path: `/v8/:projectId/`
 |--------|------|--------------------|--------------|----------------|
 | POST | `/entities/` | can access with a key (optional `actingUserId` = the author; omitted = app-owned, no drafts) | `entities.createEntity` | yes |
 | GET | `/entities/` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchManyEntities` | yes |
-| GET | `/entities/by-foreign-id` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntityByForeignId` | yes |
+| GET | `/entities/by-foreign-id` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntityByForeignId`, `entities.fetchOrCreateEntityByForeignId` (`createIfNotFound=true`) | yes |
 | GET | `/entities/by-short-id` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntityByShortId` | yes |
 | GET | `/entities/drafts` | can access with a key | `entities.fetchDrafts` | yes |
 | GET | `/entities/is-entity-saved` | can access with a key | `entities.isEntitySaved` | yes |

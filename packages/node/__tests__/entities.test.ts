@@ -5,6 +5,7 @@ import {
   fetchDrafts,
   fetchEntity,
   fetchEntityByForeignId,
+  fetchOrCreateEntityByForeignId,
   fetchEntityByShortId,
   fetchManyEntities,
   fetchReactions,
@@ -37,10 +38,52 @@ describe("node-sdk entities — request shaping", () => {
 
   it("fetchEntityByForeignId hits /entities/by-foreign-id with the full body as params", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchEntityByForeignId(client, { foreignId: "f1", createIfNotFound: true });
+    await fetchEntityByForeignId(client, { foreignId: "f1", actingUserId: "u1" });
     expect(projectInstance.get).toHaveBeenCalledWith("/entities/by-foreign-id", {
-      params: { foreignId: "f1", createIfNotFound: true },
+      params: { foreignId: "f1", actingUserId: "u1" },
     });
+  });
+
+  it("fetchEntityByForeignId returns the bare Entity", async () => {
+    const { client, projectInstance } = makeClient();
+    const entity = { id: "e1", foreignId: "f1" };
+    projectInstance.get.mockResolvedValueOnce({ data: entity, status: 200 });
+    await expect(fetchEntityByForeignId(client, { foreignId: "f1" })).resolves.toEqual(entity);
+  });
+
+  it("fetchOrCreateEntityByForeignId sends createIfNotFound=true with the rest as params", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchOrCreateEntityByForeignId(client, {
+      foreignId: "f1",
+      include: ["user", "space"],
+      actingUserId: "u1",
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/entities/by-foreign-id", {
+      params: {
+        foreignId: "f1",
+        include: "user,space",
+        actingUserId: "u1",
+        createIfNotFound: true,
+      },
+    });
+  });
+
+  it("fetchOrCreateEntityByForeignId reports created: true on 201", async () => {
+    const { client, projectInstance } = makeClient();
+    const entity = { id: "e1", foreignId: "f1" };
+    projectInstance.get.mockResolvedValueOnce({ data: entity, status: 201 });
+    await expect(
+      fetchOrCreateEntityByForeignId(client, { foreignId: "f1" }),
+    ).resolves.toEqual({ entity, created: true });
+  });
+
+  it("fetchOrCreateEntityByForeignId reports created: false on 200", async () => {
+    const { client, projectInstance } = makeClient();
+    const entity = { id: "e1", foreignId: "f1" };
+    projectInstance.get.mockResolvedValueOnce({ data: entity, status: 200 });
+    await expect(
+      fetchOrCreateEntityByForeignId(client, { foreignId: "f1" }),
+    ).resolves.toEqual({ entity, created: false });
   });
 
   it("fetchEntityByShortId hits /entities/by-short-id with the full body as params", async () => {

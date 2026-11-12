@@ -35,9 +35,9 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
     "handleSpaceReport sends the %s action to the same route",
     async (action) => {
       const { client, projectInstance } = makeClient();
-      await handleSpaceReport(client, { spaceId: "s1", reportId: "r1", actions: [action], actingUserId: "u-actor" });
+      await handleSpaceReport(client, { spaceId: "s1", reportId: "r1", actions: [action], summary: "handled", actingUserId: "u-actor" });
       expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1/reports/r1", {
-        actions: [action], actingUserId: "u-actor",
+        actions: [action], summary: "handled", actingUserId: "u-actor",
       });
     },
   );
@@ -48,6 +48,7 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
       spaceId: "s1",
       reportId: "r1",
       actions: ["ban-user"],
+      summary: "banned",
       reason: "spam",
       actingUserId: "u-actor",
     });
@@ -177,7 +178,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
     const { client, projectInstance } = makeClient();
     projectInstance.patch.mockResolvedValueOnce({ status: 204, data: "" });
     await expect(
-      handleSpaceReport(client, { spaceId: "s1", reportId: "r1", actions: ["dismiss"], actingUserId: "u-actor" }),
+      handleSpaceReport(client, { spaceId: "s1", reportId: "r1", actions: ["dismiss"], summary: "dismissed", actingUserId: "u-actor" }),
     ).resolves.toBeUndefined();
   });
 

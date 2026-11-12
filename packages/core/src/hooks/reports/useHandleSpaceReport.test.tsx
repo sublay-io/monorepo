@@ -51,6 +51,7 @@ describe("useHandleSpaceReport", () => {
         spaceId: "space-1",
         reportId: "report-1",
         actions: ["remove-message"],
+        summary: "removed",
       });
     });
 
@@ -72,6 +73,7 @@ describe("useHandleSpaceReport", () => {
         spaceId: "space-1",
         reportId: "report-1",
         actions: ["remove-comment"],
+        summary: "removed",
       }),
     ).rejects.toMatchObject({ response: { status: 400 } });
   });
@@ -86,6 +88,7 @@ describe("useHandleSpaceReport", () => {
         spaceId: "space-1",
         reportId: "",
         actions: ["dismiss"],
+        summary: "dismissed",
       }),
     ).rejects.toThrow("spaceId and reportId are required");
     expect(axiosPrivate.calls("patch")).toHaveLength(0);

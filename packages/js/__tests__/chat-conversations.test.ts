@@ -7,6 +7,7 @@ import {
   getConversation,
   getUnreadCount,
   leaveConversation,
+  checkMyConversationMembership,
   listConversations,
   listMembers,
   removeMember,
@@ -163,11 +164,18 @@ describe("js-sdk chat members — request shaping", () => {
     expect(projectInstance.delete.mock.calls[0]).toHaveLength(1);
   });
 
-  it("leaveConversation deletes /chat/conversations/:conversationId/leave with no body", async () => {
+  it("checkMyConversationMembership GETs /chat/conversations/:conversationId/members/me with no config", async () => {
+    const { client, projectInstance } = makeClient();
+    await checkMyConversationMembership(client, { conversationId: "c1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/chat/conversations/c1/members/me");
+    expect(projectInstance.get.mock.calls[0]).toHaveLength(1);
+  });
+
+  it("leaveConversation deletes /chat/conversations/:conversationId/members/me with no body", async () => {
     const { client, projectInstance } = makeClient();
     await leaveConversation(client, { conversationId: "c1" });
     expect(projectInstance.delete).toHaveBeenCalledWith(
-      "/chat/conversations/c1/leave"
+      "/chat/conversations/c1/members/me"
     );
     expect(projectInstance.delete.mock.calls[0]).toHaveLength(1);
   });
@@ -325,6 +333,16 @@ describe("js-sdk chat members — response mapping", () => {
     const result = await removeMember(client, { conversationId: "c1", userId: "target1" });
 
     expect(result).toEqual(payload);
+  });
+
+  it.each([
+    ["an active member", { isMember: true, role: "member", lastReadAt: null, mutedForever: false, mutedUntil: null }],
+    ["a member who left", { isMember: false, leftAt: "2026-01-01T00:00:00.000Z" }],
+    ["a user with no membership row", { isMember: false }],
+  ])("checkMyConversationMembership returns response.data for %s", async (_label, body) => {
+    const { client, projectInstance } = makeClient();
+    projectInstance.get.mockResolvedValueOnce({ data: body });
+    await expect(checkMyConversationMembership(client, { conversationId: "c1" })).resolves.toEqual(body);
   });
 
   it("leaveConversation returns the message wrapper", async () => {

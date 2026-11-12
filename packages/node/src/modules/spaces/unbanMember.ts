@@ -2,7 +2,8 @@ import { SublayHttpClient } from "../../core/client";
 
 export interface UnbanMemberProps {
   spaceId: string;
-  memberId: string;
+  /** The member's user id. Your own id is refused (400 `space/own-member-id`). */
+  userId: string;
   /**
    * The user this request acts as. The request has exactly that user's
    * permissions in the space and is recorded as theirs. Required.
@@ -22,9 +23,9 @@ export async function unbanMember(
   client: SublayHttpClient,
   data: UnbanMemberProps
 ): Promise<UnbanMemberResponse> {
-  const { spaceId, memberId, actingUserId } = data;
-  const response = await client.projectInstance.patch<UnbanMemberResponse>(
-    `/spaces/${spaceId}/members/${memberId}/unban`,
+  const { spaceId, userId, actingUserId } = data;
+  const response = await client.projectInstance.post<UnbanMemberResponse>(
+    `/spaces/${spaceId}/members/${userId}/unban`,
     { actingUserId }
   );
   return response.data;

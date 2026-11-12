@@ -4,9 +4,7 @@ import {
   fetchManyRules,
   fetchRule,
   getSpaceConversation,
-  handleCommentReport,
-  handleEntityReport,
-  handleSpaceChatReport,
+  handleSpaceReport,
   moderateSpaceChatMessage,
   moderateSpaceComment,
   moderateSpaceEntity,
@@ -16,34 +14,47 @@ import {
 import { makeClient } from "./helpers/mockClient";
 
 describe("node-sdk spaces (moderation/reports) — request shaping", () => {
-  it("handleEntityReport strips spaceId/reportId into the path and patches the rest, covering multiple action types", async () => {
+  it("handleSpaceReport patches the one report route with the actions, keeping spaceId/reportId in the path", async () => {
     const { client, projectInstance } = makeClient();
-    await handleEntityReport(client, {
+    await handleSpaceReport(client, {
       spaceId: "s1",
       reportId: "r1",
-      entityId: "e1",
       actions: ["remove-entity", "ban-user"],
+      summary: "Spam",
+      reason: "spam",
       actingUserId: "u-actor",
     });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
-      "/spaces/s1/reports/entity/r1",
-      { entityId: "e1", actions: ["remove-entity", "ban-user"], actingUserId: "u-actor" },
-    );
+    expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1/reports/r1", {
+      actions: ["remove-entity", "ban-user"],
+      summary: "Spam",
+      reason: "spam", actingUserId: "u-actor",
+    });
   });
 
-  it("handleCommentReport strips spaceId/reportId into the path and patches the rest, covering multiple action types", async () => {
+  it.each([["remove-comment"], ["remove-message"], ["dismiss"]] as const)(
+    "handleSpaceReport sends the %s action to the same route",
+    async (action) => {
+      const { client, projectInstance } = makeClient();
+      await handleSpaceReport(client, { spaceId: "s1", reportId: "r1", actions: [action], actingUserId: "u-actor" });
+      expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1/reports/r1", {
+        actions: [action], actingUserId: "u-actor",
+      });
+    },
+  );
+
+  it("handleSpaceReport sends no target and no ban target: the server reads both from the report", async () => {
     const { client, projectInstance } = makeClient();
-    await handleCommentReport(client, {
+    await handleSpaceReport(client, {
       spaceId: "s1",
       reportId: "r1",
-      commentId: "c1",
-      actions: ["remove-comment", "dismiss"],
+      actions: ["ban-user"],
+      reason: "spam",
       actingUserId: "u-actor",
     });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
-      "/spaces/s1/reports/comment/r1",
-      { commentId: "c1", actions: ["remove-comment", "dismiss"], actingUserId: "u-actor" },
-    );
+    const [, body] = projectInstance.patch.mock.calls[0];
+    for (const key of ["entityId", "commentId", "messageId", "userId", "spaceId", "reportId"]) {
+      expect(body).not.toHaveProperty(key);
+    }
   });
 
   it("moderateSpaceEntity strips spaceId/entityId into the path and patches the rest", async () => {
@@ -93,27 +104,6 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
     expect(projectInstance.patch).toHaveBeenCalledWith(
       "/spaces/s1/chat/messages/msg1/moderation",
       { action: "remove", actingUserId: "mod1" },
-    );
-  });
-
-  it("handleSpaceChatReport sends the body as-is, including actingUserId, with no extra client-side gating", async () => {
-    const { client, projectInstance } = makeClient();
-    await handleSpaceChatReport(client, {
-      spaceId: "s1",
-      reportId: "r1",
-      actions: ["remove-message", "ban-user"],
-      reason: "spam",
-      messageId: "msg1",
-      actingUserId: "mod1",
-    });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
-      "/spaces/s1/chat/reports/r1",
-      {
-        actions: ["remove-message", "ban-user"],
-        reason: "spam",
-        messageId: "msg1",
-        actingUserId: "mod1",
-      },
     );
   });
 
@@ -172,10 +162,10 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
     });
   });
 
-  it("reorderRules patches the reorder route with ruleIds and actingUserId in the body", async () => {
+  it("reorderRules posts the reorder route with ruleIds and actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
     await reorderRules(client, { spaceId: "s1", ruleIds: ["r2", "r1"], actingUserId: "u-actor" });
-    expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1/rules/reorder", {
+    expect(projectInstance.post).toHaveBeenCalledWith("/spaces/s1/rules/reorder", {
       ruleIds: ["r2", "r1"],
       actingUserId: "u-actor",
     });
@@ -183,31 +173,11 @@ describe("node-sdk spaces (moderation/reports) — request shaping", () => {
 });
 
 describe("node-sdk spaces (moderation/reports) — response mapping", () => {
-  it("handleEntityReport resolves to undefined on the 204 empty body", async () => {
+  it("handleSpaceReport resolves to undefined on the 204 empty body", async () => {
     const { client, projectInstance } = makeClient();
     projectInstance.patch.mockResolvedValueOnce({ status: 204, data: "" });
     await expect(
-      handleEntityReport(client, {
-        spaceId: "s1",
-        reportId: "r1",
-        entityId: "e1",
-        actions: ["dismiss"],
-        actingUserId: "u-actor",
-      }),
-    ).resolves.toBeUndefined();
-  });
-
-  it("handleCommentReport resolves to undefined on the 204 empty body", async () => {
-    const { client, projectInstance } = makeClient();
-    projectInstance.patch.mockResolvedValueOnce({ status: 204, data: "" });
-    await expect(
-      handleCommentReport(client, {
-        spaceId: "s1",
-        reportId: "r1",
-        commentId: "c1",
-        actions: ["dismiss"],
-        actingUserId: "u-actor",
-      }),
+      handleSpaceReport(client, { spaceId: "s1", reportId: "r1", actions: ["dismiss"], actingUserId: "u-actor" }),
     ).resolves.toBeUndefined();
   });
 
@@ -262,19 +232,6 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
     ).resolves.toEqual(result);
   });
 
-  it("handleSpaceChatReport resolves to undefined on the 204 empty body", async () => {
-    const { client, projectInstance } = makeClient();
-    projectInstance.patch.mockResolvedValueOnce({ status: 204, data: "" });
-    await expect(
-      handleSpaceChatReport(client, {
-        spaceId: "s1",
-        reportId: "r1",
-        actions: ["dismiss"],
-        actingUserId: "u-actor",
-      }),
-    ).resolves.toBeUndefined();
-  });
-
   it("createRule returns response.data", async () => {
     const { client, projectInstance } = makeClient();
     const rule = { id: "r1", title: "Be nice" };
@@ -326,7 +283,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
   it("reorderRules returns response.data as an array", async () => {
     const { client, projectInstance } = makeClient();
     const rules = [{ id: "r2" }, { id: "r1" }];
-    projectInstance.patch.mockResolvedValueOnce({ data: rules });
+    projectInstance.post.mockResolvedValueOnce({ data: rules });
     await expect(
       reorderRules(client, { spaceId: "s1", ruleIds: ["r2", "r1"], actingUserId: "u-actor" }),
     ).resolves.toEqual(rules);

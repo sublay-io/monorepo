@@ -10,7 +10,7 @@ export async function fetchConnectionsCount(
   data: FetchConnectionsCountProps
 ): Promise<ConnectionCountResponse> {
   const response = await client.projectInstance.get<ConnectionCountResponse>(
-    "/connections/count",
+    "/connections/connections-count",
     { params: data }
   );
   return response.data;

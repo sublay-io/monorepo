@@ -11,6 +11,7 @@ export { transferWorkspaceOwnership } from "./transferWorkspaceOwnership";
 // Membership
 export { fetchWorkspaceMembers } from "./fetchWorkspaceMembers";
 export { fetchWorkspaceMemberStanding } from "./fetchWorkspaceMemberStanding";
+export { fetchMyWorkspaceMembership } from "./fetchMyWorkspaceMembership";
 export { updateWorkspaceMember } from "./updateWorkspaceMember";
 export { removeWorkspaceMember } from "./removeWorkspaceMember";
 export { leaveWorkspace } from "./leaveWorkspace";

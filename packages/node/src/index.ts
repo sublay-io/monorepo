@@ -262,7 +262,12 @@ export type {
   ConversationPreview,
   ConversationType,
 } from "./interfaces/Conversation";
-export type { ConversationMember, ConversationMemberRole } from "./interfaces/ConversationMember";
+export type {
+  ConversationMember,
+  ConversationMemberRole,
+  CheckMyConversationMembershipResponse,
+} from "./interfaces/ConversationMember";
+export type { SpaceReportAction } from "./modules/spaces/handleSpaceReport";
 export type {
   ChatMessage,
   ChatMessageListInclude,

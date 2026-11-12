@@ -20,10 +20,10 @@ describe("js-sdk connections (own graph) — request shaping", () => {
     expect(config.params).not.toHaveProperty("userId");
   });
 
-  it("fetchConnectionsCount gets /connections/count with no params (no userId — own graph)", async () => {
+  it("fetchConnectionsCount gets /connections/connections-count with no params (no userId — own graph)", async () => {
     const { client, projectInstance } = makeClient();
     await fetchConnectionsCount(client);
-    expect(projectInstance.get).toHaveBeenCalledWith("/connections/count");
+    expect(projectInstance.get).toHaveBeenCalledWith("/connections/connections-count");
     const call = projectInstance.get.mock.calls[0];
     expect(call.length).toBe(1);
   });
@@ -50,25 +50,25 @@ describe("js-sdk connections (own graph) — request shaping", () => {
     expect(config.params).not.toHaveProperty("userId");
   });
 
-  it("acceptConnection patches /connections/:connectionId/accept with an empty body (no userId — actor derived from token)", async () => {
+  it("acceptConnection posts /connections/:connectionId/accept with an empty body (no userId — actor derived from token)", async () => {
     const { client, projectInstance } = makeClient();
     await acceptConnection(client, { connectionId: "conn1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
+    expect(projectInstance.post).toHaveBeenCalledWith(
       "/connections/conn1/accept",
       {}
     );
-    const [, body] = projectInstance.patch.mock.calls[0];
+    const [, body] = projectInstance.post.mock.calls[0];
     expect(body).not.toHaveProperty("userId");
   });
 
-  it("declineConnection patches /connections/:connectionId/decline with an empty body (no userId — actor derived from token)", async () => {
+  it("declineConnection posts /connections/:connectionId/decline with an empty body (no userId — actor derived from token)", async () => {
     const { client, projectInstance } = makeClient();
     await declineConnection(client, { connectionId: "conn1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
+    expect(projectInstance.post).toHaveBeenCalledWith(
       "/connections/conn1/decline",
       {}
     );
-    const [, body] = projectInstance.patch.mock.calls[0];
+    const [, body] = projectInstance.post.mock.calls[0];
     expect(body).not.toHaveProperty("userId");
   });
 
@@ -189,7 +189,7 @@ describe("js-sdk connections (own graph) — response mapping", () => {
       createdAt: "2025-12-31T00:00:00.000Z",
       respondedAt: "2026-01-01T00:00:00.000Z",
     };
-    projectInstance.patch.mockResolvedValueOnce({ data: actionResponse });
+    projectInstance.post.mockResolvedValueOnce({ data: actionResponse });
 
     const result = await acceptConnection(client, { connectionId: "conn1" });
 
@@ -207,7 +207,7 @@ describe("js-sdk connections (own graph) — response mapping", () => {
       createdAt: "2025-12-31T00:00:00.000Z",
       respondedAt: "2026-01-01T00:00:00.000Z",
     };
-    projectInstance.patch.mockResolvedValueOnce({ data: actionResponse });
+    projectInstance.post.mockResolvedValueOnce({ data: actionResponse });
 
     const result = await declineConnection(client, { connectionId: "conn1" });
 

@@ -210,10 +210,10 @@ describe("js-sdk entities — request shaping", () => {
     expect(config.params).not.toHaveProperty("userId");
   });
 
-  it("publishDraft patches the publish route with no body", async () => {
+  it("publishDraft posts the publish route with no body", async () => {
     const { client, projectInstance } = makeClient();
     await publishDraft(client, { entityId: "e1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
+    expect(projectInstance.post).toHaveBeenCalledWith(
       "/entities/e1/publish"
     );
   });
@@ -277,15 +277,11 @@ describe("js-sdk entities — request shaping", () => {
     );
   });
 
-  it("isEntitySaved gets /entities/is-entity-saved with the full data as params (no userId)", async () => {
+  it("isEntitySaved gets /entities/:entityId/saved with no params (no userId)", async () => {
     const { client, projectInstance } = makeClient();
     await isEntitySaved(client, { entityId: "e1" });
-    expect(projectInstance.get).toHaveBeenCalledWith(
-      "/entities/is-entity-saved",
-      { params: { entityId: "e1" } }
-    );
-    const [, config] = projectInstance.get.mock.calls[0];
-    expect(config.params).not.toHaveProperty("userId");
+    expect(projectInstance.get).toHaveBeenCalledWith("/entities/e1/saved");
+    expect(projectInstance.get.mock.calls[0]).toHaveLength(1);
   });
 });
 
@@ -390,7 +386,7 @@ describe("js-sdk entities — response mapping", () => {
   it("publishDraft returns the published Entity", async () => {
     const { client, projectInstance } = makeClient();
     const entity = { id: "e1", isDraft: false };
-    projectInstance.patch.mockResolvedValueOnce({ data: entity });
+    projectInstance.post.mockResolvedValueOnce({ data: entity });
 
     const result = await publishDraft(client, { entityId: "e1" });
 

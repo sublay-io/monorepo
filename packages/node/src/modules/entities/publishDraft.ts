@@ -17,7 +17,7 @@ export async function publishDraft(
   data: PublishDraftProps
 ): Promise<Entity> {
   const { entityId, actingUserId } = data;
-  const response = await client.projectInstance.patch<Entity>(
+  const response = await client.projectInstance.post<Entity>(
     `/entities/${entityId}/publish`,
     { actingUserId }
   );

@@ -23,24 +23,24 @@ describe("js-sdk appNotifications — request shaping", () => {
     });
   });
 
-  it("countUnreadNotifications hits /app-notifications/count with no params (actor derived from token)", async () => {
+  it("countUnreadNotifications hits /app-notifications/unread-count with no params (actor derived from token)", async () => {
     const { client, projectInstance } = makeClient();
     await countUnreadNotifications(client);
-    expect(projectInstance.get).toHaveBeenCalledWith("/app-notifications/count");
+    expect(projectInstance.get).toHaveBeenCalledWith("/app-notifications/unread-count");
   });
 
-  it("markNotificationAsRead patches the mark-as-read route, no body (actor derived from token)", async () => {
+  it("markNotificationAsRead posts the mark-as-read route, no body (actor derived from token)", async () => {
     const { client, projectInstance } = makeClient();
     await markNotificationAsRead(client, { notificationId: "n1" });
-    expect(projectInstance.patch).toHaveBeenCalledWith(
+    expect(projectInstance.post).toHaveBeenCalledWith(
       "/app-notifications/n1/mark-as-read"
     );
   });
 
-  it("markAllNotificationsAsRead patches the mark-all-as-read route, no body (actor derived from token)", async () => {
+  it("markAllNotificationsAsRead posts the mark-all-as-read route, no body (actor derived from token)", async () => {
     const { client, projectInstance } = makeClient();
     await markAllNotificationsAsRead(client);
-    expect(projectInstance.patch).toHaveBeenCalledWith(
+    expect(projectInstance.post).toHaveBeenCalledWith(
       "/app-notifications/mark-all-as-read"
     );
   });
@@ -88,7 +88,7 @@ describe("js-sdk appNotifications — response mapping", () => {
   it("markAllNotificationsAsRead returns response.data", async () => {
     const { client, projectInstance } = makeClient();
     const result = { markedAsRead: 7 };
-    projectInstance.patch.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: result });
 
     const response = await markAllNotificationsAsRead(client);
 

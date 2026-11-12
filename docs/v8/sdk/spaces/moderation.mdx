@@ -54,7 +54,7 @@ await handleSpaceReport({
 });
 ```
 
-Each report type has its own removal action alongside the shared `ban-user` and `dismiss`: an entity report takes `remove-entity`, a comment report `remove-comment`, a chat message report `remove-message`. An action that doesn't fit the report is refused with `400 report/invalid-actions`. Entity and comment reports require a `summary`; `ban-user` requires a `reason`.
+Each report type has its own removal action alongside the shared `ban-user` and `dismiss`: an entity report takes `remove-entity`, a comment report `remove-comment`, a chat message report `remove-message`. An action that doesn't fit the report is refused with `400 report/invalid-actions`. Every report requires a `summary`; `ban-user` requires a `reason`.
 
 <Note>
   `ban-user` is **space-scoped**: it bans the user from this space and the child spaces they belong to, and ends their membership of those spaces' chats. It is refused when the author is you (`400 report/cannot-ban-self`), and the space creator can't be banned this way.

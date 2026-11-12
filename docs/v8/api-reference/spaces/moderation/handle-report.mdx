@@ -37,8 +37,8 @@ The request names only the report. The server reads what was reported from the r
   - `"dismiss"` — dismisses the report without action. Cannot be combined with other actions.
 </ParamField>
 
-<ParamField body="summary" type="string">
-  What the moderator did, up to 1000 characters. Stored as `actionTaken` on the report. Required for entity and comment reports, whatever the action; optional for chat message reports.
+<ParamField body="summary" type="string" required>
+  What the moderator did, up to 1000 characters. Stored as `actionTaken` on the report. Required for every report type, whatever the action; an empty or whitespace-only `summary` counts as missing (`400 report/missing-fields`).
 </ParamField>
 
 <ParamField body="reason" type="string">
@@ -161,10 +161,11 @@ Returns `204 No Content` with no body.
     ```
   </Accordion>
   <Accordion title="Missing Required Fields — 400">
-    An entity or comment report was sent without `summary`:
+    The request has no `summary` (or only whitespace), on any report type. Nothing is changed: the report stays pending and no removal or ban in the same request is applied. With `dismiss`:
     ```json
     { "error": "Summary is required for dismissing a report", "code": "report/missing-fields" }
     ```
+    With any other action:
     ```json
     { "error": "Summary is required", "code": "report/missing-fields" }
     ```

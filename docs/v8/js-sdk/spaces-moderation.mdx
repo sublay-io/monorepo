@@ -39,8 +39,8 @@ await sublay.spaces.handleSpaceReport({
   An action the report's type doesn't take is refused with `400 report/invalid-actions`, and `"dismiss"` can't be combined with other actions. `"ban-user"` bans the author of the reported content from the space and requires `reason`; it is refused with `400 report/cannot-ban-self` when that author is the logged-in user.
 </ParamField>
 
-<ParamField body="summary" type="string">
-  The resolution note stored on the report, up to 1000 characters. Required for entity and comment reports; optional for chat message reports.
+<ParamField body="summary" type="string" required>
+  The resolution note stored on the report, up to 1000 characters. Required for every report type; without it (or with only whitespace) the request is refused with `400 report/missing-fields`.
 </ParamField>
 
 <ParamField body="reason" type="string">

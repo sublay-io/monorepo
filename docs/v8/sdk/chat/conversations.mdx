@@ -50,7 +50,7 @@ See [`useConversations`](/v8/hooks/chat/conversations/use-conversations) for the
 
 ## Creating a Direct Conversation
 
-Use `useCreateDirectConversation` to start a 1:1 conversation with another user. If a direct conversation between the two users already exists, the server returns the existing one.
+Use `useCreateDirectConversation` to start a 1:1 conversation with another user. If a direct conversation between the two users already exists, the server returns the existing one; the hook resolves to `{ conversation, created }`, with `created` telling you which happened.
 
 ```tsx
 import { useCreateDirectConversation } from "@sublay/react-js";
@@ -59,7 +59,7 @@ function StartChat({ userId }: { userId: string }) {
   const createDirect = useCreateDirectConversation();
 
   const handleClick = async () => {
-    const conversation = await createDirect({ userId });
+    const { conversation } = await createDirect({ userId });
     // Navigate to the conversation view
   };
 

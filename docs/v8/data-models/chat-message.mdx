@@ -28,7 +28,7 @@ A `ChatMessage` represents a single message in a conversation. Messages support 
 | `reactionCounts` | `Record<string, number>` | Emoji reaction counts, keyed by emoji. Computed server-side (e.g. `{ "👍": 3, "❤️": 1 }`). |
 | `userReactions` | `string[]` | Emojis the requesting user has reacted with on this message. |
 | `editedAt` | `Date \| null` | Timestamp when the message was last edited. `null` if never edited. |
-| `userDeletedAt` | `Date \| null` | Timestamp when the sender deleted the message. Deleted messages are soft-deleted — the row is kept as a `[Message deleted]` placeholder with content cleared. |
+| `userDeletedAt` | `Date \| null` | Timestamp when the sender deleted the message, or when the sender's account was deleted (which deletes all of their messages). Deleted messages are soft-deleted — the row is kept as a `[Message deleted]` placeholder with content cleared. |
 | `moderationStatus` | `"approved" \| "removed" \| null` | Moderation status. `"removed"` messages are excluded from default queries. |
 | `moderatedAt` | `Date \| null` | Timestamp when moderation action was taken. |
 | `moderatedById` | `string \| null` | ID of who removed the message: a user ID when `moderatedByType` is `"user"`, the dashboard account's ID when it is `"client"`. |
@@ -86,7 +86,7 @@ Each entry in the `mentions` array is one of:
 
 ## Soft Deletion
 
-When a user deletes their own message, the row is retained as a placeholder. `userDeletedAt` is set and the content, GIF, mentions, and metadata are cleared by the server. This preserves thread structure — a deleted parent message still anchors its thread replies.
+When a user deletes their own message, the row is retained as a placeholder. `userDeletedAt` is set and the content, GIF and mentions are cleared by the server; `metadata` is kept. This preserves thread structure — a deleted parent message still anchors its thread replies. Deleting a user deletes each of their messages the same way, with `userId` set to `null`.
 
 <Note>
   Moderator-removed messages (`moderationStatus: "removed"`) are excluded from all default API responses. They are not returned to clients.

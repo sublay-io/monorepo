@@ -18,6 +18,9 @@ export interface FetchWorkspaceMemberStandingProps {
  * `relativeRank` is the target's `rank` as an offset from YOU (negative =
  * senior to you), and is fenced with `rank`: both are absent, not null, for a
  * caller who may not see the target's authority.
+ *
+ * For your own standing use `useFetchMyWorkspaceMembership`: the server
+ * refuses your own id here (400 `workspace/own-member-id`).
  */
 function useFetchWorkspaceMemberStanding(): (
   props: FetchWorkspaceMemberStandingProps

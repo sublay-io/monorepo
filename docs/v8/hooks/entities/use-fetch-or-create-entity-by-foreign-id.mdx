@@ -1,0 +1,64 @@
+---
+title: "Fetch or create entity by foreign ID"
+description: "Fetch an entity by its foreign ID, creating it if it doesn't exist"
+icon: "plug"
+---
+
+<Note>
+  **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
+</Note>
+
+## Overview
+
+`useFetchOrCreateEntityByForeignId` returns a function that fetches the entity with the foreign ID from your system, or creates it when there is none. The entity it creates carries only the `foreignId`: no title, content or author.
+
+Because the new entity has no author, the project's **Who can create entities without an author** setting decides who may create it: everyone by default. When it is set to **Signed-in users only** (a visitor with no session is refused) or **No one from the client** (only your backend may create it), a refused caller gets `403 entity/authorless-creation-not-allowed` and nothing is created. A suspended user gets `403 user/suspended`. A `foreignId` whose entity was deleted stays taken: the call rejects with `409 entity/foreign-id-taken`. See [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id).
+
+Most hooks resolve to the plain record. This one resolves to `{ entity, created }`, because whether the call created the entity is part of its answer.
+
+## Usage Example
+
+```tsx
+import { useFetchOrCreateEntityByForeignId } from "@sublay/react-js";
+
+function ArticleSocial({ articleId }: { articleId: string }) {
+  const fetchOrCreateEntity = useFetchOrCreateEntityByForeignId();
+
+  const load = async () => {
+    const { entity, created } = await fetchOrCreateEntity({
+      foreignId: articleId,
+    });
+    console.log(entity, created);
+  };
+
+  return <button onClick={load}>Load</button>;
+}
+```
+
+## Parameters
+
+<ParamField path="foreignId" type="string" required>
+  The foreign ID to look up. This is the identifier from your own system.
+</ParamField>
+
+<ParamField path="include" type="EntityIncludeParam">
+  Optional. Populate related fields, as a single value or an array. Accepted values: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`.
+</ParamField>
+
+<ParamField path="topCommentsLimit" type="number">
+  With `"topComments"` included: how many top comments per entity. Server default `1`, maximum `5`. Not sent when `include` doesn't contain `"topComments"`.
+</ParamField>
+
+<ParamField path="topCommentsSortByReaction" type="ReactionType">
+  With `"topComments"` included: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Not sent when `include` doesn't contain `"topComments"`.
+</ParamField>
+
+## Returns
+
+<ResponseField name="entity" type="Entity">
+  The entity with this foreign ID, existing or just created. See [Entity data model](/v8/data-models/entity).
+</ResponseField>
+
+<ResponseField name="created" type="boolean">
+  `true` when this call created the entity (HTTP `201`), `false` when it already existed (HTTP `200`, also when another call created it concurrently).
+</ResponseField>

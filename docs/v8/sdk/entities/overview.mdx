@@ -53,7 +53,7 @@ When the item your users interact with already lives in your own database — an
 </EntityProvider>
 ```
 
-`createIfNotFound` creates the entity the first time it's looked up. That entity has no author, and the project's **Who can create entities without an author** setting decides who may create one. See [`useFetchEntityByForeignId`](/v8/hooks/entities/use-fetch-entity-by-foreign-id). Comment sections take `foreignId` and `createIfNotFound` the same way.
+`createIfNotFound` creates the entity the first time it's looked up. That entity has no author, and the project's **Who can create entities without an author** setting decides who may create one. See [`useFetchOrCreateEntityByForeignId`](/v8/hooks/entities/use-fetch-or-create-entity-by-foreign-id). Comment sections take `foreignId` and `createIfNotFound` the same way.
 
 ## In This Section
 

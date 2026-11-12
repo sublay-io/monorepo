@@ -127,12 +127,11 @@ const entity = await sublay.entities.fetchEntity({ entityId: "ent_xyz789" });
 
 ### fetchEntityByForeignId
 
-Fetches an entity by your application's own identifier. Optionally creates it if not found.
+Fetches an entity by your application's own identifier. It only reads: an entity that doesn't exist throws a `404`. To create the entity when missing, use [`fetchOrCreateEntityByForeignId`](#fetchorcreateentitybyforeignid).
 
 ```typescript
 const entity = await sublay.entities.fetchEntityByForeignId({
   foreignId: "post-42",
-  createIfNotFound: true,
 });
 ```
 
@@ -140,12 +139,8 @@ const entity = await sublay.entities.fetchEntityByForeignId({
   Your application's entity identifier.
 </ParamField>
 
-<ParamField body="createIfNotFound" type="boolean">
-  When `true`, creates a stub entity if no match is found. Defaults to `false`. The new entity has no author. A service key may always create it, whatever the project's **Who can create entities without an author** setting, except when it names a suspended user in `actingUserId`: that returns `403 user/suspended` and nothing is created.
-</ParamField>
-
 <ParamField body="actingUserId" type="string">
-  The user to read as: you get exactly what their own access token would get (their drafts, blocks, `saved`, their own reaction, top comments), and the read counts as their view. Omit it for the anonymous view (drafts return `404`; no view is counted). It shapes the read only: an entity made by `createIfNotFound` is always app-owned.
+  The user to read as: you get exactly what their own access token would get (their drafts, blocks, `saved`, their own reaction, top comments), and the read counts as their view. Omit it for the anonymous view (drafts return `404`; no view is counted).
 </ParamField>
 
 <ParamField body="include" type="EntityIncludeParam">
@@ -161,6 +156,40 @@ const entity = await sublay.entities.fetchEntityByForeignId({
 </ParamField>
 
 **Returns** — `Promise<Entity>`
+
+---
+
+### fetchOrCreateEntityByForeignId
+
+Returns the entity with your application's identifier, or creates it when there is none. The entity it creates carries only the `foreignId`: no title, content or author (an app-owned entity). A service key may always create it, whatever the project's **Who can create entities without an author** setting, except when it names a suspended user in `actingUserId`: that returns `403 user/suspended` and nothing is created. Props type: `FetchOrCreateEntityByForeignIdProps`.
+
+```typescript
+const { entity, created } = await sublay.entities.fetchOrCreateEntityByForeignId({
+  foreignId: "post-42",
+});
+```
+
+<ParamField body="foreignId" type="string" required>
+  Your application's entity identifier.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user to read as, as on [`fetchEntityByForeignId`](#fetchentitybyforeignid). It shapes the read only: an entity this call creates is always app-owned. An existing entity this user can't read comes back as `404`, and nothing is created.
+</ParamField>
+
+<ParamField body="include" type="EntityIncludeParam">
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+</ParamField>
+
+<ParamField body="topCommentsLimit" type="number">
+  With `include` containing `"topComments"`: how many top comments per entity. Server default `1`, maximum `5`. Rejected (`400`) without `"topComments"` in `include`.
+</ParamField>
+
+<ParamField body="topCommentsSortByReaction" type="ReactionType">
+  With `include` containing `"topComments"`: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Rejected (`400`) without `"topComments"` in `include`.
+</ParamField>
+
+**Returns** — `Promise<FetchOrCreateEntityByForeignIdResult>`: `{ entity: Entity; created: boolean }`. `created` is `true` when this call created the entity (HTTP `201`) and `false` when it already existed (HTTP `200`, also when another call created it concurrently). A `foreignId` whose entity was deleted stays taken: the call throws `409 entity/foreign-id-taken` and creates nothing. See [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id).
 
 ---
 

@@ -60,8 +60,15 @@ describe("js-sdk reports — request shaping", () => {
 describe("js-sdk reports — response mapping", () => {
   it("createReport returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "Report created", code: "report/created" };
-    projectInstance.post.mockResolvedValueOnce({ data: result });
+    const result = {
+      id: "ur1",
+      targetId: "c1",
+      targetType: "comment",
+      reason: "harassment",
+      details: null,
+      createdAt: "now",
+    };
+    projectInstance.post.mockResolvedValueOnce({ status: 201, data: result });
 
     const response = await createReport(client, {
       targetType: "comment",

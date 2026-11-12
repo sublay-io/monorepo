@@ -21,6 +21,7 @@ export type {
   FetchConversationPreviewProps,
   DeleteConversationProps,
   CreateDirectConversationProps,
+  CreateDirectConversationResult,
   UseFetchSpaceConversationProps,
   UseFetchSpaceConversationValues,
   UseConversationMembersProps,

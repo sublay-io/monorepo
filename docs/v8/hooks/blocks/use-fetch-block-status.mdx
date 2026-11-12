@@ -18,7 +18,9 @@ function ProfilePage({ userId }: { userId: string }) {
 
   useEffect(() => {
     fetchBlockStatus({ userId }).then((status) => {
-      console.log(status.blocked, status.blockId);
+      if (status.isBlocking) {
+        console.log("Blocked since", status.block.createdAt);
+      }
     });
   }, [userId]);
 }
@@ -34,16 +36,25 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-<ResponseField name="blocked" type="boolean">
+The function resolves to a [`BlockStatus`](/v8/data-models/block#blockstatus):
+
+<ResponseField name="isBlocking" type="boolean">
   Whether the current user blocks the target user.
 </ResponseField>
 
-<ResponseField name="blockId" type="string | undefined">
-  The ID of the block record. Present when `blocked` is `true`.
-</ResponseField>
-
-<ResponseField name="createdAt" type="string | undefined">
-  ISO timestamp of when the block was created. Present when `blocked` is `true`.
+<ResponseField name="block" type="BlockRow | undefined">
+  The block row, present only when `isBlocking` is `true`. Its `user` is the target user. See [BlockRow](/v8/data-models/block#blockrow).
+  <Expandable title="BlockRow properties">
+    <ResponseField name="id" type="string">
+      ID of the block record.
+    </ResponseField>
+    <ResponseField name="user" type="User">
+      The blocked user. See [User data model](/v8/data-models/user).
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO timestamp of when the block was created.
+    </ResponseField>
+  </Expandable>
 </ResponseField>
 
 ## Related

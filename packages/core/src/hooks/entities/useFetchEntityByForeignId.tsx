@@ -10,16 +10,19 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 
 export interface FetchEntityByForeignIdProps extends TopCommentsParams {
   foreignId: string;
-  createIfNotFound?: boolean;
   include?: EntityIncludeParam;
 }
 
+/**
+ * A pure read: a miss rejects with a 404. To create the entity when it is
+ * missing, use `useFetchOrCreateEntityByForeignId`.
+ */
 function useFetchEntityByForeignId(): (props: FetchEntityByForeignIdProps) => Promise<Entity> {
     const axios = useAxiosPrivate();
   const { projectId } = useProject();
 
   const fetchEntityByForeignId = useCallback(
-    async ({ foreignId, createIfNotFound, include, topCommentsLimit, topCommentsSortByReaction }: FetchEntityByForeignIdProps) => {
+    async ({ foreignId, include, topCommentsLimit, topCommentsSortByReaction }: FetchEntityByForeignIdProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -31,7 +34,6 @@ function useFetchEntityByForeignId(): (props: FetchEntityByForeignIdProps) => Pr
       const response = await axios.get(`/${projectId}/entities/by-foreign-id`, {
         params: {
           foreignId,
-          createIfNotFound,
           include: Array.isArray(include) ? include.join(",") : include,
           // Only with include=topComments (the server 400s them otherwise).
           ...sendableTopCommentsParams(include, topCommentsLimit, topCommentsSortByReaction),

@@ -6,7 +6,9 @@ icon: "plug"
 
 ## Overview
 
-Returns an async function that creates a direct (1:1) conversation with a given user. If a direct conversation between the two users already exists on the server, it is returned rather than creating a duplicate. The conversation is also stored in Redux state.
+Returns an async function that returns the direct (1:1) conversation with a given user, creating it when there is none. A direct conversation between the two users that already exists is returned rather than duplicated. The conversation is also stored in Redux state.
+
+Most hooks resolve to the plain record. This one resolves to `{ conversation, created }`, because whether the call created the conversation is part of its answer.
 
 <Note>Requires `ChatProvider` in the component tree.</Note>
 
@@ -19,7 +21,7 @@ function UserCard({ userId }: { userId: string }) {
   const createDirect = useCreateDirectConversation();
 
   const handleMessage = async () => {
-    const conversation = await createDirect({ userId });
+    const { conversation, created } = await createDirect({ userId });
     // Navigate to the conversation, e.g. router.push(`/chat/${conversation.id}`)
   };
 
@@ -37,8 +39,12 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-<ResponseField name="Conversation" type="Conversation">
-  The created or retrieved direct [Conversation](/v8/data-models/conversation).
+<ResponseField name="conversation" type="Conversation">
+  The direct [Conversation](/v8/data-models/conversation), existing or just created.
+</ResponseField>
+
+<ResponseField name="created" type="boolean">
+  `true` when this call created the conversation (HTTP `201`), `false` when it already existed (HTTP `200`).
 </ResponseField>
 
 ## Notes

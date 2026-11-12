@@ -18,7 +18,7 @@ function UserStats({ userId }: { userId: string }) {
   const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchFollowingCountByUserId({ userId }).then((res) => setCount(res.count));
+    fetchFollowingCountByUserId({ userId }).then(setCount);
   }, [userId]);
 
   return <span>{count ?? "..."} following</span>;
@@ -35,9 +35,7 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-<ResponseField name="count" type="number">
-  Total number of users that the specified user is following.
-</ResponseField>
+Returns a `number`: the total number of users that the specified user is following.
 
 ## Related
 

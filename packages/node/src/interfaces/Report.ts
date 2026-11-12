@@ -52,7 +52,17 @@ export interface Report {
   space?: Space | null;
 }
 
+/**
+ * What `POST /reports` returns: the caller's own report of the target (201 when
+ * this call made it, 200 when the caller already has an open report of that
+ * target). `id` is the caller's report record, not the shared report that
+ * moderators see.
+ */
 export interface CreateReportResponse {
-  message: string;
-  code: "report/created" | "report/updated" | "report/already-reported";
+  id: string;
+  targetId: string;
+  targetType: ReportTargetType;
+  reason: ReportReason;
+  details: string | null;
+  createdAt: string;
 }

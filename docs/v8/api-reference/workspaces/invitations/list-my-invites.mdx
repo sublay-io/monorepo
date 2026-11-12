@@ -24,7 +24,7 @@ Returns the authenticated user's **live** pending invites (`status = 'pending' A
 { "data": [ /* MyWorkspaceInvitation[] — see below */ ] }
 ```
 
-Each item is a `MyWorkspaceInvitation`: a [WorkspaceInvitation](/v8/data-models/workspace-invitation) object with one difference from every other invite read — `invitedBy` is a populated `{ id, name, username, avatar, reputation }` object instead of a bare user id, and a sibling `workspace: { id, name }` is included. The invitee has no other reach on the workspace they're invited to or on the inviter, so both are embedded here to make this endpoint self-sufficient for rendering an invite — see the [note on the data model page](/v8/data-models/workspace-invitation#properties) for the full enriched shape.
+Each item is a `MyWorkspaceInvitation`: a [WorkspaceInvitation](/v8/data-models/workspace-invitation) object with two additions no other invite read has: `invitedBy`, the inviter as a populated `{ id, name, username, avatar, reputation }` object (alongside the bare `invitedById`), and a sibling `workspace: { id, name }`. The invitee has no other reach on the workspace they're invited to or on the inviter, so both are embedded here to make this endpoint self-sufficient for rendering an invite — see the [note on the data model page](/v8/data-models/workspace-invitation#properties) for the full enriched shape.
 
 ## Error Responses
 

@@ -257,10 +257,10 @@ function useSpaceData({
       }
 
       try {
-        const breadcrumbData = await fetchSpaceBreadcrumb({
+        const breadcrumbEntries = await fetchSpaceBreadcrumb({
           spaceId: space.id,
         });
-        setBreadcrumb(breadcrumbData.breadcrumb);
+        setBreadcrumb(breadcrumbEntries);
       } catch (err) {
         // Breadcrumb is not critical, just log the error
         handleError(err, "Failed to fetch space breadcrumb");

@@ -16,15 +16,15 @@ describe("useRemoveConnectionByUserId", () => {
       { user },
     );
 
-    const response = { action: "disconnect" as const, message: "Disconnected" };
-    axiosPrivate.mockResponse("delete", response);
+    axiosPrivate.mockResponse("delete", "", 204);
 
-    let returned;
+    let returned: unknown = "unset";
     await act(async () => {
       returned = await result.current({ userId: "user-2" });
     });
 
-    expect(returned).toEqual(response);
+    // 204, no body: the hook resolves with nothing.
+    expect(returned).toBeUndefined();
 
     const [call] = axiosPrivate.calls("delete");
     expect(call.url).toBe("/test-project/users/user-2/connection");

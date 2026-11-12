@@ -131,12 +131,21 @@ export type {
   BulkDeleteProps,
   DeleteResult,
   BulkDeleteResult,
+  BulkCreateResult,
 } from "./interfaces/Table";
 export type { AddColumnProps } from "./modules/tables-management/addColumn";
 export type {
   FetchOrCreateUserByForeignIdProps,
   FetchOrCreateUserByForeignIdResult,
 } from "./modules/users/fetchOrCreateUserByForeignId";
+export type {
+  FetchOrCreateEntityByForeignIdProps,
+  FetchOrCreateEntityByForeignIdResult,
+} from "./modules/entities/fetchOrCreateEntityByForeignId";
+export type {
+  CreateDirectConversationProps,
+  CreateDirectConversationResult,
+} from "./modules/chat/createDirectConversation";
 
 // Export commonly used interfaces
 export type {
@@ -240,8 +249,14 @@ export type {
   WorkspaceListSortDir,
 } from "./interfaces/Workspace";
 export type { Rule } from "./interfaces/Rule";
-export type { Follow } from "./interfaces/Follow";
-export type { Connection, ConnectionRequestResponse, EstablishedConnection, PendingConnection, ConnectionStatusResponse } from "./interfaces/Connection";
+export type { FollowRow, FollowStatus } from "./interfaces/Follow";
+export type { BlockRow, BlockStatus } from "./interfaces/Block";
+export type {
+  AcceptedConnectionRow,
+  ConnectionRow,
+  ConnectionRowStatus,
+  ConnectionStatus,
+} from "./interfaces/Connection";
 export type {
   Conversation,
   ConversationPreview,

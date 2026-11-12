@@ -374,13 +374,13 @@ describe("node-sdk users — response mapping", () => {
     ).resolves.toEqual(user);
   });
 
-  it("fetchUserSuggestions returns response.data as an array", async () => {
+  it("fetchUserSuggestions returns the { data } envelope", async () => {
     const { client, projectInstance } = makeClient();
-    const users = [{ id: "u1" }, { id: "u2" }];
-    projectInstance.get.mockResolvedValueOnce({ data: users });
+    const body = { data: [{ id: "u1" }, { id: "u2" }] };
+    projectInstance.get.mockResolvedValueOnce({ data: body });
     await expect(
       fetchUserSuggestions(client, { query: "a" }),
-    ).resolves.toEqual(users);
+    ).resolves.toEqual(body);
   });
 
   it("checkUsernameAvailability returns response.data", async () => {
@@ -408,7 +408,10 @@ describe("node-sdk users — response mapping", () => {
 
   it("fetchFollowersByUserId returns the full PaginatedResponse envelope", async () => {
     const { client, projectInstance } = makeClient();
-    const envelope = { data: [{ id: "u2" }], pagination: { page: 1, limit: 10, total: 1 } };
+    const envelope = {
+      data: [{ id: "fol1", user: { id: "u2" }, createdAt: "now" }],
+      pagination: { page: 1, limit: 10, total: 1 },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
     await expect(
       fetchFollowersByUserId(client, { userId: "u1" }),
@@ -426,7 +429,12 @@ describe("node-sdk users — response mapping", () => {
 
   it("fetchConnectionsByUserId returns the full PaginatedResponse envelope", async () => {
     const { client, projectInstance } = makeClient();
-    const envelope = { data: [{ id: "c1" }], pagination: { page: 1, limit: 10, total: 1 } };
+    const envelope = {
+      data: [
+        { id: "c1", user: { id: "u2" }, status: "accepted", createdAt: "then", respondedAt: "now" },
+      ],
+      pagination: { page: 1, limit: 10, total: 1 },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
     await expect(
       fetchConnectionsByUserId(client, { userId: "u1" }),
@@ -444,8 +452,8 @@ describe("node-sdk users — response mapping", () => {
 
   it("createFollow returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const follow = { id: "fol1" };
-    projectInstance.post.mockResolvedValueOnce({ data: follow });
+    const follow = { id: "fol1", user: { id: "target1", name: "T", username: "t" }, createdAt: "now" };
+    projectInstance.post.mockResolvedValueOnce({ status: 201, data: follow });
     await expect(
       createFollow(client, { userId: "target1", actingUserId: "follower1" }),
     ).resolves.toEqual(follow);
@@ -453,7 +461,10 @@ describe("node-sdk users — response mapping", () => {
 
   it("fetchFollowStatus returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { isFollowing: true, followId: "fol1" };
+    const result = {
+      isFollowing: true,
+      follow: { id: "fol1", user: { id: "target1", name: "T", username: "t" }, createdAt: "now" },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: result });
     await expect(
       fetchFollowStatus(client, { userId: "target1", actingUserId: "follower1" }),
@@ -462,7 +473,15 @@ describe("node-sdk users — response mapping", () => {
 
   it("requestConnection returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const connection = { id: "conn1", status: "pending" };
+    const connection = {
+      id: "conn1",
+      user: { id: "target1", name: "T", username: "t" },
+      type: "sent",
+      message: null,
+      status: "pending",
+      createdAt: "now",
+      respondedAt: null,
+    };
     projectInstance.post.mockResolvedValueOnce({ data: connection });
     await expect(
       requestConnection(client, { userId: "target1", actingUserId: "requester1" }),
@@ -471,28 +490,38 @@ describe("node-sdk users — response mapping", () => {
 
   it("fetchConnectionStatus returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { status: "connected" };
+    const result = {
+      isConnected: true,
+      connection: {
+        id: "conn1",
+        user: { id: "target1", name: "T", username: "t" },
+        type: "received",
+        message: "hi",
+        status: "accepted",
+        createdAt: "then",
+        respondedAt: "now",
+      },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: result });
     await expect(
       fetchConnectionStatus(client, { userId: "target1", actingUserId: "requester1" }),
     ).resolves.toEqual(result);
   });
 
-  it("removeConnectionByUserId returns response.data", async () => {
+  it("removeConnectionByUserId resolves to undefined on the 204 empty body", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { removed: true };
-    projectInstance.delete.mockResolvedValueOnce({ data: result });
+    projectInstance.delete.mockResolvedValueOnce({ status: 204, data: "" });
     await expect(
       removeConnectionByUserId(client, {
         userId: "target1",
         actingUserId: "requester1",
       }),
-    ).resolves.toEqual(result);
+    ).resolves.toBeUndefined();
   });
 
   it("createBlock returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const block = { id: "blk1", blockerId: "blocker1", blockedId: "target1" };
+    const block = { id: "blk1", user: { id: "target1", name: "T", username: "t" }, createdAt: "now" };
     projectInstance.post.mockResolvedValueOnce({ data: block });
     await expect(
       createBlock(client, { userId: "target1", actingUserId: "blocker1" }),
@@ -508,7 +537,10 @@ describe("node-sdk users — response mapping", () => {
 
   it("fetchBlockStatus returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { blocked: true, blockId: "blk1" };
+    const result = {
+      isBlocking: true,
+      block: { id: "blk1", user: { id: "target1", name: "T", username: "t" }, createdAt: "now" },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: result });
     await expect(
       fetchBlockStatus(client, { userId: "target1", actingUserId: "blocker1" }),
@@ -518,7 +550,7 @@ describe("node-sdk users — response mapping", () => {
   it("fetchBlockedUsers returns the full PaginatedResponse envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
-      data: [{ id: "blk1", blockedUser: { id: "target1" }, createdAt: "now" }],
+      data: [{ id: "blk1", user: { id: "target1" }, createdAt: "now" }],
       pagination: { page: 1, limit: 10, total: 1 },
     };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });

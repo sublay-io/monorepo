@@ -64,10 +64,10 @@ Each `ConversationPreview` includes `otherMembers` — up to 5 active members ot
 
 ### createDirectConversation
 
-Creates (or returns the existing) one-to-one conversation between the acting user and a target user.
+Returns the one-to-one conversation between the acting user and a target user, or creates it when there is none. Props type: `CreateDirectConversationProps`.
 
 ```typescript
-const conversation = await sublay.chat.createDirectConversation({
+const { conversation, created } = await sublay.chat.createDirectConversation({
   actingUserId: "usr_abc123",
   userId: "usr_def456",
 });
@@ -80,7 +80,7 @@ const conversation = await sublay.chat.createDirectConversation({
   The user initiating the DM.
 </ParamField>
 
-**Returns** — `Promise<Conversation>`
+**Returns** — `Promise<CreateDirectConversationResult>`: `{ conversation: Conversation; created: boolean }`. `created` is `true` when this call created the conversation (HTTP `201`) and `false` when it already existed (HTTP `200`).
 
 ---
 
@@ -652,4 +652,4 @@ await sublay.spaces.handleSpaceChatReport({
 <ParamField body="summary" type="string">Stored as the report's resolution note.</ParamField>
 <ParamField body="actingUserId" type="string" required>The moderator the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.</ParamField>
 
-**Returns** — `Promise<{ message: string; code: string }>`
+**Returns** — `Promise<void>`. It resolves with no value once the actions are applied.

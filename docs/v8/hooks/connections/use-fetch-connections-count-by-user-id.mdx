@@ -18,7 +18,7 @@ function UserStats({ userId }: { userId: string }) {
   const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchConnectionsCountByUserId({ userId }).then((res) => setCount(res.count));
+    fetchConnectionsCountByUserId({ userId }).then(setCount);
   }, [userId]);
 
   return <span>{count ?? "..."} connections</span>;
@@ -35,9 +35,7 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-<ResponseField name="count" type="number">
-  Total number of accepted connections for the specified user.
-</ResponseField>
+Returns a `number`: the total number of accepted connections for the specified user.
 
 ## Related
 

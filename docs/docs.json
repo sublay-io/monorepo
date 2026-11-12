@@ -241,6 +241,7 @@
                   "v8/hooks/entities/use-entity",
                   "v8/hooks/entities/use-fetch-entity",
                   "v8/hooks/entities/use-fetch-entity-by-foreign-id",
+                  "v8/hooks/entities/use-fetch-or-create-entity-by-foreign-id",
                   "v8/hooks/entities/use-fetch-entity-by-short-id",
                   "v8/hooks/entities/use-fetch-many-entities",
                   "v8/hooks/entities/use-fetch-many-entities-wrapper",

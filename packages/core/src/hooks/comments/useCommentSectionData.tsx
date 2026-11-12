@@ -42,6 +42,7 @@ import {
   useEntity,
   useFetchEntity,
   useFetchEntityByForeignId,
+  useFetchOrCreateEntityByForeignId,
   useFetchEntityByShortId,
 } from "../entities";
 import { isUUID } from "../../utils/isUUID";
@@ -401,6 +402,7 @@ export function useCommentSectionDataInternal(
   const fetchComment = useFetchComment();
   const fetchEntity = useFetchEntity();
   const fetchEntityByForeignId = useFetchEntityByForeignId();
+  const fetchOrCreateEntityByForeignId = useFetchOrCreateEntityByForeignId();
   const fetchEntityByShortId = useFetchEntityByShortId();
 
   const fetchingCommentIdRef = useRef<string | null>(null);
@@ -1084,10 +1086,9 @@ export function useCommentSectionDataInternal(
         if (lookup.entityId) {
           fetchedEntity = await fetchEntity({ entityId: lookup.entityId });
         } else if (lookup.foreignId) {
-          fetchedEntity = await fetchEntityByForeignId({
-            foreignId: lookup.foreignId,
-            createIfNotFound: lookup.createIfNotFound,
-          });
+          fetchedEntity = lookup.createIfNotFound
+            ? (await fetchOrCreateEntityByForeignId({ foreignId: lookup.foreignId })).entity
+            : await fetchEntityByForeignId({ foreignId: lookup.foreignId });
         } else if (lookup.shortId) {
           fetchedEntity = await fetchEntityByShortId({ shortId: lookup.shortId });
         }
@@ -1121,7 +1122,7 @@ export function useCommentSectionDataInternal(
         }
       }
     },
-    [fetchEntity, fetchEntityByForeignId, fetchEntityByShortId],
+    [fetchEntity, fetchEntityByForeignId, fetchOrCreateEntityByForeignId, fetchEntityByShortId],
   );
 
   const hasEntity = !!entity;

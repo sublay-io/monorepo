@@ -38,11 +38,18 @@ The body is a free-form column map — one key per column you are setting. At le
 
 ## Response
 
-Returns `201 Created`.
+Returns `201 Created`. The body is the inserted row itself, a column map including its generated managed columns.
 
-<ResponseField name="row" type="object">
-  The inserted row, including its generated managed columns.
-</ResponseField>
+```json
+{
+  "id": "5b0e7c2a-9f1d-4c3e-8a6b-2d4f6e8a0c1e",
+  "title": "Launch checklist",
+  "done": false,
+  "createdAt": "2026-11-10T09:00:00.000Z",
+  "updatedAt": "2026-11-10T09:00:00.000Z",
+  "deletedAt": null
+}
+```
 
 ## Error Responses
 

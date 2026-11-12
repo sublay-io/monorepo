@@ -8,9 +8,9 @@ export async function update<T = TableRow>(
   rowId: string,
   data: Partial<T> | Record<string, unknown>,
 ): Promise<T> {
-  const response = await client.projectInstance.patch<{ row: T }>(
+  const response = await client.projectInstance.patch<T>(
     `/db/${tableName}/${rowId}`,
     data,
   );
-  return response.data.row;
+  return response.data;
 }

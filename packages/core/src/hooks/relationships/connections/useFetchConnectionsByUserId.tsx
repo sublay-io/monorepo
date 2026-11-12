@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { buildSearchParams } from "../../../utils/searchParams";
 import useProject from "../../projects/useProject";
-import { EstablishedConnection } from "../../../interfaces/models/Connection";
+import type { AcceptedConnectionRow } from "../../../interfaces/models/Connection";
 import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import { SpaceReputationUserParams } from "../../../interfaces/SpaceReputation";
@@ -16,14 +16,14 @@ export interface FetchConnectionsByUserIdParams
   limit?: number;
 }
 
-function useFetchConnectionsByUserId(): (props: FetchConnectionsByUserIdParams) => Promise<PaginatedResponse<EstablishedConnection>> {
+function useFetchConnectionsByUserId(): (props: FetchConnectionsByUserIdParams) => Promise<PaginatedResponse<AcceptedConnectionRow>> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
   const fetchConnectionsByUserId = useCallback(
     async (
       props: FetchConnectionsByUserIdParams
-    ): Promise<PaginatedResponse<EstablishedConnection>> => {
+    ): Promise<PaginatedResponse<AcceptedConnectionRow>> => {
       const { userId, page = 1, limit = 20, query, searchFields, spaceReputation, spaceReputationId, spaceReputationDescendants } = props;
       if (!projectId) {
         throw new Error("No project specified");
@@ -44,7 +44,7 @@ function useFetchConnectionsByUserId(): (props: FetchConnectionsByUserIdParams) 
         }),
       };
 
-      const response = await axios.get<PaginatedResponse<EstablishedConnection>>(
+      const response = await axios.get<PaginatedResponse<AcceptedConnectionRow>>(
         `/${projectId}/users/${userId}/connections`,
         {
           params,

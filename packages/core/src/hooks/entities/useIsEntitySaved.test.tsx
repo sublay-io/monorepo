@@ -15,7 +15,7 @@ describe("useIsEntitySaved", () => {
       user,
     });
 
-    const response = { saved: true, collections: [{ id: "collection-1", name: "Faves" }] };
+    const response = { isSaved: true, collections: [{ id: "collection-1", name: "Faves" }] };
     axiosPrivate.mockResponse("get", response);
 
     let returned: typeof response | undefined;

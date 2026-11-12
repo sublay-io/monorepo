@@ -39,7 +39,7 @@ const { data, pagination } = await sublay.follows.fetchFollowing({
   Restricts which field `query` matches against — `username` or `name`. When omitted, `query` matches either field.
 </ParamField>
 
-**Returns** — `Promise<PaginatedResponse<FollowListItem>>`, where `FollowListItem` is `{ followId, user, followedAt }`.
+**Returns** — `Promise<PaginatedResponse<FollowRow>>`, where each [`FollowRow`](/v8/data-models/follow#followrow) is `{ id, user, createdAt }`: `id` is the follow record's ID (what `deleteFollow` takes) and `user` is the followed user.
 
 ---
 
@@ -70,7 +70,7 @@ const { data, pagination } = await sublay.follows.fetchFollowers({
   Restricts which field `query` matches against — `username` or `name`. When omitted, `query` matches either field.
 </ParamField>
 
-**Returns** — `Promise<PaginatedResponse<FollowListItem>>`
+**Returns** — `Promise<PaginatedResponse<FollowRow>>`, where each [`FollowRow`](/v8/data-models/follow#followrow) is `{ id, user, createdAt }` and `user` is the follower.
 
 ---
 
@@ -107,7 +107,7 @@ await sublay.follows.deleteFollow({ followId: "flw_xyz789" });
 ```
 
 <ParamField body="followId" type="string" required>
-  The ID of the follow relationship to delete.
+  The ID of the follow relationship to delete: a `FollowRow`'s `id`, e.g. from `fetchFollowing`. Only the follower can delete a follow.
 </ParamField>
 
 **Returns** — `Promise<void>`

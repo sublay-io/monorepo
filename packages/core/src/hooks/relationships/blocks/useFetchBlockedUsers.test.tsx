@@ -2,14 +2,15 @@ import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeAuthUser, makeUser } from "../../../test-utils";
-import useFetchBlockedUsers, { type BlockedUser } from "./useFetchBlockedUsers";
+import useFetchBlockedUsers from "./useFetchBlockedUsers";
+import type { BlockRow } from "../../../interfaces/models/Block";
 import type { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
 
 afterEach(() => {
   resetAxiosMocks();
 });
 
-function makePage(blocked: BlockedUser[]): PaginatedResponse<BlockedUser> {
+function makePage(blocked: BlockRow[]): PaginatedResponse<BlockRow> {
   return {
     data: blocked,
     pagination: { page: 1, pageSize: 20, totalPages: 1, totalItems: blocked.length, hasMore: false },
@@ -22,11 +23,11 @@ describe("useFetchBlockedUsers", () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchBlockedUsers(), { user });
 
     const page = makePage([
-      { id: "block-1", blockedUser: makeUser(), createdAt: "2024-01-01T00:00:00.000Z" },
+      { id: "block-1", user: makeUser(), createdAt: "2024-01-01T00:00:00.000Z" },
     ]);
     axiosPrivate.mockResponse("get", page);
 
-    let returned: PaginatedResponse<BlockedUser> | undefined;
+    let returned: PaginatedResponse<BlockRow> | undefined;
     await act(async () => {
       returned = await result.current({ page: 1, limit: 20 });
     });

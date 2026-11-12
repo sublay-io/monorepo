@@ -161,6 +161,10 @@ If you're coming from the server SDK, three things are different here:
   objects and send `multipart/form-data` — there's no `Uint8Array` + `mimeType`
   path.
 
+## Return values
+
+Functions resolve to the server's response body as-is. Fetch-or-create functions ([`entities.fetchOrCreateEntityByForeignId`](/v8/js-sdk/entities#fetchorcreateentitybyforeignid), [`chat.createDirectConversation`](/v8/js-sdk/chat#createdirectconversation)) resolve to `{ <record>, created }`, where `created` is `true` when the call created the record (HTTP `201`). Actions that are safe to repeat, such as adding a chat member, blocking a user or joining a space, are not fetch-or-create: they give the same response whether or not this call made the change.
+
 ## Paginated responses
 
 Most list functions return a shared `PaginatedResponse<T>` shape:

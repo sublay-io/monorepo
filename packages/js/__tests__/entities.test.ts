@@ -5,6 +5,7 @@ import {
   fetchDrafts,
   fetchEntity,
   fetchEntityByForeignId,
+  fetchOrCreateEntityByForeignId,
   fetchEntityByShortId,
   fetchManyEntities,
   fetchReactions,
@@ -42,18 +43,61 @@ describe("js-sdk entities — request shaping", () => {
     });
   });
 
-  it("fetchEntityByForeignId gets /entities/by-foreign-id with the full data as params", async () => {
+  it("fetchEntityByForeignId gets /entities/by-foreign-id with its declared params", async () => {
     const { client, projectInstance } = makeClient();
     await fetchEntityByForeignId(client, {
       foreignId: "f1",
-      createIfNotFound: true,
+      include: "user",
     });
     expect(projectInstance.get).toHaveBeenCalledWith(
       "/entities/by-foreign-id",
       {
-        params: { foreignId: "f1", createIfNotFound: true },
+        params: { foreignId: "f1", include: "user" },
       }
     );
+  });
+
+  it("fetchEntityByForeignId does not forward an untyped createIfNotFound", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchEntityByForeignId(client, {
+      foreignId: "f1",
+      createIfNotFound: true,
+    } as any);
+    const [, config] = projectInstance.get.mock.calls[0];
+    expect(config.params).not.toHaveProperty("createIfNotFound");
+    expect(config.params.foreignId).toBe("f1");
+  });
+
+  it("fetchOrCreateEntityByForeignId sends createIfNotFound=true with the rest as params", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchOrCreateEntityByForeignId(client, {
+      foreignId: "f1",
+      include: ["user", "space"],
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith(
+      "/entities/by-foreign-id",
+      {
+        params: { foreignId: "f1", include: "user,space", createIfNotFound: true },
+      }
+    );
+  });
+
+  it("fetchOrCreateEntityByForeignId reports created: true on 201", async () => {
+    const { client, projectInstance } = makeClient();
+    const entity = { id: "e1", foreignId: "f1" };
+    projectInstance.get.mockResolvedValueOnce({ data: entity, status: 201 });
+    await expect(
+      fetchOrCreateEntityByForeignId(client, { foreignId: "f1" })
+    ).resolves.toEqual({ entity, created: true });
+  });
+
+  it("fetchOrCreateEntityByForeignId reports created: false on 200", async () => {
+    const { client, projectInstance } = makeClient();
+    const entity = { id: "e1", foreignId: "f1" };
+    projectInstance.get.mockResolvedValueOnce({ data: entity, status: 200 });
+    await expect(
+      fetchOrCreateEntityByForeignId(client, { foreignId: "f1" })
+    ).resolves.toEqual({ entity, created: false });
   });
 
   it("fetchEntityByShortId gets /entities/by-short-id with the full data as params", async () => {
@@ -417,7 +461,7 @@ describe("js-sdk entities — response mapping", () => {
   it("isEntitySaved returns the saved status with collections", async () => {
     const { client, projectInstance } = makeClient();
     const saved = {
-      saved: true,
+      isSaved: true,
       collections: [{ id: "col1", name: "Favorites" }],
     };
     projectInstance.get.mockResolvedValueOnce({ data: saved });

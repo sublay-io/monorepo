@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
-import { PendingConnection } from "../../../interfaces/models/Connection";
+import type { ConnectionRow } from "../../../interfaces/models/Connection";
 import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
 
 export interface FetchSentPendingConnectionsParams {
@@ -10,7 +10,7 @@ export interface FetchSentPendingConnectionsParams {
   limit?: number;
 }
 
-function useFetchSentPendingConnections(): (props?: FetchSentPendingConnectionsParams) => Promise<PaginatedResponse<PendingConnection>> {
+function useFetchSentPendingConnections(): (props?: FetchSentPendingConnectionsParams) => Promise<PaginatedResponse<ConnectionRow>> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
@@ -18,7 +18,7 @@ function useFetchSentPendingConnections(): (props?: FetchSentPendingConnectionsP
   const fetchSentPendingConnections = useCallback(
     async (
       props: FetchSentPendingConnectionsParams = {}
-    ): Promise<PaginatedResponse<PendingConnection>> => {
+    ): Promise<PaginatedResponse<ConnectionRow>> => {
       const { page = 1, limit = 20 } = props;
       if (!projectId) {
         throw new Error("No project specified");
@@ -28,7 +28,7 @@ function useFetchSentPendingConnections(): (props?: FetchSentPendingConnectionsP
         throw new Error("No user is logged in");
       }
 
-      const response = await axios.get<PaginatedResponse<PendingConnection>>(
+      const response = await axios.get<PaginatedResponse<ConnectionRow>>(
         `/${projectId}/connections/pending/sent`,
         {
           params: {

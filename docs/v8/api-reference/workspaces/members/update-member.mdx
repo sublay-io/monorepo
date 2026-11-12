@@ -153,4 +153,15 @@ Returns the updated [WorkspaceMember](/v8/data-models/workspace-member) object.
     ```
     Every path id on the workspaces bundle is checked for UUID shape before the route runs, so a malformed one is a plain `400` rather than a `500` from the database.
   </Accordion>
+  <Accordion title="Not Found — 404">
+    The workspace doesn't exist:
+    ```json
+    { "error": "Workspace not found.", "code": "workspace/not-found" }
+    ```
+    The target user isn't a direct member of the workspace, including when they were removed (or the workspace was deleted) while this request was being handled:
+    ```json
+    { "error": "The target user is not a direct member of this workspace.", "code": "workspace/not-found" }
+    ```
+    A successful response always carries the member.
+  </Accordion>
 </AccordionGroup>

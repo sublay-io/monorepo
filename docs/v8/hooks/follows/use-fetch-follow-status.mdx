@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-Returns a function that checks whether the current authenticated user follows a given `userId`. Returns a status object including the follow ID and timestamp if following.
+Returns a function that checks whether the current authenticated user follows a given `userId`. Resolves to a [`FollowStatus`](/v8/data-models/follow#followstatus): `isFollowing`, plus the follow row when they do.
 
 ## Usage Example
 
@@ -18,7 +18,9 @@ function ProfilePage({ userId }: { userId: string }) {
 
   useEffect(() => {
     fetchFollowStatus({ userId }).then((status) => {
-      console.log(status.isFollowing, status.followId);
+      if (status.isFollowing) {
+        console.log("Following since", status.follow.createdAt);
+      }
     });
   }, [userId]);
 }
@@ -34,16 +36,25 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
+The function resolves to a `FollowStatus`:
+
 <ResponseField name="isFollowing" type="boolean">
   Whether the current user is following the target user.
 </ResponseField>
 
-<ResponseField name="followId" type="string | undefined">
-  The ID of the follow record. Present when `isFollowing` is `true`.
-</ResponseField>
-
-<ResponseField name="followedAt" type="string | undefined">
-  ISO timestamp of when the follow was created. Present when `isFollowing` is `true`.
+<ResponseField name="follow" type="FollowRow | undefined">
+  The follow row, present only when `isFollowing` is `true`. Its `user` is the target user. See [FollowRow](/v8/data-models/follow#followrow).
+  <Expandable title="FollowRow properties">
+    <ResponseField name="id" type="string">
+      ID of the follow record. [useUnfollowByFollowId](/v8/hooks/follows/use-unfollow-by-follow-id) takes it.
+    </ResponseField>
+    <ResponseField name="user" type="User">
+      The followed user. See [User data model](/v8/data-models/user).
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO timestamp of when the follow was created.
+    </ResponseField>
+  </Expandable>
 </ResponseField>
 
 ## Related

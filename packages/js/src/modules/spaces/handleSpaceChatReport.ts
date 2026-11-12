@@ -14,19 +14,14 @@ export interface HandleSpaceChatReportProps {
   messageId?: string;
 }
 
-export interface HandleSpaceChatReportResponse {
-  message: string;
-  code: string;
-}
-
+/** PATCH /spaces/:spaceId/chat/reports/:reportId — answers 204, no body. */
 export async function handleSpaceChatReport(
   client: SublayHttpClient,
   data: HandleSpaceChatReportProps
-): Promise<HandleSpaceChatReportResponse> {
+): Promise<void> {
   const { spaceId, reportId, ...body } = data;
-  const response = await client.projectInstance.patch<HandleSpaceChatReportResponse>(
+  await client.projectInstance.patch(
     `/spaces/${spaceId}/chat/reports/${reportId}`,
     body
   );
-  return response.data;
 }

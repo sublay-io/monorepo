@@ -17,7 +17,7 @@ icon: "bookmark"
 ## Usage Example
 
 ```tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useIsEntitySaved } from "@sublay/react-js";
 
 function SaveStatus({ entityId }) {
@@ -29,13 +29,13 @@ function SaveStatus({ entityId }) {
   }, [entityId]);
 
   if (savedStatus === null) return <p>Checking...</p>;
-  return <p>{savedStatus.saved ? "Saved" : "Not saved"}</p>;
+  return <p>{savedStatus.isSaved ? "Saved" : "Not saved"}</p>;
 }
 ```
 
 ## Returns
 
-<ResponseField name="checkIfEntityIsSaved" type="({ entityId }: { entityId: string }) => Promise<{ saved: boolean; collections: Array<{ id: string; name: string }> }>">
+<ResponseField name="checkIfEntityIsSaved" type="({ entityId }: { entityId: string }) => Promise<{ isSaved: boolean; collections: Array<{ id: string; name: string }> }>">
   Calls the API to determine whether the entity is saved in any of the user's collections. Returns the full result including the list of collections the entity belongs to.
 </ResponseField>
 

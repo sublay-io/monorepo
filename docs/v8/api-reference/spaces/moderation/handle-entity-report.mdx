@@ -43,11 +43,7 @@ Resolves a filed report against an entity in a space. Requires the caller to be 
 
 ## Response
 
-Returns `201 Created`:
-
-```json
-{ "message": "Report handled successfully", "code": "report/handled" }
-```
+Returns `204 No Content` with no body.
 
 ## Error Responses
 
@@ -92,6 +88,12 @@ Returns `201 Created`:
     The caller (or the user named by `actingUserId`) is not a moderator or admin of the space.
     ```json
     { "error": "Moderator access required", "code": "space/moderator-required" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Body — 400">
+    The body failed validation, such as an unknown action or a field of the wrong type. `error` describes the problem.
+    ```json
+    { "error": "...", "code": "report/invalid-body" }
     ```
   </Accordion>
   <Accordion title="Report Not Found — 404">

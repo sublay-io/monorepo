@@ -5,7 +5,8 @@ import type { DbFilter, TableRow } from "../../interfaces/models/Table";
 /**
  * RTK Query endpoints for the custom-table `/db` row surface. Mirrors
  * `entityListsApi` end to end: injected into `baseApi`, tagged for cache
- * invalidation, hooks generated below.
+ * invalidation, hooks generated below. Single-row reads and writes answer the
+ * row itself (no wrapper).
  */
 
 interface FetchTableRowsParams {
@@ -95,7 +96,7 @@ export const tablesApi = baseApi.injectEndpoints({
       ],
     }),
 
-    fetchTableRow: builder.query<{ row: TableRow }, FetchTableRowParams>({
+    fetchTableRow: builder.query<TableRow, FetchTableRowParams>({
       query: ({ projectId, tableName, rowId }) => ({
         url: `/${projectId}/db/${tableName}/${rowId}`,
         method: "GET",
@@ -108,7 +109,7 @@ export const tablesApi = baseApi.injectEndpoints({
       ],
     }),
 
-    createRow: builder.mutation<{ row: TableRow }, CreateRowParams>({
+    createRow: builder.mutation<TableRow, CreateRowParams>({
       query: ({ projectId, tableName, data }) => ({
         url: `/${projectId}/db/${tableName}`,
         method: "POST",
@@ -119,7 +120,7 @@ export const tablesApi = baseApi.injectEndpoints({
       ],
     }),
 
-    updateRow: builder.mutation<{ row: TableRow }, UpdateRowParams>({
+    updateRow: builder.mutation<TableRow, UpdateRowParams>({
       query: ({ projectId, tableName, rowId, data }) => ({
         url: `/${projectId}/db/${tableName}/${rowId}`,
         method: "PATCH",
@@ -147,7 +148,7 @@ export const tablesApi = baseApi.injectEndpoints({
       ],
     }),
 
-    restoreRow: builder.mutation<{ row: TableRow }, RestoreRowParams>({
+    restoreRow: builder.mutation<TableRow, RestoreRowParams>({
       query: ({ projectId, tableName, rowId }) => ({
         url: `/${projectId}/db/${tableName}/${rowId}/restore`,
         method: "POST",

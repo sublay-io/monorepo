@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { EstablishedConnection } from "../../interfaces/Connection";
+import { AcceptedConnectionRow } from "../../interfaces/Connection";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 import { SpaceReputationUserParams } from "../../interfaces/SpaceReputation";
 import { UserSearchParams } from "../../interfaces/UserSearch";
@@ -13,10 +13,15 @@ export interface FetchConnectionsByUserIdProps
   limit?: number;
 }
 
+/**
+ * GET /users/:userId/connections — `:userId`'s accepted connections, each
+ * seen from their side (`user` = their counterpart). The same shape whoever
+ * reads it.
+ */
 export async function fetchConnectionsByUserId(
   client: SublayHttpClient,
   data: FetchConnectionsByUserIdProps
-): Promise<PaginatedResponse<EstablishedConnection>> {
+): Promise<PaginatedResponse<AcceptedConnectionRow>> {
   const {
     userId,
     spaceReputation,
@@ -33,7 +38,7 @@ export async function fetchConnectionsByUserId(
     }),
   };
   const response = await client.projectInstance.get<
-    PaginatedResponse<EstablishedConnection>
+    PaginatedResponse<AcceptedConnectionRow>
   >(`/users/${userId}/connections`, { params });
   return response.data;
 }

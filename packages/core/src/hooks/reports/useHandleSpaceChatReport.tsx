@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
-import { HandleReportResponse } from "./useHandleSpaceCommentReport";
 
 export interface HandleSpaceChatReportParams {
   spaceId: string;
@@ -35,7 +34,7 @@ export interface HandleSpaceChatReportParams {
  */
 function useHandleSpaceChatReport(): (
   params: HandleSpaceChatReportParams
-) => Promise<HandleReportResponse> {
+) => Promise<void> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -56,7 +55,8 @@ function useHandleSpaceChatReport(): (
         throw new Error("spaceId and reportId are required");
       }
 
-      const response = await axios.patch(
+      // The server answers 204 with no body.
+      await axios.patch(
         `/${projectId}/spaces/${spaceId}/chat/reports/${reportId}`,
         {
           messageId,
@@ -65,8 +65,6 @@ function useHandleSpaceChatReport(): (
           reason,
         }
       );
-
-      return response.data as HandleReportResponse;
     },
     [projectId, axios]
   );

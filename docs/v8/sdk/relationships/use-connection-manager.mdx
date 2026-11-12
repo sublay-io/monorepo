@@ -35,12 +35,12 @@ function ConnectionButton({ userId }: { userId: string }) {
           <button onClick={declineConnectionRequest}>Decline</button>
         </>
       );
-    case "connected":
+    case "accepted":
       return <button onClick={disconnectUser}>Disconnect</button>;
     case "declined-sent":
       return <span>Request Declined</span>;
     case "declined-received":
-      return <button onClick={() => sendConnectionRequest()}>Connect Again</button>;
+      return <span>You declined this request</span>;
   }
 }
 ```
@@ -53,34 +53,37 @@ function ConnectionButton({ userId }: { userId: string }) {
 
 ## Returns
 
-<ResponseField name="connectionStatus" type="ConnectionStatus">
-  The current relationship state. One of: `"none"` | `"pending-sent"` | `"pending-received"` | `"connected"` | `"declined-sent"` | `"declined-received"`.
+<ResponseField name="connectionStatus" type="ConnectionState">
+  The current relationship state. One of: `"none"` | `"pending-sent"` | `"pending-received"` | `"accepted"` | `"declined-sent"` | `"declined-received"`. It is the connection's `status`, joined with its `type` while pending or declined (`"pending-sent"`: the current user sent the request), or `"none"` when no connection exists.
 </ResponseField>
 
 <ResponseField name="connectionId" type="string | null">
-  The ID of the active connection record, if one exists.
+  The ID of the connection record, if one exists.
 </ResponseField>
 
-<ResponseField name="connectionData" type="object">
-  Additional metadata about the connection.
+<ResponseField name="connection" type="ConnectionRow | null">
+  The connection record seen from the current user's side, or `null` when there is none. See [ConnectionRow](/v8/data-models/connection#connectionrow).
   <Expandable title="properties">
-    <ResponseField name="connectionId" type="string | null">
-      ID of the connection record.
+    <ResponseField name="id" type="string">
+      ID of the connection record (the same value as `connectionId`).
     </ResponseField>
-    <ResponseField name="connectedAt" type="string | undefined">
-      ISO timestamp when the connection was established.
+    <ResponseField name="user" type="User">
+      The target user. Public profile fields only.
     </ResponseField>
-    <ResponseField name="requestedAt" type="string | undefined">
-      ISO timestamp when the request was originally sent.
+    <ResponseField name="type" type='"sent" | "received"'>
+      Whether the current user sent or received the request.
     </ResponseField>
-    <ResponseField name="respondedAt" type="string | undefined">
-      ISO timestamp when the request was responded to (accept or decline).
+    <ResponseField name="message" type="string | null">
+      The note sent with the request, or `null`.
     </ResponseField>
-    <ResponseField name="createdAt" type="string | undefined">
-      ISO timestamp when the connection record was created.
+    <ResponseField name="status" type='"pending" | "accepted" | "declined"'>
+      The connection's stored state.
     </ResponseField>
-    <ResponseField name="type" type='"sent" | "received" | undefined'>
-      Direction of the pending or declined request from the current user's perspective.
+    <ResponseField name="createdAt" type="string">
+      ISO timestamp of when the request was sent.
+    </ResponseField>
+    <ResponseField name="respondedAt" type="string | null">
+      ISO timestamp of when the request was accepted or declined; `null` while pending.
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -90,7 +93,7 @@ function ConnectionButton({ userId }: { userId: string }) {
 </ResponseField>
 
 <ResponseField name="sendConnectionRequest" type="(message?: string) => Promise<void>">
-  Sends a connection request to the target user. Accepts an optional message string. Only active when status is `"none"` or `"declined-received"`.
+  Sends a connection request to the target user. Accepts an optional message string. Only active when status is `"none"` or `"declined-received"`; the server rejects a new request while a declined one exists between the two users (`409 connection/request-declined`), so in `"declined-received"` the call fails.
 </ResponseField>
 
 <ResponseField name="acceptConnectionRequest" type="() => Promise<void>">
@@ -106,11 +109,11 @@ function ConnectionButton({ userId }: { userId: string }) {
 </ResponseField>
 
 <ResponseField name="disconnectUser" type="() => Promise<void>">
-  Removes an established connection. Only active when status is `"connected"`.
+  Removes an accepted connection. Only active when status is `"accepted"`.
 </ResponseField>
 
 <ResponseField name="removeConnectionSmart" type="() => Promise<void>">
-  Removes the connection regardless of current state (withdraw, decline, or disconnect) by user ID. Useful as a generic "remove" action when the exact state doesn't matter.
+  Acts on the connection by user ID, whatever its state: withdraws a sent request, declines a received one, or disconnects an accepted connection. Does nothing when status is `"none"`, `"declined-sent"` or `"declined-received"`. After declining a received request it re-reads the status, so `connection` holds the declined record. Useful as a generic "remove" action when the exact state doesn't matter.
 </ResponseField>
 
 <ResponseField name="refreshConnectionStatus" type="() => Promise<void>">

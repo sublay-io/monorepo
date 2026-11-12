@@ -20,19 +20,25 @@ Returns all sub-collections directly under the specified collection, owned by th
 
 ## Response
 
-Returns an array of [Collection](/v8/data-models/collection) objects, each with its [`entityCount`](/v8/data-models/collection#entitycount).
+On success, returns HTTP `200` with the sub-collections under `data`, in creation order (oldest first; ties break on `id`).
+
+<ResponseField name="data" type="Collection[]">
+  The direct child collections. Each item is a [Collection](/v8/data-models/collection) with its [`entityCount`](/v8/data-models/collection#entitycount).
+</ResponseField>
 
 ```json
-[
-  {
-    "id": "col_abc",
-    "name": "To Read",
-    "parentId": "col_root",
-    "entityCount": 5,
-    "createdAt": "2025-01-15T10:00:00.000Z",
-    "updatedAt": "2025-01-15T10:00:00.000Z"
-  }
-]
+{
+  "data": [
+    {
+      "id": "col_abc",
+      "name": "To Read",
+      "parentId": "col_root",
+      "entityCount": 5,
+      "createdAt": "2025-01-15T10:00:00.000Z",
+      "updatedAt": "2025-01-15T10:00:00.000Z"
+    }
+  ]
+}
 ```
 
 ## Error Responses

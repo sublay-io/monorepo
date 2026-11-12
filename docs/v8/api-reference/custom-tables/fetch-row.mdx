@@ -26,9 +26,18 @@ Returns one row from a custom table.
 
 ## Response
 
-<ResponseField name="row" type="object">
-  The row as a free-form column map, including managed columns.
-</ResponseField>
+Returns HTTP `200`. The body is the row itself: a free-form column map, including the managed columns (`id`, and `createdAt` / `updatedAt` / `deletedAt` where the table has them).
+
+```json
+{
+  "id": "5b0e7c2a-9f1d-4c3e-8a6b-2d4f6e8a0c1e",
+  "title": "Launch checklist",
+  "done": false,
+  "createdAt": "2026-11-10T09:00:00.000Z",
+  "updatedAt": "2026-11-10T09:00:00.000Z",
+  "deletedAt": null
+}
+```
 
 ## Error Responses
 

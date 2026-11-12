@@ -5,7 +5,8 @@ export interface IsEntitySavedProps {
 }
 
 export interface IsEntitySavedResponse {
-  saved: boolean;
+  isSaved: boolean;
+  /** The caller's collections that hold the entity (empty when not saved). */
   collections: { id: string; name: string }[];
 }
 

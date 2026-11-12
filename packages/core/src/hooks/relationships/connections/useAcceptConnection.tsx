@@ -2,19 +2,19 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
-import { ConnectionActionResponse } from "../../../interfaces/models/Connection";
+import type { ConnectionRow } from "../../../interfaces/models/Connection";
 
 export interface AcceptConnectionProps {
   connectionId: string;
 }
 
-function useAcceptConnection(): (props: AcceptConnectionProps) => Promise<ConnectionActionResponse> {
+function useAcceptConnection(): (props: AcceptConnectionProps) => Promise<ConnectionRow> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
 
   const acceptConnection = useCallback(
-    async (props: AcceptConnectionProps): Promise<ConnectionActionResponse> => {
+    async (props: AcceptConnectionProps): Promise<ConnectionRow> => {
       const { connectionId } = props;
       if (!projectId) {
         throw new Error("No project specified");
@@ -28,12 +28,13 @@ function useAcceptConnection(): (props: AcceptConnectionProps) => Promise<Connec
         throw new Error("No connection ID was provided");
       }
 
-      const response = await axios.patch(
+      // The row from the receiver's (caller's) side: `user` is the requester.
+      const response = await axios.patch<ConnectionRow>(
         `/${projectId}/connections/${connectionId}/accept`,
         {}
       );
 
-      return response.data as ConnectionActionResponse;
+      return response.data;
     },
     [axios, projectId, user]
   );

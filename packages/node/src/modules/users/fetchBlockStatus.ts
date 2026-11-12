@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { BlockStatusResponse } from "../../interfaces/Block";
+import { BlockStatus } from "../../interfaces/Block";
 
 export interface FetchBlockStatusProps {
   /** The user whose block relationship is being checked (the target). */
@@ -8,12 +8,16 @@ export interface FetchBlockStatusProps {
   actingUserId: string;
 }
 
+/**
+ * GET /users/:userId/block — `{ isBlocking }`, plus the block row (`user` =
+ * `:userId`) when the acting user blocks them. Outbound only.
+ */
 export async function fetchBlockStatus(
   client: SublayHttpClient,
   data: FetchBlockStatusProps
-): Promise<BlockStatusResponse> {
+): Promise<BlockStatus> {
   const { userId, actingUserId } = data;
-  const response = await client.projectInstance.get<BlockStatusResponse>(
+  const response = await client.projectInstance.get<BlockStatus>(
     `/users/${userId}/block`,
     { params: { actingUserId } }
   );

@@ -1,4 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
+import { BlockStatus } from "../../interfaces/Block";
 
 export interface FetchBlockStatusProps {
   /**
@@ -9,26 +10,17 @@ export interface FetchBlockStatusProps {
 }
 
 /**
- * The block-status response is outbound-only by design: it reports whether the
- * token holder blocks the target, and NEVER whether the target blocked the
- * caller (the inbound direction is deliberately not disclosed).
- */
-export interface BlockStatusResponse {
-  blocked: boolean;
-  blockId?: string;
-  createdAt?: string;
-}
-
-/**
  * GET /users/:userId/block — the token holder's outbound block status toward
- * `:userId` (derived from the token, no `actingUserId`).
+ * `:userId` (derived from the token, no `actingUserId`): `{ isBlocking }`,
+ * plus the block row (`user` = `:userId`) when they block them. It never
+ * says whether `:userId` blocks the caller.
  */
 export async function fetchBlockStatus(
   client: SublayHttpClient,
   data: FetchBlockStatusProps
-): Promise<BlockStatusResponse> {
+): Promise<BlockStatus> {
   const { userId } = data;
-  const response = await client.projectInstance.get<BlockStatusResponse>(
+  const response = await client.projectInstance.get<BlockStatus>(
     `/users/${userId}/block`
   );
   return response.data;

@@ -13,14 +13,15 @@ describe("useRemoveConnection", () => {
     const user = makeAuthUser();
     const { result, axiosPrivate } = renderHookWithAxios(() => useRemoveConnection(), { user });
 
-    axiosPrivate.mockResponse("delete", { message: "Connection removed" });
+    axiosPrivate.mockResponse("delete", "", 204);
 
-    let returned;
+    let returned: unknown = "unset";
     await act(async () => {
       returned = await result.current({ connectionId: "connection-1" });
     });
 
-    expect(returned).toEqual({ message: "Connection removed" });
+    // 204, no body: the hook resolves with nothing.
+    expect(returned).toBeUndefined();
 
     const [call] = axiosPrivate.calls("delete");
     expect(call.url).toBe("/test-project/connections/connection-1");

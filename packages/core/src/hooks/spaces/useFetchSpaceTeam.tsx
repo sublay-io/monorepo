@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
-import { SpaceTeamResponse } from "../../interfaces/models/SpaceMember";
+import { SpaceMemberWithUser } from "../../interfaces/models/SpaceMember";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
@@ -10,7 +10,7 @@ export interface FetchSpaceTeamProps extends SpaceReputationContextParams {
 }
 
 // Fetches all admins and moderators of a space (no pagination)
-function useFetchSpaceTeam(): (props: FetchSpaceTeamProps) => Promise<SpaceTeamResponse> {
+function useFetchSpaceTeam(): (props: FetchSpaceTeamProps) => Promise<SpaceMemberWithUser[]> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -34,9 +34,11 @@ function useFetchSpaceTeam(): (props: FetchSpaceTeamProps) => Promise<SpaceTeamR
         }),
       };
 
-      const response = await axios.get<SpaceTeamResponse>(url, { params });
+      const response = await axios.get<{ data: SpaceMemberWithUser[] }>(url, {
+        params,
+      });
 
-      return response.data;
+      return response.data.data;
     },
     [projectId, axios]
   );

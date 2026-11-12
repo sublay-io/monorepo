@@ -14,7 +14,7 @@ import { useFetchManyRules, useFetchRule } from "@sublay/react-js";
 
 // Fetch all rules for a space
 const fetchRules = useFetchManyRules();
-const { data: rules, count } = await fetchRules({ spaceId });
+const rules = await fetchRules({ spaceId }); // Rule[]
 
 // Fetch a single rule by ID
 const fetchRule = useFetchRule();

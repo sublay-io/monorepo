@@ -5,7 +5,7 @@ import { useUser } from "../user";
 
 export interface UseIsEntitySavedValues {
   checkIfEntityIsSaved: ({ entityId }: { entityId: string }) => Promise<{
-    saved: boolean;
+    isSaved: boolean;
     collections: Array<{ id: string; name: string }>;
   }>;
 }
@@ -28,7 +28,7 @@ function useIsEntitySaved(): UseIsEntitySavedValues {
       }
 
       const response = await axios.get<{
-        saved: boolean;
+        isSaved: boolean;
         collections: Array<{ id: string; name: string }>;
       }>(`/${projectId}/entities/is-entity-saved`, {
         params: { entityId },

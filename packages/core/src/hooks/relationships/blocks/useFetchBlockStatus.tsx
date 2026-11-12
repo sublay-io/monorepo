@@ -2,21 +2,13 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
+import type { BlockStatus } from "../../../interfaces/models/Block";
 
 export interface FetchBlockStatusProps {
   userId: string;
 }
 
-// Mirrors the server GET /users/:userId/block response verbatim. This is the
-// acting user's OUTBOUND state only — do *I* block `:userId`. It never reveals
-// whether `:userId` blocked me (the inbound direction is deliberately hidden).
-export interface BlockStatusResponse {
-  blocked: boolean;
-  blockId?: string;
-  createdAt?: string;
-}
-
-function useFetchBlockStatus(): (props: FetchBlockStatusProps) => Promise<BlockStatusResponse> {
+function useFetchBlockStatus(): (props: FetchBlockStatusProps) => Promise<BlockStatus> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
@@ -40,8 +32,12 @@ function useFetchBlockStatus(): (props: FetchBlockStatusProps) => Promise<BlockS
         throw new Error("Users don't block themselves");
       }
 
-      const response = await axios.get(`/${projectId}/users/${userId}/block`);
-      return response.data as BlockStatusResponse;
+      // The acting user's OUTBOUND state only — do *I* block `:userId`. It
+      // never reveals whether `:userId` blocked me.
+      const response = await axios.get<BlockStatus>(
+        `/${projectId}/users/${userId}/block`
+      );
+      return response.data;
     },
     [axios, projectId, user?.id]
   );

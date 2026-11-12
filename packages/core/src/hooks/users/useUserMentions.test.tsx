@@ -35,7 +35,7 @@ describe("useUserMentions", () => {
     expect(result.current.loading).toBe(true);
 
     const suggestions = [makeUser({ username: "alice" }), makeUser({ id: "user-2", username: "alicia" })];
-    axiosPrivate.mockResponse("get", suggestions);
+    axiosPrivate.mockResponse("get", { data: suggestions });
 
     await waitFor(() => expect(result.current.mentionSuggestions).toEqual(suggestions));
     expect(result.current.loading).toBe(false);
@@ -70,7 +70,7 @@ describe("useUserMentions", () => {
     );
 
     const suggestions = [makeUser({ username: "alice" })];
-    axiosPrivate.mockResponse("get", suggestions);
+    axiosPrivate.mockResponse("get", { data: suggestions });
     await waitFor(() => expect(result.current.mentionSuggestions).toEqual(suggestions));
 
     act(() => {
@@ -108,7 +108,7 @@ describe("useUserMentions", () => {
     );
 
     expect(result.current.isMentionActive).toBe(true);
-    axiosPrivate.mockResponse("get", [makeUser({ username: "fat-brown-damselfly" })]);
+    axiosPrivate.mockResponse("get", { data: [makeUser({ username: "fat-brown-damselfly" })] });
     await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
     const [call] = axiosPrivate.calls("get");
     expect(call.config?.params).toMatchObject({ query: "fat-bro" });
@@ -136,7 +136,7 @@ describe("useUserMentions", () => {
     );
 
     expect(result.current.isMentionActive).toBe(true);
-    axiosPrivate.mockResponse("get", []);
+    axiosPrivate.mockResponse("get", { data: [] });
     await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
     const [call] = axiosPrivate.calls("get");
     expect(call.config?.params).toMatchObject({ query: typed.slice(1) });
@@ -285,7 +285,7 @@ describe("useUserMentions", () => {
       },
     );
 
-    axiosPrivate.mockResponse("get", [makeUser({ username: "alice" })]);
+    axiosPrivate.mockResponse("get", { data: [makeUser({ username: "alice" })] });
     await waitFor(() => expect(result.current.mentionSuggestions).toHaveLength(1));
 
     act(() => {

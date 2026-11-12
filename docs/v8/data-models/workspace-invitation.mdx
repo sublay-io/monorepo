@@ -13,7 +13,7 @@ Acceptance is **identity-matched + verified-email, with no token** — see [Acce
 |----------|------|-------------|
 | `id` | `string` | Unique invitation identifier (UUID). **Non-secret** — knowing it does not let a non-target accept. |
 | `workspaceId` | `string` | The target workspace. |
-| `invitedBy` | `string` | User id of the inviter. |
+| `invitedById` | `string` | User id of the inviter. |
 | `userId` | `string \| null` | The resolved invitee's user id. Set at invite time when the email/username matches an existing user, and bound at signup for email-only invites. `null` only while no account exists for the address. |
 | `email` | `string \| null` | The invitee email, stored **normalized** (lowercase + trim). `null` for `userId`/`username`-addressed invites. |
 | `capabilities` | `string[]` | The [capabilities](/v8/data-models/workspace-member#capabilities-the-closed-vocabulary) to apply on accept. |
@@ -26,12 +26,12 @@ Acceptance is **identity-matched + verified-email, with no token** — see [Acce
 | `updatedAt` | `string` | Last-update timestamp. |
 
 <Note>
-  **[`GET /me/workspace-invites`](/v8/api-reference/workspaces/invitations/list-my-invites) returns an enriched variant of this shape.** Every other read of a `WorkspaceInvitation` (listing what a workspace has issued, creating one, resending one) is by a capability-holder who already has full reach on the workspace, so `workspaceId`/`invitedBy` as bare ids are enough. The my-invites read is different: it's addressed to the *invitee*, who otherwise has no reach on the workspace at all (a direct workspace read 404s for a non-member) or the inviter. So that one endpoint replaces `invitedBy` with a populated object and adds a sibling `workspace` field, so the invite can be rendered ("X invited you to *Y*") without a follow-up read per invitation:
+  **[`GET /me/workspace-invites`](/v8/api-reference/workspaces/invitations/list-my-invites) returns an enriched variant of this shape.** Every other read of a `WorkspaceInvitation` (listing what a workspace has issued, creating one, resending one) is by a capability-holder who already has full reach on the workspace, so `workspaceId`/`invitedById` as bare ids are enough. The my-invites read is different: it's addressed to the *invitee*, who otherwise has no reach on the workspace at all (a direct workspace read 404s for a non-member) or the inviter. So that one endpoint adds the populated inviter as `invitedBy` and a sibling `workspace` field, so the invite can be rendered ("X invited you to *Y*") without a follow-up read per invitation:
 
   | Property | Type | Description |
   |----------|------|-------------|
   | `workspace` | `{ id: string, name: string }` | The target workspace, embedded. `workspaceId` is still present alongside it. |
-  | `invitedBy` | `{ id: string, name: string \| null, username: string \| null, avatar: string \| null, reputation: number }` | The inviter, embedded in place of the bare id. |
+  | `invitedBy` | `{ id: string, name: string \| null, username: string \| null, avatar: string \| null, reputation: number }` | The inviter, embedded. `invitedById` is still present alongside it. |
 </Note>
 
 ## Lazy expiry

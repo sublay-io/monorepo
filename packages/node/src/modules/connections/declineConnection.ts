@@ -1,17 +1,22 @@
 import { SublayHttpClient } from "../../core/client";
-import { ConnectionActionResponse } from "../../interfaces/Connection";
+import { ConnectionRow } from "../../interfaces/Connection";
 
 export interface DeclineConnectionProps {
   connectionId: string;
   actingUserId: string;
 }
 
+/**
+ * PATCH /connections/:connectionId/decline — decline a request the caller
+ * received. Answers with the connection row (`user` = the requester, `type`
+ * `"received"`).
+ */
 export async function declineConnection(
   client: SublayHttpClient,
   data: DeclineConnectionProps
-): Promise<ConnectionActionResponse> {
+): Promise<ConnectionRow> {
   const { connectionId, actingUserId } = data;
-  const response = await client.projectInstance.patch<ConnectionActionResponse>(
+  const response = await client.projectInstance.patch<ConnectionRow>(
     `/connections/${connectionId}/decline`,
     { actingUserId }
   );

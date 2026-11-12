@@ -84,7 +84,7 @@ export function useTableRow<T extends TableRow = TableRow>(
     // row alongside `error`, so a detail view degrades to stale-plus-banner
     // rather than to a blank page, and one consumer's failed refetch cannot
     // blank another consumer's view of a perfectly healthy row.
-    const row = isRowGone(error) ? null : ((currentData?.row as T) ?? null);
+    const row = isRowGone(error) ? null : ((currentData as T | undefined) ?? null);
 
     return {
       row,

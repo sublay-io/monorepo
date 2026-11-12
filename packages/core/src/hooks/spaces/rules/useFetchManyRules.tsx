@@ -1,13 +1,13 @@
 import { useCallback } from "react";
 import useProject from "../../projects/useProject";
-import { FetchManyRulesResponse } from "../../../interfaces/models/Rule";
+import { Rule } from "../../../interfaces/models/Rule";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 
 export interface FetchManyRulesProps {
   spaceId: string;
 }
 
-function useFetchManyRules(): (props: FetchManyRulesProps) => Promise<FetchManyRulesResponse> {
+function useFetchManyRules(): (props: FetchManyRulesProps) => Promise<Rule[]> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -21,11 +21,11 @@ function useFetchManyRules(): (props: FetchManyRulesProps) => Promise<FetchManyR
         throw new Error("Please pass a spaceId");
       }
 
-      const response = await axios.get(
+      const response = await axios.get<{ data: Rule[]; count: number }>(
         `/${projectId}/spaces/${spaceId}/rules`
       );
 
-      return response.data as FetchManyRulesResponse;
+      return response.data.data;
     },
     [projectId, axios]
   );

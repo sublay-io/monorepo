@@ -6,19 +6,19 @@ icon: "plug"
 
 ## Overview
 
-Returns a function that removes a follow by its `followId`. Use this when you have the follow ID available (e.g., from a followers list response). If you only have the user ID, use `useUnfollowUserByUserId` instead.
+Returns a function that removes a follow by the follow record's ID. Use this when you have the follow ID available (the `id` of a [`FollowRow`](/v8/data-models/follow#followrow), e.g. from a following list). Only the follower can remove a follow. If you only have the user ID, use `useUnfollowUserByUserId` instead.
 
 ## Usage Example
 
 ```tsx
 import { useUnfollowByFollowId } from "@sublay/react-js";
 
-function RemoveFollowerButton({ followId }: { followId: string }) {
+function UnfollowButton({ followId }: { followId: string }) {
   const unfollowByFollowId = useUnfollowByFollowId();
 
   return (
     <button onClick={() => unfollowByFollowId({ followId })}>
-      Remove
+      Unfollow
     </button>
   );
 }
@@ -29,7 +29,7 @@ function RemoveFollowerButton({ followId }: { followId: string }) {
 The hook returns a function. That function accepts:
 
 <ParamField path="followId" type="string" required>
-  The ID of the follow record to delete.
+  The ID of the follow record to delete (a `FollowRow`'s `id`).
 </ParamField>
 
 ## Returns
@@ -39,4 +39,4 @@ The function returns `Promise<void>`.
 ## Related
 
 - [useUnfollowUserByUserId](/v8/hooks/follows/use-unfollow-user-by-user-id) — unfollow by user ID instead
-- [useFetchFollowers](/v8/hooks/follows/use-fetch-followers) — returns `followId` in each follower entry
+- [useFetchFollowing](/v8/hooks/follows/use-fetch-following) — each entry's `id` is the follow record's ID

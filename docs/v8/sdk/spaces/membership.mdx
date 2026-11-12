@@ -39,8 +39,8 @@ const { data, pagination } = await fetchMembers({ spaceId, page: 1, limit: 20 })
 
 // All admins + moderators (no pagination)
 const fetchTeam = useFetchSpaceTeam();
-const { data } = await fetchTeam({ spaceId });
-// data: SpaceMemberWithUser[]
+const team = await fetchTeam({ spaceId });
+// team: SpaceMemberWithUser[]
 ```
 
 Both lists are open to anyone who can read the space (its `memberPermissions.canRead`). A members-only space, or a space under one, answers `403 space/members-access-denied` to a user who isn't an active member of that members-only space or of a space between it and this one.
@@ -54,8 +54,10 @@ import { useCheckMyMembership } from "@sublay/react-js";
 
 const checkMembership = useCheckMyMembership();
 const result = await checkMembership({ spaceId });
-// result: { isMember, role, status, joinedAt, permissions }
+// result: { isMember, role?, status?, joinedAt?, permissions }
 ```
+
+`role` and `joinedAt` are present only for an active member, and `status` only when the user has a membership record; a field that doesn't apply is left out rather than sent as `null`.
 
 A user with a membership in the space gets it back whatever its status (`pending`, `banned`, `rejected`), so a banned user learns they are banned. A user with no membership in a space they can't see gets `404 space/not-found`. `permissions` is the same calculation as a fetched space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions).
 

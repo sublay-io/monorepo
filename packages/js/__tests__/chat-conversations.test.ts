@@ -218,14 +218,24 @@ describe("js-sdk chat conversations — response mapping", () => {
     expect(result).toEqual(conversation);
   });
 
-  it("createDirectConversation returns the (found-or-created) direct Conversation", async () => {
+  it("createDirectConversation reports created: true on 201", async () => {
     const { client, projectInstance } = makeClient();
     const conversation = { id: "c2", type: "direct", name: null };
-    projectInstance.post.mockResolvedValueOnce({ data: conversation });
+    projectInstance.post.mockResolvedValueOnce({ data: conversation, status: 201 });
 
     const result = await createDirectConversation(client, { userId: "target1" });
 
-    expect(result).toEqual(conversation);
+    expect(result).toEqual({ conversation, created: true });
+  });
+
+  it("createDirectConversation reports created: false on 200 (existing conversation)", async () => {
+    const { client, projectInstance } = makeClient();
+    const conversation = { id: "c2", type: "direct", name: null };
+    projectInstance.post.mockResolvedValueOnce({ data: conversation, status: 200 });
+
+    const result = await createDirectConversation(client, { userId: "target1" });
+
+    expect(result).toEqual({ conversation, created: false });
   });
 
   it("getConversation returns the Conversation", async () => {

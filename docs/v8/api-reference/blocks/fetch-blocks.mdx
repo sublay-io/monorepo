@@ -33,12 +33,12 @@ Returns a paginated list of the users the acting user has blocked (their **outbo
 On success, returns HTTP `200` with a paginated response:
 
 <ResponseField name="data" type="array">
-  Array of block entries.
+  Array of [block rows](/v8/data-models/block#blockrow).
   <Expandable title="item properties">
     <ResponseField name="id" type="string">
       ID of the block record.
     </ResponseField>
-    <ResponseField name="blockedUser" type="object">
+    <ResponseField name="user" type="object">
       Public profile of the blocked user. Sensitive fields (email, hash, salt, secureMetadata, etc.) are excluded. May be `null` if the user is unavailable.
     </ResponseField>
     <ResponseField name="createdAt" type="string">

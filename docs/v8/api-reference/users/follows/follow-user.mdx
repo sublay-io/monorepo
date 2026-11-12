@@ -24,18 +24,14 @@ Creates a follow relationship from the authenticated user to the specified user.
 
 ## Response
 
-On success, returns HTTP `201` with the created follow record:
+On success, returns HTTP `201` with the created [follow row](/v8/data-models/follow#followrow):
 
 <ResponseField name="id" type="string">
-  Unique follow record ID (UUID).
+  ID of the follow record (UUID). Pass it to [Delete Follow](/v8/api-reference/follows/delete-follow) to remove the follow.
 </ResponseField>
 
-<ResponseField name="followerId" type="string">
-  ID of the user who followed (the authenticated user).
-</ResponseField>
-
-<ResponseField name="followedId" type="string">
-  ID of the user being followed.
+<ResponseField name="user" type="object">
+  Public profile of the followed user (the user in the path). Sensitive fields (email, hash, secureMetadata, etc.) are excluded.
 </ResponseField>
 
 <ResponseField name="createdAt" type="string">

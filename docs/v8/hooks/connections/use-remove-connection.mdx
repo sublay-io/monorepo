@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-Returns a function that deletes a connection record by its `connectionId`. This works for both withdrawing a pending sent request and disconnecting an established connection. The current user must be authenticated.
+Returns a function that deletes a connection record by its `connectionId`. It withdraws a pending request the current user sent, or disconnects an accepted connection (either user can). The current user must be authenticated.
 
 If you don't have the connection ID, use `useRemoveConnectionByUserId` instead.
 
@@ -36,9 +36,7 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-<ResponseField name="message" type="string">
-  A confirmation message.
-</ResponseField>
+A `Promise<void>`. It resolves with no value once the connection is removed (the server answers `204 No Content`), and rejects if the request fails.
 
 ## Related
 

@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { User } from "../../interfaces/User";
+import { FollowRow } from "../../interfaces/Follow";
 import { SpaceReputationUserParams } from "../../interfaces/SpaceReputation";
 import { UserSearchParams } from "../../interfaces/UserSearch";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
@@ -19,10 +19,11 @@ export interface FetchFollowersByUserIdProps
   limit?: number;
 }
 
+/** Each row is a follow whose `user` is the follower. */
 export async function fetchFollowersByUserId(
   client: SublayHttpClient,
   data: FetchFollowersByUserIdProps
-): Promise<PaginatedResponse<User>> {
+): Promise<PaginatedResponse<FollowRow>> {
   const {
     userId,
     spaceReputation,
@@ -30,7 +31,7 @@ export async function fetchFollowersByUserId(
     spaceReputationDescendants,
     ...rest
   } = data;
-  const response = await client.projectInstance.get<PaginatedResponse<User>>(
+  const response = await client.projectInstance.get<PaginatedResponse<FollowRow>>(
     `/users/${userId}/followers`,
     {
       params: {

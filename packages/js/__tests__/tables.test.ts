@@ -107,40 +107,40 @@ describe("js-sdk custom-table row ops — response mapping", () => {
     expect(result).toEqual(envelope);
   });
 
-  it("findOne unwraps `row` from the response", async () => {
+  it("findOne returns the bare row", async () => {
     const { client, projectInstance } = makeBaseClient();
     const row = { id: "id1", name: "x" };
-    projectInstance.get.mockResolvedValueOnce({ data: { row } });
+    projectInstance.get.mockResolvedValueOnce({ data: row });
 
     const result = await findOne(client, "Events", "id1");
 
     expect(result).toEqual(row);
   });
 
-  it("create unwraps `row` from the response", async () => {
+  it("create returns the bare row", async () => {
     const { client, projectInstance } = makeBaseClient();
     const row = { id: "id1", name: "x" };
-    projectInstance.post.mockResolvedValueOnce({ data: { row } });
+    projectInstance.post.mockResolvedValueOnce({ data: row });
 
     const result = await create(client, "Events", { name: "x" });
 
     expect(result).toEqual(row);
   });
 
-  it("bulkCreate unwraps `rows` from the response", async () => {
+  it("bulkCreate returns the { data } envelope of inserted rows", async () => {
     const { client, projectInstance } = makeBaseClient();
     const rows = [{ id: "id1" }, { id: "id2" }];
-    projectInstance.post.mockResolvedValueOnce({ data: { rows } });
+    projectInstance.post.mockResolvedValueOnce({ data: { data: rows } });
 
     const result = await bulkCreate(client, "Events", [{ name: "a" }, { name: "b" }]);
 
-    expect(result).toEqual(rows);
+    expect(result).toEqual({ data: rows });
   });
 
-  it("update unwraps `row` from the response", async () => {
+  it("update returns the bare row", async () => {
     const { client, projectInstance } = makeBaseClient();
     const row = { id: "id1", name: "y" };
-    projectInstance.patch.mockResolvedValueOnce({ data: { row } });
+    projectInstance.patch.mockResolvedValueOnce({ data: row });
 
     const result = await update(client, "Events", "id1", { name: "y" });
 
@@ -167,10 +167,10 @@ describe("js-sdk custom-table row ops — response mapping", () => {
     expect(result).toEqual(bulkDeleteResult);
   });
 
-  it("restore unwraps `row` from the response", async () => {
+  it("restore returns the bare row", async () => {
     const { client, projectInstance } = makeBaseClient();
     const row = { id: "id1", deletedAt: null };
-    projectInstance.post.mockResolvedValueOnce({ data: { row } });
+    projectInstance.post.mockResolvedValueOnce({ data: row });
 
     const result = await restore(client, "Events", "id1");
 

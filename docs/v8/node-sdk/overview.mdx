@@ -121,6 +121,10 @@ Where a method requires an acting user and you leave `actingUserId` out, the ser
   </Card>
 </CardGroup>
 
+## Return values
+
+Functions resolve to the server's response body as-is. Fetch-or-create functions ([`users.fetchOrCreateUserByForeignId`](/v8/node-sdk/users#fetchorcreateuserbyforeignid), [`entities.fetchOrCreateEntityByForeignId`](/v8/node-sdk/entities#fetchorcreateentitybyforeignid), [`chat.createDirectConversation`](/v8/node-sdk/chat#createdirectconversation)) resolve to `{ <record>, created }`, where `created` is `true` when the call created the record (HTTP `201`). Actions that are safe to repeat, such as adding a chat member, blocking a user or joining a space, are not fetch-or-create: they give the same response whether or not this call made the change.
+
 ## Paginated Responses
 
 Functions that return lists use a shared `PaginatedResponse<T>` shape:

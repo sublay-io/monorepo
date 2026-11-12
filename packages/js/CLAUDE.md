@@ -77,7 +77,7 @@ File-bearing requests use `FormData` and the shared helpers in [src/core/multipa
 
 ### Interfaces
 
-[src/interfaces/](src/interfaces/) holds the response/model types (Entity, Comment, User/AuthUser, Space, Conversation, ChatMessage, Follow/FollowListItem, Connection, Collection, Reaction, File, ImageProcessing, Report, AppNotification, OAuthIdentity, Mention, Rule, IPaginatedResponse, …), ported from `@sublay/node`. Reuse them; don't invent parallel types. Note `IPaginatedResponse` (`{ data, pagination: { page, pageSize, totalPages, totalItems, hasMore } }`) matches the server's `createPaginatedResponse` helper — but a few endpoints return bespoke shapes (cursor pagination, raw arrays, `{ data, pagination: { ...limit/total } }`), so confirm per endpoint.
+[src/interfaces/](src/interfaces/) holds the response/model types (Entity, Comment, User/AuthUser, Space, Conversation, ChatMessage, Follow (FollowRow), Block (BlockRow), Connection (ConnectionRow/AcceptedConnectionRow), Collection, Reaction, File, ImageProcessing, Report, AppNotification, OAuthIdentity, Mention, Rule, IPaginatedResponse, …), ported from `@sublay/node`. Reuse them; don't invent parallel types. Note `IPaginatedResponse` (`{ data, pagination: { page, pageSize, totalPages, totalItems, hasMore } }`) matches the server's `createPaginatedResponse` helper — but a few endpoints return bespoke shapes (cursor pagination, raw arrays, `{ data, pagination: { ...limit/total } }`), so confirm per endpoint.
 
 ## Modules (14 namespaces, `sublay.<module>.<fn>`)
 

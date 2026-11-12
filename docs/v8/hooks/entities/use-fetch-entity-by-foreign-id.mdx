@@ -10,7 +10,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchEntityByForeignId` returns a function that fetches an entity using the foreign ID from your system. Optionally auto-creates the entity if it does not yet exist.
+`useFetchEntityByForeignId` returns a function that fetches an entity using the foreign ID from your system. It only reads: an entity that doesn't exist rejects with a `404`. To create the entity when it is missing, use [`useFetchOrCreateEntityByForeignId`](/v8/hooks/entities/use-fetch-or-create-entity-by-foreign-id).
 
 ## Usage Example
 
@@ -21,10 +21,7 @@ function ArticleSocial({ articleId }: { articleId: string }) {
   const fetchEntity = useFetchEntityByForeignId();
 
   const load = async () => {
-    const entity = await fetchEntity({
-      foreignId: articleId,
-      createIfNotFound: true,
-    });
+    const entity = await fetchEntity({ foreignId: articleId });
     console.log(entity);
   };
 
@@ -36,10 +33,6 @@ function ArticleSocial({ articleId }: { articleId: string }) {
 
 <ParamField path="foreignId" type="string" required>
   The foreign ID to look up. This is the identifier from your own system.
-</ParamField>
-
-<ParamField path="createIfNotFound" type="boolean">
-  If `true`, automatically creates a new entity with this foreign ID when one does not exist. The new entity has no author, so the project's **Who can create entities without an author** setting decides who may create it: everyone by default. When it is set to **Signed-in users only** (a visitor with no session is refused) or **No one from the client** (only a service key may create it), a refused caller gets `403 entity/authorless-creation-not-allowed` and nothing is created. See [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id).
 </ParamField>
 
 <ParamField path="include" type="EntityIncludeParam">
@@ -57,5 +50,5 @@ function ArticleSocial({ articleId }: { articleId: string }) {
 ## Returns
 
 <ResponseField name="Entity" type="Entity">
-  The fetched (or newly created) entity. See [Entity data model](/v8/data-models/entity).
+  The fetched entity. See [Entity data model](/v8/data-models/entity).
 </ResponseField>

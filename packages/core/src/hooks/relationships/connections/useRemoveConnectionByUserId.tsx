@@ -2,19 +2,18 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
-import { RemoveConnectionByUserIdResponse } from "../../../interfaces/models/Connection";
 
 export interface RemoveConnectionByUserIdProps {
   userId: string;
 }
 
-function useRemoveConnectionByUserId(): (props: RemoveConnectionByUserIdProps) => Promise<RemoveConnectionByUserIdResponse> {
+function useRemoveConnectionByUserId(): (props: RemoveConnectionByUserIdProps) => Promise<void> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
 
   const removeConnectionByUserId = useCallback(
-    async (props: RemoveConnectionByUserIdProps): Promise<RemoveConnectionByUserIdResponse> => {
+    async (props: RemoveConnectionByUserIdProps): Promise<void> => {
       const { userId } = props;
       if (!projectId) {
         throw new Error("No project specified");
@@ -32,11 +31,11 @@ function useRemoveConnectionByUserId(): (props: RemoveConnectionByUserIdProps) =
         throw new Error("Cannot disconnect from yourself");
       }
 
-      const response = await axios.delete(
-        `/${projectId}/users/${userId}/connection`
-      );
-
-      return response.data as RemoveConnectionByUserIdResponse;
+      // One call for every case, answered 204 with no body: a request
+      // `userId` sent the caller is declined (the row stays, `declined`); the
+      // caller's own pending request is withdrawn and an accepted connection
+      // removed (the row is deleted).
+      await axios.delete(`/${projectId}/users/${userId}/connection`);
     },
     [axios, projectId, user]
   );

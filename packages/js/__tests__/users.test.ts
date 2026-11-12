@@ -385,14 +385,14 @@ describe("js-sdk users — response mapping", () => {
     expect(result).toEqual(user);
   });
 
-  it("fetchUserSuggestions returns the array of Users", async () => {
+  it("fetchUserSuggestions returns the { data } envelope", async () => {
     const { client, projectInstance } = makeClient();
-    const users = [{ id: "u1" }, { id: "u2" }];
-    projectInstance.get.mockResolvedValueOnce({ data: users });
+    const body = { data: [{ id: "u1" }, { id: "u2" }] };
+    projectInstance.get.mockResolvedValueOnce({ data: body });
 
     const result = await fetchUserSuggestions(client, { query: "a" });
 
-    expect(result).toEqual(users);
+    expect(result).toEqual(body);
   });
 
   it("checkUsernameAvailability returns the availability wrapper", async () => {
@@ -433,7 +433,7 @@ describe("js-sdk users — response mapping", () => {
   it("fetchFollowersByUserId returns the full PaginatedResponse envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
-      data: [{ id: "f1", user: { id: "u2" } }],
+      data: [{ id: "f1", user: { id: "u2" }, createdAt: "now" }],
       pagination: {
         page: 1,
         pageSize: 20,
@@ -461,7 +461,7 @@ describe("js-sdk users — response mapping", () => {
   it("fetchFollowingByUserId returns the full PaginatedResponse envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
-      data: [{ id: "f1", user: { id: "u2" } }],
+      data: [{ id: "f1", user: { id: "u2" }, createdAt: "now" }],
       pagination: {
         page: 1,
         pageSize: 20,
@@ -489,7 +489,9 @@ describe("js-sdk users — response mapping", () => {
   it("fetchConnectionsByUserId returns the full PaginatedResponse envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
-      data: [{ id: "c1", connectedUser: { id: "u2" }, connectedAt: "now" }],
+      data: [
+        { id: "c1", user: { id: "u2" }, status: "accepted", createdAt: "then", respondedAt: "now" },
+      ],
       pagination: {
         page: 1,
         pageSize: 20,
@@ -516,10 +518,10 @@ describe("js-sdk users — response mapping", () => {
     expect(result).toEqual({ count: 2 });
   });
 
-  it("createFollow returns the created Follow", async () => {
+  it("createFollow returns the follow row", async () => {
     const { client, projectInstance } = makeClient();
-    const follow = { id: "fol1", createdAt: "now" };
-    projectInstance.post.mockResolvedValueOnce({ data: follow });
+    const follow = { id: "fol1", user: { id: "target1", username: "t" }, createdAt: "now" };
+    projectInstance.post.mockResolvedValueOnce({ status: 201, data: follow });
 
     const result = await createFollow(client, { userId: "target1" });
 
@@ -537,7 +539,10 @@ describe("js-sdk users — response mapping", () => {
 
   it("fetchFollowStatus returns the follow-status wrapper", async () => {
     const { client, projectInstance } = makeClient();
-    const status = { isFollowing: true, followId: "fol1", followedAt: "now" };
+    const status = {
+      isFollowing: true,
+      follow: { id: "fol1", user: { id: "target1", username: "t" }, createdAt: "now" },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: status });
 
     const result = await fetchFollowStatus(client, { userId: "target1" });
@@ -545,10 +550,18 @@ describe("js-sdk users — response mapping", () => {
     expect(result).toEqual(status);
   });
 
-  it("requestConnection returns the created connection-request response", async () => {
+  it("requestConnection returns the pending connection row", async () => {
     const { client, projectInstance } = makeClient();
-    const conn = { id: "conn1", status: "pending", createdAt: "now" };
-    projectInstance.post.mockResolvedValueOnce({ data: conn });
+    const conn = {
+      id: "conn1",
+      user: { id: "target1", username: "t" },
+      type: "sent",
+      message: null,
+      status: "pending",
+      createdAt: "now",
+      respondedAt: null,
+    };
+    projectInstance.post.mockResolvedValueOnce({ status: 201, data: conn });
 
     const result = await requestConnection(client, { userId: "target1" });
 
@@ -557,7 +570,18 @@ describe("js-sdk users — response mapping", () => {
 
   it("fetchConnectionStatus returns the connection-status union", async () => {
     const { client, projectInstance } = makeClient();
-    const status = { status: "connected", connectionId: "conn1", connectedAt: "now", requestedAt: "earlier" };
+    const status = {
+      isConnected: true,
+      connection: {
+        id: "conn1",
+        user: { id: "target1", username: "t" },
+        type: "sent",
+        message: null,
+        status: "accepted",
+        createdAt: "earlier",
+        respondedAt: "now",
+      },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: status });
 
     const result = await fetchConnectionStatus(client, { userId: "target1" });
@@ -565,27 +589,21 @@ describe("js-sdk users — response mapping", () => {
     expect(result).toEqual(status);
   });
 
-  it("removeConnectionByUserId returns the removal-action response", async () => {
+  it("removeConnectionByUserId resolves to undefined on the 204 empty body", async () => {
     const { client, projectInstance } = makeClient();
-    const removal = { id: "conn1", status: "declined", action: "decline" as const };
-    projectInstance.delete.mockResolvedValueOnce({ data: removal });
+    projectInstance.delete.mockResolvedValueOnce({ status: 204, data: "" });
 
     const result = await removeConnectionByUserId(client, {
       userId: "target1",
     });
 
-    expect(result).toEqual(removal);
+    expect(result).toBeUndefined();
   });
 
-  it("createBlock returns the created block", async () => {
+  it("createBlock returns the block row", async () => {
     const { client, projectInstance } = makeClient();
-    const block = {
-      id: "blk1",
-      blockerId: "me",
-      blockedId: "target1",
-      createdAt: "now",
-    };
-    projectInstance.post.mockResolvedValueOnce({ data: block });
+    const block = { id: "blk1", user: { id: "target1", username: "t" }, createdAt: "now" };
+    projectInstance.post.mockResolvedValueOnce({ status: 201, data: block });
 
     const result = await createBlock(client, { userId: "target1" });
 
@@ -603,7 +621,10 @@ describe("js-sdk users — response mapping", () => {
 
   it("fetchBlockStatus returns the outbound-only block-status wrapper", async () => {
     const { client, projectInstance } = makeClient();
-    const status = { blocked: true, blockId: "blk1", createdAt: "now" };
+    const status = {
+      isBlocking: true,
+      block: { id: "blk1", user: { id: "target1", username: "t" }, createdAt: "now" },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: status });
 
     const result = await fetchBlockStatus(client, { userId: "target1" });
@@ -614,7 +635,7 @@ describe("js-sdk users — response mapping", () => {
   it("fetchBlockedUsers returns the full PaginatedResponse envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
-      data: [{ id: "blk1", blockedUser: { id: "u2" }, createdAt: "now" }],
+      data: [{ id: "blk1", user: { id: "u2" }, createdAt: "now" }],
       pagination: {
         page: 1,
         pageSize: 20,

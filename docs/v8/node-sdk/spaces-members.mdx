@@ -74,7 +74,7 @@ const result = await sublay.spaces.checkMyMembership({
   The user the service key acts as, whose membership is checked.
 </ParamField>
 
-**Returns** — `Promise<CheckMyMembershipResponse>`. Its `permissions` come from the same calculation as a fetched space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions).
+**Returns** — `Promise<CheckMyMembershipResponse>`: `{ isMember, role?, status?, joinedAt?, permissions }`. `role` and `joinedAt` are present only when `isMember` is `true`, and `status` only when a membership record exists; a field that doesn't apply is left out, never `null`. Its `permissions` come from the same calculation as a fetched space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions).
 
 ---
 

@@ -113,6 +113,14 @@ function bindModule<
 
 export type { ClientConfig, AuthTokens } from "./core/client";
 export type {
+  FetchOrCreateEntityByForeignIdProps,
+  FetchOrCreateEntityByForeignIdResult,
+} from "./modules/entities/fetchOrCreateEntityByForeignId";
+export type {
+  CreateDirectConversationProps,
+  CreateDirectConversationResult,
+} from "./modules/chat/createDirectConversation";
+export type {
   PaginatedResponse,
   PaginationMetadata,
   CursorPaginatedResponse,
@@ -243,4 +251,13 @@ export type {
   BulkDeleteProps,
   DeleteResult,
   BulkDeleteResult,
+  BulkCreateResult,
 } from "./interfaces/Table";
+export type { FollowRow, FollowStatus } from "./interfaces/Follow";
+export type { BlockRow, BlockStatus } from "./interfaces/Block";
+export type {
+  AcceptedConnectionRow,
+  ConnectionRow,
+  ConnectionRowStatus,
+  ConnectionStatus,
+} from "./interfaces/Connection";

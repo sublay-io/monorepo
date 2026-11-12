@@ -5,12 +5,20 @@ export interface FetchSubCollectionsProps {
   collectionId: string;
 }
 
+export interface FetchSubCollectionsResponse {
+  data: Collection[];
+}
+
+/**
+ * GET /collections/:collectionId/sub-collections — the collection's direct
+ * children, oldest first (ties broken on id), each with its `entityCount`.
+ */
 export async function fetchSubCollections(
   client: SublayHttpClient,
   data: FetchSubCollectionsProps
-): Promise<Collection[]> {
+): Promise<FetchSubCollectionsResponse> {
   const { collectionId } = data;
-  const response = await client.projectInstance.get<Collection[]>(
+  const response = await client.projectInstance.get<FetchSubCollectionsResponse>(
     `/collections/${collectionId}/sub-collections`
   );
   return response.data;

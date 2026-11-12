@@ -15,20 +15,11 @@ export { default as useUnfollowUserByUserId } from "./useUnfollowUserByUserId";
 export type { FollowUserProps } from "./useFollowUser";
 export type { UnfollowByFollowIdProps } from "./useUnfollowByFollowId";
 export type { UnfollowUserByUserIdProps } from "./useUnfollowUserByUserId";
-export type {
-  FetchFollowStatusProps,
-  FollowStatusResponse,
-} from "./useFetchFollowStatus";
-export type {
-  FollowerWithFollowInfo,
-  FetchFollowersParams,
-} from "./useFetchFollowers";
+export type { FetchFollowStatusProps } from "./useFetchFollowStatus";
+export type { FetchFollowersParams } from "./useFetchFollowers";
 export type { FetchFollowersByUserIdParams } from "./useFetchFollowersByUserId";
 export type { FetchFollowersCountByUserIdProps } from "./useFetchFollowersCountByUserId";
-export type {
-  FollowingWithFollowInfo,
-  FetchFollowingParams,
-} from "./useFetchFollowing";
+export type { FetchFollowingParams } from "./useFetchFollowing";
 export type { FetchFollowingByUserIdParams } from "./useFetchFollowingByUserId";
 export type { FetchFollowingCountByUserIdProps } from "./useFetchFollowingCountByUserId";
 export type { UseFollowToggleProps } from "./useFollowManager";

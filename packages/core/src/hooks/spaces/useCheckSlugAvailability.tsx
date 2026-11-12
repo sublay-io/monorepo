@@ -6,7 +6,7 @@ export interface CheckSlugAvailabilityProps {
   slug: string;
 }
 
-function useCheckSlugAvailability(): (props: CheckSlugAvailabilityProps) => Promise<{ available: boolean }> {
+function useCheckSlugAvailability(): (props: CheckSlugAvailabilityProps) => Promise<boolean> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -20,13 +20,11 @@ function useCheckSlugAvailability(): (props: CheckSlugAvailabilityProps) => Prom
         throw new Error("Please specify a slug");
       }
 
-      const response = await axios.get(
+      const response = await axios.get<{ available: boolean }>(
         `/${projectId}/spaces/check-slug?slug=${slug}`
       );
 
-      return response.data as {
-        available: boolean;
-      };
+      return response.data.available;
     },
     [projectId, axios]
   );

@@ -104,7 +104,8 @@ export interface WorkspaceMember {
 export interface WorkspaceInvitation {
   id: string;
   workspaceId: string;
-  invitedBy: string;
+  /** The inviter's user id. */
+  invitedById: string;
   userId: string | null;
   email: string | null;
   capabilities: string[];
@@ -130,9 +131,9 @@ export interface WorkspaceInvitationInviter {
 // workspace (a direct workspace read 404s for a non-member) or the inviter,
 // so both are embedded directly on the row instead of requiring a follow-up
 // read per invitation.
-export interface MyWorkspaceInvitation
-  extends Omit<WorkspaceInvitation, "invitedBy"> {
+export interface MyWorkspaceInvitation extends WorkspaceInvitation {
   workspace: { id: string; name: string };
+  /** The inviter (their id is also in `invitedById`). */
   invitedBy: WorkspaceInvitationInviter;
 }
 

@@ -39,10 +39,26 @@ export interface CreateMessageReportProps {
   details?: string;
 }
 
+/**
+ * The caller's own report, as `POST /reports` returns it: 201 when this call
+ * files it (including joining a target someone else already reported), 200
+ * with the same record when the caller already has an open report on the
+ * target. It is the reporter's submission only — never the shared,
+ * moderator-facing report.
+ */
+export interface CreateReportResponse {
+  id: string;
+  targetId: string;
+  targetType: ReportTargetType;
+  reason: ReportReasonKey;
+  details: string | null;
+  createdAt: string;
+}
+
 function useCreateReport({ type }: UseCreateReportProps):
-  | ((props: CreateCommentReportProps) => Promise<void>)
-  | ((props: CreateEntityReportProps) => Promise<void>)
-  | ((props: CreateMessageReportProps) => Promise<void>) {
+  | ((props: CreateCommentReportProps) => Promise<CreateReportResponse>)
+  | ((props: CreateEntityReportProps) => Promise<CreateReportResponse>)
+  | ((props: CreateMessageReportProps) => Promise<CreateReportResponse>) {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
@@ -52,7 +68,7 @@ function useCreateReport({ type }: UseCreateReportProps):
     targetType,
     reason,
     details,
-  }: CreateReportProps) => {
+  }: CreateReportProps): Promise<CreateReportResponse> => {
     if (!projectId) {
       throw new Error("Project ID is required");
     }
@@ -61,7 +77,7 @@ function useCreateReport({ type }: UseCreateReportProps):
       throw new Error("No user is logged in");
     }
 
-    await axios.post(
+    const response = await axios.post<CreateReportResponse>(
       `/${projectId}/reports`,
       {
         targetId,
@@ -70,6 +86,7 @@ function useCreateReport({ type }: UseCreateReportProps):
         details,
       },
     );
+    return response.data;
   };
 
   const createCommentReport = async ({
@@ -77,7 +94,7 @@ function useCreateReport({ type }: UseCreateReportProps):
     reason,
     details,
   }: CreateCommentReportProps) => {
-    await createReport({
+    return createReport({
       targetId,
       targetType: "comment",
       reason,
@@ -90,7 +107,7 @@ function useCreateReport({ type }: UseCreateReportProps):
     reason,
     details,
   }: CreateEntityReportProps) => {
-    await createReport({
+    return createReport({
       targetId,
       targetType: "entity",
       reason,
@@ -103,7 +120,7 @@ function useCreateReport({ type }: UseCreateReportProps):
     reason,
     details,
   }: CreateMessageReportProps) => {
-    await createReport({
+    return createReport({
       targetId,
       targetType: "message",
       reason,

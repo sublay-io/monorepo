@@ -60,15 +60,6 @@ export const appNotificationsApi = baseApi.injectEndpoints({
         url: `/${projectId}/app-notifications/${notificationId}/mark-as-read`,
         method: "PATCH",
         body: {},
-        responseHandler: async (response) => {
-          // Handle text responses (like "OK" from res.sendStatus(200))
-          const contentType = response.headers.get("content-type") || "";
-          if (contentType.includes("application/json")) {
-            return response.json();
-          }
-          // For text responses, just return void since we don't need the content
-          return response.text().then(() => undefined);
-        },
       }),
       // Optimistically update the cache
       async onQueryStarted(
@@ -114,6 +105,8 @@ export const appNotificationsApi = baseApi.injectEndpoints({
         url: `/${projectId}/app-notifications/count`,
         method: "GET",
       }),
+      // The server answers `{ count }`; the cache keeps the number.
+      transformResponse: (response: { count: number }) => response.count,
       providesTags: (result, error, { projectId }) => [
         { type: "AppNotification", id: `${projectId}-COUNT` },
       ],

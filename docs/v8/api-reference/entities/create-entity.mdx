@@ -129,7 +129,7 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
 
 ## Response
 
-Returns the created [Entity](/v8/data-models/entity) object. When files are uploaded, the entity includes a `files` array with signed URLs for each attachment.
+Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. When files are uploaded, the entity includes a `files` array with signed URLs for each attachment.
 
 <Note>
   Draft entities are invisible to everyone but their author until published. Use [Fetch Drafts](/v8/api-reference/entities/fetch-drafts) to list an author's unpublished drafts.

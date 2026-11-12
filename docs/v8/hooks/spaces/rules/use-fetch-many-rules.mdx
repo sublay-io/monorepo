@@ -19,7 +19,7 @@ function RulesList({ spaceId }: { spaceId: string }) {
   const [rules, setRules] = useState([]);
 
   useEffect(() => {
-    fetchRules({ spaceId }).then(({ data }) => setRules(data));
+    fetchRules({ spaceId }).then(setRules);
   }, [spaceId]);
 
   return (
@@ -40,12 +40,6 @@ function RulesList({ spaceId }: { spaceId: string }) {
 
 ## Returns
 
-<ResponseField name="data" type="Rule[]">
-  Array of rule objects ordered by their `order` field.
-</ResponseField>
-
-<ResponseField name="count" type="number">
-  Total number of rules.
-</ResponseField>
+Returns a `Rule[]` array: the space's rules, ordered by their `order` field.
 
 For the Rule data shape, see [Rules guide](/v8/sdk/spaces/rules).

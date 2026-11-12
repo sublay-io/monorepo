@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeAuthUser } from "../../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks, makeAuthUser, makeUser } from "../../../test-utils";
 import useFetchBlockStatus from "./useFetchBlockStatus";
 
 afterEach(() => {
@@ -13,22 +13,18 @@ describe("useFetchBlockStatus", () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchBlockStatus(), { user });
 
-    axiosPrivate.mockResponse("get", {
-      blocked: true,
-      blockId: "block-1",
-      createdAt: "2024-01-01T00:00:00.000Z",
-    });
+    const status = {
+      isBlocking: true,
+      block: { id: "block-1", user: makeUser({ id: "user-2" }), createdAt: "2024-01-01T00:00:00.000Z" },
+    };
+    axiosPrivate.mockResponse("get", status);
 
     let returned;
     await act(async () => {
       returned = await result.current({ userId: "user-2" });
     });
 
-    expect(returned).toEqual({
-      blocked: true,
-      blockId: "block-1",
-      createdAt: "2024-01-01T00:00:00.000Z",
-    });
+    expect(returned).toEqual(status);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/users/user-2/block");

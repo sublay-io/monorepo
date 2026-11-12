@@ -1,17 +1,22 @@
 import { SublayHttpClient } from "../../core/client";
-import { ConnectionActionResponse } from "../../interfaces/Connection";
+import { ConnectionRow } from "../../interfaces/Connection";
 
 export interface AcceptConnectionProps {
   connectionId: string;
   actingUserId: string;
 }
 
+/**
+ * PATCH /connections/:connectionId/accept — accept a request the caller
+ * received. Answers with the connection row (`user` = the requester, `type`
+ * `"received"`).
+ */
 export async function acceptConnection(
   client: SublayHttpClient,
   data: AcceptConnectionProps
-): Promise<ConnectionActionResponse> {
+): Promise<ConnectionRow> {
   const { connectionId, actingUserId } = data;
-  const response = await client.projectInstance.patch<ConnectionActionResponse>(
+  const response = await client.projectInstance.patch<ConnectionRow>(
     `/connections/${connectionId}/accept`,
     { actingUserId }
   );

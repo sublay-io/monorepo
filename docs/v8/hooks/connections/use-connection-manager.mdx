@@ -36,16 +36,16 @@ function ConnectionControls({ userId }: { userId: string }) {
 
 ## Returns
 
-<ResponseField name="connectionStatus" type="ConnectionStatus">
-  One of: `"none"` | `"pending-sent"` | `"pending-received"` | `"connected"` | `"declined-sent"` | `"declined-received"`.
+<ResponseField name="connectionStatus" type="ConnectionState">
+  One of: `"none"` | `"pending-sent"` | `"pending-received"` | `"accepted"` | `"declined-sent"` | `"declined-received"`. It is the connection's `status`, joined with its `type` while pending or declined (`"pending-sent"`: the current user sent the request), or `"none"` when no connection exists.
 </ResponseField>
 
 <ResponseField name="connectionId" type="string | null">
-  The active connection record ID, or `null` if there is no connection.
+  The connection record ID, or `null` if there is no connection.
 </ResponseField>
 
-<ResponseField name="connectionData" type="object">
-  Metadata about the current connection state (timestamps, direction). See [useConnectionManager SDK page](/v8/sdk/relationships/use-connection-manager) for full shape.
+<ResponseField name="connection" type="ConnectionRow | null">
+  The connection record seen from the current user's side (`user` is the target user), or `null` if there is none. See [ConnectionRow](/v8/data-models/connection#connectionrow).
 </ResponseField>
 
 <ResponseField name="isLoading" type="boolean">
@@ -53,7 +53,7 @@ function ConnectionControls({ userId }: { userId: string }) {
 </ResponseField>
 
 <ResponseField name="sendConnectionRequest" type="(message?: string) => Promise<void>">
-  Sends a connection request. Only active when status is `"none"` or `"declined-received"`.
+  Sends a connection request. Only active when status is `"none"` or `"declined-received"`; the server rejects a new request while a declined one exists between the two users (`409 connection/request-declined`), so in `"declined-received"` the call fails.
 </ResponseField>
 
 <ResponseField name="acceptConnectionRequest" type="() => Promise<void>">
@@ -69,11 +69,11 @@ function ConnectionControls({ userId }: { userId: string }) {
 </ResponseField>
 
 <ResponseField name="disconnectUser" type="() => Promise<void>">
-  Removes an established connection. Only active when status is `"connected"`.
+  Removes an accepted connection. Only active when status is `"accepted"`.
 </ResponseField>
 
 <ResponseField name="removeConnectionSmart" type="() => Promise<void>">
-  Removes the connection in any state using the user ID (withdraw, disconnect, or decline depending on state).
+  Acts on the connection by user ID, whatever its state: withdraws a sent request, declines a received one, or disconnects an accepted connection. Does nothing when status is `"none"`, `"declined-sent"` or `"declined-received"`. After declining a received request it re-reads the status, so `connection` holds the declined record.
 </ResponseField>
 
 <ResponseField name="refreshConnectionStatus" type="() => Promise<void>">

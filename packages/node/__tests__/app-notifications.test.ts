@@ -52,12 +52,12 @@ describe("node-sdk appNotifications — response mapping", () => {
     );
   });
 
-  it("countUnreadNotifications returns response.data as a raw number", async () => {
+  it("countUnreadNotifications returns the { count } body", async () => {
     const { client, projectInstance } = makeClient();
-    projectInstance.get.mockResolvedValueOnce({ data: 3 });
+    projectInstance.get.mockResolvedValueOnce({ data: { count: 3 } });
     await expect(
       countUnreadNotifications(client, { actingUserId: "u1" }),
-    ).resolves.toBe(3);
+    ).resolves.toEqual({ count: 3 });
   });
 
   it("markNotificationAsRead resolves to undefined", async () => {

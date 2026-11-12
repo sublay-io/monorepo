@@ -2,18 +2,13 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
+import type { FollowStatus } from "../../../interfaces/models/Follow";
 
 export interface FetchFollowStatusProps {
   userId: string;
 }
 
-export interface FollowStatusResponse {
-  isFollowing: boolean;
-  followId?: string;
-  followedAt?: string;
-}
-
-function useFetchFollowStatus(): (props: FetchFollowStatusProps) => Promise<FollowStatusResponse> {
+function useFetchFollowStatus(): (props: FetchFollowStatusProps) => Promise<FollowStatus> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
@@ -37,8 +32,10 @@ function useFetchFollowStatus(): (props: FetchFollowStatusProps) => Promise<Foll
         throw new Error("Users don't follow themselves");
       }
 
-      const response = await axios.get(`/${projectId}/users/${userId}/follow`);
-      return response.data as FollowStatusResponse;
+      const response = await axios.get<FollowStatus>(
+        `/${projectId}/users/${userId}/follow`
+      );
+      return response.data;
     },
     [axios, projectId, user?.id]
   );

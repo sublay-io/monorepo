@@ -14,7 +14,7 @@ This page covers the moderation and administrative functions on the `spaces` mod
 Resolves a report filed against an entity in a space by applying one or more moderation actions.
 
 ```typescript
-const result = await sublay.spaces.handleEntityReport({
+await sublay.spaces.handleEntityReport({
   spaceId: "spc_abc123",
   actingUserId: "usr_mod123",
   reportId: "rpt_xyz789",
@@ -53,7 +53,7 @@ const result = await sublay.spaces.handleEntityReport({
   Reason for the ban, kept in the space's ban log. Required when `actions` includes `ban-user`.
 </ParamField>
 
-**Returns** — `Promise<HandleReportResponse>`
+**Returns** — `Promise<void>`. It resolves with no value once the actions are applied.
 
 ---
 
@@ -62,7 +62,7 @@ const result = await sublay.spaces.handleEntityReport({
 Resolves a report filed against a comment in a space by applying one or more moderation actions.
 
 ```typescript
-const result = await sublay.spaces.handleCommentReport({
+await sublay.spaces.handleCommentReport({
   spaceId: "spc_abc123",
   actingUserId: "usr_mod123",
   reportId: "rpt_abc456",
@@ -100,7 +100,7 @@ const result = await sublay.spaces.handleCommentReport({
   Reason for the ban, kept in the space's ban log. Required when `actions` includes `ban-user`.
 </ParamField>
 
-**Returns** — `Promise<HandleReportResponse>`
+**Returns** — `Promise<void>`. It resolves with no value once the actions are applied.
 
 ---
 

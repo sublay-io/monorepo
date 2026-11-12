@@ -1,12 +1,13 @@
 import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
+import type { FollowRow } from "../../../interfaces/models/Follow";
 
 export interface FollowUserProps {
   userId: string;
 }
 
-function useFollowUser(): (props: FollowUserProps) => Promise<void> {
+function useFollowUser(): (props: FollowUserProps) => Promise<FollowRow> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
 
@@ -21,10 +22,12 @@ function useFollowUser(): (props: FollowUserProps) => Promise<void> {
         throw new Error("No user ID was provided");
       }
 
-      await axios.post(
+      // `user` on the returned row is the followed user.
+      const response = await axios.post<FollowRow>(
         `/${projectId}/users/${userId}/follow`,
         {}
       );
+      return response.data;
     },
     [axios, projectId]
   );

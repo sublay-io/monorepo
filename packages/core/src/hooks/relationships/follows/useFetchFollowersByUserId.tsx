@@ -1,18 +1,12 @@
 import { useCallback } from "react";
 import { buildSearchParams } from "../../../utils/searchParams";
 import useProject from "../../projects/useProject";
-import type { User } from "../../../interfaces/models/User";
+import type { FollowRow } from "../../../interfaces/models/Follow";
 import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import { SpaceReputationUserParams } from "../../../interfaces/SpaceReputation";
 import { UserSearchParams } from "../../../interfaces/UserSearch";
 import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
-
-export interface FollowerWithFollowInfo {
-  followId: string;
-  user: User;
-  followedAt: string;
-}
 
 export interface FetchFollowersByUserIdParams
   extends SpaceReputationUserParams,
@@ -22,7 +16,7 @@ export interface FetchFollowersByUserIdParams
   limit?: number;
 }
 
-function useFetchFollowersByUserId(): (params: FetchFollowersByUserIdParams) => Promise<PaginatedResponse<FollowerWithFollowInfo>> {
+function useFetchFollowersByUserId(): (params: FetchFollowersByUserIdParams) => Promise<PaginatedResponse<FollowRow>> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -47,7 +41,7 @@ function useFetchFollowersByUserId(): (params: FetchFollowersByUserIdParams) => 
         }),
       };
 
-      const response = await axios.get<PaginatedResponse<FollowerWithFollowInfo>>(
+      const response = await axios.get<PaginatedResponse<FollowRow>>(
         `/${projectId}/users/${userId}/followers`,
         { params }
       );

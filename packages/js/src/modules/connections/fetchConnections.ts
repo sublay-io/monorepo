@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { EstablishedConnection } from "../../interfaces/Connection";
+import { AcceptedConnectionRow } from "../../interfaces/Connection";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 import { UserSearchParams } from "../../interfaces/UserSearch";
 
@@ -8,12 +8,16 @@ export interface FetchConnectionsProps extends UserSearchParams {
   limit?: number;
 }
 
+/**
+ * GET /connections — the caller's accepted connections; each row's `user` is
+ * the other user.
+ */
 export async function fetchConnections(
   client: SublayHttpClient,
   data: FetchConnectionsProps
-): Promise<PaginatedResponse<EstablishedConnection>> {
+): Promise<PaginatedResponse<AcceptedConnectionRow>> {
   const response = await client.projectInstance.get<
-    PaginatedResponse<EstablishedConnection>
+    PaginatedResponse<AcceptedConnectionRow>
   >("/connections", { params: data });
   return response.data;
 }

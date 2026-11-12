@@ -111,6 +111,8 @@ export const collectionsApi = baseApi.injectEndpoints({
         url: `/${projectId}/collections/${collectionId}/sub-collections`,
         method: "GET",
       }),
+      // The server answers `{ data: Collection[] }`; the cache keeps the array.
+      transformResponse: (response: { data: Collection[] }) => response.data,
       providesTags: (result, error, { projectId, collectionId }) => [
         { type: "Collection" as const, id: `${projectId}-${collectionId}-SUBS` },
         ...(result?.map(({ id }) => ({

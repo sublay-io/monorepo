@@ -89,4 +89,10 @@ Returns the updated [Workspace](/v8/data-models/workspace) object.
     ```
     Returned when a service key names an `actingUserId` that isn't a user in this project.
   </Accordion>
+  <Accordion title="Workspace Not Found — 404">
+    ```json
+    { "error": "Workspace not found.", "code": "workspace/not-found" }
+    ```
+    The workspace doesn't exist, or it was deleted while this request was being handled (for example by a concurrent delete). A successful response always carries the workspace.
+  </Accordion>
 </AccordionGroup>

@@ -16,11 +16,23 @@ describe("useCreateReport", () => {
       { user },
     );
 
-    axiosPrivate.mockResponse("post", undefined, 201);
+    const record = {
+      id: "user-report-1",
+      targetId: "comment-1",
+      targetType: "comment",
+      reason: "spam",
+      details: null,
+      createdAt: "2024-01-01T00:00:00.000Z",
+    };
+    axiosPrivate.mockResponse("post", record, 201);
 
+    let returned: unknown;
     await act(async () => {
-      await result.current({ targetId: "comment-1", reason: "spam" });
+      returned = await result.current({ targetId: "comment-1", reason: "spam" });
     });
+
+    // The caller's own report record, as the server returns it.
+    expect(returned).toEqual(record);
 
     const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/reports");

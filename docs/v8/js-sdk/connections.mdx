@@ -3,7 +3,7 @@ title: "Connections"
 description: "Read and manage the logged-in user's own connections and pending requests"
 ---
 
-The `connections` module acts on the **logged-in user's own** mutual connections — bidirectional relationships, similar to "friends." Use it to list established connections, inspect outgoing and incoming pending requests, and accept, decline, or remove connections.
+The `connections` module acts on the **logged-in user's own** mutual connections — bidirectional relationships, similar to "friends." Use it to list accepted connections, inspect outgoing and incoming pending requests, and accept, decline, or remove connections.
 
 <Tip>
   To **request** a connection with someone, check the connection status against a
@@ -15,7 +15,7 @@ The `connections` module acts on the **logged-in user's own** mutual connections
 
 ### fetchConnections
 
-Returns a paginated list of your established (mutual) connections.
+Returns a paginated list of your accepted connections.
 
 ```typescript
 const { data, pagination } = await sublay.connections.fetchConnections({
@@ -33,20 +33,20 @@ const { data, pagination } = await sublay.connections.fetchConnections({
 </ParamField>
 
 <ParamField body="query" type="string">
-  Optional search term. Filters the list to connections whose connected user's username or name contains this text (case-insensitive). When omitted, no filtering is applied.
+  Optional search term. Filters the list to connections whose other user's username or name contains this text (case-insensitive). When omitted, no filtering is applied.
 </ParamField>
 
 <ParamField body="searchFields" type="string">
   Restricts which field `query` matches against — `username` or `name`. When omitted, `query` matches either field.
 </ParamField>
 
-**Returns** — `Promise<PaginatedResponse<EstablishedConnection>>`, where `EstablishedConnection` is `{ id, connectedUser, connectedAt }`.
+**Returns** — `Promise<PaginatedResponse<AcceptedConnectionRow>>`, where [`AcceptedConnectionRow`](/v8/data-models/connection#acceptedconnectionrow) is `{ id, user, status: "accepted", createdAt, respondedAt }` and `user` is the other user in the connection.
 
 ---
 
 ### fetchConnectionsCount
 
-Returns the number of your established connections.
+Returns the number of your accepted connections.
 
 ```typescript
 const { count } = await sublay.connections.fetchConnectionsCount();
@@ -76,7 +76,7 @@ const { data, pagination } =
   Results per page. Defaults to `20`.
 </ParamField>
 
-**Returns** — `Promise<PaginatedResponse<PendingConnection>>`, where `PendingConnection` is `{ id, message?, createdAt, user, type: "received" | "sent" }`.
+**Returns** — `Promise<PaginatedResponse<ConnectionRow>>`, where [`ConnectionRow`](/v8/data-models/connection#connectionrow) is `{ id, user, type, message, status, createdAt, respondedAt }`. Here `user` is the user the request was sent to, `type` is `"sent"`, `status` is `"pending"` and `respondedAt` is `null`.
 
 ---
 
@@ -100,7 +100,7 @@ const { data, pagination } =
   Results per page. Defaults to `20`.
 </ParamField>
 
-**Returns** — `Promise<PaginatedResponse<PendingConnection>>`
+**Returns** — `Promise<PaginatedResponse<ConnectionRow>>`. Here `user` is the user who sent the request, `type` is `"received"`, `status` is `"pending"` and `respondedAt` is `null`.
 
 ---
 
@@ -118,7 +118,7 @@ const result = await sublay.connections.acceptConnection({
   The ID of the pending connection request to accept.
 </ParamField>
 
-**Returns** — `Promise<{ id: string; status: string; createdAt?: string; respondedAt?: string }>`
+**Returns** — `Promise<ConnectionRow>`: the accepted connection from your side (`user` is the requester, `type` is `"received"`, `status` is `"accepted"`). See [ConnectionRow](/v8/data-models/connection#connectionrow).
 
 ---
 
@@ -136,13 +136,13 @@ const result = await sublay.connections.declineConnection({
   The ID of the pending connection request to decline.
 </ParamField>
 
-**Returns** — `Promise<{ id: string; status: string; createdAt?: string; respondedAt?: string }>`
+**Returns** — `Promise<ConnectionRow>`: the declined connection from your side (`user` is the requester, `type` is `"received"`, `status` is `"declined"`). See [ConnectionRow](/v8/data-models/connection#connectionrow).
 
 ---
 
 ### removeConnection
 
-Removes an established connection by its connection ID.
+Removes a connection by its connection ID: withdraws a pending request you sent, or disconnects an accepted connection (either user can).
 
 ```typescript
 await sublay.connections.removeConnection({ connectionId: "con_xyz789" });
@@ -152,4 +152,4 @@ await sublay.connections.removeConnection({ connectionId: "con_xyz789" });
   The connection ID to remove.
 </ParamField>
 
-**Returns** — `Promise<void>`
+**Returns** — `Promise<void>`. It resolves with no value once the connection is removed (the server answers `204 No Content`).

@@ -1,6 +1,7 @@
 export { createEntity } from "./createEntity";
 export { fetchEntity } from "./fetchEntity";
 export { fetchEntityByForeignId } from "./fetchEntityByForeignId";
+export { fetchOrCreateEntityByForeignId } from "./fetchOrCreateEntityByForeignId";
 export { fetchEntityByShortId } from "./fetchEntityByShortId";
 export { fetchManyEntities } from "./fetchManyEntities";
 export { updateEntity } from "./updateEntity";

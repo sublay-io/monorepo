@@ -3,7 +3,7 @@ import { buildSearchParams } from "../../../utils/searchParams";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
-import { EstablishedConnection } from "../../../interfaces/models/Connection";
+import type { AcceptedConnectionRow } from "../../../interfaces/models/Connection";
 import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
 import { UserSearchParams } from "../../../interfaces/UserSearch";
 
@@ -12,7 +12,7 @@ export interface FetchConnectionsParams extends UserSearchParams {
   limit?: number;
 }
 
-function useFetchConnections(): (props?: FetchConnectionsParams) => Promise<PaginatedResponse<EstablishedConnection>> {
+function useFetchConnections(): (props?: FetchConnectionsParams) => Promise<PaginatedResponse<AcceptedConnectionRow>> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { user } = useUser();
@@ -20,7 +20,7 @@ function useFetchConnections(): (props?: FetchConnectionsParams) => Promise<Pagi
   const fetchConnections = useCallback(
     async (
       props: FetchConnectionsParams = {}
-    ): Promise<PaginatedResponse<EstablishedConnection>> => {
+    ): Promise<PaginatedResponse<AcceptedConnectionRow>> => {
       const { page = 1, limit = 20, query, searchFields } = props;
       if (!projectId) {
         throw new Error("No project specified");
@@ -30,7 +30,7 @@ function useFetchConnections(): (props?: FetchConnectionsParams) => Promise<Pagi
         throw new Error("No user is logged in");
       }
 
-      const response = await axios.get<PaginatedResponse<EstablishedConnection>>(
+      const response = await axios.get<PaginatedResponse<AcceptedConnectionRow>>(
         `/${projectId}/connections`,
         {
           params: {

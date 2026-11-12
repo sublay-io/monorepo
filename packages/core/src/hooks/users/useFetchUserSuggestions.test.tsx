@@ -15,7 +15,7 @@ describe("useFetchUserSuggestions", () => {
     );
 
     const users = [makeUser({ username: "alice" }), makeUser({ id: "user-2", username: "alicia" })];
-    axiosPrivate.mockResponse("get", users);
+    axiosPrivate.mockResponse("get", { data: users });
 
     let returned;
     await act(async () => {

@@ -3,14 +3,14 @@ import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeAuthUser, makeUser } from "../../../test-utils";
 import useFetchConnections from "./useFetchConnections";
-import type { EstablishedConnection } from "../../../interfaces/models/Connection";
+import type { AcceptedConnectionRow } from "../../../interfaces/models/Connection";
 import type { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
 
 afterEach(() => {
   resetAxiosMocks();
 });
 
-function makePage(connections: EstablishedConnection[]): PaginatedResponse<EstablishedConnection> {
+function makePage(connections: AcceptedConnectionRow[]): PaginatedResponse<AcceptedConnectionRow> {
   return {
     data: connections,
     pagination: { page: 1, pageSize: 20, totalPages: 1, totalItems: connections.length, hasMore: false },
@@ -22,10 +22,16 @@ describe("useFetchConnections", () => {
     const user = makeAuthUser();
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchConnections(), { user });
 
-    const page = makePage([{ id: "connection-1", connectedUser: makeUser(), connectedAt: "2024-01-01T00:00:00.000Z" }]);
+    const page = makePage([{
+        id: "connection-1",
+        user: makeUser(),
+        status: "accepted",
+        createdAt: "2023-12-31T00:00:00.000Z",
+        respondedAt: "2024-01-01T00:00:00.000Z",
+      }]);
     axiosPrivate.mockResponse("get", page);
 
-    let returned: PaginatedResponse<EstablishedConnection> | undefined;
+    let returned: PaginatedResponse<AcceptedConnectionRow> | undefined;
     await act(async () => {
       returned = await result.current({ page: 1, limit: 20 });
     });

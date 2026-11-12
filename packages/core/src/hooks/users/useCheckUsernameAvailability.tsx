@@ -7,7 +7,7 @@ export interface CheckUsernameAvailabilityProps {
   username: string;
 }
 
-function useCheckUsernameAvailability(): (props: CheckUsernameAvailabilityProps) => Promise<{ available: boolean }> {
+function useCheckUsernameAvailability(): (props: CheckUsernameAvailabilityProps) => Promise<boolean> {
   const { projectId } = useProject();
 
   const checkUsernameAvailability = useCallback(
@@ -20,13 +20,11 @@ function useCheckUsernameAvailability(): (props: CheckUsernameAvailabilityProps)
         throw new Error("Please specify a username");
       }
 
-      const response = await axios.get(`/${projectId}/users/check-username`, {
+      const response = await axios.get<{ available: boolean }>(`/${projectId}/users/check-username`, {
         params: { username },
       });
 
-      return response.data as {
-        available: boolean;
-      };
+      return response.data.available;
     },
     [projectId]
   );

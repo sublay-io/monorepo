@@ -108,14 +108,14 @@ describe("js-sdk collections — response mapping", () => {
     expect(result).toEqual(collection);
   });
 
-  it("fetchSubCollections returns an array of Collections", async () => {
+  it("fetchSubCollections returns the { data } envelope", async () => {
     const { client, projectInstance } = makeClient();
-    const collections = [{ id: "col2", name: "Sub" }];
-    projectInstance.get.mockResolvedValueOnce({ data: collections });
+    const body = { data: [{ id: "col2", name: "Sub", entityCount: 0 }] };
+    projectInstance.get.mockResolvedValueOnce({ data: body });
 
     const result = await fetchSubCollections(client, { collectionId: "col1" });
 
-    expect(result).toEqual(collections);
+    expect(result).toEqual(body);
   });
 
   it("createNewCollection returns the created Collection", async () => {

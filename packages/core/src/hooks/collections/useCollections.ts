@@ -52,7 +52,7 @@ export interface UseCollectionsValues {
     entityId: string;
     collectionId?: string;
   }) => Promise<{
-    saved: boolean;
+    isSaved: boolean;
     inSpecificCollection?: boolean;
     collections: Array<{ id: string; name: string }>;
   }>;
@@ -141,7 +141,7 @@ function useCollections(_: UseCollectionsProps = {}): UseCollectionsValues {
     async ({ entityId: selectedEntityId, collectionId }: { entityId: string; collectionId?: string }) => {
       if (!projectId || !selectedEntityId) {
         return {
-          saved: false,
+          isSaved: false,
           inSpecificCollection: collectionId ? false : undefined,
           collections: [],
         };
@@ -149,7 +149,7 @@ function useCollections(_: UseCollectionsProps = {}): UseCollectionsValues {
 
       try {
         const response = await axios.get<{
-          saved: boolean;
+          isSaved: boolean;
           collections: Array<{ id: string; name: string }>;
         }>(`/${projectId}/entities/is-entity-saved`, {
           params: { entityId: selectedEntityId },
@@ -161,14 +161,14 @@ function useCollections(_: UseCollectionsProps = {}): UseCollectionsValues {
           : undefined;
 
         return {
-          saved: response.data.saved,
+          isSaved: response.data.isSaved,
           inSpecificCollection,
           collections: response.data.collections,
         };
       } catch (err) {
         console.error("Error checking if entity is in collection:", err);
         return {
-          saved: false,
+          isSaved: false,
           inSpecificCollection: collectionId ? false : undefined,
           collections: [],
         };

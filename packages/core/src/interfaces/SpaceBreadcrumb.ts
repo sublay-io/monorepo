@@ -24,9 +24,3 @@ export interface HiddenSpaceBreadcrumbEntry {
 export type SpaceBreadcrumbEntry =
   | VisibleSpaceBreadcrumbEntry
   | HiddenSpaceBreadcrumbEntry;
-
-export interface SpaceBreadcrumb {
-  /** The path from the top-level space down to the requested one, root first. */
-  breadcrumb: SpaceBreadcrumbEntry[];
-  depth: number;
-}

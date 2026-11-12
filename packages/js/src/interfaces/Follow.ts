@@ -1,21 +1,25 @@
 import { User } from "./User";
 
-export interface Follow {
+/**
+ * A follow, seen from the caller: `{ id, user, createdAt }`. The same shape on
+ * every route that returns a follow (follow create, follow status, followers
+ * and following lists).
+ *
+ * - `id` is the follow's own id (what `follows.deleteFollow` takes).
+ * - `user` is the other user: the followed user on a follow create, on the
+ *   follow status and in a following list; the follower in a followers list.
+ * - `createdAt` is when the follow was made.
+ */
+export interface FollowRow {
   id: string;
-  projectId: string;
-  followerId: string;
-  followedId: string;
+  user: User;
   createdAt: string;
 }
 
 /**
- * An entry in a follower/following list. The list endpoints
- * (`/follows/(followers|following)` and `/users/:userId/(followers|following)`)
- * return the follow id, the populated other user, and when the follow happened
- * — NOT the raw {@link Follow} row.
+ * Does the signed-in user follow the target? `follow` (with `user` = the target)
+ * is present only when they do.
  */
-export interface FollowListItem {
-  followId: string;
-  user: User;
-  followedAt: string;
-}
+export type FollowStatus =
+  | { isFollowing: false }
+  | { isFollowing: true; follow: FollowRow };

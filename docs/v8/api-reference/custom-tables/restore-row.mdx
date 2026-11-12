@@ -24,9 +24,7 @@ Only works on a **paranoid** table — one created with `paranoid: true`, where 
 
 ## Response
 
-<ResponseField name="row" type="object">
-  The restored row, with `deletedAt` cleared.
-</ResponseField>
+Returns HTTP `200`. The body is the restored row itself, as a column map with `deletedAt` cleared.
 
 ## Error Responses
 

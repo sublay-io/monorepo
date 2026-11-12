@@ -1,23 +1,34 @@
 ---
 title: "Block"
-description: "The Block interface shape representing one user blocking another"
+description: "The block row and block status shapes for one user blocking another"
 ---
 
 A block record represents a directed edge where one user (the blocker) has blocked another (the blocked). A block simply exists or doesn't — there is no status column. Blocks are part of the trust & safety [moderation bundle](/v8/sdk/moderation/overview#blocking); the table is provisioned only in projects that have that bundle installed.
 
 Blocks are **private to the blocker** — only the blocker can read their own block list, and the block-status read is outbound-only, so the block is never disclosed to the blocked user.
 
-## Properties
+## BlockRow
+
+Every block the API returns has this shape: the block create, the block status check and the block list.
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `id` | `string` | Unique block identifier (UUID). |
-| `blockerId` | `string` | The ID of the user who created the block. |
-| `blockedId` | `string` | The ID of the user being blocked. |
-| `createdAt` | `Date` | When the block was created. |
+| `id` | `string` | The block record's ID (UUID). |
+| `user` | `User` | The blocked user. Public profile fields only. |
+| `createdAt` | `string` | ISO timestamp of when the block was created. |
+
+## BlockStatus
+
+Returned by [Get Block Status](/v8/api-reference/users/blocks/get-block-status): whether the acting user blocks the user in the path. It covers that one direction only.
+
+```ts
+type BlockStatus =
+  | { isBlocking: false }
+  | { isBlocking: true; block: BlockRow };
+```
 
 <Note>
-  The pair `(blockerId, blockedId)` is unique. Blocking someone already blocked is an idempotent no-op. Deleting either user removes their block edges in both directions.
+  A user can block another user only once. Blocking someone already blocked is an idempotent no-op. Deleting either user removes their block edges in both directions.
 </Note>
 
 ## See Also

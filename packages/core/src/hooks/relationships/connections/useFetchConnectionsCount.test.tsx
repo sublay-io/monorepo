@@ -15,12 +15,12 @@ describe("useFetchConnectionsCount", () => {
 
     axiosPrivate.mockResponse("get", { count: 5 });
 
-    let returned;
+    let returned: number | undefined;
     await act(async () => {
       returned = await result.current();
     });
 
-    expect(returned).toEqual({ count: 5 });
+    expect(returned).toBe(5);
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/connections/count");

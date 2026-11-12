@@ -62,10 +62,10 @@ Each `ConversationPreview` includes `otherMembers` — up to 5 active members ot
 
 ### createDirectConversation
 
-Creates (or returns the existing) 1:1 direct conversation with another user.
+Returns the 1:1 direct conversation with another user, or creates it when there is none. Props type: `CreateDirectConversationProps`.
 
 ```typescript
-const conversation = await sublay.chat.createDirectConversation({
+const { conversation, created } = await sublay.chat.createDirectConversation({
   userId: "usr_abc123",
 });
 ```
@@ -74,7 +74,7 @@ const conversation = await sublay.chat.createDirectConversation({
   The other participant's Sublay user ID.
 </ParamField>
 
-**Returns** — `Promise<Conversation>`
+**Returns** — `Promise<CreateDirectConversationResult>`: `{ conversation: Conversation; created: boolean }`. `created` is `true` when this call created the conversation (HTTP `201`) and `false` when it already existed (HTTP `200`).
 
 ---
 
@@ -543,7 +543,7 @@ Message reports go through the shared reports API, not a chat-specific
 function — the same call that reports entities and comments.
 
 ```typescript
-const result = await sublay.reports.createReport({
+const report = await sublay.reports.createReport({
   targetType: "message",
   targetId: "msg_xyz789",
   reason: "spam",
@@ -554,7 +554,7 @@ const result = await sublay.reports.createReport({
 `conversationId` is needed. The reporter must be a member of the conversation
 and cannot report their own message. See [createReport](/v8/js-sdk/reports).
 
-**Returns** — `Promise<{ message: string; code: string }>`
+**Returns** — `Promise<CreateReportResponse>` — the user's own report of the message (see [createReport](/v8/js-sdk/reports#createreport)).
 
 ---
 

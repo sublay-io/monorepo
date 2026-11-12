@@ -9,6 +9,11 @@ export { default as useFetchEntity } from "./useFetchEntity";
 export type { FetchEntityProps } from "./useFetchEntity";
 export { default as useFetchEntityByForeignId } from "./useFetchEntityByForeignId";
 export type { FetchEntityByForeignIdProps } from "./useFetchEntityByForeignId";
+export { default as useFetchOrCreateEntityByForeignId } from "./useFetchOrCreateEntityByForeignId";
+export type {
+  FetchOrCreateEntityByForeignIdProps,
+  FetchOrCreateEntityByForeignIdResult,
+} from "./useFetchOrCreateEntityByForeignId";
 export { default as useFetchEntityByShortId } from "./useFetchEntityByShortId";
 export type { FetchEntityByShortIdProps } from "./useFetchEntityByShortId";
 export { default as useFetchManyEntities } from "./useFetchManyEntities";

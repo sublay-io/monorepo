@@ -240,10 +240,9 @@ describe("js-sdk spaces (moderation/reports) — request shaping", () => {
 });
 
 describe("js-sdk spaces (moderation/reports) — response mapping", () => {
-  it("handleEntityReport returns the HandleReportResponse", async () => {
+  it("handleEntityReport resolves to undefined on the 204 empty body", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "Report handled", code: "ok" };
-    projectInstance.patch.mockResolvedValueOnce({ data: result });
+    projectInstance.patch.mockResolvedValueOnce({ status: 204, data: "" });
 
     const response = await handleEntityReport(client, {
       spaceId: "s1",
@@ -252,13 +251,12 @@ describe("js-sdk spaces (moderation/reports) — response mapping", () => {
       actions: ["dismiss"],
     });
 
-    expect(response).toEqual(result);
+    expect(response).toBeUndefined();
   });
 
-  it("handleCommentReport returns the HandleReportResponse", async () => {
+  it("handleCommentReport resolves to undefined on the 204 empty body", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "Report handled", code: "ok" };
-    projectInstance.patch.mockResolvedValueOnce({ data: result });
+    projectInstance.patch.mockResolvedValueOnce({ status: 204, data: "" });
 
     const response = await handleCommentReport(client, {
       spaceId: "s1",
@@ -267,7 +265,7 @@ describe("js-sdk spaces (moderation/reports) — response mapping", () => {
       actions: ["dismiss"],
     });
 
-    expect(response).toEqual(result);
+    expect(response).toBeUndefined();
   });
 
   it("moderateSpaceEntity returns the ModerationResponse", async () => {
@@ -322,10 +320,9 @@ describe("js-sdk spaces (moderation/reports) — response mapping", () => {
     expect(response).toEqual(result);
   });
 
-  it("handleSpaceChatReport returns the HandleSpaceChatReportResponse", async () => {
+  it("handleSpaceChatReport resolves to undefined on the 204 empty body", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "Report handled", code: "ok" };
-    projectInstance.patch.mockResolvedValueOnce({ data: result });
+    projectInstance.patch.mockResolvedValueOnce({ status: 204, data: "" });
 
     const response = await handleSpaceChatReport(client, {
       spaceId: "s1",
@@ -333,7 +330,7 @@ describe("js-sdk spaces (moderation/reports) — response mapping", () => {
       actions: ["dismiss"],
     });
 
-    expect(response).toEqual(result);
+    expect(response).toBeUndefined();
   });
 
   it("createRule returns the created Rule", async () => {

@@ -303,6 +303,7 @@ export {
   useDeleteEntity,
   useFetchEntity,
   useFetchEntityByForeignId,
+  useFetchOrCreateEntityByForeignId,
   useFetchEntityByShortId,
   useFetchManyEntities,
   useFetchManyEntitiesWrapper,
@@ -314,6 +315,8 @@ export {
   type DeleteEntityProps,
   type FetchEntityProps,
   type FetchEntityByForeignIdProps,
+  type FetchOrCreateEntityByForeignIdProps,
+  type FetchOrCreateEntityByForeignIdResult,
   type FetchEntityByShortIdProps,
   type PublishDraftProps,
   type UseFetchManyEntitiesWrapperProps,
@@ -509,6 +512,7 @@ export {
   type DeleteWorkspaceResponse,
   type TransferWorkspaceOwnershipProps,
   type FetchWorkspaceMembersProps,
+  type FetchWorkspaceMembers,
   type FetchWorkspaceMemberStandingProps,
   type UpdateWorkspaceMemberProps,
   type RemoveWorkspaceMemberProps,
@@ -518,11 +522,9 @@ export {
   type SkippedWorkspace,
   type CreateWorkspaceInviteProps,
   type FetchWorkspaceInvitesProps,
-  type FetchWorkspaceInvitesResponse,
   type RevokeWorkspaceInviteProps,
   type RevokeWorkspaceInviteResponse,
   type ResendWorkspaceInviteProps,
-  type FetchMyWorkspaceInvitesResponse,
   type AcceptWorkspaceInviteProps,
   type AcceptWorkspaceInviteResponse,
   type DeclineWorkspaceInviteProps,
@@ -654,12 +656,9 @@ export {
   type UnfollowByFollowIdProps,
   type UnfollowUserByUserIdProps,
   type FetchFollowStatusProps,
-  type FollowStatusResponse,
-  type FollowerWithFollowInfo,
   type FetchFollowersParams,
   type FetchFollowersByUserIdParams,
   type FetchFollowersCountByUserIdProps,
-  type FollowingWithFollowInfo,
   type FetchFollowingParams,
   type FetchFollowingByUserIdParams,
   type FetchFollowingCountByUserIdProps,
@@ -692,7 +691,8 @@ export {
   type FetchSentPendingConnectionsParams,
   type FetchReceivedPendingConnectionsParams,
   type UseConnectionManagerProps,
-  type ConnectionData,
+  type UseConnectionManagerValues,
+  type ConnectionState,
 } from "./hooks/relationships/connections";
 
 // -- blocks
@@ -705,9 +705,7 @@ export {
   type BlockUserProps,
   type UnblockUserProps,
   type FetchBlockStatusProps,
-  type BlockStatusResponse,
   type FetchBlockedUsersParams,
-  type BlockedUser,
   type UseBlockManagerProps,
   type UseBlockManagerValues,
 } from "./hooks/relationships/blocks";
@@ -724,12 +722,12 @@ export {
   type CreateCommentReportProps,
   type CreateEntityReportProps,
   type CreateMessageReportProps,
+  type CreateReportResponse,
   type ReportTargetType,
   type FetchModeratedReportsParams,
   type ReportUserReport,
   type Report,
   type HandleSpaceEntityReportParams,
-  type HandleReportResponse,
   type HandleSpaceCommentReportParams,
   type HandleSpaceChatReportParams,
 } from "./hooks/reports";
@@ -905,7 +903,6 @@ export type {
   WorkspaceMemberIncludeParam,
   WorkspaceRosterReason,
   WorkspaceRosterEntry,
-  WorkspaceRosterResponse,
   WorkspaceRosterCountsResponse,
   WorkspaceMember,
   WorkspaceStandingUser,
@@ -920,7 +917,6 @@ export type {
   SpaceMemberStatus,
   SpaceMemberWithUser,
   SpaceMembersResponse,
-  SpaceTeamResponse,
 } from "./interfaces/models/SpaceMember";
 export type {
   SpaceListSortByOptions,
@@ -937,7 +933,6 @@ export type {
   WorkspaceListFetchOptions,
 } from "./store/slices/workspaceListsSlice";
 export type {
-  SpaceBreadcrumb,
   SpaceBreadcrumbEntry,
   VisibleSpaceBreadcrumbEntry,
   HiddenSpaceBreadcrumbEntry,
@@ -952,7 +947,6 @@ export type { UserSearchParams } from "./interfaces/UserSearch";
 export type { SpaceSearchParams, SpaceSearchFields } from "./interfaces/SpaceSearch";
 export type {
   Rule,
-  FetchManyRulesResponse,
   DeleteRuleResponse,
 } from "./interfaces/models/Rule";
 export type {
@@ -974,17 +968,14 @@ export type { TimeFrame } from "./interfaces/TimeFrame";
 export type { NsfwFilter } from "./interfaces/NsfwFilter";
 export type { BlockedFilter } from "./interfaces/BlockedFilter";
 export type {
-  Connection,
-  EstablishedConnection,
-  PendingConnection,
-  ConnectionRequestParams,
-  ConnectionActionResponse,
-  ConnectionWithdrawResponse,
-  ConnectionCountResponse,
-  RemoveConnectionByUserIdResponse,
-  ConnectionStatusResponse,
+  ConnectionRow,
+  AcceptedConnectionRow,
+  ConnectionRowStatus,
   ConnectionStatus,
+  ConnectionRequestParams,
 } from "./interfaces/models/Connection";
+export type { FollowRow, FollowStatus } from "./interfaces/models/Follow";
+export type { BlockRow, BlockStatus } from "./interfaces/models/Block";
 export type {
   Image,
   ImageVariant,
@@ -1030,6 +1021,7 @@ export type {
   FetchConversationPreviewProps,
   DeleteConversationProps,
   CreateDirectConversationProps,
+  CreateDirectConversationResult,
   UseFetchSpaceConversationProps,
   UseFetchSpaceConversationValues,
   UseConversationMembersProps,

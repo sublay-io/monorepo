@@ -13,13 +13,17 @@ export interface FetchUserSuggestionsProps extends SpaceReputationUserParams {
   actingUserId?: string;
 }
 
+export interface FetchUserSuggestionsResponse {
+  data: User[];
+}
+
 export async function fetchUserSuggestions(
   client: SublayHttpClient,
   data: FetchUserSuggestionsProps
-): Promise<User[]> {
+): Promise<FetchUserSuggestionsResponse> {
   const { spaceReputation, spaceReputationId, spaceReputationDescendants, ...rest } =
     data;
-  const response = await client.projectInstance.get<User[]>(
+  const response = await client.projectInstance.get<FetchUserSuggestionsResponse>(
     "/users/suggestions",
     {
       params: {

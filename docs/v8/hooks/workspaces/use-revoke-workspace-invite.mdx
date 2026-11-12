@@ -11,7 +11,7 @@ icon: "plug"
 **Authorization:** capability-gated. Requires the `invite` capability on the workspace (owners hold it implicitly) — the same gate as creating and listing invites.
 
 <Note>
-  The underlying route is a verb-suffixed **`POST /workspaces/:id/invites/:inviteId/revoke`**, not a `DELETE`. The hook handles this for you; it is worth knowing if you are comparing against the [API reference](/v8/api-reference/workspaces/invitations/revoke-invite).
+  The underlying route is a verb-suffixed **`POST /workspaces/:workspaceId/invites/:inviteId/revoke`**, not a `DELETE`. The hook handles this for you; it is worth knowing if you are comparing against the [API reference](/v8/api-reference/workspaces/invitations/revoke-invite).
 </Note>
 
 ## Usage Example

@@ -1,10 +1,12 @@
 ---
 title: "Update Member Role"
-api: "PATCH /v8/:projectId/spaces/:spaceId/members/:memberId/role"
+api: "PATCH /v8/:projectId/spaces/:spaceId/members/:userId/role"
 description: "Update a member's role within a space"
 ---
 
 Changes a member's role. Only space admins can perform this action. The role also applies in the space's child spaces. Raising someone's role gives it to them there too, but never lowers a role they already hold there: someone who is a regular member here and an admin of a child space stays an admin there when made a moderator here. Lowering someone's role lowers it there too: an admin made a moderator becomes a moderator in the child spaces, and a regular member loses `"admin"` and `"moderator"` there. Giving someone the role they already have changes nothing, here or in the child spaces.
+
+The space creator always stays an admin of their space. Only the creator can promote or demote admins, so no one else can lower the creator's role, and the creator can't step down either: this route refuses their own id.
 
 ## Path Parameters
 
@@ -12,8 +14,8 @@ Changes a member's role. Only space admins can perform this action. The role als
   UUID of the space.
 </ParamField>
 
-<ParamField path="memberId" type="string" required>
-  UUID of the membership record to update.
+<ParamField path="userId" type="string" required>
+  UUID of the member's user: their user id, not their membership id. Your own id is refused (`400 space/own-member-id`): your own membership is [`/spaces/:spaceId/members/me`](/v8/api-reference/spaces/membership/check-my-membership).
 </ParamField>
 
 ## Body Parameters
@@ -40,9 +42,15 @@ Changes a member's role. Only space admins can perform this action. The role als
 
 <AccordionGroup>
   <Accordion title="Invalid Id — 400">
-    Returned when `spaceId` or `memberId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
+    Returned when `spaceId` or `userId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
     { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Own Member Id — 400">
+    `userId` is the acting user (the token's user, or the user named by `actingUserId`). This route acts on another member; check your own membership with `GET /spaces/:spaceId/members/me` and leave with `DELETE /spaces/:spaceId/members/me`.
+    ```json
+    { "error": "`PATCH /spaces/:spaceId/members/:userId/role` acts on another member, not on yourself. Your own membership is at `/spaces/:spaceId/members/me`: GET to check it, DELETE to leave.", "code": "space/own-member-id" }
     ```
   </Accordion>
   <Accordion title="Missing Acting User — 400">
@@ -82,6 +90,7 @@ Changes a member's role. Only space admins can perform this action. The role als
     ```
   </Accordion>
   <Accordion title="Membership Not Found — 404">
+    `userId` has no membership in this space.
     ```json
     { "error": "Membership not found.", "code": "space/membership-not-found" }
     ```

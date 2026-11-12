@@ -6,12 +6,12 @@ icon: "plug"
 
 ## Overview
 
-`useFetchWorkspaceMemberStanding` returns a callable that reads a single user's full standing on a workspace, addressed by **user id** (not a membership-row id, so it works even for users with no direct row). It returns the same unified shape as one roster row, computed on demand for **any** relation — direct `member`, this workspace's `owner`, an `ancestor-owner`, or a `reach-holder`.
+`useFetchWorkspaceMemberStanding` returns a callable that reads another user's full standing on a workspace, addressed by **user id** (not a membership-row id, so it works even for users with no direct row). It returns the same unified shape as one roster row, computed on demand for **any** relation — direct `member`, this workspace's `owner`, an `ancestor-owner`, or a `reach-holder`.
 
-**Authorization:** requires roster visibility on the workspace — **any relation** (owner, ancestor-owner, member, reach-holder), the same gate as [`useFetchWorkspaceMembers`](/v8/hooks/workspaces/use-fetch-workspace-members). The signed-in user is the actor; `targetUserId` names **who is being read**, not who is asking.
+**Authorization:** requires roster visibility on the workspace — **any relation** (owner, ancestor-owner, member, reach-holder), the same gate as [`useFetchWorkspaceMembers`](/v8/hooks/workspaces/use-fetch-workspace-members). The signed-in user is the actor; `targetUserId` names **who is being read**, not who is asking. For your own standing use [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership): your own id is refused here (`400 workspace/own-member-id`).
 
 <Warning>
-  **`capabilities`, `permissions`, `rank` and `relativeRank` are fenced.** They are **omitted from the response** (absent — not `null`) unless the signed-in user holds one of the four people-operating capabilities on this workspace (`invite`, `remove-member`, `edit-member-access`, `edit-member-profile`), is the `owner` / an `ancestor-owner`, or is reading **their own** standing. The gate is scoped to **this** workspace — it is a per-node verdict, and your resolved standing here includes what reaches in from an open inherit chain but not what a **sealed** boundary blocks. The four fields are optional in the SDK type — read them defensively (`standing.capabilities ?? []`). Everything else (`user`, `reasons`, `title`, `metadata`) is visible to any relation. `relativeRank` is fenced *with* `rank`, not beside it: it is `rank` minus your own anchor, a number you already know, so leaking it would leak `rank` exactly.
+  **`capabilities`, `permissions`, `rank` and `relativeRank` are fenced.** They are **omitted from the response** (absent — not `null`) unless the signed-in user holds one of the four people-operating capabilities on this workspace (`invite`, `remove-member`, `edit-member-access`, `edit-member-profile`) or is the `owner` / an `ancestor-owner`. The gate is scoped to **this** workspace — it is a per-node verdict, and your resolved standing here includes what reaches in from an open inherit chain but not what a **sealed** boundary blocks. The four fields are optional in the SDK type — read them defensively (`standing.capabilities ?? []`). Everything else (`user`, `reasons`, `title`, `metadata`) is visible to any relation. `relativeRank` is fenced *with* `rank`, not beside it: it is `rank` minus your own anchor, a number you already know, so leaking it would leak `rank` exactly.
 </Warning>
 
 ## Usage Example
@@ -46,7 +46,7 @@ function MemberDetail({
 </ParamField>
 
 <ParamField path="targetUserId" type="string" required>
-  The **target** user whose standing to read — a path param, not an acting user.
+  The **target** user whose standing to read — a path param, not an acting user. Must be another user, not you.
 </ParamField>
 
 ## Returns
@@ -72,11 +72,13 @@ function MemberDetail({
 
 | Code | Status | Meaning |
 |------|--------|---------|
+| `workspace/own-member-id` | 400 | `targetUserId` is your own id. Use [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership). |
 | `workspace/unauthorized` | 403 | You cannot see this workspace's roster. |
 | `workspace/not-found` | 404 | No such workspace in this project. |
 
 ## Related
 
 - [`useFetchWorkspaceMembers`](/v8/hooks/workspaces/use-fetch-workspace-members) — the whole roster
-- [`useFetchWorkspaceAuthority`](/v8/hooks/workspaces/use-fetch-workspace-authority) — the same read, but for yourself
+- [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership) — the same record, for yourself
+- [`useFetchWorkspaceAuthority`](/v8/hooks/workspaces/use-fetch-workspace-authority) — your own resolved authority
 - [Fetch Member Standing API](/v8/api-reference/workspaces/members/fetch-member-standing)

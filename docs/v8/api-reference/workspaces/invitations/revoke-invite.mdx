@@ -1,6 +1,6 @@
 ---
 title: "Revoke Invite"
-api: "POST /v8/:projectId/workspaces/:id/invites/:inviteId/revoke"
+api: "POST /v8/:projectId/workspaces/:workspaceId/invites/:inviteId/revoke"
 description: "Revoke a pending invitation"
 ---
 
@@ -8,7 +8,7 @@ Marks a pending invitation `revoked`. Requires the `invite` capability (or owner
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID.
 </ParamField>
 

@@ -7,6 +7,8 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 The space membership functions let the logged-in user join and leave spaces, and let admins and moderators manage a space's membership — roles, pending approvals, and bans.
 
+Members are addressed by their **user id**. Your own membership is checked with [checkMyMembership](#checkmymembership) and left with [leaveSpace](#leavespace) (`GET` / `DELETE /spaces/:spaceId/members/me`); the functions that take a `userId` (`updateMemberRole`, `approveMembership`, `declineMembership`, `banMember`, `unbanMember`) act on **another** member, and passing your own id is refused with `400 space/own-member-id`. The space creator stays an admin for good: they can't step down, leave the space, or be banned.
+
 ---
 
 ### joinSpace
@@ -27,7 +29,7 @@ const result = await sublay.spaces.joinSpace({ spaceId: "spc_abc123" });
 
 ### leaveSpace
 
-Leaves a space as the logged-in user.
+Leaves a space as the logged-in user (`DELETE /spaces/:spaceId/members/me`). The space creator can't leave (`400 space/creator-cannot-leave`).
 
 ```typescript
 const result = await sublay.spaces.leaveSpace({ spaceId: "spc_abc123" });
@@ -43,7 +45,7 @@ const result = await sublay.spaces.leaveSpace({ spaceId: "spc_abc123" });
 
 ### checkMyMembership
 
-Checks the logged-in user's membership status in a space. A user with a membership gets it back whatever its status (a banned user learns they're banned); a user with no membership in a space they can't see gets `404 space/not-found`.
+Checks the logged-in user's membership status in a space (`GET /spaces/:spaceId/members/me`). A user with a membership gets it back whatever its status (a banned user learns they're banned); a user with no membership in a space they can't see gets `404 space/not-found`.
 
 ```typescript
 const membership = await sublay.spaces.checkMyMembership({
@@ -121,12 +123,12 @@ Open to anyone who can read the space. A members-only space, or a space under on
 
 ### updateMemberRole
 
-Updates a member's role within a space.
+Updates another member's role within a space. Only the space creator can promote or demote admins, and nobody can demote the creator.
 
 ```typescript
 const result = await sublay.spaces.updateMemberRole({
   spaceId: "spc_abc123",
-  memberId: "mbr_xyz789",
+  userId: "usr_xyz789",
   role: "moderator",
 });
 ```
@@ -135,8 +137,8 @@ const result = await sublay.spaces.updateMemberRole({
   The Sublay space ID.
 </ParamField>
 
-<ParamField body="memberId" type="string" required>
-  The membership ID of the member to update.
+<ParamField body="userId" type="string" required>
+  The user id of the member to update. Your own id is refused (`400 space/own-member-id`).
 </ParamField>
 
 <ParamField body="role" type="string" required>
@@ -179,7 +181,7 @@ Approves a pending membership request.
 ```typescript
 const result = await sublay.spaces.approveMembership({
   spaceId: "spc_abc123",
-  memberId: "mbr_xyz789",
+  userId: "usr_xyz789",
 });
 ```
 
@@ -187,8 +189,8 @@ const result = await sublay.spaces.approveMembership({
   The Sublay space ID.
 </ParamField>
 
-<ParamField body="memberId" type="string" required>
-  The membership ID of the pending member.
+<ParamField body="userId" type="string" required>
+  The user id of the pending member. Your own id is refused (`400 space/own-member-id`).
 </ParamField>
 
 **Returns** — `Promise<ApproveMemberResponse>`
@@ -202,7 +204,7 @@ Declines a pending membership request.
 ```typescript
 const result = await sublay.spaces.declineMembership({
   spaceId: "spc_abc123",
-  memberId: "mbr_xyz789",
+  userId: "usr_xyz789",
 });
 ```
 
@@ -210,8 +212,8 @@ const result = await sublay.spaces.declineMembership({
   The Sublay space ID.
 </ParamField>
 
-<ParamField body="memberId" type="string" required>
-  The membership ID of the pending member.
+<ParamField body="userId" type="string" required>
+  The user id of the pending member. Your own id is refused (`400 space/own-member-id`).
 </ParamField>
 
 **Returns** — `Promise<DeclineMemberResponse>`
@@ -220,12 +222,12 @@ const result = await sublay.spaces.declineMembership({
 
 ### banMember
 
-Bans a member from a space.
+Bans another member from a space. A moderator can ban only regular members; only the space creator can ban an admin, and the creator can't be banned.
 
 ```typescript
 const result = await sublay.spaces.banMember({
   spaceId: "spc_abc123",
-  memberId: "mbr_xyz789",
+  userId: "usr_xyz789",
 });
 ```
 
@@ -233,8 +235,8 @@ const result = await sublay.spaces.banMember({
   The Sublay space ID.
 </ParamField>
 
-<ParamField body="memberId" type="string" required>
-  The membership ID of the member to ban.
+<ParamField body="userId" type="string" required>
+  The user id of the member to ban. Your own id is refused (`400 space/own-member-id`).
 </ParamField>
 
 <ParamField body="reason" type="string">
@@ -252,7 +254,7 @@ Unbans a previously banned member.
 ```typescript
 const result = await sublay.spaces.unbanMember({
   spaceId: "spc_abc123",
-  memberId: "mbr_xyz789",
+  userId: "usr_xyz789",
 });
 ```
 
@@ -260,8 +262,8 @@ const result = await sublay.spaces.unbanMember({
   The Sublay space ID.
 </ParamField>
 
-<ParamField body="memberId" type="string" required>
-  The membership ID of the member to unban.
+<ParamField body="userId" type="string" required>
+  The user id of the member to unban. Your own id is refused (`400 space/own-member-id`).
 </ParamField>
 
 **Returns** — `Promise<{ message: string; membership: { id: string; status: "active" } }>`

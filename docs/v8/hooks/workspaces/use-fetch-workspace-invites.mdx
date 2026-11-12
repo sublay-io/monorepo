@@ -13,7 +13,7 @@ icon: "plug"
 The list is **always returned in full** — it is deliberately unpaginated, so there is no `page`/`limit` and no `*Wrapper` hook.
 
 <Warning>
-  **Outbox, not inbox.** `useFetchWorkspaceInvites` (`GET /workspaces/:id/invites`) lists the invites **this workspace sent out** — it is scoped to one workspace and needs the `invite` capability there.
+  **Outbox, not inbox.** `useFetchWorkspaceInvites` (`GET /workspaces/:workspaceId/invites`) lists the invites **this workspace sent out** — it is scoped to one workspace and needs the `invite` capability there.
 
   [`useFetchMyWorkspaceInvites`](/v8/hooks/workspaces/use-fetch-my-workspace-invites) (`GET /me/workspace-invites`) lists the invites **addressed to the signed-in user** — it is scoped to the caller, spans every workspace, and needs no capability.
 

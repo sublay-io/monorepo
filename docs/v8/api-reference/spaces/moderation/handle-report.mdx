@@ -1,0 +1,220 @@
+---
+title: "Handle Report"
+api: "PATCH /v8/:projectId/spaces/:spaceId/reports/:reportId"
+description: "Resolve a report filed in a space: an entity, comment or chat message report"
+---
+
+Resolves a report filed in a space, whatever was reported: an entity, a comment, or a message in the space's conversation. Requires the caller to be a moderator or admin of that space.
+
+The request names only the report. The server reads what was reported from the report itself and acts on that content; `ban-user` bans that content's author. Which actions a report takes depends on what was reported:
+
+| Report about | Actions |
+| --- | --- |
+| An entity | `remove-entity`, `ban-user`, `dismiss` |
+| A comment | `remove-comment`, `ban-user`, `dismiss` |
+| A chat message | `remove-message`, `ban-user`, `dismiss` |
+
+<Note>
+  **Requires the `moderation` bundle**, which holds reports: without it the request returns `403 database/tables-not-available`. A chat message report also needs the `chat` bundle, and `remove-entity` needs the `entities` bundle. See [Bundles](/v8/bundles).
+</Note>
+
+## Path Parameters
+
+<ParamField path="spaceId" type="string" required>
+  UUID of the space.
+</ParamField>
+
+<ParamField path="reportId" type="string" required>
+  UUID of the report to resolve. It must be a report filed in this space.
+</ParamField>
+
+## Body Parameters
+
+<ParamField body="actions" type="string[]" required>
+  One or more actions to take, from the ones the report's type allows (see the table above). Must contain at least one value.
+  - `"remove-entity"`, `"remove-comment"`, `"remove-message"` — marks the reported content as removed via moderation
+  - `"ban-user"` — bans the author of the reported content from the space and the child spaces where they are an active member, and ends their membership of those spaces' chats, so they can no longer post to them, receive them or read their history (see [space conversations](/v8/data-models/conversation-member#space-conversations)). The same rules as [Ban Member](/v8/api-reference/spaces/membership/ban-member) apply, with the same errors: a moderator cannot ban a moderator or admin, only the space creator can ban an admin, and the last admin of a space cannot be banned. You can't ban yourself: when you are the author of the reported content, the request is refused (`400 report/cannot-ban-self`). A refused ban rolls back the whole request, including any removal in the same request, and the report stays pending. An author who is not a member of the space (for example, who left before the report was handled) is banned all the same: the ban is kept as a banned membership, so they can't join the space or its child spaces. If the author is already banned in the space, the ban is not repeated and the rest of the request still applies; it is still re-applied to their active memberships in child spaces, under the same rules. Requires `reason`.
+  - `"dismiss"` — dismisses the report without action. Cannot be combined with other actions.
+</ParamField>
+
+<ParamField body="summary" type="string">
+  What the moderator did, up to 1000 characters. Stored as `actionTaken` on the report. Required for entity and comment reports, whatever the action; optional for chat message reports.
+</ParamField>
+
+<ParamField body="reason" type="string">
+  Reason for the ban, up to 1000 characters, kept in the space's ban log. Required when `ban-user` is included in `actions`.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Required with a service key: the user this request acts as. The request has exactly that user's permissions, so it is refused unless they are a moderator or admin of the space, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 space/acting-user-not-allowed`).
+</ParamField>
+
+## Response
+
+Returns `204 No Content` with no body.
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Id — 400">
+    Returned when `spaceId` or `reportId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
+    ```json
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    ```
+  </Accordion>
+  <Accordion title="Missing token — 401">
+    No `Authorization` header was sent. The body is `text/plain` (`Unauthorized`), not JSON. An expired or invalid token returns `403` instead — see [Authentication](/v8/api-reference/authentication).
+  </Accordion>
+  <Accordion title="Missing Acting User — 400">
+    A service key sent no `actingUserId`.
+    ```json
+    { "error": "A service key must send actingUserId: the user this request acts as.", "code": "space/missing-user-id" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Acting User — 400">
+    `actingUserId` is not a user id.
+    ```json
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "space/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="Wrong Location — 400">
+    `actingUserId` was sent in the query string. On this endpoint every field, `actingUserId` included, goes in the request body.
+    ```json
+    { "error": "`actingUserId` goes in the request body on this endpoint.", "code": "space/wrong-location", "param": "actingUserId" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "space/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request named the reported content or its author. The server reads both from the report, so `entityId`, `commentId`, `messageId` and `userId` are refused. `param` names the field:
+    ```json
+    {
+      "error": "`entityId` isn't supported in v8: the report's target is read from the report.",
+      "code": "report/unsupported-param",
+      "param": "entityId"
+    }
+    ```
+    ```json
+    {
+      "error": "`userId` isn't supported in v8: `ban-user` bans the author of the reported content, read from the report.",
+      "code": "report/unsupported-param",
+      "param": "userId"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Not a Moderator — 403">
+    The caller (or the user named by `actingUserId`) is not a moderator or admin of the space.
+    ```json
+    { "error": "Moderator access required", "code": "space/moderator-required" }
+    ```
+  </Accordion>
+  <Accordion title="Tables Not Available — 403">
+    A bundle the request needs isn't installed: `moderation` for any report, `chat` for a chat message report, `entities` for `remove-entity`. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead.
+    ```json
+    {
+      "code": "database/tables-not-available",
+      "missingTables": ["Reports"],
+      "dashboardUrl": "https://<dashboard>/<projectId>/database"
+    }
+    ```
+    `remove-entity` on a project without the `entities` bundle:
+    ```json
+    { "error": "Entities bundle is not available for this project", "code": "database/tables-not-available" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Body — 400">
+    The body failed validation, such as an unknown action, an empty `actions` array, a `summary` or `reason` over 1000 characters, or a field of the wrong type. `error` describes the problem.
+    ```json
+    { "error": "...", "code": "report/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Report Not Found — 404">
+    No report with this id is in this space: the id names nothing, names a report in another space, or names a report a space moderator doesn't handle (a user report). All answer the same way.
+    ```json
+    { "error": "Report not found", "code": "report/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Actions — 400">
+    An action doesn't fit what was reported. The message lists the actions this report takes and the ones that were refused:
+    ```json
+    { "error": "An entity report takes the actions `remove-entity`, `ban-user`, `dismiss`. Not allowed: `remove-comment`.", "code": "report/invalid-actions" }
+    ```
+    Also returned when `dismiss` is combined with another action:
+    ```json
+    { "error": "Cannot combine 'dismiss' with other actions", "code": "report/invalid-actions" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Required Fields — 400">
+    An entity or comment report was sent without `summary`:
+    ```json
+    { "error": "Summary is required for dismissing a report", "code": "report/missing-fields" }
+    ```
+    ```json
+    { "error": "Summary is required", "code": "report/missing-fields" }
+    ```
+    `ban-user` was sent without `reason`:
+    ```json
+    { "error": "reason is required for banning a user", "code": "report/missing-fields" }
+    ```
+  </Accordion>
+  <Accordion title="Content Not Found — 404">
+    The reported content no longer exists, or isn't in this space. The code names the content type:
+    ```json
+    { "error": "Entity not found", "code": "report/entity-not-found" }
+    ```
+    ```json
+    { "error": "Entity does not belong to this space", "code": "report/entity-not-in-space" }
+    ```
+    ```json
+    { "error": "Comment not found", "code": "report/comment-not-found" }
+    ```
+    ```json
+    { "error": "Comment does not belong to this space", "code": "report/comment-not-in-space" }
+    ```
+    ```json
+    { "error": "Message not found.", "code": "chat/message-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="No Author — 400">
+    `ban-user` was requested, but the reported content has no author to ban (for example, its author deleted their account).
+    ```json
+    { "error": "The reported content has no author to ban.", "code": "report/no-author" }
+    ```
+  </Accordion>
+  <Accordion title="Cannot Ban Self — 400">
+    `ban-user` would ban the moderator handling the report: they are the author of the reported content. Nothing is changed: the report stays pending and no removal in the same request is applied.
+    ```json
+    { "error": "`ban-user` would ban you: you're the author of the reported content. Dismiss the report or remove the content instead.", "code": "report/cannot-ban-self" }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    The author of the reported content isn't a user in this project.
+    ```json
+    { "error": "User not found in this project", "code": "report/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Ban Refused — 400 / 403">
+    `ban-user` broke one of the [Ban Member](/v8/api-reference/spaces/membership/ban-member) rules, in this space or in a child space the ban reaches. `spaceId` names that space.
+    ```json
+    { "error": "Moderators can only ban regular members.", "code": "space/insufficient-permissions", "spaceId": "…" }
+    ```
+    ```json
+    { "error": "Only the space creator can ban admins.", "code": "space/creator-required", "spaceId": "…" }
+    ```
+    ```json
+    { "error": "Cannot ban the last admin. Promote another member to admin first.", "code": "space/last-admin", "spaceId": "…" }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+See also: [useHandleSpaceReport](/v8/hooks/reports/use-handle-space-report) · [Fetch Moderated Reports](/v8/api-reference/reports/fetch-moderated-reports)

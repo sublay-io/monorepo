@@ -11,7 +11,7 @@ icon: "plug"
 **Authorization:** capability-gated. Requires the `invite` capability on the workspace (owners hold it implicitly).
 
 <Note>
-  The underlying route is a verb-suffixed **`POST /workspaces/:id/invites/:inviteId/resend`**. Resend emits **no webhook** — the status stays `pending`, so there is no lifecycle transition.
+  The underlying route is a verb-suffixed **`POST /workspaces/:workspaceId/invites/:inviteId/resend`**. Resend emits **no webhook** — the status stays `pending`, so there is no lifecycle transition.
 </Note>
 
 <Warning>

@@ -1,6 +1,6 @@
 ---
 title: "Remove From Subtree"
-api: "POST /v8/:projectId/workspaces/:id/members/:userId/remove-from-subtree"
+api: "POST /v8/:projectId/workspaces/:workspaceId/members/:userId/remove-from-subtree"
 description: "Offboarding convenience — remove a user from this workspace and the descendants you can reach"
 ---
 
@@ -19,12 +19,12 @@ Nothing is removed when the sweep is refused. An owner of each workspace, or an 
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID (subtree root).
 </ParamField>
 
 <ParamField path="userId" type="string" required>
-  The user to offboard.
+  The user to offboard. Must not be the acting user (`400 workspace/own-member-id`).
 </ParamField>
 
 ## Body Parameters
@@ -81,6 +81,12 @@ Nothing is removed when the sweep is refused. An owner of each workspace, or an 
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Own Member Id — 400">
+    ```json
+    { "error": "`POST /workspaces/:workspaceId/members/:userId/remove-from-subtree` acts on another member, not on yourself. Your own membership is at `/workspaces/:workspaceId/members/me`: GET to check it, DELETE to leave.", "code": "workspace/own-member-id" }
+    ```
+    `userId` is the acting user (the token's user, or the user named by `actingUserId`). This route acts on another member. Your own membership is [`GET /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/fetch-my-membership) to read it and [`DELETE /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/leave-workspace) to leave.
+  </Accordion>
   <Accordion title="Owns Descendants — 409">
     ```json
     {

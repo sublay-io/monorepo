@@ -1,6 +1,6 @@
 ---
 title: "Remove Member"
-api: "DELETE /v8/:projectId/workspaces/:id/members/:userId"
+api: "DELETE /v8/:projectId/workspaces/:workspaceId/members/:userId"
 description: "Remove a member (rank-bounded; sole-owner protected)"
 ---
 
@@ -12,12 +12,12 @@ Removes a member from a workspace. Requires the `remove-member` capability and i
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID.
 </ParamField>
 
 <ParamField path="userId" type="string" required>
-  The member to remove.
+  The member to remove. Must not be the acting user (`400 workspace/own-member-id`).
 </ParamField>
 
 ## Query Parameters
@@ -35,6 +35,12 @@ Removes a member from a workspace. Requires the `remove-member` capability and i
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Own Member Id — 400">
+    ```json
+    { "error": "`DELETE /workspaces/:workspaceId/members/:userId` acts on another member, not on yourself. Your own membership is at `/workspaces/:workspaceId/members/me`: GET to check it, DELETE to leave.", "code": "workspace/own-member-id" }
+    ```
+    `userId` is the acting user (the token's user, or the user named by `actingUserId`). This route acts on another member. Your own membership is [`GET /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/fetch-my-membership) to read it and [`DELETE /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/leave-workspace) to leave.
+  </Accordion>
   <Accordion title="Insufficient Rank — 403">
     ```json
     { "error": "You may only remove members ranked strictly below you.", "code": "workspace/insufficient-rank" }

@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/workspace-invites/:inviteId/accept"
 description: "Accept an invitation — identity-matched + verified-email, no token"
 ---
 
-Accepts an invitation. Note the path is **not** `:id`-scoped — it is addressed by the (non-secret) invitation id.
+Accepts an invitation. Note the path is **not** `:workspaceId`-scoped — it is addressed by the (non-secret) invitation id.
 
 **Acceptance is identity-matched + verified-email, no token:**
 - The caller must **be** the invite's target (by `userId` or normalized `email`).

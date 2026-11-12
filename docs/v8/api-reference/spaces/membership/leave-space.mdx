@@ -1,10 +1,10 @@
 ---
 title: "Leave Space"
-api: "DELETE /v8/:projectId/spaces/:spaceId/leave"
+api: "DELETE /v8/:projectId/spaces/:spaceId/members/me"
 description: "Leave a space"
 ---
 
-Removes the authenticated user's membership from a space and from its child spaces, and ends their membership of those spaces' chats. A ban in a child space is kept: leaving does not clear it.
+Removes the acting user's membership (the token's user, or the user a service key names in `actingUserId`) from a space and from its child spaces, and ends their membership of those spaces' chats. A ban in a child space is kept: leaving does not clear it. The space creator can't leave: they stay an admin of the space for as long as it exists.
 
 ## Path Parameters
 

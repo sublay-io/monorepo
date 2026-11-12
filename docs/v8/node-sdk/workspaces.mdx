@@ -276,7 +276,25 @@ const counts = await sublay.workspaces.fetchWorkspaceMembers({
 <ParamField body="countOnly" type="boolean" />
 <ParamField body="actingUserId" type="string" required>The user to act as. Sent as a query param. Roster visibility and the authority-field fence both evaluate against them.</ParamField>
 
+### fetchMyWorkspaceMembership
+
+The acting user's own resolved standing on a workspace (`GET /workspaces/:workspaceId/members/me`): the same `WorkspaceMemberStanding` record [fetchWorkspaceMemberStanding](#fetchworkspacememberstanding) returns for another user. A user's own access is never fenced, so `capabilities`, `permissions`, `rank` and `relativeRank` are always present; `relativeRank` is `0` when they hold a member row on this workspace and `null` when they don't (an owner or ancestor owner without one). It needs no relation to the workspace: with none, the record comes back with `reasons: []`. See [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
+
+```typescript
+const me = await sublay.workspaces.fetchMyWorkspaceMembership({
+  workspaceId: "ws_abc",
+  actingUserId: "usr_pat",
+});
+```
+
+<ParamField body="workspaceId" type="string" required />
+<ParamField body="actingUserId" type="string" required>The user whose standing to read: the request acts as them. Sent as a query param. Omitting it is a `400 workspace/missing-user-id`.</ParamField>
+
+Returns `WorkspaceMemberStanding`.
+
 ### fetchWorkspaceMemberStanding
+
+Another user's standing. A `targetUserId` equal to `actingUserId` is refused with `400 workspace/own-member-id`: read the acting user's own with [fetchMyWorkspaceMembership](#fetchmyworkspacemembership).
 
 ```typescript
 const standing = await sublay.workspaces.fetchWorkspaceMemberStanding({
@@ -288,7 +306,7 @@ const standing = await sublay.workspaces.fetchWorkspaceMemberStanding({
 
 <ParamField body="workspaceId" type="string" required />
 <ParamField body="targetUserId" type="string" required>The user whose standing to read.</ParamField>
-<ParamField body="actingUserId" type="string" required>The user to act as. Sent as a query param. Roster visibility and the authority-field fence both evaluate against them (and a caller always sees their **own** access, so `actingUserId === targetUserId` is never fenced).</ParamField>
+<ParamField body="actingUserId" type="string" required>The user to act as. Sent as a query param. Roster visibility and the authority-field fence both evaluate against them.</ParamField>
 
 Returns `WorkspaceMemberStanding`. On its `user` field **only `id` is guaranteed** (`WorkspaceStandingUser`): the server returns the full user record when the user row still exists and falls back to `{ id }` alone when it does not — a deleted user with a lingering membership row is a reachable case. Read the rest defensively (`standing.user.username ?? "Deleted user"`).
 
@@ -306,7 +324,7 @@ await sublay.workspaces.updateWorkspaceMember({
 });
 ```
 
-Powerful fields require `edit-member-access` + rank rules + no-escalation; cosmetic fields require `edit-member-profile`.
+Powerful fields require `edit-member-access` + rank rules + no-escalation; cosmetic fields require `edit-member-profile`. A `targetUserId` equal to `actingUserId` is refused with `400 workspace/own-member-id`.
 
 Rank moves in **either coordinate** — `rank` (absolute) or `relativeRank` (an offset from `actingUserId`), never both. Omitting both means **rank unchanged**. See [choosing a rank](/v8/sdk/workspaces/overview#choosing-a-rank).
 
@@ -330,7 +348,7 @@ await sublay.workspaces.removeWorkspaceMember({
 });
 ```
 
-Requires `remove-member` (rank-bounded); sole-owner protected.
+Requires `remove-member` (rank-bounded); sole-owner protected. A `targetUserId` equal to `actingUserId` is refused with `400 workspace/own-member-id`: to leave, use [leaveWorkspace](#leaveworkspace).
 
 <ParamField body="workspaceId" type="string" required />
 <ParamField body="targetUserId" type="string" required>The member to remove.</ParamField>
@@ -342,7 +360,7 @@ Requires `remove-member` (rank-bounded); sole-owner protected.
 await sublay.workspaces.leaveWorkspace({ workspaceId: "ws_abc", actingUserId: "usr_pat" });
 ```
 
-Removes the given user's own membership on this node only.
+Removes the given user's own membership on this node only (`DELETE /workspaces/:workspaceId/members/me`).
 
 <ParamField body="workspaceId" type="string" required />
 <ParamField body="actingUserId" type="string" required>The user leaving. Sent as a query param.</ParamField>
@@ -364,7 +382,7 @@ if (result.skippedCount > 0) {
 }
 ```
 
-If the target owns this workspace or a descendant, it is refused with `409 workspace/owns-descendants` and nothing is removed. Owned workspaces the acting user has standing on always count and are named in `ownedWorkspaces`. Ones the acting user has no standing on (for example sealed sub-workspaces) count only when the target holds a membership this call would remove, and are listed as `{ id: null, name: null }` after the named ones. `ownedCount` is the number of entries. An owner of each workspace (or an ancestor owner) must transfer or delete it before a retry. See [Remove From Subtree](/v8/api-reference/workspaces/members/remove-from-subtree).
+A `targetUserId` equal to `actingUserId` is refused with `400 workspace/own-member-id`. If the target owns this workspace or a descendant, it is refused with `409 workspace/owns-descendants` and nothing is removed. Owned workspaces the acting user has standing on always count and are named in `ownedWorkspaces`. Ones the acting user has no standing on (for example sealed sub-workspaces) count only when the target holds a membership this call would remove, and are listed as `{ id: null, name: null }` after the named ones. `ownedCount` is the number of entries. An owner of each workspace (or an ancestor owner) must transfer or delete it before a retry. See [Remove From Subtree](/v8/api-reference/workspaces/members/remove-from-subtree).
 
 <Note>
   **`skippedCount` reflects the acting user, not the key.** The sweep is partial for a **non-owner** actor, and `actingUserId` is **required** on this call — a key always names someone, and is bound by their reach and their per-node rank. Name a non-owner admin and you can get a partial sweep, exactly as that admin would; name the owner for the god-path that clears every descendant. Always assert on `skippedCount` rather than assuming `removedCount` means the user is fully offboarded.

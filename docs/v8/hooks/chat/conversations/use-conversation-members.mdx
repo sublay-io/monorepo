@@ -12,6 +12,8 @@ Fetches the member list for a conversation on mount and provides actions to add 
 
 <Note>Requires `ChatProvider` in the component tree.</Note>
 
+`removeMember` and `changeRole` act on **other** members and refuse your own user id (`400 chat/own-member-id`). Your own membership is `…/members/me`: `leave` removes it, and [`useCheckMyConversationMembership`](/v8/hooks/chat/conversations/use-check-my-conversation-membership) reads it.
+
 ## Usage Example
 
 ```tsx
@@ -69,15 +71,15 @@ function MemberList({ conversationId }: { conversationId: string }) {
 </ResponseField>
 
 <ResponseField name="removeMember" type="({ userId: string }) => Promise<void>">
-  Removes a user from the conversation. Updates the local member list on success.
+  Removes another user from the conversation. Updates the local member list on success.
 </ResponseField>
 
 <ResponseField name="leave" type="() => Promise<void>">
-  Removes the current user from the conversation.
+  Removes the current user from the conversation (`DELETE /chat/conversations/:conversationId/members/me`).
 </ResponseField>
 
 <ResponseField name="changeRole" type="({ userId: string; role: 'admin' | 'member' }) => Promise<void>">
-  Updates a member's role. Updates the local member list on success.
+  Updates another member's role. Updates the local member list on success.
 </ResponseField>
 
 <ResponseField name="upsertMember" type="(member: ConversationMember) => void">

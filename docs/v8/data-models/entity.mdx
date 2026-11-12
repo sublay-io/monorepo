@@ -34,7 +34,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `userReaction` | `ReactionType \| null` | The current user's reaction. Only present when the user is authenticated and has reacted to this entity. |
 | `commentsCount` | `number` | How many comments the entity has, at any depth. Counts everything its thread contains — deleted, removed and unavailable comments included, since they stay in the thread as [placeholders](/v8/data-models/comment#placeholders) — so it's the same number for every user. |
 | `sharesCount` | `number` | Share counter stored on the entity. `0` by default. |
-| `views` | `number` | View count. Auto-incremented on every fetch by a person: a signed-in user, an anonymous caller, or a service key naming a user in `actingUserId` (a service key naming nobody doesn't count). Can also be incremented manually via the service-key-only `PATCH /entities/:entityId/increment-views` endpoint. |
+| `views` | `number` | View count. Auto-incremented on every fetch by a person: a signed-in user, an anonymous caller, or a service key naming a user in `actingUserId` (a service key naming nobody doesn't count). Can also be incremented manually via the service-key-only `POST /entities/:entityId/increment-views` endpoint. |
 | `score` | `number` | Computed "hotness" score based on engagement activity. |
 | `scoreUpdatedAt` | `Date` | When the score was last recalculated. |
 | `location` | `GeoPoint \| null` | Optional geo-location stored as a GeoJSON point. |

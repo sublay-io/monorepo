@@ -37,7 +37,7 @@ So if you dropped `member.*` in favor of `invite.*`, you would lose every target
 ## Deleting a workspace does NOT emit per-member events
 
 <Warning>
-  **`DELETE /workspaces/:id` emits `workspace.deleted` once per node in the cascade, and nothing per membership row.** There is no `workspace.member.removed` for the memberships it tears down — not for the deleted workspace, and not for any descendant.
+  **`DELETE /workspaces/:workspaceId` emits `workspace.deleted` once per node in the cascade, and nothing per membership row.** There is no `workspace.member.removed` for the memberships it tears down — not for the deleted workspace, and not for any descendant.
 
   Treat **`workspace.deleted` as removing that workspace's entire roster**: on receiving it, drop every seat you hold for that workspace id wholesale. Because the cascade fires one `workspace.deleted` per node, doing this for each event you receive clears the whole subtree.
 </Warning>

@@ -6,7 +6,9 @@ icon: "plug"
 
 ## Overview
 
-`useCheckMyMembership` returns a callable function that checks the authenticated user's membership in a specific space without loading the full space object. A user with a membership gets it back whatever its status (a banned user learns they're banned); a user with no membership in a space they can't see gets `404 space/not-found`.
+`useCheckMyMembership` returns a callable function that checks the authenticated user's membership in a specific space without loading the full space object. A user with a membership gets it back whatever its status (a banned user learns they're banned); a user with no membership in a space they can't see gets `404 space/not-found`. It calls `GET /spaces/:spaceId/members/me`.
+
+Your own membership is always `…/members/me`: this hook reads it and [`useLeaveSpace`](/v8/hooks/spaces/use-leave-space) leaves it. The member hooks that take a `userId` ([`useUpdateMemberRole`](/v8/hooks/spaces/use-update-member-role), [`useApproveMember`](/v8/hooks/spaces/use-approve-member), [`useDeclineMember`](/v8/hooks/spaces/use-decline-member), [`useBanMember`](/v8/hooks/spaces/use-ban-member), [`useUnbanMember`](/v8/hooks/spaces/use-unban-member)) act on other members and refuse your own id.
 
 ## Usage Example
 

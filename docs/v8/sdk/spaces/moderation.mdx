@@ -30,49 +30,34 @@ await moderateComment({ spaceId, commentId, action: "remove" });
 
 When members report content, moderators receive those reports and can resolve them:
 
-```tsx
-import {
-  useHandleSpaceEntityReport,
-  useHandleSpaceCommentReport,
-  useHandleSpaceChatReport,
-} from "@sublay/react-js";
+One hook handles every report in a space, whatever was reported. You name only the report: the server reads what was reported (an entity, a comment or a chat message) from the report itself, and `ban-user` bans that content's author.
 
-const handleEntityReport = useHandleSpaceEntityReport();
-const handleCommentReport = useHandleSpaceCommentReport();
-const handleChatReport = useHandleSpaceChatReport();
+```tsx
+import { useHandleSpaceReport } from "@sublay/react-js";
+
+const handleSpaceReport = useHandleSpaceReport();
 
 // `actions` is an array — you can combine a removal with a ban in one call.
-await handleEntityReport({
+await handleSpaceReport({
   spaceId,
   reportId,
-  entityId,
   actions: ["dismiss"],
   summary: "No violation found",
 });
 
-await handleCommentReport({
+await handleSpaceReport({
   spaceId,
   reportId,
-  commentId,
-  actions: ["remove-comment"],
-  summary: "Removed for harassment",
-});
-
-await handleChatReport({
-  spaceId,
-  reportId,
-  messageId,
   actions: ["remove-message", "ban-user"],
   reason: "Harassment",
   summary: "Removed and banned",
 });
 ```
 
-Each target type has its own removal action — `remove-entity`, `remove-comment`,
-`remove-message` — alongside the shared `ban-user` and `dismiss`.
+Each report type has its own removal action alongside the shared `ban-user` and `dismiss`: an entity report takes `remove-entity`, a comment report `remove-comment`, a chat message report `remove-message`. An action that doesn't fit the report is refused with `400 report/invalid-actions`. Entity and comment reports require a `summary`; `ban-user` requires a `reason`.
 
 <Note>
-  `ban-user` is **space-scoped**: it bans the user from this space and the child spaces they belong to, and ends their membership of those spaces' chats.
+  `ban-user` is **space-scoped**: it bans the user from this space and the child spaces they belong to, and ends their membership of those spaces' chats. It is refused when the author is you (`400 report/cannot-ban-self`), and the space creator can't be banned this way.
   Project-wide suspension is a dashboard action — a space moderator cannot
   suspend someone across the whole project.
 </Note>
@@ -101,5 +86,4 @@ Spaces with integrated chat also support message moderation via the API. See the
 | [`useModerateSpaceEntity`](/v8/hooks/spaces/use-moderate-space-entity) | Approve or remove an entity in a space |
 | [`useModerateSpaceComment`](/v8/hooks/spaces/use-moderate-space-comment) | Approve or remove a comment in a space |
 | [`useFetchModeratedReports`](/v8/hooks/reports/use-fetch-moderated-reports) | Fetch pending content reports |
-| [`useHandleSpaceEntityReport`](/v8/hooks/reports/use-handle-space-entity-report) | Resolve a reported entity |
-| [`useHandleSpaceCommentReport`](/v8/hooks/reports/use-handle-space-comment-report) | Resolve a reported comment |
+| [`useHandleSpaceReport`](/v8/hooks/reports/use-handle-space-report) | Resolve a report filed in the space (entity, comment or chat message) |

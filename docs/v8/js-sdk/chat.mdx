@@ -250,7 +250,7 @@ const member = await sublay.chat.addMember({
 
 ### removeMember
 
-Removes a member from a conversation.
+Removes another member from a conversation. Passing the logged-in user's own id is refused with `400 chat/own-member-id`: to leave, use [leaveConversation](#leaveconversation).
 
 ```typescript
 await sublay.chat.removeMember({
@@ -273,7 +273,7 @@ await sublay.chat.removeMember({
 
 ### changeMemberRole
 
-Changes a member's role within a conversation.
+Changes another member's role within a conversation. Passing the logged-in user's own id is refused with `400 chat/own-member-id`.
 
 ```typescript
 const member = await sublay.chat.changeMemberRole({
@@ -299,9 +299,33 @@ const member = await sublay.chat.changeMemberRole({
 
 ---
 
+### checkMyConversationMembership
+
+Reads the logged-in user's own membership in a conversation (`GET /chat/conversations/:conversationId/members/me`).
+
+```typescript
+const membership = await sublay.chat.checkMyConversationMembership({
+  conversationId: "cnv_abc123",
+});
+```
+
+<ParamField body="conversationId" type="string" required>
+  The conversation ID.
+</ParamField>
+
+**Returns** — `Promise<CheckMyConversationMembershipResponse>`, a flat object where a field that doesn't apply is left out:
+
+- an active member: `{ isMember: true, role, lastReadAt, mutedForever, mutedUntil }`
+- a user who left or was removed: `{ isMember: false, leftAt }`
+- a user with no membership yet (a space conversation they haven't opened): `{ isMember: false }`
+
+A user who can't read the conversation gets the same error as reading it (`404 chat/not-found` or `403 chat/not-a-member`). See [Check My Membership](/v8/api-reference/chat/members/check-my-membership).
+
+---
+
 ### leaveConversation
 
-The logged-in user leaves a conversation.
+The logged-in user leaves a conversation (`DELETE /chat/conversations/:conversationId/members/me`).
 
 ```typescript
 await sublay.chat.leaveConversation({ conversationId: "cnv_abc123" });
@@ -311,7 +335,7 @@ await sublay.chat.leaveConversation({ conversationId: "cnv_abc123" });
   The conversation ID.
 </ParamField>
 
-**Returns** — `Promise<{ message: string }>`
+**Returns** — `Promise<{ message: string }>`: the server's body, `{ message: "Left conversation." }`.
 
 ---
 

@@ -1,0 +1,68 @@
+---
+title: "Fetch my workspace membership"
+description: "The signed-in user's own full standing on a workspace"
+icon: "plug"
+---
+
+## Overview
+
+`useFetchMyWorkspaceMembership` returns a callable that reads the **signed-in user's own** standing on a workspace — the same record [`useFetchWorkspaceMemberStanding`](/v8/hooks/workspaces/use-fetch-workspace-member-standing) returns for another user, and one roster row's shape.
+
+**Authorization:** self-service. Any signed-in user may call it for any workspace: it is not gated by roster visibility, so a user with no relation to the workspace gets a record with `reasons: []` rather than an error. Your own access is never fenced: `capabilities`, `permissions`, `rank` and `relativeRank` are always present.
+
+Your own membership is `/workspaces/:workspaceId/members/me`: this hook reads it, and [`useLeaveWorkspace`](/v8/hooks/workspaces/use-leave-workspace) leaves it. Hooks that take a user id ([`useFetchWorkspaceMemberStanding`](/v8/hooks/workspaces/use-fetch-workspace-member-standing), [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member), [`useRemoveWorkspaceMember`](/v8/hooks/workspaces/use-remove-workspace-member), [`useRemoveWorkspaceMemberFromSubtree`](/v8/hooks/workspaces/use-remove-workspace-member-from-subtree)) act on other members and refuse your own id.
+
+## Usage Example
+
+```tsx
+import { useFetchMyWorkspaceMembership } from "@sublay/react-js";
+
+function MyRole({ workspaceId }: { workspaceId: string }) {
+  const fetchMyWorkspaceMembership = useFetchMyWorkspaceMembership();
+
+  const load = async () => {
+    const me = await fetchMyWorkspaceMembership({ workspaceId });
+    if (me.reasons.length === 0) {
+      // No standing on this workspace at all.
+    }
+    // me.capabilities, me.permissions, me.rank, me.relativeRank are always present here.
+  };
+}
+```
+
+## Parameters
+
+<ParamField path="workspaceId" type="string" required>
+  The workspace UUID.
+</ParamField>
+
+## Returns
+
+`Promise<WorkspaceMemberStanding>` — the record itself:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `user` | `WorkspaceStandingUser` | You. |
+| `reasons` | `WorkspaceAuthorityReasonDetail[]` | Why you have standing — structured `{ type, viaWorkspaceId? }` entries. Empty when you have no relation to the workspace. |
+| `capabilities` | `string[]` | Your **resolved** capability set (direct + reach + ownership). **`view` is implied by every other capability.** |
+| `permissions` | `string[]` | Your **per-node** permissions (direct membership on this workspace only; may be empty). |
+| `rank` | `number \| null` | Your direct-membership rank, or `null` when you hold no member row here (an owner, an ancestor-owner or a reach-only holder). |
+| `relativeRank` | `number \| null` | `0` when you hold a member row here (you are measured from yourself), `null` when you don't. |
+| `title` | `string \| null` | Your cosmetic title on this workspace. |
+| `metadata` | `Record<string, any>` | Your member metadata. |
+
+The type is the shared `WorkspaceMemberStanding`, where the four authority fields are optional because another user's standing may be fenced; on this read they are always set.
+
+## Error codes
+
+| Code | Status | Meaning |
+|------|--------|---------|
+| `workspace/invalid-params` | 400 | `workspaceId` isn't a UUID. |
+| `workspace/not-found` | 404 | No such workspace in this project. |
+
+## Related
+
+- [`useFetchWorkspaceMemberStanding`](/v8/hooks/workspaces/use-fetch-workspace-member-standing) — the same record for another user
+- [`useFetchWorkspaceAuthority`](/v8/hooks/workspaces/use-fetch-workspace-authority) — your resolved authority (`{ reasons, capabilities, permissions, rank }`)
+- [`useLeaveWorkspace`](/v8/hooks/workspaces/use-leave-workspace) — leave this workspace
+- [Fetch My Membership API](/v8/api-reference/workspaces/members/fetch-my-membership)

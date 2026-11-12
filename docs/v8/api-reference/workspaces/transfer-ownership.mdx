@@ -1,6 +1,6 @@
 ---
 title: "Transfer Ownership"
-api: "POST /v8/:projectId/workspaces/:id/transfer-ownership"
+api: "POST /v8/:projectId/workspaces/:workspaceId/transfer-ownership"
 description: "Owner-only ownership transfer, keeping ownerId and member rows disjoint"
 ---
 
@@ -16,7 +16,7 @@ Reassigns a workspace's `ownerId`. Doable by the workspace's **own owner OR any 
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID.
 </ParamField>
 

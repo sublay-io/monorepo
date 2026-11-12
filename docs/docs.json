@@ -332,6 +332,7 @@
                   "v8/hooks/workspaces/use-transfer-workspace-ownership",
                   "v8/hooks/workspaces/use-fetch-workspace-members",
                   "v8/hooks/workspaces/use-fetch-workspace-member-standing",
+                  "v8/hooks/workspaces/use-fetch-my-workspace-membership",
                   "v8/hooks/workspaces/use-update-workspace-member",
                   "v8/hooks/workspaces/use-remove-workspace-member",
                   "v8/hooks/workspaces/use-remove-workspace-member-from-subtree",
@@ -480,6 +481,7 @@
                   "v8/hooks/chat/conversations/use-delete-conversation",
                   "v8/hooks/chat/conversations/use-create-direct-conversation",
                   "v8/hooks/chat/conversations/use-conversation-members",
+                  "v8/hooks/chat/conversations/use-check-my-conversation-membership",
                   "v8/hooks/chat/conversations/use-fetch-space-conversation",
                   "v8/hooks/chat/conversations/use-mute-conversation"
                 ]
@@ -523,9 +525,7 @@
                 "pages": [
                   "v8/hooks/reports/use-create-report",
                   "v8/hooks/reports/use-fetch-moderated-reports",
-                  "v8/hooks/reports/use-handle-space-entity-report",
-                  "v8/hooks/reports/use-handle-space-comment-report",
-                  "v8/hooks/reports/use-handle-space-chat-report"
+                  "v8/hooks/reports/use-handle-space-report"
                 ]
               },
               {
@@ -675,7 +675,7 @@
                   "v8/api-reference/entities/remove-reaction",
                   "v8/api-reference/entities/fetch-reactions",
                   "v8/api-reference/entities/get-user-reaction",
-                  "v8/api-reference/entities/is-entity-saved"
+                  "v8/api-reference/entities/check-entity-saved"
                 ]
               },
               {
@@ -713,6 +713,7 @@
                   "v8/api-reference/chat/members/list-members",
                   "v8/api-reference/chat/members/add-member",
                   "v8/api-reference/chat/members/remove-member",
+                  "v8/api-reference/chat/members/check-my-membership",
                   "v8/api-reference/chat/members/leave-conversation",
                   "v8/api-reference/chat/members/update-member-role"
                 ]
@@ -747,7 +748,7 @@
                 "group": "App Notification Endpoints",
                 "pages": [
                   "v8/api-reference/app-notifications/fetch-notifications",
-                  "v8/api-reference/app-notifications/count-unread",
+                  "v8/api-reference/app-notifications/unread-count",
                   "v8/api-reference/app-notifications/mark-as-read",
                   "v8/api-reference/app-notifications/mark-all-as-read"
                 ]
@@ -830,9 +831,7 @@
                   "v8/api-reference/spaces/moderation/moderate-comment",
                   "v8/api-reference/spaces/moderation/moderate-message",
                   "v8/api-reference/spaces/moderation/set-entity-nsfw",
-                  "v8/api-reference/spaces/moderation/handle-entity-report",
-                  "v8/api-reference/spaces/moderation/handle-comment-report",
-                  "v8/api-reference/spaces/moderation/handle-message-report"
+                  "v8/api-reference/spaces/moderation/handle-report"
                 ]
               },
               {
@@ -857,6 +856,7 @@
                 "group": "Workspace — Membership",
                 "pages": [
                   "v8/api-reference/workspaces/members/list-members",
+                  "v8/api-reference/workspaces/members/fetch-my-membership",
                   "v8/api-reference/workspaces/members/fetch-member-standing",
                   "v8/api-reference/workspaces/members/update-member",
                   "v8/api-reference/workspaces/members/remove-member",

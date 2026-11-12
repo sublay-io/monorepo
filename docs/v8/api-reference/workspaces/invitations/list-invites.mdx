@@ -1,6 +1,6 @@
 ---
 title: "List Workspace Invites"
-api: "GET /v8/:projectId/workspaces/:id/invites"
+api: "GET /v8/:projectId/workspaces/:workspaceId/invites"
 description: "List a workspace's live pending invites"
 ---
 
@@ -8,7 +8,7 @@ Returns the workspace's **live** pending invites (`status = 'pending' AND expire
 
 ## Path Parameters
 
-<ParamField path="id" type="string" required>
+<ParamField path="workspaceId" type="string" required>
   The workspace UUID.
 </ParamField>
 

@@ -1,0 +1,62 @@
+---
+title: "Update my workspace membership"
+description: "Edit the signed-in user's own title on a workspace"
+icon: "plug"
+---
+
+## Overview
+
+`useUpdateMyWorkspaceMembership` returns a callable that edits the **signed-in user's own** `title` on a workspace.
+
+**Authorization:** self-service, no capability needed.
+
+Only `title` can be edited here. A member's other fields (`metadata`, `capabilities`, `permissions`, rank) are edited by a member with the capability, through [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member).
+
+You must hold a direct member row on the workspace. The workspace **owner has no member row**, so they have no title and get `404 workspace/not-found`; so does a user who only reaches in from an ancestor workspace.
+
+Your own membership is `/workspaces/:workspaceId/members/me`: [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership) reads it, this hook edits your title, and [`useLeaveWorkspace`](/v8/hooks/workspaces/use-leave-workspace) leaves it.
+
+## Usage Example
+
+```tsx
+import { useUpdateMyWorkspaceMembership } from "@sublay/react-js";
+
+function MyTitle({ workspaceId }: { workspaceId: string }) {
+  const updateMyWorkspaceMembership = useUpdateMyWorkspaceMembership();
+
+  const save = async (title: string) => {
+    const member = await updateMyWorkspaceMembership({ workspaceId, title });
+    console.log("Title is now:", member.title);
+  };
+
+  const clear = () => updateMyWorkspaceMembership({ workspaceId, title: null });
+}
+```
+
+## Parameters
+
+<ParamField path="workspaceId" type="string" required>
+  The workspace UUID.
+</ParamField>
+
+<ParamField path="title" type="string | null" required>
+  Your new title: trimmed, up to 100 characters. `null` clears it.
+</ParamField>
+
+## Returns
+
+`Promise<WorkspaceMember>` — your updated [WorkspaceMember](/v8/data-models/workspace-member) record, the same type [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member) resolves to.
+
+## Error codes
+
+| Code | Status | Meaning |
+|------|--------|---------|
+| `workspace/invalid-body` | 400 | `title` is missing, not a string or `null`, or longer than 100 characters. |
+| `workspace/invalid-params` | 400 | `workspaceId` isn't a UUID. |
+| `workspace/not-found` | 404 | No such workspace, you have no relation to it, or you hold no member row on it (for example, you are its owner). |
+
+## Related
+
+- [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership) — read your own standing
+- [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member) — edit another member
+- [Update My Membership API](/v8/api-reference/workspaces/members/update-my-membership)

@@ -334,6 +334,7 @@
                   "v8/hooks/workspaces/use-fetch-workspace-member-standing",
                   "v8/hooks/workspaces/use-fetch-my-workspace-membership",
                   "v8/hooks/workspaces/use-update-workspace-member",
+                  "v8/hooks/workspaces/use-update-my-workspace-membership",
                   "v8/hooks/workspaces/use-remove-workspace-member",
                   "v8/hooks/workspaces/use-remove-workspace-member-from-subtree",
                   "v8/hooks/workspaces/use-leave-workspace",
@@ -859,6 +860,7 @@
                   "v8/api-reference/workspaces/members/fetch-my-membership",
                   "v8/api-reference/workspaces/members/fetch-member-standing",
                   "v8/api-reference/workspaces/members/update-member",
+                  "v8/api-reference/workspaces/members/update-my-membership",
                   "v8/api-reference/workspaces/members/remove-member",
                   "v8/api-reference/workspaces/members/leave-workspace",
                   "v8/api-reference/workspaces/members/remove-from-subtree"

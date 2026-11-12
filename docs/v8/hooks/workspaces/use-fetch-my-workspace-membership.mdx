@@ -10,7 +10,7 @@ icon: "plug"
 
 **Authorization:** self-service. Any signed-in user may call it for any workspace: it is not gated by roster visibility, so a user with no relation to the workspace gets a record with `reasons: []` rather than an error. Your own access is never fenced: `capabilities`, `permissions`, `rank` and `relativeRank` are always present.
 
-Your own membership is `/workspaces/:workspaceId/members/me`: this hook reads it, and [`useLeaveWorkspace`](/v8/hooks/workspaces/use-leave-workspace) leaves it. Hooks that take a user id ([`useFetchWorkspaceMemberStanding`](/v8/hooks/workspaces/use-fetch-workspace-member-standing), [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member), [`useRemoveWorkspaceMember`](/v8/hooks/workspaces/use-remove-workspace-member), [`useRemoveWorkspaceMemberFromSubtree`](/v8/hooks/workspaces/use-remove-workspace-member-from-subtree)) act on other members and refuse your own id.
+Your own membership is `/workspaces/:workspaceId/members/me`: this hook reads it, [`useUpdateMyWorkspaceMembership`](/v8/hooks/workspaces/use-update-my-workspace-membership) edits your title, and [`useLeaveWorkspace`](/v8/hooks/workspaces/use-leave-workspace) leaves it. Hooks that take a user id ([`useFetchWorkspaceMemberStanding`](/v8/hooks/workspaces/use-fetch-workspace-member-standing), [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member), [`useRemoveWorkspaceMember`](/v8/hooks/workspaces/use-remove-workspace-member), [`useRemoveWorkspaceMemberFromSubtree`](/v8/hooks/workspaces/use-remove-workspace-member-from-subtree)) act on other members and refuse your own id.
 
 ## Usage Example
 

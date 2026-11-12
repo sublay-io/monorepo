@@ -9,6 +9,8 @@ Edits a member, with **two capability tiers by field sensitivity**:
 - **Powerful fields** (`capabilities`, `permissions`, and rank — as either `rank` or `relativeRank`) require **`edit-member-access`**, plus the [rank rule](/v8/data-models/workspace-member#rank-semantics) and the [no-escalation](/v8/data-models/workspace-member#no-privilege-escalation) guard.
 - **Cosmetic fields** (`title`, `metadata`) require only **`edit-member-profile`**.
 
+This route edits **another** member. A member edits their **own `title`**, with no capability, through [`PATCH /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/update-my-membership).
+
 Rank moves in **either coordinate** — `rank` (absolute) or `relativeRank` (an offset from the actor) — and they are **mutually exclusive**; sending both is a `400`. Omitting **both** means **rank unchanged**: unlike [Create Invite](/v8/api-reference/workspaces/invitations/create-invite), this endpoint has no value default, so editing someone's capabilities never moves them on the ladder. See [choosing a rank](/v8/sdk/workspaces/overview#choosing-a-rank).
 
 **Grant vs strip asymmetry:** you may only *add* a capability/permission you hold on the target node (resolved set, including via reach); *stripping* is governed by **rank alone**. **Cross-node rank is not compared** — the rank guard runs only when actor and target share a member row on the same workspace.
@@ -50,7 +52,7 @@ All optional; the controller enforces which tier each touched field belongs to. 
 </ParamField>
 
 <ParamField body="title" type="string">
-  New cosmetic title (`edit-member-profile`). Nullable.
+  New cosmetic title (`edit-member-profile`). Nullable. Your own title is edited with [`PATCH /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/update-my-membership).
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -72,9 +74,9 @@ Returns the updated [WorkspaceMember](/v8/data-models/workspace-member) object.
 <AccordionGroup>
   <Accordion title="Own Member Id — 400">
     ```json
-    { "error": "`PATCH /workspaces/:workspaceId/members/:userId` acts on another member, not on yourself. Your own membership is at `/workspaces/:workspaceId/members/me`: GET to check it, DELETE to leave.", "code": "workspace/own-member-id" }
+    { "error": "`PATCH /workspaces/:workspaceId/members/:userId` acts on another member, not on yourself. Your own membership is at `/workspaces/:workspaceId/members/me`: GET to check it, PATCH to edit your title, DELETE to leave.", "code": "workspace/own-member-id" }
     ```
-    `userId` is the acting user (the token's user, or the user named by `actingUserId`). This route acts on another member. Your own membership is [`GET /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/fetch-my-membership) to read it and [`DELETE /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/leave-workspace) to leave.
+    `userId` is the acting user (the token's user, or the user named by `actingUserId`). This route acts on another member. Your own membership is [`GET /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/fetch-my-membership) to read it, [`PATCH /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/update-my-membership) to edit your title, and [`DELETE /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/leave-workspace) to leave.
   </Accordion>
   <Accordion title="Unauthorized — 403">
     One message per tier, depending on which fields the request touched. Powerful fields (`capabilities`, `permissions`, `rank`, `relativeRank`):

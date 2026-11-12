@@ -324,7 +324,7 @@ await sublay.workspaces.updateWorkspaceMember({
 });
 ```
 
-Powerful fields require `edit-member-access` + rank rules + no-escalation; cosmetic fields require `edit-member-profile`. A `targetUserId` equal to `actingUserId` is refused with `400 workspace/own-member-id`.
+Powerful fields require `edit-member-access` + rank rules + no-escalation; cosmetic fields require `edit-member-profile`. A `targetUserId` equal to `actingUserId` is refused with `400 workspace/own-member-id`: a user edits their own `title` with [updateMyWorkspaceMembership](#updatemyworkspacemembership).
 
 Rank moves in **either coordinate** — `rank` (absolute) or `relativeRank` (an offset from `actingUserId`), never both. Omitting both means **rank unchanged**. See [choosing a rank](/v8/sdk/workspaces/overview#choosing-a-rank).
 
@@ -337,6 +337,24 @@ Rank moves in **either coordinate** — `rank` (absolute) or `relativeRank` (an 
 <ParamField body="relativeRank" type="number">An offset from the **acting user** — `1` = one rung below them. Must be `>= 1`. Anchored on their member row on this workspace if they hold one, apex otherwise, so a key acting as the owner resolves `relativeRank: 1` to rank `0`. Resolved to an absolute rank at write time and frozen. No default.</ParamField>
 <ParamField body="title" type="string" />
 <ParamField body="metadata" type="object" />
+
+### updateMyWorkspaceMembership
+
+The acting user edits their own `title` on a workspace (`PATCH /workspaces/:workspaceId/members/me`). Needs no capability. Only `title` is editable here; a member's other fields are edited by a member with the capability, through [updateWorkspaceMember](#updateworkspacemember). The acting user must hold a member row on the workspace: the owner has none, so has no title, and gets `404 workspace/not-found`. See [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership).
+
+```typescript
+const member = await sublay.workspaces.updateMyWorkspaceMembership({
+  workspaceId: "ws_abc",
+  actingUserId: "usr_pat",
+  title: "Frontend Lead",
+});
+```
+
+<ParamField body="workspaceId" type="string" required />
+<ParamField body="actingUserId" type="string" required>The user whose own title to edit: the request acts as them. Sent in the body. Omitting it is a `400 workspace/missing-user-id`.</ParamField>
+<ParamField body="title" type="string | null" required>Trimmed, up to 100 characters. `null` clears it.</ParamField>
+
+Returns `WorkspaceMember`, the same record [updateWorkspaceMember](#updateworkspacemember) returns.
 
 ### removeWorkspaceMember
 

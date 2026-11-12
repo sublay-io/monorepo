@@ -13,6 +13,8 @@ icon: "plug"
 - **Powerful fields** (`capabilities`, `permissions`, and rank — as either `rank` or `relativeRank`) require **`edit-member-access`**, plus the [rank rule](/v8/data-models/workspace-member#rank-semantics) and the [no-escalation](/v8/data-models/workspace-member#no-privilege-escalation) guard.
 - **Cosmetic fields** (`title`, `metadata`) require only **`edit-member-profile`**.
 
+It edits **another** member: your own user id as `targetUserId` is refused with `400 workspace/own-member-id`. Edit your **own `title`**, with no capability, with [`useUpdateMyWorkspaceMembership`](/v8/hooks/workspaces/use-update-my-workspace-membership).
+
 **Grant vs strip asymmetry:** you may only *add* a capability/permission you hold on the target node (resolved set, including via reach); *stripping* is governed by rank alone.
 
 **Rank moves in either coordinate** — `rank` (absolute) or `relativeRank` (an offset from you), never both. Omitting **both** means **rank unchanged**: unlike the invite hook there is no value default here, so editing someone's capabilities never quietly moves them on the ladder. See [choosing a rank](/v8/sdk/workspaces/overview#choosing-a-rank).
@@ -72,7 +74,7 @@ function MemberRow({
 </ParamField>
 
 <ParamField path="title" type="string | null">
-  New cosmetic title (`edit-member-profile`).
+  New cosmetic title (`edit-member-profile`). Edit your own title with [`useUpdateMyWorkspaceMembership`](/v8/hooks/workspaces/use-update-my-workspace-membership).
 </ParamField>
 
 <ParamField path="metadata" type="Record<string, any>">

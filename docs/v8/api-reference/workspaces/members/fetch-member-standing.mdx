@@ -100,7 +100,7 @@ Caller with a plain relation, reading **someone else's** standing — the four a
   </Accordion>
   <Accordion title="Own Member Id — 400">
     ```json
-    { "error": "`GET /workspaces/:workspaceId/members/:userId` acts on another member, not on yourself. Your own membership is at `/workspaces/:workspaceId/members/me`: GET to check it, DELETE to leave.", "code": "workspace/own-member-id" }
+    { "error": "`GET /workspaces/:workspaceId/members/:userId` acts on another member, not on yourself. Your own membership is at `/workspaces/:workspaceId/members/me`: GET to check it, PATCH to edit your title, DELETE to leave.", "code": "workspace/own-member-id" }
     ```
     `userId` is the acting user (the token's user, or the user named by `actingUserId`). Read your own standing with [`GET /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/fetch-my-membership).
   </Accordion>

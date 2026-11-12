@@ -37,9 +37,9 @@ Removes a member from a workspace. Requires the `remove-member` capability and i
 <AccordionGroup>
   <Accordion title="Own Member Id — 400">
     ```json
-    { "error": "`DELETE /workspaces/:workspaceId/members/:userId` acts on another member, not on yourself. Your own membership is at `/workspaces/:workspaceId/members/me`: GET to check it, DELETE to leave.", "code": "workspace/own-member-id" }
+    { "error": "`DELETE /workspaces/:workspaceId/members/:userId` acts on another member, not on yourself. Your own membership is at `/workspaces/:workspaceId/members/me`: GET to check it, PATCH to edit your title, DELETE to leave.", "code": "workspace/own-member-id" }
     ```
-    `userId` is the acting user (the token's user, or the user named by `actingUserId`). This route acts on another member. Your own membership is [`GET /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/fetch-my-membership) to read it and [`DELETE /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/leave-workspace) to leave.
+    `userId` is the acting user (the token's user, or the user named by `actingUserId`). This route acts on another member. Your own membership is [`GET /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/fetch-my-membership) to read it, [`PATCH /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/update-my-membership) to edit your title, and [`DELETE /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/leave-workspace) to leave.
   </Accordion>
   <Accordion title="Insufficient Rank — 403">
     ```json

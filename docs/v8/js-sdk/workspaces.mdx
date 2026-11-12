@@ -225,7 +225,7 @@ Returns `WorkspaceMemberStanding`. On its `user` field **only `id` is guaranteed
 
 ### updateWorkspaceMember
 
-Two capability tiers: **powerful** fields (`capabilities`, `permissions`, and rank as either `rank` or `relativeRank`) need `edit-member-access` plus the rank rule and [no-escalation](/v8/data-models/workspace-member#no-privilege-escalation); **cosmetic** fields (`title`, `metadata`) need only `edit-member-profile`. It edits another member: Passing your own user id as `targetUserId` is refused with `400 workspace/own-member-id`.
+Two capability tiers: **powerful** fields (`capabilities`, `permissions`, and rank as either `rank` or `relativeRank`) need `edit-member-access` plus the rank rule and [no-escalation](/v8/data-models/workspace-member#no-privilege-escalation); **cosmetic** fields (`title`, `metadata`) need only `edit-member-profile`. It edits another member: passing your own user id as `targetUserId` is refused with `400 workspace/own-member-id`. Edit your own `title`, with no capability, with [updateMyWorkspaceMembership](#updatemyworkspacemembership).
 
 Rank moves in **either coordinate**, never both; omitting both means **rank unchanged**. See [choosing a rank](/v8/sdk/workspaces/overview#choosing-a-rank).
 
@@ -246,6 +246,22 @@ const member = await sublay.workspaces.updateWorkspaceMember({
 <ParamField body="relativeRank" type="number">An offset from you — `1` = one rung below me. Must be `>= 1`. Resolved to an absolute rank at write time and frozen. No default.</ParamField>
 <ParamField body="title" type="string" />
 <ParamField body="metadata" type="object" />
+
+### updateMyWorkspaceMembership
+
+The logged-in user edits their own `title` on a workspace (`PATCH /workspaces/:workspaceId/members/me`). Needs no capability. Only `title` is editable here; a member's other fields are edited by a member with the capability, through [updateWorkspaceMember](#updateworkspacemember). You must hold a member row on the workspace: the owner has none, so has no title, and gets `404 workspace/not-found`. See [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership).
+
+```typescript
+const member = await sublay.workspaces.updateMyWorkspaceMembership({
+  workspaceId: "ws_abc",
+  title: "Frontend Lead",
+});
+```
+
+<ParamField body="workspaceId" type="string" required />
+<ParamField body="title" type="string | null" required>Trimmed, up to 100 characters. `null` clears it.</ParamField>
+
+Returns `WorkspaceMember`, the same record [updateWorkspaceMember](#updateworkspacemember) returns.
 
 ### removeWorkspaceMember
 

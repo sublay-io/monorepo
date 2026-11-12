@@ -512,6 +512,7 @@ export {
   type DeleteWorkspaceResponse,
   type TransferWorkspaceOwnershipProps,
   type FetchWorkspaceMembersProps,
+  type FetchWorkspaceMembers,
   type FetchWorkspaceMemberStandingProps,
   type UpdateWorkspaceMemberProps,
   type RemoveWorkspaceMemberProps,

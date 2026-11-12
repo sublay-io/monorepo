@@ -17,6 +17,24 @@ export interface FetchWorkspaceMembersProps {
 }
 
 /**
+ * The callable `useFetchWorkspaceMembers` returns. Typed by `countOnly`: a
+ * call without it (or with `false`) resolves to the roster array, a call with
+ * `countOnly: true` to the counts. A `boolean` only known at runtime gets the
+ * union.
+ */
+export interface FetchWorkspaceMembers {
+  (
+    props: FetchWorkspaceMembersProps & { countOnly: true }
+  ): Promise<WorkspaceRosterCountsResponse>;
+  (
+    props: FetchWorkspaceMembersProps & { countOnly?: false }
+  ): Promise<WorkspaceRosterEntry[]>;
+  (
+    props: FetchWorkspaceMembersProps
+  ): Promise<WorkspaceRosterEntry[] | WorkspaceRosterCountsResponse>;
+}
+
+/**
  * Unified roster read — one entry per distinct user, each with a `reasons`
  * array. Always returned in full (never paginated), as an array. With
  * `countOnly` it returns the counts instead (`WorkspaceRosterCountsResponse`).
@@ -26,14 +44,18 @@ export interface FetchWorkspaceMembersProps {
  * above). Both are fenced together and both are absent for a caller who does
  * not operate people here. `descendant-member` reasons carry `rank` only.
  */
-function useFetchWorkspaceMembers(): (
-  props: FetchWorkspaceMembersProps
-) => Promise<WorkspaceRosterEntry[] | WorkspaceRosterCountsResponse> {
+function useFetchWorkspaceMembers(): FetchWorkspaceMembers {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
   const fetchWorkspaceMembers = useCallback(
-    async ({ workspaceId, include, countOnly }: FetchWorkspaceMembersProps) => {
+    async ({
+      workspaceId,
+      include,
+      countOnly,
+    }: FetchWorkspaceMembersProps): Promise<
+      WorkspaceRosterEntry[] | WorkspaceRosterCountsResponse
+    > => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -60,7 +82,7 @@ function useFetchWorkspaceMembers(): (
     [projectId, axios]
   );
 
-  return fetchWorkspaceMembers;
+  return fetchWorkspaceMembers as FetchWorkspaceMembers;
 }
 
 export default useFetchWorkspaceMembers;

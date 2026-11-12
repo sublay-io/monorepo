@@ -11,9 +11,9 @@ icon: "plug"
 <Warning>
   **No `page` / `limit` on this roster.** It is never paginated. `FetchWorkspaceMembersProps` carries only `workspaceId`, `include` and `countOnly`, and the hook builds its query string from exactly those three — so a `page` or `limit` hand-written past the types is never even sent. Calling the [REST route](/v8/api-reference/workspaces/members/list-members) directly does not help either: that endpoint declares `include`, `countOnly`, `actingUserId` and `projectId`, and refuses anything else — `?page=2&limit=10` comes back as `{ "error": "Unrecognized keys: \"page\", \"limit\"", "code": "workspace/invalid-query" }`.
 
-  The response is `{ data, total }` — no `pagination` object, because there is no pagination. `total` equals `data.length`.
+  The hook resolves to the whole roster as an array; its length is the number of distinct users.
 
-  For counts, pass `countOnly` — it returns per-reason counts and a distinct-user total without materializing the roster array. For a windowed UI, slice `roster.data` client-side.
+  For counts, pass `countOnly` — it returns per-reason counts and a distinct-user total without materializing the roster array. For a windowed UI, slice the array client-side.
 </Warning>
 
 ## Usage Example
@@ -30,6 +30,12 @@ function Roster({ workspaceId }: { workspaceId: string }) {
       include: ["ancestorOwners", "descendants"],
     });
     // roster: WorkspaceRosterEntry[]
+    roster.forEach(({ user, reasons }) => {
+      // ...
+    });
+
+    const { total } = await fetchWorkspaceMembers({ workspaceId, countOnly: true });
+    // WorkspaceRosterCountsResponse
   };
 }
 ```
@@ -50,7 +56,9 @@ function Roster({ workspaceId }: { workspaceId: string }) {
 
 ## Returns
 
-`WorkspaceRosterEntry[]` — one entry per distinct user, never paginated. With `countOnly`, `WorkspaceRosterCountsResponse` (`{ counts, total, distinctUsers }`) instead.
+Returns a `WorkspaceRosterEntry[]` array: one entry per distinct user, never paginated. With `countOnly: true`, it returns a `WorkspaceRosterCountsResponse` (`{ counts, total, distinctUsers }`) instead.
+
+The callable (type `FetchWorkspaceMembers`) is typed by `countOnly`: a call without it, or with `false`, is typed as the array, so you can iterate it directly; `countOnly: true` is typed as the counts. A `countOnly` held in a `boolean` variable gets the union `WorkspaceRosterEntry[] | WorkspaceRosterCountsResponse`, which you narrow with `Array.isArray`.
 
 Each `WorkspaceRosterEntry` is `{ user, reasons }`, where a reason is `{ type, ...detail }` — `member` carries `rank` / `relativeRank` / `capabilities` / `permissions` / `title` / `metadata`, `ancestor-owner` and `reach-holder` carry `viaWorkspaceId` (reach-holder also `capabilities`), and `descendant-member` carries `workspaceId` / `rank` / `capabilities` — **never `relativeRank`**, since rank is per-workspace and an offset across two ladders would be meaningless.
 

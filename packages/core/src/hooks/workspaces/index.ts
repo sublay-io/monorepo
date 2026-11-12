@@ -21,7 +21,10 @@ export type { TransferWorkspaceOwnershipProps } from "./useTransferWorkspaceOwne
 
 // Membership
 export { default as useFetchWorkspaceMembers } from "./useFetchWorkspaceMembers";
-export type { FetchWorkspaceMembersProps } from "./useFetchWorkspaceMembers";
+export type {
+  FetchWorkspaceMembersProps,
+  FetchWorkspaceMembers,
+} from "./useFetchWorkspaceMembers";
 export { default as useFetchWorkspaceMemberStanding } from "./useFetchWorkspaceMemberStanding";
 export type { FetchWorkspaceMemberStandingProps } from "./useFetchWorkspaceMemberStanding";
 export { default as useUpdateWorkspaceMember } from "./useUpdateWorkspaceMember";

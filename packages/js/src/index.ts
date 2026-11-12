@@ -117,6 +117,10 @@ export type {
   FetchOrCreateEntityByForeignIdResult,
 } from "./modules/entities/fetchOrCreateEntityByForeignId";
 export type {
+  CreateDirectConversationProps,
+  CreateDirectConversationResult,
+} from "./modules/chat/createDirectConversation";
+export type {
   PaginatedResponse,
   PaginationMetadata,
   CursorPaginatedResponse,

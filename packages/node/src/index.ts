@@ -142,6 +142,10 @@ export type {
   FetchOrCreateEntityByForeignIdProps,
   FetchOrCreateEntityByForeignIdResult,
 } from "./modules/entities/fetchOrCreateEntityByForeignId";
+export type {
+  CreateDirectConversationProps,
+  CreateDirectConversationResult,
+} from "./modules/chat/createDirectConversation";
 
 // Export commonly used interfaces
 export type {

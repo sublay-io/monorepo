@@ -37,7 +37,8 @@ Initiates an OAuth 2.0 authorization flow for unauthenticated users (sign-in or 
   end up signed in. It points to Sublay first, which ties the sign-in to that
   browser and then sends it on to the provider. A sign-in that returns to a
   different browser is refused with `error=state_mismatch`, and so is the
-  older of two sign-ins started at the same time in one browser.
+  older of two sign-ins started at the same time in one browser (in any app
+  that uses Sublay).
 </Note>
 
 ## Callback

@@ -34,14 +34,15 @@ The authenticated user's ID is taken from the access token — it cannot be spec
   minutes for each step, and at most 30 minutes from this call.
 </ResponseField>
 
-Before going to the provider, Sublay shows the user a page naming the account the provider will be connected to (its verified email, or else its username), with **Continue** and **Cancel**. Continue goes on to the provider; Cancel returns to `redirectAfterAuth` with `error=access_denied`. The page only works in the browser that opened `authorizationUrl`, where it can be reloaded; anywhere else it shows that the link has expired. The page is in English.
+Before going to the provider, Sublay shows the user a page naming the account the provider will be connected to (its verified email, or else its username), with **Continue** and **Cancel**. Continue goes on to the provider; Cancel returns to `redirectAfterAuth` with `error=access_denied`. The page only works in the browser that opened `authorizationUrl`, where it can be reloaded; anywhere else it shows that the link has expired, and so does an older link page once a newer one was opened in the same browser. The page is in English.
 
 <Note>
   Open `authorizationUrl` as-is, in the browser (or auth session) that should
   end up signed in. It points to Sublay first, which ties the sign-in to that
   browser and then sends it on to the provider. A sign-in that returns to a
   different browser is refused with `error=state_mismatch`, and so is the
-  older of two sign-ins started at the same time in one browser.
+  older of two sign-ins started at the same time in one browser (in any app
+  that uses Sublay).
 </Note>
 
 ## Callback

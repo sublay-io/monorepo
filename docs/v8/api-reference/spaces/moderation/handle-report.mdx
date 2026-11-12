@@ -112,6 +112,12 @@ Returns `204 No Content` with no body.
     }
     ```
   </Accordion>
+  <Accordion title="Space Not Found — 404">
+    No space with this id exists in the project.
+    ```json
+    { "error": "Space not found", "code": "space/not-found" }
+    ```
+  </Accordion>
   <Accordion title="Not a Moderator — 403">
     The caller (or the user named by `actingUserId`) is not a moderator or admin of the space.
     ```json
@@ -149,7 +155,7 @@ Returns `204 No Content` with no body.
     ```json
     { "error": "An entity report takes the actions `remove-entity`, `ban-user`, `dismiss`. Not allowed: `remove-comment`.", "code": "report/invalid-actions" }
     ```
-    Also returned when `dismiss` is combined with another action:
+    Also returned when `dismiss` is combined with another action (on a chat message report the message ends with a period):
     ```json
     { "error": "Cannot combine 'dismiss' with other actions", "code": "report/invalid-actions" }
     ```
@@ -198,7 +204,7 @@ Returns `204 No Content` with no body.
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
-    The author of the reported content isn't a user in this project.
+    The author of the reported content isn't a user in this project. On a chat message report the message is `"User not found."`.
     ```json
     { "error": "User not found in this project", "code": "report/user-not-found" }
     ```

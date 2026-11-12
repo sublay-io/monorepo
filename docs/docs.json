@@ -2733,6 +2733,38 @@
   },
   "redirects": [
     {
+      "source": "/v8/api-reference/entities/is-entity-saved",
+      "destination": "/v8/api-reference/entities/check-entity-saved"
+    },
+    {
+      "source": "/v8/api-reference/app-notifications/count-unread",
+      "destination": "/v8/api-reference/app-notifications/unread-count"
+    },
+    {
+      "source": "/v8/api-reference/spaces/moderation/handle-entity-report",
+      "destination": "/v8/api-reference/spaces/moderation/handle-report"
+    },
+    {
+      "source": "/v8/api-reference/spaces/moderation/handle-comment-report",
+      "destination": "/v8/api-reference/spaces/moderation/handle-report"
+    },
+    {
+      "source": "/v8/api-reference/spaces/moderation/handle-message-report",
+      "destination": "/v8/api-reference/spaces/moderation/handle-report"
+    },
+    {
+      "source": "/v8/hooks/reports/use-handle-space-entity-report",
+      "destination": "/v8/hooks/reports/use-handle-space-report"
+    },
+    {
+      "source": "/v8/hooks/reports/use-handle-space-comment-report",
+      "destination": "/v8/hooks/reports/use-handle-space-report"
+    },
+    {
+      "source": "/v8/hooks/reports/use-handle-space-chat-report",
+      "destination": "/v8/hooks/reports/use-handle-space-report"
+    },
+    {
       "source": "/v8/api-reference/spaces/fetch-children",
       "destination": "/v8/api-reference/spaces/fetch-spaces"
     },

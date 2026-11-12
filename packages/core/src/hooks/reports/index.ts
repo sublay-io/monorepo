@@ -17,6 +17,6 @@ export type {
   Report,
 } from "./useFetchModeratedReports";
 export type {
-  HandleSpaceReportParams,
+  HandleSpaceReportProps,
   SpaceReportAction,
 } from "./useHandleSpaceReport";

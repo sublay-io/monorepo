@@ -727,7 +727,7 @@ export {
   type FetchModeratedReportsParams,
   type ReportUserReport,
   type Report,
-  type HandleSpaceReportParams,
+  type HandleSpaceReportProps,
   type SpaceReportAction,
 } from "./hooks/reports";
 

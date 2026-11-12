@@ -15,7 +15,7 @@ export type SpaceReportAction =
   | "ban-user"
   | "dismiss";
 
-export interface HandleSpaceReportParams {
+export interface HandleSpaceReportProps {
   spaceId: string;
   reportId: string;
   actions: SpaceReportAction[];
@@ -43,7 +43,7 @@ export interface HandleSpaceReportParams {
  * });
  */
 function useHandleSpaceReport(): (
-  params: HandleSpaceReportParams
+  params: HandleSpaceReportProps
 ) => Promise<void> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
@@ -55,7 +55,7 @@ function useHandleSpaceReport(): (
       actions,
       summary,
       reason,
-    }: HandleSpaceReportParams) => {
+    }: HandleSpaceReportProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }

@@ -50,8 +50,6 @@ How to render hidden entries is up to you: skip them, show "…" as above, or st
 
 ## Returns
 
-<ResponseField name="SpaceBreadcrumbEntry[]" type="array">
-  The path from the top-level space down to the given space, root first. The given space is always the last entry, and always visible; its `depth` is its nesting depth (`0` for a top-level space). A space the user can see has `id`, `shortId`, `name`, `slug`, `avatarFileId`, `visibility`, `parentSpaceId`, `depth` and `hidden: false`; one they can't see is exactly `{ hidden: true }`. For a top-level space the array holds only that space. See [Fetch Space Breadcrumb](/v8/api-reference/spaces/fetch-breadcrumb).
-</ResponseField>
+Returns a `SpaceBreadcrumbEntry[]` array: the path from the top-level space down to the given space, root first. The given space is always the last entry, and always visible; its `depth` is its nesting depth (`0` for a top-level space). A space the user can see has `id`, `shortId`, `name`, `slug`, `avatarFileId`, `visibility`, `parentSpaceId`, `depth` and `hidden: false`; one they can't see is exactly `{ hidden: true }`. For a top-level space the array holds only that space. See [Fetch Space Breadcrumb](/v8/api-reference/spaces/fetch-breadcrumb).
 
 <Tip>The `useSpace` hook automatically fetches and exposes the `breadcrumb` field — you only need this hook when fetching breadcrumbs outside of a `SpaceProvider`.</Tip>

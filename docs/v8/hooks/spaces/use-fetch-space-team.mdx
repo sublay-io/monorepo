@@ -37,6 +37,4 @@ function SpaceTeam({ spaceId }: { spaceId: string }) {
 
 ## Returns
 
-<ResponseField name="SpaceMemberWithUser[]" type="array">
-  All admins and moderators with active status, including embedded user details. When `spaceReputation` is requested, each embedded user carries an added `spaceReputation` number. See [SpaceMember](/v8/data-models/space-member) and [Reputation](/v8/data-models/reputation).
-</ResponseField>
+Returns a `SpaceMemberWithUser[]` array: all admins and moderators with active status, including embedded user details. When `spaceReputation` is requested, each embedded user carries an added `spaceReputation` number. See [SpaceMember](/v8/data-models/space-member) and [Reputation](/v8/data-models/reputation).

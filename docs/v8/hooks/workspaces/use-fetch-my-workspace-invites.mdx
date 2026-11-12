@@ -27,8 +27,8 @@ function PendingInvites() {
   const fetchMyWorkspaceInvites = useFetchMyWorkspaceInvites();
 
   const load = async () => {
-    const { data } = await fetchMyWorkspaceInvites();
-    return data; // MyWorkspaceInvitation[] — invites addressed to me
+    const invites = await fetchMyWorkspaceInvites();
+    return invites; // MyWorkspaceInvitation[] — invites addressed to me
   };
 }
 ```
@@ -39,7 +39,7 @@ None — the user is derived from the token.
 
 ## Returns
 
-`{ data: MyWorkspaceInvitation[] }` — each item a `MyWorkspaceInvitation`: a [WorkspaceInvitation](/v8/data-models/workspace-invitation) with `workspace` and `invitedBy` embedded (see the note on that page). Never paginated.
+`MyWorkspaceInvitation[]` — each item a [WorkspaceInvitation](/v8/data-models/workspace-invitation) with `workspace` and `invitedBy` embedded (see the note on that page). Never paginated.
 
 ## Related
 

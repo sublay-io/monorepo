@@ -20,8 +20,7 @@ function UsernameInput() {
 
   const handleChange = async (username: string) => {
     if (username.length < 3) return;
-    const result = await checkAvailability({ username });
-    setAvailable(result.available);
+    setAvailable(await checkAvailability({ username }));
   };
 
   return (
@@ -44,6 +43,6 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-<ResponseField name="available" type="boolean">
+<ResponseField name="boolean" type="boolean">
   `true` if the username is available, `false` if it is already taken.
 </ResponseField>

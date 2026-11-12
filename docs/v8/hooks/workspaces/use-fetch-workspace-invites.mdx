@@ -29,9 +29,9 @@ function PendingInvitations({ workspaceId }: { workspaceId: string }) {
   const fetchWorkspaceInvites = useFetchWorkspaceInvites();
 
   const load = async () => {
-    const { data } = await fetchWorkspaceInvites({ workspaceId });
-    // data: WorkspaceInvitation[] — everyone this workspace has invited
-    return data;
+    const invites = await fetchWorkspaceInvites({ workspaceId });
+    // WorkspaceInvitation[] — everyone this workspace has invited
+    return invites;
   };
 }
 ```
@@ -46,7 +46,7 @@ Paired with [`useRevokeWorkspaceInvite`](/v8/hooks/workspaces/use-revoke-workspa
 
 ## Returns
 
-`{ data: WorkspaceInvitation[] }` — each item a [WorkspaceInvitation](/v8/data-models/workspace-invitation) object. Never paginated.
+`WorkspaceInvitation[]` — each item a [WorkspaceInvitation](/v8/data-models/workspace-invitation) object. Never paginated.
 
 ## Error codes
 

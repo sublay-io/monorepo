@@ -19,8 +19,7 @@ function SlugInput() {
   const [available, setAvailable] = useState<boolean | null>(null);
 
   const handleBlur = async (slug: string) => {
-    const result = await checkSlug({ slug });
-    setAvailable(result.available);
+    setAvailable(await checkSlug({ slug }));
   };
 
   return (
@@ -41,6 +40,6 @@ function SlugInput() {
 
 ## Returns
 
-<ResponseField name="available" type="boolean">
+<ResponseField name="boolean" type="boolean">
   `true` if the slug is not currently in use within the project.
 </ResponseField>

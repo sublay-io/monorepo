@@ -29,7 +29,7 @@ function Roster({ workspaceId }: { workspaceId: string }) {
       workspaceId,
       include: ["ancestorOwners", "descendants"],
     });
-    // roster.data: WorkspaceRosterEntry[]
+    // roster: WorkspaceRosterEntry[]
   };
 }
 ```
@@ -50,7 +50,7 @@ function Roster({ workspaceId }: { workspaceId: string }) {
 
 ## Returns
 
-`WorkspaceRosterResponse` (`{ data, total }`), or `WorkspaceRosterCountsResponse` (`{ counts, total, distinctUsers }`) when `countOnly` is set.
+`WorkspaceRosterEntry[]` — one entry per distinct user, never paginated. With `countOnly`, `WorkspaceRosterCountsResponse` (`{ counts, total, distinctUsers }`) instead.
 
 Each `WorkspaceRosterEntry` is `{ user, reasons }`, where a reason is `{ type, ...detail }` — `member` carries `rank` / `relativeRank` / `capabilities` / `permissions` / `title` / `metadata`, `ancestor-owner` and `reach-holder` carry `viaWorkspaceId` (reach-holder also `capabilities`), and `descendant-member` carries `workspaceId` / `rank` / `capabilities` — **never `relativeRank`**, since rank is per-workspace and an offset across two ladders would be meaningless.
 

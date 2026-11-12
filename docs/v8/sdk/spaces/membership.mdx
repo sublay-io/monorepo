@@ -39,8 +39,8 @@ const { data, pagination } = await fetchMembers({ spaceId, page: 1, limit: 20 })
 
 // All admins + moderators (no pagination)
 const fetchTeam = useFetchSpaceTeam();
-const { data } = await fetchTeam({ spaceId });
-// data: SpaceMemberWithUser[]
+const team = await fetchTeam({ spaceId });
+// team: SpaceMemberWithUser[]
 ```
 
 Both lists are open to anyone who can read the space (its `memberPermissions.canRead`). A members-only space, or a space under one, answers `403 space/members-access-denied` to a user who isn't an active member of that members-only space or of a space between it and this one.

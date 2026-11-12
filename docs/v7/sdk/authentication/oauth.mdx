@@ -91,6 +91,8 @@ function LinkGitHubButton() {
 }
 ```
 
+Before going to the provider, Sublay shows a page naming the account the provider will be connected to, with **Continue** and **Cancel**. Cancel returns to `redirectAfterAuth` with `error=access_denied`, which `handleOAuthCallback` surfaces through `error`.
+
 The callback page logic is identical for both sign-in and link flows — `handleOAuthCallback` handles both cases.
 
 ## Expo Integration
@@ -159,7 +161,7 @@ If the user cancels or dismisses the browser, the flow resolves quietly: `isLoad
 
 ### Linking an Additional Provider
 
-`linkOAuthProvider` works exactly like the web flow and requires the user to already be signed in.
+`linkOAuthProvider` works exactly like the web flow and requires the user to already be signed in. The browser shows Sublay's page naming the account first; pressing its **Cancel** returns through your deep link with `error=access_denied`, so `error` is set (unlike dismissing the browser, which resolves quietly).
 
 ```tsx
 import { useOAuthSignIn } from "@sublay/expo";

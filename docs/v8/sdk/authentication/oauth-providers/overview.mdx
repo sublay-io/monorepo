@@ -15,13 +15,13 @@ Before your users can sign in with `useOAuthSignIn`, each provider has to be con
 
 The single most important thing to understand is that there are **two different redirect URLs**, and mixing them up is the most common reason setup fails.
 
-When a user signs in, the browser hops through three places:
+When a user signs in, the browser hops through these places:
 
 ```
-Your app  →  the provider (Google/Apple/…)  →  Sublay  →  your app
+Your app  →  Sublay  →  the provider (Google/Apple/…)  →  Sublay  →  your app
 ```
 
-1. Your app hands off to the provider's authorization page.
+1. Your app opens `authorizationUrl`, a Sublay URL. Sublay ties the sign-in to that browser and sends it on to the provider's authorization page.
 2. The provider sends the user **back to Sublay** — never straight back to you.
 3. Sublay processes the result and redirects to **your app** with tokens in the URL fragment.
 

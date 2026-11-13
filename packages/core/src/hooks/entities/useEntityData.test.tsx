@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
 import React from "react";
-import { renderHook } from "@testing-library/react";
+import { render, renderHook } from "@testing-library/react";
 import { Provider } from "react-redux";
 
 import {
@@ -358,5 +358,71 @@ describe("useEntityData — entity prop", () => {
 
       expect(result.current.provided).toEqual(expected());
     });
+  });
+});
+
+describe("useUpdateEntity / updateEntity with more than one EntityProvider", () => {
+  const A = makeEntity({ id: "A", title: "A" });
+  const B = makeEntity({ id: "B", title: "B" });
+
+  function renderTree(tree: (probe: React.ReactNode) => React.ReactNode, probe: React.ReactNode) {
+    const store = makeSublayStore();
+    const axiosPrivate = mockAxiosPrivate();
+    axiosPrivate.mockResponse("patch", { ...B, title: "B2" });
+    return render(
+      <Provider store={store}>
+        <SublayContext.Provider
+          value={{ projectId: "test-project", project: null } as SublayContextValues}
+        >
+          {tree(probe)}
+        </SublayContext.Provider>
+      </Provider>,
+    );
+  }
+
+  it("an edit of B inside A's provider leaves A's entity as it is", async () => {
+    const seen: { outer?: string | null } = {};
+    let updateEntity!: ReturnType<typeof useUpdateEntity>;
+    function Probe() {
+      updateEntity = useUpdateEntity();
+      seen.outer = useEntity().entity?.title;
+      return null;
+    }
+    renderTree((probe) => <EntityProvider entity={A}>{probe}</EntityProvider>, <Probe />);
+    expect(seen.outer).toBe("A");
+
+    await act(async () => {
+      await updateEntity({ entityId: "B", update: { title: "B2" } });
+    });
+    expect(seen.outer).toBe("A");
+  });
+
+  it("an inner provider's own updateEntity updates the inner provider, not the outer one", async () => {
+    const seen: { outer?: string | null; inner?: string | null } = {};
+    let inner!: ReturnType<typeof useEntity>;
+    function Outer() {
+      seen.outer = useEntity().entity?.title;
+      return null;
+    }
+    function Inner() {
+      inner = useEntity();
+      seen.inner = inner.entity?.title;
+      return null;
+    }
+    renderTree(
+      (probe) => (
+        <EntityProvider entity={A}>
+          <Outer />
+          <EntityProvider entity={B}>{probe}</EntityProvider>
+        </EntityProvider>
+      ),
+      <Inner />,
+    );
+
+    await act(async () => {
+      await inner.updateEntity!({ update: { title: "B2" } });
+    });
+    expect(seen.inner).toBe("B2");
+    expect(seen.outer).toBe("A");
   });
 });

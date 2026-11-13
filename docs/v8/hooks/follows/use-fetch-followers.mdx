@@ -4,6 +4,8 @@ description: "Fetch the current user's followers with pagination"
 icon: "plug"
 ---
 
+import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
+
 ## Overview
 
 Returns a function that fetches the paginated list of users who follow the currently authenticated user. Each entry is a follow row: the follow record's `id`, the follower as `user`, and `createdAt`.
@@ -60,6 +62,8 @@ The hook returns a function. That function accepts:
   Restricts which field `query` matches against — `username` or `name`. When omitted, `query` matches either field.
 </ParamField>
 
+<SpaceReputationParams variant="user" field="path" />
+
 ## Returns
 
 Returns a `PaginatedResponse<FollowRow>`. Each entry is a [`FollowRow`](/v8/data-models/follow#followrow):
@@ -71,7 +75,7 @@ Returns a `PaginatedResponse<FollowRow>`. Each entry is a [`FollowRow`](/v8/data
       ID of the follow record.
     </ResponseField>
     <ResponseField name="user" type="User">
-      The follower's user profile. See [User data model](/v8/data-models/user).
+      The follower's user profile. When `spaceReputation` is requested, it carries an added `spaceReputation` number. See [User data model](/v8/data-models/user) and [Reputation](/v8/data-models/reputation).
     </ResponseField>
     <ResponseField name="createdAt" type="string">
       ISO timestamp of when the follow was created.

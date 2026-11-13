@@ -3,6 +3,8 @@ title: "Follows"
 description: "Read and manage the logged-in user's own follow graph"
 ---
 
+import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
+
 The `follows` module acts on **your own** follow graph — the graph of the logged-in token holder. Use it to list the users you follow, list your followers, count either, and delete one of your follow relationships by its record ID.
 
 <Tip>
@@ -39,6 +41,8 @@ const { data, pagination } = await sublay.follows.fetchFollowing({
   Restricts which field `query` matches against — `username` or `name`. When omitted, `query` matches either field.
 </ParamField>
 
+<SpaceReputationParams variant="user" field="body" />
+
 **Returns** — `Promise<PaginatedResponse<FollowRow>>`, where each [`FollowRow`](/v8/data-models/follow#followrow) is `{ id, user, createdAt }`: `id` is the follow record's ID (what `deleteFollow` takes) and `user` is the followed user.
 
 ---
@@ -69,6 +73,8 @@ const { data, pagination } = await sublay.follows.fetchFollowers({
 <ParamField body="searchFields" type="string">
   Restricts which field `query` matches against — `username` or `name`. When omitted, `query` matches either field.
 </ParamField>
+
+<SpaceReputationParams variant="user" field="body" />
 
 **Returns** — `Promise<PaginatedResponse<FollowRow>>`, where each [`FollowRow`](/v8/data-models/follow#followrow) is `{ id, user, createdAt }` and `user` is the follower.
 

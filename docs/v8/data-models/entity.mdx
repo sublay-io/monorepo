@@ -105,7 +105,7 @@ To filter a list by effective NSFW, pass `nsfwFilter` to [Fetch many entities](/
 }
 ```
 
-Only the current user's own collections are listed. With no current user (a request with no credentials, or a service key without `actingUserId`), `saved` is `{ "isSaved": false, "collections": [] }`. A service key that names a user in `actingUserId` gets that user's saved state.
+Only the current user's own collections are listed. With no current user (a request with no credentials, or a service key without `actingUserId`), `saved` is `{ "isSaved": false, "collections": [] }`. A service key that names a user in `actingUserId` gets that user's saved state. On a project without the `collections` bundle, `saved` is also `{ "isSaved": false, "collections": [] }`.
 
 ## Top comments
 

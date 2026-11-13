@@ -39,6 +39,10 @@ Every user object still carries a `reputation` field, and default API responses 
 
 Every user-returning endpoint accepts an opt-in **`spaceReputation`** object that adds a `spaceReputation` number to each returned user. The `reputation` total is always included regardless; the per-space `spaceReputation` field is purely additive and only appears when you ask for it.
 
+<Info>
+**Calling the REST API directly?** Send the two flat fields, `spaceReputationId` and `spaceReputationDescendants`: in the query on a GET, in the body on a POST. Over REST they are the only form, and they aren't deprecated; an object is ignored. The `spaceReputation` object below is how the SDKs take it, and they send it as those two fields.
+</Info>
+
 ### The `spaceReputation` object (primary form)
 
 Pass a single object. Its two fields express which bucket to read and whether to sum descendants:
@@ -76,9 +80,9 @@ The object has **two variants** depending on the endpoint class — they differ 
 | **Context** | `<uuid>` · `"none"` · `"context"` | Entities, comments, reactions, chat, space members/team, moderated reports, content search & ask |
 | **User-direct** | `<uuid>` · `"none"` | Fetch user (by ID / foreign ID / username), user suggestions, followers/following/connections (your own and by user ID) |
 
-### Deprecated flat props
+### Deprecated flat props (SDKs)
 
-The object **replaces** two flat props that travelled together. They still work — passing the object **wins** if both forms are supplied — but they are deprecated and will be removed in a later major version. Prefer the object.
+In the SDKs, the object **replaces** two flat props that travelled together. They still work — passing the object **wins** if both forms are supplied — but they are deprecated and will be removed in a later major version. Prefer the object.
 
 <ParamField path="spaceReputationId" type="string" deprecated>
   **Deprecated** — use `spaceReputation.spaceId`. Same value set as the object's `spaceId` for the matching endpoint variant (`<uuid>` / `"none"`, plus `"context"` on context endpoints only).

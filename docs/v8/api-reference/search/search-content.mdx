@@ -46,7 +46,7 @@ Performs vector-similarity search over project content (entities, comments, and 
 
 This endpoint has a space in context, so it accepts the opt-in reputation params, in the body with the other fields (`spaceReputationDescendants` as a JSON boolean). They add a `spaceReputation` field to each result record's populated `user`, alongside the always-present `reputation` total. Only spaces the viewer can read count: a space they can't read reads `0` (see [Who sees space reputation](/v8/data-models/reputation#who-sees-space-reputation)). Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
 
-<SpaceReputationParams variant="context" field="body" />
+<SpaceReputationParams variant="context" field="body" rest />
 
 <Note>
   Every field goes in the body. A body field sent in the query string returns `400 search/wrong-location`.

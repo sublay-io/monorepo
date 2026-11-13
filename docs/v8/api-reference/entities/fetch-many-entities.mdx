@@ -167,7 +167,7 @@ Entities in spaces the viewer can't read (see [who can read content](/v8/data-mo
 
 This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each populated author `user`, alongside the always-present `reputation` total. Only spaces the viewer can read count: a space they can't read reads `0` (see [Who sees space reputation](/v8/data-models/reputation#who-sees-space-reputation)). Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
 
-<SpaceReputationParams variant="context" field="query" />
+<SpaceReputationParams variant="context" field="query" rest />
 
 ## Response
 
@@ -266,5 +266,5 @@ Each item in `data` is an [Entity](/v8/data-models/entity) object. File URLs are
 
 ## See Also
 
-- [Reputation data model](/v8/data-models/reputation) — the `spaceReputation` object contract
+- [Reputation data model](/v8/data-models/reputation) — the `spaceReputation` contract
 - [Entity data model](/v8/data-models/entity)

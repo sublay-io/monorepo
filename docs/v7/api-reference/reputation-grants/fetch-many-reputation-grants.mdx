@@ -74,9 +74,9 @@ Entity and comment targets are unaffected — those items are public, and both s
 
 ### Space-scoped reputation
 
-Grants carry their own `spaceId`, so this is a **context** endpoint: `spaceReputation: { spaceId: "context" }` scores each hydrated user against *that grant's own* space. The same granter appearing on two grants in different spaces therefore gets two correct numbers rather than one overwriting the other. Requires the `reputation` bundle — which this endpoint already does.
+Grants carry their own `spaceId`, so this is a **context** endpoint: `spaceReputationId=context` scores each hydrated user against *that grant's own* space. The same granter appearing on two grants in different spaces therefore gets two correct numbers rather than one overwriting the other. Requires the `reputation` bundle — which this endpoint already does.
 
-<SpaceReputationParams variant="context" field="query" />
+<SpaceReputationParams variant="context" field="query" rest />
 
 ## Response
 

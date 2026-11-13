@@ -26,7 +26,7 @@ Returns a single comment matching the given `foreignId` within the project. Usef
 
 This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to the populated author `user` (with `include=user`), alongside the always-present `reputation` total. Only spaces the viewer can read count: a space they can't read reads `0` (see [Who sees space reputation](/v8/data-models/reputation#who-sees-space-reputation)). Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
 
-<SpaceReputationParams variant="context" field="query" />
+<SpaceReputationParams variant="context" field="query" rest />
 
 ## Response
 

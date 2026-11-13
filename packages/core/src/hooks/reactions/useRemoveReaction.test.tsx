@@ -1,7 +1,8 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeEntity, makeComment } from "../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks, makeEntity, makeComment, makeUser } from "../../test-utils";
+import { setEntityListEntities } from "../../store/slices/entityListsSlice";
 import useRemoveReaction from "./useRemoveReaction";
 
 afterEach(() => {
@@ -57,5 +58,62 @@ describe("useRemoveReaction", () => {
       result.current({ targetType: "entity", targetId: "" }),
     ).rejects.toThrow("No target ID provided");
     expect(axiosPrivate.calls("delete")).toHaveLength(0);
+  });
+  describe("loaded entity lists", () => {
+    const counts = (upvote: number) => ({ ...makeEntity().reactionCounts, upvote });
+    const listEntity = () =>
+      makeEntity({
+        userReaction: "upvote",
+        reactionCounts: counts(2),
+        user: makeUser({ id: "author" }),
+        saved: { isSaved: true, collections: [{ id: "c1", name: "Reading" }] },
+      });
+
+    it("shows the reaction and the counts in every list holding the entity", async () => {
+      const { result, axiosPrivate, store } = renderHookWithAxios(() => useRemoveReaction());
+      store.dispatch(setEntityListEntities({ listId: "feed", entities: [listEntity()] }));
+      store.dispatch(
+        setEntityListEntities({
+          listId: "space",
+          entities: [makeEntity({ id: "entity-2" }), listEntity()],
+        }),
+      );
+      axiosPrivate.mockResponse(
+        "delete",
+        makeEntity({ userReaction: null, reactionCounts: counts(1), user: null }),
+      );
+
+      await act(async () => {
+        await result.current({ targetType: "entity", targetId: "entity-1" });
+      });
+
+      const lists = store.getState().sublay.entityLists.lists;
+      for (const entity of [lists.feed.entities[0], lists.space.entities[1]]) {
+        expect(entity).toEqual({
+          ...listEntity(),
+          userReaction: null,
+          reactionCounts: counts(1),
+        });
+      }
+      expect(lists.space.entities[0]).toEqual(makeEntity({ id: "entity-2" }));
+    });
+
+    it("leaves the lists as they are for a comment reaction or a failed request", async () => {
+      const { result, axiosPrivate, store } = renderHookWithAxios(() => useRemoveReaction());
+      store.dispatch(setEntityListEntities({ listId: "feed", entities: [listEntity()] }));
+      const before = store.getState().sublay.entityLists;
+
+      axiosPrivate.mockResponse("delete", makeComment({ id: "entity-1", userReaction: null }));
+      await act(async () => {
+        await result.current({ targetType: "comment", targetId: "entity-1" });
+      });
+      expect(store.getState().sublay.entityLists).toBe(before);
+
+      axiosPrivate.mockError("delete", 500, { message: "Internal error" });
+      await expect(result.current({ targetType: "entity", targetId: "entity-1" })).rejects.toMatchObject({
+        response: { status: 500 },
+      });
+      expect(store.getState().sublay.entityLists).toBe(before);
+    });
   });
 });

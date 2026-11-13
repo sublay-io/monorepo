@@ -16,6 +16,7 @@ import {
   resetCollections,
   handleError,
 } from "../../store/slices/collectionsSlice";
+import { updateEntityInLists } from "../../store/slices/entityListsSlice";
 import {
   useLazyFetchRootCollectionQuery,
   useLazyFetchSubCollectionsQuery,
@@ -56,6 +57,13 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
   );
   const entitiesByCollectionIdRef = useRef(entitiesByCollectionId);
   entitiesByCollectionIdRef.current = entitiesByCollectionId;
+
+  // Read for the collection's name when a save is shown in loaded entity lists.
+  const collectionsById = useSublaySelector(
+    (state) => state.sublay.collections.collectionsById
+  );
+  const collectionsByIdRef = useRef(collectionsById);
+  collectionsByIdRef.current = collectionsById;
 
   // RTK Query hooks
   const [fetchRootCollectionQuery] = useLazyFetchRootCollectionQuery();
@@ -239,6 +247,20 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
       handleErrorUtil(err, "Failed to add entity to collection");
       throw err;
     }
+
+    // Loaded entity lists fetched with `include=saved` show the save too.
+    // The collection is listed by name only when its name is known here.
+    dispatch(
+      updateEntityInLists({
+        entityId: entity.id,
+        saved: {
+          add: {
+            id: collectionId,
+            name: collectionsByIdRef.current[collectionId]?.name,
+          },
+        },
+      })
+    );
   }, [addToCollectionMutation, dispatch]);
 
   // Remove entity from collection — optimistically removes from Redux state, reverts on error
@@ -274,6 +296,9 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
       handleErrorUtil(err, "Failed to remove entity from collection");
       throw err;
     }
+
+    // Loaded entity lists fetched with `include=saved` show the removal too.
+    dispatch(updateEntityInLists({ entityId, saved: { remove: collectionId } }));
   }, [removeFromCollectionMutation, dispatch]);
 
   // Reset collections

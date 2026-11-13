@@ -4,6 +4,8 @@ import useProject from "../projects/useProject";
 import { Entity } from "../../interfaces/models/Entity";
 import { Mention } from "../../interfaces/models/Mention";
 import useEntity from "./useEntity";
+import { useSublayDispatch } from "../../store/hooks";
+import { updateEntityInLists } from "../../store/slices/entityListsSlice";
 
 export interface UpdateEntityProps {
   entityId: string;
@@ -26,6 +28,7 @@ function useUpdateEntity(): (props: UpdateEntityProps) => Promise<Entity> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
   const { setEntity } = useEntity();
+  const dispatch = useSublayDispatch();
 
   const updateEntity = useCallback(
     async (props: UpdateEntityProps) => {
@@ -61,9 +64,18 @@ function useUpdateEntity(): (props: UpdateEntityProps) => Promise<Entity> {
 
       const updatedEntity = response.data as Entity;
       setEntity?.(updatedEntity);
+
+      // Loaded entity lists show the edit too. Merged over each list's copy,
+      // so what the update response doesn't carry (`saved`, `space`, `files`,
+      // `topComments`, ...) stays. Two fields it does carry are left out: its
+      // `userReaction` is always null (the response isn't read as the
+      // viewer), and its `user` has no avatar or banner files.
+      const { userReaction: _userReaction, user: _user, ...changes } =
+        updatedEntity;
+      dispatch(updateEntityInLists({ entityId, changes }));
       return updatedEntity;
     },
-    [projectId, axios],
+    [projectId, axios, setEntity, dispatch],
   );
 
   return updateEntity;

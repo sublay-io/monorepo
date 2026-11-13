@@ -255,4 +255,24 @@ describe("useEntityData — entity prop", () => {
     rerender({ value: "second" });
     await waitFor(() => expect(result.current.entity?.title).toBe("second"));
   });
+  it("follows a list's copy passed in as the prop when its nested fields change", async () => {
+    const base = makeEntity({
+      id: "entity-1",
+      saved: { isSaved: false, collections: [] },
+    });
+    const { result, rerender } = renderHookWithAxios(
+      (props: { entity: typeof base }) =>
+        useEntityData({ entity: props.entity } as UseEntityDataProps),
+      { initialProps: { entity: base } },
+    );
+
+    const updated = {
+      ...base,
+      userReaction: "upvote" as const,
+      reactionCounts: { ...base.reactionCounts, upvote: 1 },
+      saved: { isSaved: true, collections: [{ id: "c1", name: "Reading" }] },
+    };
+    rerender({ entity: updated });
+    await waitFor(() => expect(result.current.entity).toEqual(updated));
+  });
 });

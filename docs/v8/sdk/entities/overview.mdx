@@ -97,6 +97,8 @@ The entity fetch hooks accept an optional `include` parameter that populates rel
 const entity = await fetchEntity({ entityId, include: ["user", "topComments"], topCommentsLimit: 3 });
 ```
 
+`EntityProvider` takes the same `include`, `topCommentsLimit` and `topCommentsSortByReaction` props for the entity it fetches. See [Loading related data](/v8/sdk/entities/provider-and-hook#loading-related-data).
+
 ## Entity Data Model
 
 See the [Entity data model](/v8/data-models/entity) for the complete field reference.

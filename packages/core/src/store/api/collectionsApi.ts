@@ -211,8 +211,8 @@ export const collectionsApi = baseApi.injectEndpoints({
 
     // Delete a collection
     // Answers `{ deletedCollectionIds }` (the collection and every collection
-    // under it). An older server answers 204 with no body, read as `null`.
-    deleteCollection: builder.mutation<DeleteCollectionResponse | null, DeleteCollectionParams>({
+    // under it).
+    deleteCollection: builder.mutation<DeleteCollectionResponse, DeleteCollectionParams>({
       query: ({ projectId, collectionId }) => ({
         url: `/${projectId}/collections/${collectionId}`,
         method: "DELETE",

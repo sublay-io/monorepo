@@ -445,13 +445,11 @@ describe("useCollectionsActions", () => {
       expect(lists(store).noSaved.entities[0]).toBe(untouched);
     });
 
-    it("deleteCollection falls back to the one collection when the server sends no body", async () => {
-      fetchHandle.fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+    it("deleteCollection doesn't touch the lists when the response names no ids", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({}));
       const { result, store } = renderHookWithStore(() => useCollectionsActions());
-      seedLists(
-        store,
-        savedIn({ id: "later", name: "Later" }, { id: "later-child", name: "Child" }),
-      );
+      seedLists(store, savedIn({ id: "later", name: "Later" }));
+      const before = lists(store).withSaved.entities[0];
 
       let returned: unknown;
       await act(async () => {
@@ -461,10 +459,47 @@ describe("useCollectionsActions", () => {
         });
       });
 
-      expect(returned).toEqual({ deletedCollectionIds: ["later"] });
-      expect(lists(store).withSaved.entities[0]).toEqual(
-        savedIn({ id: "later-child", name: "Child" }),
+      expect(returned).toEqual({ deletedCollectionIds: [] });
+      expect(lists(store).withSaved.entities[0]).toBe(before);
+    });
+
+    it("a save that finishes after its collection was deleted doesn't put it back in `saved`", async () => {
+      let finishSave!: (r: Response) => void;
+      fetchHandle.fetchMock.mockImplementationOnce(
+        () => new Promise<Response>((resolve) => { finishSave = resolve; }),
       );
+      const { result, store } = renderHookWithStore(() => useCollectionsActions());
+      seedLists(store, savedIn({ id: "root", name: "Root" }));
+
+      let savePromise!: Promise<void>;
+      act(() => {
+        savePromise = result.current.addToCollection({
+          projectId: "test-project",
+          collectionId: "later-child",
+          entity: makeEntity(),
+        });
+      });
+
+      // The delete of an ancestor ("later") answers first and names the target.
+      fetchHandle.fetchMock.mockResolvedValueOnce(
+        jsonResponse({ deletedCollectionIds: ["later", "later-child"] }),
+      );
+      await act(async () => {
+        await result.current.deleteCollection({ projectId: "test-project", collection: LATER });
+      });
+
+      await act(async () => {
+        finishSave(
+          jsonResponse({
+            success: true,
+            collection: { id: "later-child", name: "Child", entityCount: 1 },
+          }),
+        );
+        await savePromise;
+      });
+
+      expect(lists(store).withSaved.entities[0]).toEqual(savedIn({ id: "root", name: "Root" }));
+      expect(store.getState().sublay.collections.entitiesByCollectionId["later-child"]).toBeUndefined();
     });
 
     it("a failed deleteCollection leaves the lists and collections as they are", async () => {

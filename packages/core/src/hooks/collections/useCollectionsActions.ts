@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useRef } from "react";
+import { useStore } from "react-redux";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
+import type { SublayState } from "../../store/sublayReducers";
 import {
   setLoading,
   openCollection,
@@ -62,6 +64,9 @@ export interface UseCollectionsActionsValues {
  */
 export function useCollectionsActions(): UseCollectionsActionsValues {
   const dispatch = useSublayDispatch();
+  // Read at the moment a request finishes (a ref would lag until the next
+  // render), to see whether its collection was deleted meanwhile.
+  const store = useStore<{ sublay: SublayState }>();
 
   // Use a ref so removeFromCollection can read the latest entities without being in deps
   const entitiesByCollectionId = useSublaySelector(
@@ -232,12 +237,9 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
         collectionId: collection.id,
       }).unwrap();
       // The server names every collection the delete removed (this one and
-      // every one under it). An older server answers 204 with no body; then
-      // only this collection is known to be gone.
+      // every one under it).
       const returnedIds = result?.deletedCollectionIds;
-      deletedCollectionIds = Array.isArray(returnedIds)
-        ? returnedIds
-        : [collection.id];
+      deletedCollectionIds = Array.isArray(returnedIds) ? returnedIds : [];
     } catch (err) {
       handleErrorUtil(err, "Failed to delete collection");
       return;
@@ -292,7 +294,11 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
     // Loaded entity lists fetched with `include=saved` show the save too,
     // with the collection's name from the response. (Without a name the
     // collection couldn't be listed, so the lists are left as they are.)
-    if (collectionName !== undefined) {
+    // A save that finishes after its collection (or one above it) was
+    // deleted isn't shown: the delete already took it out of `saved`.
+    const deletedMeanwhile =
+      !!store.getState().sublay.collections.deletedCollectionIds[collectionId];
+    if (collectionName !== undefined && !deletedMeanwhile) {
       dispatch(
         updateEntityInLists({
           entityId: entity.id,
@@ -300,7 +306,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
         })
       );
     }
-  }, [addToCollectionMutation, dispatch]);
+  }, [addToCollectionMutation, dispatch, store]);
 
   // Remove entity from collection — optimistically removes from Redux state, reverts on error
   const removeFromCollection = useCallback(async ({

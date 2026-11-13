@@ -57,6 +57,7 @@ const initial: CollectionsState = {
   loading: false,
   currentProjectId: undefined,
   entitiesByCollectionId: {},
+  deletedCollectionIds: {},
 };
 
 describe("collectionsSlice", () => {
@@ -250,6 +251,32 @@ describe("collectionsSlice", () => {
       expect(Object.keys(s.collectionsById)).toEqual(["sibling"]);
       expect(s.subcollectionsMap).toEqual({ root: ["sibling"] });
       expect(s.entitiesByCollectionId).toEqual({});
+    });
+
+    it("keeps deleted collections from coming back through late updates", () => {
+      let s = reducer(
+        initial,
+        handleCollectionDeletion({
+          collectionId: "child",
+          parentId: "root",
+          deletedCollectionIds: ["child", "grandchild"],
+        }),
+      );
+      expect(s.deletedCollectionIds).toEqual({ child: true, grandchild: true });
+
+      s = reducer(s, setCollectionEntities({ collectionId: "child", entities: [makeEntity()] }));
+      s = reducer(s, appendCollectionEntities({ collectionId: "child", entities: [makeEntity()] }));
+      s = reducer(s, prependCollectionEntity({ collectionId: "grandchild", entity: makeEntity() }));
+      s = reducer(
+        s,
+        insertCollectionEntityAt({ collectionId: "grandchild", entity: makeEntity(), index: 0 }),
+      );
+      s = reducer(s, updateCollectionInSubCollections(makeCollection({ id: "child" })));
+      expect(s.entitiesByCollectionId).toEqual({});
+      expect(s.collectionsById).toEqual({});
+
+      s = reducer(s, resetCollections());
+      expect(s.deletedCollectionIds).toEqual({ child: true, grandchild: true });
     });
 
     it("goes back past deleted collections in the history", () => {

@@ -26,6 +26,14 @@ export interface CollectionsState {
 
   // Entity lists per collection (shared source of truth for optimistic updates)
   entitiesByCollectionId: Record<string, Entity[]>;
+
+  // Every collection deleted in this session (filled by
+  // handleCollectionDeletion). A request that finishes after its collection
+  // was deleted must not bring it back: a save into it isn't shown in loaded
+  // entity lists, and its entity list isn't recreated. Kept by
+  // resetCollections (a deleted collection stays deleted); cleared on an
+  // account change.
+  deletedCollectionIds: Record<string, true>;
 }
 
 // Initial state
@@ -37,6 +45,7 @@ const initialState: CollectionsState = {
   loading: false,
   currentProjectId: undefined,
   entitiesByCollectionId: {},
+  deletedCollectionIds: {},
 };
 
 // Create the slice. Not exported: `Entity` and `Comment` reference each other
@@ -130,6 +139,8 @@ const collectionsSlice = createSlice({
     // Update a collection (now just updates in collectionsById)
     updateCollectionInSubCollections: (state, action: PayloadAction<Collection>) => {
       const updatedCollection = action.payload;
+      // A rename that finishes after the delete doesn't bring it back.
+      if (state.deletedCollectionIds[updatedCollection.id]) return;
 
       // Update in collectionsById (single source of truth)
       state.collectionsById[updatedCollection.id] = updatedCollection;
@@ -202,6 +213,8 @@ const collectionsSlice = createSlice({
       }
 
       deleted.forEach((id) => {
+        state.deletedCollectionIds[id] = true;
+
         // Remove from collectionsById
         delete state.collectionsById[id];
 
@@ -230,6 +243,7 @@ const collectionsSlice = createSlice({
       action: PayloadAction<{ collectionId: string; entities: Entity[] }>
     ) => {
       const { collectionId, entities } = action.payload;
+      if (state.deletedCollectionIds[collectionId]) return;
       state.entitiesByCollectionId[collectionId] = entities;
     },
 
@@ -238,6 +252,7 @@ const collectionsSlice = createSlice({
       action: PayloadAction<{ collectionId: string; entities: Entity[] }>
     ) => {
       const { collectionId, entities } = action.payload;
+      if (state.deletedCollectionIds[collectionId]) return;
       if (!state.entitiesByCollectionId[collectionId]) {
         state.entitiesByCollectionId[collectionId] = [];
       }
@@ -249,6 +264,7 @@ const collectionsSlice = createSlice({
       action: PayloadAction<{ collectionId: string; entity: Entity }>
     ) => {
       const { collectionId, entity } = action.payload;
+      if (state.deletedCollectionIds[collectionId]) return;
       if (!state.entitiesByCollectionId[collectionId]) {
         state.entitiesByCollectionId[collectionId] = [];
       }
@@ -271,6 +287,7 @@ const collectionsSlice = createSlice({
       action: PayloadAction<{ collectionId: string; entity: Entity; index: number }>
     ) => {
       const { collectionId, entity, index } = action.payload;
+      if (state.deletedCollectionIds[collectionId]) return;
       if (!state.entitiesByCollectionId[collectionId]) {
         state.entitiesByCollectionId[collectionId] = [];
       }

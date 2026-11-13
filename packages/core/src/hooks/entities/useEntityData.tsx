@@ -89,6 +89,13 @@ function fetchOptionsKey({
 }
 
 const NO_OPTIONS_KEY = fetchOptionsKey({});
+
+/**
+ * The cache entry the held entity belongs to: identifier key, options key,
+ * and the Sublay id of the entity loaded there (null for a "not found"), so
+ * an entity that isn't that one is never written into the entry.
+ */
+type HeldKey = { id: string; options: string; entityId: string | null };
 const NOT_LOADED = Symbol("not loaded");
 
 export interface UseEntityDataValues {
@@ -133,7 +140,11 @@ function useEntityData({
   // a fetch by identifier), and the last value this hook itself put in state,
   // so a change made from outside (an edit merged in, a comment count, a
   // delete) can be told apart and written back to its entry.
-  const heldCacheKeyRef = useRef<{ id: string; options: string } | null>(null);
+  const heldCacheKeyRef = useRef<HeldKey | null>(null);
+
+  // The identifier the request in flight is for (null when none), so clearing
+  // the entity cancels only a request for that same identifier.
+  const inFlightIdKeyRef = useRef<string | null>(null);
   const loadedValueRef = useRef<Entity | null | undefined | typeof NOT_LOADED>(
     NOT_LOADED,
   );
@@ -182,22 +193,50 @@ function useEntityData({
   const handleDeleteEntity = useCallback(async () => {
     if (!entity) return;
 
+    const deletedId = entity.id;
     try {
-      await deleteEntity({ entityId: entity.id });
-      setEntity(undefined);
+      await deleteEntity({ entityId: deletedId });
+      // Only what was deleted: the provider may have moved on to another
+      // entity while the request was out.
+      for (const [idKey, byOptions] of Object.entries(entityCache.current)) {
+        if (Object.values(byOptions).some((cached) => cached.id === deletedId)) {
+          delete entityCache.current[idKey];
+        }
+      }
+      setEntity((current) => (current?.id === deletedId ? undefined : current));
     } catch (err) {
       handleError(err, "Failed to delete entity");
     }
   }, [entity, deleteEntity]);
 
-  const showLoaded = (
-    value: Entity | null,
-    key: { id: string; options: string } | null,
-  ) => {
+  const showLoaded = (value: Entity | null, key: HeldKey) => {
     heldCacheKeyRef.current = key;
     loadedValueRef.current = value;
     setEntity(value);
   };
+
+  // A change to the held entity made from outside this hook's loading (an
+  // edit merged in, a comment count, `setEntity`, a delete) is written back
+  // to its cache entry, and the identifier's entries for other options are
+  // dropped, since they no longer match it. Clearing the entity drops them
+  // all and cancels a request in flight for that same identifier, so nothing
+  // brings it back. Declared before the fetch effect so, when a change and
+  // a switch of identifier land in one commit, the change is filed under the
+  // identifier it was made on; and an entity that isn't the one loaded under
+  // the held entry is never written into it.
+  useEffect(() => {
+    if (entity === loadedValueRef.current) return;
+    const held = heldCacheKeyRef.current;
+    if (!held) return;
+    if (entity === undefined || entity === null) {
+      delete entityCache.current[held.id];
+      heldCacheKeyRef.current = null;
+      if (inFlightIdKeyRef.current === held.id) requestSeqRef.current += 1;
+      return;
+    }
+    if (entity.id !== held.entityId) return;
+    entityCache.current[held.id] = { [held.options]: entity };
+  }, [entity]);
 
   useEffect(() => {
     const handleFetchEntity = async () => {
@@ -211,7 +250,11 @@ function useEntityData({
       }
 
       const idKey = `${entityId ?? ""}-${foreignId ?? ""}-${shortId ?? ""}`;
-      const key = { id: idKey, options: optionsKey };
+      const keyFor = (loaded: Entity | null): HeldKey => ({
+        id: idKey,
+        options: optionsKey,
+        entityId: loaded?.id ?? null,
+      });
 
       const userChanged = fetchedForUserRef.current !== userId;
       fetchedForUserRef.current = userId;
@@ -228,7 +271,7 @@ function useEntityData({
             (foreignId && held.foreignId === foreignId) ||
             (shortId && held.shortId === shortId))
         ) {
-          heldCacheKeyRef.current = key;
+          heldCacheKeyRef.current = keyFor(held);
           return;
         }
       }
@@ -237,10 +280,11 @@ function useEntityData({
       const cached = entityCache.current[idKey]?.[optionsKey];
       if (cached) {
         heldOptionsKeyRef.current = optionsKey;
-        showLoaded(cached, key);
+        showLoaded(cached, keyFor(cached));
         return;
       }
 
+      inFlightIdKeyRef.current = idKey;
       try {
         let fetchedEntity: Entity | null = null;
         const options = fetchOptions;
@@ -264,13 +308,13 @@ function useEntityData({
 
         if (fetchedEntity) {
           (entityCache.current[idKey] ??= {})[optionsKey] = fetchedEntity;
-          showLoaded(fetchedEntity, key);
-        } else {
-          showLoaded(null, key);
         }
+        showLoaded(fetchedEntity, keyFor(fetchedEntity));
       } catch (err) {
         // The held entity (if any) stays.
         handleError(err, "Failed to fetch entity");
+      } finally {
+        if (requestSeq === requestSeqRef.current) inFlightIdKeyRef.current = null;
       }
     };
 
@@ -288,24 +332,6 @@ function useEntityData({
     optionsKey,
     userId,
   ]);
-
-  // A change to the held entity made from outside this hook's loading (an
-  // edit merged in, a comment count, `setEntity`, a delete) is written back
-  // to its cache entry, and the identifier's entries for other options are
-  // dropped, since they no longer match it. A delete drops them all and
-  // cancels any request in flight, so nothing brings the entity back.
-  useEffect(() => {
-    if (entity === loadedValueRef.current) return;
-    const held = heldCacheKeyRef.current;
-    if (!held) return;
-    if (entity === undefined || entity === null) {
-      delete entityCache.current[held.id];
-      heldCacheKeyRef.current = null;
-      requestSeqRef.current += 1;
-      return;
-    }
-    entityCache.current[held.id] = { [held.options]: entity };
-  }, [entity]);
 
   // Stable while its content is the same, so an object created again on every
   // render (an inline `entity={{ ... }}`) isn't a change.

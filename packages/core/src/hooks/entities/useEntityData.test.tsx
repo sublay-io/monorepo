@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
-import React from "react";
+import React, { useState } from "react";
 import { render, renderHook } from "@testing-library/react";
 import { Provider } from "react-redux";
 
@@ -852,6 +852,107 @@ describe("useEntityData — requests superseded or undone", () => {
 
     expect(result.current.entity).toBeUndefined();
     expect(axiosPrivate.calls("get")).toHaveLength(1);
+  });
+
+  it("a delete that resolves after switching to another id leaves the new entity", async () => {
+    const x = makeEntity({ id: "X", title: "X" });
+    const y = makeEntity({ id: "Y", title: "Y" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "X" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", x),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+
+    let releaseDelete!: () => void;
+    vi.mocked(axiosPrivate.instance.delete as () => Promise<unknown>).mockImplementationOnce(
+      (() =>
+        new Promise((resolve) => {
+          releaseDelete = () => resolve({ data: undefined, status: 204 });
+        })) as never,
+    );
+    let deleting!: Promise<void>;
+    act(() => {
+      deleting = result.current.deleteEntity();
+    });
+
+    axiosPrivate.mockResponse("get", y);
+    rerender({ entityId: "Y" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("Y"));
+
+    await act(async () => {
+      releaseDelete();
+      await deleting;
+    });
+    await waitABit();
+    expect(result.current.entity?.title).toBe("Y");
+
+    // Y's cache entry survived the delete: away to Z and back is no request.
+    axiosPrivate.mockResponse("get", makeEntity({ id: "Z", title: "Z" }));
+    rerender({ entityId: "Z" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("Z"));
+    rerender({ entityId: "Y" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("Y"));
+    expect(axiosPrivate.calls("get")).toHaveLength(3);
+  });
+
+  it("clearing the entity while another id's fetch is in flight doesn't cancel that fetch", async () => {
+    const x = makeEntity({ id: "X", title: "X" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "X" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", x),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+
+    const releaseY = holdNextGet(axiosPrivate);
+    rerender({ entityId: "Y" });
+    act(() => {
+      result.current.setEntity(undefined);
+    });
+    await releaseY(makeEntity({ id: "Y", title: "Y" }));
+    await waitABit();
+
+    expect(result.current.entity?.title).toBe("Y");
+  });
+
+  it("a local change batched with a switch to a cached id stays with its own entity", async () => {
+    const x = makeEntity({ id: "X", title: "X", commentsCount: 0 });
+    const y = makeEntity({ id: "Y", title: "Y" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => {
+        const [id, setId] = useState("X");
+        return { ...useEntityData({ entityId: id }), setId };
+      },
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", x) },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+    axiosPrivate.mockResponse("get", y);
+    act(() => result.current.setId("Y"));
+    await waitFor(() => expect(result.current.entity?.title).toBe("Y"));
+    act(() => result.current.setId("X"));
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+
+    act(() => {
+      result.current.setEntity((c) => c && { ...c, commentsCount: 42 });
+      result.current.setId("Y");
+    });
+    await waitABit();
+    expect(result.current.entity?.id).toBe("Y");
+
+    act(() => result.current.setId("X"));
+    await waitABit();
+    expect(result.current.entity?.id).toBe("X");
+    expect(result.current.entity?.commentsCount).toBe(42);
+
+    act(() => result.current.setId("Y"));
+    await waitABit();
+    expect(result.current.entity?.id).toBe("Y");
+    expect(axiosPrivate.calls("get")).toHaveLength(2);
   });
 
   it("local changes during an options-change fetch don't start more requests", async () => {

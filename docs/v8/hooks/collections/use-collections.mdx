@@ -85,7 +85,7 @@ This hook accepts no required parameters. Pass an empty object or nothing.
 </ResponseField>
 
 <ResponseField name="updateCollection" type="({ collectionId, update }: UpdateCollectionProps) => Promise<void>">
-  Rename a collection. `update` accepts `{ name: string }`. The root collection cannot be renamed.
+  Rename a collection. `update` accepts `{ name: string }`. The root collection cannot be renamed. Loaded entity lists that list the collection in `saved` show the new name.
 </ResponseField>
 
 <ResponseField name="deleteCollection" type="({ collection }: DeleteCollectionProps) => Promise<void>">

@@ -59,7 +59,7 @@ function QuickSaveButton({ entityId, collectionId, projectId }) {
 </ResponseField>
 
 <ResponseField name="updateCollection" type="({ projectId, collectionId, update }: ...) => Promise<void>">
-  Update a collection's `name`.
+  Update a collection's `name`. Loaded entity lists that list the collection in `saved` show the new name.
 </ResponseField>
 
 <ResponseField name="deleteCollection" type="({ projectId, collection }: ...) => Promise<void>">

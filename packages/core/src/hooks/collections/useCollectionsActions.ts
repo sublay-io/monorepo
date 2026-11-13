@@ -16,7 +16,10 @@ import {
   resetCollections,
   handleError,
 } from "../../store/slices/collectionsSlice";
-import { updateEntityInLists } from "../../store/slices/entityListsSlice";
+import {
+  renameSavedCollectionInLists,
+  updateEntityInLists,
+} from "../../store/slices/entityListsSlice";
 import {
   useLazyFetchRootCollectionQuery,
   useLazyFetchSubCollectionsQuery,
@@ -188,6 +191,12 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
       if (result) {
         // Check if it's the current collection or a sub-collection
         dispatch(updateCollectionInSubCollections(result));
+        // Loaded entities that list this collection in `saved` show the new name.
+        if (result.name) {
+          dispatch(
+            renameSavedCollectionInLists({ collectionId, name: result.name })
+          );
+        }
       }
     } catch (err) {
       handleErrorUtil(err, "Failed to update collection");

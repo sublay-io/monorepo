@@ -11,6 +11,7 @@ import reducer, {
   addEntity,
   removeEntity,
   updateEntityInLists,
+  renameSavedCollectionInLists,
   updateKeywordsFilters,
   cleanupList,
   cleanupOldLists,
@@ -197,6 +198,35 @@ describe("entityListsSlice", () => {
 
       const unchanged = reducer(initial, removeEntity({ listId: "missing", entityId: "e1" }));
       expect(unchanged).toEqual(initial);
+    });
+  });
+
+  describe("renameSavedCollectionInLists", () => {
+    it("renames the collection in every copy that lists it, and keeps the rest", () => {
+      const listed = {
+        ...makeEntity("e1"),
+        saved: { isSaved: true, collections: [{ id: "a", name: "Old" }, { id: "b", name: "B" }] },
+      } as Entity;
+      const unlisted = { ...makeEntity("e2"), saved: { isSaved: true, collections: [{ id: "b", name: "B" }] } } as Entity;
+      const noSaved = makeEntity("e3");
+      let s0 = reducer(initial, setEntityListEntities({ listId: "feed", entities: [listed, unlisted, noSaved] }));
+      s0 = reducer(s0, setEntityListEntities({ listId: "space", entities: [listed] }));
+      const s = reducer(s0, renameSavedCollectionInLists({ collectionId: "a", name: "New" }));
+      for (const listId of ["feed", "space"]) {
+        expect(s.lists[listId].entities[0].saved).toEqual({
+          isSaved: true,
+          collections: [{ id: "a", name: "New" }, { id: "b", name: "B" }],
+        });
+      }
+      expect(s.lists.feed.entities[1]).toBe(s0.lists.feed.entities[1]);
+      expect(s.lists.feed.entities[2]).toBe(s0.lists.feed.entities[2]);
+    });
+
+    it("keeps a copy that already shows the name as the same object", () => {
+      const e = { ...makeEntity("e1"), saved: { isSaved: true, collections: [{ id: "a", name: "Same" }] } } as Entity;
+      const s0 = reducer(initial, setEntityListEntities({ listId: "feed", entities: [e] }));
+      const s = reducer(s0, renameSavedCollectionInLists({ collectionId: "a", name: "Same" }));
+      expect(s.lists.feed.entities[0]).toBe(s0.lists.feed.entities[0]);
     });
   });
 

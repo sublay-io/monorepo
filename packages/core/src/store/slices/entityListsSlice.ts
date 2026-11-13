@@ -508,6 +508,31 @@ const entityListsSlice = createSlice({
       });
     },
 
+    // A collection was renamed: every loaded copy that lists it in `saved`
+    // shows the new name. Copies that don't list it are kept as they are.
+    renameSavedCollectionInLists: (
+      state,
+      action: PayloadAction<{ collectionId: string; name: string }>
+    ) => {
+      const { collectionId, name } = action.payload;
+
+      Object.values(state.lists).forEach((list) => {
+        list.entities.forEach((entity, index) => {
+          const collections = entity.saved?.collections;
+          if (!collections?.some((c) => c.id === collectionId && c.name !== name)) return;
+          list.entities[index] = {
+            ...entity,
+            saved: {
+              ...entity.saved!,
+              collections: collections.map((c) =>
+                c.id === collectionId ? { ...c, name } : c
+              ),
+            },
+          };
+        });
+      });
+    },
+
     // Update keywords filters (special case due to complexity)
     updateKeywordsFilters: (
       state,
@@ -626,6 +651,7 @@ export const {
   addEntity,
   removeEntity,
   updateEntityInLists,
+  renameSavedCollectionInLists,
   updateKeywordsFilters,
   cleanupList,
   cleanupOldLists,

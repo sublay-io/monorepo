@@ -261,6 +261,44 @@ describe("useCollectionsActions", () => {
     const lists = (store: ReturnType<typeof renderHookWithStore>["store"]) =>
       store.getState().sublay.entityLists.lists;
 
+    it("updateCollection renames the collection in copies that list it in `saved`", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ ...LATER, name: "Someday" }));
+      const { result, store } = renderHookWithStore(() => useCollectionsActions());
+      act(() => result.current.openCollection(LATER));
+      seedLists(store, savedIn({ id: "root", name: "Root" }, { id: "later", name: "Later" }));
+
+      await act(async () => {
+        await result.current.updateCollection({
+          projectId: "test-project",
+          collectionId: "later",
+          update: { name: "Someday" },
+        });
+      });
+
+      expect(lists(store).withSaved.entities[0]).toEqual(
+        savedIn({ id: "root", name: "Root" }, { id: "later", name: "Someday" }),
+      );
+      expect(lists(store).noSaved.entities[0]).toEqual(makeEntity({ title: "Kept" }));
+    });
+
+    it("a failed rename leaves the lists as they are", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ error: "x" }, 500));
+      const { result, store } = renderHookWithStore(() => useCollectionsActions());
+      const entity = savedIn({ id: "later", name: "Later" });
+      seedLists(store, entity);
+      const before = lists(store).withSaved.entities[0];
+
+      await act(async () => {
+        await result.current.updateCollection({
+          projectId: "test-project",
+          collectionId: "later",
+          update: { name: "Someday" },
+        });
+      });
+
+      expect(lists(store).withSaved.entities[0]).toBe(before);
+    });
+
     it("addToCollection appends the collection, named from the response, to copies that have `saved`", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(
         jsonResponse({ success: true, collection: { id: "later", name: "Later", entityCount: 1 } }),

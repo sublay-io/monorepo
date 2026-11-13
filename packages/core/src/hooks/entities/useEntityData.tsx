@@ -23,57 +23,51 @@ import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
 
 /**
  * What a fetching provider asks the server to attach: the same `include` and
- * top-comment options the entity fetch hooks take.
+ * top-comment options the entity fetch hooks take. Allowed on every variant
+ * so an identifier picked at runtime can share them; with `entity` they are
+ * ignored (the entity is used as given).
  */
 type EntityFetchOptions = TopCommentsParams & {
   include?: EntityIncludeParam;
 };
 
-/**
- * An `entity` passed in is used as given, so the fetch options don't apply to
- * it; they are typed out of that variant so passing them there is an error
- * rather than something silently ignored.
- */
-type NoEntityFetchOptions = {
-  [K in keyof EntityFetchOptions]?: undefined;
-};
-
-export type UseEntityDataProps =
-  | ({
-      entity: Entity;
-      entityId?: undefined;
-      foreignId?: undefined;
-      shortId?: undefined;
-      createIfNotFound?: undefined;
-    } & NoEntityFetchOptions)
-  | ({
-      entity?: undefined;
-      entityId: string;
-      foreignId?: undefined;
-      shortId?: undefined;
-      createIfNotFound?: undefined;
-    } & EntityFetchOptions)
-  | ({
-      entity?: undefined;
-      entityId?: undefined;
-      foreignId?: undefined;
-      shortId: string;
-      createIfNotFound?: undefined;
-    } & EntityFetchOptions)
-  | ({
-      entity?: undefined;
-      entityId?: undefined;
-      foreignId: string;
-      shortId?: undefined;
-      createIfNotFound?: boolean;
-    } & EntityFetchOptions);
+export type UseEntityDataProps = EntityFetchOptions &
+  (
+    | {
+        entity: Entity;
+        entityId?: undefined;
+        foreignId?: undefined;
+        shortId?: undefined;
+        createIfNotFound?: undefined;
+      }
+    | {
+        entity?: undefined;
+        entityId: string;
+        foreignId?: undefined;
+        shortId?: undefined;
+        createIfNotFound?: undefined;
+      }
+    | {
+        entity?: undefined;
+        entityId?: undefined;
+        foreignId?: undefined;
+        shortId: string;
+        createIfNotFound?: undefined;
+      }
+    | {
+        entity?: undefined;
+        entityId?: undefined;
+        foreignId: string;
+        shortId?: undefined;
+        createIfNotFound?: boolean;
+      }
+  );
 
 /**
  * The fetch options as a string, for the cache key and for telling whether the
  * held entity was fetched with the current options. It is built from what the
- * fetch hooks actually send: `include` joined with commas as given (an array
- * and the same comma string are one key; order and case are kept, as they are
- * in the request), and the top-comment options only when `include` asks for
+ * fetch hooks actually send: `include` joined with commas as given (order and
+ * case are kept, as they are in the request), and the top-comment options only when `include` asks for
  * `topComments` (otherwise they aren't sent, so they don't change the key).
  */
 function fetchOptionsKey({
@@ -93,6 +87,9 @@ function fetchOptionsKey({
     topComments.topCommentsSortByReaction ?? null,
   ]);
 }
+
+const NO_OPTIONS_KEY = fetchOptionsKey({});
+const NOT_LOADED = Symbol("not loaded");
 
 export interface UseEntityDataValues {
   entity: Entity | null | undefined;
@@ -124,16 +121,31 @@ function useEntityData({
   });
   const optionsKey = fetchOptionsKey(fetchOptions);
 
-  // Cache of fetched entities, keyed by identifier + fetch options, so going
-  // back to options used before shows that entity without a request.
-  const entityCache = useRef<Record<string, Entity>>({});
+  // Cache of entities by identifier, then by fetch options, so going back to
+  // options used before shows that entity without a request.
+  const entityCache = useRef<Record<string, Record<string, Entity>>>({});
 
   // The options the held entity was fetched with. When they change, the
   // entity is fetched again even though it matches the identifier.
   const heldOptionsKeyRef = useRef(optionsKey);
 
-  // Only the latest request may set the entity: one made for options (or a
-  // user) that have since changed is dropped when it lands.
+  // The cache entry the held entity belongs to (null when it didn't come from
+  // a fetch by identifier), and the last value this hook itself put in state,
+  // so a change made from outside (an edit merged in, a comment count, a
+  // delete) can be told apart and written back to its entry.
+  const heldCacheKeyRef = useRef<{ id: string; options: string } | null>(null);
+  const loadedValueRef = useRef<Entity | null | undefined | typeof NOT_LOADED>(
+    NOT_LOADED,
+  );
+
+  // The held entity, read by the fetch effect without being one of its
+  // dependencies, so a local change doesn't start another request.
+  const entityRef = useRef(entity);
+  entityRef.current = entity;
+
+  // Every run of the fetch effect bumps this, and a response only lands if
+  // no later run has happened: whatever a run decides (a fetch, the cache,
+  // keeping the held entity, an entity prop) supersedes what was in flight.
   const requestSeqRef = useRef(0);
 
   // The entity carries the signed-in user's own reaction (`userReaction`), so
@@ -178,28 +190,54 @@ function useEntityData({
     }
   }, [entity, deleteEntity]);
 
+  const showLoaded = (
+    value: Entity | null,
+    key: { id: string; options: string } | null,
+  ) => {
+    heldCacheKeyRef.current = key;
+    loadedValueRef.current = value;
+    setEntity(value);
+  };
+
   useEffect(() => {
     const handleFetchEntity = async () => {
-      if (!foreignId && !entityId && !shortId) return;
+      const requestSeq = ++requestSeqRef.current;
+
+      if (!foreignId && !entityId && !shortId) {
+        // An entity prop (or nothing): the options don't apply.
+        heldCacheKeyRef.current = null;
+        heldOptionsKeyRef.current = NO_OPTIONS_KEY;
+        return;
+      }
+
+      const idKey = `${entityId ?? ""}-${foreignId ?? ""}-${shortId ?? ""}`;
+      const key = { id: idKey, options: optionsKey };
 
       const userChanged = fetchedForUserRef.current !== userId;
       fetchedForUserRef.current = userId;
       if (userChanged) {
         entityCache.current = {};
+        // The held entity was the previous user's: not written back.
+        heldCacheKeyRef.current = null;
       } else if (heldOptionsKeyRef.current === optionsKey) {
         // Already holding this entity, fetched with these options.
-        if (entity && entityId && entity.id === entityId) return;
-        if (entity && foreignId && entity.foreignId === foreignId) return;
-        if (entity && shortId && entity.shortId === shortId) return;
+        const held = entityRef.current;
+        if (
+          held &&
+          ((entityId && held.id === entityId) ||
+            (foreignId && held.foreignId === foreignId) ||
+            (shortId && held.shortId === shortId))
+        ) {
+          heldCacheKeyRef.current = key;
+          return;
+        }
       }
 
-      const uniqueKey = `${entityId ?? ""}-${foreignId ?? ""}-${shortId ?? ""}-${optionsKey}`;
-      const requestSeq = ++requestSeqRef.current;
-
       // If we have a cached entity, update the state and exit.
-      if (entityCache.current[uniqueKey]) {
+      const cached = entityCache.current[idKey]?.[optionsKey];
+      if (cached) {
         heldOptionsKeyRef.current = optionsKey;
-        setEntity(entityCache.current[uniqueKey]);
+        showLoaded(cached, key);
         return;
       }
 
@@ -218,17 +256,20 @@ function useEntityData({
           fetchedEntity = await fetchEntityByShortId({ shortId, ...options });
         }
 
+        // Superseded by a later run. A local change made while this request
+        // was in flight (and not superseded) is replaced by the response:
+        // there is no general way to tell which of the two is newer.
         if (requestSeq !== requestSeqRef.current) return;
         heldOptionsKeyRef.current = optionsKey;
 
         if (fetchedEntity) {
-          // Store the fetched entity in cache.
-          entityCache.current[uniqueKey] = fetchedEntity;
-          setEntity(fetchedEntity);
+          (entityCache.current[idKey] ??= {})[optionsKey] = fetchedEntity;
+          showLoaded(fetchedEntity, key);
         } else {
-          setEntity(null);
+          showLoaded(null, key);
         }
       } catch (err) {
+        // The held entity (if any) stays.
         handleError(err, "Failed to fetch entity");
       }
     };
@@ -242,12 +283,29 @@ function useEntityData({
     entityId,
     foreignId,
     shortId,
-    entity,
     createIfNotFound,
     fetchOptions,
     optionsKey,
     userId,
   ]);
+
+  // A change to the held entity made from outside this hook's loading (an
+  // edit merged in, a comment count, `setEntity`, a delete) is written back
+  // to its cache entry, and the identifier's entries for other options are
+  // dropped, since they no longer match it. A delete drops them all and
+  // cancels any request in flight, so nothing brings the entity back.
+  useEffect(() => {
+    if (entity === loadedValueRef.current) return;
+    const held = heldCacheKeyRef.current;
+    if (!held) return;
+    if (entity === undefined || entity === null) {
+      delete entityCache.current[held.id];
+      heldCacheKeyRef.current = null;
+      requestSeqRef.current += 1;
+      return;
+    }
+    entityCache.current[held.id] = { [held.options]: entity };
+  }, [entity]);
 
   // Stable while its content is the same, so an object created again on every
   // render (an inline `entity={{ ... }}`) isn't a change.

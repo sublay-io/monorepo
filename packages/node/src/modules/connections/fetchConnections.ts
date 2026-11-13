@@ -1,9 +1,13 @@
 import { SublayHttpClient } from "../../core/client";
 import { AcceptedConnectionRow } from "../../interfaces/Connection";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
+import { SpaceReputationUserParams } from "../../interfaces/SpaceReputation";
 import { UserSearchParams } from "../../interfaces/UserSearch";
+import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
-export interface FetchConnectionsProps extends UserSearchParams {
+export interface FetchConnectionsProps
+  extends SpaceReputationUserParams,
+    UserSearchParams {
   actingUserId: string;
   page?: number;
   limit?: number;
@@ -17,8 +21,22 @@ export async function fetchConnections(
   client: SublayHttpClient,
   data: FetchConnectionsProps
 ): Promise<PaginatedResponse<AcceptedConnectionRow>> {
+  const {
+    spaceReputation,
+    spaceReputationId,
+    spaceReputationDescendants,
+    ...rest
+  } = data;
+  const params = {
+    ...rest,
+    ...buildSpaceReputationParams({
+      spaceReputation,
+      spaceReputationId,
+      spaceReputationDescendants,
+    }),
+  };
   const response = await client.projectInstance.get<
     PaginatedResponse<AcceptedConnectionRow>
-  >("/connections", { params: data });
+  >("/connections", { params });
   return response.data;
 }

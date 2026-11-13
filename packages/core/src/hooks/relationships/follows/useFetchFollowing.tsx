@@ -5,9 +5,13 @@ import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
 import type { FollowRow } from "../../../interfaces/models/Follow";
 import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
+import { SpaceReputationUserParams } from "../../../interfaces/SpaceReputation";
 import { UserSearchParams } from "../../../interfaces/UserSearch";
+import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
 
-export interface FetchFollowingParams extends UserSearchParams {
+export interface FetchFollowingParams
+  extends SpaceReputationUserParams,
+    UserSearchParams {
   page?: number;
   limit?: number;
 }
@@ -18,7 +22,7 @@ function useFetchFollowing(): (params?: FetchFollowingParams) => Promise<Paginat
   const { user } = useUser();
 
   const fetchFollowing = useCallback(
-    async ({ page = 1, limit = 20, query, searchFields }: FetchFollowingParams = {}) => {
+    async ({ page = 1, limit = 20, query, searchFields, spaceReputation, spaceReputationId, spaceReputationDescendants }: FetchFollowingParams = {}) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -34,6 +38,11 @@ function useFetchFollowing(): (params?: FetchFollowingParams) => Promise<Paginat
             page,
             limit,
             ...buildSearchParams(query, searchFields),
+            ...buildSpaceReputationParams({
+              spaceReputation,
+              spaceReputationId,
+              spaceReputationDescendants,
+            }),
           },
         }
       );

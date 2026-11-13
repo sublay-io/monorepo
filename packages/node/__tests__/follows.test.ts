@@ -8,6 +8,44 @@ import {
 import { makeClient } from "./helpers/mockClient";
 
 describe("node-sdk follows — request shaping", () => {
+  it("fetchFollowers sends the space-reputation object as flat spaceReputationId / spaceReputationDescendants", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchFollowers(client, {
+      actingUserId: "u1", page: 1,
+      spaceReputation: { spaceId: "sp1", includeDescendants: true },
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/follows/followers", {
+      params: { actingUserId: "u1", page: 1, spaceReputationId: "sp1", spaceReputationDescendants: true },
+    });
+  });
+
+  it("fetchFollowers forwards the flat spaceReputationId as given", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchFollowers(client, { actingUserId: "u1", spaceReputationId: "none" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/follows/followers", {
+      params: { actingUserId: "u1", spaceReputationId: "none" },
+    });
+  });
+
+  it("fetchFollowing sends the space-reputation object as flat spaceReputationId / spaceReputationDescendants", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchFollowing(client, {
+      actingUserId: "u1", page: 1,
+      spaceReputation: { spaceId: "sp1", includeDescendants: true },
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/follows/following", {
+      params: { actingUserId: "u1", page: 1, spaceReputationId: "sp1", spaceReputationDescendants: true },
+    });
+  });
+
+  it("fetchFollowing forwards the flat spaceReputationId as given", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchFollowing(client, { actingUserId: "u1", spaceReputationId: "none" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/follows/following", {
+      params: { actingUserId: "u1", spaceReputationId: "none" },
+    });
+  });
+
   it("fetchFollowing hits /follows/following with the full body as params", async () => {
     const { client, projectInstance } = makeClient();
     await fetchFollowing(client, { actingUserId: "u1", page: 1 });

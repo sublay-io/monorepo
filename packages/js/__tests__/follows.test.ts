@@ -8,6 +8,44 @@ import {
 import { makeClient } from "./helpers/client";
 
 describe("js-sdk follows (own graph) — request shaping", () => {
+  it("fetchFollowers sends the space-reputation object as flat spaceReputationId / spaceReputationDescendants", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchFollowers(client, {
+      page: 1,
+      spaceReputation: { spaceId: "sp1", includeDescendants: true },
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/follows/followers", {
+      params: { page: 1, spaceReputationId: "sp1", spaceReputationDescendants: true },
+    });
+  });
+
+  it("fetchFollowers forwards the flat spaceReputationId as given", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchFollowers(client, { spaceReputationId: "none" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/follows/followers", {
+      params: { spaceReputationId: "none" },
+    });
+  });
+
+  it("fetchFollowing sends the space-reputation object as flat spaceReputationId / spaceReputationDescendants", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchFollowing(client, {
+      page: 1,
+      spaceReputation: { spaceId: "sp1", includeDescendants: true },
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/follows/following", {
+      params: { page: 1, spaceReputationId: "sp1", spaceReputationDescendants: true },
+    });
+  });
+
+  it("fetchFollowing forwards the flat spaceReputationId as given", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchFollowing(client, { spaceReputationId: "none" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/follows/following", {
+      params: { spaceReputationId: "none" },
+    });
+  });
+
   it("fetchFollowers gets /follows/followers with page/limit as params (no userId — own graph)", async () => {
     const { client, projectInstance } = makeClient();
     await fetchFollowers(client, { page: 1, limit: 20 });

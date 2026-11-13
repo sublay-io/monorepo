@@ -10,6 +10,25 @@ import {
 import { makeClient } from "./helpers/mockClient";
 
 describe("node-sdk connections — request shaping", () => {
+  it("fetchConnections sends the space-reputation object as flat spaceReputationId / spaceReputationDescendants", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchConnections(client, {
+      actingUserId: "u1", page: 1,
+      spaceReputation: { spaceId: "sp1", includeDescendants: true },
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/connections", {
+      params: { actingUserId: "u1", page: 1, spaceReputationId: "sp1", spaceReputationDescendants: true },
+    });
+  });
+
+  it("fetchConnections forwards the flat spaceReputationId as given", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchConnections(client, { actingUserId: "u1", spaceReputationId: "none" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/connections", {
+      params: { actingUserId: "u1", spaceReputationId: "none" },
+    });
+  });
+
   it("fetchConnections hits /connections with the full body as params", async () => {
     const { client, projectInstance } = makeClient();
     await fetchConnections(client, { actingUserId: "u1", page: 1 });

@@ -3,7 +3,7 @@ export { fetchManySpaces } from "./fetchManySpaces";
 export { fetchSpace } from "./fetchSpace";
 export { fetchSpaceByShortId } from "./fetchSpaceByShortId";
 export { fetchSpaceBySlug } from "./fetchSpaceBySlug";
-export { fetchUserSpaces } from "./fetchUserSpaces";
+export { fetchMySpaces } from "./fetchMySpaces";
 export { fetchMutualSpaces } from "./fetchMutualSpaces";
 export { checkSlugAvailability } from "./checkSlugAvailability";
 export { updateSpace } from "./updateSpace";

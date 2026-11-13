@@ -164,7 +164,7 @@ A user's mutual connections and pending requests. All take `actingUserId`.
 
 Space lifecycle, membership, moderation, and rules — documented across three pages (`spaces`, `spaces-members`, `spaces-moderation`).
 
-Lifecycle: `createSpace`, `fetchManySpaces`, `fetchSpace`, `fetchSpaceByShortId`, `fetchSpaceBySlug`, `fetchUserSpaces`, `checkSlugAvailability`, `updateSpace`, `deleteSpace`, `fetchSpaceBreadcrumb`
+Lifecycle: `createSpace`, `fetchManySpaces`, `fetchSpace`, `fetchSpaceByShortId`, `fetchSpaceBySlug`, `fetchMySpaces`, `checkSlugAvailability`, `updateSpace`, `deleteSpace`, `fetchSpaceBreadcrumb`
 
 Members: `joinSpace`, `leaveSpace`, `checkMyMembership`, `fetchSpaceMembers`, `fetchSpaceTeam`, `updateMemberRole`, `addMember`, `approveMembership`, `declineMembership`, `banMember`, `unbanMember` (member actions take the member's `userId`)
 

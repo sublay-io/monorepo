@@ -41,7 +41,7 @@ interface FetchSpacesParams {
   query?: string | null;
   searchFields?: SpaceSearchFields | null;
   // The directory lists public spaces only. A user's own spaces (any
-  // visibility) come from `/spaces/user-spaces` (`useFetchUserSpaces`).
+  // visibility) come from `/spaces/mine` (`useFetchMySpaces`).
   /**
    * A space id (its direct sub-spaces), `"none"` for top-level spaces only,
    * or `"any"` for spaces at every level. `null` or left out: `"none"`.

@@ -7,7 +7,7 @@ import { UserSpacesSortByOptions } from "../../interfaces/SpaceListSortByOptions
 import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import { buildSearchParams } from "../../utils/searchParams";
 
-export interface FetchUserSpacesProps {
+export interface FetchMySpacesProps {
   page?: number;
   limit?: number;
   status?: "active" | "pending" | "banned";
@@ -35,12 +35,12 @@ export interface FetchUserSpacesProps {
   parentSpaceId?: string | "none" | "any" | null;
 }
 
-function useFetchUserSpaces(): (params?: FetchUserSpacesProps) => Promise<UserSpacesResponse> {
+function useFetchMySpaces(): (params?: FetchMySpacesProps) => Promise<UserSpacesResponse> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
-  const fetchUserSpaces = useCallback(
-    async (params: FetchUserSpacesProps = {}) => {
+  const fetchMySpaces = useCallback(
+    async (params: FetchMySpacesProps = {}) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -48,7 +48,7 @@ function useFetchUserSpaces(): (params?: FetchUserSpacesProps) => Promise<UserSp
       const { include, role, query, searchFields, parentSpaceId, ...rest } = params;
 
       const response = await axios.get<UserSpacesResponse>(
-        `/${projectId}/spaces/user-spaces`,
+        `/${projectId}/spaces/mine`,
         {
           params: {
             ...rest,
@@ -66,7 +66,7 @@ function useFetchUserSpaces(): (params?: FetchUserSpacesProps) => Promise<UserSp
     [projectId, axios]
   );
 
-  return fetchUserSpaces;
+  return fetchMySpaces;
 }
 
-export default useFetchUserSpaces;
+export default useFetchMySpaces;

@@ -202,7 +202,7 @@ Base path: `/v8/:projectId/`
 | POST | `/spaces/` | can access with a key (required `actingUserId`, the creator) | `spaces.createSpace` | yes |
 | GET | `/spaces/` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchManySpaces` | yes |
 | GET | `/spaces/check-slug` | no key needed | `spaces.checkSlugAvailability` | yes |
-| GET | `/spaces/user-spaces` | can access with a key | `spaces.fetchUserSpaces` | yes |
+| GET | `/spaces/mine` | can access with a key | `spaces.fetchMySpaces` | yes |
 | GET | `/spaces/by-short-id` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceByShortId` | yes |
 | GET | `/spaces/by-slug` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpaceBySlug` | yes |
 | GET | `/spaces/:spaceId` | no key needed (optional `actingUserId` = that user's view) | `spaces.fetchSpace` | yes |

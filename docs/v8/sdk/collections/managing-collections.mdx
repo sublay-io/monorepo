@@ -120,8 +120,8 @@ Fetch the entity with `include: "saved"` to get `entity.saved`: whether it is sa
 const fetchEntity = useFetchEntity();
 
 const entity = await fetchEntity({ entityId, include: "saved" });
-// entity.saved.isSaved — true if saved in any collection
-// entity.saved.collections — { id, name } for each collection containing it
+// entity.saved?.isSaved — true if saved in any collection
+// entity.saved?.collections — { id, name } for each collection containing it
 
 const inThisCollection = entity.saved?.collections.some((c) => c.id === collection.id);
 ```

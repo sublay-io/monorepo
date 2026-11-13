@@ -107,6 +107,8 @@ To filter a list by effective NSFW, pass `nsfwFilter` to [Fetch many entities](/
 
 Only the current user's own collections are listed. With no current user (a request with no credentials, or a service key without `actingUserId`), `saved` is `{ "isSaved": false, "collections": [] }`. A service key that names a user in `actingUserId` gets that user's saved state. On a project without the `collections` bundle, `saved` is also `{ "isSaved": false, "collections": [] }`.
 
+In the React and React Native SDKs, saving and unsaving through `useCollections` or `useCollectionsActions` updates `saved` on the entity in every loaded entity list that carries it; lists fetched without `include=saved` don't gain the field.
+
 ## Top comments
 
 `include=topComments` adds a preview of the entity's best comments — for example, the top comment under each entity in a feed, or a few rotating ones.

@@ -8,7 +8,7 @@ icon: "plug"
 
 `useReactionToggle` is the recommended hook for reaction UIs. It manages the current reaction and reaction counts locally with optimistic updates, handles toggling (selecting the same reaction removes it), and reverts on error.
 
-It works for both entities and comments via the `targetType` prop.
+It works for both entities and comments via the `targetType` prop. For an entity, the server's result also updates the entity's `userReaction` and `reactionCounts` in every loaded entity list.
 
 ## Usage Example
 

@@ -48,7 +48,7 @@ Returns a paginated list of entities saved in the specified collection. The coll
   - `files` — uploaded file/image attachments
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) for the entity
 
-  `saved` isn't accepted here (`400 collection/invalid-query`): every entity returned by this endpoint already has `isSaved: true`.
+  `saved` isn't accepted here (`400 collection/invalid-query`): every entity returned by this endpoint is in this collection. To read which of the user's collections hold an entity, fetch it with `include=saved` (see [Saved state](/v8/data-models/entity#saved-state)).
 </ParamField>
 
 <ParamField query="topCommentsLimit" type="number" default="1">
@@ -68,7 +68,7 @@ Returns a paginated list of entities saved in the specified collection. The coll
 ## Response
 
 <ResponseField name="data" type="Entity[]">
-  The page of entity objects. Each entity includes `isSaved: true`.
+  The page of entity objects.
 </ResponseField>
 
 <ResponseField name="pagination" type="object">

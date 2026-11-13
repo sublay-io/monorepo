@@ -143,7 +143,6 @@ Base path: `/v8/:projectId/`
 | GET | `/entities/by-foreign-id` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntityByForeignId`, `entities.fetchOrCreateEntityByForeignId` (`createIfNotFound=true`) | yes |
 | GET | `/entities/by-short-id` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntityByShortId` | yes |
 | GET | `/entities/drafts` | can access with a key | `entities.fetchDrafts` | yes |
-| GET | `/entities/:entityId/saved` | can access with a key | `entities.isEntitySaved` | yes |
 | POST | `/entities/:entityId/publish` | can access with a key (`actingUserId` required, and must name the draft's author; an author-less draft is 404) | `entities.publishDraft` | yes |
 | GET | `/entities/:entityId` | no key needed (optional `actingUserId` = that user's view) | `entities.fetchEntity` | yes |
 | POST | `/entities/:entityId/reactions` | can access with a key | `entities.addReaction` | yes |

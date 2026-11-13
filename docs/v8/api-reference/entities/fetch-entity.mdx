@@ -31,7 +31,7 @@ An entity in a space the viewer can't read (see [who can read content](/v8/data-
   - `user` — the author's user profile
   - `space` — the space the entity belongs to
   - `topComments` — the entity's best top-level comments, as full [Comment](/v8/data-models/comment) objects (see [Top comments](/v8/data-models/entity#top-comments))
-  - `saved` — whether the authenticated user has saved this entity (requires auth)
+  - `saved` — `saved: { isSaved, collections }`: whether the current user has saved this entity, and the collections of theirs it is in (see [Saved state](/v8/data-models/entity#saved-state))
   - `files` — uploaded file/image attachments
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) for the entity
 </ParamField>
@@ -95,6 +95,13 @@ Returns an [Entity](/v8/data-models/entity) object.
 
     ```json
     { "error": "No user with this actingUserId exists in this project.", "code": "entity/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Route — 400">
+    `GET /entities/:entityId/saved` and `GET /entities/is-entity-saved` are not v8 routes. They answer with a pointer to `include=saved` on this endpoint.
+
+    ```json
+    { "error": "`GET /entities/:entityId/saved` isn't supported in v8. Read whether an entity is saved, and in which of your collections, with `include=saved` on the entity: `entity.saved`.", "code": "entity/unsupported-route" }
     ```
   </Accordion>
 </AccordionGroup>

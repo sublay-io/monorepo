@@ -92,52 +92,6 @@ describe("useCollections", () => {
     expect(fetchHandle.calls()).toHaveLength(0);
   });
 
-  describe("isEntitySaved", () => {
-    it("returns isSaved + collections from the response, and inSpecificCollection when asked", async () => {
-      axiosPrivate.mockResponse("get", {
-        isSaved: true,
-        collections: [{ id: "root", name: "Root" }],
-      });
-      const { result } = renderHookWithStore(() => useCollections());
-
-      const saved = await result.current.isEntitySaved({
-        entityId: "entity-1",
-        collectionId: "root",
-      });
-
-      expect(saved).toEqual({
-        isSaved: true,
-        inSpecificCollection: true,
-        collections: [{ id: "root", name: "Root" }],
-      });
-      const call = axiosPrivate.calls("get")[0];
-      expect(call.url).toBe("/test-project/entities/entity-1/saved");
-      // The entity id is in the path, never a query param.
-      expect(call.config?.params).toBeUndefined();
-    });
-
-    it("falls back to a safe default and logs on failure, without throwing", async () => {
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-      axiosPrivate.mockError("get", 500);
-      const { result } = renderHookWithStore(() => useCollections());
-
-      const saved = await result.current.isEntitySaved({ entityId: "entity-1" });
-
-      expect(saved).toEqual({ isSaved: false, inSpecificCollection: undefined, collections: [] });
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
-    });
-
-    it("short-circuits without a network call when entityId is missing", async () => {
-      const { result } = renderHookWithStore(() => useCollections());
-
-      const saved = await result.current.isEntitySaved({ entityId: "" });
-
-      expect(saved).toEqual({ isSaved: false, inSpecificCollection: undefined, collections: [] });
-      expect(axiosPrivate.calls("get")).toHaveLength(0);
-    });
-  });
-
   describe("CRUD guard clauses", () => {
     it("createCollection no-ops without a current collection", async () => {
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});

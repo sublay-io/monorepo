@@ -150,6 +150,7 @@ export type {
 // Export commonly used interfaces
 export type {
   Entity,
+  EntitySaved,
   EntityInclude,
   EntityIncludeArray,
   EntityIncludeParam,

@@ -40,7 +40,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `location` | `GeoPoint \| null` | Optional geo-location stored as a GeoJSON point. |
 | `metadata` | `Record<string, any>` | Custom key-value data (max 10 KB). |
 | `topComments` | `Comment[]` | The entity's best top-level comments, as full [Comment](/v8/data-models/comment) objects. Populated when `include` contains `"topComments"`; `[]` when none qualify. See [Top comments](#top-comments). |
-| `isSaved` | `boolean` | Whether the current user has saved this entity to a collection. Populated when `include` contains `"saved"`. |
+| `saved` | `EntitySaved` | Whether the current user has saved this entity, and in which of their collections. Populated when `include` contains `"saved"`. See [Saved state](#saved-state). |
 | `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
 | `isDraft` | `boolean \| null` | Whether this entity is in draft state. A draft is created with an author (a user token, or a service key with `actingUserId`), and only its author sees it. Deleting the author deletes their drafts. A draft with no author is answered as not found (`404`), like a missing entity. |
 | `nsfw` | `boolean` | The entity's **own** NSFW flag. `false` by default. Set on create/update by the owner (a service key acting as the author, or naming nobody for an app-owned entity), or by a space moderator via the [set-NSFW endpoint](/v8/hooks/spaces/use-set-space-entity-nsfw). See [NSFW flagging](#nsfw-flagging). |
@@ -63,6 +63,13 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `type` | `"Point"` | GeoJSON geometry type. Always `"Point"`. |
 | `coordinates` | `[number, number]` | Longitude and latitude, in that order. |
 
+### EntitySaved
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `isSaved` | `boolean` | `true` when the entity is in at least one of the current user's collections. |
+| `collections` | `{ id: string; name: string }[]` | The current user's collections that hold the entity, in the order it was saved into them. `[]` when it isn't saved. |
+
 ## NSFW flagging
 
 An entity carries its own `nsfw` boolean and exposes a live-computed `nsfwEffective`:
@@ -83,6 +90,22 @@ To filter a list by effective NSFW, pass `nsfwFilter` to [Fetch many entities](/
 <Note>
   Sublay only **labels** (`nsfw`) and **filters** (`nsfwFilter`) content. It does **not** blur, age-gate, add interstitials, or store a per-viewer "show mature content" preference — how NSFW-flagged content is presented is entirely the consuming app's responsibility.
 </Note>
+
+## Saved state
+
+`include=saved` adds `saved`, the current user's saved state for each entity: whether it is saved, and the collections it is in. It works the same on a single fetch and on a list, so a feed can show which of the user's collections hold each entity without another request.
+
+```json
+"saved": {
+  "isSaved": true,
+  "collections": [
+    { "id": "0b1c4e1a-6c1f-4a8e-9d55-1f2a3b4c5d6e", "name": "Favorites" },
+    { "id": "7f8e9d0c-1b2a-4c3d-8e4f-5a6b7c8d9e0f", "name": "Recipes" }
+  ]
+}
+```
+
+Only the current user's own collections are listed. With no current user (a request with no credentials, or a service key without `actingUserId`), `saved` is `{ "isSaved": false, "collections": [] }`. A service key that names a user in `actingUserId` gets that user's saved state. On a project without the `collections` bundle, `saved` is also `{ "isSaved": false, "collections": [] }`.
 
 ## Top comments
 
@@ -107,11 +130,11 @@ Pass `include` to populate optional fields. Each endpoint accepts its own list; 
 | `"user"` | `user` — the entity author | ✓ | ✓ | ✓ |
 | `"space"` | `space` — the associated space | ✓ | ✓ | ✓ |
 | `"topComments"` | `topComments` — the best top-level comments | ✓ | ✓ | |
-| `"saved"` | `isSaved` — whether current user saved this entity | ✓ | | |
+| `"saved"` | `saved` — whether the current user saved this entity, and in which collections | ✓ | | |
 | `"files"` | `files` — managed file records | ✓ | ✓ | ✓ |
 | `"grants"` | `grants` — the reputation-grant summary | ✓ | ✓ | ✓ |
 
-"Entity fetches and lists" are [Fetch Entity](/v8/api-reference/entities/fetch-entity), [by foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id), [by short ID](/v8/api-reference/entities/fetch-entity-by-short-id) and [Fetch Many Entities](/v8/api-reference/entities/fetch-many-entities). On collection entities every item is already saved (`isSaved: true`).
+"Entity fetches and lists" are [Fetch Entity](/v8/api-reference/entities/fetch-entity), [by foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id), [by short ID](/v8/api-reference/entities/fetch-entity-by-short-id) and [Fetch Many Entities](/v8/api-reference/entities/fetch-many-entities). Collection entities don't take `"saved"`: every entity listed there is in that collection.
 
 ## See Also
 

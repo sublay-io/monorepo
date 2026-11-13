@@ -101,7 +101,7 @@ const { data, pagination } = await sublay.collections.fetchCollectionEntities({
 </ParamField>
 
 <ParamField body="include" type="CollectionEntityIncludeParam">
-  Associations to populate: `"user"`, `"space"`, `"topComments"`, `"files"`, `"grants"` (a single value or an array). `"saved"` isn't accepted — every returned entity already has `isSaved: true`. On an entity whose author has blocked the user, `topComments` is `[]`.
+  Associations to populate: `"user"`, `"space"`, `"topComments"`, `"files"`, `"grants"` (a single value or an array). `"saved"` isn't accepted — every returned entity is in this collection. On an entity whose author has blocked the user, `topComments` is `[]`.
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">

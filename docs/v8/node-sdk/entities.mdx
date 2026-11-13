@@ -108,7 +108,7 @@ const entity = await sublay.entities.fetchEntity({ entityId: "ent_xyz789" });
 </ParamField>
 
 <ParamField body="include" type="EntityIncludeParam">
-  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments). `"saved"` adds `saved: { isSaved, collections }`, the user's saved state for the entity — see [Saved state](/v8/data-models/entity#saved-state).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">
@@ -144,7 +144,7 @@ const entity = await sublay.entities.fetchEntityByForeignId({
 </ParamField>
 
 <ParamField body="include" type="EntityIncludeParam">
-  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments). `"saved"` adds `saved: { isSaved, collections }`, the user's saved state for the entity — see [Saved state](/v8/data-models/entity#saved-state).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">
@@ -178,7 +178,7 @@ const { entity, created } = await sublay.entities.fetchOrCreateEntityByForeignId
 </ParamField>
 
 <ParamField body="include" type="EntityIncludeParam">
-  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments). `"saved"` adds `saved: { isSaved, collections }`, the user's saved state for the entity — see [Saved state](/v8/data-models/entity#saved-state).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">
@@ -210,7 +210,7 @@ const entity = await sublay.entities.fetchEntityByShortId({ shortId: "abc12" });
 </ParamField>
 
 <ParamField body="include" type="EntityIncludeParam">
-  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments). `"saved"` adds `saved: { isSaved, collections }`, the user's saved state for the entity — see [Saved state](/v8/data-models/entity#saved-state).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">
@@ -272,7 +272,7 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 </ParamField>
 
 <ParamField body="include" type="EntityIncludeParam">
-  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments).
+  Associations to populate, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. `"topComments"` adds the entity's best top-level comments as full `Comment` objects — see [Top comments](/v8/data-models/entity#top-comments). `"saved"` adds `saved: { isSaved, collections }`, the user's saved state for the entity — see [Saved state](/v8/data-models/entity#saved-state).
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number">
@@ -614,26 +614,3 @@ const { reactionType } = await sublay.entities.getUserReaction({
 </ParamField>
 
 **Returns** — `Promise<{ reactionType: ReactionType | null }>`
-
----
-
-### isEntitySaved
-
-Checks whether a user has saved an entity to any of their collections, and in which ones.
-
-```typescript
-const { isSaved, collections } = await sublay.entities.isEntitySaved({
-  entityId: "ent_xyz789",
-  actingUserId: "usr_abc123",
-});
-```
-
-<ParamField body="entityId" type="string" required>
-  The Sublay entity ID.
-</ParamField>
-
-<ParamField body="actingUserId" type="string" required>
-  The user the service key acts as, whose saved state is checked.
-</ParamField>
-
-**Returns** — `Promise<{ isSaved: boolean; collections: { id: string; name: string }[] }>`

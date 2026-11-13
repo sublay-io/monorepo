@@ -11,7 +11,6 @@ import {
   fetchReactions,
   getUserReaction,
   incrementEntityViews,
-  isEntitySaved,
   publishDraft,
   removeReaction,
   updateEntity,
@@ -257,14 +256,6 @@ describe("node-sdk entities — request shaping", () => {
       params: { actingUserId: "u1" },
     });
   });
-
-  it("isEntitySaved puts entityId in the path and sends only actingUserId as a param", async () => {
-    const { client, projectInstance } = makeClient();
-    await isEntitySaved(client, { entityId: "e1", actingUserId: "u1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/entities/e1/saved", {
-      params: { actingUserId: "u1" },
-    });
-  });
 });
 
 describe("node-sdk entities — response mapping", () => {
@@ -376,15 +367,6 @@ describe("node-sdk entities — response mapping", () => {
     projectInstance.get.mockResolvedValueOnce({ data: result });
     await expect(
       getUserReaction(client, { entityId: "e1", actingUserId: "u1" }),
-    ).resolves.toEqual(result);
-  });
-
-  it("isEntitySaved returns response.data", async () => {
-    const { client, projectInstance } = makeClient();
-    const result = { isSaved: true, collections: [{ id: "col1", name: "Saved" }] };
-    projectInstance.get.mockResolvedValueOnce({ data: result });
-    await expect(
-      isEntitySaved(client, { entityId: "e1", actingUserId: "u1" }),
     ).resolves.toEqual(result);
   });
 });

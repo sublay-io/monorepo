@@ -9,6 +9,17 @@ import { Comment } from "./Comment";
 // Alias for backward compatibility - EntityFile is now just File
 export type EntityFile = File;
 
+/**
+ * The viewer's saved state for an entity, present when the read requested
+ * `include=saved`. `isSaved` is true when the entity is in at least one of the
+ * viewer's collections; `collections` lists those collections in the order the
+ * entity was saved into them. With no viewer: `{ isSaved: false, collections: [] }`.
+ */
+export interface EntitySaved {
+  isSaved: boolean;
+  collections: Array<{ id: string; name: string }>;
+}
+
 export interface Entity {
   id: string; // Unique entity ID
   foreignId: string | null; // If integrated on top of existing data, this would be the id of the item in your system. Could also accept static values such as "about-page"
@@ -45,7 +56,7 @@ export interface Entity {
   // comments (real content only), ranked by `topCommentsSortByReaction`.
   // `[]` when none qualify.
   topComments?: Comment[];
-  isSaved?: boolean; // Optional field populated when include contains "saved" - indicates if current user saved this entity
+  saved?: EntitySaved; // Populated when include contains "saved": the viewer's saved state
   grants?: GrantSummary; // Optional - reputation-grant summary, populated when include contains "grants". Zero-filled (never omitted) on projects without the grants table.
   createdAt: string; // Use camelCase for `created_at`
   updatedAt: string; // Use camelCase for `updated_at`

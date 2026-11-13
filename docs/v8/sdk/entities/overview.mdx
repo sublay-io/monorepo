@@ -89,7 +89,7 @@ The entity fetch hooks accept an optional `include` parameter that populates rel
 | `"user"` | The entity author's `User` object |
 | `"space"` | The associated `Space` object |
 | `"topComments"` | The entity's best top-level comments, as full `Comment` objects. Tune with `topCommentsLimit` (default `1`, max `5`) and `topCommentsSortByReaction` (default `"upvote"`). See [Top comments](/v8/data-models/entity#top-comments). |
-| `"saved"` | `isSaved: boolean` for the current authenticated user |
+| `"saved"` | `saved: { isSaved, collections }` — whether the current user saved the entity, and which of their collections hold it. See [Saved state](/v8/data-models/entity#saved-state) |
 | `"files"` | System-managed `File` objects attached to this entity |
 | `"grants"` | The entity's [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) — `{ total, count, viewerTotal }` |
 

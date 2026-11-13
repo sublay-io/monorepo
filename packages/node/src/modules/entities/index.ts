@@ -13,4 +13,3 @@ export { addReaction } from "./addReaction";
 export { removeReaction } from "./removeReaction";
 export { fetchReactions } from "./fetchReactions";
 export { getUserReaction } from "./getUserReaction";
-export { isEntitySaved } from "./isEntitySaved";

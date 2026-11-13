@@ -76,7 +76,7 @@ function SavedFeed({ collectionId }) {
 </ParamField>
 
 <ParamField body="include" type="CollectionEntityIncludeParam" optional>
-  Optional associations to include with each entity: `"user"`, `"space"`, `"topComments"`, `"files"`, `"grants"`. `"saved"` isn't accepted: every entity returned already has `isSaved: true`. On an entity whose author has blocked the user (saved before the block), `topComments` is `[]`.
+  Optional associations to include with each entity: `"user"`, `"space"`, `"topComments"`, `"files"`, `"grants"`. `"saved"` isn't accepted: every entity returned is in this collection. On an entity whose author has blocked the user (saved before the block), `topComments` is `[]`.
 </ParamField>
 
 <ParamField body="topCommentsLimit" type="number" optional>

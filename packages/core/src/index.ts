@@ -310,7 +310,6 @@ export {
   useUpdateEntity,
   useFetchDrafts,
   usePublishDraft,
-  useIsEntitySaved,
   type CreateEntityProps,
   type DeleteEntityProps,
   type FetchEntityProps,
@@ -321,7 +320,6 @@ export {
   type PublishDraftProps,
   type UseFetchManyEntitiesWrapperProps,
   type UseFetchManyEntitiesWrapperValues,
-  type UseIsEntitySavedValues,
 } from "./hooks/entities";
 
 // -- events
@@ -799,6 +797,7 @@ export type {
 export * as AppNotification from "./interfaces/models/AppNotification";
 export type {
   Entity,
+  EntitySaved,
   EntityInclude,
   EntityIncludeArray,
   EntityIncludeParam,

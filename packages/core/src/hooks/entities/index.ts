@@ -26,6 +26,4 @@ export { default as useUpdateEntity } from "./useUpdateEntity";
 export { default as useFetchDrafts } from "./useFetchDrafts";
 export { default as usePublishDraft } from "./usePublishDraft";
 export type { PublishDraftProps } from "./usePublishDraft";
-export { default as useIsEntitySaved } from "./useIsEntitySaved";
-export type { UseIsEntitySavedValues } from "./useIsEntitySaved";
 

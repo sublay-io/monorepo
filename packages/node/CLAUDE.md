@@ -112,7 +112,7 @@ const client = await SublayClient.init({
 
 Core content objects (posts, articles, products, listings, etc.).
 
-`createEntity`, `fetchEntity`, `fetchEntityByForeignId`, `fetchEntityByShortId`, `fetchManyEntities`, `updateEntity`, `incrementEntityViews`, `deleteEntity`, `fetchDrafts`, `publishDraft`, `addReaction`, `removeReaction`, `fetchReactions`, `getUserReaction`, `isEntitySaved`
+`createEntity`, `fetchEntity`, `fetchEntityByForeignId`, `fetchEntityByShortId`, `fetchManyEntities`, `updateEntity`, `incrementEntityViews`, `deleteEntity`, `fetchDrafts`, `publishDraft`, `addReaction`, `removeReaction`, `fetchReactions`, `getUserReaction`
 
 `fetchManyEntities` supports rich filtering via object-shaped filters: `keywordsFilters`, `metadataFilters` (`includes`/`includesAny`/`doesNotInclude`/`exists`/`doesNotExist`), `titleFilters`, `contentFilters`, `attachmentsFilters`, `locationFilters`; plus `sortBy` (new/hot/top/controversial or `metadata.<prop>`), `sortDir`, `sortType`, `sortByReaction`, `timeFrame`, `userId` (author filter)/`followedOnly`, `include`, pagination.
 

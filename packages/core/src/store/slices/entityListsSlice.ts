@@ -221,15 +221,14 @@ export interface EntityRemovePayload {
  * - `saved` changes the copy's saved state, and only on copies that have one
  *   (lists fetched with `include=saved`); copies without `saved` keep not
  *   having it. `add` appends the collection (once — a collection already
- *   listed isn't added again) and sets `isSaved: true`; without a `name` the
- *   collection can't be listed, so only `isSaved` is set. `remove` drops the
+ *   listed isn't added again) and sets `isSaved: true`. `remove` drops the
  *   collection and sets `isSaved` to whether any collection is left.
  */
 export interface EntityInListsUpdatePayload {
   entityId: string;
   changes?: Partial<Entity>;
   saved?:
-    | { add: { id: string; name?: string } }
+    | { add: { id: string; name: string } }
     | { remove: string };
 }
 
@@ -475,7 +474,7 @@ const entityListsSlice = createSlice({
             let isSaved: boolean;
             if ("add" in saved) {
               const { id, name } = saved.add;
-              if (name !== undefined && !collections.some((c) => c.id === id)) {
+              if (!collections.some((c) => c.id === id)) {
                 collections = [...collections, { id, name }];
               }
               isSaved = true;

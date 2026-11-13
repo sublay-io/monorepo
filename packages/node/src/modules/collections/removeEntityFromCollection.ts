@@ -1,4 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
+import { CollectionEntityMutationResponse } from "./addEntityToCollection";
 
 export interface RemoveEntityFromCollectionProps {
   collectionId: string;
@@ -9,10 +10,12 @@ export interface RemoveEntityFromCollectionProps {
 export async function removeEntityFromCollection(
   client: SublayHttpClient,
   data: RemoveEntityFromCollectionProps
-): Promise<void> {
+): Promise<CollectionEntityMutationResponse> {
   const { collectionId, entityId, actingUserId } = data;
-  await client.projectInstance.delete(
-    `/collections/${collectionId}/entities/${entityId}`,
-    { params: { actingUserId } }
-  );
+  const response =
+    await client.projectInstance.delete<CollectionEntityMutationResponse>(
+      `/collections/${collectionId}/entities/${entityId}`,
+      { params: { actingUserId } }
+    );
+  return response.data;
 }

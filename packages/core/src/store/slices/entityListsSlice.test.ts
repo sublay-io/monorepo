@@ -279,14 +279,6 @@ describe("entityListsSlice", () => {
       expect(s.lists.withSaved.entities[0].saved?.collections.map((c) => c.id)).toEqual(["c1", "c2"]);
     });
 
-    it("sets only `isSaved` when the collection's name isn't known", () => {
-      const s = reducer(
-        withLists({ feed: [{ ...makeEntity("e1"), saved: saved() } as Entity] }),
-        updateEntityInLists({ entityId: "e1", saved: { add: { id: "c1" } } }),
-      );
-      expect(s.lists.feed.entities[0].saved).toEqual({ isSaved: true, collections: [] });
-    });
-
     it("removes a collection and keeps `isSaved` true only while one is left", () => {
       let s = withLists({
         feed: [

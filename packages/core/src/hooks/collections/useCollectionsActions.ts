@@ -236,31 +236,32 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
 
     dispatch(prependCollectionEntity({ collectionId, entity }));
 
+    let collectionName: string | undefined;
     try {
-      await addToCollectionMutation({
+      const result = await addToCollectionMutation({
         projectId,
         collectionId,
         entityId: entity.id,
       }).unwrap();
+      collectionName =
+        result?.collection?.name ?? collectionsByIdRef.current[collectionId]?.name;
     } catch (err) {
       dispatch(removeCollectionEntity({ collectionId, entityId: entity.id }));
       handleErrorUtil(err, "Failed to add entity to collection");
       throw err;
     }
 
-    // Loaded entity lists fetched with `include=saved` show the save too.
-    // The collection is listed by name only when its name is known here.
-    dispatch(
-      updateEntityInLists({
-        entityId: entity.id,
-        saved: {
-          add: {
-            id: collectionId,
-            name: collectionsByIdRef.current[collectionId]?.name,
-          },
-        },
-      })
-    );
+    // Loaded entity lists fetched with `include=saved` show the save too,
+    // with the collection's name from the response. (Without a name the
+    // collection couldn't be listed, so the lists are left as they are.)
+    if (collectionName !== undefined) {
+      dispatch(
+        updateEntityInLists({
+          entityId: entity.id,
+          saved: { add: { id: collectionId, name: collectionName } },
+        })
+      );
+    }
   }, [addToCollectionMutation, dispatch]);
 
   // Remove entity from collection — optimistically removes from Redux state, reverts on error

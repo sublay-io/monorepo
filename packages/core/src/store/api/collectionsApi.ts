@@ -70,6 +70,7 @@ interface AddToCollectionResponse {
   success: boolean;
   collection: {
     id: string;
+    name: string;
     /** The collection's `entityCount` after the change, as the viewer sees it. */
     entityCount: number;
   };
@@ -85,6 +86,7 @@ interface RemoveFromCollectionResponse {
   success: boolean;
   collection: {
     id: string;
+    name: string;
     /** The collection's `entityCount` after the change, as the viewer sees it. */
     entityCount: number;
   };

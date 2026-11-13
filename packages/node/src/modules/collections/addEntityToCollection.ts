@@ -1,5 +1,4 @@
 import { SublayHttpClient } from "../../core/client";
-import { Collection } from "../../interfaces/Collection";
 
 export interface AddEntityToCollectionProps {
   collectionId: string;
@@ -7,14 +6,25 @@ export interface AddEntityToCollectionProps {
   actingUserId: string;
 }
 
+export interface CollectionEntityMutationResponse {
+  success: boolean;
+  collection: {
+    id: string;
+    name: string;
+    /** The collection's `entityCount` after the change, as the acting user sees it. */
+    entityCount: number;
+  };
+}
+
 export async function addEntityToCollection(
   client: SublayHttpClient,
   data: AddEntityToCollectionProps
-): Promise<Collection> {
+): Promise<CollectionEntityMutationResponse> {
   const { collectionId, ...body } = data;
-  const response = await client.projectInstance.post<Collection>(
-    `/collections/${collectionId}/entities`,
-    body
-  );
+  const response =
+    await client.projectInstance.post<CollectionEntityMutationResponse>(
+      `/collections/${collectionId}/entities`,
+      body
+    );
   return response.data;
 }

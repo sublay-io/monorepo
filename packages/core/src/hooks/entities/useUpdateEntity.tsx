@@ -24,6 +24,29 @@ export interface UpdateEntityProps {
   };
 }
 
+/**
+ * The fields of an entity-update response that are applied over a copy of the
+ * entity already held (an `EntityProvider`'s, a loaded list's). Fields the
+ * response doesn't carry (`saved`, `space`, `files`, `topComments`, ...) stay
+ * as the copy has them. Two fields it does carry are left out: its
+ * `userReaction` is always null (the response isn't read as the viewer), and
+ * its `user` has no avatar or banner files.
+ */
+export function entityUpdateChanges(updated: Entity): Partial<Entity> {
+  const { userReaction: _userReaction, user: _user, ...changes } = updated;
+  return changes;
+}
+
+/** `updated` applied over `current` when it is the same entity, else `updated`. */
+export function applyEntityUpdate(
+  current: Entity | null | undefined,
+  updated: Entity,
+): Entity {
+  return current && current.id === updated.id
+    ? { ...current, ...entityUpdateChanges(updated) }
+    : updated;
+}
+
 function useUpdateEntity(): (props: UpdateEntityProps) => Promise<Entity> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
@@ -63,16 +86,15 @@ function useUpdateEntity(): (props: UpdateEntityProps) => Promise<Entity> {
       );
 
       const updatedEntity = response.data as Entity;
-      setEntity?.(updatedEntity);
-
-      // Loaded entity lists show the edit too. Merged over each list's copy,
-      // so what the update response doesn't carry (`saved`, `space`, `files`,
-      // `topComments`, ...) stays. Two fields it does carry are left out: its
-      // `userReaction` is always null (the response isn't read as the
-      // viewer), and its `user` has no avatar or banner files.
-      const { userReaction: _userReaction, user: _user, ...changes } =
-        updatedEntity;
-      dispatch(updateEntityInLists({ entityId, changes }));
+      // The nearest `EntityProvider` and every loaded entity list show the
+      // edit, applied over their copy (see `entityUpdateChanges`).
+      setEntity?.((current) => applyEntityUpdate(current, updatedEntity));
+      dispatch(
+        updateEntityInLists({
+          entityId,
+          changes: entityUpdateChanges(updatedEntity),
+        })
+      );
       return updatedEntity;
     },
     [projectId, axios, setEntity, dispatch],

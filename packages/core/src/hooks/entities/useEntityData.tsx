@@ -5,7 +5,10 @@ import useFetchEntity from "./useFetchEntity";
 import useFetchEntityByForeignId from "./useFetchEntityByForeignId";
 import useFetchOrCreateEntityByForeignId from "./useFetchOrCreateEntityByForeignId";
 import useFetchEntityByShortId from "./useFetchEntityByShortId";
-import useUpdateEntity, { UpdateEntityProps } from "./useUpdateEntity";
+import useUpdateEntity, {
+  UpdateEntityProps,
+  applyEntityUpdate,
+} from "./useUpdateEntity";
 import useDeleteEntity from "./useDeleteEntity";
 
 import { Entity } from "../../interfaces/models/Entity";
@@ -85,7 +88,7 @@ function useEntityData({
           entityId: entity.id,
           update,
         });
-        if (newEntity) setEntity(newEntity);
+        if (newEntity) setEntity((current) => applyEntityUpdate(current, newEntity));
         return newEntity;
       } catch (err) {
         handleError(err, "Failed to update entity");

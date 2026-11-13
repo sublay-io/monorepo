@@ -1,7 +1,24 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeEntity, makeAuthUser } from "../../test-utils";
+import React from "react";
+import { renderHook } from "@testing-library/react";
+import { Provider } from "react-redux";
+
+import {
+  renderHookWithAxios,
+  resetAxiosMocks,
+  makeEntity,
+  makeAuthUser,
+  makeUser,
+  makeSpace,
+  makeSublayStore,
+  mockAxiosPrivate,
+} from "../../test-utils";
+import { SublayContext, type SublayContextValues } from "../../context/sublay-context";
+import { EntityProvider } from "../../context/entity-context";
+import useEntity from "./useEntity";
+import useUpdateEntity from "./useUpdateEntity";
 import { setUser } from "../../store/slices/authSlice";
 import useEntityData, { type UseEntityDataProps } from "./useEntityData";
 
@@ -274,5 +291,72 @@ describe("useEntityData — entity prop", () => {
     };
     rerender({ entity: updated });
     await waitFor(() => expect(result.current.entity).toEqual(updated));
+  });
+  describe("after an edit", () => {
+    const held = () =>
+      makeEntity({
+        id: "entity-1",
+        title: "Old",
+        userReaction: "upvote",
+        user: makeUser({ id: "author", avatarFileId: "file-1" }),
+        space: makeSpace({ id: "space-1" }),
+        saved: { isSaved: true, collections: [{ id: "c1", name: "Reading" }] },
+      });
+    // As the server answers an edit: no `saved` / `space`, a null
+    // `userReaction`, and the author without files.
+    const response = () =>
+      makeEntity({
+        id: "entity-1",
+        title: "New",
+        updatedAt: "2024-02-01T00:00:00.000Z",
+        userReaction: null,
+        user: makeUser({ id: "author" }),
+      });
+    const expected = () => ({
+      ...held(),
+      title: "New",
+      updatedAt: "2024-02-01T00:00:00.000Z",
+    });
+
+    it("updateEntity keeps what the response lacks or doesn't fill for the viewer", async () => {
+      const { result, axiosPrivate } = renderHookWithAxios(() =>
+        useEntityData({ entity: held() }),
+      );
+      axiosPrivate.mockResponse("patch", response());
+
+      await act(async () => {
+        await result.current.updateEntity({ update: { title: "New" } });
+      });
+
+      expect(result.current.entity).toEqual(expected());
+    });
+
+    it("useUpdateEntity inside an EntityProvider applies the edit the same way", async () => {
+      const store = makeSublayStore();
+      const axiosPrivate = mockAxiosPrivate();
+      axiosPrivate.mockResponse("patch", response());
+      const entity = held();
+      function Wrapper({ children }: { children: React.ReactNode }) {
+        return (
+          <Provider store={store}>
+            <SublayContext.Provider
+              value={{ projectId: "test-project", project: null } as SublayContextValues}
+            >
+              <EntityProvider entity={entity}>{children}</EntityProvider>
+            </SublayContext.Provider>
+          </Provider>
+        );
+      }
+      const { result } = renderHook(
+        () => ({ provided: useEntity().entity, updateEntity: useUpdateEntity() }),
+        { wrapper: Wrapper },
+      );
+
+      await act(async () => {
+        await result.current.updateEntity({ entityId: "entity-1", update: { title: "New" } });
+      });
+
+      expect(result.current.provided).toEqual(expected());
+    });
   });
 });

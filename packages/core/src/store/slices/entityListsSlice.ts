@@ -210,6 +210,28 @@ export interface EntityRemovePayload {
   entityId: string;
 }
 
+/**
+ * Brings every loaded list's copy of one entity up to date after a change made
+ * through the SDK (a save, a reaction, an edit). Lists that don't hold the
+ * entity are left as they are.
+ *
+ * - `changes` is shallow-merged into each copy: keys it carries replace the
+ *   copy's, every other field of the copy is kept.
+ * - `saved` changes the copy's saved state, and only on copies that have one
+ *   (lists fetched with `include=saved`); copies without `saved` keep not
+ *   having it. `add` appends the collection (once — a collection already
+ *   listed isn't added again) and sets `isSaved: true`; without a `name` the
+ *   collection can't be listed, so only `isSaved` is set. `remove` drops the
+ *   collection and sets `isSaved` to whether any collection is left.
+ */
+export interface EntityInListsUpdatePayload {
+  entityId: string;
+  changes?: Partial<Entity>;
+  saved?:
+    | { add: { id: string; name?: string } }
+    | { remove: string };
+}
+
 export interface EntitiesSetPayload {
   listId: string;
   entities: Entity[];
@@ -428,6 +450,40 @@ const entityListsSlice = createSlice({
       list.entities = list.entities.filter((e) => e.id !== entityId);
     },
 
+    // Update one entity in every loaded list that holds it
+    updateEntityInLists: (
+      state,
+      action: PayloadAction<EntityInListsUpdatePayload>
+    ) => {
+      const { entityId, changes, saved } = action.payload;
+
+      Object.values(state.lists).forEach((list) => {
+        list.entities.forEach((entity, index) => {
+          if (entity.id !== entityId) return;
+
+          let next: Entity = changes ? { ...entity, ...changes } : entity;
+
+          if (saved && next.saved) {
+            let collections = next.saved.collections;
+            let isSaved: boolean;
+            if ("add" in saved) {
+              const { id, name } = saved.add;
+              if (name !== undefined && !collections.some((c) => c.id === id)) {
+                collections = [...collections, { id, name }];
+              }
+              isSaved = true;
+            } else {
+              collections = collections.filter((c) => c.id !== saved.remove);
+              isSaved = collections.length > 0;
+            }
+            next = { ...next, saved: { isSaved, collections } };
+          }
+
+          if (next !== entity) list.entities[index] = next;
+        });
+      });
+    },
+
     // Update keywords filters (special case due to complexity)
     updateKeywordsFilters: (
       state,
@@ -545,6 +601,7 @@ export const {
   setEntityListError,
   addEntity,
   removeEntity,
+  updateEntityInLists,
   updateKeywordsFilters,
   cleanupList,
   cleanupOldLists,

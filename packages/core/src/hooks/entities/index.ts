@@ -1,5 +1,6 @@
 export { default as useEntity } from "./useEntity";
 export { default as useEntityData } from "./useEntityData";
+export type { UseEntityDataProps, UseEntityDataValues } from "./useEntityData";
 
 export { default as useCreateEntity } from "./useCreateEntity";
 export type { CreateEntityProps } from "./useCreateEntity";

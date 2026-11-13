@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
 import React from "react";
@@ -424,5 +424,295 @@ describe("useUpdateEntity / updateEntity with more than one EntityProvider", () 
     });
     expect(seen.inner).toBe("B2");
     expect(seen.outer).toBe("A");
+  });
+});
+
+describe("useEntityData — include and top-comment options", () => {
+  const waitABit = () =>
+    act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+    });
+
+  it("sends include on the by-id fetch, joined with commas", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useEntityData({ entityId: "entity-1", include: ["user", "space"] }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity) },
+    );
+
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+    const [call] = axiosPrivate.calls("get");
+    expect(call.url).toBe("/test-project/entities/entity-1");
+    expect(call.config?.params).toMatchObject({ include: "user,space" });
+  });
+
+  it("sends include and the top-comment options on the short-id fetch", async () => {
+    const entity = makeEntity({ shortId: "short-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () =>
+        useEntityData({
+          shortId: "short-1",
+          include: ["topComments"],
+          topCommentsLimit: 3,
+          topCommentsSortByReaction: "like",
+        }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity) },
+    );
+
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+    const [call] = axiosPrivate.calls("get");
+    expect(call.url).toBe("/test-project/entities/by-short-id");
+    expect(call.config?.params).toMatchObject({
+      shortId: "short-1",
+      include: "topComments",
+      topCommentsLimit: 3,
+      topCommentsSortByReaction: "like",
+    });
+  });
+
+  it("sends include on the foreign-id fetch", async () => {
+    const entity = makeEntity({ foreignId: "ext-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useEntityData({ foreignId: "ext-1", include: "user" }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity) },
+    );
+
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+    const [call] = axiosPrivate.calls("get");
+    expect(call.url).toBe("/test-project/entities/by-foreign-id");
+    expect(call.config?.params).toMatchObject({ foreignId: "ext-1", include: "user" });
+    expect(call.config?.params).not.toHaveProperty("createIfNotFound");
+  });
+
+  it("sends include and the top-comment options on the fetch-or-create", async () => {
+    const entity = makeEntity({ foreignId: "ext-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () =>
+        useEntityData({
+          foreignId: "ext-1",
+          createIfNotFound: true,
+          include: ["space", "topComments"],
+          topCommentsLimit: 2,
+        }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity, 201) },
+    );
+
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+    const [call] = axiosPrivate.calls("get");
+    expect(call.config?.params).toMatchObject({
+      foreignId: "ext-1",
+      createIfNotFound: true,
+      include: "space,topComments",
+      topCommentsLimit: 2,
+    });
+  });
+
+  it("leaves the top-comment options out when include doesn't ask for topComments", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () =>
+        useEntityData({
+          entityId: "entity-1",
+          include: "user",
+          topCommentsLimit: 3,
+          topCommentsSortByReaction: "like",
+        }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity) },
+    );
+
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+    const params = axiosPrivate.calls("get")[0].config?.params;
+    expect(params).not.toHaveProperty("topCommentsLimit");
+    expect(params).not.toHaveProperty("topCommentsSortByReaction");
+  });
+
+  it("fetches again when include changes, and uses the cache when it changes back", async () => {
+    const plain = makeEntity({ id: "entity-1", title: "plain" });
+    const withUser = makeEntity({ id: "entity-1", title: "with user", user: makeUser() });
+
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "entity-1" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", plain),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("plain"));
+
+    axiosPrivate.mockResponse("get", withUser);
+    rerender({ entityId: "entity-1", include: ["user"] });
+    await waitFor(() => expect(result.current.entity?.title).toBe("with user"));
+    expect(axiosPrivate.calls("get")[1].config?.params).toMatchObject({ include: "user" });
+
+    rerender({ entityId: "entity-1" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("plain"));
+
+    // The same include as a comma string is the same request, so the cache.
+    rerender({ entityId: "entity-1", include: "user" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("with user"));
+
+    await waitABit();
+    expect(axiosPrivate.calls("get")).toHaveLength(2);
+  });
+
+  it("fetches again when a top-comment option changes with include=topComments", async () => {
+    const first = makeEntity({ id: "entity-1", title: "limit 1" });
+    const second = makeEntity({ id: "entity-1", title: "limit 3" });
+
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: { limit: number }) =>
+        useEntityData({
+          entityId: "entity-1",
+          include: ["topComments"],
+          topCommentsLimit: props.limit,
+        }),
+      {
+        initialProps: { limit: 1 },
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", first),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("limit 1"));
+
+    axiosPrivate.mockResponse("get", second);
+    rerender({ limit: 3 });
+    await waitFor(() => expect(result.current.entity?.title).toBe("limit 3"));
+    expect(axiosPrivate.calls("get")[1].config?.params).toMatchObject({ topCommentsLimit: 3 });
+  });
+
+  it("doesn't fetch again when a top-comment option changes without include=topComments", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: { limit: number }) =>
+        useEntityData({ entityId: "entity-1", include: "user", topCommentsLimit: props.limit }),
+      {
+        initialProps: { limit: 1 },
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity),
+      },
+    );
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+
+    rerender({ limit: 3 });
+    await waitABit();
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+  });
+
+  it("doesn't loop or fetch again when re-rendered with the same inline include array", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    let renders = 0;
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      () => {
+        renders += 1;
+        if (renders > 50) throw new Error("render loop");
+        return useEntityData({ entityId: "entity-1", include: ["user", "space"] });
+      },
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity) },
+    );
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+
+    for (let i = 0; i < 3; i += 1) rerender();
+    await waitABit();
+
+    expect(renders).toBeLessThan(15);
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+  });
+
+  it("drops a response to a request made for options that have since changed", async () => {
+    let resolveSlow!: (value: unknown) => void;
+    const plain = makeEntity({ id: "entity-1", title: "plain" });
+    const withUser = makeEntity({ id: "entity-1", title: "with user" });
+    const seen: (string | null | undefined)[] = [];
+
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => {
+        const data = useEntityData(props);
+        seen.push(data.entity?.title);
+        return data;
+      },
+      {
+        initialProps: { entityId: "entity-1" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => {
+          vi.spyOn(axiosPrivate.instance, "get").mockImplementationOnce(
+            () => new Promise((resolve) => (resolveSlow = resolve)),
+          );
+        },
+      },
+    );
+
+    axiosPrivate.mockResponse("get", withUser);
+    rerender({ entityId: "entity-1", include: "user" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("with user"));
+
+    await act(async () => {
+      resolveSlow({ data: plain, status: 200 });
+    });
+    await waitABit();
+    expect(result.current.entity?.title).toBe("with user");
+    expect(seen).not.toContain("plain");
+  });
+
+  it("ignores the options for an entity passed in", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    // @ts-expect-error -- the fetch options don't apply to an entity passed in
+    const typedOut: UseEntityDataProps = { entity, include: "user" };
+    void typedOut;
+    const { result, axiosPrivate } = renderHookWithAxios(() =>
+      useEntityData({ entity, include: ["user"] } as unknown as UseEntityDataProps),
+    );
+
+    await waitABit();
+    expect(result.current.entity).toEqual(entity);
+    expect(axiosPrivate.calls("get")).toHaveLength(0);
+  });
+
+  it("fetches again with the same include when the user signs out", async () => {
+    const signedIn = makeEntity({ id: "entity-1", userReaction: "upvote" });
+    const signedOut = makeEntity({ id: "entity-1", userReaction: null });
+
+    const { result, axiosPrivate, store } = renderHookWithAxios(
+      () => useEntityData({ entityId: "entity-1", include: ["user", "saved"] }),
+      {
+        user: makeAuthUser({ id: "user-a" }),
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", signedIn),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.userReaction).toBe("upvote"));
+
+    axiosPrivate.mockResponse("get", signedOut);
+    act(() => {
+      store.dispatch(setUser(null));
+    });
+    await waitFor(() => expect(result.current.entity?.userReaction).toBeNull());
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(2);
+    expect(calls[1].config?.params).toMatchObject({ include: "user,saved" });
+  });
+});
+
+describe("EntityProvider — include", () => {
+  it("passes include through to its fetch", async () => {
+    const store = makeSublayStore();
+    const axiosPrivate = mockAxiosPrivate();
+    const entity = makeEntity({ id: "entity-1" });
+    axiosPrivate.mockResponse("get", entity);
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      return (
+        <Provider store={store}>
+          <SublayContext.Provider
+            value={{ projectId: "test-project", project: null } as SublayContextValues}
+          >
+            <EntityProvider entityId="entity-1" include={["user", "space"]}>
+              {children}
+            </EntityProvider>
+          </SublayContext.Provider>
+        </Provider>
+      );
+    }
+    const { result } = renderHook(() => useEntity().entity, { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current).toEqual(entity));
+    expect(axiosPrivate.calls("get")[0].config?.params).toMatchObject({
+      include: "user,space",
+    });
   });
 });

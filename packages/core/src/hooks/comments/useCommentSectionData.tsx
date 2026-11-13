@@ -34,7 +34,8 @@ import {
 } from "../../helpers/commentStore";
 import useFetchComment from "./useFetchComment";
 import { useUser } from "../user";
-import { useSublaySelector } from "../../store/hooks";
+import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
+import { updateEntityInLists } from "../../store/slices/entityListsSlice";
 import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
 import { Entity } from "../../interfaces/models/Entity";
 
@@ -362,6 +363,31 @@ export function useCommentSectionDataInternal(
         : baseEntity,
     [baseEntity, overlaidCount],
   );
+
+  // Loaded entity lists get the section's count changes too. An
+  // `EntityProvider` given an entity from a list follows that list's copy, so
+  // a count kept only in the provider would be replaced by the list's (on the
+  // next save or reaction, for example). After the count changes in the
+  // provider or the section's own copy, the next render pushes the number it
+  // now holds to the lists; `listCountSync` triggers that render's effect.
+  const dispatch = useSublayDispatch();
+  const [listCountSync, setListCountSync] = useState<{
+    entityId: string;
+    inContext: boolean;
+  } | null>(null);
+  useEffect(() => {
+    if (!listCountSync) return;
+    const source = listCountSync.inContext ? entityFromContext : ownEntity;
+    if (source && source.id === listCountSync.entityId) {
+      dispatch(
+        updateEntityInLists({
+          entityId: source.id,
+          changes: { commentsCount: source.commentsCount ?? 0 },
+        }),
+      );
+    }
+    setListCountSync(null);
+  }, [listCountSync, entityFromContext, ownEntity, dispatch]);
 
   const { user } = useUser();
 
@@ -706,6 +732,12 @@ export function useCommentSectionDataInternal(
         };
         if (sentEntityHome.context) setContextEntity?.(apply);
         else if (countsInOwnCopy) setEntity(apply);
+        if (sentEntityHome.context || countsInOwnCopy) {
+          setListCountSync({
+            entityId: sentEntityId,
+            inContext: sentEntityHome.context,
+          });
+        }
       };
       // For an `entity` prop: the caller's count when the create was sent,
       // and the overlay that was showing (restored if the create fails).
@@ -786,6 +818,15 @@ export function useCommentSectionDataInternal(
           settled: true,
           suppliedCount,
         });
+        // The caller's entity may be a loaded list's copy: the list takes
+        // the count, so the caller's entity catches up with the overlay.
+        // (Only on success: on failure the list was never changed.)
+        dispatch(
+          updateEntityInLists({
+            entityId: sentEntityId,
+            changes: { commentsCount: expected },
+          }),
+        );
       };
 
       try {
@@ -933,6 +974,7 @@ export function useCommentSectionDataInternal(
       user,
       setStore,
       setContextEntity,
+      dispatch,
       entity,
       baseEntity,
       entityHome.context,

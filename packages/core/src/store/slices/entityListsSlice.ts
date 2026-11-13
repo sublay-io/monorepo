@@ -216,7 +216,8 @@ export interface EntityRemovePayload {
  * entity are left as they are.
  *
  * - `changes` is shallow-merged into each copy: keys it carries replace the
- *   copy's, every other field of the copy is kept.
+ *   copy's, every other field of the copy is kept. A copy that already holds
+ *   every value (compared with `===`) is left as the same object.
  * - `saved` changes the copy's saved state, and only on copies that have one
  *   (lists fetched with `include=saved`); copies without `saved` keep not
  *   having it. `add` appends the collection (once — a collection already
@@ -461,7 +462,13 @@ const entityListsSlice = createSlice({
         list.entities.forEach((entity, index) => {
           if (entity.id !== entityId) return;
 
-          let next: Entity = changes ? { ...entity, ...changes } : entity;
+          // A copy that already holds every value is kept as it is.
+          const changed =
+            !!changes &&
+            (Object.keys(changes) as Array<keyof Entity>).some(
+              (key) => entity[key] !== changes[key]
+            );
+          let next: Entity = changed ? { ...entity, ...changes } : entity;
 
           if (saved && next.saved) {
             let collections = next.saved.collections;

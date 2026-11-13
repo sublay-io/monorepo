@@ -233,6 +233,12 @@ describe("entityListsSlice", () => {
       expect(reducer(initial, updateEntityInLists({ entityId: "e9", changes: { title: "x" } }))).toEqual(initial);
     });
 
+    it("keeps a copy that already holds every value as the same object", () => {
+      const s0 = withLists({ feed: [{ ...makeEntity("e1"), commentsCount: 3 } as Entity] });
+      const s = reducer(s0, updateEntityInLists({ entityId: "e1", changes: { commentsCount: 3 } }));
+      expect(s.lists.feed.entities[0]).toBe(s0.lists.feed.entities[0]);
+    });
+
     it("keeps the fields the changes don't carry", () => {
       const original = {
         ...makeEntity("e1"),

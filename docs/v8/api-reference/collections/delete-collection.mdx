@@ -4,9 +4,7 @@ api: "DELETE /v8/:projectId/collections/:collectionId"
 description: "Delete a sub-collection"
 ---
 
-Deletes a sub-collection and all its contents (cascade). The root collection cannot be deleted.
-
-Returns `204 No Content` on success.
+Deletes a sub-collection, every collection under it at any depth, and the saves they hold. The root collection cannot be deleted. The saved entities themselves are not deleted.
 
 ## Path Parameters
 
@@ -19,6 +17,18 @@ Returns `204 No Content` on success.
 <ParamField query="actingUserId" type="string">
   Service key only, and required with one: the user this request acts as. Must own the collection. A user token always acts as its own user and must not send it (`400 collection/acting-user-not-allowed`).
 </ParamField>
+
+## Response
+
+Returns `200` with the IDs of every collection the request deleted.
+
+<ResponseField name="deletedCollectionIds" type="string[]">
+  The deleted collection first, then every collection under it at any depth, in no particular order. An entity that listed any of these in [`saved.collections`](/v8/data-models/entity#saved-state) no longer does.
+</ResponseField>
+
+```json
+{ "deletedCollectionIds": ["col_abc123", "col_def456"] }
+```
 
 ## Error Responses
 

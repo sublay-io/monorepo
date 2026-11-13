@@ -187,14 +187,16 @@ const collection = await sublay.collections.updateCollection({
 
 ### deleteCollection
 
-Deletes a collection.
+Deletes a collection and every collection under it, at any depth. The root collection can't be deleted.
 
 ```typescript
-await sublay.collections.deleteCollection({ collectionId: "col_abc123" });
+const { deletedCollectionIds } = await sublay.collections.deleteCollection({
+  collectionId: "col_abc123",
+});
 ```
 
 <ParamField body="collectionId" type="string" required>
   The collection ID.
 </ParamField>
 
-**Returns** — `Promise<void>`
+**Returns** — `Promise<{ deletedCollectionIds: string[] }>`: the deleted collection and every collection under it. See [Delete Collection](/v8/api-reference/collections/delete-collection).

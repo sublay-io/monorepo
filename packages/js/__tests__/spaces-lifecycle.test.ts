@@ -372,7 +372,7 @@ describe("js-sdk spaces (lifecycle) — response mapping", () => {
     expect(result).toEqual({ available: false });
   });
 
-  it("fetchMySpaces returns the full UserSpacesResponse envelope", async () => {
+  it("fetchMySpaces returns the full MySpacesResponse envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
       data: [

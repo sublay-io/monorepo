@@ -1,6 +1,6 @@
 import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { UserSpacesResponse, SpaceIncludeParam } from "../../interfaces/Space";
+import { MySpacesResponse, SpaceIncludeParam } from "../../interfaces/Space";
 import { SpaceSearchParams } from "../../interfaces/SpaceSearch";
 
 export interface FetchMySpacesProps extends SpaceSearchParams {
@@ -33,8 +33,8 @@ export interface FetchMySpacesProps extends SpaceSearchParams {
 export async function fetchMySpaces(
   client: SublayHttpClient,
   data: FetchMySpacesProps
-): Promise<UserSpacesResponse> {
-  const response = await client.projectInstance.get<UserSpacesResponse>(
+): Promise<MySpacesResponse> {
+  const response = await client.projectInstance.get<MySpacesResponse>(
     "/spaces/mine",
     { params: { ...data, include: serializeInclude(data.include) } }
   );

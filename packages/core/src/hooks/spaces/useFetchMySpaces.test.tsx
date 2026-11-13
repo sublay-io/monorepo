@@ -3,13 +3,13 @@ import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeSpace } from "../../test-utils";
 import useFetchMySpaces from "./useFetchMySpaces";
-import type { UserSpacesResponse } from "../../interfaces/models/Space";
+import type { MySpacesResponse } from "../../interfaces/models/Space";
 
 afterEach(() => {
   resetAxiosMocks();
 });
 
-function makeResponse(): UserSpacesResponse {
+function makeResponse(): MySpacesResponse {
   return {
     data: [
       {
@@ -28,7 +28,7 @@ describe("useFetchMySpaces", () => {
     const response = makeResponse();
     axiosPrivate.mockResponse("get", response);
 
-    let returned: UserSpacesResponse | undefined;
+    let returned: MySpacesResponse | undefined;
     await act(async () => {
       returned = await result.current();
     });

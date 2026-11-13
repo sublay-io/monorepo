@@ -20,7 +20,7 @@ function MySpaces() {
     const result = await fetchMySpaces({ page: 1, limit: 20 });
     // Search within them, A–Z: fetchMySpaces({ query: "design", sortBy: "alphabetical" })
     // Top-level spaces only: fetchMySpaces({ parentSpaceId: "none" })
-    // result.data: UserSpaceItem[]
+    // result.data: MySpaceItem[]
     result.data.forEach(({ space, membership }) => {
       console.log(space.name, membership.role, membership.status);
     });
@@ -78,7 +78,7 @@ function MySpaces() {
 
 ## Returns
 
-<ResponseField name="data" type="UserSpaceItem[]">
+<ResponseField name="data" type="MySpaceItem[]">
   Each item contains a `space` ([Space](/v8/data-models/space)) and a `membership` object with `membershipId`, `role`, `status`, and `joinedAt`.
 </ResponseField>
 

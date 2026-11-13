@@ -78,7 +78,7 @@ export interface SpaceDetailed extends SpaceWithPermissions {
   childSpaces: SpacePreview[];
 }
 
-export interface UserSpaceItem {
+export interface MySpaceItem {
   space: Space;
   membership: {
     membershipId: string;
@@ -88,7 +88,7 @@ export interface UserSpaceItem {
   };
 }
 
-export type UserSpacesResponse = PaginatedResponse<UserSpaceItem>;
+export type MySpacesResponse = PaginatedResponse<MySpaceItem>;
 
 export interface JoinSpaceResponse {
   message: string;

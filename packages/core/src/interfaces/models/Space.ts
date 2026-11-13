@@ -102,7 +102,7 @@ export interface SpaceDetailed extends SpaceWithPermissions {
 }
 
 // My Spaces response types
-export interface UserSpaceItem {
+export interface MySpaceItem {
   space: Space;
   membership: {
     membershipId: string;
@@ -112,7 +112,7 @@ export interface UserSpaceItem {
   };
 }
 
-export type UserSpacesResponse = PaginatedResponse<UserSpaceItem>;
+export type MySpacesResponse = PaginatedResponse<MySpaceItem>;
 
 // Mutation response types
 export interface JoinSpaceResponse {

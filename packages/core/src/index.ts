@@ -874,8 +874,8 @@ export type {
   ReadingPermission,
   PostingPermission,
   PaginationMeta,
-  UserSpaceItem,
-  UserSpacesResponse,
+  MySpaceItem,
+  MySpacesResponse,
   JoinSpaceResponse,
   LeaveSpaceResponse,
   UpdateMemberRoleResponse,
@@ -921,7 +921,7 @@ export type {
 } from "./interfaces/models/SpaceMember";
 export type {
   SpaceListSortByOptions,
-  UserSpacesSortByOptions,
+  MySpacesSortByOptions,
 } from "./interfaces/SpaceListSortByOptions";
 // `SpaceListFilters` is exported from the slice, which is the definition
 // `useSpaceList` actually accepts. A second, unused declaration used to live in

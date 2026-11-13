@@ -1,9 +1,9 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
-import { UserSpacesResponse, SpaceIncludeParam } from "../../interfaces/models/Space";
+import { MySpacesResponse, SpaceIncludeParam } from "../../interfaces/models/Space";
 import { SpaceMemberRole } from "../../interfaces/models/SpaceMember";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
-import { UserSpacesSortByOptions } from "../../interfaces/SpaceListSortByOptions";
+import { MySpacesSortByOptions } from "../../interfaces/SpaceListSortByOptions";
 import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import { buildSearchParams } from "../../utils/searchParams";
 
@@ -21,7 +21,7 @@ export interface FetchMySpacesProps {
   /** The space field `query` matches. Left out: `slug`, `name` or `description`. */
   searchFields?: SpaceSearchFields | null;
   /** Server default `"joinedAt"` (most recently joined first). */
-  sortBy?: UserSpacesSortByOptions;
+  sortBy?: MySpacesSortByOptions;
   sortDir?: "asc" | "desc";
   include?: SpaceIncludeParam;
   /**
@@ -35,7 +35,7 @@ export interface FetchMySpacesProps {
   parentSpaceId?: string | "none" | "any" | null;
 }
 
-function useFetchMySpaces(): (params?: FetchMySpacesProps) => Promise<UserSpacesResponse> {
+function useFetchMySpaces(): (params?: FetchMySpacesProps) => Promise<MySpacesResponse> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -47,7 +47,7 @@ function useFetchMySpaces(): (params?: FetchMySpacesProps) => Promise<UserSpaces
 
       const { include, role, query, searchFields, parentSpaceId, ...rest } = params;
 
-      const response = await axios.get<UserSpacesResponse>(
+      const response = await axios.get<MySpacesResponse>(
         `/${projectId}/spaces/mine`,
         {
           params: {

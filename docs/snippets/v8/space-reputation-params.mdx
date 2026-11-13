@@ -59,8 +59,8 @@ export const SpaceReputationParams = ({ variant = "context", field = "path", res
             member/team/conversation surfaces).
           </>
         )}{" "}
-        The legacy <code>general</code> / <code>null</code> aliases are
-        rejected (400). Missing buckets read as <code>0</code>.
+        In the query, an empty value is the same as leaving it out; in a body, an empty string is rejected (400). The legacy <code>general</code> / <code>null</code> aliases
+        are rejected (400). Missing buckets read as <code>0</code>.
         </ParamField>
         <ParamField {...{ [field]: "spaceReputationDescendants", type: "boolean" }}>
           When <code>true</code>, <code>spaceReputation</code> is the{" "}

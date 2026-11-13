@@ -12,6 +12,16 @@ icon: "cube"
 
 `useEntity` reads from the nearest `EntityProvider` in the component tree and returns the entity's state and actions. It does not fetch data itself — it accesses what `EntityProvider` has already loaded.
 
+Which related data the entity carries (`user`, `space`, `topComments`, `saved`, `files`, `grants`) is set by the provider's `include` prop, along with `topCommentsLimit` and `topCommentsSortByReaction`:
+
+```tsx
+<EntityProvider entityId={entityId} include={["user", "space"]}>
+  <EntityContent />
+</EntityProvider>
+```
+
+See [EntityProvider props](/v8/sdk/entities/provider-and-hook#entityprovider-props-reference).
+
 <Note>
   `useEntity` must be used inside an `EntityProvider`. See [EntityProvider & useEntity](/v8/sdk/entities/provider-and-hook) for setup instructions.
 </Note>

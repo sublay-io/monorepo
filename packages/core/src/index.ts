@@ -320,6 +320,8 @@ export {
   type PublishDraftProps,
   type UseFetchManyEntitiesWrapperProps,
   type UseFetchManyEntitiesWrapperValues,
+  type UseEntityDataProps,
+  type UseEntityDataValues,
 } from "./hooks/entities";
 
 // -- events

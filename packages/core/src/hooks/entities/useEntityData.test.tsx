@@ -1,7 +1,7 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
-import React from "react";
+import React, { useState } from "react";
 import { render, renderHook } from "@testing-library/react";
 import { Provider } from "react-redux";
 
@@ -424,5 +424,640 @@ describe("useUpdateEntity / updateEntity with more than one EntityProvider", () 
     });
     expect(seen.inner).toBe("B2");
     expect(seen.outer).toBe("A");
+  });
+});
+
+describe("useEntityData — include and top-comment options", () => {
+  const waitABit = () =>
+    act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+    });
+
+  it("sends include on the by-id fetch, joined with commas", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useEntityData({ entityId: "entity-1", include: ["user", "space"] }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity) },
+    );
+
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+    const [call] = axiosPrivate.calls("get");
+    expect(call.url).toBe("/test-project/entities/entity-1");
+    expect(call.config?.params).toMatchObject({ include: "user,space" });
+  });
+
+  it("sends include and the top-comment options on the short-id fetch", async () => {
+    const entity = makeEntity({ shortId: "short-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () =>
+        useEntityData({
+          shortId: "short-1",
+          include: ["topComments"],
+          topCommentsLimit: 3,
+          topCommentsSortByReaction: "like",
+        }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity) },
+    );
+
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+    const [call] = axiosPrivate.calls("get");
+    expect(call.url).toBe("/test-project/entities/by-short-id");
+    expect(call.config?.params).toMatchObject({
+      shortId: "short-1",
+      include: "topComments",
+      topCommentsLimit: 3,
+      topCommentsSortByReaction: "like",
+    });
+  });
+
+  it("sends include on the foreign-id fetch", async () => {
+    const entity = makeEntity({ foreignId: "ext-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useEntityData({ foreignId: "ext-1", include: "user" }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity) },
+    );
+
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+    const [call] = axiosPrivate.calls("get");
+    expect(call.url).toBe("/test-project/entities/by-foreign-id");
+    expect(call.config?.params).toMatchObject({ foreignId: "ext-1", include: "user" });
+    expect(call.config?.params).not.toHaveProperty("createIfNotFound");
+  });
+
+  it("sends include and the top-comment options on the fetch-or-create", async () => {
+    const entity = makeEntity({ foreignId: "ext-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () =>
+        useEntityData({
+          foreignId: "ext-1",
+          createIfNotFound: true,
+          include: ["space", "topComments"],
+          topCommentsLimit: 2,
+        }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity, 201) },
+    );
+
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+    const [call] = axiosPrivate.calls("get");
+    expect(call.config?.params).toMatchObject({
+      foreignId: "ext-1",
+      createIfNotFound: true,
+      include: "space,topComments",
+      topCommentsLimit: 2,
+    });
+  });
+
+  it("leaves the top-comment options out when include doesn't ask for topComments", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () =>
+        useEntityData({
+          entityId: "entity-1",
+          include: "user",
+          topCommentsLimit: 3,
+          topCommentsSortByReaction: "like",
+        }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity) },
+    );
+
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+    const params = axiosPrivate.calls("get")[0].config?.params;
+    expect(params).not.toHaveProperty("topCommentsLimit");
+    expect(params).not.toHaveProperty("topCommentsSortByReaction");
+  });
+
+  it("fetches again when include changes, and uses the cache when it changes back", async () => {
+    const plain = makeEntity({ id: "entity-1", title: "plain" });
+    const withUser = makeEntity({ id: "entity-1", title: "with user", user: makeUser() });
+
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "entity-1" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", plain),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("plain"));
+
+    axiosPrivate.mockResponse("get", withUser);
+    rerender({ entityId: "entity-1", include: ["user"] });
+    await waitFor(() => expect(result.current.entity?.title).toBe("with user"));
+    expect(axiosPrivate.calls("get")[1].config?.params).toMatchObject({ include: "user" });
+
+    rerender({ entityId: "entity-1" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("plain"));
+
+    // The same include as a single value is the same request, so the cache.
+    rerender({ entityId: "entity-1", include: "user" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("with user"));
+
+    await waitABit();
+    expect(axiosPrivate.calls("get")).toHaveLength(2);
+  });
+
+  it("fetches again when a top-comment option changes with include=topComments", async () => {
+    const first = makeEntity({ id: "entity-1", title: "limit 1" });
+    const second = makeEntity({ id: "entity-1", title: "limit 3" });
+
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: { limit: number }) =>
+        useEntityData({
+          entityId: "entity-1",
+          include: ["topComments"],
+          topCommentsLimit: props.limit,
+        }),
+      {
+        initialProps: { limit: 1 },
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", first),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("limit 1"));
+
+    axiosPrivate.mockResponse("get", second);
+    rerender({ limit: 3 });
+    await waitFor(() => expect(result.current.entity?.title).toBe("limit 3"));
+    expect(axiosPrivate.calls("get")[1].config?.params).toMatchObject({ topCommentsLimit: 3 });
+  });
+
+  it("doesn't fetch again when a top-comment option changes without include=topComments", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: { limit: number }) =>
+        useEntityData({ entityId: "entity-1", include: "user", topCommentsLimit: props.limit }),
+      {
+        initialProps: { limit: 1 },
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity),
+      },
+    );
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+
+    rerender({ limit: 3 });
+    await waitABit();
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+  });
+
+  it("doesn't loop or fetch again when re-rendered with the same inline include array", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    let renders = 0;
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      () => {
+        renders += 1;
+        if (renders > 50) throw new Error("render loop");
+        return useEntityData({ entityId: "entity-1", include: ["user", "space"] });
+      },
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", entity) },
+    );
+    await waitFor(() => expect(result.current.entity).toEqual(entity));
+
+    for (let i = 0; i < 3; i += 1) rerender();
+    await waitABit();
+
+    expect(renders).toBeLessThan(15);
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+  });
+
+  it("drops a response to a request made for options that have since changed", async () => {
+    let resolveSlow!: (value: unknown) => void;
+    const plain = makeEntity({ id: "entity-1", title: "plain" });
+    const withUser = makeEntity({ id: "entity-1", title: "with user" });
+    const seen: (string | null | undefined)[] = [];
+
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => {
+        const data = useEntityData(props);
+        seen.push(data.entity?.title);
+        return data;
+      },
+      {
+        initialProps: { entityId: "entity-1" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => {
+          vi.spyOn(axiosPrivate.instance, "get").mockImplementationOnce(
+            () => new Promise((resolve) => (resolveSlow = resolve)),
+          );
+        },
+      },
+    );
+
+    axiosPrivate.mockResponse("get", withUser);
+    rerender({ entityId: "entity-1", include: "user" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("with user"));
+
+    await act(async () => {
+      resolveSlow({ data: plain, status: 200 });
+    });
+    await waitABit();
+    expect(result.current.entity?.title).toBe("with user");
+    expect(seen).not.toContain("plain");
+  });
+
+  it("ignores the options for an entity passed in", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(() =>
+      useEntityData({ entity, include: ["user"], topCommentsLimit: 2 }),
+    );
+
+    await waitABit();
+    expect(result.current.entity).toEqual(entity);
+    expect(axiosPrivate.calls("get")).toHaveLength(0);
+  });
+
+  it("takes the options next to either an entity or an id from one conditional object", () => {
+    // Type-level: the options are allowed on every variant, so a caller can
+    // pick the identifier at runtime and pass `include` once.
+    const pick = (e: ReturnType<typeof makeEntity> | null): UseEntityDataProps => {
+      const source = e ? { entity: e } : { entityId: "entity-1" };
+      return { ...source, include: "user" };
+    };
+    expect(pick(null)).toMatchObject({ entityId: "entity-1", include: "user" });
+  });
+
+  it("fetches again with the same include when the user signs out", async () => {
+    const signedIn = makeEntity({ id: "entity-1", userReaction: "upvote" });
+    const signedOut = makeEntity({ id: "entity-1", userReaction: null });
+
+    const { result, axiosPrivate, store } = renderHookWithAxios(
+      () => useEntityData({ entityId: "entity-1", include: ["user", "saved"] }),
+      {
+        user: makeAuthUser({ id: "user-a" }),
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", signedIn),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.userReaction).toBe("upvote"));
+
+    axiosPrivate.mockResponse("get", signedOut);
+    act(() => {
+      store.dispatch(setUser(null));
+    });
+    await waitFor(() => expect(result.current.entity?.userReaction).toBeNull());
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(2);
+    expect(calls[1].config?.params).toMatchObject({ include: "user,saved" });
+  });
+});
+
+describe("useEntityData — requests superseded or undone", () => {
+  const waitABit = () =>
+    act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+    });
+
+  // Makes the next GET wait until the returned function is called.
+  function holdNextGet(axiosPrivate: { instance: { get: unknown } }) {
+    let release!: (data: unknown) => void;
+    // The harness already spies on `get`; queue on that same spy so its
+    // recorded calls still include this one.
+    vi.mocked(axiosPrivate.instance.get as () => Promise<unknown>).mockImplementationOnce(
+      (() =>
+        new Promise((resolve) => {
+          release = (data) => resolve({ data, status: 200 });
+        })) as never,
+    );
+    return (data: unknown) =>
+      act(async () => {
+        release(data);
+      });
+  }
+
+  it("options A → B → A before B lands: B's response is dropped", async () => {
+    const plain = makeEntity({ id: "entity-1", title: "plain" });
+    const seen: (string | null | undefined)[] = [];
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => {
+        const data = useEntityData(props);
+        seen.push(data.entity?.title);
+        return data;
+      },
+      {
+        initialProps: { entityId: "entity-1" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", plain),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("plain"));
+
+    const releaseB = holdNextGet(axiosPrivate);
+    rerender({ entityId: "entity-1", include: "user" });
+    rerender({ entityId: "entity-1" });
+    await releaseB(makeEntity({ id: "entity-1", title: "with user" }));
+    await waitABit();
+
+    expect(result.current.entity?.title).toBe("plain");
+    expect(seen).not.toContain("with user");
+  });
+
+  it("ids X → Y → X before Y lands: Y's response is dropped", async () => {
+    const x = makeEntity({ id: "X", title: "X" });
+    const seen: (string | null | undefined)[] = [];
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => {
+        const data = useEntityData(props);
+        seen.push(data.entity?.title);
+        return data;
+      },
+      {
+        initialProps: { entityId: "X" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", x),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+
+    const releaseY = holdNextGet(axiosPrivate);
+    rerender({ entityId: "Y" });
+    rerender({ entityId: "X" });
+    await releaseY(makeEntity({ id: "Y", title: "Y" }));
+    await waitABit();
+
+    expect(result.current.entity?.title).toBe("X");
+    expect(seen).not.toContain("Y");
+  });
+
+  it("switching to an entity prop while a fetch is in flight drops that fetch", async () => {
+    const given = makeEntity({ id: "given", title: "given" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      { initialProps: { entityId: "Y" } as UseEntityDataProps },
+    );
+    const releaseY = holdNextGet(axiosPrivate);
+    rerender({ entityId: "Z" });
+    rerender({ entity: given });
+    await releaseY(makeEntity({ id: "Z", title: "Z" }));
+    await waitABit();
+
+    expect(result.current.entity?.title).toBe("given");
+  });
+
+  it("an edit under options A survives A → B → A", async () => {
+    const a = makeEntity({ id: "entity-1", title: "old" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "entity-1" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", a),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("old"));
+
+    axiosPrivate.mockResponse("patch", { ...a, title: "edited" });
+    await act(async () => {
+      await result.current.updateEntity({ update: { title: "edited" } });
+    });
+
+    axiosPrivate.mockResponse("get", { ...a, title: "edited", user: makeUser() });
+    rerender({ entityId: "entity-1", include: "user" });
+    await waitFor(() => expect(result.current.entity?.user).toBeTruthy());
+
+    rerender({ entityId: "entity-1" });
+    await waitABit();
+    expect(result.current.entity?.title).toBe("edited");
+  });
+
+  it("an edit under options B isn't undone by A's older cached copy", async () => {
+    const a = makeEntity({ id: "entity-1", title: "old" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "entity-1" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", a),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("old"));
+
+    axiosPrivate.mockResponse("get", { ...a, user: makeUser() });
+    rerender({ entityId: "entity-1", include: "user" });
+    await waitFor(() => expect(result.current.entity?.user).toBeTruthy());
+
+    act(() => {
+      result.current.setEntity((current) => current && { ...current, commentsCount: 9 });
+    });
+
+    axiosPrivate.mockResponse("get", { ...a, commentsCount: 9 });
+    rerender({ entityId: "entity-1" });
+    await waitABit();
+    expect(result.current.entity?.commentsCount).toBe(9);
+  });
+
+  it("a deleted entity isn't brought back from the cache", async () => {
+    const a = makeEntity({ id: "entity-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useEntityData({ entityId: "entity-1" }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", a) },
+    );
+    await waitFor(() => expect(result.current.entity).toEqual(a));
+
+    axiosPrivate.mockResponse("delete", undefined, 204);
+    await act(async () => {
+      await result.current.deleteEntity();
+    });
+    await waitABit();
+
+    expect(result.current.entity).toBeUndefined();
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+  });
+
+  it("a delete that resolves after switching to another id leaves the new entity", async () => {
+    const x = makeEntity({ id: "X", title: "X" });
+    const y = makeEntity({ id: "Y", title: "Y" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "X" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", x),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+
+    let releaseDelete!: () => void;
+    vi.mocked(axiosPrivate.instance.delete as () => Promise<unknown>).mockImplementationOnce(
+      (() =>
+        new Promise((resolve) => {
+          releaseDelete = () => resolve({ data: undefined, status: 204 });
+        })) as never,
+    );
+    let deleting!: Promise<void>;
+    act(() => {
+      deleting = result.current.deleteEntity();
+    });
+
+    axiosPrivate.mockResponse("get", y);
+    rerender({ entityId: "Y" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("Y"));
+
+    await act(async () => {
+      releaseDelete();
+      await deleting;
+    });
+    await waitABit();
+    expect(result.current.entity?.title).toBe("Y");
+
+    // Y's cache entry survived the delete: away to Z and back is no request.
+    axiosPrivate.mockResponse("get", makeEntity({ id: "Z", title: "Z" }));
+    rerender({ entityId: "Z" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("Z"));
+    rerender({ entityId: "Y" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("Y"));
+    expect(axiosPrivate.calls("get")).toHaveLength(3);
+  });
+
+  it("clearing the entity while another id's fetch is in flight doesn't cancel that fetch", async () => {
+    const x = makeEntity({ id: "X", title: "X" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "X" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", x),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+
+    const releaseY = holdNextGet(axiosPrivate);
+    rerender({ entityId: "Y" });
+    act(() => {
+      result.current.setEntity(undefined);
+    });
+    await releaseY(makeEntity({ id: "Y", title: "Y" }));
+    await waitABit();
+
+    expect(result.current.entity?.title).toBe("Y");
+  });
+
+  it("a local change batched with a switch to a cached id stays with its own entity", async () => {
+    const x = makeEntity({ id: "X", title: "X", commentsCount: 0 });
+    const y = makeEntity({ id: "Y", title: "Y" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => {
+        const [id, setId] = useState("X");
+        return { ...useEntityData({ entityId: id }), setId };
+      },
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", x) },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+    axiosPrivate.mockResponse("get", y);
+    act(() => result.current.setId("Y"));
+    await waitFor(() => expect(result.current.entity?.title).toBe("Y"));
+    act(() => result.current.setId("X"));
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+
+    act(() => {
+      result.current.setEntity((c) => c && { ...c, commentsCount: 42 });
+      result.current.setId("Y");
+    });
+    await waitABit();
+    expect(result.current.entity?.id).toBe("Y");
+
+    act(() => result.current.setId("X"));
+    await waitABit();
+    expect(result.current.entity?.id).toBe("X");
+    expect(result.current.entity?.commentsCount).toBe(42);
+
+    act(() => result.current.setId("Y"));
+    await waitABit();
+    expect(result.current.entity?.id).toBe("Y");
+    expect(axiosPrivate.calls("get")).toHaveLength(2);
+  });
+
+  it("a delete during an options-change fetch of the same entity stays deleted", async () => {
+    const x = makeEntity({ id: "X", title: "X" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "X" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", x),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+
+    const releaseWithUser = holdNextGet(axiosPrivate);
+    rerender({ entityId: "X", include: "user" });
+    axiosPrivate.mockResponse("delete", undefined, 204);
+    await act(async () => {
+      await result.current.deleteEntity();
+    });
+    expect(result.current.entity).toBeUndefined();
+
+    await releaseWithUser({ ...x, user: makeUser() });
+    await waitABit();
+    expect(result.current.entity).toBeUndefined();
+  });
+
+  it("an entity with another id set locally isn't filed under the held identifier", async () => {
+    const x = makeEntity({ id: "X", title: "X" });
+    const y = makeEntity({ id: "Y", title: "Y" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "X" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", x),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+    axiosPrivate.mockResponse("get", y);
+    rerender({ entityId: "Y" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("Y"));
+    rerender({ entityId: "X" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+
+    act(() => {
+      result.current.setEntity(makeEntity({ id: "other", title: "other" }));
+    });
+    rerender({ entityId: "Y" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("Y"));
+    rerender({ entityId: "X" });
+    await waitABit();
+
+    expect(result.current.entity?.id).toBe("X");
+  });
+
+  it("local changes during an options-change fetch don't start more requests", async () => {
+    const a = makeEntity({ id: "entity-1", title: "plain" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "entity-1" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", a),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("plain"));
+
+    const releaseB = holdNextGet(axiosPrivate);
+    rerender({ entityId: "entity-1", include: "user" });
+    act(() => {
+      result.current.setEntity((c) => c && { ...c, commentsCount: 1 });
+    });
+    act(() => {
+      result.current.setEntity((c) => c && { ...c, commentsCount: 2 });
+    });
+    await releaseB({ ...a, title: "with user" });
+    await waitABit();
+
+    expect(axiosPrivate.calls("get")).toHaveLength(2);
+    expect(result.current.entity?.title).toBe("with user");
+  });
+});
+
+describe("EntityProvider — include", () => {
+  it("passes include through to its fetch", async () => {
+    const store = makeSublayStore();
+    const axiosPrivate = mockAxiosPrivate();
+    const entity = makeEntity({ id: "entity-1" });
+    axiosPrivate.mockResponse("get", entity);
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      return (
+        <Provider store={store}>
+          <SublayContext.Provider
+            value={{ projectId: "test-project", project: null } as SublayContextValues}
+          >
+            <EntityProvider entityId="entity-1" include={["user", "space"]}>
+              {children}
+            </EntityProvider>
+          </SublayContext.Provider>
+        </Provider>
+      );
+    }
+    const { result } = renderHook(() => useEntity().entity, { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current).toEqual(entity));
+    expect(axiosPrivate.calls("get")[0].config?.params).toMatchObject({
+      include: "user,space",
+    });
   });
 });

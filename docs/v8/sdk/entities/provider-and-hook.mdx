@@ -49,7 +49,23 @@ description: "Load a single entity and access its state and actions from any chi
   `EntityProvider` renders `null` if none of the identifier props are provided. Exactly one must be present.
 </Note>
 
-When the signed-in user signs in, signs out or switches accounts, `EntityProvider` fetches its entity again (when it was given an id), since the entity carries that user's own reaction (`userReaction`). An entity passed as the `entity` prop is used as it is.
+## Loading Related Data
+
+When it fetches by `entityId`, `foreignId` or `shortId`, `EntityProvider` takes the same `include`, `topCommentsLimit` and `topCommentsSortByReaction` options as the entity fetch hooks, and sends them with its fetch (with `createIfNotFound` too):
+
+```tsx
+<EntityProvider entityId="ent_abc123" include={["user", "space", "topComments"]} topCommentsLimit={3}>
+  <EntityDetail />
+</EntityProvider>
+```
+
+See [The `include` parameter](/v8/sdk/entities/overview#the-include-parameter) for the values. `topCommentsLimit` and `topCommentsSortByReaction` are sent only when `include` contains `"topComments"`.
+
+Changing any of the three fetches the entity again with the new options; the entity on screen stays until the new one arrives. If that fetch fails, the entity on screen stays and the error is reported through the SDK's error handler. The provider keeps each entity it fetched by identifier and options, so going back to options it already used shows that entity without a request. A change made to the entity on screen (an edit, a new comment count) is kept with it; the entity under other options is fetched again the next time they are used, so it never shows the entity from before the change. An `include` given inline (`include={["user"]}`) is not a change on each render.
+
+With the `entity` prop the options are ignored: the entity is used as given. They can still be passed, so one set of props can carry either an entity or an id.
+
+When the signed-in user signs in, signs out or switches accounts, `EntityProvider` fetches its entity again (when it was given an id), with the same options, since the entity carries that user's own reaction (`userReaction`). An entity passed as the `entity` prop is used as it is.
 
 ## Accessing Entity State with `useEntity`
 
@@ -118,4 +134,16 @@ function EntityDetail() {
 
 <ParamField path="createIfNotFound" type="boolean">
   Only valid with `foreignId`. If `true`, the entity is automatically created when it doesn't exist yet. Useful for "entity-per-resource" patterns. The created entity has no author, so the project's **Who can create entities without an author** setting decides who may create it: everyone by default. A caller the setting refuses gets `403 entity/authorless-creation-not-allowed`. See [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id).
+</ParamField>
+
+<ParamField path="include" type="EntityIncludeParam">
+  Ignored with `entity`. Related data to populate on the fetched entity, as a single value or an array: `"user"`, `"space"`, `"topComments"`, `"saved"`, `"files"`, `"grants"`. Changing it fetches the entity again.
+</ParamField>
+
+<ParamField path="topCommentsLimit" type="number">
+  Ignored with `entity`. With `"topComments"` included: how many top comments to attach. Server default `1`, maximum `5`. Not sent when `include` doesn't contain `"topComments"`.
+</ParamField>
+
+<ParamField path="topCommentsSortByReaction" type="ReactionType">
+  Ignored with `entity`. With `"topComments"` included: the reaction whose raw count ranks the top comments. Server default `"upvote"`. Not sent when `include` doesn't contain `"topComments"`.
 </ParamField>

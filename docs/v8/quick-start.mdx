@@ -209,7 +209,7 @@ The examples use React on the web. React Native and Expo work the same way — s
 
     `init` asks for your platform, styling (Tailwind or inline styles) and where to put components (default `src/components`). See [Components](/v8/components/overview) for the other components.
 
-    The entity page loads one entity by its ID with `EntityProvider` and binds the comment section to the same entity:
+    The entity page loads one entity by its ID with `EntityProvider`, with its author (`include="user"`), and binds the comment section to the same entity:
 
     ```tsx EntityPage.tsx
     import { EntityProvider, useEntity } from "@sublay/react-js";
@@ -218,7 +218,7 @@ The examples use React on the web. React Native and Expo work the same way — s
 
     export function EntityPage({ entityId, onBack }: { entityId: string; onBack: () => void }) {
       return (
-        <EntityProvider entityId={entityId}>
+        <EntityProvider entityId={entityId} include="user">
           <button onClick={onBack}>Back</button>
           <EntityDetail />
           <ThreadedCommentSection entityId={entityId} />
@@ -233,6 +233,7 @@ The examples use React on the web. React Native and Expo work the same way — s
       return (
         <article>
           <h1>{entity.title}</h1>
+          <p>by {entity.user?.username ?? "unknown"}</p>
           <p>{entity.content}</p>
           <LikeButton entity={entity} />
         </article>

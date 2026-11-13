@@ -126,7 +126,7 @@ const entity = await fetchEntity({ entityId, include: "saved" });
 const inThisCollection = entity.saved?.collections.some((c) => c.id === collection.id);
 ```
 
-Saving and unsaving through `useCollections` updates `saved` on the entity in every loaded entity list that carries it, so a feed fetched with `include: "saved"` shows the change without fetching again.
+Adding an entity to a collection or removing it from one through `useCollections` updates `saved` on the entity in every loaded entity list that carries it, so a feed fetched with `include: "saved"` shows the change without fetching again. Renaming or deleting a collection doesn't update `saved` in loaded lists.
 
 See [Saved state](/v8/data-models/entity#saved-state).
 

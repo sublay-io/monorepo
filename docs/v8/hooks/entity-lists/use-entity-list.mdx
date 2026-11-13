@@ -10,7 +10,7 @@ icon: "cube"
 
 See [Fetching Entities](/v8/sdk/entity-lists/fetch-entities) for a full guide on using this hook.
 
-Loaded lists stay current with changes the user makes through the SDK: saving or unsaving an entity (`useCollections`, `useCollectionsActions`) updates its `saved` in every list that carries `saved`, reacting to an entity (`useReactionToggle`, `useAddReaction`, `useRemoveReaction`) updates its `userReaction` and `reactionCounts`, and editing it (`useUpdateEntity`) updates the edited fields. An `EntityProvider` given an entity from the list follows these updates.
+Loaded lists stay current with changes the user makes through these hooks: saving an entity to a collection or removing it from one (`addToCollection` / `removeFromCollection` of `useCollections` or `useCollectionsActions`) updates its `saved` in every list that carries `saved`; reacting to an entity (`useReactionToggle`, `useAddReaction`, `useRemoveReaction`) updates its `userReaction` and `reactionCounts`; editing it (`useUpdateEntity`) updates the edited fields; and posting a comment through a comment section updates its `commentsCount`. Renaming or deleting a collection doesn't change `saved` in loaded lists. An `EntityProvider` given an entity from the list follows these updates.
 
 ## Usage Example
 

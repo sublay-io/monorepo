@@ -67,7 +67,7 @@ function QuickSaveButton({ entityId, collectionId, projectId }) {
 </ResponseField>
 
 <ResponseField name="addToCollection" type="({ projectId, collectionId, entityId }: ...) => Promise<void>">
-  Add an entity to a collection by creating a junction table entry. Once it succeeds, loaded entity lists that carry `saved` (fetched with `include=saved`) add the collection to the entity's `saved.collections` and set `isSaved` to `true`. The collection is listed by name only when it is loaded in the collections state (for example, opened with `openCollection`); otherwise only `isSaved` changes.
+  Add an entity to a collection by creating a junction table entry. Once it succeeds, loaded entity lists that carry `saved` (fetched with `include=saved`) add the collection, with the name the response gives, to the entity's `saved.collections` and set `isSaved` to `true`.
 </ResponseField>
 
 <ResponseField name="removeFromCollection" type="({ projectId, collectionId, entityId }: ...) => Promise<void>">

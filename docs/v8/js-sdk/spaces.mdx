@@ -88,7 +88,7 @@ const space = await sublay.spaces.fetchSpace({ spaceId: "spc_abc123" });
 
 ### fetchManySpaces
 
-Fetches a paginated, filterable list of public spaces (the space directory). For the spaces the logged-in user belongs to, whatever their visibility, use [fetchUserSpaces](#fetchuserspaces).
+Fetches a paginated, filterable list of public spaces (the space directory). For the spaces the logged-in user belongs to, whatever their visibility, use [fetchMySpaces](#fetchmyspaces).
 
 ```typescript
 const { data, pagination } = await sublay.spaces.fetchManySpaces({
@@ -178,12 +178,12 @@ const space = await sublay.spaces.fetchSpaceByShortId({ shortId: "a1b2c3" });
 
 ---
 
-### fetchUserSpaces
+### fetchMySpaces
 
-Fetches the spaces the logged-in user belongs to, with the user's membership on each. Every space the user is an active member of is listed, whatever its visibility; a `pending`, `banned` or `rejected` membership of a space the user can't see (a private space, or one under it) is left out. It can search within them and sort them.
+Fetches the spaces the logged-in user belongs to (`GET /spaces/mine`), with the user's membership on each. Every space the user is an active member of is listed, whatever its visibility; a `pending`, `banned` or `rejected` membership of a space the user can't see (a private space, or one under it) is left out. It can search within them and sort them.
 
 ```typescript
-const userSpaces = await sublay.spaces.fetchUserSpaces({
+const mySpaces = await sublay.spaces.fetchMySpaces({
   role: "admin,moderator",
   query: "design",
   sortBy: "alphabetical",

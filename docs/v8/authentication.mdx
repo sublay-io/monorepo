@@ -242,7 +242,7 @@ These query filters take `none`:
 | Endpoint | Filter | `none` means | Left out or empty |
 |---|---|---|---|
 | [`GET /spaces`](/v8/api-reference/spaces/fetch-spaces) | `parentSpaceId` | top-level spaces only | top-level spaces only |
-| [`GET /spaces/user-spaces`](/v8/api-reference/spaces/fetch-user-spaces) | `parentSpaceId` | the user's memberships in top-level spaces only | memberships at every level |
+| [`GET /spaces/mine`](/v8/api-reference/spaces/fetch-my-spaces) | `parentSpaceId` | the user's memberships in top-level spaces only | memberships at every level |
 | [`GET /workspaces`](/v8/api-reference/workspaces/fetch-workspaces) | `parentWorkspaceId` | the user's top-level workspaces only | workspaces at every level |
 | [`GET /entities`](/v8/api-reference/entities/fetch-many-entities) | `sourceId` | entities with no source | any source |
 | [`GET /entities`](/v8/api-reference/entities/fetch-many-entities) | `spaceId` | entities in no space | any space, or none |
@@ -256,7 +256,7 @@ These filters also take `any`:
 | Endpoint | Filter | `any` means |
 |---|---|---|
 | [`GET /spaces`](/v8/api-reference/spaces/fetch-spaces) | `parentSpaceId` | spaces at every level |
-| [`GET /spaces/user-spaces`](/v8/api-reference/spaces/fetch-user-spaces) | `parentSpaceId` | memberships at every level (the same as leaving it out) |
+| [`GET /spaces/mine`](/v8/api-reference/spaces/fetch-my-spaces) | `parentSpaceId` | memberships at every level (the same as leaving it out) |
 | [`GET /workspaces`](/v8/api-reference/workspaces/fetch-workspaces) | `parentWorkspaceId` | workspaces at every level (the same as leaving it out) |
 
 Other id filters, such as `spaceId` on search and on moderated reports, take ids only.

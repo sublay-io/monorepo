@@ -7,7 +7,7 @@ description: "Get a paginated list of public spaces with filtering and sorting"
 Fetches a paginated list of public spaces: the space directory. By default it lists top-level spaces (spaces with no parent); the `parentSpaceId` filter lists a space's sub-spaces or every level instead. Supports text search. Authentication is optional; when there is a viewer (the signed-in user, or the user a service key names in `actingUserId`), each space carries their `isMember` flag.
 
 <Note>
-  Across levels (`parentSpaceId` left out, `none` or `any`) this is a discovery surface: a space is listed only if it **and every space above it** are `public`, for every caller. Under one parent (`parentSpaceId=<id>`) the list holds the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of — the same sub-spaces that space's `childSpaces` preview shows and its `childSpacesCount` counts. So an `unlisted` sub-space appears only to its active members, and a `private` one only to its active members. To list the spaces a user is a member of, whatever their visibility, use [Fetch User Spaces](/v8/api-reference/spaces/fetch-user-spaces). See [Space visibility](/v8/data-models/space#visibility).
+  Across levels (`parentSpaceId` left out, `none` or `any`) this is a discovery surface: a space is listed only if it **and every space above it** are `public`, for every caller. Under one parent (`parentSpaceId=<id>`) the list holds the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of — the same sub-spaces that space's `childSpaces` preview shows and its `childSpacesCount` counts. So an `unlisted` sub-space appears only to its active members, and a `private` one only to its active members. To list the spaces the signed-in user is a member of, whatever their visibility, use [Fetch My Spaces](/v8/api-reference/spaces/fetch-my-spaces). See [Space visibility](/v8/data-models/space#visibility).
 </Note>
 
 ## Query Parameters
@@ -102,11 +102,11 @@ Fetches a paginated list of public spaces: the space directory. By default it li
     ```
   </Accordion>
   <Accordion title="Unsupported memberOf — 400">
-    `memberOf`, in any form, is rejected with a pointer to [Fetch User Spaces](/v8/api-reference/spaces/fetch-user-spaces), which lists the spaces a user is a member of.
+    `memberOf`, in any form, is rejected with a pointer to [Fetch My Spaces](/v8/api-reference/spaces/fetch-my-spaces), which lists the spaces the signed-in user is a member of.
 
     ```json
     {
-      "error": "`memberOf` isn't supported in v8. To list the spaces a user is a member of, use `GET /spaces/user-spaces`.",
+      "error": "`memberOf` isn't supported in v8. To list your spaces, use `GET /spaces/mine`.",
       "code": "space/unsupported-param",
       "param": "memberOf"
     }

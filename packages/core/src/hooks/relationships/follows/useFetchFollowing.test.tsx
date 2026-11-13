@@ -37,6 +37,37 @@ describe("useFetchFollowing", () => {
     expect(call.config?.params).toEqual({ page: 1, limit: 20 });
   });
 
+  it("sends the space-reputation object as flat spaceReputationId / spaceReputationDescendants", async () => {
+    const user = makeAuthUser();
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchFollowing(), { user });
+
+    axiosPrivate.mockResponse("get", makePage([]));
+    axiosPrivate.mockResponse("get", makePage([]));
+    axiosPrivate.mockResponse("get", makePage([]));
+
+    await act(async () => {
+      await result.current({ spaceReputation: { spaceId: "space-1", includeDescendants: true } });
+    });
+    await act(async () => {
+      await result.current({ spaceReputation: { spaceId: "none" } });
+    });
+    await act(async () => {
+      await result.current();
+    });
+
+    const [withSpace, withNone, without] = axiosPrivate.calls("get");
+    expect(withSpace.url).toBe("/test-project/follows/following");
+    expect(withSpace.config?.params).toEqual({
+      page: 1,
+      limit: 20,
+      spaceReputationId: "space-1",
+      spaceReputationDescendants: true,
+    });
+    expect(withNone.config?.params).toEqual({ page: 1, limit: 20, spaceReputationId: "none" });
+    expect(without.config?.params).not.toHaveProperty("spaceReputationId");
+    expect(without.config?.params).not.toHaveProperty("spaceReputationDescendants");
+  });
+
   it("rejects when the server returns an error response", async () => {
     const user = makeAuthUser();
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchFollowing(), { user });

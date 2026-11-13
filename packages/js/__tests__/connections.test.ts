@@ -10,6 +10,25 @@ import {
 import { makeClient } from "./helpers/client";
 
 describe("js-sdk connections (own graph) — request shaping", () => {
+  it("fetchConnections sends the space-reputation object as flat spaceReputationId / spaceReputationDescendants", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchConnections(client, {
+      page: 1,
+      spaceReputation: { spaceId: "sp1", includeDescendants: true },
+    });
+    expect(projectInstance.get).toHaveBeenCalledWith("/connections", {
+      params: { page: 1, spaceReputationId: "sp1", spaceReputationDescendants: true },
+    });
+  });
+
+  it("fetchConnections forwards the flat spaceReputationId as given", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchConnections(client, { spaceReputationId: "none" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/connections", {
+      params: { spaceReputationId: "none" },
+    });
+  });
+
   it("fetchConnections gets /connections with page/limit as params (no userId — own graph)", async () => {
     const { client, projectInstance } = makeClient();
     await fetchConnections(client, { page: 1, limit: 20 });

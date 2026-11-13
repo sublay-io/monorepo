@@ -1,9 +1,9 @@
 import { serializeInclude } from "../../core/includeParam";
 import { SublayHttpClient } from "../../core/client";
-import { UserSpacesResponse, SpaceIncludeParam } from "../../interfaces/Space";
+import { MySpacesResponse, SpaceIncludeParam } from "../../interfaces/Space";
 import { SpaceSearchParams } from "../../interfaces/SpaceSearch";
 
-export interface FetchUserSpacesProps extends SpaceSearchParams {
+export interface FetchMySpacesProps extends SpaceSearchParams {
   page?: number;
   limit?: number;
   /** Left out: `"joinedAt"` (when the user joined each space, most recent first). */
@@ -29,12 +29,12 @@ export interface FetchUserSpacesProps extends SpaceSearchParams {
   parentSpaceId?: string | "none" | "any";
 }
 
-export async function fetchUserSpaces(
+export async function fetchMySpaces(
   client: SublayHttpClient,
-  data: FetchUserSpacesProps
-): Promise<UserSpacesResponse> {
-  const response = await client.projectInstance.get<UserSpacesResponse>(
-    "/spaces/user-spaces",
+  data: FetchMySpacesProps
+): Promise<MySpacesResponse> {
+  const response = await client.projectInstance.get<MySpacesResponse>(
+    "/spaces/mine",
     { params: { ...data, include: serializeInclude(data.include) } }
   );
   return response.data;

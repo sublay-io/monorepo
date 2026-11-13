@@ -8,7 +8,7 @@ import {
   fetchSpaceBreadcrumb,
   fetchSpaceByShortId,
   fetchSpaceBySlug,
-  fetchUserSpaces,
+  fetchMySpaces,
   updateSpace,
 } from "../src/modules/spaces";
 import { formDataToObject, makeClient } from "./helpers/client";
@@ -166,39 +166,39 @@ describe("js-sdk spaces (lifecycle) — request shaping", () => {
     });
   });
 
-  it("fetchUserSpaces gets /spaces/user-spaces with the full data as params (no userId — actor derived from token)", async () => {
+  it("fetchMySpaces gets /spaces/mine with the full data as params (no userId — actor derived from token)", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchUserSpaces(client, { role: "admin", page: 1 });
-    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/user-spaces", {
+    await fetchMySpaces(client, { role: "admin", page: 1 });
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/mine", {
       params: { role: "admin", page: 1 },
     });
   });
 
-  it("fetchUserSpaces forwards query, searchFields, sortBy and sortDir", async () => {
+  it("fetchMySpaces forwards query, searchFields, sortBy and sortDir", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchUserSpaces(client, {
+    await fetchMySpaces(client, {
       query: "design",
       searchFields: "name",
       sortBy: "members",
       sortDir: "asc",
     });
-    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/user-spaces", {
+    expect(projectInstance.get).toHaveBeenCalledWith("/spaces/mine", {
       params: { query: "design", searchFields: "name", sortBy: "members", sortDir: "asc" },
     });
   });
 
-  it("fetchUserSpaces forwards parentSpaceId, a space id, \"none\" or \"any\" as given", async () => {
+  it("fetchMySpaces forwards parentSpaceId, a space id, \"none\" or \"any\" as given", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchUserSpaces(client, { parentSpaceId: "s1" });
-    await fetchUserSpaces(client, { parentSpaceId: "none" });
-    await fetchUserSpaces(client, { parentSpaceId: "any" });
-    expect(projectInstance.get).toHaveBeenNthCalledWith(3, "/spaces/user-spaces", {
+    await fetchMySpaces(client, { parentSpaceId: "s1" });
+    await fetchMySpaces(client, { parentSpaceId: "none" });
+    await fetchMySpaces(client, { parentSpaceId: "any" });
+    expect(projectInstance.get).toHaveBeenNthCalledWith(3, "/spaces/mine", {
       params: { parentSpaceId: "any" },
     });
-    expect(projectInstance.get).toHaveBeenNthCalledWith(1, "/spaces/user-spaces", {
+    expect(projectInstance.get).toHaveBeenNthCalledWith(1, "/spaces/mine", {
       params: { parentSpaceId: "s1" },
     });
-    expect(projectInstance.get).toHaveBeenNthCalledWith(2, "/spaces/user-spaces", {
+    expect(projectInstance.get).toHaveBeenNthCalledWith(2, "/spaces/mine", {
       params: { parentSpaceId: "none" },
     });
   });
@@ -372,7 +372,7 @@ describe("js-sdk spaces (lifecycle) — response mapping", () => {
     expect(result).toEqual({ available: false });
   });
 
-  it("fetchUserSpaces returns the full UserSpacesResponse envelope", async () => {
+  it("fetchMySpaces returns the full MySpacesResponse envelope", async () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
       data: [
@@ -396,7 +396,7 @@ describe("js-sdk spaces (lifecycle) — response mapping", () => {
     };
     projectInstance.get.mockResolvedValueOnce({ data: envelope });
 
-    const result = await fetchUserSpaces(client, {});
+    const result = await fetchMySpaces(client, {});
 
     expect(result).toEqual(envelope);
   });

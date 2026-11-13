@@ -19,7 +19,7 @@ export async function fetchMyWorkspaceInvites(
 ): Promise<FetchMyWorkspaceInvitesResponse> {
   const response =
     await client.projectInstance.get<FetchMyWorkspaceInvitesResponse>(
-      "/me/workspace-invites"
+      "/workspace-invites"
     );
   return response.data;
 }

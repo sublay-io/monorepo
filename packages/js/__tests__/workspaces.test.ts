@@ -470,10 +470,10 @@ describe("js-sdk workspaces — invitation request shaping", () => {
     expectNoActorUserIdAnywhere(projectInstance);
   });
 
-  it("fetchMyWorkspaceInvites hits /me/workspace-invites with NO params (actor from token)", async () => {
+  it("fetchMyWorkspaceInvites hits /workspace-invites with NO params (actor from token)", async () => {
     const { client, projectInstance } = makeClient();
     await fetchMyWorkspaceInvites(client);
-    expect(projectInstance.get).toHaveBeenCalledWith("/me/workspace-invites");
+    expect(projectInstance.get).toHaveBeenCalledWith("/workspace-invites");
     expectNoActorUserIdAnywhere(projectInstance);
   });
 
@@ -483,7 +483,7 @@ describe("js-sdk workspaces — invitation request shaping", () => {
     await fetchMyWorkspaceInvites(client);
     expect(projectInstance.get.mock.calls.map((c) => c[0])).toEqual([
       "/workspaces/w1/invites",
-      "/me/workspace-invites",
+      "/workspace-invites",
     ]);
   });
 });

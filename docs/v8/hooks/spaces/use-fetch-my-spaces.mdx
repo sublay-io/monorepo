@@ -1,26 +1,26 @@
 ---
-title: "Fetch user spaces"
+title: "Fetch my spaces"
 description: "Fetch, search and sort the spaces the current user is a member of"
 icon: "plug"
 ---
 
 ## Overview
 
-`useFetchUserSpaces` returns a callable function that fetches the spaces where the authenticated user has a membership (active by default). The response includes membership metadata alongside each space. Every space the user is an active member of is listed, whatever its visibility, so this is the hook for a "my spaces" screen (a `pending`, `banned` or `rejected` membership of a space the user can't see is left out); [`useFetchManySpaces`](/v8/hooks/spaces/use-fetch-many-spaces) lists public spaces only. It can search within the user's spaces and sort them.
+`useFetchMySpaces` returns a callable function that fetches the spaces where the authenticated user has a membership (active by default). The response includes membership metadata alongside each space. Every space the user is an active member of is listed, whatever its visibility, so this is the hook for a "my spaces" screen (a `pending`, `banned` or `rejected` membership of a space the user can't see is left out); [`useFetchManySpaces`](/v8/hooks/spaces/use-fetch-many-spaces) lists public spaces only. It can search within the user's spaces and sort them.
 
 ## Usage Example
 
 ```tsx
-import { useFetchUserSpaces } from "@sublay/react-js";
+import { useFetchMySpaces } from "@sublay/react-js";
 
 function MySpaces() {
-  const fetchUserSpaces = useFetchUserSpaces();
+  const fetchMySpaces = useFetchMySpaces();
 
   const loadSpaces = async () => {
-    const result = await fetchUserSpaces({ page: 1, limit: 20 });
-    // Search within them, A–Z: fetchUserSpaces({ query: "design", sortBy: "alphabetical" })
-    // Top-level spaces only: fetchUserSpaces({ parentSpaceId: "none" })
-    // result.data: UserSpaceItem[]
+    const result = await fetchMySpaces({ page: 1, limit: 20 });
+    // Search within them, A–Z: fetchMySpaces({ query: "design", sortBy: "alphabetical" })
+    // Top-level spaces only: fetchMySpaces({ parentSpaceId: "none" })
+    // result.data: MySpaceItem[]
     result.data.forEach(({ space, membership }) => {
       console.log(space.name, membership.role, membership.status);
     });
@@ -78,10 +78,12 @@ function MySpaces() {
 
 ## Returns
 
-<ResponseField name="data" type="UserSpaceItem[]">
+<ResponseField name="data" type="MySpaceItem[]">
   Each item contains a `space` ([Space](/v8/data-models/space)) and a `membership` object with `membershipId`, `role`, `status`, and `joinedAt`.
 </ResponseField>
 
 <ResponseField name="pagination" type="object">
   Standard pagination metadata.
 </ResponseField>
+
+See also: [Fetch My Spaces](/v8/api-reference/spaces/fetch-my-spaces)

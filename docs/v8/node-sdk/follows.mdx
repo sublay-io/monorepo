@@ -3,6 +3,8 @@ title: "Follows"
 description: "Read a user's follow graph and remove follows by ID from your server"
 ---
 
+import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
+
 The `follows` module reads a user's follow graph — the users they follow and the users following them — and removes follow relationships by ID.
 
 <Note>
@@ -50,6 +52,8 @@ const { data, pagination } = await sublay.follows.fetchFollowing({
   Restricts which field `query` matches against — `username` or `name`. When omitted, `query` matches either field.
 </ParamField>
 
+<SpaceReputationParams variant="user" field="body" />
+
 **Returns** — `Promise<PaginatedResponse<FollowRow>>`, where each [`FollowRow`](/v8/data-models/follow#followrow) is `{ id, user, createdAt }`: `id` is the follow record's ID (what `deleteFollow` takes) and `user` is the followed user.
 
 ---
@@ -85,6 +89,8 @@ const { data, pagination } = await sublay.follows.fetchFollowers({
 <ParamField body="searchFields" type="string">
   Restricts which field `query` matches against — `username` or `name`. When omitted, `query` matches either field.
 </ParamField>
+
+<SpaceReputationParams variant="user" field="body" />
 
 **Returns** — `Promise<PaginatedResponse<FollowRow>>`, where each [`FollowRow`](/v8/data-models/follow#followrow) is `{ id, user, createdAt }` and `user` is the follower.
 

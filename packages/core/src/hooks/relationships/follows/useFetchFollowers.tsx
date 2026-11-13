@@ -5,9 +5,13 @@ import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
 import type { FollowRow } from "../../../interfaces/models/Follow";
 import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
+import { SpaceReputationUserParams } from "../../../interfaces/SpaceReputation";
 import { UserSearchParams } from "../../../interfaces/UserSearch";
+import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
 
-export interface FetchFollowersParams extends UserSearchParams {
+export interface FetchFollowersParams
+  extends SpaceReputationUserParams,
+    UserSearchParams {
   page?: number;
   limit?: number;
 }
@@ -18,7 +22,7 @@ function useFetchFollowers(): (params?: FetchFollowersParams) => Promise<Paginat
   const { user } = useUser();
 
   const fetchFollowers = useCallback(
-    async ({ page = 1, limit = 20, query, searchFields }: FetchFollowersParams = {}) => {
+    async ({ page = 1, limit = 20, query, searchFields, spaceReputation, spaceReputationId, spaceReputationDescendants }: FetchFollowersParams = {}) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -30,7 +34,16 @@ function useFetchFollowers(): (params?: FetchFollowersParams) => Promise<Paginat
       const response = await axios.get<PaginatedResponse<FollowRow>>(
         `/${projectId}/follows/followers`,
         {
-          params: { page, limit, ...buildSearchParams(query, searchFields) },
+          params: {
+            page,
+            limit,
+            ...buildSearchParams(query, searchFields),
+            ...buildSpaceReputationParams({
+              spaceReputation,
+              spaceReputationId,
+              spaceReputationDescendants,
+            }),
+          },
         }
       );
 

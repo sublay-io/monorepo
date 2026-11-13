@@ -19,7 +19,7 @@ function useFetchMyWorkspaceInvites(): () => Promise<MyWorkspaceInvitation[]> {
     }
 
     const response = await axios.get<{ data: MyWorkspaceInvitation[] }>(
-      `/${projectId}/me/workspace-invites`
+      `/${projectId}/workspace-invites`
     );
 
     return response.data.data;

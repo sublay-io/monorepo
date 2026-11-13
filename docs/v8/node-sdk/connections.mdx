@@ -3,6 +3,8 @@ title: "Connections"
 description: "Query and respond to a user's mutual connections from your server"
 ---
 
+import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
+
 The `connections` module reads and manages a user's mutual connections (bidirectional relationships, similar to "friends"). Use it to list accepted connections, inspect pending requests, and accept, decline, or remove connections.
 
 <Note>
@@ -50,6 +52,8 @@ const { data, pagination } = await sublay.connections.fetchConnections({
 <ParamField body="searchFields" type="string">
   Restricts which field `query` matches against — `username` or `name`. When omitted, `query` matches either field.
 </ParamField>
+
+<SpaceReputationParams variant="user" field="body" />
 
 **Returns** — `Promise<PaginatedResponse<AcceptedConnectionRow>>`, where [`AcceptedConnectionRow`](/v8/data-models/connection#acceptedconnectionrow) is `{ id, user, status: "accepted", createdAt, respondedAt }` and `user` is the other user in the connection.
 

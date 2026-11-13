@@ -5,9 +5,13 @@ import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
 import type { AcceptedConnectionRow } from "../../../interfaces/models/Connection";
 import { PaginatedResponse } from "../../../interfaces/PaginatedResponse";
+import { SpaceReputationUserParams } from "../../../interfaces/SpaceReputation";
 import { UserSearchParams } from "../../../interfaces/UserSearch";
+import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
 
-export interface FetchConnectionsParams extends UserSearchParams {
+export interface FetchConnectionsParams
+  extends SpaceReputationUserParams,
+    UserSearchParams {
   page?: number;
   limit?: number;
 }
@@ -21,7 +25,7 @@ function useFetchConnections(): (props?: FetchConnectionsParams) => Promise<Pagi
     async (
       props: FetchConnectionsParams = {}
     ): Promise<PaginatedResponse<AcceptedConnectionRow>> => {
-      const { page = 1, limit = 20, query, searchFields } = props;
+      const { page = 1, limit = 20, query, searchFields, spaceReputation, spaceReputationId, spaceReputationDescendants } = props;
       if (!projectId) {
         throw new Error("No project specified");
       }
@@ -37,6 +41,11 @@ function useFetchConnections(): (props?: FetchConnectionsParams) => Promise<Pagi
             page,
             limit,
             ...buildSearchParams(query, searchFields),
+            ...buildSpaceReputationParams({
+              spaceReputation,
+              spaceReputationId,
+              spaceReputationDescendants,
+            }),
           },
         }
       );

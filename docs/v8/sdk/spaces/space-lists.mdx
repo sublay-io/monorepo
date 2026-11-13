@@ -105,19 +105,19 @@ subSpaces.fetchSpaces({ sortBy: "alphabetical", parentSpaceId: "parent-space-id"
 
 ## My Spaces
 
-Across levels (`parentSpaceId` `"none"` or `"any"`), a space list includes a space only if it and every space above it are `public`. Under one parent (a space id), it includes the sub-spaces the user can see that are `public` or that they're an active member of — the same ones the parent's `childSpaces` preview shows and its `childSpacesCount` counts. For a "my spaces" screen, use [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces): it lists the spaces the current user is a member of, whatever their visibility, with their membership on each, and takes its own `query`, `searchFields`, `sortBy` (`"joinedAt"`, the default, `"createdAt"`, `"members"` or `"alphabetical"`) and `sortDir`.
+Across levels (`parentSpaceId` `"none"` or `"any"`), a space list includes a space only if it and every space above it are `public`. Under one parent (a space id), it includes the sub-spaces the user can see that are `public` or that they're an active member of — the same ones the parent's `childSpaces` preview shows and its `childSpacesCount` counts. For a "my spaces" screen, use [`useFetchMySpaces`](/v8/hooks/spaces/use-fetch-my-spaces): it lists the spaces the current user is a member of, whatever their visibility, with their membership on each, and takes its own `query`, `searchFields`, `sortBy` (`"joinedAt"`, the default, `"createdAt"`, `"members"` or `"alphabetical"`) and `sortDir`.
 
 It also takes `parentSpaceId`: `"none"` for the user's memberships in top-level spaces only, or a space id for their memberships in that space's direct sub-spaces. `"any"`, left out or `null`: memberships at every level (the default, because membership is per space). `"none"` goes by where the space sits, not by what the user belongs to: a membership in a sub-space whose parent the user isn't in is not top-level, so `"none"` leaves it out.
 
 ```tsx
-const fetchUserSpaces = useFetchUserSpaces();
+const fetchMySpaces = useFetchMySpaces();
 
-const { data } = await fetchUserSpaces({ query: "design", sortBy: "alphabetical" });
+const { data } = await fetchMySpaces({ query: "design", sortBy: "alphabetical" });
 // data: { space, membership }[]
 
 // The user's top-level spaces, then their sub-spaces of one of them
-const topLevel = await fetchUserSpaces({ parentSpaceId: "none" });
-const children = await fetchUserSpaces({ parentSpaceId: "parent-space-id" });
+const topLevel = await fetchMySpaces({ parentSpaceId: "none" });
+const children = await fetchMySpaces({ parentSpaceId: "parent-space-id" });
 ```
 
 ## Return Values
@@ -157,4 +157,4 @@ const children = await fetchUserSpaces({ parentSpaceId: "parent-space-id" });
 | [`useSpaceList`](/v8/hooks/space-lists/use-space-list) | Main hook for paginated space lists |
 | [`useSpaceListActions`](/v8/hooks/space-lists/use-space-list-actions) | Low-level list actions (used internally by `useSpaceList`) |
 | [`useFetchManySpaces`](/v8/hooks/spaces/use-fetch-many-spaces) | One-off fetch of multiple spaces |
-| [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces) | Fetch, search and sort the spaces the current user is a member of |
+| [`useFetchMySpaces`](/v8/hooks/spaces/use-fetch-my-spaces) | Fetch, search and sort the spaces the current user is a member of |

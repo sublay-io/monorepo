@@ -11,7 +11,7 @@ icon: "plug"
 For paginated, stateful lists with load-more support, use [`useSpaceList`](/v8/hooks/space-lists/use-space-list) instead.
 
 <Note>
-  This is a discovery surface: a space is listed only if it **and every space above it** are `public`, for every caller. `unlisted` and `private` spaces, and every space under one, are never listed here, not even to their members (whoever can see them reaches them by id, slug or short id). To list the spaces the current user is a member of, whatever their visibility, use [`useFetchUserSpaces`](/v8/hooks/spaces/use-fetch-user-spaces). See [Space visibility](/v8/data-models/space#visibility).
+  This is a discovery surface: a space is listed only if it **and every space above it** are `public`, for every caller. `unlisted` and `private` spaces, and every space under one, are never listed here, not even to their members (whoever can see them reaches them by id, slug or short id). To list the spaces the current user is a member of, whatever their visibility, use [`useFetchMySpaces`](/v8/hooks/spaces/use-fetch-my-spaces). See [Space visibility](/v8/data-models/space#visibility).
 </Note>
 
 ## Usage Example

@@ -4,6 +4,8 @@ description: "Fetch the current user's accepted connections with pagination"
 icon: "plug"
 ---
 
+import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
+
 ## Overview
 
 Returns a function that fetches the paginated list of accepted connections for the currently authenticated user. Each entry includes the other user's profile and the connection's timestamps.
@@ -60,6 +62,8 @@ The hook returns a function. That function accepts:
   Restricts which field `query` matches against — `username` or `name`. When omitted, `query` matches either field.
 </ParamField>
 
+<SpaceReputationParams variant="user" field="path" />
+
 ## Returns
 
 A `PaginatedResponse<AcceptedConnectionRow>`:
@@ -71,7 +75,7 @@ A `PaginatedResponse<AcceptedConnectionRow>`:
       ID of the connection record.
     </ResponseField>
     <ResponseField name="user" type="User">
-      The other user in the connection. Public profile fields only. See [User data model](/v8/data-models/user).
+      The other user in the connection. Public profile fields only. When `spaceReputation` is requested, it carries an added `spaceReputation` number. See [User data model](/v8/data-models/user) and [Reputation](/v8/data-models/reputation).
     </ResponseField>
     <ResponseField name="status" type='"accepted"'>
       Always `"accepted"` in this list.

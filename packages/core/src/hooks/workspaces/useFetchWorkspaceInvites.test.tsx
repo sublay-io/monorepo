@@ -32,7 +32,7 @@ describe("useFetchWorkspaceInvites", () => {
     expect(returned).toEqual(invites);
 
     const [call] = axiosPrivate.calls("get");
-    // NOT `/me/workspace-invites` — that is useFetchMyWorkspaceInvites.
+    // NOT `/workspace-invites` — that is useFetchMyWorkspaceInvites.
     expect(call.url).toBe("/project-1/workspaces/w1/invites");
     // Unpaginated + no actor param; the actor is the token subject.
     expect(call.config).toBeUndefined();

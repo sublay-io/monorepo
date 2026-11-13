@@ -1,6 +1,6 @@
 ---
 title: "List My Invites"
-api: "GET /v8/:projectId/me/workspace-invites"
+api: "GET /v8/:projectId/workspace-invites"
 description: "The authenticated user's live pending invites"
 ---
 
@@ -52,6 +52,12 @@ Each item is a `MyWorkspaceInvitation`: a [WorkspaceInvitation](/v8/data-models/
     { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }
     ```
     Returned when a service key names an `actingUserId` that isn't a user in this project.
+  </Accordion>
+  <Accordion title="Unsupported Route — 400">
+    ```json
+    { "error": "`GET /me/workspace-invites` isn't supported in v8. List your invites with `GET /workspace-invites`.", "code": "workspace/unsupported-route" }
+    ```
+    `GET /me/workspace-invites` is not a v8 route. It answers with a pointer to this endpoint.
   </Accordion>
 </AccordionGroup>
 

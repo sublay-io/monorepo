@@ -2,14 +2,14 @@ import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeSpace } from "../../test-utils";
-import useFetchUserSpaces from "./useFetchUserSpaces";
-import type { UserSpacesResponse } from "../../interfaces/models/Space";
+import useFetchMySpaces from "./useFetchMySpaces";
+import type { MySpacesResponse } from "../../interfaces/models/Space";
 
 afterEach(() => {
   resetAxiosMocks();
 });
 
-function makeResponse(): UserSpacesResponse {
+function makeResponse(): MySpacesResponse {
   return {
     data: [
       {
@@ -21,14 +21,14 @@ function makeResponse(): UserSpacesResponse {
   };
 }
 
-describe("useFetchUserSpaces", () => {
+describe("useFetchMySpaces", () => {
   it("fetches the current user's spaces with default params", async () => {
-    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchUserSpaces());
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchMySpaces());
 
     const response = makeResponse();
     axiosPrivate.mockResponse("get", response);
 
-    let returned: UserSpacesResponse | undefined;
+    let returned: MySpacesResponse | undefined;
     await act(async () => {
       returned = await result.current();
     });
@@ -36,11 +36,11 @@ describe("useFetchUserSpaces", () => {
     expect(returned).toEqual(response);
 
     const [call] = axiosPrivate.calls("get");
-    expect(call.url).toBe("/test-project/spaces/user-spaces");
+    expect(call.url).toBe("/test-project/spaces/mine");
   });
 
   it("joins a role array into a comma-separated param", async () => {
-    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchUserSpaces());
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchMySpaces());
 
     axiosPrivate.mockResponse("get", makeResponse());
 
@@ -53,7 +53,7 @@ describe("useFetchUserSpaces", () => {
   });
 
   it("sends query, searchFields, sortBy and sortDir, and leaves a blank query out", async () => {
-    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchUserSpaces());
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchMySpaces());
 
     axiosPrivate.mockResponse("get", makeResponse());
     axiosPrivate.mockResponse("get", makeResponse());
@@ -78,7 +78,7 @@ describe("useFetchUserSpaces", () => {
   });
 
   it("passes parentSpaceId through, sends \"none\" as given, and leaves null out", async () => {
-    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchUserSpaces());
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchMySpaces());
 
     axiosPrivate.mockResponse("get", makeResponse());
     axiosPrivate.mockResponse("get", makeResponse());
@@ -106,7 +106,7 @@ describe("useFetchUserSpaces", () => {
   });
 
   it("rejects when the server returns an error response", async () => {
-    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchUserSpaces());
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchMySpaces());
 
     axiosPrivate.mockError("get", 500, { message: "Internal error" });
 
@@ -117,7 +117,7 @@ describe("useFetchUserSpaces", () => {
 
   it("throws before making a request when there is no project", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(
-      () => useFetchUserSpaces(),
+      () => useFetchMySpaces(),
       { projectId: "" },
     );
 

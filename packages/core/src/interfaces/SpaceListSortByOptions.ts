@@ -6,4 +6,4 @@
 export type SpaceListSortByOptions = "createdAt" | "members" | "alphabetical";
 
 /** A user's spaces also sort by when the user joined each one. */
-export type UserSpacesSortByOptions = SpaceListSortByOptions | "joinedAt";
+export type MySpacesSortByOptions = SpaceListSortByOptions | "joinedAt";

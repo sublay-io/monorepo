@@ -409,10 +409,10 @@ describe("node-sdk workspaces (invitations) — request shaping", () => {
     );
   });
 
-  it("fetchMyWorkspaceInvites hits /me/workspace-invites with the actingUserId as a param", async () => {
+  it("fetchMyWorkspaceInvites hits /workspace-invites with the actingUserId as a param", async () => {
     const { client, projectInstance } = makeClient();
     await fetchMyWorkspaceInvites(client, { actingUserId: "u1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/me/workspace-invites", {
+    expect(projectInstance.get).toHaveBeenCalledWith("/workspace-invites", {
       params: { actingUserId: "u1" },
     });
   });

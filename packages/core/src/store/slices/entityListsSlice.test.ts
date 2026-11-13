@@ -239,6 +239,34 @@ describe("entityListsSlice", () => {
       expect(s.lists.feed.entities[0]).toBe(s0.lists.feed.entities[0]);
     });
 
+    it("moves `commentsCount` by `commentsCountDelta` in each copy, never below 0", () => {
+      let s = withLists({
+        feed: [{ ...makeEntity("e1"), commentsCount: 3 } as Entity],
+        other: [{ ...makeEntity("e1"), commentsCount: 0 } as Entity],
+      });
+      s = reducer(s, updateEntityInLists({ entityId: "e1", commentsCountDelta: 1 }));
+      expect(s.lists.feed.entities[0].commentsCount).toBe(4);
+      expect(s.lists.other.entities[0].commentsCount).toBe(1);
+      s = reducer(s, updateEntityInLists({ entityId: "e1", commentsCountDelta: -2 }));
+      expect(s.lists.feed.entities[0].commentsCount).toBe(2);
+      expect(s.lists.other.entities[0].commentsCount).toBe(0);
+    });
+
+    it("keeps a copy whose saved state wouldn't change as the same object", () => {
+      const s0 = withLists({
+        feed: [{ ...makeEntity("e1"), saved: saved({ id: "c1", name: "Reading" }) } as Entity],
+        unsaved: [{ ...makeEntity("e1"), saved: saved() } as Entity],
+      });
+      const added = reducer(
+        s0,
+        updateEntityInLists({ entityId: "e1", saved: { add: { id: "c1", name: "Reading" } } }),
+      );
+      expect(added.lists.feed.entities[0]).toBe(s0.lists.feed.entities[0]);
+      const removed = reducer(s0, updateEntityInLists({ entityId: "e1", saved: { remove: "c9" } }));
+      expect(removed.lists.feed.entities[0]).toBe(s0.lists.feed.entities[0]);
+      expect(removed.lists.unsaved.entities[0]).toBe(s0.lists.unsaved.entities[0]);
+    });
+
     it("keeps the fields the changes don't carry", () => {
       const original = {
         ...makeEntity("e1"),

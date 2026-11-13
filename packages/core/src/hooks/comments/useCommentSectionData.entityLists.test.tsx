@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, render, renderHook, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 
 import { makeAuthUser, makeSublayStore, resetAxiosMocks } from "../../test-utils";
@@ -164,4 +164,117 @@ describe("useCommentSectionData — an entity from a loaded list", () => {
       expect(result.current.listCopy?.commentsCount).toBe(expected);
     });
   }
+});
+
+describe("useCommentSectionData — a create that fails after the section moved on", () => {
+  const boom = () => Object.assign(new Error("boom"), { response: { status: 500, data: {} } });
+
+  /** Creates hang until `reject` is called. */
+  function mockPendingCreate() {
+    let reject: (e: unknown) => void = () => {};
+    vi.spyOn(axiosPrivate, "get").mockImplementation(() =>
+      ok({ data: [], pagination: { nextCursor: null, hasMore: false } }),
+    );
+    vi.spyOn(axiosPrivate, "post").mockImplementation(
+      () => new Promise((_resolve, rej) => { reject = rej; }) as any,
+    );
+    return { reject: (e: unknown) => reject(e) };
+  }
+
+  it("a section unmounted mid-create: the list and its EntityProvider both go back", async () => {
+    const pending = mockPendingCreate();
+    const store = makeStore();
+    const seen: { provided?: number; list?: number } = {};
+    let section!: ReturnType<typeof useCommentSectionData>;
+    let hide: () => void = () => {};
+    function Section() {
+      section = useCommentSectionData({});
+      return null;
+    }
+    function Probe() {
+      seen.provided = useEntity().entity?.commentsCount;
+      return null;
+    }
+    function FeedItem() {
+      const entity = useListCopy();
+      seen.list = entity?.commentsCount;
+      const [show, setShow] = useState(true);
+      hide = () => setShow(false);
+      if (!entity) return null;
+      return (
+        <EntityProvider entity={entity}>
+          <Probe />
+          {show ? <Section /> : null}
+        </EntityProvider>
+      );
+    }
+    render(
+      <Provider store={store}>
+        <SublayContext.Provider
+          value={{ projectId: "test-project", project: null } as SublayContextValues}
+        >
+          <FeedItem />
+        </SublayContext.Provider>
+      </Provider>,
+    );
+    await waitFor(() => expect(section.loading).toBe(false));
+
+    let created!: Promise<unknown>;
+    act(() => {
+      created = section.createComment({ content: "hello" });
+    });
+    await waitFor(() => expect(seen.list).toBe(6));
+    expect(seen.provided).toBe(6);
+
+    act(() => hide());
+    await act(async () => {
+      pending.reject(boom());
+      await created;
+    });
+
+    await waitFor(() => expect(seen.list).toBe(5));
+    expect(seen.provided).toBe(5);
+  });
+
+  it("a section moved to another entity mid-create: the sent entity's list copy goes back", async () => {
+    const pending = mockPendingCreate();
+    const store = makeStore();
+    const other = makeEntity({ id: "entity-2", commentsCount: 9 });
+    store.dispatch(setEntityListEntities({ listId: "feed", entities: [listEntity, other] }));
+    function Wrapper({ children }: { children: React.ReactNode }) {
+      return (
+        <Provider store={store}>
+          <SublayContext.Provider
+            value={{ projectId: "test-project", project: null } as SublayContextValues}
+          >
+            {children}
+          </SublayContext.Provider>
+        </Provider>
+      );
+    }
+    const { result, rerender } = renderHook(
+      ({ index }: { index: number }) => {
+        const entities = useSublaySelector((state) => state.sublay.entityLists.lists.feed.entities);
+        return { section: useCommentSectionData({ entity: entities[index] }), entities };
+      },
+      { wrapper: Wrapper, initialProps: { index: 0 } },
+    );
+    await waitFor(() => expect(result.current.section.loading).toBe(false));
+
+    let created!: Promise<unknown>;
+    act(() => {
+      created = result.current.section.createComment({ content: "hello" });
+    });
+    await waitFor(() => expect(result.current.entities[0].commentsCount).toBe(6));
+
+    rerender({ index: 1 });
+    await act(async () => {
+      pending.reject(boom());
+      await created;
+    });
+
+    expect(result.current.entities[0].commentsCount).toBe(5);
+    expect(result.current.entities[1].commentsCount).toBe(9);
+    expect(result.current.section.entity?.commentsCount).toBe(9);
+  });
 });

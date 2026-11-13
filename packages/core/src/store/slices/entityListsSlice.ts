@@ -222,11 +222,16 @@ export interface EntityRemovePayload {
  *   (lists fetched with `include=saved`); copies without `saved` keep not
  *   having it. `add` appends the collection (once — a collection already
  *   listed isn't added again) and sets `isSaved: true`. `remove` drops the
- *   collection and sets `isSaved` to whether any collection is left.
+ *   collection and sets `isSaved` to whether any collection is left. A copy
+ *   whose saved state wouldn't change is left as the same object.
+ * - `commentsCountDelta` moves each copy's `commentsCount` by that much (never
+ *   below 0): relative, so it doesn't overwrite a copy that is newer than the
+ *   change's sender.
  */
 export interface EntityInListsUpdatePayload {
   entityId: string;
   changes?: Partial<Entity>;
+  commentsCountDelta?: number;
   saved?:
     | { add: { id: string; name: string } }
     | { remove: string };
@@ -455,7 +460,7 @@ const entityListsSlice = createSlice({
       state,
       action: PayloadAction<EntityInListsUpdatePayload>
     ) => {
-      const { entityId, changes, saved } = action.payload;
+      const { entityId, changes, saved, commentsCountDelta } = action.payload;
 
       Object.values(state.lists).forEach((list) => {
         list.entities.forEach((entity, index) => {
@@ -469,8 +474,15 @@ const entityListsSlice = createSlice({
             );
           let next: Entity = changed ? { ...entity, ...changes } : entity;
 
+          if (commentsCountDelta) {
+            const current = next.commentsCount ?? 0;
+            const moved = Math.max(0, current + commentsCountDelta);
+            if (moved !== current) next = { ...next, commentsCount: moved };
+          }
+
           if (saved && next.saved) {
-            let collections = next.saved.collections;
+            const prevSaved = next.saved;
+            let collections = prevSaved.collections;
             let isSaved: boolean;
             if ("add" in saved) {
               const { id, name } = saved.add;
@@ -479,10 +491,16 @@ const entityListsSlice = createSlice({
               }
               isSaved = true;
             } else {
-              collections = collections.filter((c) => c.id !== saved.remove);
+              const kept = collections.filter((c) => c.id !== saved.remove);
+              if (kept.length !== collections.length) collections = kept;
               isSaved = collections.length > 0;
             }
-            next = { ...next, saved: { isSaved, collections } };
+            if (
+              collections !== prevSaved.collections ||
+              isSaved !== prevSaved.isSaved
+            ) {
+              next = { ...next, saved: { isSaved, collections } };
+            }
           }
 
           if (next !== entity) list.entities[index] = next;

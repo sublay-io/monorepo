@@ -364,30 +364,9 @@ export function useCommentSectionDataInternal(
     [baseEntity, overlaidCount],
   );
 
-  // Loaded entity lists get the section's count changes too. An
-  // `EntityProvider` given an entity from a list follows that list's copy, so
-  // a count kept only in the provider would be replaced by the list's (on the
-  // next save or reaction, for example). After the count changes in the
-  // provider or the section's own copy, the next render pushes the number it
-  // now holds to the lists; `listCountSync` triggers that render's effect.
+  // Loaded entity lists get the section's count changes too (see
+  // `bumpCounts` / `settleCounts`).
   const dispatch = useSublayDispatch();
-  const [listCountSync, setListCountSync] = useState<{
-    entityId: string;
-    inContext: boolean;
-  } | null>(null);
-  useEffect(() => {
-    if (!listCountSync) return;
-    const source = listCountSync.inContext ? entityFromContext : ownEntity;
-    if (source && source.id === listCountSync.entityId) {
-      dispatch(
-        updateEntityInLists({
-          entityId: source.id,
-          changes: { commentsCount: source.commentsCount ?? 0 },
-        }),
-      );
-    }
-    setListCountSync(null);
-  }, [listCountSync, entityFromContext, ownEntity, dispatch]);
 
   const { user } = useUser();
 
@@ -732,12 +711,23 @@ export function useCommentSectionDataInternal(
         };
         if (sentEntityHome.context) setContextEntity?.(apply);
         else if (countsInOwnCopy) setEntity(apply);
-        if (sentEntityHome.context || countsInOwnCopy) {
-          setListCountSync({
+      };
+      // Loaded entity lists count the comment too: +1 when it is sent, -1
+      // if the create fails, nothing on success. An `EntityProvider` given a
+      // list's copy follows that copy, so a count kept only in the provider
+      // would be replaced by the list's (on the next save or reaction, for
+      // example). Relative and dispatched right away, keyed on the sent
+      // entity, so it holds whatever the section does meanwhile (unmounts,
+      // moves to another entity) and never overwrites a newer list copy with
+      // an older number. A list refetched mid-create with the new comment
+      // already counted, followed by a failure, ends one low; accepted.
+      const moveListCount = (delta: number) => {
+        dispatch(
+          updateEntityInLists({
             entityId: sentEntityId,
-            inContext: sentEntityHome.context,
-          });
-        }
+            commentsCountDelta: delta,
+          }),
+        );
       };
       // For an `entity` prop: the caller's count when the create was sent,
       // and the overlay that was showing (restored if the create fails).
@@ -767,6 +757,7 @@ export function useCommentSectionDataInternal(
           bumpedCommentsCount = current + 1;
           return bumpedCommentsCount;
         });
+        moveListCount(1);
       };
       const settleCounts = (succeeded: boolean) => {
         // The parent is a comment of the sent entity: only while the section
@@ -784,6 +775,7 @@ export function useCommentSectionDataInternal(
         updateEntityCount((current) =>
           settleCount(current, bumpedCommentsCount, succeeded),
         );
+        if (!succeeded) moveListCount(-1);
         if (!sentEntityHome.overlay) return;
         const suppliedNow =
           overlaysCountRef.current && baseEntityRef.current?.id === sentEntityId
@@ -818,15 +810,6 @@ export function useCommentSectionDataInternal(
           settled: true,
           suppliedCount,
         });
-        // The caller's entity may be a loaded list's copy: the list takes
-        // the count, so the caller's entity catches up with the overlay.
-        // (Only on success: on failure the list was never changed.)
-        dispatch(
-          updateEntityInLists({
-            entityId: sentEntityId,
-            changes: { commentsCount: expected },
-          }),
-        );
       };
 
       try {

@@ -38,16 +38,16 @@ export function entityUpdateChanges(updated: Entity): Partial<Entity> {
 }
 
 /**
- * `updated` applied over `current` when it is the same entity. Another entity
- * is kept as it is (an edit of B made inside A's `EntityProvider` doesn't
- * replace A); with no entity yet, `updated` is taken.
+ * `updated` applied over `current` when it is the same entity. Anything else
+ * is kept as it is: an edit of B made inside A's `EntityProvider` doesn't
+ * replace A, and a provider with no entity yet (loading, or not found) doesn't
+ * take on another entity's edit.
  */
 export function applyEntityUpdate<T extends Entity | null | undefined>(
   current: T,
   updated: Entity,
 ): T | Entity {
-  if (!current) return updated;
-  if (current.id !== updated.id) return current;
+  if (!current || current.id !== updated.id) return current;
   return { ...current, ...entityUpdateChanges(updated) };
 }
 

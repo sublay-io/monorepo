@@ -3,7 +3,7 @@ import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeEntity, makeUser, makeSpace } from "../../test-utils";
 import { setEntityListEntities } from "../../store/slices/entityListsSlice";
-import useUpdateEntity from "./useUpdateEntity";
+import useUpdateEntity, { applyEntityUpdate } from "./useUpdateEntity";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -108,5 +108,24 @@ describe("useUpdateEntity", () => {
       ).rejects.toMatchObject({ response: { status: 500 } });
       expect(store.getState().sublay.entityLists).toBe(before);
     });
+  });
+});
+
+describe("applyEntityUpdate", () => {
+  const base = { id: "e1", title: "Old", userReaction: "upvote", saved: { isSaved: true, collections: [] } } as any;
+  const edit = { id: "e1", title: "New", userReaction: null, user: { id: "u1" } } as any;
+
+  it("applies an edit of the same entity, keeping userReaction, user and fields the response lacks", () => {
+    expect(applyEntityUpdate(base, edit)).toEqual({ ...base, title: "New" });
+  });
+
+  it("keeps a different entity as it is", () => {
+    const other = { id: "e2", title: "Other" } as any;
+    expect(applyEntityUpdate(other, edit)).toBe(other);
+  });
+
+  it("keeps a provider with no entity yet empty", () => {
+    expect(applyEntityUpdate(null, edit)).toBeNull();
+    expect(applyEntityUpdate(undefined, edit)).toBeUndefined();
   });
 });

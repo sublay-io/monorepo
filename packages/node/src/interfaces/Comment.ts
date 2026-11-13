@@ -20,7 +20,7 @@ export interface GifData {
  * The entity attached to a comment by `include=entity` / `include=space`: the
  * stored entity record only. The computed and associated fields an entity
  * fetch adds (`commentsCount`, `userReaction`, `nsfwEffective`, `user`,
- * `files`, `topComments`, `isSaved`, `grants`) are not included.
+ * `files`, `topComments`, `saved`, `grants`) are not included.
  */
 export type CommentEntity = Omit<
   Entity,
@@ -30,7 +30,7 @@ export type CommentEntity = Omit<
   | "user"
   | "files"
   | "topComments"
-  | "isSaved"
+  | "saved"
   | "grants"
   | "space"
 > & {

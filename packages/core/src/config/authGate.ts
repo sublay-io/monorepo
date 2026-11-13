@@ -11,7 +11,7 @@
 //    routes that self-heals — the server sends a bare 403 and the response
 //    interceptor refreshes and retries. On `optionalUserAuth` routes there is
 //    no error to react to: `req.userId` is simply undefined, so `userReaction`
-//    comes back null for every row, block exclusions no-op, and `isSaved` is
+//    comes back null for every row, block exclusions no-op, and `saved` is
 //    empty. Nothing refetches when the token lands, because the leaf fetchers
 //    depend on `[axios, projectId]` and both are stable.
 //

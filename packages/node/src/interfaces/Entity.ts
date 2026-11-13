@@ -6,6 +6,17 @@ import { ReactionCounts, ReactionType } from "./Reaction";
 import { File } from "./File";
 import { Comment } from "./Comment";
 
+/**
+ * The viewer's saved state for an entity, present when the read requested
+ * `include=saved`. `isSaved` is true when the entity is in at least one of the
+ * viewer's collections; `collections` lists those collections in the order the
+ * entity was saved into them. With no viewer: `{ isSaved: false, collections: [] }`.
+ */
+export interface EntitySaved {
+  isSaved: boolean;
+  collections: Array<{ id: string; name: string }>;
+}
+
 export interface Entity {
   id: string;
   foreignId: string | null;
@@ -40,7 +51,7 @@ export interface Entity {
   // Populated when include contains "topComments": the best top-level
   // comments (real content only). `[]` when none qualify.
   topComments?: Comment[];
-  isSaved?: boolean; // Populated when include contains "saved"
+  saved?: EntitySaved; // Populated when include contains "saved": the viewer's saved state
   /**
    * Reputation-grant summary. Opt-in — present exactly when the read requested
    * `include=grants`. Once requested the server always returns the object,

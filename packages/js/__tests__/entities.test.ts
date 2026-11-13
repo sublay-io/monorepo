@@ -10,7 +10,6 @@ import {
   fetchManyEntities,
   fetchReactions,
   getUserReaction,
-  isEntitySaved,
   publishDraft,
   removeReaction,
   updateEntity,
@@ -276,13 +275,6 @@ describe("js-sdk entities — request shaping", () => {
       "/entities/e1/reactions/me"
     );
   });
-
-  it("isEntitySaved gets /entities/:entityId/saved with no params (no userId)", async () => {
-    const { client, projectInstance } = makeClient();
-    await isEntitySaved(client, { entityId: "e1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/entities/e1/saved");
-    expect(projectInstance.get.mock.calls[0]).toHaveLength(1);
-  });
 });
 
 describe("js-sdk entities — response mapping", () => {
@@ -452,18 +444,5 @@ describe("js-sdk entities — response mapping", () => {
     const result = await getUserReaction(client, { entityId: "e1" });
 
     expect(result).toEqual({ reactionType: "upvote" });
-  });
-
-  it("isEntitySaved returns the saved status with collections", async () => {
-    const { client, projectInstance } = makeClient();
-    const saved = {
-      isSaved: true,
-      collections: [{ id: "col1", name: "Favorites" }],
-    };
-    projectInstance.get.mockResolvedValueOnce({ data: saved });
-
-    const result = await isEntitySaved(client, { entityId: "e1" });
-
-    expect(result).toEqual(saved);
   });
 });

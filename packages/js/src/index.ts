@@ -141,6 +141,7 @@ export type {
 } from "./interfaces/Comment";
 export type {
   Entity,
+  EntitySaved,
   EntityInclude,
   EntityIncludeArray,
   EntityIncludeParam,

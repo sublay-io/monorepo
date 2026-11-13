@@ -197,13 +197,14 @@ describe("js-sdk collections — response mapping", () => {
     expect(result).toEqual(collection);
   });
 
-  it("deleteCollection resolves to undefined (void, response.data is discarded)", async () => {
+  it("deleteCollection returns the { deletedCollectionIds } body", async () => {
     const { client, projectInstance } = makeClient();
-    projectInstance.delete.mockResolvedValueOnce({ data: { ignored: true } });
+    const body = { deletedCollectionIds: ["col1", "col2"] };
+    projectInstance.delete.mockResolvedValueOnce({ data: body });
 
     const result = await deleteCollection(client, { collectionId: "col1" });
 
-    expect(result).toBeUndefined();
+    expect(result).toEqual(body);
   });
 });
 

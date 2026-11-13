@@ -157,6 +157,7 @@ export type {
   SpaceReputationContextParams,
   SpaceReputationUserParams,
 } from "./interfaces/SpaceReputation";
+export type { DeleteCollectionResponse } from "./interfaces/Collection";
 export type { UserSearchParams } from "./interfaces/UserSearch";
 export type { SpaceSearchParams, SpaceSearchFields } from "./interfaces/SpaceSearch";
 export type {

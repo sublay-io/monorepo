@@ -175,11 +175,13 @@ describe("node-sdk collections — response mapping", () => {
     ).resolves.toEqual(collection);
   });
 
-  it("deleteCollection resolves to undefined", async () => {
-    const { client } = makeClient();
+  it("deleteCollection returns the { deletedCollectionIds } body", async () => {
+    const { client, projectInstance } = makeClient();
+    const body = { deletedCollectionIds: ["c1", "c2"] };
+    projectInstance.delete.mockResolvedValueOnce({ data: body });
     await expect(
       deleteCollection(client, { collectionId: "c1", actingUserId: "u1" }),
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual(body);
   });
 });
 

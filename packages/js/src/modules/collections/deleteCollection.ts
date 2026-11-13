@@ -1,4 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
+import { DeleteCollectionResponse } from "../../interfaces/Collection";
 
 export interface DeleteCollectionProps {
   collectionId: string;
@@ -7,7 +8,10 @@ export interface DeleteCollectionProps {
 export async function deleteCollection(
   client: SublayHttpClient,
   data: DeleteCollectionProps
-): Promise<void> {
+): Promise<DeleteCollectionResponse> {
   const { collectionId } = data;
-  await client.projectInstance.delete(`/collections/${collectionId}`);
+  const response = await client.projectInstance.delete<DeleteCollectionResponse>(
+    `/collections/${collectionId}`
+  );
+  return response.data;
 }

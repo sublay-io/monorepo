@@ -39,6 +39,10 @@ Every user object still carries a `reputation` field, and default API responses 
 
 Every user-returning endpoint accepts an opt-in **`spaceReputation`** object that adds a `spaceReputation` number to each returned user. The `reputation` total is always included regardless; the per-space `spaceReputation` field is purely additive and only appears when you ask for it.
 
+<Info>
+**Calling the REST API directly?** Send the two flat fields, `spaceReputationId` and `spaceReputationDescendants`, as query parameters. Over REST they are the only form, and they aren't deprecated; an object is ignored. The `spaceReputation` object below is how the SDKs take it, and they send it as those two fields.
+</Info>
+
 ### The `spaceReputation` object (primary form)
 
 Pass a single object. Its two fields express which bucket to read and whether to sum descendants:

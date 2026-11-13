@@ -94,7 +94,7 @@ An unknown `userId` returns an empty page.
 
 This endpoint accepts the opt-in reputation params, resolved against each comment's space. They add a `spaceReputation` field to each populated author `user`, alongside the always-present `reputation` total. Only spaces the viewer can read count: a space they can't read reads `0` (see [Who sees space reputation](/v8/data-models/reputation#who-sees-space-reputation)). Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation).
 
-<SpaceReputationParams variant="context" field="query" />
+<SpaceReputationParams variant="context" field="query" rest />
 
 ## Response
 

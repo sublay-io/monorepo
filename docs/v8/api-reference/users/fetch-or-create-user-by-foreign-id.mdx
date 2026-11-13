@@ -61,9 +61,9 @@ Everything goes in the JSON request body, so the profile, `secureMetadata` inclu
 
 ### Space-scoped reputation
 
-This endpoint has no space in context, so the opt-in `spaceReputation` object accepts a `spaceId` of a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to the returned user, alongside the always-present `reputation` total. Only spaces the viewer — the user `actingUserId` names, or a signed-out caller when it names nobody — can read count: a space they can't read reads `0` (see [Who sees space reputation](/v8/data-models/reputation#who-sees-space-reputation)). Send it in the body: `spaceReputationId` as a string, `spaceReputationDescendants` as a boolean (`"true"` and `"false"` are accepted too). Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation).
+This endpoint has no space in context, so the opt-in `spaceReputationId` accepts a space **`<uuid>`** or **`none`** only — `context` is rejected (400). It adds a `spaceReputation` field to the returned user, alongside the always-present `reputation` total. Only spaces the viewer — the user `actingUserId` names, or a signed-out caller when it names nobody — can read count: a space they can't read reads `0` (see [Who sees space reputation](/v8/data-models/reputation#who-sees-space-reputation)). Send it in the body: `spaceReputationId` as a string, `spaceReputationDescendants` as a boolean (`"true"` and `"false"` are accepted too). Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation).
 
-<SpaceReputationParams variant="user" field="body" />
+<SpaceReputationParams variant="user" field="body" rest />
 
 <Note>
   Every field goes in the body. Any of them sent in the query string returns `400 user/wrong-location`.

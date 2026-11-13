@@ -153,7 +153,7 @@ Returns a paginated list of entities for the project. Supports rich filtering by
 
 This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each populated author `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v7/data-models/reputation) for the full contract.
 
-<SpaceReputationParams variant="context" field="query" />
+<SpaceReputationParams variant="context" field="query" rest />
 
 ## Response
 
@@ -180,5 +180,5 @@ Each item in `data` is an [Entity](/v7/data-models/entity) object. File URLs are
 
 ## See Also
 
-- [Reputation data model](/v7/data-models/reputation) — the `spaceReputation` object contract
+- [Reputation data model](/v7/data-models/reputation) — the `spaceReputation` contract
 - [Entity data model](/v7/data-models/entity)

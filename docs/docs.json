@@ -249,8 +249,7 @@
                   "v8/hooks/entities/use-update-entity",
                   "v8/hooks/entities/use-delete-entity",
                   "v8/hooks/entities/use-fetch-drafts",
-                  "v8/hooks/entities/use-publish-draft",
-                  "v8/hooks/entities/use-is-entity-saved"
+                  "v8/hooks/entities/use-publish-draft"
                 ]
               },
               {
@@ -675,8 +674,7 @@
                   "v8/api-reference/entities/add-reaction",
                   "v8/api-reference/entities/remove-reaction",
                   "v8/api-reference/entities/fetch-reactions",
-                  "v8/api-reference/entities/get-user-reaction",
-                  "v8/api-reference/entities/check-entity-saved"
+                  "v8/api-reference/entities/get-user-reaction"
                 ]
               },
               {
@@ -2736,7 +2734,15 @@
   "redirects": [
     {
       "source": "/v8/api-reference/entities/is-entity-saved",
-      "destination": "/v8/api-reference/entities/check-entity-saved"
+      "destination": "/v8/api-reference/entities/fetch-entity"
+    },
+    {
+      "source": "/v8/api-reference/entities/check-entity-saved",
+      "destination": "/v8/api-reference/entities/fetch-entity"
+    },
+    {
+      "source": "/v8/hooks/entities/use-is-entity-saved",
+      "destination": "/v8/hooks/entities/use-fetch-entity"
     },
     {
       "source": "/v8/api-reference/app-notifications/count-unread",

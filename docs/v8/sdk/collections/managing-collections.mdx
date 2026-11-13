@@ -114,16 +114,19 @@ A collection's `entityCount` counts the entities the user can see in it, by the 
 
 ## Checking If an Entity Is Saved
 
-`isEntitySaved` queries whether a specific entity is saved anywhere in the user's collections. Optionally pass a `collectionId` to check a specific folder.
+Fetch the entity with `include: "saved"` to get `entity.saved`: whether it is saved anywhere in the user's collections, and which collections hold it. It works on lists too, so each entity in a feed carries its own saved state.
 
 ```tsx
-const result = await isEntitySaved({ entityId: entity.id });
-// result.isSaved — true if saved in any collection
-// result.collections — list of { id, name } for each collection containing it
+const fetchEntity = useFetchEntity();
 
-const specificResult = await isEntitySaved({ entityId: entity.id, collectionId: collection.id });
-// specificResult.inSpecificCollection — true if in that specific collection
+const entity = await fetchEntity({ entityId, include: "saved" });
+// entity.saved.isSaved — true if saved in any collection
+// entity.saved.collections — { id, name } for each collection containing it
+
+const inThisCollection = entity.saved?.collections.some((c) => c.id === collection.id);
 ```
+
+See [Saved state](/v8/data-models/entity#saved-state).
 
 ## Displaying Collection Entities
 

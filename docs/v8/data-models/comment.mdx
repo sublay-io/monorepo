@@ -87,7 +87,7 @@ The fields an entity fetch computes or joins are **not included**:
 | `user` | `entity.userId`, or fetch the entity with `include=user`. |
 | `files` | Fetch the entity with `include=files`. |
 | `topComments` | Fetch the entity with `include=topComments`. |
-| `isSaved` | Fetch the entity with `include=saved`. |
+| `saved` | Fetch the entity with `include=saved`. |
 | `grants` | Fetch the entity with `include=grants`. The comment's own `grants` is unaffected. |
 
 `entity.space` is present only when `include` contains `"space"`, and is `null` when the entity isn't in a space. It is the [Space](/v8/data-models/space) record with `membersCount` and `childSpacesCount` (and `isMember` for a signed-in caller), without the `avatarFile` and `bannerFile` objects.

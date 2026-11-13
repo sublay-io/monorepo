@@ -1,7 +1,10 @@
 import { baseApi } from "./baseApi";
 import { sendableSortDir } from "../../helpers/oneWaySorts";
 import { sendableTopCommentsParams } from "../../utils/topCommentsParams";
-import type { Collection } from "../../interfaces/models/Collection";
+import type {
+  Collection,
+  DeleteCollectionResponse,
+} from "../../interfaces/models/Collection";
 import type {
   CollectionEntityIncludeParam,
   Entity,
@@ -207,7 +210,9 @@ export const collectionsApi = baseApi.injectEndpoints({
     }),
 
     // Delete a collection
-    deleteCollection: builder.mutation<void, DeleteCollectionParams>({
+    // Answers `{ deletedCollectionIds }` (the collection and every collection
+    // under it).
+    deleteCollection: builder.mutation<DeleteCollectionResponse, DeleteCollectionParams>({
       query: ({ projectId, collectionId }) => ({
         url: `/${projectId}/collections/${collectionId}`,
         method: "DELETE",

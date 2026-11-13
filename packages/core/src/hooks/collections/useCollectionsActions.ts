@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useRef } from "react";
+import { useStore } from "react-redux";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
+import type { SublayState } from "../../store/sublayReducers";
 import {
   setLoading,
   openCollection,
@@ -18,6 +20,7 @@ import {
 } from "../../store/slices/collectionsSlice";
 import {
   renameSavedCollectionInLists,
+  removeSavedCollectionsFromLists,
   updateEntityInLists,
 } from "../../store/slices/entityListsSlice";
 import {
@@ -30,7 +33,10 @@ import {
   useRemoveFromCollectionMutation,
 } from "../../store/api/collectionsApi";
 import { handleError as handleErrorUtil } from "../../utils/handleError";
-import type { Collection } from "../../interfaces/models/Collection";
+import type {
+  Collection,
+  DeleteCollectionResponse,
+} from "../../interfaces/models/Collection";
 import type { Entity } from "../../interfaces/models/Entity";
 
 export interface UseCollectionsActionsValues {
@@ -41,7 +47,12 @@ export interface UseCollectionsActionsValues {
   fetchSubCollections: ({ projectId, collectionId }: { projectId: string; collectionId: string }) => Promise<void>;
   createCollection: ({ projectId, parentCollectionId, name }: { projectId: string; parentCollectionId: string; name: string }) => Promise<void>;
   updateCollection: ({ projectId, collectionId, update }: { projectId: string; collectionId: string; update: { name: string } }) => Promise<void>;
-  deleteCollection: ({ projectId, collection }: { projectId: string; collection: Collection }) => Promise<void>;
+  /**
+   * Resolves to `{ deletedCollectionIds }` (the collection and every
+   * collection under it) once the delete succeeds, or `undefined` when it
+   * didn't happen (missing parameters or a failed request).
+   */
+  deleteCollection: ({ projectId, collection }: { projectId: string; collection: Collection }) => Promise<DeleteCollectionResponse | undefined>;
   addToCollection: ({ projectId, collectionId, entity }: { projectId: string; collectionId: string; entity: Entity }) => Promise<void>;
   removeFromCollection: ({ projectId, collectionId, entityId }: { projectId: string; collectionId: string; entityId: string }) => Promise<void>;
   resetCollections: () => void;
@@ -53,6 +64,9 @@ export interface UseCollectionsActionsValues {
  */
 export function useCollectionsActions(): UseCollectionsActionsValues {
   const dispatch = useSublayDispatch();
+  // Read at the moment a request finishes (a ref would lag until the next
+  // render), to see whether its collection was deleted meanwhile.
+  const store = useStore<{ sublay: SublayState }>();
 
   // Use a ref so removeFromCollection can read the latest entities without being in deps
   const entitiesByCollectionId = useSublaySelector(
@@ -210,22 +224,39 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
   }: {
     projectId: string;
     collection: Collection;
-  }): Promise<void> => {
+  }): Promise<DeleteCollectionResponse | undefined> => {
     if (!projectId || !collection) {
       console.error("Missing required parameters for deleting collection.");
       return;
     }
 
+    let deletedCollectionIds: string[];
     try {
-      await deleteCollectionMutation({
+      const result = await deleteCollectionMutation({
         projectId,
         collectionId: collection.id,
       }).unwrap();
-
-      dispatch(handleCollectionDeletion({ collectionId: collection.id, parentId: collection.parentId }));
+      // The server names every collection the delete removed (this one and
+      // every one under it).
+      const returnedIds = result?.deletedCollectionIds;
+      deletedCollectionIds = Array.isArray(returnedIds) ? returnedIds : [];
     } catch (err) {
       handleErrorUtil(err, "Failed to delete collection");
+      return;
     }
+
+    dispatch(
+      handleCollectionDeletion({
+        collectionId: collection.id,
+        parentId: collection.parentId,
+        deletedCollectionIds,
+      })
+    );
+    // Loaded entity lists fetched with `include=saved` stop listing the
+    // deleted collections.
+    dispatch(removeSavedCollectionsFromLists({ collectionIds: deletedCollectionIds }));
+
+    return { deletedCollectionIds };
   }, [deleteCollectionMutation, dispatch]);
 
   // Add entity to collection — optimistically prepends to Redux state, reverts on error
@@ -263,7 +294,11 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
     // Loaded entity lists fetched with `include=saved` show the save too,
     // with the collection's name from the response. (Without a name the
     // collection couldn't be listed, so the lists are left as they are.)
-    if (collectionName !== undefined) {
+    // A save that finishes after its collection (or one above it) was
+    // deleted isn't shown: the delete already took it out of `saved`.
+    const deletedMeanwhile =
+      !!store.getState().sublay.collections.deletedCollectionIds[collectionId];
+    if (collectionName !== undefined && !deletedMeanwhile) {
       dispatch(
         updateEntityInLists({
           entityId: entity.id,
@@ -271,7 +306,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
         })
       );
     }
-  }, [addToCollectionMutation, dispatch]);
+  }, [addToCollectionMutation, dispatch, store]);
 
   // Remove entity from collection — optimistically removes from Redux state, reverts on error
   const removeFromCollection = useCallback(async ({

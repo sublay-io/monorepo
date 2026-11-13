@@ -92,7 +92,7 @@ The root collection cannot be renamed.
 await deleteCollection({ collection });
 ```
 
-The root collection cannot be deleted. When a collection is deleted, the navigation state automatically moves back to the parent.
+Deleting a collection also deletes every collection under it. The root collection cannot be deleted. If the current collection is among the deleted ones, navigation moves back to the most recent collection in the history that wasn't deleted; otherwise it stays where it is. `deleteCollection` resolves to `{ deletedCollectionIds }`, the deleted collection and every collection under it, or to `undefined` when the delete fails.
 
 ## Saving and Removing Entities
 
@@ -126,7 +126,7 @@ const entity = await fetchEntity({ entityId, include: "saved" });
 const inThisCollection = entity.saved?.collections.some((c) => c.id === collection.id);
 ```
 
-Adding an entity to a collection or removing it from one through `useCollections` updates `saved` on the entity in every loaded entity list that carries it, so a feed fetched with `include: "saved"` shows the change without fetching again. Renaming a collection updates its name in `saved` the same way. Deleting a collection doesn't update `saved` in loaded lists.
+Adding an entity to a collection or removing it from one through `useCollections` updates `saved` on the entity in every entity list that carries it, so a feed fetched with `include: "saved"` shows the change without fetching again. Renaming a collection updates its name in `saved` the same way, and deleting a collection drops it, and every collection under it, from `saved.collections`; `isSaved` stays `true` only while another collection is listed. These updates, like those for reactions, edits and comment counts, reach lists loaded with [`useEntityList`](/v8/hooks/entity-lists/use-entity-list), and an `EntityProvider` given one of their entities. They don't reach an `EntityProvider` that fetched the entity itself, or entities held by [`useFetchManyEntitiesWrapper`](/v8/hooks/entities/use-fetch-many-entities-wrapper); fetch those again to see the change.
 
 See [Saved state](/v8/data-models/entity#saved-state).
 

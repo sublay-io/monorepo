@@ -14,3 +14,12 @@ export interface Collection {
   createdAt: string;
   updatedAt: string;
 }
+
+/** What deleting a collection returns. */
+export interface DeleteCollectionResponse {
+  /**
+   * Every collection the delete removed: the collection itself and every
+   * collection under it, at any depth.
+   */
+  deletedCollectionIds: string[];
+}

@@ -12,6 +12,7 @@ import reducer, {
   removeEntity,
   updateEntityInLists,
   renameSavedCollectionInLists,
+  removeSavedCollectionsFromLists,
   updateKeywordsFilters,
   cleanupList,
   cleanupOldLists,
@@ -227,6 +228,59 @@ describe("entityListsSlice", () => {
       const s0 = reducer(initial, setEntityListEntities({ listId: "feed", entities: [e] }));
       const s = reducer(s0, renameSavedCollectionInLists({ collectionId: "a", name: "Same" }));
       expect(s.lists.feed.entities[0]).toBe(s0.lists.feed.entities[0]);
+    });
+  });
+
+  describe("removeSavedCollectionsFromLists", () => {
+    const savedIn = (id: string, ...collections: Array<{ id: string; name: string }>) =>
+      ({ ...makeEntity(id), saved: { isSaved: collections.length > 0, collections } }) as Entity;
+
+    it("drops every deleted id from each copy in every list", () => {
+      const both = savedIn("e1", { id: "a", name: "A" }, { id: "b", name: "B" }, { id: "c", name: "C" });
+      let s0 = reducer(initial, setEntityListEntities({ listId: "feed", entities: [both] }));
+      s0 = reducer(s0, setEntityListEntities({ listId: "space", entities: [both] }));
+      const s = reducer(s0, removeSavedCollectionsFromLists({ collectionIds: ["a", "c", "zzz"] }));
+      for (const listId of ["feed", "space"]) {
+        expect(s.lists[listId].entities[0].saved).toEqual({
+          isSaved: true,
+          collections: [{ id: "b", name: "B" }],
+        });
+      }
+    });
+
+    it("sets isSaved to false when the last listed collection is removed", () => {
+      const e = savedIn("e1", { id: "a", name: "A" }, { id: "a-child", name: "Child" });
+      const s0 = reducer(initial, setEntityListEntities({ listId: "feed", entities: [e] }));
+      const s = reducer(s0, removeSavedCollectionsFromLists({ collectionIds: ["a", "a-child"] }));
+      expect(s.lists.feed.entities[0]).toEqual(savedIn("e1"));
+    });
+
+    it("keeps copies without saved, or listing none of the ids, as the same object", () => {
+      const other = savedIn("e1", { id: "b", name: "B" });
+      const notSaved = savedIn("e2");
+      const noSaved = makeEntity("e3");
+      const hit = savedIn("e4", { id: "a", name: "A" }, { id: "b", name: "B" });
+      const s0 = reducer(
+        initial,
+        setEntityListEntities({ listId: "feed", entities: [other, notSaved, noSaved, hit] }),
+      );
+      const s = reducer(s0, removeSavedCollectionsFromLists({ collectionIds: ["a"] }));
+      expect(s.lists.feed.entities[0]).toBe(s0.lists.feed.entities[0]);
+      expect(s.lists.feed.entities[1]).toBe(s0.lists.feed.entities[1]);
+      expect(s.lists.feed.entities[2]).toBe(s0.lists.feed.entities[2]);
+      expect(s.lists.feed.entities[3].saved).toEqual({
+        isSaved: true,
+        collections: [{ id: "b", name: "B" }],
+      });
+    });
+
+    it("leaves the whole state as the same object when nothing lists the ids", () => {
+      const s0 = reducer(
+        initial,
+        setEntityListEntities({ listId: "feed", entities: [savedIn("e1", { id: "b", name: "B" })] }),
+      );
+      expect(reducer(s0, removeSavedCollectionsFromLists({ collectionIds: ["a"] }))).toBe(s0);
+      expect(reducer(s0, removeSavedCollectionsFromLists({ collectionIds: [] }))).toBe(s0);
     });
   });
 

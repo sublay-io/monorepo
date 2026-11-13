@@ -827,7 +827,10 @@ export type {
   EventIncludeArray,
   EventIncludeParam,
 } from "./interfaces/models/Event";
-export type { Collection } from "./interfaces/models/Collection";
+export type {
+  Collection,
+  DeleteCollectionResponse,
+} from "./interfaces/models/Collection";
 export type {
   ReputationGrant,
   ReputationGrantSourceType,

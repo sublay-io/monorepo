@@ -13,7 +13,10 @@ import {
 import { useCollectionsActions } from "./useCollectionsActions";
 import useProject from "../projects/useProject";
 import { useUser } from "../user";
-import type { Collection } from "../../interfaces/models/Collection";
+import type {
+  Collection,
+  DeleteCollectionResponse,
+} from "../../interfaces/models/Collection";
 
 export interface UseCollectionsProps {}
 
@@ -49,7 +52,14 @@ export interface UseCollectionsValues {
 
   createCollection: (props: CreateCollectionProps) => Promise<void>;
   updateCollection: (props: UpdateCollectionProps) => Promise<void>;
-  deleteCollection: (props: DeleteCollectionProps) => Promise<void>;
+  /**
+   * Resolves to `{ deletedCollectionIds }` (the collection and every
+   * collection under it) once the delete succeeds, or `undefined` when it
+   * didn't happen.
+   */
+  deleteCollection: (
+    props: DeleteCollectionProps,
+  ) => Promise<DeleteCollectionResponse | undefined>;
   addToCollection: (props: AddToCollectionProps) => Promise<void>;
   removeFromCollection: (props: RemoveFromCollectionProps) => Promise<void>;
 }
@@ -171,7 +181,7 @@ function useCollections(_: UseCollectionsProps = {}): UseCollectionsValues {
         return;
       }
 
-      await deleteCollectionAction({ projectId, collection });
+      return deleteCollectionAction({ projectId, collection });
     },
     [deleteCollectionAction, projectId],
   );

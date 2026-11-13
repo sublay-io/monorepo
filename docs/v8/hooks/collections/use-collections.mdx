@@ -89,7 +89,7 @@ This hook accepts no required parameters. Pass an empty object or nothing.
 </ResponseField>
 
 <ResponseField name="deleteCollection" type="({ collection }: DeleteCollectionProps) => Promise<{ deletedCollectionIds: string[] } | undefined>">
-  Delete a collection and every collection under it. The root collection cannot be deleted. Once it succeeds, it resolves to `{ deletedCollectionIds }` (the deleted collection and every collection under it), navigation moves back to the parent, and loaded entity lists that carry `saved` drop the deleted collections from each entity's `saved.collections`; `isSaved` stays `true` only while another collection holds it. Resolves to `undefined` when the delete fails.
+  Delete a collection and every collection under it. The root collection cannot be deleted. Once it succeeds, it resolves to `{ deletedCollectionIds }` (the deleted collection and every collection under it). If the current collection is one of them, navigation moves back to the most recent collection in the history that wasn't deleted; otherwise it stays where it is. Entity lists loaded with `useEntityList` that carry `saved` drop the deleted collections from each entity's `saved.collections`; `isSaved` stays `true` only while another collection holds it. Resolves to `undefined` when the delete fails.
 </ResponseField>
 
 <ResponseField name="addToCollection" type="({ entityId }: AddToCollectionProps) => Promise<void>">

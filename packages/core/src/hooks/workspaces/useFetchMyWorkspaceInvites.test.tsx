@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe("useFetchMyWorkspaceInvites", () => {
-  it("gets /me/workspace-invites with no params (matched by token server-side)", async () => {
+  it("gets /workspace-invites with no params (matched by token server-side)", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useFetchMyWorkspaceInvites(),
@@ -31,7 +31,7 @@ describe("useFetchMyWorkspaceInvites", () => {
     expect(returned).toEqual([{ id: "i1" }]);
 
     const [call] = axiosPrivate.calls("get");
-    expect(call.url).toBe("/project-1/me/workspace-invites");
+    expect(call.url).toBe("/project-1/workspace-invites");
     // No config/params — the actor is the token user (no userId leak).
     expect(call.config).toBeUndefined();
   });

@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useRemoveReaction` is a low-level hook that removes the authenticated user's current reaction. For most use cases, use [`useReactionToggle`](/v8/hooks/reactions/use-reaction-toggle) instead.
+`useRemoveReaction` is a low-level hook that removes the authenticated user's current reaction. For most use cases, use [`useReactionToggle`](/v8/hooks/reactions/use-reaction-toggle) instead. After an entity reaction is removed, the entity's `userReaction` and `reactionCounts` are updated in every loaded entity list.
 
 <Note>Requires an authenticated user.</Note>
 

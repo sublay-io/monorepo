@@ -10,7 +10,7 @@ icon: "plug"
 
 ## Overview
 
-`useUpdateEntity` returns a function that updates an entity's content fields. After a successful update, the entity state inside the nearest `EntityProvider` is automatically synced with the new data.
+`useUpdateEntity` returns a function that updates an entity's content fields. After a successful update, the nearest `EntityProvider` shows the edit when it holds the same entity (one holding another entity is left as it is), and so does every loaded entity list holding it: the response's fields replace those of the provider's and the list's copy, and fields the response doesn't carry or doesn't fill for the viewer (such as `saved`, `space`, the viewer's `userReaction` and the author's files) are kept.
 
 ## Usage Example
 

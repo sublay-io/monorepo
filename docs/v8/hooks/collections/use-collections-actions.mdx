@@ -59,7 +59,7 @@ function QuickSaveButton({ entityId, collectionId, projectId }) {
 </ResponseField>
 
 <ResponseField name="updateCollection" type="({ projectId, collectionId, update }: ...) => Promise<void>">
-  Update a collection's `name`.
+  Update a collection's `name`. Loaded entity lists that list the collection in `saved` show the new name.
 </ResponseField>
 
 <ResponseField name="deleteCollection" type="({ projectId, collection }: ...) => Promise<void>">
@@ -67,11 +67,11 @@ function QuickSaveButton({ entityId, collectionId, projectId }) {
 </ResponseField>
 
 <ResponseField name="addToCollection" type="({ projectId, collectionId, entityId }: ...) => Promise<void>">
-  Add an entity to a collection by creating a junction table entry.
+  Add an entity to a collection by creating a junction table entry. Once it succeeds, loaded entity lists that carry `saved` (fetched with `include=saved`) add the collection, with the name the response gives, to the entity's `saved.collections` and set `isSaved` to `true`.
 </ResponseField>
 
 <ResponseField name="removeFromCollection" type="({ projectId, collectionId, entityId }: ...) => Promise<void>">
-  Remove an entity from a collection.
+  Remove an entity from a collection. Once it succeeds, loaded entity lists that carry `saved` drop the collection from the entity's `saved.collections`; `isSaved` stays `true` only while another collection is listed.
 </ResponseField>
 
 ### Utility

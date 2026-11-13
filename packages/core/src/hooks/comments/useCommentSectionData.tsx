@@ -34,7 +34,8 @@ import {
 } from "../../helpers/commentStore";
 import useFetchComment from "./useFetchComment";
 import { useUser } from "../user";
-import { useSublaySelector } from "../../store/hooks";
+import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
+import { updateEntityInLists } from "../../store/slices/entityListsSlice";
 import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
 import { Entity } from "../../interfaces/models/Entity";
 
@@ -362,6 +363,10 @@ export function useCommentSectionDataInternal(
         : baseEntity,
     [baseEntity, overlaidCount],
   );
+
+  // Loaded entity lists get the section's count changes too (see
+  // `bumpCounts` / `settleCounts`).
+  const dispatch = useSublayDispatch();
 
   const { user } = useUser();
 
@@ -707,6 +712,23 @@ export function useCommentSectionDataInternal(
         if (sentEntityHome.context) setContextEntity?.(apply);
         else if (countsInOwnCopy) setEntity(apply);
       };
+      // Loaded entity lists count the comment too: +1 when it is sent, -1
+      // if the create fails, nothing on success. An `EntityProvider` given a
+      // list's copy follows that copy, so a count kept only in the provider
+      // would be replaced by the list's (on the next save or reaction, for
+      // example). Relative and dispatched right away, keyed on the sent
+      // entity, so it holds whatever the section does meanwhile (unmounts,
+      // moves to another entity) and never overwrites a newer list copy with
+      // an older number. A list refetched mid-create with the new comment
+      // already counted, followed by a failure, ends one low; accepted.
+      const moveListCount = (delta: number) => {
+        dispatch(
+          updateEntityInLists({
+            entityId: sentEntityId,
+            commentsCountDelta: delta,
+          }),
+        );
+      };
       // For an `entity` prop: the caller's count when the create was sent,
       // and the overlay that was showing (restored if the create fails).
       const propCountAtSend = baseEntity?.commentsCount ?? 0;
@@ -735,6 +757,7 @@ export function useCommentSectionDataInternal(
           bumpedCommentsCount = current + 1;
           return bumpedCommentsCount;
         });
+        moveListCount(1);
       };
       const settleCounts = (succeeded: boolean) => {
         // The parent is a comment of the sent entity: only while the section
@@ -752,6 +775,7 @@ export function useCommentSectionDataInternal(
         updateEntityCount((current) =>
           settleCount(current, bumpedCommentsCount, succeeded),
         );
+        if (!succeeded) moveListCount(-1);
         if (!sentEntityHome.overlay) return;
         const suppliedNow =
           overlaysCountRef.current && baseEntityRef.current?.id === sentEntityId
@@ -933,6 +957,7 @@ export function useCommentSectionDataInternal(
       user,
       setStore,
       setContextEntity,
+      dispatch,
       entity,
       baseEntity,
       entityHome.context,

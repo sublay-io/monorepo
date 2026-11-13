@@ -134,28 +134,36 @@ describe("node-sdk collections — response mapping", () => {
     ).resolves.toEqual(envelope);
   });
 
-  it("addEntityToCollection returns response.data", async () => {
+  it("addEntityToCollection returns the mutation response", async () => {
     const { client, projectInstance } = makeClient();
-    const collection = { id: "c1" };
-    projectInstance.post.mockResolvedValueOnce({ data: collection });
+    const mutationResult = {
+      success: true,
+      collection: { id: "c1", name: "Reading", entityCount: 5 },
+    };
+    projectInstance.post.mockResolvedValueOnce({ data: mutationResult });
     await expect(
       addEntityToCollection(client, {
         collectionId: "c1",
         entityId: "e1",
         actingUserId: "u1",
       }),
-    ).resolves.toEqual(collection);
+    ).resolves.toEqual(mutationResult);
   });
 
-  it("removeEntityFromCollection resolves to undefined", async () => {
-    const { client } = makeClient();
+  it("removeEntityFromCollection returns the mutation response", async () => {
+    const { client, projectInstance } = makeClient();
+    const mutationResult = {
+      success: true,
+      collection: { id: "c1", name: "Reading", entityCount: 4 },
+    };
+    projectInstance.delete.mockResolvedValueOnce({ data: mutationResult });
     await expect(
       removeEntityFromCollection(client, {
         collectionId: "c1",
         entityId: "e1",
         actingUserId: "u1",
       }),
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual(mutationResult);
   });
 
   it("updateCollection returns response.data", async () => {

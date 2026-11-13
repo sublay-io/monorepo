@@ -85,7 +85,7 @@ This hook accepts no required parameters. Pass an empty object or nothing.
 </ResponseField>
 
 <ResponseField name="updateCollection" type="({ collectionId, update }: UpdateCollectionProps) => Promise<void>">
-  Rename a collection. `update` accepts `{ name: string }`. The root collection cannot be renamed.
+  Rename a collection. `update` accepts `{ name: string }`. The root collection cannot be renamed. Loaded entity lists that list the collection in `saved` show the new name.
 </ResponseField>
 
 <ResponseField name="deleteCollection" type="({ collection }: DeleteCollectionProps) => Promise<void>">
@@ -93,11 +93,11 @@ This hook accepts no required parameters. Pass an empty object or nothing.
 </ResponseField>
 
 <ResponseField name="addToCollection" type="({ entityId }: AddToCollectionProps) => Promise<void>">
-  Save an entity into the current collection.
+  Save an entity into the current collection. Loaded entity lists that carry `saved` (fetched with `include=saved`) show the save once it succeeds: the collection is added to the entity's `saved.collections` and `isSaved` becomes `true`.
 </ResponseField>
 
 <ResponseField name="removeFromCollection" type="({ entityId }: RemoveFromCollectionProps) => Promise<void>">
-  Remove an entity from the current collection.
+  Remove an entity from the current collection. Loaded entity lists that carry `saved` drop the collection from the entity's `saved.collections` once the removal succeeds, and `isSaved` stays `true` only while another collection holds it.
 </ResponseField>
 
 For a full integration guide, see [Managing Collections](/v8/sdk/collections/managing-collections).

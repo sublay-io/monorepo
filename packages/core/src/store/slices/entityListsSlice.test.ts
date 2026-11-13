@@ -10,6 +10,8 @@ import reducer, {
   setEntityListError,
   addEntity,
   removeEntity,
+  updateEntityInLists,
+  renameSavedCollectionInLists,
   updateKeywordsFilters,
   cleanupList,
   cleanupOldLists,
@@ -196,6 +198,160 @@ describe("entityListsSlice", () => {
 
       const unchanged = reducer(initial, removeEntity({ listId: "missing", entityId: "e1" }));
       expect(unchanged).toEqual(initial);
+    });
+  });
+
+  describe("renameSavedCollectionInLists", () => {
+    it("renames the collection in every copy that lists it, and keeps the rest", () => {
+      const listed = {
+        ...makeEntity("e1"),
+        saved: { isSaved: true, collections: [{ id: "a", name: "Old" }, { id: "b", name: "B" }] },
+      } as Entity;
+      const unlisted = { ...makeEntity("e2"), saved: { isSaved: true, collections: [{ id: "b", name: "B" }] } } as Entity;
+      const noSaved = makeEntity("e3");
+      let s0 = reducer(initial, setEntityListEntities({ listId: "feed", entities: [listed, unlisted, noSaved] }));
+      s0 = reducer(s0, setEntityListEntities({ listId: "space", entities: [listed] }));
+      const s = reducer(s0, renameSavedCollectionInLists({ collectionId: "a", name: "New" }));
+      for (const listId of ["feed", "space"]) {
+        expect(s.lists[listId].entities[0].saved).toEqual({
+          isSaved: true,
+          collections: [{ id: "a", name: "New" }, { id: "b", name: "B" }],
+        });
+      }
+      expect(s.lists.feed.entities[1]).toBe(s0.lists.feed.entities[1]);
+      expect(s.lists.feed.entities[2]).toBe(s0.lists.feed.entities[2]);
+    });
+
+    it("keeps a copy that already shows the name as the same object", () => {
+      const e = { ...makeEntity("e1"), saved: { isSaved: true, collections: [{ id: "a", name: "Same" }] } } as Entity;
+      const s0 = reducer(initial, setEntityListEntities({ listId: "feed", entities: [e] }));
+      const s = reducer(s0, renameSavedCollectionInLists({ collectionId: "a", name: "Same" }));
+      expect(s.lists.feed.entities[0]).toBe(s0.lists.feed.entities[0]);
+    });
+  });
+
+  describe("updateEntityInLists", () => {
+    const withLists = (lists: Record<string, Entity[]>): EntityListsState =>
+      Object.entries(lists).reduce(
+        (s, [listId, entities]) => reducer(s, setEntityListEntities({ listId, entities })),
+        initial,
+      );
+    const saved = (...collections: Array<{ id: string; name: string }>) => ({
+      isSaved: collections.length > 0,
+      collections,
+    });
+
+    it("updates the entity in every list that holds it and leaves the rest", () => {
+      const s0 = withLists({
+        feed: [makeEntity("e1"), makeEntity("e2")],
+        space: [{ ...makeEntity("e1"), title: "old" } as Entity],
+        other: [makeEntity("e3")],
+      });
+      const s = reducer(
+        s0,
+        updateEntityInLists({ entityId: "e1", changes: { title: "new" } }),
+      );
+      expect(s.lists.feed.entities[0].title).toBe("new");
+      expect(s.lists.space.entities[0].title).toBe("new");
+      expect(s.lists.feed.entities[1]).toBe(s0.lists.feed.entities[1]);
+      expect(s.lists.other).toBe(s0.lists.other);
+    });
+
+    it("changes nothing when no list holds the entity", () => {
+      const s0 = withLists({ feed: [makeEntity("e1")] });
+      expect(reducer(s0, updateEntityInLists({ entityId: "e9", changes: { title: "x" } }))).toEqual(s0);
+      expect(reducer(initial, updateEntityInLists({ entityId: "e9", changes: { title: "x" } }))).toEqual(initial);
+    });
+
+    it("keeps a copy that already holds every value as the same object", () => {
+      const s0 = withLists({ feed: [{ ...makeEntity("e1"), commentsCount: 3 } as Entity] });
+      const s = reducer(s0, updateEntityInLists({ entityId: "e1", changes: { commentsCount: 3 } }));
+      expect(s.lists.feed.entities[0]).toBe(s0.lists.feed.entities[0]);
+    });
+
+    it("moves `commentsCount` by `commentsCountDelta` in each copy, never below 0", () => {
+      let s = withLists({
+        feed: [{ ...makeEntity("e1"), commentsCount: 3 } as Entity],
+        other: [{ ...makeEntity("e1"), commentsCount: 0 } as Entity],
+      });
+      s = reducer(s, updateEntityInLists({ entityId: "e1", commentsCountDelta: 1 }));
+      expect(s.lists.feed.entities[0].commentsCount).toBe(4);
+      expect(s.lists.other.entities[0].commentsCount).toBe(1);
+      s = reducer(s, updateEntityInLists({ entityId: "e1", commentsCountDelta: -2 }));
+      expect(s.lists.feed.entities[0].commentsCount).toBe(2);
+      expect(s.lists.other.entities[0].commentsCount).toBe(0);
+    });
+
+    it("keeps a copy whose saved state wouldn't change as the same object", () => {
+      const s0 = withLists({
+        feed: [{ ...makeEntity("e1"), saved: saved({ id: "c1", name: "Reading" }) } as Entity],
+        unsaved: [{ ...makeEntity("e1"), saved: saved() } as Entity],
+      });
+      const added = reducer(
+        s0,
+        updateEntityInLists({ entityId: "e1", saved: { add: { id: "c1", name: "Reading" } } }),
+      );
+      expect(added.lists.feed.entities[0]).toBe(s0.lists.feed.entities[0]);
+      const removed = reducer(s0, updateEntityInLists({ entityId: "e1", saved: { remove: "c9" } }));
+      expect(removed.lists.feed.entities[0]).toBe(s0.lists.feed.entities[0]);
+      expect(removed.lists.unsaved.entities[0]).toBe(s0.lists.unsaved.entities[0]);
+    });
+
+    it("keeps the fields the changes don't carry", () => {
+      const original = {
+        ...makeEntity("e1"),
+        title: "old",
+        content: "body",
+        saved: saved({ id: "c1", name: "Reading" }),
+        reactionCounts: { upvote: 1 },
+      } as Entity;
+      const s = reducer(
+        withLists({ feed: [original] }),
+        updateEntityInLists({ entityId: "e1", changes: { title: "new" } }),
+      );
+      expect(s.lists.feed.entities[0]).toEqual({ ...original, title: "new" });
+    });
+
+    it("adds a collection to copies that have `saved`, once, at the end", () => {
+      const s0 = withLists({
+        withSaved: [{ ...makeEntity("e1"), saved: saved({ id: "c1", name: "Reading" }) } as Entity],
+        unsaved: [{ ...makeEntity("e1"), saved: saved() } as Entity],
+        noSaved: [makeEntity("e1")],
+      });
+      let s = reducer(
+        s0,
+        updateEntityInLists({ entityId: "e1", saved: { add: { id: "c2", name: "Later" } } }),
+      );
+      expect(s.lists.withSaved.entities[0].saved).toEqual(
+        saved({ id: "c1", name: "Reading" }, { id: "c2", name: "Later" }),
+      );
+      expect(s.lists.unsaved.entities[0].saved).toEqual(saved({ id: "c2", name: "Later" }));
+      expect(s.lists.noSaved.entities[0]).toBe(s0.lists.noSaved.entities[0]);
+      expect(s.lists.noSaved.entities[0].saved).toBeUndefined();
+
+      // Adding a collection already listed doesn't list it twice.
+      s = reducer(
+        s,
+        updateEntityInLists({ entityId: "e1", saved: { add: { id: "c1", name: "Reading" } } }),
+      );
+      expect(s.lists.withSaved.entities[0].saved?.collections.map((c) => c.id)).toEqual(["c1", "c2"]);
+    });
+
+    it("removes a collection and keeps `isSaved` true only while one is left", () => {
+      let s = withLists({
+        feed: [
+          {
+            ...makeEntity("e1"),
+            saved: saved({ id: "c1", name: "Reading" }, { id: "c2", name: "Later" }),
+          } as Entity,
+        ],
+        noSaved: [makeEntity("e1")],
+      });
+      s = reducer(s, updateEntityInLists({ entityId: "e1", saved: { remove: "c1" } }));
+      expect(s.lists.feed.entities[0].saved).toEqual(saved({ id: "c2", name: "Later" }));
+      s = reducer(s, updateEntityInLists({ entityId: "e1", saved: { remove: "c2" } }));
+      expect(s.lists.feed.entities[0].saved).toEqual({ isSaved: false, collections: [] });
+      expect(s.lists.noSaved.entities[0].saved).toBeUndefined();
     });
   });
 

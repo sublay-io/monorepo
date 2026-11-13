@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useAddReaction` is a low-level hook that adds a reaction to an entity or comment. For most use cases, use [`useReactionToggle`](/v8/hooks/reactions/use-reaction-toggle) instead — it handles toggling, optimistic updates, and state management automatically.
+`useAddReaction` is a low-level hook that adds a reaction to an entity or comment. For most use cases, use [`useReactionToggle`](/v8/hooks/reactions/use-reaction-toggle) instead — it handles toggling, optimistic updates, and state management automatically. After an entity reaction succeeds, the entity's `userReaction` and `reactionCounts` are updated in every loaded entity list.
 
 <Note>Requires an authenticated user.</Note>
 

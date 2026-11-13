@@ -156,7 +156,7 @@ describe("js-sdk collections — response mapping", () => {
     const { client, projectInstance } = makeClient();
     const mutationResult = {
       success: true,
-      collection: { id: "col1", entityCount: 5 },
+      collection: { id: "col1", name: "Reading", entityCount: 5 },
     };
     projectInstance.post.mockResolvedValueOnce({ data: mutationResult });
 
@@ -172,7 +172,7 @@ describe("js-sdk collections — response mapping", () => {
     const { client, projectInstance } = makeClient();
     const mutationResult = {
       success: true,
-      collection: { id: "col1", entityCount: 4 },
+      collection: { id: "col1", name: "Reading", entityCount: 4 },
     };
     projectInstance.delete.mockResolvedValueOnce({ data: mutationResult });
 

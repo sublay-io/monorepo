@@ -148,7 +148,7 @@ const { data, pagination } = await sublay.collections.fetchCollectionEntities({
 Saves an entity into a collection.
 
 ```typescript
-const collection = await sublay.collections.addEntityToCollection({
+const { collection } = await sublay.collections.addEntityToCollection({
   collectionId: "col_xyz789",
   entityId: "ent_xyz789",
   actingUserId: "usr_abc123",
@@ -167,7 +167,7 @@ const collection = await sublay.collections.addEntityToCollection({
   The user the service key acts as, who owns the collection.
 </ParamField>
 
-**Returns** — `Promise<Collection>`
+**Returns** — `Promise<{ success: boolean; collection: { id: string; name: string; entityCount: number } }>`
 
 ---
 
@@ -195,7 +195,7 @@ await sublay.collections.removeEntityFromCollection({
   The user the service key acts as, who owns the collection.
 </ParamField>
 
-**Returns** — `Promise<void>`
+**Returns** — `Promise<{ success: boolean; collection: { id: string; name: string; entityCount: number } }>`
 
 ---
 

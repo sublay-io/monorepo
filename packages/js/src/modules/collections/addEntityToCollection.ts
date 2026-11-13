@@ -9,6 +9,7 @@ export interface CollectionEntityMutationResponse {
   success: boolean;
   collection: {
     id: string;
+    name: string;
     /** The collection's `entityCount` after the change, as the viewer sees it. */
     entityCount: number;
   };

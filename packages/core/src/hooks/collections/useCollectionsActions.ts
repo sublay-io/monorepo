@@ -17,6 +17,10 @@ import {
   handleError,
 } from "../../store/slices/collectionsSlice";
 import {
+  renameSavedCollectionInLists,
+  updateEntityInLists,
+} from "../../store/slices/entityListsSlice";
+import {
   useLazyFetchRootCollectionQuery,
   useLazyFetchSubCollectionsQuery,
   useCreateCollectionMutation,
@@ -56,6 +60,13 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
   );
   const entitiesByCollectionIdRef = useRef(entitiesByCollectionId);
   entitiesByCollectionIdRef.current = entitiesByCollectionId;
+
+  // Read for the collection's name when a save is shown in loaded entity lists.
+  const collectionsById = useSublaySelector(
+    (state) => state.sublay.collections.collectionsById
+  );
+  const collectionsByIdRef = useRef(collectionsById);
+  collectionsByIdRef.current = collectionsById;
 
   // RTK Query hooks
   const [fetchRootCollectionQuery] = useLazyFetchRootCollectionQuery();
@@ -180,6 +191,12 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
       if (result) {
         // Check if it's the current collection or a sub-collection
         dispatch(updateCollectionInSubCollections(result));
+        // Loaded entities that list this collection in `saved` show the new name.
+        if (result.name) {
+          dispatch(
+            renameSavedCollectionInLists({ collectionId, name: result.name })
+          );
+        }
       }
     } catch (err) {
       handleErrorUtil(err, "Failed to update collection");
@@ -228,16 +245,31 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
 
     dispatch(prependCollectionEntity({ collectionId, entity }));
 
+    let collectionName: string | undefined;
     try {
-      await addToCollectionMutation({
+      const result = await addToCollectionMutation({
         projectId,
         collectionId,
         entityId: entity.id,
       }).unwrap();
+      collectionName =
+        result?.collection?.name ?? collectionsByIdRef.current[collectionId]?.name;
     } catch (err) {
       dispatch(removeCollectionEntity({ collectionId, entityId: entity.id }));
       handleErrorUtil(err, "Failed to add entity to collection");
       throw err;
+    }
+
+    // Loaded entity lists fetched with `include=saved` show the save too,
+    // with the collection's name from the response. (Without a name the
+    // collection couldn't be listed, so the lists are left as they are.)
+    if (collectionName !== undefined) {
+      dispatch(
+        updateEntityInLists({
+          entityId: entity.id,
+          saved: { add: { id: collectionId, name: collectionName } },
+        })
+      );
     }
   }, [addToCollectionMutation, dispatch]);
 
@@ -274,6 +306,9 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
       handleErrorUtil(err, "Failed to remove entity from collection");
       throw err;
     }
+
+    // Loaded entity lists fetched with `include=saved` show the removal too.
+    dispatch(updateEntityInLists({ entityId, saved: { remove: collectionId } }));
   }, [removeFromCollectionMutation, dispatch]);
 
   // Reset collections

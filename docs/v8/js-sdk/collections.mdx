@@ -135,7 +135,7 @@ const result = await sublay.collections.addEntityToCollection({
   The ID of the entity to add.
 </ParamField>
 
-**Returns** — `Promise<{ success: boolean; collection: { id: string; entityCount: number } }>`
+**Returns** — `Promise<{ success: boolean; collection: { id: string; name: string; entityCount: number } }>`
 
 ---
 
@@ -158,7 +158,7 @@ const result = await sublay.collections.removeEntityFromCollection({
   The ID of the entity to remove.
 </ParamField>
 
-**Returns** — `Promise<{ success: boolean; collection: { id: string; entityCount: number } }>`
+**Returns** — `Promise<{ success: boolean; collection: { id: string; name: string; entityCount: number } }>`
 
 ---
 

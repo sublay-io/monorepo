@@ -210,6 +210,33 @@ export interface EntityRemovePayload {
   entityId: string;
 }
 
+/**
+ * Brings every loaded list's copy of one entity up to date after a change made
+ * through the SDK (a save, a reaction, an edit). Lists that don't hold the
+ * entity are left as they are.
+ *
+ * - `changes` is shallow-merged into each copy: keys it carries replace the
+ *   copy's, every other field of the copy is kept. A copy that already holds
+ *   every value (compared with `===`) is left as the same object.
+ * - `saved` changes the copy's saved state, and only on copies that have one
+ *   (lists fetched with `include=saved`); copies without `saved` keep not
+ *   having it. `add` appends the collection (once — a collection already
+ *   listed isn't added again) and sets `isSaved: true`. `remove` drops the
+ *   collection and sets `isSaved` to whether any collection is left. A copy
+ *   whose saved state wouldn't change is left as the same object.
+ * - `commentsCountDelta` moves each copy's `commentsCount` by that much (never
+ *   below 0): relative, so it doesn't overwrite a copy that is newer than the
+ *   change's sender.
+ */
+export interface EntityInListsUpdatePayload {
+  entityId: string;
+  changes?: Partial<Entity>;
+  commentsCountDelta?: number;
+  saved?:
+    | { add: { id: string; name: string } }
+    | { remove: string };
+}
+
 export interface EntitiesSetPayload {
   listId: string;
   entities: Entity[];
@@ -428,6 +455,84 @@ const entityListsSlice = createSlice({
       list.entities = list.entities.filter((e) => e.id !== entityId);
     },
 
+    // Update one entity in every loaded list that holds it
+    updateEntityInLists: (
+      state,
+      action: PayloadAction<EntityInListsUpdatePayload>
+    ) => {
+      const { entityId, changes, saved, commentsCountDelta } = action.payload;
+
+      Object.values(state.lists).forEach((list) => {
+        list.entities.forEach((entity, index) => {
+          if (entity.id !== entityId) return;
+
+          // A copy that already holds every value is kept as it is.
+          const changed =
+            !!changes &&
+            (Object.keys(changes) as Array<keyof Entity>).some(
+              (key) => entity[key] !== changes[key]
+            );
+          let next: Entity = changed ? { ...entity, ...changes } : entity;
+
+          if (commentsCountDelta) {
+            const current = next.commentsCount ?? 0;
+            const moved = Math.max(0, current + commentsCountDelta);
+            if (moved !== current) next = { ...next, commentsCount: moved };
+          }
+
+          if (saved && next.saved) {
+            const prevSaved = next.saved;
+            let collections = prevSaved.collections;
+            let isSaved: boolean;
+            if ("add" in saved) {
+              const { id, name } = saved.add;
+              if (!collections.some((c) => c.id === id)) {
+                collections = [...collections, { id, name }];
+              }
+              isSaved = true;
+            } else {
+              const kept = collections.filter((c) => c.id !== saved.remove);
+              if (kept.length !== collections.length) collections = kept;
+              isSaved = collections.length > 0;
+            }
+            if (
+              collections !== prevSaved.collections ||
+              isSaved !== prevSaved.isSaved
+            ) {
+              next = { ...next, saved: { isSaved, collections } };
+            }
+          }
+
+          if (next !== entity) list.entities[index] = next;
+        });
+      });
+    },
+
+    // A collection was renamed: every loaded copy that lists it in `saved`
+    // shows the new name. Copies that don't list it are kept as they are.
+    renameSavedCollectionInLists: (
+      state,
+      action: PayloadAction<{ collectionId: string; name: string }>
+    ) => {
+      const { collectionId, name } = action.payload;
+
+      Object.values(state.lists).forEach((list) => {
+        list.entities.forEach((entity, index) => {
+          const collections = entity.saved?.collections;
+          if (!collections?.some((c) => c.id === collectionId && c.name !== name)) return;
+          list.entities[index] = {
+            ...entity,
+            saved: {
+              ...entity.saved!,
+              collections: collections.map((c) =>
+                c.id === collectionId ? { ...c, name } : c
+              ),
+            },
+          };
+        });
+      });
+    },
+
     // Update keywords filters (special case due to complexity)
     updateKeywordsFilters: (
       state,
@@ -545,6 +650,8 @@ export const {
   setEntityListError,
   addEntity,
   removeEntity,
+  updateEntityInLists,
+  renameSavedCollectionInLists,
   updateKeywordsFilters,
   cleanupList,
   cleanupOldLists,

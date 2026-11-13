@@ -15,6 +15,7 @@ import {
   selectCollectionEntities,
   setCollectionEntities,
 } from "../../store/slices/collectionsSlice";
+import { setEntityListEntities } from "../../store/slices/entityListsSlice";
 import type { Collection } from "../../interfaces/models/Collection";
 import type { Entity } from "../../interfaces/models/Entity";
 
@@ -241,6 +242,190 @@ describe("useCollectionsActions", () => {
     expect(
       selectCollectionEntities("root")(store.getState()).map((e) => e.id),
     ).toEqual(["a", "b"]);
+  });
+
+  describe("loaded entity lists", () => {
+    const LATER: Collection = { ...ROOT, id: "later", parentId: "root", name: "Later" };
+    const savedIn = (...collections: Array<{ id: string; name: string }>) =>
+      makeEntity({
+        title: "Kept",
+        saved: { isSaved: collections.length > 0, collections },
+      });
+    const seedLists = (store: ReturnType<typeof renderHookWithStore>["store"], entity: Entity) =>
+      act(() => {
+        store.dispatch(setEntityListEntities({ listId: "withSaved", entities: [entity] }));
+        store.dispatch(
+          setEntityListEntities({ listId: "noSaved", entities: [makeEntity({ title: "Kept" })] }),
+        );
+      });
+    const lists = (store: ReturnType<typeof renderHookWithStore>["store"]) =>
+      store.getState().sublay.entityLists.lists;
+
+    it("updateCollection renames the collection in copies that list it in `saved`", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ ...LATER, name: "Someday" }));
+      const { result, store } = renderHookWithStore(() => useCollectionsActions());
+      act(() => result.current.openCollection(LATER));
+      seedLists(store, savedIn({ id: "root", name: "Root" }, { id: "later", name: "Later" }));
+
+      await act(async () => {
+        await result.current.updateCollection({
+          projectId: "test-project",
+          collectionId: "later",
+          update: { name: "Someday" },
+        });
+      });
+
+      expect(lists(store).withSaved.entities[0]).toEqual(
+        savedIn({ id: "root", name: "Root" }, { id: "later", name: "Someday" }),
+      );
+      expect(lists(store).noSaved.entities[0]).toEqual(makeEntity({ title: "Kept" }));
+    });
+
+    it("a failed rename leaves the lists as they are", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ error: "x" }, 500));
+      const { result, store } = renderHookWithStore(() => useCollectionsActions());
+      const entity = savedIn({ id: "later", name: "Later" });
+      seedLists(store, entity);
+      const before = lists(store).withSaved.entities[0];
+
+      await act(async () => {
+        await result.current.updateCollection({
+          projectId: "test-project",
+          collectionId: "later",
+          update: { name: "Someday" },
+        });
+      });
+
+      expect(lists(store).withSaved.entities[0]).toBe(before);
+    });
+
+    it("addToCollection appends the collection, named from the response, to copies that have `saved`", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(
+        jsonResponse({ success: true, collection: { id: "later", name: "Later", entityCount: 1 } }),
+      );
+      const { result, store } = renderHookWithStore(() => useCollectionsActions());
+      seedLists(store, savedIn({ id: "root", name: "Root" }));
+
+      await act(async () => {
+        await result.current.addToCollection({
+          projectId: "test-project",
+          collectionId: "later",
+          entity: makeEntity(),
+        });
+      });
+
+      expect(lists(store).withSaved.entities[0]).toEqual(
+        savedIn({ id: "root", name: "Root" }, { id: "later", name: "Later" }),
+      );
+      expect(lists(store).noSaved.entities[0]).toEqual(makeEntity({ title: "Kept" }));
+    });
+
+    it("addToCollection takes the name from the loaded collection when the response has none", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(
+        jsonResponse({ success: true, collection: { id: "later", entityCount: 1 } }),
+      );
+      const { result, store } = renderHookWithStore(() => useCollectionsActions());
+      act(() => result.current.openCollection(LATER));
+      seedLists(store, savedIn());
+
+      await act(async () => {
+        await result.current.addToCollection({
+          projectId: "test-project",
+          collectionId: "later",
+          entity: makeEntity(),
+        });
+      });
+
+      expect(lists(store).withSaved.entities[0]).toEqual(savedIn({ id: "later", name: "Later" }));
+    });
+
+    it("addToCollection leaves the lists as they are when no name is known", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(
+        jsonResponse({ success: true, collection: { id: "unknown", entityCount: 1 } }),
+      );
+      const { result, store } = renderHookWithStore(() => useCollectionsActions());
+      seedLists(store, savedIn());
+      const before = store.getState().sublay.entityLists;
+
+      await act(async () => {
+        await result.current.addToCollection({
+          projectId: "test-project",
+          collectionId: "unknown",
+          entity: makeEntity(),
+        });
+      });
+
+      expect(store.getState().sublay.entityLists).toBe(before);
+    });
+
+    it("addToCollection leaves the lists as they are on failure", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
+      const { result, store } = renderHookWithStore(() => useCollectionsActions());
+      act(() => result.current.openCollection(LATER));
+      seedLists(store, savedIn());
+      const before = store.getState().sublay.entityLists;
+
+      await act(async () => {
+        await expect(
+          result.current.addToCollection({
+            projectId: "test-project",
+            collectionId: "later",
+            entity: makeEntity(),
+          }),
+        ).rejects.toBeTruthy();
+      });
+
+      expect(store.getState().sublay.entityLists).toBe(before);
+    });
+
+    it("removeFromCollection drops the collection and updates `isSaved`", async () => {
+      fetchHandle.fetchMock.mockResolvedValue(
+        jsonResponse({ success: true, collection: { id: "root", name: "Root", entityCount: 0 } }),
+      );
+      const { result, store } = renderHookWithStore(() => useCollectionsActions());
+      seedLists(store, savedIn({ id: "root", name: "Root" }, { id: "later", name: "Later" }));
+
+      await act(async () => {
+        await result.current.removeFromCollection({
+          projectId: "test-project",
+          collectionId: "root",
+          entityId: "entity-1",
+        });
+      });
+      expect(lists(store).withSaved.entities[0]).toEqual(savedIn({ id: "later", name: "Later" }));
+
+      fetchHandle.fetchMock.mockResolvedValue(
+        jsonResponse({ success: true, collection: { id: "later", entityCount: 0 } }),
+      );
+      await act(async () => {
+        await result.current.removeFromCollection({
+          projectId: "test-project",
+          collectionId: "later",
+          entityId: "entity-1",
+        });
+      });
+      expect(lists(store).withSaved.entities[0]).toEqual(savedIn());
+      expect(lists(store).noSaved.entities[0]).toEqual(makeEntity({ title: "Kept" }));
+    });
+
+    it("removeFromCollection leaves the lists as they are on failure", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
+      const { result, store } = renderHookWithStore(() => useCollectionsActions());
+      seedLists(store, savedIn({ id: "root", name: "Root" }));
+      const before = store.getState().sublay.entityLists;
+
+      await act(async () => {
+        await expect(
+          result.current.removeFromCollection({
+            projectId: "test-project",
+            collectionId: "root",
+            entityId: "entity-1",
+          }),
+        ).rejects.toBeTruthy();
+      });
+
+      expect(store.getState().sublay.entityLists).toBe(before);
+    });
   });
 
   it("resetCollections clears the slice back to its initial state", async () => {

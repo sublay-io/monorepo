@@ -1,6 +1,8 @@
 import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
+import { useSublayDispatch } from "../../store/hooks";
+import { updateEntityInLists } from "../../store/slices/entityListsSlice";
 import { Entity } from "../../interfaces/models/Entity";
 import { Comment } from "../../interfaces/models/Comment";
 
@@ -12,6 +14,7 @@ export interface RemoveReactionProps {
 function useRemoveReaction(): (props: RemoveReactionProps) => Promise<Entity | Comment> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
+  const dispatch = useSublayDispatch();
 
   const removeReaction = useCallback(
     async (props: RemoveReactionProps): Promise<Entity | Comment> => {
@@ -33,9 +36,25 @@ function useRemoveReaction(): (props: RemoveReactionProps) => Promise<Entity | C
 
       const response = await axios.delete(endpoint);
 
+      // Loaded entity lists show the viewer's reaction and the counts too.
+      if (targetType === "entity") {
+        const entity = response.data as Entity;
+        dispatch(
+          updateEntityInLists({
+            entityId: targetId,
+            changes: {
+              userReaction: entity.userReaction ?? null,
+              ...(entity.reactionCounts
+                ? { reactionCounts: entity.reactionCounts }
+                : {}),
+            },
+          })
+        );
+      }
+
       return response.data as Entity | Comment;
     },
-    [axios, projectId]
+    [axios, projectId, dispatch]
   );
 
   return removeReaction;

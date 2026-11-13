@@ -955,6 +955,58 @@ describe("useEntityData — requests superseded or undone", () => {
     expect(axiosPrivate.calls("get")).toHaveLength(2);
   });
 
+  it("a delete during an options-change fetch of the same entity stays deleted", async () => {
+    const x = makeEntity({ id: "X", title: "X" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "X" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", x),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+
+    const releaseWithUser = holdNextGet(axiosPrivate);
+    rerender({ entityId: "X", include: "user" });
+    axiosPrivate.mockResponse("delete", undefined, 204);
+    await act(async () => {
+      await result.current.deleteEntity();
+    });
+    expect(result.current.entity).toBeUndefined();
+
+    await releaseWithUser({ ...x, user: makeUser() });
+    await waitABit();
+    expect(result.current.entity).toBeUndefined();
+  });
+
+  it("an entity with another id set locally isn't filed under the held identifier", async () => {
+    const x = makeEntity({ id: "X", title: "X" });
+    const y = makeEntity({ id: "Y", title: "Y" });
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (props: UseEntityDataProps) => useEntityData(props),
+      {
+        initialProps: { entityId: "X" } as UseEntityDataProps,
+        beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", x),
+      },
+    );
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+    axiosPrivate.mockResponse("get", y);
+    rerender({ entityId: "Y" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("Y"));
+    rerender({ entityId: "X" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("X"));
+
+    act(() => {
+      result.current.setEntity(makeEntity({ id: "other", title: "other" }));
+    });
+    rerender({ entityId: "Y" });
+    await waitFor(() => expect(result.current.entity?.title).toBe("Y"));
+    rerender({ entityId: "X" });
+    await waitABit();
+
+    expect(result.current.entity?.id).toBe("X");
+  });
+
   it("local changes during an options-change fetch don't start more requests", async () => {
     const a = makeEntity({ id: "entity-1", title: "plain" });
     const { result, rerender, axiosPrivate } = renderHookWithAxios(

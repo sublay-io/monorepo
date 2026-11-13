@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/collections/:collectionId/sub-collections"
 description: "Create a new sub-collection inside an existing collection"
 ---
 
-Creates a new named sub-collection under the specified parent collection. Returns `400` if the parent collection does not exist.
+Creates a new named sub-collection under the specified parent collection. Returns `400` if the parent collection doesn't exist or isn't one of the user's own collections.
 
 ## Path Parameters
 

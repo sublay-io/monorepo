@@ -533,6 +533,30 @@ const entityListsSlice = createSlice({
       });
     },
 
+    // Collections were deleted (a collection and every collection under it):
+    // every loaded copy drops them from `saved.collections`, and `isSaved` is
+    // set from what's left. Copies without `saved`, or that list none of the
+    // ids, are kept as they are.
+    removeSavedCollectionsFromLists: (
+      state,
+      action: PayloadAction<{ collectionIds: string[] }>
+    ) => {
+      const deleted = new Set(action.payload.collectionIds);
+      if (deleted.size === 0) return;
+
+      Object.values(state.lists).forEach((list) => {
+        list.entities.forEach((entity, index) => {
+          const collections = entity.saved?.collections;
+          if (!collections?.some((c) => deleted.has(c.id))) return;
+          const kept = collections.filter((c) => !deleted.has(c.id));
+          list.entities[index] = {
+            ...entity,
+            saved: { isSaved: kept.length > 0, collections: kept },
+          };
+        });
+      });
+    },
+
     // Update keywords filters (special case due to complexity)
     updateKeywordsFilters: (
       state,
@@ -652,6 +676,7 @@ export const {
   removeEntity,
   updateEntityInLists,
   renameSavedCollectionInLists,
+  removeSavedCollectionsFromLists,
   updateKeywordsFilters,
   cleanupList,
   cleanupOldLists,

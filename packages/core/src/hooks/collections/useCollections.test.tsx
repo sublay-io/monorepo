@@ -14,7 +14,9 @@ import {
 } from "../../test-utils";
 import { setUser } from "../../store/slices/authSlice";
 import useCollections from "./useCollections";
+import { setEntityListEntities } from "../../store/slices/entityListsSlice";
 import type { Collection } from "../../interfaces/models/Collection";
+import type { Entity } from "../../interfaces/models/Entity";
 
 let fetchHandle: FetchMockHandle;
 let axiosPrivate: AxiosMockHandle;
@@ -174,6 +176,53 @@ describe("useCollections", () => {
 
       const postCall = fetchHandle.calls().find((c) => c.method === "POST");
       expect(postCall?.url).toContain("/test-project/collections/root/entities");
+    });
+
+    it("deleteCollection returns the deleted ids and removes them from loaded entity lists", async () => {
+      fetchHandle.fetchMock.mockImplementation(async (...args: unknown[]) => {
+        const { url, method } = requestUrlAndMethod(args);
+        if (method === "DELETE" && url.endsWith("/collections/child")) {
+          return jsonResponse({ deletedCollectionIds: ["child", "grandchild"] });
+        }
+        return defaultCollectionsResponder(...args);
+      });
+
+      const { result, store } = renderHookWithStore(() => useCollections());
+      store.dispatch(setUser(makeAuthUser()));
+      await waitFor(() => expect(result.current.subCollections).toHaveLength(1));
+      act(() => {
+        store.dispatch(
+          setEntityListEntities({
+            listId: "feed",
+            entities: [
+              {
+                id: "entity-1",
+                saved: {
+                  isSaved: true,
+                  collections: [
+                    { id: "child", name: "Child" },
+                    { id: "grandchild", name: "Grandchild" },
+                  ],
+                },
+              } as Entity,
+            ],
+          }),
+        );
+      });
+
+      let returned: unknown;
+      await act(async () => {
+        returned = await result.current.deleteCollection({
+          collection: result.current.subCollections[0],
+        });
+      });
+
+      expect(returned).toEqual({ deletedCollectionIds: ["child", "grandchild"] });
+      expect(result.current.subCollections).toHaveLength(0);
+      expect(store.getState().sublay.entityLists.lists.feed.entities[0].saved).toEqual({
+        isSaved: false,
+        collections: [],
+      });
     });
   });
 });

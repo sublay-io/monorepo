@@ -217,6 +217,56 @@ describe("collectionsSlice", () => {
       s = reducer(s, handleCollectionDeletion({ collectionId: "root" }));
       expect(s.currentCollectionId).toBeNull();
     });
+
+    it("removes every id in deletedCollectionIds, with their mappings and entities", () => {
+      let s = reducer(
+        initial,
+        setSubCollections({
+          collections: [
+            makeCollection({ id: "child", parentId: "root" }),
+            makeCollection({ id: "sibling", parentId: "root" }),
+          ],
+          parentCollectionId: "root",
+        }),
+      );
+      s = reducer(
+        s,
+        setSubCollections({
+          collections: [makeCollection({ id: "grandchild", parentId: "child" })],
+          parentCollectionId: "child",
+        }),
+      );
+      s = reducer(s, setCollectionEntities({ collectionId: "child", entities: [makeEntity()] }));
+      s = reducer(s, setCollectionEntities({ collectionId: "grandchild", entities: [makeEntity()] }));
+
+      s = reducer(
+        s,
+        handleCollectionDeletion({
+          collectionId: "child",
+          parentId: "root",
+          deletedCollectionIds: ["child", "grandchild", "never-loaded"],
+        }),
+      );
+      expect(Object.keys(s.collectionsById)).toEqual(["sibling"]);
+      expect(s.subcollectionsMap).toEqual({ root: ["sibling"] });
+      expect(s.entitiesByCollectionId).toEqual({});
+    });
+
+    it("goes back past deleted collections in the history", () => {
+      let s = reducer(initial, openCollection(makeCollection({ id: "root" })));
+      s = reducer(s, openCollection(makeCollection({ id: "child", parentId: "root" })));
+      s = reducer(s, openCollection(makeCollection({ id: "grandchild", parentId: "child" })));
+      s = reducer(
+        s,
+        handleCollectionDeletion({
+          collectionId: "child",
+          parentId: "root",
+          deletedCollectionIds: ["child", "grandchild"],
+        }),
+      );
+      expect(s.currentCollectionId).toBe("root");
+      expect(s.collectionHistory).toEqual([]);
+    });
   });
 
   describe("collection entity list management", () => {

@@ -179,43 +179,48 @@ const collectionsSlice = createSlice({
       delete state.subcollectionsMap[collectionId];
     },
 
-    // Handle collection deletion
+    // Handle collection deletion. Deleting a collection also deletes every
+    // collection under it: `deletedCollectionIds` names all of them (the
+    // deleted collection included), and each one is dropped from the store.
+    // Without it, only `collectionId` is dropped.
     handleCollectionDeletion: (
       state,
-      action: PayloadAction<{ collectionId: string; parentId?: string | null }>
+      action: PayloadAction<{
+        collectionId: string;
+        parentId?: string | null;
+        deletedCollectionIds?: string[];
+      }>
     ) => {
-      const { collectionId, parentId } = action.payload;
+      const { collectionId, parentId, deletedCollectionIds } = action.payload;
+      const deleted = new Set([collectionId, ...(deletedCollectionIds ?? [])]);
 
-      // Remove from parent-child mapping
+      // Remove from parent-child mappings
       if (parentId && state.subcollectionsMap[parentId]) {
         state.subcollectionsMap[parentId] = state.subcollectionsMap[parentId].filter(
-          (id) => id !== collectionId
+          (id) => !deleted.has(id)
         );
       }
 
-      // Remove from collectionsById
-      delete state.collectionsById[collectionId];
+      deleted.forEach((id) => {
+        // Remove from collectionsById
+        delete state.collectionsById[id];
 
-      // Remove its own sub-collections mapping
-      delete state.subcollectionsMap[collectionId];
+        // Remove its own sub-collections mapping
+        delete state.subcollectionsMap[id];
 
-      // Remove its entity list
-      delete state.entitiesByCollectionId[collectionId];
+        // Remove its entity list
+        delete state.entitiesByCollectionId[id];
+      });
 
-      // If deleted collection is current collection, go back
-      if (state.currentCollectionId === collectionId) {
-        if (state.collectionHistory.length === 0) {
-          state.currentCollectionId = null;
-          return;
-        }
+      // A deleted collection can't be gone back to.
+      const history = state.collectionHistory.filter((id) => !deleted.has(id));
+      if (history.length !== state.collectionHistory.length) {
+        state.collectionHistory = history;
+      }
 
-        const previousCollectionId = state.collectionHistory.pop();
-        if (!previousCollectionId) {
-          state.currentCollectionId = null;
-          return;
-        }
-
-        state.currentCollectionId = previousCollectionId;
+      // If the current collection was deleted, go back to the nearest one left
+      if (state.currentCollectionId && deleted.has(state.currentCollectionId)) {
+        state.currentCollectionId = state.collectionHistory.pop() ?? null;
       }
     },
 

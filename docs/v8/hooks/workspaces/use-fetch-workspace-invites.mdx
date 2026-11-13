@@ -15,7 +15,7 @@ The list is **always returned in full** — it is deliberately unpaginated, so t
 <Warning>
   **Outbox, not inbox.** `useFetchWorkspaceInvites` (`GET /workspaces/:workspaceId/invites`) lists the invites **this workspace sent out** — it is scoped to one workspace and needs the `invite` capability there.
 
-  [`useFetchMyWorkspaceInvites`](/v8/hooks/workspaces/use-fetch-my-workspace-invites) (`GET /me/workspace-invites`) lists the invites **addressed to the signed-in user** — it is scoped to the caller, spans every workspace, and needs no capability.
+  [`useFetchMyWorkspaceInvites`](/v8/hooks/workspaces/use-fetch-my-workspace-invites) (`GET /workspace-invites`) lists the invites **addressed to the signed-in user** — it is scoped to the caller, spans every workspace, and needs no capability.
 
   These are the two most confusable hooks in the bundle. If you are building an admin/members screen you want **this** hook; if you are building a "You've been invited" screen you want the other one.
 </Warning>

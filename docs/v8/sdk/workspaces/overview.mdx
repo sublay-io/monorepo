@@ -587,7 +587,7 @@ Creating a workspace from the switcher with the list's [`createWorkspace`](/v8/h
 | [`useDeclineWorkspaceInvite`](/v8/hooks/workspaces/use-decline-workspace-invite) | Decline an invitation | Self-service + verified email |
 
 <Warning>
-  [`useFetchWorkspaceInvites`](/v8/hooks/workspaces/use-fetch-workspace-invites) and [`useFetchMyWorkspaceInvites`](/v8/hooks/workspaces/use-fetch-my-workspace-invites) are the two most confusable hooks in this bundle. The first is the **outbox** of one workspace (`GET /workspaces/:workspaceId/invites`) — who *this team* has invited and not yet heard back from; it powers the "Pending invitations" section of a members panel. The second is the signed-in user's **inbox** (`GET /me/workspace-invites`) across every workspace — it powers a "You've been invited" list.
+  [`useFetchWorkspaceInvites`](/v8/hooks/workspaces/use-fetch-workspace-invites) and [`useFetchMyWorkspaceInvites`](/v8/hooks/workspaces/use-fetch-my-workspace-invites) are the two most confusable hooks in this bundle. The first is the **outbox** of one workspace (`GET /workspaces/:workspaceId/invites`) — who *this team* has invited and not yet heard back from; it powers the "Pending invitations" section of a members panel. The second is the signed-in user's **inbox** (`GET /workspace-invites`) across every workspace — it powers a "You've been invited" list.
 </Warning>
 
 ### Authority

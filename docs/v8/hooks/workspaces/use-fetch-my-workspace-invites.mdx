@@ -11,7 +11,7 @@ icon: "plug"
 **Authorization:** self-service. No capability and no workspace scope — the caller is derived from the token. **Surfacing is not verification-gated**: a user sees invites right after signup; the verified check applies when they act on one — [accept](/v8/hooks/workspaces/use-accept-workspace-invite) *and* [decline](/v8/hooks/workspaces/use-decline-workspace-invite).
 
 <Warning>
-  **Inbox, not outbox.** `useFetchMyWorkspaceInvites` (`GET /me/workspace-invites`) lists the invites **addressed to the signed-in user**, spanning every workspace, with no capability required.
+  **Inbox, not outbox.** `useFetchMyWorkspaceInvites` (`GET /workspace-invites`) lists the invites **addressed to the signed-in user**, spanning every workspace, with no capability required.
 
   [`useFetchWorkspaceInvites`](/v8/hooks/workspaces/use-fetch-workspace-invites) (`GET /workspaces/:workspaceId/invites`) lists the invites **one workspace has issued**, and requires the `invite` capability there.
 

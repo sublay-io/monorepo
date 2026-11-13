@@ -26,7 +26,7 @@ Acceptance is **identity-matched + verified-email, with no token** — see [Acce
 | `updatedAt` | `string` | Last-update timestamp. |
 
 <Note>
-  **[`GET /me/workspace-invites`](/v8/api-reference/workspaces/invitations/list-my-invites) returns an enriched variant of this shape.** Every other read of a `WorkspaceInvitation` (listing what a workspace has issued, creating one, resending one) is by a capability-holder who already has full reach on the workspace, so `workspaceId`/`invitedById` as bare ids are enough. The my-invites read is different: it's addressed to the *invitee*, who otherwise has no reach on the workspace at all (a direct workspace read 404s for a non-member) or the inviter. So that one endpoint adds the populated inviter as `invitedBy` and a sibling `workspace` field, so the invite can be rendered ("X invited you to *Y*") without a follow-up read per invitation:
+  **[`GET /workspace-invites`](/v8/api-reference/workspaces/invitations/list-my-invites) returns an enriched variant of this shape.** Every other read of a `WorkspaceInvitation` (listing what a workspace has issued, creating one, resending one) is by a capability-holder who already has full reach on the workspace, so `workspaceId`/`invitedById` as bare ids are enough. The my-invites read is different: it's addressed to the *invitee*, who otherwise has no reach on the workspace at all (a direct workspace read 404s for a non-member) or the inviter. So that one endpoint adds the populated inviter as `invitedBy` and a sibling `workspace` field, so the invite can be rendered ("X invited you to *Y*") without a follow-up read per invitation:
 
   | Property | Type | Description |
   |----------|------|-------------|

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { SocketChatMessage } from "../../types/socket";
 import { resetAccountScopedState } from "../actions";
 import type {
   Conversation,
@@ -194,7 +195,13 @@ function withModerationDetails<T extends Record<string, any>>(
   return result as T;
 }
 
-function upsertInto(items: ChatMessage[], message: ChatMessage): void {
+function upsertInto(
+  items: ChatMessage[],
+  incoming: ChatMessage | SocketChatMessage
+): void {
+  // A `message:created` copy has no moderation details. They're filled in
+  // below: kept from the held copy on a merge, `null` on an insert.
+  const message = incoming as ChatMessage;
   const merge = (existing: ChatMessage): ChatMessage => {
     const merged = withModerationDetails({ ...existing, ...message }, existing);
     if (message.quotedMessage) {
@@ -509,8 +516,9 @@ const chatSlice = createSlice({
      * and the parent's `threadReplyCount` arrives on its own event. See
      * `upsertInto` for deduplication.
      */
-    upsertMessage(state, action: PayloadAction<ChatMessage>) {
-      const message = action.payload;
+    upsertMessage(state, action: PayloadAction<ChatMessage | SocketChatMessage>) {
+      // `upsertInto` fills a socket copy's missing moderation details.
+      const message = action.payload as ChatMessage;
       const { conversationId, parentMessageId } = message;
 
       if (parentMessageId) {

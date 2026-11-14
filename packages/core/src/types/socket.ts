@@ -8,13 +8,24 @@ import type { ConversationMember } from "../interfaces/models/ConversationMember
 
 // ─── Server → Client events ────────────────────────────────────────────────
 
+type ModerationDetailKey = "moderationReason" | "moderatedById" | "moderatedByType";
+
+/**
+ * A message as `message:created` sends it: the moderation details
+ * (`moderationReason`, `moderatedById`, `moderatedByType`) are never in a
+ * broadcast, on the message or its `quotedMessage`. Read them over REST.
+ */
+export type SocketChatMessage = Omit<ChatMessage, ModerationDetailKey | "quotedMessage"> & {
+  quotedMessage?: Omit<ChatMessage, ModerationDetailKey | "quotedMessage"> | null;
+};
+
 // This is a hand-maintained mirror of the server's own copy (server
 // src/types/socket.ts) — nothing typechecks the two against each other, so a
 // field declared here that the server never sends compiles cleanly and fails
 // silently at runtime. Message-scoped events all carry `conversationId`;
 // handlers tolerate its absence so an SDK ahead of its server still works.
 export interface ServerToClientEvents {
-  "message:created": (message: ChatMessage) => void;
+  "message:created": (message: SocketChatMessage) => void;
   "message:updated": (payload: {
     messageId: string;
     conversationId: string;

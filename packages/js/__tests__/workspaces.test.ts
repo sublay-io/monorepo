@@ -296,6 +296,17 @@ describe("js-sdk workspaces — membership request shaping", () => {
     expectNoActorUserIdAnywhere(projectInstance);
   });
 
+  it("updateMyWorkspaceMembership sends metadata, alone or with the title (the owner's profile)", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateMyWorkspaceMembership(client, { workspaceId: "w1", metadata: { pronouns: "they/them" } });
+    await updateMyWorkspaceMembership(client, { workspaceId: "w1", title: "Founder", metadata: {} });
+    expect(projectInstance.patch.mock.calls).toEqual([
+      ["/workspaces/w1/members/me", { metadata: { pronouns: "they/them" } }],
+      ["/workspaces/w1/members/me", { title: "Founder", metadata: {} }],
+    ]);
+    expectNoActorUserIdAnywhere(projectInstance);
+  });
+
   it("updateWorkspaceMember PATCHes the member route with the body minus path params", async () => {
     const { client, projectInstance } = makeClient();
     await updateWorkspaceMember(client, {

@@ -223,6 +223,16 @@ describe("node-sdk workspaces (membership) — request shaping", () => {
     ]);
   });
 
+  it("updateMyWorkspaceMembership sends metadata, alone or with the title (the owner's profile)", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateMyWorkspaceMembership(client, { workspaceId: "w1", actingUserId: "actor1", metadata: { pronouns: "they/them" } });
+    await updateMyWorkspaceMembership(client, { workspaceId: "w1", actingUserId: "actor1", title: "Founder", metadata: {} });
+    expect(projectInstance.patch.mock.calls).toEqual([
+      ["/workspaces/w1/members/me", { actingUserId: "actor1", metadata: { pronouns: "they/them" } }],
+      ["/workspaces/w1/members/me", { actingUserId: "actor1", title: "Founder", metadata: {} }],
+    ]);
+  });
+
   it("updateWorkspaceMember puts target in the path, actor actingUserId in the body", async () => {
     const { client, projectInstance } = makeClient();
     await updateWorkspaceMember(client, {

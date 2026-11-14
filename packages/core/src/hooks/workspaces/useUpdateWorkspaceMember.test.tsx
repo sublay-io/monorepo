@@ -23,7 +23,7 @@ describe("useUpdateWorkspaceMember", () => {
     const member = { id: "m1", userId: "user-2", rank: 4 };
     axiosPrivate.mockResponse("patch", member);
 
-    let returned: unknown;
+    let returned: typeof member | undefined;
     await act(async () => {
       returned = await result.current({
         workspaceId: "w1",

@@ -224,6 +224,7 @@ export type { SpaceMember, SpaceMemberWithUser } from "./interfaces/SpaceMember"
 export type {
   Workspace,
   WorkspaceMember,
+  WorkspaceOwnerProfile,
   WorkspaceInvitation,
   MyWorkspaceInvitation,
   WorkspaceInvitationInviter,

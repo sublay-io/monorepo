@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
-import { WorkspaceMember } from "../../interfaces/models/Workspace";
+import { WorkspaceMember, WorkspaceOwnerProfile } from "../../interfaces/models/Workspace";
 
 export interface UpdateMyWorkspaceMembershipProps {
   workspaceId: string;
@@ -20,11 +20,12 @@ export interface UpdateMyWorkspaceMembershipProps {
  * owner edits their `title` and `metadata` here, and only here. A user with no
  * member row who is not the owner gets 404 `workspace/not-found`. Resolves to
  * the updated member record, as `useUpdateWorkspaceMember` does; for the owner
- * it holds the profile only (`rank: null`, no capabilities or permissions).
+ * it is a `WorkspaceOwnerProfile`, holding the profile only (`rank: null`, no
+ * capabilities or permissions).
  */
 function useUpdateMyWorkspaceMembership(): (
   props: UpdateMyWorkspaceMembershipProps
-) => Promise<WorkspaceMember> {
+) => Promise<WorkspaceMember | WorkspaceOwnerProfile> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -37,7 +38,7 @@ function useUpdateMyWorkspaceMembership(): (
         throw new Error("Please pass a workspaceId");
       }
 
-      const response = await axios.patch<WorkspaceMember>(
+      const response = await axios.patch<WorkspaceMember | WorkspaceOwnerProfile>(
         `/${projectId}/workspaces/${workspaceId}/members/me`,
         { title, metadata }
       );

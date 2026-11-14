@@ -7,7 +7,7 @@ A **WorkspaceMember** record represents a user's membership in a specific [works
 
 The workspace's **owner is never a member** of it: their authority comes from owning the workspace (see [Workspace → Ownership](/v8/data-models/workspace#ownership)), never from a record of this shape.
 
-The owner can still have a `title` and `metadata`, which they set themselves with [`PATCH /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/update-my-membership) (nobody else can set them). They are kept in an **owner profile** record of this same shape, created the first time the owner sets either one. It holds the profile only: `rank` is `null` and `capabilities` and `permissions` are empty when it is returned. It is not a membership: it grants nothing, adds no `member` reason and no seat of its own, and the owner shows on the roster once, as reason `owner`, carrying that `title` and `metadata`.
+The owner can still have a `title` and `metadata`, which they set themselves with [`PATCH /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/update-my-membership) (nobody else can set them). They are kept in an **owner profile** record, created the first time the owner sets either one. It has the same fields as a member record but holds the profile only: `rank` is `null` and `capabilities` and `permissions` are empty. The SDKs type it as `WorkspaceOwnerProfile`. It is not a membership: it grants nothing, adds no `member` reason and no seat of its own, and the owner shows on the roster once, as reason `owner`, carrying that `title` and `metadata`.
 
 ## Properties
 
@@ -18,7 +18,7 @@ The owner can still have a `title` and `metadata`, which they set themselves wit
 | `userId` | `string` | ID of the member user. |
 | `capabilities` | `string[]` | The member's [capabilities](#capabilities-the-closed-vocabulary) — a **closed, Sublay-enforced vocabulary** governing workspace plumbing. |
 | `permissions` | `string[]` | The member's [permissions](#permissions-opaque) — **free-form, developer-defined, opaque** strings. Sublay stores and returns them but never consumes them. |
-| `rank` | `number \| null` | The member's management [rank](#rank-semantics) (smaller = more senior). `null` on the owner profile record. |
+| `rank` | `number` | The member's management [rank](#rank-semantics) (smaller = more senior). |
 | `title` | `string \| null` | Optional cosmetic label (e.g. "Frontend Team Leader"). **No authority.** |
 | `metadata` | `Record<string, any>` | Arbitrary developer-defined data (opaque JSON). |
 | `joinedAt` | `string` | ISO timestamp when the membership was created. |

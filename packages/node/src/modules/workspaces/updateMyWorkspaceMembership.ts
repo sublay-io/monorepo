@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { WorkspaceMember } from "../../interfaces/Workspace";
+import { WorkspaceMember, WorkspaceOwnerProfile } from "../../interfaces/Workspace";
 
 export interface UpdateMyWorkspaceMembershipProps {
   workspaceId: string;
@@ -30,9 +30,9 @@ export interface UpdateMyWorkspaceMembershipProps {
 export async function updateMyWorkspaceMembership(
   client: SublayHttpClient,
   data: UpdateMyWorkspaceMembershipProps
-): Promise<WorkspaceMember> {
+): Promise<WorkspaceMember | WorkspaceOwnerProfile> {
   const { workspaceId, actingUserId, title, metadata } = data;
-  const response = await client.projectInstance.patch<WorkspaceMember>(
+  const response = await client.projectInstance.patch<WorkspaceMember | WorkspaceOwnerProfile>(
     `/workspaces/${workspaceId}/members/me`,
     { actingUserId, title, metadata }
   );

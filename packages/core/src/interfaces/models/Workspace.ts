@@ -105,17 +105,22 @@ export interface WorkspaceMember {
   userId: string;
   capabilities: WorkspaceCapability[];
   permissions: string[];
-  /**
-   * The member's rank. `null` on the record `useUpdateMyWorkspaceMembership`
-   * returns to the workspace's owner: it holds their profile (`title`,
-   * `metadata`) only, so `capabilities` / `permissions` are empty too — the
-   * owner's access comes from ownership.
-   */
-  rank: number | null;
+  rank: number;
   title: string | null;
   metadata: Record<string, any>;
   joinedAt: string;
   createdAt: string;
+}
+
+// The workspace owner's profile record, returned by
+// `useUpdateMyWorkspaceMembership` when the signed-in user owns the workspace. It holds the owner's `title` and
+// `metadata` only: the owner is not a member, and their access comes from
+// ownership, so `rank` is `null` and `capabilities` / `permissions` are empty.
+export interface WorkspaceOwnerProfile
+  extends Omit<WorkspaceMember, "rank" | "capabilities" | "permissions"> {
+  rank: null;
+  capabilities: [];
+  permissions: [];
 }
 
 export interface WorkspaceInvitation {

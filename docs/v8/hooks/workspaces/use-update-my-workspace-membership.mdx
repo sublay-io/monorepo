@@ -58,7 +58,7 @@ function MyTitle({ workspaceId }: { workspaceId: string }) {
 
 ## Returns
 
-`Promise<WorkspaceMember>` — your updated [WorkspaceMember](/v8/data-models/workspace-member) record, the same type [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member) resolves to. For the owner it holds the profile only: `rank` is `null` and `capabilities` / `permissions` are empty, since the owner's access comes from ownership (read it with [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership)).
+`Promise<WorkspaceMember | WorkspaceOwnerProfile>` — for a member, your updated [WorkspaceMember](/v8/data-models/workspace-member) record, the same type [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member) resolves to. For the owner, a `WorkspaceOwnerProfile`: the same fields, holding the profile only, with `rank: null` and empty `capabilities` / `permissions`, since the owner's access comes from ownership (read it with [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership)).
 
 ## Error codes
 

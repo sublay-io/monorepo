@@ -58,7 +58,7 @@ Returns the updated [WorkspaceMember](/v8/data-models/workspace-member) object, 
 }
 ```
 
-For the owner, the record holds their profile only: `rank` is `null` and `capabilities` and `permissions` are empty, because the owner's access comes from ownership, not from this record. Read it with [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
+For the owner, it returns their [owner profile](/v8/data-models/workspace-member) record instead (`WorkspaceOwnerProfile` in the SDKs): the same fields, holding the profile only, with `rank` `null` and `capabilities` and `permissions` empty, because the owner's access comes from ownership, not from this record. Read the owner's access with [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
 
 ```json
 {

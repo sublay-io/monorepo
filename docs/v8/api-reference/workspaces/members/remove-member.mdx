@@ -7,7 +7,7 @@ description: "Remove a member (rank-bounded; sole-owner protected)"
 Removes a member from a workspace. Requires the `remove-member` capability and is **rank-bounded** (act only on strictly-lower ranks). Fires `workspace.member.removed`.
 
 <Note>
-  Owners have no member row, so removal targets member rows only. **Sole-owner protection:** the owner cannot be removed while sole owner — they must transfer ownership first.
+  The owner is not a member, so removal targets members only. **Sole-owner protection:** the owner cannot be removed while sole owner — they must transfer ownership first.
 </Note>
 
 ## Path Parameters

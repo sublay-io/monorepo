@@ -9,7 +9,7 @@ Returns the acting user's own standing on a workspace: the token's user, or the 
 Any signed-in user may call it for any workspace. It is **not** gated by roster visibility: a user with no relation to the workspace gets `200` with `reasons: []`, so "am I a member here?" always has an answer. Your own access is **never fenced** — `capabilities`, `permissions`, `rank` and `relativeRank` are always present.
 
 <Note>
-  **Your own membership is `/workspaces/:workspaceId/members/me`**: `GET` to read it, [`PATCH`](/v8/api-reference/workspaces/members/update-my-membership) to edit your title, [`DELETE`](/v8/api-reference/workspaces/members/leave-workspace) to leave. The `/workspaces/:workspaceId/members/:userId` routes ([read](/v8/api-reference/workspaces/members/fetch-member-standing), [edit](/v8/api-reference/workspaces/members/update-member), [remove](/v8/api-reference/workspaces/members/remove-member), [remove from subtree](/v8/api-reference/workspaces/members/remove-from-subtree)) act on other members and refuse your own id with `400 workspace/own-member-id`.
+  **Your own membership is `/workspaces/:workspaceId/members/me`**: `GET` to read it, [`PATCH`](/v8/api-reference/workspaces/members/update-my-membership) to edit your title (and, as the owner, your metadata), [`DELETE`](/v8/api-reference/workspaces/members/leave-workspace) to leave. The `/workspaces/:workspaceId/members/:userId` routes ([read](/v8/api-reference/workspaces/members/fetch-member-standing), [edit](/v8/api-reference/workspaces/members/update-member), [remove](/v8/api-reference/workspaces/members/remove-member), [remove from subtree](/v8/api-reference/workspaces/members/remove-from-subtree)) act on other members and refuse your own id with `400 workspace/own-member-id`.
 </Note>
 
 ## Path Parameters
@@ -42,9 +42,9 @@ Any signed-in user may call it for any workspace. It is **not** gated by roster 
 - `reasons` — structured `{ type, viaWorkspaceId? }` entries; `viaWorkspaceId` appears on `ancestor-owner` / `reach-holder` entries only. Empty when the user has no relation to the workspace.
 - `capabilities` — the **resolved** set (direct + reach + ownership). **`view` is implied by every other capability.** Empty when the user has no relation.
 - `permissions` — **per-node** (the direct membership on this workspace only; may be empty).
-- `rank` — the direct-membership rank, or `null` when the user holds no member row here (an owner, an ancestor-owner or a reach-only holder).
+- `rank` — the direct-membership rank, or `null` when the user is not a member here (the owner, an ancestor-owner or a reach-only holder).
 - `relativeRank` — `0` when the user holds a member row here (they are measured from themselves), `null` when they don't.
-- `title` / `metadata` — from the direct member row; `null` / `{}` without one.
+- `title` / `metadata` — from the direct member row, or for the workspace's owner the title and metadata they set with [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership); `null` / `{}` when there are none.
 
 ## Error Responses
 

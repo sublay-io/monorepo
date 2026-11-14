@@ -226,6 +226,8 @@ Owner-only; cascades the subtree and fires `workspace.deleted` per deleted works
 
 ### transferWorkspaceOwnership
 
+Titles travel with the people: the new owner keeps the `title` and `metadata` they had as a member, and the previous owner keeps theirs when demoted. A previous owner who is removed loses theirs. See [Transfer Ownership](/v8/api-reference/workspaces/transfer-ownership).
+
 ```typescript
 const workspace = await sublay.workspaces.transferWorkspaceOwnership({
   workspaceId: "ws_abc",
@@ -324,7 +326,7 @@ await sublay.workspaces.updateWorkspaceMember({
 });
 ```
 
-Powerful fields require `edit-member-access` + rank rules + no-escalation; cosmetic fields require `edit-member-profile`. A `targetUserId` equal to `actingUserId` is refused with `400 workspace/own-member-id`: a user edits their own `title` with [updateMyWorkspaceMembership](#updatemyworkspacemembership).
+Powerful fields require `edit-member-access` + rank rules + no-escalation; cosmetic fields require `edit-member-profile`. A `targetUserId` equal to `actingUserId` is refused with `400 workspace/own-member-id`: a user edits their own `title` with [updateMyWorkspaceMembership](#updatemyworkspacemembership). The workspace's owner is never a target, whoever the key acts as: naming them gets `404 workspace/not-found`, and their `title` and `metadata` are set only by a key acting as the owner, with updateMyWorkspaceMembership.
 
 Rank moves in **either coordinate** — `rank` (absolute) or `relativeRank` (an offset from `actingUserId`), never both. Omitting both means **rank unchanged**. See [choosing a rank](/v8/sdk/workspaces/overview#choosing-a-rank).
 
@@ -340,7 +342,7 @@ Rank moves in **either coordinate** — `rank` (absolute) or `relativeRank` (an 
 
 ### updateMyWorkspaceMembership
 
-The acting user edits their own `title` on a workspace (`PATCH /workspaces/:workspaceId/members/me`). Needs no capability. Only `title` is editable here; a member's other fields are edited by a member with the capability, through [updateWorkspaceMember](#updateworkspacemember). The acting user must hold a member row on the workspace: the owner has none, so has no title, and gets `404 workspace/not-found`. See [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership).
+The acting user edits their own profile on a workspace (`PATCH /workspaces/:workspaceId/members/me`). Needs no capability. A member edits their `title` only; a member's other fields are edited by a member with the capability, through [updateWorkspaceMember](#updateworkspacemember). The workspace's **owner** (a key acting as the owner) edits their `title` and `metadata` here, and only here: they are profile only and change nothing about the owner's authority. An acting user who is not the owner and holds no member row on the workspace gets `404 workspace/not-found`. See [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership).
 
 ```typescript
 const member = await sublay.workspaces.updateMyWorkspaceMembership({
@@ -351,10 +353,11 @@ const member = await sublay.workspaces.updateMyWorkspaceMembership({
 ```
 
 <ParamField body="workspaceId" type="string" required />
-<ParamField body="actingUserId" type="string" required>The user whose own title to edit: the request acts as them. Sent in the body. Omitting it is a `400 workspace/missing-user-id`.</ParamField>
-<ParamField body="title" type="string | null" required>Trimmed, up to 100 characters. `null` clears it.</ParamField>
+<ParamField body="actingUserId" type="string" required>The user whose own profile to edit: the request acts as them. Sent in the body. Omitting it is a `400 workspace/missing-user-id`.</ParamField>
+<ParamField body="title" type="string | null">Trimmed, up to 100 characters. `null` clears it. Required for a member; the owner sends `title`, `metadata` or both. Leaving it out keeps the current title.</ParamField>
+<ParamField body="metadata" type="object">**The owner only.** Replaces the owner's metadata (up to 1 MB). A member who sends it gets `400 workspace/unsupported-param`.</ParamField>
 
-Returns `WorkspaceMember`, the same record [updateWorkspaceMember](#updateworkspacemember) returns.
+Returns `WorkspaceMember`, the same record [updateWorkspaceMember](#updateworkspacemember) returns. For the owner it holds the profile only: `rank` is `null` and `capabilities` / `permissions` are empty, since the owner's access comes from ownership.
 
 ### removeWorkspaceMember
 

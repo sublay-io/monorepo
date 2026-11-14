@@ -15,7 +15,7 @@ icon: "plug"
 </Warning>
 
 <Warning>
-  **Owned workspaces block, they do not cascade.** Because owners have no member row, this sweep cannot offboard the target from a workspace they *own*. If they own this workspace or any descendant the call fails with `409 workspace/owns-descendants` and nothing is removed. A workspace you have standing on always counts. One you have no standing on (for example a sealed sub-workspace) counts only when the target holds a membership this call would remove; it is then listed without an id or name. An owner of each workspace (or an ancestor owner) reassigns it via [`useTransferWorkspaceOwnership`](/v8/hooks/workspaces/use-transfer-workspace-ownership) or deletes it, then retry.
+  **Owned workspaces block, they do not cascade.** Because an owner is not a member of what they own, this sweep cannot offboard the target from a workspace they *own*. If they own this workspace or any descendant the call fails with `409 workspace/owns-descendants` and nothing is removed. A workspace you have standing on always counts. One you have no standing on (for example a sealed sub-workspace) counts only when the target holds a membership this call would remove; it is then listed without an id or name. An owner of each workspace (or an ancestor owner) reassigns it via [`useTransferWorkspaceOwnership`](/v8/hooks/workspaces/use-transfer-workspace-ownership) or deletes it, then retry.
 </Warning>
 
 ## Usage Example

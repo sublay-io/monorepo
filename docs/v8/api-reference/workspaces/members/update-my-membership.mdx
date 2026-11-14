@@ -1,17 +1,22 @@
 ---
 title: "Update My Membership"
 api: "PATCH /v8/:projectId/workspaces/:workspaceId/members/me"
-description: "Edit your own title on a workspace"
+description: "Edit your own title on a workspace, and as its owner your metadata"
 ---
 
-Edits the acting user's own `title` on a workspace: the token's user, or the user a service key names in `actingUserId`. `me` in the path always means that user. It is self-service: **no capability is needed**.
+Edits the acting user's own profile on a workspace: the token's user, or the user a service key names in `actingUserId`. `me` in the path always means that user. It is self-service: **no capability is needed**.
 
-Only `title` can be edited here. A member's other fields (`metadata`, `capabilities`, `permissions`, `rank`, `relativeRank`) are edited by a member with the capability, through [Update Member](/v8/api-reference/workspaces/members/update-member); sending one here is refused with `400 workspace/unsupported-param`.
+What you can edit depends on who you are on the workspace:
 
-The route edits the acting user's own **direct member row** on this workspace. The workspace **owner has no member row**, so they have no title and this route answers them `404 workspace/not-found`. The same `404` goes to a user who only reaches in from an ancestor workspace and holds no row here. A user with no relation to the workspace at all gets the roster-visibility `404`.
+- **A member** edits their own `title` only. A member's other fields (`metadata`, `capabilities`, `permissions`, `rank`, `relativeRank`) are edited by a member with the capability, through [Update Member](/v8/api-reference/workspaces/members/update-member). A member who sends `metadata` here is refused with `400 workspace/unsupported-param`.
+- **The workspace's owner** edits their own `title` and `metadata`, either or both. This route is the only way to set them: [Update Member](/v8/api-reference/workspaces/members/update-member) refuses the owner as a target for everyone, ancestor owners included. A service key acting as the owner counts as the owner. The owner's title and metadata are profile only: the owner's authority comes from owning the workspace, and setting them changes nothing about it. They show on the owner's [roster](/v8/api-reference/workspaces/members/list-members) entry and [standing](/v8/api-reference/workspaces/members/fetch-my-membership).
+
+Ownership is per workspace. An ancestor owner who holds a member row on a child workspace is a member there, and edits only their `title` on that child.
+
+A user who only reaches in from an ancestor workspace and holds no member row here gets `404 workspace/not-found`. A user with no relation to the workspace at all gets the roster-visibility `404`.
 
 <Note>
-  **Your own membership is `/workspaces/:workspaceId/members/me`**: [`GET`](/v8/api-reference/workspaces/members/fetch-my-membership) to read it, `PATCH` to edit your title, [`DELETE`](/v8/api-reference/workspaces/members/leave-workspace) to leave. The `/workspaces/:workspaceId/members/:userId` routes act on other members and refuse your own id with `400 workspace/own-member-id`.
+  **Your own membership is `/workspaces/:workspaceId/members/me`**: [`GET`](/v8/api-reference/workspaces/members/fetch-my-membership) to read it, `PATCH` to edit your profile, [`DELETE`](/v8/api-reference/workspaces/members/leave-workspace) to leave. The `/workspaces/:workspaceId/members/:userId` routes act on other members and refuse your own id with `400 workspace/own-member-id`.
 </Note>
 
 ## Path Parameters
@@ -22,12 +27,16 @@ The route edits the acting user's own **direct member row** on this workspace. T
 
 ## Body Parameters
 
-<ParamField body="title" type="string | null" required>
-  Your new title: trimmed, up to 100 characters. `null` clears it. A cosmetic label with no authority.
+<ParamField body="title" type="string | null">
+  Your new title: trimmed, up to 100 characters. `null` clears it. A cosmetic label with no authority. Required for a member; the owner sends `title`, `metadata` or both. Leaving it out keeps the current title.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  **The owner only.** Arbitrary JSON (up to 1 MB) that replaces the owner's current metadata. Leaving it out keeps the current metadata. A member who sends it is refused with `400 workspace/unsupported-param`.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  Service keys only, and **required** with one: the user whose own title is edited. A key that names nobody is refused with `400 workspace/missing-user-id`. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
+  Service keys only, and **required** with one: the user whose own profile is edited. A key that names nobody is refused with `400 workspace/missing-user-id`. A user token always acts as its own user and must not send it (`400 workspace/acting-user-not-allowed`). See [Acting on behalf of a user](/v8/sdk/workspaces/overview#acting-on-behalf-of-a-user).
 </ParamField>
 
 ## Response
@@ -49,19 +58,44 @@ Returns the updated [WorkspaceMember](/v8/data-models/workspace-member) object, 
 }
 ```
 
+For the owner, the record holds their profile only: `rank` is `null` and `capabilities` and `permissions` are empty, because the owner's access comes from ownership, not from this record. Read it with [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
+
+```json
+{
+  "id": "0b9e4d71-3c2a-4e58-a6f1-7d8c9e0a1b23",
+  "workspaceId": "ws_abc",
+  "userId": "u_owner",
+  "capabilities": [],
+  "permissions": [],
+  "rank": null,
+  "title": "Founder",
+  "metadata": { "timezone": "UTC" },
+  "joinedAt": "2026-11-14T09:00:00.000Z",
+  "createdAt": "2026-11-14T09:00:00.000Z"
+}
+```
+
 ## Error Responses
 
 <AccordionGroup>
   <Accordion title="Field Not Editable Here — 400">
     ```json
+    { "error": "`capabilities` can't be edited on your own membership: only `title` can. A member with the capability edits `capabilities` through `PATCH /workspaces/:workspaceId/members/:userId`.", "code": "workspace/unsupported-param", "param": "capabilities" }
+    ```
+    Sent for `capabilities`, `permissions`, `rank` or `relativeRank`, whoever sends it, the owner included; `param` names the field. Sent for `metadata` too when the acting user is not the workspace's owner:
+    ```json
     { "error": "`metadata` can't be edited on your own membership: only `title` can. A member with the capability edits `metadata` through `PATCH /workspaces/:workspaceId/members/:userId`.", "code": "workspace/unsupported-param", "param": "metadata" }
     ```
-    Sent for `metadata`, `capabilities`, `permissions`, `rank` or `relativeRank`, whoever sends it; `param` names the field. Nothing is written.
+    Nothing is written.
   </Accordion>
   <Accordion title="Invalid Body — 400">
-    `title` is missing, the wrong type or longer than 100 characters:
+    No editable field was sent:
     ```json
-    { "error": "title: Invalid input: expected string, received undefined", "code": "workspace/invalid-body" }
+    { "error": "At least one field must be provided", "code": "workspace/invalid-body" }
+    ```
+    `title` is the wrong type or longer than 100 characters, or `metadata` is not an object or is over 1 MB:
+    ```json
+    { "error": "title: Too big: expected string to have <=100 characters", "code": "workspace/invalid-body" }
     ```
     Any other unknown key is refused too:
     ```json
@@ -102,7 +136,7 @@ Returns the updated [WorkspaceMember](/v8/data-models/workspace-member) object, 
     ```json
     { "error": "Workspace not found", "code": "workspace/not-found" }
     ```
-    The acting user has no direct member row on this workspace (the owner, or a user who only reaches in from an ancestor), including when the row was removed while this request was being handled:
+    The acting user is not the owner and has no direct member row on this workspace (a user who only reaches in from an ancestor), including when the row was removed while this request was being handled:
     ```json
     { "error": "The target user is not a direct member of this workspace.", "code": "workspace/not-found" }
     ```

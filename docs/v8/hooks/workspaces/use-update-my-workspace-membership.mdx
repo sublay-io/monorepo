@@ -1,20 +1,21 @@
 ---
 title: "Update my workspace membership"
-description: "Edit the signed-in user's own title on a workspace"
+description: "Edit the signed-in user's own title on a workspace, and as its owner their metadata"
 icon: "plug"
 ---
 
 ## Overview
 
-`useUpdateMyWorkspaceMembership` returns a callable that edits the **signed-in user's own** `title` on a workspace.
+`useUpdateMyWorkspaceMembership` returns a callable that edits the **signed-in user's own** profile on a workspace.
 
 **Authorization:** self-service, no capability needed.
 
-Only `title` can be edited here. A member's other fields (`metadata`, `capabilities`, `permissions`, rank) are edited by a member with the capability, through [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member).
+- **A member** edits their own `title` only. A member's other fields (`metadata`, `capabilities`, `permissions`, rank) are edited by a member with the capability, through [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member).
+- **The workspace's owner** edits their own `title` and `metadata`, either or both. Only the owner can set them: `useUpdateWorkspaceMember` refuses the owner as a target. They are profile only, and change nothing about the owner's authority, which comes from owning the workspace.
 
-You must hold a direct member row on the workspace. The workspace **owner has no member row**, so they have no title and get `404 workspace/not-found`; so does a user who only reaches in from an ancestor workspace.
+A user who only reaches in from an ancestor workspace and holds no member row here gets `404 workspace/not-found`.
 
-Your own membership is `/workspaces/:workspaceId/members/me`: [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership) reads it, this hook edits your title, and [`useLeaveWorkspace`](/v8/hooks/workspaces/use-leave-workspace) leaves it.
+Your own membership is `/workspaces/:workspaceId/members/me`: [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership) reads it, this hook edits your profile, and [`useLeaveWorkspace`](/v8/hooks/workspaces/use-leave-workspace) leaves it.
 
 ## Usage Example
 
@@ -30,6 +31,14 @@ function MyTitle({ workspaceId }: { workspaceId: string }) {
   };
 
   const clear = () => updateMyWorkspaceMembership({ workspaceId, title: null });
+
+  // The workspace's owner only:
+  const setOwnerProfile = () =>
+    updateMyWorkspaceMembership({
+      workspaceId,
+      title: "Founder",
+      metadata: { timezone: "UTC" },
+    });
 }
 ```
 
@@ -39,21 +48,26 @@ function MyTitle({ workspaceId }: { workspaceId: string }) {
   The workspace UUID.
 </ParamField>
 
-<ParamField path="title" type="string | null" required>
-  Your new title: trimmed, up to 100 characters. `null` clears it.
+<ParamField path="title" type="string | null">
+  Your new title: trimmed, up to 100 characters. `null` clears it. Required for a member; the owner passes `title`, `metadata` or both. Leaving it out keeps the current title.
+</ParamField>
+
+<ParamField path="metadata" type="Record<string, any>">
+  **The owner only.** Arbitrary JSON (up to 1 MB) that replaces your current metadata. Leaving it out keeps it. A member who passes it gets `400 workspace/unsupported-param`.
 </ParamField>
 
 ## Returns
 
-`Promise<WorkspaceMember>` — your updated [WorkspaceMember](/v8/data-models/workspace-member) record, the same type [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member) resolves to.
+`Promise<WorkspaceMember>` — your updated [WorkspaceMember](/v8/data-models/workspace-member) record, the same type [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member) resolves to. For the owner it holds the profile only: `rank` is `null` and `capabilities` / `permissions` are empty, since the owner's access comes from ownership (read it with [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership)).
 
 ## Error codes
 
 | Code | Status | Meaning |
 |------|--------|---------|
-| `workspace/invalid-body` | 400 | `title` is missing, not a string or `null`, or longer than 100 characters. |
+| `workspace/invalid-body` | 400 | Neither `title` nor `metadata` was passed, `title` is not a string or `null` or is longer than 100 characters, or `metadata` is not an object or is over 1 MB. |
+| `workspace/unsupported-param` | 400 | You are not the workspace's owner and passed `metadata`. |
 | `workspace/invalid-params` | 400 | `workspaceId` isn't a UUID. |
-| `workspace/not-found` | 404 | No such workspace, you have no relation to it, or you hold no member row on it (for example, you are its owner). |
+| `workspace/not-found` | 404 | No such workspace, you have no relation to it, or you are not its owner and hold no member row on it. |
 
 ## Related
 

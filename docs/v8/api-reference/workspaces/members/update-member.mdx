@@ -11,6 +11,8 @@ Edits a member, with **two capability tiers by field sensitivity**:
 
 This route edits **another** member. A member edits their **own `title`**, with no capability, through [`PATCH /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/update-my-membership).
 
+The workspace's **owner** is never a target here, for anyone, ancestor owners included: nobody outranks the owner, and the owner's `title` and `metadata` are theirs alone to set, through `PATCH /workspaces/:workspaceId/members/me`. Naming the owner as `:userId` gets `404 workspace/not-found`, whether or not they have set a title or metadata.
+
 Rank moves in **either coordinate** — `rank` (absolute) or `relativeRank` (an offset from the actor) — and they are **mutually exclusive**; sending both is a `400`. Omitting **both** means **rank unchanged**: unlike [Create Invite](/v8/api-reference/workspaces/invitations/create-invite), this endpoint has no value default, so editing someone's capabilities never moves them on the ladder. See [choosing a rank](/v8/sdk/workspaces/overview#choosing-a-rank).
 
 **Grant vs strip asymmetry:** you may only *add* a capability/permission you hold on the target node (resolved set, including via reach); *stripping* is governed by **rank alone**. **Cross-node rank is not compared** — the rank guard runs only when actor and target share a member row on the same workspace.
@@ -166,7 +168,7 @@ Returns the updated [WorkspaceMember](/v8/data-models/workspace-member) object.
     ```json
     { "error": "Workspace not found.", "code": "workspace/not-found" }
     ```
-    The target user isn't a direct member of the workspace, including when they were removed (or the workspace was deleted) while this request was being handled:
+    The target user isn't a direct member of the workspace, including when they were removed (or the workspace was deleted) while this request was being handled. The workspace's owner always gets this, since the owner is never a member:
     ```json
     { "error": "The target user is not a direct member of this workspace.", "code": "workspace/not-found" }
     ```

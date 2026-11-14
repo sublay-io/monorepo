@@ -40,7 +40,7 @@ A workspace can optionally contain copies of itself:
 - The owner can have a `title` and `metadata` all the same: **profile only**, set by the owner alone through [`PATCH /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/update-my-membership).
 - **Titles travel with the people** on every ownership change: the new owner keeps the `title` and `metadata` they had as a member. Ownership changes in two ways:
   - a [transfer](/v8/api-reference/workspaces/transfer-ownership), where the previous owner also keeps theirs if demoted to a member, and loses them if removed;
-  - the owner's account being deleted, where each workspace they owned passes to the nearest remaining ancestor owner or, with none, to its most senior member (lowest rank, then earliest joined). A workspace left with no one is deleted with its subtree.
+  - the owner's account being deleted, where each workspace they owned passes to the nearest remaining ancestor owner or, with none, to its most senior member (lowest rank, then earliest joined). A workspace with no other members of its own is deleted, together with all its sub-workspaces, even ones that still have members.
 - The owner still appears in the roster and **counts as a seat**, synthesized from `ownerId` with reason `owner`, which carries their `title` and `metadata`.
 - Ownership **stacks down the tree**: an ancestor's owner is an owner over all descendants (the "god path"). So the account owner at the root is god over everything, while day-to-day authority is distributed to whoever runs each sub-workspace.
 

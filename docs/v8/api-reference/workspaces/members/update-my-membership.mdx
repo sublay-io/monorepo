@@ -13,7 +13,7 @@ What you can edit depends on who you are on the workspace:
 
 Ownership is per workspace. An ancestor owner who holds a member row on a child workspace is a member there, and edits only their `title` on that child.
 
-A user who only reaches in from an ancestor workspace and holds no member row here gets `404 workspace/not-found`. A user with no relation to the workspace at all gets the roster-visibility `404`.
+A user who only reaches in from an ancestor workspace and holds no member row here gets `404 workspace/not-found`, unless they send `metadata`: that is refused first, with `400 workspace/unsupported-param`, for anyone who is not the owner. A user with no relation to the workspace at all gets the roster-visibility `404`.
 
 <Note>
   **Your own membership is `/workspaces/:workspaceId/members/me`**: [`GET`](/v8/api-reference/workspaces/members/fetch-my-membership) to read it, `PATCH` to edit your profile, [`DELETE`](/v8/api-reference/workspaces/members/leave-workspace) to leave. The `/workspaces/:workspaceId/members/:userId` routes act on other members and refuse your own id with `400 workspace/own-member-id`.
@@ -32,7 +32,7 @@ A user who only reaches in from an ancestor workspace and holds no member row he
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  **The owner only.** Arbitrary JSON (up to 1 MB) that replaces the owner's current metadata. Leaving it out keeps the current metadata. A member who sends it is refused with `400 workspace/unsupported-param`.
+  **The owner only.** Arbitrary JSON (up to 1 MB) that replaces the owner's current metadata. Leaving it out keeps the current metadata. Anyone else who sends it (a member, or a user with no member row here) is refused with `400 workspace/unsupported-param`, before any member row is looked up.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">

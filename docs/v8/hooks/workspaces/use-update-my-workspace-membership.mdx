@@ -13,7 +13,7 @@ icon: "plug"
 - **A member** edits their own `title` only. A member's other fields (`metadata`, `capabilities`, `permissions`, rank) are edited by a member with the capability, through [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member).
 - **The workspace's owner** edits their own `title` and `metadata`, either or both. Only the owner can set them: `useUpdateWorkspaceMember` refuses the owner as a target. They are profile only, and change nothing about the owner's authority, which comes from owning the workspace.
 
-A user who only reaches in from an ancestor workspace and holds no member row here gets `404 workspace/not-found`.
+A user who only reaches in from an ancestor workspace and holds no member row here gets `404 workspace/not-found`, unless they pass `metadata`: anyone who is not the owner gets `400 workspace/unsupported-param` for that first.
 
 Your own membership is `/workspaces/:workspaceId/members/me`: [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership) reads it, this hook edits your profile, and [`useLeaveWorkspace`](/v8/hooks/workspaces/use-leave-workspace) leaves it.
 
@@ -53,7 +53,7 @@ function MyTitle({ workspaceId }: { workspaceId: string }) {
 </ParamField>
 
 <ParamField path="metadata" type="Record<string, any>">
-  **The owner only.** Arbitrary JSON (up to 1 MB) that replaces your current metadata. Leaving it out keeps it. A member who passes it gets `400 workspace/unsupported-param`.
+  **The owner only.** Arbitrary JSON (up to 1 MB) that replaces your current metadata. Leaving it out keeps it. Anyone else who passes it gets `400 workspace/unsupported-param`, before any member row is looked up.
 </ParamField>
 
 ## Returns
@@ -67,7 +67,7 @@ function MyTitle({ workspaceId }: { workspaceId: string }) {
 | `workspace/invalid-body` | 400 | Neither `title` nor `metadata` was passed, `title` is not a string or `null` or is longer than 100 characters, or `metadata` is not an object or is over 1 MB. |
 | `workspace/unsupported-param` | 400 | You are not the workspace's owner and passed `metadata`. |
 | `workspace/invalid-params` | 400 | `workspaceId` isn't a UUID. |
-| `workspace/not-found` | 404 | No such workspace, you have no relation to it, or you are not its owner and hold no member row on it. |
+| `workspace/not-found` | 404 | No such workspace, you have no relation to it, or you are not its owner and hold no member row on it (and did not pass `metadata`, which is refused first). |
 
 ## Related
 

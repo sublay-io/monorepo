@@ -262,7 +262,7 @@ const member = await sublay.workspaces.updateMyWorkspaceMembership({
 
 <ParamField body="workspaceId" type="string" required />
 <ParamField body="title" type="string | null">Trimmed, up to 100 characters. `null` clears it. Required for a member; the owner sends `title`, `metadata` or both. Leaving it out keeps the current title.</ParamField>
-<ParamField body="metadata" type="object">**The owner only.** Replaces the owner's metadata (up to 1 MB). A member who sends it gets `400 workspace/unsupported-param`.</ParamField>
+<ParamField body="metadata" type="object">**The owner only.** Replaces the owner's metadata (up to 1 MB). Anyone else who sends it gets `400 workspace/unsupported-param`, even with no member row here (refused before the row is looked up).</ParamField>
 
 Returns `WorkspaceMember | WorkspaceOwnerProfile`: for a member, the same `WorkspaceMember` record [updateWorkspaceMember](#updateworkspacemember) returns; for the owner, a `WorkspaceOwnerProfile`, the same fields holding the profile only, with `rank: null` and empty `capabilities` / `permissions`, since the owner's access comes from ownership.
 

@@ -80,7 +80,7 @@ For the owner, it returns their [owner profile](/v8/data-models/workspace-member
 <AccordionGroup>
   <Accordion title="Field Not Editable Here — 400">
     ```json
-    { "error": "`capabilities` can't be edited on your own membership: only `title` can. A member with the capability edits `capabilities` through `PATCH /workspaces/:workspaceId/members/:userId`.", "code": "workspace/unsupported-param", "param": "capabilities" }
+    { "error": "`capabilities` can't be edited on your own membership: only your profile can (`title`, and `metadata` if you own the workspace). A member with the capability edits `capabilities` through `PATCH /workspaces/:workspaceId/members/:userId`.", "code": "workspace/unsupported-param", "param": "capabilities" }
     ```
     Sent for `capabilities`, `permissions`, `rank` or `relativeRank`, whoever sends it, the owner included; `param` names the field. Sent for `metadata` too when the acting user is not the workspace's owner:
     ```json

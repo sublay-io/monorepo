@@ -29,8 +29,9 @@ There are exactly **7** events:
 
 - **On accept, BOTH fire:** `workspace.invite.accepted` (lifecycle) **and** `workspace.member.added` (roster). Dedupe on the ids in the payload if you consume both.
 - **`member.*` also covers non-invite roster changes** that have **no** invite event:
-  - `member.removed` fires on exactly five paths: a **leave**, a **remove**, a **remove-from-subtree** sweep, **user-deletion cleanup**, and when a user *becomes owner* and their existing member row is dropped (owner/member rows are disjoint).
-  - `member.added` fires on the **transfer-demote** case (a previous owner demoted into a fresh member row).
+  - `member.removed` fires on exactly five paths: a **leave**, a **remove**, a **remove-from-subtree** sweep, **user-deletion cleanup**, and when a member *becomes owner* by transfer (the owner is never a member).
+  - `member.added` fires on the **transfer-demote** case (a previous owner demoted into a member row).
+  - The owner setting their own `title` or `metadata` fires neither: the owner is not a member.
 
 So if you dropped `member.*` in favor of `invite.*`, you would lose every targeted removal transition (leaves, removals, offboarding) — which is why `member.*` is the stream to mirror your live seat/roster set.
 

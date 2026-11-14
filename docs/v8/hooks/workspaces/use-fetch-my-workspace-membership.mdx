@@ -46,10 +46,10 @@ function MyRole({ workspaceId }: { workspaceId: string }) {
 | `reasons` | `WorkspaceAuthorityReasonDetail[]` | Why you have standing — structured `{ type, viaWorkspaceId? }` entries. Empty when you have no relation to the workspace. |
 | `capabilities` | `string[]` | Your **resolved** capability set (direct + reach + ownership). **`view` is implied by every other capability.** |
 | `permissions` | `string[]` | Your **per-node** permissions (direct membership on this workspace only; may be empty). |
-| `rank` | `number \| null` | Your direct-membership rank, or `null` when you hold no member row here (an owner, an ancestor-owner or a reach-only holder). |
+| `rank` | `number \| null` | Your direct-membership rank, or `null` when you are not a member here (the owner, an ancestor-owner or a reach-only holder). |
 | `relativeRank` | `number \| null` | `0` when you hold a member row here (you are measured from yourself), `null` when you don't. |
-| `title` | `string \| null` | Your cosmetic title on this workspace. |
-| `metadata` | `Record<string, any>` | Your member metadata. |
+| `title` | `string \| null` | Your cosmetic title on this workspace. The owner has one too, once they set it with [`useUpdateMyWorkspaceMembership`](/v8/hooks/workspaces/use-update-my-workspace-membership). |
+| `metadata` | `Record<string, any>` | Your member metadata, or as the owner the metadata you set; `{}` when there is none. |
 
 The type is the shared `WorkspaceMemberStanding`, where the four authority fields are optional because another user's standing may be fenced; on this read they are always set.
 

@@ -69,7 +69,7 @@ With a client token, every endpoint in the bundle resolves the actor from that t
 </Note>
 
 <Note>
-  **Your own membership is `/workspaces/:workspaceId/members/me`**: [`GET`](/v8/api-reference/workspaces/members/fetch-my-membership) to read your standing, [`PATCH`](/v8/api-reference/workspaces/members/update-my-membership) to edit your `title` (no capability needed; nothing else on your own membership is editable there), [`DELETE`](/v8/api-reference/workspaces/members/leave-workspace) to leave. `me` is the acting user — the token's user, or the user a service key names in `actingUserId`. The `/workspaces/:workspaceId/members/:userId` routes (read, edit, remove, remove from the subtree) act on **other** members and refuse your own id with `400 workspace/own-member-id`.
+  **Your own membership is `/workspaces/:workspaceId/members/me`**: [`GET`](/v8/api-reference/workspaces/members/fetch-my-membership) to read your standing, [`PATCH`](/v8/api-reference/workspaces/members/update-my-membership) to edit your `title` (no capability needed; nothing else on a member's own membership is editable there, while the workspace's owner edits their `title` and `metadata` there and nowhere else), [`DELETE`](/v8/api-reference/workspaces/members/leave-workspace) to leave. `me` is the acting user — the token's user, or the user a service key names in `actingUserId`. The `/workspaces/:workspaceId/members/:userId` routes (read, edit, remove, remove from the subtree) act on **other** members and refuse your own id with `400 workspace/own-member-id`.
 </Note>
 
 <Warning>
@@ -569,7 +569,7 @@ Creating a workspace from the switcher with the list's [`createWorkspace`](/v8/h
 | [`useFetchWorkspaceMemberStanding`](/v8/hooks/workspaces/use-fetch-workspace-member-standing) | Another user's resolved standing | Visibility |
 | [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership) | Your own resolved standing | Self-service |
 | [`useUpdateWorkspaceMember`](/v8/hooks/workspaces/use-update-workspace-member) | Edit another member's access / profile | `edit-member-access` or `edit-member-profile`, rank-bounded |
-| [`useUpdateMyWorkspaceMembership`](/v8/hooks/workspaces/use-update-my-workspace-membership) | Edit your own `title` | Self-service |
+| [`useUpdateMyWorkspaceMembership`](/v8/hooks/workspaces/use-update-my-workspace-membership) | Edit your own `title` (the owner: `title` and `metadata`) | Self-service |
 | [`useRemoveWorkspaceMember`](/v8/hooks/workspaces/use-remove-workspace-member) | Remove a member from this node | `remove-member`, rank-bounded |
 | [`useRemoveWorkspaceMemberFromSubtree`](/v8/hooks/workspaces/use-remove-workspace-member-from-subtree) | Offboard a user across the subtree (refused while they own a workspace in it) | `remove-member`, rank-bounded per node |
 | [`useLeaveWorkspace`](/v8/hooks/workspaces/use-leave-workspace) | Leave a workspace yourself | Self-service |

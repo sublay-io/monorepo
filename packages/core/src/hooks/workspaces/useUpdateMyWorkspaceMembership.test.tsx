@@ -51,6 +51,38 @@ describe("useUpdateMyWorkspaceMembership", () => {
     expect(call.body).toEqual({ title: null });
   });
 
+  it("sends `metadata` with the title, for the owner's profile", async () => {
+    const user = makeAuthUser({ id: "user-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useUpdateMyWorkspaceMembership(),
+      { projectId: "project-1", user }
+    );
+    const profile = {
+      id: "m1",
+      userId: "user-1",
+      rank: null,
+      title: "Founder",
+      metadata: { pronouns: "they/them" },
+    };
+    axiosPrivate.mockResponse("patch", profile);
+
+    let returned: unknown;
+    await act(async () => {
+      returned = await result.current({
+        workspaceId: "w1",
+        title: "Founder",
+        metadata: { pronouns: "they/them" },
+      });
+    });
+
+    expect(returned).toEqual(profile);
+    const [call] = axiosPrivate.calls("patch");
+    expect(call.body).toEqual({
+      title: "Founder",
+      metadata: { pronouns: "they/them" },
+    });
+  });
+
   it("rejects when the server returns an error response", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(

@@ -7,7 +7,7 @@ description: "Remove your own membership on this node"
 Removes the caller's own membership on **this node only** (self-service, no capability). Leaving a parent while still owning a child is fine — ownership is independent of membership. Fires `workspace.member.removed`.
 
 <Note>
-  An **owner** has no member row and cannot leave via this path — an owner exits by transferring ownership or deleting the workspace. Sole-owner protection blocks a sole owner from leaving without transferring first. If the caller has **no direct member row here** (only reaches in from an ancestor), leave is a no-op / 404.
+  An **owner** is not a member and cannot leave via this path — an owner exits by transferring ownership or deleting the workspace. Sole-owner protection blocks a sole owner from leaving without transferring first. If the caller has **no direct member row here** (only reaches in from an ancestor), leave is a no-op / 404.
 </Note>
 
 ## Path Parameters
@@ -31,7 +31,12 @@ Removes the caller's own membership on **this node only** (self-service, no capa
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="Not a Member — 404">
+  <Accordion title="Not Found — 404">
+    The workspace doesn't exist, including when it was deleted while this request was being handled:
+    ```json
+    { "error": "Workspace not found.", "code": "workspace/not-found" }
+    ```
+    The acting user has no direct member row on this workspace (for example, they only reach in from an ancestor):
     ```json
     { "error": "You are not a direct member of this workspace.", "code": "workspace/not-found" }
     ```

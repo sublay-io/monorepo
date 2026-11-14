@@ -178,6 +178,7 @@ export type {
 export type {
   Workspace,
   WorkspaceMember,
+  WorkspaceOwnerProfile,
   WorkspaceInvitation,
   MyWorkspaceInvitation,
   WorkspaceInvitationInviter,

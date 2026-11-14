@@ -11,7 +11,7 @@ icon: "plug"
 **Authorization:** capability-gated + rank-bounded. Requires the `remove-member` capability, and you may act only on members ranked strictly below you.
 
 <Note>
-  Owners have no member row, so removal targets member rows only. **Sole-owner protection:** the owner cannot be removed while sole owner — [transfer ownership](/v8/hooks/workspaces/use-transfer-workspace-ownership) first.
+  The owner is not a member, so removal targets members only. **Sole-owner protection:** the owner cannot be removed while sole owner — [transfer ownership](/v8/hooks/workspaces/use-transfer-workspace-ownership) first.
 </Note>
 
 ## Usage Example
@@ -56,6 +56,7 @@ Resolves to `void` (the endpoint returns `204 No Content`).
 |------|--------|---------|
 | `workspace/unauthorized` | 403 | You lack the `remove-member` capability. |
 | `workspace/insufficient-rank` | 403 | You may only remove members ranked strictly below you. |
+| `workspace/not-found` | 404 | The workspace doesn't exist (or was deleted while the request ran), or the target isn't a direct member of it. |
 | `workspace/sole-owner` | 409 | The sole owner must transfer ownership first. |
 
 ## Related

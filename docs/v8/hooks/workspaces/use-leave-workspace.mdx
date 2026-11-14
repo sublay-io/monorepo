@@ -11,7 +11,7 @@ icon: "plug"
 **Authorization:** self-service. No capability is required; the actor is always the signed-in user, so this hook cannot remove anyone else (use [`useRemoveWorkspaceMember`](/v8/hooks/workspaces/use-remove-workspace-member) for that).
 
 <Note>
-  An **owner** has no member row and cannot leave this way — an owner exits by [transferring ownership](/v8/hooks/workspaces/use-transfer-workspace-ownership) or [deleting](/v8/hooks/workspaces/use-delete-workspace) the workspace. If you have no direct member row here (you only reach in from an ancestor), leaving is a no-op / `404`.
+  An **owner** is not a member and cannot leave this way — an owner exits by [transferring ownership](/v8/hooks/workspaces/use-transfer-workspace-ownership) or [deleting](/v8/hooks/workspaces/use-delete-workspace) the workspace. If you have no direct member row here (you only reach in from an ancestor), leaving is a no-op / `404`.
 </Note>
 
 ## Usage Example
@@ -44,7 +44,7 @@ Resolves to `void` (the endpoint returns `204 No Content`).
 
 | Code | Status | Meaning |
 |------|--------|---------|
-| `workspace/not-found` | 404 | You have no direct membership on this workspace. |
+| `workspace/not-found` | 404 | The workspace doesn't exist (or was deleted while the request ran), or you have no direct membership on it. |
 | `workspace/sole-owner` | 409 | The sole owner must transfer ownership before leaving. |
 
 ## Related

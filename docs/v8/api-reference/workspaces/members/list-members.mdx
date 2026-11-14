@@ -44,7 +44,7 @@ Each entry's `reasons[]` contains `{ type, ...detail }` objects. A user present 
 
 | `type` | Detail | Counted as a seat? |
 |--------|--------|--------------------|
-| `owner` | — | **Yes** |
+| `owner` | `title`, `metadata` (the owner's own, set with [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership); `null` / `{}` when unset) | **Yes** |
 | `member` | `rank`, `relativeRank`, `capabilities`, `permissions`, `title`, `metadata` | **Yes** |
 | `ancestor-owner` | `viaWorkspaceId` | No (informational) |
 | `reach-holder` | `viaWorkspaceId`, `capabilities` | No (informational) |

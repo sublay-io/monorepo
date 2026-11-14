@@ -910,6 +910,7 @@ export type {
   WorkspaceRosterEntry,
   WorkspaceRosterCountsResponse,
   WorkspaceMember,
+  WorkspaceOwnerProfile,
   WorkspaceStandingUser,
   WorkspaceMemberStanding,
   WorkspaceAuthority,

@@ -81,6 +81,7 @@ Caller with a plain relation, reading **someone else's** standing — the four a
 - `capabilities` is the **resolved** set (direct + reach + ownership). **`view` is implied by every other capability** — anyone with standing resolves with `view`, including a member whose stored `capabilities` array is empty. A user with no relation at all returns `reasons: []` and an empty capability set.
 - `permissions` is **per-node** (the direct membership on this workspace only; may be empty).
 - `rank` is the direct-membership rank, or `null` for owners / ancestor-owners / reach-only holders (they sit outside the numbered ladder).
+- `title` / `metadata` come from the target's direct member row on this workspace. For the workspace's owner they are the title and metadata the owner set with [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership); `null` / `{}` when there are none.
 - `relativeRank` is that same position expressed as an **offset from the caller** — `2` above means the target sits two rungs below you; a negative value means they are *senior* to you, and `0` means they are your peer. `null` exactly when `rank` is `null`. The caller's own anchor is their member row on this workspace if they hold one, and apex (one step above rank 0) otherwise — so an owner reads a rank-0 member back as `1`. See [rank semantics](/v8/data-models/workspace-member#two-coordinates-rank-and-relativerank).
 
 ## Error Responses

@@ -5,7 +5,9 @@ description: "The shape of a WorkspaceMember object, plus the capability vocabul
 
 A **WorkspaceMember** record represents a user's membership in a specific [workspace](/v8/data-models/workspace). One row exists per user per workspace, and it exists **only once an invite is accepted** — there is **no `status` column** (the "pending" state lives entirely on the [invitation](/v8/data-models/workspace-invitation)). A member row always means "this user actually works here."
 
-The workspace's **owner never has a member row** — owner and member rows are disjoint (see [Workspace → Ownership](/v8/data-models/workspace#ownership)).
+The workspace's **owner is never a member** of it: their authority comes from owning the workspace (see [Workspace → Ownership](/v8/data-models/workspace#ownership)), never from a record of this shape.
+
+The owner can still have a `title` and `metadata`, which they set themselves with [`PATCH /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/update-my-membership) (nobody else can set them). They are kept in an **owner profile** record, created the first time the owner sets either one. It has the same fields as a member record but holds the profile only: `rank` is `null` and `capabilities` and `permissions` are empty. The SDKs type it as `WorkspaceOwnerProfile`. It is not a membership: it grants nothing, adds no `member` reason and no seat of its own, and the owner shows on the roster once, as reason `owner`, carrying that `title` and `metadata`.
 
 ## Properties
 
@@ -56,7 +58,7 @@ The four **people-operating** capabilities (`invite`, `remove-member`, `edit-mem
   `relativeRank` is fenced *with* `rank` rather than beside it, because it is `rank` minus a number the caller already knows — handing it to a fenced caller would hand them `rank` itself. Note that fencing and *presence* are different questions on descendant rows: `relativeRank` is uniformly absent there for everyone (ranks from two ladders cannot be subtracted), while the fence above is decided node by node.
 </Note>
 
-**Owner-only, deliberately NOT capabilities:** deleting a workspace, transferring ownership, and flipping the inherit flag. **Self-service, no capability needed:** accepting/declining your own invite, reading your own membership, editing your own `title` ([`PATCH /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/update-my-membership)), and leaving.
+**Owner-only, deliberately NOT capabilities:** deleting a workspace, transferring ownership, and flipping the inherit flag. **Self-service, no capability needed:** accepting/declining your own invite, reading your own membership, editing your own `title` ([`PATCH /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/update-my-membership); the owner edits their `metadata` there too), and leaving.
 
 Capabilities are **resolved across the tree** — a member's effective set includes their direct capabilities, plus any reaching in from ancestors via an open inherit-chain, plus the full vocabulary if they are an owner/ancestor-owner. See [reach](/v8/data-models/workspace#reach-and-the-wall-door-rule) and the [authority read](/v8/api-reference/workspaces/fetch-authority).
 

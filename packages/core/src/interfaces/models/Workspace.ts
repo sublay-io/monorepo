@@ -112,6 +112,17 @@ export interface WorkspaceMember {
   createdAt: string;
 }
 
+// The workspace owner's profile record, returned by
+// `useUpdateMyWorkspaceMembership` when the signed-in user owns the workspace. It holds the owner's `title` and
+// `metadata` only: the owner is not a member, and their access comes from
+// ownership, so `rank` is `null` and `capabilities` / `permissions` are empty.
+export interface WorkspaceOwnerProfile
+  extends Omit<WorkspaceMember, "rank" | "capabilities" | "permissions"> {
+  rank: null;
+  capabilities: [];
+  permissions: [];
+}
+
 export interface WorkspaceInvitation {
   id: string;
   workspaceId: string;
@@ -161,7 +172,8 @@ export interface WorkspaceRosterReason {
   // `title`/`metadata`; `ancestor-owner`/`reach-holder` carry `viaWorkspaceId`
   // (reach-holder also `capabilities`); `descendant-member` carries
   // `workspaceId` + `rank`/`capabilities` but never `relativeRank`. `owner`
-  // carries none.
+  // carries the owner's `title`/`metadata` (`null`/`{}` when unset) and
+  // nothing else.
   //
   // The authority-bearing fields (`rank`, `relativeRank`, `capabilities`,
   // `permissions`) are additionally OMITTED (absent, not null) on OTHER users'

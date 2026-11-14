@@ -813,3 +813,148 @@ describe("chatSlice — thread replies", () => {
     expect(state.threads["parent-1"].items[0].moderationStatus).toBe("removed");
   });
 });
+
+describe("chatSlice — moderation details left out of socket messages", () => {
+  const CONV = "conversation-1";
+  const FIELDS = ["moderationReason", "moderatedById", "moderatedByType"] as const;
+
+  // The `message:created` payload carries no moderation details, on the
+  // message or on its quotedMessage.
+  function socketPayload(message: Record<string, any>) {
+    const copy: Record<string, any> = { ...message };
+    for (const f of FIELDS) delete copy[f];
+    if (copy.quotedMessage) {
+      copy.quotedMessage = { ...copy.quotedMessage };
+      for (const f of FIELDS) delete copy.quotedMessage[f];
+    }
+    return copy as never;
+  }
+
+  function quoted(extra: Record<string, unknown> = {}) {
+    return makeChatMessage({
+      id: "quoted-1",
+      conversationId: CONV,
+      createdAt: "2024-01-01T00:00:00.000Z",
+      ...extra,
+    });
+  }
+
+  function withState(items: ReturnType<typeof makeChatMessage>[]) {
+    return baseState({
+      messages: {
+        [CONV]: {
+          items,
+          loading: false,
+          hasMore: false,
+          oldestMessageId: items[0]?.id ?? null,
+          newestMessageId: items[items.length - 1]?.id ?? null,
+        },
+      },
+    });
+  }
+
+  it("a message inserted from the socket has them null, on it and its quotedMessage", () => {
+    const incoming = makeChatMessage({
+      id: "msg-1",
+      conversationId: CONV,
+      createdAt: "2024-01-01T00:00:01.000Z",
+      quotedMessageId: "quoted-1",
+      quotedMessage: quoted({ moderationReason: "spam", moderatedById: "mod-1", moderatedByType: "user" }),
+    });
+    const state = reducer(withState([]), upsertMessage(socketPayload(incoming)));
+
+    const stored = state.messages[CONV].items[0] as Record<string, any>;
+    for (const f of FIELDS) {
+      expect(stored[f]).toBeNull();
+      expect(stored.quotedMessage[f]).toBeNull();
+    }
+  });
+
+  it("a socket copy merged into a REST copy keeps its values, on it and its quotedMessage", () => {
+    const rest = makeChatMessage({
+      id: "msg-1",
+      conversationId: CONV,
+      createdAt: "2024-01-01T00:00:01.000Z",
+      content: "before",
+      moderationReason: "off-topic",
+      moderatedById: "mod-1",
+      moderatedByType: "user",
+      quotedMessageId: "quoted-1",
+      quotedMessage: quoted({ moderationReason: "spam", moderatedById: "mod-2", moderatedByType: "client" }),
+    });
+    const incoming = socketPayload({
+      ...rest,
+      content: "after",
+      quotedMessage: { ...rest.quotedMessage, content: "quoted after" },
+    });
+    const state = reducer(withState([rest]), upsertMessage(incoming));
+
+    const stored = state.messages[CONV].items[0];
+    expect(state.messages[CONV].items).toHaveLength(1);
+    expect(stored.content).toBe("after");
+    expect(stored.moderationReason).toBe("off-topic");
+    expect(stored.moderatedById).toBe("mod-1");
+    expect(stored.moderatedByType).toBe("user");
+    expect(stored.quotedMessage?.content).toBe("quoted after");
+    expect(stored.quotedMessage?.moderationReason).toBe("spam");
+    expect(stored.quotedMessage?.moderatedById).toBe("mod-2");
+    expect(stored.quotedMessage?.moderatedByType).toBe("client");
+  });
+
+  it("a socket copy merged into an optimistic send without a quotedMessage gets null on its quotedMessage", () => {
+    const optimistic = makeChatMessage({
+      id: "temp-1",
+      localId: "local-1",
+      conversationId: CONV,
+      createdAt: "2024-01-01T00:00:01.000Z",
+      quotedMessageId: "quoted-1",
+      quotedMessage: undefined,
+    });
+    const incoming = socketPayload(
+      makeChatMessage({
+        id: "msg-1",
+        localId: "local-1",
+        conversationId: CONV,
+        createdAt: "2024-01-01T00:00:01.000Z",
+        quotedMessageId: "quoted-1",
+        quotedMessage: quoted({ moderationReason: "spam" }),
+      })
+    );
+    const state = reducer(withState([optimistic]), upsertMessage(incoming));
+
+    const stored = state.messages[CONV].items[0] as Record<string, any>;
+    expect(state.messages[CONV].items).toHaveLength(1);
+    for (const f of FIELDS) {
+      expect(stored[f]).toBeNull();
+      expect(stored.quotedMessage[f]).toBeNull();
+    }
+  });
+
+  it("a socket copy quoting a different message than the held copy gets null on its quotedMessage", () => {
+    const rest = makeChatMessage({
+      id: "msg-1",
+      conversationId: CONV,
+      createdAt: "2024-01-01T00:00:01.000Z",
+      quotedMessageId: "quoted-other",
+      quotedMessage: quoted({ id: "quoted-other", moderationReason: "spam", moderatedById: "mod-2", moderatedByType: "client" }),
+    });
+    const incoming = socketPayload({ ...rest, quotedMessageId: "quoted-1", quotedMessage: quoted() });
+    const state = reducer(withState([rest]), upsertMessage(incoming));
+
+    const stored = state.messages[CONV].items[0].quotedMessage as Record<string, any>;
+    expect(stored.id).toBe("quoted-1");
+    for (const f of FIELDS) expect(stored[f]).toBeNull();
+  });
+
+  it("a REST copy that sends them still overwrites the held values", () => {
+    const held = makeChatMessage({
+      id: "msg-1",
+      conversationId: CONV,
+      createdAt: "2024-01-01T00:00:01.000Z",
+      moderationReason: "off-topic",
+    });
+    const state = reducer(withState([held]), upsertMessage({ ...held, moderationReason: null }));
+
+    expect(state.messages[CONV].items[0].moderationReason).toBeNull();
+  });
+});

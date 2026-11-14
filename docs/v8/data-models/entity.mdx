@@ -45,14 +45,27 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `isDraft` | `boolean \| null` | Whether this entity is in draft state. A draft is created with an author (a user token, or a service key with `actingUserId`), and only its author sees it. Deleting the author deletes their drafts. A draft with no author is answered as not found (`404`), like a missing entity. |
 | `nsfw` | `boolean` | The entity's **own** NSFW flag. `false` by default. Set on create/update by the owner (a service key acting as the author, or naming nobody for an app-owned entity), or by a space moderator via the [set-NSFW endpoint](/v8/hooks/spaces/use-set-space-entity-nsfw). See [NSFW flagging](#nsfw-flagging). |
 | `nsfwEffective` | `boolean` | **Computed live, read-only.** `true` when the entity's own `nsfw` is `true` **or** its space is effectively NSFW: `entity.nsfw OR (space?.nsfwEffective ?? false)`. This is the value the `nsfwFilter` query param keys off. See [NSFW flagging](#nsfw-flagging). |
-| `moderationStatus` | `"approved" \| "removed" \| null` | Current space moderation status. |
+| `moderationStatus` | `"approved" \| "removed" \| null` | Current space moderation status. Visible to everyone. |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
-| `moderatedById` | `string \| null` | ID of who took the action: the space moderator's user ID when `moderatedByType` is `"user"`, the dashboard account's ID when it is `"client"`. |
-| `moderatedByType` | `"client" \| "user" \| null` | `"user"` when a space moderator took the action (through a report or directly); `"client"` when it was taken from the dashboard. |
-| `moderationReason` | `string \| null` | Reason provided for moderation. |
+| `moderatedById` | `string \| null` | ID of who took the action: the space moderator's user ID when `moderatedByType` is `"user"`, the dashboard account's ID when it is `"client"`. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
+| `moderatedByType` | `"client" \| "user" \| null` | `"user"` when a space moderator took the action (through a report or directly); `"client"` when it was taken from the dashboard. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
+| `moderationReason` | `string \| null` | Reason provided for moderation. Visible only to some requesters, including the entity's author — see [Moderation fields](#moderation-fields); `null` for everyone else. |
 | `createdAt` | `Date` | When the entity was created. |
 | `updatedAt` | `Date` | When the entity was last updated. |
 | `deletedAt` | `Date \| null` | Soft-delete timestamp. `null` for active entities. |
+
+## Moderation fields
+
+`moderationStatus` is returned to everyone. The other three moderation fields are returned only to some requesters, on every entity response; everyone else gets `null`. The requester is the signed-in user, or the user a service key names in `actingUserId` (the key then gets exactly that user's view); a service key naming nobody is treated as signed out:
+
+| Requester | `moderationReason` | `moderatedById`, `moderatedByType` |
+|---|---|---|
+| An active admin or moderator of the entity's space | ✓ | ✓ |
+| A user whose project [`role`](/v8/data-models/user) is `admin` or `moderator` | ✓ | ✓ |
+| The entity's author | ✓ | — |
+| Anyone else, including signed-out requests and a service key naming nobody | — | — |
+
+An entity with no space has no space moderators: only project-role admins and moderators and the entity's author qualify.
 
 ## Nested Types
 

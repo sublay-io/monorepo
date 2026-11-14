@@ -364,7 +364,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             conversationId: message.conversationId,
             patch: {
               lastMessageAt: message.createdAt,
-              lastMessage: message,
+              // The preview never carries moderation details (REST or socket).
+              lastMessage: message as ChatMessage,
             },
           })
         );

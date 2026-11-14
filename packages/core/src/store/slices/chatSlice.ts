@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { SocketChatMessage } from "../../types/socket";
 import { resetAccountScopedState } from "../actions";
 import type {
   Conversation,
@@ -169,10 +170,47 @@ function findLoadedMessages(
  *
  * `sendFailed` is client-only state, so a merge would keep it: a server copy
  * (a real id) clears it, since the message was delivered after all.
+ *
+ * The moderation details (`moderationReason`, `moderatedById`,
+ * `moderatedByType`) are left out of the `message:created` payload. A merge
+ * keeps the held copy's values — on the message and on its `quotedMessage`,
+ * which a merge would otherwise replace wholesale — and an inserted message
+ * missing them gets `null`, the value an ordinary member reads.
  */
-function upsertInto(items: ChatMessage[], message: ChatMessage): void {
+const MODERATION_DETAIL_FIELDS = [
+  "moderationReason",
+  "moderatedById",
+  "moderatedByType",
+] as const;
+
+/** `target` with each moderation detail it lacks taken from `source`. */
+function withModerationDetails<T extends Record<string, any>>(
+  target: T,
+  source: Record<string, any> | null | undefined
+): T {
+  const result: Record<string, any> = { ...target };
+  for (const field of MODERATION_DETAIL_FIELDS) {
+    if (result[field] === undefined) result[field] = source?.[field] ?? null;
+  }
+  return result as T;
+}
+
+function upsertInto(
+  items: ChatMessage[],
+  incoming: ChatMessage | SocketChatMessage
+): void {
+  // A `message:created` copy has no moderation details. They're filled in
+  // below: kept from the held copy on a merge, `null` on an insert.
+  const message = incoming as ChatMessage;
   const merge = (existing: ChatMessage): ChatMessage => {
-    const merged = { ...existing, ...message };
+    const merged = withModerationDetails({ ...existing, ...message }, existing);
+    if (message.quotedMessage) {
+      const held =
+        existing.quotedMessage?.id === message.quotedMessage.id
+          ? existing.quotedMessage
+          : null;
+      merged.quotedMessage = withModerationDetails(message.quotedMessage, held);
+    }
     if (!message.id.startsWith("temp-")) delete merged.sendFailed;
     return merged;
   };
@@ -192,10 +230,13 @@ function upsertInto(items: ChatMessage[], message: ChatMessage): void {
   }
 
   const inserted: ChatMessage = {
-    ...message,
+    ...withModerationDetails(message, null),
     reactionCounts: message.reactionCounts ?? {},
     userReactions: message.userReactions ?? [],
   };
+  if (message.quotedMessage) {
+    inserted.quotedMessage = withModerationDetails(message.quotedMessage, null);
+  }
   const insertAt = items.findIndex(
     (m) =>
       new Date(m.createdAt).getTime() > new Date(message.createdAt).getTime()
@@ -475,8 +516,9 @@ const chatSlice = createSlice({
      * and the parent's `threadReplyCount` arrives on its own event. See
      * `upsertInto` for deduplication.
      */
-    upsertMessage(state, action: PayloadAction<ChatMessage>) {
-      const message = action.payload;
+    upsertMessage(state, action: PayloadAction<ChatMessage | SocketChatMessage>) {
+      // `upsertInto` fills a socket copy's missing moderation details.
+      const message = action.payload as ChatMessage;
       const { conversationId, parentMessageId } = message;
 
       if (parentMessageId) {

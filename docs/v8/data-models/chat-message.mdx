@@ -51,7 +51,7 @@ A `ChatMessage` represents a single message in a conversation. Messages support 
 
 Direct and group conversations have no space, so in them only project-role admins and moderators and the message's sender qualify. A group conversation's admins don't qualify through that role.
 
-Real-time events never carry the values of these three fields, whoever receives them: the `message:created` payload has them `null` (on the message and on its `quotedMessage`), as an ordinary member reads them, and the other message events don't include them. Moderators fetch the message to read them. See [Real-time Features](/v8/sdk/chat/real-time).
+Real-time events never carry these three fields, whoever receives them: the `message:created` payload leaves them out (on the message and on its `quotedMessage`), and the other message events don't include them. A message the React SDK adds from `message:created` has them `null`; a message it already holds keeps what it had. Moderators fetch the message to read them. See [Real-time Features](/v8/sdk/chat/real-time).
 
 ## Client-only Fields
 

@@ -23,7 +23,7 @@ Takes a direct moderation action on a chat message in a space's integrated conve
 </ParamField>
 
 <ParamField body="reason" type="string">
-  Optional reason for the removal. Trimmed; up to 1,000 characters. Stored as the message's `moderationReason`.
+  Optional reason for the removal. Trimmed; up to 1,000 characters. Stored as the message's `moderationReason`, which only moderators and the message's sender can see (a service key sees it only when it acts as one of them) — see [Moderation fields](/v8/data-models/chat-message#moderation-fields).
 </ParamField>
 
 <ParamField body="actingUserId" type="string">

@@ -29,14 +29,29 @@ A `ChatMessage` represents a single message in a conversation. Messages support 
 | `userReactions` | `string[]` | Emojis the requesting user has reacted with on this message. |
 | `editedAt` | `Date \| null` | Timestamp when the message was last edited. `null` if never edited. |
 | `userDeletedAt` | `Date \| null` | Timestamp when the sender deleted the message, or when the sender's account was deleted (which deletes all of their messages). Deleted messages are soft-deleted — the row is kept as a `[Message deleted]` placeholder with content cleared. |
-| `moderationStatus` | `"approved" \| "removed" \| null` | Moderation status. `"removed"` messages are excluded from default queries. |
+| `moderationStatus` | `"approved" \| "removed" \| null` | Moderation status. `"removed"` messages are excluded from default queries. Visible to everyone. |
 | `moderatedAt` | `Date \| null` | Timestamp when moderation action was taken. |
-| `moderatedById` | `string \| null` | ID of who removed the message: a user ID when `moderatedByType` is `"user"`, the dashboard account's ID when it is `"client"`. |
-| `moderatedByType` | `"client" \| "user" \| null` | `"user"` when a user removed the message: a space moderator (through a report or directly) or a group conversation admin deleting another member's message. `"client"` when it was removed from the dashboard. A message a space moderator removed through the v7 API also carries `"client"`, with that moderator's user ID (or `null`) in `moderatedById`. |
-| `moderationReason` | `string \| null` | Optional reason recorded with the moderation action. |
+| `moderatedById` | `string \| null` | ID of who removed the message: a user ID when `moderatedByType` is `"user"`, the dashboard account's ID when it is `"client"`. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
+| `moderatedByType` | `"client" \| "user" \| null` | `"user"` when a user removed the message: a space moderator (through a report or directly) or a group conversation admin deleting another member's message. `"client"` when it was removed from the dashboard. A message a space moderator removed through the v7 API also carries `"client"`, with that moderator's user ID (or `null`) in `moderatedById`. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
+| `moderationReason` | `string \| null` | Optional reason recorded with the moderation action. Visible only to some requesters, including the message's sender — see [Moderation fields](#moderation-fields); `null` for everyone else. |
 | `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when the read asks for grants (`includeGrants: true` on the React message hooks, or `"grants"` in `include` on the REST API and the `@sublay/js` / `@sublay/node` SDKs). Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
 | `createdAt` | `Date` | Timestamp when the message was sent. |
 | `updatedAt` | `Date` | Timestamp of the last update to this record. |
+
+## Moderation fields
+
+`moderationStatus` is returned to everyone. The other three moderation fields are returned only to some requesters, on every message response; everyone else gets `null`. The requester is the signed-in user, or the user a service key names in `actingUserId` (the key then gets exactly that user's view):
+
+| Requester | `moderationReason` | `moderatedById`, `moderatedByType` |
+|---|---|---|
+| An active admin or moderator of the space the message's conversation belongs to | ✓ | ✓ |
+| A user whose project [`role`](/v8/data-models/user) is `admin` or `moderator` | ✓ | ✓ |
+| The message's sender | ✓ | — |
+| Anyone else, including other members of the conversation | — | — |
+
+Direct and group conversations have no space, so in them only project-role admins and moderators and the message's sender qualify. A group conversation's admins don't qualify through that role.
+
+Real-time events never carry these three fields, whoever receives them: a message delivered by `message:created` has them `null`, and the other message events don't include them. Fetch the message to read them. See [Real-time Features](/v8/sdk/chat/real-time).
 
 ## Client-only Fields
 

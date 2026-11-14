@@ -30,7 +30,7 @@ In a space chat, the caller must also be an active member of the chat's space an
 </ParamField>
 
 <ParamField query="actingUserId" type="string">
-  Service key only, and required with one: the user this request acts as. Must be a member of the conversation. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
+  Service key only, and required with one: the user this request acts as. Must be a member of the conversation. The response is what that user's own access token would get, [moderation details](/v8/data-models/chat-message#moderation-fields) (`moderationReason`, `moderatedById`, `moderatedByType`) included only where that user may see them. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
 </ParamField>
 
 ### Space-scoped reputation

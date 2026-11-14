@@ -901,6 +901,51 @@ describe("chatSlice — moderation details left out of socket messages", () => {
     expect(stored.quotedMessage?.moderatedByType).toBe("client");
   });
 
+  it("a socket copy merged into an optimistic send without a quotedMessage gets null on its quotedMessage", () => {
+    const optimistic = makeChatMessage({
+      id: "temp-1",
+      localId: "local-1",
+      conversationId: CONV,
+      createdAt: "2024-01-01T00:00:01.000Z",
+      quotedMessageId: "quoted-1",
+      quotedMessage: undefined,
+    });
+    const incoming = socketPayload(
+      makeChatMessage({
+        id: "msg-1",
+        localId: "local-1",
+        conversationId: CONV,
+        createdAt: "2024-01-01T00:00:01.000Z",
+        quotedMessageId: "quoted-1",
+        quotedMessage: quoted({ moderationReason: "spam" }),
+      })
+    );
+    const state = reducer(withState([optimistic]), upsertMessage(incoming));
+
+    const stored = state.messages[CONV].items[0] as Record<string, any>;
+    expect(state.messages[CONV].items).toHaveLength(1);
+    for (const f of FIELDS) {
+      expect(stored[f]).toBeNull();
+      expect(stored.quotedMessage[f]).toBeNull();
+    }
+  });
+
+  it("a socket copy quoting a different message than the held copy gets null on its quotedMessage", () => {
+    const rest = makeChatMessage({
+      id: "msg-1",
+      conversationId: CONV,
+      createdAt: "2024-01-01T00:00:01.000Z",
+      quotedMessageId: "quoted-other",
+      quotedMessage: quoted({ id: "quoted-other", moderationReason: "spam", moderatedById: "mod-2", moderatedByType: "client" }),
+    });
+    const incoming = socketPayload({ ...rest, quotedMessageId: "quoted-1", quotedMessage: quoted() });
+    const state = reducer(withState([rest]), upsertMessage(incoming));
+
+    const stored = state.messages[CONV].items[0].quotedMessage as Record<string, any>;
+    expect(stored.id).toBe("quoted-1");
+    for (const f of FIELDS) expect(stored[f]).toBeNull();
+  });
+
   it("a REST copy that sends them still overwrites the held values", () => {
     const held = makeChatMessage({
       id: "msg-1",

@@ -197,15 +197,12 @@ function withModerationDetails<T extends Record<string, any>>(
 function upsertInto(items: ChatMessage[], message: ChatMessage): void {
   const merge = (existing: ChatMessage): ChatMessage => {
     const merged = withModerationDetails({ ...existing, ...message }, existing);
-    if (
-      message.quotedMessage &&
-      existing.quotedMessage &&
-      message.quotedMessage.id === existing.quotedMessage.id
-    ) {
-      merged.quotedMessage = withModerationDetails(
-        message.quotedMessage,
-        existing.quotedMessage
-      );
+    if (message.quotedMessage) {
+      const held =
+        existing.quotedMessage?.id === message.quotedMessage.id
+          ? existing.quotedMessage
+          : null;
+      merged.quotedMessage = withModerationDetails(message.quotedMessage, held);
     }
     if (!message.id.startsWith("temp-")) delete merged.sendFailed;
     return merged;

@@ -27,7 +27,7 @@ description: "Typing indicators, unread counts, and marking conversations as rea
 | `member:left` | When it's the current user leaving or being removed, removes the conversation from the list |
 | `conversation:deleted` | Removes the conversation from the list |
 
-No event carries a message's `moderationReason`, `moderatedById` or `moderatedByType`, even to moderators: the `message:created` payload leaves them out, so a message the SDK adds from it doesn't have them, and the other events leave them unchanged. Fetch the message to read them. See [Moderation fields](/v8/data-models/chat-message#moderation-fields).
+No event carries the values of a message's `moderationReason`, `moderatedById` or `moderatedByType`, even to moderators: the `message:created` payload has them `null` (on the message and on its `quotedMessage`), so a message the SDK adds from it has them `null`, and the other events leave them unchanged. Moderators fetch the message to read them. See [Moderation fields](/v8/data-models/chat-message#moderation-fields).
 
 ## Live Conversation List
 

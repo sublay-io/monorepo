@@ -169,10 +169,44 @@ function findLoadedMessages(
  *
  * `sendFailed` is client-only state, so a merge would keep it: a server copy
  * (a real id) clears it, since the message was delivered after all.
+ *
+ * The moderation details (`moderationReason`, `moderatedById`,
+ * `moderatedByType`) are left out of the `message:created` payload. A merge
+ * keeps the held copy's values — on the message and on its `quotedMessage`,
+ * which a merge would otherwise replace wholesale — and an inserted message
+ * missing them gets `null`, the value an ordinary member reads.
  */
+const MODERATION_DETAIL_FIELDS = [
+  "moderationReason",
+  "moderatedById",
+  "moderatedByType",
+] as const;
+
+/** `target` with each moderation detail it lacks taken from `source`. */
+function withModerationDetails<T extends Record<string, any>>(
+  target: T,
+  source: Record<string, any> | null | undefined
+): T {
+  const result: Record<string, any> = { ...target };
+  for (const field of MODERATION_DETAIL_FIELDS) {
+    if (result[field] === undefined) result[field] = source?.[field] ?? null;
+  }
+  return result as T;
+}
+
 function upsertInto(items: ChatMessage[], message: ChatMessage): void {
   const merge = (existing: ChatMessage): ChatMessage => {
-    const merged = { ...existing, ...message };
+    const merged = withModerationDetails({ ...existing, ...message }, existing);
+    if (
+      message.quotedMessage &&
+      existing.quotedMessage &&
+      message.quotedMessage.id === existing.quotedMessage.id
+    ) {
+      merged.quotedMessage = withModerationDetails(
+        message.quotedMessage,
+        existing.quotedMessage
+      );
+    }
     if (!message.id.startsWith("temp-")) delete merged.sendFailed;
     return merged;
   };
@@ -192,10 +226,13 @@ function upsertInto(items: ChatMessage[], message: ChatMessage): void {
   }
 
   const inserted: ChatMessage = {
-    ...message,
+    ...withModerationDetails(message, null),
     reactionCounts: message.reactionCounts ?? {},
     userReactions: message.userReactions ?? [],
   };
+  if (message.quotedMessage) {
+    inserted.quotedMessage = withModerationDetails(message.quotedMessage, null);
+  }
   const insertAt = items.findIndex(
     (m) =>
       new Date(m.createdAt).getTime() > new Date(message.createdAt).getTime()

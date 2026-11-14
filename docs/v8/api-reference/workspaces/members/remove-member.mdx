@@ -75,6 +75,26 @@ Removes a member from a workspace. Requires the `remove-member` capability and i
     ```
     Returned when a service key names an `actingUserId` that isn't a user in this project.
   </Accordion>
+  <Accordion title="Unauthorized — 403">
+    ```json
+    { "error": "Capability 'remove-member' required", "code": "workspace/unauthorized" }
+    ```
+    The acting user has no `remove-member` capability on this workspace, including when they have no relation to it.
+  </Accordion>
+  <Accordion title="Not Found — 404">
+    The workspace doesn't exist:
+    ```json
+    { "error": "Workspace not found", "code": "workspace/not-found" }
+    ```
+    The same with a closing period when the workspace was deleted while this request was being handled:
+    ```json
+    { "error": "Workspace not found.", "code": "workspace/not-found" }
+    ```
+    The target user isn't a direct member of the workspace:
+    ```json
+    { "error": "The target user is not a direct member of this workspace.", "code": "workspace/not-found" }
+    ```
+  </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json
     { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params" }

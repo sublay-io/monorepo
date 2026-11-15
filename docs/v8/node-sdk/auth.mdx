@@ -248,7 +248,7 @@ const { success } = await sublay.auth.sendVerificationEmail({
 <ParamField body="redirectUrl" type="string">
   For `mode: "link"` — where to send the user after the link is verified.
 
-  Must be an `https` address on one of your project's **Verified Domains** (Dashboard → Settings → Domains). Each entry covers exactly the host it names, never its subdomains: `example.com` allows `https://example.com/…` but not `www.example.com`, which needs its own entry. A full address such as `https://app.example.com` covers only that host and port. `localhost` and `*.localhost` are always allowed, over `http` too. Anything else, including a custom-scheme deep link such as `myapp://verified`, is refused with `400 auth/redirect-url-not-allowed` and no email is sent.
+  Must be an `https` address on one of your project's **Verified Domains** (Dashboard → Settings → Domains). Each entry covers exactly the host it names, never its subdomains: `example.com` allows `https://example.com/…` on any port, but not `www.example.com`, which needs its own entry. A full address such as `https://app.example.com` covers only that host and port. `localhost` and `*.localhost` are always allowed, over `http` too. Anything else, including a custom-scheme deep link such as `myapp://verified`, is refused with `400 auth/redirect-url-not-allowed` and no email is sent.
 </ParamField>
 
 **Returns** — `Promise<{ success: boolean }>`

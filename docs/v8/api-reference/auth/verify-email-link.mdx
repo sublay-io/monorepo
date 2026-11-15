@@ -25,7 +25,7 @@ You don't call this endpoint from your app: it's the target of the button in the
 | Invalid / expired token | Hosted error page | Hosted error page |
 | Server error | Hosted error page | Hosted error page |
 
-The destination is the `redirectUrl` you passed to [Send Verification Email](/v8/api-reference/auth/send-verification-email), stored with the token when the email was sent. The link itself carries no destination, so it can't be edited to send someone elsewhere. Only `http` and `https` addresses are followed. A failed verification always shows the hosted page.
+The destination is the `redirectUrl` you passed to [Send Verification Email](/v8/api-reference/auth/send-verification-email), stored with the token when the email was sent. The link itself carries no destination, so it can't be edited to send someone elsewhere. Send Verification Email only accepts a `redirectUrl` on one of your project's Verified Domains. A failed verification always shows the hosted page.
 
 ## See Also
 

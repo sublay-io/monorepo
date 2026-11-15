@@ -282,7 +282,7 @@ await sendVerificationEmail({
 | `mode` | `"code" \| "link"` | always | Whether to send a code to enter, or a link to click |
 | `tokenFormat` | `"hex" \| "numeric" \| "alpha" \| "alphanumeric"` | when `mode: "code"` (optional, defaults to `"hex"`, for `mode: "link"`) | Character set for the token |
 | `tokenLength` | `number` (4–12) | when `mode: "code"` and `tokenFormat` isn't `"hex"` (not allowed when it is `"hex"`; optional for `mode: "link"`, defaults to `6`) | Length of the token |
-| `redirectUrl` | `string` | never | Where to redirect after link verification (only valid with `mode: "link"`) |
+| `redirectUrl` | `string` | never | Where to redirect after link verification (only valid with `mode: "link"`). Must be an `https` address on one of your project's Verified Domains, or `localhost` |
 
 TypeScript enforces this combination at compile time — `sendVerificationEmail({ mode: "code" })` or `sendVerificationEmail({ mode: "code", tokenFormat: "numeric" })` (missing `tokenLength`) won't type-check.
 
@@ -327,6 +327,8 @@ On success, `user.isVerified` is updated immediately in the local Redux store �
 When using `mode: "link"`, the email contains a button that opens a Sublay page asking the user to confirm (so an email scanner opening the link verifies nothing). When they click **Confirm my email**, the email is verified and they see a success page that either:
 - sends them on to the `redirectUrl` you provided, with `verified=true` added, after 5 seconds, or
 - stays on the success page if no `redirectUrl` was given.
+
+`redirectUrl` must be on one of your project's **Verified Domains** (Dashboard → Settings → Domains), the same list that lets your web app call Sublay from a browser. Here each entry is matched exactly: `example.com` doesn't cover `www.example.com`, so list the exact host of the page users land on. A mobile app with no website listed there either adds the domain of the page it wants users to land on, or leaves `redirectUrl` out (or uses `mode: "code"`). Custom-scheme deep links such as `myapp://verified` are refused. See [Send Verification Email](/v8/api-reference/auth/send-verification-email) for the matching rules.
 
 The `user.isVerified` field will be `true` the next time the user's session is loaded (e.g. on next sign-in or token refresh). There is no SDK callback for link-mode verification since it happens outside the app's JS context.
 

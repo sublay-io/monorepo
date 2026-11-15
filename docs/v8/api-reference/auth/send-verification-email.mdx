@@ -37,7 +37,9 @@ All parameters are optional.
 <ParamField body="redirectUrl" type="string">
   A URL to redirect the user to after they click the verification link. Only used when `mode` is `"link"`.
 
-  Must be an `http` or `https` address; any other kind isn't followed. On success `verified=true` is added to its query string. An invalid or expired link shows the hosted error page instead of redirecting.
+  Must be an `https` address on one of your project's **Verified Domains** (Dashboard → Settings → Domains). Each entry covers exactly the host it names, never its subdomains: `example.com` allows `https://example.com/…` on any port, but not `www.example.com`, which needs its own entry. A full address such as `https://app.example.com` covers only that host and port. `localhost` and `*.localhost` are always allowed, over `http` too. Anything else, including a custom-scheme deep link such as `myapp://verified`, is refused with `400 auth/redirect-url-not-allowed` and no email is sent.
+
+  On success `verified=true` is added to its query string. An invalid or expired link shows the hosted error page instead of redirecting.
 
   If omitted, the server renders a hosted success/error page.
 </ParamField>
@@ -56,6 +58,7 @@ All parameters are optional.
 
 | Code | Status | Description |
 |------|--------|-------------|
+| `auth/redirect-url-not-allowed` | 400 | `mode` is `"link"` and `redirectUrl` isn't an `https` address on one of the project's Verified Domains (or `localhost`). No email is sent. |
 | `auth/not-password-user` | 400 | The authenticated user does not have an email/password account. |
 | `auth/no-user-found` | 403 | The access token is valid but no matching user record exists (e.g. the account was already deleted). |
 | `auth/missing-user-id` | 400 | A service key sent no `actingUserId`. Error text: `A service key must send actingUserId: the user this request acts as.` |

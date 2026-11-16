@@ -116,7 +116,7 @@ const { user, accessToken, refreshToken } = await sublay.auth.signIn({
 
 **Returns** — `Promise<{ user: AuthUser; accessToken: string; refreshToken: string }>`
 
-When the project requires email verification before sign-in and the account's email isn't confirmed, a correct password rejects with a `403` whose body is `EmailNotVerifiedErrorBody` (`{ error, code: "auth/email-not-verified", verificationId? }`), and a new confirmation email is sent:
+When the project requires email verification before sign-in and the account's email isn't confirmed, a correct password rejects with a `403` whose body is `EmailNotVerifiedErrorBody` (`{ error, code: "auth/email-not-verified", verificationId? }`), and a new confirmation email is sent (unless one went out in the last 10 minutes):
 
 ```typescript
 try {

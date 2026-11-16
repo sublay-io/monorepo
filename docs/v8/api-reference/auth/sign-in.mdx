@@ -30,7 +30,7 @@ Authenticates an existing user by email and password. Returns an access token, r
 
 ## Email verification required
 
-When the project requires email verification before sign-in (Dashboard → Settings → SDK), an account that has a password must confirm its email before it can sign in. Once the password is confirmed correct, an unconfirmed account is refused with `403 auth/email-not-verified` and sent a new confirmation email. A wrong password or an unknown email still gets the single `401` below, so the new error only appears after a correct password.
+When the project requires email verification before sign-in (Dashboard → Settings → SDK), an account that has a password must confirm its email before it can sign in. Once the password is confirmed correct, an unconfirmed account is refused with `403 auth/email-not-verified` and sent a new confirmation email (unless one went out in the last 10 minutes). A wrong password or an unknown email still gets the single `401` below, so the new error only appears after a correct password.
 
 Accounts that have no password (they sign in only through a provider) and accounts that sign in through your own login ([external sign-in](/v8/sdk/authentication/external)) aren't affected.
 

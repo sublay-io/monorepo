@@ -99,7 +99,7 @@ function SignInForm() {
 Turn on **Require email verification before sign-in** (Dashboard → Settings → SDK) to make users confirm their email before they can sign in. With it on:
 
 - **Sign-up creates no session.** It emails a confirmation link (or a 6-digit code) that lasts 24 hours, and resolves `{ emailVerificationRequired: true }` instead of signing the user in. It answers the same way whether or not the email already has an account; an existing account's owner gets an email pointing them to sign-in or password reset instead.
-- **Accounts with a password must confirm their email before any sign-in** — with the password, through any OAuth provider, and on token refresh. A refused sign-in sends a new confirmation email.
+- **Accounts with a password must confirm their email before any sign-in** — with the password, through any OAuth provider, and on token refresh. A refused sign-in sends a new confirmation email, unless one went out in the last 10 minutes.
 - **Users already signed in with an unconfirmed email lose access** within 30 minutes: their next token refresh is refused, so their API calls fail. `useAuth().user` stays set until the app next starts (or switches to that account), when the SDK signs them out and marks the account as needing sign-in.
 - **Not affected:** accounts with no password that sign in only through a provider, and users of your own login ([external sign-in](/v8/sdk/authentication/external)).
 - The setting applies to the v7 and v8 APIs. v7 sign-up is refused while it's on, so sign users up through v8.
@@ -132,7 +132,7 @@ await verifyEmail({ token: code, verificationId: pendingVerificationId });
 await signInWithEmailAndPassword({ email, password });
 ```
 
-A code allows 5 wrong tries. If the user loses the code, runs out of tries, or a correct code is refused (for example after signing up twice, when the second answer carries an ID that doesn't match the emailed code), signing in again: within 10 minutes of the last confirmation email it sends nothing new and returns the `verificationId` of the code already sent; after that, or once a code has run out of tries, it sends a new code with a new `verificationId`. Emails to one address are limited to one every 10 minutes and five a day; past the limit, nothing is sent and the code already in the inbox keeps working.
+A code allows 5 wrong tries. If the user loses the code, runs out of tries, or a correct code is refused (for example after signing up twice, when the second answer carries an ID that doesn't match the emailed code), the user signs in again. Within 10 minutes of the last confirmation email, that sends nothing new and returns the `verificationId` of the code already sent; after that, or once a code has run out of tries, it sends a new code with a new `verificationId`. Emails to one address are limited to one every 10 minutes and five a day; past the limit, nothing is sent and the code already in the inbox keeps working.
 
 ### Sign in
 

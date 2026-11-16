@@ -11,7 +11,7 @@ This page explains your options so you can choose the path that fits your projec
 <Warning>
   When using Sublay from a web application in production, add each site your app runs on to your project's **Verified Domains** (Dashboard → Settings → Domains). Listed sites must be served over `https`, and a browser request from any other site is rejected; `localhost` is always allowed, over `http` too, and requests with no `Origin` (native apps, your own backend) aren't affected.
 
-  Only the list of the project you're calling counts, and each entry is matched exactly: `example.com` allows `https://example.com` (on any port) but not `www.example.com` or `app.example.com`, which each need their own entry. A full address such as `https://app.example.com` allows only that host and port. A browser extension is listed by its own origin, `chrome-extension://<id>`. The same list decides where verification emails may send users after they confirm (see [Send Verification Email](/v8/api-reference/auth/send-verification-email)).
+  Only the list of the project you're calling counts, and each entry is matched exactly: `example.com` allows `https://example.com` (on any port) but not `www.example.com` or `app.example.com`, which each need their own entry. A full address such as `https://app.example.com` allows only that host and port. A Chrome (or other Chromium-based) extension is listed by its own origin, `chrome-extension://<id>`. The same list decides where verification emails may send users after they confirm (see [Send Verification Email](/v8/api-reference/auth/send-verification-email)).
 </Warning>
 
 ## Option 1: React / React Native SDK (Recommended)

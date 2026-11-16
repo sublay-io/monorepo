@@ -132,7 +132,7 @@ await verifyEmail({ token: code, verificationId: pendingVerificationId });
 await signInWithEmailAndPassword({ email, password });
 ```
 
-A code allows 5 wrong tries. If the user loses the code, runs out of tries, or a correct code is refused (for example after signing up twice, when the second answer carries an ID that doesn't match the emailed code), signing in again sends a new one with a new `verificationId`. Emails to one address are limited to one every 10 minutes and five a day, so a new email can take up to 10 minutes; past the limit, nothing is sent and the code already in the inbox keeps working.
+A code allows 5 wrong tries. If the user loses the code, runs out of tries, or a correct code is refused (for example after signing up twice, when the second answer carries an ID that doesn't match the emailed code), signing in again: within 10 minutes of the last confirmation email it sends nothing new and returns the `verificationId` of the code already sent; after that, or once a code has run out of tries, it sends a new code with a new `verificationId`. Emails to one address are limited to one every 10 minutes and five a day; past the limit, nothing is sent and the code already in the inbox keeps working.
 
 ### Sign in
 

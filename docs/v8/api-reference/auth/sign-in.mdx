@@ -95,7 +95,7 @@ The emails sent to one address are limited to one every 10 minutes and five a da
       "verificationId": "9f2c…"
     }
     ```
-    The password is correct, but the project requires email verification before sign-in and the account's email isn't confirmed. A new confirmation email has been sent. In code mode the body carries `verificationId`: send it with the emailed code to [Verify Email](/v8/api-reference/auth/verify-email), then sign in again. When the per-address limit skipped the email, `verificationId` is the one for the code already sent; if no code is outstanding, it's absent.
+    The password is correct, but the project requires email verification before sign-in and the account's email isn't confirmed. A new confirmation email is sent, unless one went out in the last 10 minutes or the per-address limit is reached. In code mode the body carries `verificationId`: send it with the emailed code to [Verify Email](/v8/api-reference/auth/verify-email), then sign in again. When no new email was sent, `verificationId` is the one for the code already sent; if no code is outstanding, it's absent.
   </Accordion>
   <Accordion title="Redirect URL Not Allowed — 400">
     ```json

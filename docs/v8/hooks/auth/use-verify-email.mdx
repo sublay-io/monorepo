@@ -73,7 +73,7 @@ The returned function accepts:
 </ParamField>
 
 <ParamField path="verificationId" type="string">
-  The `verificationId` returned with a sign-up code. Required to confirm one; leave it out for a code from `useSendVerificationEmail`. A sign-up code allows 5 wrong tries; after that, or if the ID is lost, signing in again sends a new code with a new `verificationId`.
+  The `verificationId` returned with a sign-up code. Required to confirm one; leave it out for a code from `useSendVerificationEmail`. A sign-up code allows 5 wrong tries. If the ID is lost, signing in again returns it (or a new code's, if the last email is more than 10 minutes old); after the tries run out, signing in again sends a new code with a new `verificationId`.
 </ParamField>
 
 ## Returns

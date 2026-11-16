@@ -147,7 +147,7 @@ When the project requires email verification before sign-in, every sign-up that 
 </ResponseField>
 
 <ResponseField name="verificationId" type="string">
-  Present when `emailVerification.mode` is `"code"`. Keep it with the sign-up screen (in memory is enough) and send it with the code to [Verify Email](/v8/api-reference/auth/verify-email). If it's lost, signing in again with the same email and password sends a new code with a new `verificationId`.
+  Present when `emailVerification.mode` is `"code"`. Keep it with the sign-up screen (in memory is enough) and send it with the code to [Verify Email](/v8/api-reference/auth/verify-email). If it's lost, sign in again with the same email and password: the refused sign-in returns the `verificationId` of the code already sent (or of a new one, if the last email is more than 10 minutes old).
 </ResponseField>
 
 What happens behind the same answer:

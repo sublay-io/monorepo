@@ -145,7 +145,7 @@ Each provider must be configured in the project dashboard with:
        - **The provider hasn't verified the email:** the sign-in is refused with `error=email_not_verified`, because an unverified email can't prove the account is theirs.
     3. **New user** — if no user has the email, a new user is created from the provider profile (name, email, avatar).
 
-    When the project requires email verification before sign-in and the resolved account has a password and an unconfirmed email, no session is created: Sublay emails a confirmation link to the account's address and redirects with `error=account_email_not_confirmed`.
+    When the project requires email verification before sign-in and the resolved account has a password and an unconfirmed email, no session is created: Sublay emails a confirmation link to the account's address (unless one went out in the last 10 minutes) and redirects with `error=account_email_not_confirmed`.
 
     Sublay then redirects to the `redirectAfterAuth` URL with Sublay tokens appended as query parameters.
   </Step>

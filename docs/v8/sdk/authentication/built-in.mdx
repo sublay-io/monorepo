@@ -132,11 +132,11 @@ await verifyEmail({ token: code, verificationId: pendingVerificationId });
 await signInWithEmailAndPassword({ email, password });
 ```
 
-A code allows 5 wrong tries. If the user loses the code, runs out of tries, or a correct code is refused (for example after signing up twice, when the second answer carries an ID that doesn't match the emailed code), the user signs in again. Within 10 minutes of the last confirmation email, that sends nothing new and returns the `verificationId` of the code already sent; after that, or once a code has run out of tries, it sends a new code with a new `verificationId`. Emails to one address are limited to one every 10 minutes and five a day; past the limit, nothing is sent and the code already in the inbox keeps working.
+A code allows 5 wrong tries. If the user loses the code, runs out of tries, or a correct code is refused (for example after signing up twice, when the second answer carries an ID that doesn't match the emailed code), the user signs in again. Within 10 minutes of the last confirmation email, that sends nothing new and returns the `verificationId` of the code already sent; after that, or once a code has run out of tries, it can send a new code with a new `verificationId`. Emails to one address are limited to one every 10 minutes and five a day; past the limit, nothing is sent and the code already in the inbox keeps working.
 
 ### Sign in
 
-A correct password on an unconfirmed account throws an `Error` whose `code` is `auth/email-not-verified`; a new confirmation email has been sent. Pass the same `emailVerification` to sign-in to choose link or code (left out, it uses what the user chose at sign-up, else a link). In code mode the error carries `verificationId`:
+A correct password on an unconfirmed account throws an `Error` whose `code` is `auth/email-not-verified`, and a new confirmation email is sent (unless one went out in the last 10 minutes). Pass the same `emailVerification` to sign-in to choose link or code (left out, it uses what the user chose at sign-up, else a link). In code mode the error carries `verificationId`:
 
 ```tsx
 import type { SublayAuthError } from "@sublay/react-js";

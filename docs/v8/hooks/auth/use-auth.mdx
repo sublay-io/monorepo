@@ -127,8 +127,8 @@ function SignInButton() {
   Throws if credentials are invalid. The thrown `Error` (typed `SublayAuthError`)
   carries the server's `code`: `auth/email-not-verified` when the password is
   correct but the project requires email verification before sign-in and the
-  email isn't confirmed — a new confirmation email has been sent, sent the way
-  `emailVerification` says, and in code mode the error also carries
+  email isn't confirmed — a new confirmation email is sent (unless one went out in the last 10 minutes),
+  the way `emailVerification` says, and in code mode the error also carries
   `verificationId`. Also throws
   [`ACCOUNT_LIMIT_MESSAGE`](#the-account-limit) if this would be a **sixth**
   account on the device. Signing back in to an account already stored on the

@@ -73,7 +73,7 @@ function AuthCallbackPage() {
 
 `handleOAuthCallback` returns `true` if tokens were found in the URL fragment and `false` otherwise. If the provider returned an error (for example, the user denied access), the error is surfaced through the `error` field.
 
-`error` holds the redirect's `error_description`, written to be shown to the user. When the project requires email verification before sign-in and the account has a password and an unconfirmed email, the sign-in is refused (`error=account_email_not_confirmed`) and a confirmation link is emailed to the account's address; when an account with an unconfirmed email links a provider with a different email, the link is refused (`error=link_needs_confirmed_email`). See [Authorize OAuth](/v8/api-reference/oauth/authorize#callback) for every error.
+`error` holds the redirect's `error_description`, written to be shown to the user. When the project requires email verification before sign-in and the account has a password and an unconfirmed email, the sign-in is refused (`error=account_email_not_confirmed`) and a confirmation link is emailed to the account's address (unless one went out in the last 10 minutes); when an account with an unconfirmed email links a provider with a different email, the link is refused (`error=link_needs_confirmed_email`). See [Authorize OAuth](/v8/api-reference/oauth/authorize#callback) for every error.
 
 ### Linking an Additional Provider
 

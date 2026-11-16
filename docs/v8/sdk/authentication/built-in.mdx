@@ -100,7 +100,7 @@ Turn on **Require email verification before sign-in** (Dashboard → Settings �
 
 - **Sign-up creates no session.** It emails a confirmation link (or a 6-digit code) that lasts 24 hours, and resolves `{ emailVerificationRequired: true }` instead of signing the user in. It answers the same way whether or not the email already has an account; an existing account's owner gets an email pointing them to sign-in or password reset instead.
 - **Accounts with a password must confirm their email before any sign-in** — with the password, through any OAuth provider, and on token refresh. A refused sign-in sends a new confirmation email.
-- **Users already signed in with an unconfirmed email are signed out** within 30 minutes, when their next token refresh is refused.
+- **Users already signed in with an unconfirmed email lose access** within 30 minutes: their next token refresh is refused, so their API calls fail. `useAuth().user` stays set until the app next starts (or switches to that account), when the SDK signs them out and marks the account as needing sign-in.
 - **Not affected:** accounts with no password that sign in only through a provider, and users of your own login ([external sign-in](/v8/sdk/authentication/external)).
 - The setting applies to the v7 and v8 APIs. v7 sign-up is refused while it's on, so sign users up through v8.
 

@@ -60,7 +60,7 @@ Authenticates an existing user by email and password. Returns an access token, r
 When the project requires email verification before sign-in (Dashboard → Settings → SDK):
 
 - An unknown email, an account without a password, and a wrong password all get the same answer, `401 auth/invalid-credentials` (`"Email or password is incorrect."`), so sign-in doesn't reveal whether an email has an account. The `auth/no-user-found` and `auth/wrong-password` errors below, and the `403` form of `auth/invalid-credentials`, are not returned.
-- An account that has a password and an unconfirmed email is refused with `403 auth/email-not-verified` once the password is confirmed correct, and is emailed a new confirmation link. Emails to one address are limited to one every 10 minutes and five a day.
+- An account that has a password and an unconfirmed email is refused with `403 auth/email-not-verified` once the password is confirmed correct, and is emailed a new confirmation link (unless one went out in the last 10 minutes). Emails to one address are limited to one every 10 minutes and five a day.
 - Accounts that sign in through your own login (external sign-in) aren't affected.
 
 ## Error Responses

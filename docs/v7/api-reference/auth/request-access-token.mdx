@@ -70,6 +70,15 @@ Reuse detection ends **sessions only**. Push bindings are left in place, so noti
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Email Not Verified — 403">
+    ```json
+    {
+      "error": "Confirm your email to sign in.",
+      "code": "auth/email-not-verified"
+    }
+    ```
+    The project requires email verification before sign-in (Dashboard → Settings → SDK), and this account has a password and an unconfirmed email. Users already signed in when the setting is turned on stop being able to call the API within 30 minutes. No email is sent; signing in again sends one. Accounts that sign in through your own login (external sign-in) aren't affected.
+  </Accordion>
   <Accordion title="Project Mismatch — 403">
     ```json
     {

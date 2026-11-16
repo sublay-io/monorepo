@@ -4,7 +4,7 @@ api: "DELETE /v8/:projectId/oauth/identities/:identityId"
 description: "Remove a linked OAuth identity from the current user"
 ---
 
-Unlinks an OAuth identity from the authenticated user's account. The identity is permanently deleted.
+Unlinks an OAuth identity from the authenticated user's account. The identity is permanently deleted, and that provider account can no longer sign in to this one. This is how a user removes a connection they don't recognise: list them with [List Identities](/v8/api-reference/oauth/list-identities), then unlink the one that isn't theirs.
 
 Requires the user's own access token; a service key is refused. The identity must belong to the authenticated user.
 

@@ -6,6 +6,8 @@ description: "Create a new user account with email and password"
 
 Registers a new user within the specified project. On success, returns an access token, refresh token, and the created user object. The endpoint also accepts optional profile data and image file uploads for the avatar and banner.
 
+When the project requires email verification before sign-in (Dashboard → Settings → SDK), this endpoint refuses every sign-up with `403 auth/email-verification-required`: sign users up through the [v8 API](/v8/api-reference/auth/sign-up) instead.
+
 <Note>
   This endpoint accepts `multipart/form-data` when uploading avatar or banner
   images. Send `application/json` for text-only registration.
@@ -115,6 +117,15 @@ On success, returns HTTP `201` with:
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Email Verification Required — 403">
+    ```json
+    {
+      "error": "This project requires email verification before sign-in; sign up through the v8 API.",
+      "code": "auth/email-verification-required"
+    }
+    ```
+    The project requires email verification before sign-in. Nothing is uploaded or created.
+  </Accordion>
   <Accordion title="Email Already In Use — 409">
     ```json
     {

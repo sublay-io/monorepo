@@ -60,6 +60,8 @@ https://yourapp.com/callback#accessToken=...&refreshToken=...
 https://yourapp.com/callback?error=...&error_description=...
 ```
 
+When the project requires email verification before sign-in (Dashboard → Settings → SDK), an account whose email isn't confirmed can only link a provider whose verified email is the same as the account's; any other provider is refused with `error=link_needs_confirmed_email` ("Confirm your email before connecting a sign-in that uses a different email.") and nothing is linked.
+
 ## Error Responses
 
 <AccordionGroup>

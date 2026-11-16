@@ -46,7 +46,11 @@ const { user, accessToken, refreshToken } = await sublay.auth.signUp({
   Arbitrary key-value data attached to the user at creation time.
 </ParamField>
 
-**Returns** — `Promise<{ user: AuthUser; accessToken: string; refreshToken: string }>`
+<ParamField body="emailVerification" type='{ mode?: "link" | "code"; redirectUrl?: string }'>
+  How the confirmation email is sent when the project requires email verification before sign-in. `mode` defaults to `"link"`; `"code"` emails a 6-digit code and returns a `verificationId`. `redirectUrl` (link mode) must be on the project's Verified Domains. Ignored when the setting is off. See [Sign Up](/v8/api-reference/auth/sign-up#with-email-verification-required).
+</ParamField>
+
+**Returns** — `Promise<SignUpResponse | EmailVerificationRequiredResponse>`: `{ user, accessToken, refreshToken }`, or, when the project requires email verification before sign-in, `{ success: true, emailVerificationRequired: true, verificationId? }` with no tokens.
 
 ---
 
@@ -69,7 +73,13 @@ const { user, accessToken, refreshToken } = await sublay.auth.signIn({
   The user's password.
 </ParamField>
 
+<ParamField body="emailVerification" type='{ mode?: "link" | "code"; redirectUrl?: string }'>
+  How the new confirmation email is sent when sign-in is refused because the account's email isn't confirmed. Ignored when the project doesn't require email verification before sign-in.
+</ParamField>
+
 **Returns** — `Promise<{ user: AuthUser; accessToken: string; refreshToken: string }>`
+
+When the project requires email verification before sign-in and the account's email isn't confirmed, a correct password rejects with a `403` whose body is `EmailNotVerifiedErrorBody` (`{ error, code: "auth/email-not-verified", verificationId? }`, read from `err.response.data`), and a new confirmation email is sent.
 
 ---
 
@@ -195,14 +205,21 @@ await sublay.auth.resetPassword({
 
 ### verifyEmail
 
-Marks a user's email address as verified using a token from the verification email.
+Marks a user's email address as verified using a code from the verification email.
 
 ```typescript
 await sublay.auth.verifyEmail({ token: verificationToken });
+
+// A sign-up code, with the ID signUp or signIn returned
+await sublay.auth.verifyEmail({ token: code, verificationId });
 ```
 
 <ParamField body="token" type="string" required>
-  The email verification token.
+  The email verification code.
+</ParamField>
+
+<ParamField body="verificationId" type="string">
+  The `verificationId` returned with a sign-up code (by `signUp`, or in the body of a sign-in refused with `auth/email-not-verified`). Required to confirm such a code; leave it out for a code from `sendVerificationEmail`.
 </ParamField>
 
 **Returns** — `Promise<void>`

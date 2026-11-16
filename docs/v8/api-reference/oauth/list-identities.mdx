@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/oauth/identities"
 description: "List all OAuth identities linked to the current user"
 ---
 
-Returns all OAuth identities linked to the authenticated user's account, ordered by creation date. Use this to display connected accounts on a settings page.
+Returns all OAuth identities linked to the authenticated user's account, ordered by creation date. Use this to display connected accounts on a settings page, so users can spot a connection they don't recognise and remove it with [Unlink Identity](/v8/api-reference/oauth/unlink-identity) — for example after a [password reset](/v8/api-reference/auth/reset-password), which keeps connected sign-ins.
 
 Requires the user's own access token; a service key is refused.
 

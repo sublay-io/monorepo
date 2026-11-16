@@ -1,12 +1,15 @@
 ---
 title: "Verify email"
-description: "Verify the authenticated user's email address using a token from a verification email"
+description: "Verify an email address using a code from a verification email"
 icon: "plug"
 ---
 
 ## Overview
 
-`useVerifyEmail` returns a function that submits a verification token to the server. Used with `mode: "code"` from `useSendVerificationEmail`. On success, `user.isVerified` is updated immediately in the local Redux store.
+`useVerifyEmail` returns a function that submits a verification code to the server. It confirms two kinds of code:
+
+- a code from `useSendVerificationEmail` with `mode: "code"`, sent to the signed-in user. On success, `user.isVerified` is updated immediately in the local Redux store.
+- a sign-up code, sent when the project requires email verification before sign-in and you passed `emailVerification: { mode: "code" }` to `signUpWithEmailAndPassword` or `signInWithEmailAndPassword`. Pass the `verificationId` they returned. The account being confirmed isn't signed in, so the signed-in user (if any) is left untouched; sign the user in afterwards. See [Require Email Verification](/v8/sdk/authentication/built-in#require-email-verification).
 
 ## Usage Example
 
@@ -66,7 +69,11 @@ function VerifyCodeScreen({ code }: { code: string }) {
 The returned function accepts:
 
 <ParamField path="token" type="string" required>
-  The verification token entered by the user. Must match the token from the most recent verification email exactly.
+  The code entered by the user. Must match the code from the email exactly.
+</ParamField>
+
+<ParamField path="verificationId" type="string">
+  The `verificationId` returned with a sign-up code. Required to confirm one; leave it out for a code from `useSendVerificationEmail`. A sign-up code allows 5 wrong tries; after that, or if the ID is lost, signing in again sends a new code with a new `verificationId`.
 </ParamField>
 
 ## Returns
@@ -78,8 +85,9 @@ The hook returns an async function. That function resolves to:
 </ResponseField>
 
 <Note>
-  On success, `user.isVerified` is optimistically set to `true` in the local
-  Redux store immediately — no need to refetch the user.
+  On success without a `verificationId`, `user.isVerified` is optimistically set
+  to `true` in the local Redux store immediately — no need to refetch the user.
+  With a `verificationId`, the local store is left as it is.
 </Note>
 
 ## See Also

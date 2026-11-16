@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/auth/verify-email-link"
 description: "The page a verification email's link opens: confirm to verify"
 ---
 
-The page a verification email's link opens (emails sent with `mode: "link"`). Opening it doesn't verify anything: it shows a Sublay page asking the user to confirm — "Only confirm if you created an account with \{your app's name\}" — with a **Confirm my email** button. Clicking it verifies the email (`isVerified` becomes `true`) and invalidates the token.
+The page a verification email's link opens: emails sent by [Send Verification Email](/v8/api-reference/auth/send-verification-email) with `mode: "link"` (the link lasts 5 minutes), and the confirmation emails sent at sign-up and after a refused sign-in when the project requires email verification before sign-in (the link lasts 24 hours, and a newer link replaces the previous one). Opening it doesn't verify anything: it shows a Sublay page asking the user to confirm — "Only confirm if you created an account with \{your app's name\}" — with a **Confirm my email** button. Clicking it verifies the email (`isVerified` becomes `true`) and invalidates the token.
 
 The confirm step exists because work email scanners open every link in incoming mail. If opening the link verified the account, a scanner could verify an account someone else created with that person's email.
 
@@ -25,10 +25,11 @@ You don't call this endpoint from your app: it's the target of the button in the
 | Invalid / expired token | Hosted error page | Hosted error page |
 | Server error | Hosted error page | Hosted error page |
 
-The destination is the `redirectUrl` you passed to [Send Verification Email](/v8/api-reference/auth/send-verification-email), stored with the token when the email was sent. The link itself carries no destination, so it can't be edited to send someone elsewhere. Send Verification Email only accepts a `redirectUrl` on one of your project's Verified Domains. A failed verification always shows the hosted page.
+The destination is the `redirectUrl` you passed to Send Verification Email, or in `emailVerification` to Sign Up or Sign In, stored with the token when the email was sent. The link itself carries no destination, so it can't be edited to send someone elsewhere. Only a `redirectUrl` on one of your project's Verified Domains is accepted, and a stored one is checked again when a later email uses it: if it's no longer on the list, the link shows the hosted success page instead. A failed verification always shows the hosted page.
 
 ## See Also
 
 - [Send Verification Email endpoint](/v8/api-reference/auth/send-verification-email)
+- [Sign Up endpoint](/v8/api-reference/auth/sign-up)
 - [`useSendVerificationEmail` hook](/v8/hooks/auth/use-send-verification-email)
 - [Built-in Auth guide](/v8/sdk/authentication/built-in)

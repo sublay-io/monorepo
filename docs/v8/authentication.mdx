@@ -49,6 +49,7 @@ Sublay provides a complete email/password authentication system out of the box. 
 - Sign-out (revokes the refresh token)
 - Password change (requires current password)
 - Password reset via email link (requires an email provider configured in the dashboard)
+- Optionally, requiring users to confirm their email before they can sign in (**Require email verification before sign-in**, Dashboard → Settings → SDK). With it on, sign-up emails a confirmation link or code and returns no session, and accounts with a password can't sign in by any method — password, OAuth, or token refresh — until their email is confirmed. See [Require Email Verification](/v8/sdk/authentication/built-in#require-email-verification).
 
 Users created through built-in auth can link OAuth providers to their account later — see the OAuth section below.
 
@@ -144,6 +145,8 @@ Each provider must be configured in the project dashboard with:
        - **The provider hasn't verified the email:** the sign-in is refused with `error=email_not_verified`, because an unverified email can't prove the account is theirs.
     3. **New user** — if no user has the email, a new user is created from the provider profile (name, email, avatar).
 
+    When the project requires email verification before sign-in and the resolved account has a password and an unconfirmed email, no session is created: Sublay emails a confirmation link to the account's address and redirects with `error=account_email_not_confirmed`.
+
     Sublay then redirects to the `redirectAfterAuth` URL with Sublay tokens appended as query parameters.
   </Step>
   <Step title="Complete sign-in in your app">
@@ -156,6 +159,8 @@ Each provider must be configured in the project dashboard with:
 A user can link multiple OAuth providers (and a password account) to a single Sublay user record. To link an additional provider, the user must be signed in, and the OAuth flow is initiated via the link endpoint rather than the authorize endpoint. Sublay first shows the user a page naming the account the provider will be connected to, and continues to the provider only when they confirm. The new identity is attached to the existing account.
 
 This enables scenarios like "sign in with Google on a laptop and GitHub on another device" — both map to the same user.
+
+An account whose email isn't confirmed can only link a provider whose verified email is the same as the account's; any other provider needs the account's email confirmed first (`error=link_needs_confirmed_email`). This rule fully protects only projects that require email verification before sign-in. See [Link OAuth Provider](/v8/api-reference/oauth/link).
 
 See [SDK Reference → Authentication → OAuth](/v8/sdk/authentication/oauth) for the full integration guide.
 

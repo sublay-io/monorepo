@@ -18,12 +18,18 @@ Changing or setting a password, self-service account deletion, and linking or li
 Creates a new user account and returns credentials.
 
 ```typescript
-const { user, accessToken, refreshToken } = await sublay.auth.signUp({
+const result = await sublay.auth.signUp({
   email: "user@example.com",
   password: "s3cur3P@ss",
   name: "Alice",
   username: "alice",
 });
+
+if ("accessToken" in result) {
+  const { user, accessToken, refreshToken } = result;
+} else {
+  // The project requires email verification before sign-in: no session yet.
+}
 ```
 
 <ParamField body="email" type="string" required>

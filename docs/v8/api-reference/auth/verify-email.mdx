@@ -33,7 +33,7 @@ This endpoint is unauthenticated — the code itself proves identity.
 
 A sign-up code is 6 digits and allows 5 wrong tries. After the fifth wrong try it stops working, and so does its `verificationId`. Sending a new code (signing in again with the email and password) replaces the previous one, with a new `verificationId` and a fresh set of tries.
 
-Keep the `verificationId` in memory on the screen that asks for the code. If the user loses it, or runs out of tries, the way back is to sign in again with the same email and password, which sends a new code and returns a new `verificationId` — or to reset the password, which also confirms the email. Emails to one address are limited to one every 10 minutes, so a new code can take up to 10 minutes to arrive.
+Keep the `verificationId` in memory on the screen that asks for the code. If the user loses it, runs out of tries, or a correct code is refused (a repeated sign-up answers with an ID that doesn't match the code already emailed), the way back is to sign in again with the same email and password, which sends a new code and returns a new `verificationId` — or to reset the password, which also confirms the email. Emails to one address are limited to one every 10 minutes, so a new code can take up to 10 minutes to arrive.
 
 ## Error Codes
 

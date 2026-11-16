@@ -16,12 +16,18 @@ The `auth` module handles authentication for the current end user. Use it to reg
 Registers a new user and stores the returned tokens.
 
 ```typescript
-const { user, accessToken, refreshToken } = await sublay.auth.signUp({
+const result = await sublay.auth.signUp({
   email: "user@example.com",
   password: "s3cur3P@ss",
   name: "Alice",
   username: "alice",
 });
+
+if ("accessToken" in result) {
+  const { user, accessToken, refreshToken } = result;
+} else {
+  // The project requires email verification before sign-in: no session yet.
+}
 ```
 
 <ParamField body="email" type="string" required>

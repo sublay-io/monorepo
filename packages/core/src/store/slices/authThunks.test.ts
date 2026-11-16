@@ -91,6 +91,84 @@ describe("signUpWithEmailAndPasswordThunk", () => {
   });
 });
 
+describe("signUpWithEmailAndPasswordThunk — email verification required", () => {
+  it("stores nothing and resolves the pending result with its verificationId", async () => {
+    const store = makeSublayStore();
+    const axios = mockAxiosPublic();
+    axios.mockResponse(
+      "post",
+      { success: true, emailVerificationRequired: true, verificationId: "vid-1" },
+      202,
+    );
+
+    const result = await store.dispatch(
+      signUpWithEmailAndPasswordThunk({
+        projectId: "project-1",
+        email: "a@b.com",
+        password: "secret",
+        emailVerification: { mode: "code" },
+      }),
+    );
+
+    expect(signUpWithEmailAndPasswordThunk.fulfilled.match(result)).toBe(true);
+    expect(result.payload).toEqual({
+      emailVerificationRequired: true,
+      verificationId: "vid-1",
+    });
+    const state = store.getState();
+    expect(state.sublay.auth.accessToken).toBeNull();
+    expect(state.sublay.auth.user).toBeNull();
+    expect(state.sublay.auth.isAuthenticating).toBe(false);
+    expect(axios.calls("post")[0].body).toMatchObject({
+      emailVerification: { mode: "code" },
+    });
+  });
+
+  it("skips Gate 2 — a full map does not refuse a sign-up that created no session", async () => {
+    const store = makeSublayStore();
+    const axios = mockAxiosPublic();
+    axios.mockResponse("post", { success: true, emailVerificationRequired: true }, 202);
+
+    const pending = store.dispatch(
+      signUpWithEmailAndPasswordThunk({
+        projectId: "project-1",
+        email: "sixth@example.com",
+        password: "secret",
+      }),
+    );
+    // The map fills while the request is in flight (after Gate 1).
+    store.dispatch(setAccountMap(makeFullAccountMap()));
+    const result = await pending;
+
+    expect(signUpWithEmailAndPasswordThunk.fulfilled.match(result)).toBe(true);
+    expect(result.payload).toEqual({ emailVerificationRequired: true });
+    // No cleanup sign-out: there is no session to end.
+    expect(axios.calls("post")).toHaveLength(1);
+    expect(store.getState().sublay.accounts.accountLimitReached).toBe(false);
+  });
+
+  it("sends emailVerification as a JSON field on a multipart sign-up", async () => {
+    const store = makeSublayStore();
+    const axios = mockAxiosPublic();
+    axios.mockResponse("post", { success: true, emailVerificationRequired: true }, 202);
+
+    await store.dispatch(
+      signUpWithEmailAndPasswordThunk({
+        projectId: "project-1",
+        email: "a@b.com",
+        password: "secret",
+        avatarFile: new Blob(["x"]),
+        emailVerification: { mode: "link", redirectUrl: "https://app.example.com/ok" },
+      }),
+    );
+
+    const body = axios.calls("post")[0].body as FormData;
+    expect(body.get("emailVerification")).toBe(
+      JSON.stringify({ mode: "link", redirectUrl: "https://app.example.com/ok" }),
+    );
+  });
+});
+
 describe("signInWithEmailAndPasswordThunk", () => {
   it("stores tokens/user on success", async () => {
     const store = makeSublayStore();
@@ -127,6 +205,40 @@ describe("signInWithEmailAndPasswordThunk", () => {
     const state = store.getState();
     expect(state.sublay.auth.accessToken).toBeNull();
     expect(state.sublay.auth.isAuthenticating).toBe(false);
+  });
+});
+
+describe("signInWithEmailAndPasswordThunk — email not verified", () => {
+  it("rejects with the server code and verificationId, and passes emailVerification through", async () => {
+    const store = makeSublayStore();
+    const axios = mockAxiosPublic();
+    axios.mockError("post", 403, {
+      error: "Confirm your email to sign in.",
+      code: "auth/email-not-verified",
+      verificationId: "vid-2",
+    });
+
+    const result = await store.dispatch(
+      signInWithEmailAndPasswordThunk({
+        projectId: "project-1",
+        email: "a@b.com",
+        password: "secret",
+        emailVerification: { mode: "code" },
+      }),
+    );
+
+    expect(signInWithEmailAndPasswordThunk.rejected.match(result)).toBe(true);
+    expect(result.payload).toMatchObject({
+      code: "auth/email-not-verified",
+      verificationId: "vid-2",
+    });
+    expect(typeof (result.payload as { message: unknown }).message).toBe("string");
+    expect(axios.calls("post")[0].body).toEqual({
+      email: "a@b.com",
+      password: "secret",
+      emailVerification: { mode: "code" },
+    });
+    expect(store.getState().sublay.auth.accessToken).toBeNull();
   });
 });
 
@@ -1181,7 +1293,7 @@ describe("account cap — Gate 1 (pre-flight, sign-up only)", () => {
     if (!signUpWithEmailAndPasswordThunk.rejected.match(result)) {
       throw new Error("expected the sign-up to reject");
     }
-    expect(result.payload).toBe(ACCOUNT_LIMIT_MESSAGE);
+    expect(result.payload).toEqual({ message: ACCOUNT_LIMIT_MESSAGE });
 
     // The whole point of Gate 1: no account is created on the server at all.
     expect(axios.calls("post")).toHaveLength(0);
@@ -1303,7 +1415,7 @@ describe("account cap — Gate 2 (post-authentication, all four entry points)", 
     if (!signInWithEmailAndPasswordThunk.rejected.match(result)) {
       throw new Error("expected the sign-in to reject");
     }
-    expect(result.payload).toBe(ACCOUNT_LIMIT_MESSAGE);
+    expect(result.payload).toEqual({ message: ACCOUNT_LIMIT_MESSAGE });
 
     const calls = axios.calls("post");
     expect(calls.map((c) => c.url)).toEqual([

@@ -319,7 +319,7 @@ theme={theme}
               <View className="flex-row items-center gap-3">
                 <TouchableOpacity
                   onPress={() =>
-                    comment.parentId
+                    comment.parentCommentId
                       ? handleShallowReply!(comment)
                       : handleDeepReply!(comment)
                   }
@@ -359,7 +359,7 @@ theme={theme}
           </View>
         </Pressable>
         )}
-        {!comment.parentId && (
+        {!comment.parentCommentId && (
           <Replies commentId={comment.id} CommentComponent={Comment} />
         )}
       </View>

@@ -22,7 +22,7 @@ function useFetchFollowers(): (params?: FetchFollowersParams) => Promise<Paginat
   const { user } = useUser();
 
   const fetchFollowers = useCallback(
-    async ({ page = 1, limit = 20, query, searchFields, spaceReputation, spaceReputationId, spaceReputationDescendants }: FetchFollowersParams = {}) => {
+    async ({ page = 1, limit = 20, query, searchFields, spaceReputation }: FetchFollowersParams = {}) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -38,11 +38,7 @@ function useFetchFollowers(): (params?: FetchFollowersParams) => Promise<Paginat
             page,
             limit,
             ...buildSearchParams(query, searchFields),
-            ...buildSpaceReputationParams({
-              spaceReputation,
-              spaceReputationId,
-              spaceReputationDescendants,
-            }),
+            ...buildSpaceReputationParams({ spaceReputation }),
           },
         }
       );

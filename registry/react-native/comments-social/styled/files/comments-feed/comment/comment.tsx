@@ -375,7 +375,7 @@ theme={theme}
               <View style={[styles.actionsContainer, { gap: actionsItemGap }]}>
                 <TouchableOpacity
                   onPress={() =>
-                    comment.parentId
+                    comment.parentCommentId
                       ? handleShallowReply!(comment)
                       : handleDeepReply!(comment)
                   }
@@ -421,7 +421,7 @@ theme={theme}
           </View>
         </Pressable>
         )}
-        {!comment.parentId && (
+        {!comment.parentCommentId && (
           <Replies commentId={comment.id} CommentComponent={Comment} />
         )}
       </View>

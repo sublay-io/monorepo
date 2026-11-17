@@ -22,7 +22,7 @@ function useFetchSpaceMembers(): (props: FetchSpaceMembersProps) => Promise<Spac
   const axios = useAxiosPrivate();
 
   const fetchSpaceMembers = useCallback(
-    async ({ spaceId, page, limit, role, status, spaceReputation, spaceReputationId, spaceReputationDescendants }: FetchSpaceMembersProps) => {
+    async ({ spaceId, page, limit, role, status, spaceReputation }: FetchSpaceMembersProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -36,11 +36,7 @@ function useFetchSpaceMembers(): (props: FetchSpaceMembersProps) => Promise<Spac
         limit,
         role,
         status,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       const response = await axios.get<SpaceMembersResponse>(

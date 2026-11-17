@@ -58,7 +58,7 @@ function useCreateComment(): (props: CreateCommentProps) => Promise<Comment> {
         content,
         gif,
         mentions,
-        parentId: parentCommentId,
+        parentCommentId,
         referencedCommentId,
         attachments,
         metadata,

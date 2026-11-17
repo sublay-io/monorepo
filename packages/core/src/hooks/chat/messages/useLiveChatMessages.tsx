@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSublayDispatch, useSublaySelector } from "../../../store/hooks";
 import {
   selectMessages,
@@ -15,7 +15,11 @@ import {
   startThreadLoad,
   setThreadLoading,
 } from "../../../store/slices/chatSlice";
-import { ChatMessage } from "../../../interfaces/models/ChatMessage";
+import {
+  ChatMessage,
+  ChatMessageListInclude,
+  ChatMessageListIncludeParam,
+} from "../../../interfaces/models/ChatMessage";
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
 import { useChatContext } from "../../../context/chat-context";
@@ -25,14 +29,14 @@ export interface UseLiveChatMessagesProps {
   conversationId: string;
   parentMessageId?: string | null;
   limit?: number;
-  includeFiles?: boolean;
   /**
-   * When `true`, each message carries its `grants` reputation-grant summary.
-   * Needed for grants to survive a reload or a scroll into history — the
+   * Opt-in fields on each message, one value or an array: `"files"` populates
+   * `files`, `"grants"` the `grants` reputation-grant summary. Ask for
+   * `"grants"` to keep grants across a reload or a scroll into history — the
    * `message:grant` socket event only covers grants issued while the
    * conversation is open.
    */
-  includeGrants?: boolean;
+  include?: ChatMessageListIncludeParam;
 }
 
 export interface UseLiveChatMessagesValues {
@@ -57,8 +61,7 @@ function useLiveChatMessages({
   conversationId,
   parentMessageId,
   limit = 50,
-  includeFiles,
-  includeGrants,
+  include: includeProp,
 }: UseLiveChatMessagesProps): UseLiveChatMessagesValues {
   const dispatch = useSublayDispatch();
   const { projectId } = useProject();
@@ -66,6 +69,16 @@ function useLiveChatMessages({
   const { socket } = useChatContext();
 
   const isThread = Boolean(parentMessageId);
+
+  // A primitive key, so a fresh array each render doesn't re-run the fetches.
+  const includeKey = Array.isArray(includeProp)
+    ? includeProp.join(",")
+    : includeProp ?? "";
+  const include = useMemo(
+    () =>
+      includeKey ? (includeKey.split(",") as ChatMessageListInclude[]) : undefined,
+    [includeKey]
+  );
 
   // Read from the correct Redux bucket
   const mainMessages = useSublaySelector(selectMessages(conversationId));
@@ -110,8 +123,7 @@ function useLiveChatMessages({
           before,
           limit,
           sortDir: isThread ? "asc" : "desc",
-          includeFiles,
-          includeGrants,
+          include,
         });
 
         if (isThread) {
@@ -135,7 +147,7 @@ function useLiveChatMessages({
         handleError(err, "Failed to load messages");
       }
     },
-    [projectId, conversationId, parentMessageId, isThread, limit, includeFiles, includeGrants, fetchMany, dispatch]
+    [projectId, conversationId, parentMessageId, isThread, limit, include, fetchMany, dispatch]
   );
 
   // Initial fetch on mount
@@ -159,18 +171,18 @@ function useLiveChatMessages({
     };
 
     initialFetch();
-    // Re-runs on the conversation/thread identity AND on the two include
-    // flags, which change what a message row CONTAINS: flipping `includeGrants`
-    // (or `includeFiles`) on a mounted hook has to refetch, or the caller has
-    // toggled a prop that silently does nothing until the conversation changes.
+    // Re-runs on the conversation/thread identity AND on `include`, which
+    // changes what a message row CONTAINS: adding or dropping "grants" (or
+    // "files") on a mounted hook has to refetch, or the caller has changed a
+    // prop that silently does nothing until the conversation changes.
     //
     // `fetchPage` is deliberately left out even though it is called here. It is
     // a `useCallback` over exactly these deps plus `fetchMany`/`dispatch`, so
     // listing it would add nothing but the risk of a refetch loop if either of
-    // those two ever stops being stable. The two flags are primitives, so no
+    // those two ever stops being stable. `includeKey` is a primitive, so no
     // re-render can re-arm this effect on identity alone.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId, conversationId, parentMessageId, includeFiles, includeGrants]);
+  }, [projectId, conversationId, parentMessageId, includeKey]);
 
   // Load more messages:
   // - Main stream: fetch older messages using `before` cursor (oldest loaded createdAt)
@@ -193,8 +205,7 @@ function useLiveChatMessages({
           after,
           limit,
           sortDir: "asc",
-          includeFiles,
-          includeGrants,
+          include,
         });
         dispatch(
           mergeThreadReplies({
@@ -218,7 +229,7 @@ function useLiveChatMessages({
     dispatch(setMessagesLoading({ conversationId, loading: true }));
     await fetchPage(before);
     dispatch(setMessagesLoading({ conversationId, loading: false }));
-  }, [loading, hasMore, isThread, parentMessageId, projectId, conversationId, limit, includeFiles, includeGrants, fetchMany, dispatch, fetchPage]);
+  }, [loading, hasMore, isThread, parentMessageId, projectId, conversationId, limit, include, fetchMany, dispatch, fetchPage]);
 
   // Thread reconnect catch-up: fetch the replies sent while the socket was
   // down. Page forward from the newest reply fetched in order until the server
@@ -243,8 +254,7 @@ function useLiveChatMessages({
           after,
           limit: after === null ? limit : 100,
           sortDir: "asc",
-          includeFiles,
-          includeGrants,
+          include,
         });
         dispatch(
           mergeThreadReplies({
@@ -268,7 +278,7 @@ function useLiveChatMessages({
     } catch (err) {
       handleError(err, "Failed to fetch missed thread replies");
     }
-  }, [projectId, conversationId, parentMessageId, limit, includeFiles, includeGrants, fetchMany, dispatch]);
+  }, [projectId, conversationId, parentMessageId, limit, include, fetchMany, dispatch]);
 
   useEffect(() => {
     if (!socket || !isThread) return;

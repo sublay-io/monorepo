@@ -96,7 +96,7 @@ describe("useEntityComments", () => {
     const nested = makeComment({
       id: "c1",
       repliesCount: 1,
-      replies: makePage([makeComment({ id: "r1", parentId: "c1" })], null),
+      replies: makePage([makeComment({ id: "r1", parentCommentId: "c1" })], null),
     });
     const { result, axiosPrivate } = renderHookWithAxios(
       () =>
@@ -115,7 +115,7 @@ describe("useEntityComments", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.getComment("c1")).not.toHaveProperty("replies");
-    expect(result.current.getComment("r1")?.parentId).toBe("c1");
+    expect(result.current.getComment("r1")?.parentCommentId).toBe("c1");
     expect(result.current.getComment("missing")).toBeUndefined();
 
     axiosPrivate.mockResponse("get", makePage([], null));
@@ -344,7 +344,7 @@ describe("useEntityComments", () => {
   });
 
   it("changing sortByReaction while not sorting by top neither refetches nor drops loaded replies", async () => {
-    const reply = makeComment({ id: "r1", parentId: "c1" });
+    const reply = makeComment({ id: "r1", parentCommentId: "c1" });
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useEntityComments({ entityId: "entity-1", defaultSortBy: "createdAt", replyDepth: 1 }),
       {

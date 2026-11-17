@@ -56,10 +56,9 @@ describe("useFetchManyChatMessages", () => {
         before: "2024-01-02T00:00:00.000Z",
         limit: 20,
         sortDir: "asc",
-        includeFiles: true,
+        include: "files",
         filters: { hasReplies: true },
-        spaceReputationId: "space-1",
-        spaceReputationDescendants: true,
+        spaceReputation: { spaceId: "space-1", includeDescendants: true },
       });
     });
 
@@ -76,7 +75,7 @@ describe("useFetchManyChatMessages", () => {
     });
   });
 
-  it("sends include=grants when includeGrants is set", async () => {
+  it("sends include=grants for a single value", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyChatMessages());
 
     axiosPrivate.mockResponse("get", makePage());
@@ -84,7 +83,7 @@ describe("useFetchManyChatMessages", () => {
     await act(async () => {
       await result.current({
         conversationId: "conversation-1",
-        includeGrants: true,
+        include: "grants",
       });
     });
 
@@ -92,10 +91,8 @@ describe("useFetchManyChatMessages", () => {
     expect(call.config?.params.include).toBe("grants");
   });
 
-  it("composes both tokens into one include param when files and grants are both requested", async () => {
-    // The endpoint takes a single `include`, so the two must not overwrite each
-    // other. The server splits on commas and trims, so this reaches both of its
-    // parsers intact.
+  it("joins an include array into one comma-separated param", async () => {
+    // The endpoint takes a single `include`; the server splits on commas.
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyChatMessages());
 
     axiosPrivate.mockResponse("get", makePage());
@@ -103,8 +100,7 @@ describe("useFetchManyChatMessages", () => {
     await act(async () => {
       await result.current({
         conversationId: "conversation-1",
-        includeFiles: true,
-        includeGrants: true,
+        include: ["files", "grants"],
       });
     });
 
@@ -112,7 +108,7 @@ describe("useFetchManyChatMessages", () => {
     expect(call.config?.params.include).toBe("files,grants");
   });
 
-  it("omits include entirely when neither token is requested", async () => {
+  it("omits include entirely when it isn't given", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyChatMessages());
 
     axiosPrivate.mockResponse("get", makePage());

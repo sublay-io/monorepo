@@ -38,17 +38,17 @@ interface FetchManyCommentsBaseProps extends SpaceReputationContextParams {
 
 /**
  * A thread fetch (`GET /comments`): `entityId` → that entity's top-level
- * comments; `parentId` (alone — the parent decides the entity) → a comment's
+ * comments; `parentCommentId` (alone — the parent decides the entity) → a comment's
  * direct replies. Exactly one of the two, and no `sortDir` with
  * `sortBy: "controversial"`. A user's comment history is
  * `users.fetchCommentsByUserId`.
  */
 export type FetchManyCommentsProps =
   | WithOneWaySortDir<
-      FetchManyCommentsBaseProps & { entityId: string; parentId?: null }
+      FetchManyCommentsBaseProps & { entityId: string; parentCommentId?: null }
     >
   | WithOneWaySortDir<
-      FetchManyCommentsBaseProps & { parentId: string; entityId?: null }
+      FetchManyCommentsBaseProps & { parentCommentId: string; entityId?: null }
     >;
 
 export async function fetchManyComments(
@@ -57,7 +57,7 @@ export async function fetchManyComments(
 ): Promise<CursorPaginatedResponse<Comment>> {
   const {
     entityId,
-    parentId,
+    parentCommentId,
     limit,
     cursor,
     sortBy,
@@ -70,14 +70,12 @@ export async function fetchManyComments(
     replySortDir,
     replySortByReaction,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
   } = data;
   // Only the thread endpoint's own params are forwarded (no spread), so a
   // stray `page` / `userId` / `sourceId` / `blockedFilter` never reaches it.
   const params: Record<string, unknown> = {
     entityId,
-    parentId,
+    parentCommentId,
     limit,
     cursor: cursor ?? undefined,
     sortBy,
@@ -92,11 +90,7 @@ export async function fetchManyComments(
     replySortDir:
       (replySortBy ?? sortBy) === "controversial" ? undefined : replySortDir,
     replySortByReaction,
-    ...buildSpaceReputationParams({
-      spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
-    }),
+    ...buildSpaceReputationParams({ spaceReputation }),
   };
   for (const key of Object.keys(params)) {
     if (params[key] === undefined) delete params[key];

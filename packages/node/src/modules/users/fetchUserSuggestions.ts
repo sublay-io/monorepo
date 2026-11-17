@@ -21,18 +21,14 @@ export async function fetchUserSuggestions(
   client: SublayHttpClient,
   data: FetchUserSuggestionsProps
 ): Promise<FetchUserSuggestionsResponse> {
-  const { spaceReputation, spaceReputationId, spaceReputationDescendants, ...rest } =
+  const { spaceReputation, ...rest } =
     data;
   const response = await client.projectInstance.get<FetchUserSuggestionsResponse>(
     "/users/suggestions",
     {
       params: {
         ...rest,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

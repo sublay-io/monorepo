@@ -20,8 +20,6 @@ function useFetchUserByForeignId(): (props: FetchUserByForeignIdProps) => Promis
       foreignId,
       include,
       spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
     }: FetchUserByForeignIdProps) => {
       if (!projectId) {
         throw new Error("No project specified");
@@ -34,11 +32,7 @@ function useFetchUserByForeignId(): (props: FetchUserByForeignIdProps) => Promis
       const params: Record<string, any> = {
         foreignId,
         include: Array.isArray(include) ? include.join(",") : include,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       const response = await axios.get(`/${projectId}/users/by-foreign-id`, {

@@ -65,7 +65,7 @@ describe("useCollectionEntitiesWrapper", () => {
           id: "root",
           projectId: "test-project",
           userId: "user-1",
-          parentId: null,
+          parentCollectionId: null,
           name: "Root",
           entityCount: 0,
           createdAt: "2024-01-01T00:00:00.000Z",

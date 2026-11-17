@@ -27,8 +27,6 @@ export async function fetchFollowingByUserId(
   const {
     userId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<PaginatedResponse<FollowRow>>(
@@ -36,11 +34,7 @@ export async function fetchFollowingByUserId(
     {
       params: {
         ...rest,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

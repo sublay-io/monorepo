@@ -68,8 +68,8 @@ A filter set to `null` is left out of the request; `"none"` is sent only when yo
 
 The `config` object passed to `fetchEntities` accepts an optional `spaceReputation` object that opts each row's embedded author into an added `spaceReputation` number. Only spaces the viewer can read count: a space they can't read reads `0` (see [Who sees space reputation](/v8/data-models/reputation#who-sees-space-reputation)).
 
-<ParamField path="config.spaceReputation" type="object">
-  Opt-in. Adds a `spaceReputation` number to each row's embedded author. **This object is the primary form** — it replaces the deprecated flat config props below. This is a context surface, so `spaceId` accepts `"context"`.
+<ParamField path="config.spaceReputation" type="object | null">
+  Opt-in. Adds a `spaceReputation` number to each row's embedded author. `null` or left out: none. Like the rest of `config`, it applies to this fetch and the `loadMore` calls after it; a later `fetchEntities` call without it drops it. This is a context surface, so `spaceId` accepts `"context"`.
 
   <Expandable title="spaceReputation">
     <ParamField name="spaceId" type='string | "none" | "context"' required>
@@ -79,14 +79,6 @@ The `config` object passed to `fetchEntities` accepts an optional `spaceReputati
       Only honored when `spaceId` is an explicit space `<uuid>`. When `true`, `spaceReputation` is the subtree sum (the named space plus all of its descendants). Ignored for `"none"`; not allowed with `"context"`.
     </ParamField>
   </Expandable>
-</ParamField>
-
-<ParamField path="config.spaceReputationId" type="string" deprecated>
-  **Deprecated** — use `config.spaceReputation.spaceId`. The flat form; still accepted (the object wins if both are passed). Accepts a space `<uuid>`, `"none"`, or `"context"`.
-</ParamField>
-
-<ParamField path="config.spaceReputationDescendants" type="boolean" deprecated>
-  **Deprecated** — use `config.spaceReputation.includeDescendants`. Only honored alongside an explicit `config.spaceReputationId` `<uuid>`.
 </ParamField>
 
 ## Return Values

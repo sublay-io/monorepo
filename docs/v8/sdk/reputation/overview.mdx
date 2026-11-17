@@ -57,7 +57,7 @@ If the sender's chosen bucket is short, the request rejects with `409 reputation
 
 ## Showing totals on an item
 
-Ask for the grants summary inline rather than fetching a list you then have to sum. Entities and comments take a `grants` token in `include`; chat messages take an `includeGrants` boolean:
+Ask for the grants summary inline rather than fetching a list you then have to sum. Entities, comments and chat messages all take a `grants` token in `include`:
 
 ```tsx
 const { entities } = useFetchManyEntitiesWrapper({ include: ["user", "grants"] });
@@ -117,10 +117,10 @@ function WhoRewardedThis({ commentId }) {
 
 A grant landing on a chat message is broadcast live to everyone in the conversation, the same way message reactions are. `ChatProvider` handles the [`message:grant`](/v8/sdk/chat/real-time) event for you: the message's `grants` summary updates in the store and your components re-render.
 
-Load messages with `includeGrants: true` so each message carries a baseline summary — without it, `viewerTotal` starts at `0` and only reflects grants seen live in that session.
+Load messages with `include: "grants"` so each message carries a baseline summary — without it, `viewerTotal` starts at `0` and only reflects grants seen live in that session.
 
 ```tsx
-const { messages } = useLiveChatMessages({ conversationId, includeGrants: true });
+const { messages } = useLiveChatMessages({ conversationId, include: "grants" });
 ```
 
 ## When users can't grant directly

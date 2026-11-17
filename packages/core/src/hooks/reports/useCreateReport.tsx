@@ -6,7 +6,7 @@ import { useUser } from "../user";
 export type ReportTargetType = "comment" | "entity" | "message";
 
 export interface UseCreateReportProps {
-  type: ReportTargetType;
+  targetType: ReportTargetType;
 }
 
 export interface CreateReportProps {
@@ -55,7 +55,7 @@ export interface CreateReportResponse {
   createdAt: string;
 }
 
-function useCreateReport({ type }: UseCreateReportProps):
+function useCreateReport({ targetType: reportType }: UseCreateReportProps):
   | ((props: CreateCommentReportProps) => Promise<CreateReportResponse>)
   | ((props: CreateEntityReportProps) => Promise<CreateReportResponse>)
   | ((props: CreateMessageReportProps) => Promise<CreateReportResponse>) {
@@ -128,11 +128,11 @@ function useCreateReport({ type }: UseCreateReportProps):
     });
   };
 
-  if (type === "comment") {
+  if (reportType === "comment") {
     return createCommentReport;
-  } else if (type === "entity") {
+  } else if (reportType === "entity") {
     return createEntityReport;
-  } else if (type === "message") {
+  } else if (reportType === "message") {
     return createMessageReport;
   }
 

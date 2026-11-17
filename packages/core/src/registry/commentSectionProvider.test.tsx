@@ -201,7 +201,7 @@ const page = (data: Comment[]) => ({ data, pagination: { nextCursor: null, hasMo
 function mockApi() {
   const get = vi.spyOn(axiosPrivate, "get").mockImplementation((url: string, config?: any) => {
     if (url.endsWith(`/comments/${H}`)) {
-      return ok(makeComment({ id: H, entityId: "entity-A", parentId: null }));
+      return ok(makeComment({ id: H, entityId: "entity-A", parentCommentId: null }));
     }
     if (url.endsWith("/entities/entity-A")) {
       return ok(makeEntity({ id: "entity-A", commentsCount: 2 }));

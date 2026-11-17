@@ -27,7 +27,7 @@ function makeParent(overrides: Partial<Comment> = {}): Comment {
   return makeComment({
     id: P,
     entityId: "entity-1",
-    parentId: null,
+    parentCommentId: null,
     userId: "user-2",
     user: makeAuthUser({ id: "user-2", username: "bob" }) as any,
     content: "the parent",
@@ -61,7 +61,7 @@ describe("useCommentSectionData — a failed create is reported", () => {
       error: "This comment was deleted and can't be replied to.",
       code: "comment/parent-deleted",
     });
-    const returned = await result.current.createComment({ parentId: P, content: "a reply" });
+    const returned = await result.current.createComment({ parentCommentId: P, content: "a reply" });
 
     expect(returned).toBeUndefined();
     expect(commentCreateFailedCallback).toHaveBeenCalledTimes(1);
@@ -69,11 +69,11 @@ describe("useCommentSectionData — a failed create is reported", () => {
       code: "comment/parent-deleted",
       message: "This comment was deleted and can't be replied to.",
       status: 403,
-      parentId: P,
+      parentCommentId: P,
     });
   });
 
-  it("reports a top-level comment with parentId null", async () => {
+  it("reports a top-level comment with parentCommentId null", async () => {
     const commentCreateFailedCallback = vi.fn();
     const { result, axiosPrivate } = renderSection(null, { commentCreateFailedCallback });
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -88,7 +88,7 @@ describe("useCommentSectionData — a failed create is reported", () => {
       code: "comment/server-error",
       message: "Internal server error",
       status: 500,
-      parentId: null,
+      parentCommentId: null,
     });
   });
 
@@ -100,20 +100,20 @@ describe("useCommentSectionData — a failed create is reported", () => {
     await waitFor(() => expect(result.current.comments).toHaveLength(1));
 
     axiosPrivate.mockNetworkError("post");
-    await result.current.createComment({ parentId: P, content: "a reply" });
+    await result.current.createComment({ parentCommentId: P, content: "a reply" });
 
     expect(commentCreateFailedCallback).toHaveBeenCalledWith({
       code: undefined,
       message: undefined,
       status: undefined,
-      parentId: P,
+      parentCommentId: P,
     });
     await waitFor(() =>
       expect(result.current.createError).toEqual({
         code: undefined,
         message: undefined,
         status: undefined,
-        parentId: P,
+        parentCommentId: P,
       }),
     );
     // Not one of the parent codes: the parent is left as it was.
@@ -135,13 +135,13 @@ describe("useCommentSectionData — a failed create is reported", () => {
         endDate: null,
       }),
     );
-    await result.current.createComment({ parentId: P, content: "a reply" });
+    await result.current.createComment({ parentCommentId: P, content: "a reply" });
 
     const expected = {
       code: "user/suspended",
       message: "Your account is suspended.",
       status: 403,
-      parentId: P,
+      parentCommentId: P,
     };
     expect(commentCreateFailedCallback).toHaveBeenCalledWith(expected);
     await waitFor(() => expect(result.current.createError).toEqual(expected));
@@ -164,7 +164,7 @@ describe("useCommentSectionData — a failed create is reported", () => {
         code: "comment/webhook-validation-failed",
         message: "Webhook validation rejected",
         status: 400,
-        parentId: null,
+        parentCommentId: null,
       }),
     );
 
@@ -207,7 +207,7 @@ describe("useCommentSectionData — a failed create is reported", () => {
       await result.current.createComment({ content: "x" });
     });
     expect(commentTooShortCallback).toHaveBeenCalledTimes(1);
-    expect(result.current.createError).toMatchObject({ status: 500, parentId: null });
+    expect(result.current.createError).toMatchObject({ status: 500, parentCommentId: null });
   });
 
   it("comment/parent-deleted turns the parent into the deleted placeholder", async () => {
@@ -218,7 +218,7 @@ describe("useCommentSectionData — a failed create is reported", () => {
       error: "This comment was deleted and can't be replied to.",
       code: "comment/parent-deleted",
     });
-    await result.current.createComment({ parentId: P, content: "a reply" });
+    await result.current.createComment({ parentCommentId: P, content: "a reply" });
 
     await waitFor(() => expect(result.current.getComment(P)?.userDeletedAt).toBeTruthy());
     const parent = result.current.getComment(P)!;
@@ -248,7 +248,7 @@ describe("useCommentSectionData — a failed create is reported", () => {
       error: "This comment was removed and can't be replied to.",
       code: "comment/parent-removed",
     });
-    await result.current.createComment({ parentId: P, content: "a reply" });
+    await result.current.createComment({ parentCommentId: P, content: "a reply" });
 
     await waitFor(() => expect(result.current.getComment(P)?.moderationStatus).toBe("removed"));
     const parent = result.current.getComment(P)!;
@@ -275,7 +275,7 @@ describe("useCommentSectionData — a failed create is reported", () => {
       error: "This comment was removed and can't be replied to.",
       code: "comment/parent-removed",
     });
-    await result.current.createComment({ parentId: P, content: "a reply" });
+    await result.current.createComment({ parentCommentId: P, content: "a reply" });
 
     await waitFor(() => expect(result.current.getComment(P)?.moderationStatus).toBe("removed"));
     const parent = result.current.getComment(P)!;
@@ -297,7 +297,7 @@ describe("useCommentSectionData — a failed create is reported", () => {
     await waitFor(() => expect(result.current.getComment(P)?.userDeletedAt).toBeTruthy());
     expect(result.current.createError).toMatchObject({
       code: "comment/parent-deleted",
-      parentId: P,
+      parentCommentId: P,
     });
     // The reply target and its banner are kept, as for any failed create.
     await waitFor(() => expect(result.current.repliedToComment?.id).toBe(P));
@@ -309,7 +309,7 @@ describe("useCommentSectionData — a failed create is reported", () => {
     await waitFor(() => expect(result.current.comments).toHaveLength(1));
 
     axiosPrivate.mockError("post", 500, { error: "Internal server error" });
-    const returned = await result.current.createComment({ parentId: P, content: "a reply" });
+    const returned = await result.current.createComment({ parentCommentId: P, content: "a reply" });
 
     expect(returned).toBeUndefined();
     await waitFor(() => expect(result.current.submittingComment).toBe(false));

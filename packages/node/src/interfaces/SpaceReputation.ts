@@ -14,13 +14,11 @@
  * Both classes share the same param names and types — only the accepted
  * `spaceId` value set (documented in JSDoc) differs.
  *
- * **Preferred form:** pass the `spaceReputation` object (`{ spaceId,
- * includeDescendants? }`). The flat props (`spaceReputationId` /
- * `spaceReputationDescendants`) are `@deprecated` but still accepted; when both
- * forms are supplied the object wins. The object is normalized to the flat wire
- * params by `buildSpaceReputationParams` before it reaches the request — it must
- * never be forwarded to axios `params` un-normalized (axios would bracket-encode
- * it and the server would ignore it).
+ * The object is normalized to the server's flat params
+ * (`spaceReputationId` / `spaceReputationDescendants`) by
+ * `buildSpaceReputationParams` before it reaches the request — it must never be
+ * forwarded to axios `params` un-normalized (axios would bracket-encode it and
+ * the server would ignore it).
  */
 
 /**
@@ -43,22 +41,6 @@ export interface SpaceReputationContextParams {
     spaceId: string | "none" | "context";
     includeDescendants?: boolean;
   };
-  /**
-   * @deprecated Pass `spaceReputation` instead. Retained for back-compat.
-   * Opt the returned/embedded user(s) into a space-scoped `spaceReputation`.
-   * Accepted forms:
-   * - a space `<uuid>` — reputation scoped to that specific space
-   * - `"none"` — the user's global, non-space reputation
-   * - `"context"` — reputation scoped to each row's own space (per-row)
-   */
-  spaceReputationId?: string;
-  /**
-   * @deprecated Pass `spaceReputation.includeDescendants` instead. Retained for
-   * back-compat. Include reputation accrued in descendant spaces. Only honored
-   * when `spaceReputationId` is an explicit `<uuid>`; ignored for `"none"` and
-   * disallowed (not applicable) with `"context"`.
-   */
-  spaceReputationDescendants?: boolean;
 }
 
 /**
@@ -84,18 +66,4 @@ export interface SpaceReputationUserParams {
     spaceId: string | "none";
     includeDescendants?: boolean;
   };
-  /**
-   * @deprecated Pass `spaceReputation` instead. Retained for back-compat.
-   * Opt the returned user(s) into a space-scoped `spaceReputation`.
-   * Accepted forms:
-   * - a space `<uuid>` — reputation scoped to that specific space
-   * - `"none"` — the user's global, non-space reputation
-   */
-  spaceReputationId?: string;
-  /**
-   * @deprecated Pass `spaceReputation.includeDescendants` instead. Retained for
-   * back-compat. Include reputation accrued in descendant spaces. Only honored
-   * when `spaceReputationId` is an explicit `<uuid>`; ignored for `"none"`.
-   */
-  spaceReputationDescendants?: boolean;
 }

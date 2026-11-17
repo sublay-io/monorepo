@@ -14,18 +14,14 @@ function useFetchUserSuggestions(): (props: FetchUserSuggestionsProps) => Promis
   const { projectId } = useProject();
 
   const fetchUserSuggestions = useCallback(
-    async ({ query, spaceReputation, spaceReputationId, spaceReputationDescendants }: FetchUserSuggestionsProps) => {
+    async ({ query, spaceReputation }: FetchUserSuggestionsProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
 
       const params: Record<string, any> = {
         query,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       // The server answers `{ data: User[] }`; the hook returns the array.

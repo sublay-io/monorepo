@@ -9,7 +9,7 @@ afterEach(() => {
 });
 
 describe("useMessageThread", () => {
-  it("fetches thread replies for the given messageId on mount", async () => {
+  it("fetches thread replies for the given parentMessageId on mount", async () => {
     const reply = makeChatMessage({
       id: "reply-1",
       parentMessageId: "message-1",
@@ -17,7 +17,7 @@ describe("useMessageThread", () => {
     });
 
     const { result, axiosPrivate } = renderHookWithAxios(
-      () => useMessageThread({ conversationId: "conversation-1", messageId: "message-1" }),
+      () => useMessageThread({ conversationId: "conversation-1", parentMessageId: "message-1" }),
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
@@ -38,9 +38,9 @@ describe("useMessageThread", () => {
     expect(call.config?.params).toMatchObject({ sortDir: "asc", parentMessageId: "message-1" });
   });
 
-  it("sendReply automatically attaches the thread's messageId as parentMessageId", async () => {
+  it("sendReply automatically attaches the thread's parentMessageId", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(
-      () => useMessageThread({ conversationId: "conversation-1", messageId: "message-1" }),
+      () => useMessageThread({ conversationId: "conversation-1", parentMessageId: "message-1" }),
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
@@ -73,7 +73,7 @@ describe("useMessageThread", () => {
     });
 
     const { result, axiosPrivate } = renderHookWithAxios(
-      () => useMessageThread({ conversationId: "conversation-1", messageId: "message-1" }),
+      () => useMessageThread({ conversationId: "conversation-1", parentMessageId: "message-1" }),
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {

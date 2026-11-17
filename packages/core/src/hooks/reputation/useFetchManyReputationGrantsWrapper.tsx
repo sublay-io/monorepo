@@ -66,8 +66,6 @@ function useFetchManyReputationGrantsWrapper(
     targetId,
     include,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
   } = props;
 
   // Forwarded to the leaf fetcher, which flattens it via
@@ -76,8 +74,6 @@ function useFetchManyReputationGrantsWrapper(
   // effect on every render.
   const reputation = {
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
   };
   const reputationKey = JSON.stringify(reputation);
 

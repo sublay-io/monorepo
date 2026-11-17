@@ -69,8 +69,6 @@ export async function listGrants(
 ): Promise<ListGrantsResponse> {
   const {
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<ListGrantsResponse>(
@@ -82,11 +80,7 @@ export async function listGrants(
         // `spaceReputationId=context` scores each hydrated user against THAT
         // GRANT'S own bucket. Normalized rather than spread raw — axios would
         // bracket-encode the object and the server would ignore it.
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

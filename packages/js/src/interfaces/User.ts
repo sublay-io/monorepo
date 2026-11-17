@@ -26,7 +26,7 @@ export type UserFull = {
   reputation: number;
   /**
    * Space-scoped reputation, present only when the request opted in via
-   * `spaceReputationId` (and the project has the reputation bundle). It is the
+   * `spaceReputation` (and the project has the reputation bundle). It is the
    * user's reputation within the requested space context — see
    * {@link SpaceReputationContextParams} / {@link SpaceReputationUserParams}.
    */

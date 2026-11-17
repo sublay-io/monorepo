@@ -33,8 +33,6 @@ export async function fetchUserByForeignId(
     include: serializeInclude(data.include),
     ...buildSpaceReputationParams({
       spaceReputation: data.spaceReputation,
-      spaceReputationId: data.spaceReputationId,
-      spaceReputationDescendants: data.spaceReputationDescendants,
     }),
   };
 

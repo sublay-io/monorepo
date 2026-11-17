@@ -54,11 +54,10 @@ function MessageList({ conversationId }: { conversationId: string }) {
   Number of messages per page. Defaults to `50`.
 </ParamField>
 
-<ParamField body="includeFiles" type="boolean">
-  When `true`, the server populates the `files` field on each message. Omitted by default to keep payloads small.
-</ParamField>
-<ParamField body="includeGrants" type="boolean">
-  When `true`, each message carries its [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) at `message.grants` — `{ total, count, viewerTotal }` over positive grants. Populated by the `reputation` bundle; on a project without it the summary comes back zero-filled rather than missing.
+<ParamField body="include" type="ChatMessageListIncludeParam">
+  Fields to add to each message, as a single value or an array:
+  - `"files"` — the `files` field. Left out by default to keep payloads small.
+  - `"grants"` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) at `message.grants`: `{ total, count, viewerTotal }` over positive grants. Populated by the `reputation` bundle; on a project without it the summary comes back zero-filled rather than missing.
 </ParamField>
 
 ## Returns

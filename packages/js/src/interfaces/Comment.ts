@@ -50,7 +50,7 @@ export interface Comment {
   entity?: CommentEntity | null;
   userId: string | null; // `null` on placeholders
   user?: User | null; // Populated when include contains "user"; `null` on placeholders
-  parentId: string | null;
+  parentCommentId: string | null;
   // Populated when include contains "parent". `null` when the comment has no
   // parent, or the parent can't be shown to the viewer.
   parentComment?: Comment | null;

@@ -22,8 +22,6 @@ export async function fetchComment(
   const {
     commentId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<Comment>(
@@ -32,11 +30,7 @@ export async function fetchComment(
       params: {
         ...rest,
         include: serializeInclude(rest.include),
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

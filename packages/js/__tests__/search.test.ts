@@ -8,8 +8,7 @@ describe("js-sdk search — request shaping", () => {
     await searchContent(client, {
       query: "hello",
       sourceTypes: ["entity"],
-      spaceReputationId: "rep1",
-      spaceReputationDescendants: true,
+      spaceReputation: { spaceId: "rep1", includeDescendants: true },
     });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/search/content",

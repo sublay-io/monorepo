@@ -138,7 +138,7 @@ Only an **active** membership counts. A `pending`, `banned` or `rejected` user r
 |-------|----------------------------------------------|
 | A single entity or comment (by id, short id or foreign id) and its reactions | `404` with the route's not-found code (`entity/not-found`, `comment/not-found`), exactly like an item that doesn't exist. |
 | [Fetch Many Entities](/v8/api-reference/entities/fetch-many-entities) | The entity is left out, and `totalItems` counts only what the viewer can read. `spaceId` of a space they can't read is an empty page with `totalItems: 0`. |
-| A comment thread ([Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments)) | The empty page, as for an unknown `entityId` or `parentId`. |
+| A comment thread ([Fetch Many Comments](/v8/api-reference/comments/fetch-many-comments)) | The empty page, as for an unknown `entityId` or `parentCommentId`. |
 | A user's comments ([Fetch Comments by User ID](/v8/api-reference/users/fetch-comments-by-user-id)) | Comments on entities in spaces the viewer can't read are left out, the user's own included. |
 
 A comment is read through its entity's space. Content in no space is read by everyone.

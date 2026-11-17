@@ -31,7 +31,7 @@ function NewCommentForm() {
     useState<CommentCreateError | null>(null);
   const createErrorMessage =
     createError &&
-    createError.parentId === null &&
+    createError.parentCommentId === null &&
     createError !== dismissedCreateError
       ? getCommentCreateErrorMessage(createError)
       : null;

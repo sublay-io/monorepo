@@ -70,7 +70,7 @@ describe("entity-lists spaceReputation serialization regression guard", () => {
     expect(url.search).not.toContain("[object Object]");
   });
 
-  it("the equivalent FLAT form serializes to the same flat query", async () => {
+  it("doesn't take the flat names as fetch options", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(okPage());
     const { result } = renderHookWithStore(() => useEntityListActions(), {
       projectId: "test-project",
@@ -81,13 +81,12 @@ describe("entity-lists spaceReputation serialization regression guard", () => {
         page: 1,
         sortBy: "hot",
         limit: 10,
+        // @ts-expect-error — spaceReputationId is a wire param, not an option
         spaceReputationId: "space-7",
-        spaceReputationDescendants: true,
       });
     });
 
     const url = new URL(fetchHandle.calls()[0].url);
-    expect(url.searchParams.get("spaceReputationId")).toBe("space-7");
-    expect(url.searchParams.get("spaceReputationDescendants")).toBe("true");
+    expect(url.searchParams.has("spaceReputationId")).toBe(false);
   });
 });

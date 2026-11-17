@@ -14,7 +14,7 @@ function ReportContent({ resetView }: { resetView: () => void }) {
   const { user } = useUser();
   const { callbacks } = useCommentSection();
   const { optionsComment, closeCommentOptionsModal, theme } = useUIState();
-  const createCommentReport = useCreateReport({ type: "comment" });
+  const createCommentReport = useCreateReport({ targetType: "comment" });
 
   const [submitting, setSubmitting] = useState(false);
   const [reason, setReason] = useState<ReportReasonKey | null>(null);

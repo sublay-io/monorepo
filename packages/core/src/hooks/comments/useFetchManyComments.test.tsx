@@ -52,7 +52,7 @@ describe("useFetchManyComments", () => {
 
     await act(async () => {
       await result.current({
-        parentId: "comment-1",
+        parentCommentId: "comment-1",
         cursor: "abc",
         limit: 20,
         sortBy: "top",
@@ -68,7 +68,7 @@ describe("useFetchManyComments", () => {
 
     const [call] = axiosPrivate.calls("get");
     expect(call.config?.params).toEqual({
-      parentId: "comment-1",
+      parentCommentId: "comment-1",
       cursor: "abc",
       limit: 20,
       sortBy: "top",
@@ -131,12 +131,12 @@ describe("useFetchManyComments", () => {
     });
   });
 
-  it("throws before making a request without an entityId or parentId", async () => {
+  it("throws before making a request without an entityId or parentCommentId", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyComments());
 
     await expect(
       result.current({} as unknown as FetchManyCommentsProps),
-    ).rejects.toThrow("requires an entityId or a parentId");
+    ).rejects.toThrow("requires an entityId or a parentCommentId");
     expect(axiosPrivate.calls("get")).toHaveLength(0);
   });
 
@@ -162,29 +162,29 @@ describe("useFetchManyComments", () => {
   });
 });
 
-// One of entityId (a thread) or parentId (replies, alone), never neither or
+// One of entityId (a thread) or parentCommentId (replies, alone), never neither or
 // both, alongside the one-way sort rule — checked when this file compiles.
 describe("FetchManyCommentsProps", () => {
-  it("takes entityId or parentId, with any sort, including one held in state", () => {
+  it("takes entityId or parentCommentId, with any sort, including one held in state", () => {
     const pick = (sortBy: "createdAt" | "top" | "controversial", isReply: boolean) => {
       const thread: FetchManyCommentsProps = { entityId: "e", sortBy };
-      const replies: FetchManyCommentsProps = { parentId: "p", sortBy };
+      const replies: FetchManyCommentsProps = { parentCommentId: "p", sortBy };
       const either: FetchManyCommentsProps = {
-        ...(isReply ? { parentId: "p" } : { entityId: "e" }),
+        ...(isReply ? { parentCommentId: "p" } : { entityId: "e" }),
         sortBy,
       };
       return [thread, replies, either];
     };
     const threadDir: FetchManyCommentsProps = { entityId: "e", sortBy: "top", sortDir: "asc" };
-    const repliesDir: FetchManyCommentsProps = { parentId: "p", sortDir: "asc" };
+    const repliesDir: FetchManyCommentsProps = { parentCommentId: "p", sortDir: "asc" };
     // @ts-expect-error — neither id
     const neither: FetchManyCommentsProps = { sortBy: "createdAt" };
-    // @ts-expect-error — not both: replies take parentId alone
-    const both: FetchManyCommentsProps = { entityId: "e", parentId: "p" };
+    // @ts-expect-error — not both: replies take parentCommentId alone
+    const both: FetchManyCommentsProps = { entityId: "e", parentCommentId: "p" };
     // @ts-expect-error — no sortDir with controversial (thread)
     const badThread: FetchManyCommentsProps = { entityId: "e", sortBy: "controversial", sortDir: "asc" };
     // @ts-expect-error — no sortDir with controversial (replies)
-    const badReplies: FetchManyCommentsProps = { parentId: "p", sortBy: "controversial", sortDir: "asc" };
+    const badReplies: FetchManyCommentsProps = { parentCommentId: "p", sortBy: "controversial", sortDir: "asc" };
     expect([
       ...pick("controversial", true),
       threadDir,

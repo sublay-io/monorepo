@@ -158,7 +158,7 @@ Users can report messages for moderation review:
 import { useCreateReport } from "@sublay/react-js";
 
 function MessageMenu({ messageId }) {
-  const report = useCreateReport({ type: "message" });
+  const report = useCreateReport({ targetType: "message" });
 
   return (
     <button onClick={() => report({ targetId: messageId, reason: "spam" })}>

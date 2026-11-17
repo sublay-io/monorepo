@@ -20,7 +20,7 @@ const page = (data: Comment[]) => ({ data, pagination: { nextCursor: null, hasMo
 describe("useCommentSectionData — store consistency", () => {
   it("the highlighted comment follows the store: a delete shows its placeholder, and a sort reset keeps it", async () => {
     const entity = makeEntity({ id: "entity-1" });
-    const target = makeComment({ id: T, content: "deep linked", parentId: null });
+    const target = makeComment({ id: T, content: "deep linked", parentCommentId: null });
     vi.spyOn(axiosPrivate, "get").mockImplementation((url: string) =>
       url.endsWith(`/comments/${T}`) ? ok(target) : ok(page([])),
     );
@@ -160,7 +160,7 @@ describe("useCommentSectionData — store consistency", () => {
       await waitFor(() => expect(result.current.comments).toHaveLength(1));
       let pending!: Promise<unknown>;
       act(() => {
-        pending = result.current.createComment({ parentId: G, content: "a reply" });
+        pending = result.current.createComment({ parentCommentId: G, content: "a reply" });
       });
       expect(result.current.getComment(G)?.repliesCount).toBe(3);
       // A sort change re-delivers the parent with the server's count (2).
@@ -172,7 +172,7 @@ describe("useCommentSectionData — store consistency", () => {
     it("success ends one above the re-delivered count", async () => {
       const { result, settle, pending } = await setup();
       await act(async () => {
-        settle().resolve({ data: makeComment({ id: X, parentId: G }), status: 201 });
+        settle().resolve({ data: makeComment({ id: X, parentCommentId: G }), status: 201 });
         await pending();
       });
       expect(result.current.getComment(G)?.repliesCount).toBe(3);

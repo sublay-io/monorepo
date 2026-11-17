@@ -34,19 +34,13 @@ export async function searchContent(
   // the server nested).
   const {
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...body
   } = data;
   const response = await client.projectInstance.post<ContentSearchResult[]>(
     "/search/content",
     {
       ...body,
-      ...buildSpaceReputationParams({
-        spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
-      }),
+      ...buildSpaceReputationParams({ spaceReputation }),
     }
   );
   return response.data;

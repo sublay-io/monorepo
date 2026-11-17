@@ -63,8 +63,6 @@ export async function fetchCommentsByUserId(
     include,
     cursor,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const params = {
@@ -74,11 +72,7 @@ export async function fetchCommentsByUserId(
     ...(include !== undefined
       ? { include: Array.isArray(include) ? include.join(",") : include }
       : {}),
-    ...buildSpaceReputationParams({
-      spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
-    }),
+    ...buildSpaceReputationParams({ spaceReputation }),
   };
   const response = await client.projectInstance.get<
     CursorPaginatedResponse<Comment>

@@ -4,7 +4,8 @@ import useSendMessage, { SendMessageParams } from "./useSendMessage";
 
 export interface UseMessageThreadProps {
   conversationId: string;
-  messageId: string;
+  /** The message whose thread replies to load and send. */
+  parentMessageId: string;
 }
 
 export interface UseMessageThreadValues {
@@ -17,17 +18,17 @@ export interface UseMessageThreadValues {
 
 function useMessageThread({
   conversationId,
-  messageId,
+  parentMessageId,
 }: UseMessageThreadProps): UseMessageThreadValues {
   const { messages, loading, hasMore, loadOlder } = useLiveChatMessages({
     conversationId,
-    parentMessageId: messageId,
+    parentMessageId,
   });
 
   const send = useSendMessage({ conversationId });
 
   const sendReply = (params: Omit<SendMessageParams, "parentMessageId">) =>
-    send({ ...params, parentMessageId: messageId });
+    send({ ...params, parentMessageId });
 
   return {
     replies: messages,

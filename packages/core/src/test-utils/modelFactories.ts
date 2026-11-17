@@ -189,7 +189,7 @@ export function makeComment(overrides: Partial<Comment> = {}): Comment {
     entityId: "entity-1",
     spaceId: null,
     userId: "user-1",
-    parentId: null,
+    parentCommentId: null,
     referencedCommentId: null,
     content: "hello",
     gif: null,

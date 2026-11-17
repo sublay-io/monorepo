@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChatMessage } from "../../../interfaces/models/ChatMessage";
+import {
+  ChatMessage,
+  ChatMessageListIncludeParam,
+} from "../../../interfaces/models/ChatMessage";
 import { handleError } from "../../../utils/handleError";
 import useFetchManyChatMessages, {
   MessageFilters,
@@ -18,13 +21,11 @@ export interface UseFetchManyChatMessagesWrapperProps extends SpaceReputationCon
    * newer messages.
    */
   sortDir?: "asc" | "desc";
-  /** When `true`, the server populates the `files` field on each message. */
-  includeFiles?: boolean;
   /**
-   * When `true`, the server populates the `grants` reputation-grant summary on
-   * each message.
+   * Opt-in fields on each message, one value or an array: `"files"` populates
+   * `files`, `"grants"` the `grants` reputation-grant summary.
    */
-  includeGrants?: boolean;
+  include?: ChatMessageListIncludeParam;
   filters?: MessageFilters;
 }
 
@@ -52,17 +53,14 @@ function useFetchManyChatMessagesWrapper(
     parentMessageId,
     limit = 50,
     sortDir = "desc",
-    includeFiles,
-    includeGrants,
+    include,
     filters,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
   } = props;
 
   // Forwarded to the leaf fetcher, which flattens it via
   // buildSpaceReputationParams before it reaches the serializer.
-  const reputation = { spaceReputation, spaceReputationId, spaceReputationDescendants };
+  const reputation = { spaceReputation };
   const reputationKey = JSON.stringify(reputation);
 
   const fetchMany = useFetchManyChatMessages();
@@ -80,6 +78,7 @@ function useFetchManyChatMessagesWrapper(
   // Stable primitive for dependency arrays — `filters` is a fresh object each
   // render unless the caller memoizes it.
   const filtersKey = JSON.stringify(filters ?? {});
+  const includeKey = Array.isArray(include) ? include.join(",") : include ?? "";
 
   const advanceCursor = useCallback(
     (res: { oldestCreatedAt: string | null; newestCreatedAt: string | null }) => {
@@ -100,8 +99,7 @@ function useFetchManyChatMessagesWrapper(
         parentMessageId,
         limit,
         sortDir,
-        includeFiles,
-        includeGrants,
+        include,
         filters,
         ...reputation,
       });
@@ -116,7 +114,7 @@ function useFetchManyChatMessagesWrapper(
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchMany, conversationId, parentMessageId, limit, sortDir, includeFiles, includeGrants, filtersKey, reputationKey, advanceCursor]);
+  }, [fetchMany, conversationId, parentMessageId, limit, sortDir, includeKey, filtersKey, reputationKey, advanceCursor]);
 
   const loadMore = useCallback(async () => {
     if (loadingRef.current || !hasMoreRef.current || !cursorRef.current) return;
@@ -128,8 +126,7 @@ function useFetchManyChatMessagesWrapper(
         parentMessageId,
         limit,
         sortDir,
-        includeFiles,
-        includeGrants,
+        include,
         filters,
         ...reputation,
         ...(sortDir === "asc"
@@ -147,7 +144,7 @@ function useFetchManyChatMessagesWrapper(
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchMany, conversationId, parentMessageId, limit, sortDir, includeFiles, includeGrants, filtersKey, reputationKey, advanceCursor]);
+  }, [fetchMany, conversationId, parentMessageId, limit, sortDir, includeKey, filtersKey, reputationKey, advanceCursor]);
 
   useEffect(() => {
     refetch();

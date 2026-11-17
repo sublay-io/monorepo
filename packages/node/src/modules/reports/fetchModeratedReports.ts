@@ -21,18 +21,14 @@ export async function fetchModeratedReports(
   client: SublayHttpClient,
   data: FetchModeratedReportsProps
 ): Promise<PaginatedResponse<Report>> {
-  const { spaceReputation, spaceReputationId, spaceReputationDescendants, ...rest } =
+  const { spaceReputation, ...rest } =
     data;
   const response = await client.projectInstance.get<PaginatedResponse<Report>>(
     "/reports/moderated",
     {
       params: {
         ...rest,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

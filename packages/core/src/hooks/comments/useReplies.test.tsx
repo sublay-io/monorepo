@@ -74,14 +74,14 @@ describe("useReplies", () => {
 
     axiosPrivate.mockResponse(
       "get",
-      makePage([makeComment({ id: R1, parentId: C1 })], "next"),
+      makePage([makeComment({ id: R1, parentCommentId: C1 })], "next"),
     );
     await act(async () => {
       await result.current.replies.loadMore();
     });
 
     expect(axiosPrivate.calls("get")[1].config?.params).toEqual({
-      parentId: C1,
+      parentCommentId: C1,
       limit: 10,
       sortBy: "top",
       sortDir: "desc",
@@ -110,7 +110,7 @@ describe("useReplies", () => {
 
   it("continues after replies the section pre-loaded, without nesting or duplicates", async () => {
     const preloaded = [1, 2, 3].map((n) =>
-      makeComment({ id: `pre-${n}`, parentId: C1 }),
+      makeComment({ id: `pre-${n}`, parentCommentId: C1 }),
     );
     const { result, axiosPrivate } = renderReplies({
       topLevel: [
@@ -129,7 +129,7 @@ describe("useReplies", () => {
     axiosPrivate.mockResponse(
       "get",
       makePage(
-        [makeComment({ id: "pre-3", parentId: C1 }), makeComment({ id: "post-4", parentId: C1 })],
+        [makeComment({ id: "pre-3", parentCommentId: C1 }), makeComment({ id: "post-4", parentCommentId: C1 })],
         null,
       ),
     );
@@ -138,7 +138,7 @@ describe("useReplies", () => {
     });
 
     const params = axiosPrivate.calls("get")[1].config?.params;
-    expect(params).toMatchObject({ parentId: C1, cursor: "after-3", limit: 10 });
+    expect(params).toMatchObject({ parentCommentId: C1, cursor: "after-3", limit: 10 });
     expect(params).not.toHaveProperty("replyDepth");
     expect(result.current.replies.replies.map((r) => r.id)).toEqual([
       "pre-1",
@@ -156,7 +156,7 @@ describe("useReplies", () => {
     });
     await settled(result);
 
-    axiosPrivate.mockResponse("get", makePage([makeComment({ id: R1, parentId: C1 })], "c-10"));
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: R1, parentCommentId: C1 })], "c-10"));
     await act(async () => {
       await result.current.replies.loadMore();
     });
@@ -293,7 +293,7 @@ describe("useReplies", () => {
     expect(result.current.replies.error).toBeNull();
 
     await act(async () => {
-      resolveRetry({ data: makePage([makeComment({ id: R1, parentId: C1 })], null) });
+      resolveRetry({ data: makePage([makeComment({ id: R1, parentCommentId: C1 })], null) });
       await pending;
     });
     expect(result.current.replies.error).toBeNull();
@@ -426,7 +426,7 @@ describe("useReplies — one instance moved to another comment", () => {
     expect(result.current.replies.loading).toBe(false);
 
     const R2 = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2";
-    axiosPrivate.mockResponse("get", makePage([makeComment({ id: R2, parentId: A2 })], null));
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: R2, parentCommentId: A2 })], null));
     await act(async () => {
       await result.current.replies.loadMore();
     });
@@ -475,7 +475,7 @@ describe("useReplies — one instance moved to another comment", () => {
 
     const R1a = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1";
     await act(async () => {
-      resolveA1({ data: makePage([makeComment({ id: R1a, parentId: A1 })], null), status: 200 });
+      resolveA1({ data: makePage([makeComment({ id: R1a, parentCommentId: A1 })], null), status: 200 });
       await pendingA1;
     });
     expect(result.current.replies.replies).toEqual([]);

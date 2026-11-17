@@ -50,8 +50,7 @@ describe("js-sdk spaces (membership) — request shaping", () => {
     await fetchSpaceMembers(client, {
       spaceId: "s1",
       status: "active",
-      spaceReputationId: "s1",
-      spaceReputationDescendants: true,
+      spaceReputation: { spaceId: "s1", includeDescendants: true },
     });
     expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/members", {
       params: {
@@ -74,7 +73,7 @@ describe("js-sdk spaces (membership) — request shaping", () => {
     const { client, projectInstance } = makeClient();
     await fetchSpaceTeam(client, {
       spaceId: "s1",
-      spaceReputationId: "context",
+      spaceReputation: { spaceId: "context" },
     });
     expect(projectInstance.get).toHaveBeenCalledWith("/spaces/s1/team", {
       params: { spaceReputationId: "context" },

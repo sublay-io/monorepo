@@ -48,8 +48,6 @@ function useFetchCommentsByUserIdWrapper(
     defaultSortDir = "desc",
     defaultSortByReaction,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
   } = props;
 
   const fetchCommentsByUserId = useFetchCommentsByUserId();
@@ -62,8 +60,6 @@ function useFetchCommentsByUserIdWrapper(
     limit,
     include,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
   });
 
   const fetchPage = useCallback(
@@ -79,8 +75,6 @@ function useFetchCommentsByUserIdWrapper(
         ...oneWaySortFields(sort.sortBy, sort.sortDir),
         sortByReaction: sort.sortBy === "top" ? sort.sortByReaction : undefined,
         spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
       }),
     [fetchCommentsByUserId, resetKey], // eslint-disable-line react-hooks/exhaustive-deps
   );

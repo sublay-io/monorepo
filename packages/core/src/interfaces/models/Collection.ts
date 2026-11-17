@@ -2,7 +2,7 @@ export interface Collection {
   id: string;
   projectId: string;
   userId: string;
-  parentId: string | null;
+  parentCollectionId: string | null;
   name: string;
   /**
    * How many saved entities the viewer can currently see in the collection,

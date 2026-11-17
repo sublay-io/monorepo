@@ -22,8 +22,6 @@ export async function fetchModeratedReports(
 ): Promise<PaginatedResponse<Report>> {
   const {
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<PaginatedResponse<Report>>(
@@ -31,11 +29,7 @@ export async function fetchModeratedReports(
     {
       params: {
         ...rest,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

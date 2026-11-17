@@ -16,7 +16,7 @@ export interface ChatMessage {
   content: string | null;
   gif: GifData | null;
   mentions: Mention[];
-  // Opt-in only — populated when the hook is called with includeFiles: true.
+  // Opt-in only — populated when the hook's `include` contains "files".
   // Omitted by default to keep message payloads small in large conversations.
   files?: File[];
   metadata: Record<string, any>;
@@ -28,7 +28,7 @@ export interface ChatMessage {
   // emojis the requesting user has reacted with on this message (computed server-side)
   userReactions: string[];
   // Reputation-grant summary. Opt-in on the READ — the server populates it
-  // exactly when the hook is called with `includeGrants: true`, and once
+  // exactly when the hook's `include` contains "grants", and once
   // requested it always returns the object, zero-filled
   // (`{ total: 0, count: 0, viewerTotal: 0 }`) rather than omitted, on projects
   // with no grants and on projects without the reputation bundle alike. So a
@@ -37,7 +37,7 @@ export interface ChatMessage {
   // Presence is NOT a record of what the read asked for, though: `chatSlice`'s
   // `updateGrants` writes this field on every loaded copy of the message when a
   // `message:grant` socket event arrives, whether or not the fetch that loaded
-  // it opted in. A message read without `includeGrants` therefore GAINS the
+  // it opted in. A message read without "grants" therefore GAINS the
   // field the moment someone grants on it while the conversation is open.
   //
   // That is deliberate, and preserving the opt-in state instead would be worse:
@@ -70,3 +70,10 @@ export interface ChatMessage {
   // Set to true by failOptimisticMessage when a send request fails.
   sendFailed?: boolean;
 }
+
+/** `include` values the message list accepts. */
+export type ChatMessageListInclude = "files" | "grants";
+export type ChatMessageListIncludeArray = ChatMessageListInclude[];
+export type ChatMessageListIncludeParam =
+  | ChatMessageListInclude
+  | ChatMessageListIncludeArray;

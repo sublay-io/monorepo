@@ -158,13 +158,11 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
     replyLimit = DEFAULT_COMMENT_REPLY_LIMIT,
     include = "user",
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
   } = props;
 
   const reputation = useMemo(
-    () => ({ spaceReputation, spaceReputationId, spaceReputationDescendants }),
-    [JSON.stringify({ spaceReputation, spaceReputationId, spaceReputationDescendants })], // eslint-disable-line react-hooks/exhaustive-deps
+    () => ({ spaceReputation }),
+    [JSON.stringify({ spaceReputation })], // eslint-disable-line react-hooks/exhaustive-deps
   );
   const includeKey = JSON.stringify(include);
 

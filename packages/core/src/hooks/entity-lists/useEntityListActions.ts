@@ -60,14 +60,10 @@ interface FetchEntitiesOptions {
   topCommentsLimit?: number | null;
   topCommentsSortByReaction?: ReactionType | null;
   /**
-   * Primary form. Flattened to `spaceReputationId`/`spaceReputationDescendants`
-   * before it reaches the serializer.
+   * Flattened to `spaceReputationId`/`spaceReputationDescendants` before it
+   * reaches the serializer.
    */
-  spaceReputation?: SpaceReputationContextObject;
-  /** @deprecated Use `spaceReputation` instead. */
-  spaceReputationId?: string | null;
-  /** @deprecated Use `spaceReputation.includeDescendants` instead. */
-  spaceReputationDescendants?: boolean | null;
+  spaceReputation?: SpaceReputationContextObject | null;
 }
 
 interface CreateEntityOptions {
@@ -132,8 +128,6 @@ export function useEntityListActions(): UseEntityListActionsValues {
       // `spaceReputation` object never reaches RTK Query's serializer.
       const reputationParams = buildSpaceReputationParams({
         spaceReputation: options.spaceReputation,
-        spaceReputationId: options.spaceReputationId,
-        spaceReputationDescendants: options.spaceReputationDescendants,
       });
 
       try {

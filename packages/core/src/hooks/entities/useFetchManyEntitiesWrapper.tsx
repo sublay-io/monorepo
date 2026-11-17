@@ -87,13 +87,11 @@ function useFetchManyEntitiesWrapper(
     nsfwFilter,
     blockedFilter,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
   } = props;
 
   // Forwarded to the leaf fetcher, which flattens it via
   // buildSpaceReputationParams before it reaches the serializer.
-  const reputation = { spaceReputation, spaceReputationId, spaceReputationDescendants };
+  const reputation = { spaceReputation };
   const reputationKey = JSON.stringify(reputation);
 
   // Same for the filter objects: an inline `{ ... }` is a fresh reference every

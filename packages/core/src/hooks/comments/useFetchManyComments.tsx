@@ -40,17 +40,17 @@ interface FetchManyCommentsBaseProps extends SpaceReputationContextParams {
 
 /**
  * A thread fetch (`GET /comments`): `entityId` → that entity's top-level
- * comments; `parentId` (alone — the parent decides the entity) → a comment's
+ * comments; `parentCommentId` (alone — the parent decides the entity) → a comment's
  * direct replies. Exactly one of the two, and no `sortDir` with
  * `sortBy: "controversial"`. A user's comment history is
  * `useFetchCommentsByUserId`.
  */
 export type FetchManyCommentsProps =
   | WithOneWaySortDir<
-      FetchManyCommentsBaseProps & { entityId: string; parentId?: null }
+      FetchManyCommentsBaseProps & { entityId: string; parentCommentId?: null }
     >
   | WithOneWaySortDir<
-      FetchManyCommentsBaseProps & { parentId: string; entityId?: null }
+      FetchManyCommentsBaseProps & { parentCommentId: string; entityId?: null }
     >;
 
 function useFetchManyComments(): (
@@ -65,7 +65,7 @@ function useFetchManyComments(): (
     ): Promise<CursorPaginatedResponse<Comment>> => {
       const {
         entityId,
-        parentId,
+        parentCommentId,
         sortBy,
         sortDir,
         sortByReaction,
@@ -78,12 +78,10 @@ function useFetchManyComments(): (
         replySortDir,
         replySortByReaction,
         spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
       } = props;
 
-      if (!entityId && !parentId) {
-        throw new Error("Fetching comments requires an entityId or a parentId");
+      if (!entityId && !parentCommentId) {
+        throw new Error("Fetching comments requires an entityId or a parentCommentId");
       }
 
       if (limit === 0) {
@@ -95,15 +93,11 @@ function useFetchManyComments(): (
       }
 
       const params: Record<string, any> = {
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       if (entityId) params.entityId = entityId;
-      if (parentId) params.parentId = parentId;
+      if (parentCommentId) params.parentCommentId = parentCommentId;
       if (sortBy) params.sortBy = sortBy;
       // The server refuses sortDir / replySortDir with controversial.
       const sendSortDir = sendableSortDir(sortBy, sortDir);

@@ -34,17 +34,11 @@ export async function listReactions(
     conversationId,
     messageId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const params = {
     ...rest,
-    ...buildSpaceReputationParams({
-      spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
-    }),
+    ...buildSpaceReputationParams({ spaceReputation }),
   };
   const response = await client.projectInstance.get<ListReactionsResponse>(
     `/chat/conversations/${conversationId}/messages/${messageId}/reactions`,

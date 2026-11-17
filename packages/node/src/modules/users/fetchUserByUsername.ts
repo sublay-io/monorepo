@@ -19,17 +19,13 @@ export async function fetchUserByUsername(
   client: SublayHttpClient,
   data: FetchUserByUsernameProps
 ): Promise<User> {
-  const { spaceReputation, spaceReputationId, spaceReputationDescendants, ...rest } =
+  const { spaceReputation, ...rest } =
     data;
   const response = await client.projectInstance.get<User>("/users/by-username", {
     params: {
       ...rest,
       include: serializeInclude(rest.include),
-      ...buildSpaceReputationParams({
-        spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
-      }),
+      ...buildSpaceReputationParams({ spaceReputation }),
     },
   });
   return response.data;

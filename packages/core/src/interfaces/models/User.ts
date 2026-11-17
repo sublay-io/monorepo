@@ -23,7 +23,7 @@ export type UserFull = {
   metadata: Record<string, any>; // JSON object that could contain any other data about the user which is relevant to the project. Limited to 10KB size.
   secureMetadata: Record<string, any>; // Same as metadata only it is excluded when user is added to entity and comment data
   reputation: number; // Automatically managed by sublay based on usr activity
-  spaceReputation?: number; // Per-space reputation, present only when a request opts in via `spaceReputationId`
+  spaceReputation?: number; // Per-space reputation, present only when a request opts in via `spaceReputation`
   isVerified: boolean; // Whether the user is verified
   isActive: boolean; // Whether the user account is active
   lastActive: string; // Timestamp for last activity

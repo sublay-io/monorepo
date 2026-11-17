@@ -92,13 +92,11 @@ export async function* askContent(
   data: AskContentProps
 ): AsyncGenerator<AskContentEvent, void, unknown> {
   // Every field goes in the JSON body on a POST, the space-reputation options
-  // too. The helper flattens the `spaceReputation` object (or the deprecated
-  // flat props) to the flat pair the server reads.
+  // too. The helper flattens the `spaceReputation` object to the flat pair the
+  // server reads.
   const {
     signal,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...body
   } = data;
 
@@ -115,11 +113,7 @@ export async function* askContent(
     headers,
     body: JSON.stringify({
       ...body,
-      ...buildSpaceReputationParams({
-        spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
-      }),
+      ...buildSpaceReputationParams({ spaceReputation }),
     }),
     signal,
   });

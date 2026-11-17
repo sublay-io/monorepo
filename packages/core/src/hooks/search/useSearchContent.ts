@@ -45,7 +45,7 @@ export default function useSearchContent(): UseSearchContentReturn {
   const [error, setError] = useState<string | null>(null);
 
   const search = useCallback(
-    async ({ query, sourceTypes, spaceId, includeChildSpaces, conversationId, limit, spaceReputation, spaceReputationId, spaceReputationDescendants }: UseSearchContentProps) => {
+    async ({ query, sourceTypes, spaceId, includeChildSpaces, conversationId, limit, spaceReputation }: UseSearchContentProps) => {
       if (!projectId) return;
       if (!query.trim()) return;
 
@@ -62,11 +62,7 @@ export default function useSearchContent(): UseSearchContentReturn {
             includeChildSpaces,
             conversationId,
             limit,
-            ...buildSpaceReputationParams({
-              spaceReputation,
-              spaceReputationId,
-              spaceReputationDescendants,
-            }),
+            ...buildSpaceReputationParams({ spaceReputation }),
           }
         );
         setResults(response.data);

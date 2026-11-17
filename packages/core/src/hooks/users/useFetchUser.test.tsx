@@ -26,13 +26,13 @@ describe("useFetchUser", () => {
     expect(call.url).toBe("/test-project/users/user-1");
   });
 
-  it("passes the spaceReputationId param through", async () => {
+  it("sends spaceReputation as the flat spaceReputationId param", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchUser());
 
     axiosPrivate.mockResponse("get", makeUser());
 
     await act(async () => {
-      await result.current({ userId: "user-1", spaceReputationId: "none" });
+      await result.current({ userId: "user-1", spaceReputation: { spaceId: "none" } });
     });
 
     const [call] = axiosPrivate.calls("get");

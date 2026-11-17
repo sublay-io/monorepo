@@ -28,8 +28,6 @@ export async function getMessage(
     conversationId,
     messageId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<ChatMessage>(
@@ -38,11 +36,7 @@ export async function getMessage(
       params: {
         ...rest,
         include: serializeInclude(rest.include),
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

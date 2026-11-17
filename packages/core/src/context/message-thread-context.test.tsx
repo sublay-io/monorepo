@@ -11,7 +11,7 @@ afterEach(() => {
 });
 
 describe("MessageThreadProvider", () => {
-  it("exposes the message thread's replies and messageId to consumers", async () => {
+  it("exposes the message thread's replies and parentMessageId to consumers", async () => {
     const reply = makeChatMessage({ id: "reply-1", parentMessageId: "message-1" });
 
     const { Wrapper, axiosPrivate } = makeProvidersWrapper({
@@ -27,7 +27,7 @@ describe("MessageThreadProvider", () => {
     const { result } = renderHook(() => useMessageThreadContext(), {
       wrapper: ({ children }) => (
         <Wrapper>
-          <MessageThreadProvider conversationId="conversation-1" messageId="message-1">
+          <MessageThreadProvider conversationId="conversation-1" parentMessageId="message-1">
             {children}
           </MessageThreadProvider>
         </Wrapper>
@@ -36,14 +36,14 @@ describe("MessageThreadProvider", () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.replies).toEqual([reply]);
-    expect(result.current.messageId).toBe("message-1");
+    expect(result.current.parentMessageId).toBe("message-1");
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/chat/conversations/conversation-1/messages");
     expect(call.config?.params).toMatchObject({ parentMessageId: "message-1" });
   });
 
-  it("sendReply attaches the thread's messageId as parentMessageId", async () => {
+  it("sendReply attaches the thread's parentMessageId", async () => {
     const { Wrapper, axiosPrivate } = makeProvidersWrapper({
       beforeRender: ({ axiosPrivate }) =>
         axiosPrivate.mockResponse("get", {
@@ -57,7 +57,7 @@ describe("MessageThreadProvider", () => {
     const { result } = renderHook(() => useMessageThreadContext(), {
       wrapper: ({ children }) => (
         <Wrapper>
-          <MessageThreadProvider conversationId="conversation-1" messageId="message-1">
+          <MessageThreadProvider conversationId="conversation-1" parentMessageId="message-1">
             {children}
           </MessageThreadProvider>
         </Wrapper>
@@ -121,7 +121,7 @@ describe("MessageThreadProvider", () => {
         wrapper: ({ children }) => (
           <harness.Wrapper>
             <ChatContext.Provider value={chatContextValue}>
-              <MessageThreadProvider conversationId="conversation-1" messageId="message-1">
+              <MessageThreadProvider conversationId="conversation-1" parentMessageId="message-1">
                 {children}
               </MessageThreadProvider>
             </ChatContext.Provider>

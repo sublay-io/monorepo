@@ -9,7 +9,7 @@ export interface CreateCommentProps {
   content?: string;
   gif?: GifData | null;
   mentions?: Mention[];
-  parentId?: string;
+  parentCommentId?: string | null;
   referencedCommentId?: string;
   attachments?: Record<string, any>[];
   metadata?: Record<string, any>;

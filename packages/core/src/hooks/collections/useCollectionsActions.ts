@@ -116,8 +116,8 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
     try {
       const result = await fetchRootCollectionQuery({ projectId }).unwrap();
       if (result) {
-        // Set parentId to null for root collection
-        const rootCollection = { ...result, parentId: null };
+        // The root collection has no parent
+        const rootCollection = { ...result, parentCollectionId: null };
         dispatch(setCurrentCollection(rootCollection));
       }
     } catch (err) {
@@ -248,7 +248,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
     dispatch(
       handleCollectionDeletion({
         collectionId: collection.id,
-        parentId: collection.parentId,
+        parentId: collection.parentCollectionId,
         deletedCollectionIds,
       })
     );

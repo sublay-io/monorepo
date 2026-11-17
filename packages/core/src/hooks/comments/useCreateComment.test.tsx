@@ -39,6 +39,28 @@ describe("useCreateComment", () => {
     expect(call.body).toMatchObject({ entityId: "entity-1", content: "hello" });
   });
 
+  it("sends a reply's parent as parentCommentId", async () => {
+    const user = makeAuthUser({ id: "user-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(() => useCreateComment(), {
+      projectId: "project-1",
+      user,
+    });
+
+    axiosPrivate.mockResponse("post", { id: "comment-2" }, 201);
+
+    await act(async () => {
+      await result.current({
+        entityId: "entity-1",
+        parentCommentId: "comment-1",
+        content: "a reply",
+      });
+    });
+
+    const [call] = axiosPrivate.calls("post");
+    expect(call.body).toMatchObject({ parentCommentId: "comment-1" });
+    expect(call.body).not.toHaveProperty("parentId");
+  });
+
   it("rejects when the server returns an error response", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(() => useCreateComment(), {

@@ -155,7 +155,7 @@ function useReplies({
         // Replies are the level being fetched, so the section's reply sort is
         // sent as the level sort; nested levels inherit it on the server.
         const response = await fetchManyComments({
-          parentId: commentId,
+          parentCommentId: commentId,
           cursor: current.repliesCursor,
           limit: pageLimit,
           ...oneWaySortFields(ctx.replySort.sortBy, ctx.replySort.sortDir),

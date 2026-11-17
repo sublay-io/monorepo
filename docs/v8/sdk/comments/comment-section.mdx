@@ -125,7 +125,7 @@ An entity the section fetched itself (from `entityId`, `foreignId` or `shortId`)
   - `loginRequiredCallback()` — called when a non-authenticated user tries to comment
   - `usernameRequiredCallback()` — called when the user has no username set
   - `commentTooShortCallback()` — optional. Called when the submitted comment is too short; without it the comment is just not posted
-  - `commentCreateFailedCallback({ code?, message?, status?, parentId })` — called when `createComment` sent a comment and the request failed. `code` and `message` come from the server's error response and `status` is its HTTP status — including `user/suspended` with `403` when the user is suspended; all three are `undefined` only when no response arrived (a network error). `parentId` is the comment being replied to, or `null` for a top-level comment. The same details are in [`createError`](#usecommentsection-return-values).
+  - `commentCreateFailedCallback({ code?, message?, status?, parentCommentId })` — called when `createComment` sent a comment and the request failed. `code` and `message` come from the server's error response and `status` is its HTTP status — including `user/suspended` with `403` when the user is suspended; all three are `undefined` only when no response arrived (a network error). `parentCommentId` is the comment being replied to, or `null` for a top-level comment. The same details are in [`createError`](#usecommentsection-return-values).
 </ParamField>
 
 <ParamField path="mentionTriggers" type="{ user?: string; space?: string }">
@@ -266,7 +266,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="createError" type="CommentCreateError | null">
-  The last failure creating a comment through `createComment`: `{ code?: string; message?: string; status?: number; parentId: string | null }`. `code` and `message` come from the server's error response (see [Create Comment → Error Responses](/v8/api-reference/comments/create-comment#error-responses)) and `status` is its HTTP status; all three are `undefined` only when no response arrived (a network error). A comment refused because the user is suspended has `code: "user/suspended"` and `status: 403`. `parentId` is the comment that was being replied to, or `null` for a top-level comment. Set when a create fails; cleared when the next create starts and when the section moves to another entity. A create stopped before it is sent — no signed-in user, no username, a comment that is too short — doesn't change it.
+  The last failure creating a comment through `createComment`: `{ code?: string; message?: string; status?: number; parentCommentId: string | null }`. `code` and `message` come from the server's error response (see [Create Comment → Error Responses](/v8/api-reference/comments/create-comment#error-responses)) and `status` is its HTTP status; all three are `undefined` only when no response arrived (a network error). A comment refused because the user is suspended has `code: "user/suspended"` and `status: 403`. `parentCommentId` is the comment that was being replied to, or `null` for a top-level comment. Set when a create fails; cleared when the next create starts and when the section moves to another entity. A create stopped before it is sent — no signed-in user, no username, a comment that is too short — doesn't change it.
 
   ```tsx
   const { createError } = useCommentSection();
@@ -315,7 +315,7 @@ function CommentList() {
 
 <ResponseField name="createComment" type="(props) => Promise<Comment | undefined>">
   Submits a new comment. Shows it immediately (optimistically) and adds 1 to the parent comment's `repliesCount` and the entity's `commentsCount`, rolling back if the request fails. Accepts:
-  - `parentId` — reply to a specific comment ID
+  - `parentCommentId` — reply to a specific comment ID
   - `content` — text content
   - `gif` — GIF data object
   - `mentions` — array of `Mention` objects
@@ -350,7 +350,7 @@ function CommentList() {
 </ResponseField>
 
 <ResponseField name="repliedToComment" type="Partial<Comment> | null">
-  The comment currently being replied to. `createComment` uses it as the parent when no `parentId` is passed, and clears it (with the reply banner and `pushMention`) when it sends. If the request fails, `repliedToComment` is put back, so sending again is still a reply to the same comment. Its `user` is then the user the banner named — the pushed mention when there was one, otherwise the comment's author — and `showReplyBanner` is put back when there is such a user. `pushMention` stays cleared. `repliedToComment` is also cleared when the section moves to another entity.
+  The comment currently being replied to. `createComment` uses it as the parent when no `parentCommentId` is passed, and clears it (with the reply banner and `pushMention`) when it sends. If the request fails, `repliedToComment` is put back, so sending again is still a reply to the same comment. Its `user` is then the user the banner named — the pushed mention when there was one, otherwise the comment's author — and `showReplyBanner` is put back when there is such a user. `pushMention` stays cleared. `repliedToComment` is also cleared when the section moves to another entity.
 </ResponseField>
 
 <ResponseField name="setRepliedToComment" type="(comment: Comment | null) => void">

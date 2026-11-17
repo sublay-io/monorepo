@@ -304,7 +304,7 @@ describe("useCommentSectionData", () => {
   it("stores a highlighted reply under its parent, and keeps both across a sort change", async () => {
     const entity = makeEntity({ id: "entity-1" });
     const parent = makeComment({ id: "p1", repliesCount: 5 });
-    const target = makeComment({ id: "t1", parentId: "p1", parentComment: parent });
+    const target = makeComment({ id: "t1", parentCommentId: "p1", parentComment: parent });
 
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useCommentSectionData({ entity, highlightedCommentId: "t1" }),
@@ -320,7 +320,7 @@ describe("useCommentSectionData", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.highlightedComment?.parentComment?.id).toBe("p1");
     expect(result.current.getComment("p1")?.id).toBe("p1");
-    expect(result.current.getComment("t1")?.parentId).toBe("p1");
+    expect(result.current.getComment("t1")?.parentCommentId).toBe("p1");
 
     axiosPrivate.mockResponse("get", emptyCommentsPage());
     act(() => {
@@ -350,11 +350,11 @@ describe("useCommentSectionData", () => {
     // Success: +1 stays.
     axiosPrivate.mockResponse(
       "post",
-      makeComment({ id: "r1", parentId: "p1", content: "a reply" }),
+      makeComment({ id: "r1", parentCommentId: "p1", content: "a reply" }),
       201,
     );
     await act(async () => {
-      await result.current.createComment({ parentId: "p1", content: "a reply" });
+      await result.current.createComment({ parentCommentId: "p1", content: "a reply" });
     });
     expect(result.current.getComment("p1")?.repliesCount).toBe(3);
     expect(result.current.getComment("r1")).toBeDefined();
@@ -362,7 +362,7 @@ describe("useCommentSectionData", () => {
     // Failure: rolled back.
     axiosPrivate.mockError("post", 500, { message: "nope" });
     await act(async () => {
-      await result.current.createComment({ parentId: "p1", content: "another" });
+      await result.current.createComment({ parentCommentId: "p1", content: "another" });
     });
     expect(result.current.getComment("p1")?.repliesCount).toBe(3);
 
@@ -370,9 +370,9 @@ describe("useCommentSectionData", () => {
     axiosPrivate.mockResponse("delete", undefined, 204);
     const r1 = "11111111-1111-4111-8111-111111111111";
     // seed a real-uuid reply to delete
-    axiosPrivate.mockResponse("post", makeComment({ id: r1, parentId: "p1" }), 201);
+    axiosPrivate.mockResponse("post", makeComment({ id: r1, parentCommentId: "p1" }), 201);
     await act(async () => {
-      await result.current.createComment({ parentId: "p1", content: "third" });
+      await result.current.createComment({ parentCommentId: "p1", content: "third" });
     });
     expect(result.current.getComment("p1")?.repliesCount).toBe(4);
     await act(async () => {

@@ -58,8 +58,7 @@ describe("node-sdk chat (messages) — request shaping", () => {
       conversationId: "conv1",
       actingUserId: "u1",
       content: "hi",
-      spaceReputationId: "rep1",
-      spaceReputationDescendants: true,
+      spaceReputation: { spaceId: "rep1", includeDescendants: true },
     });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/chat/conversations/conv1/messages",

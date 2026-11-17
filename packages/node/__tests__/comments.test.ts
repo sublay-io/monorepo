@@ -122,7 +122,7 @@ describe("node-sdk comments — request shaping", () => {
       replySortDir: "desc",
       replySortByReaction: "like",
       include: ["user", "grants"],
-      spaceReputationId: "none",
+      spaceReputation: { spaceId: "none" },
     });
     expect(projectInstance.get).toHaveBeenCalledWith("/comments", {
       params: {
@@ -146,14 +146,14 @@ describe("node-sdk comments — request shaping", () => {
   it("fetchManyComments never forwards params the thread endpoint rejects", async () => {
     const { client, projectInstance } = makeClient();
     await fetchManyComments(client, {
-      parentId: "c0",
+      parentCommentId: "c0",
       page: 2,
       userId: "u1",
       sourceId: "s1",
       blockedFilter: "exclude",
     } as any);
     expect(projectInstance.get).toHaveBeenCalledWith("/comments", {
-      params: { parentId: "c0" },
+      params: { parentCommentId: "c0" },
     });
   });
 

@@ -17,8 +17,6 @@ export async function fetchUserSuggestions(
 ): Promise<FetchUserSuggestionsResponse> {
   const {
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<FetchUserSuggestionsResponse>(
@@ -26,11 +24,7 @@ export async function fetchUserSuggestions(
     {
       params: {
         ...rest,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

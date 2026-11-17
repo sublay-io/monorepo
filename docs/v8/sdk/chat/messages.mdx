@@ -38,10 +38,10 @@ function MessageList({ conversationId }: { conversationId: string }) {
 
 Messages are sorted oldest-first in the returned array. `loadOlder` fetches messages older than the oldest currently loaded.
 
-To include attached files in the response, pass `includeFiles: true`:
+To include attached files in the response, pass `include: "files"` (or an array, such as `["files", "grants"]`):
 
 ```tsx
-const { messages } = useLiveChatMessages({ conversationId, includeFiles: true });
+const { messages } = useLiveChatMessages({ conversationId, include: "files" });
 ```
 
 See [`useLiveChatMessages`](/v8/hooks/chat/messages/use-live-chat-messages).

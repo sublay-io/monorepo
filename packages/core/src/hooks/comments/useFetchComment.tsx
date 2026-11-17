@@ -15,7 +15,7 @@ function useFetchComment(): (props: FetchCommentProps) => Promise<Comment> {
   const axios = useAxiosPrivate();
 
   const fetchComment = useCallback(
-    async ({ commentId, include, spaceReputation, spaceReputationId, spaceReputationDescendants }: FetchCommentProps) => {
+    async ({ commentId, include, spaceReputation }: FetchCommentProps) => {
       if (!projectId) {
         throw new Error("No project specified");
       }
@@ -25,11 +25,7 @@ function useFetchComment(): (props: FetchCommentProps) => Promise<Comment> {
       }
 
       const params: Record<string, any> = {
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       if (include) {

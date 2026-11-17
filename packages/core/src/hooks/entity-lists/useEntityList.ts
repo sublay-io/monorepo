@@ -153,8 +153,7 @@ function useEntityList({
       // Apply config defaults if not provided
       // Each call sets the whole config: a field left out goes back to its
       // default rather than being carried over from the last fetch (loadMore
-      // reads the stored config). The `spaceReputation` object, when passed,
-      // overrides the flat pair below.
+      // reads the stored config).
       const configWithDefaults = {
         sourceId: null,
         spaceId: null,
@@ -162,8 +161,7 @@ function useEntityList({
         include: null,
         topCommentsLimit: null,
         topCommentsSortByReaction: null,
-        spaceReputationId: null,
-        spaceReputationDescendants: null,
+        spaceReputation: null,
         ...newConfig,
       };
 
@@ -194,11 +192,9 @@ function useEntityList({
           include: configWithDefaults.include,
           topCommentsLimit: configWithDefaults.topCommentsLimit,
           topCommentsSortByReaction: configWithDefaults.topCommentsSortByReaction,
-          // Object form (primary) + deprecated flat props; flattened downstream
-          // by useEntityListActions before reaching the serializer.
+          // Flattened downstream by useEntityListActions before reaching the
+          // serializer.
           spaceReputation: configWithDefaults.spaceReputation,
-          spaceReputationId: configWithDefaults.spaceReputationId,
-          spaceReputationDescendants: configWithDefaults.spaceReputationDescendants,
         };
 
         // Build final filters by taking current state and applying new filters
@@ -289,8 +285,6 @@ function useEntityList({
             topCommentsLimit: currentConfig.topCommentsLimit,
             topCommentsSortByReaction: currentConfig.topCommentsSortByReaction,
             spaceReputation: currentConfig.spaceReputation,
-            spaceReputationId: currentConfig.spaceReputationId,
-            spaceReputationDescendants: currentConfig.spaceReputationDescendants,
           });
         } catch (err) {
           console.error(
@@ -365,8 +359,7 @@ function useEntityList({
         include: config.include,
         topCommentsLimit: config.topCommentsLimit,
         topCommentsSortByReaction: config.topCommentsSortByReaction,
-        spaceReputationId: config.spaceReputationId,
-        spaceReputationDescendants: config.spaceReputationDescendants,
+        spaceReputation: config.spaceReputation,
       });
     } catch (err) {
       console.error(

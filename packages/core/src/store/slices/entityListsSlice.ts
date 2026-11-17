@@ -18,7 +18,6 @@ import { AttachmentsFilters } from "../../interfaces/entity-filters/AttachmentsF
 import { KeywordsFilters } from "../../interfaces/entity-filters/KeywordsFilters";
 import { NsfwFilter } from "../../interfaces/NsfwFilter";
 import { SpaceReputationContextObject } from "../../interfaces/SpaceReputation";
-import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
 
 // Individual entity list state
 export interface EntityListState {
@@ -37,8 +36,7 @@ export interface EntityListState {
   include: EntityIncludeParam | null;
   topCommentsLimit: number | null;
   topCommentsSortByReaction: ReactionType | null;
-  spaceReputationId: string | null;
-  spaceReputationDescendants: boolean | null;
+  spaceReputation: SpaceReputationContextObject | null;
 
   // Filter/sort state (user-controlled filters only)
   sortBy: EntityListSortByOptions;
@@ -78,8 +76,7 @@ const createDefaultEntityListState = (): EntityListState => ({
   include: null,
   topCommentsLimit: null,
   topCommentsSortByReaction: null,
-  spaceReputationId: null,
-  spaceReputationDescendants: null,
+  spaceReputation: null,
 
   // Default filters (user-controlled only)
   sortBy: "hot",
@@ -145,27 +142,11 @@ export interface EntityListConfig {
   /** With `include` containing `"topComments"`: the reaction that ranks them (default `"upvote"`). */
   topCommentsSortByReaction?: ReactionType | null;
   /**
-   * Opt the embedded authors into a space-scoped `spaceReputation`. This is the
-   * primary form; it supersedes the deprecated flat props below. Normalized to
-   * the flat `spaceReputationId`/`spaceReputationDescendants` pair before it is
-   * stored in slice state (the persisted shape stays flat).
+   * Opt the embedded authors into a space-scoped `spaceReputation`. Sent as
+   * the flat `spaceReputationId` / `spaceReputationDescendants` params. `null`
+   * or left out: none.
    */
-  spaceReputation?: SpaceReputationContextObject;
-  /**
-   * Opt into per-row `spaceReputation` on embedded authors. Accepted forms: a
-   * space `<uuid>`, `"none"`, or `"context"`.
-   *
-   * @deprecated Use `spaceReputation: { spaceId, includeDescendants? }`
-   * instead. Still accepted; ignored when the `spaceReputation` object is supplied.
-   */
-  spaceReputationId?: string | null;
-  /**
-   * Only honored with an explicit `<uuid>` `spaceReputationId`.
-   *
-   * @deprecated Use `spaceReputation.includeDescendants` instead. Still
-   * accepted; ignored when the `spaceReputation` object is supplied.
-   */
-  spaceReputationDescendants?: boolean | null;
+  spaceReputation?: SpaceReputationContextObject | null;
 }
 
 // Options for entity list operations
@@ -332,25 +313,10 @@ const entityListsSlice = createSlice({
         if (config.topCommentsSortByReaction !== undefined) {
           list.topCommentsSortByReaction = config.topCommentsSortByReaction;
         }
-        // Normalize the reputation params at this input boundary so the
-        // `spaceReputation` object never reaches the persisted (flat) state or
-        // the serializer. When the object form is supplied it wins; an absent
-        // key inside it clears the corresponding flat field to `null`.
         if (config.spaceReputation !== undefined) {
-          const flat = buildSpaceReputationParams({
-            spaceReputation: config.spaceReputation,
-          });
-          list.spaceReputationId = flat.spaceReputationId ?? null;
-          list.spaceReputationDescendants =
-            flat.spaceReputationDescendants ?? null;
-        } else {
-          // Flat form (back-compat). `null` stays meaningful ("explicitly cleared").
-          if (config.spaceReputationId !== undefined) {
-            list.spaceReputationId = config.spaceReputationId;
-          }
-          if (config.spaceReputationDescendants !== undefined) {
-            list.spaceReputationDescendants = config.spaceReputationDescendants;
-          }
+          list.spaceReputation = config.spaceReputation
+            ? { ...config.spaceReputation }
+            : null;
         }
       }
 
@@ -753,8 +719,7 @@ export const selectEntityListConfig = createSelector(
     include: EntityIncludeParam | null;
     topCommentsLimit: number | null;
     topCommentsSortByReaction: ReactionType | null;
-    spaceReputationId: string | null;
-    spaceReputationDescendants: boolean | null;
+    spaceReputation: SpaceReputationContextObject | null;
   } | null => {
     if (!entityList) return null;
 
@@ -765,8 +730,7 @@ export const selectEntityListConfig = createSelector(
       include: entityList.include,
       topCommentsLimit: entityList.topCommentsLimit,
       topCommentsSortByReaction: entityList.topCommentsSortByReaction,
-      spaceReputationId: entityList.spaceReputationId,
-      spaceReputationDescendants: entityList.spaceReputationDescendants,
+      spaceReputation: entityList.spaceReputation,
     };
   }
 );

@@ -51,7 +51,7 @@ export interface Comment {
   // `null` on placeholders (user-deleted, removed for others, unavailable).
   userId: string | null;
   user?: User | null; // Optional - included when include contains "user"; `null` on placeholders
-  parentId: string | null; // Optional parent comment (if it's a reply)
+  parentCommentId: string | null; // The comment this one replies to, if it is a reply
   // Optional - included when include contains "parent". `null` when the
   // comment has no parent, or the parent can't be shown to you.
   parentComment?: Comment | null;

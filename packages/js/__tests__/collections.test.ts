@@ -100,7 +100,7 @@ describe("js-sdk collections — request shaping", () => {
 describe("js-sdk collections — response mapping", () => {
   it("fetchRootCollection returns the Collection", async () => {
     const { client, projectInstance } = makeClient();
-    const collection = { id: "col1", name: "Root", parentId: null };
+    const collection = { id: "col1", name: "Root", parentCollectionId: null };
     projectInstance.get.mockResolvedValueOnce({ data: collection });
 
     const result = await fetchRootCollection(client);
@@ -120,7 +120,7 @@ describe("js-sdk collections — response mapping", () => {
 
   it("createNewCollection returns the created Collection", async () => {
     const { client, projectInstance } = makeClient();
-    const collection = { id: "col2", name: "Favorites", parentId: "col1" };
+    const collection = { id: "col2", name: "Favorites", parentCollectionId: "col1" };
     projectInstance.post.mockResolvedValueOnce({ data: collection });
 
     const result = await createNewCollection(client, {

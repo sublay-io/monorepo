@@ -29,16 +29,12 @@ export async function searchContent(
   client: SublayHttpClient,
   data: SearchContentProps
 ): Promise<PaginatedResponse<Entity>> {
-  const { spaceReputation, spaceReputationId, spaceReputationDescendants, ...body } =
+  const { spaceReputation, ...body } =
     data;
   // Every field goes in the body on a POST, the space-reputation options too.
   const response = await client.projectInstance.post<PaginatedResponse<Entity>>("/search/content", {
     ...body,
-    ...buildSpaceReputationParams({
-      spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
-    }),
+    ...buildSpaceReputationParams({ spaceReputation }),
   });
   return response.data;
 }

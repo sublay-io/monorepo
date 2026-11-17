@@ -20,8 +20,6 @@ function useFetchUserByUsername(): (props: FetchUserByUsernameProps) => Promise<
       username,
       include,
       spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
     }: FetchUserByUsernameProps) => {
       if (!projectId) {
         throw new Error("No project specified");
@@ -34,11 +32,7 @@ function useFetchUserByUsername(): (props: FetchUserByUsernameProps) => Promise<
       const params: Record<string, any> = {
         username,
         include: Array.isArray(include) ? include.join(",") : include,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       const response = await axios.get(`/${projectId}/users/by-username`, {

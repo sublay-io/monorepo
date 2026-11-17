@@ -406,13 +406,25 @@ describe("useEntityList", () => {
     expect(third.has("spaceId")).toBe(false);
   });
 
-  it("an omitted spaceReputationId isn't kept for loadMore", async () => {
+  it("an omitted spaceReputation isn't kept for loadMore", async () => {
     const [first, , third] = await fetchTwiceThenLoadMore(
-      { spaceReputationId: "context", spaceReputationDescendants: true },
+      { spaceReputation: { spaceId: "space-7", includeDescendants: true } },
       {},
     );
-    expect(first.get("spaceReputationId")).toBe("context");
+    expect(first.get("spaceReputationId")).toBe("space-7");
+    expect(first.get("spaceReputationDescendants")).toBe("true");
     expect(third.has("spaceReputationId")).toBe(false);
+    expect(third.has("spaceReputationDescendants")).toBe(false);
+  });
+
+  it("loadMore keeps the current fetch's spaceReputation", async () => {
+    const [, second, third] = await fetchTwiceThenLoadMore(
+      {},
+      { spaceReputation: { spaceId: "context" } },
+    );
+    expect(second.get("spaceReputationId")).toBe("context");
+    expect(third.get("page")).toBe("2");
+    expect(third.get("spaceReputationId")).toBe("context");
     expect(third.has("spaceReputationDescendants")).toBe(false);
   });
 

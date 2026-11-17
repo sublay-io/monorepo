@@ -15,8 +15,6 @@ export async function fetchUserByUsername(
 ): Promise<User> {
   const {
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<User>(
@@ -25,11 +23,7 @@ export async function fetchUserByUsername(
       params: {
         ...rest,
         include: serializeInclude(rest.include),
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

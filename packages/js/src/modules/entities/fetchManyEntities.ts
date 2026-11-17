@@ -122,8 +122,6 @@ export async function fetchManyEntities(
   const path = `/entities`;
   const {
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<PaginatedResponse<Entity>>(
@@ -132,11 +130,7 @@ export async function fetchManyEntities(
       params: {
         ...rest,
         include: serializeInclude(rest.include),
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

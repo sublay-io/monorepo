@@ -25,7 +25,7 @@ function useFetchConnections(): (props?: FetchConnectionsParams) => Promise<Pagi
     async (
       props: FetchConnectionsParams = {}
     ): Promise<PaginatedResponse<AcceptedConnectionRow>> => {
-      const { page = 1, limit = 20, query, searchFields, spaceReputation, spaceReputationId, spaceReputationDescendants } = props;
+      const { page = 1, limit = 20, query, searchFields, spaceReputation } = props;
       if (!projectId) {
         throw new Error("No project specified");
       }
@@ -41,11 +41,7 @@ function useFetchConnections(): (props?: FetchConnectionsParams) => Promise<Pagi
             page,
             limit,
             ...buildSearchParams(query, searchFields),
-            ...buildSpaceReputationParams({
-              spaceReputation,
-              spaceReputationId,
-              spaceReputationDescendants,
-            }),
+            ...buildSpaceReputationParams({ spaceReputation }),
           },
         }
       );

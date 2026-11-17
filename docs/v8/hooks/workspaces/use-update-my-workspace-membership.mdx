@@ -67,7 +67,8 @@ function MyTitle({ workspaceId }: { workspaceId: string }) {
 | `workspace/invalid-body` | 400 | Neither `title` nor `metadata` was passed, `title` is not a string or `null` or is longer than 100 characters, or `metadata` is not an object or is over 1 MB. |
 | `workspace/unsupported-param` | 400 | You are not the workspace's owner and passed `metadata`. |
 | `workspace/invalid-params` | 400 | `workspaceId` isn't a UUID. |
-| `workspace/not-found` | 404 | No such workspace, you have no relation to it, or you are not its owner and hold no member row on it (and did not pass `metadata`, which is refused first). |
+| `workspace/not-member` | 403 | You can see the workspace but are not its owner and hold no member row on it (and did not pass `metadata`, which is refused first). |
+| `workspace/not-found` | 404 | No such workspace, or you have no relation to it (answered alike). |
 
 ## Related
 

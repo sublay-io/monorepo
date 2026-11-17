@@ -59,7 +59,8 @@ Returns the refreshed [WorkspaceInvitation](/v8/data-models/workspace-invitation
 
 | Code | Status | Meaning |
 |------|--------|---------|
-| `workspace/forbidden` | 403 | You lack the `invite` capability on this workspace. |
+| `workspace/forbidden` | 403 | You can see the workspace but lack the `invite` capability on it. |
+| `workspace/not-found` | 404 | No such workspace, or you have no relation to it (answered alike). |
 | `workspace/invite-not-found` | 404 | No such invitation on this workspace. |
 | `workspace/not-pending` | 409 | The invitation is accepted / declined / revoked — create a new one instead. |
 | `workspace/missing-invite-accept-url` | 409 | The **project** has no [`workspaces.inviteAcceptUrl`](/v8/sdk/workspaces/overview#project-settings) configured. The invitation row is not touched. |

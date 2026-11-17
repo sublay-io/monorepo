@@ -13,7 +13,7 @@ What you can edit depends on who you are on the workspace:
 
 Ownership is per workspace. An ancestor owner who holds a member row on a child workspace is a member there, and edits only their `title` on that child.
 
-A user who only reaches in from an ancestor workspace and holds no member row here gets `404 workspace/not-found`, unless they send `metadata`: that is refused first, with `400 workspace/unsupported-param`, for anyone who is not the owner. A user with no relation to the workspace at all gets the roster-visibility `404`.
+A user with no relation to the workspace at all gets `404 workspace/not-found`, exactly as for a workspace that doesn't exist. A user who can see the workspace but only reaches in from an ancestor, with no member row here, gets `403 workspace/not-member`, as [leaving](/v8/api-reference/workspaces/members/leave-workspace) does, unless they send `metadata`: that is refused first, with `400 workspace/unsupported-param`, for anyone who is not the owner.
 
 <Note>
   **Your own membership is `/workspaces/:workspaceId/members/me`**: [`GET`](/v8/api-reference/workspaces/members/fetch-my-membership) to read it, `PATCH` to edit your profile, [`DELETE`](/v8/api-reference/workspaces/members/leave-workspace) to leave. The `/workspaces/:workspaceId/members/:userId` routes act on other members and refuse your own id with `400 workspace/own-member-id`.
@@ -132,13 +132,15 @@ For the owner, it returns their [owner profile](/v8/data-models/workspace-member
     Returned when a service key names an `actingUserId` that isn't a user in this project.
   </Accordion>
   <Accordion title="Not Found — 404">
-    The workspace doesn't exist, or the acting user has no relation to it:
+    The workspace doesn't exist, or the acting user has no relation to it (the two answer alike), including when it was deleted while this request was being handled:
     ```json
-    { "error": "Workspace not found", "code": "workspace/not-found" }
+    { "error": "Workspace not found.", "code": "workspace/not-found" }
     ```
-    The acting user is not the owner and has no direct member row on this workspace (a user who only reaches in from an ancestor), including when the row was removed while this request was being handled:
+  </Accordion>
+  <Accordion title="Not a Member — 403">
+    The acting user can see the workspace but is not its owner and has no direct member row on it (a user who only reaches in from an ancestor), including when the row was removed while this request was being handled:
     ```json
-    { "error": "The target user is not a direct member of this workspace.", "code": "workspace/not-found" }
+    { "error": "You are not a direct member of this workspace.", "code": "workspace/not-member" }
     ```
   </Accordion>
 </AccordionGroup>

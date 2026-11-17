@@ -81,6 +81,18 @@ Nothing is removed when the sweep is refused. An owner of each workspace, or an 
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Forbidden — 403">
+    ```json
+    { "error": "Capability 'remove-member' required", "code": "workspace/forbidden" }
+    ```
+    The acting user can see the workspace but has no `remove-member` capability on it.
+  </Accordion>
+  <Accordion title="Not Found — 404">
+    The workspace doesn't exist, or the acting user has no relation to it (not its owner, an ancestor owner, a member or a reach-holder): the two answer alike, with the same body [Fetch Workspace](/v8/api-reference/workspaces/fetch-workspace) gives.
+    ```json
+    { "error": "Workspace not found.", "code": "workspace/not-found" }
+    ```
+  </Accordion>
   <Accordion title="Own Member Id — 400">
     ```json
     { "error": "`POST /workspaces/:workspaceId/members/:userId/remove-from-subtree` acts on another member, not on yourself. Your own membership is at `/workspaces/:workspaceId/members/me`: GET to check it, PATCH to edit your title, DELETE to leave.", "code": "workspace/own-member-id" }

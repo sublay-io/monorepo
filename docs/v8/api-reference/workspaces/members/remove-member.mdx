@@ -79,14 +79,10 @@ Removes a member from a workspace. Requires the `remove-member` capability and i
     ```json
     { "error": "Capability 'remove-member' required", "code": "workspace/forbidden" }
     ```
-    The acting user has no `remove-member` capability on this workspace, including when they have no relation to it.
+    The acting user can see the workspace but has no `remove-member` capability on it.
   </Accordion>
   <Accordion title="Not Found — 404">
-    The workspace doesn't exist:
-    ```json
-    { "error": "Workspace not found", "code": "workspace/not-found" }
-    ```
-    The same with a closing period when the workspace was deleted while this request was being handled:
+    The workspace doesn't exist, or the acting user has no relation to it (not its owner, an ancestor owner, a member or a reach-holder): the two answer alike, with the same body [Fetch Workspace](/v8/api-reference/workspaces/fetch-workspace) gives. Also returned when the workspace is deleted while this request is being handled:
     ```json
     { "error": "Workspace not found.", "code": "workspace/not-found" }
     ```

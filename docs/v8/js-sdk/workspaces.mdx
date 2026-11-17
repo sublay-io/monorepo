@@ -251,7 +251,7 @@ const member = await sublay.workspaces.updateWorkspaceMember({
 
 ### updateMyWorkspaceMembership
 
-The logged-in user edits their own profile on a workspace (`PATCH /workspaces/:workspaceId/members/me`). Needs no capability. A member edits their `title` only; a member's other fields are edited by a member with the capability, through [updateWorkspaceMember](#updateworkspacemember). The workspace's **owner** edits their `title` and `metadata` here, and only here: they are profile only and change nothing about the owner's authority. A user who is not the owner and holds no member row on the workspace gets `404 workspace/not-found`. See [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership).
+The logged-in user edits their own profile on a workspace (`PATCH /workspaces/:workspaceId/members/me`). Needs no capability. A member edits their `title` only; a member's other fields are edited by a member with the capability, through [updateWorkspaceMember](#updateworkspacemember). The workspace's **owner** edits their `title` and `metadata` here, and only here: they are profile only and change nothing about the owner's authority. A user who can see the workspace but is not its owner and holds no member row on it gets `403 workspace/not-member`; one with no relation to it gets `404 workspace/not-found`, as for a missing workspace. See [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership).
 
 ```typescript
 const member = await sublay.workspaces.updateMyWorkspaceMembership({

@@ -50,8 +50,10 @@ Returns the created [Workspace](/v8/data-models/workspace) object.
     ```json
     { "error": "The 'create-sub-workspace' capability on the parent is required.", "code": "workspace/forbidden" }
     ```
+    The acting user can see the parent workspace but has no `create-sub-workspace` capability on it.
   </Accordion>
   <Accordion title="Parent Not Found — 404">
+    The parent workspace doesn't exist, or the acting user has no relation to it (the two answer alike).
     ```json
     { "error": "Parent workspace not found.", "code": "workspace/not-found" }
     ```

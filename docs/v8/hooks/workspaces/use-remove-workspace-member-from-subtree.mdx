@@ -107,7 +107,8 @@ try {
 |------|--------|---------|
 | `workspace/owns-descendants` | 409 | The target owns this workspace or a descendant (see below for when one you can't see counts). Nothing was removed. See [Reading the owned-workspaces block](#reading-the-owned-workspaces-block). |
 | `workspace/insufficient-rank` | 403 | You are outranked by the target at some node in the sweep. |
-| `workspace/forbidden` | 403 | You lack the `remove-member` capability. |
+| `workspace/forbidden` | 403 | You can see the workspace but lack the `remove-member` capability. |
+| `workspace/not-found` | 404 | No such workspace, or you have no relation to it (answered alike). |
 
 ## Related
 

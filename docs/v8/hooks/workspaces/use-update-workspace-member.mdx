@@ -92,6 +92,7 @@ Returns the updated [WorkspaceMember](/v8/data-models/workspace-member) object.
 | Code | Status | Meaning |
 |------|--------|---------|
 | `workspace/forbidden` | 403 | You lack the capability tier for a field you touched. |
+| `workspace/not-found` | 404 | No such workspace, or you have no relation to it (answered alike), or the target isn't a direct member of it. |
 | `workspace/insufficient-rank` | 403 | Two rules share this code: you may only **manage** members ranked strictly below you, and you may only **set** ranks strictly below your own. The second is also what refuses `rank: 0` to anyone holding a row on this workspace — there is no separate rank-0 guard. |
 | `workspace/no-escalation` | 403 | You tried to grant a capability/permission you do not hold. |
 

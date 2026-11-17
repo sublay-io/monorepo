@@ -31,6 +31,18 @@ This is a workspace's **outbox**. For the invites addressed **to** a user, see [
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Forbidden — 403">
+    ```json
+    { "error": "Capability 'invite' required", "code": "workspace/forbidden" }
+    ```
+    The acting user can see the workspace but has no `invite` capability on it.
+  </Accordion>
+  <Accordion title="Not Found — 404">
+    The workspace doesn't exist, or the acting user has no relation to it (not its owner, an ancestor owner, a member or a reach-holder): the two answer alike, with the same body [Fetch Workspace](/v8/api-reference/workspaces/fetch-workspace) gives.
+    ```json
+    { "error": "Workspace not found.", "code": "workspace/not-found" }
+    ```
+  </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json
     { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params", "param": "workspaceId" }

@@ -110,7 +110,8 @@ The emails sent to one address are limited to one every 10 minutes and five a da
     ```json
     {
       "error": "...",
-      "code": "auth/invalid-body"
+      "code": "auth/invalid-body",
+      "param": "emailVerification"
     }
     ```
     `emailVerification` is malformed. Only checked when the project requires email verification before sign-in.
@@ -119,10 +120,11 @@ The emails sent to one address are limited to one every 10 minutes and five a da
     ```json
     {
       "error": "...",
-      "code": "auth/invalid-credentials"
+      "code": "auth/invalid-body",
+      "param": "email"
     }
     ```
-    A missing or non-string `email` or `password`. Sign-in is the one auth route that reports these as `auth/invalid-credentials` rather than `auth/invalid-body`, so this code has two statuses: branch on the status to tell "fix your request" (`400`) from "these credentials are wrong" (`401`).
+    A missing or malformed `email` or `password`. `param` names the field.
   </Accordion>
   <Accordion title="Server Error — 500">
     ```json
@@ -134,7 +136,7 @@ The emails sent to one address are limited to one every 10 minutes and five a da
   </Accordion>
 </AccordionGroup>
 
-**Rate limit:** 25 requests per 5 minutes per IP. Exceeding it returns `429` with the plain-text message `Too many sign in attempts, please wait 5 minutes` and no `code`.
+**Rate limit:** 25 requests per 5 minutes per IP. Exceeding it returns `429` `request/rate-limited`, with `Too many sign in attempts, please wait 5 minutes` as `error`.
 
 ## See Also
 

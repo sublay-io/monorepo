@@ -246,6 +246,7 @@ Checks run in this order; the first failing check is returned.
 
     ```json
     {
+      "error": "This endpoint needs tables that aren't installed in this project (Comments). Install their bundle from the dashboard.",
       "code": "database/tables-not-available",
       "missingTables": ["Comments"],
       "dashboardUrl": "https://<dashboard>/<projectId>/database"

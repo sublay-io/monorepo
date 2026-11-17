@@ -161,4 +161,7 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
     { "error": "Quoted message not found in this conversation.", "code": "chat/invalid-quote" }
     ```
   </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    The multipart body was refused as it was read: `chat/file-too-large` (a file over 100 MB), `chat/unsupported-file-type`, `chat/unexpected-file-field`, `chat/field-too-large` or `chat/invalid-multipart`, with `param` naming the field when there is one. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+  </Accordion>
 </AccordionGroup>

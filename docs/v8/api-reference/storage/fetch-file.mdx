@@ -108,12 +108,17 @@ Requires an authenticated user.
   <Accordion title="Invalid Id — 400">
     Returned when `fileId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
-    { "error": "Invalid file id: expected a UUID.", "code": "storage/invalid-params" }
+    { "error": "Invalid file id: expected a UUID.", "code": "storage/invalid-params", "param": "fileId" }
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
     ```json
     { "error": "File not found", "code": "storage/file-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Failed to retrieve file", "code": "storage/server-error" }
     ```
   </Accordion>
 </AccordionGroup>

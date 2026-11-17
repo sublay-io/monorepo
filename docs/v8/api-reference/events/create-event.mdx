@@ -184,14 +184,20 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     { "error": "This user isn't an active member of this space.", "code": "event/host-not-member" }
     ```
   </Accordion>
-  <Accordion title="File Too Large — 413">
+  <Accordion title="Image Too Large — 413">
     ```json
-    { "code": "event/file-too-large", "message": "Image \"cover.jpg\" exceeds 50MB limit." }
+    { "error": "Image \"cover.jpg\" exceeds 50MB limit.", "code": "event/file-too-large" }
     ```
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
-    { "code": "event/invalid-image", "message": "File \"cover.jpg\" is not a valid image: ..." }
+    { "error": "File \"cover.jpg\" is not a valid image: ...", "code": "event/invalid-image" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    A cover or gallery image was uploaded without its options. `param` is `cover.options` or `gallery.options`.
+    ```json
+    { "error": "`cover.options` is required when a cover image is uploaded.", "code": "event/missing-image-options", "param": "cover.options" }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
@@ -200,6 +206,9 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     ```json
     { "error": "No user with this actingUserId exists in this project.", "code": "event/user-not-found" }
     ```
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    The multipart body was refused as it was read: `event/file-too-large` (a file over 100 MB), `event/unsupported-file-type`, `event/unexpected-file-field`, `event/field-too-large` or `event/invalid-multipart`, with `param` naming the field when there is one. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>
 

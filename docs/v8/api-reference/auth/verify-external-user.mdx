@@ -114,10 +114,33 @@ The `userJwt` must contain:
     ```json
     {
       "error": "Username already taken",
-      "field": "username",
-      "code": "DUPLICATE_USERNAME"
+      "code": "auth/username-taken",
+      "param": "username"
     }
     ```
+  </Accordion>
+  <Accordion title="Duplicate User Field — 409">
+    ```json
+    {
+      "error": "A user with this <field> already exists in this project",
+      "code": "auth/duplicate-field",
+      "param": "<field>"
+    }
+    ```
+    A uniqueness conflict the check above didn't catch (for example, two
+    requests racing for the same value). `param` names the field. The code is
+    `auth/username-taken`, `auth/email-taken` or `auth/foreign-id-taken` when
+    the field is one of those, `auth/duplicate-field` for any other.
+  </Accordion>
+  <Accordion title="Invalid Body — 400">
+    ```json
+    {
+      "error": "...",
+      "code": "auth/invalid-body",
+      "param": "userJwt"
+    }
+    ```
+    A missing or malformed `userJwt`.
   </Accordion>
 </AccordionGroup>
 

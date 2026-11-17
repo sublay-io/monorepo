@@ -46,8 +46,9 @@ On success, returns HTTP `204 No Content` with an empty body.
   <Accordion title="Invalid Params — 400">
     ```json
     {
-      "error": "...",
-      "code": "user/invalid-params"
+      "error": "Invalid user id: expected a UUID.",
+      "code": "user/invalid-params",
+      "param": "userId"
     }
     ```
   </Accordion>

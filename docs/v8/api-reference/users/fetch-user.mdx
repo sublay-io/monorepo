@@ -121,8 +121,9 @@ On success, returns HTTP `200` with the user object:
   <Accordion title="Invalid Params — 400">
     ```json
     {
-      "error": "...",
-      "code": "user/invalid-params"
+      "error": "Invalid user id: expected a UUID.",
+      "code": "user/invalid-params",
+      "param": "userId"
     }
     ```
   </Accordion>

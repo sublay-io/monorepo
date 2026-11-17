@@ -131,6 +131,25 @@ Returns the updated [Event](/v8/data-models/event) object.
     { "error": "Some removeImageIds do not belong to this event.", "code": "event/invalid-remove-image-ids" }
     ```
   </Accordion>
+  <Accordion title="Image Too Large — 413">
+    ```json
+    { "error": "Image \"cover.jpg\" exceeds 50MB limit.", "code": "event/file-too-large" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Image — 422">
+    ```json
+    { "error": "File \"cover.jpg\" is not a valid image: ...", "code": "event/invalid-image" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    A cover or gallery image was uploaded without its options. `param` is `cover.options` or `gallery.options`.
+    ```json
+    { "error": "`cover.options` is required when a cover image is uploaded.", "code": "event/missing-image-options", "param": "cover.options" }
+    ```
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    The multipart body was refused as it was read: `event/file-too-large` (a file over 100 MB), `event/unsupported-file-type`, `event/unexpected-file-field`, `event/field-too-large` or `event/invalid-multipart`, with `param` naming the field when there is one. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+  </Accordion>
 </AccordionGroup>
 
 See also: [useUpdateEvent](/v8/hooks/events/use-update-event)

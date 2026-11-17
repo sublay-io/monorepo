@@ -149,6 +149,7 @@ Returns `200` with a `results` map keyed by user ID (lowercase, whatever case yo
   <Accordion title="Bundle Not Installed — 403">
     ```json
     {
+      "error": "This endpoint needs tables that aren't installed in this project (PushProviderConfigs, PushDevices, NotificationPreferences). Install their bundle from the dashboard.",
       "code": "database/tables-not-available",
       "missingTables": ["PushProviderConfigs", "PushDevices", "NotificationPreferences"],
       "dashboardUrl": "https://…/<projectId>/database"
@@ -158,6 +159,7 @@ Returns `200` with a `results` map keyed by user ID (lowercase, whatever case yo
   <Accordion title="Bundle Provisioning — 503">
     ```json
     {
+      "error": "The \"push\" bundle is being installed for this project. Try again shortly.",
       "code": "database/tables-provisioning",
       "missingTables": ["PushProviderConfigs", "PushDevices", "NotificationPreferences"],
       "bundleId": "push"
@@ -186,7 +188,7 @@ Returns `200` with a `results` map keyed by user ID (lowercase, whatever case yo
   </Accordion>
 </AccordionGroup>
 
-**Rate limit:** 50 requests per 5 minutes per IP. Exceeding it returns `429` with a plain-text message and no `code`.
+**Rate limit:** 50 requests per 5 minutes per IP. Exceeding it returns `429` `request/rate-limited`.
 
 ## See Also
 

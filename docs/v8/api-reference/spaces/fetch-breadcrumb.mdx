@@ -68,7 +68,7 @@ How to render hidden entries is up to the app: skip them, show a placeholder suc
   <Accordion title="Invalid Id — 400">
     Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
-    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params", "param": "spaceId" }
     ```
   </Accordion>
   <Accordion title="Not Found — 404">

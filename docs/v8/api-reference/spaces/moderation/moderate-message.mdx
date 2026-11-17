@@ -46,7 +46,7 @@ Takes a direct moderation action on a chat message in a space's integrated conve
   <Accordion title="Invalid Id — 400">
     Returned when `spaceId` or `messageId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
-    { "error": "Invalid space id: expected a UUID.", "code": "chat/invalid-params" }
+    { "error": "Invalid space id: expected a UUID.", "code": "chat/invalid-params", "param": "spaceId" }
     ```
   </Accordion>
   <Accordion title="Invalid Action — 400">

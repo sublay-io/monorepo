@@ -38,7 +38,7 @@ Permanently deletes a rule. Only space admins can delete rules.
   <Accordion title="Invalid Id — 400">
     Returned when `spaceId` or `ruleId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
-    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params", "param": "spaceId" }
     ```
   </Accordion>
   <Accordion title="Missing Acting User — 400">

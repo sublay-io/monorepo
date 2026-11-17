@@ -38,7 +38,16 @@ On success, returns HTTP `200` with:
     ```json
     {
       "error": "...",
-      "code": "username/invalid-query"
+      "code": "user/invalid-query",
+      "param": "username"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    {
+      "error": "An error occurred while checking username availability.",
+      "code": "user/server-error"
     }
     ```
   </Accordion>

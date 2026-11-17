@@ -59,7 +59,7 @@ An id that isn't a UUID is refused with `400`:
   ```json
   {
     "error": "Invalid space id: expected a UUID.",
-    "code": "space/invalid-params"
+    "code": "space/invalid-params", "param": "spaceId"
   }
   ```
 
@@ -104,7 +104,7 @@ Paginated responses always return the same envelope:
 
 ## Error Format
 
-All error responses follow a consistent structure:
+Every error is JSON with the same two keys:
 
 ```json
 {
@@ -113,15 +113,52 @@ All error responses follow a consistent structure:
 }
 ```
 
-Some errors include an additional `field` key (e.g., validation errors on a specific input field):
+- `error` is text for people. Show it or log it, but don't branch on it: it can change.
+- `code` is stable, in the form `<area>/<kebab-case-slug>` (`entity/not-found`, `auth/email-taken`). Branch on this.
 
-```json
-{
-  "error": "Username already taken",
-  "field": "username",
-  "code": "DUPLICATE_USERNAME"
-}
-```
+Some errors add keys:
+
+- `param` names the failing input when the error is about one: a validation `400` (`<area>/invalid-body`, `<area>/invalid-query`, `<area>/invalid-params`), an id that isn't a UUID, a field another user already holds, a missing image-options field. It is the input's dot path, as you sent it (`email`, `metadata.title`, `images.options`). It is left out when the error is about the request as a whole.
+
+  ```json
+  {
+    "error": "Username already taken",
+    "code": "auth/username-taken",
+    "param": "username"
+  }
+  ```
+
+- A `500`'s code is `<area>/server-error`. The underlying failure is recorded in Sublay's server logs, not returned in the response.
+- Some endpoints add keys of their own (`missingTables` on a missing bundle, `verificationId` on an unverified sign-in); each endpoint's page lists them.
+
+The one exception: an access token that is missing, expired or invalid gets a bare `401 Unauthorized` / `403 Forbidden` with no JSON body. See [Authentication](/v8/api-reference/authentication).
+
+### Request errors
+
+These can come from any endpoint, because they are about the HTTP request itself rather than the resource:
+
+| Status | Code | When |
+|--------|------|------|
+| `400` | `request/invalid-json` | The body is sent as JSON but doesn't parse. |
+| `404` | `request/route-not-found` | No endpoint matches the method and path. |
+| `413` | `request/body-too-large` | The JSON body is over the size limit. |
+| `400` | `request/invalid-body` | The body can't be read for another reason (an unsupported charset or encoding, an aborted request). |
+| `429` | `request/rate-limited` | The endpoint's rate limit for your IP is exceeded. See [Rate Limiting](#rate-limiting). |
+| `500` | `request/server-error` | An unexpected failure outside any endpoint's own handling. |
+
+### Upload errors
+
+Endpoints that take a file in a `multipart/form-data` body answer a refused upload with a code in the endpoint's area (`entity`, `event`, `space`, `user`, `auth`, `chat`, `storage`). These are checked as the body is read, before the endpoint's own checks:
+
+| Status | Code | When |
+|--------|------|------|
+| `413` | `<area>/file-too-large` | A file is over the 100 MB upload limit. `param` names its field. |
+| `400` | `<area>/unsupported-file-type` | A file isn't JPEG, PNG, WebP or PDF. |
+| `400` | `<area>/unexpected-file-field` | A file is in a field the endpoint doesn't take, or a field has more files than it takes. `param` names the field. |
+| `413` | `<area>/field-too-large` | A text field in the multipart body is too large. `param` names the field. |
+| `400` | `<area>/invalid-multipart` | The multipart body is malformed. |
+
+Endpoints that process images add their own, lower limits and checks (for example `413 <area>/file-too-large` for an image over 50 MB, `422 <area>/invalid-image`); each endpoint's page lists them.
 
 ### Common HTTP Status Codes
 
@@ -133,9 +170,10 @@ Some errors include an additional `field` key (e.g., validation errors on a spec
 | `401` | Unauthorized — no `Authorization` header, or a request the endpoint requires a user for |
 | `403` | Forbidden — token expired or invalid, or a valid token without the required permission |
 | `404` | Not found |
-| `409` | Conflict — duplicate resource (e.g., email already in use) |
-| `429` | Rate limit exceeded |
-| `500` | Internal server error |
+| `409` | Conflict — the value is already taken (`auth/email-taken`, `auth/username-taken`, `<area>/foreign-id-taken`) |
+| `413` | Payload too large — a body over the size limit (`request/body-too-large`) or a file over the upload limit (`<area>/file-too-large`) |
+| `429` | Too many requests — the endpoint's rate limit (`request/rate-limited`) or the project's plan quota (`project/quota-reached`) |
+| `500` | Internal server error — `<area>/server-error` |
 
 <Note>
   An **expired token returns `403`, not `401`** — see
@@ -145,4 +183,13 @@ Some errors include an additional `field` key (e.g., validation errors on a spec
 
 ## Rate Limiting
 
-Each endpoint has its own rate limit, applied per project and per IP. When a limit is exceeded, the API returns `429 Too Many Requests`. Limits are noted per endpoint in this reference.
+Each endpoint has its own rate limit, counted per client IP. When a limit is exceeded, the API returns `429` with code `request/rate-limited` and the endpoint's own message as `error`:
+
+```json
+{
+  "error": "Too many sign in attempts, please wait 5 minutes",
+  "code": "request/rate-limited"
+}
+```
+
+The response carries the standard rate-limit headers. Limits are noted per endpoint in this reference.

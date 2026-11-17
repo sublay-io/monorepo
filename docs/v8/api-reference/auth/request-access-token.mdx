@@ -117,13 +117,14 @@ Accounts without a password and accounts that sign in through your own login (ex
     ```
     The project requires email verification before sign-in and this account's email isn't confirmed. See [Email Verification Required](#email-verification-required).
   </Accordion>
-  <Accordion title="User Not Found — 403">
+  <Accordion title="User Not Found — 404">
     ```json
     {
       "error": "User not found.",
-      "code": "auth/no-user-found"
+      "code": "auth/user-not-found"
     }
     ```
+    The refresh token is valid but its user no longer exists (the account was deleted). Treat it as the end of the session, like a refused token. The React and React Native SDKs read it as a refused credential: the account is marked `needsReauth`, and at app launch the app lands signed out (see [Multi-Account](/v8/sdk/authentication/multi-account)).
   </Accordion>
 </AccordionGroup>
 

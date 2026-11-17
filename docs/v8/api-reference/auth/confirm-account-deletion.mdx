@@ -28,7 +28,7 @@ Returns `204 No Content` on success. The user and their session tokens no longer
 | Code | Status | Description |
 |------|--------|-------------|
 | `auth/invalid-or-expired-code` | 400 | The code does not match, was never issued, or has expired (10-minute TTL). |
-| `user/not-found` | 404 | The authenticated user no longer exists. |
+| `auth/user-not-found` | 404 | The authenticated user no longer exists. |
 | `user/delete-failed` | 404 | The user could not be deleted (not found or already deleted). |
 | `auth/unsupported-param` | 400 | The request sent `userId`, in the body or the query. These endpoints always act as the signed-in user: ``"`userId` isn't accepted here: these endpoints always act as the signed-in user."``, with `param: "userId"`. |
 | `auth/user-token-required` | 403 | A service key called this endpoint, with or without `actingUserId`: `"This endpoint needs the user's own access token; a service key can't use it."` |

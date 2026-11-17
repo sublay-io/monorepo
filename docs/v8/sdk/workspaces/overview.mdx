@@ -281,7 +281,7 @@ Between the two, on the routes that check the acting user's standing before anyt
 
   <Accordion title="A path parameter that is not a UUID — 400">
     ```json
-    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params" }
+    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params", "param": "workspaceId" }
     ```
 
     Every `:workspaceId`, `:userId` and `:inviteId` on the bundle is checked for UUID shape before the route runs, so a malformed one is a plain `400` rather than a `500` echoing driver internals. The message names which parameter — *workspace id*, *user id*, *invitation id*.

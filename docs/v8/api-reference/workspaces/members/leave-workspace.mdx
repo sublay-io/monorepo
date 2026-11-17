@@ -72,7 +72,7 @@ Removes the caller's own membership on **this node only** (self-service, no capa
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json
-    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params" }
+    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params", "param": "workspaceId" }
     ```
     Every path id on the workspaces bundle is checked for UUID shape before the route runs, so a malformed one is a plain `400` rather than a `500` from the database.
   </Accordion>

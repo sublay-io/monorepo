@@ -191,7 +191,7 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     `sourceId` is `"none"`, `"null"` or `"undefined"`. Other spellings, such as `"None"`, are ordinary values.
 
     ```json
-    { "error": "sourceId: `none` is a reserved value. For no source, leave `sourceId` out or send null.", "code": "entity/invalid-body" }
+    { "error": "sourceId: `none` is a reserved value. For no source, leave `sourceId` out or send null.", "code": "entity/invalid-body", "param": "sourceId" }
     ```
   </Accordion>
   <Accordion title="Rejected by Validation Webhook — 400">
@@ -217,7 +217,7 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     The space doesn't exist, or the author can't see it (for example a `private` space they aren't an active member of, banned there included). Both answer the same way. Nothing is created.
 
     ```json
-    { "error": "Space not found", "message": "Space with id 4f7c… does not exist or has been deleted", "code": "entity/space-not-found" }
+    { "error": "Space not found", "code": "entity/space-not-found" }
     ```
   </Accordion>
   <Accordion title="Posting Not Allowed — 403">
@@ -245,12 +245,25 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
   </Accordion>
   <Accordion title="File Too Large — 413">
     ```json
-    { "code": "entity/file-too-large", "message": "Image \"photo.jpg\" exceeds 50MB limit." }
+    { "error": "Image \"photo.jpg\" exceeds 50MB limit.", "code": "entity/file-too-large" }
     ```
+    Also returned with `File "…" exceeds 50MB limit.` for a file in `files.files`.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
-    { "code": "entity/invalid-image", "message": "File \"doc.txt\" is not a valid image: ..." }
+    { "error": "File \"doc.txt\" is not a valid image: ...", "code": "entity/invalid-image" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    `images.files` was sent without `images.options`. Checked before the validation webhook and before anything is uploaded, so nothing is stored.
+    ```json
+    { "error": "Image options are required when uploading images. Must include mode property.", "code": "entity/missing-image-options", "param": "images.options" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Reference — 400">
+    A value refers to a record that doesn't exist. `constraint` names the database constraint that refused it.
+    ```json
+    { "error": "A referenced record does not exist", "code": "entity/invalid-foreign-key", "constraint": "..." }
     ```
   </Accordion>
   <Accordion title="Removed Parameter: excludeUserId — 400">
@@ -285,6 +298,14 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     Returned when a file or image is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed.
     ```json
     { "error": "File and image uploads require the files-images bundle. Enable it for this project.", "code": "entity/files-images-bundle-required", "missingTables": ["Files", "Images"] }
+    ```
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    The multipart body was refused as it was read: `entity/file-too-large` (a file over 100 MB), `entity/unsupported-file-type`, `entity/unexpected-file-field`, `entity/field-too-large` or `entity/invalid-multipart`, with `param` naming the field when there is one. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal server error.", "code": "entity/server-error" }
     ```
   </Accordion>
 </AccordionGroup>

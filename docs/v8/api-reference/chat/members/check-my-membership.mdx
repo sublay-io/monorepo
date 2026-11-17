@@ -76,7 +76,7 @@ A flat object. `isMember` is always present; a field that describes a membership
   <Accordion title="Invalid Params — 400">
     Returned when `conversationId` isn't a valid UUID.
     ```json
-    { "error": "Invalid conversation id: expected a UUID.", "code": "chat/invalid-params" }
+    { "error": "Invalid conversation id: expected a UUID.", "code": "chat/invalid-params", "param": "conversationId" }
     ```
   </Accordion>
   <Accordion title="Missing token — 401">

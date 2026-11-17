@@ -168,4 +168,12 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     { "error": "No user with this actingUserId exists in this project.", "code": "storage/user-not-found" }
     ```
   </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    The multipart body was refused as it was read: `storage/file-too-large` (a file over 100 MB), `storage/unsupported-file-type`, `storage/unexpected-file-field`, `storage/field-too-large` or `storage/invalid-multipart`, with `param` naming the field when there is one. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Failed to upload image", "code": "storage/server-error" }
+    ```
+  </Accordion>
 </AccordionGroup>

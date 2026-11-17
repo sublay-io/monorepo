@@ -85,7 +85,7 @@ const { user, created } = await sublay.users.fetchOrCreateUserByForeignId({
 </ParamField>
 
 <ParamField body="username" type="string">
-  Username — used only when creating a new user. 3 to 30 characters after trimming, only letters, numbers, underscores (`_`) and hyphens (`-`); anything else throws a `400` (`user/invalid-body`). A username another user already holds throws a `409` (`DUPLICATE_USER_FIELD`).
+  Username — used only when creating a new user. 3 to 30 characters after trimming, only letters, numbers, underscores (`_`) and hyphens (`-`); anything else throws a `400` (`user/invalid-body`). A username another user already holds throws a `409` (`user/username-taken`, with `param: "username"`).
 </ParamField>
 
 <ParamField body="avatar" type="string | null">

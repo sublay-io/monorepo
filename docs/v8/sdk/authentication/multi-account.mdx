@@ -258,7 +258,8 @@ the account's push notifications — that is the atomic-removal refusal describe
 
 <ResponseField name="AccountTransitionError.credentialRejected" type="boolean">
   `true` when the **server refused** the stored credential — expired, revoked, reuse-detected,
-  invalidated by a password change or a remote sign-out-all — or when the stored entry carries no
+  invalidated by a password change or a remote sign-out-all, or belonging to a user who no longer
+  exists — or when the stored entry carries no
   usable credential at all. This is the only case in which `needsReauth` is set on that account.
 
   `false` when the exchange never got an answer, or the rotated successor could not be persisted.

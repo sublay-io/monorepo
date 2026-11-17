@@ -135,7 +135,7 @@ The first two `500`s below are reachable only when `pushDevice` is supplied; the
     ```
     Returned when the project has spent its monthly API-call allowance and is on
     a plan that hard-blocks at the limit. Distinct from the rate-limit `429`
-    below, which is plain text with no `code`.
+    below (`request/rate-limited`).
   </Accordion>
   <Accordion title="Project Pending Deletion — 423">
     ```json
@@ -153,7 +153,7 @@ The first two `500`s below are reachable only when `pushDevice` is supplied; the
   </Accordion>
 </AccordionGroup>
 
-**Rate limit:** 50 requests per 5 minutes per IP. Exceeding it returns `429` with the plain-text message `Too many sign out attempts, please wait 5 minutes` and no `code`.
+**Rate limit:** 50 requests per 5 minutes per IP. Exceeding it returns `429` `request/rate-limited`, with `Too many sign out attempts, please wait 5 minutes` as `error`.
 
 The budget is sized for a fan-out: signing out of every stored account issues one request per account in parallel, so a five-account sign-out spends five of the fifty. The limiter keys on IP, so several users behind one address share the budget.
 

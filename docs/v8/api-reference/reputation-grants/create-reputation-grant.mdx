@@ -109,6 +109,7 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
   <Accordion title="Tables Not Available — 403">
     ```json
     {
+      "error": "This endpoint needs tables that aren't installed in this project (ReputationBuckets, ReputationGrants). Install their bundle from the dashboard.",
       "code": "database/tables-not-available",
       "missingTables": ["ReputationBuckets", "ReputationGrants"],
       "dashboardUrl": "https://…/<projectId>/database"
@@ -165,6 +166,6 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
   </Accordion>
 </AccordionGroup>
 
-**Rate limit:** 50 requests per 5 minutes per IP. Exceeding it returns `429` with a plain-text message and no `code`.
+**Rate limit:** 50 requests per 5 minutes per IP. Exceeding it returns `429` `request/rate-limited`.
 
 See also: [useCreateReputationGrant](/v8/hooks/reputation/use-create-reputation-grant) · [node-sdk](/v8/node-sdk/reputation) · [js-sdk](/v8/js-sdk/reputation)

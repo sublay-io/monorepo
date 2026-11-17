@@ -85,7 +85,7 @@ Direct conversations (`type: "direct"`) cannot be deleted.
     ```
   </Accordion>
   <Accordion title="Not a Member — 403">
-    The acting user isn't an active member of the conversation. Returned for a group conversation.
+    The acting user isn't an active member of the conversation. In a space conversation: anyone who isn't an active member of its space or can't see it, including a pending or banned member.
     ```json
     { "error": "You are not an active member of this conversation.", "code": "chat/not-a-member" }
     ```
@@ -97,6 +97,7 @@ Direct conversations (`type: "direct"`) cannot be deleted.
     ```
   </Accordion>
   <Accordion title="Forbidden (space) — 403">
+    The acting user is an active member of the space without the `admin` role in the space.
     ```json
     { "error": "Only space admins can delete the space conversation.", "code": "chat/forbidden" }
     ```

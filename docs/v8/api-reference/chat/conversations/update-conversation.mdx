@@ -104,7 +104,7 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
     ```
   </Accordion>
   <Accordion title="Not a Member — 403">
-    The acting user isn't an active member of the conversation. Returned for a group conversation.
+    The acting user isn't an active member of the conversation. In a space conversation: anyone who isn't an active member of its space or can't see it, including a pending or banned member.
     ```json
     { "error": "You are not an active member of this conversation.", "code": "chat/not-a-member" }
     ```
@@ -116,6 +116,7 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
     ```
   </Accordion>
   <Accordion title="Forbidden (space) — 403">
+    The acting user is an active member of the space without the `admin` or `moderator` role in the space.
     ```json
     { "error": "Only space admins and moderators can update the space conversation.", "code": "chat/forbidden" }
     ```

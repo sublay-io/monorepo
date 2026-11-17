@@ -48,7 +48,7 @@ Requires the `entities` bundle in addition to `spaces`.
   <Accordion title="Invalid Id — 400">
     Returned when `spaceId` or `entityId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
-    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params", "param": "spaceId" }
+    { "error": "Invalid space id: expected a UUID.", "code": "moderation/invalid-params", "param": "spaceId" }
     ```
   </Accordion>
   <Accordion title="Missing Acting User — 400">

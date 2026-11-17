@@ -6,7 +6,7 @@ import useMessageThread, {
 // ─── Context shape ────────────────────────────────────────────────────────────
 
 export interface MessageThreadContextValue extends UseMessageThreadValues {
-  messageId: string;
+  parentMessageId: string;
 }
 
 export const MessageThreadContext = createContext<
@@ -20,20 +20,20 @@ export function useMessageThreadContext(): Partial<MessageThreadContextValue> {
 // ─── Provider ────────────────────────────────────────────────────────────────
 
 export interface MessageThreadProviderProps {
-  messageId: string;
+  parentMessageId: string;
   conversationId: string;
   children: ReactNode;
 }
 
 export const MessageThreadProvider: React.FC<MessageThreadProviderProps> = ({
-  messageId,
+  parentMessageId,
   conversationId,
   children,
 }) => {
-  const data = useMessageThread({ messageId, conversationId });
+  const data = useMessageThread({ parentMessageId, conversationId });
 
   return (
-    <MessageThreadContext.Provider value={{ ...data, messageId }}>
+    <MessageThreadContext.Provider value={{ ...data, parentMessageId }}>
       {children}
     </MessageThreadContext.Provider>
   );

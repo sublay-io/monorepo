@@ -12,7 +12,7 @@ describe("useCreateReport", () => {
   it("creates a comment report", async () => {
     const user = makeAuthUser();
     const { result, axiosPrivate } = renderHookWithAxios(
-      () => useCreateReport({ type: "comment" }),
+      () => useCreateReport({ targetType: "comment" }),
       { user },
     );
 
@@ -46,7 +46,7 @@ describe("useCreateReport", () => {
   it("creates an entity report with details", async () => {
     const user = makeAuthUser();
     const { result, axiosPrivate } = renderHookWithAxios(
-      () => useCreateReport({ type: "entity" }),
+      () => useCreateReport({ targetType: "entity" }),
       { user },
     );
 
@@ -72,7 +72,7 @@ describe("useCreateReport", () => {
   it("creates a message report against the shared reports endpoint", async () => {
     const user = makeAuthUser();
     const { result, axiosPrivate } = renderHookWithAxios(
-      () => useCreateReport({ type: "message" }),
+      () => useCreateReport({ targetType: "message" }),
       { user },
     );
 
@@ -101,7 +101,7 @@ describe("useCreateReport", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     expect(() =>
-      renderHookWithAxios(() => useCreateReport({ type: "bogus" as any }), { user }),
+      renderHookWithAxios(() => useCreateReport({ targetType: "bogus" as any }), { user }),
     ).toThrow("Invalid report type");
 
     consoleSpy.mockRestore();
@@ -110,7 +110,7 @@ describe("useCreateReport", () => {
   it("rejects when the server returns an error response", async () => {
     const user = makeAuthUser();
     const { result, axiosPrivate } = renderHookWithAxios(
-      () => useCreateReport({ type: "comment" }),
+      () => useCreateReport({ targetType: "comment" }),
       { user },
     );
 
@@ -123,7 +123,7 @@ describe("useCreateReport", () => {
 
   it("throws before making a request when there is no authenticated user", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() =>
-      useCreateReport({ type: "comment" }),
+      useCreateReport({ targetType: "comment" }),
     );
 
     await expect(

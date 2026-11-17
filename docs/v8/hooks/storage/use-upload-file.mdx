@@ -1,12 +1,12 @@
 ---
 title: "Upload file"
-description: "Upload a generic file (document, video, or other) without server-side processing"
+description: "Upload a file (PDF, JPEG, PNG or WebP) without server-side processing"
 icon: "plug"
 ---
 
 ## Overview
 
-Uploads a file to Sublay storage without any server-side processing. The raw file is stored and a proxy URL is returned. Use this for PDFs, videos, Office documents, or any file type where you don't need variant generation.
+Uploads a file to Sublay storage without any server-side processing. The raw file is stored and a proxy URL is returned. Use this for a PDF, or a JPEG, PNG or WebP image you don't need variants of; other file types are refused with `storage/unsupported-file-type`.
 
 For images that need resizing or format conversion, use [`useUploadImage`](/v8/hooks/storage/use-upload-image) instead.
 
@@ -87,4 +87,4 @@ The hook returns the `uploadFile` function directly (no state wrappers). The fun
 }
 ```
 
-<Note>The `type` field is inferred automatically from the file's MIME type. PDFs and Office documents become `"document"`, video files become `"video"`, images become `"image"`, and everything else becomes `"other"`.</Note>
+<Note>The `type` field is inferred automatically from the file's MIME type: a PDF becomes `"document"` and an image becomes `"image"`.</Note>

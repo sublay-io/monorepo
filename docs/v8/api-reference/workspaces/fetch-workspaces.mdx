@@ -132,7 +132,7 @@ GET /v8/:projectId/workspaces?parentWorkspaceId=none&page=1&limit=10&include=mem
   </Accordion>
   <Accordion title="Undeclared Query Parameter — 400">
     ```json
-    { "error": "Unrecognized key: \"sort\"", "code": "workspace/invalid-query" }
+    { "error": "Unrecognized key: \"sort\"", "code": "workspace/invalid-query", "param": "sort" }
     ```
     This route declares `page`, `limit`, `relation`, `parentWorkspaceId`, `sortDir`, `include` and `actingUserId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "sort", "order"`. The two exceptions across the bundle are the cache-busters `_` and `_t`, which are dropped before the request is read. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>

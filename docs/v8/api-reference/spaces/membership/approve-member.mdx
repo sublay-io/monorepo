@@ -38,7 +38,7 @@ Sets a pending member's status to `"active"`. Requires the caller to be a modera
   <Accordion title="Invalid Id — 400">
     Returned when `spaceId` or `userId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
-    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params", "param": "spaceId" }
     ```
   </Accordion>
   <Accordion title="Own Member Id — 400">
@@ -56,7 +56,7 @@ Sets a pending member's status to `"active"`. Requires the caller to be a modera
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body", "param": "actingUserId" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

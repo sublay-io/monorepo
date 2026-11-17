@@ -154,7 +154,7 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     - `foreignId` is an empty string or longer than 255 characters;
     - `metadata` isn't an object, or is larger than 10 KB;
     - `createdAt` or `updatedAt` isn't a UTC ISO 8601 datetime ending in `Z`;
-    - from a service key, `createdAt` or `updatedAt` is more than five minutes in the future (`createdAt can't be in the future.` / `updatedAt can't be in the future.`).
+    - from a service key, `createdAt` or `updatedAt` is more than five minutes in the future (`createdAt can't be in the future.` / `updatedAt can't be in the future.`, with `param` naming the field).
 
     ```json
     { "error": "At least one of content, gif, or attachments must be provided", "code": "comment/invalid-body" }
@@ -261,7 +261,7 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     Returned when another comment already uses the supplied `foreignId`.
 
     ```json
-    { "error": "A comment with this foreignId already exists.", "code": "comment/foreign-id-taken" }
+    { "error": "A comment with this foreignId already exists.", "code": "comment/foreign-id-taken", "param": "foreignId" }
     ```
   </Accordion>
 </AccordionGroup>

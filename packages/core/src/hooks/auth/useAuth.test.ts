@@ -41,7 +41,10 @@ describe("useAuth", () => {
     const { result, axiosPublic } = renderHookWithAxios(() => useAuth(), {
       projectId: "project-1",
     });
-    axiosPublic.mockError("post", 401, { message: "Invalid credentials" });
+    axiosPublic.mockError("post", 401, {
+      error: "Invalid credentials",
+      code: "auth/invalid-credentials",
+    });
 
     await expect(
       act(async () => {
@@ -81,6 +84,33 @@ describe("useAuth", () => {
     expect(axiosPublic.calls("post")[0].body).toMatchObject({
       emailVerification: { mode: "code" },
     });
+  });
+
+  it("signUpWithEmailAndPassword throws the server's error text, code and param", async () => {
+    const { result, axiosPublic } = renderHookWithAxios(() => useAuth(), {
+      projectId: "project-1",
+    });
+    axiosPublic.mockError("post", 409, {
+      error: "Email already in use",
+      code: "auth/email-taken",
+      param: "email",
+    });
+
+    let thrown: unknown;
+    await act(async () => {
+      try {
+        await result.current.signUpWithEmailAndPassword({
+          email: "a@b.com",
+          password: "secret",
+        });
+      } catch (error) {
+        thrown = error;
+      }
+    });
+
+    expect(thrown).toBeInstanceOf(Error);
+    expect((thrown as Error).message).toBe("Email already in use");
+    expect(thrown).toMatchObject({ code: "auth/email-taken", param: "email" });
   });
 
   it("signUpWithEmailAndPassword resolves the pending result when email verification is required", async () => {

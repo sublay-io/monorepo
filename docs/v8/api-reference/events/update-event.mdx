@@ -79,7 +79,7 @@ Returns the updated [Event](/v8/data-models/event) object.
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId must be a user id.", "code": "event/invalid-body" }
+    { "error": "actingUserId must be a user id.", "code": "event/invalid-body", "param": "actingUserId" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
@@ -128,8 +128,28 @@ Returns the updated [Event](/v8/data-models/event) object.
   </Accordion>
   <Accordion title="Invalid removeImageIds — 400">
     ```json
-    { "error": "Some removeImageIds do not belong to this event.", "code": "event/invalid-remove-image-ids" }
+    { "error": "Some removeImageIds do not belong to this event.", "code": "event/invalid-remove-image-ids", "param": "removeImageIds", "invalidIds": ["..."] }
     ```
+  </Accordion>
+  <Accordion title="Image Too Large — 413">
+    ```json
+    { "error": "Image \"cover.jpg\" exceeds 50MB limit.", "code": "event/file-too-large", "param": "cover" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Image — 422">
+    ```json
+    { "error": "File \"cover.jpg\" is not a valid image: ...", "code": "event/invalid-image", "param": "cover" }
+    ```
+    A cover or gallery file can't be read as an image. `param` is `cover` or `gallery`.
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    A cover or gallery image was uploaded without its options. `param` is `cover.options` or `gallery.options`.
+    ```json
+    { "error": "`cover.options` is required when a cover image is uploaded.", "code": "event/missing-image-options", "param": "cover.options" }
+    ```
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    A file was refused as the body was read: `event/unsupported-file-type` or `event/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>
 

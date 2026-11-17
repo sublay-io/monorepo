@@ -162,7 +162,7 @@ Candidates are excluded when they are: the asker (unless `excludeSelf: false`), 
   <Accordion title="Tables Not Available — 403">
     The `interest-matching` bundle is not installed.
     ```json
-    { "code": "database/tables-not-available", "missingTables": ["UserInterestFacets"] }
+    { "error": "This endpoint needs tables that aren't installed in this project (UserInterestFacets). Install their bundle from the dashboard.", "code": "database/tables-not-available", "missingTables": ["UserInterestFacets"] }
     ```
   </Accordion>
 </AccordionGroup>

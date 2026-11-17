@@ -73,8 +73,8 @@ Feature endpoints and SDK hooks only work when their bundle is installed. If you
 
 | Situation | Response | Meaning |
 |-----------|----------|---------|
-| Bundle not installed | `403` · `database/tables-not-available` | The feature isn't enabled for this project. The response includes a `dashboardUrl` pointing at the project's Database page so you can install it. |
-| Bundle currently installing | `503` · `database/tables-provisioning` | The bundle is mid-install. This is transient — retry shortly. |
+| Bundle not installed | `403` · `database/tables-not-available` | The feature isn't enabled for this project. The body carries `error`, `code`, `missingTables` (the tables that aren't installed) and a `dashboardUrl` pointing at the project's Database page so you can install it. |
+| Bundle currently installing | `503` · `database/tables-provisioning` | The bundle is mid-install. This is transient — retry shortly. The body carries `error`, `code`, `missingTables` and `bundleId` (the bundle being installed). |
 
 If you hit one of these while building, the fix is almost always to install the bundle for the feature you're using. Open the **Database** page in the dashboard and add it.
 

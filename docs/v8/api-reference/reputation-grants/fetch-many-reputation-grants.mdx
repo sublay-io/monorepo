@@ -154,6 +154,7 @@ See [ReputationGrant](/v8/data-models/reputation-grant) for the row shape and [G
   <Accordion title="Tables Not Available — 403">
     ```json
     {
+      "error": "This endpoint needs tables that aren't installed in this project (ReputationBuckets, ReputationGrants). Install their bundle from the dashboard.",
       "code": "database/tables-not-available",
       "missingTables": ["ReputationBuckets", "ReputationGrants"],
       "dashboardUrl": "https://…/<projectId>/database"
@@ -188,6 +189,6 @@ See [ReputationGrant](/v8/data-models/reputation-grant) for the row shape and [G
   </Accordion>
 </AccordionGroup>
 
-**Rate limit:** 100 requests per 5 minutes per IP. Exceeding it returns `429` with a plain-text message and no `code`.
+**Rate limit:** 100 requests per 5 minutes per IP. Exceeding it returns `429` `request/rate-limited`.
 
 See also: [useFetchManyReputationGrants](/v8/hooks/reputation/use-fetch-many-reputation-grants) · [useFetchManyReputationGrantsWrapper](/v8/hooks/reputation/use-fetch-many-reputation-grants-wrapper) · [node-sdk](/v8/node-sdk/reputation) · [js-sdk](/v8/js-sdk/reputation)

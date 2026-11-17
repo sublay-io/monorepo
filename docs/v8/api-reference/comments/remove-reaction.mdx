@@ -54,7 +54,7 @@ Returns the [Comment](/v8/data-models/comment) as you'd see it after the change 
     Returned when `commentId` isn't a valid UUID.
 
     ```json
-    { "error": "Invalid comment id: expected a UUID.", "code": "comment/invalid-params" }
+    { "error": "Invalid comment id: expected a UUID.", "code": "comment/invalid-params", "param": "commentId" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

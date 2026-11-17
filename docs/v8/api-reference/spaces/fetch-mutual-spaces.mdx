@@ -49,7 +49,7 @@ Returns a paginated list of spaces that both the authenticated user and another 
   <Accordion title="Invalid Id — 400">
     Returned when `userId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
-    { "error": "Invalid user id: expected a UUID.", "code": "space/invalid-params" }
+    { "error": "Invalid user id: expected a UUID.", "code": "space/invalid-params", "param": "userId" }
     ```
   </Accordion>
   <Accordion title="Missing User — 400">

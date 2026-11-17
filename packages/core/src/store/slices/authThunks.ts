@@ -429,18 +429,28 @@ async function refuseAtAccountLimit({
 }
 
 /**
- * The rejection payload for sign-up and sign-in: the message as before, plus
- * the server's error `code` and — on a sign-in refused with
- * `auth/email-not-verified` in code mode — the `verificationId` the freshly
- * emailed code is confirmed with.
+ * The rejection payload for sign-up and sign-in: the server's `error` text as
+ * the message (the transport's own message when the server sent none), plus
+ * the server's error `code`, the `param` naming the failing input when the
+ * server gives one, and — on a sign-in refused with `auth/email-not-verified`
+ * in code mode — the `verificationId` the freshly emailed code is confirmed
+ * with.
  */
 function toAuthRejection(error: unknown): AuthRejection {
   const data = (error as { response?: { data?: unknown } } | null | undefined)
-    ?.response?.data as { code?: unknown; verificationId?: unknown } | undefined;
+    ?.response?.data as
+    | { error?: unknown; code?: unknown; param?: unknown; verificationId?: unknown }
+    | undefined;
   const rejection: AuthRejection = {
-    message: error instanceof Error ? error.message : "Unknown error",
+    message:
+      typeof data?.error === "string" && data.error
+        ? data.error
+        : error instanceof Error
+          ? error.message
+          : "Unknown error",
   };
   if (typeof data?.code === "string") rejection.code = data.code;
+  if (typeof data?.param === "string") rejection.param = data.param;
   if (typeof data?.verificationId === "string") {
     rejection.verificationId = data.verificationId;
   }
@@ -750,8 +760,9 @@ export const confirmAccountDeletionThunk = createAsyncThunk(
 export interface RefreshRejectionMeta {
   /**
    * True when the server refused the credential (401/403 — expired, revoked,
-   * reuse-detected, invalidated by a password change or a remote sign-out-all),
-   * and when there was no credential to present at all. False for a transport
+   * reuse-detected, invalidated by a password change or a remote sign-out-all,
+   * or 404 `auth/user-not-found` — the token's user no longer exists), and
+   * when there was no credential to present at all. False for a transport
    * failure, which says nothing about whether the account is alive.
    */
   credentialRejected: boolean;

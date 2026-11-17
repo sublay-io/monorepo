@@ -184,14 +184,21 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     { "error": "This user isn't an active member of this space.", "code": "event/host-not-member" }
     ```
   </Accordion>
-  <Accordion title="File Too Large — 413">
+  <Accordion title="Image Too Large — 413">
     ```json
-    { "code": "event/file-too-large", "message": "Image \"cover.jpg\" exceeds 50MB limit." }
+    { "error": "Image \"cover.jpg\" exceeds 50MB limit.", "code": "event/file-too-large", "param": "cover" }
     ```
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
-    { "code": "event/invalid-image", "message": "File \"cover.jpg\" is not a valid image: ..." }
+    { "error": "File \"cover.jpg\" is not a valid image: ...", "code": "event/invalid-image", "param": "cover" }
+    ```
+    A cover or gallery file can't be read as an image. `param` is `cover` or `gallery`.
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    A cover or gallery image was uploaded without its options. `param` is `cover.options` or `gallery.options`.
+    ```json
+    { "error": "`cover.options` is required when a cover image is uploaded.", "code": "event/missing-image-options", "param": "cover.options" }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
@@ -200,6 +207,9 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     ```json
     { "error": "No user with this actingUserId exists in this project.", "code": "event/user-not-found" }
     ```
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    A file was refused as the body was read: `event/unsupported-file-type` or `event/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>
 

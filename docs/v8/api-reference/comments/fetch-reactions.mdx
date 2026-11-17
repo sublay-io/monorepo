@@ -85,7 +85,7 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
     Returned when `commentId` isn't a valid UUID.
 
     ```json
-    { "error": "Invalid comment id: expected a UUID.", "code": "comment/invalid-params" }
+    { "error": "Invalid comment id: expected a UUID.", "code": "comment/invalid-params", "param": "commentId" }
     ```
   </Accordion>
   <Accordion title="Invalid Query — 400">

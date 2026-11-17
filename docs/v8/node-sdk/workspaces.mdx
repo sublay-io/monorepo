@@ -49,7 +49,7 @@ The `workspaces` module is the developer's **authorization-server SDK** for the 
   Every workspaces endpoint also declares its fields exactly, and refuses any
   top-level field it does not declare, for every caller — in the body of a
   write, with
-  `{ "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body" }`
+  `{ "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body", "param": "onBehalfOf" }`
   (plural `Unrecognized keys: "a", "b"` for two or more), and in the query
   string of a read or delete, with `workspace/invalid-query`. This SDK sends
   each call's fields where the server reads them: the query string on reads and

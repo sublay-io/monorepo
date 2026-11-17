@@ -73,6 +73,7 @@ A **positive** mint notifies the recipient when they can [read the content](/v8/
   <Accordion title="Tables Not Available — 403">
     ```json
     {
+      "error": "This endpoint needs tables that aren't installed in this project (Spaces). Install their bundle from the dashboard.",
       "code": "database/tables-not-available",
       "missingTables": ["Spaces"],
       "dashboardUrl": "https://…/<projectId>/database"
@@ -122,6 +123,6 @@ A **positive** mint notifies the recipient when they can [read the content](/v8/
   </Accordion>
 </AccordionGroup>
 
-**Rate limit:** 50 requests per 5 minutes per IP. Exceeding it returns `429` with a plain-text message and no `code`.
+**Rate limit:** 50 requests per 5 minutes per IP. Exceeding it returns `429` `request/rate-limited`.
 
 See also: [node-sdk `mintGrant`](/v8/node-sdk/reputation) · [Create Reputation Grant](/v8/api-reference/reputation-grants/create-reputation-grant)

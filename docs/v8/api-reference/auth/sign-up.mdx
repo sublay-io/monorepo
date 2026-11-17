@@ -170,8 +170,8 @@ Validation still runs first, in the same order: an invalid body, an image error,
     ```json
     {
       "error": "Email already in use",
-      "field": "email",
-      "code": "DUPLICATE_EMAIL"
+      "code": "auth/email-taken",
+      "param": "email"
     }
     ```
     Only when the project doesn't require email verification before sign-in. It tells the caller the email is registered.
@@ -189,8 +189,8 @@ Validation still runs first, in the same order: an invalid body, an image error,
     ```json
     {
       "error": "Username already taken",
-      "field": "username",
-      "code": "DUPLICATE_USERNAME"
+      "code": "auth/username-taken",
+      "param": "username"
     }
     ```
   </Accordion>
@@ -206,28 +206,44 @@ Validation still runs first, in the same order: an invalid body, an image error,
     ```json
     {
       "error": "Avatar image exceeds 50MB limit.",
-      "code": "auth/file-too-large"
+      "code": "auth/file-too-large",
+      "param": "avatarFile"
     }
     ```
-    Also returned with `"Banner image exceeds 50MB limit."` for the banner file.
+    Also returned with `"Banner image exceeds 50MB limit."` and `param: "bannerFile"` for the banner file.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
     {
       "error": "Avatar file is not a valid image: ...",
-      "code": "auth/invalid-image"
+      "code": "auth/invalid-image",
+      "param": "avatarFile"
     }
     ```
-    Returned when the uploaded file cannot be parsed as an image. Also returned for the banner file with `"Banner file is not a valid image: ..."`.
+    Returned when the uploaded file cannot be parsed as an image. Also returned for the banner file with `"Banner file is not a valid image: ..."` and `param: "bannerFile"`.
   </Accordion>
   <Accordion title="Missing Image Options — 400">
     ```json
     {
       "error": "Image options are required when uploading an avatar. Must include mode property.",
-      "code": "auth/missing-image-options"
+      "code": "auth/missing-image-options",
+      "param": "avatarFile.options"
     }
     ```
-    Returned when `avatarFile` or `bannerFile` is uploaded without the corresponding `.options` field.
+    Returned when `avatarFile` or `bannerFile` is uploaded without the corresponding `.options` field. `param` is `avatarFile.options` or `bannerFile.options`.
+  </Accordion>
+  <Accordion title="Invalid Image Options — 400">
+    ```json
+    {
+      "error": "Invalid JSON in avatarFile.options field.",
+      "code": "auth/invalid-body",
+      "param": "avatarFile.options"
+    }
+    ```
+    The `.options` field isn't valid JSON. `param` names the field: `avatarFile.options` or `bannerFile.options`.
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    A file was refused as the body was read: `auth/unsupported-file-type` or `auth/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
   <Accordion title="Validation Failed — 400">
     ```json
@@ -241,12 +257,14 @@ Validation still runs first, in the same order: an invalid body, an image error,
     ```json
     {
       "error": "A user with this <field> already exists in this project",
-      "field": "<field>",
-      "code": "DUPLICATE_USER_FIELD"
+      "code": "auth/duplicate-field",
+      "param": "<field>"
     }
     ```
-    The catch-all uniqueness conflict, raised for any unique column the two
-    conflicts above do not name. `field` identifies the column.
+    A uniqueness conflict the checks above didn't catch (for example, two
+    sign-ups racing for the same value). `param` names the field. The code is
+    `auth/username-taken`, `auth/email-taken` or `auth/foreign-id-taken` when
+    the field is one of those, `auth/duplicate-field` for any other.
   </Accordion>
   <Accordion title="Storage Quota Reached — 429">
     ```json
@@ -269,7 +287,7 @@ Validation still runs first, in the same order: an invalid body, an image error,
   </Accordion>
 </AccordionGroup>
 
-**Rate limit:** 5 requests per 5 minutes per IP. Exceeding it returns `429` with the plain-text message `Too many sign up attempts, please wait 5 minutes` and no `code` — distinct from the quota `429` above, which carries a JSON body.
+**Rate limit:** 5 requests per 5 minutes per IP. Exceeding it returns `429` `request/rate-limited`, with `Too many sign up attempts, please wait 5 minutes` as `error` — distinct from the quota `429` above (`project/quota-reached`).
 
 ## See Also
 

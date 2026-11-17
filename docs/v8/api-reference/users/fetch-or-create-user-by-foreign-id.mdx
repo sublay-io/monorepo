@@ -183,16 +183,18 @@ Returns HTTP `200` (an existing user) or `201` (a user this request created), wi
     { "error": "No user with this actingUserId exists in this project.", "code": "user/user-not-found" }
     ```
   </Accordion>
-  <Accordion title="Duplicate Field — 409">
+  <Accordion title="Field Already Taken — 409">
     No user has this `foreignId`, and another user already holds the `username` (or another unique field) in this project. Nothing is created.
 
     ```json
     {
       "error": "A user with this username already exists in this project",
-      "field": "username",
-      "code": "DUPLICATE_USER_FIELD"
+      "code": "user/username-taken",
+      "param": "username"
     }
     ```
+
+    `param` names the field. The code is `user/username-taken`, `user/email-taken` or `user/foreign-id-taken` for those fields, `user/duplicate-field` for any other.
   </Accordion>
 </AccordionGroup>
 

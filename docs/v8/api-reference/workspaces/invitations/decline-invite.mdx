@@ -80,7 +80,7 @@ Marks the invite `declined` and fires `workspace.invite.declined`.
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json
-    { "error": "Invalid invitation id: expected a UUID.", "code": "workspace/invalid-params" }
+    { "error": "Invalid invitation id: expected a UUID.", "code": "workspace/invalid-params", "param": "inviteId" }
     ```
     Every path id on the workspaces bundle is checked for UUID shape before the route runs, so a malformed one is a plain `400` rather than a `500` from the database.
   </Accordion>

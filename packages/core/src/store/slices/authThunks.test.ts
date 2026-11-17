@@ -242,6 +242,53 @@ describe("signInWithEmailAndPasswordThunk — email not verified", () => {
   });
 });
 
+describe("sign-up and sign-in rejections carry the server's error", () => {
+  it("uses the server's `error` text as the message and copies `code` and `param`", async () => {
+    const store = makeSublayStore();
+    const axios = mockAxiosPublic();
+    axios.mockError("post", 409, {
+      error: "Username already taken",
+      code: "auth/username-taken",
+      param: "username",
+    });
+
+    const result = await store.dispatch(
+      signUpWithEmailAndPasswordThunk({
+        projectId: "project-1",
+        email: "a@b.com",
+        password: "secret",
+        username: "taken",
+      }),
+    );
+
+    expect(signUpWithEmailAndPasswordThunk.rejected.match(result)).toBe(true);
+    expect(result.payload).toEqual({
+      message: "Username already taken",
+      code: "auth/username-taken",
+      param: "username",
+    });
+  });
+
+  it("falls back to the transport's message when the server sent no `error`", async () => {
+    const store = makeSublayStore();
+    const axios = mockAxiosPublic();
+    axios.mockError("post", 500, {});
+
+    const result = await store.dispatch(
+      signInWithEmailAndPasswordThunk({
+        projectId: "project-1",
+        email: "a@b.com",
+        password: "secret",
+      }),
+    );
+
+    expect(signInWithEmailAndPasswordThunk.rejected.match(result)).toBe(true);
+    const payload = result.payload as { message: string; param?: string };
+    expect(payload.message).not.toBe("");
+    expect(payload).not.toHaveProperty("param");
+  });
+});
+
 describe("signOutThunk", () => {
   it("throws a guard error when there is no refresh token", async () => {
     const store = makeSublayStore();
@@ -527,6 +574,20 @@ describe("requestNewAccessTokenThunk", () => {
     expect(requestNewAccessTokenThunk.rejected.match(result)).toBe(true);
     expect(result.payload).toBe("No refresh token available");
     expect(axios.calls("post")).toHaveLength(0);
+  });
+
+  it("marks the credential rejected when the token's user no longer exists (404 auth/user-not-found)", async () => {
+    const store = makeSublayStore();
+    store.dispatch(setTokens({ accessToken: "stale", refreshToken: "refresh-1" }));
+    const axios = mockAxiosPublic();
+    axios.mockError("post", 404, { error: "User not found.", code: "auth/user-not-found" });
+
+    const result = await store.dispatch(requestNewAccessTokenThunk({ projectId: "project-1" }));
+
+    expect(requestNewAccessTokenThunk.rejected.match(result)).toBe(true);
+    expect(
+      (result.meta as { credentialRejected?: boolean }).credentialRejected,
+    ).toBe(true);
   });
 
   it("rotates the access and refresh tokens on success", async () => {

@@ -46,13 +46,13 @@ Deletion **cascades** the entire subtree in one transaction, bottom-up: invitati
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json
-    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params" }
+    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params", "param": "workspaceId" }
     ```
     Every path id on the workspaces bundle is checked for UUID shape before the route runs, so a malformed one is a plain `400` rather than a `500` from the database.
   </Accordion>
   <Accordion title="Undeclared Field — 400">
     ```json
-    { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-query" }
+    { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-query", "param": "onBehalfOf" }
     ```
     Every workspaces endpoint declares its fields exactly, and a query parameter this `DELETE` does not declare is refused rather than ignored, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. Send only `actingUserId`. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>

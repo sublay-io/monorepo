@@ -32,7 +32,7 @@ Returns the full array of all rules for the space in the new order (same shape a
   <Accordion title="Invalid Id — 400">
     Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
-    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params", "param": "spaceId" }
     ```
   </Accordion>
   <Accordion title="Missing Acting User — 400">
@@ -44,7 +44,7 @@ Returns the full array of all rules for the space in the new order (same shape a
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body", "param": "actingUserId" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
@@ -74,7 +74,7 @@ Returns the full array of all rules for the space in the new order (same shape a
   <Accordion title="Invalid Rule IDs — 400">
     One or more provided IDs do not exist in this space.
     ```json
-    { "error": "Some rule IDs were not found in this space.", "code": "rule/invalid-ids", "missingIds": ["..."] }
+    { "error": "Some rule IDs were not found in this space.", "code": "rule/invalid-ids", "param": "ruleIds", "missingIds": ["..."] }
     ```
   </Accordion>
 </AccordionGroup>

@@ -48,8 +48,11 @@ The JWT is signed with `RS256`, expires in 5 minutes, and includes:
 
 <AccordionGroup>
   <Accordion title="Missing Parameters — 400">
-    ```
-    Missing params in request body
+    ```json
+    {
+      "error": "Missing params in request body: privateKey and payload are required.",
+      "code": "crypto/missing-params"
+    }
     ```
     Returned when `privateKey` or `payload` is missing.
   </Accordion>

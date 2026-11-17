@@ -73,7 +73,7 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
   <Accordion title="Invalid Id — 400">
     Returned when `spaceId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
-    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params", "param": "spaceId" }
     ```
   </Accordion>
   <Accordion title="Missing Acting User — 400">
@@ -85,7 +85,7 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body", "param": "actingUserId" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
@@ -117,11 +117,43 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
     { "error": "Space not found.", "code": "space/not-found" }
     ```
   </Accordion>
+  <Accordion title="Slug Taken — 409">
+    ```json
+    { "error": "A space with this slug already exists.", "code": "space/slug-taken", "param": "slug" }
+    ```
+  </Accordion>
   <Accordion title="files-images Bundle Required — 403">
     Returned when an avatar or banner is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed.
     ```json
     { "error": "Space avatar/banner uploads require the files-images bundle. Enable it for this project.", "code": "space/files-images-bundle-required", "missingTables": ["Files", "Images"] }
     ```
+  </Accordion>
+  <Accordion title="Image Too Large — 413">
+    ```json
+    { "error": "Avatar image exceeds 50MB limit.", "code": "space/file-too-large", "param": "avatarFile" }
+    ```
+    Also returned with `"Banner image exceeds 50MB limit."` and `param: "bannerFile"` for the banner.
+  </Accordion>
+  <Accordion title="Invalid Image — 422">
+    ```json
+    { "error": "Avatar file is not a valid image: ...", "code": "space/invalid-image", "param": "avatarFile" }
+    ```
+    The file can't be read as an image. Also returned for the banner, with `param: "bannerFile"`.
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    ```json
+    { "error": "Image options are required when uploading an avatar. Must include mode property.", "code": "space/missing-image-options", "param": "avatarFile.options" }
+    ```
+    `avatarFile` or `bannerFile` was uploaded without its `.options` field. `param` is `avatarFile.options` or `bannerFile.options`.
+  </Accordion>
+  <Accordion title="Invalid Image Options — 400">
+    ```json
+    { "error": "Invalid JSON in avatarFile.options field.", "code": "space/invalid-body", "param": "avatarFile.options" }
+    ```
+    The `.options` field isn't valid JSON. `param` names the field: `avatarFile.options` or `bannerFile.options`.
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    A file was refused as the body was read: `space/unsupported-file-type` or `space/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>
 

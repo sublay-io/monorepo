@@ -176,7 +176,8 @@ Between the two, on the routes that check the acting user's standing before anyt
     ```json
     {
       "error": "`userId` is not the acting user on workspace routes — it addresses the target. Use `actingUserId` to act on behalf of a user.",
-      "code": "workspace/invalid-body"
+      "code": "workspace/invalid-body",
+      "param": "userId"
     }
     ```
 
@@ -185,7 +186,8 @@ Between the two, on the routes that check the acting user's standing before anyt
     ```json
     {
       "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
-      "code": "workspace/invalid-body"
+      "code": "workspace/invalid-body",
+      "param": "userId"
     }
     ```
 
@@ -196,7 +198,7 @@ Between the two, on the routes that check the acting user's standing before anyt
 
   <Accordion title="An empty or null `actingUserId` — 400">
     ```json
-    { "error": "Invalid actingUserId.", "code": "workspace/invalid-body" }
+    { "error": "Invalid actingUserId.", "code": "workspace/invalid-body", "param": "actingUserId" }
     ```
 
     The actor is read by **presence**, not truthiness. `""`, `null` and a non-UUID string are all a caller *attempting* to name someone, and they fail here as a malformed actor. On a route with no capability guard the rejection comes from the schema instead and reads `actingUserId: Invalid UUID format` — same status, same code, same outcome.
@@ -208,7 +210,8 @@ Between the two, on the routes that check the acting user's standing before anyt
     ```json
     {
       "error": "`actingUserID` is not a recognized field — did you mean `actingUserId`? A misspelled acting user names nobody, so the request couldn't tell which user it acts as.",
-      "code": "workspace/invalid-body"
+      "code": "workspace/invalid-body",
+      "param": "actingUserID"
     }
     ```
 
@@ -219,10 +222,10 @@ Between the two, on the routes that check the acting user's standing before anyt
 
   <Accordion title="Any field the endpoint does not declare — 400">
     ```json
-    { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body" }
+    { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body", "param": "onBehalfOf" }
     ```
 
-    Every workspaces endpoint declares its fields exactly and refuses a top-level field it does not declare, for every caller: in the query string of a `GET` or `DELETE` (`workspace/invalid-query`), and in the body of a `POST` or `PATCH` (`workspace/invalid-body`). Two or more at once are named together — `Unrecognized keys: "onBehalfOf", "impersonate"`. The query string of a `POST` or `PATCH` is not a field channel: a field the route reads from the body is `workspace/wrong-location` there, a `userId` or a near-miss spelling of `actingUserId` is refused by the gate, and any other query parameter is ignored.
+    Every workspaces endpoint declares its fields exactly and refuses a top-level field it does not declare, for every caller: in the query string of a `GET` or `DELETE` (`workspace/invalid-query`), and in the body of a `POST` or `PATCH` (`workspace/invalid-body`). Two or more at once are named together — `Unrecognized keys: "onBehalfOf", "impersonate"` — and `param` names the first. The query string of a `POST` or `PATCH` is not a field channel: a field the route reads from the body is `workspace/wrong-location` there, a `userId` or a near-miss spelling of `actingUserId` is refused by the gate, and any other query parameter is ignored.
 
     That is a categorical rule, not a list of bad names. `onBehalfOf`, `impersonate`, `acting_user_id`, `ACTING-USER-ID`, `actingUserId ` with a trailing space, `requestId`, `traceId`, `sort` — none of them is a field of any workspaces route, so all of them fail at the wire, whatever they carry. The rule is the same for a service key and for a signed-in user: a request the API cannot fully read is answered rather than half-honored.
 
@@ -253,7 +256,8 @@ Between the two, on the routes that check the acting user's standing before anyt
     ```json
     {
       "error": "`_` must be a single value. Repeating it (or nesting it) can push other query parameters past the parser's limit, silently discarding them — including `actingUserId`, so the request couldn't tell which user it acts as.",
-      "code": "workspace/invalid-query"
+      "code": "workspace/invalid-query",
+      "param": "_"
     }
     ```
 
@@ -281,7 +285,7 @@ Between the two, on the routes that check the acting user's standing before anyt
 
   <Accordion title="A path parameter that is not a UUID — 400">
     ```json
-    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params" }
+    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params", "param": "workspaceId" }
     ```
 
     Every `:workspaceId`, `:userId` and `:inviteId` on the bundle is checked for UUID shape before the route runs, so a malformed one is a plain `400` rather than a `500` echoing driver internals. The message names which parameter — *workspace id*, *user id*, *invitation id*.

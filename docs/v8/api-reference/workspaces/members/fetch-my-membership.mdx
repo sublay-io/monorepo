@@ -51,7 +51,7 @@ Any signed-in user may call it for any workspace. It is **not** gated by roster 
 <AccordionGroup>
   <Accordion title="Invalid Path Parameter — 400">
     ```json
-    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params" }
+    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params", "param": "workspaceId" }
     ```
   </Accordion>
   <Accordion title="Missing Acting User — 400">

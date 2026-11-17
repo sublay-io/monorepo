@@ -57,13 +57,13 @@ Returns the refreshed [WorkspaceInvitation](/v8/data-models/workspace-invitation
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json
-    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params" }
+    { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params", "param": "workspaceId" }
     ```
     Every path id on the workspaces bundle is checked for UUID shape before the route runs, so a malformed one is a plain `400` rather than a `500` from the database.
   </Accordion>
   <Accordion title="Undeclared Field — 400">
     ```json
-    { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body" }
+    { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body", "param": "onBehalfOf" }
     ```
     Every workspaces endpoint declares its body fields exactly, and a top-level body field it does not declare is refused rather than ignored, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. Send only the fields documented above, in the JSON body. The query string carries none of them: a body field sent there is `400 workspace/wrong-location`, a `userId` or a re-cased `actingUserId` there is `400 workspace/invalid-query`, and any other query parameter is ignored. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>

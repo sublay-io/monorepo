@@ -191,7 +191,7 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     `sourceId` is `"none"`, `"null"` or `"undefined"`. Other spellings, such as `"None"`, are ordinary values.
 
     ```json
-    { "error": "sourceId: `none` is a reserved value. For no source, leave `sourceId` out or send null.", "code": "entity/invalid-body" }
+    { "error": "sourceId: `none` is a reserved value. For no source, leave `sourceId` out or send null.", "code": "entity/invalid-body", "param": "sourceId" }
     ```
   </Accordion>
   <Accordion title="Rejected by Validation Webhook — 400">
@@ -204,20 +204,20 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     The request sent a `foreignId` that is taken. Another entity already has this `foreignId`, or had it: a `foreignId` is unique across the project's entities, deleted ones included, and a deleted entity's `foreignId` can't be reused. Nothing is created.
 
     ```json
-    { "error": "An entity with this foreignId already exists.", "code": "entity/foreign-id-taken" }
+    { "error": "An entity with this foreignId already exists.", "code": "entity/foreign-id-taken", "param": "foreignId" }
     ```
 
     When the entity holding it was deleted:
 
     ```json
-    { "error": "An entity with this foreignId was deleted; its foreignId can't be reused.", "code": "entity/foreign-id-taken" }
+    { "error": "An entity with this foreignId was deleted; its foreignId can't be reused.", "code": "entity/foreign-id-taken", "param": "foreignId" }
     ```
   </Accordion>
   <Accordion title="Space Not Found — 404">
     The space doesn't exist, or the author can't see it (for example a `private` space they aren't an active member of, banned there included). Both answer the same way. Nothing is created.
 
     ```json
-    { "error": "Space not found", "message": "Space with id 4f7c… does not exist or has been deleted", "code": "entity/space-not-found" }
+    { "error": "Space not found", "code": "entity/space-not-found" }
     ```
   </Accordion>
   <Accordion title="Posting Not Allowed — 403">
@@ -237,20 +237,33 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     ```
   </Accordion>
   <Accordion title="Future Timestamp — 400">
-    Returned to a service key when `createdAt` or `updatedAt` is more than five minutes ahead of the current time. `error` names the field.
+    Returned to a service key when `createdAt` or `updatedAt` is more than five minutes ahead of the current time. `param` names the field.
 
     ```json
-    { "error": "createdAt can't be in the future.", "code": "entity/invalid-body" }
+    { "error": "createdAt can't be in the future.", "code": "entity/invalid-body", "param": "createdAt" }
     ```
   </Accordion>
   <Accordion title="File Too Large — 413">
     ```json
-    { "code": "entity/file-too-large", "message": "Image \"photo.jpg\" exceeds 50MB limit." }
+    { "error": "Image \"photo.jpg\" exceeds 50MB limit.", "code": "entity/file-too-large", "param": "images.files" }
     ```
+    Also returned with `File "…" exceeds 50MB limit.` and `param: "files.files"` for a file in `files.files`.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
-    { "code": "entity/invalid-image", "message": "File \"doc.txt\" is not a valid image: ..." }
+    { "error": "File \"photo.png\" is not a valid image: ...", "code": "entity/invalid-image", "param": "images.files" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    `images.files` was sent without `images.options`. Checked before the validation webhook and before anything is uploaded, so nothing is stored.
+    ```json
+    { "error": "Image options are required when uploading images. Must include mode property.", "code": "entity/missing-image-options", "param": "images.options" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Reference — 400">
+    A value refers to a record that doesn't exist. `constraint` names the database constraint that refused it.
+    ```json
+    { "error": "A referenced record does not exist", "code": "entity/invalid-foreign-key", "constraint": "..." }
     ```
   </Accordion>
   <Accordion title="Removed Parameter: excludeUserId — 400">
@@ -285,6 +298,14 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     Returned when a file or image is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed.
     ```json
     { "error": "File and image uploads require the files-images bundle. Enable it for this project.", "code": "entity/files-images-bundle-required", "missingTables": ["Files", "Images"] }
+    ```
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    A file was refused as the body was read: `entity/unsupported-file-type` or `entity/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal server error.", "code": "entity/server-error" }
     ```
   </Accordion>
 </AccordionGroup>

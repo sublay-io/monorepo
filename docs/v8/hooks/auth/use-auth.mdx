@@ -97,7 +97,10 @@ function SignInButton() {
   nothing is stored; the user signs in after confirming their email
   (`verificationId` is present in code mode, for
   [`useVerifyEmail`](/v8/hooks/auth/use-verify-email)). Throws if registration
-  fails, with the server's error `code` on the thrown `Error`.
+  fails: the thrown `Error` (typed `SublayAuthError`) has the server's `error`
+  text as its `message`, the server's `code`, and `param` when the server names
+  the failing input — for example `code: "auth/username-taken"` with
+  `param: "username"`, or `auth/email-taken` with `param: "email"`.
 
   **Parameters:**
   - `email` (required) — User's email address
@@ -125,7 +128,10 @@ function SignInButton() {
 <ResponseField name="signInWithEmailAndPassword" type="function">
   Sign in with an existing account. Accepts `{ email: string; password: string; emailVerification?: { mode?: "link" | "code"; redirectUrl?: string } }`.
   Throws if credentials are invalid. The thrown `Error` (typed `SublayAuthError`)
-  carries the server's `code`: `auth/email-not-verified` when the password is
+  has the server's `error` text as its `message` and carries the server's
+  `code` (and `param` when the server names the failing input):
+  `auth/invalid-credentials` for a wrong email or password,
+  `auth/email-not-verified` when the password is
   correct but the project requires email verification before sign-in and the
   email isn't confirmed — a new confirmation email is sent (unless one went out in the last 10 minutes),
   the way `emailVerification` says, and in code mode the error also carries

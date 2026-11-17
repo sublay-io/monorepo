@@ -48,7 +48,8 @@ export interface FetchOrCreateUserByForeignIdResult {
  * body, so the profile never appears in a URL.
  *
  * Resolves to `{ user, created }`: `created` is true when the server answered
- * 201. A username another user already holds is a 409 (`DUPLICATE_USER_FIELD`).
+ * 201. A username another user already holds is a 409 `user/username-taken`
+ * (`param: "username"`).
  */
 export async function fetchOrCreateUserByForeignId(
   client: SublayHttpClient,

@@ -161,4 +161,13 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
     { "error": "Quoted message not found in this conversation.", "code": "chat/invalid-quote" }
     ```
   </Accordion>
+  <Accordion title="Invalid JSON Field — 400">
+    On a `multipart/form-data` request, `gif`, `mentions` or `metadata` isn't valid JSON. `param` names the field.
+    ```json
+    { "error": "Invalid JSON in 'metadata' field.", "code": "chat/invalid-body", "param": "metadata" }
+    ```
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    A file was refused as the body was read: `chat/file-too-large` (a file over 100 MB), `chat/unsupported-file-type` or `chat/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+  </Accordion>
 </AccordionGroup>

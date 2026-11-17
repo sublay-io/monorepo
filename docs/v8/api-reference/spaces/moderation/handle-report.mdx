@@ -59,7 +59,7 @@ Returns `204 No Content` with no body.
   <Accordion title="Invalid Id — 400">
     Returned when `spaceId` or `reportId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
-    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params" }
+    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params", "param": "spaceId" }
     ```
   </Accordion>
   <Accordion title="Missing token — 401">
@@ -74,7 +74,7 @@ Returns `204 No Content` with no body.
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body", "param": "actingUserId" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
@@ -128,6 +128,7 @@ Returns `204 No Content` with no body.
     A bundle the request needs isn't installed: `moderation` for any report, `chat` for a chat message report, `entities` for `remove-entity`. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead.
     ```json
     {
+      "error": "This endpoint needs tables that aren't installed in this project (Reports). Install their bundle from the dashboard.",
       "code": "database/tables-not-available",
       "missingTables": ["Reports"],
       "dashboardUrl": "https://<dashboard>/<projectId>/database"

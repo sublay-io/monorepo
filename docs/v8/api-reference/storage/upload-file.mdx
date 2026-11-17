@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/storage"
 description: "Upload a generic file without server-side processing"
 ---
 
-Uploads a file directly to storage without processing. Suitable for PDFs, videos, Office documents, and other non-image assets. The file type is inferred automatically from the MIME type.
+Uploads a file directly to storage without processing. The file must be a PDF, JPEG, PNG or WebP; any other type is refused with `400 storage/unsupported-file-type`. The file type is inferred automatically from the MIME type.
 
 This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 
@@ -13,7 +13,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 ## Body Parameters
 
 <ParamField body="file" type="file" required>
-  The file to upload. Maximum 50 MB.
+  The file to upload: PDF, JPEG, PNG or WebP. Maximum 50 MB.
 </ParamField>
 
 <ParamField body="pathParts" type="array" required>
@@ -102,7 +102,7 @@ The `type` field is one of: `image`, `video`, `document`, `other`. It is inferre
   </Accordion>
   <Accordion title="File Too Large — 413">
     ```json
-    { "error": "File size exceeds the allowed limit of 50MB", "code": "storage/file-too-large" }
+    { "error": "File size exceeds the allowed limit of 50MB", "code": "storage/file-too-large", "param": "file" }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
@@ -110,6 +110,14 @@ The `type` field is one of: `image`, `video`, `document`, `other`. It is inferre
 
     ```json
     { "error": "No user with this actingUserId exists in this project.", "code": "storage/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    A file was refused as the body was read: `storage/unsupported-file-type` or `storage/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Internal server error", "code": "storage/server-error" }
     ```
   </Accordion>
 </AccordionGroup>

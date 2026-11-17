@@ -162,12 +162,12 @@ const collectionsSlice = createSlice({
       state.currentCollectionId = newCollection.id;
 
       // Update parent-child mapping
-      if (newCollection.parentId) {
-        if (!state.subcollectionsMap[newCollection.parentId]) {
-          state.subcollectionsMap[newCollection.parentId] = [];
+      if (newCollection.parentCollectionId) {
+        if (!state.subcollectionsMap[newCollection.parentCollectionId]) {
+          state.subcollectionsMap[newCollection.parentCollectionId] = [];
         }
-        if (!state.subcollectionsMap[newCollection.parentId].includes(newCollection.id)) {
-          state.subcollectionsMap[newCollection.parentId].push(newCollection.id);
+        if (!state.subcollectionsMap[newCollection.parentCollectionId].includes(newCollection.id)) {
+          state.subcollectionsMap[newCollection.parentCollectionId].push(newCollection.id);
         }
       }
     },

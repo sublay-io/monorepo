@@ -121,7 +121,7 @@ export interface UseCommentSectionDataProps {
 }
 
 export interface CommentSectionCreateCommentProps {
-  parentId?: string;
+  parentCommentId?: string;
   content?: string;
   gif?: GifData;
   mentions?: Mention[];
@@ -131,14 +131,14 @@ export interface CommentSectionCreateCommentProps {
 /**
  * Why creating a comment failed. `code` and `message` come from the server's
  * error response and `status` is its HTTP status; all three are `undefined`
- * when no response arrived (a network error). `parentId` is the comment that
+ * when no response arrived (a network error). `parentCommentId` is the comment that
  * was being replied to, or `null` for a top-level comment.
  */
 export interface CommentCreateError {
   code?: string;
   message?: string;
   status?: number;
-  parentId: string | null;
+  parentCommentId: string | null;
 }
 
 export interface CommentSectionUpdateCommentProps {
@@ -563,7 +563,7 @@ export function useCommentSectionDataInternal(
   // top-level), and its author is pushed as a mention (e.g. @username).
   const handleShallowReply = useCallback(
     (comment: Comment) => {
-      setRepliedToComment!({ id: comment.parentId ?? undefined });
+      setRepliedToComment!({ id: comment.parentCommentId ?? undefined });
 
       if (comment.user) setPushMention(comment.user);
     },
@@ -572,7 +572,7 @@ export function useCommentSectionDataInternal(
 
   const handleCreateComment = useCallback(
     async (props: CommentSectionCreateCommentProps) => {
-      const { parentId, content, gif, mentions, autoReaction } = props;
+      const { parentCommentId, content, gif, mentions, autoReaction } = props;
 
       if (submittingComment.current) return;
 
@@ -616,7 +616,7 @@ export function useCommentSectionDataInternal(
         id: TEMP_ID,
         foreignId: null,
         userId: user.id,
-        parentId: parentId ?? repliedToComment?.id ?? null,
+        parentCommentId: parentCommentId ?? repliedToComment?.id ?? null,
         referencedCommentId: null,
         entityId: entity.id,
         spaceId: entity.spaceId ?? null,
@@ -671,7 +671,7 @@ export function useCommentSectionDataInternal(
       setShowReplyBanner(false);
       setPushMention(null);
 
-      const newParentId = tempNewComment.parentId;
+      const newParentId = tempNewComment.parentCommentId;
       // The entity this create is for. Everything after the request settles
       // checks the section is still on it (C1): a comment posted to A must
       // not appear in, count towards or leave an error on B.
@@ -817,7 +817,7 @@ export function useCommentSectionDataInternal(
         bumpCounts();
         const newCommentData = await createComment({
           entityId: entity.id,
-          parentCommentId: parentId ?? repliedToComment?.id ?? null,
+          parentCommentId: parentCommentId ?? repliedToComment?.id ?? null,
           content,
           gif,
           mentions: filteredMentions,
@@ -902,13 +902,13 @@ export function useCommentSectionDataInternal(
               code: SUSPENDED_ERROR_CODE,
               message: err.message,
               status: 403,
-              parentId: newParentId,
+              parentCommentId: newParentId,
             }
           : {
               code: typeof body?.code === "string" ? body.code : undefined,
               message: typeof body?.error === "string" ? body.error : undefined,
               status: typeof response?.status === "number" ? response.status : undefined,
-              parentId: newParentId,
+              parentCommentId: newParentId,
             };
         // The server refuses a direct reply to a deleted or removed comment.
         // The section's copy of that comment was loaded before it was deleted

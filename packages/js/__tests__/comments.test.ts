@@ -18,7 +18,7 @@ describe("js-sdk comments — request shaping", () => {
     const data = {
       entityId: "e1",
       content: "hello",
-      parentId: null,
+      parentCommentId: null,
       mentions: [],
     };
     await createComment(client, data);
@@ -138,14 +138,14 @@ describe("js-sdk comments — request shaping", () => {
   it("fetchManyComments never forwards params the thread endpoint rejects", async () => {
     const { client, projectInstance } = makeClient();
     await fetchManyComments(client, {
-      parentId: "c0",
+      parentCommentId: "c0",
       page: 2,
       userId: "u1",
       sourceId: "s1",
       blockedFilter: "exclude",
     } as any);
     expect(projectInstance.get).toHaveBeenCalledWith("/comments", {
-      params: { parentId: "c0" },
+      params: { parentCommentId: "c0" },
     });
   });
 

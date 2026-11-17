@@ -128,7 +128,7 @@ Event lifecycle, RSVPs, hosts, and invites.
 
 `createComment`, `fetchComment`, `fetchCommentByForeignId`, `updateComment`, `deleteComment`, `fetchManyComments`, `addReaction`, `removeReaction`, `fetchReactions`, `getUserReaction`
 
-Threaded replies (`parentId`), quote-replies (`referencedCommentId`), GIFs, mentions, reactions, foreign IDs, soft deletes. `fetchManyComments` is the thread fetch (`entityId` → top-level comments, `parentId` → a comment's replies; cursor-paged, opt-in nested replies via `replyDepth`/`replyLimit`); a user's comment history is `users.fetchCommentsByUserId`.
+Threaded replies (`parentCommentId`), quote-replies (`referencedCommentId`), GIFs, mentions, reactions, foreign IDs, soft deletes. `fetchManyComments` is the thread fetch (`entityId` → top-level comments, `parentCommentId` → a comment's replies; cursor-paged, opt-in nested replies via `replyDepth`/`replyLimit`); a user's comment history is `users.fetchCommentsByUserId`.
 
 ### 4. Users Module (19 functions)
 

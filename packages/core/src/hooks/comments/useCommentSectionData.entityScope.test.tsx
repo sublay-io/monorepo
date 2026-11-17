@@ -231,7 +231,7 @@ describe("C1 — a create that settles after the section moved to another entity
     await tick();
 
     expect(failed).toHaveBeenCalledWith(
-      expect.objectContaining({ code: "comment/parent-deleted", parentId: A1 }),
+      expect.objectContaining({ code: "comment/parent-deleted", parentCommentId: A1 }),
     );
     expect(result.current.section.createError).toBeNull();
     expect(result.current.section.repliedToComment).toBeNull();
@@ -255,7 +255,7 @@ describe("C2 — reply/selection state belongs to the entity", () => {
     const child = makeComment({
       id: A2,
       entityId: "entity-A",
-      parentId: A1,
+      parentCommentId: A1,
       user: makeAuthUser({ id: "user-4", username: "dave" }) as any,
     });
     api.lists["entity-A"] = page([parent]);
@@ -263,7 +263,7 @@ describe("C2 — reply/selection state belongs to the entity", () => {
       .spyOn(axiosPrivate, "post")
       .mockImplementationOnce(() => Promise.reject(axiosErrorWithStatus(500, {})))
       .mockImplementation(((_url: string, body: any) =>
-        ok(makeComment({ id: NEW, entityId: body.entityId, parentId: body.parentId ?? null }), 201)) as any);
+        ok(makeComment({ id: NEW, entityId: body.entityId, parentCommentId: body.parentCommentId ?? null }), 201)) as any);
 
     const entityA = makeEntity({ id: "entity-A" });
     const entityB = makeEntity({ id: "entity-B" });
@@ -293,7 +293,7 @@ describe("C2 — reply/selection state belongs to the entity", () => {
     });
     const body = post.mock.calls[1][1] as any;
     expect(body.entityId).toBe("entity-B");
-    expect(body.parentId ?? null).toBeNull();
+    expect(body.parentCommentId ?? null).toBeNull();
 
     // A pushed mention is cleared too.
     rerender({ entity: entityA });

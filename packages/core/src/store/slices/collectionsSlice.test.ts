@@ -38,7 +38,7 @@ const makeCollection = (overrides: Partial<Collection> = {}): Collection => ({
   id: "col-1",
   projectId: "project-1",
   userId: "user-1",
-  parentId: null,
+  parentCollectionId: null,
   name: "Root",
   entityCount: 0,
   createdAt: "2024-01-01T00:00:00.000Z",
@@ -76,7 +76,7 @@ describe("collectionsSlice", () => {
       expect(s.currentCollectionId).toBe("root");
       expect(s.collectionHistory).toEqual([]);
 
-      const child = makeCollection({ id: "child", parentId: "root" });
+      const child = makeCollection({ id: "child", parentCollectionId: "root" });
       s = reducer(s, openCollection(child));
       expect(s.currentCollectionId).toBe("child");
       expect(s.collectionHistory).toEqual(["root"]);
@@ -91,7 +91,7 @@ describe("collectionsSlice", () => {
 
     it("goBack pops history and restores the previous collection", () => {
       let s = reducer(initial, openCollection(makeCollection({ id: "root" })));
-      s = reducer(s, openCollection(makeCollection({ id: "child", parentId: "root" })));
+      s = reducer(s, openCollection(makeCollection({ id: "child", parentCollectionId: "root" })));
       s = reducer(s, goBack());
       expect(s.currentCollectionId).toBe("root");
       expect(s.collectionHistory).toEqual([]);
@@ -104,8 +104,8 @@ describe("collectionsSlice", () => {
 
     it("goToRoot jumps to the first history entry and clears history", () => {
       let s = reducer(initial, openCollection(makeCollection({ id: "root" })));
-      s = reducer(s, openCollection(makeCollection({ id: "mid", parentId: "root" })));
-      s = reducer(s, openCollection(makeCollection({ id: "leaf", parentId: "mid" })));
+      s = reducer(s, openCollection(makeCollection({ id: "mid", parentCollectionId: "root" })));
+      s = reducer(s, openCollection(makeCollection({ id: "leaf", parentCollectionId: "mid" })));
       s = reducer(s, goToRoot());
       expect(s.currentCollectionId).toBe("root");
       expect(s.collectionHistory).toEqual([]);
@@ -153,7 +153,7 @@ describe("collectionsSlice", () => {
   describe("addNewCollectionAndNavigate", () => {
     it("stores, navigates to, and maps the new collection under its parent", () => {
       let s = reducer(initial, openCollection(makeCollection({ id: "root" })));
-      const child = makeCollection({ id: "child", parentId: "root" });
+      const child = makeCollection({ id: "child", parentCollectionId: "root" });
       s = reducer(s, addNewCollectionAndNavigate(child));
 
       expect(s.currentCollectionId).toBe("child");
@@ -168,7 +168,7 @@ describe("collectionsSlice", () => {
 
     it("does not duplicate an id already present under the parent", () => {
       let s = reducer(initial, openCollection(makeCollection({ id: "root" })));
-      const child = makeCollection({ id: "child", parentId: "root" });
+      const child = makeCollection({ id: "child", parentCollectionId: "root" });
       s = reducer(s, addNewCollectionAndNavigate(child));
       s = reducer(s, openCollection(makeCollection({ id: "root" })));
       s = reducer(s, addNewCollectionAndNavigate(child));
@@ -194,7 +194,7 @@ describe("collectionsSlice", () => {
       let s = reducer(
         initial,
         setSubCollections({
-          collections: [makeCollection({ id: "child", parentId: "root" })],
+          collections: [makeCollection({ id: "child", parentCollectionId: "root" })],
           parentCollectionId: "root",
         }),
       );
@@ -208,7 +208,7 @@ describe("collectionsSlice", () => {
 
     it("navigates back when the deleted collection was current and history exists", () => {
       let s = reducer(initial, openCollection(makeCollection({ id: "root" })));
-      s = reducer(s, openCollection(makeCollection({ id: "child", parentId: "root" })));
+      s = reducer(s, openCollection(makeCollection({ id: "child", parentCollectionId: "root" })));
       s = reducer(s, handleCollectionDeletion({ collectionId: "child", parentId: "root" }));
       expect(s.currentCollectionId).toBe("root");
     });
@@ -224,8 +224,8 @@ describe("collectionsSlice", () => {
         initial,
         setSubCollections({
           collections: [
-            makeCollection({ id: "child", parentId: "root" }),
-            makeCollection({ id: "sibling", parentId: "root" }),
+            makeCollection({ id: "child", parentCollectionId: "root" }),
+            makeCollection({ id: "sibling", parentCollectionId: "root" }),
           ],
           parentCollectionId: "root",
         }),
@@ -233,7 +233,7 @@ describe("collectionsSlice", () => {
       s = reducer(
         s,
         setSubCollections({
-          collections: [makeCollection({ id: "grandchild", parentId: "child" })],
+          collections: [makeCollection({ id: "grandchild", parentCollectionId: "child" })],
           parentCollectionId: "child",
         }),
       );
@@ -281,8 +281,8 @@ describe("collectionsSlice", () => {
 
     it("goes back past deleted collections in the history", () => {
       let s = reducer(initial, openCollection(makeCollection({ id: "root" })));
-      s = reducer(s, openCollection(makeCollection({ id: "child", parentId: "root" })));
-      s = reducer(s, openCollection(makeCollection({ id: "grandchild", parentId: "child" })));
+      s = reducer(s, openCollection(makeCollection({ id: "child", parentCollectionId: "root" })));
+      s = reducer(s, openCollection(makeCollection({ id: "grandchild", parentCollectionId: "child" })));
       s = reducer(
         s,
         handleCollectionDeletion({
@@ -409,7 +409,7 @@ describe("collectionsSlice", () => {
 
     it("selectCollectionHistory resolves history ids through collectionsById", () => {
       let s = reducer(initial, openCollection(makeCollection({ id: "root" })));
-      s = reducer(s, openCollection(makeCollection({ id: "child", parentId: "root" })));
+      s = reducer(s, openCollection(makeCollection({ id: "child", parentCollectionId: "root" })));
       const history = selectCollectionHistory({ sublay: { collections: s } } as never);
       expect(history.map((c) => c.id)).toEqual(["root"]);
     });

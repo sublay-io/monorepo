@@ -35,7 +35,7 @@ describe("useCommentSectionData — a failed reply keeps its target", () => {
     const top = makeComment({
       id: A,
       entityId: "entity-1",
-      parentId: null,
+      parentCommentId: null,
       repliesCount: 2,
       user: makeAuthUser({ id: "user-3", username: "carol" }) as any,
     });
@@ -46,7 +46,7 @@ describe("useCommentSectionData — a failed reply keeps its target", () => {
         Promise.reject(axiosErrorWithStatus(403, { code: "comment/parent-deleted" })),
       )
       .mockImplementation((_url: string, body: any) =>
-        ok(makeComment({ id: G, entityId: "entity-1", parentId: body.parentId ?? null })),
+        ok(makeComment({ id: G, entityId: "entity-1", parentCommentId: body.parentCommentId ?? null })),
       );
     vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -62,7 +62,7 @@ describe("useCommentSectionData — a failed reply keeps its target", () => {
 
     const first = await result.current.createComment({ content: "my reply" });
     expect(first).toBeUndefined();
-    expect((post.mock.calls[0][1] as any).parentId).toBe(A);
+    expect((post.mock.calls[0][1] as any).parentCommentId).toBe(A);
 
     // The optimistic row and count are rolled back; the reply target stays.
     await waitFor(() => expect(result.current.submittingComment).toBe(false));
@@ -76,8 +76,8 @@ describe("useCommentSectionData — a failed reply keeps its target", () => {
     await act(async () => {
       second = await result.current.createComment({ content: "my reply" });
     });
-    expect((post.mock.calls[1][1] as any).parentId).toBe(A);
-    expect(second?.parentId).toBe(A);
+    expect((post.mock.calls[1][1] as any).parentCommentId).toBe(A);
+    expect(second?.parentCommentId).toBe(A);
     // Not a new top-level comment.
     expect(result.current.newComments).toHaveLength(0);
     // A reply that went through clears the target.
@@ -87,12 +87,12 @@ describe("useCommentSectionData — a failed reply keeps its target", () => {
 
   it("a failed same-level reply keeps its parent, and doesn't push the mention a second time", async () => {
     const entity = makeEntity({ id: "entity-1" });
-    const top = makeComment({ id: A, entityId: "entity-1", parentId: null, repliesCount: 1 });
+    const top = makeComment({ id: A, entityId: "entity-1", parentCommentId: null, repliesCount: 1 });
     const mentioned = makeAuthUser({ id: "user-2", username: "bob" });
     const reply = makeComment({
       id: P,
       entityId: "entity-1",
-      parentId: A,
+      parentCommentId: A,
       user: mentioned as any,
     });
     vi.spyOn(axiosPrivate, "get").mockImplementation(() => ok(page([top])));
@@ -100,7 +100,7 @@ describe("useCommentSectionData — a failed reply keeps its target", () => {
       .spyOn(axiosPrivate, "post")
       .mockImplementationOnce(() => Promise.reject(axiosErrorWithStatus(500, {})))
       .mockImplementation((_url: string, body: any) =>
-        ok(makeComment({ id: G, entityId: "entity-1", parentId: body.parentId ?? null })),
+        ok(makeComment({ id: G, entityId: "entity-1", parentCommentId: body.parentCommentId ?? null })),
       );
     vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -123,7 +123,7 @@ describe("useCommentSectionData — a failed reply keeps its target", () => {
     await act(async () => {
       await result.current.createComment({ content: "@bob hello" });
     });
-    expect((post.mock.calls[1][1] as any).parentId).toBe(A);
+    expect((post.mock.calls[1][1] as any).parentCommentId).toBe(A);
   });
 
   it("Reply on a comment, then on one of its replies: the restored banner still has a name", async () => {
@@ -132,12 +132,12 @@ describe("useCommentSectionData — a failed reply keeps its target", () => {
     const top = makeComment({
       id: A,
       entityId: "entity-1",
-      parentId: null,
+      parentCommentId: null,
       repliesCount: 1,
       user: topAuthor as any,
     });
     const mentioned = makeAuthUser({ id: "user-2", username: "bob" });
-    const reply = makeComment({ id: P, entityId: "entity-1", parentId: A, user: mentioned as any });
+    const reply = makeComment({ id: P, entityId: "entity-1", parentCommentId: A, user: mentioned as any });
     vi.spyOn(axiosPrivate, "get").mockImplementation(() => ok(page([top])));
     vi.spyOn(axiosPrivate, "post").mockImplementation(() =>
       Promise.reject(axiosErrorWithStatus(500, {})),
@@ -168,7 +168,7 @@ describe("useCommentSectionData — a failed reply keeps its target", () => {
 
   it("a restored target with nobody to name doesn't bring the banner back", async () => {
     const entity = makeEntity({ id: "entity-1" });
-    const top = makeComment({ id: A, entityId: "entity-1", parentId: null, repliesCount: 1 });
+    const top = makeComment({ id: A, entityId: "entity-1", parentCommentId: null, repliesCount: 1 });
     vi.spyOn(axiosPrivate, "get").mockImplementation(() => ok(page([top])));
     vi.spyOn(axiosPrivate, "post").mockImplementation(() =>
       Promise.reject(axiosErrorWithStatus(500, {})),
@@ -194,8 +194,8 @@ describe("useCommentSectionData — a failed reply keeps its target", () => {
 
   it("a reply target picked while the failed request was in flight isn't overwritten", async () => {
     const entity = makeEntity({ id: "entity-1" });
-    const a = makeComment({ id: A, entityId: "entity-1", parentId: null });
-    const g = makeComment({ id: G, entityId: "entity-1", parentId: null });
+    const a = makeComment({ id: A, entityId: "entity-1", parentCommentId: null });
+    const g = makeComment({ id: G, entityId: "entity-1", parentCommentId: null });
     vi.spyOn(axiosPrivate, "get").mockImplementation(() => ok(page([a, g])));
     let reject!: (err: unknown) => void;
     vi.spyOn(axiosPrivate, "post").mockImplementation(
@@ -228,9 +228,9 @@ describe("useCommentSectionData — a highlight on another entity, section given
   };
 
   it("is dropped once the entity resolves: no highlight, not in the store, not re-seeded", async () => {
-    const otherParent = makeComment({ id: P, entityId: "entity-OTHER", parentId: null });
+    const otherParent = makeComment({ id: P, entityId: "entity-OTHER", parentCommentId: null });
     const other = {
-      ...makeComment({ id: T, entityId: "entity-OTHER", parentId: P }),
+      ...makeComment({ id: T, entityId: "entity-OTHER", parentCommentId: P }),
       parentComment: otherParent,
     };
     const { gate, release } = gatedEntity();
@@ -268,9 +268,9 @@ describe("useCommentSectionData — a highlight on another entity, section given
   });
 
   it("keeps a highlight on the section's own entity that arrived before the entity resolved", async () => {
-    const parent = makeComment({ id: P, entityId: "entity-1", parentId: null, repliesCount: 1 });
+    const parent = makeComment({ id: P, entityId: "entity-1", parentCommentId: null, repliesCount: 1 });
     const target = {
-      ...makeComment({ id: T, entityId: "entity-1", parentId: P }),
+      ...makeComment({ id: T, entityId: "entity-1", parentCommentId: P }),
       parentComment: parent,
     };
     const { gate, release } = gatedEntity();

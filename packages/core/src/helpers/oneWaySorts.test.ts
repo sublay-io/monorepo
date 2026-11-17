@@ -52,7 +52,7 @@ describe("one-way sorts (hot, controversial)", () => {
     // A sort held in state (any of the sorts, no sortDir) is accepted.
     const fromState = (sortBy: "createdAt" | "top" | "controversial") => {
       const thread: FetchManyCommentsProps = { entityId: "e", sortBy };
-      const replies: FetchManyCommentsProps = { parentId: "p", sortBy };
+      const replies: FetchManyCommentsProps = { parentCommentId: "p", sortBy };
       const history: FetchCommentsByUserIdProps = { userId: "u", sortBy };
       // With a direction too: through oneWaySortFields.
       const withDir: FetchManyCommentsProps = { entityId: "e", ...oneWaySortFields(sortBy, "asc" as const) };

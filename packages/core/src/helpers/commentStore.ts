@@ -108,21 +108,21 @@ function upsertOne(
   // A refreshed node keeps the child list (and its Set) the batch already
   // copied for it, so nothing to do for `childIdSets` here.
 
-  if (comment.parentId) {
-    const parent = draft.nodes[comment.parentId];
+  if (comment.parentCommentId) {
+    const parent = draft.nodes[comment.parentCommentId];
     if (!parent) return;
-    let childIdSet = draft.childIdSets.get(comment.parentId);
+    let childIdSet = draft.childIdSets.get(comment.parentCommentId);
     if (!childIdSet) {
       if (parent.childIds.includes(comment.id)) return;
       // First addition under this parent in the batch: copy its list once.
       const childIds = [...parent.childIds];
       childIdSet = new Set(childIds);
-      draft.childIdSets.set(comment.parentId, childIdSet);
-      draft.nodes[comment.parentId] = { ...parent, childIds };
+      draft.childIdSets.set(comment.parentCommentId, childIdSet);
+      draft.nodes[comment.parentCommentId] = { ...parent, childIds };
     }
     if (childIdSet.has(comment.id)) return;
     childIdSet.add(comment.id);
-    draft.nodes[comment.parentId].childIds.push(comment.id);
+    draft.nodes[comment.parentCommentId].childIds.push(comment.id);
   } else {
     if (!draft.rootIdSet) {
       if (draft.rootIds.includes(comment.id)) return;
@@ -163,7 +163,7 @@ export function insertComments(
 }
 
 /**
- * Store a page of a comment's direct replies (a `parentId` fetch): insert them
+ * Store a page of a comment's direct replies (a `parentCommentId` fetch): insert them
  * under the parent and move the parent's replies cursor forward. Unlike a
  * re-arrival, this is the parent's own "load more", so its cursor/hasMore are
  * replaced and it's marked loaded.
@@ -227,7 +227,7 @@ export function removeComment(store: CommentStore, commentId: string): CommentSt
     delete nodes[id];
   }
 
-  const parentId = node.comment.parentId;
+  const parentId = node.comment.parentCommentId;
   if (parentId && nodes[parentId]) {
     nodes[parentId] = {
       ...nodes[parentId],

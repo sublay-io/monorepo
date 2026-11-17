@@ -34,8 +34,8 @@ describe("commentStore", () => {
   });
 
   it("flattens nested replies parent-first and strips the nested copies", () => {
-    const r1a = makeComment({ id: "r1a", parentId: "r1" });
-    const r1 = makeComment({ id: "r1", parentId: "c1", replies: page([r1a], null) });
+    const r1a = makeComment({ id: "r1a", parentCommentId: "r1" });
+    const r1 = makeComment({ id: "r1", parentCommentId: "c1", replies: page([r1a], null) });
     const c1 = makeComment({ id: "c1", repliesCount: 7, replies: page([r1], "cur-c1") });
 
     const store = insertComments(emptyCommentStore(), [c1]);
@@ -57,14 +57,14 @@ describe("commentStore", () => {
   it("a re-arriving comment refreshes its data but never moves its replies state backwards", () => {
     const c1 = makeComment({ id: "c1", repliesCount: 40 });
     let store = insertComments(emptyCommentStore(), [c1]);
-    store = applyRepliesPage(store, "c1", page([makeComment({ id: "r1", parentId: "c1" })], "cur-30"));
+    store = applyRepliesPage(store, "c1", page([makeComment({ id: "r1", parentCommentId: "c1" })], "cur-30"));
 
     // A later page re-delivers c1 with a fresh (earlier) nested preview.
     store = insertComments(store, [
       makeComment({
         id: "c1",
         repliesCount: 41,
-        replies: page([makeComment({ id: "r1", parentId: "c1" })], "cur-1"),
+        replies: page([makeComment({ id: "r1", parentCommentId: "c1" })], "cur-1"),
       }),
     ]);
 
@@ -78,7 +78,7 @@ describe("commentStore", () => {
     expect(store.nodes.c1.repliesLoaded).toBe(false);
 
     store = insertComments(store, [
-      makeComment({ id: "c1", repliesCount: 5, replies: page([makeComment({ id: "r1", parentId: "c1" })], "cur") }),
+      makeComment({ id: "c1", repliesCount: 5, replies: page([makeComment({ id: "r1", parentCommentId: "c1" })], "cur") }),
     ]);
 
     expect(store.nodes.c1).toMatchObject({
@@ -92,12 +92,12 @@ describe("commentStore", () => {
   it("childIds never hold an id twice; a re-arriving child keeps its position", () => {
     let store = insertComments(emptyCommentStore(), [makeComment({ id: "c1" })]);
     store = applyRepliesPage(store, "c1", page([
-      makeComment({ id: "r1", parentId: "c1" }),
-      makeComment({ id: "r2", parentId: "c1" }),
+      makeComment({ id: "r1", parentCommentId: "c1" }),
+      makeComment({ id: "r2", parentCommentId: "c1" }),
     ], "x"));
     store = applyRepliesPage(store, "c1", page([
-      makeComment({ id: "r2", parentId: "c1" }),
-      makeComment({ id: "r3", parentId: "c1" }),
+      makeComment({ id: "r2", parentCommentId: "c1" }),
+      makeComment({ id: "r3", parentCommentId: "c1" }),
     ], null));
 
     expect(store.nodes.c1.childIds).toEqual(["r1", "r2", "r3"]);
@@ -106,10 +106,10 @@ describe("commentStore", () => {
 
   it("own new replies stay in newReplies when a fetch returns them", () => {
     let store = insertComments(emptyCommentStore(), [makeComment({ id: "c1", repliesCount: 2 })]);
-    store = insertComments(store, [makeComment({ id: "mine", parentId: "c1" })], { newlyAdded: true });
+    store = insertComments(store, [makeComment({ id: "mine", parentCommentId: "c1" })], { newlyAdded: true });
     store = applyRepliesPage(store, "c1", page([
-      makeComment({ id: "mine", parentId: "c1" }),
-      makeComment({ id: "other", parentId: "c1" }),
+      makeComment({ id: "mine", parentCommentId: "c1" }),
+      makeComment({ id: "other", parentCommentId: "c1" }),
     ], null));
 
     const { replies, newReplies } = selectReplies(store, "c1");
@@ -123,7 +123,7 @@ describe("commentStore", () => {
 
     // Optimistic +1 for the viewer's own reply (D24).
     store = patchComment(store, "c1", (c) => ({ ...c, repliesCount: 1 }));
-    store = insertComments(store, [makeComment({ id: "mine", parentId: "c1" })], { newlyAdded: true });
+    store = insertComments(store, [makeComment({ id: "mine", parentCommentId: "c1" })], { newlyAdded: true });
     expect(nodeRepliesHasMore(store, "c1")).toBe(false);
 
     store = patchComment(store, "c1", (c) => ({ ...c, repliesCount: 2 }));
@@ -132,7 +132,7 @@ describe("commentStore", () => {
 
   it("keeps a reply whose parent isn't stored as a detached subtree root", () => {
     const store = insertComments(emptyCommentStore(), [
-      makeComment({ id: "orphan", parentId: "missing" }),
+      makeComment({ id: "orphan", parentCommentId: "missing" }),
     ]);
     expect(store.nodes.orphan).toBeDefined();
     expect(store.rootIds).toEqual([]);
@@ -141,7 +141,7 @@ describe("commentStore", () => {
 
   it("inserts a highlighted comment parent-first, keeping the parent unloaded with more to load", () => {
     const parent = makeComment({ id: "p", repliesCount: 4 });
-    const target = makeComment({ id: "t", parentId: "p" });
+    const target = makeComment({ id: "t", parentCommentId: "p" });
     let store = insertHighlightedComment(emptyCommentStore(), target, parent);
 
     expect(store.nodes.p.childIds).toEqual(["t"]);
@@ -150,21 +150,21 @@ describe("commentStore", () => {
 
     // The parent's first normal load re-delivers the target: no duplicate.
     store = applyRepliesPage(store, "p", page([
-      makeComment({ id: "x", parentId: "p" }),
-      makeComment({ id: "t", parentId: "p" }),
+      makeComment({ id: "x", parentCommentId: "p" }),
+      makeComment({ id: "t", parentCommentId: "p" }),
     ], null));
     expect(store.nodes.p.childIds).toEqual(["t", "x"]);
   });
 
   it("a highlighted parent whose only reply is the target has nothing more to load", () => {
     const parent = makeComment({ id: "p", repliesCount: 1 });
-    const target = makeComment({ id: "t", parentId: "p" });
+    const target = makeComment({ id: "t", parentCommentId: "p" });
     let store = insertHighlightedComment(emptyCommentStore(), target, parent);
     expect(nodeRepliesHasMore(store, "p")).toBe(false);
 
     // The viewer's own new reply (+1, D24) is already shown too.
     store = patchComment(store, "p", (c) => ({ ...c, repliesCount: 2 }));
-    store = insertComments(store, [makeComment({ id: "mine", parentId: "p" })], { newlyAdded: true });
+    store = insertComments(store, [makeComment({ id: "mine", parentCommentId: "p" })], { newlyAdded: true });
     expect(nodeRepliesHasMore(store, "p")).toBe(false);
 
     store = patchComment(store, "p", (c) => ({ ...c, repliesCount: 3 }));
@@ -172,8 +172,8 @@ describe("commentStore", () => {
   });
 
   it("a highlighted comment whose parent sits deeper is kept even though the parent is detached", () => {
-    const parent = makeComment({ id: "p", parentId: "grandparent" });
-    const target = makeComment({ id: "t", parentId: "p" });
+    const parent = makeComment({ id: "p", parentCommentId: "grandparent" });
+    const target = makeComment({ id: "t", parentCommentId: "p" });
     const store = insertHighlightedComment(emptyCommentStore(), target, parent);
     expect(store.nodes.p.childIds).toEqual(["t"]);
     expect(store.rootIds).toEqual([]);
@@ -184,7 +184,7 @@ describe("commentStore", () => {
       makeComment({
         id: "c1",
         replies: page([
-          makeComment({ id: "r1", parentId: "c1", replies: page([makeComment({ id: "r1a", parentId: "r1" })], null) }),
+          makeComment({ id: "r1", parentCommentId: "c1", replies: page([makeComment({ id: "r1a", parentCommentId: "r1" })], null) }),
         ], null),
       }),
     ]);
@@ -238,14 +238,14 @@ describe("commentStore — insert cost (one copy per batch, not per comment)", (
   // 2 levels of replies (4 + 4*10 + 4*10*11 ≈ 484 rows; padded to 494).
   const nestedPage = (prefix: string): { comments: Comment[]; rows: number } => {
     let rows = 0;
-    const level = (parentId: string | null, depth: number, width: number): Comment[] =>
+    const level = (parentCommentId: string | null, depth: number, width: number): Comment[] =>
       Array.from({ length: width }, (_, i) => {
-        const id = `${parentId ?? prefix}-${i}`;
+        const id = `${parentCommentId ?? prefix}-${i}`;
         rows += 1;
         const children = depth > 0 ? level(id, depth - 1, depth === 2 ? 10 : 11) : [];
         return makeComment({
           id,
-          parentId,
+          parentCommentId,
           ...(depth > 0 ? { replies: page(children, null) } : {}),
         });
       });
@@ -288,9 +288,9 @@ describe("commentStore — insert cost (one copy per batch, not per comment)", (
     const parentChildIds = parentNode.childIds;
 
     const next = insertComments(base, [
-      makeComment({ id: "r1", parentId: "p" }),
-      makeComment({ id: "r2", parentId: "p" }),
-      makeComment({ id: "r1", parentId: "p", content: "again" }),
+      makeComment({ id: "r1", parentCommentId: "p" }),
+      makeComment({ id: "r2", parentCommentId: "p" }),
+      makeComment({ id: "r1", parentCommentId: "p", content: "again" }),
       makeComment({ id: "n" }),
     ]);
 
@@ -308,7 +308,7 @@ describe("commentStore — insert cost (one copy per batch, not per comment)", (
 
     // A second batch must copy the child list again rather than reuse the
     // previous batch's array.
-    const third = insertComments(next, [makeComment({ id: "r3", parentId: "p" })]);
+    const third = insertComments(next, [makeComment({ id: "r3", parentCommentId: "p" })]);
     expect(next.nodes.p.childIds).toEqual(["r1", "r2"]);
     expect(third.nodes.p.childIds).toEqual(["r1", "r2", "r3"]);
     // Only replies arrived: the root list is the same array.

@@ -63,7 +63,7 @@ describe("useFetchManyCommentsWrapper", () => {
   it("passes the reply params through and returns nested replies as delivered", async () => {
     const nested = makeComment({
       id: "c1",
-      replies: makePage([makeComment({ id: "r1", parentId: "c1" })], "more"),
+      replies: makePage([makeComment({ id: "r1", parentCommentId: "c1" })], "more"),
     });
     const { result, axiosPrivate } = renderHookWithAxios(
       () =>
@@ -99,16 +99,16 @@ describe("useFetchManyCommentsWrapper", () => {
     });
   });
 
-  it("lists a comment's direct replies by parentId", async () => {
+  it("lists a comment's direct replies by parentCommentId", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(
-      () => useFetchManyCommentsWrapper({ parentId: "c1" }),
+      () => useFetchManyCommentsWrapper({ parentCommentId: "c1" }),
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", makePage([], null)),
       },
     );
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(axiosPrivate.calls("get")[0].config?.params).toMatchObject({ parentId: "c1" });
+    expect(axiosPrivate.calls("get")[0].config?.params).toMatchObject({ parentCommentId: "c1" });
     expect(axiosPrivate.calls("get")[0].config?.params).not.toHaveProperty("entityId");
   });
 
@@ -253,7 +253,7 @@ describe("useFetchManyCommentsWrapper", () => {
 });
 
 describe("useFetchManyCommentsWrapper — the target going away", () => {
-  it("clears the previous target's comments when entityId/parentId are removed", async () => {
+  it("clears the previous target's comments when entityId/parentCommentId are removed", async () => {
     const { result, rerender } = renderHookWithAxios(
       (p: { entityId: string | null }) => useFetchManyCommentsWrapper(p),
       {

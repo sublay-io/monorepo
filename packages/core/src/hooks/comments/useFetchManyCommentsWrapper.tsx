@@ -17,7 +17,7 @@ import {
 
 /**
  * A stateful thread list (`GET /comments`): an entity's top-level comments
- * (`entityId`) or a comment's direct replies (`parentId`), cursor-paged.
+ * (`entityId`) or a comment's direct replies (`parentCommentId`), cursor-paged.
  * Nested replies (`replyDepth` > 0) come back inside each comment's `replies`
  * exactly as delivered. For a user's history use
  * `useFetchCommentsByUserIdWrapper`.
@@ -25,7 +25,7 @@ import {
 export interface UseFetchManyCommentsWrapperProps
   extends SpaceReputationContextParams {
   entityId?: string | null;
-  parentId?: string | null;
+  parentCommentId?: string | null;
   limit?: number;
   include?: CommentThreadIncludeParam;
   defaultSortBy?: CommentsSortByOptions;
@@ -47,7 +47,7 @@ function useFetchManyCommentsWrapper(
 ): UseFetchManyCommentsWrapperValues {
   const {
     entityId,
-    parentId,
+    parentCommentId,
     limit = 10,
     include,
     defaultSortBy = "createdAt",
@@ -67,7 +67,7 @@ function useFetchManyCommentsWrapper(
 
   const resetKey = JSON.stringify({
     entityId,
-    parentId,
+    parentCommentId,
     limit,
     include,
     replyDepth,
@@ -83,8 +83,8 @@ function useFetchManyCommentsWrapper(
   const fetchPage = useCallback(
     (cursor: string | null, sort: CommentListSort) =>
       fetchManyComments({
-        // Replies take parentId alone: the parent decides the entity.
-        ...(parentId ? { parentId } : { entityId: entityId as string }),
+        // Replies take parentCommentId alone: the parent decides the entity.
+        ...(parentCommentId ? { parentCommentId } : { entityId: entityId as string }),
         cursor,
         limit,
         include,
@@ -107,7 +107,7 @@ function useFetchManyCommentsWrapper(
   );
 
   return useCursorCommentList({
-    enabled: !!(entityId || parentId),
+    enabled: !!(entityId || parentCommentId),
     resetKey,
     defaultSortBy,
     defaultSortDir,

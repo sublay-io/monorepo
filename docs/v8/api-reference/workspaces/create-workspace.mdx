@@ -46,9 +46,9 @@ Returns the created [Workspace](/v8/data-models/workspace) object.
     ```
     Also returned when a **service key** creates a root workspace on behalf of an unverified `actingUserId` — keys do not bypass this gate. Ownership has exactly three doors (create, accept an invite, receive a transfer) and all three enforce it identically, which is what guarantees every workspace participant has a confirmed email.
   </Accordion>
-  <Accordion title="Unauthorized — 403">
+  <Accordion title="Forbidden — 403">
     ```json
-    { "error": "The 'create-sub-workspace' capability on the parent is required.", "code": "workspace/unauthorized" }
+    { "error": "The 'create-sub-workspace' capability on the parent is required.", "code": "workspace/forbidden" }
     ```
   </Accordion>
   <Accordion title="Parent Not Found — 404">

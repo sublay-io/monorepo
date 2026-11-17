@@ -141,7 +141,7 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
   <Accordion title="Team Only — 403">
     The space chat's `postingPermission` is `"team"` and the caller isn't an active admin or moderator of the space.
     ```json
-    { "error": "Only space admins and moderators can post in this conversation.", "code": "chat/not-a-member" }
+    { "error": "Only space admins and moderators can post in this conversation.", "code": "chat/forbidden" }
     ```
   </Accordion>
   <Accordion title="Banned — 403">
@@ -169,5 +169,11 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
     A file was refused as the body was read: `chat/file-too-large` (a file over 100 MB), `chat/unsupported-file-type` or `chat/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+  </Accordion>
+  <Accordion title="Bundle Not Installed — 403">
+    Returned when `files` are attached on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    ```json
+    { "error": "File attachments require the files-images bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
+    ```
   </Accordion>
 </AccordionGroup>

@@ -50,11 +50,11 @@ Returns `204 No Content` on success.
     ```
     Returned when the entity record exists but could not be deleted (e.g., it was already soft-deleted).
   </Accordion>
-  <Accordion title="Unauthorized — 403">
+  <Accordion title="Forbidden — 403">
     The caller isn't the author, and can read the entity.
 
     ```json
-    { "error": "Not authorized to delete this entity.", "code": "entity/not-authorized" }
+    { "error": "Not authorized to delete this entity.", "code": "entity/forbidden" }
     ```
   </Accordion>
   <Accordion title="Missing User ID — 400">

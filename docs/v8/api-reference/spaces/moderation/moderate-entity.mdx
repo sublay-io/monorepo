@@ -91,6 +91,18 @@ Takes a direct moderation action on an entity in a space. Requires the caller to
     { "error": "Entity not found.", "code": "moderation/entity-not-found" }
     ```
   </Accordion>
+  <Accordion title="Bundle Not Installed — 403">
+    The project doesn't have the entities bundle. While it is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    ```json
+    {
+      "error": "This route needs the entities bundle, which is not installed for this project.",
+      "code": "database/tables-not-available",
+      "missingTables": ["Entities"],
+      "bundleId": "entities",
+      "dashboardUrl": "https://…/<projectId>/database"
+    }
+    ```
+  </Accordion>
 </AccordionGroup>
 
 See also: [useModerateSpaceEntity](/v8/hooks/spaces/use-moderate-space-entity)

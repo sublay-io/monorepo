@@ -75,9 +75,9 @@ Removes a member from a workspace. Requires the `remove-member` capability and i
     ```
     Returned when a service key names an `actingUserId` that isn't a user in this project.
   </Accordion>
-  <Accordion title="Unauthorized — 403">
+  <Accordion title="Forbidden — 403">
     ```json
-    { "error": "Capability 'remove-member' required", "code": "workspace/unauthorized" }
+    { "error": "Capability 'remove-member' required", "code": "workspace/forbidden" }
     ```
     The acting user has no `remove-member` capability on this workspace, including when they have no relation to it.
   </Accordion>

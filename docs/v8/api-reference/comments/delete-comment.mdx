@@ -60,7 +60,7 @@ Returns `204 No Content` on success.
     Returned when the acting user isn't the comment's author, or when a user token, or a service key naming a user, deletes a comment with no author.
 
     ```json
-    { "error": "You do not have permission to delete this comment.", "code": "comment/not-authorized" }
+    { "error": "You do not have permission to delete this comment.", "code": "comment/forbidden" }
     ```
   </Accordion>
   <Accordion title="Missing User ID — 400">

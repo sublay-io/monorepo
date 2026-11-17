@@ -38,11 +38,19 @@ On success, returns HTTP `204 No Content` with no body.
     }
     ```
   </Accordion>
-  <Accordion title="Unauthorized — 403">
+  <Accordion title="Forbidden — 403">
+    The request is pending and the acting user isn't its requester: only the requester can withdraw it (its receiver declines it with [Decline Connection](/v8/api-reference/connections/decline-connection)).
     ```json
     {
       "error": "Only the requester can withdraw a pending connection request.",
-      "code": "connection/unauthorized"
+      "code": "connection/forbidden"
+    }
+    ```
+    The connection is accepted and the acting user isn't one of the two connected users.
+    ```json
+    {
+      "error": "Only connected users can disconnect.",
+      "code": "connection/forbidden"
     }
     ```
   </Accordion>

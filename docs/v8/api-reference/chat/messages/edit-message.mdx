@@ -107,6 +107,7 @@ Returns the updated [ChatMessage](/v8/data-models/chat-message), with `editedAt`
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    No message has this ID in the conversation, or the message was deleted or removed: a message every read shows as gone can't be edited, and answers like a missing one. Checked before the author check.
     ```json
     { "error": "Message not found.", "code": "chat/message-not-found" }
     ```
@@ -114,16 +115,6 @@ Returns the updated [ChatMessage](/v8/data-models/chat-message), with `editedAt`
   <Accordion title="Forbidden — 403 (not the author)">
     ```json
     { "error": "Only the message author can edit this message.", "code": "chat/forbidden" }
-    ```
-  </Accordion>
-  <Accordion title="Message Deleted — 400 Bad Request">
-    ```json
-    { "error": "Deleted messages cannot be edited.", "code": "chat/message-deleted" }
-    ```
-  </Accordion>
-  <Accordion title="Message Removed — 400 Bad Request">
-    ```json
-    { "error": "Removed messages cannot be edited.", "code": "chat/message-removed" }
     ```
   </Accordion>
   <Accordion title="Empty Result — 400 Bad Request">

@@ -131,12 +131,19 @@ Returns `204 No Content` with no body.
       "error": "This endpoint needs tables that aren't installed in this project (Reports). Install their bundle from the dashboard.",
       "code": "database/tables-not-available",
       "missingTables": ["Reports"],
+      "bundleId": "moderation",
       "dashboardUrl": "https://<dashboard>/<projectId>/database"
     }
     ```
     `remove-entity` on a project without the `entities` bundle:
     ```json
-    { "error": "Entities bundle is not available for this project", "code": "database/tables-not-available" }
+    {
+      "error": "Removing the entity needs the entities bundle, which is not installed for this project.",
+      "code": "database/tables-not-available",
+      "missingTables": ["Entities"],
+      "bundleId": "entities",
+      "dashboardUrl": "https://<dashboard>/<projectId>/database"
+    }
     ```
   </Accordion>
   <Accordion title="Invalid Body — 400">
@@ -190,7 +197,7 @@ Returns `204 No Content` with no body.
     { "error": "Comment does not belong to this space", "code": "report/comment-not-in-space" }
     ```
     ```json
-    { "error": "Message not found.", "code": "chat/message-not-found" }
+    { "error": "Message not found.", "code": "report/message-not-found" }
     ```
   </Accordion>
   <Accordion title="No Author — 400">
@@ -211,10 +218,10 @@ Returns `204 No Content` with no body.
     { "error": "User not found in this project", "code": "report/user-not-found" }
     ```
   </Accordion>
-  <Accordion title="Ban Refused — 400 / 403">
+  <Accordion title="Ban Refused — 403 / 409">
     `ban-user` broke one of the [Ban Member](/v8/api-reference/spaces/membership/ban-member) rules, in this space or in a child space the ban reaches. `spaceId` names that space.
     ```json
-    { "error": "Moderators can only ban regular members.", "code": "space/insufficient-permissions", "spaceId": "…" }
+    { "error": "Moderators can only ban regular members.", "code": "space/forbidden", "spaceId": "…" }
     ```
     ```json
     { "error": "Only the space creator can ban admins.", "code": "space/creator-required", "spaceId": "…" }

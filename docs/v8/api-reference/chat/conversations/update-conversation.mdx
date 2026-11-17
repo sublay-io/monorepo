@@ -105,12 +105,12 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
   </Accordion>
   <Accordion title="Forbidden (group) — 403">
     ```json
-    { "error": "Only group admins can update this conversation.", "code": "chat/not-a-member" }
+    { "error": "Only group admins can update this conversation.", "code": "chat/forbidden" }
     ```
   </Accordion>
   <Accordion title="Forbidden (space) — 403">
     ```json
-    { "error": "Only space admins and moderators can update the space conversation.", "code": "chat/not-a-member" }
+    { "error": "Only space admins and moderators can update the space conversation.", "code": "chat/forbidden" }
     ```
   </Accordion>
 </AccordionGroup>

@@ -86,12 +86,12 @@ Direct conversations (`type: "direct"`) cannot be deleted.
   </Accordion>
   <Accordion title="Forbidden (group) — 403">
     ```json
-    { "error": "Only group admins can delete this conversation.", "code": "chat/not-a-member" }
+    { "error": "Only group admins can delete this conversation.", "code": "chat/forbidden" }
     ```
   </Accordion>
   <Accordion title="Forbidden (space) — 403">
     ```json
-    { "error": "Only space admins can delete the space conversation.", "code": "chat/not-a-member" }
+    { "error": "Only space admins can delete the space conversation.", "code": "chat/forbidden" }
     ```
   </Accordion>
 </AccordionGroup>

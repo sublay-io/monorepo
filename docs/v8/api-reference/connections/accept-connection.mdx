@@ -54,18 +54,29 @@ On success, returns HTTP `200` with the accepted [connection row](/v8/data-model
 
 <AccordionGroup>
   <Accordion title="Not Found — 404">
+    No connection request has this ID, or the acting user is neither its requester nor its receiver. A request the requester withdrew no longer exists, so it answers the same.
     ```json
     {
-      "error": "Pending connection request not found.",
+      "error": "Connection request not found.",
       "code": "connection/not-found"
     }
     ```
   </Accordion>
-  <Accordion title="Unauthorized — 403">
+  <Accordion title="Forbidden — 403">
+    The acting user sent the request: only its receiver can accept it.
     ```json
     {
       "error": "Only the receiver can accept a connection request.",
-      "code": "connection/unauthorized"
+      "code": "connection/forbidden"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Not Pending — 409">
+    The request was already accepted or declined. The message names its current status. Of two answers sent at the same time, the second gets this too.
+    ```json
+    {
+      "error": "This connection request is no longer pending (it is accepted).",
+      "code": "connection/not-pending"
     }
     ```
   </Accordion>

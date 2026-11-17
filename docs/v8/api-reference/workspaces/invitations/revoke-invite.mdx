@@ -36,6 +36,12 @@ Marks a pending invitation `revoked`. Requires the `invite` capability (or owner
     { "error": "Invitation not found.", "code": "workspace/invite-not-found" }
     ```
   </Accordion>
+  <Accordion title="Not Pending — 409">
+    ```json
+    { "error": "This invitation is no longer pending.", "code": "workspace/not-pending" }
+    ```
+    The invitation is already `accepted`, `declined`, or `revoked`.
+  </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json
     { "error": "Invalid workspace id: expected a UUID.", "code": "workspace/invalid-params", "param": "workspaceId" }

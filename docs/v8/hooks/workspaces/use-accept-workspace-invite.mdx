@@ -47,8 +47,7 @@ function AcceptButton({ inviteId }: { inviteId: string }) {
 |------|--------|---------|
 | `workspace/email-not-verified` | 403 | The accepting user's email is not verified. |
 | `workspace/invite-not-found` | 404 | No such invitation, or it is not addressed to you. |
-| `workspace/invite-expired` | 409 | The invitation lapsed — ask for a [resend](/v8/hooks/workspaces/use-resend-workspace-invite). |
-| `workspace/invite-terminal` | 409 | Already accepted / declined / revoked. |
+| `workspace/not-pending` | 409 | Already accepted / declined / revoked, or expired. An expired invitation can be [resent](/v8/hooks/workspaces/use-resend-workspace-invite); `error` says which. |
 
 ## Related
 

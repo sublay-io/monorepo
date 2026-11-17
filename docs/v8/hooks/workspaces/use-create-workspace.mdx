@@ -50,7 +50,7 @@ Returns the created [Workspace](/v8/data-models/workspace) object.
 | Code | Status | Meaning |
 |------|--------|---------|
 | `workspace/email-not-verified` | 403 | Root creation, and the caller's email is not verified. |
-| `workspace/unauthorized` | 403 | Child creation, and you lack `create-sub-workspace` on the parent. |
+| `workspace/forbidden` | 403 | Child creation, and you lack `create-sub-workspace` on the parent. |
 | `workspace/not-found` | 404 | The `parentWorkspaceId` does not exist in this project. |
 | `workspace/max-depth-exceeded` | 400 | The child would sit deeper than the 10-level nesting cap. |
 

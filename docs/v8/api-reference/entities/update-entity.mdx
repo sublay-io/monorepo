@@ -79,11 +79,11 @@ Returns the updated [Entity](/v8/data-models/entity) object, populated with the 
     { "error": "Entity not found.", "code": "entity/not-found" }
     ```
   </Accordion>
-  <Accordion title="Unauthorized — 403">
+  <Accordion title="Forbidden — 403">
     The caller isn't the author, and can read the entity.
 
     ```json
-    { "error": "Not authorized to update this entity.", "code": "entity/not-authorized" }
+    { "error": "Not authorized to update this entity.", "code": "entity/forbidden" }
     ```
   </Accordion>
   <Accordion title="Posting Not Allowed — 403">

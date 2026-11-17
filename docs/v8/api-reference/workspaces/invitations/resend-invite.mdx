@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/workspaces/:workspaceId/invites/:inviteId/resend"
 description: "Refresh a lapsed pending invitation and resend the email"
 ---
 
-Refreshes a pending invitation — sets `expiresAt = now + 14 days` and resends the email. **Valid on any `pending` invite, including one past `expiresAt`** (resend = refresh a lapsed invite). A **terminal** invite (`accepted`/`declined`/`revoked`) → `409`. Requires the `invite` capability (or owner).
+Refreshes a pending invitation — sets `expiresAt = now + 14 days` and resends the email. **Valid on any `pending` invite, including one past `expiresAt`** (resend = refresh a lapsed invite). An invite that was already answered or revoked (`accepted`/`declined`/`revoked`) → `409 workspace/not-pending`. Requires the `invite` capability (or owner).
 
 <Note>
   Resend **emits no webhook** — the status stays `pending`, so there is no lifecycle transition.
@@ -49,11 +49,11 @@ Returns the refreshed [WorkspaceInvitation](/v8/data-models/workspace-invitation
     ```
     A **project misconfiguration**, not a bad request. The row is not touched — `expiresAt` is unchanged and no email is sent. Set [`workspaces.inviteAcceptUrl`](/v8/sdk/workspaces/overview#project-settings) and retry.
   </Accordion>
-  <Accordion title="Terminal Invite — 409">
+  <Accordion title="Not Pending — 409">
     ```json
-    { "error": "This invitation is no longer pending.", "code": "workspace/invite-terminal" }
+    { "error": "This invitation is no longer pending.", "code": "workspace/not-pending" }
     ```
-    The invitation is `accepted`, `declined`, or `revoked`. Note an invitation merely past its `expiresAt` is **not** terminal — resending one is the documented purpose of this endpoint.
+    The invitation is `accepted`, `declined`, or `revoked`. An invitation merely past its `expiresAt` is still pending here: resending one is the purpose of this endpoint.
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json

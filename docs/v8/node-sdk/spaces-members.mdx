@@ -36,7 +36,7 @@ const result = await sublay.spaces.joinSpace({
 
 ### leaveSpace
 
-Removes a member from a space, acting as that member (`DELETE /spaces/:spaceId/members/me`). The space creator can't leave (`400 space/creator-cannot-leave`).
+Removes a member from a space, acting as that member (`DELETE /spaces/:spaceId/members/me`). The space creator can't leave (`409 space/creator-cannot-leave`).
 
 ```typescript
 const result = await sublay.spaces.leaveSpace({
@@ -92,7 +92,7 @@ const result = await sublay.spaces.fetchSpaceMembers({
 });
 ```
 
-Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/members-access-denied` to a user who isn't an active member of that members-only space or of a space between it and this one.
+Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/forbidden` to a user who isn't an active member of that members-only space or of a space between it and this one.
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
@@ -115,7 +115,7 @@ Open to anyone who can read the space. A members-only space, or a space under on
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  The user to list as, exactly as their own access token: a members-only space's list is open to them only as an active member. Omit it for the anonymous view (a members-only space returns `403 space/members-access-denied`).
+  The user to list as, exactly as their own access token: a members-only space's list is open to them only as an active member. Omit it for the anonymous view (a members-only space returns `403 space/forbidden`).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />
@@ -132,14 +132,14 @@ Returns the admin and moderator members of a space (the "team").
 const result = await sublay.spaces.fetchSpaceTeam({ spaceId: "spc_abc123" });
 ```
 
-Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/members-access-denied` to a user who isn't an active member of that members-only space or of a space between it and this one.
+Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/forbidden` to a user who isn't an active member of that members-only space or of a space between it and this one.
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
-  The user to read as, exactly as their own access token: a members-only space's team is open to them only as an active member. Omit it for the anonymous view (a members-only space returns `403 space/members-access-denied`).
+  The user to read as, exactly as their own access token: a members-only space's team is open to them only as an active member. Omit it for the anonymous view (a members-only space returns `403 space/forbidden`).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />

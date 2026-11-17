@@ -39,9 +39,9 @@ Deletion **cascades** the entire subtree in one transaction, bottom-up: invitati
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="Unauthorized — 403">
+  <Accordion title="Forbidden — 403">
     ```json
-    { "error": "Owner access required", "code": "workspace/unauthorized" }
+    { "error": "Owner access required", "code": "workspace/forbidden" }
     ```
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">

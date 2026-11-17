@@ -59,8 +59,9 @@ function InviteRow({
 
 | Code | Status | Meaning |
 |------|--------|---------|
-| `workspace/unauthorized` | 403 | You lack the `invite` capability on this workspace. |
+| `workspace/forbidden` | 403 | You lack the `invite` capability on this workspace. |
 | `workspace/invite-not-found` | 404 | No such invitation on this workspace. |
+| `workspace/not-pending` | 409 | The invitation is already accepted / declined / revoked. |
 
 ## Related
 

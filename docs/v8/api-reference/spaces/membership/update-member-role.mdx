@@ -101,7 +101,7 @@ The space creator always stays an admin of their space. Only the creator can pro
     { "error": "Only the space creator can promote or demote admins.", "code": "space/creator-required" }
     ```
   </Accordion>
-  <Accordion title="Last Admin — 400">
+  <Accordion title="Last Admin — 409">
     ```json
     { "error": "Cannot demote the last admin. Promote another member to admin first.", "code": "space/last-admin" }
     ```

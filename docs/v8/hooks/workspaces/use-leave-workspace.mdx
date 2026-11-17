@@ -44,7 +44,8 @@ Resolves to `void` (the endpoint returns `204 No Content`).
 
 | Code | Status | Meaning |
 |------|--------|---------|
-| `workspace/not-found` | 404 | The workspace doesn't exist (or was deleted while the request ran), or you have no direct membership on it. |
+| `workspace/not-found` | 404 | The workspace doesn't exist (or was deleted while the request ran), or you can't see it: one you have no relation to answers exactly like a missing one. |
+| `workspace/not-member` | 403 | You can see the workspace but have no direct membership on it (you only reach in from an ancestor), so there is nothing to leave. |
 | `workspace/sole-owner` | 409 | The sole owner must transfer ownership before leaving. |
 
 ## Related

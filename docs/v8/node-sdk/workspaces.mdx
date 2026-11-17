@@ -381,7 +381,7 @@ Requires `remove-member` (rank-bounded); sole-owner protected. A `targetUserId` 
 await sublay.workspaces.leaveWorkspace({ workspaceId: "ws_abc", actingUserId: "usr_pat" });
 ```
 
-Removes the given user's own membership on this node only (`DELETE /workspaces/:workspaceId/members/me`).
+Removes the given user's own membership on this node only (`DELETE /workspaces/:workspaceId/members/me`). An owner cannot leave (`409 workspace/sole-owner`). A user who only reaches in, with no direct membership here, gets `403 workspace/not-member`; one who can't see the workspace gets `404 workspace/not-found`, as for a missing one.
 
 <ParamField body="workspaceId" type="string" required />
 <ParamField body="actingUserId" type="string" required>The user leaving. Sent as a query param.</ParamField>

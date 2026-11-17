@@ -168,7 +168,7 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
 
 <AccordionGroup>
   <Accordion title="Not signed in — 401 / 403">
-    Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired. Checked before any uploaded file is read, so a request with no credentials gets `401` rather than a body or acting-user error. A valid token for a different user gets `403 user/not-authorized` instead (Signed In as Another User, below).
+    Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired. Checked before any uploaded file is read, so a request with no credentials gets `401` rather than a body or acting-user error. A valid token for a different user gets `403 user/forbidden` instead (Signed In as Another User, below).
   </Accordion>
   <Accordion title="Signed In as Another User — 403">
     A valid user token, signed in as a user other than `:userId`, tried to update that user. Returned with a JSON body, unlike the invalid-token `403` above.
@@ -176,7 +176,7 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     ```json
     {
       "error": "Not authorized to update this user.",
-      "code": "user/not-authorized"
+      "code": "user/forbidden"
     }
     ```
   </Accordion>
@@ -229,13 +229,14 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     ```
     The `.options` field isn't valid JSON. `param` names the field: `avatarFile.options` or `bannerFile.options`.
   </Accordion>
-  <Accordion title="Validation Failed — 400">
+  <Accordion title="Rejected by Validation Webhook — 400">
     ```json
     {
       "error": "User validation failed",
-      "code": "user/validation-failed"
+      "code": "user/webhook-validation-failed"
     }
     ```
+    Returned when your `user.updated` [validation webhook](/v8/webhooks) rejects the update. `error` carries the `message` your webhook returned (`User validation failed` when it returned none). Nothing is changed.
   </Accordion>
   <Accordion title="Invalid Params — 400">
     ```json
@@ -259,7 +260,7 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     ```json
     {
       "error": "actingUserId must be the user in the path: a service key updates a user by acting as that user.",
-      "code": "user/unauthorized"
+      "code": "user/forbidden"
     }
     ```
   </Accordion>
@@ -280,10 +281,10 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     { "error": "No user with this actingUserId exists in this project.", "code": "user/user-not-found" }
     ```
   </Accordion>
-  <Accordion title="files-images Bundle Required — 403">
-    Returned when an avatar or banner is uploaded on a project without the files-images bundle.
+  <Accordion title="Bundle Not Installed — 403">
+    Returned when an avatar or banner is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
     ```json
-    { "error": "Avatar and banner uploads require the files-images bundle, which is not installed for this project.", "code": "user/files-images-not-installed" }
+    { "error": "Avatar and banner uploads require the files-images bundle, which is not installed for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">

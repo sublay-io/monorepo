@@ -114,6 +114,21 @@ Returns the created [WorkspaceInvitation](/v8/data-models/workspace-invitation) 
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="User Not Found — 404">
+    The `userId` or `username` names no user in this project.
+    ```json
+    { "error": "The invited user was not found.", "code": "workspace/user-not-found" }
+    ```
+    ```json
+    { "error": "The invited username was not found.", "code": "workspace/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Email — 400">
+    Neither `userId` nor `username` was sent, and `email` isn't a valid email address.
+    ```json
+    { "error": "A valid invite target (email, userId, or username) is required.", "code": "workspace/invalid-body", "param": "email" }
+    ```
+  </Accordion>
   <Accordion title="Already a Member — 409">
     ```json
     { "error": "That user is already a member. Change their grant via edit-member-access.", "code": "workspace/already-member" }

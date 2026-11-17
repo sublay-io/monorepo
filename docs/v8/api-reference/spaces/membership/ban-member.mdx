@@ -99,10 +99,10 @@ Sets a member's status to `"banned"`, in this space and the child spaces where t
     { "error": "This member is already banned.", "code": "space/already-banned" }
     ```
   </Accordion>
-  <Accordion title="Insufficient Permissions — 403">
+  <Accordion title="Forbidden — 403">
     A moderator banning someone who is a moderator or admin in this space or in a child space the ban reaches. `spaceId` names that space.
     ```json
-    { "error": "Moderators can only ban regular members.", "code": "space/insufficient-permissions", "spaceId": "…" }
+    { "error": "Moderators can only ban regular members.", "code": "space/forbidden", "spaceId": "…" }
     ```
   </Accordion>
   <Accordion title="Creator Required — 403">
@@ -111,7 +111,7 @@ Sets a member's status to `"banned"`, in this space and the child spaces where t
     { "error": "Only the space creator can ban admins.", "code": "space/creator-required", "spaceId": "…" }
     ```
   </Accordion>
-  <Accordion title="Last Admin — 400">
+  <Accordion title="Last Admin — 409">
     The member is the last admin of this space or of a child space the ban reaches. `spaceId` names that space.
     ```json
     { "error": "Cannot ban the last admin. Promote another member to admin first.", "code": "space/last-admin", "spaceId": "…" }

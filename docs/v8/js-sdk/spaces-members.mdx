@@ -29,7 +29,7 @@ const result = await sublay.spaces.joinSpace({ spaceId: "spc_abc123" });
 
 ### leaveSpace
 
-Leaves a space as the logged-in user (`DELETE /spaces/:spaceId/members/me`). The space creator can't leave (`400 space/creator-cannot-leave`).
+Leaves a space as the logged-in user (`DELETE /spaces/:spaceId/members/me`). The space creator can't leave (`409 space/creator-cannot-leave`).
 
 ```typescript
 const result = await sublay.spaces.leaveSpace({ spaceId: "spc_abc123" });
@@ -73,7 +73,7 @@ const members = await sublay.spaces.fetchSpaceMembers({
 });
 ```
 
-Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/members-access-denied` to a user who isn't an active member of that members-only space or of a space between it and this one.
+Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/forbidden` to a user who isn't an active member of that members-only space or of a space between it and this one.
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
@@ -109,7 +109,7 @@ Fetches the team (admins and moderators) of a space.
 const team = await sublay.spaces.fetchSpaceTeam({ spaceId: "spc_abc123" });
 ```
 
-Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/members-access-denied` to a user who isn't an active member of that members-only space or of a space between it and this one.
+Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/forbidden` to a user who isn't an active member of that members-only space or of a space between it and this one.
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.

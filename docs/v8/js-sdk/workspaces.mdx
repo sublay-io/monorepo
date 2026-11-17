@@ -307,7 +307,7 @@ if (skippedCount > 0) {
 
 ### leaveWorkspace
 
-**Self-service** — removes the bearer-token user's *own* direct membership on this node only. No capability required. An owner cannot leave (`409 workspace/sole-owner`); transfer or delete first.
+**Self-service** — removes the bearer-token user's *own* direct membership on this node only. No capability required. An owner cannot leave (`409 workspace/sole-owner`); transfer or delete first. A user who only reaches in, with no direct membership here, gets `403 workspace/not-member`; one who can't see the workspace gets `404 workspace/not-found`, as for a missing one.
 
 ```typescript
 await sublay.workspaces.leaveWorkspace({ workspaceId: "ws_abc" });

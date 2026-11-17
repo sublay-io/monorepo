@@ -67,10 +67,12 @@ describe("useResendWorkspaceInvite", () => {
       { projectId: "project-1", user }
     );
 
-    axiosPrivate.mockError("post", 409, { code: "workspace/invite-terminal" });
+    axiosPrivate.mockError("post", 409, { code: "workspace/not-pending" });
 
     await expect(
       result.current({ workspaceId: "w1", inviteId: "i1" })
-    ).rejects.toMatchObject({ response: { status: 409 } });
+    ).rejects.toMatchObject({
+      response: { status: 409, data: { code: "workspace/not-pending" } },
+    });
   });
 });

@@ -300,13 +300,13 @@ describe("useAskContent", () => {
   });
 
   it("does not refresh on a coded 401 and surfaces the error", async () => {
-    // Controllers raise coded 401s (space/auth-required, auth/user-required,
-    // …). No refresh can fix those.
+    // Controllers raise coded 401s (auth/session-ended, …). No refresh can
+    // fix those.
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(
         JSON.stringify({
-          error: "Authentication required to filter by membership.",
-          code: "space/auth-required",
+          error: "This session has ended. Sign in again.",
+          code: "auth/session-ended",
         }),
         { status: 401 },
       ),
@@ -321,7 +321,7 @@ describe("useAskContent", () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.error).toBe(
-      "Authentication required to filter by membership.",
+      "This session has ended. Sign in again.",
     );
     expect(mockedRefresh).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -338,8 +338,8 @@ describe("useAskContent", () => {
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
-            error: "Authentication required to filter by membership.",
-            code: "space/auth-required",
+            error: "This session has ended. Sign in again.",
+            code: "auth/session-ended",
           }),
           { status: 401 },
         ),
@@ -358,7 +358,7 @@ describe("useAskContent", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(result.current.error).toBe(
-      "Authentication required to filter by membership.",
+      "This session has ended. Sign in again.",
     );
   });
 

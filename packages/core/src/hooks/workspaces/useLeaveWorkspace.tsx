@@ -9,7 +9,10 @@ export interface LeaveWorkspaceProps {
 /**
  * Self-service departure — removes the bearer-token user's DIRECT membership on
  * this node only (descendant memberships are untouched). An owner cannot leave
- * their own workspace; transfer ownership or delete it first.
+ * their own workspace (409 `workspace/sole-owner`); transfer ownership or
+ * delete it first. A user who only reaches in, with no direct membership here,
+ * gets 403 `workspace/not-member`; one who can't see the workspace at all gets
+ * 404 `workspace/not-found`, as for a missing one.
  */
 function useLeaveWorkspace(): (props: LeaveWorkspaceProps) => Promise<void> {
   const { projectId } = useProject();

@@ -19,8 +19,6 @@ function useFetchCommentByForeignId(): (props: FetchCommentByForeignIdProps) => 
       foreignId,
       include,
       spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
     }: FetchCommentByForeignIdProps) => {
       if (!projectId) {
         throw new Error("No project specified");
@@ -32,11 +30,7 @@ function useFetchCommentByForeignId(): (props: FetchCommentByForeignIdProps) => 
 
       const params: Record<string, any> = {
         foreignId,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       if (include) {

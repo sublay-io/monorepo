@@ -4,9 +4,10 @@
  * {@link import("./models/User").UserFull}).
  *
  * The relationship is expressed as a single `spaceReputation` object —
- * `{ spaceId, includeDescendants? }` — rather than the two flat props it
- * replaces, because the two always travel together and `includeDescendants`
- * is only meaningful alongside an explicit `spaceId`.
+ * `{ spaceId, includeDescendants? }` — because the two always travel together
+ * and `includeDescendants` is only meaningful alongside an explicit `spaceId`.
+ * The SDK sends it as the server's flat `spaceReputationId` /
+ * `spaceReputationDescendants` params.
  *
  * Two variants exist because the server accepts a different value set per
  * endpoint class:
@@ -15,10 +16,6 @@
  *   `<uuid> | "none" | "context"`.
  * - {@link SpaceReputationUserParams} — user-direct endpoints (the `users`
  *   module). Accept `<uuid> | "none"` only; `"context"` is rejected (400).
- *
- * Both variants also keep the now-deprecated flat props
- * (`spaceReputationId` / `spaceReputationDescendants`) so existing callers
- * keep working unchanged. When both forms are supplied the object wins.
  */
 
 /**
@@ -73,27 +70,8 @@ export interface SpaceReputationUserObject {
 export interface SpaceReputationContextParams {
   /**
    * Opt the returned/embedded user(s) into a space-scoped `spaceReputation`.
-   * This is the primary form; it supersedes the deprecated flat props below.
    */
   spaceReputation?: SpaceReputationContextObject;
-  /**
-   * Which space's reputation to attach. Accepts a space `<uuid>`, `"none"`
-   * (global reputation), or `"context"` (per-row).
-   *
-   * @deprecated Use `spaceReputation: { spaceId, includeDescendants? }`
-   * instead. Still accepted for backward compatibility; ignored when the
-   * `spaceReputation` object is supplied.
-   */
-  spaceReputationId?: string;
-  /**
-   * Include reputation accrued in descendant spaces. Only honored when
-   * `spaceReputationId` is an explicit `<uuid>`.
-   *
-   * @deprecated Use `spaceReputation.includeDescendants` instead. Still
-   * accepted for backward compatibility; ignored when the `spaceReputation`
-   * object is supplied.
-   */
-  spaceReputationDescendants?: boolean;
 }
 
 /**
@@ -105,25 +83,6 @@ export interface SpaceReputationContextParams {
 export interface SpaceReputationUserParams {
   /**
    * Opt the returned user(s) into a space-scoped `spaceReputation`.
-   * This is the primary form; it supersedes the deprecated flat props below.
    */
   spaceReputation?: SpaceReputationUserObject;
-  /**
-   * Which space's reputation to attach. Accepts a space `<uuid>` or `"none"`
-   * (global reputation). `"context"` is rejected by the server (400) here.
-   *
-   * @deprecated Use `spaceReputation: { spaceId, includeDescendants? }`
-   * instead. Still accepted for backward compatibility; ignored when the
-   * `spaceReputation` object is supplied.
-   */
-  spaceReputationId?: string;
-  /**
-   * Include reputation accrued in descendant spaces. Only honored when
-   * `spaceReputationId` is an explicit `<uuid>`.
-   *
-   * @deprecated Use `spaceReputation.includeDescendants` instead. Still
-   * accepted for backward compatibility; ignored when the `spaceReputation`
-   * object is supplied.
-   */
-  spaceReputationDescendants?: boolean;
 }

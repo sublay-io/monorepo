@@ -79,8 +79,6 @@ function useFetchManyChatMessages(): (
         include,
         filters,
         spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
       } = props;
 
       if (!projectId) throw new Error("No project specified");
@@ -88,11 +86,7 @@ function useFetchManyChatMessages(): (
 
       const params: Record<string, any> = {
         limit,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
       if (sortDir) params.sortDir = sortDir;
       if (parentMessageId) params.parentMessageId = parentMessageId;

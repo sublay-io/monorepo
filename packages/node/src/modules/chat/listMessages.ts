@@ -60,8 +60,6 @@ export async function listMessages(
   const {
     conversationId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<ListMessagesResponse>(
@@ -70,11 +68,7 @@ export async function listMessages(
       params: {
         ...rest,
         include: serializeInclude(rest.include),
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

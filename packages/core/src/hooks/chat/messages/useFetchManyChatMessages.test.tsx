@@ -58,8 +58,7 @@ describe("useFetchManyChatMessages", () => {
         sortDir: "asc",
         include: "files",
         filters: { hasReplies: true },
-        spaceReputationId: "space-1",
-        spaceReputationDescendants: true,
+        spaceReputation: { spaceId: "space-1", includeDescendants: true },
       });
     });
 

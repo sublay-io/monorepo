@@ -16,10 +16,9 @@ import type { Comment } from "../../interfaces/models/Comment";
  * The new `spaceReputation` object must NEVER reach a query-string serializer
  * un-normalized. If a nested `{ spaceId, includeDescendants }` object survives
  * into axios `params`, axios serializes it to bracketed params
- * (`spaceReputation[spaceId]=…`) which the server IGNORES — the new (primary)
- * form silently no-ops while the deprecated flat props still work. Typecheck
- * and the old flat-prop tests both stay green when this happens; these tests
- * are the only thing that catches it.
+ * (`spaceReputation[spaceId]=…`) which the server IGNORES — the option
+ * silently no-ops. Typecheck stays green when this happens; these tests are
+ * the only thing that catches it.
  *
  * For axios-backed hooks the harness records the `config.params` object handed
  * to axios. We assert (a) the flat keys are present and (b) NO `spaceReputation`
@@ -80,44 +79,20 @@ describe("spaceReputation serialization regression guard (core hooks)", () => {
     expect(qs).not.toContain("spaceReputation[");
   });
 
-  it("the OBJECT form and the equivalent FLAT form produce identical serialized params", async () => {
-    // Object form
-    const objHarness = renderHookWithAxios(() => useFetchManyComments());
-    objHarness.axiosPrivate.mockResponse("get", makePage());
+  it("doesn't take the flat names as input props", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyComments());
+    axiosPrivate.mockResponse("get", makePage());
     await act(async () => {
-      await objHarness.result.current({
+      await result.current({
         entityId: "entity-1",
         sortBy: "createdAt",
-        spaceReputation: { spaceId: "space-9", includeDescendants: false },
-      });
-    });
-    const objParams = (objHarness.axiosPrivate.calls("get")[0].config?.params ??
-      {}) as Record<string, unknown>;
-    resetAxiosMocks();
-
-    // Equivalent flat (deprecated) form
-    const flatHarness = renderHookWithAxios(() => useFetchManyComments());
-    flatHarness.axiosPrivate.mockResponse("get", makePage());
-    await act(async () => {
-      await flatHarness.result.current({
-        entityId: "entity-1",
-        sortBy: "createdAt",
+        // @ts-expect-error — spaceReputationId is a wire param, not a hook prop
         spaceReputationId: "space-9",
-        spaceReputationDescendants: false,
       });
     });
-    const flatParams = (flatHarness.axiosPrivate.calls("get")[0].config?.params ??
+    const params = (axiosPrivate.calls("get")[0].config?.params ??
       {}) as Record<string, unknown>;
-
-    expect(objParams).toMatchObject({
-      spaceReputationId: "space-9",
-      spaceReputationDescendants: false,
-    });
-    expect(flatParams).toMatchObject({
-      spaceReputationId: "space-9",
-      spaceReputationDescendants: false,
-    });
-    expect(objParams).not.toHaveProperty("spaceReputation");
+    expect(params).not.toHaveProperty("spaceReputationId");
   });
 
   it("a users-variant hook (useFetchUser) serializes the OBJECT form to flat params", async () => {

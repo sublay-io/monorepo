@@ -32,16 +32,12 @@ export async function askContent(
   client: SublayHttpClient,
   data: AskContentProps
 ): Promise<AskContentResponse> {
-  const { spaceReputation, spaceReputationId, spaceReputationDescendants, ...body } =
+  const { spaceReputation, ...body } =
     data;
   // Every field goes in the body on a POST, the space-reputation options too.
   const response = await client.projectInstance.post<AskContentResponse>("/search/ask", {
     ...body,
-    ...buildSpaceReputationParams({
-      spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
-    }),
+    ...buildSpaceReputationParams({ spaceReputation }),
   });
   return response.data;
 }

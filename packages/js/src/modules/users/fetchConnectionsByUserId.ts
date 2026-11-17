@@ -25,17 +25,11 @@ export async function fetchConnectionsByUserId(
   const {
     userId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const params = {
     ...rest,
-    ...buildSpaceReputationParams({
-      spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
-    }),
+    ...buildSpaceReputationParams({ spaceReputation }),
   };
   const response = await client.projectInstance.get<
     PaginatedResponse<AcceptedConnectionRow>

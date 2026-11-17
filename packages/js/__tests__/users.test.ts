@@ -38,8 +38,7 @@ describe("js-sdk users — profile — request shaping", () => {
     const { client, projectInstance } = makeClient();
     await fetchUserById(client, {
       userId: "u1",
-      spaceReputationId: "sp1",
-      spaceReputationDescendants: true,
+      spaceReputation: { spaceId: "sp1", includeDescendants: true },
     });
     expect(projectInstance.get).toHaveBeenCalledWith("/users/u1", {
       params: { spaceReputationId: "sp1", spaceReputationDescendants: true },

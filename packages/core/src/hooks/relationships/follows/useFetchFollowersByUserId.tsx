@@ -21,7 +21,7 @@ function useFetchFollowersByUserId(): (params: FetchFollowersByUserIdParams) => 
   const axios = useAxiosPrivate();
 
   const fetchFollowersByUserId = useCallback(
-    async ({ userId, page = 1, limit = 20, query, searchFields, spaceReputation, spaceReputationId, spaceReputationDescendants }: FetchFollowersByUserIdParams) => {
+    async ({ userId, page = 1, limit = 20, query, searchFields, spaceReputation }: FetchFollowersByUserIdParams) => {
       if (!userId) {
         throw new Error("No userId provided.");
       }
@@ -34,11 +34,7 @@ function useFetchFollowersByUserId(): (params: FetchFollowersByUserIdParams) => 
         page,
         limit,
         ...buildSearchParams(query, searchFields),
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       const response = await axios.get<PaginatedResponse<FollowRow>>(

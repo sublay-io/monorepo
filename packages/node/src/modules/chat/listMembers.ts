@@ -20,8 +20,6 @@ export async function listMembers(
   const {
     conversationId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<
@@ -29,11 +27,7 @@ export async function listMembers(
   >(`/chat/conversations/${conversationId}/members`, {
     params: {
       ...rest,
-      ...buildSpaceReputationParams({
-        spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
-      }),
+      ...buildSpaceReputationParams({ spaceReputation }),
     },
   });
   return response.data;

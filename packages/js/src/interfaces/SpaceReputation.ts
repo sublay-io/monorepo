@@ -13,7 +13,7 @@
  *   server (400).
  *
  * Both classes share the same param names and types — only the accepted
- * `spaceReputationId` value set (documented in JSDoc) differs.
+ * `spaceId` value set (documented in JSDoc) differs.
  */
 
 /**
@@ -36,27 +36,6 @@ export interface SpaceReputationContextParams {
     spaceId: string | "none" | "context";
     includeDescendants?: boolean;
   };
-  /**
-   * @deprecated Pass the `spaceReputation` object instead. Retained for
-   * back-compat; removal is a later major version.
-   *
-   * Opt into space-scoped reputation enrichment. Accepted forms:
-   * - a space `<uuid>` — reputation within that specific space;
-   * - `"none"` — no space context (global reputation only);
-   * - `"context"` — derive the space from each record's own context
-   *   (e.g. a feed enriches each row's author with reputation in that row's
-   *   space).
-   */
-  spaceReputationId?: string;
-  /**
-   * @deprecated Pass the `spaceReputation` object (`includeDescendants`)
-   * instead. Retained for back-compat; removal is a later major version.
-   *
-   * Whether to include descendant spaces when computing space-scoped
-   * reputation. Only honored with an explicit space `<uuid>` (ignored for
-   * `"none"` / `"context"`).
-   */
-  spaceReputationDescendants?: boolean;
 }
 
 /**
@@ -79,24 +58,4 @@ export interface SpaceReputationUserParams {
     spaceId: string | "none";
     includeDescendants?: boolean;
   };
-  /**
-   * @deprecated Pass the `spaceReputation` object instead. Retained for
-   * back-compat; removal is a later major version.
-   *
-   * Opt into space-scoped reputation enrichment. Accepted forms:
-   * - a space `<uuid>` — reputation within that specific space;
-   * - `"none"` — no space context (global reputation only).
-   *
-   * `"context"` is **rejected by the server (400)** on user-direct endpoints —
-   * there is no per-record context to derive a space from.
-   */
-  spaceReputationId?: string;
-  /**
-   * @deprecated Pass the `spaceReputation` object (`includeDescendants`)
-   * instead. Retained for back-compat; removal is a later major version.
-   *
-   * Whether to include descendant spaces when computing space-scoped
-   * reputation. Only honored with an explicit space `<uuid>`.
-   */
-  spaceReputationDescendants?: boolean;
 }

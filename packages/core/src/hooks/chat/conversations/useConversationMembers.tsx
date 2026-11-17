@@ -26,17 +26,11 @@ export interface UseConversationMembersValues {
 function useConversationMembers({
   conversationId,
   spaceReputation,
-  spaceReputationId,
-  spaceReputationDescendants,
 }: UseConversationMembersProps): UseConversationMembersValues {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
-  const reputationParams = buildSpaceReputationParams({
-    spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
-  });
+  const reputationParams = buildSpaceReputationParams({ spaceReputation });
   const reputationKey = JSON.stringify(reputationParams);
 
   const [members, setMembers] = useState<ConversationMember[]>([]);

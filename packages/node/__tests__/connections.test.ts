@@ -21,9 +21,9 @@ describe("node-sdk connections — request shaping", () => {
     });
   });
 
-  it("fetchConnections forwards the flat spaceReputationId as given", async () => {
+  it("fetchConnections sends spaceReputation as the flat spaceReputationId", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchConnections(client, { actingUserId: "u1", spaceReputationId: "none" });
+    await fetchConnections(client, { actingUserId: "u1", spaceReputation: { spaceId: "none" } });
     expect(projectInstance.get).toHaveBeenCalledWith("/connections", {
       params: { actingUserId: "u1", spaceReputationId: "none" },
     });

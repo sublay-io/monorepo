@@ -88,8 +88,6 @@ function useFetchModeratedReports(): (params: FetchModeratedReportsParams) => Pr
       page,
       limit,
       spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
     }: FetchModeratedReportsParams) => {
       if (!projectId) {
         throw new Error("No projectId available.");
@@ -103,11 +101,7 @@ function useFetchModeratedReports(): (params: FetchModeratedReportsParams) => Pr
         sortDir,
         page,
         limit,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       const response = await axios.get<PaginatedResponse<Report>>(

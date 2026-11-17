@@ -8,8 +8,7 @@ describe("node-sdk search — request shaping", () => {
     await searchContent(client, {
       query: "hello",
       sourceTypes: ["entity"],
-      spaceReputationId: "rep1",
-      spaceReputationDescendants: true,
+      spaceReputation: { spaceId: "rep1", includeDescendants: true },
     });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/search/content",
@@ -55,8 +54,7 @@ describe("node-sdk search — request shaping", () => {
     await askContent(client, {
       query: "what is this space about?",
       spaceId: "s1",
-      spaceReputationId: "rep1",
-      spaceReputationDescendants: false,
+      spaceReputation: { spaceId: "rep1", includeDescendants: false },
     });
     expect(projectInstance.post).toHaveBeenCalledWith(
       "/search/ask",

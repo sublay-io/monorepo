@@ -24,7 +24,7 @@ function useFetchConnectionsByUserId(): (props: FetchConnectionsByUserIdParams) 
     async (
       props: FetchConnectionsByUserIdParams
     ): Promise<PaginatedResponse<AcceptedConnectionRow>> => {
-      const { userId, page = 1, limit = 20, query, searchFields, spaceReputation, spaceReputationId, spaceReputationDescendants } = props;
+      const { userId, page = 1, limit = 20, query, searchFields, spaceReputation } = props;
       if (!projectId) {
         throw new Error("No project specified");
       }
@@ -37,11 +37,7 @@ function useFetchConnectionsByUserId(): (props: FetchConnectionsByUserIdParams) 
         page,
         limit,
         ...buildSearchParams(query, searchFields),
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       const response = await axios.get<PaginatedResponse<AcceptedConnectionRow>>(

@@ -11,9 +11,8 @@ import { makeClient, MockAxiosInstance } from "./helpers/mockClient";
  *
  * The central risk: if the nested `spaceReputation` object is forwarded to axios
  * `params` un-normalized, axios bracket-encodes it
- * (`spaceReputation%5BspaceId%5D=…`) and the server IGNORES it — so the new
- * (primary) form silently no-ops while the deprecated flat props keep working.
- * Typecheck and the existing flat-prop tests both stay green when that happens.
+ * (`spaceReputation%5BspaceId%5D=…`) and the server IGNORES it — so the option
+ * silently no-ops. Typecheck stays green when that happens.
  *
  * These tests pass the OBJECT form, capture the exact `params` object handed to
  * the mocked axios instance, serialize it through axios's OWN default param
@@ -118,16 +117,16 @@ describe("space-reputation serialization guard — object form never drops or br
     expect(params).not.toHaveProperty("entityId"); // path param, not a query param
   });
 
-  it("object form wins over deprecated flat props (precedence)", () => {
+  it("doesn't take the flat names as input", () => {
     const out = buildSpaceReputationParams({
-      spaceReputation: { spaceId: "rep1", includeDescendants: true },
+      // @ts-expect-error — spaceReputationId is a wire param, not an input
       spaceReputationId: "ignored",
-      spaceReputationDescendants: false,
     });
-    expect(out).toEqual({
-      spaceReputationId: "rep1",
-      spaceReputationDescendants: true,
-    });
+    expect(out).toEqual({});
+  });
+
+  it("returns nothing without an object", () => {
+    expect(buildSpaceReputationParams({})).toEqual({});
   });
 
   it("`spaceId: \"none\"` flattens to `spaceReputationId=none` without descendants", () => {

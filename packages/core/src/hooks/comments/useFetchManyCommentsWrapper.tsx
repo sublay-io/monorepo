@@ -59,8 +59,6 @@ function useFetchManyCommentsWrapper(
     replySortDir,
     replySortByReaction,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
   } = props;
 
   const fetchManyComments = useFetchManyComments();
@@ -76,8 +74,6 @@ function useFetchManyCommentsWrapper(
     replySortDir,
     replySortByReaction,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
   });
 
   const fetchPage = useCallback(
@@ -100,8 +96,6 @@ function useFetchManyCommentsWrapper(
           replySortByReaction,
         ),
         spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
       }),
     [fetchManyComments, resetKey], // eslint-disable-line react-hooks/exhaustive-deps
   );

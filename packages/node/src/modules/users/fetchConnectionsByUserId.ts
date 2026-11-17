@@ -31,8 +31,6 @@ export async function fetchConnectionsByUserId(
   const {
     userId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<
@@ -40,11 +38,7 @@ export async function fetchConnectionsByUserId(
   >(`/users/${userId}/connections`, {
     params: {
       ...rest,
-      ...buildSpaceReputationParams({
-        spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
-      }),
+      ...buildSpaceReputationParams({ spaceReputation }),
     },
   });
   return response.data;

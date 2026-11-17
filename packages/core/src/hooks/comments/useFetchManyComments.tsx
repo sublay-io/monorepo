@@ -78,8 +78,6 @@ function useFetchManyComments(): (
         replySortDir,
         replySortByReaction,
         spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
       } = props;
 
       if (!entityId && !parentCommentId) {
@@ -95,11 +93,7 @@ function useFetchManyComments(): (
       }
 
       const params: Record<string, any> = {
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       if (entityId) params.entityId = entityId;

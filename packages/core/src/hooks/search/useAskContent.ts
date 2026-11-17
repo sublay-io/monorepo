@@ -107,7 +107,7 @@ export default function useAskContent(): UseAskContentReturn {
   }, []);
 
   const ask = useCallback(
-    ({ query, sourceTypes, spaceId, includeChildSpaces, conversationId, limit, spaceReputation, spaceReputationId, spaceReputationDescendants }: UseAskContentProps) => {
+    ({ query, sourceTypes, spaceId, includeChildSpaces, conversationId, limit, spaceReputation }: UseAskContentProps) => {
       if (!projectId) return;
       if (!query.trim()) return;
 
@@ -131,11 +131,7 @@ export default function useAskContent(): UseAskContentReturn {
         ...(conversationId && { conversationId }),
         ...(limit && { limit }),
         // Every field goes in the body on a POST, the space-reputation options too.
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       });
 
       // Run async without blocking the render cycle — errors are surfaced via state

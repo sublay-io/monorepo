@@ -64,8 +64,6 @@ function useFetchCommentsByUserId(): (
         cursor,
         include,
         spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
       } = props;
 
       if (!projectId) {
@@ -81,11 +79,7 @@ function useFetchCommentsByUserId(): (
       }
 
       const params: Record<string, any> = {
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       if (entityId) params.entityId = entityId;

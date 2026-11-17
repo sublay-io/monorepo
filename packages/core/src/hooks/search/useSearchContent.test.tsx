@@ -44,7 +44,7 @@ describe("useSearchContent", () => {
         includeChildSpaces: true,
         conversationId: "conversation-1",
         limit: 5,
-        spaceReputationId: "context",
+        spaceReputation: { spaceId: "context" },
       });
     });
 

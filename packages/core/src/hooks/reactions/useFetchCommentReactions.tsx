@@ -20,7 +20,7 @@ function useFetchCommentReactions(): (props: FetchCommentReactionsProps) => Prom
 
   const fetchCommentReactions = useCallback(
     async (props: FetchCommentReactionsProps): Promise<PaginatedResponse<Reaction>> => {
-      const { commentId, page, limit = 20, reactionType, sortDir = "desc", spaceReputation, spaceReputationId, spaceReputationDescendants } = props;
+      const { commentId, page, limit = 20, reactionType, sortDir = "desc", spaceReputation } = props;
 
       if (page === 0) {
         throw new Error("Can't fetch reactions with page 0");
@@ -42,11 +42,7 @@ function useFetchCommentReactions(): (props: FetchCommentReactionsProps) => Prom
         page,
         limit,
         sortDir,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       if (reactionType) {

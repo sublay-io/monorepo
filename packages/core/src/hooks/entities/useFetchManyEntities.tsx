@@ -118,11 +118,7 @@ function useFetchManyEntities(): (params?: FetchManyEntitiesParams) => Promise<P
       if (params?.blockedFilter) queryParams.blockedFilter = params.blockedFilter;
       Object.assign(
         queryParams,
-        buildSpaceReputationParams({
-          spaceReputation: params?.spaceReputation,
-          spaceReputationId: params?.spaceReputationId,
-          spaceReputationDescendants: params?.spaceReputationDescendants,
-        })
+        buildSpaceReputationParams({ spaceReputation: params?.spaceReputation })
       );
 
       if (params?.include) {

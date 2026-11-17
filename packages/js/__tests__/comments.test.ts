@@ -30,7 +30,7 @@ describe("js-sdk comments — request shaping", () => {
     await fetchComment(client, {
       commentId: "c1",
       include: "user",
-      spaceReputationId: "none",
+      spaceReputation: { spaceId: "none" },
     });
     expect(projectInstance.get).toHaveBeenCalledWith("/comments/c1", {
       params: { include: "user", spaceReputationId: "none" },
@@ -114,7 +114,7 @@ describe("js-sdk comments — request shaping", () => {
       replySortDir: "desc",
       replySortByReaction: "like",
       include: ["user", "grants"],
-      spaceReputationId: "none",
+      spaceReputation: { spaceId: "none" },
     });
     expect(projectInstance.get).toHaveBeenCalledWith("/comments", {
       params: {

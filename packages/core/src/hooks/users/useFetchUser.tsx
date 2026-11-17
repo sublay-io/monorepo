@@ -20,8 +20,6 @@ function useFetchUser(): (props: FetchUserProps) => Promise<User> {
       userId,
       include,
       spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
     }: FetchUserProps) => {
       if (!projectId) {
         throw new Error("No project specified");
@@ -33,11 +31,7 @@ function useFetchUser(): (props: FetchUserProps) => Promise<User> {
 
       const params: Record<string, any> = {
         include: Array.isArray(include) ? include.join(",") : include,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       const response = await axios.get(`/${projectId}/users/${userId}`, {

@@ -67,8 +67,7 @@ describe("js-sdk askContent — request shaping", () => {
       askContent(client, {
         query: "how do refunds work?",
         spaceId: "s1",
-        spaceReputationId: "rep1",
-        spaceReputationDescendants: true,
+        spaceReputation: { spaceId: "rep1", includeDescendants: true },
       })
     );
 

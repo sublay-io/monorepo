@@ -122,7 +122,7 @@ describe("node-sdk comments — request shaping", () => {
       replySortDir: "desc",
       replySortByReaction: "like",
       include: ["user", "grants"],
-      spaceReputationId: "none",
+      spaceReputation: { spaceId: "none" },
     });
     expect(projectInstance.get).toHaveBeenCalledWith("/comments", {
       params: {

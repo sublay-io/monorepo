@@ -110,8 +110,7 @@ describe("useSendMessage", () => {
     await act(async () => {
       await result.current({
         content: "hi",
-        spaceReputationId: "space-1",
-        spaceReputationDescendants: true,
+        spaceReputation: { spaceId: "space-1", includeDescendants: true },
       });
     });
 

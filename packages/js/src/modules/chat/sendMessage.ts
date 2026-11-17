@@ -34,18 +34,12 @@ export async function sendMessage(
     // a multipart send), flattened via the helper so the `spaceReputation`
     // object never reaches the serializer.
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...body
   } = data;
   const path = `/chat/conversations/${conversationId}/messages`;
   const fields = {
     ...body,
-    ...buildSpaceReputationParams({
-      spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
-    }),
+    ...buildSpaceReputationParams({ spaceReputation }),
   };
 
   if (files && files.length > 0) {

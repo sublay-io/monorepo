@@ -22,7 +22,7 @@ function useFetchEntity(): (props: FetchEntityProps) => Promise<Entity> {
   const { projectId } = useProject();
 
   const fetchEntity = useCallback(
-    async ({ entityId, include, topCommentsLimit, topCommentsSortByReaction, spaceReputation, spaceReputationId, spaceReputationDescendants }: FetchEntityProps) => {
+    async ({ entityId, include, topCommentsLimit, topCommentsSortByReaction, spaceReputation }: FetchEntityProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -33,11 +33,7 @@ function useFetchEntity(): (props: FetchEntityProps) => Promise<Entity> {
 
       const params: Record<string, any> = {
         include: Array.isArray(include) ? include.join(",") : include,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       // Only with include=topComments (the server 400s them otherwise).

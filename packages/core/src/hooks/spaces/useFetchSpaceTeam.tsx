@@ -15,7 +15,7 @@ function useFetchSpaceTeam(): (props: FetchSpaceTeamProps) => Promise<SpaceMembe
   const axios = useAxiosPrivate();
 
   const fetchSpaceTeam = useCallback(
-    async ({ spaceId, spaceReputation, spaceReputationId, spaceReputationDescendants }: FetchSpaceTeamProps) => {
+    async ({ spaceId, spaceReputation }: FetchSpaceTeamProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -27,11 +27,7 @@ function useFetchSpaceTeam(): (props: FetchSpaceTeamProps) => Promise<SpaceMembe
       const url = `/${projectId}/spaces/${spaceId}/team`;
 
       const params: Record<string, any> = {
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       const response = await axios.get<{ data: SpaceMemberWithUser[] }>(url, {

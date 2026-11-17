@@ -27,8 +27,6 @@ export async function fetchReactions(
   const {
     commentId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<PaginatedResponse<Reaction>>(
@@ -36,11 +34,7 @@ export async function fetchReactions(
     {
       params: {
         ...rest,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

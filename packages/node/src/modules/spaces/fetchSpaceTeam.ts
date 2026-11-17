@@ -19,8 +19,6 @@ export async function fetchSpaceTeam(
   const {
     spaceId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<SpaceTeamResponse>(
@@ -28,11 +26,7 @@ export async function fetchSpaceTeam(
     {
       params: {
         ...rest,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

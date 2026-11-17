@@ -36,8 +36,6 @@ export async function sendMessage(
     conversationId,
     files,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...body
   } = data;
   const url = `/chat/conversations/${conversationId}/messages`;
@@ -46,11 +44,7 @@ export async function sendMessage(
   // keys, or form fields on a multipart send (booleans become "true"/"false").
   const fields = {
     ...body,
-    ...buildSpaceReputationParams({
-      spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
-    }),
+    ...buildSpaceReputationParams({ spaceReputation }),
   };
 
   // With attachments, send multipart: object fields are JSON-stringified (the

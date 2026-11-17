@@ -115,11 +115,7 @@ function useFetchManyReputationGrants(): (
       // object would be bracket-encoded by axios and silently ignored.
       Object.assign(
         params,
-        buildSpaceReputationParams({
-          spaceReputation: props?.spaceReputation,
-          spaceReputationId: props?.spaceReputationId,
-          spaceReputationDescendants: props?.spaceReputationDescendants,
-        })
+        buildSpaceReputationParams({ spaceReputation: props?.spaceReputation })
       );
 
       const response = await axios.get<FetchManyReputationGrantsResponse>(

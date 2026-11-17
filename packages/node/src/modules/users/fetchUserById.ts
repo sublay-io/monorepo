@@ -22,8 +22,6 @@ export async function fetchUserById(
   const {
     userId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const path = `/users/${userId}`; // assuming client handles prefix like /{projectId}
@@ -31,11 +29,7 @@ export async function fetchUserById(
     params: {
       ...rest,
       include: serializeInclude(rest.include),
-      ...buildSpaceReputationParams({
-        spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
-      }),
+      ...buildSpaceReputationParams({ spaceReputation }),
     },
   });
   return response.data;

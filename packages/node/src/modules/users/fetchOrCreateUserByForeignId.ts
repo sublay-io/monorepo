@@ -56,8 +56,6 @@ export async function fetchOrCreateUserByForeignId(
 ): Promise<FetchOrCreateUserByForeignIdResult> {
   const {
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...body
   } = data;
 
@@ -66,11 +64,7 @@ export async function fetchOrCreateUserByForeignId(
     {
       // `include` goes as given: a JSON body carries a string or an array.
       ...body,
-      ...buildSpaceReputationParams({
-        spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
-      }),
+      ...buildSpaceReputationParams({ spaceReputation }),
     }
   );
 

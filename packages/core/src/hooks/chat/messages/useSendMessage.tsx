@@ -52,19 +52,13 @@ function useSendMessage({
       parentMessageId,
       files,
       spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
     }: SendMessageParams): Promise<ChatMessage> => {
       if (!projectId) throw new Error("No projectId available.");
       if (!conversationId) throw new Error("No conversationId provided.");
 
       // Body fields like everything else on a POST: JSON keys, or form fields
       // on a multipart send.
-      const reputationFields = buildSpaceReputationParams({
-        spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
-      });
+      const reputationFields = buildSpaceReputationParams({ spaceReputation });
 
       const localId = crypto.randomUUID();
       const now = new Date().toISOString();

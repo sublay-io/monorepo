@@ -23,8 +23,6 @@ export async function fetchSpaceMembers(
   const {
     spaceId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const response = await client.projectInstance.get<SpaceMembersResponse>(
@@ -32,11 +30,7 @@ export async function fetchSpaceMembers(
     {
       params: {
         ...rest,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       },
     }
   );

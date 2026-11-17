@@ -2,7 +2,7 @@ import axios from "axios";
 
 import { fetchManyEntities } from "../src/modules/entities/fetchManyEntities";
 import { fetchUserByForeignId } from "../src/modules/users/fetchUserByForeignId";
-import { fetchEntity } from "../src/modules/entities/fetchEntity";
+import { fetchEntity, FetchEntityProps } from "../src/modules/entities/fetchEntity";
 import { fetchUserById } from "../src/modules/users/fetchUserById";
 import { searchContent } from "../src/modules/search/searchContent";
 import { sendMessage } from "../src/modules/chat/sendMessage";
@@ -17,9 +17,8 @@ import { makeClient } from "./helpers/client";
  * un-normalized. If a nested `{ spaceId, includeDescendants }` object survives
  * into axios `params`, axios bracket-encodes it (`spaceReputation[spaceId]=…`);
  * if it survives into `askContent`'s `URLSearchParams`, it stringifies to
- * `[object Object]`. Both are silently ignored by the server while the flat
- * props keep working — so the bug passes typecheck AND passes the old
- * flat-prop tests. These tests are the only thing that catches it.
+ * `[object Object]`. Both are silently ignored by the server, so the bug passes
+ * typecheck. These tests are the only thing that catches it.
  *
  * Strategy: for the axios modules we assert the EXACT `params` object handed to
  * axios (so a surviving `spaceReputation` key fails the test), AND we run that
@@ -194,18 +193,13 @@ describe("space-reputation serialization guard — askContent body", () => {
   });
 });
 
-describe("space-reputation serialization guard — precedence", () => {
-  it("the object form wins over the deprecated flat props", async () => {
-    const { client, projectInstance } = makeClient();
-    await fetchEntity(client, {
+describe("space-reputation serialization guard — input shape", () => {
+  it("doesn't type the flat names as input props", () => {
+    const props: FetchEntityProps = {
       entityId: "e1",
-      spaceReputation: { spaceId: "space-1", includeDescendants: true },
-      // These deprecated flat props must be ignored in favor of the object.
-      spaceReputationId: "STALE",
-      spaceReputationDescendants: false,
-    });
-    const params = getParams(projectInstance.get);
-    expect(params.spaceReputationId).toBe("space-1");
-    expect(params.spaceReputationDescendants).toBe(true);
+      // @ts-expect-error — spaceReputationId is a wire param, not an input prop
+      spaceReputationId: "space-1",
+    };
+    expect(props.entityId).toBe("e1");
   });
 });

@@ -77,8 +77,6 @@ export async function fetchManyComments(
     replySortByReaction,
     actingUserId,
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
   } = data;
   // Only the thread endpoint's own params are forwarded (no spread), so a
   // stray `page` / `userId` / `sourceId` / `blockedFilter` never reaches it.
@@ -100,11 +98,7 @@ export async function fetchManyComments(
       (replySortBy ?? sortBy) === "controversial" ? undefined : replySortDir,
     replySortByReaction,
     actingUserId,
-    ...buildSpaceReputationParams({
-      spaceReputation,
-      spaceReputationId,
-      spaceReputationDescendants,
-    }),
+    ...buildSpaceReputationParams({ spaceReputation }),
   };
   for (const key of Object.keys(params)) {
     if (params[key] === undefined) delete params[key];

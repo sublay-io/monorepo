@@ -20,7 +20,7 @@ function useFetchEntityReactions(): (props: FetchEntityReactionsProps) => Promis
 
   const fetchEntityReactions = useCallback(
     async (props: FetchEntityReactionsProps): Promise<PaginatedResponse<Reaction>> => {
-      const { entityId, page, limit = 20, reactionType, sortDir = "desc", spaceReputation, spaceReputationId, spaceReputationDescendants } = props;
+      const { entityId, page, limit = 20, reactionType, sortDir = "desc", spaceReputation } = props;
 
       if (page === 0) {
         throw new Error("Can't fetch reactions with page 0");
@@ -42,11 +42,7 @@ function useFetchEntityReactions(): (props: FetchEntityReactionsProps) => Promis
         page,
         limit,
         sortDir,
-        ...buildSpaceReputationParams({
-          spaceReputation,
-          spaceReputationId,
-          spaceReputationDescendants,
-        }),
+        ...buildSpaceReputationParams({ spaceReputation }),
       };
 
       if (reactionType) {

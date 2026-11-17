@@ -21,9 +21,9 @@ describe("js-sdk connections (own graph) — request shaping", () => {
     });
   });
 
-  it("fetchConnections forwards the flat spaceReputationId as given", async () => {
+  it("fetchConnections sends spaceReputation as the flat spaceReputationId", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchConnections(client, { spaceReputationId: "none" });
+    await fetchConnections(client, { spaceReputation: { spaceId: "none" } });
     expect(projectInstance.get).toHaveBeenCalledWith("/connections", {
       params: { spaceReputationId: "none" },
     });

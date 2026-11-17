@@ -16,8 +16,6 @@ export async function fetchCommentByForeignId(
 ): Promise<Comment> {
   const {
     spaceReputation,
-    spaceReputationId,
-    spaceReputationDescendants,
     ...rest
   } = data;
   const path = `/comments/by-foreign-id`;
@@ -25,11 +23,7 @@ export async function fetchCommentByForeignId(
     params: {
       ...rest,
       include: serializeInclude(rest.include),
-      ...buildSpaceReputationParams({
-        spaceReputation,
-        spaceReputationId,
-        spaceReputationDescendants,
-      }),
+      ...buildSpaceReputationParams({ spaceReputation }),
     },
   });
   // v8 returns the comment bare (v7 wrapped it in { comment }, which the 7.x

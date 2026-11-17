@@ -54,8 +54,7 @@ describe("js-sdk chat messages — request shaping", () => {
     await listMessages(client, {
       conversationId: "c1",
       parentMessageId: "m1",
-      spaceReputationId: "space1",
-      spaceReputationDescendants: true,
+      spaceReputation: { spaceId: "space1", includeDescendants: true },
     });
     expect(projectInstance.get).toHaveBeenCalledWith(
       "/chat/conversations/c1/messages",
@@ -74,7 +73,7 @@ describe("js-sdk chat messages — request shaping", () => {
     await getMessage(client, {
       conversationId: "c1",
       messageId: "m1",
-      spaceReputationId: "none",
+      spaceReputation: { spaceId: "none" },
     });
     expect(projectInstance.get).toHaveBeenCalledWith(
       "/chat/conversations/c1/messages/m1",
@@ -122,8 +121,7 @@ describe("js-sdk chat messages — request shaping", () => {
     await sendMessage(client, {
       conversationId: "c1",
       content: "hello",
-      spaceReputationId: "space1",
-      spaceReputationDescendants: false,
+      spaceReputation: { spaceId: "space1", includeDescendants: false },
     });
 
     expect(projectInstance.post).toHaveBeenCalledWith(

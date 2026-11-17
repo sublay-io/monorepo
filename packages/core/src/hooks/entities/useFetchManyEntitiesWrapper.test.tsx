@@ -56,11 +56,10 @@ describe("useFetchManyEntitiesWrapper", () => {
   });
 
   it("forwards the spaceReputation OBJECT form as flat params on BOTH page 1 and load-more", async () => {
-    // Regression guard: the load-more path previously forwarded only the
-    // deprecated flat props and dropped the new `spaceReputation` object, so a
-    // caller on the object form got correct reputation on page 1 then a silent
-    // no-op on every load-more page. Exercise the real load-more flow and assert
-    // page 2 carries the same flat `spaceReputationId`/`spaceReputationDescendants`
+    // Regression guard: a load-more path that drops the `spaceReputation`
+    // object gives correct reputation on page 1 then a silent no-op on every
+    // load-more page. Exercise the real load-more flow and assert page 2
+    // carries the same flat `spaceReputationId`/`spaceReputationDescendants`
     // the object flattens to — never dropped, never bracketed.
     const firstEntity = makeEntity({ id: "entity-1" });
     const secondEntity = makeEntity({ id: "entity-2" });

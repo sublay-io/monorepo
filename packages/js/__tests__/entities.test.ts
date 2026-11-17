@@ -35,7 +35,7 @@ describe("js-sdk entities — request shaping", () => {
     await fetchEntity(client, {
       entityId: "e1",
       include: "user",
-      spaceReputationId: "none",
+      spaceReputation: { spaceId: "none" },
     });
     expect(projectInstance.get).toHaveBeenCalledWith("/entities/e1", {
       params: { include: "user", spaceReputationId: "none" },

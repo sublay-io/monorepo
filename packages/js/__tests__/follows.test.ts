@@ -19,9 +19,9 @@ describe("js-sdk follows (own graph) — request shaping", () => {
     });
   });
 
-  it("fetchFollowers forwards the flat spaceReputationId as given", async () => {
+  it("fetchFollowers sends spaceReputation as the flat spaceReputationId", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchFollowers(client, { spaceReputationId: "none" });
+    await fetchFollowers(client, { spaceReputation: { spaceId: "none" } });
     expect(projectInstance.get).toHaveBeenCalledWith("/follows/followers", {
       params: { spaceReputationId: "none" },
     });
@@ -38,9 +38,9 @@ describe("js-sdk follows (own graph) — request shaping", () => {
     });
   });
 
-  it("fetchFollowing forwards the flat spaceReputationId as given", async () => {
+  it("fetchFollowing sends spaceReputation as the flat spaceReputationId", async () => {
     const { client, projectInstance } = makeClient();
-    await fetchFollowing(client, { spaceReputationId: "none" });
+    await fetchFollowing(client, { spaceReputation: { spaceId: "none" } });
     expect(projectInstance.get).toHaveBeenCalledWith("/follows/following", {
       params: { spaceReputationId: "none" },
     });

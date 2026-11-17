@@ -45,7 +45,7 @@ const comment = await sublay.comments.createComment({
   User mentions embedded in the comment.
 </ParamField>
 
-<ParamField body="parentCommentId" type="string">
+<ParamField body="parentCommentId" type="string | null">
   The Sublay comment ID of the parent, for creating a reply.
 </ParamField>
 

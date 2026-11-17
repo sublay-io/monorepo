@@ -82,6 +82,10 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
   Associates the file with a space.
 </ParamField>
 
+<ParamField body="eventId" type="string">
+  Associates the file with an event. Needs the events bundle. Send at most one of `entityId`, `commentId`, `spaceId` and `eventId`.
+</ParamField>
+
 <ParamField body="actingUserId" type="string">
   Service key only: the user this request acts as, who owns the uploaded file; the upload runs under that user's own checks. Leave it out to upload an app-owned file with no owning user. A user that doesn't exist returns `404 storage/user-not-found`. A user token always acts as its own user and must not send it (`400 storage/acting-user-not-allowed`).
 </ParamField>
@@ -166,6 +170,12 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 
     ```json
     { "error": "No user with this actingUserId exists in this project.", "code": "storage/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Bundle Not Installed — 403">
+    Returned when `eventId` is sent on a project without the events bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    ```json
+    { "error": "Linking an image to an event requires the events bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Events", "EventRsvps", "EventInvites"], "bundleId": "events", "dashboardUrl": "https://…/<projectId>/database" }
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">

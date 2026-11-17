@@ -56,7 +56,7 @@ Permanently deletes a space. All entities, members, child spaces, rules, and rep
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId: Invalid UUID format", "code": "space/invalid-query" }
+    { "error": "actingUserId: Invalid UUID format", "code": "space/invalid-query", "param": "actingUserId" }
     ```
   </Accordion>
   <Accordion title="Missing Acting User — 400">

@@ -97,7 +97,7 @@ function SingleComment({
     useState<CommentCreateError | null>(null);
   const replyErrorMessage =
     createError &&
-    createError.parentId === comment.id &&
+    createError.parentCommentId === comment.id &&
     createError !== dismissedReplyError
       ? getCommentCreateErrorMessage(createError)
       : null;

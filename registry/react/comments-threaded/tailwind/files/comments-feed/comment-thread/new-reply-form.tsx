@@ -108,7 +108,7 @@ function NewReplyForm({
     try {
       const result = await createComment?.({
         content: tempContent,
-        parentId: comment.id,
+        parentCommentId: comment.id,
         mentions: tempMentions,
       });
       if (result === undefined) {

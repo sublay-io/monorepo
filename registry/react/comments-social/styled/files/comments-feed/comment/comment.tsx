@@ -369,7 +369,7 @@ theme={theme}
                 {canReply && (
                 <button
                   onClick={() =>
-                    comment.parentId
+                    comment.parentCommentId
                       ? handleShallowReply!(comment)
                       : handleDeepReply!(comment)
                   }
@@ -434,7 +434,7 @@ theme={theme}
           </div>
         </div>
         )}
-        {!comment.parentId && <Replies commentId={comment.id} />}
+        {!comment.parentCommentId && <Replies commentId={comment.id} />}
       </div>
     );
   }

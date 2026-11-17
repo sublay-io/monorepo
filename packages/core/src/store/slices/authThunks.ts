@@ -760,8 +760,9 @@ export const confirmAccountDeletionThunk = createAsyncThunk(
 export interface RefreshRejectionMeta {
   /**
    * True when the server refused the credential (401/403 — expired, revoked,
-   * reuse-detected, invalidated by a password change or a remote sign-out-all),
-   * and when there was no credential to present at all. False for a transport
+   * reuse-detected, invalidated by a password change or a remote sign-out-all,
+   * or 404 `auth/user-not-found` — the token's user no longer exists), and
+   * when there was no credential to present at all. False for a transport
    * failure, which says nothing about whether the account is alive.
    */
   credentialRejected: boolean;

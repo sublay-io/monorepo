@@ -142,7 +142,7 @@ These can come from any endpoint, because they are about the HTTP request itself
 | `400` | `request/invalid-json` | The body is sent as JSON but doesn't parse. |
 | `404` | `request/route-not-found` | No endpoint matches the method and path. |
 | `413` | `request/body-too-large` | The JSON body is over the size limit. |
-| `400` | `request/invalid-body` | The body can't be read for another reason (an unsupported charset or encoding, an aborted request). |
+| `400` / `415` | `request/invalid-body` | The body can't be read for another reason: `415` for a charset or content encoding the server can't read, `400` otherwise (for example an aborted request). |
 | `429` | `request/rate-limited` | The endpoint's rate limit for your IP is exceeded. See [Rate Limiting](#rate-limiting). |
 | `500` | `request/server-error` | An unexpected failure outside any endpoint's own handling. |
 

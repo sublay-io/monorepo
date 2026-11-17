@@ -24,6 +24,7 @@ You don't call this endpoint from your app: it's the target of the button in the
 | Confirmed | Success page, then on to `{redirectUrl}` with `verified=true` added to its query after 5 seconds (or at once with **Continue now**) | Success page |
 | Invalid / expired token | Hosted error page | Hosted error page |
 | Server error | Hosted error page | Hosted error page |
+| Rate limit exceeded (10 requests per 15 minutes per IP) | `429` with a plain-text sentence (`Too many verification attempts, please wait 15 minutes`), not JSON | Same |
 
 The destination is the `redirectUrl` you passed to Send Verification Email, or in `emailVerification` to Sign Up or Sign In, stored with the token when the email was sent. The link itself carries no destination, so it can't be edited to send someone elsewhere. Only a `redirectUrl` on one of your project's Verified Domains is accepted, and a stored one is checked again when a later email uses it: if it's no longer on the list, the link shows the hosted success page instead. A failed verification always shows the hosted page.
 

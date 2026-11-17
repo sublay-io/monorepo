@@ -44,7 +44,7 @@ function PostComment({ entityId }: { entityId: string }) {
   GIF attachment. Required if `content` is not provided.
 </ParamField>
 
-<ParamField path="parentCommentId" type="string">
+<ParamField path="parentCommentId" type="string | null">
   ID of the parent comment for replies.
 </ParamField>
 

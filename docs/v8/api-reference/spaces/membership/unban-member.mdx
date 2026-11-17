@@ -56,7 +56,7 @@ Sets a banned member's status back to `"active"`, in this space and in the child
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body", "param": "actingUserId" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

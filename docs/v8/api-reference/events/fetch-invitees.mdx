@@ -42,7 +42,7 @@ Returns a paginated response: `{ data: EventInvite[], pagination: {...} }`.
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId must be a user id.", "code": "event/invalid-query" }
+    { "error": "actingUserId must be a user id.", "code": "event/invalid-query", "param": "actingUserId" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

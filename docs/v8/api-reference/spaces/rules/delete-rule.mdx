@@ -50,7 +50,7 @@ Permanently deletes a rule. Only space admins can delete rules.
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId must be a user id.", "code": "space/invalid-query" }
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-query", "param": "actingUserId" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

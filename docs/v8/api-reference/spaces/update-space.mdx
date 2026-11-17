@@ -85,7 +85,7 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body", "param": "actingUserId" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
@@ -115,6 +115,11 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
   <Accordion title="Not Found — 404">
     ```json
     { "error": "Space not found.", "code": "space/not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Slug Taken — 409">
+    ```json
+    { "error": "A space with this slug already exists.", "code": "space/slug-taken", "param": "slug" }
     ```
   </Accordion>
   <Accordion title="files-images Bundle Required — 403">

@@ -79,7 +79,7 @@ Returns the updated [Event](/v8/data-models/event) object.
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId must be a user id.", "code": "event/invalid-body" }
+    { "error": "actingUserId must be a user id.", "code": "event/invalid-body", "param": "actingUserId" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

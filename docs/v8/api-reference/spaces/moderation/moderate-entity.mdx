@@ -58,7 +58,7 @@ Takes a direct moderation action on an entity in a space. Requires the caller to
   <Accordion title="Invalid Acting User — 400">
     `actingUserId` is not a user id.
     ```json
-    { "error": "actingUserId must be a user id.", "code": "space/invalid-body" }
+    { "error": "actingUserId must be a user id.", "code": "space/invalid-body", "param": "actingUserId" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

@@ -131,7 +131,10 @@ Some errors add keys:
 - A `500`'s code is `<area>/server-error`, with two exceptions on [sign-out](/v8/api-reference/auth/sign-out): `auth/device-deregistration-failed` and `auth/sign-out-failed`. The underlying failure is recorded in Sublay's server logs, not returned in the response.
 - Some endpoints add keys of their own (`missingTables` on a missing bundle, `verificationId` on an unverified sign-in); each endpoint's page lists them.
 
-The one exception: an access token that is missing, expired or invalid gets a bare `401 Unauthorized` / `403 Forbidden` with no JSON body. See [Authentication](/v8/api-reference/authentication).
+Two exceptions:
+
+- An access token that is missing, expired or invalid gets a bare `401 Unauthorized` / `403 Forbidden` with no JSON body. See [Authentication](/v8/api-reference/authentication).
+- The pages Sublay hosts for your users to open in a browser answer their errors as pages, not JSON: the [email verification link](/v8/api-reference/auth/verify-email-link) (its `429` is a plain sentence) and the password reset page.
 
 ### Request errors
 

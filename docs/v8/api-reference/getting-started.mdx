@@ -118,7 +118,7 @@ Every error is JSON with the same two keys:
 
 Some errors add keys:
 
-- `param` names the failing input when the error is about one: a validation `400` (`<area>/invalid-body`, `<area>/invalid-query`, `<area>/invalid-params`), an id that isn't a UUID, a field another user already holds, an image-options field that is missing or isn't valid JSON, a refused file. It is the input's dot path, as you sent it (`email`, `metadata.title`, `images.options`). It is left out when the error is about the request as a whole.
+- `param` names the failing input when the error is about one: a validation `400` (`<area>/invalid-body`, `<area>/invalid-query`, `<area>/invalid-params`), including a key the endpoint doesn't take and a malformed or misspelled `actingUserId`; an id that isn't a UUID, the project id in the path included (`project/invalid-id`); a value another record already holds (`<area>/foreign-id-taken`, `auth/email-taken`); an image-options field that is missing or isn't valid JSON; a refused file (`<area>/file-too-large`, `<area>/unsupported-file-type`, `<area>/unexpected-file-field`, `<area>/invalid-image`). It is the input's dot path, as you sent it (`email`, `metadata.title`, `images.options`, `images.files`). It is left out when the error is about the request as a whole: a validation rule that checks several fields together, a body sent with a content type the server doesn't read, or a query string with more parameters than the server reads.
 
   ```json
   {
@@ -139,12 +139,12 @@ These can come from any endpoint, because they are about the HTTP request itself
 
 | Status | Code | When |
 |--------|------|------|
-| `400` | `request/invalid-json` | The body is sent as JSON but doesn't parse. |
-| `413` | `request/body-too-large` | The JSON body is over the size limit. |
+| `400` | `request/invalid-json` | The body is sent as JSON but doesn't parse, or parses to a value that isn't an object or an array (`"text"`, `42`, `null`). |
+| `413` | `request/body-too-large` | The JSON body is over the 100 KB limit. |
 | `400` | `request/invalid-multipart` | The `multipart/form-data` body is malformed. `param` names the field when the fault is in one. |
 | `413` | `request/field-too-large` | A text field in a multipart body is too large. `param` names the field. |
 | `400` / `415` | `request/unreadable-body` | The body can't be read for another reason: `415` for a charset or content encoding the server can't read, `400` otherwise (for example an aborted request). |
-| `403` | `request/origin-not-allowed` | The request comes from a browser origin that isn't in the project's allowed domains. |
+| `403` | `request/origin-not-allowed` | The request comes from a browser origin that isn't in the project's allowed domains. The response carries no CORS headers, so the browser hides it from the page (the request fails as a CORS error); the code is visible to server-side callers and tools such as curl. |
 | `404` | `request/route-not-found` | No endpoint matches the method and path. |
 | `429` | `request/rate-limited` | The endpoint's rate limit for your IP is exceeded. See [Rate Limiting](#rate-limiting). |
 | `500` | `request/server-error` | An unexpected failure outside any endpoint's own handling. |
@@ -156,10 +156,10 @@ Endpoints that take a file in a `multipart/form-data` body answer a refused file
 | Status | Code | When |
 |--------|------|------|
 | `413` | `<area>/file-too-large` | A file is over the upload limit. `param` names its field. |
-| `400` | `<area>/unsupported-file-type` | A file isn't JPEG, PNG, WebP or PDF. |
+| `400` | `<area>/unsupported-file-type` | A file isn't JPEG, PNG, WebP or PDF. `param` names its field. |
 | `400` | `<area>/unexpected-file-field` | A file is in a field the endpoint doesn't take, or a field has more files than it takes. `param` names the field. |
 
-The upload limit is 50 MB per file on every endpoint except chat messages, which take files up to 100 MB. Endpoints that process images add their own checks (for example `422 <area>/invalid-image`); each endpoint's page lists them.
+The upload limit is 50 MB per file on every endpoint except chat messages, which take files up to 100 MB. Endpoints that process images add their own checks (for example `422 <area>/invalid-image` for a file that isn't a valid image, with `param` naming its field); each endpoint's page lists them.
 
 ### Common HTTP Status Codes
 

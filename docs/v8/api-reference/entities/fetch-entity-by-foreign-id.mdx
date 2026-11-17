@@ -95,7 +95,7 @@ Returns an [Entity](/v8/data-models/entity) object: HTTP `201` when `createIfNot
     `createIfNotFound` was `"true"` and the entity with this `foreignId` was deleted. A `foreignId` is unique across the project's entities, deleted ones included, so a deleted entity's `foreignId` can't be reused. Nothing is created.
 
     ```json
-    { "error": "An entity with this foreignId was deleted; its foreignId can't be reused.", "code": "entity/foreign-id-taken" }
+    { "error": "An entity with this foreignId was deleted; its foreignId can't be reused.", "code": "entity/foreign-id-taken", "param": "foreignId" }
     ```
   </Accordion>
   <Accordion title="Rejected by Validation Webhook — 400">

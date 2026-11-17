@@ -9,7 +9,7 @@ icon: "plug"
 `useFetchWorkspaceMembers` returns a callable for the [unified roster](/v8/api-reference/workspaces/members/list-members): one entry per distinct user, each with a `reasons` array. Always returned in full (never paginated). With `countOnly`, the shape is `WorkspaceRosterCountsResponse` instead.
 
 <Warning>
-  **No `page` / `limit` on this roster.** It is never paginated. `FetchWorkspaceMembersProps` carries only `workspaceId`, `include` and `countOnly`, and the hook builds its query string from exactly those three — so a `page` or `limit` hand-written past the types is never even sent. Calling the [REST route](/v8/api-reference/workspaces/members/list-members) directly does not help either: that endpoint declares `include`, `countOnly`, `actingUserId` and `projectId`, and refuses anything else — `?page=2&limit=10` comes back as `{ "error": "Unrecognized keys: \"page\", \"limit\"", "code": "workspace/invalid-query" }`.
+  **No `page` / `limit` on this roster.** It is never paginated. `FetchWorkspaceMembersProps` carries only `workspaceId`, `include` and `countOnly`, and the hook builds its query string from exactly those three — so a `page` or `limit` hand-written past the types is never even sent. Calling the [REST route](/v8/api-reference/workspaces/members/list-members) directly does not help either: that endpoint declares `include`, `countOnly`, `actingUserId` and `projectId`, and refuses anything else — `?page=2&limit=10` comes back as `{ "error": "Unrecognized keys: \"page\", \"limit\"", "code": "workspace/invalid-query", "param": "page" }`.
 
   The hook resolves to the whole roster as an array; its length is the number of distinct users.
 

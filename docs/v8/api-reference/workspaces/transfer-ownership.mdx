@@ -85,7 +85,7 @@ Returns the updated [Workspace](/v8/data-models/workspace) object with the new `
   </Accordion>
   <Accordion title="Undeclared Field — 400">
     ```json
-    { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body" }
+    { "error": "Unrecognized key: \"onBehalfOf\"", "code": "workspace/invalid-body", "param": "onBehalfOf" }
     ```
     Every workspaces endpoint declares its body fields exactly, and a top-level body field it does not declare is refused rather than ignored, for every caller. Two or more at once are named together: `Unrecognized keys: "onBehalfOf", "impersonate"`. Send only the fields documented above, in the JSON body. The query string carries none of them: a body field sent there is `400 workspace/wrong-location`, a `userId` or a re-cased `actingUserId` there is `400 workspace/invalid-query`, and any other query parameter is ignored. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>

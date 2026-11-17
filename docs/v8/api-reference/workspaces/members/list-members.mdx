@@ -9,7 +9,7 @@ Returns the roster as a **single unified array, one entry per distinct user**, e
 **Always returned in full — never paginated.** `include` flags only *add* entries; they never change the shape. `countOnly` is the numbers-only escape hatch.
 
 <Warning>
-  **There is no `page` or `limit` on this route, and sending them is a `400`.** This route declares exactly the query parameters listed below, and anything else is refused rather than ignored — `?page=2&limit=10` comes back as `{ "error": "Unrecognized keys: \"page\", \"limit\"", "code": "workspace/invalid-query" }`. A paginating client therefore fails on its first call instead of receiving the **entire** roster every time and mistaking it for page 1.
+  **There is no `page` or `limit` on this route, and sending them is a `400`.** This route declares exactly the query parameters listed below, and anything else is refused rather than ignored — `?page=2&limit=10` comes back as `{ "error": "Unrecognized keys: \"page\", \"limit\"", "code": "workspace/invalid-query", "param": "page" }`. A paginating client therefore fails on its first call instead of receiving the **entire** roster every time and mistaking it for page 1.
 
   The response carries no `pagination` object precisely because there is none. If you need numbers rather than rows — a seat count, a badge — use [`countOnly=true`](#query-parameters), which returns per-reason counts and a distinct-user total **without ever materializing the roster array**. If you need a windowed UI, slice client-side after the single read.
 </Warning>
@@ -140,7 +140,7 @@ The same roster read by a caller who cannot manage people here — the `member` 
   </Accordion>
   <Accordion title="Undeclared Query Parameter — 400">
     ```json
-    { "error": "Unrecognized key: \"page\"", "code": "workspace/invalid-query" }
+    { "error": "Unrecognized key: \"page\"", "code": "workspace/invalid-query", "param": "page" }
     ```
     This route declares `include`, `countOnly` and `actingUserId`, and refuses anything else rather than ignoring it. Two or more at once are named together: `Unrecognized keys: "page", "limit"`. See [Shapes the server rejects](/v8/sdk/workspaces/overview#shapes-the-server-rejects).
   </Accordion>

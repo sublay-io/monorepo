@@ -261,7 +261,7 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     Returned when another comment already uses the supplied `foreignId`.
 
     ```json
-    { "error": "A comment with this foreignId already exists.", "code": "comment/foreign-id-taken" }
+    { "error": "A comment with this foreignId already exists.", "code": "comment/foreign-id-taken", "param": "foreignId" }
     ```
   </Accordion>
 </AccordionGroup>

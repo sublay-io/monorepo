@@ -191,8 +191,9 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
-    { "error": "File \"cover.jpg\" is not a valid image: ...", "code": "event/invalid-image" }
+    { "error": "File \"cover.jpg\" is not a valid image: ...", "code": "event/invalid-image", "param": "cover" }
     ```
+    A cover or gallery file can't be read as an image. `param` is `cover` or `gallery`.
   </Accordion>
   <Accordion title="Missing Image Options — 400">
     A cover or gallery image was uploaded without its options. `param` is `cover.options` or `gallery.options`.

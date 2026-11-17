@@ -204,13 +204,13 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     The request sent a `foreignId` that is taken. Another entity already has this `foreignId`, or had it: a `foreignId` is unique across the project's entities, deleted ones included, and a deleted entity's `foreignId` can't be reused. Nothing is created.
 
     ```json
-    { "error": "An entity with this foreignId already exists.", "code": "entity/foreign-id-taken" }
+    { "error": "An entity with this foreignId already exists.", "code": "entity/foreign-id-taken", "param": "foreignId" }
     ```
 
     When the entity holding it was deleted:
 
     ```json
-    { "error": "An entity with this foreignId was deleted; its foreignId can't be reused.", "code": "entity/foreign-id-taken" }
+    { "error": "An entity with this foreignId was deleted; its foreignId can't be reused.", "code": "entity/foreign-id-taken", "param": "foreignId" }
     ```
   </Accordion>
   <Accordion title="Space Not Found — 404">
@@ -251,7 +251,7 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
-    { "error": "File \"doc.txt\" is not a valid image: ...", "code": "entity/invalid-image" }
+    { "error": "File \"photo.png\" is not a valid image: ...", "code": "entity/invalid-image", "param": "images.files" }
     ```
   </Accordion>
   <Accordion title="Missing Image Options — 400">

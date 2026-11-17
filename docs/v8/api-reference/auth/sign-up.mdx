@@ -206,10 +206,11 @@ Validation still runs first, in the same order: an invalid body, an image error,
     ```json
     {
       "error": "Avatar image exceeds 50MB limit.",
-      "code": "auth/file-too-large"
+      "code": "auth/file-too-large",
+      "param": "avatarFile"
     }
     ```
-    Also returned with `"Banner image exceeds 50MB limit."` for the banner file.
+    Also returned with `"Banner image exceeds 50MB limit."` and `param: "bannerFile"` for the banner file.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
@@ -233,15 +234,15 @@ Validation still runs first, in the same order: an invalid body, an image error,
   <Accordion title="Invalid Image Options — 400">
     ```json
     {
-      "error": "Invalid JSON in avatarFile.options field",
-      "code": "auth/invalid-avatar-options",
+      "error": "Invalid JSON in avatarFile.options field.",
+      "code": "auth/invalid-body",
       "param": "avatarFile.options"
     }
     ```
-    The `.options` field isn't valid JSON. `auth/invalid-banner-options` (with `param: "bannerFile.options"`) for the banner.
+    The `.options` field isn't valid JSON. `param` names the field: `avatarFile.options` or `bannerFile.options`.
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    The multipart body was refused as it was read: `auth/file-too-large` (a file over 100 MB), `auth/unsupported-file-type`, `auth/unexpected-file-field`, `auth/field-too-large` or `auth/invalid-multipart`, with `param` naming the field when there is one. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `auth/unsupported-file-type` or `auth/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
   <Accordion title="Validation Failed — 400">
     ```json

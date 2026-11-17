@@ -87,7 +87,6 @@ Both counterparties are hydrated with a display-only projection — `id`, `name`
   <Accordion title="Tables Not Available — 403">
     ```json
     {
-      "error": "This endpoint needs tables that aren't installed in this project (ReputationGrants). Install their bundle from the dashboard.",
       "code": "database/tables-not-available",
       "missingTables": ["ReputationGrants"],
       "dashboardUrl": "https://…/<projectId>/database"
@@ -96,6 +95,6 @@ Both counterparties are hydrated with a display-only projection — `id`, `name`
   </Accordion>
 </AccordionGroup>
 
-**Rate limit:** 25 requests per 5 minutes per IP. Exceeding it returns `429` `request/rate-limited`.
+**Rate limit:** 25 requests per 5 minutes per IP. Exceeding it returns `429` with a plain-text message and no `code`.
 
 See also: [ReputationGrant](/v8/data-models/reputation-grant) · [Fetch Many Reputation Grants](/v8/api-reference/reputation-grants/fetch-many-reputation-grants)

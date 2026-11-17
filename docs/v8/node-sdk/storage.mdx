@@ -23,7 +23,7 @@ The `storage` module uploads files and images to managed cloud storage and retur
 
 ### uploadFile
 
-Uploads a generic file (PDF, video, document, …) without server-side processing. The file type is inferred from the MIME type.
+Uploads a file (PDF, JPEG, PNG or WebP) without server-side processing. The file type is inferred from the MIME type.
 
 ```typescript
 import { readFile } from "node:fs/promises";
@@ -115,7 +115,7 @@ const file = await sublay.storage.uploadImage({
 ```
 
 <ParamField body="file" type="Uint8Array | Blob" required>
-  The image bytes. Must be a valid image format recognized by Sharp. Maximum 50 MB.
+  The image bytes: JPEG, PNG or WebP. Maximum 50 MB.
 </ParamField>
 
 <ParamField body="imageOptions" type="ImageOptions" required>

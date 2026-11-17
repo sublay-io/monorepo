@@ -237,17 +237,17 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     ```
   </Accordion>
   <Accordion title="Future Timestamp — 400">
-    Returned to a service key when `createdAt` or `updatedAt` is more than five minutes ahead of the current time. `error` names the field.
+    Returned to a service key when `createdAt` or `updatedAt` is more than five minutes ahead of the current time. `param` names the field.
 
     ```json
-    { "error": "createdAt can't be in the future.", "code": "entity/invalid-body" }
+    { "error": "createdAt can't be in the future.", "code": "entity/invalid-body", "param": "createdAt" }
     ```
   </Accordion>
   <Accordion title="File Too Large — 413">
     ```json
-    { "error": "Image \"photo.jpg\" exceeds 50MB limit.", "code": "entity/file-too-large" }
+    { "error": "Image \"photo.jpg\" exceeds 50MB limit.", "code": "entity/file-too-large", "param": "images.files" }
     ```
-    Also returned with `File "…" exceeds 50MB limit.` for a file in `files.files`.
+    Also returned with `File "…" exceeds 50MB limit.` and `param: "files.files"` for a file in `files.files`.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
@@ -301,7 +301,7 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    The multipart body was refused as it was read: `entity/file-too-large` (a file over 100 MB), `entity/unsupported-file-type`, `entity/unexpected-file-field`, `entity/field-too-large` or `entity/invalid-multipart`, with `param` naming the field when there is one. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `entity/unsupported-file-type` or `entity/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
   <Accordion title="Server Error — 500">
     ```json

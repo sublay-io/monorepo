@@ -13,7 +13,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 ## Body Parameters
 
 <ParamField body="file" type="file" required>
-  The image file to upload. Must be a valid image format recognized by Sharp (JPEG, PNG, WebP, AVIF, TIFF, GIF, SVG). Maximum 50 MB.
+  The image file to upload: JPEG, PNG or WebP. Maximum 50 MB.
 </ParamField>
 
 <ParamField body="mode" type="string" required>
@@ -153,7 +153,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
   </Accordion>
   <Accordion title="File Too Large — 413">
     ```json
-    { "error": "File size exceeds the allowed limit of 50MB", "code": "storage/file-too-large" }
+    { "error": "File size exceeds the allowed limit of 50MB", "code": "storage/file-too-large", "param": "file" }
     ```
   </Accordion>
   <Accordion title="Invalid Image — 422">
@@ -169,7 +169,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    The multipart body was refused as it was read: `storage/file-too-large` (a file over 100 MB), `storage/unsupported-file-type`, `storage/unexpected-file-field`, `storage/field-too-large` or `storage/invalid-multipart`, with `param` naming the field when there is one. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `storage/unsupported-file-type` or `storage/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
   <Accordion title="Server Error — 500">
     ```json

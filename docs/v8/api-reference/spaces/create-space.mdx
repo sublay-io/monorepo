@@ -150,9 +150,9 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
   </Accordion>
   <Accordion title="Image Too Large — 413">
     ```json
-    { "error": "Avatar image exceeds 50MB limit.", "code": "space/file-too-large" }
+    { "error": "Avatar image exceeds 50MB limit.", "code": "space/file-too-large", "param": "avatarFile" }
     ```
-    Also returned with `"Banner image exceeds 50MB limit."` for the banner.
+    Also returned with `"Banner image exceeds 50MB limit."` and `param: "bannerFile"` for the banner.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
@@ -168,12 +168,12 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
   </Accordion>
   <Accordion title="Invalid Image Options — 400">
     ```json
-    { "error": "Invalid JSON in avatarFile.options field", "code": "space/invalid-avatar-options", "param": "avatarFile.options" }
+    { "error": "Invalid JSON in avatarFile.options field.", "code": "space/invalid-body", "param": "avatarFile.options" }
     ```
-    The `.options` field isn't valid JSON. `space/invalid-banner-options` (with `param: "bannerFile.options"`) for the banner.
+    The `.options` field isn't valid JSON. `param` names the field: `avatarFile.options` or `bannerFile.options`.
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    The multipart body was refused as it was read: `space/file-too-large` (a file over 100 MB), `space/unsupported-file-type`, `space/unexpected-file-field`, `space/field-too-large` or `space/invalid-multipart`, with `param` naming the field when there is one. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `space/unsupported-file-type` or `space/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>
 

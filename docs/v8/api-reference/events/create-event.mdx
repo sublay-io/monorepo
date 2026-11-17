@@ -186,7 +186,7 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
   </Accordion>
   <Accordion title="Image Too Large — 413">
     ```json
-    { "error": "Image \"cover.jpg\" exceeds 50MB limit.", "code": "event/file-too-large" }
+    { "error": "Image \"cover.jpg\" exceeds 50MB limit.", "code": "event/file-too-large", "param": "cover" }
     ```
   </Accordion>
   <Accordion title="Invalid Image — 422">
@@ -208,7 +208,7 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    The multipart body was refused as it was read: `event/file-too-large` (a file over 100 MB), `event/unsupported-file-type`, `event/unexpected-file-field`, `event/field-too-large` or `event/invalid-multipart`, with `param` naming the field when there is one. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `event/unsupported-file-type` or `event/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>
 

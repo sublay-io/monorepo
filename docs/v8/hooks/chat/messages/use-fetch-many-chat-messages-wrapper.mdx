@@ -58,11 +58,10 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
   Sort by creation time. Defaults to `"desc"` (newest first), where `loadMore` fetches older messages. With `"asc"`, `loadMore` fetches newer messages.
 </ParamField>
 
-<ParamField body="includeFiles" type="boolean">
-  When `true`, the server populates the `files` field on each message.
-</ParamField>
-<ParamField body="includeGrants" type="boolean">
-  When `true`, each message carries its [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) at `message.grants` — `{ total, count, viewerTotal }` over positive grants. Populated by the `reputation` bundle; on a project without it the summary comes back zero-filled rather than missing.
+<ParamField body="include" type="ChatMessageListIncludeParam">
+  Fields to add to each message, as a single value or an array:
+  - `"files"` — the `files` field.
+  - `"grants"` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) at `message.grants`: `{ total, count, viewerTotal }` over positive grants. Populated by the `reputation` bundle; on a project without it the summary comes back zero-filled rather than missing.
 </ParamField>
 
 <ParamField body="filters" type="MessageFilters">

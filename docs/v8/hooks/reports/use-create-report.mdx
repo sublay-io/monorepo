@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-Returns a function to submit a content report on behalf of the authenticated user. Pass `type: "comment"`, `type: "entity"`, or `type: "message"` when calling the hook — the returned function is pre-configured for that target type.
+Returns a function to submit a content report on behalf of the authenticated user. Pass `targetType: "comment"`, `targetType: "entity"`, or `targetType: "message"` when calling the hook — the returned function is pre-configured for that target type.
 
 If the same target already has an **open** report, the user's report is appended to it (reports are deduplicated per user, so reporting the same target twice has no additional effect).
 
@@ -20,7 +20,7 @@ Once a moderator resolves a report — dismissed or actioned — it is closed. A
 import { useCreateReport } from "@sublay/react-js";
 
 function ReportEntityButton({ entityId }: { entityId: string }) {
-  const createEntityReport = useCreateReport({ type: "entity" });
+  const createEntityReport = useCreateReport({ targetType: "entity" });
 
   const handleReport = async () => {
     const report = await createEntityReport({
@@ -36,13 +36,13 @@ function ReportEntityButton({ entityId }: { entityId: string }) {
 
 ## Parameters
 
-<ParamField path="type" type='"comment" | "entity" | "message"' required>
+<ParamField path="targetType" type='"comment" | "entity" | "message"' required>
   The target type this hook instance will report against. Determines the shape of the returned function.
 </ParamField>
 
 ## Returned Function
 
-The hook returns `createCommentReport`, `createEntityReport`, or `createMessageReport` depending on the `type` argument. All three accept the same parameters:
+The hook returns `createCommentReport`, `createEntityReport`, or `createMessageReport` depending on the `targetType` argument. All three accept the same parameters:
 
 <ParamField body="targetId" type="string" required>
   The ID of the comment, entity, or chat message being reported. For messages

@@ -43,6 +43,8 @@ The `message.created.complete` event's `data` carries the `message`, its `sender
 
 The space events' `data` carries the space's fields, `postingPermission` among them: `"anyone"`, `"members"`, or `"team"` (only the space's admins and moderators may post).
 
+The comment events' `data` — here and in the `comment.created` / `comment.updated` validation events below — carries the comment's fields. A reply names its parent comment in `parentCommentId`, which is `null` for a top-level comment.
+
 ### Validation Events (Blocking)
 
 These fire before an operation is committed. Sublay waits for your response. If you respond with `{ "valid": true }`, the operation proceeds. Any other response (or no response) causes the operation to be rejected.

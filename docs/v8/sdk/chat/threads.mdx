@@ -21,14 +21,14 @@ import { useMessageThread } from "@sublay/react-js";
 
 function ThreadPanel({
   conversationId,
-  messageId,
+  parentMessageId,
 }: {
   conversationId: string;
-  messageId: string;
+  parentMessageId: string;
 }) {
   const { replies, loading, hasMore, loadMore, sendReply } = useMessageThread({
     conversationId,
-    messageId,
+    parentMessageId,
   });
   const [text, setText] = useState("");
 

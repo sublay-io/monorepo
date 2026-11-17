@@ -42,7 +42,7 @@ function CollectionsPanel() {
       <button onClick={() => createCollection({ name: "New Folder" })}>
         Add folder
       </button>
-      {currentCollection.parentId && (
+      {currentCollection.parentCollectionId && (
         <button onClick={goBack}>Back</button>
       )}
     </div>

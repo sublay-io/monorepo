@@ -32,7 +32,7 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
 
 ## Response
 
-Returns a [Comment](/v8/data-models/comment) object, with `isAuthorBlocked` and `isUnavailable` flags. A deleted comment, or a moderator-removed one viewed by anyone but its author, is returned as a [placeholder](/v8/data-models/comment#placeholders) — the author and content are blanked, and the comment's `id`, `parentId`, timestamps and counts are kept.
+Returns a [Comment](/v8/data-models/comment) object, with `isAuthorBlocked` and `isUnavailable` flags. A deleted comment, or a moderator-removed one viewed by anyone but its author, is returned as a [placeholder](/v8/data-models/comment#placeholders) — the author and content are blanked, and the comment's `id`, `parentCommentId`, timestamps and counts are kept.
 
 ## Reading
 

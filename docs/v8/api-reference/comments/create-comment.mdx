@@ -39,7 +39,7 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
   An array of generic attachment objects. At least one of `content`, `gif`, or `attachments` must be provided.
 </ParamField>
 
-<ParamField body="parentId" type="string | null">
+<ParamField body="parentCommentId" type="string | null">
   The UUID of the parent comment. When provided, this comment is treated as a reply to that comment. For a top-level comment, send `null` or leave it out; the string `"none"` is refused with `400 comment/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). The parent comment must be on the entity given in `entityId` — otherwise the request returns `404 comment/entity-not-found`. The parent comment's author receives a reply notification.
 
   The parent comment can't be one its author deleted (`403 comment/parent-deleted`) or one a moderator removed (`403 comment/parent-removed`) — see [Deleted and removed parents and quotes](#deleted-and-removed-parents-and-quotes).
@@ -102,7 +102,7 @@ Commenting and replying take part in the entity's space (see [Who can post and t
 
 A comment its author deleted, or a moderator removed, can't be replied to or quoted:
 
-| The comment was | As `parentId` | As `referencedCommentId` |
+| The comment was | As `parentCommentId` | As `referencedCommentId` |
 |---|---|---|
 | Deleted by its author | `403 comment/parent-deleted` | `403 comment/referenced-deleted` |
 | Removed by a moderator | `403 comment/parent-removed` | `403 comment/referenced-removed` |
@@ -121,7 +121,7 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
 
 <AccordionGroup>
   <Accordion title="Entity Not Found — 404">
-    Returned when the entity doesn't exist, when it's in a space the commenting user can't read (see [Spaces](#spaces)), when `parentId` doesn't exist or belongs to another entity, when the quoted comment isn't visible to the commenting user, or when a block refuses the comment (see [Blocks](#blocks)).
+    Returned when the entity doesn't exist, when it's in a space the commenting user can't read (see [Spaces](#spaces)), when `parentCommentId` doesn't exist or belongs to another entity, when the quoted comment isn't visible to the commenting user, or when a block refuses the comment (see [Blocks](#blocks)).
 
     ```json
     { "error": "Entity not found", "code": "comment/entity-not-found" }
@@ -148,7 +148,7 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     Returned when the body fails validation. `error` names the field and the problem:
 
     - none of `content`, `gif` or `attachments` is provided — `content` that is empty or only whitespace, and an empty `attachments` array, don't count;
-    - `entityId`, `parentId`, `referencedCommentId` or `actingUserId` isn't a UUID (a missing `entityId` included);
+    - `entityId`, `parentCommentId`, `referencedCommentId` or `actingUserId` isn't a UUID (a missing `entityId` included);
     - `gif` is missing one of its six fields, or one has the wrong type;
     - a `mentions` item doesn't match one of the two shapes;
     - `foreignId` is an empty string or longer than 255 characters;
@@ -172,7 +172,17 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
-    Returned when the request sends `userId`. On this route the user a service key acts as is `actingUserId`.
+    Returned when the request sends `parentId`. A reply's parent comment is `parentCommentId`.
+
+    ```json
+    {
+      "error": "`parentId` isn't supported in v8. To reply to a comment, send `parentCommentId`.",
+      "code": "comment/unsupported-param",
+      "param": "parentId"
+    }
+    ```
+
+    Also returned when the request sends `userId`. On this route the user a service key acts as is `actingUserId`.
 
     With a service key:
 
@@ -220,14 +230,14 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     ```
   </Accordion>
   <Accordion title="Parent Deleted — 403">
-    Returned when `parentId` is a comment its author deleted (see [Deleted and removed parents and quotes](#deleted-and-removed-parents-and-quotes)).
+    Returned when `parentCommentId` is a comment its author deleted (see [Deleted and removed parents and quotes](#deleted-and-removed-parents-and-quotes)).
 
     ```json
     { "error": "This comment was deleted and can't be replied to.", "code": "comment/parent-deleted" }
     ```
   </Accordion>
   <Accordion title="Parent Removed — 403">
-    Returned when `parentId` is a comment a moderator removed — for every requester, including that comment's author (see [Deleted and removed parents and quotes](#deleted-and-removed-parents-and-quotes)).
+    Returned when `parentCommentId` is a comment a moderator removed — for every requester, including that comment's author (see [Deleted and removed parents and quotes](#deleted-and-removed-parents-and-quotes)).
 
     ```json
     { "error": "This comment was removed and can't be replied to.", "code": "comment/parent-removed" }

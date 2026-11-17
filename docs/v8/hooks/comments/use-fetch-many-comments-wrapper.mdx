@@ -6,9 +6,9 @@ icon: "cube"
 
 ## Overview
 
-`useFetchManyCommentsWrapper` is a stateful wrapper around [`useFetchManyComments`](/v8/hooks/comments/use-fetch-many-comments) that manages the list, the cursor and the sort for you. It lists one level of a thread: an entity's top-level comments (`entityId`) or a comment's direct replies (`parentId`). Use it for a custom thread view outside `CommentSectionProvider`.
+`useFetchManyCommentsWrapper` is a stateful wrapper around [`useFetchManyComments`](/v8/hooks/comments/use-fetch-many-comments) that manages the list, the cursor and the sort for you. It lists one level of a thread: an entity's top-level comments (`entityId`) or a comment's direct replies (`parentCommentId`). Use it for a custom thread view outside `CommentSectionProvider`.
 
-The hook doesn't fetch until `entityId` or `parentId` is set. Changing the sort, or any prop, resets the list and fetches from the start.
+The hook doesn't fetch until `entityId` or `parentCommentId` is set. Changing the sort, or any prop, resets the list and fetches from the start.
 
 Nested replies (`replyDepth` above `0`) come back inside each comment's `replies` exactly as the server delivers them — the hook doesn't track them. For per-comment "load more replies", use `CommentSectionProvider` with [`useReplies`](/v8/hooks/comments/use-replies).
 
@@ -22,7 +22,7 @@ import { useFetchManyCommentsWrapper } from "@sublay/react-js";
 function ReplyList({ commentId }: { commentId: string }) {
   const { comments, loading, error, hasMore, sortBy, setSortBy, loadMore } =
     useFetchManyCommentsWrapper({
-      parentId: commentId,
+      parentCommentId: commentId,
       limit: 10,
       defaultSortBy: "createdAt",
       defaultSortDir: "asc",
@@ -57,8 +57,8 @@ function ReplyList({ commentId }: { commentId: string }) {
   List this entity's top-level comments.
 </ParamField>
 
-<ParamField body="parentId" type="string | null" optional>
-  List this comment's direct replies. With `parentId` set, `entityId` is ignored: the parent decides the entity.
+<ParamField body="parentCommentId" type="string | null" optional>
+  List this comment's direct replies. With `parentCommentId` set, `entityId` is ignored: the parent decides the entity.
 </ParamField>
 
 <ParamField body="limit" type="number" optional>
@@ -108,7 +108,7 @@ function ReplyList({ commentId }: { commentId: string }) {
 </ResponseField>
 
 <ResponseField name="loading" type="boolean">
-  `true` while a page is loading, and before `entityId` or `parentId` is first set. When both are removed after one was set, the list is cleared and `loading` is `false`.
+  `true` while a page is loading, and before `entityId` or `parentCommentId` is first set. When both are removed after one was set, the list is cleared and `loading` is `false`.
 </ResponseField>
 
 <ResponseField name="error" type="Error | null">

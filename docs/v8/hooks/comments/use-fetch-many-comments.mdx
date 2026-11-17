@@ -8,7 +8,7 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 ## Overview
 
-`useFetchManyComments` returns a function that fetches one level of a comment thread ([`GET /comments`](/v8/api-reference/comments/fetch-many-comments)): an entity's top-level comments (`entityId`) or a comment's direct replies (`parentId`). It's the fetch function behind `useEntityComments` and `useReplies`. Use it directly when you need full control over a thread request.
+`useFetchManyComments` returns a function that fetches one level of a comment thread ([`GET /comments`](/v8/api-reference/comments/fetch-many-comments)): an entity's top-level comments (`entityId`) or a comment's direct replies (`parentCommentId`). It's the fetch function behind `useEntityComments` and `useReplies`. Use it directly when you need full control over a thread request.
 
 For a user's comments across entities, use [`useFetchCommentsByUserId`](/v8/hooks/comments/use-fetch-comments-by-user-id).
 
@@ -55,13 +55,13 @@ function TopComments({ entityId }: { entityId: string }) {
 
 ## Parameters
 
-Pass exactly one of `entityId` or `parentId`; the props type refuses neither and both. A replies fetch takes `parentId` alone, since the parent decides the entity.
+Pass exactly one of `entityId` or `parentCommentId`; the props type refuses neither and both. A replies fetch takes `parentCommentId` alone, since the parent decides the entity.
 
 <ParamField path="entityId" type="string">
   Fetch this entity's top-level comments.
 </ParamField>
 
-<ParamField path="parentId" type="string">
+<ParamField path="parentCommentId" type="string">
   Fetch this comment's direct replies.
 </ParamField>
 

@@ -9,9 +9,9 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 Returns one level of a comment thread, cursor-paginated:
 
 - **`entityId`** → the entity's **top-level** comments.
-- **`parentId`** → that comment's **direct replies**.
+- **`parentCommentId`** → that comment's **direct replies**.
 
-Send exactly one of the two: neither or both returns `400 comment/invalid-query`. A replies fetch takes `parentId` alone, since the parent decides the entity.
+Send exactly one of the two: neither or both returns `400 comment/invalid-query`. A replies fetch takes `parentCommentId` alone, since the parent decides the entity.
 
 Each request can also bring a few levels of replies nested inside every returned comment (`replyDepth`, `replyLimit`), each with its own "load more" cursor — so a threaded view can render its first screen with a single request.
 
@@ -34,17 +34,17 @@ Authentication is optional. When there is a viewer — the signed-in user, or th
 ### Thread
 
 <ParamField query="entityId" type="string">
-  Return this entity's top-level comments. Send this or `parentId`, not both.
+  Return this entity's top-level comments. Send this or `parentCommentId`, not both.
 </ParamField>
 
-<ParamField query="parentId" type="string">
+<ParamField query="parentCommentId" type="string">
   Return the direct replies of this comment. Send this or `entityId`, not both.
 </ParamField>
 
 ### Pagination
 
 <ParamField query="limit" type="number" default="10">
-  How many comments to return **at the level being fetched** (top-level comments for `entityId`, direct replies for `parentId`). A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 comment/invalid-query`. Values above `100` are treated as `100`.
+  How many comments to return **at the level being fetched** (top-level comments for `entityId`, direct replies for `parentCommentId`). A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 comment/invalid-query`. Values above `100` are treated as `100`.
 </ParamField>
 
 <ParamField query="cursor" type="string">
@@ -96,7 +96,7 @@ Authentication is optional. When there is a viewer — the signed-in user, or th
   The reaction the nested levels rank by. Only accepted when the nested sort is `top` (`replySortBy=top`, or `sortBy=top` without `replySortBy`) — otherwise `400`. Defaults to `sortByReaction` when the level is also sorted by `top`, else `upvote`. When `replySortBy` is omitted, all three reply-sort params follow the level's sort.
 </ParamField>
 
-The params come in pairs: `limit` and `sortBy`/`sortDir`/`sortByReaction` describe the level you're asking for; `replyLimit` and `replySortBy`/`replySortDir`/`replySortByReaction` describe what's nested underneath. A `parentId` request is a request for replies, so to get replies oldest-first there, send `sortBy=createdAt&sortDir=asc`.
+The params come in pairs: `limit` and `sortBy`/`sortDir`/`sortByReaction` describe the level you're asking for; `replyLimit` and `replySortBy`/`replySortDir`/`replySortByReaction` describe what's nested underneath. A `parentCommentId` request is a request for replies, so to get replies oldest-first there, send `sortBy=createdAt&sortDir=asc`.
 
 #### Request size limit
 
@@ -131,7 +131,7 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
   "data": [
     {
       "id": "c1",
-      "parentId": null,
+      "parentCommentId": null,
       "repliesCount": 7,
       "isAuthorBlocked": false,
       "isUnavailable": false,
@@ -139,12 +139,12 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
         "data": [
           {
             "id": "r1",
-            "parentId": "c1",
+            "parentCommentId": "c1",
             "repliesCount": 2,
             "isAuthorBlocked": false,
             "isUnavailable": false,
             "replies": {
-              "data": [{ "id": "r1a", "parentId": "r1", "repliesCount": 0, "…": "…" }],
+              "data": [{ "id": "r1a", "parentCommentId": "r1", "repliesCount": 0, "…": "…" }],
               "pagination": { "nextCursor": null, "hasMore": false }
             }
           }
@@ -183,7 +183,7 @@ With `replyDepth` above `0`, each comment carries a `replies` field with the **s
 
 ### Deleted and removed comments
 
-Deleted and moderator-removed comments stay in the thread as **placeholders**, so the replies under them aren't lost. A placeholder keeps its position, `id`, `parentId`, timestamps, `reactionCounts` and `repliesCount`, with the author and content blanked. A moderator-removed comment is shown in full to its own author. See [Placeholders](/v8/data-models/comment#placeholders).
+Deleted and moderator-removed comments stay in the thread as **placeholders**, so the replies under them aren't lost. A placeholder keeps its position, `id`, `parentCommentId`, timestamps, `reactionCounts` and `repliesCount`, with the author and content blanked. A moderator-removed comment is shown in full to its own author. See [Placeholders](/v8/data-models/comment#placeholders).
 
 ### Blocked authors
 
@@ -197,22 +197,22 @@ Every comment carries two flags, `isAuthorBlocked` and `isUnavailable`. Both are
 
 `isUnavailable` is deliberately neutral: it means the comment exists but can't be shown to this caller, without saying why. Replying to or reacting to an `isUnavailable` comment is refused, so hide those controls.
 
-When the **entity's** author has blocked the caller, the whole thread is unavailable to them: a request with that `entityId`, or with the `parentId` of any comment on that entity, returns an empty page — exactly what an entity that doesn't exist returns.
+When the **entity's** author has blocked the caller, the whole thread is unavailable to them: a request with that `entityId`, or with the `parentCommentId` of any comment on that entity, returns an empty page — exactly what an entity that doesn't exist returns.
 
 ## Reading
 
-A thread follows its entity's space. When the entity is in a space the caller can't read (see [who can read content](/v8/data-models/space#who-can-read-content)), a request with that `entityId`, or with the `parentId` of any comment on that entity, returns the same empty page. A service key without `actingUserId` reads as a signed-out caller, so threads on entities in members-only and private spaces come back empty; name a member in `actingUserId` to read them.
+A thread follows its entity's space. When the entity is in a space the caller can't read (see [who can read content](/v8/data-models/space#who-can-read-content)), a request with that `entityId`, or with the `parentCommentId` of any comment on that entity, returns the same empty page. A service key without `actingUserId` reads as a signed-out caller, so threads on entities in members-only and private spaces come back empty; name a member in `actingUserId` to read them.
 
 ## Cursors
 
 A cursor is an opaque string. It records the sort it was created under and the last comment you received, and the next request continues right after that comment. Comments posted in the meantime don't shift what you get.
 
 - Send the same `sortBy`, `sortDir` and `sortByReaction` with a cursor as the request that returned it. A different sort returns `400 comment/cursor-sort-mismatch`; to change the sort, start over without a cursor.
-- A cursor doesn't record which entity or comment it came from. Sending it with a different `entityId` or `parentId` just continues from the same sort position there.
-- **Continuing nested replies:** a `replies.pagination.nextCursor` was created under the **reply** sort. Continue it with a `parentId` request for that comment, sending the reply sort as `sortBy` / `sortDir` / `sortByReaction` (for a `controversial` reply sort, leave `sortDir` out):
+- A cursor doesn't record which entity or comment it came from. Sending it with a different `entityId` or `parentCommentId` just continues from the same sort position there.
+- **Continuing nested replies:** a `replies.pagination.nextCursor` was created under the **reply** sort. Continue it with a `parentCommentId` request for that comment, sending the reply sort as `sortBy` / `sortDir` / `sortByReaction` (for a `controversial` reply sort, leave `sortDir` out):
 
   ```
-  GET /v8/:projectId/comments?parentId=c1&cursor=<replies.pagination.nextCursor>&sortBy=<replySortBy>&sortDir=<replySortDir>
+  GET /v8/:projectId/comments?parentCommentId=c1&cursor=<replies.pagination.nextCursor>&sortBy=<replySortBy>&sortDir=<replySortDir>
   ```
 
   The SDK's [`useReplies`](/v8/hooks/comments/use-replies) does this for you.
@@ -225,6 +225,7 @@ These parameters return `400` with code `comment/unsupported-param`, a `param` f
 | Sent | Use instead |
 |---|---|
 | `page` | Cursor pagination: leave `cursor` out on the first request, then pass `pagination.nextCursor`. |
+| `parentId` | `parentCommentId`. |
 | `userId` | [`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id). |
 | `blockedFilter` | Threads always include comments by users the caller blocked, marked `isAuthorBlocked: true`. `blockedFilter` is available on [`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id). |
 | `sourceId` | A thread already belongs to one entity. To filter a user's comments by source, use [`GET /users/:userId/comments?sourceId=…`](/v8/api-reference/users/fetch-comments-by-user-id). |
@@ -259,13 +260,21 @@ Checks run in this order; the first failing check is returned.
       "param": "page"
     }
     ```
-  </Accordion>
-  <Accordion title="Invalid query — 400">
-    Returned with code `comment/invalid-query` for invalid values — for example neither or both of `entityId` and `parentId`, a malformed id, an unknown `include` value, `sortByReaction` without `sortBy=top`, `replySortByReaction` when the nested sort isn't `top`, `limit` below `1` or not a whole number, `replyDepth` above `5`, or `replyLimit` below `1`. `error` names the first problem found:
 
     ```json
     {
-      "error": "Send `entityId` (an entity's top-level comments) or `parentId` (a comment's replies), not both. To list a user's comments, use `GET /users/:userId/comments`.",
+      "error": "`parentId` isn't supported in v8. To list a comment's replies, send `parentCommentId`.",
+      "code": "comment/unsupported-param",
+      "param": "parentId"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Invalid query — 400">
+    Returned with code `comment/invalid-query` for invalid values — for example neither or both of `entityId` and `parentCommentId`, a malformed id, an unknown `include` value, `sortByReaction` without `sortBy=top`, `replySortByReaction` when the nested sort isn't `top`, `limit` below `1` or not a whole number, `replyDepth` above `5`, or `replyLimit` below `1`. `error` names the first problem found:
+
+    ```json
+    {
+      "error": "Send `entityId` (an entity's top-level comments) or `parentCommentId` (a comment's replies), not both. To list a user's comments, use `GET /users/:userId/comments`.",
       "code": "comment/invalid-query"
     }
     ```

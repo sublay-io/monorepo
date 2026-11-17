@@ -16,7 +16,7 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `entity` | `CommentEntity \| null` | The entity the comment is on, as its stored record — see [The included entity](#the-included-entity) for which fields it carries. Populated when `include` contains `"entity"` or `"space"`. `null` when the entity isn't available to the caller — for example, removed by a moderator, or on [your own comment on an entity whose author blocked you](/v8/api-reference/users/fetch-comments-by-user-id#your-own-comments-on-an-unavailable-entity). The comment is still returned, and `null` doesn't say why. |
 | `userId` | `string \| null` | The ID of the user who posted this comment. `null` on [placeholders](#placeholders). |
 | `user` | `User \| null` | The comment author. Populated when `include` contains `"user"`. `null` on placeholders. |
-| `parentId` | `string \| null` | ID of the parent comment if this is a reply. `null` for top-level comments. |
+| `parentCommentId` | `string \| null` | ID of the parent comment if this is a reply. `null` for top-level comments. |
 | `parentComment` | `Comment \| null` | The parent comment, under the same placeholder and block rules as any comment. Populated when `include` contains `"parent"` (user history and single-comment fetches). `null` for top-level comments, when the parent no longer exists or is on another entity, and on your own comment on an unavailable entity. |
 | `referencedCommentId` | `string \| null` | ID of the comment this one quotes, set with `referencedCommentId` when the comment is created. `null` when it quotes none, or the quoted comment no longer exists. |
 | `content` | `string \| null` | Text content of the comment. `null` on placeholders. |
@@ -102,7 +102,7 @@ A comment that can't be shown in full stays in place as a **placeholder**, so th
 | Removed by a moderator | `moderationStatus: "removed"` | Its author |
 | Unavailable to this user | `isUnavailable: true` | — |
 
-On a placeholder, `userId`, `user`, `content`, `gif` and `metadata` are `null`, and `mentions` and `attachments` are `[]`. Everything else is kept: `id`, `entityId`, `parentId`, `foreignId`, timestamps, `reactionCounts`, `repliesCount` and the markers.
+On a placeholder, `userId`, `user`, `content`, `gif` and `metadata` are `null`, and `mentions` and `attachments` are `[]`. Everything else is kept: `id`, `entityId`, `parentCommentId`, `foreignId`, timestamps, `reactionCounts`, `repliesCount` and the markers.
 
 Markers can combine — for example, a deleted comment whose author blocked the requesting user carries both `userDeletedAt` and `isUnavailable: true`. Render `isUnavailable` first: show the neutral unavailable row, without reply or reaction controls.
 

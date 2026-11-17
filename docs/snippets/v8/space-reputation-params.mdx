@@ -14,16 +14,16 @@
        /snippets/space-reputation-params.mdx: a snippet can't derive the
        version from the page that includes it, so each docs version includes
        its own copy. Every includer of this file is under v8/, and its link
-       points at /v8/. Keep the two copies' parameter text in step.
+       points at /v8/. Keep the two copies' parameter text in step, except that
+       the v8 SDKs take only the object (no flat props).
 
   Both rules were learned the hard way: a `<uuid>` in prose made this snippet
   unparseable from the day it was added, and Mintlify compiled it away, so the
   59 pages that include it silently rendered none of these parameters.
 
   REST pages pass `rest`: the API takes only the two flat fields
-  (spaceReputationId, spaceReputationDescendants), so they're shown as the
-  normal parameters, not deprecated, and the object isn't shown. The object
-  is the SDKs' form; SDK and hook pages leave `rest` out.
+  (spaceReputationId, spaceReputationDescendants), and the object isn't
+  shown. The SDKs take only the object; SDK and hook pages leave `rest` out.
 */}
 
 export const SpaceReputationParams = ({ variant = "context", field = "path", rest = false }) => {
@@ -79,8 +79,9 @@ export const SpaceReputationParams = ({ variant = "context", field = "path", res
         scoped to a single space. Requires the <code>reputation</code> bundle.
         The <code>reputation</code> total is always present regardless;{" "}
         <code>spaceReputation</code> is purely additive and only appears when you
-        pass this object. <strong>This object is the primary form</strong> — it
-        replaces the deprecated flat props below. See the{" "}
+        pass this object. It's sent as the API's flat{" "}
+        <code>spaceReputationId</code> / <code>spaceReputationDescendants</code>{" "}
+        params. See the{" "}
         <a href="/v8/data-models/reputation">Reputation data model</a> for the
         full contract. Only spaces the viewer can read count: a space they
         can't read reads <code>0</code> (see{" "}
@@ -118,30 +119,6 @@ export const SpaceReputationParams = ({ variant = "context", field = "path", res
             <code>"none"</code>; not allowed with <code>"context"</code>.
           </ParamField>
         </Expandable>
-      </ParamField>
-
-      {isUser ? (
-        <ParamField {...{ [field]: "spaceReputationId", type: "string", deprecated: true }}>
-          <strong>Deprecated</strong> — use the <code>spaceReputation</code>{" "}
-          object instead. The flat form of <code>spaceReputation.spaceId</code>.
-          Still accepted (the object wins if both are passed); removal is a later
-          major version. Accepts a space <code>&lt;uuid&gt;</code> or <code>"none"</code> only —{" "}
-          <code>"context"</code> is rejected (400) on this endpoint.
-        </ParamField>
-      ) : (
-        <ParamField {...{ [field]: "spaceReputationId", type: "string", deprecated: true }}>
-          <strong>Deprecated</strong> — use the <code>spaceReputation</code>{" "}
-          object instead. The flat form of <code>spaceReputation.spaceId</code>.
-          Still accepted (the object wins if both are passed); removal is a later
-          major version. Accepts a space <code>&lt;uuid&gt;</code>, <code>"none"</code>, or{" "}
-          <code>"context"</code>.
-        </ParamField>
-      )}
-
-      <ParamField {...{ [field]: "spaceReputationDescendants", type: "boolean", deprecated: true }}>
-        <strong>Deprecated</strong> — use{" "}
-        <code>spaceReputation.includeDescendants</code> instead. The flat form,
-        only honored alongside an explicit <code>spaceReputationId</code> <code>&lt;uuid&gt;</code>.
       </ParamField>
     </>
   );

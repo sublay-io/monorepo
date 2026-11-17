@@ -72,7 +72,7 @@ A grant on a chat message is as private as the message, so it surfaces different
 - `recipientId` and `senderId` run the same test per row. A grant on a chat message stays in the feed of someone who can see the message and drops out for someone who cannot — out of `data` and `pagination.totalItems` together, so a filtered page and a filtered total never disagree. A user's own "reputation I received" feed therefore includes the grants made on messages in their own conversations.
 - Either shape hides the grants on a message moderation has removed, a member of the conversation included.
 
-For the running totals on a message, ask the message read itself with `includeGrants: true` rather than paging this list.
+For the running totals on a message, ask the message read itself with `include: "grants"` rather than paging this list.
 
 ## Failure Modes
 

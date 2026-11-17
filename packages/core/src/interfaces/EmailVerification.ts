@@ -33,9 +33,16 @@ export interface EmailVerificationRequiredResult {
  * `useAuth` copies onto the `Error` it throws.
  */
 export interface AuthRejection {
+  /** The server's `error` text, else the transport's own message. */
   message: string;
   /** The server's error code, e.g. `auth/email-not-verified`. */
   code?: string;
+  /**
+   * The failing input, when the server names one: a dot path such as
+   * `email`, or the field another user already holds on a
+   * `auth/username-taken` / `auth/email-taken` 409.
+   */
+  param?: string;
   /**
    * Set on a sign-in refused with `auth/email-not-verified` in code mode: the
    * ID to confirm the freshly emailed code with.
@@ -46,5 +53,6 @@ export interface AuthRejection {
 /** The `Error` `useAuth`'s sign-up and sign-in throw. */
 export type SublayAuthError = Error & {
   code?: string;
+  param?: string;
   verificationId?: string;
 };

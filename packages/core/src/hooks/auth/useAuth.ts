@@ -24,7 +24,8 @@ import type {
 
 /**
  * Turns a sign-up/sign-in rejection payload into the `Error` the hook throws,
- * carrying the server's `code` and, when present, the `verificationId`.
+ * carrying the server's `code` and, when present, the `param` and the
+ * `verificationId`.
  */
 function toAuthError(payload: unknown): SublayAuthError {
   const rejection = (
@@ -34,6 +35,7 @@ function toAuthError(payload: unknown): SublayAuthError {
     typeof rejection.message === 'string' ? rejection.message : 'Unknown error'
   ) as SublayAuthError;
   if (rejection.code) error.code = rejection.code;
+  if (rejection.param) error.param = rejection.param;
   if (rejection.verificationId) error.verificationId = rejection.verificationId;
   return error;
 }

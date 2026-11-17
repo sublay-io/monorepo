@@ -78,7 +78,7 @@ const useAxiosPrivate = (): AxiosInstance => {
         // `sendStatus(401)` for an absent header and `sendStatus(403)` for one
         // that fails verification. Every semantic 401/403 the controllers raise
         // carries a `code` — 403: project/plan-required, project/owner-required,
-        // space-permission, user/suspended, auth/no-user-found; 401:
+        // space-permission, user/suspended; 401:
         // space/auth-required, auth/user-required,
         // push-device/unauthorized, auth/token-reuse-detected, auth/wrong-password.
         // Those are

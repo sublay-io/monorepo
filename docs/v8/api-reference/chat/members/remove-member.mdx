@@ -67,7 +67,14 @@ The removed user's membership row is soft-deactivated (`isActive: false`, `leftA
     { "error": "Members can only be removed from group conversations.", "code": "chat/invalid-type" }
     ```
   </Accordion>
+  <Accordion title="Not a Member — 403">
+    The acting user isn't an active member of the conversation.
+    ```json
+    { "error": "You are not an active member of this conversation.", "code": "chat/not-a-member" }
+    ```
+  </Accordion>
   <Accordion title="Forbidden — 403">
+    The acting user is a member of the group without the `admin` role.
     ```json
     { "error": "Only group admins can remove members.", "code": "chat/forbidden" }
     ```

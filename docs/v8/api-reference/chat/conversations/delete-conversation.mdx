@@ -84,7 +84,14 @@ Direct conversations (`type: "direct"`) cannot be deleted.
     { "error": "Direct conversations cannot be deleted.", "code": "chat/cannot-delete-dm" }
     ```
   </Accordion>
+  <Accordion title="Not a Member — 403">
+    The acting user isn't an active member of the conversation. Returned for a group conversation.
+    ```json
+    { "error": "You are not an active member of this conversation.", "code": "chat/not-a-member" }
+    ```
+  </Accordion>
   <Accordion title="Forbidden (group) — 403">
+    The acting user is a member of the group without the `admin` role.
     ```json
     { "error": "Only group admins can delete this conversation.", "code": "chat/forbidden" }
     ```

@@ -61,7 +61,14 @@ Returns the [ConversationMember](/v8/data-models/conversation-member) record for
     { "error": "Members can only be added to group conversations.", "code": "chat/invalid-type" }
     ```
   </Accordion>
+  <Accordion title="Not a Member — 403">
+    The acting user isn't an active member of the conversation.
+    ```json
+    { "error": "You are not an active member of this conversation.", "code": "chat/not-a-member" }
+    ```
+  </Accordion>
   <Accordion title="Forbidden — 403">
+    The acting user is a member of the group without the `admin` role.
     ```json
     { "error": "Only group admins can add members.", "code": "chat/forbidden" }
     ```

@@ -60,6 +60,14 @@ https://yourapp.com/callback#accessToken=...&refreshToken=...
 https://yourapp.com/callback?error=...&error_description=...
 ```
 
+`error=account_email_not_confirmed` and `error=email_not_verified` can come back from a link too; see [Authorize OAuth](/v8/api-reference/oauth/authorize#callback).
+
+`error=link_needs_confirmed_email` means the account's email isn't confirmed yet and the provider's email is different from it, or isn't verified by the provider. Nothing is linked. `error_description`: "Confirm your email before connecting a sign-in that uses a different email." An account whose email isn't confirmed can only link a provider whose verified email is the same as the account's email (linking it then confirms the account's email); a provider with any other email needs the account's email confirmed first. Accounts with no email aren't affected.
+
+<Note>
+  This rule fully protects only projects that require email verification before sign-in (Dashboard → Settings → SDK). With that setting off, a link started through the v7 API isn't held to it.
+</Note>
+
 ## Error Responses
 
 <AccordionGroup>

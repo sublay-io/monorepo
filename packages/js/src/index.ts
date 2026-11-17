@@ -243,6 +243,14 @@ export type {
   SignOutResult,
   PushUnbindSkipReason,
 } from "./modules/auth/signOut";
+export type {
+  EmailVerificationOptions,
+  EmailVerificationRequiredResponse,
+  EmailNotVerifiedErrorBody,
+} from "./interfaces/EmailVerification";
+export type { SignUpProps, SignUpResponse } from "./modules/auth/signUp";
+export type { SignInProps, SignInResponse } from "./modules/auth/signIn";
+export type { VerifyEmailProps } from "./modules/auth/verifyEmail";
 export type { UpdateNotificationPreferencesProps } from "./modules/push/updateNotificationPreferences";
 export type {
   MuteConversationProps,

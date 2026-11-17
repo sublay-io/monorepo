@@ -90,7 +90,14 @@ function SignInButton() {
 
 <ResponseField name="signUpWithEmailAndPassword" type="function">
   Create a new account and sign in. Accepts a `SignUpWithEmailAndPasswordProps`
-  object. Throws if registration fails.
+  object. Declared `(props) => Promise<{ emailVerificationRequired: true; verificationId?: string } | void>`:
+  it resolves nothing when the user is signed in, and
+  `{ emailVerificationRequired: true, verificationId? }` when the project
+  requires email verification before sign-in — then no session is created and
+  nothing is stored; the user signs in after confirming their email
+  (`verificationId` is present in code mode, for
+  [`useVerifyEmail`](/v8/hooks/auth/use-verify-email)). Throws if registration
+  fails, with the server's error `code` on the thrown `Error`.
 
   **Parameters:**
   - `email` (required) — User's email address
@@ -107,6 +114,7 @@ function SignInButton() {
   - `avatarOptions` (optional) — Image processing options for the avatar
   - `bannerFile` (optional) — Banner image file to upload
   - `bannerOptions` (optional) — Image processing options for the banner
+  - `emailVerification` (optional) — `{ mode?: "link" | "code"; redirectUrl?: string }`: how the confirmation email is sent when the project requires email verification before sign-in. Ignored otherwise. See [Require Email Verification](/v8/sdk/authentication/built-in#require-email-verification).
 
   Also throws [`ACCOUNT_LIMIT_MESSAGE`](#the-account-limit) when the device
   already stores 5 accounts. Normally this happens before any network call, so
@@ -115,8 +123,13 @@ function SignInButton() {
 </ResponseField>
 
 <ResponseField name="signInWithEmailAndPassword" type="function">
-  Sign in with an existing account. Accepts `{ email: string; password: string }`.
-  Throws if credentials are invalid, and throws
+  Sign in with an existing account. Accepts `{ email: string; password: string; emailVerification?: { mode?: "link" | "code"; redirectUrl?: string } }`.
+  Throws if credentials are invalid. The thrown `Error` (typed `SublayAuthError`)
+  carries the server's `code`: `auth/email-not-verified` when the password is
+  correct but the project requires email verification before sign-in and the
+  email isn't confirmed — a new confirmation email is sent (unless one went out in the last 10 minutes),
+  the way `emailVerification` says, and in code mode the error also carries
+  `verificationId`. Also throws
   [`ACCOUNT_LIMIT_MESSAGE`](#the-account-limit) if this would be a **sixth**
   account on the device. Signing back in to an account already stored on the
   device always succeeds, even at the limit.

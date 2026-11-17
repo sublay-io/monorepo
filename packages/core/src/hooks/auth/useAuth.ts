@@ -15,6 +15,28 @@ import {
   requestNewAccessTokenThunk
 } from '../../store/slices/authThunks';
 import useProject from '../projects/useProject';
+import type {
+  AuthRejection,
+  EmailVerificationOptions,
+  EmailVerificationRequiredResult,
+  SublayAuthError,
+} from '../../interfaces/EmailVerification';
+
+/**
+ * Turns a sign-up/sign-in rejection payload into the `Error` the hook throws,
+ * carrying the server's `code` and, when present, the `verificationId`.
+ */
+function toAuthError(payload: unknown): SublayAuthError {
+  const rejection = (
+    payload && typeof payload === 'object' ? payload : { message: payload }
+  ) as Partial<AuthRejection>;
+  const error = new Error(
+    typeof rejection.message === 'string' ? rejection.message : 'Unknown error'
+  ) as SublayAuthError;
+  if (rejection.code) error.code = rejection.code;
+  if (rejection.verificationId) error.verificationId = rejection.verificationId;
+  return error;
+}
 
 export interface SignUpWithEmailAndPasswordProps {
   email: string;
@@ -34,11 +56,22 @@ export interface SignUpWithEmailAndPasswordProps {
   avatarOptions?: any;
   bannerFile?: File | Blob;
   bannerOptions?: any;
+  /**
+   * How the confirmation email is sent when the project requires email
+   * verification before sign-in. Ignored when the setting is off.
+   */
+  emailVerification?: EmailVerificationOptions;
 }
 
 export interface SignInWithEmailAndPasswordProps {
   email: string;
   password: string;
+  /**
+   * How the confirmation email is sent when sign-in is refused because the
+   * account's email isn't confirmed. Ignored when the project doesn't require
+   * email verification before sign-in.
+   */
+  emailVerification?: EmailVerificationOptions;
 }
 
 export interface ChangePasswordProps {
@@ -56,7 +89,19 @@ export interface UseAuthValues {
   accessToken: string | null;
   refreshToken: string | null;
   setRefreshToken: React.Dispatch<React.SetStateAction<string | null>>;
-  signUpWithEmailAndPassword: (props: SignUpWithEmailAndPasswordProps) => Promise<void>;
+  /**
+   * Resolves `{ emailVerificationRequired: true, verificationId? }` when the
+   * project requires email verification before sign-in (no session is
+   * created); otherwise signs the new user in and resolves nothing. Throws an
+   * `Error` carrying the server's `code`.
+   */
+  signUpWithEmailAndPassword: (
+    props: SignUpWithEmailAndPasswordProps
+  ) => Promise<EmailVerificationRequiredResult | void>;
+  /**
+   * Throws an `Error` carrying the server's `code` on failure — e.g.
+   * `auth/email-not-verified`, with `verificationId` in code mode.
+   */
   signInWithEmailAndPassword: (props: SignInWithEmailAndPasswordProps) => Promise<void>;
   signOut: () => Promise<void>;
   changePassword: (props: ChangePasswordProps) => Promise<void>;
@@ -95,7 +140,15 @@ export default function useAuth(): UseAuthValues {
       }));
 
       if (signUpWithEmailAndPasswordThunk.rejected.match(result)) {
-        throw new Error(result.payload as string);
+        throw toAuthError(result.payload);
+      }
+
+      if (
+        result.payload &&
+        (result.payload as EmailVerificationRequiredResult)
+          .emailVerificationRequired === true
+      ) {
+        return result.payload as EmailVerificationRequiredResult;
       }
     },
     [dispatch, projectId]
@@ -113,7 +166,7 @@ export default function useAuth(): UseAuthValues {
       }));
       
       if (signInWithEmailAndPasswordThunk.rejected.match(result)) {
-        throw new Error(result.payload as string);
+        throw toAuthError(result.payload);
       }
     },
     [dispatch, projectId]

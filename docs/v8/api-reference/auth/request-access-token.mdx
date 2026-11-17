@@ -67,6 +67,12 @@ Each call to this endpoint revokes the submitted refresh token and issues a new 
 
 Reuse detection ends **sessions only**. Push bindings are left in place, so notifications keep arriving on the user's devices and resume normally once each signs back in. Re-presenting a spent refresh token is a signal, not a proof — an app killed mid-refresh, a staggered multi-tab restore or a response lost in transit all look identical to it, which is what the 30-second grace window exists for — and none of those should silence every handset a user owns. The two events that *do* clear push bindings are ones the user deliberately takes: [Reset Password](/v8/api-reference/auth/reset-password) and [Change Password](/v8/api-reference/auth/change-password).
 
+## Email Verification Required
+
+When the project requires email verification before sign-in (Dashboard → Settings → SDK), a refresh for an account that has a password and an unconfirmed email is refused with `403 auth/email-not-verified`. This covers users who were already signed in when the setting was turned on: their API calls stop within 30 minutes, when the access token expires, and open real-time connections end at their next reconnect. No email is sent on a refresh; signing in again sends one. Treat it as the end of the session: the user signs in again after confirming their email.
+
+Accounts without a password and accounts that sign in through your own login (external sign-in) aren't affected.
+
 ## Error Responses
 
 <AccordionGroup>
@@ -101,6 +107,15 @@ Reuse detection ends **sessions only**. Push bindings are left in place, so noti
       "code": "auth/refresh-token-malformed"
     }
     ```
+  </Accordion>
+  <Accordion title="Email Not Verified — 403">
+    ```json
+    {
+      "error": "Confirm your email to sign in.",
+      "code": "auth/email-not-verified"
+    }
+    ```
+    The project requires email verification before sign-in and this account's email isn't confirmed. See [Email Verification Required](#email-verification-required).
   </Accordion>
   <Accordion title="User Not Found — 403">
     ```json

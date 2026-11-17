@@ -50,6 +50,100 @@ describe("useAuth", () => {
     ).rejects.toThrow();
   });
 
+  it("signInWithEmailAndPassword throws an Error carrying the server code and verificationId", async () => {
+    const { result, axiosPublic } = renderHookWithAxios(() => useAuth(), {
+      projectId: "project-1",
+    });
+    axiosPublic.mockError("post", 403, {
+      error: "Confirm your email to sign in.",
+      code: "auth/email-not-verified",
+      verificationId: "vid-2",
+    });
+
+    let thrown: unknown;
+    await act(async () => {
+      try {
+        await result.current.signInWithEmailAndPassword({
+          email: "a@b.com",
+          password: "secret",
+          emailVerification: { mode: "code" },
+        });
+      } catch (error) {
+        thrown = error;
+      }
+    });
+
+    expect(thrown).toBeInstanceOf(Error);
+    expect(thrown).toMatchObject({
+      code: "auth/email-not-verified",
+      verificationId: "vid-2",
+    });
+    expect(axiosPublic.calls("post")[0].body).toMatchObject({
+      emailVerification: { mode: "code" },
+    });
+  });
+
+  it("signUpWithEmailAndPassword resolves the pending result when email verification is required", async () => {
+    const { result, axiosPublic } = renderHookWithAxios(() => useAuth(), {
+      projectId: "project-1",
+    });
+    axiosPublic.mockResponse(
+      "post",
+      { success: true, emailVerificationRequired: true, verificationId: "vid-1" },
+      202,
+    );
+
+    let returned: unknown;
+    await act(async () => {
+      returned = await result.current.signUpWithEmailAndPassword({
+        email: "a@b.com",
+        password: "secret",
+        emailVerification: { mode: "code" },
+      });
+    });
+
+    expect(returned).toEqual({ emailVerificationRequired: true, verificationId: "vid-1" });
+    expect(result.current.accessToken).toBeNull();
+  });
+
+  it("signUpWithEmailAndPassword resolves nothing when it signs the user in", async () => {
+    const { result, axiosPublic } = renderHookWithAxios(() => useAuth(), {
+      projectId: "project-1",
+    });
+    const user = { id: "user-1" } as AuthUser;
+    axiosPublic.mockResponse("post", { accessToken: "access-1", refreshToken: "refresh-1", user });
+
+    let returned: unknown = "unset";
+    await act(async () => {
+      returned = await result.current.signUpWithEmailAndPassword({
+        email: "a@b.com",
+        password: "secret",
+      });
+    });
+
+    expect(returned).toBeUndefined();
+    expect(result.current.accessToken).toBe("access-1");
+  });
+
+  it("signUpWithEmailAndPassword throws an Error carrying the server code", async () => {
+    const { result, axiosPublic } = renderHookWithAxios(() => useAuth(), {
+      projectId: "project-1",
+    });
+    axiosPublic.mockError("post", 409, { error: "Username taken", code: "auth/username-taken" });
+
+    let thrown: unknown;
+    await act(async () => {
+      try {
+        await result.current.signUpWithEmailAndPassword({ email: "a@b.com", password: "secret" });
+      } catch (error) {
+        thrown = error;
+      }
+    });
+
+    expect(thrown).toMatchObject({ code: "auth/username-taken" });
+    expect((thrown as { verificationId?: string }).verificationId).toBeUndefined();
+  });
+
   it("signOut clears the token state", async () => {
     const { result, axiosPublic } = renderHookWithAxios(() => useAuth(), {
       projectId: "project-1",

@@ -34,6 +34,11 @@ import { baseApi } from "../api/baseApi";
 import { resetAccountScopedState } from "../actions";
 import { readJwtSub } from "../../utils/jwt";
 import type { PushDeviceIdentifier } from "../../interfaces/PushTokenAdapter";
+import type {
+  AuthRejection,
+  EmailVerificationOptions,
+  EmailVerificationRequiredResult,
+} from "../../interfaces/EmailVerification";
 
 // Account-management endpoints (change/set password, confirm account deletion)
 // run behind requireUserAuth on the server. The shared default axios instance
@@ -97,6 +102,7 @@ const authService = {
       avatarOptions?: any;
       bannerFile?: File | Blob;
       bannerOptions?: any;
+      emailVerification?: EmailVerificationOptions;
     }
   ) {
     // Check if we need to use FormData (when files are present)
@@ -113,6 +119,9 @@ const authService = {
       if (data.birthdate) formData.append("birthdate", data.birthdate.toISOString());
       if (data.metadata) formData.append("metadata", JSON.stringify(data.metadata));
       if (data.secureMetadata) formData.append("secureMetadata", JSON.stringify(data.secureMetadata));
+      if (data.emailVerification) {
+        formData.append("emailVerification", JSON.stringify(data.emailVerification));
+      }
 
       // Append avatar file and options
       if (data.avatarFile) {
@@ -155,6 +164,7 @@ const authService = {
         birthdate: data.birthdate,
         metadata: data.metadata,
         secureMetadata: data.secureMetadata,
+        emailVerification: data.emailVerification,
       },
     );
 
@@ -163,9 +173,19 @@ const authService = {
 
   async signInWithEmailAndPassword(
     projectId: string,
-    data: { email: string; password: string }
+    data: {
+      email: string;
+      password: string;
+      emailVerification?: EmailVerificationOptions;
+    }
   ) {
-    const response = await axios.post(`/${projectId}/auth/sign-in`, data);
+    const response = await axios.post(`/${projectId}/auth/sign-in`, {
+      email: data.email,
+      password: data.password,
+      ...(data.emailVerification
+        ? { emailVerification: data.emailVerification }
+        : {}),
+    });
 
     return response.data;
   },
@@ -408,6 +428,27 @@ async function refuseAtAccountLimit({
   dispatch(setAccountLimitReached(true));
 }
 
+/**
+ * The rejection payload for sign-up and sign-in: the message as before, plus
+ * the server's error `code` and — on a sign-in refused with
+ * `auth/email-not-verified` in code mode — the `verificationId` the freshly
+ * emailed code is confirmed with.
+ */
+function toAuthRejection(error: unknown): AuthRejection {
+  const data = (error as { response?: { data?: unknown } } | null | undefined)
+    ?.response?.data as { code?: unknown; verificationId?: unknown } | undefined;
+  const rejection: AuthRejection = {
+    message: error instanceof Error ? error.message : "Unknown error",
+  };
+  if (typeof data?.code === "string") rejection.code = data.code;
+  if (typeof data?.verificationId === "string") {
+    rejection.verificationId = data.verificationId;
+  }
+  return rejection;
+}
+
+const limitRejection = (): AuthRejection => ({ message: ACCOUNT_LIMIT_MESSAGE });
+
 // Async Thunks
 
 export const signUpWithEmailAndPasswordThunk = createAsyncThunk(
@@ -429,6 +470,7 @@ export const signUpWithEmailAndPasswordThunk = createAsyncThunk(
       avatarOptions?: any;
       bannerFile?: File | Blob;
       bannerOptions?: any;
+      emailVerification?: EmailVerificationOptions;
     },
     { dispatch, getState, rejectWithValue }
   ) => {
@@ -441,13 +483,26 @@ export const signUpWithEmailAndPasswordThunk = createAsyncThunk(
       const accountsBefore = (getState() as RootState).sublay.accounts.accounts;
       if (wouldExceedAccountLimit(accountsBefore)) {
         dispatch(setAccountLimitReached(true));
-        return rejectWithValue(ACCOUNT_LIMIT_MESSAGE);
+        return rejectWithValue(limitRejection());
       }
 
       const result = await authService.signUpWithEmailAndPassword(
         data.projectId,
         data
       );
+
+      // The project requires email verification before sign-in: the server
+      // created no session (and says the same whether or not the email already
+      // had an account). Nothing to store, and Gate 2 has no account to check.
+      if (result?.emailVerificationRequired === true) {
+        const pending: EmailVerificationRequiredResult = {
+          emailVerificationRequired: true,
+        };
+        if (typeof result.verificationId === "string") {
+          pending.verificationId = result.verificationId;
+        }
+        return pending;
+      }
 
       // GATE 2 — authoritative, and still needed after Gate 1: the map can fill
       // while the request is in flight (another tab, a concurrent sign-in).
@@ -465,7 +520,7 @@ export const signUpWithEmailAndPasswordThunk = createAsyncThunk(
           // Captured straight off the response, before anything can overwrite it.
           refreshToken: result?.refreshToken,
         });
-        return rejectWithValue(ACCOUNT_LIMIT_MESSAGE);
+        return rejectWithValue(limitRejection());
       }
 
       // Update auth state
@@ -481,9 +536,7 @@ export const signUpWithEmailAndPasswordThunk = createAsyncThunk(
       return result;
     } catch (error) {
       handleError(error, "Failed to register user with email and password:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     } finally {
       dispatch(setAuthenticating(false));
     }
@@ -493,7 +546,12 @@ export const signUpWithEmailAndPasswordThunk = createAsyncThunk(
 export const signInWithEmailAndPasswordThunk = createAsyncThunk(
   "auth/signInWithEmailAndPassword",
   async (
-    data: { projectId: string; email: string; password: string },
+    data: {
+      projectId: string;
+      email: string;
+      password: string;
+      emailVerification?: EmailVerificationOptions;
+    },
     { dispatch, getState, rejectWithValue }
   ) => {
     try {
@@ -522,7 +580,7 @@ export const signInWithEmailAndPasswordThunk = createAsyncThunk(
           projectId: data.projectId,
           refreshToken: result?.refreshToken,
         });
-        return rejectWithValue(ACCOUNT_LIMIT_MESSAGE);
+        return rejectWithValue(limitRejection());
       }
 
       // Update auth state
@@ -538,9 +596,7 @@ export const signInWithEmailAndPasswordThunk = createAsyncThunk(
       return result;
     } catch (error) {
       handleError(error, "Failed to log user in:");
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Unknown error"
-      );
+      return rejectWithValue(toAuthRejection(error));
     } finally {
       dispatch(setAuthenticating(false));
     }

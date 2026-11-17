@@ -59,6 +59,8 @@ These fire before an operation is committed. Sublay waits for your response. If 
 | `space.updated` | A space is about to be updated |
 | `message.created` | A chat message is about to be sent |
 
+When the project requires email verification before sign-in, the `user.created` validation webhook runs on every email/password sign-up, including one for an email that already has an account, where nothing is then created. `user.created.complete` fires when the account is created at sign-up, before the user has confirmed their email.
+
 <Note>
   If no webhook is configured for your project, or if an event type is not in your subscribed list, all validation webhooks pass automatically — your server does not need to be present for your project to function.
 </Note>

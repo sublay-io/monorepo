@@ -6,6 +6,8 @@ description: "Send an email verification token or link to the authenticated user
 
 Sends a verification email to the authenticated user's registered email address. The token or link expires after **5 minutes**.
 
+This is for a signed-in user. When the project requires email verification before sign-in, unconfirmed users with a password can't be signed in; they get their confirmation email from [Sign Up](/v8/api-reference/auth/sign-up) and from a refused [Sign In](/v8/api-reference/auth/sign-in) instead, and that link or code lasts **24 hours**.
+
 Requires a valid user access token, or a service key that names the user in `actingUserId`. Returns immediately with `{ success: true }` if the user is already verified.
 
 ## Body Parameters

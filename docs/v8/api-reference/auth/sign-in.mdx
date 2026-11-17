@@ -16,6 +16,26 @@ Authenticates an existing user by email and password. Returns an access token, r
   User's password.
 </ParamField>
 
+<ParamField body="emailVerification" type="object">
+  How the new confirmation email is sent when sign-in is refused because the account's email isn't confirmed. Ignored when the project doesn't require email verification before sign-in. When it's left out, the email uses what the user chose at sign-up (for 24 hours), else a link.
+  <Expandable title="properties">
+    <ParamField body="mode" type='"link" | "code"'>
+      `"link"` emails a **Confirm my email** button; `"code"` emails a 6-digit code, and the `403` carries the `verificationId` to confirm it with.
+    </ParamField>
+    <ParamField body="redirectUrl" type="string">
+      Where the confirmation link sends the user after they confirm. Link mode only. Must be an `https` address on one of your project's Verified Domains (or `localhost`); anything else is refused with `400 auth/redirect-url-not-allowed`.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Email verification required
+
+When the project requires email verification before sign-in (Dashboard → Settings → SDK), an account that has a password must confirm its email before it can sign in. Once the password is confirmed correct, an unconfirmed account is refused with `403 auth/email-not-verified` and sent a new confirmation email (unless one went out in the last 10 minutes). A wrong password or an unknown email still gets the single `401` below, so the new error only appears after a correct password.
+
+Accounts that have no password (they sign in only through a provider) and accounts that sign in through your own login ([external sign-in](/v8/sdk/authentication/external)) aren't affected.
+
+The emails sent to one address are limited to one every 10 minutes and five a day. Past that, sign-in still returns the `403` but sends nothing, and the link or code already in the inbox keeps working.
+
 ## Response
 
 <ResponseField name="success" type="boolean">
@@ -67,6 +87,34 @@ Authenticates an existing user by email and password. Returns an access token, r
     ```
     The same answer for an email with no account, an account with no password (e.g. one created through OAuth), and a wrong password, so sign-in never reveals whether an email has an account. To offer "create an account" or "sign in with Google" after a failure, show those options alongside the error rather than choosing between them.
   </Accordion>
+  <Accordion title="Email Not Verified — 403">
+    ```json
+    {
+      "error": "Confirm your email to sign in.",
+      "code": "auth/email-not-verified",
+      "verificationId": "9f2c…"
+    }
+    ```
+    The password is correct, but the project requires email verification before sign-in and the account's email isn't confirmed. A new confirmation email is sent, unless one went out in the last 10 minutes or the per-address limit is reached. In code mode the body carries `verificationId`: send it with the emailed code to [Verify Email](/v8/api-reference/auth/verify-email), then sign in again. When no new email was sent, `verificationId` is the one for the code already sent; if no code is outstanding, it's absent.
+  </Accordion>
+  <Accordion title="Redirect URL Not Allowed — 400">
+    ```json
+    {
+      "error": "...",
+      "code": "auth/redirect-url-not-allowed"
+    }
+    ```
+    `emailVerification.redirectUrl` isn't on the project's Verified Domains. Only checked when the project requires email verification before sign-in.
+  </Accordion>
+  <Accordion title="Invalid Email Verification Options — 400">
+    ```json
+    {
+      "error": "...",
+      "code": "auth/invalid-body"
+    }
+    ```
+    `emailVerification` is malformed. Only checked when the project requires email verification before sign-in.
+  </Accordion>
   <Accordion title="Malformed Body — 400">
     ```json
     {
@@ -74,7 +122,7 @@ Authenticates an existing user by email and password. Returns an access token, r
       "code": "auth/invalid-credentials"
     }
     ```
-    A missing or non-string `email` or `password`. Sign-in is the one auth route whose body validation reports `auth/invalid-credentials` rather than `auth/invalid-body`, so this code has two statuses: branch on the status to tell "fix your request" (`400`) from "these credentials are wrong" (`401`).
+    A missing or non-string `email` or `password`. Sign-in is the one auth route that reports these as `auth/invalid-credentials` rather than `auth/invalid-body`, so this code has two statuses: branch on the status to tell "fix your request" (`400`) from "these credentials are wrong" (`401`).
   </Accordion>
   <Accordion title="Server Error — 500">
     ```json
@@ -91,4 +139,4 @@ Authenticates an existing user by email and password. Returns an access token, r
 ## See Also
 
 - [`useAuth` hook](/v8/hooks/auth/use-auth) — `signInWithEmailAndPassword`
-- [Built-in Auth guide](/v8/sdk/authentication/built-in)
+- [Built-in Auth guide](/v8/sdk/authentication/built-in) — including [Require email verification](/v8/sdk/authentication/built-in#require-email-verification)

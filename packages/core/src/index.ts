@@ -91,6 +91,12 @@ export {
   type VerifyEmailProps,
   type ConfirmAccountDeletionProps,
 } from "./hooks/auth";
+export type {
+  EmailVerificationOptions,
+  EmailVerificationRequiredResult,
+  AuthRejection,
+  SublayAuthError,
+} from "./interfaces/EmailVerification";
 
 // -- authentication (accounts)
 export {

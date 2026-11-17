@@ -54,6 +54,8 @@ All of these return the same token structure:
 }
 ```
 
+When the project requires email verification before sign-in (Dashboard → Settings → SDK), sign-up returns `202 { "success": true, "emailVerificationRequired": true }` with no tokens instead, and an account with a password and an unconfirmed email is refused tokens by every method — sign-in and token refresh with `403 auth/email-not-verified`, OAuth with `error=account_email_not_confirmed`. See [Require Email Verification](/v8/sdk/authentication/built-in#require-email-verification).
+
 ## Refreshing Tokens
 
 When an access token expires, use the refresh token to obtain a new access token:

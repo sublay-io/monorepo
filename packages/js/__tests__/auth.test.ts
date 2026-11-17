@@ -631,6 +631,73 @@ describe("js-sdk auth — response mapping", () => {
     expect(client.getRefreshToken()).toBe("rt1");
   });
 
+  it("signUp returns the 202 body and stores no tokens when email verification is required", async () => {
+    const { client, projectInstance } = makeRealClient();
+    const result = {
+      success: true,
+      emailVerificationRequired: true,
+      verificationId: "vid1",
+    };
+    projectInstance.post.mockResolvedValueOnce({ data: result });
+    const setTokensSpy = jest.spyOn(client, "setTokens");
+
+    await expect(
+      signUp(client, {
+        email: "a@b.com",
+        password: "pw",
+        emailVerification: { mode: "code" },
+      })
+    ).resolves.toEqual(result);
+    expect(setTokensSpy).not.toHaveBeenCalled();
+    expect(client.getAccessToken()).toBeNull();
+    expect(client.getRefreshToken()).toBeNull();
+    expect(projectInstance.post).toHaveBeenCalledWith("/auth/sign-up", {
+      email: "a@b.com",
+      password: "pw",
+      emailVerification: { mode: "code" },
+    });
+  });
+
+  it("signIn passes emailVerification through and surfaces the 403 body with verificationId", async () => {
+    const { client, projectInstance } = makeRealClient();
+    const error = Object.assign(new Error("Request failed with status code 403"), {
+      response: {
+        status: 403,
+        data: {
+          error: "Confirm your email to sign in.",
+          code: "auth/email-not-verified",
+          verificationId: "vid2",
+        },
+      },
+    });
+    projectInstance.post.mockRejectedValueOnce(error);
+
+    await expect(
+      signIn(client, {
+        email: "a@b.com",
+        password: "pw",
+        emailVerification: { mode: "code" },
+      })
+    ).rejects.toMatchObject({
+      response: { data: { code: "auth/email-not-verified", verificationId: "vid2" } },
+    });
+    expect(projectInstance.post).toHaveBeenCalledWith("/auth/sign-in", {
+      email: "a@b.com",
+      password: "pw",
+      emailVerification: { mode: "code" },
+    });
+    expect(client.getAccessToken()).toBeNull();
+  });
+
+  it("verifyEmail sends the code with its verificationId", async () => {
+    const { client, projectInstance } = makeRealClient();
+    await verifyEmail(client, { token: "123456", verificationId: "vid1" });
+    expect(projectInstance.post).toHaveBeenCalledWith("/auth/verify-email", {
+      token: "123456",
+      verificationId: "vid1",
+    });
+  });
+
   it("signOut reports no skipped unbind and clears the SDK's stored tokens", async () => {
     const { client, projectInstance } = makeRealClient({
       accessToken: "at1",

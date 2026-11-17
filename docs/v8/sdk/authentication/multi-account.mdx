@@ -439,6 +439,8 @@ No session, ever: a refused sign-in really did create one on the server, and the
 
 **One exception, and it is a user record rather than a session.** A sign-up refused *before* the request creates nothing at all. A sign-up whose fifth slot filled *while the request was in flight* is refused after it, so the account exists on the server: its session is destroyed, but the user record stays and the email is taken. Retrying that email after freeing a slot fails as "already in use" — sign in with it instead.
 
+When the project requires email verification before sign-in, a sign-up returns `202` with no session and resolves `{ emailVerificationRequired: true }`. It is only checked before the request, at a full map; nothing is checked after it, since there is no account to store until the user confirms their email and signs in. That sign-in is checked like any other.
+
 What changes locally depends on the path:
 
 - **Sign-up, email sign-in and external verification** are refused *before* the SDK touches your session, so whatever account was active stays signed in.

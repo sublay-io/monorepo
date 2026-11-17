@@ -6,6 +6,8 @@ description: "Create a new user account with email and password"
 
 Registers a new user within the specified project. On success, returns an access token, refresh token, and the created user object. The endpoint also accepts optional profile data and image file uploads for the avatar and banner.
 
+When the project requires email verification before sign-in (Dashboard → Settings → SDK → **Require email verification before sign-in**), sign-up works differently: it returns `202` with no session, emails a confirmation link or code, and answers the same way whether or not the email already has an account. See [With email verification required](#with-email-verification-required).
+
 <Note>
   This endpoint accepts `multipart/form-data` when uploading avatar or banner
   images. Send `application/json` for text-only registration.
@@ -72,6 +74,18 @@ Registers a new user within the specified project. On success, returns an access
   Requires `bannerFile.options` to also be present.
 </ParamField>
 
+<ParamField body="emailVerification" type="object">
+  How the confirmation email is sent when the project requires email verification before sign-in. Ignored when the setting is off. In a `multipart/form-data` request, send it as a JSON string.
+  <Expandable title="properties">
+    <ParamField body="mode" type='"link" | "code"' default='"link"'>
+      `"link"` emails a **Confirm my email** button (see [Verify Email Link](/v8/api-reference/auth/verify-email-link)). `"code"` emails a 6-digit code the user types into your app; confirm it with [Verify Email](/v8/api-reference/auth/verify-email) and the `verificationId` from the response.
+    </ParamField>
+    <ParamField body="redirectUrl" type="string">
+      Where the confirmation link sends the user after they confirm, with `verified=true` added to its query. Link mode only. Must be an `https` address on one of your project's Verified Domains (or `localhost`), the same rule as [Send Verification Email](/v8/api-reference/auth/send-verification-email); anything else is refused with `400 auth/redirect-url-not-allowed` before anything is created.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
 ## Response
 
 On success, returns HTTP `201` with:
@@ -112,6 +126,43 @@ On success, returns HTTP `201` with:
   </Expandable>
 </ResponseField>
 
+## With email verification required
+
+When the project requires email verification before sign-in, every sign-up that passes validation returns HTTP `202` with:
+
+```json
+{
+  "success": true,
+  "emailVerificationRequired": true,
+  "verificationId": "9f2c…"
+}
+```
+
+<ResponseField name="success" type="boolean">
+  Always `true`.
+</ResponseField>
+
+<ResponseField name="emailVerificationRequired" type="boolean">
+  Always `true`. No `user`, `accessToken` or `refreshToken` is returned: the user signs in after confirming their email.
+</ResponseField>
+
+<ResponseField name="verificationId" type="string">
+  Present when `emailVerification.mode` is `"code"`. Keep it with the sign-up screen (in memory is enough) and send it with the code to [Verify Email](/v8/api-reference/auth/verify-email). If it's lost, sign in again with the same email and password: the refused sign-in returns the `verificationId` of the code already sent (or of a new one, if the last email is more than 10 minutes old).
+</ResponseField>
+
+What happens behind the same answer:
+
+- **New email** — the account is created (unconfirmed) and a confirmation email is sent. The link or code lasts 24 hours.
+- **Email that already has an account** — nothing is created and nothing changes. Any uploaded avatar or banner is discarded. The address is sent an email saying someone tried to sign up with it, pointing to sign-in or password reset. In code mode the response still carries a `verificationId`, which confirms nothing.
+
+The confirmation emails sent to one address are limited to one every 10 minutes and five a day; past that, the response is the same but no email is sent.
+
+Validation still runs first, in the same order: an invalid body, an image error, a `user.created` validation webhook that refuses, or a taken username still returns its error. Usernames are public through the username check, so a taken username is still reported.
+
+<Note>
+  The setting stops sign-up from telling a new email from a registered one, but not every way of finding out. A sign-in with the password just used at sign-up answers "confirm your email first" (`403 auth/email-not-verified`) for an account that sign-up created and "incorrect password" (`401 auth/invalid-credentials`) for one that already existed. A sign-up that sent a `username` shows it too: the username is taken afterwards only if sign-up created the account. With the setting off, sign-up's `409` tells anyone whether an email is registered.
+</Note>
+
 ## Error Responses
 
 <AccordionGroup>
@@ -123,6 +174,16 @@ On success, returns HTTP `201` with:
       "code": "DUPLICATE_EMAIL"
     }
     ```
+    Only when the project doesn't require email verification before sign-in. It tells the caller the email is registered.
+  </Accordion>
+  <Accordion title="Redirect URL Not Allowed — 400">
+    ```json
+    {
+      "error": "...",
+      "code": "auth/redirect-url-not-allowed"
+    }
+    ```
+    `emailVerification.redirectUrl` isn't an `https` address on one of the project's Verified Domains (or `localhost`). Only checked when the project requires email verification before sign-in. Nothing is created and no email is sent.
   </Accordion>
   <Accordion title="Username Already Taken — 409">
     ```json
@@ -213,4 +274,5 @@ On success, returns HTTP `201` with:
 ## See Also
 
 - [`useAuth` hook](/v8/hooks/auth/use-auth) — `signUpWithEmailAndPassword`
-- [Built-in Auth guide](/v8/sdk/authentication/built-in)
+- [Built-in Auth guide](/v8/sdk/authentication/built-in) — including [Require email verification](/v8/sdk/authentication/built-in#require-email-verification)
+- [Verify Email endpoint](/v8/api-reference/auth/verify-email)

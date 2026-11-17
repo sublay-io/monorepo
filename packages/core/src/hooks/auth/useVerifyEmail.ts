@@ -5,7 +5,15 @@ import { useSublayDispatch } from "../../store/hooks";
 import { updateUserOptimistic } from "../../store/slices/userSlice";
 
 export interface VerifyEmailProps {
+  /** The link token or the emailed 6-digit code. */
   token: string;
+  /**
+   * The `verificationId` returned with a code (by sign-up, or by a sign-in
+   * refused with `auth/email-not-verified`). Required to confirm such a code.
+   * The account being confirmed is not signed in, so the signed-in user (if
+   * any) is left untouched.
+   */
+  verificationId?: string;
 }
 
 function useVerifyEmail(): (props: VerifyEmailProps) => Promise<{ success: boolean }> {
@@ -13,7 +21,7 @@ function useVerifyEmail(): (props: VerifyEmailProps) => Promise<{ success: boole
   const dispatch = useSublayDispatch();
 
   const verifyEmail = useCallback(
-    async ({ token }: VerifyEmailProps) => {
+    async ({ token, verificationId }: VerifyEmailProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
@@ -24,10 +32,16 @@ function useVerifyEmail(): (props: VerifyEmailProps) => Promise<{ success: boole
 
       const response = await axios.post(`/${projectId}/auth/verify-email`, {
         token: token.trim(),
+        ...(verificationId ? { verificationId } : {}),
       });
 
-      // Update local state immediately so the UI reflects the verified status
-      dispatch(updateUserOptimistic({ isVerified: true }));
+      // A code confirmed with a `verificationId` belongs to an account that
+      // isn't signed in (sign-up, or a refused sign-in), so the signed-in user
+      // is not the one being confirmed. Otherwise update local state
+      // immediately so the UI reflects the verified status.
+      if (!verificationId) {
+        dispatch(updateUserOptimistic({ isVerified: true }));
+      }
 
       return response.data;
     },

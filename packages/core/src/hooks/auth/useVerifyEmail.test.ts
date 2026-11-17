@@ -32,6 +32,24 @@ describe("useVerifyEmail", () => {
     expect(store.getState().sublay.user.user?.isVerified).toBe(true);
   });
 
+  it("sends a code with its verificationId and leaves the signed-in user untouched", async () => {
+    const { result, store, axiosPublic } = renderHookWithAxios(() => useVerifyEmail());
+    act(() => {
+      store.dispatch(setUserInUserSlice(makeAuthUser({ isVerified: false })));
+    });
+
+    axiosPublic.mockResponse("post", { success: true });
+
+    await act(async () => {
+      await result.current({ token: " 123456 ", verificationId: "vid-1" });
+    });
+
+    const [call] = axiosPublic.calls("post");
+    expect(call.body).toEqual({ token: "123456", verificationId: "vid-1" });
+    // The confirmed account is not the signed-in one.
+    expect(store.getState().sublay.user.user?.isVerified).toBe(false);
+  });
+
   it("does not throw when optimistically updating with no user yet in the slice", async () => {
     const { result, store, axiosPublic } = renderHookWithAxios(() => useVerifyEmail());
 

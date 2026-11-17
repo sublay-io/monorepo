@@ -94,6 +94,76 @@ function SignInForm() {
 }
 ```
 
+## Require Email Verification
+
+Turn on **Require email verification before sign-in** (Dashboard → Settings → SDK) to make users confirm their email before they can sign in. With it on:
+
+- **Sign-up creates no session.** It emails a confirmation link (or a 6-digit code) that lasts 24 hours, and resolves `{ emailVerificationRequired: true }` instead of signing the user in. It answers the same way whether or not the email already has an account; an existing account's owner gets an email pointing them to sign-in or password reset instead.
+- **Accounts with a password must confirm their email before any sign-in** — with the password, through any OAuth provider, and on token refresh. A refused sign-in sends a new confirmation email, unless one went out in the last 10 minutes.
+- **Users already signed in with an unconfirmed email lose access** within 30 minutes: their next token refresh is refused, so their API calls fail. `useAuth().user` stays set until the app next starts (or switches to that account), when the SDK signs them out and marks the account as needing sign-in.
+- **Not affected:** accounts with no password that sign in only through a provider, and users of your own login ([external sign-in](/v8/sdk/authentication/external)).
+- The setting applies to the v7 and v8 APIs. v7 sign-up is refused while it's on, so sign users up through v8.
+
+Users who never confirmed and whose email can't receive mail won't be able to sign in once it's on.
+
+### Sign up
+
+Pass `emailVerification` to choose how the email is sent. `mode: "link"` (the default) emails a **Confirm my email** button that sends the user on to `redirectUrl` (which must be on your Verified Domains, like [link mode](#link-mode) below). `mode: "code"` emails a 6-digit code and resolves a `verificationId` to confirm it with:
+
+```tsx
+const result = await signUpWithEmailAndPassword({
+  email,
+  password,
+  emailVerification: { mode: "code" },
+});
+
+if (result?.emailVerificationRequired) {
+  // No session. Ask for the emailed code; keep the ID in memory.
+  setPendingVerificationId(result.verificationId);
+}
+```
+
+Then confirm the code with [`useVerifyEmail`](/v8/hooks/auth/use-verify-email), and sign the user in:
+
+```tsx
+const verifyEmail = useVerifyEmail();
+
+await verifyEmail({ token: code, verificationId: pendingVerificationId });
+await signInWithEmailAndPassword({ email, password });
+```
+
+A code allows 5 wrong tries. If the user loses the code, runs out of tries, or a correct code is refused (for example after signing up twice, when the second answer carries an ID that doesn't match the emailed code), the user signs in again. Within 10 minutes of the last confirmation email, that sends nothing new and returns the `verificationId` of the code already sent; after that, or once a code has run out of tries, it can send a new code with a new `verificationId`. Emails to one address are limited to one every 10 minutes and five a day; past the limit, nothing is sent and the code already in the inbox keeps working.
+
+### Sign in
+
+A correct password on an unconfirmed account throws an `Error` whose `code` is `auth/email-not-verified`, and a new confirmation email is sent (unless one went out in the last 10 minutes). Pass the same `emailVerification` to sign-in to choose link or code (left out, it uses what the user chose at sign-up, else a link). In code mode the error carries `verificationId`:
+
+```tsx
+import type { SublayAuthError } from "@sublay/react-js";
+
+try {
+  await signInWithEmailAndPassword({
+    email,
+    password,
+    emailVerification: { mode: "code" },
+  });
+} catch (err) {
+  const { code, verificationId } = err as SublayAuthError;
+  if (code === "auth/email-not-verified") {
+    setPendingVerificationId(verificationId);
+    setMessage("Check your email to confirm your account, then sign in.");
+  }
+}
+```
+
+A wrong password or unknown email still gets the one "incorrect email or password" answer, so the new error only appears after a correct password. A password reset also confirms the email.
+
+<Note>
+  With the setting on, sign-up doesn't tell a new email from a registered one, but sign-in can: someone who signs up with an address and then signs in with the same made-up password is told "confirm your email" when sign-up created the account, and "incorrect password" when it already existed. A `username` sent with the sign-up shows it too: it's taken afterwards only if sign-up created the account. With the setting off, sign-up's `409` reports a registered email directly.
+</Note>
+
+A user's own connected sign-ins are kept by a password reset. To remove a connection they don't recognise, use [`useOAuthIdentities`](/v8/hooks/auth/use-oauth-identities) to list and unlink it.
+
 ## The Account Limit
 
 A device stores at most **5 accounts** ([Multi-Account](/v8/sdk/authentication/multi-account)). Both calls above refuse a sixth, throwing an `Error` whose message is exported as `ACCOUNT_LIMIT_MESSAGE`:
@@ -124,6 +194,8 @@ try {
 <Warning>
   **One sign-up case does leave a user record behind.** The pre-request check can only use the accounts stored when the call left. If the fifth slot fills while your sign-up is in flight — another tab, or a second sign-in racing this one — the account has already been created on the server by the time the limit is discovered. The SDK signs that session straight back out, but the **user record persists**, so retrying the same email after freeing a slot fails with "email already in use". Sign in with it instead.
 </Warning>
+
+A sign-up that resolves `{ emailVerificationRequired: true }` creates no session, so it is only checked before the request.
 
 A refusal leaves the currently active account signed in, leaves the accounts map untouched, signs the server-side session created by the refused attempt back out, and sets `accountLimitReached` — see [Reaching the account limit](/v8/sdk/authentication/multi-account#reaching-the-account-limit).
 

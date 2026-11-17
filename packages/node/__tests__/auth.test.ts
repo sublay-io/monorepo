@@ -130,6 +130,43 @@ describe("node-sdk auth — response mapping", () => {
     ).resolves.toEqual(result);
   });
 
+  it("signUp returns the 202 body when email verification is required", async () => {
+    const { client, projectInstance } = makeClient();
+    const result = { success: true, emailVerificationRequired: true, verificationId: "vid1" };
+    projectInstance.post.mockResolvedValueOnce({ data: result });
+    await expect(
+      signUp(client, {
+        email: "a@b.com",
+        password: "pw",
+        emailVerification: { mode: "code" },
+      }),
+    ).resolves.toEqual(result);
+    expect(projectInstance.post).toHaveBeenCalledWith("/auth/sign-up", {
+      email: "a@b.com",
+      password: "pw",
+      emailVerification: { mode: "code" },
+    });
+  });
+
+  it("signIn and verifyEmail send the email-verification fields", async () => {
+    const { client, projectInstance } = makeClient();
+    await signIn(client, {
+      email: "a@b.com",
+      password: "pw",
+      emailVerification: { mode: "link", redirectUrl: "https://app.example.com/ok" },
+    });
+    expect(projectInstance.post).toHaveBeenCalledWith("/auth/sign-in", {
+      email: "a@b.com",
+      password: "pw",
+      emailVerification: { mode: "link", redirectUrl: "https://app.example.com/ok" },
+    });
+    await verifyEmail(client, { token: "123456", verificationId: "vid1" });
+    expect(projectInstance.post).toHaveBeenCalledWith("/auth/verify-email", {
+      token: "123456",
+      verificationId: "vid1",
+    });
+  });
+
   it("signIn returns response.data", async () => {
     const { client, projectInstance } = makeClient();
     const result = { user: { id: "u1" }, accessToken: "at1", refreshToken: "rt1" };

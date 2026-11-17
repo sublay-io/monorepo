@@ -680,7 +680,7 @@ const chatSlice = createSlice({
      *
      * Like `updateReactions`, this looks in the thread buckets as well as the
      * conversation bucket (see `findLoadedMessages`). Thread replies are a
-     * grants-rendering surface — `useLiveChatMessages` passes `includeGrants`
+     * grants-rendering surface — `useLiveChatMessages` passes its `include`
      * on the thread fetch path too — so a reducer that only reached
      * `state.messages` would render a reply's grant total on load and then
      * never update it live.
@@ -693,15 +693,15 @@ const chatSlice = createSlice({
      * `userId` + `delta`.
      *
      * ## The seam with the fetched summary
-     * A message loaded with `includeGrants: true` already carries a summary.
+     * A message loaded with `include: "grants"` already carries a summary.
      * The two mechanisms compose because only ONE field is incremental: the
      * absolute `total`/`count` are overwritten (so they can never drift or
      * double-count), and `viewerTotal` accrues on top of the fetched baseline.
      *
-     * When the message was fetched WITHOUT `includeGrants` there is no
+     * When the message was fetched WITHOUT "grants" there is no
      * baseline, so `viewerTotal` starts at 0 and reflects only grants seen
      * live. `total`/`count` are exact either way. An app that renders the
-     * viewer's own figure should pass `includeGrants: true`.
+     * viewer's own figure should pass `include: "grants"`.
      */
     updateGrants(
       state,

@@ -292,7 +292,7 @@ describe("chatSlice — updateGrants", () => {
   });
 
   it("stays coherent across the fetch→socket seam: server totals are absolute, viewerTotal accrues on the fetched baseline", () => {
-    // Baseline as it arrives from an `includeGrants: true` page fetch: 100
+    // Baseline as it arrives from an `include: "grants"` page fetch: 100
     // total across 4 grants, 20 of which this viewer sent.
     let state = stateWithMessage("message-1", {
       total: 100,
@@ -338,7 +338,7 @@ describe("chatSlice — updateGrants", () => {
     });
   });
 
-  it("seeds a summary from the event when the message was fetched without includeGrants", () => {
+  it("seeds a summary from the event when the message was fetched without grants", () => {
     // total/count are still exact (the server recomputes them per event);
     // viewerTotal starts from 0 because no baseline was ever loaded.
     let state = stateWithMessage("message-1");
@@ -382,7 +382,7 @@ describe("chatSlice — updateGrants", () => {
     // Thread replies live in `threads[parentMessageId]`, never in the
     // conversation bucket: the server's message list filters
     // `parentMessageId: null`, so the two are disjoint on the fetch path.
-    // `useLiveChatMessages` still passes `includeGrants` on the thread fetch,
+    // `useLiveChatMessages` still passes its `include` on the thread fetch,
     // which makes replies a grants-rendering surface — so the socket path has
     // to reach them too.
     let state = baseState({

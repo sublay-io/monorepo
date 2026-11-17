@@ -38,7 +38,7 @@ describe("useFetchManyChatMessagesWrapper", () => {
     expect(call.config?.params).toMatchObject({ limit: 50, sortDir: "desc" });
   });
 
-  it("forwards includeGrants on both the first page and load-more", async () => {
+  it("forwards include on both the first page and load-more", async () => {
     const first = makeChatMessage({
       id: "message-1",
       createdAt: "2024-01-02T00:00:00.000Z",
@@ -48,7 +48,7 @@ describe("useFetchManyChatMessagesWrapper", () => {
       () =>
         useFetchManyChatMessagesWrapper({
           conversationId: "conversation-1",
-          includeGrants: true,
+          include: "grants",
         }),
       {
         beforeRender: ({ axiosPrivate }) =>

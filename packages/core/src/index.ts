@@ -1077,7 +1077,12 @@ export type {
   ConversationMemberRole,
   CheckMyConversationMembershipResponse,
 } from "./interfaces/models/ConversationMember";
-export type { ChatMessage } from "./interfaces/models/ChatMessage";
+export type {
+  ChatMessage,
+  ChatMessageListInclude,
+  ChatMessageListIncludeArray,
+  ChatMessageListIncludeParam,
+} from "./interfaces/models/ChatMessage";
 
 // -- chat slice
 export {

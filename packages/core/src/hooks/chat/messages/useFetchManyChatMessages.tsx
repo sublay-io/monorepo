@@ -1,5 +1,8 @@
 import { useCallback } from "react";
-import { ChatMessage } from "../../../interfaces/models/ChatMessage";
+import {
+  ChatMessage,
+  ChatMessageListIncludeParam,
+} from "../../../interfaces/models/ChatMessage";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { SpaceReputationContextParams } from "../../../interfaces/SpaceReputation";
@@ -25,19 +28,16 @@ export interface FetchManyChatMessagesProps extends SpaceReputationContextParams
   /** Page size (1–100, defaults to 50 server-side). */
   limit?: number;
   sortDir?: "asc" | "desc";
-  /** When `true`, the server populates the `files` field on each message. */
-  includeFiles?: boolean;
   /**
-   * When `true`, the server populates the `grants` reputation-grant summary on
-   * each message. Opt-in for the same reason `includeFiles` is: it costs an
-   * extra aggregate query per page, so conversations that don't render grants
-   * must not pay for it.
-   *
-   * On a project without the `reputation` bundle the server still returns the
-   * summary — zero-filled, never omitted — so the field's shape doesn't depend
-   * on bundle state.
+   * Opt-in fields on each message, one value or an array:
+   * - `"files"` populates the `files` field.
+   * - `"grants"` populates the `grants` reputation-grant summary. It costs an
+   *   extra aggregate query per page, so conversations that don't render
+   *   grants shouldn't ask for it. On a project without the `reputation`
+   *   bundle the server still returns the summary, zero-filled, never omitted,
+   *   so the field's shape doesn't depend on bundle state.
    */
-  includeGrants?: boolean;
+  include?: ChatMessageListIncludeParam;
   filters?: MessageFilters;
 }
 
@@ -76,8 +76,7 @@ function useFetchManyChatMessages(): (
         after,
         limit = 50,
         sortDir,
-        includeFiles,
-        includeGrants,
+        include,
         filters,
         spaceReputation,
         spaceReputationId,
@@ -99,13 +98,8 @@ function useFetchManyChatMessages(): (
       if (parentMessageId) params.parentMessageId = parentMessageId;
       if (before) params.before = before;
       if (after) params.after = after;
-      // Both tokens ride the ONE `include` param the endpoint accepts, so they
-      // must compose rather than overwrite each other. The server splits on
-      // commas and trims, so `files,grants` reaches both parsers intact.
-      const includeTokens: string[] = [];
-      if (includeFiles) includeTokens.push("files");
-      if (includeGrants) includeTokens.push("grants");
-      if (includeTokens.length > 0) params.include = includeTokens.join(",");
+      const includeValue = Array.isArray(include) ? include.join(",") : include;
+      if (includeValue) params.include = includeValue;
       if (filters) params.filters = filters;
 
       const response = await axios.get<FetchManyChatMessagesResponse>(

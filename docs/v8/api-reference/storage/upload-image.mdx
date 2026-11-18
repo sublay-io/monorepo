@@ -152,7 +152,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
   </Accordion>
   <Accordion title="No File — 400 Bad Request">
     ```json
-    { "error": "No file provided", "code": "storage/no-file" }
+    { "error": "No file provided", "code": "storage/no-file", "param": "file" }
     ```
   </Accordion>
   <Accordion title="File Too Large — 413">

@@ -6,17 +6,13 @@ export interface DeleteWorkspaceProps {
   workspaceId: string;
 }
 
-export interface DeleteWorkspaceResponse {
-  message: string;
-}
-
 /**
  * Delete a workspace. Owner-only — the actor (the bearer-token user) must be
  * the workspace's own owner or an ancestor owner.
  */
 function useDeleteWorkspace(): (
   props: DeleteWorkspaceProps
-) => Promise<DeleteWorkspaceResponse> {
+) => Promise<void> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -29,11 +25,9 @@ function useDeleteWorkspace(): (
         throw new Error("Please pass a workspaceId");
       }
 
-      const response = await axios.delete<DeleteWorkspaceResponse>(
+      await axios.delete<void>(
         `/${projectId}/workspaces/${workspaceId}`
       );
-
-      return response.data;
     },
     [projectId, axios]
   );

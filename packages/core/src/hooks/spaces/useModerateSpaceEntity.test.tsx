@@ -14,7 +14,7 @@ describe("useModerateSpaceEntity", () => {
       useModerateSpaceEntity(),
     );
 
-    axiosPrivate.mockResponse("patch", { message: "Removed", moderationStatus: "removed" });
+    axiosPrivate.mockResponse("patch", { moderationStatus: "removed" });
 
     let returned;
     await act(async () => {
@@ -26,7 +26,7 @@ describe("useModerateSpaceEntity", () => {
       });
     });
 
-    expect(returned).toEqual({ message: "Removed", moderationStatus: "removed" });
+    expect(returned).toEqual({ moderationStatus: "removed" });
 
     const [call] = axiosPrivate.calls("patch");
     expect(call.url).toBe("/test-project/spaces/space-1/entities/entity-1/moderation");

@@ -140,7 +140,7 @@ const workspace = await sublay.workspaces.updateWorkspaceInheritFlag({
 **Owner-only** (own owner or an ancestor owner). Cascades the whole subtree transactionally and fires `workspace.deleted` per deleted workspace — and **no** `workspace.member.removed` events for the memberships it tears down (see [Webhooks](/v8/sdk/workspaces/webhooks)).
 
 ```typescript
-const { message } = await sublay.workspaces.deleteWorkspace({ workspaceId: "ws_abc" });
+await sublay.workspaces.deleteWorkspace({ workspaceId: "ws_abc" });
 ```
 
 <ParamField body="workspaceId" type="string" required />

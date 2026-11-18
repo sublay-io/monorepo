@@ -209,7 +209,7 @@ describe("useWorkspaceListActions", () => {
         await result.current.fetchWorkspaces("feed", { page: 1, limit: 20 });
       });
 
-      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "deleted" }));
+      fetchHandle.fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
       await act(async () => {
         await result.current.deleteWorkspace("feed", { workspaceId: "w1" });
       });

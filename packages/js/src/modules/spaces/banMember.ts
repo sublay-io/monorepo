@@ -1,4 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
+import { SpaceMember } from "../../interfaces/SpaceMember";
 
 export interface BanMemberProps {
   spaceId: string;
@@ -8,20 +9,12 @@ export interface BanMemberProps {
   reason?: string;
 }
 
-export interface BanMemberResponse {
-  message: string;
-  membership: {
-    id: string;
-    status: "banned";
-  };
-}
-
 export async function banMember(
   client: SublayHttpClient,
   data: BanMemberProps
-): Promise<BanMemberResponse> {
+): Promise<SpaceMember> {
   const { spaceId, userId, reason } = data;
-  const response = await client.projectInstance.post<BanMemberResponse>(
+  const response = await client.projectInstance.post<SpaceMember>(
     `/spaces/${spaceId}/members/${userId}/ban`,
     { reason }
   );

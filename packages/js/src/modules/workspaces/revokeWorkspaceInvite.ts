@@ -5,10 +5,6 @@ export interface RevokeWorkspaceInviteProps {
   inviteId: string;
 }
 
-export interface RevokeWorkspaceInviteResponse {
-  success: boolean;
-}
-
 /**
  * Revoke a pending invitation. Requires the `invite` capability (or owner).
  * Note the verb-suffixed POST route — this is not a `DELETE`.
@@ -16,12 +12,10 @@ export interface RevokeWorkspaceInviteResponse {
 export async function revokeWorkspaceInvite(
   client: SublayHttpClient,
   data: RevokeWorkspaceInviteProps
-): Promise<RevokeWorkspaceInviteResponse> {
+): Promise<void> {
   const { workspaceId, inviteId } = data;
-  const response =
-    await client.projectInstance.post<RevokeWorkspaceInviteResponse>(
-      `/workspaces/${workspaceId}/invites/${inviteId}/revoke`,
-      {}
-    );
-  return response.data;
+  await client.projectInstance.post<void>(
+    `/workspaces/${workspaceId}/invites/${inviteId}/revoke`,
+    {}
+  );
 }

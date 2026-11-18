@@ -473,17 +473,12 @@ describe("js-sdk spaces (lifecycle) — response mapping", () => {
     expect(result).toEqual(space);
   });
 
-  it("deleteSpace returns the DeleteSpaceResponse", async () => {
+  it("deleteSpace resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = {
-      message: "Space deleted",
-      deletedSpace: { id: "s1", name: "My Space" },
-      counts: { entities: 3, members: 5, childSpaces: 0 },
-    };
-    projectInstance.delete.mockResolvedValueOnce({ data: result });
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
 
     const response = await deleteSpace(client, { spaceId: "s1" });
 
-    expect(response).toEqual(result);
+    expect(response).toBeUndefined();
   });
 });

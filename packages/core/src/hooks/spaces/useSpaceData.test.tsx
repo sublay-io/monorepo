@@ -21,6 +21,19 @@ function mockBreadcrumb(axiosPrivate: { mockResponse: (m: "get", d: unknown) => 
   axiosPrivate.mockResponse("get", { breadcrumb: [], depth: 0 });
 }
 
+// What join answers with: the membership record itself.
+function membershipRecord(status: "active" | "pending") {
+  return {
+    id: "membership-1",
+    spaceId: "space-1",
+    userId: "user-1",
+    role: "member",
+    status,
+    joinedAt: "2024-01-01T00:00:00.000Z",
+    createdAt: "2024-01-01T00:00:00.000Z",
+  };
+}
+
 describe("useSpaceData", () => {
   it("resolves a space by spaceId and fetches its breadcrumb", async () => {
     const space = makeSpaceDetailed({ id: "space-1" });
@@ -102,11 +115,11 @@ describe("useSpaceData", () => {
     expect(result.current.error).toBe("Failed to fetch space");
   });
 
-  it("joins the space and takes the server's permissions from the join response", async () => {
+  it("joins the space, then loads it again for the server's permissions", async () => {
     const space = makeSpaceDetailed({ id: "space-1", membersCount: 5 });
 
     const { result, axiosPrivate } = renderHookWithAxios(
-      () => useSpaceData({ space }),
+      () => useSpaceData({ space, include: "files" }),
       { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
     );
     await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
@@ -118,11 +131,8 @@ describe("useSpaceData", () => {
       status: "active",
       canPost: false,
     });
-    axiosPrivate.mockResponse("post", {
-      message: "Joined",
-      membership: { id: "membership-1", spaceId: "space-1", userId: "user-1", role: "member", status: "active", joinedAt: "2024-01-01T00:00:00.000Z" },
-      memberPermissions,
-    });
+    axiosPrivate.mockResponse("post", membershipRecord("active"), 201);
+    axiosPrivate.mockResponse("get", { ...space, membersCount: 6, memberPermissions });
 
     await act(async () => {
       await result.current.joinSpace();
@@ -132,12 +142,151 @@ describe("useSpaceData", () => {
     expect(result.current.space?.memberPermissions).toEqual(memberPermissions);
     expect(result.current.isMember).toBe(true);
     expect(result.current.canPost).toBe(false);
+    expect(result.current.error).toBeNull();
 
     const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/spaces/space-1/join");
+    const refetch = axiosPrivate.calls("get")[1];
+    expect(refetch.url).toBe("/test-project/spaces/space-1");
+    expect(refetch.config).toEqual({ params: { include: "files" } });
   });
 
-  it("leaves the space and takes the server's permissions from the leave response", async () => {
+  it("shows a pending join request from the space loaded again", async () => {
+    const space = makeSpaceDetailed({ id: "space-1", membersCount: 5 });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useSpaceData({ space }),
+      { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+    );
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+    const memberPermissions = makeMemberPermissions({ status: "pending", canRead: true });
+    axiosPrivate.mockResponse("post", membershipRecord("pending"), 201);
+    axiosPrivate.mockResponse("get", { ...space, memberPermissions });
+
+    await act(async () => {
+      await result.current.joinSpace();
+    });
+
+    // The count is the server's: a pending request isn't a member.
+    expect(result.current.space?.membersCount).toBe(5);
+    expect(result.current.isMember).toBe(false);
+    expect(result.current.isPending).toBe(true);
+  });
+
+  it("doesn't load the space again when the join fails", async () => {
+    const space = makeSpaceDetailed({ id: "space-1", membersCount: 5 });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useSpaceData({ space }),
+      { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+    );
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+    axiosPrivate.mockError("post", 403, { error: "You are banned from this space.", code: "space/banned" });
+
+    await act(async () => {
+      await result.current.joinSpace();
+    });
+
+    expect(result.current.error).toBe("Failed to join space");
+    expect(result.current.space).toEqual(space);
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+  });
+
+  it.each([
+    ["join", "post", "space/already-member", 409, true],
+    ["leave", "delete", "space/membership-required", 403, false],
+  ] as const)(
+    "a %s refused because it already happened loads the space again",
+    async (action, method, code, status, isMember) => {
+      // Shown in the state the earlier, already-applied action left behind.
+      const space = makeSpaceDetailed({
+        id: "space-1",
+        memberPermissions: makeMemberPermissions(
+          isMember ? { canRead: true } : { isMember: true, status: "active", canRead: true },
+        ),
+      });
+      const fresh = makeSpaceDetailed({
+        id: "space-1",
+        memberPermissions: makeMemberPermissions(
+          isMember ? { isMember: true, status: "active", canRead: true } : { canRead: true },
+        ),
+      });
+
+      const { result, axiosPrivate } = renderHookWithAxios(
+        () => useSpaceData({ space }),
+        { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+      );
+      await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+      axiosPrivate.mockError(method, status, { error: "Already done.", code });
+      axiosPrivate.mockResponse("get", fresh);
+
+      await act(async () => {
+        await (action === "join" ? result.current.joinSpace() : result.current.leaveSpace());
+      });
+
+      expect(result.current.error).toBeNull();
+      expect(result.current.space).toEqual(fresh);
+      expect(result.current.isMember).toBe(isMember);
+    },
+  );
+
+  it("a pending member's refused leave stays an error and loads nothing", async () => {
+    const space = makeSpaceDetailed({
+      id: "space-1",
+      memberPermissions: makeMemberPermissions({ isMember: true, status: "pending" }),
+    });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useSpaceData({ space }),
+      { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+    );
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+    axiosPrivate.mockError("delete", 403, { error: "Space membership required", code: "space/membership-required" });
+
+    await act(async () => {
+      await result.current.leaveSpace();
+    });
+
+    expect(result.current.error).toBe("Failed to leave space");
+    expect(result.current.space).toEqual(space);
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+  });
+
+  it("a retry after a failed reload clears the reload error", async () => {
+    const space = makeSpaceDetailed({ id: "space-1" });
+    const fresh = makeSpaceDetailed({
+      id: "space-1",
+      memberPermissions: makeMemberPermissions({ isMember: true, status: "active", canRead: true }),
+    });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useSpaceData({ space }),
+      { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+    );
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+    axiosPrivate.mockResponse("post", membershipRecord("active"), 201);
+    axiosPrivate.mockError("get", 500, { error: "Internal error" });
+    await act(async () => {
+      await result.current.joinSpace();
+    });
+    expect(result.current.error).toBe("Failed to refresh space");
+
+    axiosPrivate.mockError("post", 409, { error: "Already a member.", code: "space/already-member" });
+    axiosPrivate.mockResponse("get", fresh);
+    await act(async () => {
+      await result.current.joinSpace();
+    });
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.space).toEqual(fresh);
+  });
+
+  it("leaves the space, then loads it again for the server's permissions", async () => {
     const space = makeSpaceDetailed({
       id: "space-1",
       membersCount: 5,
@@ -160,7 +309,8 @@ describe("useSpaceData", () => {
 
     // Now a non-member of an open space: still reads, no longer posts.
     const memberPermissions = makeMemberPermissions({ canRead: true });
-    axiosPrivate.mockResponse("delete", { message: "Left", memberPermissions });
+    axiosPrivate.mockResponse("delete", "", 204);
+    axiosPrivate.mockResponse("get", { ...space, membersCount: 4, memberPermissions });
 
     await act(async () => {
       await result.current.leaveSpace();
@@ -174,6 +324,83 @@ describe("useSpaceData", () => {
 
     const [call] = axiosPrivate.calls("delete");
     expect(call.url).toBe("/test-project/spaces/space-1/members/me");
+    expect(axiosPrivate.calls("get")[1].url).toBe("/test-project/spaces/space-1");
+  });
+
+  it("drops a space the user can no longer see after leaving it", async () => {
+    const space = makeSpaceDetailed({
+      id: "space-1",
+      memberPermissions: makeMemberPermissions({ isMember: true, status: "active", canRead: true }),
+    });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useSpaceData({ space }),
+      { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+    );
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+    axiosPrivate.mockResponse("delete", "", 204);
+    axiosPrivate.mockError("get", 404, { error: "Space not found.", code: "space/not-found" });
+
+    await act(async () => {
+      await result.current.leaveSpace();
+    });
+
+    expect(result.current.space).toBeNull();
+    expect(result.current.isMember).toBe(false);
+    expect(result.current.error).toBeNull();
+  });
+
+  it("drops a space loaded by id once the user can no longer see it, without loading it again", async () => {
+    const space = makeSpaceDetailed({
+      id: "space-1",
+      memberPermissions: makeMemberPermissions({ isMember: true, status: "active", canRead: true }),
+    });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useSpaceData({ spaceId: "space-1" }),
+      {
+        beforeRender: ({ axiosPrivate }) => {
+          axiosPrivate.mockResponse("get", space);
+          mockBreadcrumb(axiosPrivate);
+        },
+      },
+    );
+    await waitFor(() => expect(result.current.space).toEqual(space));
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(2));
+
+    axiosPrivate.mockResponse("delete", "", 204);
+    axiosPrivate.mockError("get", 404, { error: "Space not found.", code: "space/not-found" });
+
+    await act(async () => {
+      await result.current.leaveSpace();
+    });
+
+    expect(result.current.space).toBeNull();
+    expect(result.current.error).toBeNull();
+    expect(result.current.loading).toBe(false);
+    // The space fetch, the breadcrumb, and the one reload after leaving.
+    expect(axiosPrivate.calls("get")).toHaveLength(3);
+  });
+
+  it("keeps the space and reports an error when loading it again fails", async () => {
+    const space = makeSpaceDetailed({ id: "space-1", membersCount: 5 });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useSpaceData({ space }),
+      { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+    );
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+    axiosPrivate.mockResponse("post", membershipRecord("active"), 201);
+    axiosPrivate.mockError("get", 500, { error: "Internal error" });
+
+    await act(async () => {
+      await result.current.joinSpace();
+    });
+
+    expect(result.current.space).toEqual(space);
+    expect(result.current.error).toBe("Failed to refresh space");
   });
 
   it("updates the space via updateSpace, keeping the server's permissions and the hierarchy", async () => {
@@ -233,7 +460,8 @@ describe("useSpaceData", () => {
     await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(2));
 
     const left = makeMemberPermissions({ canRead: true });
-    axiosPrivate.mockResponse("delete", { message: "Left", memberPermissions: left });
+    axiosPrivate.mockResponse("delete", "", 204);
+    axiosPrivate.mockResponse("get", { ...spaceA, membersCount: 4, memberPermissions: left });
     await act(async () => {
       await result.current.leaveSpace();
     });
@@ -252,11 +480,12 @@ describe("useSpaceData", () => {
     expect(result.current.canPost).toBe(false);
     expect(result.current.space?.memberPermissions).toEqual(left);
     expect(result.current.space?.membersCount).toBe(4);
-    // Space A came from the cache: one fetch each for A and B.
+    // Space A came back from the cache: A, A loaded again after leaving, B.
     const spaceFetches = axiosPrivate
       .calls("get")
       .filter((c) => !c.url.endsWith("/breadcrumb"));
     expect(spaceFetches.map((c) => c.url)).toEqual([
+      "/test-project/spaces/space-a",
       "/test-project/spaces/space-a",
       "/test-project/spaces/space-b",
     ]);
@@ -271,9 +500,7 @@ describe("useSpaceData", () => {
     );
     await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
 
-    axiosPrivate.mockResponse("delete", {
-      message: "Space deleted successfully.",
-    });
+    axiosPrivate.mockResponse("delete", "", 204);
 
     await act(async () => {
       await result.current.deleteSpace();

@@ -30,13 +30,15 @@ The space creator always stays an admin of their space. Only the creator can pro
 
 ## Response
 
-<ResponseField name="message" type="string">
-  Confirmation message.
-</ResponseField>
+The updated membership record, as a [SpaceMember](/v8/data-models/space-member) object. When the member already has `role`, nothing changes and the record is returned as it is.
 
-<ResponseField name="membership" type="object">
-  Updated membership with `id`, `role`, `status`, `joinedAt`, and `userId`.
-</ResponseField>
+<ResponseField name="id" type="string">Membership id.</ResponseField>
+<ResponseField name="spaceId" type="string">The space.</ResponseField>
+<ResponseField name="userId" type="string">The member.</ResponseField>
+<ResponseField name="role" type="'admin' | 'moderator' | 'member'">The new role.</ResponseField>
+<ResponseField name="status" type="'pending' | 'active' | 'banned' | 'rejected'">The member's status, unchanged.</ResponseField>
+<ResponseField name="joinedAt" type="string">When the membership became active (ISO 8601).</ResponseField>
+<ResponseField name="createdAt" type="string">When the membership record was created (ISO 8601).</ResponseField>
 
 ## Errors
 

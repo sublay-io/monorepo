@@ -5,17 +5,18 @@ description: "The shape of a SpaceMember object returned by the Spaces membershi
 
 A SpaceMember record represents a user's membership in a specific space. It tracks their role (admin, moderator, or member), membership status (pending, active, banned, or rejected), and join timestamp.
 
+The member actions return this record as their response body: [Join Space](/v8/api-reference/spaces/membership/join-space), [Add Member](/v8/api-reference/spaces/membership/add-member), [Approve Member](/v8/api-reference/spaces/membership/approve-member), [Decline Member](/v8/api-reference/spaces/membership/decline-member), [Ban Member](/v8/api-reference/spaces/membership/ban-member), [Unban Member](/v8/api-reference/spaces/membership/unban-member) and [Update Member Role](/v8/api-reference/spaces/membership/update-member-role).
+
 ## Properties
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | `string` | Unique membership record identifier (UUID). |
-| `projectId` | `string` | The project this membership belongs to. |
 | `spaceId` | `string` | ID of the space this membership is for. |
 | `userId` | `string` | ID of the user who is a member. |
 | `role` | `"admin" \| "moderator" \| "member"` | The user's role in the space. |
 | `status` | `"pending" \| "active" \| "banned" \| "rejected"` | The user's membership status. |
-| `joinedAt` | `Date` | Timestamp when the membership was created. |
+| `joinedAt` | `Date` | When the membership became active. On a request still awaiting approval, or a declined one, when the request was made. |
 | `createdAt` | `Date` | Record creation timestamp. |
 
 ## Membership Statuses

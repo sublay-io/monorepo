@@ -93,7 +93,7 @@ is `{ id, provider, providerAccountId, email, name, avatar, isVerified, createdA
 Unlinks one of the current user's OAuth identities by ID.
 
 ```typescript
-const { success } = await sublay.oauth.unlinkIdentity({
+await sublay.oauth.unlinkIdentity({
   identityId: "oid_abc123",
 });
 ```
@@ -102,7 +102,7 @@ const { success } = await sublay.oauth.unlinkIdentity({
   The linked-identity ID to remove.
 </ParamField>
 
-**Returns** — `Promise<{ success: boolean }>`
+**Returns** — `Promise<void>`
 
 <Note>
   The server refuses to remove the last remaining identity if the user has no

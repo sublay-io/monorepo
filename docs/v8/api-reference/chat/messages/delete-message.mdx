@@ -29,15 +29,7 @@ The caller must be either the message author or an active group `admin`. An admi
 
 ## Response
 
-For author self-delete:
-```json
-{ "message": "Message deleted.", "userDeletedAt": "2025-01-15T10:30:00.000Z" }
-```
-
-For admin moderation:
-```json
-{ "message": "Message removed by admin." }
-```
+`204 No Content` on success, with no body, for an author self-delete and for an admin moderation delete alike.
 
 ## Error Responses
 

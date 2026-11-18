@@ -9,10 +9,9 @@ export interface RemoveMemberProps {
 export async function removeMember(
   client: SublayHttpClient,
   data: RemoveMemberProps
-): Promise<{ message: string }> {
+): Promise<void> {
   const { conversationId, userId } = data;
-  const response = await client.projectInstance.delete<{ message: string }>(
+  await client.projectInstance.delete<void>(
     `/chat/conversations/${conversationId}/members/${userId}`
   );
-  return response.data;
 }

@@ -8,7 +8,7 @@ icon: "cube"
 
 `useSpace` returns the current space state and all operations from the nearest `SpaceProvider`. It is the primary way to interact with a space in your component tree.
 
-The permission flags (`isMember`, `canPost`, `canRead`, …) come from the space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions), which the server always returns and recalculates on join, leave and update. They are all `false` until the space has loaded.
+The permission flags (`isMember`, `canPost`, `canRead`, …) come from the space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions), which the server always returns. After `joinSpace` or `leaveSpace` the hook fetches the space again to pick up the new ones (also when a join answers `space/already-member`, and when a leave by a user shown as an active member answers `space/membership-required`, which means an earlier join or leave already went through), and an update returns them. They are all `false` until the space has loaded.
 
 <Note>This hook must be used inside a `SpaceProvider`.</Note>
 
@@ -108,11 +108,11 @@ function SpaceHeader() {
 </ResponseField>
 
 <ResponseField name="joinSpace" type="() => Promise<void>">
-  Join the space. Creates a `pending` membership when approval is required. The space's `memberPermissions` becomes the server's answer for the new membership.
+  Join the space. Creates a `pending` membership when approval is required. The space is then fetched again, so its `memberPermissions` become the server's answer for the new membership.
 </ResponseField>
 
 <ResponseField name="leaveSpace" type="() => Promise<void>">
-  Leave the space. The space's `memberPermissions` becomes the server's answer for the user as a non-member.
+  Leave the space. The space is then fetched again, so its `memberPermissions` become the server's answer for the user as a non-member. A space the user can no longer see once they have left (a private space) becomes `null`.
 </ResponseField>
 
 <ResponseField name="updateSpace" type="(props: { update }) => Promise<SpaceWithPermissions | undefined>">

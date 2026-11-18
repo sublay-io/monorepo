@@ -278,15 +278,6 @@ export const entityListsApi = baseApi.injectEndpoints({
       query: ({ projectId, entityId }) => ({
         url: `/${projectId}/entities/${entityId}`,
         method: "DELETE",
-        responseHandler: async (response) => {
-          // Handle text responses (like "OK" from res.sendStatus(200))
-          const contentType = response.headers.get('content-type') || '';
-          if (contentType.includes('application/json')) {
-            return response.json();
-          }
-          // For text responses, just return void since we don't need the content
-          return response.text().then(() => undefined);
-        },
       }),
       // Every list holding the entity provides its id tag.
       invalidatesTags: (result, error, { entityId }) => [

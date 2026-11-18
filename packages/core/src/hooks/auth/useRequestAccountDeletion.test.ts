@@ -13,11 +13,11 @@ describe("useRequestAccountDeletion", () => {
       useRequestAccountDeletion(),
     );
 
-    axiosPrivate.mockResponse("post", { success: true });
+    axiosPrivate.mockResponse("post", "", 204);
 
     const returned = await result.current();
 
-    expect(returned).toEqual({ success: true });
+    expect(returned).toBeUndefined();
 
     const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/auth/request-account-deletion");

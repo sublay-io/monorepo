@@ -28,7 +28,7 @@ describe("node-sdk NSFW — request shaping", () => {
 
   it("setSpaceEntityNsfw returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "Entity NSFW flag updated.", nsfw: true };
+    const result = { nsfw: true };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
       setSpaceEntityNsfw(client, {

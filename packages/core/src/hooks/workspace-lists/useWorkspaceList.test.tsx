@@ -324,7 +324,7 @@ describe("useWorkspaceList", () => {
       act(() => result.current.fetchWorkspaces({}));
       await waitFor(() => expect(result.current.workspaces).toHaveLength(2));
 
-      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "deleted" }));
+      fetchHandle.fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
       await act(async () => {
         await result.current.deleteWorkspace({ workspaceId: "w1" });
       });

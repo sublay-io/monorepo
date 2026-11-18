@@ -516,7 +516,6 @@ export {
   type UpdateWorkspaceProps,
   type UpdateWorkspaceInheritFlagProps,
   type DeleteWorkspaceProps,
-  type DeleteWorkspaceResponse,
   type TransferWorkspaceOwnershipProps,
   type FetchWorkspaceMembersProps,
   type FetchWorkspaceMembers,
@@ -532,12 +531,10 @@ export {
   type CreateWorkspaceInviteProps,
   type FetchWorkspaceInvitesProps,
   type RevokeWorkspaceInviteProps,
-  type RevokeWorkspaceInviteResponse,
   type ResendWorkspaceInviteProps,
   type AcceptWorkspaceInviteProps,
   type AcceptWorkspaceInviteResponse,
   type DeclineWorkspaceInviteProps,
-  type DeclineWorkspaceInviteResponse,
   type FetchWorkspaceAuthorityProps,
 } from "./hooks/workspaces";
 
@@ -885,13 +882,6 @@ export type {
   PaginationMeta,
   MySpaceItem,
   MySpacesResponse,
-  JoinSpaceResponse,
-  LeaveSpaceResponse,
-  UpdateMemberRoleResponse,
-  ApproveMemberResponse,
-  AddMemberResponse,
-  DeclineMemberResponse,
-  DeleteSpaceResponse,
   SpaceInclude,
   SpaceIncludeArray,
   SpaceIncludeParam,
@@ -958,7 +948,6 @@ export type { UserSearchParams } from "./interfaces/UserSearch";
 export type { SpaceSearchParams, SpaceSearchFields } from "./interfaces/SpaceSearch";
 export type {
   Rule,
-  DeleteRuleResponse,
 } from "./interfaces/models/Rule";
 export type {
   CommentsSortByOptions,

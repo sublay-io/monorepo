@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { JoinSpaceResponse } from "../../interfaces/Space";
+import { SpaceMember } from "../../interfaces/SpaceMember";
 
 export interface JoinSpaceProps {
   spaceId: string;
@@ -9,9 +9,9 @@ export interface JoinSpaceProps {
 export async function joinSpace(
   client: SublayHttpClient,
   data: JoinSpaceProps
-): Promise<JoinSpaceResponse> {
+): Promise<SpaceMember> {
   const { spaceId, actingUserId } = data;
-  const response = await client.projectInstance.post<JoinSpaceResponse>(
+  const response = await client.projectInstance.post<SpaceMember>(
     `/spaces/${spaceId}/join`,
     { actingUserId }
   );

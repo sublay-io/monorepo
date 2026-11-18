@@ -9,11 +9,10 @@ export interface MarkAsReadProps {
 export async function markAsRead(
   client: SublayHttpClient,
   data: MarkAsReadProps
-): Promise<{ message: string }> {
+): Promise<void> {
   const { conversationId, messageId } = data;
-  const response = await client.projectInstance.post<{ message: string }>(
+  await client.projectInstance.post<void>(
     `/chat/conversations/${conversationId}/read`,
     { messageId }
   );
-  return response.data;
 }

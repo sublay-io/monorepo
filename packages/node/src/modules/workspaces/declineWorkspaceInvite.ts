@@ -8,19 +8,14 @@ export interface DeclineWorkspaceInviteProps {
   actingUserId: string;
 }
 
-export interface DeclineWorkspaceInviteResponse {
-  success: boolean;
-}
-
 /** Decline an invitation — identity-matched + verified-email-gated (same as accept). */
 export async function declineWorkspaceInvite(
   client: SublayHttpClient,
   data: DeclineWorkspaceInviteProps
-): Promise<DeclineWorkspaceInviteResponse> {
+): Promise<void> {
   const { inviteId, actingUserId } = data;
-  const response = await client.projectInstance.post<DeclineWorkspaceInviteResponse>(
+  await client.projectInstance.post<void>(
     `/workspace-invites/${inviteId}/decline`,
     { actingUserId }
   );
-  return response.data;
 }

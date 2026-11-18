@@ -3,9 +3,12 @@ import { PaginatedResponse } from "../PaginatedResponse";
 export type SpaceMemberRole = "admin" | "moderator" | "member";
 export type SpaceMemberStatus = "pending" | "active" | "banned" | "rejected";
 
+/**
+ * A membership record: what the member actions (join, add, approve, decline,
+ * ban, unban, role change) return.
+ */
 export interface SpaceMember {
   id: string;
-  projectId: string;
   spaceId: string;
   userId: string;
   role: SpaceMemberRole;

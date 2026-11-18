@@ -213,7 +213,7 @@ Owner-only in both directions; subject to the enforced-default lock.
 ### deleteWorkspace
 
 ```typescript
-const { message } = await sublay.workspaces.deleteWorkspace({
+await sublay.workspaces.deleteWorkspace({
   workspaceId: "ws_abc",
   actingUserId: "usr_owner",
 });

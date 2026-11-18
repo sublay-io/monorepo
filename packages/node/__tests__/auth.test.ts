@@ -218,12 +218,11 @@ describe("node-sdk auth — response mapping", () => {
     await expect(verifyEmail(client, { token: "tok1" })).resolves.toBeUndefined();
   });
 
-  it("sendVerificationEmail returns response.data", async () => {
+  it("sendVerificationEmail resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { success: true };
-    projectInstance.post.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: "", status: 204 });
     await expect(
       sendVerificationEmail(client, { actingUserId: "u1", mode: "link" }),
-    ).resolves.toEqual(result);
+    ).resolves.toBeUndefined();
   });
 });

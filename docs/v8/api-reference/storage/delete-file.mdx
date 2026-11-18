@@ -24,19 +24,7 @@ Requires authentication. **The owner deletes:** a file with an owner is deleted 
 
 ## Response
 
-```json
-{
-  "message": "File deleted successfully",
-  "fileId": "uuid",
-  "deletedPaths": [
-    "images/abc123/original.webp",
-    "images/abc123/thumbnail_original.webp",
-    "images/abc123/medium_original.webp"
-  ]
-}
-```
-
-`deletedPaths` lists all storage paths that were removed, including the original file and any image variants.
+`204 No Content` on success, with no body. The original file and every image variant made from it are removed from storage.
 
 ## Error Responses
 

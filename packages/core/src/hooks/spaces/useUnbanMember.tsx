@@ -1,7 +1,7 @@
 import { useCallback } from "react";
+import type { SpaceMember } from "../../interfaces/models/SpaceMember";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
-import type { UnbanMemberResponse } from "../../interfaces/models/Space";
 
 export interface UnbanMemberProps {
   spaceId: string;
@@ -9,7 +9,7 @@ export interface UnbanMemberProps {
   userId: string;
 }
 
-function useUnbanMember(): (props: UnbanMemberProps) => Promise<UnbanMemberResponse> {
+function useUnbanMember(): (props: UnbanMemberProps) => Promise<SpaceMember> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -27,7 +27,7 @@ function useUnbanMember(): (props: UnbanMemberProps) => Promise<UnbanMemberRespo
         `/${projectId}/spaces/${spaceId}/members/${userId}/unban`
       );
 
-      return response.data as UnbanMemberResponse;
+      return response.data as SpaceMember;
     },
     [projectId]
   );

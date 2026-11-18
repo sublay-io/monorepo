@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { DeclineMemberResponse } from "../../interfaces/Space";
+import { SpaceMember } from "../../interfaces/SpaceMember";
 
 export interface DeclineMembershipProps {
   spaceId: string;
@@ -15,9 +15,9 @@ export interface DeclineMembershipProps {
 export async function declineMembership(
   client: SublayHttpClient,
   data: DeclineMembershipProps
-): Promise<DeclineMemberResponse> {
+): Promise<SpaceMember> {
   const { spaceId, userId, actingUserId } = data;
-  const response = await client.projectInstance.post<DeclineMemberResponse>(
+  const response = await client.projectInstance.post<SpaceMember>(
     `/spaces/${spaceId}/members/${userId}/decline`,
     { actingUserId }
   );

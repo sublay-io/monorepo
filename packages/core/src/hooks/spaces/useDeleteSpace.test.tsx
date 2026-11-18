@@ -3,27 +3,23 @@ import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks } from "../../test-utils";
 import useDeleteSpace from "./useDeleteSpace";
-import type { DeleteSpaceResponse } from "../../interfaces/models/Space";
 
 afterEach(() => {
   resetAxiosMocks();
 });
 
 describe("useDeleteSpace", () => {
-  it("deletes the space and returns the confirmation message", async () => {
+  it("deletes the space and resolves with nothing", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useDeleteSpace());
 
-    const response: DeleteSpaceResponse = {
-      message: "Space deleted successfully.",
-    };
-    axiosPrivate.mockResponse("delete", response);
+    axiosPrivate.mockResponse("delete", "", 204);
 
-    let returned: DeleteSpaceResponse | undefined;
+    let returned: unknown = "unset";
     await act(async () => {
       returned = await result.current({ spaceId: "space-1" });
     });
 
-    expect(returned).toEqual(response);
+    expect(returned).toBeUndefined();
 
     const [call] = axiosPrivate.calls("delete");
     expect(call.url).toBe("/test-project/spaces/space-1");

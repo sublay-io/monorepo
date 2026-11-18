@@ -7,10 +7,9 @@ export interface LeaveConversationProps {
 export async function leaveConversation(
   client: SublayHttpClient,
   data: LeaveConversationProps
-): Promise<{ message: string }> {
+): Promise<void> {
   const { conversationId } = data;
-  const response = await client.projectInstance.delete<{ message: string }>(
+  await client.projectInstance.delete<void>(
     `/chat/conversations/${conversationId}/members/me`
   );
-  return response.data;
 }

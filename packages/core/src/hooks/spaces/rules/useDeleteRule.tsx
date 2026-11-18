@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import useProject from "../../projects/useProject";
-import { DeleteRuleResponse } from "../../../interfaces/models/Rule";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 
 export interface DeleteRuleProps {
@@ -8,7 +7,7 @@ export interface DeleteRuleProps {
   ruleId: string;
 }
 
-function useDeleteRule(): (props: DeleteRuleProps) => Promise<DeleteRuleResponse> {
+function useDeleteRule(): (props: DeleteRuleProps) => Promise<void> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -26,11 +25,9 @@ function useDeleteRule(): (props: DeleteRuleProps) => Promise<DeleteRuleResponse
         throw new Error("Please pass a ruleId");
       }
 
-      const response = await axios.delete(
+      await axios.delete(
         `/${projectId}/spaces/${spaceId}/rules/${ruleId}`
       );
-
-      return response.data as DeleteRuleResponse;
     },
     [projectId, axios]
   );

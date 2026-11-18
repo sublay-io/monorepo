@@ -4,18 +4,12 @@ export interface SetPasswordProps {
   newPassword: string;
 }
 
-export interface SetPasswordResponse {
-  success: boolean;
-  message: string;
-}
-
 export async function setPassword(
   client: SublayHttpClient,
   data: SetPasswordProps
-): Promise<SetPasswordResponse> {
-  const response = await client.projectInstance.post<SetPasswordResponse>(
+): Promise<void> {
+  await client.projectInstance.post<void>(
     "/auth/set-password",
     data
   );
-  return response.data;
 }

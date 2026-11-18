@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useSendVerificationEmail` returns a function that sends a verification email to the currently authenticated user. The token expires after 5 minutes. Calling it on an already-verified user is a no-op (returns `{ success: true }` without sending).
+`useSendVerificationEmail` returns a function that sends a verification email to the currently authenticated user. The token expires after 5 minutes. Calling it on an already-verified user is a no-op (resolves without sending).
 
 ## Usage Example
 
@@ -111,11 +111,7 @@ The returned function requires a props object — `mode` is always required, and
 
 ## Returns
 
-The hook returns an async function. That function resolves to:
-
-<ResponseField name="success" type="boolean">
-  `true` when the request completes without a server error.
-</ResponseField>
+The hook returns an async function that resolves with nothing (`Promise<void>`) when the request completes without a server error.
 
 ## See Also
 

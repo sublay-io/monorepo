@@ -69,7 +69,7 @@ A minimal space shape used only as an embedded reference — never returned dire
 
 ## SpaceMemberPermissions
 
-Always included in `SpaceDetailed.memberPermissions`, and returned as `memberPermissions` by [Create Space](/v8/api-reference/spaces/create-space), [Update Space](/v8/api-reference/spaces/update-space), [Join Space](/v8/api-reference/spaces/membership/join-space) and [Leave Space](/v8/api-reference/spaces/membership/leave-space). [Check My Membership](/v8/api-reference/spaces/membership/check-my-membership) returns the same values as `permissions`. Lists of spaces don't carry it.
+Always included in `SpaceDetailed.memberPermissions`, and returned as `memberPermissions` by [Create Space](/v8/api-reference/spaces/create-space) and [Update Space](/v8/api-reference/spaces/update-space). [Join Space](/v8/api-reference/spaces/membership/join-space) and [Leave Space](/v8/api-reference/spaces/membership/leave-space) don't return it: fetch the space again after either to read the new values. [Check My Membership](/v8/api-reference/spaces/membership/check-my-membership) returns the same values as `permissions`. Lists of spaces don't carry it.
 
 | Property | Type | Description |
 |----------|------|-------------|

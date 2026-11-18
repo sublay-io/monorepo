@@ -96,13 +96,12 @@ describe("js-sdk oauth — response mapping", () => {
     expect(response).toEqual(result);
   });
 
-  it("unlinkIdentity returns the success result as-is", async () => {
+  it("unlinkIdentity resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { success: true };
-    projectInstance.delete.mockResolvedValueOnce({ data: result });
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
 
     const response = await unlinkIdentity(client, { identityId: "ident1" });
 
-    expect(response).toEqual(result);
+    expect(response).toBeUndefined();
   });
 });

@@ -13,8 +13,13 @@ describe("useUpdateMemberRole", () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateMemberRole());
 
     const response = {
-      message: "Updated",
-      membership: { id: "membership-1", role: "moderator" as const, status: "active", joinedAt: "2024-01-01T00:00:00.000Z", userId: "user-2" },
+      id: "membership-1",
+      spaceId: "space-1",
+      userId: "user-2",
+      role: "moderator" as const,
+      status: "active" as const,
+      joinedAt: "2024-01-01T00:00:00.000Z",
+      createdAt: "2024-01-01T00:00:00.000Z",
     };
     axiosPrivate.mockResponse("patch", response);
 

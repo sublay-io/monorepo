@@ -16,14 +16,14 @@ describe("useVerifyEmail", () => {
       store.dispatch(setUserInUserSlice(makeAuthUser({ isVerified: false })));
     });
 
-    axiosPublic.mockResponse("post", { success: true });
+    axiosPublic.mockResponse("post", "", 204);
 
     let returned;
     await act(async () => {
       returned = await result.current({ token: "  abc123  " });
     });
 
-    expect(returned).toEqual({ success: true });
+    expect(returned).toBeUndefined();
 
     const [call] = axiosPublic.calls("post");
     expect(call.url).toBe("/test-project/auth/verify-email");
@@ -38,7 +38,7 @@ describe("useVerifyEmail", () => {
       store.dispatch(setUserInUserSlice(makeAuthUser({ isVerified: false })));
     });
 
-    axiosPublic.mockResponse("post", { success: true });
+    axiosPublic.mockResponse("post", "", 204);
 
     await act(async () => {
       await result.current({ token: " 123456 ", verificationId: "vid-1" });
@@ -53,7 +53,7 @@ describe("useVerifyEmail", () => {
   it("does not throw when optimistically updating with no user yet in the slice", async () => {
     const { result, store, axiosPublic } = renderHookWithAxios(() => useVerifyEmail());
 
-    axiosPublic.mockResponse("post", { success: true });
+    axiosPublic.mockResponse("post", "", 204);
 
     await act(async () => {
       await result.current({ token: "abc123" });

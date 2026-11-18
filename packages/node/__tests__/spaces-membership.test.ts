@@ -13,6 +13,19 @@ import {
 } from "../src/modules/spaces";
 import { makeClient } from "./helpers/mockClient";
 
+// What the member actions answer with: the membership record itself.
+function membershipRecord(status: string, role: string) {
+  return {
+    id: "m1",
+    spaceId: "s1",
+    userId: "u-target",
+    role,
+    status,
+    joinedAt: "2026-01-01T00:00:00.000Z",
+    createdAt: "2026-01-01T00:00:00.000Z",
+  };
+}
+
 describe("node-sdk spaces (membership) — request shaping", () => {
   it("joinSpace posts actingUserId to /spaces/:id/join", async () => {
     const { client, projectInstance } = makeClient();
@@ -88,10 +101,7 @@ describe("node-sdk spaces (membership) — request shaping", () => {
 
   it("addMember returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = {
-      message: "User added to the space.",
-      membership: { id: "m1", spaceId: "s1", userId: "u-target", role: "member", status: "active" },
-    };
+    const result = membershipRecord("active", "member");
     projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
       addMember(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" }),
@@ -143,20 +153,19 @@ describe("node-sdk spaces (membership) — request shaping", () => {
 describe("node-sdk spaces (membership) — response mapping", () => {
   it("joinSpace returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { membership: { id: "m1", status: "active" } };
+    const result = membershipRecord("active", "member");
     projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
       joinSpace(client, { spaceId: "s1", actingUserId: "u1" }),
     ).resolves.toEqual(result);
   });
 
-  it("leaveSpace returns response.data", async () => {
+  it("leaveSpace resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { left: true };
-    projectInstance.delete.mockResolvedValueOnce({ data: result });
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
     await expect(
       leaveSpace(client, { spaceId: "s1", actingUserId: "u1" }),
-    ).resolves.toEqual(result);
+    ).resolves.toBeUndefined();
   });
 
   it("checkMyMembership returns response.data", async () => {
@@ -190,7 +199,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
 
   it("updateMemberRole returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { membership: { id: "m1", role: "moderator" } };
+    const result = membershipRecord("active", "moderator");
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
       updateMemberRole(client, {
@@ -204,7 +213,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
 
   it("approveMembership returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "approved", membership: { id: "m1", status: "active" } };
+    const result = membershipRecord("active", "member");
     projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
       approveMembership(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" }),
@@ -213,7 +222,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
 
   it("declineMembership returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "declined", membership: { id: "m1", status: "rejected" } };
+    const result = membershipRecord("rejected", "member");
     projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
       declineMembership(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" }),
@@ -222,7 +231,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
 
   it("banMember returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "banned", membership: { id: "m1", status: "banned" as const } };
+    const result = membershipRecord("banned", "member");
     projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
       banMember(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" }),
@@ -231,7 +240,7 @@ describe("node-sdk spaces (membership) — response mapping", () => {
 
   it("unbanMember returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "unbanned", membership: { id: "m1", status: "active" as const } };
+    const result = membershipRecord("active", "member");
     projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
       unbanMember(client, { spaceId: "s1", userId: "u-target", actingUserId: "u-actor" }),

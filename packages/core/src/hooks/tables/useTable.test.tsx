@@ -105,7 +105,7 @@ beforeEach(() => {
       return jsonResponse({ id: "1", name: "updated" });
     }
     if (method === "DELETE" && url.includes("/db/Events/1")) {
-      return jsonResponse({ deleted: true, soft: !url.includes("force=true") });
+      return new Response(null, { status: 204 });
     }
     return jsonResponse({}, 404);
   });
@@ -202,15 +202,15 @@ describe("useTable", () => {
     expect(patchCall?.url).toContain("/db/Events/1");
   });
 
-  it("deleteRow issues a DELETE and reports soft-delete by default", async () => {
+  it("deleteRow issues a DELETE and resolves with nothing", async () => {
     const { result } = renderHookWithStore(() => useTable("Events"));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    let outcome: { deleted: boolean; soft: boolean } | undefined;
+    let outcome: unknown = "unset";
     await act(async () => {
       outcome = await result.current.deleteRow("1");
     });
-    expect(outcome).toEqual({ deleted: true, soft: true });
+    expect(outcome).toBeUndefined();
 
     const deleteCall = fetchHandle.calls().find((c) => c.method === "DELETE");
     expect(deleteCall?.url).toContain("/db/Events/1");

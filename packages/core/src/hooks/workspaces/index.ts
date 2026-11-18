@@ -14,7 +14,6 @@ export type { UpdateWorkspaceInheritFlagProps } from "./useUpdateWorkspaceInheri
 export { default as useDeleteWorkspace } from "./useDeleteWorkspace";
 export type {
   DeleteWorkspaceProps,
-  DeleteWorkspaceResponse,
 } from "./useDeleteWorkspace";
 export { default as useTransferWorkspaceOwnership } from "./useTransferWorkspaceOwnership";
 export type { TransferWorkspaceOwnershipProps } from "./useTransferWorkspaceOwnership";
@@ -52,7 +51,6 @@ export type { FetchWorkspaceInvitesProps } from "./useFetchWorkspaceInvites";
 export { default as useRevokeWorkspaceInvite } from "./useRevokeWorkspaceInvite";
 export type {
   RevokeWorkspaceInviteProps,
-  RevokeWorkspaceInviteResponse,
 } from "./useRevokeWorkspaceInvite";
 export { default as useResendWorkspaceInvite } from "./useResendWorkspaceInvite";
 export type { ResendWorkspaceInviteProps } from "./useResendWorkspaceInvite";
@@ -65,7 +63,6 @@ export type {
 export { default as useDeclineWorkspaceInvite } from "./useDeclineWorkspaceInvite";
 export type {
   DeclineWorkspaceInviteProps,
-  DeclineWorkspaceInviteResponse,
 } from "./useDeclineWorkspaceInvite";
 
 // Authority-as-a-service

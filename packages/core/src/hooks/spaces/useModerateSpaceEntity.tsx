@@ -10,7 +10,6 @@ export interface ModerateSpaceEntityProps {
 }
 
 interface ModerateResponse {
-  message: string;
   moderationStatus: "approved" | "removed";
 }
 

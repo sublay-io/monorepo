@@ -14,7 +14,7 @@ describe("useModerateSpaceComment", () => {
       useModerateSpaceComment(),
     );
 
-    axiosPrivate.mockResponse("patch", { message: "Removed", moderationStatus: "removed" });
+    axiosPrivate.mockResponse("patch", { moderationStatus: "removed" });
 
     let returned;
     await act(async () => {
@@ -26,7 +26,7 @@ describe("useModerateSpaceComment", () => {
       });
     });
 
-    expect(returned).toEqual({ message: "Removed", moderationStatus: "removed" });
+    expect(returned).toEqual({ moderationStatus: "removed" });
 
     const [call] = axiosPrivate.calls("patch");
     expect(call.url).toBe("/test-project/spaces/space-1/comments/comment-1/moderation");
@@ -38,7 +38,7 @@ describe("useModerateSpaceComment", () => {
       useModerateSpaceComment(),
     );
 
-    axiosPrivate.mockResponse("patch", { message: "Approved", moderationStatus: "approved" });
+    axiosPrivate.mockResponse("patch", { moderationStatus: "approved" });
 
     await act(async () => {
       await result.current({ spaceId: "space-1", commentId: "comment-1", action: "approve" });

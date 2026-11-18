@@ -215,6 +215,7 @@ export type {
   SpaceIncludeArray,
   SpaceIncludeParam,
 } from "./interfaces/Space";
+export type { SpaceMember } from "./interfaces/SpaceMember";
 export type {
   EventInclude,
   EventIncludeArray,
@@ -263,7 +264,6 @@ export type {
   DbFilter,
   DbFilterOperator,
   BulkDeleteProps,
-  DeleteResult,
   BulkDeleteResult,
   BulkCreateResult,
 } from "./interfaces/Table";

@@ -95,7 +95,7 @@ beforeEach(() => {
       return jsonResponse(ROW_B);
     }
     if (method === "DELETE" && url.endsWith(`/db/Events/${ID_A}`)) {
-      return jsonResponse({ deleted: true, soft: false });
+      return new Response(null, { status: 204 });
     }
     if (method === "PATCH" && url.endsWith(`/db/Events/${ID_A}`)) {
       rowAName = "renamed";

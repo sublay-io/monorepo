@@ -20,11 +20,6 @@ export interface ChangePasswordProps {
   pushDevice?: PushDeviceIdentifier;
 }
 
-export interface ChangePasswordResponse {
-  success: boolean;
-  message: string;
-}
-
 /**
  * Change the signed-in user's password.
  *
@@ -37,8 +32,8 @@ export interface ChangePasswordResponse {
 export async function changePassword(
   client: SublayHttpClient,
   data: ChangePasswordProps
-): Promise<ChangePasswordResponse> {
-  const response = await client.projectInstance.post<ChangePasswordResponse>(
+): Promise<void> {
+  await client.projectInstance.post<void>(
     "/auth/change-password",
     {
       password: data.password,
@@ -46,5 +41,4 @@ export async function changePassword(
       ...(data.pushDevice ? { pushDevice: data.pushDevice } : {}),
     }
   );
-  return response.data;
 }

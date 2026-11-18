@@ -22,24 +22,15 @@ A private space can't be joined and takes no join requests: joining a space the 
 
 ## Response
 
-<ResponseField name="message" type="string">
-  Confirmation message.
-</ResponseField>
+The user's membership record, as a [SpaceMember](/v8/data-models/space-member) object: `201` for a new membership, `200` for a rejoin after a declined request. To read what the user may do in the space now, fetch the space again ([Fetch Space](/v8/api-reference/spaces/fetch-space)): its `memberPermissions` describe them. A request awaiting approval has `status: "pending"`, and the space's `memberPermissions` then report `isMember: false`.
 
-<ResponseField name="membership" type="object">
-  <Expandable title="properties">
-    <ResponseField name="id" type="string">Membership record UUID.</ResponseField>
-    <ResponseField name="spaceId" type="string">Space UUID.</ResponseField>
-    <ResponseField name="userId" type="string">User UUID.</ResponseField>
-    <ResponseField name="role" type="string">`"member"`</ResponseField>
-    <ResponseField name="status" type="string">`"pending"` or `"active"`</ResponseField>
-    <ResponseField name="joinedAt" type="Date">Creation timestamp.</ResponseField>
-  </Expandable>
-</ResponseField>
-
-<ResponseField name="memberPermissions" type="SpaceMemberPermissions">
-  What the user may do in the space now, as a [SpaceMemberPermissions](/v8/data-models/space#spacememberpermissions) object. Returned on both successes: a new membership (`201`) and a rejoin after a declined request (`200`). A request awaiting approval reports `status: "pending"` and `isMember: false`.
-</ResponseField>
+<ResponseField name="id" type="string">Membership id.</ResponseField>
+<ResponseField name="spaceId" type="string">The space.</ResponseField>
+<ResponseField name="userId" type="string">The member.</ResponseField>
+<ResponseField name="role" type="'admin' | 'moderator' | 'member'">Always `member`.</ResponseField>
+<ResponseField name="status" type="'pending' | 'active' | 'banned' | 'rejected'">`active`, or `pending` when the space requires approval.</ResponseField>
+<ResponseField name="joinedAt" type="string">When the membership became active; on a request still awaiting approval, when the request was made (ISO 8601).</ResponseField>
+<ResponseField name="createdAt" type="string">When the membership record was created (ISO 8601).</ResponseField>
 
 ## Error Responses
 

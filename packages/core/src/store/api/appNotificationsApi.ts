@@ -22,10 +22,6 @@ interface MarkAllNotificationsAsReadParams {
   projectId: string;
 }
 
-interface MarkAllNotificationsAsReadResponse {
-  markedAsRead: number;
-}
-
 // Extended API with app notifications endpoints
 export const appNotificationsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -114,7 +110,7 @@ export const appNotificationsApi = baseApi.injectEndpoints({
 
     // Mark all notifications as read
     markAllNotificationsAsRead: builder.mutation<
-      MarkAllNotificationsAsReadResponse,
+      void,
       MarkAllNotificationsAsReadParams
     >({
       query: ({ projectId }) => ({

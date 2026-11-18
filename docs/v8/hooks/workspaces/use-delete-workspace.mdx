@@ -23,8 +23,7 @@ function DangerZone({ workspaceId }: { workspaceId: string }) {
   const deleteWorkspace = useDeleteWorkspace();
 
   const handleDelete = async () => {
-    const { message } = await deleteWorkspace({ workspaceId });
-    console.log(message);
+    await deleteWorkspace({ workspaceId });
   };
 
   return <button onClick={handleDelete}>Delete workspace</button>;
@@ -39,7 +38,7 @@ function DangerZone({ workspaceId }: { workspaceId: string }) {
 
 ## Returns
 
-`{ message: string }`.
+`Promise<void>`: resolves with nothing once the workspace and its subtree are deleted.
 
 ## Error codes
 

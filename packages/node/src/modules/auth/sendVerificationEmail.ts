@@ -45,18 +45,12 @@ export type SendVerificationEmailProps =
   | SendCodeVerificationEmailShortProps
   | SendLinkVerificationEmailProps;
 
-export interface SendVerificationEmailResponse {
-  success: boolean;
-}
-
 export async function sendVerificationEmail(
   client: SublayHttpClient,
   data: SendVerificationEmailProps
-): Promise<SendVerificationEmailResponse> {
-  const response =
-    await client.projectInstance.post<SendVerificationEmailResponse>(
-      "/auth/send-verification-email",
-      data
-    );
-  return response.data;
+): Promise<void> {
+  await client.projectInstance.post<void>(
+    "/auth/send-verification-email",
+    data
+  );
 }

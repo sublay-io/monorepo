@@ -1,5 +1,4 @@
 import { SublayHttpClient } from "../../core/client";
-import { LeaveSpaceResponse } from "../../interfaces/Space";
 
 export interface LeaveSpaceProps {
   spaceId: string;
@@ -8,10 +7,9 @@ export interface LeaveSpaceProps {
 export async function leaveSpace(
   client: SublayHttpClient,
   data: LeaveSpaceProps
-): Promise<LeaveSpaceResponse> {
+): Promise<void> {
   const { spaceId } = data;
-  const response = await client.projectInstance.delete<LeaveSpaceResponse>(
+  await client.projectInstance.delete<void>(
     `/spaces/${spaceId}/members/me`
   );
-  return response.data;
 }

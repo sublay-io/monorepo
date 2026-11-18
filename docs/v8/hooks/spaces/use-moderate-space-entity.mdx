@@ -45,6 +45,8 @@ function EntityModerationActions({ spaceId, entityId }: { spaceId: string; entit
 
 ## Returns
 
-A confirmation response from the server.
+<ResponseField name="moderationStatus" type='"approved" | "removed"'>
+  The resulting status.
+</ResponseField>
 
 For integration guidance, see [Moderation](/v8/sdk/spaces/moderation).

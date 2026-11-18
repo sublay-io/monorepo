@@ -30,13 +30,7 @@ On a **paranoid** table the row is soft-deleted (its `deletedAt` is set) and can
 
 ## Response
 
-<ResponseField name="deleted" type="boolean">
-  Always `true` when the call succeeds.
-</ResponseField>
-
-<ResponseField name="soft" type="boolean">
-  Whether the row was soft-deleted (`true`) or removed permanently (`false`). Read this rather than assuming, since it reflects both the table's `paranoid` setting and `force`.
-</ResponseField>
+`204 No Content` on success, with no body. Whether the row was soft-deleted or removed permanently follows the table's `paranoid` setting and `force`, as described above.
 
 ## Error Responses
 

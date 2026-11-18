@@ -18,19 +18,7 @@ Marks all unread notifications as read for the currently authenticated user. Onl
 
 ## Response
 
-Returns HTTP `200` with the number of notifications that were updated:
-
-<ResponseField name="markedAsRead" type="number">
-  The count of notifications that were updated from unread to read. Returns `0` if there were no unread notifications.
-</ResponseField>
-
-**Example:**
-
-```json
-{
-  "markedAsRead": 12
-}
-```
+`204 No Content` on success, with no body, including when there were no unread notifications.
 
 ## Error Responses
 

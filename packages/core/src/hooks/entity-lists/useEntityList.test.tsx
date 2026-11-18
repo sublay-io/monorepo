@@ -311,7 +311,7 @@ describe("useEntityList", () => {
       await waitFor(() => expect(result.current.entities).toHaveLength(1));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(
-        new Response("OK", { status: 200, headers: { "content-type": "text/plain" } }),
+        new Response(null, { status: 204 }),
       );
       await act(async () => {
         await result.current.deleteEntity({ entityId: "e1" });

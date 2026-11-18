@@ -44,10 +44,4 @@ function RoleSelector({ spaceId, userId }: { spaceId: string; userId: string }) 
 
 ## Returns
 
-<ResponseField name="message" type="string">
-  Confirmation message.
-</ResponseField>
-
-<ResponseField name="membership" type="object">
-  Updated membership with `id`, `role`, `status`, `joinedAt`, and `userId`.
-</ResponseField>
+Resolves with the updated membership record, as a [SpaceMember](/v8/data-models/space-member) object: `id`, `spaceId`, `userId`, `role`, `status`, `joinedAt` and `createdAt`. When the member already has the role, nothing changes and the record comes back as it is.

@@ -16,14 +16,14 @@ Members are addressed by their **user id**. Your own membership is checked with 
 Joins a space as the logged-in user, or requests to join if the space requires approval. A private space can't be joined: joining a space the user can't see answers `404 space/not-found`. Its moderators and admins add members with [addMember](#addmember).
 
 ```typescript
-const result = await sublay.spaces.joinSpace({ spaceId: "spc_abc123" });
+const membership = await sublay.spaces.joinSpace({ spaceId: "spc_abc123" });
 ```
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
 </ParamField>
 
-**Returns** — `Promise<JoinSpaceResponse>`: `{ message, membership, memberPermissions }`, where [`memberPermissions`](/v8/data-models/space#spacememberpermissions) is what the user may do in the space now (a request awaiting approval reports `status: "pending"` and `isMember: false`).
+**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)). `status` is `"pending"` when the space requires approval. The response carries no permissions: fetch the space again to read its [`memberPermissions`](/v8/data-models/space#spacememberpermissions) after joining.
 
 ---
 
@@ -32,14 +32,14 @@ const result = await sublay.spaces.joinSpace({ spaceId: "spc_abc123" });
 Leaves a space as the logged-in user (`DELETE /spaces/:spaceId/members/me`). The space creator can't leave (`409 space/creator-cannot-leave`).
 
 ```typescript
-const result = await sublay.spaces.leaveSpace({ spaceId: "spc_abc123" });
+await sublay.spaces.leaveSpace({ spaceId: "spc_abc123" });
 ```
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
 </ParamField>
 
-**Returns** — `Promise<LeaveSpaceResponse>`: `{ message, memberPermissions }`, where [`memberPermissions`](/v8/data-models/space#spacememberpermissions) is what the user may still do in the space as a non-member.
+**Returns** — `Promise<void>`. It resolves with no value once the user has left. Fetch the space again to read its [`memberPermissions`](/v8/data-models/space#spacememberpermissions), what the user may still do in it as a non-member.
 
 ---
 
@@ -145,7 +145,7 @@ const result = await sublay.spaces.updateMemberRole({
   The new role: `"admin"`, `"moderator"`, or `"member"`.
 </ParamField>
 
-**Returns** — `Promise<UpdateMemberRoleResponse>`
+**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)).
 
 ---
 
@@ -153,7 +153,7 @@ const result = await sublay.spaces.updateMemberRole({
 
 Adds a user to a space directly: they become an active member at once, with no request or approval step. The logged-in user must be an active moderator or admin of the space. This is how users get into a private space, which can't be joined.
 
-A user with a `pending` or `rejected` membership becomes active; one who is already an active member is left as they are (`message` says so). A banned user can't be added until unbanned (`409 space/member-banned`), nor can a user banned in a parent space (`409 space/banned-in-parent`). A user can't be added when there is a block between them and the adder, in either direction, or when they are suspended (`403 space/user-cannot-be-added`; the response doesn't say which). The added user gets a `space-member-added` notification. See [Add Member](/v8/api-reference/spaces/membership/add-member) for every case and error.
+A user with a `pending` or `rejected` membership becomes active; one who is already an active member is left as they are. A banned user can't be added until unbanned (`409 space/member-banned`), nor can a user banned in a parent space (`409 space/banned-in-parent`). A user can't be added when there is a block between them and the adder, in either direction, or when they are suspended (`403 space/user-cannot-be-added`; the response doesn't say which). The added user gets a `space-member-added` notification. See [Add Member](/v8/api-reference/spaces/membership/add-member) for every case and error.
 
 ```typescript
 const result = await sublay.spaces.addMember({
@@ -170,7 +170,7 @@ const result = await sublay.spaces.addMember({
   The user to add.
 </ParamField>
 
-**Returns** — `Promise<AddMemberResponse>`: `{ message, membership }`, where `membership` has `id`, `spaceId`, `userId`, `role`, `status: "active"`, `joinedAt` and `createdAt`.
+**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)), with `status: "active"`. `role` is `member` for a user just added; one who was already an active member keeps their role.
 
 ---
 
@@ -193,7 +193,7 @@ const result = await sublay.spaces.approveMembership({
   The user id of the pending member. Your own id is refused (`400 space/own-member-id`).
 </ParamField>
 
-**Returns** — `Promise<ApproveMemberResponse>`
+**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)), with `status: "active"`.
 
 ---
 
@@ -216,7 +216,7 @@ const result = await sublay.spaces.declineMembership({
   The user id of the pending member. Your own id is refused (`400 space/own-member-id`).
 </ParamField>
 
-**Returns** — `Promise<DeclineMemberResponse>`
+**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)), with `status: "rejected"`.
 
 ---
 
@@ -243,7 +243,7 @@ const result = await sublay.spaces.banMember({
   Why the member is banned; kept in the space's ban log.
 </ParamField>
 
-**Returns** — `Promise<{ message: string; membership: { id: string; status: "banned" } }>`
+**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)), with `status: "banned"`.
 
 ---
 
@@ -266,4 +266,4 @@ const result = await sublay.spaces.unbanMember({
   The user id of the member to unban. Your own id is refused (`400 space/own-member-id`).
 </ParamField>
 
-**Returns** — `Promise<{ message: string; membership: { id: string; status: "active" } }>`
+**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)), with `status: "active"`.

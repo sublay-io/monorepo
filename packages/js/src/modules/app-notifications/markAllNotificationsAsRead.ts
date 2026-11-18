@@ -1,15 +1,9 @@
 import { SublayHttpClient } from "../../core/client";
 
-export interface MarkAllNotificationsAsReadResponse {
-  markedAsRead: number;
-}
-
 export async function markAllNotificationsAsRead(
   client: SublayHttpClient
-): Promise<MarkAllNotificationsAsReadResponse> {
-  const response =
-    await client.projectInstance.post<MarkAllNotificationsAsReadResponse>(
-      "/app-notifications/mark-all-as-read"
-    );
-  return response.data;
+): Promise<void> {
+  await client.projectInstance.post<void>(
+    "/app-notifications/mark-all-as-read"
+  );
 }

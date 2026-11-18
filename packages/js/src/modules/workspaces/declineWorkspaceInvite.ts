@@ -4,10 +4,6 @@ export interface DeclineWorkspaceInviteProps {
   inviteId: string;
 }
 
-export interface DeclineWorkspaceInviteResponse {
-  success: boolean;
-}
-
 /**
  * Decline an invitation — identity-matched to the bearer-token user, and
  * verified-email-gated (the same gate as accept, so an unverified squatter on
@@ -17,12 +13,10 @@ export interface DeclineWorkspaceInviteResponse {
 export async function declineWorkspaceInvite(
   client: SublayHttpClient,
   data: DeclineWorkspaceInviteProps
-): Promise<DeclineWorkspaceInviteResponse> {
+): Promise<void> {
   const { inviteId } = data;
-  const response =
-    await client.projectInstance.post<DeclineWorkspaceInviteResponse>(
-      `/workspace-invites/${inviteId}/decline`,
-      {}
-    );
-  return response.data;
+  await client.projectInstance.post<void>(
+    `/workspace-invites/${inviteId}/decline`,
+    {}
+  );
 }

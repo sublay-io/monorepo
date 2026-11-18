@@ -36,10 +36,4 @@ function DeleteRuleButton({ spaceId, ruleId }: { spaceId: string; ruleId: string
 
 ## Returns
 
-<ResponseField name="message" type="string">
-  Confirmation message.
-</ResponseField>
-
-<ResponseField name="deletedRule" type="object">
-  The `id` and `title` of the deleted rule.
-</ResponseField>
+`Promise<void>`: resolves with nothing once the rule is deleted.

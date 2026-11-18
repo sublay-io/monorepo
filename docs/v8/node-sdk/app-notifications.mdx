@@ -88,14 +88,13 @@ await sublay.appNotifications.markNotificationAsRead({
 Marks all of a user's unread notifications as read.
 
 ```typescript
-const { markedAsRead } =
-  await sublay.appNotifications.markAllNotificationsAsRead({
-    actingUserId: "usr_abc123",
-  });
+await sublay.appNotifications.markAllNotificationsAsRead({
+  actingUserId: "usr_abc123",
+});
 ```
 
 <ParamField body="actingUserId" type="string" required>
   The user the service key acts as, whose notifications to mark as read.
 </ParamField>
 
-**Returns** — `Promise<{ markedAsRead: number }>`
+**Returns** — `Promise<void>`

@@ -71,7 +71,7 @@ await sublay.appNotifications.markNotificationAsRead({
 Marks all the user's notifications as read.
 
 ```typescript
-const { markedAsRead } = await sublay.appNotifications.markAllNotificationsAsRead();
+await sublay.appNotifications.markAllNotificationsAsRead();
 ```
 
-**Returns** — `Promise<{ markedAsRead: number }>`
+**Returns** — `Promise<void>`

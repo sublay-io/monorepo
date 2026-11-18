@@ -38,10 +38,4 @@ function AddToSpaceButton({ spaceId, userId }: { spaceId: string; userId: string
 
 ## Returns
 
-<ResponseField name="message" type="string">
-  `"User added to the space."`, or `"User is already a member of this space."` when nothing changed.
-</ResponseField>
-
-<ResponseField name="membership" type="object">
-  The user's membership: `id`, `spaceId`, `userId`, `role` (`member` for a user just added; an existing active member keeps their role), `status: "active"`, `joinedAt` and `createdAt`.
-</ResponseField>
+Resolves with the user's membership record (`status: "active"`), as a [SpaceMember](/v8/data-models/space-member) object: `id`, `spaceId`, `userId`, `role`, `status`, `joinedAt` and `createdAt`. `role` is `member` for a user just added; a user who was already an active member keeps their role.

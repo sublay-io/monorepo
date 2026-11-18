@@ -61,11 +61,7 @@ The returned function takes no arguments — it always acts on the currently aut
 
 ## Returns
 
-The hook returns an async function. That function resolves to:
-
-<ResponseField name="success" type="boolean">
-  `true` when the request completes without a server error.
-</ResponseField>
+The hook returns an async function that resolves with nothing (`Promise<void>`) when the request completes without a server error.
 
 ## See Also
 

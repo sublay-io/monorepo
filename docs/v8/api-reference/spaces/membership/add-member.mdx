@@ -43,23 +43,15 @@ The body takes no other fields: any other field is refused with `400 space/inval
 
 ## Response
 
-<ResponseField name="message" type="string">
-  `"User added to the space."`, or `"User is already a member of this space."` when nothing changed.
-</ResponseField>
+The user's membership record, as a [SpaceMember](/v8/data-models/space-member) object: `201` when it was just created, `200` otherwise (see the table above).
 
-<ResponseField name="membership" type="object">
-  The user's membership.
-
-  <Expandable title="properties">
-    <ResponseField name="id" type="string">Membership id.</ResponseField>
-    <ResponseField name="spaceId" type="string">The space.</ResponseField>
-    <ResponseField name="userId" type="string">The added user.</ResponseField>
-    <ResponseField name="role" type="'admin' | 'moderator' | 'member'">`member` for a user just added. A user who was already an active member keeps their role.</ResponseField>
-    <ResponseField name="status" type="'active'">Always `active`.</ResponseField>
-    <ResponseField name="joinedAt" type="string">When the membership became active (ISO 8601).</ResponseField>
-    <ResponseField name="createdAt" type="string">When the membership record was created (ISO 8601).</ResponseField>
-  </Expandable>
-</ResponseField>
+<ResponseField name="id" type="string">Membership id.</ResponseField>
+<ResponseField name="spaceId" type="string">The space.</ResponseField>
+<ResponseField name="userId" type="string">The member.</ResponseField>
+<ResponseField name="role" type="'admin' | 'moderator' | 'member'">`member` for a user just added. A user who was already an active member keeps their role.</ResponseField>
+<ResponseField name="status" type="'pending' | 'active' | 'banned' | 'rejected'">Always `active`.</ResponseField>
+<ResponseField name="joinedAt" type="string">When the membership became active (ISO 8601).</ResponseField>
+<ResponseField name="createdAt" type="string">When the membership record was created (ISO 8601).</ResponseField>
 
 ## Errors
 

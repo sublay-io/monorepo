@@ -36,6 +36,4 @@ function BannedMemberRow({ spaceId, userId }: { spaceId: string; userId: string 
 
 ## Returns
 
-<ResponseField name="message" type="string">
-  Confirmation message.
-</ResponseField>
+Resolves with the unbanned membership record (`status: "active"`), as a [SpaceMember](/v8/data-models/space-member) object: `id`, `spaceId`, `userId`, `role`, `status`, `joinedAt` and `createdAt`.

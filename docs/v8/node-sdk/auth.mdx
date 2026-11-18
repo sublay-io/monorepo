@@ -237,7 +237,7 @@ await sublay.auth.verifyEmail({ token: code, verificationId });
 Sends (or re-sends) an email-verification message to a user. Verification can be delivered as a short code or as a clickable link.
 
 ```typescript
-const { success } = await sublay.auth.sendVerificationEmail({
+await sublay.auth.sendVerificationEmail({
   actingUserId: "usr_abc123",
   mode: "code",
   tokenFormat: "numeric",
@@ -274,4 +274,4 @@ const { success } = await sublay.auth.sendVerificationEmail({
   Must be an `https` address on one of your project's **Verified Domains** (Dashboard → Settings → Domains). Each entry covers exactly the host it names, never its subdomains: `example.com` allows `https://example.com/…` on any port, but not `www.example.com`, which needs its own entry. A full address such as `https://app.example.com` covers only that host and port. `localhost` and `*.localhost` are always allowed, over `http` too. Anything else, including a custom-scheme deep link such as `myapp://verified`, is refused with `400 auth/redirect-url-not-allowed` and no email is sent.
 </ParamField>
 
-**Returns** — `Promise<{ success: boolean }>`
+**Returns** — `Promise<void>`

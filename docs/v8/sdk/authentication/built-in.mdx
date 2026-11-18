@@ -267,9 +267,8 @@ function ForgotPasswordForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
-    const result = await requestPasswordReset({ email: form.email.value });
-    console.log(result.message);
-    // Always returns a success message to prevent email enumeration
+    await requestPasswordReset({ email: form.email.value });
+    // Resolves the same way whether or not the email is registered
   };
 
   return (
@@ -282,7 +281,7 @@ function ForgotPasswordForm() {
 ```
 
 <Note>
-  The API always responds with a success message regardless of whether the email
+  The API gives the same answer (`204`, no body) whether or not the email
   address is registered, to prevent user enumeration.
 </Note>
 

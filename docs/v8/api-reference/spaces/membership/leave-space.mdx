@@ -20,13 +20,7 @@ Removes the acting user's membership (the token's user, or the user a service ke
 
 ## Response
 
-<ResponseField name="message" type="string">
-  Confirmation message.
-</ResponseField>
-
-<ResponseField name="memberPermissions" type="SpaceMemberPermissions">
-  What the user may still do in the space, now as a non-member (`isMember: false`, `status: null`), as a [SpaceMemberPermissions](/v8/data-models/space#spacememberpermissions) object.
-</ResponseField>
+`204 No Content` on success, with no body. To read the user's permissions in the space now, as a non-member, fetch the space again ([Fetch Space](/v8/api-reference/spaces/fetch-space)): its `memberPermissions` describe them, for as long as the user can still see the space.
 
 ## Errors
 

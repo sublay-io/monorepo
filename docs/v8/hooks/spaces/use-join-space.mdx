@@ -8,7 +8,7 @@ icon: "plug"
 
 `useJoinSpace` returns a callable function for joining a space. If the space has `requireJoinApproval: true`, the membership is created with `status: "pending"` until approved by a moderator or admin. Otherwise, it is immediately `active`. A private space can't be joined: joining a space the user can't see answers `404 space/not-found`, and its moderators and admins add members with [`useAddMember`](/v8/hooks/spaces/use-add-member).
 
-<Note>When using `SpaceProvider`, call `joinSpace` from `useSpace` — it updates the space's member count and takes `memberPermissions` from the response.</Note>
+<Note>When using `SpaceProvider`, call `joinSpace` from `useSpace` — it then fetches the space again, so the space's `memberPermissions` and member count reflect the change.</Note>
 
 ## Usage Example
 
@@ -20,7 +20,7 @@ function JoinButton({ spaceId }: { spaceId: string }) {
 
   const handleJoin = async () => {
     const result = await joinSpace({ spaceId });
-    console.log(result.membership.status); // "pending" or "active"
+    console.log(result.status); // "pending" or "active"
   };
 
   return <button onClick={handleJoin}>Join</button>;
@@ -35,14 +35,6 @@ function JoinButton({ spaceId }: { spaceId: string }) {
 
 ## Returns
 
-<ResponseField name="message" type="string">
-  Confirmation message.
-</ResponseField>
+Resolves with the user's membership record, as a [SpaceMember](/v8/data-models/space-member) object: `id`, `spaceId`, `userId`, `role` (`"member"`), `status` (`"pending"` or `"active"`), `joinedAt` and `createdAt`.
 
-<ResponseField name="membership" type="object">
-  The created membership record with `id`, `spaceId`, `userId`, `role` (`"member"`), `status`, and `joinedAt`.
-</ResponseField>
-
-<ResponseField name="memberPermissions" type="SpaceMemberPermissions">
-  What the user may do in the space now, from the server's calculation (see [SpaceMemberPermissions](/v8/data-models/space#spacememberpermissions)). A request awaiting approval reports `status: "pending"` and `isMember: false`.
-</ResponseField>
+The response carries no permissions. To read what the user may do in the space now, fetch the space again: its `memberPermissions` describe them (a request awaiting approval reports `status: "pending"` and `isMember: false`). `joinSpace` from `useSpace` does this for you.

@@ -174,7 +174,7 @@ await sublay.chat.deleteConversation({ conversationId: "cnv_abc123" });
   The conversation ID.
 </ParamField>
 
-**Returns** — `Promise<{ message: string }>`
+**Returns** — `Promise<void>`
 
 ---
 
@@ -267,7 +267,7 @@ await sublay.chat.removeMember({
   The member to remove (the target).
 </ParamField>
 
-**Returns** — `Promise<{ message: string }>`
+**Returns** — `Promise<void>`
 
 ---
 
@@ -335,7 +335,7 @@ await sublay.chat.leaveConversation({ conversationId: "cnv_abc123" });
   The conversation ID.
 </ParamField>
 
-**Returns** — `Promise<{ message: string }>`: the server's body, `{ message: "Left conversation." }`.
+**Returns** — `Promise<void>`. It resolves with no value once the user has left.
 
 ---
 
@@ -556,8 +556,7 @@ await sublay.chat.deleteMessage({
   The message ID.
 </ParamField>
 
-**Returns** — `Promise<{ message: string; userDeletedAt?: string }>` (`userDeletedAt`
-is set when the author soft-deletes their own message).
+**Returns** — `Promise<void>`. It resolves with no value once the message is deleted.
 
 ---
 
@@ -669,7 +668,7 @@ await sublay.chat.markAsRead({
   The message up to which the conversation is marked read.
 </ParamField>
 
-**Returns** — `Promise<{ message: string }>`
+**Returns** — `Promise<void>`
 
 ---
 

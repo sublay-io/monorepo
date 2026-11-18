@@ -36,10 +36,4 @@ function PendingMemberRow({ spaceId, userId }: { spaceId: string; userId: string
 
 ## Returns
 
-<ResponseField name="message" type="string">
-  Confirmation message.
-</ResponseField>
-
-<ResponseField name="membership" type="object">
-  Updated membership with `id`, `status: "active"`, and `joinedAt`.
-</ResponseField>
+Resolves with the approved membership record (`status: "active"`), as a [SpaceMember](/v8/data-models/space-member) object: `id`, `spaceId`, `userId`, `role`, `status`, `joinedAt` and `createdAt`.

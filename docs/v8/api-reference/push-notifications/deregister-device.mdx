@@ -8,7 +8,7 @@ Removes the calling user's push device registration. The device is identified th
 
 It is a `POST` with the device in the request body because a device token or web-push subscription doesn't belong in a URL, which gets logged; and your app knows its push token, not Sublay's device id.
 
-**Deregistration is idempotent.** The endpoint returns `200` whether or not a matching registration existed — the contract is "this binding is gone", and it is equally gone if an earlier call removed it or it never existed. There is no not-found error.
+**Deregistration is idempotent.** The endpoint returns `204` whether or not a matching registration existed — the contract is "this binding is gone", and it is equally gone if an earlier call removed it or it never existed. There is no not-found error.
 
 Only the calling user's own binding is removed. A device can be registered by several accounts at once, so deregistering unbinds the caller's account from that device and leaves every other account's binding on the same device intact — callers cannot deregister devices they don't own.
 
@@ -43,11 +43,7 @@ Requires the `push` bundle.
 
 ## Response
 
-Returns `200` on success, including when no matching registration existed.
-
-```json
-{ "success": true }
-```
+`204 No Content` on success, with no body, including when no matching registration existed.
 
 ## Error Responses
 

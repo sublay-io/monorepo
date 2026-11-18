@@ -172,7 +172,7 @@ await sublay.table("Events").delete("a1b2c3d4-...", { force: true });
   When `true`, hard-deletes a paranoid row instead of soft-deleting it.
 </ParamField>
 
-**Returns** — `Promise<{ deleted: boolean; soft: boolean }>` — `soft` is `true` when the row was soft-deleted.
+**Returns** — `Promise<void>`
 
 ---
 

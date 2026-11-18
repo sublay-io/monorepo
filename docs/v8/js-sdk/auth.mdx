@@ -318,7 +318,7 @@ Changes the authenticated user's password after verifying the current one. Use t
 A password change ends **every other session** for that user and deletes every push binding they hold — see [Change Password](/v8/api-reference/auth/change-password). The session making the call survives: the server reads which session is asking off the access token the request is already authenticated with, so nothing about it has to be sent.
 
 ```typescript
-const { success, message } = await sublay.auth.changePassword({
+await sublay.auth.changePassword({
   password: "currentP@ss",
   newPassword: "newS3cur3P@ss",
 });
@@ -338,7 +338,7 @@ const { success, message } = await sublay.auth.changePassword({
   Omit it and every push binding for the user is deleted, this device's included — and nothing re-binds it until the app cold-starts, switches accounts or rotates its token, so it stops notifying until then.
 </ParamField>
 
-**Returns** — `Promise<{ success: boolean; message: string }>`
+**Returns** — `Promise<void>`
 
 ---
 
@@ -347,7 +347,7 @@ const { success, message } = await sublay.auth.changePassword({
 Sets an **initial** password for an OAuth-only user who has no password yet. Unlike `changePassword`, there is no current password to verify. Use this to let an OAuth-only user add a password (for example, so they can sign in with email/password, or unlink their last OAuth identity). If the user already has a password, this fails with `auth/already-password-authenticated` — use `changePassword` instead.
 
 ```typescript
-const { success, message } = await sublay.auth.setPassword({
+await sublay.auth.setPassword({
   newPassword: "newS3cur3P@ss",
 });
 ```
@@ -356,7 +356,7 @@ const { success, message } = await sublay.auth.setPassword({
   The password to set for the account.
 </ParamField>
 
-**Returns** — `Promise<{ success: boolean; message: string }>`
+**Returns** — `Promise<void>`
 
 ---
 
@@ -365,7 +365,7 @@ const { success, message } = await sublay.auth.setPassword({
 Sends (or re-sends) an email-verification message to the authenticated user, delivered as a code or a link.
 
 ```typescript
-const { success } = await sublay.auth.sendVerificationEmail({
+await sublay.auth.sendVerificationEmail({
   mode: "code",
   tokenFormat: "numeric",
   tokenLength: 6,
@@ -397,7 +397,7 @@ The argument is required, and `mode` determines what else is required — enforc
   Must be an `https` address on one of your project's **Verified Domains** (Dashboard → Settings → Domains). Each entry covers exactly the host it names, never its subdomains: `example.com` allows `https://example.com/…` on any port, but not `www.example.com`, which needs its own entry. A full address such as `https://app.example.com` covers only that host and port. `localhost` and `*.localhost` are always allowed, over `http` too. Anything else, including a custom-scheme deep link such as `myapp://verified`, is refused with `400 auth/redirect-url-not-allowed` and no email is sent.
 </ParamField>
 
-**Returns** — `Promise<{ success: boolean }>`
+**Returns** — `Promise<void>`
 
 ---
 
@@ -429,14 +429,14 @@ await sublay.auth.verifyEmail({ token: code, verificationId });
 Starts self-service deletion of the authenticated user's account by emailing them a one-time confirmation code (valid for 10 minutes). This does not delete anything on its own — pass the code to [`confirmAccountDeletion`](#confirmaccountdeletion) to finish.
 
 ```typescript
-const { success } = await sublay.auth.requestAccountDeletion();
+await sublay.auth.requestAccountDeletion();
 ```
 
 Only works for accounts with an email on file. Accounts without one (e.g. anonymous or foreign-id users) must be deleted server-side with a service key via [`@sublay/node`](/v8/node-sdk/users). The request fails with `auth/no-email-on-file` otherwise.
 
 Takes no arguments.
 
-**Returns** — `Promise<{ success: boolean }>`
+**Returns** — `Promise<void>`
 
 ---
 

@@ -329,14 +329,14 @@ const space = await sublay.spaces.updateSpace({
 Deletes a space.
 
 ```typescript
-const result = await sublay.spaces.deleteSpace({ spaceId: "spc_abc123" });
+await sublay.spaces.deleteSpace({ spaceId: "spc_abc123" });
 ```
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
 </ParamField>
 
-**Returns** — `Promise<DeleteSpaceResponse>`
+**Returns** — `Promise<void>`. It resolves with no value once the space is deleted.
 
 ---
 

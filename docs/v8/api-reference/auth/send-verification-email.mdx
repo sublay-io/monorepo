@@ -8,7 +8,7 @@ Sends a verification email to the authenticated user's registered email address.
 
 This is for a signed-in user. When the project requires email verification before sign-in, unconfirmed users with a password can't be signed in; they get their confirmation email from [Sign Up](/v8/api-reference/auth/sign-up) and from a refused [Sign In](/v8/api-reference/auth/sign-in) instead, and that link or code lasts **24 hours**.
 
-Requires a valid user access token, or a service key that names the user in `actingUserId`. Returns immediately with `{ success: true }` if the user is already verified.
+Requires a valid user access token, or a service key that names the user in `actingUserId`. Returns `204` at once, sending nothing, if the user is already verified.
 
 ## Body Parameters
 
@@ -52,9 +52,7 @@ All parameters are optional.
 
 ## Response
 
-<ResponseField name="success" type="boolean">
-  `true` when the request is processed without a server error (including when the user is already verified).
-</ResponseField>
+`204 No Content` with no body whenever the request is processed without a server error, including when the user is already verified.
 
 ## Error Codes
 

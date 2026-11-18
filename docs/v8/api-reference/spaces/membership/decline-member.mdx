@@ -24,13 +24,15 @@ Sets a pending member's status to `"rejected"`. Requires the caller to be a mode
 
 ## Response
 
-<ResponseField name="message" type="string">
-  Confirmation message.
-</ResponseField>
+The declined membership record, as a [SpaceMember](/v8/data-models/space-member) object.
 
-<ResponseField name="membership" type="object">
-  Updated membership with `id` and `status: "rejected"`.
-</ResponseField>
+<ResponseField name="id" type="string">Membership id.</ResponseField>
+<ResponseField name="spaceId" type="string">The space.</ResponseField>
+<ResponseField name="userId" type="string">The member.</ResponseField>
+<ResponseField name="role" type="'admin' | 'moderator' | 'member'">The member's role.</ResponseField>
+<ResponseField name="status" type="'pending' | 'active' | 'banned' | 'rejected'">Always `rejected`.</ResponseField>
+<ResponseField name="joinedAt" type="string">When the membership became active (ISO 8601).</ResponseField>
+<ResponseField name="createdAt" type="string">When the membership record was created (ISO 8601).</ResponseField>
 
 ## Error Responses
 

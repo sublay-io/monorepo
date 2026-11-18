@@ -131,7 +131,7 @@ function Events() {
   Updates a row; `updatedAt` is bumped automatically on a timestamped table.
 </ResponseField>
 
-<ResponseField name="deleteRow" type="(rowId: string, opts?: { force?: boolean }) => Promise<{ deleted: boolean; soft: boolean }>">
+<ResponseField name="deleteRow" type="(rowId: string, opts?: { force?: boolean }) => Promise<void>">
   Deletes a row. Soft-deletes on a paranoid table by default; pass `{ force: true }` to hard-delete.
 </ResponseField>
 

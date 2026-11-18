@@ -35,14 +35,4 @@ function DeleteSpaceButton({ spaceId }: { spaceId: string }) {
 
 ## Returns
 
-<ResponseField name="message" type="string">
-  Confirmation message.
-</ResponseField>
-
-<ResponseField name="deletedSpace" type="object">
-  The `id` and `name` of the deleted space.
-</ResponseField>
-
-<ResponseField name="counts" type="object">
-  Counts of deleted resources: `entities`, `members`, `childSpaces`.
-</ResponseField>
+`Promise<void>`: resolves with nothing once the space is deleted.

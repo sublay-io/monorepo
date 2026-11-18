@@ -42,12 +42,6 @@ function MemberActions({ spaceId, userId }: { spaceId: string; userId: string })
 
 ## Returns
 
-<ResponseField name="message" type="string">
-  Confirmation message.
-</ResponseField>
-
-<ResponseField name="membership" type="SpaceMember">
-  The updated membership record, with `status` set to `"banned"`.
-</ResponseField>
+Resolves with the banned membership record (`status: "banned"`), as a [SpaceMember](/v8/data-models/space-member) object: `id`, `spaceId`, `userId`, `role`, `status`, `joinedAt` and `createdAt`.
 
 See also: [`useUnbanMember`](/v8/hooks/spaces/use-unban-member) to reverse a ban, and [`useLeaveSpace`](/v8/hooks/spaces/use-leave-space) for a member leaving voluntarily.

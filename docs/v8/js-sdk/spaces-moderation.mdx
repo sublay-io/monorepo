@@ -82,7 +82,7 @@ const result = await sublay.spaces.moderateSpaceEntity({
   The reason for the moderation action.
 </ParamField>
 
-**Returns** — `Promise<{ message: string; moderationStatus: "approved" | "removed" }>`
+**Returns** — `Promise<{ moderationStatus: "approved" | "removed" }>`
 
 ---
 
@@ -110,7 +110,7 @@ const result = await sublay.spaces.setSpaceEntityNsfw({
   The NSFW own-flag to set on the entity.
 </ParamField>
 
-**Returns** — `Promise<{ message: string; nsfw: boolean }>`
+**Returns** — `Promise<{ nsfw: boolean }>`
 
 ---
 
@@ -142,7 +142,7 @@ const result = await sublay.spaces.moderateSpaceComment({
   The reason for the moderation action.
 </ParamField>
 
-**Returns** — `Promise<{ message: string; moderationStatus: "approved" | "removed" }>`
+**Returns** — `Promise<{ moderationStatus: "approved" | "removed" }>`
 
 ---
 
@@ -175,7 +175,7 @@ const result = await sublay.spaces.moderateSpaceChatMessage({
   The reason for the removal. Trimmed; up to 1,000 characters.
 </ParamField>
 
-**Returns** — `Promise<{ message: string; moderationStatus: "removed" }>`
+**Returns** — `Promise<{ moderationStatus: "removed" }>`
 
 ---
 
@@ -283,7 +283,7 @@ const rule = await sublay.spaces.updateRule({
 Deletes a rule.
 
 ```typescript
-const result = await sublay.spaces.deleteRule({
+await sublay.spaces.deleteRule({
   spaceId: "spc_abc123",
   ruleId: "rul_222",
 });
@@ -297,7 +297,7 @@ const result = await sublay.spaces.deleteRule({
   The ID of the rule to delete.
 </ParamField>
 
-**Returns** — `Promise<DeleteRuleResponse>`
+**Returns** — `Promise<void>`. It resolves with no value once the rule is deleted.
 
 ---
 

@@ -78,11 +78,7 @@ The returned function accepts:
 
 ## Returns
 
-The hook returns an async function. That function resolves to:
-
-<ResponseField name="success" type="boolean">
-  `true` when verification succeeded.
-</ResponseField>
+The hook returns an async function that resolves with nothing (`Promise<void>`) once the email is verified.
 
 <Note>
   On success without a `verificationId`, `user.isVerified` is optimistically set

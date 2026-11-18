@@ -200,7 +200,13 @@ describe("useSpaceData", () => {
   ] as const)(
     "a %s refused because it already happened loads the space again",
     async (action, method, code, status, isMember) => {
-      const space = makeSpaceDetailed({ id: "space-1" });
+      // Shown in the state the earlier, already-applied action left behind.
+      const space = makeSpaceDetailed({
+        id: "space-1",
+        memberPermissions: makeMemberPermissions(
+          isMember ? { canRead: true } : { isMember: true, status: "active", canRead: true },
+        ),
+      });
       const fresh = makeSpaceDetailed({
         id: "space-1",
         memberPermissions: makeMemberPermissions(
@@ -226,6 +232,59 @@ describe("useSpaceData", () => {
       expect(result.current.isMember).toBe(isMember);
     },
   );
+
+  it("a pending member's refused leave stays an error and loads nothing", async () => {
+    const space = makeSpaceDetailed({
+      id: "space-1",
+      memberPermissions: makeMemberPermissions({ isMember: true, status: "pending" }),
+    });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useSpaceData({ space }),
+      { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+    );
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+    axiosPrivate.mockError("delete", 403, { error: "Space membership required", code: "space/membership-required" });
+
+    await act(async () => {
+      await result.current.leaveSpace();
+    });
+
+    expect(result.current.error).toBe("Failed to leave space");
+    expect(result.current.space).toEqual(space);
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+  });
+
+  it("a retry after a failed reload clears the reload error", async () => {
+    const space = makeSpaceDetailed({ id: "space-1" });
+    const fresh = makeSpaceDetailed({
+      id: "space-1",
+      memberPermissions: makeMemberPermissions({ isMember: true, status: "active", canRead: true }),
+    });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useSpaceData({ space }),
+      { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+    );
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+    axiosPrivate.mockResponse("post", membershipRecord("active"), 201);
+    axiosPrivate.mockError("get", 500, { error: "Internal error" });
+    await act(async () => {
+      await result.current.joinSpace();
+    });
+    expect(result.current.error).toBe("Failed to refresh space");
+
+    axiosPrivate.mockError("post", 409, { error: "Already a member.", code: "space/already-member" });
+    axiosPrivate.mockResponse("get", fresh);
+    await act(async () => {
+      await result.current.joinSpace();
+    });
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.space).toEqual(fresh);
+  });
 
   it("leaves the space, then loads it again for the server's permissions", async () => {
     const space = makeSpaceDetailed({

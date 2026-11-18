@@ -187,6 +187,7 @@ function useSpaceData({
   const handleJoinSpace = useCallback(async () => {
     if (!space) return;
 
+    setError(null);
     try {
       await joinSpaceHook({ spaceId: space.id });
     } catch (err) {
@@ -207,12 +208,18 @@ function useSpaceData({
   const handleLeaveSpace = useCallback(async () => {
     if (!space) return;
 
+    setError(null);
     try {
       await leaveSpaceHook({ spaceId: space.id });
     } catch (err) {
-      // Not a member any more (an earlier leave landed but its reload
-      // failed): load the space so the flags catch up.
-      if (errorCode(err) === "space/membership-required") {
+      // Shown as an active member but no longer one (an earlier leave landed
+      // but its reload failed): load the space so the flags catch up. A
+      // pending, banned or rejected member gets the same code as a real
+      // refusal, so it stays an error.
+      if (
+        errorCode(err) === "space/membership-required" &&
+        space.memberPermissions?.status === "active"
+      ) {
         await refreshSpace(space.id);
         return;
       }

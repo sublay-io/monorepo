@@ -284,7 +284,7 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
         entityId: entity.id,
       }).unwrap();
       collectionName =
-        result?.collection?.name ?? collectionsByIdRef.current[collectionId]?.name;
+        result?.name ?? collectionsByIdRef.current[collectionId]?.name;
     } catch (err) {
       dispatch(removeCollectionEntity({ collectionId, entityId: entity.id }));
       handleErrorUtil(err, "Failed to add entity to collection");

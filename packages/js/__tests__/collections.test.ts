@@ -154,10 +154,7 @@ describe("js-sdk collections — response mapping", () => {
 
   it("addEntityToCollection returns the mutation response", async () => {
     const { client, projectInstance } = makeClient();
-    const mutationResult = {
-      success: true,
-      collection: { id: "col1", name: "Reading", entityCount: 5 },
-    };
+    const mutationResult = { id: "col1", name: "Reading", entityCount: 5 };
     projectInstance.post.mockResolvedValueOnce({ data: mutationResult });
 
     const result = await addEntityToCollection(client, {
@@ -170,10 +167,7 @@ describe("js-sdk collections — response mapping", () => {
 
   it("removeEntityFromCollection returns the mutation response", async () => {
     const { client, projectInstance } = makeClient();
-    const mutationResult = {
-      success: true,
-      collection: { id: "col1", name: "Reading", entityCount: 4 },
-    };
+    const mutationResult = { id: "col1", name: "Reading", entityCount: 4 };
     projectInstance.delete.mockResolvedValueOnce({ data: mutationResult });
 
     const result = await removeEntityFromCollection(client, {

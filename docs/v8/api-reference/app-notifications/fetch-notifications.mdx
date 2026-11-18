@@ -21,7 +21,7 @@ Event notifications follow the event: `event-updated` and `event-cancelled` go o
 </ParamField>
 
 <ParamField query="limit" type="number" default="5">
-  Notifications per page: a whole number from `1` to `50`. Defaults to `5`. A larger value returns `400 app-notification/invalid-query` with `param: "limit"` (it is never lowered to `50`), as does `0`, a negative number or a value that isn't a whole number. See [Pagination](/v8/api-reference/getting-started#pagination).
+  Notifications per page: a whole number from `1` to `100`. Defaults to `5`. A larger value returns `400 app-notification/invalid-query` with `param: "limit"` (it is never lowered to `100`), as does `0`, a negative number or a value that isn't a whole number. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField query="actingUserId" type="string">

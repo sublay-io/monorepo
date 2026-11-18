@@ -172,7 +172,7 @@ const updatedUser = await sublay.users.updateUser({
 </ParamField>
 
 <ParamField body="username" type="string">
-  New username. Must be available.
+  New username. Must be available: a username another user already holds throws a `409` (`user/username-taken`, with `param: "username"`).
 </ParamField>
 
 <ParamField body="bio" type="string">

@@ -180,7 +180,8 @@ Validation still runs first, in the same order: an invalid body, an image error,
     ```json
     {
       "error": "...",
-      "code": "auth/redirect-url-not-allowed"
+      "code": "auth/redirect-url-not-allowed",
+      "param": "emailVerification.redirectUrl"
     }
     ```
     `emailVerification.redirectUrl` isn't an `https` address on one of the project's Verified Domains (or `localhost`). Only checked when the project requires email verification before sign-in. Nothing is created and no email is sent.
@@ -215,12 +216,12 @@ Validation still runs first, in the same order: an invalid body, an image error,
   <Accordion title="Invalid Image — 422">
     ```json
     {
-      "error": "Avatar file is not a valid image: ...",
+      "error": "Avatar file is not a valid image.",
       "code": "auth/invalid-image",
       "param": "avatarFile"
     }
     ```
-    Returned when the uploaded file cannot be parsed as an image. Also returned for the banner file with `"Banner file is not a valid image: ..."` and `param: "bannerFile"`.
+    Returned when the uploaded file cannot be parsed as an image. Also returned for the banner file with `"Banner file is not a valid image."` and `param: "bannerFile"`.
   </Accordion>
   <Accordion title="Missing Image Options — 400">
     ```json

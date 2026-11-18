@@ -45,11 +45,11 @@ describe("useFetchMySpaces", () => {
     axiosPrivate.mockResponse("get", makeResponse());
 
     await act(async () => {
-      await result.current({ role: ["admin", "moderator"], all: true });
+      await result.current({ role: ["admin", "moderator"] });
     });
 
     const [call] = axiosPrivate.calls("get");
-    expect(call.config?.params).toMatchObject({ role: "admin,moderator", all: true });
+    expect(call.config?.params).toMatchObject({ role: "admin,moderator" });
   });
 
   it("sends query, searchFields, sortBy and sortDir, and leaves a blank query out", async () => {

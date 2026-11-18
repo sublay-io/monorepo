@@ -11,7 +11,6 @@ export interface FetchMySpacesProps extends SpaceSearchParams {
   sortDir?: "asc" | "desc";
   include?: SpaceIncludeParam;
   role?: string; // single role or comma-separated, e.g. "admin,moderator"
-  all?: "true" | "false";
   /**
    * Membership status to list. Defaults to `"active"` (spaces the user is in);
    * `"pending"` returns join requests awaiting approval, `"banned"` the spaces

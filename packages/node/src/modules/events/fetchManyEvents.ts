@@ -30,7 +30,7 @@ export interface EventLocationFilters {
 export interface FetchManyEventsProps {
   // Pagination
   page?: number;
-  limit?: number; // capped at 100 server-side
+  limit?: number; // 1 to 100; over 100 is a 400, never clamped
 
   // Sorting
   sortBy?: "startTime" | "going";

@@ -197,6 +197,48 @@ describe("useCollectionsActions", () => {
     expect(selectCollectionEntities("root")(store.getState())).toEqual([]);
   });
 
+  it("a repeat save of an entity already listed adds no second copy", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(
+      jsonResponse({ id: "root", name: "Root", entityCount: 1 }),
+    );
+    const { result, store } = renderHookWithStore(() => useCollectionsActions());
+    const entity = makeEntity();
+    act(() =>
+      store.dispatch(setCollectionEntities({ collectionId: "root", entities: [entity] })),
+    );
+
+    await act(async () => {
+      await result.current.addToCollection({
+        projectId: "test-project",
+        collectionId: "root",
+        entity,
+      });
+    });
+
+    expect(selectCollectionEntities("root")(store.getState())).toEqual([entity]);
+  });
+
+  it("a failed repeat save keeps the entity that is really saved", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
+    const { result, store } = renderHookWithStore(() => useCollectionsActions());
+    const entity = makeEntity();
+    act(() =>
+      store.dispatch(setCollectionEntities({ collectionId: "root", entities: [entity] })),
+    );
+
+    await act(async () => {
+      await expect(
+        result.current.addToCollection({
+          projectId: "test-project",
+          collectionId: "root",
+          entity,
+        }),
+      ).rejects.toBeTruthy();
+    });
+
+    expect(selectCollectionEntities("root")(store.getState())).toEqual([entity]);
+  });
+
   it("removeFromCollection optimistically removes, then keeps it removed on success", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
       jsonResponse({ id: "root", entityCount: 0 }),

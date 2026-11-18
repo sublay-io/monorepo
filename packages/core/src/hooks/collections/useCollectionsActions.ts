@@ -274,7 +274,16 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
       return;
     }
 
-    dispatch(prependCollectionEntity({ collectionId, entity }));
+    // A repeat save of an entity already listed here neither adds a second
+    // copy nor, if the call fails, takes out the copy that is really saved.
+    const alreadyListed = !!store
+      .getState()
+      .sublay.collections.entitiesByCollectionId[collectionId]?.some(
+        (e) => e.id === entity.id
+      );
+    if (!alreadyListed) {
+      dispatch(prependCollectionEntity({ collectionId, entity }));
+    }
 
     let collectionName: string | undefined;
     try {
@@ -286,7 +295,9 @@ export function useCollectionsActions(): UseCollectionsActionsValues {
       collectionName =
         result?.name ?? collectionsByIdRef.current[collectionId]?.name;
     } catch (err) {
-      dispatch(removeCollectionEntity({ collectionId, entityId: entity.id }));
+      if (!alreadyListed) {
+        dispatch(removeCollectionEntity({ collectionId, entityId: entity.id }));
+      }
       handleErrorUtil(err, "Failed to add entity to collection");
       throw err;
     }

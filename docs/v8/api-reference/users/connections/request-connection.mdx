@@ -10,7 +10,7 @@ When a connection between the two users already exists:
 
 - **Your own request is still pending**, or **you are already connected**: `200` with the existing connection row. The stored message is kept (a new `message` is ignored) and no second notification is sent.
 - **The other user already sent you a request**: `409 connection/request-received`, with their request in the body as `connection`, so your app can offer to [accept it](/v8/api-reference/connections/accept-connection).
-- **The other user declined your request**: `409 connection/request-declined`. Only they can start a new request.
+- **A declined request exists between you** (either of you declined the other): `409 connection/request-declined`. A new request is refused while it exists.
 
 Two requests sent at the same time are answered by these same rules, never with a server error.
 

@@ -207,7 +207,7 @@ const result = await sublay.spaces.addMember({
   The user to add.
 </ParamField>
 
-**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)), with `status: "active"`. `role` is `member` for a user just added; one who was already an active member keeps their role. HTTP `201` when the user became an active member now, `200` when they already were. `role` is `member` for a user just added; one who was already an active member keeps their role.
+**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)), with `status: "active"`. `role` is `member` for a user just added; one who was already an active member keeps their role. HTTP `201` when the user became an active member now, `200` when they already were.
 
 ---
 

@@ -1,4 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
+import { WorkspaceMemberStanding } from "../../interfaces/Workspace";
 
 export interface AcceptWorkspaceInviteProps {
   inviteId: string;
@@ -7,22 +8,22 @@ export interface AcceptWorkspaceInviteProps {
   actingUserId: string;
 }
 
-export interface AcceptWorkspaceInviteResponse {
-  success: boolean;
-  workspaceId: string;
-}
-
 /**
  * Accept an invitation — identity-matched + verified-email, non-secret id.
- * Idempotent: if the user is already a member/owner, marks `accepted` with no
- * duplicate row.
+ *
+ * Resolves to the accepting user's standing in the workspace — the same record
+ * `fetchMyWorkspaceMembership` returns. The server answers 201 when the accept
+ * made the user a member, and 200 when they already were (or own the
+ * workspace), including a repeat accept of an invite they already accepted.
+ * An invite that is revoked, declined, expired, accepted by someone else, or
+ * accepted by a user who has since left fails with 409 `workspace/not-pending`.
  */
 export async function acceptWorkspaceInvite(
   client: SublayHttpClient,
   data: AcceptWorkspaceInviteProps
-): Promise<AcceptWorkspaceInviteResponse> {
+): Promise<WorkspaceMemberStanding> {
   const { inviteId, actingUserId } = data;
-  const response = await client.projectInstance.post<AcceptWorkspaceInviteResponse>(
+  const response = await client.projectInstance.post<WorkspaceMemberStanding>(
     `/workspace-invites/${inviteId}/accept`,
     { actingUserId }
   );

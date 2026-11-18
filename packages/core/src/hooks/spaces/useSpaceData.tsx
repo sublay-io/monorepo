@@ -189,14 +189,11 @@ function useSpaceData({
 
     setError(null);
     try {
+      // A repeat join (an earlier one landed but its reload failed) answers
+      // 200 with the existing membership, so it reloads the space like a
+      // fresh join and the flags catch up.
       await joinSpaceHook({ spaceId: space.id });
     } catch (err) {
-      // Already a member (an earlier join landed but its reload failed):
-      // load the space so the flags catch up.
-      if (errorCode(err) === "space/already-member") {
-        await refreshSpace(space.id);
-        return;
-      }
       handleError(err, "Failed to join space");
       setError("Failed to join space");
       return;

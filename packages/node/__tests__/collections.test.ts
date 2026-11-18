@@ -136,10 +136,7 @@ describe("node-sdk collections — response mapping", () => {
 
   it("addEntityToCollection returns the mutation response", async () => {
     const { client, projectInstance } = makeClient();
-    const mutationResult = {
-      success: true,
-      collection: { id: "c1", name: "Reading", entityCount: 5 },
-    };
+    const mutationResult = { id: "c1", name: "Reading", entityCount: 5 };
     projectInstance.post.mockResolvedValueOnce({ data: mutationResult });
     await expect(
       addEntityToCollection(client, {
@@ -152,10 +149,7 @@ describe("node-sdk collections — response mapping", () => {
 
   it("removeEntityFromCollection returns the mutation response", async () => {
     const { client, projectInstance } = makeClient();
-    const mutationResult = {
-      success: true,
-      collection: { id: "c1", name: "Reading", entityCount: 4 },
-    };
+    const mutationResult = { id: "c1", name: "Reading", entityCount: 4 };
     projectInstance.delete.mockResolvedValueOnce({ data: mutationResult });
     await expect(
       removeEntityFromCollection(client, {

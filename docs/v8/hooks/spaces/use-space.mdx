@@ -8,7 +8,7 @@ icon: "cube"
 
 `useSpace` returns the current space state and all operations from the nearest `SpaceProvider`. It is the primary way to interact with a space in your component tree.
 
-The permission flags (`isMember`, `canPost`, `canRead`, …) come from the space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions), which the server always returns. After `joinSpace` or `leaveSpace` the hook fetches the space again to pick up the new ones (also when a join answers `space/already-member`, and when a leave by a user shown as an active member answers `space/membership-required`, which means an earlier join or leave already went through), and an update returns them. They are all `false` until the space has loaded.
+The permission flags (`isMember`, `canPost`, `canRead`, …) come from the space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions), which the server always returns. After `joinSpace` or `leaveSpace` the hook fetches the space again to pick up the new ones (a repeat join succeeds with the existing membership and reloads it the same way; a leave by a user shown as an active member that answers `space/membership-required` means an earlier leave already went through, and also reloads it), and an update returns them. They are all `false` until the space has loaded.
 
 <Note>This hook must be used inside a `SpaceProvider`.</Note>
 

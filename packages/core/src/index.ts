@@ -533,7 +533,6 @@ export {
   type RevokeWorkspaceInviteProps,
   type ResendWorkspaceInviteProps,
   type AcceptWorkspaceInviteProps,
-  type AcceptWorkspaceInviteResponse,
   type DeclineWorkspaceInviteProps,
   type FetchWorkspaceAuthorityProps,
 } from "./hooks/workspaces";

@@ -12,7 +12,8 @@ export interface AddMemberProps {
 /**
  * Add a user to a space directly: they become an active member at once, with
  * no request or approval step. The signed-in user must be an active moderator
- * or admin of the space.
+ * or admin of the space. Answers 201 when the user became an active member
+ * now, 200 when they already were; the membership row either way.
  */
 function useAddMember(): (props: AddMemberProps) => Promise<SpaceMember> {
   const { projectId } = useProject();

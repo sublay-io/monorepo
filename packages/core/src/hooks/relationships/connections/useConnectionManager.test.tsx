@@ -56,6 +56,47 @@ describe("useConnectionManager", () => {
     expect(call.body).toEqual({ message: "Hi there" });
   });
 
+  it("a repeat request (200 with the existing row) keeps that row", async () => {
+    const { result, axiosPrivate } = renderWithStatus({ isConnected: false });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    // The two were connected meanwhile: the server answers 200 with that row.
+    const accepted = makeRow({ status: "accepted", respondedAt: "2024-01-02T00:00:00.000Z" });
+    axiosPrivate.mockResponse("post", accepted, 200);
+
+    await act(async () => {
+      await result.current.sendConnectionRequest();
+    });
+
+    expect(result.current.connectionStatus).toBe("accepted");
+    expect(result.current.connection).toEqual(accepted);
+  });
+
+  it("a request the other user already sent shows their row and still fails", async () => {
+    const { result, axiosPrivate } = renderWithStatus({ isConnected: false });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const received = makeRow({ type: "received" });
+    axiosPrivate.mockError("post", 409, {
+      error: "This user has already sent you a connection request.",
+      code: "connection/request-received",
+      connection: received,
+    });
+
+    let caught: unknown;
+    await act(async () => {
+      try {
+        await result.current.sendConnectionRequest();
+      } catch (err) {
+        caught = err;
+      }
+    });
+
+    expect(caught).toBeDefined();
+    expect(result.current.connectionStatus).toBe("pending-received");
+    expect(result.current.connection).toEqual(received);
+  });
+
   it("reads an accepted connection as 'accepted'", async () => {
     const accepted = makeRow({ status: "accepted", respondedAt: "2024-01-02T00:00:00.000Z" });
     const { result } = renderWithStatus({ isConnected: true, connection: accepted });

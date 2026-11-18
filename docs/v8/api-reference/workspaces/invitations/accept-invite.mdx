@@ -17,7 +17,9 @@ Accepts an invitation. Note the path is **not** `:workspaceId`-scoped — it is 
 
 On accept, the stored grant is applied and the `WorkspaceMember` is created **transactionally**; the invite is marked `accepted`. Fires **both** `workspace.invite.accepted` **and** `workspace.member.added` (invitation-lifecycle vs roster-sync — intentionally two streams).
 
-**Idempotence:** if the caller is already a member (or owner), accept is a **no-op** — the invite is marked `accepted`, no duplicate row is created, the existing grant is **not** overwritten, and **no** `workspace.member.added` fires.
+**Already a member:** if the caller is already a member (or owner), accept makes no membership change — the invite is marked `accepted`, no duplicate row is created, the existing grant is **not** overwritten, and **no** `workspace.member.added` fires.
+
+**Accepting again:** accepting an invite you already accepted, while you are still a member (or owner) of the workspace, answers `200` with your standing and changes nothing. Any other invite that is no longer pending — revoked, declined, accepted by someone else, or accepted by you before you left the workspace — answers `409 workspace/not-pending`.
 
 ## Path Parameters
 
@@ -35,9 +37,33 @@ On accept, the stored grant is applied and the `WorkspaceMember` is created **tr
 
 ## Response
 
+Your standing in the workspace after the accept: exactly the record [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership) returns, with every field present.
+
+| Case | Status |
+|---|---|
+| The accept made you a member (a membership row was created) | `201` |
+| You were already a member or the owner, or you are accepting an invite you already accepted | `200` |
+
 ```json
-{ "success": true, "workspaceId": "ws_abc" }
+{
+  "user": { "id": "u_pat", "username": "pat" },
+  "reasons": [{ "type": "member" }],
+  "capabilities": ["view", "invite"],
+  "permissions": ["deploy"],
+  "rank": 3,
+  "relativeRank": 0,
+  "title": "Frontend Lead",
+  "metadata": {}
+}
 ```
+
+- `user` — the accepting user's public profile.
+- `reasons` — why you have standing, as structured `{ type, viaWorkspaceId? }` entries (`member`, `owner`, …).
+- `capabilities` — the **resolved** set (direct + reach + ownership).
+- `permissions` — the per-node permissions of your membership on this workspace (may be empty).
+- `rank` — your membership rank, or `null` when you have no member row here (the owner).
+- `relativeRank` — `0` when you hold a member row here, `null` when you don't.
+- `title` / `metadata` — from your member row (for the owner, their profile row); `null` / `{}` when there are none.
 
 ## Error Responses
 
@@ -70,7 +96,7 @@ On accept, the stored grant is applied and the `WorkspaceMember` is created **tr
     ```json
     { "error": "This invitation is no longer pending.", "code": "workspace/not-pending" }
     ```
-    The invitation is already `accepted`, `declined`, or `revoked`.
+    The invitation is `declined` or `revoked`, was accepted by another user, or was accepted by you but you are no longer a member of the workspace. Accepting an invite you accepted while you are still a member answers `200` instead.
   </Accordion>
   <Accordion title="Missing Acting User — 400">
     ```json

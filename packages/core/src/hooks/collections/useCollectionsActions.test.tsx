@@ -163,7 +163,7 @@ describe("useCollectionsActions", () => {
 
   it("addToCollection optimistically prepends, then keeps the entity on success", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      jsonResponse({ success: true, collection: { id: "root", entityCount: 1 } }),
+      jsonResponse({ id: "root", entityCount: 1 }),
     );
     const { result, store } = renderHookWithStore(() => useCollectionsActions());
     const entity = makeEntity();
@@ -197,9 +197,51 @@ describe("useCollectionsActions", () => {
     expect(selectCollectionEntities("root")(store.getState())).toEqual([]);
   });
 
+  it("a repeat save of an entity already listed adds no second copy", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(
+      jsonResponse({ id: "root", name: "Root", entityCount: 1 }),
+    );
+    const { result, store } = renderHookWithStore(() => useCollectionsActions());
+    const entity = makeEntity();
+    act(() =>
+      store.dispatch(setCollectionEntities({ collectionId: "root", entities: [entity] })),
+    );
+
+    await act(async () => {
+      await result.current.addToCollection({
+        projectId: "test-project",
+        collectionId: "root",
+        entity,
+      });
+    });
+
+    expect(selectCollectionEntities("root")(store.getState())).toEqual([entity]);
+  });
+
+  it("a failed repeat save keeps the entity that is really saved", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
+    const { result, store } = renderHookWithStore(() => useCollectionsActions());
+    const entity = makeEntity();
+    act(() =>
+      store.dispatch(setCollectionEntities({ collectionId: "root", entities: [entity] })),
+    );
+
+    await act(async () => {
+      await expect(
+        result.current.addToCollection({
+          projectId: "test-project",
+          collectionId: "root",
+          entity,
+        }),
+      ).rejects.toBeTruthy();
+    });
+
+    expect(selectCollectionEntities("root")(store.getState())).toEqual([entity]);
+  });
+
   it("removeFromCollection optimistically removes, then keeps it removed on success", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      jsonResponse({ success: true, collection: { id: "root", entityCount: 0 } }),
+      jsonResponse({ id: "root", entityCount: 0 }),
     );
     const { result, store } = renderHookWithStore(() => useCollectionsActions());
     const entity = makeEntity();
@@ -301,7 +343,7 @@ describe("useCollectionsActions", () => {
 
     it("addToCollection appends the collection, named from the response, to copies that have `saved`", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(
-        jsonResponse({ success: true, collection: { id: "later", name: "Later", entityCount: 1 } }),
+        jsonResponse({ id: "later", name: "Later", entityCount: 1 }),
       );
       const { result, store } = renderHookWithStore(() => useCollectionsActions());
       seedLists(store, savedIn({ id: "root", name: "Root" }));
@@ -322,7 +364,7 @@ describe("useCollectionsActions", () => {
 
     it("addToCollection takes the name from the loaded collection when the response has none", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(
-        jsonResponse({ success: true, collection: { id: "later", entityCount: 1 } }),
+        jsonResponse({ id: "later", entityCount: 1 }),
       );
       const { result, store } = renderHookWithStore(() => useCollectionsActions());
       act(() => result.current.openCollection(LATER));
@@ -341,7 +383,7 @@ describe("useCollectionsActions", () => {
 
     it("addToCollection leaves the lists as they are when no name is known", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(
-        jsonResponse({ success: true, collection: { id: "unknown", entityCount: 1 } }),
+        jsonResponse({ id: "unknown", entityCount: 1 }),
       );
       const { result, store } = renderHookWithStore(() => useCollectionsActions());
       seedLists(store, savedIn());
@@ -380,7 +422,7 @@ describe("useCollectionsActions", () => {
 
     it("removeFromCollection drops the collection and updates `isSaved`", async () => {
       fetchHandle.fetchMock.mockResolvedValue(
-        jsonResponse({ success: true, collection: { id: "root", name: "Root", entityCount: 0 } }),
+        jsonResponse({ id: "root", name: "Root", entityCount: 0 }),
       );
       const { result, store } = renderHookWithStore(() => useCollectionsActions());
       seedLists(store, savedIn({ id: "root", name: "Root" }, { id: "later", name: "Later" }));
@@ -395,7 +437,7 @@ describe("useCollectionsActions", () => {
       expect(lists(store).withSaved.entities[0]).toEqual(savedIn({ id: "later", name: "Later" }));
 
       fetchHandle.fetchMock.mockResolvedValue(
-        jsonResponse({ success: true, collection: { id: "later", entityCount: 0 } }),
+        jsonResponse({ id: "later", entityCount: 0 }),
       );
       await act(async () => {
         await result.current.removeFromCollection({
@@ -490,10 +532,7 @@ describe("useCollectionsActions", () => {
 
       await act(async () => {
         finishSave(
-          jsonResponse({
-            success: true,
-            collection: { id: "later-child", name: "Child", entityCount: 1 },
-          }),
+          jsonResponse({ id: "later-child", name: "Child", entityCount: 1 }),
         );
         await savePromise;
       });

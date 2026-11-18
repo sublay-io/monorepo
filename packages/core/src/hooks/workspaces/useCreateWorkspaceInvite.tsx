@@ -64,7 +64,8 @@ export interface CreateWorkspaceInviteProps {
  *
  * ⚠️ This route doubles as an UPSERT, and the default above applies only to a
  * NEW invitation. Re-inviting a target who already holds a live pending invite
- * refreshes THAT invitation in place — same id, expiry reset — and on that
+ * refreshes THAT invitation in place — same id, expiry reset, answered 200
+ * instead of a new invitation's 201 — and on that
  * branch an omitted grant field is PRESERVED, not re-defaulted or blanked:
  * `rank`, `capabilities`, `permissions` and `title` all keep their stored
  * values. A "Resend invitation" button that posts only the address therefore

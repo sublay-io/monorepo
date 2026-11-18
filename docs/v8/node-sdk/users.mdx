@@ -562,7 +562,7 @@ const follow = await sublay.users.createFollow({
   The user performing the follow (the follower).
 </ParamField>
 
-**Returns** — `Promise<FollowRow>` — `{ id, user, createdAt }`, where `user` is the followed user. Following a user the acting user already follows is rejected with `409 follow/already-exists`.
+**Returns** — `Promise<FollowRow>` — `{ id, user, createdAt }`, where `user` is the followed user. Following a user the acting user already follows is not an error: it resolves with the existing follow, the same record a new follow gives, so a repeat is safe.
 
 ---
 
@@ -648,6 +648,8 @@ const connection = await sublay.users.requestConnection({
 </ParamField>
 
 **Returns** — `Promise<ConnectionRow>` — the pending request, with `type: "sent"` and `user` = the target. See [ConnectionRow](/v8/data-models/connection#connectionrow).
+
+When a connection already exists, a request the acting user sent that is still pending, or an accepted connection, resolves to that row, so a repeat is safe (the stored message is kept). A request the target already sent the acting user rejects with `409 connection/request-received`; the error body carries that request as `connection`, so you can accept it instead. After the target declined the acting user's request it rejects with `409 connection/request-declined`.
 
 ---
 

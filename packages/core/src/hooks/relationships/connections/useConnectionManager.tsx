@@ -96,9 +96,18 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
         return;
 
       try {
+        // A repeat of a request still pending, or a request to a user already
+        // connected, answers 200 with that row, so the state catches up.
         const result = await requestConnection({ userId, message });
         setConnection(result);
       } catch (error) {
+        // `userId` sent the signed-in user a request meanwhile: the 409 body
+        // carries that row, so the state shows it (ready to accept) while the
+        // call still fails.
+        const body = (error as any)?.response?.data;
+        if (body?.code === "connection/request-received" && body.connection) {
+          setConnection(body.connection as ConnectionRow);
+        }
         console.error("Failed to send connection request:", error);
         throw error;
       }

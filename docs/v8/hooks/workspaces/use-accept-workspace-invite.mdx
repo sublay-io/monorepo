@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useAcceptWorkspaceInvite` returns a callable that accepts an [invitation](/v8/data-models/workspace-invitation). The `inviteId` is non-secret. Idempotent when already a member/owner.
+`useAcceptWorkspaceInvite` returns a callable that accepts an [invitation](/v8/data-models/workspace-invitation). The `inviteId` is non-secret. Accepting when you are already a member or the owner, or accepting again an invite you already accepted while you are still a member, succeeds without changing anything.
 
 **Authorization:** self-service. The invite must be addressed to the signed-in user (identity-matched), and a **verified email is required**.
 
@@ -19,8 +19,8 @@ function AcceptButton({ inviteId }: { inviteId: string }) {
   const acceptWorkspaceInvite = useAcceptWorkspaceInvite();
 
   const handleAccept = async () => {
-    const { workspaceId } = await acceptWorkspaceInvite({ inviteId });
-    console.log("Joined workspace:", workspaceId);
+    const standing = await acceptWorkspaceInvite({ inviteId });
+    console.log("Joined with capabilities:", standing.capabilities);
   };
 
   return <button onClick={handleAccept}>Accept</button>;
@@ -35,7 +35,7 @@ function AcceptButton({ inviteId }: { inviteId: string }) {
 
 ## Returns
 
-`{ success: boolean; workspaceId: string }`.
+Your standing in the workspace, a `WorkspaceMemberStanding` — the same record [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership) returns: `{ user, reasons, capabilities, permissions, rank, relativeRank, title, metadata }`, with every field present. It resolves with the same record whether the accept just made you a member or you already were one (or own the workspace).
 
 <Note>
   An unverified accept fails with `workspace/email-not-verified` — prompt the user to verify their email, then retry.
@@ -47,7 +47,7 @@ function AcceptButton({ inviteId }: { inviteId: string }) {
 |------|--------|---------|
 | `workspace/email-not-verified` | 403 | The accepting user's email is not verified. |
 | `workspace/invite-not-found` | 404 | No such invitation, or it is not addressed to you. |
-| `workspace/not-pending` | 409 | Already accepted / declined / revoked, or expired. An expired invitation can be [resent](/v8/hooks/workspaces/use-resend-workspace-invite); `error` says which. |
+| `workspace/not-pending` | 409 | Declined, revoked, accepted by another user, accepted by you before you left the workspace, or expired. An expired invitation can be [resent](/v8/hooks/workspaces/use-resend-workspace-invite); `error` says which. |
 
 ## Related
 

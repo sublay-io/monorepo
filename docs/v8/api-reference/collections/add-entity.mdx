@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/collections/:collectionId/entities"
 description: "Save an entity into a collection"
 ---
 
-Saves an entity into the specified collection. This operation is idempotent — if the entity is already in the collection, it returns success without creating a duplicate.
+Saves an entity into the specified collection. Saving an entity that is already in the collection is not an error: it answers `200` with the same body and creates no duplicate. A new save answers `201`. Two saves of the same entity sent at the same time get one `201` and one `200`, with the same summary, never a server error.
 
 An entity in a space the user can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) can't be saved: it answers `404 entity/not-found`, the same as a missing entity.
 
@@ -26,19 +26,19 @@ An entity in a space the user can't read (see [who can read content](/v8/data-mo
 
 ## Response
 
-<ResponseField name="success" type="boolean">
-  Always `true` on success.
+The collection's summary after the save, the same body either way: `201` when the entity was newly added, `200` when it was already in the collection.
+
+<ResponseField name="id" type="string">Collection ID.</ResponseField>
+
+<ResponseField name="name" type="string">The collection's name.</ResponseField>
+
+<ResponseField name="entityCount" type="number">
+  The collection's [`entityCount`](/v8/data-models/collection#entitycount) after the save (also when the entity was already saved).
 </ResponseField>
 
-<ResponseField name="collection" type="object">
-  Updated collection metadata.
-
-  <Expandable>
-    <ResponseField name="id" type="string">Collection ID.</ResponseField>
-    <ResponseField name="name" type="string">The collection's name.</ResponseField>
-    <ResponseField name="entityCount" type="number">The collection's [`entityCount`](/v8/data-models/collection#entitycount) after the save (also when the entity was already saved).</ResponseField>
-  </Expandable>
-</ResponseField>
+```json
+{ "id": "c1f0…", "name": "Read later", "entityCount": 12 }
+```
 
 ## Error Responses
 

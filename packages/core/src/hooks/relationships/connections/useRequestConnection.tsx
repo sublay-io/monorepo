@@ -3,6 +3,14 @@ import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import type { ConnectionRequestParams, ConnectionRow } from "../../../interfaces/models/Connection";
 
+/**
+ * Request a connection with `userId`. Answers 201 with the new pending row,
+ * or 200 with the existing row when the signed-in user's request is still
+ * pending or the two are already connected (the stored message is kept). A
+ * request `userId` already sent the signed-in user is a 409
+ * `connection/request-received` whose body carries that row as `connection`;
+ * after `userId` declined the request it is a 409 `connection/request-declined`.
+ */
 function useRequestConnection(): (props: ConnectionRequestParams) => Promise<ConnectionRow> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();

@@ -69,30 +69,22 @@ interface AddToCollectionParams {
   entityId: string;
 }
 
-interface AddToCollectionResponse {
-  success: boolean;
-  collection: {
-    id: string;
-    name: string;
-    /** The collection's `entityCount` after the change, as the viewer sees it. */
-    entityCount: number;
-  };
+/**
+ * The collection's summary after an add or remove. The server answers 201 when
+ * the entity was newly added and 200 when it was already there (add), and 200
+ * whether or not it was there (remove).
+ */
+interface CollectionEntityMutationResponse {
+  id: string;
+  name: string;
+  /** The collection's `entityCount` after the change, as the viewer sees it. */
+  entityCount: number;
 }
 
 interface RemoveFromCollectionParams {
   projectId: string;
   collectionId: string;
   entityId: string;
-}
-
-interface RemoveFromCollectionResponse {
-  success: boolean;
-  collection: {
-    id: string;
-    name: string;
-    /** The collection's `entityCount` after the change, as the viewer sees it. */
-    entityCount: number;
-  };
 }
 
 // Extended API with collections endpoints
@@ -225,7 +217,7 @@ export const collectionsApi = baseApi.injectEndpoints({
     }),
 
     // Add entity to collection (POST - create relationship)
-    addToCollection: builder.mutation<AddToCollectionResponse, AddToCollectionParams>({
+    addToCollection: builder.mutation<CollectionEntityMutationResponse, AddToCollectionParams>({
       query: ({ projectId, collectionId, entityId }) => ({
         url: `/${projectId}/collections/${collectionId}/entities`,
         method: "POST",
@@ -238,7 +230,7 @@ export const collectionsApi = baseApi.injectEndpoints({
     }),
 
     // Remove entity from collection (DELETE - remove relationship)
-    removeFromCollection: builder.mutation<RemoveFromCollectionResponse, RemoveFromCollectionParams>({
+    removeFromCollection: builder.mutation<CollectionEntityMutationResponse, RemoveFromCollectionParams>({
       query: ({ projectId, collectionId, entityId }) => ({
         url: `/${projectId}/collections/${collectionId}/entities/${entityId}`,
         method: "DELETE",

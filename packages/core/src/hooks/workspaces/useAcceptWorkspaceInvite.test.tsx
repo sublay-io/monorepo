@@ -7,23 +7,33 @@ import {
   makeAuthUser,
 } from "../../test-utils";
 import useAcceptWorkspaceInvite from "./useAcceptWorkspaceInvite";
+import type { WorkspaceMemberStanding } from "../../interfaces/models/Workspace";
 
 afterEach(() => {
   resetAxiosMocks();
 });
 
 describe("useAcceptWorkspaceInvite", () => {
-  it("posts an EMPTY body to the non-:id-scoped accept route (actor from token)", async () => {
+  it("posts an EMPTY body to the non-:id-scoped accept route (actor from token) and returns the standing", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useAcceptWorkspaceInvite(),
       { projectId: "project-1", user }
     );
 
-    const response = { success: true, workspaceId: "w1" };
+    const response: WorkspaceMemberStanding = {
+      user: { id: "user-1" },
+      reasons: [{ type: "member" }],
+      capabilities: [],
+      permissions: [],
+      rank: 1,
+      relativeRank: 0,
+      title: null,
+      metadata: {},
+    };
     axiosPrivate.mockResponse("post", response);
 
-    let returned: typeof response | undefined;
+    let returned: WorkspaceMemberStanding | undefined;
     await act(async () => {
       returned = await result.current({ inviteId: "i1" });
     });

@@ -11,7 +11,7 @@ This is how users get into a [private space](/v8/data-models/space#visibility): 
 | The user's membership before | Result | Status |
 |---|---|---|
 | None | A new active membership with role `member` | `201` |
-| `pending` or `rejected` | Becomes active, with role `member` | `200` |
+| `pending` or `rejected` | Becomes active, with role `member` | `201` |
 | `active` | Nothing changes; the existing membership is returned | `200` |
 | `banned` | Refused: unban them first | `409 space/member-banned` |
 
@@ -43,7 +43,7 @@ The body takes no other fields: any other field is refused with `400 space/inval
 
 ## Response
 
-The user's membership record, as a [SpaceMember](/v8/data-models/space-member) object: `201` when it was just created, `200` otherwise (see the table above).
+The user's membership record, as a [SpaceMember](/v8/data-models/space-member) object, the same body either way: `201` when the user became an active member now, `200` when they already were (see the table above).
 
 <ResponseField name="id" type="string">Membership id.</ResponseField>
 <ResponseField name="spaceId" type="string">The space.</ResponseField>

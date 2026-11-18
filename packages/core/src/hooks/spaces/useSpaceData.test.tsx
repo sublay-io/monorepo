@@ -194,44 +194,63 @@ describe("useSpaceData", () => {
     expect(axiosPrivate.calls("get")).toHaveLength(1);
   });
 
-  it.each([
-    ["join", "post", "space/already-member", 409, true],
-    ["leave", "delete", "space/membership-required", 403, false],
-  ] as const)(
-    "a %s refused because it already happened loads the space again",
-    async (action, method, code, status, isMember) => {
-      // Shown in the state the earlier, already-applied action left behind.
-      const space = makeSpaceDetailed({
-        id: "space-1",
-        memberPermissions: makeMemberPermissions(
-          isMember ? { canRead: true } : { isMember: true, status: "active", canRead: true },
-        ),
-      });
-      const fresh = makeSpaceDetailed({
-        id: "space-1",
-        memberPermissions: makeMemberPermissions(
-          isMember ? { isMember: true, status: "active", canRead: true } : { canRead: true },
-        ),
-      });
+  it("a repeat join (200 with the existing membership) loads the space again", async () => {
+    // Shown as a non-member: an earlier join landed but its reload failed.
+    const space = makeSpaceDetailed({
+      id: "space-1",
+      memberPermissions: makeMemberPermissions({ canRead: true }),
+    });
+    const fresh = makeSpaceDetailed({
+      id: "space-1",
+      memberPermissions: makeMemberPermissions({ isMember: true, status: "active", canRead: true }),
+    });
 
-      const { result, axiosPrivate } = renderHookWithAxios(
-        () => useSpaceData({ space }),
-        { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
-      );
-      await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useSpaceData({ space }),
+      { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+    );
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
 
-      axiosPrivate.mockError(method, status, { error: "Already done.", code });
-      axiosPrivate.mockResponse("get", fresh);
+    axiosPrivate.mockResponse("post", membershipRecord("active"), 200);
+    axiosPrivate.mockResponse("get", fresh);
 
-      await act(async () => {
-        await (action === "join" ? result.current.joinSpace() : result.current.leaveSpace());
-      });
+    await act(async () => {
+      await result.current.joinSpace();
+    });
 
-      expect(result.current.error).toBeNull();
-      expect(result.current.space).toEqual(fresh);
-      expect(result.current.isMember).toBe(isMember);
-    },
-  );
+    expect(result.current.error).toBeNull();
+    expect(result.current.space).toEqual(fresh);
+    expect(result.current.isMember).toBe(true);
+  });
+
+  it("a leave refused because it already happened loads the space again", async () => {
+    // Shown as an active member: an earlier leave landed but its reload failed.
+    const space = makeSpaceDetailed({
+      id: "space-1",
+      memberPermissions: makeMemberPermissions({ isMember: true, status: "active", canRead: true }),
+    });
+    const fresh = makeSpaceDetailed({
+      id: "space-1",
+      memberPermissions: makeMemberPermissions({ canRead: true }),
+    });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useSpaceData({ space }),
+      { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+    );
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+    axiosPrivate.mockError("delete", 403, { error: "Already done.", code: "space/membership-required" });
+    axiosPrivate.mockResponse("get", fresh);
+
+    await act(async () => {
+      await result.current.leaveSpace();
+    });
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.space).toEqual(fresh);
+    expect(result.current.isMember).toBe(false);
+  });
 
   it("a pending member's refused leave stays an error and loads nothing", async () => {
     const space = makeSpaceDetailed({
@@ -276,7 +295,7 @@ describe("useSpaceData", () => {
     });
     expect(result.current.error).toBe("Failed to refresh space");
 
-    axiosPrivate.mockError("post", 409, { error: "Already a member.", code: "space/already-member" });
+    axiosPrivate.mockResponse("post", membershipRecord("active"), 200);
     axiosPrivate.mockResponse("get", fresh);
     await act(async () => {
       await result.current.joinSpace();

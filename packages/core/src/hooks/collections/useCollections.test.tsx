@@ -161,7 +161,7 @@ describe("useCollections", () => {
       fetchHandle.fetchMock.mockImplementation(async (...args: unknown[]) => {
         const { url, method } = requestUrlAndMethod(args);
         if (method === "POST" && url.endsWith("/collections/root/entities")) {
-          return jsonResponse({ success: true, collection: { id: "root", entityCount: 1 } });
+          return jsonResponse({ id: "root", entityCount: 1 });
         }
         return defaultCollectionsResponder(...args);
       });

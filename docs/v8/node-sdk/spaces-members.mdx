@@ -30,7 +30,7 @@ const membership = await sublay.spaces.joinSpace({
   The user the service key acts as: the user who joins.
 </ParamField>
 
-**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)). `status` is `"pending"` when the space requires approval. The response carries no permissions: fetch the space again to read its [`memberPermissions`](/v8/data-models/space#spacememberpermissions) after joining.
+**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)). `status` is `"pending"` when the space requires approval. A user who is already an active member, or already asked to join, gets their existing membership back unchanged, so a repeat join is safe: it resolves with the same record a fresh join would. The response carries no permissions: fetch the space again to read its [`memberPermissions`](/v8/data-models/space#spacememberpermissions) after joining.
 
 ---
 
@@ -207,7 +207,7 @@ const result = await sublay.spaces.addMember({
   The user to add.
 </ParamField>
 
-**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)), with `status: "active"`. `role` is `member` for a user just added; one who was already an active member keeps their role.
+**Returns** — `Promise<SpaceMember>`: the membership record, `{ id, spaceId, userId, role, status, joinedAt, createdAt }` (see [SpaceMember](/v8/data-models/space-member)), with `status: "active"`. `role` is `member` for a user just added; one who was already an active member keeps their role. It resolves with the same record whether the user was just added or already was an active member, so a repeat is safe.
 
 ---
 

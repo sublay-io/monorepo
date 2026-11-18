@@ -6,6 +6,8 @@ description: "Join a space or submit a membership request"
 
 Joins a space. If the space has `requireJoinApproval: true`, the membership is created with `status: "pending"` until approved. Otherwise it is immediately `active`.
 
+Joining again is not an error. A user who is already an active member, or already has a request awaiting approval, gets `200` with that membership, unchanged. A user whose earlier request was declined joins again as if for the first time: a new request, or an active membership when the space needs no approval.
+
 A private space can't be joined and takes no join requests: joining a space the user can't see answers `404 space/not-found`, like a space that doesn't exist. A private space's moderators and admins [add](/v8/api-reference/spaces/membership/add-member) its members instead. See [Space visibility](/v8/data-models/space#visibility).
 
 ## Path Parameters
@@ -22,13 +24,21 @@ A private space can't be joined and takes no join requests: joining a space the 
 
 ## Response
 
-The user's membership record, as a [SpaceMember](/v8/data-models/space-member) object: `201` for a new membership, `200` for a rejoin after a declined request. To read what the user may do in the space now, fetch the space again ([Fetch Space](/v8/api-reference/spaces/fetch-space)): its `memberPermissions` describe them. A request awaiting approval has `status: "pending"`, and the space's `memberPermissions` then report `isMember: false`.
+The user's membership record, as a [SpaceMember](/v8/data-models/space-member) object. The body is the same whether the status is `201` or `200`:
+
+| The user's membership before | Result | Status |
+|---|---|---|
+| None, or a declined request (`rejected`) | A new membership: `active`, or `pending` when the space requires approval | `201` |
+| `active` or `pending` | Nothing changes; the existing membership is returned | `200` |
+| `banned` (here or in a parent space) | Refused | `403 space/banned` |
+
+To read what the user may do in the space now, fetch the space again ([Fetch Space](/v8/api-reference/spaces/fetch-space)): its `memberPermissions` describe them. A request awaiting approval has `status: "pending"`, and the space's `memberPermissions` then report `isMember: false`.
 
 <ResponseField name="id" type="string">Membership id.</ResponseField>
 <ResponseField name="spaceId" type="string">The space.</ResponseField>
 <ResponseField name="userId" type="string">The member.</ResponseField>
-<ResponseField name="role" type="'admin' | 'moderator' | 'member'">Always `member`.</ResponseField>
-<ResponseField name="status" type="'pending' | 'active' | 'banned' | 'rejected'">`active`, or `pending` when the space requires approval.</ResponseField>
+<ResponseField name="role" type="'admin' | 'moderator' | 'member'">`member` for a new membership; on a repeat join, the role the user already holds.</ResponseField>
+<ResponseField name="status" type="'pending' | 'active' | 'banned' | 'rejected'">`active`, or `pending` for a request awaiting approval.</ResponseField>
 <ResponseField name="joinedAt" type="string">When the membership became active; on a request still awaiting approval, when the request was made (ISO 8601).</ResponseField>
 <ResponseField name="createdAt" type="string">When the membership record was created (ISO 8601).</ResponseField>
 
@@ -103,19 +113,12 @@ The user's membership record, as a [SpaceMember](/v8/data-models/space-member) o
     { "error": "You are banned from a parent of this space.", "code": "space/banned", "bannedSpaceIds": ["…"] }
     ```
   </Accordion>
-  <Accordion title="Already a Member — 409">
-    The user already has an active membership, or a pending request; `membership` is that membership.
+  <Accordion title="Membership Changed — 409">
+    The user's membership was changed by another request while this one ran, and is now neither active, pending nor banned. Try again.
     ```json
-    { "error": "You are already a member of this space.", "code": "space/already-member", "membership": { "…": "…" } }
+    { "error": "Your membership changed meanwhile. Try again.", "code": "space/membership-changed" }
     ```
-    ```json
-    { "error": "You already have a pending membership request.", "code": "space/already-member", "membership": { "…": "…" } }
-    ```
-    Also returned when the user's membership was written or changed by another request while this one ran (a parallel join, or a moderator adding them); the message then names the membership's current state, or asks to try again.
-    ```json
-    { "error": "Your membership changed meanwhile. Try again.", "code": "space/already-member" }
-    ```
-    A ban that lands meanwhile answers `403 space/banned` instead.
+    A membership written meanwhile that is active or pending (a parallel join, or a moderator adding them) answers `200` with it; a ban that lands meanwhile answers `403 space/banned`.
   </Accordion>
 </AccordionGroup>
 

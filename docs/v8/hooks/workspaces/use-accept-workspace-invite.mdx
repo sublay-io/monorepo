@@ -35,7 +35,7 @@ function AcceptButton({ inviteId }: { inviteId: string }) {
 
 ## Returns
 
-Your standing in the workspace, a `WorkspaceMemberStanding` — the same record [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership) returns: `{ user, reasons, capabilities, permissions, rank, relativeRank, title, metadata }`, with every field present. The server answers `201` when the accept made you a member and `200` when you already were (or own the workspace).
+Your standing in the workspace, a `WorkspaceMemberStanding` — the same record [`useFetchMyWorkspaceMembership`](/v8/hooks/workspaces/use-fetch-my-workspace-membership) returns: `{ user, reasons, capabilities, permissions, rank, relativeRank, title, metadata }`, with every field present. It resolves with the same record whether the accept just made you a member or you already were one (or own the workspace).
 
 <Note>
   An unverified accept fails with `workspace/email-not-verified` — prompt the user to verify their email, then retry.

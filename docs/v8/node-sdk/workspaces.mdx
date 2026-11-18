@@ -456,7 +456,7 @@ The invited rank is named in **either coordinate** — `rank` (absolute) or `rel
 <ParamField body="title" type="string" />
 <ParamField body="actingUserId" type="string" required>The **inviter** to act as. The `invite` capability, the no-escalation and rank floors run against their standing, and the invitation's `invitedById` records them. Distinct from `userId`, which is the invitee.</ParamField>
 
-Returns a `WorkspaceInvitation`: the new invitation (HTTP `201`), or the target's live pending invitation updated in place, with the same `id` and a new expiry (HTTP `200`). A target who is already a member or owns the workspace → `409 workspace/already-member`.
+Returns a `WorkspaceInvitation`: the new invitation, or the target's live pending invitation updated in place (same `id`, new expiry). It resolves with the same record either way, so inviting someone again is safe. A target who is already a member or owns the workspace → `409 workspace/already-member`.
 
 ### fetchWorkspaceInvites
 
@@ -511,7 +511,7 @@ const standing = await sublay.workspaces.acceptWorkspaceInvite({
 });
 ```
 
-Identity-matched + verified-email. Returns the accepting user's standing, a `WorkspaceMemberStanding` — the same record [`fetchMyWorkspaceMembership`](#fetchmyworkspacemembership) returns, every field present. HTTP `201` when the accept made them a member; `200` when they already were (or own the workspace), including accepting again an invite they already accepted while still a member. An invite declined, revoked, accepted by another user, accepted before the user left the workspace, or expired → `409 workspace/not-pending`.
+Identity-matched + verified-email. Returns the accepting user's standing, a `WorkspaceMemberStanding` — the same record [`fetchMyWorkspaceMembership`](#fetchmyworkspacemembership) returns, every field present. It resolves with the same record whether the accept just made them a member or they already were one (or own the workspace), so accepting again an invite they already accepted, while still a member, is safe. An invite declined, revoked, accepted by another user, accepted before the user left the workspace, or expired → `409 workspace/not-pending`.
 
 <ParamField body="inviteId" type="string" required />
 <ParamField body="actingUserId" type="string" required>The accepting user (must be the target and verified).</ParamField>

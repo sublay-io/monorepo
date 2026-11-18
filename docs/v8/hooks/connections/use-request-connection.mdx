@@ -41,8 +41,8 @@ The hook returns a function. That function accepts:
 
 A `Promise<ConnectionRow>` that resolves to the connection, seen from the signed-in user's side. See [ConnectionRow](/v8/data-models/connection#connectionrow).
 
-- A new request answers HTTP `201`.
-- When the signed-in user's own request is still pending, or the two are already connected, it resolves to that existing row (HTTP `200`). The stored message is kept and no second notification is sent.
+- A new request resolves to the new pending row.
+- When the signed-in user's own request is still pending, or the two are already connected, it resolves to that existing row, so a repeat is safe. The stored message is kept and no second notification is sent.
 - When the other user already sent the signed-in user a request, it rejects with `409 connection/request-received`. The error body carries their request as `connection`, so you can offer [to accept it](/v8/hooks/connections/use-accept-connection).
 - After the other user declined the signed-in user's request, it rejects with `409 connection/request-declined`.
 

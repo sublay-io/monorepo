@@ -167,7 +167,7 @@ const collection = await sublay.collections.addEntityToCollection({
   The user the service key acts as, who owns the collection.
 </ParamField>
 
-**Returns** — `Promise<{ id: string; name: string; entityCount: number }>`: the collection's summary after the save. The same whether the entity was newly added (`201`) or already in the collection (`200`).
+**Returns** — `Promise<{ id: string; name: string; entityCount: number }>`: the collection's summary after the save. The same whether the entity was just added or already in the collection, so a repeat save is safe.
 
 ---
 

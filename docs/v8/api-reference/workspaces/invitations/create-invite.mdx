@@ -34,8 +34,10 @@ The inviter is the caller's own token subject, or — for a service key — the 
 
 **Duplicate handling:**
 - Inviting an **existing member** → `409` (change the grant via [Update Member](/v8/api-reference/workspaces/members/update-member)).
-- A **live** invite (`pending` and not past `expiresAt`) for the same target → the existing invitation is **updated in place**, under the same `id`, and its 14-day expiry restarts. This answers `200` instead of `201`. See [what a re-invite does to the grant](#what-a-re-invite-does-to-the-grant) — it is not a plain replace.
+- A **live** invite (`pending` and not past `expiresAt`) for the same target → the existing invitation is **updated in place**, under the same `id`, and its 14-day expiry restarts. This answers `200` instead of `201`, sends the invitation email again, and fires `workspace.invite.created` again with the same `invitationId`. See [what a re-invite does to the grant](#what-a-re-invite-does-to-the-grant) — it is not a plain replace.
 - A **terminal** (`accepted`/`declined`/`revoked`) or **effectively-expired** invite does **not** block — a fresh `pending` is created. (An `accepted` invite means the user is already a member, so re-inviting them returns `409` instead.)
+
+Two invites for the same person sent at the same time leave one invitation.
 
 Invite-by-email to an address that already has an account resolves and stores the `userId` at creation. The account lookup is **case-insensitive**, so an account stored as `Jane@Example.com` is still bound when invited as `jane@example.com`.
 

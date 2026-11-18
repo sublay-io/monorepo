@@ -12,7 +12,7 @@ When a connection between the two users already exists:
 - **The other user already sent you a request**: `409 connection/request-received`, with their request in the body as `connection`, so your app can offer to [accept it](/v8/api-reference/connections/accept-connection).
 - **A declined request exists between you** (either of you declined the other): `409 connection/request-declined`. A new request is refused while it exists.
 
-Two requests sent at the same time are answered by these same rules, never with a server error.
+When the two users send each other a request at the same time, one request is created: one call gets `201`, the other `409 connection/request-received`.
 
 <Note>
   **Requires the `connections` bundle.** A project without the connections bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).

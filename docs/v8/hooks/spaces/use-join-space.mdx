@@ -35,6 +35,6 @@ function JoinButton({ spaceId }: { spaceId: string }) {
 
 ## Returns
 
-Resolves with the user's membership record, as a [SpaceMember](/v8/data-models/space-member) object: `id`, `spaceId`, `userId`, `role` (`"member"`), `status` (`"pending"` or `"active"`), `joinedAt` and `createdAt`. A new membership (also a join after a declined request) answers HTTP `201`. Joining again as an active member, or with a request already awaiting approval, is not an error: it answers HTTP `200` with the existing membership, unchanged. A banned user gets `403 space/banned`.
+Resolves with the user's membership record, as a [SpaceMember](/v8/data-models/space-member) object: `id`, `spaceId`, `userId`, `role` (`"member"`), `status` (`"pending"` or `"active"`), `joinedAt` and `createdAt`. Joining again as an active member, or with a request already awaiting approval, is not an error: it resolves with the existing membership, unchanged, the same record a fresh join gives. A banned user gets `403 space/banned`.
 
 The response carries no permissions. To read what the user may do in the space now, fetch the space again: its `memberPermissions` describe them (a request awaiting approval reports `status: "pending"` and `isMember: false`). `joinSpace` from `useSpace` does this for you.

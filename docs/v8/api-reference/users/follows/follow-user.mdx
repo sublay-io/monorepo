@@ -6,7 +6,7 @@ description: "Follow a user by their ID"
 
 Creates a follow relationship from the authenticated user to the specified user. A notification is sent to the followed user.
 
-Following a user you already follow is not an error: it answers `200` with the existing follow, and no second notification is sent. Two follows sent at the same time leave one follow, and both get it back.
+Following a user you already follow is not an error: it answers `200` with the existing follow, and no second notification is sent. Two follows sent at the same time leave one follow.
 
 <Note>
   **Requires the `follows` bundle.** A project without the follows bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).

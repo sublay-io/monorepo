@@ -77,6 +77,9 @@ function useSpaceData({
 
   // Cache to store fetched spaces keyed by unique identifier
   const spaceCache = useRef<Record<string, SpaceDetailed>>({});
+  // The key (`spaceId-shortId-slug`) of a space dropped because the viewer
+  // can no longer see it, so the fetch effect doesn't load it again.
+  const goneKey = useRef<string | null>(null);
 
   // Fetch hooks
   const fetchSpace = useFetchSpace();
@@ -167,6 +170,7 @@ function useSpaceData({
           for (const key of Object.keys(spaceCache.current)) {
             if (spaceCache.current[key].id === id) delete spaceCache.current[key];
           }
+          goneKey.current = `${spaceId ?? ""}-${shortId ?? ""}-${slug ?? ""}`;
           setSpace(null);
           return;
         }
@@ -174,7 +178,7 @@ function useSpaceData({
         setError("Failed to refresh space");
       }
     },
-    [fetchSpace, stableInclude, applySpace]
+    [fetchSpace, stableInclude, applySpace, spaceId, shortId, slug]
   );
 
   // Handle join space
@@ -216,6 +220,11 @@ function useSpaceData({
       if (space && slug && space.slug === slug) return;
 
       const uniqueKey = `${spaceId ?? ""}-${shortId ?? ""}-${slug ?? ""}`;
+
+      // A space dropped after the viewer lost access stays dropped until the
+      // hook is pointed at another space.
+      if (goneKey.current === uniqueKey) return;
+      goneKey.current = null;
 
       // If we have a cached space, update the state and exit
       if (spaceCache.current[uniqueKey]) {

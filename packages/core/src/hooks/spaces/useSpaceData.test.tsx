@@ -259,6 +259,38 @@ describe("useSpaceData", () => {
     expect(result.current.error).toBeNull();
   });
 
+  it("drops a space loaded by id once the user can no longer see it, without loading it again", async () => {
+    const space = makeSpaceDetailed({
+      id: "space-1",
+      memberPermissions: makeMemberPermissions({ isMember: true, status: "active", canRead: true }),
+    });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useSpaceData({ spaceId: "space-1" }),
+      {
+        beforeRender: ({ axiosPrivate }) => {
+          axiosPrivate.mockResponse("get", space);
+          mockBreadcrumb(axiosPrivate);
+        },
+      },
+    );
+    await waitFor(() => expect(result.current.space).toEqual(space));
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(2));
+
+    axiosPrivate.mockResponse("delete", "", 204);
+    axiosPrivate.mockError("get", 404, { error: "Space not found.", code: "space/not-found" });
+
+    await act(async () => {
+      await result.current.leaveSpace();
+    });
+
+    expect(result.current.space).toBeNull();
+    expect(result.current.error).toBeNull();
+    expect(result.current.loading).toBe(false);
+    // The space fetch, the breadcrumb, and the one reload after leaving.
+    expect(axiosPrivate.calls("get")).toHaveLength(3);
+  });
+
   it("keeps the space and reports an error when loading it again fails", async () => {
     const space = makeSpaceDetailed({ id: "space-1", membersCount: 5 });
 

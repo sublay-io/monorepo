@@ -103,7 +103,7 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  The number of spaces to return per page.
+  The number of spaces to return per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 space/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField body="sortBy" type="string">
@@ -191,11 +191,11 @@ const mySpaces = await sublay.spaces.fetchMySpaces({
 ```
 
 <ParamField body="page" type="number">
-  The page number to fetch.
+  The page number to fetch (1-indexed), `1` or more. Defaults to `1`.
 </ParamField>
 
 <ParamField body="limit" type="number">
-  The number of spaces to return per page.
+  The number of spaces to return per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 space/invalid-query` (`param: "limit"`), never lowered to `100`. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField body="query" type="string">
@@ -232,11 +232,18 @@ const mySpaces = await sublay.spaces.fetchMySpaces({
   Membership status to list: `"active"` (default), `"pending"`, or `"banned"`. Use `"pending"` to find join requests still awaiting approval.
 </ParamField>
 
-<ParamField body="all" type="string">
-  Pass `"true"` or `"false"`.
-</ParamField>
-
 **Returns** — `Promise<MySpacesResponse>`
+
+The list is always paged. To load every space the user is in, fetch page after page until `pagination.hasMore` is `false`; add `role: "admin,moderator"` to list only the spaces they moderate:
+
+```typescript
+const moderated = [];
+for (let page = 1; ; page++) {
+  const result = await sublay.spaces.fetchMySpaces({ role: "admin,moderator", limit: 100, page });
+  moderated.push(...result.data);
+  if (!result.pagination.hasMore) break;
+}
+```
 
 ---
 
@@ -261,7 +268,7 @@ const mutual = await sublay.spaces.fetchMutualSpaces({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  The number of spaces to return per page. Max `100`.
+  The number of spaces to return per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 space/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField body="include" type="SpaceIncludeParam">

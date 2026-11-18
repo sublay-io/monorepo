@@ -53,7 +53,7 @@ function InviteForm({ workspaceId }: { workspaceId: string }) {
 
 ## Returns
 
-Returns the created [WorkspaceInvitation](/v8/data-models/workspace-invitation) object.
+Returns a [WorkspaceInvitation](/v8/data-models/workspace-invitation) object: the new invitation (HTTP `201`), or the target's live pending invitation updated in place, with the same `id` and a new expiry (HTTP `200`).
 
 ## Error codes
 

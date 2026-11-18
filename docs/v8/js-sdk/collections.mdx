@@ -135,7 +135,7 @@ const result = await sublay.collections.addEntityToCollection({
   The ID of the entity to add.
 </ParamField>
 
-**Returns** — `Promise<{ success: boolean; collection: { id: string; name: string; entityCount: number } }>`
+**Returns** — `Promise<{ id: string; name: string; entityCount: number }>`: the collection's summary after the save. The same whether the entity was newly added (`201`) or already in the collection (`200`).
 
 ---
 
@@ -158,7 +158,7 @@ const result = await sublay.collections.removeEntityFromCollection({
   The ID of the entity to remove.
 </ParamField>
 
-**Returns** — `Promise<{ success: boolean; collection: { id: string; name: string; entityCount: number } }>`
+**Returns** — `Promise<{ id: string; name: string; entityCount: number }>`: the collection's summary after the removal, whether or not the entity was in it.
 
 ---
 

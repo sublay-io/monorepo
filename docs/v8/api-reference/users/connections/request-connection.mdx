@@ -6,6 +6,14 @@ description: "Send a connection request to a user"
 
 Sends a connection request from the authenticated user to the specified user. An optional message can be included. A notification is sent to the receiving user.
 
+When a connection between the two users already exists:
+
+- **Your own request is still pending**, or **you are already connected**: `200` with the existing connection row. The stored message is kept (a new `message` is ignored) and no second notification is sent.
+- **The other user already sent you a request**: `409 connection/request-received`, with their request in the body as `connection`, so your app can offer to [accept it](/v8/api-reference/connections/accept-connection).
+- **The other user declined your request**: `409 connection/request-declined`. Only they can start a new request.
+
+Two requests sent at the same time are answered by these same rules, never with a server error.
+
 <Note>
   **Requires the `connections` bundle.** A project without the connections bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
 </Note>
@@ -28,7 +36,7 @@ Sends a connection request from the authenticated user to the specified user. An
 
 ## Response
 
-On success, returns HTTP `201` with the created [connection row](/v8/data-models/connection#connectionrow):
+Returns HTTP `201` with the created [connection row](/v8/data-models/connection#connectionrow), or HTTP `200` with the existing row when your request is already pending or the two of you are already connected. The body is the same in both cases:
 
 <ResponseField name="id" type="string">
   ID of the connection record. Pass it to [Remove Connection](/v8/api-reference/connections/remove-connection) to withdraw the request.
@@ -39,7 +47,7 @@ On success, returns HTTP `201` with the created [connection row](/v8/data-models
 </ResponseField>
 
 <ResponseField name="type" type="string">
-  Always `"sent"` here: the authenticated user sent the request.
+  `"sent"` when the authenticated user sent the request, `"received"` when the other user did. Always `"sent"` on a `201`; an existing accepted connection the other user started answers `"received"`.
 </ResponseField>
 
 <ResponseField name="message" type="string | null">
@@ -47,7 +55,7 @@ On success, returns HTTP `201` with the created [connection row](/v8/data-models
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  Always `"pending"` for a new request.
+  `"pending"` for a request not yet answered (always, on a `201`), `"accepted"` for an existing connection.
 </ResponseField>
 
 <ResponseField name="createdAt" type="string">
@@ -55,7 +63,7 @@ On success, returns HTTP `201` with the created [connection row](/v8/data-models
 </ResponseField>
 
 <ResponseField name="respondedAt" type="string | null">
-  Always `null` for a new request.
+  When the request was accepted, or `null` while it is pending.
 </ResponseField>
 
 ## Error Responses
@@ -103,19 +111,21 @@ On success, returns HTTP `201` with the created [connection row](/v8/data-models
     }
     ```
   </Accordion>
-  <Accordion title="Already Pending — 409">
+  <Accordion title="Request Received — 409">
+    The other user already sent you a connection request. `connection` is that request, as a [connection row](/v8/data-models/connection#connectionrow) seen from your side (`type: "received"`); accept it with [Accept Connection](/v8/api-reference/connections/accept-connection).
     ```json
     {
-      "error": "A connection request is already pending between these users.",
-      "code": "connection/request-pending"
-    }
-    ```
-  </Accordion>
-  <Accordion title="Already Connected — 409">
-    ```json
-    {
-      "error": "Users are already connected.",
-      "code": "connection/already-connected"
+      "error": "This user has already sent you a connection request.",
+      "code": "connection/request-received",
+      "connection": {
+        "id": "8f0c…",
+        "user": { "id": "…", "username": "…" },
+        "type": "received",
+        "message": "Hi!",
+        "status": "pending",
+        "createdAt": "2026-11-18T10:00:00.000Z",
+        "respondedAt": null
+      }
     }
     ```
   </Accordion>

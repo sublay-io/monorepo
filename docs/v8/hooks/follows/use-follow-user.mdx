@@ -35,7 +35,7 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-The function resolves to the follow row, a [`FollowRow`](/v8/data-models/follow#followrow). Following a user you already follow is rejected with `409 follow/already-exists`.
+The function resolves to the follow row, a [`FollowRow`](/v8/data-models/follow#followrow): the new follow (HTTP `201`), or the existing one when you already follow the user (HTTP `200`).
 
 <ResponseField name="id" type="string">
   ID of the follow record. [useUnfollowByFollowId](/v8/hooks/follows/use-unfollow-by-follow-id) takes it.

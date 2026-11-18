@@ -38,4 +38,4 @@ function AddToSpaceButton({ spaceId, userId }: { spaceId: string; userId: string
 
 ## Returns
 
-Resolves with the user's membership record (`status: "active"`), as a [SpaceMember](/v8/data-models/space-member) object: `id`, `spaceId`, `userId`, `role`, `status`, `joinedAt` and `createdAt`. `role` is `member` for a user just added; a user who was already an active member keeps their role.
+Resolves with the user's membership record (`status: "active"`), as a [SpaceMember](/v8/data-models/space-member) object: `id`, `spaceId`, `userId`, `role`, `status`, `joinedAt` and `createdAt`. `role` is `member` for a user just added; a user who was already an active member keeps their role. HTTP `201` when the user became an active member now, `200` when they already were.

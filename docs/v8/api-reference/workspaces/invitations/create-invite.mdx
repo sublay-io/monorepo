@@ -34,7 +34,7 @@ The inviter is the caller's own token subject, or — for a service key — the 
 
 **Duplicate handling:**
 - Inviting an **existing member** → `409` (change the grant via [Update Member](/v8/api-reference/workspaces/members/update-member)).
-- A **live** invite (`pending` and not past `expiresAt`) for the same target → the existing invitation is **updated in place**, under the same `id`, and its 14-day expiry restarts. See [what a re-invite does to the grant](#what-a-re-invite-does-to-the-grant) — it is not a plain replace.
+- A **live** invite (`pending` and not past `expiresAt`) for the same target → the existing invitation is **updated in place**, under the same `id`, and its 14-day expiry restarts. This answers `200` instead of `201`. See [what a re-invite does to the grant](#what-a-re-invite-does-to-the-grant) — it is not a plain replace.
 - A **terminal** (`accepted`/`declined`/`revoked`) or **effectively-expired** invite does **not** block — a fresh `pending` is created. (An `accepted` invite means the user is already a member, so re-inviting them returns `409` instead.)
 
 Invite-by-email to an address that already has an account resolves and stores the `userId` at creation. The account lookup is **case-insensitive**, so an account stored as `Jane@Example.com` is still bound when invited as `jane@example.com`.
@@ -109,7 +109,13 @@ This endpoint doubles as an **upsert**, so a second call for a target who alread
 
 ## Response
 
-Returns the created [WorkspaceInvitation](/v8/data-models/workspace-invitation) object.
+Returns a [WorkspaceInvitation](/v8/data-models/workspace-invitation) object, the same body either way:
+
+| Case | Status |
+|---|---|
+| A new invitation was created | `201` |
+| The target's live pending invitation was updated in place (same `id`, new expiry) | `200` |
+| The target is already a member, or owns the workspace | `409 workspace/already-member` |
 
 ## Error Responses
 

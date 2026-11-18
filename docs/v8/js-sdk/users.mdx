@@ -446,7 +446,7 @@ const follow = await sublay.users.createFollow({ userId: "usr_target" });
   The user being followed (the target).
 </ParamField>
 
-**Returns** — `Promise<FollowRow>` — `{ id, user, createdAt }`, where `user` is the followed user. Following a user the logged-in user already follows is rejected with `409 follow/already-exists`.
+**Returns** — `Promise<FollowRow>` — `{ id, user, createdAt }`, where `user` is the followed user. Following a user the logged-in user already follows is not an error: it resolves to the existing follow (HTTP `200`, a new follow is `201`).
 
 ---
 
@@ -518,7 +518,9 @@ const connection = await sublay.users.requestConnection({
   Optional message to include with the request.
 </ParamField>
 
-**Returns** — `Promise<ConnectionRow>` — the pending request, with `type: "sent"` and `user` = the target. See [ConnectionRow](/v8/data-models/connection#connectionrow).
+**Returns** — `Promise<ConnectionRow>` — the new pending request (HTTP `201`), with `type: "sent"` and `user` = the target. See [ConnectionRow](/v8/data-models/connection#connectionrow).
+
+When a connection already exists, a request the logged-in user sent that is still pending, or an accepted connection, resolves to that row (HTTP `200`; the stored message is kept). A request the target already sent the logged-in user rejects with `409 connection/request-received`; the error body carries that request as `connection`, so you can accept it instead. After the target declined the logged-in user's request it rejects with `409 connection/request-declined`.
 
 ---
 

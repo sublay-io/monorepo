@@ -93,7 +93,7 @@ function ConnectionButton({ userId }: { userId: string }) {
 </ResponseField>
 
 <ResponseField name="sendConnectionRequest" type="(message?: string) => Promise<void>">
-  Sends a connection request to the target user. Accepts an optional message string. Only active when status is `"none"` or `"declined-received"`; the server rejects a new request while a declined one exists between the two users (`409 connection/request-declined`), so in `"declined-received"` the call fails.
+  Sends a connection request to the target user. Accepts an optional message string. Only active when status is `"none"` or `"declined-received"`; the server rejects a new request while a declined one exists between the two users (`409 connection/request-declined`), so in `"declined-received"` the call fails. When the server answers with an existing row (your request was already pending, or you were connected meanwhile), the state takes that row. When the other user sent you a request meanwhile (`409 connection/request-received`), the call fails and the state takes their request from the error body, so `connectionStatus` becomes `"pending-received"` and `acceptConnectionRequest` works.
 </ResponseField>
 
 <ResponseField name="acceptConnectionRequest" type="() => Promise<void>">

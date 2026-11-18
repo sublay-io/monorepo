@@ -36,8 +36,9 @@ All other fields are optional. Only the fields provided are updated.
 </ParamField>
 
 <ParamField body="username" type="string">
-  New username. Automatically lowercased and sanitized. Returns 409 if already
-  taken by another user.
+  New username. Automatically lowercased and sanitized. Returns
+  `409 user/username-taken` (with `param: "username"`) if another user already
+  holds it.
 </ParamField>
 
 <ParamField body="avatar" type="string">
@@ -228,6 +229,17 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     }
     ```
     The `.options` field isn't valid JSON. `param` names the field: `avatarFile.options` or `bannerFile.options`.
+  </Accordion>
+  <Accordion title="Username Taken — 409">
+    Another user already holds the `username` sent. Nothing is changed, and any file uploaded with the request is removed.
+
+    ```json
+    {
+      "error": "A user with this username already exists in this project",
+      "code": "user/username-taken",
+      "param": "username"
+    }
+    ```
   </Accordion>
   <Accordion title="Rejected by Validation Webhook — 400">
     ```json

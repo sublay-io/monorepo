@@ -21,11 +21,14 @@ function MyRole({ workspaceId }: { workspaceId: string }) {
   const fetchMyWorkspaceMembership = useFetchMyWorkspaceMembership();
 
   const load = async () => {
-    const me = await fetchMyWorkspaceMembership({ workspaceId });
-    if (me.reasons.length === 0) {
-      // No standing on this workspace at all.
+    try {
+      const me = await fetchMyWorkspaceMembership({ workspaceId });
+      // me.capabilities, me.permissions, me.rank, me.relativeRank are always present here.
+    } catch (err: any) {
+      if (err.response?.data?.code === "workspace/not-found") {
+        // No such workspace, or no standing on it at all (answered alike).
+      }
     }
-    // me.capabilities, me.permissions, me.rank, me.relativeRank are always present here.
   };
 }
 ```
@@ -43,7 +46,7 @@ function MyRole({ workspaceId }: { workspaceId: string }) {
 | Field | Type | Description |
 |-------|------|-------------|
 | `user` | `WorkspaceStandingUser` | You. |
-| `reasons` | `WorkspaceAuthorityReasonDetail[]` | Why you have standing — structured `{ type, viaWorkspaceId? }` entries. Empty when you have no relation to the workspace. |
+| `reasons` | `WorkspaceAuthorityReasonDetail[]` | Why you have standing — structured `{ type, viaWorkspaceId? }` entries. |
 | `capabilities` | `string[]` | Your **resolved** capability set (direct + reach + ownership). **`view` is implied by every other capability.** |
 | `permissions` | `string[]` | Your **per-node** permissions (direct membership on this workspace only; may be empty). |
 | `rank` | `number \| null` | Your direct-membership rank, or `null` when you are not a member here (the owner, an ancestor-owner or a reach-only holder). |

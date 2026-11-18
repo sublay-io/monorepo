@@ -19,11 +19,11 @@ Returns a paginated list of spaces a user has a membership in — the signed-in 
 </ParamField>
 
 <ParamField query="page" type="number">
-  Page number. Defaults to `1`.
+  Page number (1-indexed): a whole number, `1` or more. Defaults to `1`. Any other value returns `400 space/invalid-query` with `param: "page"`.
 </ParamField>
 
 <ParamField query="limit" type="number">
-  Results per page. Max `100`.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value returns `400 space/invalid-query` with `param: "limit"` (it is never lowered to `100`), as does `0`, a negative number or a value that isn't a whole number. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField query="query" type="string">
@@ -59,9 +59,13 @@ Returns a paginated list of spaces a user has a membership in — the signed-in 
   Matching ignores case. An unknown value returns `400 space/invalid-query`.
 </ParamField>
 
-<ParamField query="all" type="string">
-  Pass `"true"` to return all memberships without pagination. When used, the response omits the `pagination` field.
-</ParamField>
+### Listing every space
+
+The list is always paged. To read every space the user is in, request `page=1`, `page=2`, … with `limit` up to `100` until `pagination.hasMore` is `false`. To list only the spaces the user moderates, add `role=admin,moderator`:
+
+```
+GET /v8/:projectId/spaces/mine?role=admin,moderator&limit=100&page=1
+```
 
 ## Response
 
@@ -97,6 +101,17 @@ Returns a paginated list of spaces a user has a membership in — the signed-in 
     }
     ```
   </Accordion>
+  <Accordion title="Unsupported all — 400">
+    The list has no unpaged mode, so `all` is refused, whatever its value.
+
+    ```json
+    {
+      "error": "`all` isn't supported in v8. Page through your spaces with `page` and `limit` (at most 100) until `pagination.hasMore` is false; to list only the spaces you moderate, add `role=admin,moderator`.",
+      "code": "space/unsupported-param",
+      "param": "all"
+    }
+    ```
+  </Accordion>
   <Accordion title="Unsupported parentSpaceId value — 400">
     `parentSpaceId=null` and `parentSpaceId=undefined` are rejected with the spelling to use instead.
 
@@ -109,7 +124,7 @@ Returns a paginated list of spaces a user has a membership in — the signed-in 
     ```
   </Accordion>
   <Accordion title="Invalid query — 400">
-    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy`, `sortDir`, `searchFields` or `include` value, a blank `query`, or an `actingUserId` that isn't a valid UUID. `error` names the first problem found.
+    Returned with code `space/invalid-query` for invalid values — for example an unknown `sortBy`, `sortDir`, `searchFields` or `include` value, a blank `query`, a `page` or `limit` that breaks the [pagination rule](/v8/api-reference/getting-started#pagination), or an `actingUserId` that isn't a valid UUID. `error` names the first problem found.
 
     ```json
     { "error": "include: Unknown include `members`. Allowed: files.", "code": "space/invalid-query" }

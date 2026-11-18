@@ -33,11 +33,11 @@ Supplying none, more than one, or only half of the target pair returns `400 repu
 </ParamField>
 
 <ParamField query="page" type="number">
-  Page number (1-indexed). Defaults to `1`.
+  Page number (1-indexed): a whole number, `1` or more. Defaults to `1`. Any other value returns `400 reputation-grant/invalid-query` with `param: "page"`.
 </ParamField>
 
 <ParamField query="limit" type="number">
-  Results per page. Defaults to `20`; the maximum is `100`. A larger value is rejected with `400 reputation-grant/invalid-query`, not silently clamped.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value returns `400 reputation-grant/invalid-query` with `param: "limit"` (it is never lowered to `100`), as does `0`, a negative number or a value that isn't a whole number. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField query="recipientId" type="string">
@@ -150,9 +150,9 @@ See [ReputationGrant](/v8/data-models/reputation-grant) for the row shape and [G
   </Accordion>
   <Accordion title="Invalid Query — 400">
     ```json
-    { "error": "limit: Too big: expected number to be <=100", "code": "reputation-grant/invalid-query" }
+    { "error": "limit: Limit must be at most 100", "code": "reputation-grant/invalid-query", "param": "limit" }
     ```
-    Shape failures from the query schema: a `limit` above `100`, a non-positive `page`, a malformed UUID (`"recipientId: Invalid UUID format"`), a `targetType` outside the three accepted values, or an unknown `include` value (``"include: Unknown include `sender`. Allowed: user."``). The field path prefixes the message, so `error` reads `"<path>: <message>"`.
+    Shape failures from the query schema: a `page` or `limit` that breaks the [pagination rule](/v8/api-reference/getting-started#pagination) (`param` names it), a malformed UUID (`"recipientId: Invalid UUID format"`), a `targetType` outside the three accepted values, or an unknown `include` value (``"include: Unknown include `sender`. Allowed: user."``). The field path prefixes the message, so `error` reads `"<path>: <message>"`.
   </Accordion>
   <Accordion title="Tables Not Available — 403">
     ```json

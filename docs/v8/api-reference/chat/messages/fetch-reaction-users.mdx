@@ -27,11 +27,11 @@ In a space chat, the caller must also be an active member of the chat's space an
 </ParamField>
 
 <ParamField query="page" type="number">
-  Page number (1-based). Defaults to 1.
+  Page number (1-indexed): a whole number, `1` or more. Defaults to `1`. Any other value returns `400 chat/invalid-query` with `param: "page"`.
 </ParamField>
 
 <ParamField query="limit" type="number">
-  Number of reactions per page. Defaults to 50. Max 100.
+  Reactions per page: a whole number from `1` to `100`. Defaults to `50`. A larger value returns `400 chat/invalid-query` with `param: "limit"` (it is never lowered to `100`), as does `0`, a negative number or a value that isn't a whole number. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField query="actingUserId" type="string">

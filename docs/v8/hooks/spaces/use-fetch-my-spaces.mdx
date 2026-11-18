@@ -28,6 +28,23 @@ function MySpaces() {
 }
 ```
 
+### Listing every space
+
+The list is always paged. To load every space the user is in, fetch page after page until `pagination.hasMore` is `false`. Add `role: ["admin", "moderator"]` to list only the spaces the user moderates:
+
+```tsx
+const fetchMySpaces = useFetchMySpaces();
+
+async function fetchModeratedSpaces() {
+  const items = [];
+  for (let page = 1; ; page++) {
+    const result = await fetchMySpaces({ role: ["admin", "moderator"], limit: 100, page });
+    items.push(...result.data);
+    if (!result.pagination.hasMore) return items;
+  }
+}
+```
+
 ## Parameters
 
 <ParamField path="status" type="string">
@@ -35,19 +52,15 @@ function MySpaces() {
 </ParamField>
 
 <ParamField path="page" type="number">
-  Page number. Defaults to `1`.
+  Page number (1-indexed), `1` or more. Defaults to `1`.
 </ParamField>
 
 <ParamField path="limit" type="number">
-  Number of results per page.
+  Number of results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 space/invalid-query` (`param: "limit"`), never lowered to `100`. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField path="role" type="SpaceMemberRole | SpaceMemberRole[]">
   Only memberships with this role: `"admin"`, `"moderator"` or `"member"`, or an array of them.
-</ParamField>
-
-<ParamField path="all" type="boolean">
-  `true` returns every matching membership without pagination; the response then has no `pagination`.
 </ParamField>
 
 <ParamField path="query" type="string | null">

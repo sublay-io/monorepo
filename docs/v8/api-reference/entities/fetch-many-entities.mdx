@@ -25,11 +25,11 @@ Entities in spaces the viewer can't read (see [who can read content](/v8/data-mo
 ### Pagination
 
 <ParamField query="page" type="number" default="1">
-  Page number (1-indexed). A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 entity/invalid-query`.
+  Page number (1-indexed): a whole number, `1` or more. Defaults to `1`. Any other value returns `400 entity/invalid-query` with `param: "page"`.
 </ParamField>
 
 <ParamField query="limit" type="number" default="10">
-  Number of entities per page. A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 entity/invalid-query`. Maximum `100` — larger values are treated as `100`.
+  Entities per page: a whole number from `1` to `100`. Defaults to `10`. A larger value returns `400 entity/invalid-query` with `param: "limit"` (it is never lowered to `100`), as does `0`, a negative number or a value that isn't a whole number. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 ### Sorting
@@ -218,10 +218,10 @@ Each item in `data` is an [Entity](/v8/data-models/entity) object. File URLs are
     ```
   </Accordion>
   <Accordion title="Invalid Query — 400">
-    Returned when `page` or `limit` is below `1` or not a whole number, when `locationFilters.radius` isn't a number greater than `0` and at most `20000000`, or when `metadataFilters` contains a NUL character. `error` starts with the field name.
+    Returned when `page` or `limit` breaks the [pagination rule](/v8/api-reference/getting-started#pagination) (`param` names it), when `locationFilters.radius` isn't a number greater than `0` and at most `20000000`, or when `metadataFilters` contains a NUL character. `error` starts with the field name.
 
     ```json
-    { "error": "page: Page must be a positive integer", "code": "entity/invalid-query" }
+    { "error": "page: Page must be a whole number of 1 or more", "code": "entity/invalid-query", "param": "page" }
     ```
     ```json
     { "error": "locationFilters.radius: Radius must be a number greater than 0 and at most 20000000 (meters)", "code": "entity/invalid-query" }

@@ -15,11 +15,11 @@ Returns a paginated list of entities saved in the specified collection. The coll
 ## Query Parameters
 
 <ParamField query="page" type="number" optional>
-  Page number (1-indexed). Default: `1`.
+  Page number (1-indexed): a whole number, `1` or more. Defaults to `1`. Any other value returns `400 collection/invalid-query` with `param: "page"`.
 </ParamField>
 
 <ParamField query="limit" type="number" optional>
-  Number of entities per page. Default: `20`.
+  Entities per page: a whole number from `1` to `100`. Defaults to `20`. A larger value returns `400 collection/invalid-query` with `param: "limit"` (it is never lowered to `100`), as does `0`, a negative number or a value that isn't a whole number. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField query="sortBy" type='"createdAt" | "addedAt" | "top" | "hot"' optional>

@@ -32,8 +32,8 @@ The hook returns a function. That function accepts an optional object:
   Page number for pagination.
 </ParamField>
 
-<ParamField path="limit" type="number" default="20">
-  Number of results per page. Max `100`.
+<ParamField path="limit" type="number">
+  Number of results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 block/invalid-query`, never lowered to `100`.
 </ParamField>
 
 ## Returns

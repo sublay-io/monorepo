@@ -15,11 +15,11 @@ Returns a paginated list of draft entities belonging to the authenticated user. 
 ## Query Parameters
 
 <ParamField query="page" type="number" default="1">
-  Page number (1-indexed). A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 entity/invalid-query`.
+  Page number (1-indexed): a whole number, `1` or more. Defaults to `1`. Any other value returns `400 entity/invalid-query` with `param: "page"`.
 </ParamField>
 
 <ParamField query="limit" type="number" default="10">
-  Number of drafts per page. A whole number of at least `1` — `0`, a negative number or a non-integer value returns `400 entity/invalid-query`. Maximum `100` — larger values are treated as `100`.
+  Drafts per page: a whole number from `1` to `100`. Defaults to `10`. A larger value returns `400 entity/invalid-query` with `param: "limit"` (it is never lowered to `100`), as does `0`, a negative number or a value that isn't a whole number. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField query="sourceId" type="string">
@@ -67,10 +67,10 @@ Each item is an [Entity](/v8/data-models/entity) with `isDraft: true`. Results a
 
 <AccordionGroup>
   <Accordion title="Invalid Query — 400">
-    Returned when `page` or `limit` is below `1` or not a whole number, or `include` contains a value that isn't accepted here.
+    Returned when `page` or `limit` breaks the [pagination rule](/v8/api-reference/getting-started#pagination) (`param` names it), or `include` contains a value that isn't accepted here.
 
     ```json
-    { "error": "page: Page must be a positive integer", "code": "entity/invalid-query" }
+    { "error": "page: Page must be a whole number of 1 or more", "code": "entity/invalid-query", "param": "page" }
     ```
 
     ```json

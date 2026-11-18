@@ -85,7 +85,9 @@ const { data, pagination } = await sublay.workspaces.fetchManyWorkspaces({
 <ParamField body="parentWorkspaceId" type='string | "none" | "any"'>Narrows the list by where each workspace sits in the tree, within `relation`. `"none"`: top-level workspaces only. A workspace id: the workspaces directly under that workspace; an id that matches no workspace returns an empty page, not a 404. `"any"` or left out: workspaces at every level (the default).</ParamField>
 <ParamField body="sortDir" type='"desc" | "asc"'>Order by creation time. `"desc"` or left out (the default): newest first. `"asc"`: oldest first, which puts every parent before its children — see [Building a workspace switcher](/v8/sdk/workspaces/overview#building-a-workspace-switcher).</ParamField>
 <ParamField body="page" type="number" />
-<ParamField body="limit" type="number" />
+<ParamField body="limit" type="number">
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 workspace/invalid-query`, never lowered to `100`.
+</ParamField>
 <ParamField body="include" type="WorkspaceIncludeParam">A single value or an array, sent as a query param. The only value is `"memberCount"`: it adds a `memberCount` to **every row** — the workspace's direct member count, resolved in one grouped query over the returned page rather than one request per row. Omit it and the field is absent from each row.</ParamField>
 
 ### fetchMutualWorkspaces
@@ -103,7 +105,9 @@ const { data } = await sublay.workspaces.fetchMutualWorkspaces({
 <ParamField body="relation" type='"reachable" | "direct"'>`"reachable"` or left out (the default): workspaces each of you can open. `"direct"`: workspaces each of you owns or has a member row on.</ParamField>
 <ParamField body="sortDir" type='"desc" | "asc"'>Order by creation time: `"desc"` (the default) or `"asc"`.</ParamField>
 <ParamField body="page" type="number" />
-<ParamField body="limit" type="number" />
+<ParamField body="limit" type="number">
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 workspace/invalid-query`, never lowered to `100`.
+</ParamField>
 <ParamField body="include" type="WorkspaceIncludeParam">The only value is `"memberCount"`.</ParamField>
 
 ### updateWorkspace

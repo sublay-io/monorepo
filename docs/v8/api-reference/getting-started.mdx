@@ -80,12 +80,28 @@ See [Authentication](/v8/api-reference/authentication) for full details on obtai
 
 ## Pagination
 
-Endpoints that return lists use cursor-free offset pagination. Pass `page` and `limit` as query parameters:
+Endpoints that return pages of records use offset pagination. Pass `page` and `limit` as query parameters:
 
-| Parameter | Default | Max | Description |
-|-----------|---------|-----|-------------|
-| `page` | `1` | — | Page number (1-indexed) |
-| `limit` | varies | varies | Results per page (endpoint-specific) |
+| Parameter | Default | Allowed | Description |
+|-----------|---------|---------|-------------|
+| `page` | `1` | A whole number from `1` to `9007199254740991` | Page number (1-indexed) |
+| `limit` | Endpoint-specific | A whole number from `1` to `100` | Results per page |
+
+The maximum `limit` is `100` on every page-numbered endpoint. Each endpoint's page gives its default.
+
+Both values are written as plain digits. A request is refused with `400 <area>/invalid-query` in the endpoint's own area, with `param` naming the field (`page` or `limit`), when it sends:
+
+- a `limit` above `100`. It is never lowered to `100` for you; the message names the maximum.
+- a `page` above `9007199254740991` (`"page: Page must be at most 9007199254740991"`).
+- `0`, a negative number, a decimal (`1.5`), an exponent (`1e1`), trailing text (`5abc`), surrounding spaces or an empty value.
+
+```json
+{
+  "error": "limit: Limit must be at most 100",
+  "code": "entity/invalid-query",
+  "param": "limit"
+}
+```
 
 Paginated responses always return the same envelope:
 
@@ -101,6 +117,10 @@ Paginated responses always return the same envelope:
   }
 }
 ```
+
+To read a whole list, request pages in turn (`page=1`, `page=2`, …) until `pagination.hasMore` is `false`; a paginated endpoint never returns all its records in one response.
+
+Chat conversations, chat messages and comments page by cursor instead; their pages describe how.
 
 ## Error Format
 

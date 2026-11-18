@@ -114,7 +114,7 @@ const { data, pagination } = await sublay.spaces.fetchManySpaces({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
+  The number of spaces to return per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 space/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField body="sortBy" type="string">
@@ -220,11 +220,11 @@ const result = await sublay.spaces.fetchMySpaces({
 </ParamField>
 
 <ParamField body="page" type="number">
-  Page number (1-indexed). Defaults to `1`.
+  Page number (1-indexed), `1` or more. Defaults to `1`.
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 space/invalid-query` (`param: "limit"`), never lowered to `100`. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField body="query" type="string">
@@ -251,10 +251,6 @@ const result = await sublay.spaces.fetchMySpaces({
   Membership status to list: `"active"` (default), `"pending"`, or `"banned"`. Use `"pending"` to find join requests still awaiting approval.
 </ParamField>
 
-<ParamField body="all" type='"true" | "false"'>
-  When `"true"`, returns the full set of spaces rather than only the paginated page.
-</ParamField>
-
 <ParamField body="parentSpaceId" type='string | "none" | "any"'>
   Narrows the list by where each space sits in the tree. `"none"` returns the user's memberships in top-level spaces only. A space id returns their memberships in that space's direct sub-spaces; an id that matches no space returns an empty page, not a 404. `"any"` or left out: memberships at every level (the default).
 
@@ -266,6 +262,22 @@ const result = await sublay.spaces.fetchMySpaces({
 </ParamField>
 
 **Returns** — `Promise<MySpacesResponse>`
+
+The list is always paged. To load every space the user is in, fetch page after page until `pagination.hasMore` is `false`; add `role: "admin,moderator"` to list only the spaces they moderate:
+
+```typescript
+const moderated = [];
+for (let page = 1; ; page++) {
+  const result = await sublay.spaces.fetchMySpaces({
+    actingUserId: "usr_abc123",
+    role: "admin,moderator",
+    limit: 100,
+    page,
+  });
+  moderated.push(...result.data);
+  if (!result.pagination.hasMore) break;
+}
+```
 
 ---
 
@@ -295,7 +307,7 @@ const result = await sublay.spaces.fetchMutualSpaces({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Max `100`. Defaults to `20`.
+  The number of spaces to return per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 space/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField body="include" type="SpaceIncludeParam">

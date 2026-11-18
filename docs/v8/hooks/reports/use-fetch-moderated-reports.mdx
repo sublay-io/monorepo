@@ -66,7 +66,7 @@ function ModerationQueue({ spaceId }: { spaceId: string }) {
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Items per page. Defaults to `20`.
+  Items per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 report/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />

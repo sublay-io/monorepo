@@ -12,7 +12,6 @@ export interface FetchMySpacesProps {
   limit?: number;
   status?: "active" | "pending" | "banned";
   role?: SpaceMemberRole | SpaceMemberRole[];
-  all?: boolean;
   /**
    * Text search over the user's spaces. Blank or left out: no filter, and
    * `searchFields` is left out with it.

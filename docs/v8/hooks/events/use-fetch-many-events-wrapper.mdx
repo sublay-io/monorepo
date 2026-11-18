@@ -40,7 +40,9 @@ function EventsList() {
 
 ## Parameters
 
-<ParamField path="limit" type="number">Page size. Defaults to `10`.</ParamField>
+<ParamField path="limit" type="number">
+  Page size: a whole number from `1` to `100`. Defaults to `10`. A larger value is rejected with `400 event/invalid-query`, never lowered to `100`.
+</ParamField>
 <ParamField path="spaceId" type='string | "none" | null'>Only this space's events, or `"none"` for events not in any space. Left out or `null`: every event.</ParamField>
 <ParamField path="hostId" type="string | null">Only events this user hosts: events whose `hostIds` contain them, and events they own.</ParamField>
 <ParamField path="type" type='"online" | "physical" | "hybrid" | null'>Filter by type.</ParamField>

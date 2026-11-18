@@ -17,11 +17,11 @@ Returns a paginated list of users who follow the authenticated user. Unlike the 
 ## Query Parameters
 
 <ParamField query="page" type="number">
-  Page number for pagination. Defaults to `1`.
+  Page number (1-indexed): a whole number, `1` or more. Defaults to `1`. Any other value returns `400 follow/invalid-query` with `param: "page"`.
 </ParamField>
 
 <ParamField query="limit" type="number">
-  Number of results per page. Defaults to `20`. Max `100`.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value returns `400 follow/invalid-query` with `param: "limit"` (it is never lowered to `100`), as does `0`, a negative number or a value that isn't a whole number. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField query="query" type="string">

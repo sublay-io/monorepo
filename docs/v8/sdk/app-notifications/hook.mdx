@@ -43,7 +43,7 @@ function NotificationFeed() {
 ## Parameters
 
 <ParamField path="limit" type="number">
-  Number of notifications to load per page. Defaults to `10`.
+  Number of notifications to load per page: a whole number from `1` to `100`. Defaults to `10`. A larger value is rejected with `400 app-notification/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField path="notificationTemplates" type="Partial<NotificationTemplates>">

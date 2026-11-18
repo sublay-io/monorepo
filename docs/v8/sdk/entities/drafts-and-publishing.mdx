@@ -59,7 +59,7 @@ function DraftsList() {
 | Param | Type | Description |
 |-------|------|-------------|
 | `page` | `number` | Page number for pagination |
-| `limit` | `number` | Results per page |
+| `limit` | `number` | Results per page, `1` to `100` (default `10`); a larger value is rejected with `400 entity/invalid-query` |
 | `sourceId` | `string` | Only drafts from this source, or `"none"` for drafts with no source. Left out or `null`: any source |
 | `spaceId` | `string` | Only drafts in this space, or `"none"` for drafts in no space. Left out or `null`: any space, or none |
 | `include` | `DraftIncludeParam` | Populate related data, as a single value or an array: `"user"`, `"space"`, `"files"`, `"grants"` |

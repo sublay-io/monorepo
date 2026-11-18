@@ -58,7 +58,6 @@ export { default as useFetchMyWorkspaceInvites } from "./useFetchMyWorkspaceInvi
 export { default as useAcceptWorkspaceInvite } from "./useAcceptWorkspaceInvite";
 export type {
   AcceptWorkspaceInviteProps,
-  AcceptWorkspaceInviteResponse,
 } from "./useAcceptWorkspaceInvite";
 export { default as useDeclineWorkspaceInvite } from "./useDeclineWorkspaceInvite";
 export type {

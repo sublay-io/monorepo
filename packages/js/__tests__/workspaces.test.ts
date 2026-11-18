@@ -732,6 +732,22 @@ describe("js-sdk workspaces — response mapping", () => {
     await expect(fetchMyWorkspaceMembership(client, { workspaceId: "w1" })).resolves.toEqual(standing);
   });
 
+  it("acceptWorkspaceInvite returns the caller's standing record", async () => {
+    const { client, projectInstance } = makeClient();
+    const standing = {
+      user: { id: "u1" },
+      reasons: [{ type: "member" }],
+      capabilities: [],
+      permissions: [],
+      rank: 1,
+      relativeRank: 0,
+      title: null,
+      metadata: {},
+    };
+    projectInstance.post.mockResolvedValueOnce({ data: standing });
+    await expect(acceptWorkspaceInvite(client, { inviteId: "i1" })).resolves.toEqual(standing);
+  });
+
   it("removeWorkspaceMemberFromSubtree returns the removal report", async () => {
     const { client, projectInstance } = makeClient();
     const report = {

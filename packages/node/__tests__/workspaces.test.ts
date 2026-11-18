@@ -500,9 +500,18 @@ describe("node-sdk workspaces — response mapping", () => {
     await expect(fetchMyWorkspaceMembership(client, { workspaceId: "w1", actingUserId: "actor1" })).resolves.toEqual(standing);
   });
 
-  it("acceptWorkspaceInvite returns response.data", async () => {
+  it("acceptWorkspaceInvite returns the accepting user's standing", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { success: true, workspaceId: "w1" };
+    const result = {
+      user: { id: "u1" },
+      reasons: [{ type: "member" }],
+      capabilities: [],
+      permissions: [],
+      rank: 1,
+      relativeRank: 0,
+      title: null,
+      metadata: {},
+    };
     projectInstance.post.mockResolvedValueOnce({ data: result });
     await expect(
       acceptWorkspaceInvite(client, { inviteId: "i1", actingUserId: "u1" })

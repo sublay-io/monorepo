@@ -63,6 +63,11 @@ export interface UseSpaceDataValues {
   error: string | null;
 }
 
+// The `code` of a server error response, if there is one.
+function errorCode(err: unknown): unknown {
+  return (err as { response?: { data?: { code?: unknown } } })?.response?.data?.code;
+}
+
 function useSpaceData({
   spaceId,
   shortId,
@@ -163,10 +168,7 @@ function useSpaceData({
       } catch (err) {
         // A space the viewer can no longer see (a private space just left)
         // answers exactly like one that doesn't exist: drop it.
-        const response = (
-          err as { response?: { status?: number; data?: { code?: unknown } } }
-        )?.response;
-        if (response?.status === 404 && response.data?.code === "space/not-found") {
+        if (errorCode(err) === "space/not-found") {
           for (const key of Object.keys(spaceCache.current)) {
             if (spaceCache.current[key].id === id) delete spaceCache.current[key];
           }
@@ -188,6 +190,12 @@ function useSpaceData({
     try {
       await joinSpaceHook({ spaceId: space.id });
     } catch (err) {
+      // Already a member (an earlier join landed but its reload failed):
+      // load the space so the flags catch up.
+      if (errorCode(err) === "space/already-member") {
+        await refreshSpace(space.id);
+        return;
+      }
       handleError(err, "Failed to join space");
       setError("Failed to join space");
       return;
@@ -202,6 +210,12 @@ function useSpaceData({
     try {
       await leaveSpaceHook({ spaceId: space.id });
     } catch (err) {
+      // Not a member any more (an earlier leave landed but its reload
+      // failed): load the space so the flags catch up.
+      if (errorCode(err) === "space/membership-required") {
+        await refreshSpace(space.id);
+        return;
+      }
       handleError(err, "Failed to leave space");
       setError("Failed to leave space");
       return;

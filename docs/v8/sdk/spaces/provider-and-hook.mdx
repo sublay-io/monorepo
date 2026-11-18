@@ -106,7 +106,7 @@ function SpaceContent() {
 
 ### Membership & Permissions
 
-These flags come from the space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions), which the server always returns, for members and non-members alike. After `joinSpace` or `leaveSpace` the hook fetches the space again to pick up the new ones, and an update returns them. Until the space has loaded they are all `false`; the SDK never works them out from the space's settings.
+These flags come from the space's [`memberPermissions`](/v8/data-models/space#spacememberpermissions), which the server always returns, for members and non-members alike. After `joinSpace` or `leaveSpace` the hook fetches the space again to pick up the new ones (also when the server answers that the join or leave already happened: `space/already-member` or `space/membership-required`), and an update returns them. Until the space has loaded they are all `false`; the SDK never works them out from the space's settings.
 
 <ResponseField name="isMember" type="boolean">
   `true` if the current user has an active membership in this space.

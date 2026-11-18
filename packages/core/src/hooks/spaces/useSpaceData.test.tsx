@@ -194,6 +194,39 @@ describe("useSpaceData", () => {
     expect(axiosPrivate.calls("get")).toHaveLength(1);
   });
 
+  it.each([
+    ["join", "post", "space/already-member", 409, true],
+    ["leave", "delete", "space/membership-required", 403, false],
+  ] as const)(
+    "a %s refused because it already happened loads the space again",
+    async (action, method, code, status, isMember) => {
+      const space = makeSpaceDetailed({ id: "space-1" });
+      const fresh = makeSpaceDetailed({
+        id: "space-1",
+        memberPermissions: makeMemberPermissions(
+          isMember ? { isMember: true, status: "active", canRead: true } : { canRead: true },
+        ),
+      });
+
+      const { result, axiosPrivate } = renderHookWithAxios(
+        () => useSpaceData({ space }),
+        { beforeRender: ({ axiosPrivate }) => mockBreadcrumb(axiosPrivate) },
+      );
+      await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+      axiosPrivate.mockError(method, status, { error: "Already done.", code });
+      axiosPrivate.mockResponse("get", fresh);
+
+      await act(async () => {
+        await (action === "join" ? result.current.joinSpace() : result.current.leaveSpace());
+      });
+
+      expect(result.current.error).toBeNull();
+      expect(result.current.space).toEqual(fresh);
+      expect(result.current.isMember).toBe(isMember);
+    },
+  );
+
   it("leaves the space, then loads it again for the server's permissions", async () => {
     const space = makeSpaceDetailed({
       id: "space-1",

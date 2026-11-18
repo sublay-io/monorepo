@@ -23,11 +23,11 @@ Returns a paginated page of rows from a custom table.
 ## Query Parameters
 
 <ParamField query="page" type="number">
-  1-indexed page number. Defaults to `1`.
+  Page number (1-indexed): a whole number, `1` or more. Defaults to `1`. Any other value returns `400 database/invalid-query` with `param: "page"`.
 </ParamField>
 
 <ParamField query="limit" type="number">
-  Rows per page. Defaults to `50`. Maximum `200`.
+  Rows per page: a whole number from `1` to `100`. Defaults to `50`. A larger value returns `400 database/invalid-query` with `param: "limit"` (it is never lowered to `100`), as does `0`, a negative number or a value that isn't a whole number. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField query="sortBy" type="string">

@@ -51,7 +51,7 @@ function EntityFeed() {
 </ParamField>
 
 <ParamField path="limit" type="number">
-  Results per page. Defaults to server default.
+  Results per page: a whole number from `1` to `100`. Defaults to `10`. A larger value is rejected with `400 entity/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField path="sortBy" type="string">

@@ -38,7 +38,7 @@ function MemberList({ spaceId }: { spaceId: string }) {
 </ParamField>
 
 <ParamField path="limit" type="number">
-  Number of members per page.
+  Number of members per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 space/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField path="status" type="string">

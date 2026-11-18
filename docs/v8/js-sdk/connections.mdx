@@ -31,7 +31,7 @@ const { data, pagination } = await sublay.connections.fetchConnections({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 connection/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField body="query" type="string">
@@ -77,7 +77,7 @@ const { data, pagination } =
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 connection/invalid-query`, never lowered to `100`.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<ConnectionRow>>`, where [`ConnectionRow`](/v8/data-models/connection#connectionrow) is `{ id, user, type, message, status, createdAt, respondedAt }`. Here `user` is the user the request was sent to, `type` is `"sent"`, `status` is `"pending"` and `respondedAt` is `null`.
@@ -101,7 +101,7 @@ const { data, pagination } =
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 connection/invalid-query`, never lowered to `100`.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<ConnectionRow>>`. Here `user` is the user who sent the request, `type` is `"received"`, `status` is `"pending"` and `respondedAt` is `null`.

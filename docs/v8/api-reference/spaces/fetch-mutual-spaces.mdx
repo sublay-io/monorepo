@@ -19,11 +19,11 @@ Returns a paginated list of spaces that both the authenticated user and another 
 </ParamField>
 
 <ParamField query="page" type="number">
-  Page number. Defaults to `1`.
+  Page number (1-indexed): a whole number, `1` or more. Defaults to `1`. Any other value returns `400 space/invalid-query` with `param: "page"`.
 </ParamField>
 
 <ParamField query="limit" type="number">
-  Results per page. Max `100`. Defaults to `20`.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value returns `400 space/invalid-query` with `param: "limit"` (it is never lowered to `100`), as does `0`, a negative number or a value that isn't a whole number. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField query="include" type="string">

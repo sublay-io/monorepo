@@ -59,8 +59,8 @@ function SavedFeed({ collectionId }) {
   The collection to fetch entities from. Defaults to the current collection in Redux state.
 </ParamField>
 
-<ParamField body="limit" type="number" optional>
-  Number of entities per page. Default: `20`.
+<ParamField body="limit" type="number">
+  Number of entities per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 collection/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField body="defaultSortBy" type='"createdAt" | "addedAt" | "top" | "hot"' optional>

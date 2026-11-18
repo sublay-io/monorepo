@@ -287,7 +287,7 @@ const { data, pagination } = await sublay.users.fetchFollowersByUserId({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 follow/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField body="query" type="string">
@@ -343,7 +343,7 @@ const { data, pagination } = await sublay.users.fetchFollowingByUserId({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 follow/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField body="query" type="string">
@@ -399,7 +399,7 @@ const { data, pagination } = await sublay.users.fetchConnectionsByUserId({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 connection/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField body="query" type="string">
@@ -654,7 +654,7 @@ const { data, pagination } = await sublay.users.fetchBlockedUsers({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`. Max `100`.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 block/invalid-query`, never lowered to `100`.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<BlockRow>>`, where each [`BlockRow`](/v8/data-models/block#blockrow) is `{ id, user, createdAt }` and `user` is the blocked user.

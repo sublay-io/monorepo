@@ -25,7 +25,7 @@ The whole argument is optional.
 </ParamField>
 
 <ParamField body="limit" type="number">
-  The number of notifications to return per page.
+  The number of notifications to return per page: a whole number from `1` to `50`. Defaults to `5`. A larger value is rejected with `400 app-notification/invalid-query`, never lowered to `50`.
 </ParamField>
 
 **Returns** — `Promise<PaginatedResponse<UnifiedAppNotification>>`

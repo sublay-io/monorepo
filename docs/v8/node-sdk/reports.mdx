@@ -123,7 +123,7 @@ const { data, pagination } = await sublay.reports.fetchModeratedReports({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
+  The number of reports to return per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 report/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />

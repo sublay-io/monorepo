@@ -13,11 +13,11 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
 ## Query Parameters
 
 <ParamField query="page" type="number">
-  Page number (1-indexed). Defaults to `1`.
+  Page number (1-indexed): a whole number, `1` or more. Defaults to `1`. Any other value returns `400 event/invalid-query` with `param: "page"`.
 </ParamField>
 
 <ParamField query="limit" type="number">
-  Results per page. Capped at `100`. Defaults to `10`.
+  Results per page: a whole number from `1` to `100`. Defaults to `10`. A larger value returns `400 event/invalid-query` with `param: "limit"` (it is never lowered to `100`), as does `0`, a negative number or a value that isn't a whole number. See [Pagination](/v8/api-reference/getting-started#pagination).
 </ParamField>
 
 <ParamField query="sortBy" type="string">
@@ -155,8 +155,9 @@ Returns a paginated response: `{ data: Event[], pagination: { page, pageSize, to
     ```
   </Accordion>
   <Accordion title="Invalid Query — 400">
+    Returned when `page` or `limit` breaks the [pagination rule](/v8/api-reference/getting-started#pagination), with `param` naming it:
     ```json
-    { "error": "Limit must be a positive number", "code": "event/invalid-query" }
+    { "error": "limit: Limit must be at most 100", "code": "event/invalid-query", "param": "limit" }
     ```
     Also returned for a `myRsvp` entry that isn't exactly `going`, `maybe` or `not-going`:
     ```json

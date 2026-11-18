@@ -268,7 +268,7 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
+  Results per page: a whole number from `1` to `100`. Defaults to `10`. A larger value is rejected with `400 entity/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField body="include" type="EntityIncludeParam">
@@ -458,7 +458,7 @@ const { data, pagination } = await sublay.entities.fetchDrafts({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
+  Results per page: a whole number from `1` to `100`. Defaults to `10`. A larger value is rejected with `400 entity/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField body="sourceId" type='string | "none"'>
@@ -580,7 +580,7 @@ const { data, pagination } = await sublay.entities.fetchReactions({
 </ParamField>
 
 <ParamField body="limit" type="number">
-  Results per page. Defaults to `20`.
+  Results per page: a whole number from `1` to `100`. Defaults to `20`. A larger value is rejected with `400 entity/invalid-query`, never lowered to `100`.
 </ParamField>
 
 <ParamField body="sortDir" type="string">

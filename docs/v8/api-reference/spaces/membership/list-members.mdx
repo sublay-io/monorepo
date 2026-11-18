@@ -64,7 +64,7 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
   <Accordion title="Members Only — 403">
     The caller can't read the space: it, or a space above it, has `readingPermission: "members"`, and the caller isn't an active member of that members-only space or of a space between it and this one, this one included (no membership, or one that is pending, banned or rejected, doesn't count). See [How permissions are calculated](/v8/data-models/space#how-permissions-are-calculated).
     ```json
-    { "error": "This space requires membership. You must be a member to view members.", "code": "space/forbidden" }
+    { "error": "This space requires membership. You must be a member to view members.", "code": "space/membership-required" }
     ```
   </Accordion>
   <Accordion title="Acting User Not Allowed — 400">

@@ -280,7 +280,7 @@ const counts = await sublay.workspaces.fetchWorkspaceMembers({
 
 ### fetchMyWorkspaceMembership
 
-The acting user's own resolved standing on a workspace (`GET /workspaces/:workspaceId/members/me`): the same `WorkspaceMemberStanding` record [fetchWorkspaceMemberStanding](#fetchworkspacememberstanding) returns for another user. A user's own access is never fenced, so `capabilities`, `permissions`, `rank` and `relativeRank` are always present; `relativeRank` is `0` when they hold a member row on this workspace and `null` when they don't (an owner or ancestor owner without one). It needs no relation to the workspace: with none, the record comes back with `reasons: []`. See [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
+The acting user's own resolved standing on a workspace (`GET /workspaces/:workspaceId/members/me`): the same `WorkspaceMemberStanding` record [fetchWorkspaceMemberStanding](#fetchworkspacememberstanding) returns for another user. A user's own access is never fenced, so `capabilities`, `permissions`, `rank` and `relativeRank` are always present; `relativeRank` is `0` when they hold a member row on this workspace and `null` when they don't (an owner or ancestor owner without one). A user with no relation to the workspace gets `404 workspace/not-found`, as for a missing workspace. See [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
 
 ```typescript
 const me = await sublay.workspaces.fetchMyWorkspaceMembership({
@@ -558,6 +558,6 @@ if (authority.permissions.includes("deploy")) {
 <ParamField body="workspaceId" type="string" required />
 <ParamField body="actingUserId" type="string" required>The acting user whose resolved standing to read.</ParamField>
 
-`reasons` entries carry `viaWorkspaceId` on `ancestor-owner` / `reach-holder`, naming the ancestor responsible — so when a user has authority you did not expect, you can tell exactly which node to go fix. `capabilities` is the fully-resolved set, and **`view` is implied by every other capability**: any user with standing carries it, while a user with no relation at all comes back with `reasons: []` and an empty capability set. There is no `relativeRank` on this read — it is an offset from the caller, and here the caller is the subject, so `rank` is the coordinate it reports.
+`reasons` entries carry `viaWorkspaceId` on `ancestor-owner` / `reach-holder`, naming the ancestor responsible — so when a user has authority you did not expect, you can tell exactly which node to go fix. `capabilities` is the fully-resolved set, and **`view` is implied by every other capability**: any user with standing carries it, and a user with no relation at all gets `404 workspace/not-found` instead of a record. There is no `relativeRank` on this read — it is an offset from the caller, and here the caller is the subject, so `rank` is the coordinate it reports.
 
 Sublay never consumes your opaque `permissions` — there is deliberately no `?permission=` check or `can()` helper.

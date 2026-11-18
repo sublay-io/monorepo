@@ -92,7 +92,7 @@ const result = await sublay.spaces.fetchSpaceMembers({
 });
 ```
 
-Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/forbidden` to a user who isn't an active member of that members-only space or of a space between it and this one.
+Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/membership-required` to a user who isn't an active member of that members-only space or of a space between it and this one.
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.
@@ -132,7 +132,7 @@ Returns the admin and moderator members of a space (the "team").
 const result = await sublay.spaces.fetchSpaceTeam({ spaceId: "spc_abc123" });
 ```
 
-Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/forbidden` to a user who isn't an active member of that members-only space or of a space between it and this one.
+Open to anyone who can read the space. A members-only space, or a space under one, answers `403 space/membership-required` to a user who isn't an active member of that members-only space or of a space between it and this one.
 
 <ParamField body="spaceId" type="string" required>
   The Sublay space ID.

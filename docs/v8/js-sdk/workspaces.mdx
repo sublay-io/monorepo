@@ -191,7 +191,7 @@ const counts = await sublay.workspaces.fetchWorkspaceMembers({ workspaceId: "ws_
 
 ### fetchMyWorkspaceMembership
 
-The logged-in user's own resolved standing on a workspace (`GET /workspaces/:workspaceId/members/me`): the same `WorkspaceMemberStanding` record [fetchWorkspaceMemberStanding](#fetchworkspacememberstanding) returns for another user. Your own access is never fenced, so `capabilities`, `permissions`, `rank` and `relativeRank` are always present; `relativeRank` is `0` when you hold a member row on this workspace and `null` when you don't (an owner or ancestor owner without one). It needs no relation to the workspace: with none, the record comes back with `reasons: []`. See [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
+The logged-in user's own resolved standing on a workspace (`GET /workspaces/:workspaceId/members/me`): the same `WorkspaceMemberStanding` record [fetchWorkspaceMemberStanding](#fetchworkspacememberstanding) returns for another user. Your own access is never fenced, so `capabilities`, `permissions`, `rank` and `relativeRank` are always present; `relativeRank` is `0` when you hold a member row on this workspace and `null` when you don't (an owner or ancestor owner without one). A user with no relation to the workspace gets `404 workspace/not-found`, as for a missing workspace. See [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
 
 ```typescript
 const me = await sublay.workspaces.fetchMyWorkspaceMembership({
@@ -419,7 +419,7 @@ await sublay.workspaces.declineWorkspaceInvite({ inviteId: "inv_1" });
 
 The bearer-token user's resolved standing on a workspace — `{ reasons, capabilities, permissions, rank }`. **Self-service**, so nothing is fenced here. (No `relativeRank`: it is an offset from you, and here the subject *is* you, so `rank` is the coordinate this read reports.) Drive your UI off this rather than guessing: a permission check is a one-line `.includes()` on the result.
 
-`reasons` is an array of structured `{ type, viaWorkspaceId? }` entries (`viaWorkspaceId` on `ancestor-owner` / `reach-holder` only). `capabilities` is the fully-resolved set and **`view` is implied by every other capability** — any user with standing carries it, while a stranger gets `reasons: []` and an empty set.
+`reasons` is an array of structured `{ type, viaWorkspaceId? }` entries (`viaWorkspaceId` on `ancestor-owner` / `reach-holder` only). `capabilities` is the fully-resolved set and **`view` is implied by every other capability** — any user with standing carries it, and a user with no relation gets `404 workspace/not-found` instead of a record.
 
 ```typescript
 const authority = await sublay.workspaces.fetchWorkspaceAuthority({ workspaceId: "ws_abc" });

@@ -9,7 +9,7 @@ export interface FetchMyWorkspaceMembershipProps {
  * GET /workspaces/:workspaceId/members/me — the signed-in user's own resolved
  * standing on a workspace: the same record `fetchWorkspaceMemberStanding`
  * returns, never fenced. A user with no relation to the workspace gets
- * `reasons: []`. `relativeRank` is `0` when they hold a membership row, `null`
+ * 404 `workspace/not-found`, as for a missing workspace. `relativeRank` is `0` when they hold a membership row, `null`
  * for an owner without one.
  */
 export async function fetchMyWorkspaceMembership(

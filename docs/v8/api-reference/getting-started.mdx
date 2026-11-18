@@ -87,7 +87,7 @@ Endpoints that return pages of records use offset pagination. Pass `page` and `l
 | `page` | `1` | A whole number from `1` to `9007199254740991` | Page number (1-indexed) |
 | `limit` | Endpoint-specific | A whole number from `1` to `100` | Results per page |
 
-The maximum `limit` is `100` on every paginated endpoint. Each endpoint's page gives its default.
+The maximum `limit` is `100` on every page-numbered endpoint. Each endpoint's page gives its default.
 
 Both values are written as plain digits. A request is refused with `400 <area>/invalid-query` in the endpoint's own area, with `param` naming the field (`page` or `limit`), when it sends:
 

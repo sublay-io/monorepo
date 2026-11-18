@@ -180,7 +180,8 @@ Validation still runs first, in the same order: an invalid body, an image error,
     ```json
     {
       "error": "...",
-      "code": "auth/redirect-url-not-allowed"
+      "code": "auth/redirect-url-not-allowed",
+      "param": "emailVerification.redirectUrl"
     }
     ```
     `emailVerification.redirectUrl` isn't an `https` address on one of the project's Verified Domains (or `localhost`). Only checked when the project requires email verification before sign-in. Nothing is created and no email is sent.

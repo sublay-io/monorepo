@@ -101,7 +101,8 @@ The emails sent to one address are limited to one every 10 minutes and five a da
     ```json
     {
       "error": "...",
-      "code": "auth/redirect-url-not-allowed"
+      "code": "auth/redirect-url-not-allowed",
+      "param": "emailVerification.redirectUrl"
     }
     ```
     `emailVerification.redirectUrl` isn't on the project's Verified Domains. Only checked when the project requires email verification before sign-in.

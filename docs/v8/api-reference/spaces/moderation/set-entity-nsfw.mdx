@@ -48,7 +48,7 @@ Requires the `entities` bundle in addition to `spaces`.
   <Accordion title="Invalid Id — 400">
     Returned when `spaceId` or `entityId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
-    { "error": "Invalid space id: expected a UUID.", "code": "space/invalid-params", "param": "spaceId" }
+    { "error": "Invalid space id: expected a UUID.", "code": "moderation/invalid-params", "param": "spaceId" }
     ```
   </Accordion>
   <Accordion title="Missing Acting User — 400">
@@ -93,11 +93,15 @@ Requires the `entities` bundle in addition to `spaces`.
     ```
   </Accordion>
 
-  <Accordion title="Entities Bundle Unavailable — 403">
+  <Accordion title="Bundle Not Installed — 403">
+    The project doesn't have the entities bundle. While it is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
     ```json
     {
-      "error": "Entities bundle is not available for this project",
-      "code": "database/tables-not-available"
+      "error": "This route needs the entities bundle, which is not installed for this project.",
+      "code": "database/tables-not-available",
+      "missingTables": ["Entities"],
+      "bundleId": "entities",
+      "dashboardUrl": "https://…/<projectId>/database"
     }
     ```
   </Accordion>

@@ -191,7 +191,7 @@ const counts = await sublay.workspaces.fetchWorkspaceMembers({ workspaceId: "ws_
 
 ### fetchMyWorkspaceMembership
 
-The logged-in user's own resolved standing on a workspace (`GET /workspaces/:workspaceId/members/me`): the same `WorkspaceMemberStanding` record [fetchWorkspaceMemberStanding](#fetchworkspacememberstanding) returns for another user. Your own access is never fenced, so `capabilities`, `permissions`, `rank` and `relativeRank` are always present; `relativeRank` is `0` when you hold a member row on this workspace and `null` when you don't (an owner or ancestor owner without one). It needs no relation to the workspace: with none, the record comes back with `reasons: []`. See [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
+The logged-in user's own resolved standing on a workspace (`GET /workspaces/:workspaceId/members/me`): the same `WorkspaceMemberStanding` record [fetchWorkspaceMemberStanding](#fetchworkspacememberstanding) returns for another user. Your own access is never fenced, so `capabilities`, `permissions`, `rank` and `relativeRank` are always present; `relativeRank` is `0` when you hold a member row on this workspace and `null` when you don't (an owner or ancestor owner without one). A user with no relation to the workspace gets `404 workspace/not-found`, as for a missing workspace. See [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
 
 ```typescript
 const me = await sublay.workspaces.fetchMyWorkspaceMembership({
@@ -251,7 +251,7 @@ const member = await sublay.workspaces.updateWorkspaceMember({
 
 ### updateMyWorkspaceMembership
 
-The logged-in user edits their own profile on a workspace (`PATCH /workspaces/:workspaceId/members/me`). Needs no capability. A member edits their `title` only; a member's other fields are edited by a member with the capability, through [updateWorkspaceMember](#updateworkspacemember). The workspace's **owner** edits their `title` and `metadata` here, and only here: they are profile only and change nothing about the owner's authority. A user who is not the owner and holds no member row on the workspace gets `404 workspace/not-found`. See [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership).
+The logged-in user edits their own profile on a workspace (`PATCH /workspaces/:workspaceId/members/me`). Needs no capability. A member edits their `title` only; a member's other fields are edited by a member with the capability, through [updateWorkspaceMember](#updateworkspacemember). The workspace's **owner** edits their `title` and `metadata` here, and only here: they are profile only and change nothing about the owner's authority. A user who can see the workspace but is not its owner and holds no member row on it gets `403 workspace/not-member`; one with no relation to it gets `404 workspace/not-found`, as for a missing workspace. See [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership).
 
 ```typescript
 const member = await sublay.workspaces.updateMyWorkspaceMembership({
@@ -307,7 +307,7 @@ if (skippedCount > 0) {
 
 ### leaveWorkspace
 
-**Self-service** — removes the bearer-token user's *own* direct membership on this node only. No capability required. An owner cannot leave (`409 workspace/sole-owner`); transfer or delete first.
+**Self-service** — removes the bearer-token user's *own* direct membership on this node only. No capability required. An owner cannot leave (`409 workspace/sole-owner`); transfer or delete first. A user who only reaches in, with no direct membership here, gets `403 workspace/not-member`; one who can't see the workspace gets `404 workspace/not-found`, as for a missing one.
 
 ```typescript
 await sublay.workspaces.leaveWorkspace({ workspaceId: "ws_abc" });
@@ -419,7 +419,7 @@ await sublay.workspaces.declineWorkspaceInvite({ inviteId: "inv_1" });
 
 The bearer-token user's resolved standing on a workspace — `{ reasons, capabilities, permissions, rank }`. **Self-service**, so nothing is fenced here. (No `relativeRank`: it is an offset from you, and here the subject *is* you, so `rank` is the coordinate this read reports.) Drive your UI off this rather than guessing: a permission check is a one-line `.includes()` on the result.
 
-`reasons` is an array of structured `{ type, viaWorkspaceId? }` entries (`viaWorkspaceId` on `ancestor-owner` / `reach-holder` only). `capabilities` is the fully-resolved set and **`view` is implied by every other capability** — any user with standing carries it, while a stranger gets `reasons: []` and an empty set.
+`reasons` is an array of structured `{ type, viaWorkspaceId? }` entries (`viaWorkspaceId` on `ancestor-owner` / `reach-holder` only). `capabilities` is the fully-resolved set and **`view` is implied by every other capability** — any user with standing carries it, and a user with no relation gets `404 workspace/not-found` instead of a record.
 
 ```typescript
 const authority = await sublay.workspaces.fetchWorkspaceAuthority({ workspaceId: "ws_abc" });

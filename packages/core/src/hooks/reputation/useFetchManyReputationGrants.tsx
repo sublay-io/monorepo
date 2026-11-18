@@ -26,7 +26,7 @@ interface FetchManyReputationGrantsBaseProps
 /**
  * The third filter shape — "who rewarded this item" — is the
  * {@link ReputationGrantTargetFilter} pair, so a half-filled target is a
- * compile error rather than a `400 reputation-grant/invalid-filter`. The
+ * compile error rather than a `400 reputation-grant/invalid-query`. The
  * runtime check inside the hook stays as the defense for plain-JS callers.
  *
  * Mutual exclusivity between the three shapes is NOT expressed in the type: a

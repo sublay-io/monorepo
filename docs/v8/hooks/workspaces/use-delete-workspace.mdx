@@ -45,8 +45,8 @@ function DangerZone({ workspaceId }: { workspaceId: string }) {
 
 | Code | Status | Meaning |
 |------|--------|---------|
-| `workspace/unauthorized` | 403 | You are not the owner or an ancestor owner. |
-| `workspace/not-found` | 404 | No such workspace in this project. |
+| `workspace/forbidden` | 403 | You can see the workspace but are not its owner or an ancestor owner. |
+| `workspace/not-found` | 404 | No such workspace, or you have no relation to it (answered alike), or it was deleted while the request ran. |
 
 ## Related
 

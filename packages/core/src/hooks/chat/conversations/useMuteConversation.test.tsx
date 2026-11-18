@@ -166,7 +166,7 @@ describe("useMuteConversation", () => {
   it("logs and rethrows when the server rejects the mute", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      jsonResponse({ error: "Not a member", code: "chat/not-member" }, 403),
+      jsonResponse({ error: "You are not an active member of this conversation.", code: "chat/not-a-member" }, 403),
     );
 
     const { result } = renderHookWithStore(() => useMuteConversation(), {

@@ -15,7 +15,8 @@ export interface ResendWorkspaceInviteProps {
 /**
  * Resend / refresh a pending invitation (valid on any `pending` invite, even one
  * past `expiresAt` — resets a 14-day expiry and resends the email). A terminal
- * invite (accepted/declined/revoked) → 409. Requires `invite` (or owner).
+ * invite (accepted/declined/revoked) → 409 `workspace/not-pending`. Requires
+ * `invite` (or owner).
  */
 export async function resendWorkspaceInvite(
   client: SublayHttpClient,

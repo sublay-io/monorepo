@@ -103,14 +103,22 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
     { "error": "'postingPermission' can only be set on space conversations.", "code": "chat/invalid-field" }
     ```
   </Accordion>
-  <Accordion title="Forbidden (group) — 403">
+  <Accordion title="Not a Member — 403">
+    The acting user isn't an active member of the conversation. In a space conversation: anyone who isn't an active member of its space or can't see it, including a pending or banned member.
     ```json
-    { "error": "Only group admins can update this conversation.", "code": "chat/not-a-member" }
+    { "error": "You are not an active member of this conversation.", "code": "chat/not-a-member" }
+    ```
+  </Accordion>
+  <Accordion title="Forbidden (group) — 403">
+    The acting user is a member of the group without the `admin` role.
+    ```json
+    { "error": "Only group admins can update this conversation.", "code": "chat/forbidden" }
     ```
   </Accordion>
   <Accordion title="Forbidden (space) — 403">
+    The acting user is an active member of the space without the `admin` or `moderator` role in the space.
     ```json
-    { "error": "Only space admins and moderators can update the space conversation.", "code": "chat/not-a-member" }
+    { "error": "Only space admins and moderators can update the space conversation.", "code": "chat/forbidden" }
     ```
   </Accordion>
 </AccordionGroup>

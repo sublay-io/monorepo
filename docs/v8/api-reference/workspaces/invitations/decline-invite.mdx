@@ -43,10 +43,11 @@ Marks the invite `declined` and fires `workspace.invite.declined`.
     { "error": "Invitation not found.", "code": "workspace/invite-not-found" }
     ```
   </Accordion>
-  <Accordion title="Invite Terminal — 409">
+  <Accordion title="Not Pending — 409">
     ```json
-    { "error": "This invitation is no longer pending.", "code": "workspace/invite-terminal" }
+    { "error": "This invitation is no longer pending.", "code": "workspace/not-pending" }
     ```
+    The invitation is already `accepted`, `declined`, or `revoked`.
   </Accordion>
   <Accordion title="Missing Acting User — 400">
     ```json
@@ -74,7 +75,7 @@ Marks the invite `declined` and fires `workspace.invite.declined`.
   </Accordion>
   <Accordion title="Acting User Not Found — 404">
     ```json
-    { "error": "Acting user not found.", "code": "workspace/invalid-target" }
+    { "error": "Acting user not found.", "code": "workspace/user-not-found" }
     ```
     The user behind the request no longer exists, for example a user token that outlived its user.
   </Accordion>

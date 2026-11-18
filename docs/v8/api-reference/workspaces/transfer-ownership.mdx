@@ -53,9 +53,16 @@ Returns the updated [Workspace](/v8/data-models/workspace) object with the new `
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="Unauthorized — 403">
+  <Accordion title="Forbidden — 403">
     ```json
-    { "error": "Owner access required", "code": "workspace/unauthorized" }
+    { "error": "Owner access required", "code": "workspace/forbidden" }
+    ```
+    The acting user can see the workspace but is neither its owner nor an owner of a workspace above it.
+  </Accordion>
+  <Accordion title="Not Found — 404">
+    The workspace doesn't exist, or the acting user has no relation to it (not its owner, an ancestor owner, a member or a reach-holder): the two answer alike, with the same body [Fetch Workspace](/v8/api-reference/workspaces/fetch-workspace) gives. Also returned when the workspace is deleted while this request is being handled.
+    ```json
+    { "error": "Workspace not found.", "code": "workspace/not-found" }
     ```
   </Accordion>
   <Accordion title="New Owner Not Verified — 403">
@@ -63,9 +70,10 @@ Returns the updated [Workspace](/v8/data-models/workspace) object with the new `
     { "error": "The new owner must have a verified email.", "code": "workspace/email-not-verified" }
     ```
   </Accordion>
-  <Accordion title="Invalid Target — 404">
+  <Accordion title="User Not Found — 404">
+    The new owner named in the body isn't a user in this project.
     ```json
-    { "error": "Target user not found.", "code": "workspace/invalid-target" }
+    { "error": "Target user not found.", "code": "workspace/user-not-found" }
     ```
   </Accordion>
   <Accordion title="Relative Rank Not Accepted — 400">

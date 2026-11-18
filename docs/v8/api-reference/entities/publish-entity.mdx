@@ -47,9 +47,9 @@ Returns the published [Entity](/v8/data-models/entity) object with `isDraft: fal
     ```
     Returned when no draft with this ID exists, the entity is not a draft, or the draft has no author.
   </Accordion>
-  <Accordion title="Unauthorized — 403">
+  <Accordion title="Forbidden — 403">
     ```json
-    { "error": "Not authorized to publish this draft.", "code": "entity/unauthorized" }
+    { "error": "Not authorized to publish this draft.", "code": "entity/forbidden" }
     ```
   </Accordion>
   <Accordion title="Space Not Found — 404">

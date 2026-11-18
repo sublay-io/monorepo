@@ -6,7 +6,7 @@ description: "The acting user's own full standing on a workspace"
 
 Returns the acting user's own standing on a workspace: the token's user, or the user a service key names in `actingUserId`. `me` in the path always means that user. The response is the same record [Fetch Member Standing](/v8/api-reference/workspaces/members/fetch-member-standing) returns for another user, and the same shape as one roster row.
 
-Any signed-in user may call it for any workspace. It is **not** gated by roster visibility: a user with no relation to the workspace gets `200` with `reasons: []`, so "am I a member here?" always has an answer. Your own access is **never fenced** — `capabilities`, `permissions`, `rank` and `relativeRank` are always present.
+A user with no relation to the workspace (not its owner, an ancestor owner, a member or a reach-holder) can't see it, so they get `404 workspace/not-found`, exactly as for a workspace that doesn't exist. Your own access is **never fenced** — `capabilities`, `permissions`, `rank` and `relativeRank` are always present.
 
 <Note>
   **Your own membership is `/workspaces/:workspaceId/members/me`**: `GET` to read it, [`PATCH`](/v8/api-reference/workspaces/members/update-my-membership) to edit your title (and, as the owner, your metadata), [`DELETE`](/v8/api-reference/workspaces/members/leave-workspace) to leave. The `/workspaces/:workspaceId/members/:userId` routes ([read](/v8/api-reference/workspaces/members/fetch-member-standing), [edit](/v8/api-reference/workspaces/members/update-member), [remove](/v8/api-reference/workspaces/members/remove-member), [remove from subtree](/v8/api-reference/workspaces/members/remove-from-subtree)) act on other members and refuse your own id with `400 workspace/own-member-id`.
@@ -39,8 +39,8 @@ Any signed-in user may call it for any workspace. It is **not** gated by roster 
 }
 ```
 
-- `reasons` — structured `{ type, viaWorkspaceId? }` entries; `viaWorkspaceId` appears on `ancestor-owner` / `reach-holder` entries only. Empty when the user has no relation to the workspace.
-- `capabilities` — the **resolved** set (direct + reach + ownership). **`view` is implied by every other capability.** Empty when the user has no relation.
+- `reasons` — structured `{ type, viaWorkspaceId? }` entries; `viaWorkspaceId` appears on `ancestor-owner` / `reach-holder` entries only.
+- `capabilities` — the **resolved** set (direct + reach + ownership). **`view` is implied by every other capability.**
 - `permissions` — **per-node** (the direct membership on this workspace only; may be empty).
 - `rank` — the direct-membership rank, or `null` when the user is not a member here (the owner, an ancestor-owner or a reach-only holder).
 - `relativeRank` — `0` when the user holds a member row here (they are measured from themselves), `null` when they don't.
@@ -82,7 +82,7 @@ Any signed-in user may call it for any workspace. It is **not** gated by roster 
     ```json
     { "error": "Workspace not found.", "code": "workspace/not-found" }
     ```
-    No workspace with this id exists in this project.
+    No workspace with this id exists in this project, or the acting user has no relation to it: the two answer alike.
   </Accordion>
 </AccordionGroup>
 

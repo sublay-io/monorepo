@@ -62,7 +62,10 @@ Returns the created [WorkspaceInvitation](/v8/data-models/workspace-invitation) 
 | `workspace/already-member` | 409 | The target is already a member — edit their grant instead. |
 | `workspace/no-escalation` | 403 | You tried to grant a capability/permission you do not hold. |
 | `workspace/insufficient-rank` | 403 | The invited rank is not strictly below your own. Checked on the resolved absolute value, so `relativeRank` clears it by construction. |
-| `workspace/unauthorized` | 403 | You lack the `invite` capability. |
+| `workspace/forbidden` | 403 | You can see the workspace but lack the `invite` capability on it. |
+| `workspace/not-found` | 404 | No such workspace, or you have no relation to it (answered alike). |
+| `workspace/user-not-found` | 404 | The `userId` or `username` names no user in this project. |
+| `workspace/invalid-body` | 400 | `email` isn't a valid email address (`param: "email"`), among other body errors. |
 | `workspace/missing-invite-accept-url` | 409 | The **project** has no [`workspaces.inviteAcceptUrl`](/v8/sdk/workspaces/overview#project-settings) configured, so the invite email would have nowhere to link. Nothing is persisted. A misconfiguration to fix in project settings, not something the end user can act on — surface it to yourself, not to them. |
 
 <Warning>

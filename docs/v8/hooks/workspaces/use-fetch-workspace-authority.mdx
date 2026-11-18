@@ -9,9 +9,7 @@ icon: "plug"
 `useFetchWorkspaceAuthority` returns a callable that resolves the signed-in user's standing on a workspace: `{ reasons, capabilities, permissions, rank }`. Use it to drive UI (show/hide buttons) — a permission check is a one-line `.includes()` on the result. Sublay never consumes your opaque `permissions`.
 
 <Note>
-  **Not visibility-gated.** [`GET /workspaces/:workspaceId/authority/me`](/v8/api-reference/workspaces/fetch-authority) requires a signed-in user and nothing more. It returns `404` only when the workspace does not exist — a signed-in user with no relation to an existing workspace gets `200` with `reasons: []` and empty `capabilities` / `permissions`, which is exactly the answer a UI gate wants. The trade-off is that the route confirms a workspace *exists* to any signed-in caller.
-
-  Its sibling, [`useFetchWorkspaceMemberStanding`](/v8/hooks/workspaces/use-fetch-workspace-member-standing), *is* visibility-gated and `404`s on a workspace the caller cannot see, so it never leaks existence. Do not assume the two behave alike.
+  **Visibility-gated, like every workspace read.** A signed-in user with no relation to the workspace gets `404 workspace/not-found` from [`GET /workspaces/:workspaceId/authority/me`](/v8/api-reference/workspaces/fetch-authority), exactly as for a workspace that doesn't exist, so the route never confirms that a workspace exists. For a UI gate, treat that `404` as "no standing here".
 </Note>
 
 ## Usage Example
@@ -54,7 +52,7 @@ function InviteGate({ workspaceId }: { workspaceId: string }) {
 | `viaWorkspaceId` | `string?` | The ancestor granting it — present on `ancestor-owner` / `reach-holder` only. A user reaching in from several ancestors carries one entry per ancestor. |
 
 <Note>
-  **`view` is implied by every other capability.** Any user with standing resolves with `view` in `capabilities`, including a member whose stored `capabilities` array is empty. A user with no relation at all resolves to `reasons: []` and an empty capability set — so `capabilities.includes("view")` is a reliable "does this user have any standing here" check.
+  **`view` is implied by every other capability.** Any user with standing resolves with `view` in `capabilities`, including a member whose stored `capabilities` array is empty. A user with no relation at all gets the `404` instead of a record — so a returned record always includes `view`.
 </Note>
 
 Unlike the [member-standing read](/v8/hooks/workspaces/use-fetch-workspace-member-standing), this hook is inherently a **self** read, so `capabilities` / `permissions` / `rank` are never fenced here — the fence exists to stop a caller reconstructing *someone else's* rank, and there is nobody else in this payload.

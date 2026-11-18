@@ -142,6 +142,15 @@ The `userJwt` must contain:
     ```
     A missing or malformed `userJwt`.
   </Accordion>
+  <Accordion title="Rejected by Validation Webhook — 400">
+    ```json
+    {
+      "error": "User validation failed",
+      "code": "auth/webhook-validation-failed"
+    }
+    ```
+    Returned when the JWT names a user this project doesn't have yet and your `user.created` [validation webhook](/v8/webhooks) rejects them. `error` carries the `message` your webhook returned (`User validation failed` when it returned none). No user is created.
+  </Accordion>
 </AccordionGroup>
 
 ## See Also

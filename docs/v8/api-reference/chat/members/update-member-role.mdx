@@ -69,9 +69,16 @@ Returns the updated [ConversationMember](/v8/data-models/conversation-member) re
     { "error": "Roles can only be changed in group conversations.", "code": "chat/invalid-type" }
     ```
   </Accordion>
-  <Accordion title="Forbidden — 403">
+  <Accordion title="Not a Member — 403">
+    The acting user isn't an active member of the conversation.
     ```json
-    { "error": "Only group admins can change member roles.", "code": "chat/not-a-member" }
+    { "error": "You are not an active member of this conversation.", "code": "chat/not-a-member" }
+    ```
+  </Accordion>
+  <Accordion title="Forbidden — 403">
+    The acting user is a member of the group without the `admin` role.
+    ```json
+    { "error": "Only group admins can change member roles.", "code": "chat/forbidden" }
     ```
   </Accordion>
   <Accordion title="Member Not Found — 404">

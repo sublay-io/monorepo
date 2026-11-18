@@ -146,7 +146,7 @@ const user = await sublay.users.fetchUserByUsername({ username: "alice" });
 
 ### updateUser
 
-Updates a user's profile fields. The update acts as that user: `actingUserId` must be the same user as `userId`, and the request behaves exactly as their own access token would (`403 user/unauthorized` if the two differ).
+Updates a user's profile fields. The update acts as that user: `actingUserId` must be the same user as `userId`, and the request behaves exactly as their own access token would (`403 user/forbidden` if the two differ).
 
 ```typescript
 const updatedUser = await sublay.users.updateUser({

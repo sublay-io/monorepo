@@ -52,8 +52,8 @@ Returns a `WorkspaceInvitation[]` array: each item a [WorkspaceInvitation](/v8/d
 
 | Code | Status | Meaning |
 |------|--------|---------|
-| `workspace/unauthorized` | 403 | You lack the `invite` capability on this workspace. |
-| `workspace/not-found` | 404 | No such workspace in this project. |
+| `workspace/forbidden` | 403 | You can see the workspace but lack the `invite` capability on it. |
+| `workspace/not-found` | 404 | No such workspace, or you have no relation to it (answered alike). |
 
 ## Related
 

@@ -46,7 +46,8 @@ Returns the updated [Workspace](/v8/data-models/workspace) object.
 
 | Code | Status | Meaning |
 |------|--------|---------|
-| `workspace/unauthorized` | 403 | You are not the owner or an ancestor owner. |
+| `workspace/forbidden` | 403 | You can see the workspace but are not its owner or an ancestor owner. |
+| `workspace/not-found` | 404 | No such workspace, or you have no relation to it (answered alike). |
 | `workspace/inherit-enforced` | 403 | The project enforces its inherit default; the flag cannot be changed. |
 
 ## Related

@@ -77,11 +77,10 @@ const useAxiosPrivate = (): AxiosInstance => {
         // middlewares (requireUserAuth/requireAdminAuth/requireClientAuth) via
         // `sendStatus(401)` for an absent header and `sendStatus(403)` for one
         // that fails verification. Every semantic 401/403 the controllers raise
-        // carries a `code` — 403: project/plan-required, project/owner-required,
-        // space-permission, user/suspended; 401:
-        // space/auth-required, auth/user-required,
-        // push-device/unauthorized, auth/token-reuse-detected, auth/wrong-password.
-        // Those are
+        // carries a `code` — 403: `<area>/forbidden`, project/plan-required,
+        // project/owner-required, user/suspended, database/tables-not-available;
+        // 401: auth/session-ended, auth/invalid-credentials,
+        // auth/token-reuse-detected, auth/wrong-password. Those are
         // rejections a refresh cannot fix, so we must not rotate the token or
         // retry — doing so would waste a rotation on every such response (e.g.
         // every AI call on a free plan).

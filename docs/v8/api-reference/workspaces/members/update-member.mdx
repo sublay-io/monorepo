@@ -80,17 +80,17 @@ Returns the updated [WorkspaceMember](/v8/data-models/workspace-member) object.
     ```
     `userId` is the acting user (the token's user, or the user named by `actingUserId`). This route acts on another member. Your own membership is [`GET /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/fetch-my-membership) to read it, [`PATCH /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/update-my-membership) to edit your title, and [`DELETE /workspaces/:workspaceId/members/me`](/v8/api-reference/workspaces/members/leave-workspace) to leave.
   </Accordion>
-  <Accordion title="Unauthorized — 403">
+  <Accordion title="Forbidden — 403">
     One message per tier, depending on which fields the request touched. Powerful fields (`capabilities`, `permissions`, `rank`, `relativeRank`):
 
     ```json
-    { "error": "The 'edit-member-access' capability is required to edit access fields.", "code": "workspace/unauthorized" }
+    { "error": "The 'edit-member-access' capability is required to edit access fields.", "code": "workspace/forbidden" }
     ```
 
     Cosmetic fields (`title`, `metadata`):
 
     ```json
-    { "error": "The 'edit-member-profile' capability is required to edit profile fields.", "code": "workspace/unauthorized" }
+    { "error": "The 'edit-member-profile' capability is required to edit profile fields.", "code": "workspace/forbidden" }
     ```
   </Accordion>
   <Accordion title="Insufficient Rank — 403">
@@ -164,7 +164,7 @@ Returns the updated [WorkspaceMember](/v8/data-models/workspace-member) object.
     Every path id on the workspaces bundle is checked for UUID shape before the route runs, so a malformed one is a plain `400` rather than a `500` from the database.
   </Accordion>
   <Accordion title="Not Found — 404">
-    The workspace doesn't exist:
+    The workspace doesn't exist, or the acting user has no relation to it (the two answer alike):
     ```json
     { "error": "Workspace not found.", "code": "workspace/not-found" }
     ```

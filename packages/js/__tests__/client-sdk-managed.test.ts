@@ -211,7 +211,7 @@ describe("SublayHttpClient — SDK-managed mode (default, no getToken)", () => {
     [403, "user/suspended"],
     [403, "project/plan-required"],
     [403, "database/tables-not-available"],
-    [401, "auth/user-required"],
+    [401, "auth/session-ended"],
   ])(
     "surfaces a coded %i (%s) without refreshing or retrying",
     async (status, code) => {

@@ -150,14 +150,13 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     { "error": "Online events require a `url`.", "code": "event/invalid-body" }
     ```
   </Accordion>
-  <Accordion title="files-images Bundle Required — 403">
+  <Accordion title="Bundle Not Installed — 403">
+    Returned when cover or gallery images are uploaded on a project without the files-images bundle, or when `spaceId` is sent on a project without the spaces bundle: `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
     ```json
-    { "error": "Event cover/gallery images require the files-images bundle. Enable it for this project.", "code": "event/files-images-bundle-required" }
+    { "error": "Event cover/gallery images require the files-images bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
     ```
-  </Accordion>
-  <Accordion title="spaces Bundle Required — 403">
     ```json
-    { "error": "Space-scoped events require the spaces bundle. Enable it for this project.", "code": "event/spaces-bundle-required" }
+    { "error": "Space-scoped events require the spaces bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Spaces", "SpaceMembers", "SpaceBans", "Rules"], "bundleId": "spaces", "dashboardUrl": "https://…/<projectId>/database" }
     ```
   </Accordion>
   <Accordion title="Space Not Found — 404">

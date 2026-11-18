@@ -46,16 +46,16 @@ Takes a direct moderation action on a chat message in a space's integrated conve
   <Accordion title="Invalid Id — 400">
     Returned when `spaceId` or `messageId` isn't a valid UUID. Checked before sign-in, permissions and the endpoint's other checks.
     ```json
-    { "error": "Invalid space id: expected a UUID.", "code": "chat/invalid-params", "param": "spaceId" }
+    { "error": "Invalid space id: expected a UUID.", "code": "moderation/invalid-params", "param": "spaceId" }
     ```
   </Accordion>
   <Accordion title="Invalid Action — 400">
     `action` is missing or isn't `"remove"`. `action: "approve"` gets its own message.
     ```json
-    { "error": "action: Chat messages can only be removed: they're never held for approval, so there is nothing to approve. Send `action: \"remove\"`.", "code": "chat/invalid-body" }
+    { "error": "action: Chat messages can only be removed: they're never held for approval, so there is nothing to approve. Send `action: \"remove\"`.", "code": "moderation/invalid-body" }
     ```
     ```json
-    { "error": "action: Invalid action: expected \"remove\"", "code": "chat/invalid-body" }
+    { "error": "action: Invalid action: expected \"remove\"", "code": "moderation/invalid-body" }
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
@@ -63,14 +63,14 @@ Takes a direct moderation action on a chat message in a space's integrated conve
     ```json
     {
       "error": "`moderationStatus` isn't supported in v8. Send `action: \"remove\"`.",
-      "code": "chat/unsupported-param",
+      "code": "moderation/unsupported-param",
       "param": "moderationStatus"
     }
     ```
     ```json
     {
       "error": "`moderationReason` isn't supported in v8. Send the reason as `reason`.",
-      "code": "chat/unsupported-param",
+      "code": "moderation/unsupported-param",
       "param": "moderationReason"
     }
     ```
@@ -109,6 +109,12 @@ Takes a direct moderation action on a chat message in a space's integrated conve
     The user named by `actingUserId` cannot moderate this space.
     ```json
     { "error": "Moderator access required", "code": "space/moderator-required" }
+    ```
+  </Accordion>
+  <Accordion title="Message Not Found — 404">
+    The message isn't in this space's conversation, or the space has no conversation.
+    ```json
+    { "error": "Message not found in this space's conversation.", "code": "moderation/message-not-found" }
     ```
   </Accordion>
 </AccordionGroup>

@@ -199,7 +199,7 @@ describe("js-sdk reputation — target pair contract", () => {
   // COMPILE-TIME assertions, checked by ts-jest's diagnostics. The server
   // applies a shared `bothOrNeitherTarget` refinement to the write body and the
   // equivalent rule to the list query, answering a half-filled target with
-  // `400 reputation-grant/invalid-body` / `invalid-filter`. The
+  // `400 reputation-grant/invalid-body` / `invalid-query`. The
   // `@ts-expect-error` lines below fail this file's compile if anyone flattens
   // `ReputationGrantTargetFilter` back into two independent optional fields.
   it("rejects a half-filled target at compile time on createGrant", async () => {
@@ -269,7 +269,7 @@ describe("js-sdk reputation — target pair contract", () => {
     // COMPILE-TIME assertions, same shape as the `metadata: null` case above
     // and for the same reason: `grantBodyFields.targetType`/`targetId` are
     // `.optional()` with NO `.nullable()`, so `targetType: null` is answered
-    // with 400 reputation-grant/invalid-body (invalid-filter on the list), not
+    // with 400 reputation-grant/invalid-body (invalid-query on the list), not
     // read as "no target". The empty branch of
     // `ReputationGrantTargetFilter` is therefore `?: undefined`, and these
     // directives go unused — failing the compile — the moment anyone widens it

@@ -73,12 +73,12 @@ Removes the acting user's membership (the token's user, or the user a service ke
     { "error": "Space membership required", "code": "space/membership-required" }
     ```
   </Accordion>
-  <Accordion title="Creator Cannot Leave — 400">
+  <Accordion title="Creator Cannot Leave — 409">
     ```json
     { "error": "The space creator cannot leave the space. Transfer ownership or delete the space instead.", "code": "space/creator-cannot-leave" }
     ```
   </Accordion>
-  <Accordion title="Last Admin — 400">
+  <Accordion title="Last Admin — 409">
     The user is the last admin of this space:
     ```json
     { "error": "You are the last admin of this space. Promote another member to admin before leaving, or delete the space.", "code": "space/last-admin" }

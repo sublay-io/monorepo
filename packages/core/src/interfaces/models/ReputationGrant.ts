@@ -19,7 +19,7 @@ export type ReputationGrantSourceType = "user" | "app";
  * does not compile. The server answers that shape with
  * `400 reputation-grant/invalid-body` on the write (a shared
  * `bothOrNeitherTarget` refinement) and
- * `400 reputation-grant/invalid-filter` on the list, so the union turns a
+ * `400 reputation-grant/invalid-query` on the list, so the union turns a
  * guaranteed round trip into a red squiggle.
  *
  * The empty branch is `?: undefined`, NOT `?: null` — deliberately, and for the

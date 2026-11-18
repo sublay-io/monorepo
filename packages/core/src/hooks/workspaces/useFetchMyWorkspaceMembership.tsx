@@ -15,7 +15,7 @@ export interface FetchMyWorkspaceMembershipProps {
  * Your own access is never hidden, so every field is present. `relativeRank`
  * is `0` when you have a member row here and `null` when you don't (an owner
  * or ancestor-owner without one). With no relation to the workspace at all
- * the answer is still a record, with `reasons: []`.
+ * the call fails with 404 `workspace/not-found`, as for a missing workspace.
  */
 function useFetchMyWorkspaceMembership(): (
   props: FetchMyWorkspaceMembershipProps

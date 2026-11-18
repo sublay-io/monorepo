@@ -52,10 +52,10 @@ Requires authentication. **The owner deletes:** a file with an owner is deleted 
     { "error": "File not found", "code": "storage/file-not-found" }
     ```
   </Accordion>
-  <Accordion title="Unauthorized — 403">
+  <Accordion title="Forbidden — 403">
     Returned when the acting user doesn't own the file, or when a user token, or a service key naming a user, deletes an app-owned file.
     ```json
-    { "error": "Unauthorized", "code": "storage/unauthorized" }
+    { "error": "Only the file's owner can delete it.", "code": "storage/forbidden" }
     ```
   </Accordion>
   <Accordion title="Missing User ID — 400">

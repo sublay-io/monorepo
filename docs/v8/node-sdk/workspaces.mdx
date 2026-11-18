@@ -280,7 +280,7 @@ const counts = await sublay.workspaces.fetchWorkspaceMembers({
 
 ### fetchMyWorkspaceMembership
 
-The acting user's own resolved standing on a workspace (`GET /workspaces/:workspaceId/members/me`): the same `WorkspaceMemberStanding` record [fetchWorkspaceMemberStanding](#fetchworkspacememberstanding) returns for another user. A user's own access is never fenced, so `capabilities`, `permissions`, `rank` and `relativeRank` are always present; `relativeRank` is `0` when they hold a member row on this workspace and `null` when they don't (an owner or ancestor owner without one). It needs no relation to the workspace: with none, the record comes back with `reasons: []`. See [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
+The acting user's own resolved standing on a workspace (`GET /workspaces/:workspaceId/members/me`): the same `WorkspaceMemberStanding` record [fetchWorkspaceMemberStanding](#fetchworkspacememberstanding) returns for another user. A user's own access is never fenced, so `capabilities`, `permissions`, `rank` and `relativeRank` are always present; `relativeRank` is `0` when they hold a member row on this workspace and `null` when they don't (an owner or ancestor owner without one). A user with no relation to the workspace gets `404 workspace/not-found`, as for a missing workspace. See [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).
 
 ```typescript
 const me = await sublay.workspaces.fetchMyWorkspaceMembership({
@@ -342,7 +342,7 @@ Rank moves in **either coordinate** — `rank` (absolute) or `relativeRank` (an 
 
 ### updateMyWorkspaceMembership
 
-The acting user edits their own profile on a workspace (`PATCH /workspaces/:workspaceId/members/me`). Needs no capability. A member edits their `title` only; a member's other fields are edited by a member with the capability, through [updateWorkspaceMember](#updateworkspacemember). The workspace's **owner** (a key acting as the owner) edits their `title` and `metadata` here, and only here: they are profile only and change nothing about the owner's authority. An acting user who is not the owner and holds no member row on the workspace gets `404 workspace/not-found`. See [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership).
+The acting user edits their own profile on a workspace (`PATCH /workspaces/:workspaceId/members/me`). Needs no capability. A member edits their `title` only; a member's other fields are edited by a member with the capability, through [updateWorkspaceMember](#updateworkspacemember). The workspace's **owner** (a key acting as the owner) edits their `title` and `metadata` here, and only here: they are profile only and change nothing about the owner's authority. An acting user who can see the workspace but is not its owner and holds no member row on it gets `403 workspace/not-member`; one with no relation to it gets `404 workspace/not-found`, as for a missing workspace. See [Update My Membership](/v8/api-reference/workspaces/members/update-my-membership).
 
 ```typescript
 const member = await sublay.workspaces.updateMyWorkspaceMembership({
@@ -381,7 +381,7 @@ Requires `remove-member` (rank-bounded); sole-owner protected. A `targetUserId` 
 await sublay.workspaces.leaveWorkspace({ workspaceId: "ws_abc", actingUserId: "usr_pat" });
 ```
 
-Removes the given user's own membership on this node only (`DELETE /workspaces/:workspaceId/members/me`).
+Removes the given user's own membership on this node only (`DELETE /workspaces/:workspaceId/members/me`). An owner cannot leave (`409 workspace/sole-owner`). A user who only reaches in, with no direct membership here, gets `403 workspace/not-member`; one who can't see the workspace gets `404 workspace/not-found`, as for a missing one.
 
 <ParamField body="workspaceId" type="string" required />
 <ParamField body="actingUserId" type="string" required>The user leaving. Sent as a query param.</ParamField>
@@ -558,6 +558,6 @@ if (authority.permissions.includes("deploy")) {
 <ParamField body="workspaceId" type="string" required />
 <ParamField body="actingUserId" type="string" required>The acting user whose resolved standing to read.</ParamField>
 
-`reasons` entries carry `viaWorkspaceId` on `ancestor-owner` / `reach-holder`, naming the ancestor responsible — so when a user has authority you did not expect, you can tell exactly which node to go fix. `capabilities` is the fully-resolved set, and **`view` is implied by every other capability**: any user with standing carries it, while a user with no relation at all comes back with `reasons: []` and an empty capability set. There is no `relativeRank` on this read — it is an offset from the caller, and here the caller is the subject, so `rank` is the coordinate it reports.
+`reasons` entries carry `viaWorkspaceId` on `ancestor-owner` / `reach-holder`, naming the ancestor responsible — so when a user has authority you did not expect, you can tell exactly which node to go fix. `capabilities` is the fully-resolved set, and **`view` is implied by every other capability**: any user with standing carries it, and a user with no relation at all gets `404 workspace/not-found` instead of a record. There is no `relativeRank` on this read — it is an offset from the caller, and here the caller is the subject, so `rank` is the coordinate it reports.
 
 Sublay never consumes your opaque `permissions` — there is deliberately no `?permission=` check or `can()` helper.

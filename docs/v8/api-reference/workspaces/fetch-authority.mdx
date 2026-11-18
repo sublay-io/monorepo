@@ -48,7 +48,7 @@ This read is inherently a **self** read (or a privileged-key read of a named use
 ```
 
 - `reasons` — structured standings; `viaWorkspaceId` is present on `ancestor-owner` / `reach-holder` only.
-- `capabilities` — the fully-resolved set (direct + reach + ownership). **`view` is implied by every other capability** — any user with standing on the workspace resolves with `view`, including a member whose stored `capabilities` array is empty. A user with no relation at all resolves to an empty set.
+- `capabilities` — the fully-resolved set (direct + reach + ownership). **`view` is implied by every other capability** — any user with standing on the workspace resolves with `view`, including a member whose stored `capabilities` array is empty.
 - `permissions` — **per-node** (the direct membership on this workspace only; may be empty). Does not cascade.
 - `rank` — the direct-membership rank, or `null` for owners / ancestor-owners / reach-only holders.
 - There is **no `relativeRank`** on this read. It is an offset from the caller, and here the caller *is* the subject — so it could only ever be `0`, a constant dressed as a coordinate. `rank` is the position this endpoint reports. `relativeRank` is meaningful on the [roster](/v8/api-reference/workspaces/members/list-members) and [member-standing](/v8/api-reference/workspaces/members/fetch-member-standing) reads, where the subject is somebody else.
@@ -79,6 +79,12 @@ This read is inherently a **self** read (or a privileged-key read of a named use
     { "error": "No user with this actingUserId exists in this project.", "code": "workspace/user-not-found" }
     ```
     Returned when a service key names an `actingUserId` that isn't a user in this project.
+  </Accordion>
+  <Accordion title="Not Found — 404">
+    ```json
+    { "error": "Workspace not found.", "code": "workspace/not-found" }
+    ```
+    No workspace with this id exists in this project, or the acting user has no relation to it (not its owner, an ancestor owner, a member or a reach-holder): the two answer alike, so the response never confirms that a workspace exists.
   </Accordion>
   <Accordion title="Invalid Path Parameter — 400">
     ```json

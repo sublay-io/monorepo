@@ -169,7 +169,7 @@ export default function useAskContent(): UseAskContentReturn {
           // an unverifiable header respectively. Unlike the axios hooks, this
           // raw-fetch stream can't lean on the interceptor, so refresh once
           // (coalesced with it via the shared single-flight) and retry. Coded
-          // responses (project/plan-required, user/suspended, space/auth-required,
+          // responses (project/plan-required, user/suspended, auth/session-ended,
           // …) are semantic and unrecoverable by refresh, so surface them as-is.
           //
           // 401 was previously treated as terminal, on the reasoning that it

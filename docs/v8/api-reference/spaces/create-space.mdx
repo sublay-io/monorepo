@@ -142,10 +142,10 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
     { "error": "Maximum nesting depth (10) exceeded.", "code": "space/max-depth-exceeded" }
     ```
   </Accordion>
-  <Accordion title="files-images Bundle Required — 403">
-    Returned when an avatar or banner is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed.
+  <Accordion title="Bundle Not Installed — 403">
+    Returned when an avatar or banner is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
     ```json
-    { "error": "Space avatar/banner uploads require the files-images bundle. Enable it for this project.", "code": "space/files-images-bundle-required", "missingTables": ["Files", "Images"] }
+    { "error": "Space avatar/banner uploads require the files-images bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
     ```
   </Accordion>
   <Accordion title="Image Too Large — 413">

@@ -245,13 +245,20 @@ Validation still runs first, in the same order: an invalid body, an image error,
   <Accordion title="Upload Refused — 400 / 413">
     A file was refused as the body was read: `auth/unsupported-file-type` or `auth/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
-  <Accordion title="Validation Failed — 400">
+  <Accordion title="Bundle Not Installed — 403">
+    Returned when `avatarFile` or `bannerFile` is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    ```json
+    { "error": "Avatar and banner uploads require the files-images bundle, which is not installed for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
+    ```
+  </Accordion>
+  <Accordion title="Rejected by Validation Webhook — 400">
     ```json
     {
       "error": "User validation failed",
-      "code": "auth/validation-failed"
+      "code": "auth/webhook-validation-failed"
     }
     ```
+    Returned when your `user.created` [validation webhook](/v8/webhooks) rejects the new user. `error` carries the `message` your webhook returned (`User validation failed` when it returned none). No user is created.
   </Accordion>
   <Accordion title="Duplicate User Field — 409">
     ```json

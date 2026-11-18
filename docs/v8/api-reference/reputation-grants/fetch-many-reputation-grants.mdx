@@ -24,7 +24,7 @@ Exactly one filter is required, and the three shapes are **mutually exclusive** 
 
 Grants pointing at a **chat message** are private to that conversation, which is what makes the choice of shape matter — see [Chat message targets](#chat-message-targets-are-private) below.
 
-Supplying none returns `400 reputation-grant/missing-filter`; supplying more than one returns `400 reputation-grant/invalid-filter`. Combining shapes is rejected rather than intersected, because a target list narrowed by sender would render rows that no longer reconcile with the `summary` printed above them.
+Supplying none, more than one, or only half of the target pair returns `400 reputation-grant/invalid-query`, with `param` naming the field to fix. Combining shapes is rejected rather than intersected, because a target list narrowed by sender would render rows that no longer reconcile with the `summary` printed above them.
 
 ## Query Parameters
 
@@ -134,16 +134,19 @@ See [ReputationGrant](/v8/data-models/reputation-grant) for the row shape and [G
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="Missing Filter — 400">
+  <Accordion title="Filter Shape — 400">
+    No filter was supplied; `param` is `recipientId`:
     ```json
-    { "error": "One filter is required: recipientId, senderId, or targetType + targetId.", "code": "reputation-grant/missing-filter" }
+    { "error": "One filter is required: recipientId, senderId, or targetType + targetId.", "code": "reputation-grant/invalid-query", "param": "recipientId" }
     ```
-  </Accordion>
-  <Accordion title="Invalid Filter — 400">
+    More than one was supplied; `param` names the second (`senderId`, or `targetType` for the target pair):
     ```json
-    { "error": "Filters are mutually exclusive: supply recipientId, senderId, or targetType + targetId — not more than one.", "code": "reputation-grant/invalid-filter" }
+    { "error": "Filters are mutually exclusive: supply recipientId, senderId, or targetType + targetId — not more than one.", "code": "reputation-grant/invalid-query", "param": "senderId" }
     ```
-    Also returned when only one half of `targetType` / `targetId` is supplied.
+    Only one half of the target pair was supplied; `param` names the missing half:
+    ```json
+    { "error": "targetType and targetId must be supplied together.", "code": "reputation-grant/invalid-query", "param": "targetId" }
+    ```
   </Accordion>
   <Accordion title="Invalid Query — 400">
     ```json
@@ -157,6 +160,7 @@ See [ReputationGrant](/v8/data-models/reputation-grant) for the row shape and [G
       "error": "This endpoint needs tables that aren't installed in this project (ReputationBuckets, ReputationGrants). Install their bundle from the dashboard.",
       "code": "database/tables-not-available",
       "missingTables": ["ReputationBuckets", "ReputationGrants"],
+      "bundleId": "reputation",
       "dashboardUrl": "https://…/<projectId>/database"
     }
     ```

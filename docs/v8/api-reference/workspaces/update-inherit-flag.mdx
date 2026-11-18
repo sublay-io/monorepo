@@ -34,9 +34,16 @@ Returns the updated [Workspace](/v8/data-models/workspace) object.
 ## Error Responses
 
 <AccordionGroup>
-  <Accordion title="Unauthorized — 403">
+  <Accordion title="Forbidden — 403">
     ```json
-    { "error": "Owner access required", "code": "workspace/unauthorized" }
+    { "error": "Owner access required", "code": "workspace/forbidden" }
+    ```
+    The acting user can see the workspace but is neither its owner nor an owner of a workspace above it.
+  </Accordion>
+  <Accordion title="Not Found — 404">
+    The workspace doesn't exist, or the acting user has no relation to it (not its owner, an ancestor owner, a member or a reach-holder): the two answer alike, with the same body [Fetch Workspace](/v8/api-reference/workspaces/fetch-workspace) gives.
+    ```json
+    { "error": "Workspace not found.", "code": "workspace/not-found" }
     ```
   </Accordion>
   <Accordion title="Inherit Enforced — 403">

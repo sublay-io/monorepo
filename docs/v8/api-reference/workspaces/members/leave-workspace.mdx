@@ -32,13 +32,15 @@ Removes the caller's own membership on **this node only** (self-service, no capa
 
 <AccordionGroup>
   <Accordion title="Not Found — 404">
-    The workspace doesn't exist, including when it was deleted while this request was being handled:
+    The workspace doesn't exist, or the acting user can't see it (no relation to it at all: not a member, not an owner, no reach from an ancestor), including when it was deleted while this request was being handled. A workspace you can't see answers exactly like one that doesn't exist.
     ```json
     { "error": "Workspace not found.", "code": "workspace/not-found" }
     ```
-    The acting user has no direct member row on this workspace (for example, they only reach in from an ancestor):
+  </Accordion>
+  <Accordion title="Not a Member — 403">
+    The acting user can see the workspace but has no direct member row on it (for example, they only reach in from an ancestor), so there is nothing to leave.
     ```json
-    { "error": "You are not a direct member of this workspace.", "code": "workspace/not-found" }
+    { "error": "You are not a direct member of this workspace.", "code": "workspace/not-member" }
     ```
   </Accordion>
   <Accordion title="Sole Owner — 409">

@@ -80,14 +80,15 @@ For group conversations, if the caller is the last `admin`, they must promote an
     { "error": "Direct conversations cannot be left.", "code": "chat/cannot-leave-dm" }
     ```
   </Accordion>
-  <Accordion title="Not a Member — 400 Bad Request">
+  <Accordion title="Not a Member — 403">
     ```json
     { "error": "You are not an active member of this conversation.", "code": "chat/not-a-member" }
     ```
   </Accordion>
-  <Accordion title="Last Admin — 400 Bad Request">
+  <Accordion title="Last Admin — 409">
+    The caller is the group's only admin. Someone has to stay in charge, so another member must be made admin first.
     ```json
-    { "error": "You are the last admin. Promote another member before leaving.", "code": "chat/last-admin" }
+    { "error": "You are the last admin. Promote another member to admin before leaving.", "code": "chat/last-admin" }
     ```
   </Accordion>
 </AccordionGroup>

@@ -15,6 +15,8 @@ export interface AddMemberProps {
 
 /**
  * Add a user to a space directly: they become an active member at once.
+ * Answers 201 when the user became an active member now, 200 when they
+ * already were; the membership row either way.
  */
 export async function addMember(
   client: SublayHttpClient,

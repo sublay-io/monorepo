@@ -10,7 +10,8 @@ export interface CreateFollowProps {
 
 /**
  * POST /users/:userId/follow — follow `:userId`. Answers 201 with the new
- * follow; its `user` is the followed user.
+ * follow, or 200 with the existing one when the follow is already there; its
+ * `user` is the followed user either way.
  */
 export async function createFollow(
   client: SublayHttpClient,

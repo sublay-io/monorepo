@@ -7,6 +7,10 @@ export interface FollowUserProps {
   userId: string;
 }
 
+/**
+ * Follow `userId`. Answers 201 with the new follow, or 200 with the existing
+ * one when the signed-in user already follows them.
+ */
 function useFollowUser(): (props: FollowUserProps) => Promise<FollowRow> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();

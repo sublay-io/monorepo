@@ -90,69 +90,6 @@ export interface MySpaceItem {
 
 export type MySpacesResponse = PaginatedResponse<MySpaceItem>;
 
-export interface JoinSpaceResponse {
-  message: string;
-  membership: {
-    id: string;
-    spaceId: string;
-    userId: string;
-    role: "member";
-    status: "pending" | "active";
-    joinedAt: string;
-  };
-  /** The joiner's permissions in the space after joining. */
-  memberPermissions: SpaceMemberPermissions;
-}
-
-export interface LeaveSpaceResponse {
-  message: string;
-  /** The caller's permissions in the space after leaving, now as a non-member. */
-  memberPermissions: SpaceMemberPermissions;
-}
-
-export interface UpdateMemberRoleResponse {
-  message: string;
-  membership: {
-    id: string;
-    role: SpaceMemberRole;
-    status: string;
-    joinedAt: string;
-    userId: string;
-  };
-}
-
-export interface ApproveMemberResponse {
-  message: string;
-  membership: {
-    id: string;
-    status: "active";
-    joinedAt: string;
-  };
-}
-
-export interface AddMemberResponse {
-  /** "User added to the space." or, when they were already an active member, "User is already a member of this space." */
-  message: string;
-  membership: {
-    id: string;
-    spaceId: string;
-    userId: string;
-    /** `member` for a user just added; an existing active member keeps their role. */
-    role: SpaceMemberRole;
-    status: "active";
-    joinedAt: string;
-    createdAt: string;
-  };
-}
-
-export interface DeclineMemberResponse {
-  message: string;
-  membership: {
-    id: string;
-    status: "rejected";
-  };
-}
-
 /**
  * The caller's standing in a space. A field that describes a relationship the
  * caller doesn't have is absent (never `null`): `status` only when a
@@ -170,12 +107,6 @@ export interface CheckMyMembershipResponse {
     isAdmin: boolean;
     isModerator: boolean;
   };
-}
-
-// The server replies with `{ message }` only — it does not echo the deleted
-// space or any per-table counts.
-export interface DeleteSpaceResponse {
-  message: string;
 }
 
 /** A space on the path that the viewer can see. */

@@ -269,14 +269,13 @@ describe("js-sdk chat conversations — response mapping", () => {
     expect(result).toEqual(conversation);
   });
 
-  it("deleteConversation returns the message wrapper", async () => {
+  it("deleteConversation resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const payload = { message: "Conversation deleted." };
-    projectInstance.delete.mockResolvedValueOnce({ data: payload });
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
 
     const result = await deleteConversation(client, { conversationId: "c1" });
 
-    expect(result).toEqual(payload);
+    expect(result).toBeUndefined();
   });
 
   it("getUnreadCount returns the UnreadCountResponse", async () => {
@@ -325,14 +324,13 @@ describe("js-sdk chat members — response mapping", () => {
     expect(result).toEqual(member);
   });
 
-  it("removeMember returns the message wrapper", async () => {
+  it("removeMember resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const payload = { message: "Member removed." };
-    projectInstance.delete.mockResolvedValueOnce({ data: payload });
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
 
     const result = await removeMember(client, { conversationId: "c1", userId: "target1" });
 
-    expect(result).toEqual(payload);
+    expect(result).toBeUndefined();
   });
 
   it.each([
@@ -345,14 +343,13 @@ describe("js-sdk chat members — response mapping", () => {
     await expect(checkMyConversationMembership(client, { conversationId: "c1" })).resolves.toEqual(body);
   });
 
-  it("leaveConversation returns the message wrapper", async () => {
+  it("leaveConversation resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const payload = { message: "Left conversation." };
-    projectInstance.delete.mockResolvedValueOnce({ data: payload });
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
 
     const result = await leaveConversation(client, { conversationId: "c1" });
 
-    expect(result).toEqual(payload);
+    expect(result).toBeUndefined();
   });
 
   it("changeMemberRole returns the updated ConversationMember", async () => {

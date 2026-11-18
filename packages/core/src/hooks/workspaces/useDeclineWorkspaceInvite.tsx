@@ -6,10 +6,6 @@ export interface DeclineWorkspaceInviteProps {
   inviteId: string;
 }
 
-export interface DeclineWorkspaceInviteResponse {
-  success: boolean;
-}
-
 /**
  * Decline an invitation — identity-matched to the bearer-token user, and
  * verified-email-gated (the same gate as accept, so an unverified squatter on
@@ -18,7 +14,7 @@ export interface DeclineWorkspaceInviteResponse {
  */
 function useDeclineWorkspaceInvite(): (
   props: DeclineWorkspaceInviteProps
-) => Promise<DeclineWorkspaceInviteResponse> {
+) => Promise<void> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -31,12 +27,10 @@ function useDeclineWorkspaceInvite(): (
         throw new Error("Please pass an inviteId");
       }
 
-      const response = await axios.post<DeclineWorkspaceInviteResponse>(
+      await axios.post<void>(
         `/${projectId}/workspace-invites/${inviteId}/decline`,
         {}
       );
-
-      return response.data;
     },
     [projectId, axios]
   );

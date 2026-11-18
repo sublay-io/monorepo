@@ -4,10 +4,6 @@ export interface DeleteWorkspaceProps {
   workspaceId: string;
 }
 
-export interface DeleteWorkspaceResponse {
-  message: string;
-}
-
 /**
  * Owner-only delete (own owner or an ancestor owner). Cascades the whole
  * subtree transactionally. The actor is the bearer-token user — no actor
@@ -16,10 +12,9 @@ export interface DeleteWorkspaceResponse {
 export async function deleteWorkspace(
   client: SublayHttpClient,
   data: DeleteWorkspaceProps
-): Promise<DeleteWorkspaceResponse> {
+): Promise<void> {
   const { workspaceId } = data;
-  const response = await client.projectInstance.delete<DeleteWorkspaceResponse>(
+  await client.projectInstance.delete<void>(
     `/workspaces/${workspaceId}`
   );
-  return response.data;
 }

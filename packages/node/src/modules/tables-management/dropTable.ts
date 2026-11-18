@@ -4,9 +4,8 @@ import { SublayHttpClient } from "../../core/client";
 export async function dropTable(
   client: SublayHttpClient,
   data: { tableName: string },
-): Promise<{ dropped: string }> {
-  const response = await client.projectInstance.delete<{ dropped: string }>(
+): Promise<void> {
+  await client.projectInstance.delete<void>(
     `/db/tables/${data.tableName}`,
   );
-  return response.data;
 }

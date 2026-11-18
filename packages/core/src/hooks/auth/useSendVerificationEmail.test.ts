@@ -13,11 +13,11 @@ describe("useSendVerificationEmail", () => {
       useSendVerificationEmail(),
     );
 
-    axiosPrivate.mockResponse("post", { success: true });
+    axiosPrivate.mockResponse("post", "", 204);
 
     const returned = await result.current({ mode: "link" });
 
-    expect(returned).toEqual({ success: true });
+    expect(returned).toBeUndefined();
 
     const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/auth/send-verification-email");
@@ -29,7 +29,7 @@ describe("useSendVerificationEmail", () => {
       useSendVerificationEmail(),
     );
 
-    axiosPrivate.mockResponse("post", { success: true });
+    axiosPrivate.mockResponse("post", "", 204);
 
     await result.current({
       mode: "link",

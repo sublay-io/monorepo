@@ -3,7 +3,6 @@ import { buildSearchParams } from "../../utils/searchParams";
 import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import type {
   Space,
-  DeleteSpaceResponse,
   PostingPermission,
 } from "../../interfaces/models/Space";
 import type { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions";
@@ -95,7 +94,7 @@ export const spacesApi = baseApi.injectEndpoints({
     }),
 
     // Delete space
-    deleteSpace: builder.mutation<DeleteSpaceResponse, DeleteSpaceParams>({
+    deleteSpace: builder.mutation<void, DeleteSpaceParams>({
       query: ({ projectId, spaceId }) => ({
         url: `/${projectId}/spaces/${spaceId}`,
         method: "DELETE",

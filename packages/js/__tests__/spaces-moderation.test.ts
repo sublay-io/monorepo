@@ -176,7 +176,7 @@ describe("js-sdk spaces (moderation/reports) — response mapping", () => {
 
   it("moderateSpaceEntity returns the ModerationResponse", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "Entity moderated", moderationStatus: "removed" as const };
+    const result = { moderationStatus: "removed" as const };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
 
     const response = await moderateSpaceEntity(client, {
@@ -190,7 +190,7 @@ describe("js-sdk spaces (moderation/reports) — response mapping", () => {
 
   it("moderateSpaceComment returns the ModerationResponse", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "Comment moderated", moderationStatus: "approved" as const };
+    const result = { moderationStatus: "approved" as const };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
 
     const response = await moderateSpaceComment(client, {
@@ -214,7 +214,7 @@ describe("js-sdk spaces (moderation/reports) — response mapping", () => {
 
   it("moderateSpaceChatMessage returns the ModerateSpaceChatMessageResponse", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "Message moderated", moderationStatus: "removed" as const };
+    const result = { moderationStatus: "removed" as const };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
 
     const response = await moderateSpaceChatMessage(client, {
@@ -270,17 +270,13 @@ describe("js-sdk spaces (moderation/reports) — response mapping", () => {
     expect(response).toEqual(rule);
   });
 
-  it("deleteRule returns the DeleteRuleResponse", async () => {
+  it("deleteRule resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = {
-      message: "Rule deleted",
-      deletedRule: { id: "r1", title: "Be nice" },
-    };
-    projectInstance.delete.mockResolvedValueOnce({ data: result });
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
 
     const response = await deleteRule(client, { spaceId: "s1", ruleId: "r1" });
 
-    expect(response).toEqual(result);
+    expect(response).toBeUndefined();
   });
 
   it("reorderRules returns the reordered Rule array", async () => {

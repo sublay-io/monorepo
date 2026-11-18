@@ -1,6 +1,6 @@
 import { useCallback } from "react";
+import type { SpaceMember } from "../../interfaces/models/SpaceMember";
 import useProject from "../projects/useProject";
-import { AddMemberResponse } from "../../interfaces/models/Space";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 
 export interface AddMemberProps {
@@ -14,7 +14,7 @@ export interface AddMemberProps {
  * no request or approval step. The signed-in user must be an active moderator
  * or admin of the space.
  */
-function useAddMember(): (props: AddMemberProps) => Promise<AddMemberResponse> {
+function useAddMember(): (props: AddMemberProps) => Promise<SpaceMember> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -33,7 +33,7 @@ function useAddMember(): (props: AddMemberProps) => Promise<AddMemberResponse> {
         { userId }
       );
 
-      return response.data as AddMemberResponse;
+      return response.data as SpaceMember;
     },
     [projectId]
   );

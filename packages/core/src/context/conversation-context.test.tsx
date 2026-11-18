@@ -80,7 +80,7 @@ describe("ConversationProvider", () => {
     const confirmed = makeChatMessage({ id: "message-1", conversationId: "conversation-1" });
     axiosPrivate.mockResponse("post", confirmed);
     // The confirmed message becomes the newest one and is marked read.
-    axiosPrivate.mockResponse("post", { message: "Marked as read." });
+    axiosPrivate.mockResponse("post", "", 204);
 
     await act(async () => {
       await result.current.send!({ content: "hi" });
@@ -220,7 +220,7 @@ describe("ConversationProvider", () => {
             messagesResponse.promise as never,
           );
           axiosPrivate.mockResponse("get", emptyMembersPage());
-          axiosPrivate.mockResponse("post", { message: "Marked as read." });
+          axiosPrivate.mockResponse("post", "", 204);
         },
       });
       store.dispatch(
@@ -260,7 +260,7 @@ describe("ConversationProvider", () => {
         beforeRender: ({ axiosPrivate }) => {
           axiosPrivate.mockResponse("get", messagesPage([]));
           axiosPrivate.mockResponse("get", emptyMembersPage());
-          axiosPrivate.mockResponse("post", { message: "Marked as read." });
+          axiosPrivate.mockResponse("post", "", 204);
         },
       });
       store.dispatch(upsertMessage(msg("message-1", "2024-01-01T00:00:01.000Z")));
@@ -284,7 +284,7 @@ describe("ConversationProvider", () => {
         beforeRender: ({ axiosPrivate }) => {
           axiosPrivate.mockResponse("get", messagesPage([]));
           axiosPrivate.mockResponse("get", emptyMembersPage());
-          axiosPrivate.mockResponse("post", { message: "Marked as read." });
+          axiosPrivate.mockResponse("post", "", 204);
         },
       });
       store.dispatch(upsertMessage(msg("message-1", "2024-01-01T00:00:01.000Z")));
@@ -314,8 +314,8 @@ describe("ConversationProvider", () => {
         beforeRender: ({ axiosPrivate }) => {
           axiosPrivate.mockResponse("get", messagesPage([msg("message-1", "2024-01-01T00:00:01.000Z")]));
           axiosPrivate.mockResponse("get", emptyMembersPage());
-          axiosPrivate.mockResponse("post", { message: "Marked as read." });
-          axiosPrivate.mockResponse("post", { message: "Marked as read." });
+          axiosPrivate.mockResponse("post", "", 204);
+          axiosPrivate.mockResponse("post", "", 204);
         },
       });
 
@@ -365,7 +365,7 @@ describe("ConversationProvider", () => {
         beforeRender: ({ axiosPrivate }) => {
           axiosPrivate.mockResponse("get", messagesPage([msg("message-1", "2024-01-01T00:00:01.000Z")]));
           axiosPrivate.mockResponse("get", emptyMembersPage());
-          axiosPrivate.mockResponse("post", { message: "Marked as read." });
+          axiosPrivate.mockResponse("post", "", 204);
         },
       });
 
@@ -389,7 +389,7 @@ describe("ConversationProvider", () => {
           msg("message-3", "2024-01-01T00:00:03.000Z"),
         ],
       });
-      axiosPrivate.mockResponse("post", { message: "Marked as read." });
+      axiosPrivate.mockResponse("post", "", 204);
 
       await act(async () => {
         fakeSocket.trigger("connect");
@@ -425,7 +425,7 @@ describe("ConversationProvider", () => {
           axiosPrivate.mockResponse("get", mountPage);
           axiosPrivate.mockResponse("get", emptyMembersPage());
           for (let i = 0; i < 5; i++) {
-            axiosPrivate.mockResponse("post", { message: "Marked as read." });
+            axiosPrivate.mockResponse("post", "", 204);
           }
         },
       });

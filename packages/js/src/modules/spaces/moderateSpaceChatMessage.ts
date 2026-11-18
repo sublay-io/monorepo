@@ -10,7 +10,6 @@ export interface ModerateSpaceChatMessageProps {
 }
 
 export interface ModerateSpaceChatMessageResponse {
-  message: string;
   moderationStatus: "removed";
 }
 

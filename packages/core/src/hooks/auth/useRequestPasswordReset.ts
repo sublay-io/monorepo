@@ -6,7 +6,7 @@ export interface RequestPasswordResetProps {
   email: string;
 }
 
-function useRequestPasswordReset(): (props: RequestPasswordResetProps) => Promise<{ success: boolean; message: string }> {
+function useRequestPasswordReset(): (props: RequestPasswordResetProps) => Promise<void> {
   const { projectId } = useProject();
 
   const requestPasswordReset = useCallback(
@@ -19,12 +19,10 @@ function useRequestPasswordReset(): (props: RequestPasswordResetProps) => Promis
         throw new Error("Email is required.");
       }
 
-      const response = await axios.post(
+      await axios.post(
         `/${projectId}/auth/request-password-reset`,
         { email: email.trim() }
       );
-
-      return response.data;
     },
     [projectId]
   );

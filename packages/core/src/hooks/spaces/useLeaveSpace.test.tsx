@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeMemberPermissions } from "../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks } from "../../test-utils";
 import useLeaveSpace from "./useLeaveSpace";
 
 afterEach(() => {
@@ -9,18 +9,17 @@ afterEach(() => {
 });
 
 describe("useLeaveSpace", () => {
-  it("leaves a space", async () => {
+  it("leaves a space and resolves with nothing", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useLeaveSpace());
 
-    const response = { message: "Left", memberPermissions: makeMemberPermissions() };
-    axiosPrivate.mockResponse("delete", response);
+    axiosPrivate.mockResponse("delete", "", 204);
 
-    let returned;
+    let returned: unknown = "unset";
     await act(async () => {
       returned = await result.current({ spaceId: "space-1" });
     });
 
-    expect(returned).toEqual(response);
+    expect(returned).toBeUndefined();
 
     const [call] = axiosPrivate.calls("delete");
     expect(call.url).toBe("/test-project/spaces/space-1/members/me");

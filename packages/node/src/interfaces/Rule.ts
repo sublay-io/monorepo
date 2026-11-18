@@ -14,11 +14,3 @@ export interface FetchManyRulesResponse {
   data: Rule[];
   count: number;
 }
-
-export interface DeleteRuleResponse {
-  message: string;
-  deletedRule: {
-    id: string;
-    title: string;
-  };
-}

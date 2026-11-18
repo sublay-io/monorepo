@@ -51,11 +51,6 @@ export interface BulkCreateResult<T = TableRow> {
   data: T[];
 }
 
-export interface DeleteResult {
-  deleted: boolean;
-  soft: boolean;
-}
-
 export interface BulkDeleteResult {
   deletedCount: number;
   soft: boolean;
@@ -80,7 +75,7 @@ export interface TableAccessor<T = TableRow> {
     rows: Array<Partial<T> | Record<string, unknown>>,
   ): Promise<BulkCreateResult<T>>;
   update(rowId: string, data: Partial<T> | Record<string, unknown>): Promise<T>;
-  delete(rowId: string, opts?: { force?: boolean }): Promise<DeleteResult>;
+  delete(rowId: string, opts?: { force?: boolean }): Promise<void>;
   bulkDelete(params: BulkDeleteProps): Promise<BulkDeleteResult>;
   restore(rowId: string): Promise<T>;
 }

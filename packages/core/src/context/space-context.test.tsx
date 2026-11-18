@@ -97,16 +97,20 @@ describe("SpaceProvider", () => {
       ),
     });
 
+    // The join answers with the membership record; the space is then loaded
+    // again for the server's permissions and member count.
     axiosPrivate.mockResponse("post", {
-      message: "Joined",
-      membership: {
-        id: "member-1",
-        spaceId: "space-1",
-        userId: "user-1",
-        role: "member",
-        status: "active",
-        joinedAt: "2024-01-01T00:00:00.000Z",
-      },
+      id: "member-1",
+      spaceId: "space-1",
+      userId: "user-1",
+      role: "member",
+      status: "active",
+      joinedAt: "2024-01-01T00:00:00.000Z",
+      createdAt: "2024-01-01T00:00:00.000Z",
+    }, 201);
+    axiosPrivate.mockResponse("get", {
+      ...space,
+      membersCount: 2,
       memberPermissions: makeMemberPermissions({ isMember: true, status: "active", canPost: true }),
     });
 

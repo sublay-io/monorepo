@@ -305,14 +305,13 @@ describe("js-sdk chat messages — response mapping", () => {
     expect(result).toEqual(message);
   });
 
-  it("deleteMessage returns the message wrapper, including userDeletedAt when present", async () => {
+  it("deleteMessage resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const payload = { message: "Message deleted.", userDeletedAt: "2026-06-01T00:00:00Z" };
-    projectInstance.delete.mockResolvedValueOnce({ data: payload });
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
 
     const result = await deleteMessage(client, { conversationId: "c1", messageId: "m1" });
 
-    expect(result).toEqual(payload);
+    expect(result).toBeUndefined();
   });
 
   it("sendMessage returns the created ChatMessage (JSON path)", async () => {
@@ -388,13 +387,12 @@ describe("js-sdk chat messages — response mapping", () => {
     expect(result).toEqual(envelope);
   });
 
-  it("markAsRead returns the message wrapper", async () => {
+  it("markAsRead resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const payload = { message: "Marked as read." };
-    projectInstance.post.mockResolvedValueOnce({ data: payload });
+    projectInstance.post.mockResolvedValueOnce({ data: "", status: 204 });
 
     const result = await markAsRead(client, { conversationId: "c1", messageId: "m1" });
 
-    expect(result).toEqual(payload);
+    expect(result).toBeUndefined();
   });
 });

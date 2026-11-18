@@ -13,17 +13,13 @@ describe("useUnbanMember", () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUnbanMember());
 
     const response = {
-      message: "Unbanned",
-      membership: {
-        id: "membership-1",
-        projectId: "test-project",
-        spaceId: "space-1",
-        userId: "user-2",
-        role: "member" as const,
-        status: "active" as const,
-        joinedAt: "2024-01-01T00:00:00.000Z",
-        createdAt: "2024-01-01T00:00:00.000Z",
-      },
+      id: "membership-1",
+      spaceId: "space-1",
+      userId: "user-2",
+      role: "member" as const,
+      status: "active" as const,
+      joinedAt: "2024-01-01T00:00:00.000Z",
+      createdAt: "2024-01-01T00:00:00.000Z",
     };
     axiosPrivate.mockResponse("post", response);
 

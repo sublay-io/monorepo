@@ -1,4 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
+import { SpaceMember } from "../../interfaces/SpaceMember";
 
 export interface UnbanMemberProps {
   spaceId: string;
@@ -6,20 +7,12 @@ export interface UnbanMemberProps {
   userId: string;
 }
 
-export interface UnbanMemberResponse {
-  message: string;
-  membership: {
-    id: string;
-    status: "active";
-  };
-}
-
 export async function unbanMember(
   client: SublayHttpClient,
   data: UnbanMemberProps
-): Promise<UnbanMemberResponse> {
+): Promise<SpaceMember> {
   const { spaceId, userId } = data;
-  const response = await client.projectInstance.post<UnbanMemberResponse>(
+  const response = await client.projectInstance.post<SpaceMember>(
     `/spaces/${spaceId}/members/${userId}/unban`
   );
   return response.data;

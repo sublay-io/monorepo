@@ -1,7 +1,7 @@
 import { useCallback } from "react";
+import type { SpaceMember } from "../../interfaces/models/SpaceMember";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
-import type { BanMemberResponse } from "../../interfaces/models/Space";
 
 export interface BanMemberProps {
   spaceId: string;
@@ -11,7 +11,7 @@ export interface BanMemberProps {
   reason?: string;
 }
 
-function useBanMember(): (props: BanMemberProps) => Promise<BanMemberResponse> {
+function useBanMember(): (props: BanMemberProps) => Promise<SpaceMember> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -30,7 +30,7 @@ function useBanMember(): (props: BanMemberProps) => Promise<BanMemberResponse> {
         { reason }
       );
 
-      return response.data as BanMemberResponse;
+      return response.data as SpaceMember;
     },
     [projectId]
   );

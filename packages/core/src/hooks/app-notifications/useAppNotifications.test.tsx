@@ -151,7 +151,7 @@ describe("useAppNotifications", () => {
     });
     expect(result.current.appNotifications[0].isRead).toBe(true);
 
-    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ markedAsRead: 1 }));
+    fetchHandle.fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
     await act(async () => {
       await result.current.markAllNotificationsAsRead();
     });

@@ -13,8 +13,13 @@ describe("useApproveMember", () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useApproveMember());
 
     const response = {
-      message: "Approved",
-      membership: { id: "membership-1", status: "active" as const, joinedAt: "2024-01-01T00:00:00.000Z" },
+      id: "membership-1",
+      spaceId: "space-1",
+      userId: "user-2",
+      role: "member" as const,
+      status: "active" as const,
+      joinedAt: "2024-01-01T00:00:00.000Z",
+      createdAt: "2024-01-01T00:00:00.000Z",
     };
     axiosPrivate.mockResponse("post", response);
 

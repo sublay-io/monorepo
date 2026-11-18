@@ -23,7 +23,6 @@ describe("useSetSpaceEntityNsfw", () => {
     );
 
     axiosPrivate.mockResponse("patch", {
-      message: "Entity NSFW flag updated.",
       nsfw: true,
     });
 
@@ -37,7 +36,6 @@ describe("useSetSpaceEntityNsfw", () => {
     });
 
     expect(returned).toEqual({
-      message: "Entity NSFW flag updated.",
       nsfw: true,
     });
 

@@ -679,14 +679,12 @@ describe("js-sdk workspaces — response mapping", () => {
     ).resolves.toEqual(authority);
   });
 
-  it("deleteWorkspace returns the message envelope", async () => {
+  it("deleteWorkspace resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    projectInstance.delete.mockResolvedValueOnce({
-      data: { message: "Workspace deleted successfully." },
-    });
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
     await expect(
       deleteWorkspace(client, { workspaceId: "w1" })
-    ).resolves.toEqual({ message: "Workspace deleted successfully." });
+    ).resolves.toBeUndefined();
   });
 
   it("fetchWorkspaceInvites returns the { data } envelope", async () => {

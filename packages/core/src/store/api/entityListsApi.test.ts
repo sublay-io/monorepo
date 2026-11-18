@@ -305,10 +305,8 @@ describe("entityListsApi", () => {
     expect(call.url).toContain("/test-project/entities/e1");
   });
 
-  it("deleteEntity issues a DELETE and handles a text response as void", async () => {
-    fetchHandle.fetchMock.mockResolvedValueOnce(
-      new Response("OK", { status: 200, headers: { "content-type": "text/plain" } }),
-    );
+  it("deleteEntity issues a DELETE and takes the empty 204 response", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
 
     const result = await store.dispatch(
       entityListsApi.endpoints.deleteEntity.initiate({
@@ -319,7 +317,7 @@ describe("entityListsApi", () => {
 
     expect(fetchHandle.calls()[0].method).toBe("DELETE");
     expect(result.error).toBeUndefined();
-    expect(result.data).toBeUndefined();
+    expect(result.data ?? undefined).toBeUndefined();
   });
 
   it("surfaces a non-2xx response as a query error", async () => {

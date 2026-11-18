@@ -9,11 +9,3 @@ export interface Rule {
   createdAt: string;
   updatedAt: string;
 }
-
-export interface DeleteRuleResponse {
-  message: string;
-  deletedRule: {
-    id: string;
-    title: string;
-  };
-}

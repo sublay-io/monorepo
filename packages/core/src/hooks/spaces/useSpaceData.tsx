@@ -149,44 +149,61 @@ function useSpaceData({
     }
   }, [space, deleteSpaceHook]);
 
+  // Load the space again after a membership change, the way the hook loads it
+  // by id: the server's `memberPermissions` (never guessed from the
+  // membership), the member count and the hierarchy, all as they are now.
+  const refreshSpace = useCallback(
+    async (id: string) => {
+      try {
+        const fresh = await fetchSpace({ spaceId: id, include: stableInclude });
+        applySpace(fresh);
+      } catch (err) {
+        // A space the viewer can no longer see (a private space just left)
+        // answers exactly like one that doesn't exist: drop it.
+        const response = (
+          err as { response?: { status?: number; data?: { code?: unknown } } }
+        )?.response;
+        if (response?.status === 404 && response.data?.code === "space/not-found") {
+          for (const key of Object.keys(spaceCache.current)) {
+            if (spaceCache.current[key].id === id) delete spaceCache.current[key];
+          }
+          setSpace(null);
+          return;
+        }
+        handleError(err, "Failed to refresh space");
+        setError("Failed to refresh space");
+      }
+    },
+    [fetchSpace, stableInclude, applySpace]
+  );
+
   // Handle join space
   const handleJoinSpace = useCallback(async () => {
     if (!space) return;
 
     try {
-      const response = await joinSpaceHook({ spaceId: space.id });
-
-      // The server's permissions after joining (never guessed from the
-      // membership status), and the member count
-      applySpace({
-        ...space,
-        membersCount: space.membersCount + 1,
-        memberPermissions: response.memberPermissions,
-      });
+      await joinSpaceHook({ spaceId: space.id });
     } catch (err) {
       handleError(err, "Failed to join space");
       setError("Failed to join space");
+      return;
     }
-  }, [space, joinSpaceHook, applySpace]);
+    await refreshSpace(space.id);
+  }, [space, joinSpaceHook, refreshSpace]);
 
   // Handle leave space
   const handleLeaveSpace = useCallback(async () => {
     if (!space) return;
 
     try {
-      const response = await leaveSpaceHook({ spaceId: space.id });
-
-      // The server's permissions now as a non-member, and the member count
-      applySpace({
-        ...space,
-        membersCount: Math.max(0, space.membersCount - 1),
-        memberPermissions: response.memberPermissions,
-      });
+      await leaveSpaceHook({ spaceId: space.id });
     } catch (err) {
       handleError(err, "Failed to leave space");
       setError("Failed to leave space");
+      return;
     }
-  }, [space, leaveSpaceHook, applySpace]);
+    await refreshSpace(space.id);
+  }, [space, leaveSpaceHook, refreshSpace]);
 
   // Fetch space effect
   useEffect(() => {

@@ -766,31 +766,29 @@ describe("js-sdk auth — response mapping", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("changePassword returns response.data and sends no session credential", async () => {
+  it("changePassword resolves with nothing (204) and sends no session credential", async () => {
     // A real client, holding real tokens: the point is that none of them reach
     // the request. The server identifies the session to spare from a claim on
     // the access token the call already carries, so the body names no session
     // and no refresh token travels to this endpoint.
     const { client, projectInstance } = makeRealClient();
-    const result = { success: true, message: "Password changed" };
-    projectInstance.post.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: "", status: 204 });
 
     await expect(
       changePassword(client, { password: "old-pw", newPassword: "new-pw" })
-    ).resolves.toEqual(result);
+    ).resolves.toBeUndefined();
 
     const [, body] = projectInstance.post.mock.calls[0];
     expect(body).toEqual({ password: "old-pw", newPassword: "new-pw" });
     expect(body).not.toHaveProperty("refreshToken");
   });
 
-  it("setPassword returns response.data", async () => {
+  it("setPassword resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { success: true, message: "Password set successfully." };
-    projectInstance.post.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: "", status: 204 });
     await expect(
       setPassword(client, { newPassword: "new-pw" })
-    ).resolves.toEqual(result);
+    ).resolves.toBeUndefined();
   });
 
   it("verifyEmail resolves to undefined", async () => {
@@ -798,20 +796,18 @@ describe("js-sdk auth — response mapping", () => {
     await expect(verifyEmail(client, { token: "tok1" })).resolves.toBeUndefined();
   });
 
-  it("sendVerificationEmail returns response.data", async () => {
+  it("sendVerificationEmail resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { success: true };
-    projectInstance.post.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: "", status: 204 });
     await expect(
       sendVerificationEmail(client, { mode: "link" })
-    ).resolves.toEqual(result);
+    ).resolves.toBeUndefined();
   });
 
-  it("requestAccountDeletion returns response.data", async () => {
+  it("requestAccountDeletion resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { success: true };
-    projectInstance.post.mockResolvedValueOnce({ data: result });
-    await expect(requestAccountDeletion(client)).resolves.toEqual(result);
+    projectInstance.post.mockResolvedValueOnce({ data: "", status: 204 });
+    await expect(requestAccountDeletion(client)).resolves.toBeUndefined();
   });
 
   it("confirmAccountDeletion resolves to undefined", async () => {

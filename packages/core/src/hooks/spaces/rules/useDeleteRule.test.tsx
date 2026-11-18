@@ -3,7 +3,6 @@ import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks } from "../../../test-utils";
 import useDeleteRule from "./useDeleteRule";
-import type { DeleteRuleResponse } from "../../../interfaces/models/Rule";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -13,18 +12,14 @@ describe("useDeleteRule", () => {
   it("deletes a rule", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useDeleteRule());
 
-    const response: DeleteRuleResponse = {
-      message: "Rule deleted",
-      deletedRule: { id: "rule-1", title: "Be respectful" },
-    };
-    axiosPrivate.mockResponse("delete", response);
+    axiosPrivate.mockResponse("delete", "", 204);
 
-    let returned: DeleteRuleResponse | undefined;
+    let returned: unknown = "unset";
     await act(async () => {
       returned = await result.current({ spaceId: "space-1", ruleId: "rule-1" });
     });
 
-    expect(returned).toEqual(response);
+    expect(returned).toBeUndefined();
 
     const [call] = axiosPrivate.calls("delete");
     expect(call.url).toBe("/test-project/spaces/space-1/rules/rule-1");

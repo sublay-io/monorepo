@@ -11,19 +11,14 @@ export interface RevokeWorkspaceInviteProps {
   actingUserId: string;
 }
 
-export interface RevokeWorkspaceInviteResponse {
-  success: boolean;
-}
-
 /** Revoke a pending invitation. Requires the `invite` capability (or owner). */
 export async function revokeWorkspaceInvite(
   client: SublayHttpClient,
   data: RevokeWorkspaceInviteProps
-): Promise<RevokeWorkspaceInviteResponse> {
+): Promise<void> {
   const { workspaceId, inviteId, ...body } = data;
-  const response = await client.projectInstance.post<RevokeWorkspaceInviteResponse>(
+  await client.projectInstance.post<void>(
     `/workspaces/${workspaceId}/invites/${inviteId}/revoke`,
     body
   );
-  return response.data;
 }

@@ -1,13 +1,12 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
-import { LeaveSpaceResponse } from "../../interfaces/models/Space";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 
 export interface LeaveSpaceProps {
   spaceId: string;
 }
 
-function useLeaveSpace(): (props: LeaveSpaceProps) => Promise<LeaveSpaceResponse> {
+function useLeaveSpace(): (props: LeaveSpaceProps) => Promise<void> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -21,11 +20,9 @@ function useLeaveSpace(): (props: LeaveSpaceProps) => Promise<LeaveSpaceResponse
         throw new Error("Please pass a spaceId");
       }
 
-      const response = await axios.delete(
+      await axios.delete(
         `/${projectId}/spaces/${spaceId}/members/me`
       );
-
-      return response.data as LeaveSpaceResponse;
     },
     [projectId]
   );

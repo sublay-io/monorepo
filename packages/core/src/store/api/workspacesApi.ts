@@ -96,7 +96,7 @@ export const workspacesApi = baseApi.injectEndpoints({
       }),
     }),
 
-    deleteWorkspace: builder.mutation<{ message: string }, DeleteWorkspaceParams>(
+    deleteWorkspace: builder.mutation<void, DeleteWorkspaceParams>(
       {
         query: ({ projectId, workspaceId }) => ({
           url: `/${projectId}/workspaces/${workspaceId}`,

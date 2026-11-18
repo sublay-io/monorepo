@@ -6,19 +6,14 @@ export interface DeleteWorkspaceProps {
   actingUserId: string;
 }
 
-export interface DeleteWorkspaceResponse {
-  message: string;
-}
-
 export async function deleteWorkspace(
   client: SublayHttpClient,
   data: DeleteWorkspaceProps
-): Promise<DeleteWorkspaceResponse> {
+): Promise<void> {
   const { workspaceId, actingUserId } = data;
   // A DELETE takes no body: the acting user goes in the query.
-  const response = await client.projectInstance.delete<DeleteWorkspaceResponse>(
+  await client.projectInstance.delete<void>(
     `/workspaces/${workspaceId}`,
     { params: { actingUserId } }
   );
-  return response.data;
 }

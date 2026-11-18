@@ -132,10 +132,7 @@ export const tablesApi = baseApi.injectEndpoints({
       ],
     }),
 
-    deleteRow: builder.mutation<
-      { deleted: boolean; soft: boolean },
-      DeleteRowParams
-    >({
+    deleteRow: builder.mutation<void, DeleteRowParams>({
       query: ({ projectId, tableName, rowId, force }) => ({
         url: `/${projectId}/db/${tableName}/${rowId}`,
         method: "DELETE",

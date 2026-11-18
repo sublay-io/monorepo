@@ -129,7 +129,6 @@ export type {
   CustomColumnDefinition,
   CreateTableProps,
   BulkDeleteProps,
-  DeleteResult,
   BulkDeleteResult,
   BulkCreateResult,
 } from "./interfaces/Table";

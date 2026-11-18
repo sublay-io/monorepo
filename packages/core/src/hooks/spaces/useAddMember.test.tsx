@@ -13,16 +13,13 @@ describe("useAddMember", () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useAddMember());
 
     const response = {
-      message: "User added to the space.",
-      membership: {
-        id: "membership-1",
-        spaceId: "space-1",
-        userId: "user-2",
-        role: "member" as const,
-        status: "active" as const,
-        joinedAt: "2026-01-01T00:00:00.000Z",
-        createdAt: "2026-01-01T00:00:00.000Z",
-      },
+      id: "membership-1",
+      spaceId: "space-1",
+      userId: "user-2",
+      role: "member" as const,
+      status: "active" as const,
+      joinedAt: "2024-01-01T00:00:00.000Z",
+      createdAt: "2024-01-01T00:00:00.000Z",
     };
     axiosPrivate.mockResponse("post", response);
 

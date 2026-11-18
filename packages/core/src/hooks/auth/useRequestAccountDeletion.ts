@@ -11,7 +11,7 @@ import useProject from "../projects/useProject";
  * anonymous or foreign-id users) must be deleted server-side with a service key
  * via the node SDK.
  */
-function useRequestAccountDeletion(): () => Promise<{ success: boolean }> {
+function useRequestAccountDeletion(): () => Promise<void> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -20,12 +20,10 @@ function useRequestAccountDeletion(): () => Promise<{ success: boolean }> {
       throw new Error("No projectId available.");
     }
 
-    const response = await axios.post(
+    await axios.post(
       `/${projectId}/auth/request-account-deletion`,
       {}
     );
-
-    return response.data;
   }, [projectId, axios]);
 
   return requestAccountDeletion;

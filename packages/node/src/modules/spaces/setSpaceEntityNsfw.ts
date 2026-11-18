@@ -12,7 +12,6 @@ export interface SetSpaceEntityNsfwProps {
 }
 
 export interface SetSpaceEntityNsfwResponse {
-  message: string;
   nsfw: boolean;
 }
 

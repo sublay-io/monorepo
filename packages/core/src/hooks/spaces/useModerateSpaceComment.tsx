@@ -10,7 +10,6 @@ export interface ModerateSpaceCommentProps {
 }
 
 interface ModerateResponse {
-  message: string;
   moderationStatus: "approved" | "removed";
 }
 

@@ -1,9 +1,12 @@
 import { PaginatedResponse } from "./IPaginatedResponse";
 import { SpaceMemberRole, SpaceMemberStatus } from "./Space";
 
+/**
+ * A membership record: what the member actions (join, add, approve, decline,
+ * ban, unban, role change) return.
+ */
 export interface SpaceMember {
   id: string;
-  projectId: string;
   spaceId: string;
   userId: string;
   role: SpaceMemberRole;

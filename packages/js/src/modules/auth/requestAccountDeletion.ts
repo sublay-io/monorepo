@@ -1,9 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
 
-export interface RequestAccountDeletionResponse {
-  success: boolean;
-}
-
 /**
  * Step 1 of self-service account deletion. Emails the signed-in user a one-time
  * confirmation code. Pass that code to {@link confirmAccountDeletion} to
@@ -15,11 +11,9 @@ export interface RequestAccountDeletionResponse {
  */
 export async function requestAccountDeletion(
   client: SublayHttpClient
-): Promise<RequestAccountDeletionResponse> {
-  const response =
-    await client.projectInstance.post<RequestAccountDeletionResponse>(
-      "/auth/request-account-deletion",
-      {}
-    );
-  return response.data;
+): Promise<void> {
+  await client.projectInstance.post<void>(
+    "/auth/request-account-deletion",
+    {}
+  );
 }

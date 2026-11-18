@@ -271,11 +271,10 @@ describe("node-sdk spaces (lifecycle) — response mapping", () => {
     ).resolves.toEqual(space);
   });
 
-  it("deleteSpace returns response.data", async () => {
+  it("deleteSpace resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { deleted: true };
-    projectInstance.delete.mockResolvedValueOnce({ data: result });
-    await expect(deleteSpace(client, { spaceId: "s1", actingUserId: "u1" })).resolves.toEqual(result);
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
+    await expect(deleteSpace(client, { spaceId: "s1", actingUserId: "u1" })).resolves.toBeUndefined();
   });
 });
 

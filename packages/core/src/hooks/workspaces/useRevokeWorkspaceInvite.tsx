@@ -7,17 +7,13 @@ export interface RevokeWorkspaceInviteProps {
   inviteId: string;
 }
 
-export interface RevokeWorkspaceInviteResponse {
-  success: boolean;
-}
-
 /**
  * Revoke a pending invitation. Requires the `invite` capability (or owner).
  * Note this is a POST to `.../invites/:inviteId/revoke`, not a DELETE.
  */
 function useRevokeWorkspaceInvite(): (
   props: RevokeWorkspaceInviteProps
-) => Promise<RevokeWorkspaceInviteResponse> {
+) => Promise<void> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -33,12 +29,10 @@ function useRevokeWorkspaceInvite(): (
         throw new Error("Please pass an inviteId");
       }
 
-      const response = await axios.post<RevokeWorkspaceInviteResponse>(
+      await axios.post<void>(
         `/${projectId}/workspaces/${workspaceId}/invites/${inviteId}/revoke`,
         {}
       );
-
-      return response.data;
     },
     [projectId, axios]
   );

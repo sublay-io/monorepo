@@ -7,9 +7,8 @@ import { SublayHttpClient } from "../../core/client";
 export async function dropColumn(
   client: SublayHttpClient,
   data: { tableName: string; columnName: string },
-): Promise<{ dropped: string }> {
-  const response = await client.projectInstance.delete<{ dropped: string }>(
+): Promise<void> {
+  await client.projectInstance.delete<void>(
     `/db/tables/${data.tableName}/columns/${data.columnName}`,
   );
-  return response.data;
 }

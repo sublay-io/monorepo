@@ -199,7 +199,7 @@ describe("useEntityListActions", () => {
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(
-        new Response("OK", { status: 200, headers: { "content-type": "text/plain" } }),
+        new Response(null, { status: 204 }),
       );
       await act(async () => {
         await result.current.deleteEntity("feed", { entityId: "e1" });

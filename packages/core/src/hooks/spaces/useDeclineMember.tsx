@@ -1,6 +1,6 @@
 import { useCallback } from "react";
+import type { SpaceMember } from "../../interfaces/models/SpaceMember";
 import useProject from "../projects/useProject";
-import { DeclineMemberResponse } from "../../interfaces/models/Space";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 
 export interface DeclineMemberProps {
@@ -9,7 +9,7 @@ export interface DeclineMemberProps {
   userId: string;
 }
 
-function useDeclineMember(): (props: DeclineMemberProps) => Promise<DeclineMemberResponse> {
+function useDeclineMember(): (props: DeclineMemberProps) => Promise<SpaceMember> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -27,7 +27,7 @@ function useDeclineMember(): (props: DeclineMemberProps) => Promise<DeclineMembe
         `/${projectId}/spaces/${spaceId}/members/${userId}/decline`
       );
 
-      return response.data as DeclineMemberResponse;
+      return response.data as SpaceMember;
     },
     [projectId]
   );

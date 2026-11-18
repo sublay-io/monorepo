@@ -13,7 +13,6 @@ export interface ModerateSpaceEntityProps {
 }
 
 export interface ModerationResponse {
-  message: string;
 }
 
 export async function moderateSpaceEntity(

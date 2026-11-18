@@ -218,7 +218,7 @@ describe("appNotificationsApi", () => {
       expect(readFlags()).toEqual([true, true]);
       expect(cachedCount()).toBe(0);
 
-      release(jsonResponse({ markedAsRead: 2 }));
+      release(new Response(null, { status: 204 }));
       await pending;
     });
 
@@ -259,7 +259,7 @@ describe("appNotificationsApi", () => {
       })(store.getState());
       expect(other.data?.data[0].isRead).toBe(false);
 
-      release(jsonResponse({ markedAsRead: 0 }));
+      release(new Response(null, { status: 204 }));
       await pending;
     });
   });
@@ -283,7 +283,7 @@ describe("appNotificationsApi", () => {
       appNotificationsApi.endpoints.countUnreadNotifications.initiate({ projectId: "test-project" }),
     );
 
-    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ markedAsRead: 3 }));
+    fetchHandle.fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
     await store.dispatch(
       appNotificationsApi.endpoints.markAllNotificationsAsRead.initiate({
         projectId: "test-project",

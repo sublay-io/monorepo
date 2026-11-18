@@ -1,6 +1,6 @@
 import { useCallback } from "react";
+import type { SpaceMember } from "../../interfaces/models/SpaceMember";
 import useProject from "../projects/useProject";
-import { ApproveMemberResponse } from "../../interfaces/models/Space";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 
 export interface ApproveMemberProps {
@@ -9,7 +9,7 @@ export interface ApproveMemberProps {
   userId: string;
 }
 
-function useApproveMember(): (props: ApproveMemberProps) => Promise<ApproveMemberResponse> {
+function useApproveMember(): (props: ApproveMemberProps) => Promise<SpaceMember> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -27,7 +27,7 @@ function useApproveMember(): (props: ApproveMemberProps) => Promise<ApproveMembe
         `/${projectId}/spaces/${spaceId}/members/${userId}/approve`
       );
 
-      return response.data as ApproveMemberResponse;
+      return response.data as SpaceMember;
     },
     [projectId]
   );

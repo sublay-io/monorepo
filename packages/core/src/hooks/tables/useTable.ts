@@ -53,7 +53,7 @@ export interface UseTableValues<T extends TableRow = TableRow> {
   deleteRow: (
     rowId: string,
     opts?: { force?: boolean },
-  ) => Promise<{ deleted: boolean; soft: boolean }>;
+  ) => Promise<void>;
   restoreRow: (rowId: string) => Promise<T>;
 }
 
@@ -196,13 +196,14 @@ export function useTable<T extends TableRow = TableRow>(
   );
 
   const deleteRow = useCallback(
-    async (rowId: string, opts?: { force?: boolean }) =>
-      deleteRowMutation({
+    async (rowId: string, opts?: { force?: boolean }) => {
+      await deleteRowMutation({
         projectId: projectId as string,
         tableName,
         rowId,
         force: opts?.force,
-      }).unwrap(),
+      }).unwrap();
+    },
     [deleteRowMutation, projectId, tableName],
   );
 

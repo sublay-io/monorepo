@@ -67,12 +67,11 @@ describe("node-sdk appNotifications — response mapping", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("markAllNotificationsAsRead returns response.data", async () => {
+  it("markAllNotificationsAsRead resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { markedAsRead: 5 };
-    projectInstance.post.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: "", status: 204 });
     await expect(
       markAllNotificationsAsRead(client, { actingUserId: "u1" }),
-    ).resolves.toEqual(result);
+    ).resolves.toBeUndefined();
   });
 });

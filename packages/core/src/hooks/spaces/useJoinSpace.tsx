@@ -1,13 +1,13 @@
 import { useCallback } from "react";
+import type { SpaceMember } from "../../interfaces/models/SpaceMember";
 import useProject from "../projects/useProject";
-import { JoinSpaceResponse } from "../../interfaces/models/Space";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 
 export interface JoinSpaceProps {
   spaceId: string;
 }
 
-function useJoinSpace(): (props: JoinSpaceProps) => Promise<JoinSpaceResponse> {
+function useJoinSpace(): (props: JoinSpaceProps) => Promise<SpaceMember> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -23,7 +23,7 @@ function useJoinSpace(): (props: JoinSpaceProps) => Promise<JoinSpaceResponse> {
 
       const response = await axios.post(`/${projectId}/spaces/${spaceId}/join`);
 
-      return response.data as JoinSpaceResponse;
+      return response.data as SpaceMember;
     },
     [projectId]
   );

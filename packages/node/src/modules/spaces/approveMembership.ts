@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { ApproveMemberResponse } from "../../interfaces/Space";
+import { SpaceMember } from "../../interfaces/SpaceMember";
 
 export interface ApproveMembershipProps {
   spaceId: string;
@@ -15,9 +15,9 @@ export interface ApproveMembershipProps {
 export async function approveMembership(
   client: SublayHttpClient,
   data: ApproveMembershipProps
-): Promise<ApproveMemberResponse> {
+): Promise<SpaceMember> {
   const { spaceId, userId, actingUserId } = data;
-  const response = await client.projectInstance.post<ApproveMemberResponse>(
+  const response = await client.projectInstance.post<SpaceMember>(
     `/spaces/${spaceId}/members/${userId}/approve`,
     { actingUserId }
   );

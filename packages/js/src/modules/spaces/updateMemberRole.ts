@@ -1,5 +1,6 @@
 import { SublayHttpClient } from "../../core/client";
-import { UpdateMemberRoleResponse, SpaceMemberRole } from "../../interfaces/Space";
+import { SpaceMember } from "../../interfaces/SpaceMember";
+import { SpaceMemberRole } from "../../interfaces/Space";
 
 export interface UpdateMemberRoleProps {
   spaceId: string;
@@ -11,9 +12,9 @@ export interface UpdateMemberRoleProps {
 export async function updateMemberRole(
   client: SublayHttpClient,
   data: UpdateMemberRoleProps
-): Promise<UpdateMemberRoleResponse> {
+): Promise<SpaceMember> {
   const { spaceId, userId, role } = data;
-  const response = await client.projectInstance.patch<UpdateMemberRoleResponse>(
+  const response = await client.projectInstance.patch<SpaceMember>(
     `/spaces/${spaceId}/members/${userId}/role`,
     { role }
   );

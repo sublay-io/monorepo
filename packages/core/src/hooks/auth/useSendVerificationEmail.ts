@@ -45,7 +45,7 @@ export type SendVerificationEmailProps =
   | SendCodeVerificationEmailShortProps
   | SendLinkVerificationEmailProps;
 
-function useSendVerificationEmail(): (props: SendVerificationEmailProps) => Promise<{ success: boolean }> {
+function useSendVerificationEmail(): (props: SendVerificationEmailProps) => Promise<void> {
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
 
@@ -55,12 +55,10 @@ function useSendVerificationEmail(): (props: SendVerificationEmailProps) => Prom
         throw new Error("No projectId available.");
       }
 
-      const response = await axios.post(
+      await axios.post(
         `/${projectId}/auth/send-verification-email`,
         props
       );
-
-      return response.data;
     },
     [projectId, axios]
   );

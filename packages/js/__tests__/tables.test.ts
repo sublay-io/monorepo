@@ -147,14 +147,13 @@ describe("js-sdk custom-table row ops — response mapping", () => {
     expect(result).toEqual(row);
   });
 
-  it("deleteRow returns the delete result as-is", async () => {
+  it("deleteRow resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeBaseClient();
-    const deleteResult = { deleted: true, soft: true };
-    projectInstance.delete.mockResolvedValueOnce({ data: deleteResult });
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
 
     const result = await deleteRow(client, "Events", "id1");
 
-    expect(result).toEqual(deleteResult);
+    expect(result).toBeUndefined();
   });
 
   it("bulkDelete returns the bulk delete result as-is", async () => {

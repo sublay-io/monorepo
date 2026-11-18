@@ -20,15 +20,14 @@ describe("useDeleteWorkspace", () => {
       { projectId: "project-1", user }
     );
 
-    const response = { message: "Workspace deleted successfully." };
-    axiosPrivate.mockResponse("delete", response);
+    axiosPrivate.mockResponse("delete", "", 204);
 
-    let returned: typeof response | undefined;
+    let returned: unknown = "unset";
     await act(async () => {
       returned = await result.current({ workspaceId: "w1" });
     });
 
-    expect(returned).toEqual(response);
+    expect(returned).toBeUndefined();
 
     const [call] = axiosPrivate.calls("delete");
     expect(call.url).toBe("/project-1/workspaces/w1");

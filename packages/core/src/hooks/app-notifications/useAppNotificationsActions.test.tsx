@@ -254,7 +254,7 @@ describe("useAppNotificationsActions", () => {
 
   describe("markAllNotificationsAsRead", () => {
     it("optimistically marks all read locally, then calls the API", async () => {
-      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ markedAsRead: 2 }));
+      fetchHandle.fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
       const { result, store } = renderHookWithStore(
         () => useAppNotificationsActions(),
         { projectId: "test-project" },

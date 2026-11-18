@@ -184,7 +184,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
 
   it("moderateSpaceEntity returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "moderated" };
+    const result = { moderationStatus: "removed" as const };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
       moderateSpaceEntity(client, {
@@ -198,7 +198,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
 
   it("moderateSpaceComment returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "moderated" };
+    const result = { moderationStatus: "removed" as const };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
       moderateSpaceComment(client, {
@@ -221,7 +221,7 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
 
   it("moderateSpaceChatMessage returns response.data", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { message: "moderated", moderationStatus: "removed" as const };
+    const result = { moderationStatus: "removed" as const };
     projectInstance.patch.mockResolvedValueOnce({ data: result });
     await expect(
       moderateSpaceChatMessage(client, {
@@ -256,13 +256,12 @@ describe("node-sdk spaces (moderation/reports) — response mapping", () => {
     ).resolves.toEqual(rule);
   });
 
-  it("deleteRule returns response.data", async () => {
+  it("deleteRule resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { deleted: true };
-    projectInstance.delete.mockResolvedValueOnce({ data: result });
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
     await expect(
       deleteRule(client, { spaceId: "s1", ruleId: "r1", actingUserId: "u-actor" }),
-    ).resolves.toEqual(result);
+    ).resolves.toBeUndefined();
   });
 
   it("fetchRule returns response.data", async () => {

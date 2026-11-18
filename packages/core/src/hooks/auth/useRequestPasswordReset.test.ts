@@ -13,11 +13,11 @@ describe("useRequestPasswordReset", () => {
       useRequestPasswordReset(),
     );
 
-    axiosPublic.mockResponse("post", { success: true, message: "Email sent" });
+    axiosPublic.mockResponse("post", "", 204);
 
     const returned = await result.current({ email: "  alice@example.com  " });
 
-    expect(returned).toEqual({ success: true, message: "Email sent" });
+    expect(returned).toBeUndefined();
 
     const [call] = axiosPublic.calls("post");
     expect(call.url).toBe("/test-project/auth/request-password-reset");

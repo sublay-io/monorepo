@@ -16,7 +16,7 @@ export interface VerifyEmailProps {
   verificationId?: string;
 }
 
-function useVerifyEmail(): (props: VerifyEmailProps) => Promise<{ success: boolean }> {
+function useVerifyEmail(): (props: VerifyEmailProps) => Promise<void> {
   const { projectId } = useProject();
   const dispatch = useSublayDispatch();
 
@@ -30,7 +30,7 @@ function useVerifyEmail(): (props: VerifyEmailProps) => Promise<{ success: boole
         throw new Error("Verification token is required.");
       }
 
-      const response = await axios.post(`/${projectId}/auth/verify-email`, {
+      await axios.post(`/${projectId}/auth/verify-email`, {
         token: token.trim(),
         ...(verificationId ? { verificationId } : {}),
       });
@@ -42,8 +42,6 @@ function useVerifyEmail(): (props: VerifyEmailProps) => Promise<{ success: boole
       if (!verificationId) {
         dispatch(updateUserOptimistic({ isVerified: true }));
       }
-
-      return response.data;
     },
     [projectId, dispatch]
   );

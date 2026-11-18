@@ -1,5 +1,4 @@
 import { SublayHttpClient } from "../../core/client";
-import { DeleteResult } from "../../interfaces/Table";
 
 /**
  * DELETE /db/:tableName/:rowId — soft-delete on a paranoid table by default;
@@ -10,13 +9,12 @@ export async function deleteRow(
   tableName: string,
   rowId: string,
   opts: { force?: boolean } = {},
-): Promise<DeleteResult> {
-  const response = await client.projectInstance.delete<DeleteResult>(
+): Promise<void> {
+  await client.projectInstance.delete<void>(
     `/db/${tableName}/${rowId}`,
     {
       params:
         opts.force === undefined ? {} : { force: opts.force ? "true" : "false" },
     },
   );
-  return response.data;
 }

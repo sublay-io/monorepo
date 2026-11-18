@@ -138,11 +138,10 @@ describe("node-sdk custom-table row ops — response mapping", () => {
     await expect(update(client, "Events", "id1", { name: "y" })).resolves.toEqual(row);
   });
 
-  it("deleteRow returns the full DeleteResult", async () => {
+  it("deleteRow resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { deleted: true, id: "id1" };
-    projectInstance.delete.mockResolvedValueOnce({ data: result });
-    await expect(deleteRow(client, "Events", "id1")).resolves.toEqual(result);
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
+    await expect(deleteRow(client, "Events", "id1")).resolves.toBeUndefined();
   });
 
   it("bulkDelete returns the full BulkDeleteResult", async () => {
@@ -224,11 +223,10 @@ describe("node-sdk table management (DDL) — response mapping", () => {
     ).resolves.toEqual(result);
   });
 
-  it("dropTable returns response.data", async () => {
+  it("dropTable resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { dropped: "custom_Events" };
-    projectInstance.delete.mockResolvedValueOnce({ data: result });
-    await expect(dropTable(client, { tableName: "Events" })).resolves.toEqual(result);
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
+    await expect(dropTable(client, { tableName: "Events" })).resolves.toBeUndefined();
   });
 
   it("addColumn returns response.data", async () => {
@@ -245,12 +243,11 @@ describe("node-sdk table management (DDL) — response mapping", () => {
     ).resolves.toEqual(result);
   });
 
-  it("dropColumn returns response.data", async () => {
+  it("dropColumn resolves with nothing (204)", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { dropped: "price" };
-    projectInstance.delete.mockResolvedValueOnce({ data: result });
+    projectInstance.delete.mockResolvedValueOnce({ data: "", status: 204 });
     await expect(
       dropColumn(client, { tableName: "Events", columnName: "price" }),
-    ).resolves.toEqual(result);
+    ).resolves.toBeUndefined();
   });
 });

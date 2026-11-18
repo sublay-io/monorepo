@@ -1,5 +1,4 @@
 import { SublayHttpClient } from "../../core/client";
-import { DeleteRuleResponse } from "../../interfaces/Rule";
 
 export interface DeleteRuleProps {
   spaceId: string;
@@ -9,10 +8,9 @@ export interface DeleteRuleProps {
 export async function deleteRule(
   client: SublayHttpClient,
   data: DeleteRuleProps
-): Promise<DeleteRuleResponse> {
+): Promise<void> {
   const { spaceId, ruleId } = data;
-  const response = await client.projectInstance.delete<DeleteRuleResponse>(
+  await client.projectInstance.delete<void>(
     `/spaces/${spaceId}/rules/${ruleId}`
   );
-  return response.data;
 }

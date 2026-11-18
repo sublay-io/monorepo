@@ -251,8 +251,9 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
-    { "error": "File \"photo.png\" is not a valid image: ...", "code": "entity/invalid-image", "param": "images.files" }
+    { "error": "File \"photo.png\" is not a valid image.", "code": "entity/invalid-image", "param": "images.files" }
     ```
+    A file can't be read as an image. `error` names the file as it was uploaded.
   </Accordion>
   <Accordion title="Missing Image Options — 400">
     `images.files` was sent without `images.options`. Checked before the validation webhook and before anything is uploaded, so nothing is stored.

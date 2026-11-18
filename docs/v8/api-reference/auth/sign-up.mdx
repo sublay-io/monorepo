@@ -216,12 +216,12 @@ Validation still runs first, in the same order: an invalid body, an image error,
   <Accordion title="Invalid Image — 422">
     ```json
     {
-      "error": "Avatar file is not a valid image: ...",
+      "error": "Avatar file is not a valid image.",
       "code": "auth/invalid-image",
       "param": "avatarFile"
     }
     ```
-    Returned when the uploaded file cannot be parsed as an image. Also returned for the banner file with `"Banner file is not a valid image: ..."` and `param: "bannerFile"`.
+    Returned when the uploaded file cannot be parsed as an image. Also returned for the banner file with `"Banner file is not a valid image."` and `param: "bannerFile"`.
   </Accordion>
   <Accordion title="Missing Image Options — 400">
     ```json

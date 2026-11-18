@@ -204,11 +204,12 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
   <Accordion title="Invalid Image — 422">
     ```json
     {
-      "error": "Avatar file is not a valid image: ...",
+      "error": "Avatar file is not a valid image.",
       "code": "user/invalid-image",
       "param": "avatarFile"
     }
     ```
+    The file can't be read as an image. Also returned for the banner, with `"Banner file is not a valid image."` and `param: "bannerFile"`.
   </Accordion>
   <Accordion title="Missing Image Options — 400">
     ```json

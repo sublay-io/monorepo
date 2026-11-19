@@ -18,10 +18,17 @@ import { makeClient } from "./helpers/mockClient";
 describe("node-sdk chat (conversations) — request shaping", () => {
   it("listConversations hits /chat/conversations with the full body as params (cursor pagination)", async () => {
     const { client, projectInstance } = makeClient();
-    await listConversations(client, { actingUserId: "u1", cursor: "c1", cursorCreatedAt: "t1" });
+    await listConversations(client, { actingUserId: "u1", cursor: "opaque-cursor" });
     expect(projectInstance.get).toHaveBeenCalledWith("/chat/conversations", {
-      params: { actingUserId: "u1", cursor: "c1", cursorCreatedAt: "t1" },
+      params: { actingUserId: "u1", cursor: "opaque-cursor" },
     });
+  });
+
+  it("listConversations does not send a null cursor (the last page's nextCursor)", async () => {
+    const { client, projectInstance } = makeClient();
+    await listConversations(client, { actingUserId: "u1", cursor: null });
+    const [, config] = projectInstance.get.mock.calls[0];
+    expect(config.params).not.toHaveProperty("cursor");
   });
 
   it("listConversations joins a `types` array into a comma string", async () => {
@@ -146,9 +153,12 @@ describe("node-sdk chat (conversations) — request shaping", () => {
 });
 
 describe("node-sdk chat (conversations) — response mapping", () => {
-  it("listConversations returns the raw { conversations, hasMore } shape, not a PaginatedResponse envelope", async () => {
+  it("listConversations returns the { data, pagination: { nextCursor, hasMore } } envelope as-is", async () => {
     const { client, projectInstance } = makeClient();
-    const result = { conversations: [{ id: "conv1" }], hasMore: true };
+    const result = {
+      data: [{ id: "conv1" }],
+      pagination: { nextCursor: "opaque-next", hasMore: true },
+    };
     projectInstance.get.mockResolvedValueOnce({ data: result });
     await expect(listConversations(client, { actingUserId: "u1" })).resolves.toEqual(result);
   });

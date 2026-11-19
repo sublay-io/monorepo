@@ -17,7 +17,7 @@ describe("useConversationData", () => {
       () => useConversationData({ conversationId: "conversation-1" }),
       {
         beforeRender: ({ axiosPrivate }) => {
-          axiosPrivate.mockResponse("get", { messages: [message], hasMore: false, oldestCreatedAt: null, newestCreatedAt: null });
+          axiosPrivate.mockResponse("get", { data: [message], pagination: { hasMore: false } });
           axiosPrivate.mockResponse("get", { data: [member] });
         },
       },
@@ -38,7 +38,7 @@ describe("useConversationData", () => {
       () => useConversationData({ conversationId: "conversation-1" }),
       {
         beforeRender: ({ axiosPrivate }) => {
-          axiosPrivate.mockResponse("get", { messages: [], hasMore: false, oldestCreatedAt: null, newestCreatedAt: null });
+          axiosPrivate.mockResponse("get", { data: [], pagination: { hasMore: false } });
           axiosPrivate.mockResponse("get", { data: [] });
         },
       },
@@ -63,7 +63,7 @@ describe("useConversationData", () => {
       () => useConversationData({ conversationId: "conversation-1" }),
       {
         beforeRender: ({ axiosPrivate }) => {
-          axiosPrivate.mockResponse("get", { messages: [], hasMore: false, oldestCreatedAt: null, newestCreatedAt: null });
+          axiosPrivate.mockResponse("get", { data: [], pagination: { hasMore: false } });
           axiosPrivate.mockResponse("get", { data: [] });
         },
       },
@@ -85,7 +85,7 @@ describe("useConversationData", () => {
       () => useConversationData({ conversationId: "conversation-1" }),
       {
         beforeRender: ({ axiosPrivate }) => {
-          axiosPrivate.mockResponse("get", { messages: [], hasMore: false, oldestCreatedAt: null, newestCreatedAt: null });
+          axiosPrivate.mockResponse("get", { data: [], pagination: { hasMore: false } });
           axiosPrivate.mockResponse("get", { data: [] });
         },
       },

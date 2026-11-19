@@ -14,10 +14,8 @@ function makePage(
   overrides: Partial<FetchManyChatMessagesResponse> = {},
 ): FetchManyChatMessagesResponse {
   return {
-    messages: [makeChatMessage()],
-    hasMore: false,
-    oldestCreatedAt: "2024-01-01T00:00:00.000Z",
-    newestCreatedAt: "2024-01-01T00:00:00.000Z",
+    data: [makeChatMessage()],
+    pagination: { hasMore: false },
     ...overrides,
   };
 }
@@ -53,7 +51,7 @@ describe("useFetchManyChatMessages", () => {
       await result.current({
         conversationId: "conversation-1",
         parentMessageId: "message-1",
-        before: "2024-01-02T00:00:00.000Z",
+        before: "message-0",
         limit: 20,
         sortDir: "asc",
         include: "files",
@@ -67,7 +65,7 @@ describe("useFetchManyChatMessages", () => {
       limit: 20,
       sortDir: "asc",
       parentMessageId: "message-1",
-      before: "2024-01-02T00:00:00.000Z",
+      before: "message-0",
       include: "files",
       filters: { hasReplies: true },
       spaceReputationId: "space-1",

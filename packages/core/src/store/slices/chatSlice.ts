@@ -33,11 +33,18 @@ interface ThreadBucket {
   // Whether the server has newer replies than the fetched run (threads load
   // oldest first, so "more" is at the newest end)
   hasMore: boolean;
-  // createdAt of the newest reply in the unbroken run fetched from the start of
-  // the thread — the `after` cursor for loading more and for reconnect
-  // catch-up. A live reply that lands while `hasMore` is true sits beyond a gap
-  // and doesn't advance it; one that lands at the end does.
-  cursor: string | null;
+  // The newest reply in the unbroken run fetched from the start of the thread:
+  // its id is the `after` cursor for loading more and for reconnect catch-up,
+  // its createdAt orders it against newer replies. A live reply that lands
+  // while `hasMore` is true sits beyond a gap and doesn't advance it; one that
+  // lands at the end does.
+  cursor: ThreadCursor | null;
+}
+
+/** The reply a thread continues from: `after` takes its `id`. */
+export interface ThreadCursor {
+  id: string;
+  createdAt: string;
 }
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -50,7 +57,8 @@ export interface ChatState {
     items: ConversationPreview[];
     loading: boolean;
     hasMore: boolean;
-    // lastMessageAt ISO string of the oldest loaded preview — next-page cursor
+    // `pagination.nextCursor` of the last page loaded (opaque; `null` when
+    // the server has no more)
     cursor: string | null;
   };
   // Messages keyed by conversationId; stored ASC (oldest first, newest at end)
@@ -248,16 +256,25 @@ function upsertInto(
   }
 }
 
-/** The later of a thread cursor and the newest real reply in `messages`. */
+/**
+ * The later of a thread cursor and the newest real reply in `messages`, by
+ * `createdAt` and then `id`. The server orders by microsecond `createdAt` then
+ * `id`; this compares milliseconds then `id`, so between replies in the same
+ * millisecond it can pick one the server puts earlier. That is conservative:
+ * paging `after` it can only fetch a reply again (de-duplicated by id), never
+ * skip one.
+ */
 function advanceCursor(
-  cursor: string | null,
+  cursor: ThreadCursor | null,
   messages: ChatMessage[]
-): string | null {
+): ThreadCursor | null {
   let newest = cursor;
   for (const m of messages) {
     if (m.id.startsWith("temp-")) continue;
-    if (!newest || new Date(m.createdAt).getTime() > new Date(newest).getTime()) {
-      newest = m.createdAt;
+    const at = new Date(m.createdAt).getTime();
+    const newestAt = newest ? new Date(newest.createdAt).getTime() : 0;
+    if (!newest || at > newestAt || (at === newestAt && m.id > newest.id)) {
+      newest = { id: m.id, createdAt: m.createdAt };
     }
   }
   return newest;
@@ -541,6 +558,42 @@ const chatSlice = createSlice({
       const bucket = state.messages[conversationId];
       upsertInto(bucket.items, message);
       refreshCursors(bucket);
+    },
+
+    /**
+     * Replace a conversation's loaded messages with its latest page (given
+     * oldest first), as a fresh start: messages loaded before it are dropped,
+     * so no gap can sit between them and the page, and `hasMore` is the page's.
+     * Kept: optimistic `temp-` messages, and messages newer than the page's
+     * newest (live ones that landed while the page was in flight).
+     */
+    replaceMessages(
+      state,
+      action: PayloadAction<{
+        conversationId: string;
+        messages: ChatMessage[];
+        hasMore: boolean;
+      }>
+    ) {
+      const { conversationId, messages, hasMore } = action.payload;
+      const previous = state.messages[conversationId];
+      const held = previous?.items ?? [];
+      let newestAt: number | null = null;
+      for (const m of messages) {
+        const at = new Date(m.createdAt).getTime();
+        if (newestAt === null || at > newestAt) newestAt = at;
+      }
+      const bucket = emptyBucket();
+      bucket.items = held.filter(
+        (m) =>
+          m.id.startsWith("temp-") ||
+          (newestAt !== null && new Date(m.createdAt).getTime() > newestAt)
+      );
+      for (const m of messages) upsertInto(bucket.items, m);
+      bucket.hasMore = hasMore;
+      bucket.loading = previous?.loading ?? false;
+      refreshCursors(bucket);
+      state.messages[conversationId] = bucket;
     },
 
     /**
@@ -862,6 +915,7 @@ export const {
   setUnreadSummary,
   setMessagesLoading,
   setMessagesHasMore,
+  replaceMessages,
   upsertMessage,
   addOptimisticMessage,
   failOptimisticMessage,

@@ -26,7 +26,7 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
 
   useEffect(() => {
     fetchMessages({ conversationId, filters: { hasReplies: true } }).then((res) =>
-      setMessages(res.messages)
+      setMessages(res.data)
     );
   }, [conversationId]);
 
@@ -49,11 +49,11 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
 </ParamField>
 
 <ParamField path="before" type="string | null">
-  Keyset cursor: messages created before this, as a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`. Mutually exclusive with `after`.
+  A message id: the `limit` messages just before it. Pass the oldest message you hold to load older ones. It must be a message of this conversation at the same thread level (`parentMessageId`), or the request fails with `400 chat/invalid-cursor`. Mutually exclusive with `after`. See [List Messages › Paging](/v8/api-reference/chat/messages/list-messages#paging).
 </ParamField>
 
 <ParamField path="after" type="string | null">
-  Keyset cursor: messages created after this, as a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`. Mutually exclusive with `before`.
+  A message id: the `limit` messages just after it. Pass the newest message you hold to load newer ones. Same rules as `before`. Mutually exclusive with `before`.
 </ParamField>
 
 <ParamField path="limit" type="number">
@@ -61,7 +61,7 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
 </ParamField>
 
 <ParamField path="sortDir" type='"asc" | "desc"'>
-  Sort by creation time.
+  The order of the page by creation time. Defaults to `"desc"` for the main stream and `"asc"` for a thread. With `before` or `after`, the anchor decides which messages are in the page; `sortDir` only orders them.
 </ParamField>
 
 <ParamField path="include" type="ChatMessageListIncludeParam">
@@ -82,20 +82,12 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
 
 A `Promise` resolving to:
 
-<ResponseField name="messages" type="ChatMessage[]">
-  Messages for the requested page. When `spaceReputation` is requested, each embedded sender carries an added `spaceReputation` number. See [ChatMessage](/v8/data-models/chat-message) and [Reputation](/v8/data-models/reputation).
+<ResponseField name="data" type="ChatMessage[]">
+  Messages for the requested page, in `sortDir` order. When `spaceReputation` is requested, each embedded sender carries an added `spaceReputation` number. See [ChatMessage](/v8/data-models/chat-message) and [Reputation](/v8/data-models/reputation).
 </ResponseField>
 
-<ResponseField name="hasMore" type="boolean">
-  Whether more messages exist in the requested direction.
-</ResponseField>
-
-<ResponseField name="oldestCreatedAt" type="string | null">
-  ISO timestamp of the oldest message in this page; `null` if empty.
-</ResponseField>
-
-<ResponseField name="newestCreatedAt" type="string | null">
-  ISO timestamp of the newest message in this page; `null` if empty.
+<ResponseField name="pagination" type="{ hasMore: boolean }">
+  `hasMore`: whether more messages exist past this page in the direction of travel — older with `before`, newer with `after`; with neither, older for `"desc"` and newer for `"asc"`. To continue, pass the id of the last message in `data` as `before` (for `"desc"`) or `after` (for `"asc"`).
 </ResponseField>
 
 <ResponseField name="notice" type="string">

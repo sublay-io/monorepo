@@ -10,15 +10,20 @@ afterEach(() => {
   resetAxiosMocks();
 });
 
+// A server page: `nextCursor` is opaque and `null` on the last page.
+function listPage(items: unknown[], nextCursor: string | null = null) {
+  return { data: items, pagination: { nextCursor, hasMore: nextCursor !== null } };
+}
+
 describe("useConversations", () => {
-  it("fetches the first page on mount and computes a cursor from the last item", async () => {
+  it("fetches the first page on mount and stores the server's nextCursor", async () => {
     const first = makeConversationPreview({ id: "conversation-1", lastMessageAt: "2024-01-02T00:00:00.000Z", createdAt: "2024-01-01T00:00:00.000Z" });
 
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useConversations(),
       {
         beforeRender: ({ axiosPrivate }) =>
-          axiosPrivate.mockResponse("get", { conversations: [first], hasMore: true }),
+          axiosPrivate.mockResponse("get", listPage([first], "cursor-1")),
       },
     );
 
@@ -31,7 +36,7 @@ describe("useConversations", () => {
     expect(call.config?.params).toMatchObject({ limit: "20" });
   });
 
-  it("loads more using the derived cursor", async () => {
+  it("loads more by sending the stored nextCursor back as cursor", async () => {
     const first = makeConversationPreview({ id: "conversation-1", lastMessageAt: "2024-01-02T00:00:00.000Z", createdAt: "2024-01-01T00:00:00.000Z" });
     const second = makeConversationPreview({ id: "conversation-2" });
 
@@ -39,13 +44,13 @@ describe("useConversations", () => {
       () => useConversations(),
       {
         beforeRender: ({ axiosPrivate }) =>
-          axiosPrivate.mockResponse("get", { conversations: [first], hasMore: true }),
+          axiosPrivate.mockResponse("get", listPage([first], "cursor-2")),
       },
     );
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    axiosPrivate.mockResponse("get", { conversations: [second], hasMore: false });
+    axiosPrivate.mockResponse("get", listPage([second]));
 
     await act(async () => {
       await result.current.loadMore();
@@ -55,18 +60,61 @@ describe("useConversations", () => {
     expect(result.current.hasMore).toBe(false);
 
     const calls = axiosPrivate.calls("get");
-    expect(calls[1].config?.params).toMatchObject({
-      cursor: new Date(first.lastMessageAt!).toISOString(),
-      cursorCreatedAt: new Date(first.createdAt).toISOString(),
-    });
+    expect(calls[1].config?.params).toEqual({ limit: "20", cursor: "cursor-2" });
   });
+
+  it("pages through with each page's nextCursor and stops when it is null", async () => {
+    const { result, store, axiosPrivate } = renderHookWithAxios(
+      () => useConversations(),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse(
+            "get",
+            listPage([makeConversationPreview({ id: "conversation-1" })], "cursor-a"),
+          ),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(store.getState().sublay.chat.conversationList.cursor).toBe("cursor-a");
+
+    axiosPrivate.mockResponse(
+      "get",
+      listPage([makeConversationPreview({ id: "conversation-2" })], "cursor-b"),
+    );
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    axiosPrivate.mockResponse("get", listPage([makeConversationPreview({ id: "conversation-3" })]));
+    await act(async () => {
+      await result.current.loadMore();
+    });
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(3);
+    expect(calls[1].config?.params.cursor).toBe("cursor-a");
+    expect(calls[2].config?.params.cursor).toBe("cursor-b");
+    expect(result.current.conversations.map((c) => c.id)).toEqual([
+      "conversation-1",
+      "conversation-2",
+      "conversation-3",
+    ]);
+    expect(result.current.hasMore).toBe(false);
+    expect(store.getState().sublay.chat.conversationList.cursor).toBeNull();
+
+    // The last page reached: loadMore sends nothing.
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    expect(axiosPrivate.calls("get")).toHaveLength(3);
+  });
+
 
   it("filters by types", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useConversations({ types: ["group", "direct"] }),
       {
         beforeRender: ({ axiosPrivate }) =>
-          axiosPrivate.mockResponse("get", { conversations: [], hasMore: false }),
+          axiosPrivate.mockResponse("get", listPage([])),
       },
     );
 
@@ -83,7 +131,7 @@ describe("useConversations", () => {
       () => useConversations(),
       {
         beforeRender: ({ axiosPrivate }) =>
-          axiosPrivate.mockResponse("get", { conversations: [], hasMore: false }),
+          axiosPrivate.mockResponse("get", listPage([])),
       },
     );
 
@@ -113,16 +161,13 @@ describe("useConversations", () => {
       const { Wrapper, store, axiosPrivate } = makeProvidersWrapper({
         accessToken: "token-1",
         beforeRender: ({ axiosPrivate }) =>
-          axiosPrivate.mockResponse("get", {
-            conversations: [
+          axiosPrivate.mockResponse("get", listPage([
               makeConversationPreview({
                 id: "conversation-1",
                 lastMessageAt: "2024-01-02T00:00:00.000Z",
                 createdAt: "2024-01-01T00:00:00.000Z",
               }),
-            ],
-            hasMore: true,
-          }),
+            ], "cursor-6")),
       });
       if (connectedAtMount) store.dispatch(setSocketConnected(true));
       const rendered = renderHook(() => useConversations(props), { wrapper: Wrapper });
@@ -147,10 +192,7 @@ describe("useConversations", () => {
       await waitFor(() => expect(result.current.loading).toBe(false));
 
       // Paginate past page 1 so a reconnect has a cursor to reset.
-      axiosPrivate.mockResponse("get", {
-        conversations: [makeConversationPreview({ id: "conversation-2" })],
-        hasMore: false,
-      });
+      axiosPrivate.mockResponse("get", listPage([makeConversationPreview({ id: "conversation-2" })]));
       await act(async () => {
         await result.current.loadMore();
       });
@@ -171,10 +213,7 @@ describe("useConversations", () => {
 
       // While offline, a new conversation moved to the top.
       const fresh = makeConversationPreview({ id: "conversation-3" });
-      axiosPrivate.mockResponse("get", {
-        conversations: [fresh, makeConversationPreview({ id: "conversation-1" })],
-        hasMore: true,
-      });
+      axiosPrivate.mockResponse("get", listPage([fresh, makeConversationPreview({ id: "conversation-1" })], "cursor-8"));
       act(() => {
         store.dispatch(setSocketConnected(true));
       });
@@ -225,7 +264,7 @@ describe("useConversations", () => {
         act(() => {
           store.dispatch(setSocketConnected(false));
         });
-        axiosPrivate.mockResponse("get", { conversations: [], hasMore: false });
+        axiosPrivate.mockResponse("get", listPage([]));
         act(() => {
           store.dispatch(setSocketConnected(true));
         });

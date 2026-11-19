@@ -16,18 +16,25 @@ import {
 import { makeClient } from "./helpers/client";
 
 describe("js-sdk chat conversations — request shaping", () => {
-  it("listConversations gets /chat/conversations with the full query (incl. cursor params) as params", async () => {
+  it("listConversations gets /chat/conversations with the full query (incl. the opaque cursor) as params", async () => {
     const { client, projectInstance } = makeClient();
     const query = {
       types: ["direct", "group"] as ("direct" | "group")[],
-      cursor: "2026-06-01T00:00:00Z",
-      cursorCreatedAt: "2026-05-30T00:00:00Z",
+      cursor: "opaque-cursor",
       limit: 20,
     };
     await listConversations(client, query);
     expect(projectInstance.get).toHaveBeenCalledWith("/chat/conversations", {
       params: { ...query, types: "direct,group" },
     });
+  });
+
+  it("listConversations does not send a null cursor (the last page's nextCursor)", async () => {
+    const { client, projectInstance } = makeClient();
+    await listConversations(client, { cursor: null, limit: 5 });
+    const [, config] = projectInstance.get.mock.calls[0];
+    expect(config.params).not.toHaveProperty("cursor");
+    expect(config.params.limit).toBe(5);
   });
 
   it("listConversations sends a single `types` value as-is", async () => {
@@ -137,7 +144,7 @@ describe("js-sdk chat members — request shaping", () => {
       "/chat/conversations/c1/members",
       { params: { page: 2, limit: 25, role: "admin" } }
     );
-    // Contrast with listConversations/listMessages: no cursor/cursorCreatedAt/before/after here.
+    // Contrast with listConversations/listMessages: no cursor/before/after here.
     const [, config] = projectInstance.get.mock.calls[0];
     expect(config.params).not.toHaveProperty("cursor");
     expect(config.params).not.toHaveProperty("before");
@@ -197,23 +204,22 @@ describe("js-sdk chat members — request shaping", () => {
 });
 
 describe("js-sdk chat conversations — response mapping", () => {
-  it("listConversations returns the raw array + hasMore shape (NOT a PaginatedResponse envelope)", async () => {
+  it("listConversations returns the { data, pagination: { nextCursor, hasMore } } envelope as-is", async () => {
     const { client, projectInstance } = makeClient();
     const payload = {
-      conversations: [
+      data: [
         { id: "c1", type: "direct", lastMessageAt: "2026-06-01T00:00:00Z" },
         { id: "c2", type: "group", lastMessageAt: null },
       ],
-      hasMore: true,
+      pagination: { nextCursor: "opaque-next", hasMore: true },
     };
     projectInstance.get.mockResolvedValueOnce({ data: payload });
 
     const result = await listConversations(client, { limit: 2 });
 
     expect(result).toEqual(payload);
-    expect(Array.isArray(result.conversations)).toBe(true);
-    expect(result).not.toHaveProperty("pagination");
-    expect(result).not.toHaveProperty("data");
+    expect(result.pagination.nextCursor).toBe("opaque-next");
+    expect(result).not.toHaveProperty("conversations");
   });
 
   it("createGroupConversation returns the created Conversation", async () => {

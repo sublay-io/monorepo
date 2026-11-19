@@ -221,9 +221,11 @@ Reactions: `toggleReaction`, `listReactions` · Read state: `markAsRead`
   `changeMemberRole` also take the target as `userId`). The server resolves that
   user, then runs the normal membership/role checks against them — so you can only
   act as a genuine member, and admin ops require that user to be a group admin.
-- **Cursor pagination.** `listConversations` (`cursor`/`cursorCreatedAt`) and
-  `listMessages` (`before`/`after`) return raw arrays + `hasMore`, **not** the
-  `PaginatedResponse` envelope. `listMembers` uses offset (`PaginatedResponse`).
+- **Cursor pagination.** `listConversations` takes the opaque `cursor`
+  (`pagination.nextCursor` of the previous page) and returns
+  `CursorPaginatedResponse`; `listMessages` takes `before`/`after` as message ids
+  and returns `{ data, pagination: { hasMore } }`. `listMembers` uses offset
+  (`PaginatedResponse`).
 - **`sendMessage` is multipart when `files` are attached** (object fields
   JSON-stringified, like `storage`); otherwise a JSON body. Don't hand-set
   Content-Type.

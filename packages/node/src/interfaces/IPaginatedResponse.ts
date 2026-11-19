@@ -12,7 +12,7 @@ export interface PaginatedResponse<T> {
 }
 
 /**
- * Cursor pagination (comment lists). `nextCursor` continues after the last
+ * Cursor pagination (comment and chat conversation lists). `nextCursor` continues after the last
  * item of this page — pass it back as `cursor` — and is `null` when `hasMore`
  * is `false`. `hasMore` is exact.
  */

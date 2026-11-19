@@ -23,7 +23,9 @@ import {
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
 import { useChatContext } from "../../../context/chat-context";
-import useFetchManyChatMessages from "./useFetchManyChatMessages";
+import useFetchManyChatMessages, {
+  isInvalidChatCursorError,
+} from "./useFetchManyChatMessages";
 
 export interface UseLiveChatMessagesProps {
   conversationId: string;
@@ -109,15 +111,17 @@ function useLiveChatMessages({
   const threadHasMoreRef = useRef(threadHasMore);
   threadHasMoreRef.current = threadHasMore;
 
-  // Fetch a page of messages.
-  // `before` is an ISO 8601 timestamp — the server queries messages created
-  // before this point in time (not a UUID cursor).
+  // Fetch a page of messages. `before` is the id of the oldest message held
+  // (null for the first page).
   const fetchPage = useCallback(
     async (before: string | null) => {
       if (!projectId || !conversationId) return;
 
       try {
-        const { messages: items, hasMore: more } = await fetchMany({
+        const {
+          data: items,
+          pagination: { hasMore: more },
+        } = await fetchMany({
           conversationId,
           parentMessageId,
           before,
@@ -185,8 +189,8 @@ function useLiveChatMessages({
   }, [projectId, conversationId, parentMessageId, includeKey]);
 
   // Load more messages:
-  // - Main stream: fetch older messages using `before` cursor (oldest loaded createdAt)
-  // - Thread: fetch newer replies using the thread's `after` cursor (the newest
+  // - Main stream: fetch older messages `before` the oldest loaded message's id
+  // - Thread: fetch newer replies `after` the thread cursor's id (the newest
   //   reply fetched in order — not the newest loaded, which may be a live
   //   reply beyond a gap), merge
   const loadOlder = useCallback(async () => {
@@ -196,13 +200,15 @@ function useLiveChatMessages({
       const cursor = threadCursorRef.current;
       if (!cursor || !parentMessageId || !projectId || !conversationId) return;
 
-      const after = new Date(cursor).toISOString();
       dispatch(setThreadLoading({ parentMessageId: parentMessageId, loading: true }));
       try {
-        const { messages: newItems, hasMore: more } = await fetchMany({
+        const {
+          data: newItems,
+          pagination: { hasMore: more },
+        } = await fetchMany({
           conversationId,
           parentMessageId,
-          after,
+          after: cursor.id,
           limit,
           sortDir: "asc",
           include,
@@ -222,58 +228,78 @@ function useLiveChatMessages({
       return;
     }
 
-    const oldest = mainMessagesRef.current[0];
+    // Optimistic `temp-` messages have no server row to page from.
+    const oldest = mainMessagesRef.current.find((m) => !m.id.startsWith("temp-"));
     if (!oldest) return;
 
-    const before = new Date(oldest.createdAt).toISOString();
     dispatch(setMessagesLoading({ conversationId, loading: true }));
-    await fetchPage(before);
+    await fetchPage(oldest.id);
     dispatch(setMessagesLoading({ conversationId, loading: false }));
   }, [loading, hasMore, isThread, parentMessageId, projectId, conversationId, limit, include, fetchMany, dispatch, fetchPage]);
 
   // Thread reconnect catch-up: fetch the replies sent while the socket was
-  // down. Page forward from the newest reply fetched in order until the server
-  // has no more; with none fetched yet (an empty thread, or a first load that
-  // failed), load the first page only, as on open, and leave the rest to
-  // `loadOlder`. A thread whose fetched run hasn't
-  // reached the end needs nothing: newer replies come in through `loadOlder`.
-  // The main stream's catch-up lives in ConversationProvider, which also
-  // re-joins the room; a thread shares its conversation's room.
+  // down. Page forward from the newest reply fetched in order (by its id) until
+  // the server has no more; with none fetched yet (an empty thread, or a first
+  // load that failed), load the first page only, as on open, and leave the rest
+  // to `loadOlder`. A thread whose fetched run hasn't reached the end needs
+  // nothing: newer replies come in through `loadOlder`. If the server can't
+  // page from the cursor (`chat/invalid-cursor`: that reply is gone), the
+  // thread is reloaded from its first page, once. The main stream's catch-up
+  // lives in ConversationProvider, which also re-joins the room; a thread
+  // shares its conversation's room.
   const catchUpReplies = useCallback(async () => {
     if (!projectId || !conversationId || !parentMessageId) return;
     if (threadCursorRef.current && threadHasMoreRef.current) return;
 
-    let after = threadCursorRef.current
-      ? new Date(threadCursorRef.current).toISOString()
-      : null;
+    const fetchReplies = (after: string | null) =>
+      fetchMany({
+        conversationId,
+        parentMessageId,
+        after,
+        limit: after === null ? limit : 100,
+        sortDir: "asc",
+        include,
+      });
+    const merge = (page: Awaited<ReturnType<typeof fetchReplies>>) =>
+      dispatch(
+        mergeThreadReplies({
+          parentMessageId,
+          messages: page.data,
+          hasMore: page.pagination.hasMore,
+        })
+      );
+
+    let after = threadCursorRef.current?.id ?? null;
     try {
       while (true) {
-        const page = await fetchMany({
-          conversationId,
-          parentMessageId,
-          after,
-          limit: after === null ? limit : 100,
-          sortDir: "asc",
-          include,
-        });
-        dispatch(
-          mergeThreadReplies({
-            parentMessageId,
-            messages: page.messages,
-            hasMore: page.hasMore,
-          })
-        );
+        let page: Awaited<ReturnType<typeof fetchReplies>>;
+        try {
+          page = await fetchReplies(after);
+        } catch (err) {
+          if (after === null || !isInvalidChatCursorError(err)) throw err;
+          // Start the fetched run over, as on open: forgetting the cursor
+          // keeps the next `loadOlder` from paging from it again.
+          dispatch(startThreadLoad({ parentMessageId }));
+          try {
+            merge(await fetchReplies(null));
+          } finally {
+            dispatch(setThreadLoading({ parentMessageId, loading: false }));
+          }
+          return;
+        }
+        merge(page);
         // Stop after a first page, when the server is done, or if the cursor
         // didn't move.
+        const last = page.data[page.data.length - 1];
         if (
           after === null ||
-          !page.hasMore ||
-          !page.newestCreatedAt ||
-          page.newestCreatedAt === after
+          !page.pagination.hasMore ||
+          !last ||
+          last.id === after
         ) {
           break;
         }
-        after = page.newestCreatedAt;
+        after = last.id;
       }
     } catch (err) {
       handleError(err, "Failed to fetch missed thread replies");

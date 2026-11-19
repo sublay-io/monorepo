@@ -183,8 +183,10 @@ Most list functions return a shared `PaginatedResponse<T>` shape:
 ```
 
 Pass `page` and `limit` to control pagination. A few endpoints use different
-shapes — notably `chat.listConversations` / `chat.listMessages` use **cursor**
-pagination, the `search.search*` functions return **raw arrays**, and a handful
+shapes — notably comment lists and `chat.listConversations` page by an opaque
+**cursor** (`{ data, pagination: { nextCursor, hasMore } }`), `chat.listMessages`
+pages **before or after a message id** (`{ data, pagination: { hasMore } }`),
+the `search.search*` functions return **raw arrays**, and a handful
 of reaction-list endpoints return a `{ data, pagination: { page, limit, total,
 hasMore } }` shape. Each is called out on its module page.
 

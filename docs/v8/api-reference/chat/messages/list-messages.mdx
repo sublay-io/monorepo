@@ -8,6 +8,8 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 Returns a cursor-paginated list of [ChatMessage](/v8/data-models/chat-message) objects. By default returns the main conversation stream (excludes thread replies). Pass `parentMessageId` to fetch replies for a specific thread.
 
+Pages are anchored on a message: pass the id of the first or last message you hold as `before` or `after` to get the messages next to it. See [Paging](#paging).
+
 The caller must be a member. Former members (who left) can only read messages up to when they left. In a space chat, the caller must also be an active member of the chat's space and able to see it ([visibility](/v8/data-models/space#visibility)). Anyone else, including a pending, rejected or banned member and someone who left or was removed from the space, gets `403 chat/not-a-member`, as a non-member does, even while they still hold a conversation membership. Deleting their own messages, leaving the conversation and muting it stay allowed: they need the conversation membership and sight of the space, not an active space membership. A former member of the space keeps no access to the history.
 
 ## Path Parameters
@@ -23,19 +25,19 @@ The caller must be a member. Former members (who left) can only read messages up
 </ParamField>
 
 <ParamField query="before" type="string">
-  UTC ISO 8601 timestamp ending in `Z`, such as `toISOString()` output; an offset (`+02:00`) or no zone returns `400 chat/invalid-query`. Returns messages created before this time. Used for loading older messages, with `sortDir=desc`. Mutually exclusive with `after`.
+  A message id. Returns the `limit` messages just before that message. Used for loading older messages: pass the oldest message you hold. Mutually exclusive with `after`. See [Paging](#paging).
 </ParamField>
 
 <ParamField query="after" type="string">
-  UTC ISO 8601 timestamp ending in `Z`, such as `toISOString()` output; an offset (`+02:00`) or no zone returns `400 chat/invalid-query`. Returns messages created after this time. Used for loading newer messages, with `sortDir=asc` (with `desc`, the page is the newest messages after this time, not the ones right after it). Mutually exclusive with `before`.
+  A message id. Returns the `limit` messages just after that message. Used for loading newer messages: pass the newest message you hold. Mutually exclusive with `before`. See [Paging](#paging).
 </ParamField>
 
 <ParamField query="limit" type="number">
-  Number of messages to return. Defaults to 50.
+  Number of messages to return, from `1` to `100`. Defaults to 50.
 </ParamField>
 
 <ParamField query="sortDir" type="string">
-  Sort direction by creation time: `asc` or `desc` (either case). Defaults to `desc` for the main stream, `asc` for threads.
+  The order of the messages in `data`, by creation time: `asc` or `desc` (either case). Defaults to `desc` for the main stream, `asc` for threads. With `before` or `after` it only orders the page; which messages are in it is decided by the anchor.
 </ParamField>
 
 <ParamField query="include" type="string">
@@ -58,6 +60,20 @@ The caller must be a member. Former members (who left) can only read messages up
   Service key only, and required with one: the user this request acts as. Must be a member of the conversation. The response is what that user's own access token would get, [moderation details](/v8/data-models/chat-message#moderation-fields) (`moderationReason`, `moderatedById`, `moderatedByType`) included only where that user may see them. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
 </ParamField>
 
+### Paging
+
+A message's position is its `createdAt`, then its `id` for messages created at the same moment, so every message has exactly one place in the list and no page boundary skips or repeats one.
+
+- **No `before` or `after`:** with `sortDir=desc` (the main stream's default), the newest `limit` messages; with `asc` (a thread's default), the oldest `limit`.
+- **`before=<id>`:** the `limit` messages nearest that message on the older side. `pagination.hasMore` says whether there are older ones still.
+- **`after=<id>`:** the `limit` messages nearest that message on the newer side. `pagination.hasMore` says whether there are newer ones still.
+
+The anchor itself is never in the page. To keep going, pass the message at the far end of the page: for older messages the oldest one in `data` (its last item with `desc`), for newer ones the newest (its last item with `asc`).
+
+The anchor must be a message of this conversation at the same thread level as the request: a top-level message when `parentMessageId` is left out, a reply to that same message when it is sent. A deleted or moderated message is still a valid anchor. Anything else, such as an id that isn't a message, a message of another conversation or a reply from a different thread, returns `400 chat/invalid-cursor` with `param` naming `before` or `after`. If the message you paged from is gone, start again without an anchor.
+
+A former member only gets messages from before they left, whatever the anchor.
+
 ### Space-scoped reputation
 
 This endpoint has a space in context, so it accepts the opt-in reputation params. They add a `spaceReputation` field to each message sender's `user`, alongside the always-present `reputation` total. Requires the `reputation` bundle. See the [Reputation data model](/v8/data-models/reputation) for the full contract.
@@ -66,20 +82,16 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
 
 ## Response
 
-<ResponseField name="messages" type="ChatMessage[]">
-  Array of message objects. Each includes `reactionCounts`, `userReactions`, `user`, and `quotedMessage` fields. File attachments are included only when `include=files` is specified.
+<ResponseField name="data" type="ChatMessage[]">
+  The page of messages, in `sortDir` order. Each includes `reactionCounts`, `userReactions`, `user`, and `quotedMessage` fields. File attachments are included only when `include=files` is specified.
 </ResponseField>
 
-<ResponseField name="hasMore" type="boolean">
-  Whether more messages exist in the requested direction.
-</ResponseField>
-
-<ResponseField name="oldestCreatedAt" type="string | null">
-  ISO timestamp of the oldest message in this page. `null` if no messages were returned.
-</ResponseField>
-
-<ResponseField name="newestCreatedAt" type="string | null">
-  ISO timestamp of the newest message in this page. `null` if no messages were returned.
+<ResponseField name="pagination" type="object">
+  <Expandable title="pagination fields">
+    <ResponseField name="hasMore" type="boolean">
+      Whether more messages exist beyond this page in the direction of travel: older with `before`, newer with `after`. With no anchor, older for `desc` and newer for `asc`.
+    </ResponseField>
+  </Expandable>
 </ResponseField>
 
 <ResponseField name="notice" type="string">
@@ -140,16 +152,23 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
     { "error": "A service key must send actingUserId: the user this request acts as.", "code": "chat/missing-user-id" }
     ```
   </Accordion>
+  <Accordion title="Invalid Cursor — 400">
+    `before` or `after` isn't a message of this conversation at the request's thread level. `param` names the one sent.
+    ```json
+    {
+      "error": "Invalid `before`. Pass the id of a message in this conversation at the same thread level as the request (the same `parentMessageId`, or none for top-level messages) — the first or last message of a previous page.",
+      "code": "chat/invalid-cursor",
+      "param": "before"
+    }
+    ```
+  </Accordion>
   <Accordion title="Forbidden — 403">
     ```json
     { "error": "You are not a member of this conversation.", "code": "chat/not-a-member" }
     ```
   </Accordion>
   <Accordion title="Invalid Query — 400">
-    For example `sortDir` other than `asc`/`desc`, both `before` and `after`, a `before` or `after` that isn't a UTC (`Z`) datetime, `sort` (not accepted; use `sortDir`), or an unknown `include` value. `error` starts with the field name.
-    ```json
-    { "error": "before: Invalid ISO datetime", "code": "chat/invalid-query" }
-    ```
+    For example `sortDir` other than `asc`/`desc`, both `before` and `after`, a `limit` outside 1–100, `sort` (not accepted; use `sortDir`), or an unknown `include` value. `error` starts with the field name.
     ```json
     { "error": "sort: 'sort' is not accepted in v8; use 'sortDir'", "code": "chat/invalid-query" }
     ```

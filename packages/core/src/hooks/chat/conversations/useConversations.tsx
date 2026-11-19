@@ -4,10 +4,12 @@ import {
   selectConversationList,
   selectConversationListHasMore,
   selectConversationListLoading,
+  selectConversationListCursor,
   selectSocketConnected,
   setConversationList,
   setConversationListLoading,
   setConversationListHasMore,
+  setConversationListCursor,
 } from "../../../store/slices/chatSlice";
 import {
   ConversationPreview,
@@ -16,6 +18,7 @@ import {
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
+import { CursorPaginatedResponse } from "../../../interfaces/PaginatedResponse";
 
 export interface UseConversationsProps {
   types?: ConversationType[];
@@ -37,13 +40,6 @@ export interface UseConversationsValues {
   }) => Promise<ConversationPreview>;
 }
 
-// Two-cursor state derived from the last item returned by the server.
-// The server does NOT return a cursor field; we compute it from the response.
-interface CursorState {
-  cursor: string | null; // last item's lastMessageAt (ISO string)
-  cursorCreatedAt: string | null; // last item's createdAt (ISO string)
-}
-
 function useConversations({
   types,
 }: UseConversationsProps = {}): UseConversationsValues {
@@ -54,6 +50,8 @@ function useConversations({
   const conversations = useSublaySelector(selectConversationList);
   const loading = useSublaySelector(selectConversationListLoading);
   const hasMore = useSublaySelector(selectConversationListHasMore);
+  // `pagination.nextCursor` of the last page loaded, kept in the store
+  const nextCursor = useSublaySelector(selectConversationListCursor);
   const socketConnected = useSublaySelector(selectSocketConnected);
 
   const typesKey = types ? [...types].sort().join(",") : "";
@@ -62,39 +60,24 @@ function useConversations({
   const conversationsRef = useRef(conversations);
   conversationsRef.current = conversations;
 
-  // Local two-cursor ref — NOT stored in Redux to avoid schema changes
-  const cursorRef = useRef<CursorState>({ cursor: null, cursorCreatedAt: null });
-
   const fetchPage = useCallback(
-    async (cursors: CursorState | null, isRefresh: boolean) => {
+    async (cursor: string | null, isRefresh: boolean) => {
       if (!projectId) return;
 
       dispatch(setConversationListLoading(true));
       try {
         const params: Record<string, string> = { limit: "20" };
         if (types && types.length > 0) params.types = types.join(",");
-        if (cursors?.cursor) params.cursor = cursors.cursor;
-        if (cursors?.cursorCreatedAt) params.cursorCreatedAt = cursors.cursorCreatedAt;
+        if (cursor) params.cursor = cursor;
 
-        const response = await axios.get(`/${projectId}/chat/conversations`, {
-          params,
-        });
+        const response = await axios.get<
+          CursorPaginatedResponse<ConversationPreview>
+        >(`/${projectId}/chat/conversations`, { params });
 
-        const { conversations: items, hasMore: more } = response.data as {
-          conversations: ConversationPreview[];
-          hasMore: boolean;
-        };
-
-        // Derive the next cursor from the last item in the response
-        if (items.length > 0) {
-          const last = items[items.length - 1];
-          cursorRef.current = {
-            cursor: last.lastMessageAt ? new Date(last.lastMessageAt).toISOString() : null,
-            cursorCreatedAt: new Date(last.createdAt).toISOString(),
-          };
-        } else if (isRefresh) {
-          cursorRef.current = { cursor: null, cursorCreatedAt: null };
-        }
+        const {
+          data: items,
+          pagination: { nextCursor: next, hasMore: more },
+        } = response.data;
 
         if (isRefresh) {
           dispatch(setConversationList(items));
@@ -109,6 +92,7 @@ function useConversations({
             )
           );
         }
+        dispatch(setConversationListCursor(next));
         dispatch(setConversationListHasMore(more));
       } catch (err) {
         handleError(err, "Failed to load conversations");
@@ -123,18 +107,16 @@ function useConversations({
   // Initial fetch on mount (or when types/projectId changes)
   useEffect(() => {
     if (!projectId) return;
-    cursorRef.current = { cursor: null, cursorCreatedAt: null };
     fetchPage(null, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, typesKey]);
 
   const loadMore = useCallback(async () => {
-    if (loading || !hasMore) return;
-    await fetchPage(cursorRef.current, false);
-  }, [loading, hasMore, fetchPage]);
+    if (loading || !hasMore || !nextCursor) return;
+    await fetchPage(nextCursor, false);
+  }, [loading, hasMore, nextCursor, fetchPage]);
 
   const refresh = useCallback(async () => {
-    cursorRef.current = { cursor: null, cursorCreatedAt: null };
     await fetchPage(null, true);
   }, [fetchPage]);
 

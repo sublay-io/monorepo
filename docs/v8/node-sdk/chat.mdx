@@ -30,14 +30,23 @@ Your service key has no implicit session user, so **every** chat call takes the 
 
 ### listConversations
 
-Lists the acting user's conversations, newest activity first. Uses **cursor (keyset) pagination** — pass the last item's `lastMessageAt` as `cursor` and its `createdAt` as `cursorCreatedAt` to get the next page.
+Lists the acting user's conversations, newest activity first. Uses **cursor pagination** — pass `pagination.nextCursor` from the previous page as `cursor` to get the next one.
 
 ```typescript
-const { conversations, hasMore } = await sublay.chat.listConversations({
+const { data: conversations, pagination } = await sublay.chat.listConversations({
   actingUserId: "usr_abc123",
   types: ["direct", "group"],
   limit: 20,
 });
+
+// Next page (nextCursor is null on the last page):
+if (pagination.hasMore) {
+  const next = await sublay.chat.listConversations({
+    actingUserId: "usr_abc123",
+    types: ["direct", "group"],
+    cursor: pagination.nextCursor,
+  });
+}
 ```
 
 <ParamField body="actingUserId" type="string" required>
@@ -46,17 +55,14 @@ const { conversations, hasMore } = await sublay.chat.listConversations({
 <ParamField body="types" type="ConversationType | ConversationType[]">
   Only conversations of these types: any of `"direct"`, `"group"`, `"space"`. Omitted, every type is listed.
 </ParamField>
-<ParamField body="cursor" type="string">
-  Keyset cursor — the `lastMessageAt` of the last item from the previous page: a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`.
-</ParamField>
-<ParamField body="cursorCreatedAt" type="string">
-  Tie-breaker cursor — the `createdAt` of the last item from the previous page: a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`.
+<ParamField body="cursor" type="string | null">
+  `pagination.nextCursor` from the previous response, passed as returned; omit it (or pass `null`) for the first page. It is opaque: don't build or parse it. One the server can't read is rejected with `400 chat/invalid-cursor`.
 </ParamField>
 <ParamField body="limit" type="number">
   Page size, 1–50. Defaults to `20`.
 </ParamField>
 
-**Returns** — `Promise<{ conversations: ConversationPreview[]; hasMore: boolean }>`
+**Returns** — `Promise<CursorPaginatedResponse<ConversationPreview>>`: `{ data: ConversationPreview[]; pagination: { nextCursor: string | null; hasMore: boolean } }`. `nextCursor` is `null` when `hasMore` is `false`.
 
 Each `ConversationPreview` includes `otherMembers` — up to 5 active members other than the acting user (`id`, `name`, `username`, `avatar`) for `direct`/`group` conversations, so a DM/group can render the counterparty without a separate members fetch. Capped at 5 (use `memberCount` for the group total); empty for `space` conversations.
 
@@ -317,21 +323,23 @@ await sublay.chat.leaveConversation({
 
 ### listMessages
 
-Lists messages in a conversation. Uses **cursor pagination** — pass `before` (a UTC ISO timestamp ending in `Z`) to page backwards, or `after` to page forwards (`before`/`after` are mutually exclusive).
+Lists messages in a conversation. Pages are anchored on a message — pass a message id as `before` to page backwards, or as `after` to page forwards (`before`/`after` are mutually exclusive).
 
 ```typescript
-const { messages, hasMore, oldestCreatedAt } = await sublay.chat.listMessages({
+const { data: messages, pagination } = await sublay.chat.listMessages({
   conversationId: "cnv_abc123",
   actingUserId: "usr_abc123",
   limit: 50,
 });
 
-// Next (older) page:
-const older = await sublay.chat.listMessages({
-  conversationId: "cnv_abc123",
-  actingUserId: "usr_abc123",
-  before: oldestCreatedAt!,
-});
+// Next (older) page: newest first by default, so the oldest message is the last one.
+if (pagination.hasMore) {
+  const older = await sublay.chat.listMessages({
+    conversationId: "cnv_abc123",
+    actingUserId: "usr_abc123",
+    before: messages[messages.length - 1].id,
+  });
+}
 
 // Only messages that have thread replies.
 const withReplies = await sublay.chat.listMessages({
@@ -344,15 +352,15 @@ const withReplies = await sublay.chat.listMessages({
 <ParamField body="conversationId" type="string" required />
 <ParamField body="actingUserId" type="string" required>The acting user (must be a member).</ParamField>
 <ParamField body="parentMessageId" type="string">List this message's thread replies (thread view), oldest first by default.</ParamField>
-<ParamField body="before" type="string">Messages created before this: a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`. Mutually exclusive with `after`.</ParamField>
-<ParamField body="after" type="string">Messages created after this: a UTC ISO datetime ending in `Z` (`toISOString()` output); an offset is rejected with `400 chat/invalid-query`. Mutually exclusive with `before`.</ParamField>
+<ParamField body="before" type="string">A message id: the `limit` messages just before it. Pass the oldest message you hold to load older ones. It must be a message of this conversation at the same thread level (`parentMessageId`), or the call is rejected with `400 chat/invalid-cursor`. Mutually exclusive with `after`.</ParamField>
+<ParamField body="after" type="string">A message id: the `limit` messages just after it. Pass the newest message you hold to load newer ones. Same rules as `before`. Mutually exclusive with `before`.</ParamField>
 <ParamField body="limit" type="number">1–100, defaults to `50`.</ParamField>
-<ParamField body="sortDir" type='"asc" | "desc"' />
+<ParamField body="sortDir" type='"asc" | "desc"'>The order of the page by creation time. Defaults to `"desc"` for the main stream and `"asc"` for a thread. With `before` or `after`, the anchor decides which messages are in the page; `sortDir` only orders them.</ParamField>
 <ParamField body="include" type="ChatMessageListIncludeParam">Associations to populate, as a single value or an array: `"files"` (message attachments) and `"grants"` (each message's [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). Pass `["files", "grants"]` for both.</ParamField>
 <ParamField body="filters" type="MessageFilters">Optional filters. `filters.hasReplies` (boolean): when `true`, returns only messages that have thread replies (`threadReplyCount > 0`); when `false`, only messages with none. Filters by thread replies, not quotings. Threads are one level deep, so `hasReplies: true` together with `parentMessageId` always returns an empty list — the response's `notice` field explains why.</ParamField>
 <SpaceReputationParams variant="context" field="body" />
 
-**Returns** — `Promise<{ messages: ChatMessage[]; hasMore: boolean; oldestCreatedAt: string | null; newestCreatedAt: string | null }>`
+**Returns** — `Promise<{ data: ChatMessage[]; pagination: { hasMore: boolean }; notice?: string }>`. `hasMore` says whether more messages exist past this page in the direction of travel: older with `before`, newer with `after`; with neither, older for `"desc"` and newer for `"asc"`. See [List Messages › Paging](/v8/api-reference/chat/messages/list-messages#paging).
 
 ---
 

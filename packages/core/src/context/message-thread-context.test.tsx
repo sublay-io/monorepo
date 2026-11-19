@@ -17,10 +17,8 @@ describe("MessageThreadProvider", () => {
     const { Wrapper, axiosPrivate } = makeProvidersWrapper({
       beforeRender: ({ axiosPrivate }) =>
         axiosPrivate.mockResponse("get", {
-          messages: [reply],
-          hasMore: false,
-          oldestCreatedAt: reply.createdAt,
-          newestCreatedAt: reply.createdAt,
+          data: [reply],
+          pagination: { hasMore: false },
         }),
     });
 
@@ -47,10 +45,8 @@ describe("MessageThreadProvider", () => {
     const { Wrapper, axiosPrivate } = makeProvidersWrapper({
       beforeRender: ({ axiosPrivate }) =>
         axiosPrivate.mockResponse("get", {
-          messages: [],
-          hasMore: false,
-          oldestCreatedAt: null,
-          newestCreatedAt: null,
+          data: [],
+          pagination: { hasMore: false },
         }),
     });
 
@@ -98,12 +94,9 @@ describe("MessageThreadProvider", () => {
     }
 
     function page(replies: ReturnType<typeof reply>[], hasMore = false) {
-      const times = replies.map((r) => r.createdAt).sort();
       return {
-        messages: replies,
-        hasMore,
-        oldestCreatedAt: times[0] ?? null,
-        newestCreatedAt: times[times.length - 1] ?? null,
+        data: replies,
+        pagination: { hasMore },
       };
     }
 
@@ -185,11 +178,11 @@ describe("MessageThreadProvider", () => {
       expect(calls[0].url).toBe(MESSAGES_URL);
       expect(calls[0].config.params).toEqual({
         parentMessageId: "message-1",
-        after: "2024-01-01T00:00:01.000Z",
+        after: "reply-1",
         limit: 100,
         sortDir: "asc",
       });
-      expect(calls[1].config.params.after).toBe("2024-01-01T00:00:03.000Z");
+      expect(calls[1].config.params.after).toBe("reply-3");
       expect(result.current.hasMore).toBe(false);
     });
 
@@ -215,6 +208,75 @@ describe("MessageThreadProvider", () => {
         sortDir: "asc",
       });
       expect(result.current.hasMore).toBe(true);
+    });
+
+    it("stops when a page ends on the reply it paged from", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderThread(
+        fakeSocket,
+        page([reply("reply-1", "2024-01-01T00:00:01.000Z")]),
+      );
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      axiosPrivate.mockResponse("get", page([reply("reply-2", "2024-01-01T00:00:02.000Z")], true));
+      // A server that answers the same page again: the cursor didn't move.
+      axiosPrivate.mockResponse("get", page([reply("reply-2", "2024-01-01T00:00:02.000Z")], true));
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+
+      await waitFor(() => expect(catchUpCalls(axiosPrivate)).toHaveLength(2));
+      // Give a runaway loop a chance to show itself.
+      await new Promise((r) => setTimeout(r, 50));
+      const calls = catchUpCalls(axiosPrivate);
+      expect(calls).toHaveLength(2);
+      expect(calls[0].config.params.after).toBe("reply-1");
+      expect(calls[1].config.params.after).toBe("reply-2");
+    });
+
+    it("reloads the thread from its first page, once, when the server can't page from the cursor", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderThread(
+        fakeSocket,
+        page([reply("reply-1", "2024-01-01T00:00:01.000Z"), reply("reply-2", "2024-01-01T00:00:02.000Z")]),
+      );
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      axiosPrivate.mockError("get", 400, {
+        error: "Invalid cursor",
+        code: "chat/invalid-cursor",
+        param: "after",
+      });
+      // reply-2 is gone; the thread's first page, with more to come.
+      axiosPrivate.mockResponse(
+        "get",
+        page([reply("reply-1", "2024-01-01T00:00:01.000Z"), reply("reply-3", "2024-01-01T00:00:03.000Z")], true),
+      );
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+
+      await waitFor(() => expect(catchUpCalls(axiosPrivate)).toHaveLength(2));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      const calls = catchUpCalls(axiosPrivate);
+      expect(calls[0].config.params.after).toBe("reply-2");
+      expect(calls[1].config.params).toEqual({
+        parentMessageId: "message-1",
+        limit: 50,
+        sortDir: "asc",
+      });
+      expect(result.current.hasMore).toBe(true);
+
+      // loadMore continues from the reloaded run, not from the gone reply.
+      axiosPrivate.mockResponse("get", page([reply("reply-4", "2024-01-01T00:00:04.000Z")]));
+      await act(async () => {
+        await result.current.loadMore!();
+      });
+      const all = catchUpCalls(axiosPrivate);
+      expect(all).toHaveLength(3);
+      expect(all[2].config.params.after).toBe("reply-3");
     });
 
     it("leaves a thread that isn't loaded to its end to loadMore", async () => {

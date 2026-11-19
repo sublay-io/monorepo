@@ -13,10 +13,10 @@ import { makeClient } from "./helpers/mockClient";
 describe("node-sdk chat (messages) — request shaping", () => {
   it("listMessages strips conversationId into the path and passes the rest as params (before/after cursor pagination)", async () => {
     const { client, projectInstance } = makeClient();
-    await listMessages(client, { conversationId: "conv1", actingUserId: "u1", before: "t1", limit: 20 });
+    await listMessages(client, { conversationId: "conv1", actingUserId: "u1", before: "msg0", limit: 20 });
     expect(projectInstance.get).toHaveBeenCalledWith(
       "/chat/conversations/conv1/messages",
-      { params: { actingUserId: "u1", before: "t1", limit: 20 } },
+      { params: { actingUserId: "u1", before: "msg0", limit: 20 } },
     );
   });
 
@@ -143,13 +143,11 @@ describe("node-sdk chat (messages) — request shaping", () => {
 });
 
 describe("node-sdk chat (messages) — response mapping", () => {
-  it("listMessages returns the raw { messages, hasMore, ... } shape, not a PaginatedResponse envelope", async () => {
+  it("listMessages returns the { data, pagination: { hasMore } } envelope as-is", async () => {
     const { client, projectInstance } = makeClient();
     const result = {
-      messages: [{ id: "msg1" }],
-      hasMore: false,
-      oldestCreatedAt: "t0",
-      newestCreatedAt: "t1",
+      data: [{ id: "msg1" }],
+      pagination: { hasMore: false },
     };
     projectInstance.get.mockResolvedValueOnce({ data: result });
     await expect(

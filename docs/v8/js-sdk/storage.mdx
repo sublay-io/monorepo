@@ -165,10 +165,9 @@ const file = await sublay.storage.getFile({ fileId: "fil_abc123" });
 
 **Returns** — `Promise<GetFileResponse>` — a flat projection carrying `fileId`,
 `type`, `originalPath`, `originalSize`, `originalMimeType`, `position`, `metadata`,
-`createdAt`/`updatedAt`, the uploader's `userId`, the ids of what the file
-belongs to (`entityId`, `commentId`, `spaceId`) when there are any, and — for
-images — an `image` object with `variants`, `processingStatus`, `format`,
-`quality`, and `exifStripped`.
+`createdAt`/`updatedAt`, the uploader's `userId`, the `entityId`, `commentId`
+and `spaceId` when set, and — for images — an `image` object with `variants`,
+`processingStatus`, `format`, `quality`, and `exifStripped`.
 
 ---
 

@@ -53,15 +53,15 @@ Requires an authenticated user.
 </ResponseField>
 
 <ResponseField name="entityId" type="string">
-  ID of the associated entity (present if provided at upload).
+  ID of the entity the file belongs to (present when it belongs to one).
 </ResponseField>
 
 <ResponseField name="commentId" type="string">
-  ID of the associated comment (present if provided at upload).
+  ID of the comment the file belongs to (present when it belongs to one).
 </ResponseField>
 
 <ResponseField name="spaceId" type="string">
-  ID of the associated space (present if provided at upload).
+  ID of the space the file belongs to, or of the space its entity or event is in (present when there is one).
 </ResponseField>
 
 <ResponseField name="createdAt" type="string">

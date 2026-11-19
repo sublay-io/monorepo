@@ -5,6 +5,8 @@ description: "Upload, retrieve, and delete files and images from your server"
 
 The `storage` module uploads files and images to managed cloud storage and returns proxy URLs, plus reads and deletes existing files. Uploads are sent as `multipart/form-data` — pass the file bytes as a `Uint8Array` or a `Blob`.
 
+A file uploaded with this module isn't attached to anything: it has no entity, comment, space or event.
+
 <Note>
   Uploads can be attributed to a user by passing that user's Sublay ID as
   [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user), the user your
@@ -59,24 +61,11 @@ const file = await sublay.storage.uploadFile({
 </ParamField>
 
 <ParamField body="position" type="number">
-  Display order when a record has multiple attachments. Defaults to `0`.
+  A number stored on the file as `position`. Defaults to `0`.
 </ParamField>
 
 <ParamField body="metadata" type="object">
   Custom key-value data stored alongside the file record.
-</ParamField>
-
-<ParamField body="entityId" type="string">
-  Associates the file with an entity for cascade deletion. Only one of
-  `entityId` / `commentId` / `spaceId` may be set.
-</ParamField>
-
-<ParamField body="commentId" type="string">
-  Associates the file with a comment for cascade deletion.
-</ParamField>
-
-<ParamField body="spaceId" type="string">
-  Associates the file with a space.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -145,25 +134,6 @@ const file = await sublay.storage.uploadImage({
 
 <ParamField body="pathParts" type="string[]">
   Storage path segments. Defaults to `["images", "<fileId>"]`.
-</ParamField>
-
-<ParamField body="entityId" type="string">
-  Associates the image with an entity. Only one of `entityId` / `commentId` /
-  `spaceId` / `eventId` may be set.
-</ParamField>
-
-<ParamField body="commentId" type="string">
-  Associates the image with a comment.
-</ParamField>
-
-<ParamField body="spaceId" type="string">
-  Associates the image with a space.
-</ParamField>
-
-<ParamField body="eventId" type="string">
-  Associates the image with an event. Use this to attach a cover or gallery image
-  to an event created via `sublay.events.createEvent` (the Node SDK does not
-  support inline event image upload). See the [Events module](/v8/node-sdk/events).
 </ParamField>
 
 <ParamField body="actingUserId" type="string">

@@ -98,23 +98,6 @@ function useUploadImage(): UseUploadImageValues {
           formData.append("fit", options.fit);
         }
 
-        // Append optional associations
-        if (options.entityId) {
-          formData.append("entityId", options.entityId);
-        }
-
-        if (options.commentId) {
-          formData.append("commentId", options.commentId);
-        }
-
-        if (options.spaceId) {
-          formData.append("spaceId", options.spaceId);
-        }
-
-        if (options.eventId) {
-          formData.append("eventId", options.eventId);
-        }
-
         // Make request with progress tracking
         const response = await axios.post(
           `/${projectId}/storage/images`,

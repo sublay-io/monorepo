@@ -13,7 +13,6 @@ describe("js-sdk storage — uploadFile request shaping", () => {
       pathParts: ["avatars", "u1"],
       position: 1,
       metadata: { source: "upload" },
-      entityId: "e1",
     });
 
     expect(projectInstance.post).toHaveBeenCalledTimes(1);
@@ -27,7 +26,6 @@ describe("js-sdk storage — uploadFile request shaping", () => {
     expect(fields.pathParts).toBe(JSON.stringify(["avatars", "u1"]));
     expect(fields.position).toBe("1");
     expect(fields.metadata).toBe(JSON.stringify({ source: "upload" }));
-    expect(fields.entityId).toBe("e1");
   });
 
   it("defaults the multipart filename to the File's own name when no explicit filename is given", async () => {
@@ -50,7 +48,7 @@ describe("js-sdk storage — uploadFile request shaping", () => {
     expect((fields.file as File).name).toBe("upload");
   });
 
-  it("skips undefined optional fields (position/metadata/entityId/commentId/spaceId) entirely", async () => {
+  it("skips undefined optional fields (position/metadata) entirely", async () => {
     const { client, projectInstance } = makeClient();
     const file = new File(["bytes"], "f.png", { type: "image/png" });
     await uploadFile(client, { file, pathParts: ["files"] });
@@ -59,9 +57,6 @@ describe("js-sdk storage — uploadFile request shaping", () => {
     const fields = formDataToObject(body as FormData);
     expect(fields).not.toHaveProperty("position");
     expect(fields).not.toHaveProperty("metadata");
-    expect(fields).not.toHaveProperty("entityId");
-    expect(fields).not.toHaveProperty("commentId");
-    expect(fields).not.toHaveProperty("spaceId");
     // pathParts (array) still present and JSON-stringified.
     expect(fields.pathParts).toBe(JSON.stringify(["files"]));
   });
@@ -79,7 +74,6 @@ describe("js-sdk storage — uploadImage request shaping", () => {
         fit: "cover",
       },
       pathParts: ["spaces", "s1", "banner"],
-      spaceId: "s1",
     });
 
     expect(projectInstance.post).toHaveBeenCalledTimes(1);
@@ -95,7 +89,6 @@ describe("js-sdk storage — uploadImage request shaping", () => {
     );
     expect(fields.fit).toBe("cover");
     expect(fields.pathParts).toBe(JSON.stringify(["spaces", "s1", "banner"]));
-    expect(fields.spaceId).toBe("s1");
     // imageOptions itself is never sent as a nested field/object.
     expect(fields).not.toHaveProperty("imageOptions");
   });
@@ -110,7 +103,6 @@ describe("js-sdk storage — uploadImage request shaping", () => {
         aspectRatio: { width: 16, height: 9 },
         widths: { hero: 1200 },
       },
-      entityId: "e1",
     });
 
     const [, body] = projectInstance.post.mock.calls[0];
@@ -118,7 +110,6 @@ describe("js-sdk storage — uploadImage request shaping", () => {
     expect(fields.mode).toBe("aspect-ratio-width-based");
     expect(fields.aspectRatio).toBe(JSON.stringify({ width: 16, height: 9 }));
     expect(fields.widths).toBe(JSON.stringify({ hero: 1200 }));
-    expect(fields.entityId).toBe("e1");
   });
 
   it("flattens aspect-ratio-height-based imageOptions as top-level multipart fields", async () => {
@@ -131,7 +122,6 @@ describe("js-sdk storage — uploadImage request shaping", () => {
         aspectRatio: { width: 4, height: 3 },
         heights: { card: 400 },
       },
-      commentId: "c1",
     });
 
     const [, body] = projectInstance.post.mock.calls[0];
@@ -139,7 +129,6 @@ describe("js-sdk storage — uploadImage request shaping", () => {
     expect(fields.mode).toBe("aspect-ratio-height-based");
     expect(fields.aspectRatio).toBe(JSON.stringify({ width: 4, height: 3 }));
     expect(fields.heights).toBe(JSON.stringify({ card: 400 }));
-    expect(fields.commentId).toBe("c1");
   });
 
   it("flattens original-aspect imageOptions as top-level multipart fields", async () => {
@@ -174,7 +163,6 @@ describe("js-sdk storage — uploadImage request shaping", () => {
         ],
         sizes: { hero: 1200 },
       },
-      eventId: "ev1",
     });
 
     const [, body] = projectInstance.post.mock.calls[0];
@@ -187,7 +175,6 @@ describe("js-sdk storage — uploadImage request shaping", () => {
       ])
     );
     expect(fields.sizes).toBe(JSON.stringify({ hero: 1200 }));
-    expect(fields.eventId).toBe("ev1");
   });
 
   it("uses the explicit filename over the File's own name when both are given", async () => {
@@ -204,7 +191,7 @@ describe("js-sdk storage — uploadImage request shaping", () => {
     expect((fields.file as File).name).toBe("renamed.png");
   });
 
-  it("skips undefined optional association/path fields", async () => {
+  it("skips an undefined pathParts", async () => {
     const { client, projectInstance } = makeClient();
     const file = new File(["bytes"], "x.png", { type: "image/png" });
     await uploadImage(client, {
@@ -215,10 +202,6 @@ describe("js-sdk storage — uploadImage request shaping", () => {
     const [, body] = projectInstance.post.mock.calls[0];
     const fields = formDataToObject(body as FormData);
     expect(fields).not.toHaveProperty("pathParts");
-    expect(fields).not.toHaveProperty("entityId");
-    expect(fields).not.toHaveProperty("commentId");
-    expect(fields).not.toHaveProperty("spaceId");
-    expect(fields).not.toHaveProperty("eventId");
   });
 });
 

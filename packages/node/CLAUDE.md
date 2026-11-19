@@ -196,12 +196,13 @@ File and image uploads, plus read/delete. `uploadFile`, `uploadImage`, `getFile`
 
 - **Uploads** are multipart (`FormData`); `file` accepts a `Uint8Array` or `Blob`. Content-Type is left
   to axios so the multipart boundary is set correctly — do not hand-set it.
-- **`uploadFile`** requires `pathParts` (string[]); optional `position`, `metadata`, one of
-  `entityId`/`commentId`/`spaceId`, and `actingUserId` (owner; omit for an app-owned file).
+- **`uploadFile`** requires `pathParts` (string[]); optional `position`, `metadata`, and
+  `actingUserId` (owner; omit for an app-owned file). Uploads belong to nothing: the server refuses
+  `entityId`/`commentId`/`spaceId`/`eventId` (S#148).
 - **`uploadImage`** takes `imageOptions` — a discriminated union on `mode` (`exact-dimensions`,
   `aspect-ratio-width-based`, `aspect-ratio-height-based`, `original-aspect`, `multi-aspect-ratio`),
-  mirroring the server schema (see `interfaces/ImageProcessing.ts`); plus optional `pathParts`, one
-  association, and `actingUserId`. (No `metadata`/`position` — the image schema doesn't read them.)
+  mirroring the server schema (see `interfaces/ImageProcessing.ts`); plus optional `pathParts` and
+  `actingUserId`. (No `metadata`/`position` — the image schema doesn't read them.)
 - **Access model:** reads (`getFile`) are project-scoped (any caller in the project); **delete
   follows "the owner acts"**: a file with an owner is deleted only as that owner (`actingUserId`
   required, 400 `storage/missing-user-id` without it), an app-owned file only by a key naming nobody.

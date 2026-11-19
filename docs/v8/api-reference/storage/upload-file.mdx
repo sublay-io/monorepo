@@ -6,6 +6,10 @@ description: "Upload a generic file without server-side processing"
 
 Uploads a file directly to storage without processing. The file must be a PDF, JPEG, PNG or WebP; any other type is refused with `400 storage/unsupported-file-type`. The file type is inferred automatically from the MIME type.
 
+The uploaded file isn't attached to anything: it has no entity, comment, space or event. A file that belongs to a record is sent with that record's own request (for example, the images of [Create Entity](/v8/api-reference/entities/create-entity), or the cover and gallery of [Update Event](/v8/api-reference/events/update-event)).
+
+Use the returned `fileId` where an endpoint takes the id of an uploaded file, such as `avatarFileId` on [Update Conversation](/v8/api-reference/chat/conversations/update-conversation).
+
 This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 
 **Rate limit**: 10 requests per 5 minutes.
@@ -20,20 +24,8 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
   JSON-encoded array of path segments. The file is stored under the joined path with a UUID sub-folder appended. Example: `["documents", "user-123"]` → `documents/user-123/<uuid>/<filename>`.
 </ParamField>
 
-<ParamField body="entityId" type="string">
-  Associates the file with an entity for cascade deletion.
-</ParamField>
-
-<ParamField body="commentId" type="string">
-  Associates the file with a comment for cascade deletion.
-</ParamField>
-
-<ParamField body="spaceId" type="string">
-  Associates the file with a space.
-</ParamField>
-
 <ParamField body="position" type="number">
-  Display order when a record has multiple attachments. Defaults to `0`.
+  A number stored on the file as `position`. Defaults to `0`.
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -73,6 +65,16 @@ The `type` field is one of: `image`, `video`, `document`, `other`. It is inferre
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
+    The request sent `entityId`, `commentId`, `spaceId` or `eventId`. A file uploaded here isn't attached to anything, so these fields are refused rather than ignored, and nothing is stored. `param` names the field:
+
+    ```json
+    {
+      "error": "`entityId` isn't accepted: a file uploaded here isn't attached to anything.",
+      "code": "storage/unsupported-param",
+      "param": "entityId"
+    }
+    ```
+
     The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
 
     With a service key:

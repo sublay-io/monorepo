@@ -6,6 +6,10 @@ description: "Upload an image with server-side processing and named variant gene
 
 Uploads an image, processes it with Sharp, and stores the original plus all requested variants. Returns proxy URLs for all variants immediately.
 
+The uploaded file isn't attached to anything: it has no entity, comment, space or event. A file that belongs to a record is sent with that record's own request (for example, the images of [Create Entity](/v8/api-reference/entities/create-entity), or the cover and gallery of [Update Event](/v8/api-reference/events/update-event)).
+
+Use the returned `fileId` where an endpoint takes the id of an uploaded file, such as `avatarFileId` on [Update Conversation](/v8/api-reference/chat/conversations/update-conversation).
+
 This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 
 **Rate limit**: 20 requests per 5 minutes.
@@ -70,22 +74,6 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
   Storage path segments as a JSON-encoded array. Defaults to `["images", "<fileId>"]`.
 </ParamField>
 
-<ParamField body="entityId" type="string">
-  Associates the file with an entity for cascade deletion.
-</ParamField>
-
-<ParamField body="commentId" type="string">
-  Associates the file with a comment for cascade deletion.
-</ParamField>
-
-<ParamField body="spaceId" type="string">
-  Associates the file with a space.
-</ParamField>
-
-<ParamField body="eventId" type="string">
-  Associates the file with an event. Needs the events bundle. Send at most one of `entityId`, `commentId`, `spaceId` and `eventId`.
-</ParamField>
-
 <ParamField body="actingUserId" type="string">
   Service key only: the user this request acts as, who owns the uploaded file; the upload runs under that user's own checks. Leave it out to upload an app-owned file with no owning user. A user that doesn't exist returns `404 storage/user-not-found`. A user token always acts as its own user and must not send it (`400 storage/acting-user-not-allowed`).
 </ParamField>
@@ -128,6 +116,16 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
+    The request sent `entityId`, `commentId`, `spaceId` or `eventId`. A file uploaded here isn't attached to anything, so these fields are refused rather than ignored, and nothing is stored. `param` names the field:
+
+    ```json
+    {
+      "error": "`entityId` isn't accepted: a file uploaded here isn't attached to anything.",
+      "code": "storage/unsupported-param",
+      "param": "entityId"
+    }
+    ```
+
     The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
 
     With a service key:
@@ -170,12 +168,6 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 
     ```json
     { "error": "No user with this actingUserId exists in this project.", "code": "storage/user-not-found" }
-    ```
-  </Accordion>
-  <Accordion title="Bundle Not Installed — 403">
-    Returned when `eventId` is sent on a project without the events bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
-    ```json
-    { "error": "Linking an image to an event requires the events bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Events", "EventRsvps", "EventInvites"], "bundleId": "events", "dashboardUrl": "https://…/<projectId>/database" }
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">

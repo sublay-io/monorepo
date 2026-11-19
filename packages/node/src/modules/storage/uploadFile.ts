@@ -11,13 +11,9 @@ export interface UploadFileProps {
    * the server (`uploadFileBodySchema.pathParts`).
    */
   pathParts: string[];
-  /** Ordering within the associated entity/comment/space. */
+  /** Stored on the file as `position`. */
   position?: number;
   metadata?: Record<string, any>;
-  /** Only one of entityId/commentId/spaceId may be set. */
-  entityId?: string;
-  commentId?: string;
-  spaceId?: string;
   /**
    * The user the service key acts as, who owns the upload. Omit for an
    * app-owned file.

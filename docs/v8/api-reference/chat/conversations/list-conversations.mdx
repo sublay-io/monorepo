@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/chat/conversations"
 description: "Get the current user's conversations, ordered by most recent activity"
 ---
 
-Returns a cursor-paginated list of `ConversationPreview` objects for the acting user. Only active memberships are included. A space chat is included only while the acting user is an active member of its space and can see it ([visibility](/v8/data-models/space#visibility)); a pending, rejected or banned member, or someone who left the space, doesn't get it even while they still hold a conversation membership. Results are ordered by `lastMessageAt` descending (conversations with no messages appear last, ordered by `createdAt`).
+Returns a cursor-paginated list of `ConversationPreview` objects for the acting user. Only active memberships are included. A space chat is included only while the acting user is an active member of its space and can see it ([visibility](/v8/data-models/space#visibility)); a pending, rejected or banned member, or someone who left the space, doesn't get it even while they still hold a conversation membership. Results are ordered by `lastMessageAt` descending (conversations with no messages appear last), then by `createdAt` descending, then by `id`, so every conversation has one place in the order and no page skips or repeats one.
 
 <Note>
   A `direct` conversation stays out of both parties' lists until it has a visible last message, so an opened-but-never-sent DM is invisible to the other side. If a DM's only message is later deleted or moderated away, it drops back out of the list and reappears when either party sends again. `group` and `space` conversations appear from creation.
@@ -19,11 +19,7 @@ To fetch a single conversation in this same shape — one that was paginated out
 </ParamField>
 
 <ParamField query="cursor" type="string">
-  The `lastMessageAt` timestamp of the last item in the previous page. Used for cursor pagination. Omit for the first page. A UTC ISO 8601 timestamp ending in `Z`, as the response gives it; an offset (`+02:00`) or no zone returns `400 chat/invalid-query`.
-</ParamField>
-
-<ParamField query="cursorCreatedAt" type="string">
-  The `createdAt` timestamp of the last item in the previous page. Required together with `cursor` when paginating. A UTC ISO 8601 timestamp ending in `Z`, as the response gives it; an offset (`+02:00`) or no zone returns `400 chat/invalid-query`.
+  Continue after the last conversation of a previous response. Leave it out on the first request, then pass `pagination.nextCursor` from the previous response, unchanged. The cursor is opaque: don't build or parse it. One that can't be read returns `400 chat/invalid-cursor`. Keep `types` the same across the pages of one list.
 </ParamField>
 
 <ParamField query="limit" type="number">
@@ -36,7 +32,7 @@ To fetch a single conversation in this same shape — one that was paginated out
 
 ## Response
 
-<ResponseField name="conversations" type="ConversationPreview[]">
+<ResponseField name="data" type="ConversationPreview[]">
   Array of conversation preview objects. Each item is a [Conversation](/v8/data-models/conversation) extended with the following fields:
 
   <Expandable title="ConversationPreview fields">
@@ -96,8 +92,15 @@ To fetch a single conversation in this same shape — one that was paginated out
   </Expandable>
 </ResponseField>
 
-<ResponseField name="hasMore" type="boolean">
-  Whether more conversations exist beyond this page.
+<ResponseField name="pagination" type="object">
+  <Expandable title="pagination fields">
+    <ResponseField name="nextCursor" type="string | null">
+      Pass it as `cursor` to get the next page. `null` when `hasMore` is `false`.
+    </ResponseField>
+    <ResponseField name="hasMore" type="boolean">
+      Whether more conversations exist beyond this page.
+    </ResponseField>
+  </Expandable>
 </ResponseField>
 
 ## Error Responses
@@ -144,11 +147,18 @@ To fetch a single conversation in this same shape — one that was paginated out
     { "error": "A service key must send actingUserId: the user this request acts as.", "code": "chat/missing-user-id" }
     ```
   </Accordion>
-  <Accordion title="Invalid Query — 400">
-    For example a `types` value other than `direct`, `group` or `space`, a `cursor` or `cursorCreatedAt` that isn't a UTC (`Z`) datetime, or a `limit` above 50. `error` starts with the field name.
+  <Accordion title="Invalid Cursor — 400">
+    `cursor` isn't a `pagination.nextCursor` the server gave out.
     ```json
-    { "error": "cursor: Invalid ISO datetime", "code": "chat/invalid-query" }
+    {
+      "error": "Invalid `cursor`. Pass `pagination.nextCursor` from a previous response unchanged, or leave `cursor` out to start from the beginning.",
+      "code": "chat/invalid-cursor",
+      "param": "cursor"
+    }
     ```
+  </Accordion>
+  <Accordion title="Invalid Query — 400">
+    For example a `types` value other than `direct`, `group` or `space`, a `limit` above 50, or `cursorCreatedAt` (not accepted; pass `pagination.nextCursor` as `cursor`). `error` starts with the field name.
     ```json
     { "error": "types: Unknown type `DIRECT`. Allowed: direct, group, space.", "code": "chat/invalid-query" }
     ```

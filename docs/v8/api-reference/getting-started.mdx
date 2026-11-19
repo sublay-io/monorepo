@@ -120,7 +120,7 @@ Paginated responses always return the same envelope:
 
 To read a whole list, request pages in turn (`page=1`, `page=2`, …) until `pagination.hasMore` is `false`; a paginated endpoint never returns all its records in one response.
 
-Chat conversations, chat messages and comments page by cursor instead; their pages describe how.
+Chat conversations, chat messages and comments page by cursor instead, with the same `data` and a `pagination.hasMore`. Comments and chat conversations take an opaque `cursor`: pass the previous page's `pagination.nextCursor` back unchanged. Chat messages page before or after a message: pass the id of the first or last message you hold as `before` or `after`. Their pages describe the details.
 
 ## Error Format
 

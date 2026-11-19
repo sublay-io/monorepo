@@ -46,8 +46,8 @@ The hook returns a function. That function accepts:
   New conversation description.
 </ParamField>
 
-<ParamField body="avatarFileId" type="string | null">
-  File ID for the avatar image. Pass `null` to remove the current avatar.
+<ParamField body="avatar" type="{ file: File | Blob; options: UploadImageOptions }">
+  New avatar image and its processing options (a `mode` and the fields it needs; see [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes)). The request is sent as multipart form data, and the previous avatar, if any, is deleted.
 </ParamField>
 
 <ParamField body="postingPermission" type="'members' | 'team'">

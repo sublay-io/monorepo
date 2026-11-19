@@ -29,7 +29,7 @@ All fields are optional. Only provided fields are updated.
 </ParamField>
 
 <ParamField body="avatarFileId" type="string | null">
-  ID of an uploaded [File](/v7/data-models/file) to use as the conversation avatar. Pass `null` to remove the current avatar. If a previous avatar exists, it is deleted from storage automatically.
+  ID of an uploaded [File](/v7/data-models/file) to use as the conversation avatar: a file the acting user uploaded (with a service key, also an app-owned file uploaded without a `userId`) with [Upload Image](/v7/api-reference/storage/upload-image) or [Upload File](/v7/api-reference/storage/upload-file), that isn't attached to anything: no entity, comment, event, space or chat message, and not any user's or space's avatar or banner, or another conversation's avatar. Any other file is refused with `400 chat/invalid-avatar-file`. Pass `null` to remove the current avatar. If a previous avatar exists, it is deleted from storage automatically.
 </ParamField>
 
 <ParamField body="postingPermission" type="string">
@@ -56,6 +56,12 @@ Returns the updated [Conversation](/v7/data-models/conversation) object, with `a
   <Accordion title="Invalid Field — 400 Bad Request">
     ```json
     { "error": "'postingPermission' can only be set on space conversations.", "code": "chat/invalid-field" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Avatar File — 400 Bad Request">
+    `avatarFileId` names a file that doesn't exist, that the acting user didn't upload (and isn't app-owned, with a service key), or that is already attached to something.
+    ```json
+    { "error": "avatarFileId must be a file you uploaded that isn't attached to anything else.", "code": "chat/invalid-avatar-file" }
     ```
   </Accordion>
   <Accordion title="Forbidden (group) — 403">

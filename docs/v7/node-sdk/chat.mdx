@@ -144,7 +144,7 @@ const conversation = await sublay.chat.updateConversation({
 <ParamField body="userId" type="string" required>The acting user (must be a group admin).</ParamField>
 <ParamField body="name" type="string" />
 <ParamField body="description" type="string" />
-<ParamField body="avatarFileId" type="string | null">File id for the avatar, or `null` to clear it.</ParamField>
+<ParamField body="avatarFileId" type="string | null">File id for the avatar, or `null` to clear it. It must be a file the acting user uploaded, or an app-owned file uploaded without a `userId`, that isn't attached to anything else (`400 chat/invalid-avatar-file` otherwise).</ParamField>
 <ParamField body="postingPermission" type='"members" | "admins"'>Space conversations only.</ParamField>
 
 **Returns** — `Promise<Conversation>`

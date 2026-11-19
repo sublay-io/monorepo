@@ -6,6 +6,8 @@ description: "Update a group or space conversation's name, description, avatar, 
 
 Updates one or more fields on a conversation. Only `group` and `space` conversations can be updated — direct conversations return a 400.
 
+Send a JSON body, or `multipart/form-data` when uploading a new avatar.
+
 **Authorization:**
 - `group` conversations: caller must be an active `admin` member.
 - `space` conversations: caller must be an active `admin` or `moderator` of the parent Space (a banned admin or moderator can't).
@@ -28,8 +30,12 @@ All fields are optional. Only provided fields are updated.
   New description. Maximum 1000 characters.
 </ParamField>
 
-<ParamField body="avatarFileId" type="string | null">
-  ID of an uploaded [File](/v8/data-models/file) to use as the conversation avatar. Pass `null` to remove the current avatar; the string `"none"` is refused with `400 chat/unsupported-param` (see [Saying "no value"](/v8/authentication#saying-no-value)). If a previous avatar exists, it is deleted from storage automatically.
+<ParamField body="avatarFile" type="file">
+  New avatar image: JPEG, PNG or WebP, maximum 50 MB. Requires `avatarFile.options`. The image is processed into the variants the options ask for, and the previous avatar, if any, is deleted.
+</ParamField>
+
+<ParamField body="avatarFile.options" type="object">
+  JSON-encoded image-processing options for `avatarFile`: a `mode` and the fields it needs, for example `{ "mode": "original-aspect", "sizes": { "small": 64, "large": 256 } }`. See [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes).
 </ParamField>
 
 <ParamField body="postingPermission" type="string">
@@ -47,6 +53,9 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Not signed in — 401 / 403">
+    Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired. Checked before any uploaded file is read, so a request with no credentials gets `401` rather than a body or acting-user error.
+  </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
@@ -60,6 +69,16 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
+    The request sent `avatarFileId`. The avatar is the image itself, uploaded as `avatarFile`; this endpoint never takes the id of a file uploaded elsewhere.
+
+    ```json
+    {
+      "error": "`avatarFileId` isn't accepted: send the avatar image itself as the `avatarFile` file.",
+      "code": "chat/unsupported-param",
+      "param": "avatarFileId"
+    }
+    ```
+
     The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
 
     With a service key:
@@ -120,5 +139,37 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
     ```json
     { "error": "Only space admins and moderators can update the space conversation.", "code": "chat/forbidden" }
     ```
+  </Accordion>
+  <Accordion title="Bundle Not Installed — 403">
+    Returned when an avatar is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    ```json
+    { "error": "Conversation avatar uploads require the files-images bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
+    ```
+  </Accordion>
+  <Accordion title="Image Too Large — 413">
+    ```json
+    { "error": "Avatar image exceeds 50MB limit.", "code": "chat/file-too-large", "param": "avatarFile" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Image — 422">
+    The file can't be read as an image.
+    ```json
+    { "error": "Avatar file is not a valid image.", "code": "chat/invalid-image", "param": "avatarFile" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    `avatarFile` was uploaded without `avatarFile.options`.
+    ```json
+    { "error": "Image options are required when uploading an avatar. Must include mode property.", "code": "chat/missing-image-options", "param": "avatarFile.options" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Image Options — 400">
+    `avatarFile.options` isn't valid JSON, or isn't valid image options.
+    ```json
+    { "error": "Invalid JSON in avatarFile.options field.", "code": "chat/invalid-body", "param": "avatarFile.options" }
+    ```
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    A file was refused as the body was read: `chat/unsupported-file-type` or `chat/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>

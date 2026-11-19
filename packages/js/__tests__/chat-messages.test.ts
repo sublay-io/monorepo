@@ -15,7 +15,7 @@ describe("js-sdk chat messages — request shaping", () => {
     const { client, projectInstance } = makeClient();
     await listMessages(client, {
       conversationId: "c1",
-      before: "2026-06-01T00:00:00Z",
+      before: "m-anchor",
       limit: 50,
       sortDir: "desc",
       include: "files",
@@ -25,7 +25,7 @@ describe("js-sdk chat messages — request shaping", () => {
       "/chat/conversations/c1/messages",
       {
         params: {
-          before: "2026-06-01T00:00:00Z",
+          before: "m-anchor",
           limit: 50,
           sortDir: "desc",
           include: "files",
@@ -39,11 +39,11 @@ describe("js-sdk chat messages — request shaping", () => {
     const { client, projectInstance } = makeClient();
     await listMessages(client, {
       conversationId: "c1",
-      after: "2026-06-01T00:00:00Z",
+      after: "m-anchor",
     });
     expect(projectInstance.get).toHaveBeenCalledWith(
       "/chat/conversations/c1/messages",
-      { params: { after: "2026-06-01T00:00:00Z" } }
+      { params: { after: "m-anchor" } }
     );
     const [, config] = projectInstance.get.mock.calls[0];
     expect(config.params).not.toHaveProperty("before");
@@ -240,34 +240,30 @@ describe("js-sdk chat messages — request shaping", () => {
 });
 
 describe("js-sdk chat messages — response mapping", () => {
-  it("listMessages returns the raw array + hasMore (+ cursor bookkeeping) shape — NOT a PaginatedResponse envelope", async () => {
+  it("listMessages returns the { data, pagination: { hasMore } } envelope as-is", async () => {
     const { client, projectInstance } = makeClient();
     const payload = {
-      messages: [
+      data: [
         { id: "m1", conversationId: "c1", content: "hi" },
         { id: "m2", conversationId: "c1", content: "there" },
       ],
-      hasMore: true,
-      oldestCreatedAt: "2026-06-01T00:00:00Z",
-      newestCreatedAt: "2026-06-02T00:00:00Z",
+      pagination: { hasMore: true },
     };
     projectInstance.get.mockResolvedValueOnce({ data: payload });
 
     const result = await listMessages(client, { conversationId: "c1" });
 
     expect(result).toEqual(payload);
-    expect(Array.isArray(result.messages)).toBe(true);
-    expect(result).not.toHaveProperty("pagination");
-    expect(result).not.toHaveProperty("data");
+    expect(result.pagination.hasMore).toBe(true);
+    expect(result).not.toHaveProperty("messages");
+    expect(result).not.toHaveProperty("oldestCreatedAt");
   });
 
   it("listMessages surfaces the optional notice field for unsatisfiable filter combinations", async () => {
     const { client, projectInstance } = makeClient();
     const payload = {
-      messages: [],
-      hasMore: false,
-      oldestCreatedAt: null,
-      newestCreatedAt: null,
+      data: [],
+      pagination: { hasMore: false },
       notice: "hasReplies filter ignored for thread replies.",
     };
     projectInstance.get.mockResolvedValueOnce({ data: payload });
@@ -293,7 +289,7 @@ describe("js-sdk chat messages — response mapping", () => {
 
   it("editMessage returns the updated ChatMessage", async () => {
     const { client, projectInstance } = makeClient();
-    const message = { id: "m1", content: "edited text", editedAt: "2026-06-01T00:00:00Z" };
+    const message = { id: "m1", content: "edited text", editedAt: "m-anchor" };
     projectInstance.patch.mockResolvedValueOnce({ data: message });
 
     const result = await editMessage(client, {
@@ -366,7 +362,7 @@ describe("js-sdk chat messages — response mapping", () => {
     const { client, projectInstance } = makeClient();
     const envelope = {
       data: [
-        { user: { id: "u1", name: "Alice" }, emoji: "👍", createdAt: "2026-06-01T00:00:00Z" },
+        { user: { id: "u1", name: "Alice" }, emoji: "👍", createdAt: "m-anchor" },
       ],
       pagination: {
         page: 1,

@@ -27,6 +27,26 @@ describe("useUpdateConversation", () => {
     expect(call.body).toEqual({ name: "New name" });
   });
 
+  it("sends a new avatar as multipart avatarFile + avatarFile.options", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateConversation());
+    axiosPrivate.mockResponse("patch", makeConversation());
+
+    const file = new File(["bytes"], "a.png", { type: "image/png" });
+    const options = { mode: "original-aspect" as const, sizes: { small: 64 } };
+    await act(async () => {
+      await result.current({ conversationId: "conversation-1", name: "New name", avatar: { file, options } });
+    });
+
+    const [call] = axiosPrivate.calls("patch");
+    expect(call.url).toBe("/test-project/chat/conversations/conversation-1");
+    expect(call.body).toBeInstanceOf(FormData);
+    const formData = call.body as FormData;
+    expect(formData.get("avatarFile")).toBeInstanceOf(File);
+    expect(formData.get("avatarFile.options")).toBe(JSON.stringify(options));
+    expect(formData.get("name")).toBe("New name");
+    expect(formData.has("avatar")).toBe(false);
+  });
+
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateConversation());
 

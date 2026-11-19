@@ -47,7 +47,7 @@ The hook returns a function. That function accepts:
 </ParamField>
 
 <ParamField body="avatarFileId" type="string | null">
-  File ID for the avatar image. Pass `null` to remove the current avatar.
+  File ID for the avatar image. It must be a file the acting user uploaded that isn't attached to anything else (`400 chat/invalid-avatar-file` otherwise). Pass `null` to remove the current avatar.
 </ParamField>
 
 <ParamField body="postingPermission" type="'members' | 'admins'">

@@ -149,10 +149,11 @@ const conversation = await sublay.chat.updateConversation({
 <ParamField body="actingUserId" type="string" required>The acting user (must be a group admin).</ParamField>
 <ParamField body="name" type="string" />
 <ParamField body="description" type="string" />
-<ParamField body="avatarFileId" type="string | null">File id for the avatar, or `null` to clear it.</ParamField>
 <ParamField body="postingPermission" type='"members" | "team"'>Space conversations only: who may post — any active member (`"members"`) or only the space's active admins and moderators (`"team"`).</ParamField>
 
 **Returns** — `Promise<Conversation>`
+
+The Node SDK can't set a conversation's avatar: the avatar is an image uploaded with [Update Conversation](/v8/api-reference/chat/conversations/update-conversation), which the browser [JS SDK](/v8/js-sdk/chat) and the [React SDK](/v8/hooks/chat/conversations/use-update-conversation) send.
 
 ---
 

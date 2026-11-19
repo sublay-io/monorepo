@@ -282,7 +282,6 @@ These body id fields take JSON `null`, and refuse the string `"none"` with `400 
 | [`POST /workspaces`](/v8/api-reference/workspaces/create-workspace) | `parentWorkspaceId` | a root workspace |
 | [`POST /comments`](/v8/api-reference/comments/create-comment) | `parentCommentId` | a top-level comment |
 | [`POST /reputation-grants`](/v8/api-reference/reputation-grants/create-reputation-grant), [`POST /reputation-grants/mint`](/v8/api-reference/reputation-grants/mint-reputation-grant) | `spaceId` | the general bucket (no space) |
-| [`PATCH /chat/conversations/:conversationId`](/v8/api-reference/chat/conversations/update-conversation) | `avatarFileId` | remove the avatar |
 
 ```json
 { "error": "`parentSpaceId: \"none\"` isn't supported in a request body. For a top-level space, send `parentSpaceId: null` or leave it out.", "code": "space/unsupported-param", "param": "parentSpaceId" }

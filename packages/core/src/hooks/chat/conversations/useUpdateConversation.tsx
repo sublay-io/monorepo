@@ -2,12 +2,17 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { Conversation } from "../../../interfaces/models/Conversation";
+import { UploadImageOptions } from "../../../interfaces/models/Image";
 
 export interface UpdateConversationParams {
   conversationId: string;
   name?: string;
   description?: string;
-  avatarFileId?: string | null;
+  /**
+   * New avatar image. When present the request is sent as multipart form data
+   * and the server processes the image per `options`, replacing the old avatar.
+   */
+  avatar?: { file: File | Blob; options: UploadImageOptions };
   postingPermission?: "members" | "team";
 }
 
@@ -20,15 +25,33 @@ function useUpdateConversation(): (
   const update = useCallback(
     async ({
       conversationId,
+      avatar,
       ...rest
     }: UpdateConversationParams): Promise<Conversation> => {
       if (!projectId) throw new Error("No projectId available.");
       if (!conversationId) throw new Error("Please pass a conversationId.");
 
-      const response = await axios.patch(
-        `/${projectId}/chat/conversations/${conversationId}`,
-        rest
-      );
+      const path = `/${projectId}/chat/conversations/${conversationId}`;
+
+      if (avatar) {
+        const formData = new FormData();
+        if (rest.name !== undefined) formData.append("name", rest.name);
+        if (rest.description !== undefined) {
+          formData.append("description", rest.description);
+        }
+        if (rest.postingPermission !== undefined) {
+          formData.append("postingPermission", rest.postingPermission);
+        }
+        formData.append("avatarFile", avatar.file);
+        formData.append("avatarFile.options", JSON.stringify(avatar.options));
+
+        const response = await axios.patch(path, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data as Conversation;
+      }
+
+      const response = await axios.patch(path, rest);
       return response.data as Conversation;
     },
     [projectId, axios]

@@ -7,8 +7,6 @@ export interface UpdateConversationProps {
   actingUserId: string;
   name?: string;
   description?: string;
-  /** File id for the conversation avatar, or null to clear it. */
-  avatarFileId?: string | null;
   /** Space conversations only: who may post. */
   postingPermission?: "members" | "team";
 }

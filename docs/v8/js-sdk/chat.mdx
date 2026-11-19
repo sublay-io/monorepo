@@ -147,8 +147,11 @@ const conversation = await sublay.chat.updateConversation({
   New description.
 </ParamField>
 
-<ParamField body="avatarFileId" type="string | null">
-  File ID for the conversation avatar, or `null` to clear it.
+<ParamField body="avatarFile" type="{ file: Blob | File; options: ImageOptions }">
+  New avatar image and its processing options (a `mode` and the fields it
+  needs; see [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes)).
+  The request is then sent as `multipart/form-data`, and the previous avatar,
+  if any, is deleted.
 </ParamField>
 
 <ParamField body="postingPermission" type='"members" | "team"'>

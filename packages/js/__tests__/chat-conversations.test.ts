@@ -13,7 +13,7 @@ import {
   removeMember,
   updateConversation,
 } from "../src/modules/chat";
-import { makeClient } from "./helpers/client";
+import { formDataToObject, makeClient } from "./helpers/client";
 
 describe("js-sdk chat conversations — request shaping", () => {
   it("listConversations gets /chat/conversations with the full query (incl. the opaque cursor) as params", async () => {
@@ -102,15 +102,21 @@ describe("js-sdk chat conversations — request shaping", () => {
     });
   });
 
-  it("updateConversation forwards avatarFileId: null to clear the avatar", async () => {
+  it("updateConversation sends a new avatar as multipart avatarFile + avatarFile.options", async () => {
     const { client, projectInstance } = makeClient();
+    const file = new File(["bytes"], "a.png", { type: "image/png" });
+    const options = { mode: "original-aspect" as const, sizes: { small: 64 } };
     await updateConversation(client, {
       conversationId: "c1",
-      avatarFileId: null,
+      name: "New name",
+      avatarFile: { file, options },
     });
-    expect(projectInstance.patch).toHaveBeenCalledWith("/chat/conversations/c1", {
-      avatarFileId: null,
-    });
+    const [path, body] = projectInstance.patch.mock.calls[0];
+    expect(path).toBe("/chat/conversations/c1");
+    const fields = formDataToObject(body as FormData);
+    expect(fields.avatarFile).toBeInstanceOf(File);
+    expect(fields["avatarFile.options"]).toBe(JSON.stringify(options));
+    expect(fields.name).toBe("New name");
   });
 
   it("deleteConversation deletes /chat/conversations/:conversationId", async () => {

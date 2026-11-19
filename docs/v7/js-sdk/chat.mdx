@@ -151,7 +151,7 @@ const conversation = await sublay.chat.updateConversation({
 </ParamField>
 
 <ParamField body="avatarFileId" type="string | null">
-  File ID for the conversation avatar, or `null` to clear it.
+  File ID for the conversation avatar, or `null` to clear it. It must be a file the acting user uploaded that isn't attached to anything else (`400 chat/invalid-avatar-file` otherwise).
 </ParamField>
 
 <ParamField body="postingPermission" type='"members" | "admins"'>

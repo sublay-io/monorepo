@@ -8,6 +8,8 @@ Uploads a file directly to storage without processing. The file must be a PDF, J
 
 The uploaded file isn't attached to anything: it has no entity, comment, space or event. A file that belongs to a record is sent with that record's own request (for example, the images of [Create Entity](/v8/api-reference/entities/create-entity), or the cover and gallery of [Update Event](/v8/api-reference/events/update-event)).
 
+Use the returned `fileId` where an endpoint takes the id of an uploaded file, such as `avatarFileId` on [Update Conversation](/v8/api-reference/chat/conversations/update-conversation).
+
 This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 
 **Rate limit**: 10 requests per 5 minutes.

@@ -12,13 +12,8 @@ export interface UploadImageProps {
    * the server's `uploadImageBodySchema` — see {@link ImageOptions}.
    */
   imageOptions: ImageOptions;
-  /** Storage path segments, e.g. ["spaces", spaceId, "banner"]. */
+  /** Storage path segments, e.g. ["uploads", "photos"]. */
   pathParts?: string[];
-  /** Only one of entityId/commentId/spaceId/eventId may be set. */
-  entityId?: string;
-  commentId?: string;
-  spaceId?: string;
-  eventId?: string;
   /**
    * The user the service key acts as, who owns the upload. Omit for an
    * app-owned file.

@@ -8,11 +8,11 @@ The `events` module covers the full events surface: creating and editing events,
 Because the Node SDK authenticates with a **service key** (it acts as the whole project, not a single end user), functions that act as a user take that user in [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user). On the event-management functions (`updateEvent`, `cancelEvent`, `deleteEvent`, the host and invite functions, `fetchInvitees`), `actingUserId` is the user the call acts as (a host, the owner, or an admin or moderator of the event's space, depending on the function), with exactly that user's powers. On the host and invite functions, `userId` is the **target** user (the host or invitee).
 
 <Note>
-  **Image upload caveat.** The Node SDK does not support inline cover/gallery
-  upload on `createEvent`/`updateEvent` yet. Create the event first, then attach
-  images with [`sublay.storage.uploadImage`](/v8/node-sdk/storage) using its
-  `eventId` parameter. (The browser [JS SDK](/v8/js-sdk/events) and the
-  [React SDK](/v8/sdk/events/overview) do support inline upload.)
+  **Event images.** The Node SDK can't attach a cover or gallery image to an
+  event: `createEvent` and `updateEvent` don't take image files. The browser
+  [JS SDK](/v8/js-sdk/events), the [React SDK](/v8/sdk/events/overview) and the
+  [Create Event](/v8/api-reference/events/create-event) and
+  [Update Event](/v8/api-reference/events/update-event) endpoints do.
 </Note>
 
 Requires the `events` bundle. Space-scoping needs the `spaces` bundle; images need `files-images`; notifications need `notifications`.
@@ -363,36 +363,3 @@ const { data, pagination } = await sublay.events.fetchEventRsvps({
 
 **Returns** — `Promise<PaginatedResponse<EventRsvp>>`
 
----
-
-## Attaching images
-
-Create the event, then upload a cover or gallery image and associate it with `eventId`:
-
-```typescript
-import { readFile } from "node:fs/promises";
-
-const event = await sublay.events.createEvent({
-  actingUserId: "usr_abc123",
-  title: "Launch Party",
-  type: "online",
-  url: "https://meet.example.com/launch",
-  startTime: "2026-09-01T18:00:00.000Z",
-});
-
-const buffer = await readFile("./cover.jpg");
-await sublay.storage.uploadImage({
-  file: new Uint8Array(buffer),
-  filename: "cover.jpg",
-  mimeType: "image/jpeg",
-  imageOptions: { mode: "original-aspect", sizes: { full: 1600 }, format: "webp" },
-  eventId: event.id,
-  actingUserId: "usr_abc123",
-});
-```
-
-<Note>
-  Uploading via `storage.uploadImage` attaches a gallery image (a `File` with the
-  event's `eventId`). Setting it as the event's single cover (`coverImageId`) is
-  done by the inline-upload path, which the Node SDK does not yet expose.
-</Note>

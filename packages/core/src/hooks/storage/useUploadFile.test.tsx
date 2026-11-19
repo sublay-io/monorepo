@@ -62,7 +62,7 @@ describe("useUploadFile", () => {
     expect(formData.get("file")).not.toBeInstanceOf(File);
   });
 
-  it("includes optional associations and metadata in the FormData", async () => {
+  it("includes position and metadata in the FormData", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUploadFile());
 
     axiosPrivate.mockResponse("post", makeUploadResponse());
@@ -71,9 +71,6 @@ describe("useUploadFile", () => {
 
     await act(async () => {
       await result.current(file, ["uploads"], {
-        entityId: "entity-1",
-        commentId: "comment-1",
-        spaceId: "space-1",
         position: 2,
         metadata: { source: "test" },
       });
@@ -81,9 +78,6 @@ describe("useUploadFile", () => {
 
     const [call] = axiosPrivate.calls("post");
     const formData = call.body as FormData;
-    expect(formData.get("entityId")).toBe("entity-1");
-    expect(formData.get("commentId")).toBe("comment-1");
-    expect(formData.get("spaceId")).toBe("space-1");
     expect(formData.get("position")).toBe("2");
     expect(formData.get("metadata")).toBe(JSON.stringify({ source: "test" }));
   });

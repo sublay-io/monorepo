@@ -63,7 +63,6 @@ describe("node-sdk storage — uploadImage request shaping", () => {
         fit: "cover",
       },
       pathParts: ["spaces", "s1", "banner"],
-      spaceId: "s1",
     });
 
     expect(projectInstance.post).toHaveBeenCalledTimes(1);
@@ -77,7 +76,6 @@ describe("node-sdk storage — uploadImage request shaping", () => {
     );
     expect(fields.fit).toBe("cover");
     expect(fields.pathParts).toBe(JSON.stringify(["spaces", "s1", "banner"]));
-    expect(fields.spaceId).toBe("s1");
   });
 
   it("flattens aspect-ratio-width-based imageOptions as top-level multipart fields", async () => {
@@ -89,7 +87,6 @@ describe("node-sdk storage — uploadImage request shaping", () => {
         aspectRatio: { width: 16, height: 9 },
         widths: { hero: 1200 },
       },
-      entityId: "e1",
     });
 
     const [, formData] = projectInstance.post.mock.calls[0];
@@ -97,7 +94,6 @@ describe("node-sdk storage — uploadImage request shaping", () => {
     expect(fields.mode).toBe("aspect-ratio-width-based");
     expect(fields.aspectRatio).toBe(JSON.stringify({ width: 16, height: 9 }));
     expect(fields.widths).toBe(JSON.stringify({ hero: 1200 }));
-    expect(fields.entityId).toBe("e1");
   });
 });
 

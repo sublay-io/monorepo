@@ -18,9 +18,6 @@ export interface RNFile {
 type UniversalFile = BrowserFile | RNFile;
 
 export interface UploadFileOptions {
-  entityId?: string;
-  commentId?: string;
-  spaceId?: string;
   position?: number;
   metadata?: Record<string, any>;
 }
@@ -69,16 +66,6 @@ function useUploadFile(): (file: UniversalFile, pathParts: string[], options?: U
       // Append pathParts
       formData.append("pathParts", JSON.stringify(pathParts));
 
-      // Append optional associations
-      if (options?.entityId) {
-        formData.append("entityId", options.entityId);
-      }
-      if (options?.commentId) {
-        formData.append("commentId", options.commentId);
-      }
-      if (options?.spaceId) {
-        formData.append("spaceId", options.spaceId);
-      }
       if (options?.position !== undefined) {
         formData.append("position", options.position.toString());
       }

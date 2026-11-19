@@ -48,7 +48,6 @@ describe("useUploadImage", () => {
       returned = await result.current.uploadImage(file, {
         mode: "exact-dimensions",
         dimensions: { thumbnail: { width: 100, height: 100 } },
-        entityId: "entity-1",
       });
     });
 
@@ -63,7 +62,6 @@ describe("useUploadImage", () => {
     expect(formData.get("dimensions")).toBe(
       JSON.stringify({ thumbnail: { width: 100, height: 100 } }),
     );
-    expect(formData.get("entityId")).toBe("entity-1");
   });
 
   it("uploads an image in aspect-ratio-width-based mode", async () => {

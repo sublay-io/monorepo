@@ -28,10 +28,6 @@ interface BaseImageOptions {
   format?: "webp" | "jpeg" | "png" | "original"; // default: "webp"
   stripExif?: boolean; // default: true
   pathParts?: string[]; // Storage path
-  entityId?: string; // Optional association for cascade delete
-  commentId?: string; // Optional association for cascade delete
-  spaceId?: string; // Optional association for cascade delete
-  eventId?: string; // Optional association for cascade delete
   onProgress?: (progress: number) => void; // Callback for upload progress
 }
 

@@ -9,6 +9,9 @@ proxy URLs, plus reads and deletes existing files. Uploads are sent as
 or a **`Blob`**. There is no `Uint8Array` + `mimeType` path; the browser supplies
 the content type.
 
+A file uploaded with this module isn't attached to anything: it has no entity, comment, space or event. A file that belongs to a record is sent with that record's own call
+(for example, the `cover` and `gallery` of `sublay.events.createEvent`).
+
 <Note>
   Uploads are attributed to the logged-in user automatically (from the token) —
   there is no `userId` param. A user may delete files they own; reads are
@@ -29,7 +32,6 @@ const uploaded = await sublay.storage.uploadFile({
   file,
   filename: "report.pdf",
   pathParts: ["documents", "reports"],
-  entityId: "ent_xyz789",
 });
 // uploaded.publicPath → proxy URL
 ```
@@ -49,24 +51,11 @@ const uploaded = await sublay.storage.uploadFile({
 </ParamField>
 
 <ParamField body="position" type="number">
-  Display order when a record has multiple attachments.
+  A number stored on the file as `position`. Defaults to `0`.
 </ParamField>
 
 <ParamField body="metadata" type="object">
   Custom key-value data stored alongside the file record.
-</ParamField>
-
-<ParamField body="entityId" type="string">
-  Associates the file with an entity for cascade deletion. Only one of
-  `entityId` / `commentId` / `spaceId` may be set.
-</ParamField>
-
-<ParamField body="commentId" type="string">
-  Associates the file with a comment for cascade deletion.
-</ParamField>
-
-<ParamField body="spaceId" type="string">
-  Associates the file with a space.
 </ParamField>
 
 **Returns** — `Promise<UploadFileResponse>`:
@@ -142,25 +131,6 @@ const uploaded = await sublay.storage.uploadImage({
   Storage path segments. Defaults to `["images", "<fileId>"]`.
 </ParamField>
 
-<ParamField body="entityId" type="string">
-  Associates the image with an entity. Only one of `entityId` / `commentId` /
-  `spaceId` / `eventId` may be set.
-</ParamField>
-
-<ParamField body="commentId" type="string">
-  Associates the image with a comment.
-</ParamField>
-
-<ParamField body="spaceId" type="string">
-  Associates the image with a space.
-</ParamField>
-
-<ParamField body="eventId" type="string">
-  Associates the image with an event. Most apps attach event images inline via
-  `sublay.events.createEvent`/`updateEvent` (`cover` / `gallery`); use this only
-  to attach an image to an existing event out-of-band.
-</ParamField>
-
 **Returns** — `Promise<UploadImageResponse>`:
 
 ```typescript
@@ -195,9 +165,10 @@ const file = await sublay.storage.getFile({ fileId: "fil_abc123" });
 
 **Returns** — `Promise<GetFileResponse>` — a flat projection carrying `fileId`,
 `type`, `originalPath`, `originalSize`, `originalMimeType`, `position`, `metadata`,
-`createdAt`/`updatedAt`, the optional association ids (`userId`, `entityId`,
-`commentId`, `spaceId`), and — for images — an `image` object with `variants`,
-`processingStatus`, `format`, `quality`, and `exifStripped`.
+`createdAt`/`updatedAt`, the uploader's `userId`, the ids of what the file
+belongs to (`entityId`, `commentId`, `spaceId`) when there are any, and — for
+images — an `image` object with `variants`, `processingStatus`, `format`,
+`quality`, and `exifStripped`.
 
 ---
 

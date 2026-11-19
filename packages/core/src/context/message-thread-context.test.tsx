@@ -210,6 +210,31 @@ describe("MessageThreadProvider", () => {
       expect(result.current.hasMore).toBe(true);
     });
 
+    it("stops when a page ends on the reply it paged from", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderThread(
+        fakeSocket,
+        page([reply("reply-1", "2024-01-01T00:00:01.000Z")]),
+      );
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      axiosPrivate.mockResponse("get", page([reply("reply-2", "2024-01-01T00:00:02.000Z")], true));
+      // A server that answers the same page again: the cursor didn't move.
+      axiosPrivate.mockResponse("get", page([reply("reply-2", "2024-01-01T00:00:02.000Z")], true));
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+
+      await waitFor(() => expect(catchUpCalls(axiosPrivate)).toHaveLength(2));
+      // Give a runaway loop a chance to show itself.
+      await new Promise((r) => setTimeout(r, 50));
+      const calls = catchUpCalls(axiosPrivate);
+      expect(calls).toHaveLength(2);
+      expect(calls[0].config.params.after).toBe("reply-1");
+      expect(calls[1].config.params.after).toBe("reply-2");
+    });
+
     it("reloads the thread from its first page, once, when the server can't page from the cursor", async () => {
       const fakeSocket = createFakeSocket();
       fakeSocket.connected = true;

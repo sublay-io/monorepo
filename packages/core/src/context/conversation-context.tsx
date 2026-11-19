@@ -19,6 +19,7 @@ import useFetchManyChatMessages, {
 import useProject from "../hooks/projects/useProject";
 import {
   clearUnread,
+  replaceMessages,
   setMessagesHasMore,
   upsertMessage,
 } from "../store/slices/chatSlice";
@@ -82,8 +83,10 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   // long disconnect doesn't drop everything past the first page. With nothing
   // to anchor on (an empty conversation, or a first load that failed), load
   // the latest page the way the mount fetch does. If the server can't page
-  // from the anchor (`chat/invalid-cursor`: that message is gone), load the
-  // latest page instead, once.
+  // from the anchor (`chat/invalid-cursor`: that message is gone), start the
+  // conversation over from its latest page, once: the messages held before it
+  // are replaced, so no gap is left between them and the page that `loadOlder`
+  // (which pages from the oldest held message) could never fill.
   //
   // `anchorId` is the newest message loaded when the socket dropped. Paging
   // from the newest loaded *now* would skip what others sent while it was
@@ -118,7 +121,15 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
           });
         } catch (err) {
           if (!isInvalidChatCursorError(err)) throw err;
-          await loadLatestPage();
+          const latest = await fetchMany({ conversationId, sortDir: "desc" });
+          dispatch(
+            replaceMessages({
+              conversationId,
+              // Newest first from the server; the store keeps messages ascending.
+              messages: [...latest.data].reverse(),
+              hasMore: latest.pagination.hasMore,
+            }),
+          );
           return;
         }
         page.data.forEach((msg) => dispatch(upsertMessage(msg)));

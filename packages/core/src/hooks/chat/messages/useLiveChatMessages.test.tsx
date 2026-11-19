@@ -4,7 +4,7 @@ import { act, waitFor } from "@testing-library/react";
 import { renderHookWithAxios, resetAxiosMocks, makeChatMessage } from "../../../test-utils";
 import useLiveChatMessages from "./useLiveChatMessages";
 import type { ChatMessageListIncludeParam } from "../../../interfaces/models/ChatMessage";
-import { setThreadReplies, upsertMessage } from "../../../store/slices/chatSlice";
+import { addOptimisticMessage, setThreadReplies, upsertMessage } from "../../../store/slices/chatSlice";
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -282,6 +282,36 @@ describe("useLiveChatMessages", () => {
 
     const calls = axiosPrivate.calls("get");
     expect(calls[1].config?.params).toMatchObject({ before: oldest.id });
+  });
+
+  it("loadOlder never pages from an optimistic message", async () => {
+    // Only an optimistic send is held, yet the server says there is history.
+    const { result, store, axiosPrivate } = renderHookWithAxios(
+      () => useLiveChatMessages({ conversationId: "conversation-1" }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", { data: [], pagination: { hasMore: true } }),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    act(() => {
+      store.dispatch(
+        addOptimisticMessage(
+          makeChatMessage({
+            id: "temp-abc",
+            localId: "abc",
+            conversationId: "conversation-1",
+            createdAt: "2024-01-01T00:00:05.000Z",
+          }),
+        ),
+      );
+    });
+    await act(async () => {
+      await result.current.loadOlder();
+    });
+
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
   });
 
   it("loadOlder is a no-op when there is no more data", async () => {

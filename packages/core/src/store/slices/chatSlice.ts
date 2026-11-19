@@ -257,8 +257,12 @@ function upsertInto(
 }
 
 /**
- * The later of a thread cursor and the newest real reply in `messages`, in the
- * server's order: `createdAt`, then `id` for replies created at the same time.
+ * The later of a thread cursor and the newest real reply in `messages`, by
+ * `createdAt` and then `id`. The server orders by microsecond `createdAt` then
+ * `id`; this compares milliseconds then `id`, so between replies in the same
+ * millisecond it can pick one the server puts earlier. That is conservative:
+ * paging `after` it can only fetch a reply again (de-duplicated by id), never
+ * skip one.
  */
 function advanceCursor(
   cursor: ThreadCursor | null,
@@ -554,6 +558,42 @@ const chatSlice = createSlice({
       const bucket = state.messages[conversationId];
       upsertInto(bucket.items, message);
       refreshCursors(bucket);
+    },
+
+    /**
+     * Replace a conversation's loaded messages with its latest page (given
+     * oldest first), as a fresh start: messages loaded before it are dropped,
+     * so no gap can sit between them and the page, and `hasMore` is the page's.
+     * Kept: optimistic `temp-` messages, and messages newer than the page's
+     * newest (live ones that landed while the page was in flight).
+     */
+    replaceMessages(
+      state,
+      action: PayloadAction<{
+        conversationId: string;
+        messages: ChatMessage[];
+        hasMore: boolean;
+      }>
+    ) {
+      const { conversationId, messages, hasMore } = action.payload;
+      const previous = state.messages[conversationId];
+      const held = previous?.items ?? [];
+      let newestAt: number | null = null;
+      for (const m of messages) {
+        const at = new Date(m.createdAt).getTime();
+        if (newestAt === null || at > newestAt) newestAt = at;
+      }
+      const bucket = emptyBucket();
+      bucket.items = held.filter(
+        (m) =>
+          m.id.startsWith("temp-") ||
+          (newestAt !== null && new Date(m.createdAt).getTime() > newestAt)
+      );
+      for (const m of messages) upsertInto(bucket.items, m);
+      bucket.hasMore = hasMore;
+      bucket.loading = previous?.loading ?? false;
+      refreshCursors(bucket);
+      state.messages[conversationId] = bucket;
     },
 
     /**
@@ -875,6 +915,7 @@ export const {
   setUnreadSummary,
   setMessagesLoading,
   setMessagesHasMore,
+  replaceMessages,
   upsertMessage,
   addOptimisticMessage,
   failOptimisticMessage,

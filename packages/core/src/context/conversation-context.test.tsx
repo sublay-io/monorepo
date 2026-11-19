@@ -628,7 +628,7 @@ describe("ConversationProvider", () => {
       expect(calls[1].config.params.after).toBe("message-2");
     });
 
-    it("loads the latest page, once, when the server can't page from the anchor", async () => {
+    it("starts over from the latest page, once, when the server can't page from the anchor", async () => {
       const fakeSocket = createFakeSocket();
       fakeSocket.connected = true;
       const { result, axiosPrivate } = renderConversation(
@@ -658,18 +658,62 @@ describe("ConversationProvider", () => {
         fakeSocket.trigger("connect");
       });
 
+      // message-1 is dropped: nothing could fill the gap between it and the page.
       await waitFor(() =>
-        expect(result.current.messages!.map((m) => m.id)).toEqual([
-          "message-1",
-          "message-2",
-          "message-3",
-        ]),
+        expect(result.current.messages!.map((m) => m.id)).toEqual(["message-2", "message-3"]),
       );
+      expect(result.current.hasMore).toBe(true);
       const calls = catchUpCalls(axiosPrivate);
       expect(calls).toHaveLength(2);
       expect(calls[0].config.params.after).toBe("message-1");
       expect(calls[1].config.params).toEqual({ limit: 50, sortDir: "desc" });
       await waitForMarked(axiosPrivate, "message-3");
+
+      // Older history continues from the page, right below it.
+      axiosPrivate.mockResponse("get", page([msg("message-1b", "2024-01-01T00:00:01.500Z")]));
+      await act(async () => {
+        await result.current.loadOlder!();
+      });
+      const all = catchUpCalls(axiosPrivate);
+      expect(all).toHaveLength(3);
+      expect(all[2].config.params).toMatchObject({ before: "message-2", sortDir: "desc" });
+    });
+
+    it("anchors on the newest real message, not an optimistic one, when the socket drops", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, store, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")]),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      await waitForMarked(axiosPrivate, "message-1");
+
+      act(() => {
+        store.dispatch(
+          addOptimisticMessage(
+            makeChatMessage({
+              id: "temp-abc",
+              localId: "abc",
+              conversationId: "conversation-1",
+              createdAt: "2024-01-01T00:00:05.000Z",
+            }),
+          ),
+        );
+      });
+      act(() => {
+        fakeSocket.trigger("disconnect");
+      });
+
+      axiosPrivate.mockResponse("get", page([msg("message-2", "2024-01-01T00:00:02.000Z")]));
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+
+      await waitForMarked(axiosPrivate, "message-2");
+      const calls = catchUpCalls(axiosPrivate);
+      expect(calls).toHaveLength(1);
+      expect(calls[0].config.params.after).toBe("message-1");
     });
 
     it("does not retry when the latest-page fallback fails too", async () => {

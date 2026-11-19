@@ -20,10 +20,8 @@ describe("useFetchManyChatMessagesWrapper", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [first],
-            hasMore: true,
-            oldestCreatedAt: first.createdAt,
-            newestCreatedAt: first.createdAt,
+            data: [first],
+            pagination: { hasMore: true },
           }),
       },
     );
@@ -53,10 +51,8 @@ describe("useFetchManyChatMessagesWrapper", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [first],
-            hasMore: true,
-            oldestCreatedAt: first.createdAt,
-            newestCreatedAt: first.createdAt,
+            data: [first],
+            pagination: { hasMore: true },
           }),
       },
     );
@@ -64,10 +60,8 @@ describe("useFetchManyChatMessagesWrapper", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     axiosPrivate.mockResponse("get", {
-      messages: [],
-      hasMore: false,
-      oldestCreatedAt: null,
-      newestCreatedAt: null,
+      data: [],
+      pagination: { hasMore: false },
     });
 
     act(() => {
@@ -98,10 +92,8 @@ describe("useFetchManyChatMessagesWrapper", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [first],
-            hasMore: true,
-            oldestCreatedAt: first.createdAt,
-            newestCreatedAt: first.createdAt,
+            data: [first],
+            pagination: { hasMore: true },
           }),
       },
     );
@@ -109,10 +101,8 @@ describe("useFetchManyChatMessagesWrapper", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     axiosPrivate.mockResponse("get", {
-      messages: [second],
-      hasMore: false,
-      oldestCreatedAt: second.createdAt,
-      newestCreatedAt: second.createdAt,
+      data: [second],
+      pagination: { hasMore: false },
     });
 
     await act(async () => {
@@ -123,7 +113,34 @@ describe("useFetchManyChatMessagesWrapper", () => {
     expect(result.current.hasMore).toBe(false);
 
     const calls = axiosPrivate.calls("get");
-    expect(calls[1].config?.params).toMatchObject({ before: first.createdAt });
+    expect(calls[1].config?.params).toMatchObject({ before: first.id });
+  });
+
+  it("loads more after the last message of the page for asc sort", async () => {
+    const page1 = [
+      makeChatMessage({ id: "message-1", createdAt: "2024-01-01T00:00:00.000Z" }),
+      makeChatMessage({ id: "message-2", createdAt: "2024-01-02T00:00:00.000Z" }),
+    ];
+    const page2 = [makeChatMessage({ id: "message-3", createdAt: "2024-01-03T00:00:00.000Z" })];
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useFetchManyChatMessagesWrapper({ conversationId: "conversation-1", sortDir: "asc" }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", { data: page1, pagination: { hasMore: true } }),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    axiosPrivate.mockResponse("get", { data: page2, pagination: { hasMore: false } });
+    await act(async () => {
+      await result.current.loadMore();
+    });
+
+    expect(result.current.messages.map((m) => m.id)).toEqual(["message-1", "message-2", "message-3"]);
+    const calls = axiosPrivate.calls("get");
+    expect(calls[1].config?.params).toMatchObject({ after: "message-2", sortDir: "asc" });
+    expect(calls[1].config?.params).not.toHaveProperty("before");
   });
 
   it("refetches from scratch, replacing the existing list", async () => {
@@ -134,10 +151,8 @@ describe("useFetchManyChatMessagesWrapper", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [first],
-            hasMore: true,
-            oldestCreatedAt: first.createdAt,
-            newestCreatedAt: first.createdAt,
+            data: [first],
+            pagination: { hasMore: true },
           }),
       },
     );
@@ -146,10 +161,8 @@ describe("useFetchManyChatMessagesWrapper", () => {
 
     const replacement = makeChatMessage({ id: "message-2" });
     axiosPrivate.mockResponse("get", {
-      messages: [replacement],
-      hasMore: false,
-      oldestCreatedAt: replacement.createdAt,
-      newestCreatedAt: replacement.createdAt,
+      data: [replacement],
+      pagination: { hasMore: false },
     });
 
     await act(async () => {
@@ -165,10 +178,8 @@ describe("useFetchManyChatMessagesWrapper", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [],
-            hasMore: false,
-            oldestCreatedAt: null,
-            newestCreatedAt: null,
+            data: [],
+            pagination: { hasMore: false },
           }),
       },
     );

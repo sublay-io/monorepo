@@ -69,8 +69,9 @@ function useFetchManyChatMessagesWrapper(
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
 
-  // Cursor for the next page, in the direction of travel: the oldest loaded
-  // timestamp for "desc", the newest for "asc".
+  // Cursor for the next page: the id of the last message loaded, which is the
+  // furthest one in the direction of travel (the oldest for "desc", the newest
+  // for "asc").
   const cursorRef = useRef<string | null>(null);
   const loadingRef = useRef(false);
   const hasMoreRef = useRef(true);
@@ -80,12 +81,10 @@ function useFetchManyChatMessagesWrapper(
   const filtersKey = JSON.stringify(filters ?? {});
   const includeKey = Array.isArray(include) ? include.join(",") : include ?? "";
 
-  const advanceCursor = useCallback(
-    (res: { oldestCreatedAt: string | null; newestCreatedAt: string | null }) => {
-      cursorRef.current = sortDir === "asc" ? res.newestCreatedAt : res.oldestCreatedAt;
-    },
-    [sortDir]
-  );
+  const advanceCursor = (page: ChatMessage[]) => {
+    const last = page[page.length - 1];
+    if (last) cursorRef.current = last.id;
+  };
 
   const refetch = useCallback(async () => {
     if (!conversationId) return;
@@ -103,10 +102,11 @@ function useFetchManyChatMessagesWrapper(
         filters,
         ...reputation,
       });
-      setMessages(res.messages);
-      hasMoreRef.current = res.hasMore;
-      setHasMore(res.hasMore);
-      advanceCursor(res);
+      cursorRef.current = null;
+      setMessages(res.data);
+      hasMoreRef.current = res.pagination.hasMore;
+      setHasMore(res.pagination.hasMore);
+      advanceCursor(res.data);
     } catch (err) {
       handleError(err, "Failed to fetch messages");
     } finally {
@@ -114,7 +114,7 @@ function useFetchManyChatMessagesWrapper(
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchMany, conversationId, parentMessageId, limit, sortDir, includeKey, filtersKey, reputationKey, advanceCursor]);
+  }, [fetchMany, conversationId, parentMessageId, limit, sortDir, includeKey, filtersKey, reputationKey]);
 
   const loadMore = useCallback(async () => {
     if (loadingRef.current || !hasMoreRef.current || !cursorRef.current) return;
@@ -133,10 +133,10 @@ function useFetchManyChatMessagesWrapper(
           ? { after: cursorRef.current }
           : { before: cursorRef.current }),
       });
-      setMessages((prev) => [...prev, ...res.messages]);
-      hasMoreRef.current = res.hasMore;
-      setHasMore(res.hasMore);
-      advanceCursor(res);
+      setMessages((prev) => [...prev, ...res.data]);
+      hasMoreRef.current = res.pagination.hasMore;
+      setHasMore(res.pagination.hasMore);
+      advanceCursor(res.data);
     } catch (err) {
       handleError(err, "Failed to load more messages");
     } finally {
@@ -144,7 +144,7 @@ function useFetchManyChatMessagesWrapper(
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchMany, conversationId, parentMessageId, limit, sortDir, includeKey, filtersKey, reputationKey, advanceCursor]);
+  }, [fetchMany, conversationId, parentMessageId, limit, sortDir, includeKey, filtersKey, reputationKey]);
 
   useEffect(() => {
     refetch();

@@ -17,10 +17,8 @@ describe("useChatMessages", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [message],
-            hasMore: false,
-            oldestCreatedAt: message.createdAt,
-            newestCreatedAt: message.createdAt,
+            data: [message],
+            pagination: { hasMore: false },
           }),
       },
     );

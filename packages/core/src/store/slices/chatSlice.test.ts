@@ -589,7 +589,7 @@ describe("chatSlice — thread replies", () => {
           items: [reply("reply-1", "2024-01-01T00:00:01.000Z")],
           loading: false,
           hasMore,
-          cursor: "2024-01-01T00:00:01.000Z",
+          cursor: { id: "reply-1", createdAt: "2024-01-01T00:00:01.000Z" },
         },
       },
     });
@@ -623,7 +623,7 @@ describe("chatSlice — thread replies", () => {
 
   it("a live reply advances the cursor when the thread is loaded to its end", () => {
     const state = reducer(openThread(false), upsertMessage(reply("reply-2", "2024-01-01T00:00:02.000Z")));
-    expect(state.threads["parent-1"].cursor).toBe("2024-01-01T00:00:02.000Z");
+    expect(state.threads["parent-1"].cursor).toEqual({ id: "reply-2", createdAt: "2024-01-01T00:00:02.000Z" });
   });
 
   it("a reply confirmed while the socket is down leaves the cursor, so catch-up covers what was missed", () => {
@@ -633,7 +633,7 @@ describe("chatSlice — thread replies", () => {
     );
 
     expect(state.threads["parent-1"].items.map((m) => m.id)).toEqual(["reply-1", "reply-6"]);
-    expect(state.threads["parent-1"].cursor).toBe("2024-01-01T00:00:01.000Z");
+    expect(state.threads["parent-1"].cursor).toEqual({ id: "reply-1", createdAt: "2024-01-01T00:00:01.000Z" });
   });
 
   it("confirming a send or an edit keeps the reactions the server response leaves out", () => {
@@ -698,7 +698,7 @@ describe("chatSlice — thread replies", () => {
     const state = reducer(openThread(true), upsertMessage(reply("reply-9", "2024-01-01T00:00:09.000Z")));
 
     expect(state.threads["parent-1"].items.map((m) => m.id)).toEqual(["reply-1", "reply-9"]);
-    expect(state.threads["parent-1"].cursor).toBe("2024-01-01T00:00:01.000Z");
+    expect(state.threads["parent-1"].cursor).toEqual({ id: "reply-1", createdAt: "2024-01-01T00:00:01.000Z" });
   });
 
   it("mergeThreadReplies merges a page in order, keeping live replies, and moves the cursor", () => {
@@ -718,7 +718,7 @@ describe("chatSlice — thread replies", () => {
       "reply-3",
       "reply-9",
     ]);
-    expect(state.threads["parent-1"].cursor).toBe("2024-01-01T00:00:03.000Z");
+    expect(state.threads["parent-1"].cursor).toEqual({ id: "reply-3", createdAt: "2024-01-01T00:00:03.000Z" });
     expect(state.threads["parent-1"].hasMore).toBe(false);
   });
 
@@ -726,7 +726,7 @@ describe("chatSlice — thread replies", () => {
     // Read to the end, closed; replies 2–8 were missed while closed, then
     // reply-9 arrived live and moved the cursor past them.
     let state = reducer(openThread(false), upsertMessage(reply("reply-9", "2024-01-01T00:00:09.000Z")));
-    expect(state.threads["parent-1"].cursor).toBe("2024-01-01T00:00:09.000Z");
+    expect(state.threads["parent-1"].cursor).toEqual({ id: "reply-9", createdAt: "2024-01-01T00:00:09.000Z" });
 
     // Reopened: the load starts by forgetting the fetched run…
     state = reducer(state, startThreadLoad({ parentMessageId: "parent-1" }));
@@ -744,9 +744,27 @@ describe("chatSlice — thread replies", () => {
       }),
     );
 
-    expect(state.threads["parent-1"].cursor).toBe("2024-01-01T00:00:02.000Z");
+    expect(state.threads["parent-1"].cursor).toEqual({ id: "reply-2", createdAt: "2024-01-01T00:00:02.000Z" });
     expect(state.threads["parent-1"].hasMore).toBe(true);
     expect(state.threads["parent-1"].items.map((m) => m.id)).toEqual(["reply-1", "reply-2", "reply-9"]);
+  });
+
+  it("between replies created at the same time, the cursor takes the later id, as the server orders them", () => {
+    const state = reducer(
+      openThread(true),
+      mergeThreadReplies({
+        parentMessageId: "parent-1",
+        messages: [
+          reply("reply-b", "2024-01-01T00:00:04.000Z"),
+          reply("reply-a", "2024-01-01T00:00:04.000Z"),
+        ],
+        hasMore: true,
+      }),
+    );
+    expect(state.threads["parent-1"].cursor).toEqual({
+      id: "reply-b",
+      createdAt: "2024-01-01T00:00:04.000Z",
+    });
   });
 
   it("an optimistic reply goes to its thread, and a failed one is flagged there", () => {
@@ -756,7 +774,7 @@ describe("chatSlice — thread replies", () => {
     expect(state.threads["parent-1"].items.map((m) => m.id)).toEqual(["reply-1", "temp-abc"]);
     expect(state.messages[CONV].items.map((m) => m.id)).toEqual(["parent-1"]);
     // Optimistic replies don't move the cursor
-    expect(state.threads["parent-1"].cursor).toBe("2024-01-01T00:00:01.000Z");
+    expect(state.threads["parent-1"].cursor).toEqual({ id: "reply-1", createdAt: "2024-01-01T00:00:01.000Z" });
 
     state = reducer(state, failOptimisticMessage({ conversationId: CONV, localId: "abc" }));
     expect(state.threads["parent-1"].items[1].sendFailed).toBe(true);

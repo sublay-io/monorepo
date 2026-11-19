@@ -33,11 +33,18 @@ interface ThreadBucket {
   // Whether the server has newer replies than the fetched run (threads load
   // oldest first, so "more" is at the newest end)
   hasMore: boolean;
-  // createdAt of the newest reply in the unbroken run fetched from the start of
-  // the thread — the `after` cursor for loading more and for reconnect
-  // catch-up. A live reply that lands while `hasMore` is true sits beyond a gap
-  // and doesn't advance it; one that lands at the end does.
-  cursor: string | null;
+  // The newest reply in the unbroken run fetched from the start of the thread:
+  // its id is the `after` cursor for loading more and for reconnect catch-up,
+  // its createdAt orders it against newer replies. A live reply that lands
+  // while `hasMore` is true sits beyond a gap and doesn't advance it; one that
+  // lands at the end does.
+  cursor: ThreadCursor | null;
+}
+
+/** The reply a thread continues from: `after` takes its `id`. */
+export interface ThreadCursor {
+  id: string;
+  createdAt: string;
 }
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -50,7 +57,8 @@ export interface ChatState {
     items: ConversationPreview[];
     loading: boolean;
     hasMore: boolean;
-    // lastMessageAt ISO string of the oldest loaded preview — next-page cursor
+    // `pagination.nextCursor` of the last page loaded (opaque; `null` when
+    // the server has no more)
     cursor: string | null;
   };
   // Messages keyed by conversationId; stored ASC (oldest first, newest at end)
@@ -248,16 +256,21 @@ function upsertInto(
   }
 }
 
-/** The later of a thread cursor and the newest real reply in `messages`. */
+/**
+ * The later of a thread cursor and the newest real reply in `messages`, in the
+ * server's order: `createdAt`, then `id` for replies created at the same time.
+ */
 function advanceCursor(
-  cursor: string | null,
+  cursor: ThreadCursor | null,
   messages: ChatMessage[]
-): string | null {
+): ThreadCursor | null {
   let newest = cursor;
   for (const m of messages) {
     if (m.id.startsWith("temp-")) continue;
-    if (!newest || new Date(m.createdAt).getTime() > new Date(newest).getTime()) {
-      newest = m.createdAt;
+    const at = new Date(m.createdAt).getTime();
+    const newestAt = newest ? new Date(newest.createdAt).getTime() : 0;
+    if (!newest || at > newestAt || (at === newestAt && m.id > newest.id)) {
+      newest = { id: m.id, createdAt: m.createdAt };
     }
   }
   return newest;

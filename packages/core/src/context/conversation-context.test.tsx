@@ -22,7 +22,7 @@ afterEach(() => {
 });
 
 function emptyMessagesPage() {
-  return { messages: [], hasMore: false, oldestCreatedAt: null, newestCreatedAt: null };
+  return { data: [], pagination: { hasMore: false } };
 }
 
 function emptyMembersPage() {
@@ -187,7 +187,7 @@ describe("ConversationProvider", () => {
 
     // Server returns the main stream newest-first.
     function messagesPage(messages: ReturnType<typeof msg>[]) {
-      return { messages, hasMore: false };
+      return { data: messages, pagination: { hasMore: false } };
     }
 
     function connectedChatContext(fakeSocket: FakeSocket): ChatContextValue {
@@ -384,10 +384,11 @@ describe("ConversationProvider", () => {
 
       // Catch-up returns ascending.
       axiosPrivate.mockResponse("get", {
-        messages: [
+        data: [
           msg("message-2", "2024-01-01T00:00:02.000Z"),
           msg("message-3", "2024-01-01T00:00:03.000Z"),
         ],
+        pagination: { hasMore: false },
       });
       axiosPrivate.mockResponse("post", "", 204);
 
@@ -408,12 +409,9 @@ describe("ConversationProvider", () => {
     }
 
     function page(messages: ReturnType<typeof msg>[], hasMore = false) {
-      const times = messages.map((m) => m.createdAt).sort();
       return {
-        messages,
-        hasMore,
-        oldestCreatedAt: times[0] ?? null,
-        newestCreatedAt: times[times.length - 1] ?? null,
+        data: messages,
+        pagination: { hasMore },
       };
     }
 
@@ -517,7 +515,7 @@ describe("ConversationProvider", () => {
       expect(calls).toHaveLength(1);
       expect(calls[0].url).toBe(MESSAGES_URL);
       expect(calls[0].config.params).toEqual({
-        after: "2024-01-01T00:00:01.000Z",
+        after: "message-1",
         limit: 100,
         sortDir: "asc",
       });
@@ -559,7 +557,7 @@ describe("ConversationProvider", () => {
       const calls = catchUpCalls(axiosPrivate);
       expect(calls).toHaveLength(2);
       expect(calls[1].url).toBe(MESSAGES_URL);
-      expect(calls[1].config.params.after).toBe("2024-01-01T00:00:03.000Z");
+      expect(calls[1].config.params.after).toBe("message-3");
       await waitForMarked(axiosPrivate, "message-4");
     });
 
@@ -598,7 +596,104 @@ describe("ConversationProvider", () => {
       );
       const calls = catchUpCalls(axiosPrivate);
       expect(calls).toHaveLength(1);
-      expect(calls[0].config.params.after).toBe("2024-01-01T00:00:01.000Z");
+      expect(calls[0].config.params.after).toBe("message-1");
+    });
+
+    it("stops when a page ends on the message it paged from", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")]),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+
+      axiosPrivate.mockResponse(
+        "get",
+        page([msg("message-2", "2024-01-01T00:00:02.000Z")], true),
+      );
+      // A server that answers the same page again: the cursor didn't move.
+      axiosPrivate.mockResponse(
+        "get",
+        page([msg("message-2", "2024-01-01T00:00:02.000Z")], true),
+      );
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+
+      await waitForMarked(axiosPrivate, "message-2");
+      const calls = catchUpCalls(axiosPrivate);
+      expect(calls).toHaveLength(2);
+      expect(calls[0].config.params.after).toBe("message-1");
+      expect(calls[1].config.params.after).toBe("message-2");
+    });
+
+    it("loads the latest page, once, when the server can't page from the anchor", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")]),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      await waitForMarked(axiosPrivate, "message-1");
+
+      axiosPrivate.mockError("get", 400, {
+        error: "Invalid cursor",
+        code: "chat/invalid-cursor",
+        param: "after",
+      });
+      // The latest page, newest first.
+      axiosPrivate.mockResponse(
+        "get",
+        page(
+          [
+            msg("message-3", "2024-01-01T00:00:03.000Z"),
+            msg("message-2", "2024-01-01T00:00:02.000Z"),
+          ],
+          true,
+        ),
+      );
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+
+      await waitFor(() =>
+        expect(result.current.messages!.map((m) => m.id)).toEqual([
+          "message-1",
+          "message-2",
+          "message-3",
+        ]),
+      );
+      const calls = catchUpCalls(axiosPrivate);
+      expect(calls).toHaveLength(2);
+      expect(calls[0].config.params.after).toBe("message-1");
+      expect(calls[1].config.params).toEqual({ limit: 50, sortDir: "desc" });
+      await waitForMarked(axiosPrivate, "message-3");
+    });
+
+    it("does not retry when the latest-page fallback fails too", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")]),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      await waitForMarked(axiosPrivate, "message-1");
+
+      const invalid = { error: "Invalid cursor", code: "chat/invalid-cursor", param: "after" };
+      axiosPrivate.mockError("get", 400, invalid);
+      axiosPrivate.mockError("get", 400, invalid);
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+
+      await waitFor(() => expect(catchUpCalls(axiosPrivate)).toHaveLength(2));
+      // Give a runaway loop a chance to show itself.
+      await new Promise((r) => setTimeout(r, 50));
+      expect(catchUpCalls(axiosPrivate)).toHaveLength(2);
+      expect(result.current.messages!.map((m) => m.id)).toEqual(["message-1"]);
     });
 
     it("loads the latest page when no message is loaded to page from", async () => {

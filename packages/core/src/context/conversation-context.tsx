@@ -13,7 +13,9 @@ import useConversationData, {
   UseConversationDataValues,
 } from "../hooks/chat/useConversationData";
 import useMarkConversationAsRead from "../hooks/chat/useMarkConversationAsRead";
-import useFetchManyChatMessages from "../hooks/chat/messages/useFetchManyChatMessages";
+import useFetchManyChatMessages, {
+  isInvalidChatCursorError,
+} from "../hooks/chat/messages/useFetchManyChatMessages";
 import useProject from "../hooks/projects/useProject";
 import {
   clearUnread,
@@ -76,40 +78,56 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   }, [reduxMessages]);
 
   // Fetch what arrived while the socket was down. With messages loaded, page
-  // forward from the newest one until the server has no more, so a long
-  // disconnect doesn't drop everything past the first page. With nothing to
-  // anchor on (an empty conversation, or a first load that failed), load the
-  // latest page the way the mount fetch does.
+  // forward from the newest one (by its id) until the server has no more, so a
+  // long disconnect doesn't drop everything past the first page. With nothing
+  // to anchor on (an empty conversation, or a first load that failed), load
+  // the latest page the way the mount fetch does. If the server can't page
+  // from the anchor (`chat/invalid-cursor`: that message is gone), load the
+  // latest page instead, once.
   //
-  // `anchorAt` is the newest message loaded when the socket dropped. Paging
+  // `anchorId` is the newest message loaded when the socket dropped. Paging
   // from the newest loaded *now* would skip what others sent while it was
   // down if you sent a message meanwhile (your send still confirms over REST).
-  const catchUpMessages = useCallback(async (anchorAt: string | null) => {
+  const catchUpMessages = useCallback(async (anchorId: string | null) => {
     if (!projectId || !conversationId) return;
 
+    const loadLatestPage = async () => {
+      const page = await fetchMany({ conversationId, sortDir: "desc" });
+      // Newest first from the server; the store keeps messages ascending.
+      [...page.data].reverse().forEach((msg) => dispatch(upsertMessage(msg)));
+      dispatch(
+        setMessagesHasMore({ conversationId, hasMore: page.pagination.hasMore }),
+      );
+    };
+
     try {
-      if (!anchorAt) {
-        const page = await fetchMany({ conversationId, sortDir: "desc" });
-        // Newest first from the server; the store keeps messages ascending.
-        [...page.messages].reverse().forEach((msg) => dispatch(upsertMessage(msg)));
-        dispatch(setMessagesHasMore({ conversationId, hasMore: page.hasMore }));
+      if (!anchorId) {
+        await loadLatestPage();
         return;
       }
 
-      let after = new Date(anchorAt).toISOString();
+      let after = anchorId;
       while (true) {
-        const page = await fetchMany({
-          conversationId,
-          after,
-          limit: 100,
-          sortDir: "asc",
-        });
-        page.messages.forEach((msg) => dispatch(upsertMessage(msg)));
+        let page: Awaited<ReturnType<typeof fetchMany>>;
+        try {
+          page = await fetchMany({
+            conversationId,
+            after,
+            limit: 100,
+            sortDir: "asc",
+          });
+        } catch (err) {
+          if (!isInvalidChatCursorError(err)) throw err;
+          await loadLatestPage();
+          return;
+        }
+        page.data.forEach((msg) => dispatch(upsertMessage(msg)));
         // Stop when the server is done, or if the cursor didn't move.
-        if (!page.hasMore || !page.newestCreatedAt || page.newestCreatedAt === after) {
+        const last = page.data[page.data.length - 1];
+        if (!page.pagination.hasMore || !last || last.id === after) {
           break;
         }
-        after = page.newestCreatedAt;
+        after = last.id;
       }
     } catch (err) {
       handleError(err, "Failed to fetch missed messages");
@@ -178,13 +196,13 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     // it from subsequent reconnects (socket.on("connect") fires on both).
     const hasConnectedOnceRef = { current: socket.connected };
 
-    // The newest real message when the socket dropped (`undefined`: no drop
-    // seen, e.g. mounted while already disconnected).
-    const newestLoadedAt = (): string | null => {
+    // The id of the newest real message when the socket dropped (`undefined`:
+    // no drop seen, e.g. mounted while already disconnected).
+    const newestLoadedId = (): string | null => {
       for (let i = messagesRef.current.length - 1; i >= 0; i--) {
-        // Optimistic `temp-` messages have no server timestamp to page from.
+        // Optimistic `temp-` messages have no server row to page from.
         if (!messagesRef.current[i].id.startsWith("temp-")) {
-          return messagesRef.current[i].createdAt;
+          return messagesRef.current[i].id;
         }
       }
       return null;
@@ -192,7 +210,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     let anchorAtDisconnect: string | null | undefined;
 
     const handleDisconnect = () => {
-      anchorAtDisconnect = newestLoadedAt();
+      anchorAtDisconnect = newestLoadedId();
     };
 
     const handleConnect = async () => {
@@ -204,10 +222,10 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
       // True reconnect: re-join the room and catch up on missed messages.
       socket.emit("join:conversation", { conversationId });
-      const anchorAt =
-        anchorAtDisconnect !== undefined ? anchorAtDisconnect : newestLoadedAt();
+      const anchorId =
+        anchorAtDisconnect !== undefined ? anchorAtDisconnect : newestLoadedId();
       anchorAtDisconnect = undefined;
-      await catchUpMessages(anchorAt);
+      await catchUpMessages(anchorId);
     };
 
     socket.on("disconnect", handleDisconnect);

@@ -21,10 +21,8 @@ describe("useMessageThread", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [reply],
-            hasMore: false,
-            oldestCreatedAt: reply.createdAt,
-            newestCreatedAt: reply.createdAt,
+            data: [reply],
+            pagination: { hasMore: false },
           }),
       },
     );
@@ -44,10 +42,8 @@ describe("useMessageThread", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [],
-            hasMore: false,
-            oldestCreatedAt: null,
-            newestCreatedAt: null,
+            data: [],
+            pagination: { hasMore: false },
           }),
       },
     );
@@ -77,10 +73,8 @@ describe("useMessageThread", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [reply],
-            hasMore: true,
-            oldestCreatedAt: reply.createdAt,
-            newestCreatedAt: reply.createdAt,
+            data: [reply],
+            pagination: { hasMore: true },
           }),
       },
     );
@@ -93,10 +87,8 @@ describe("useMessageThread", () => {
       createdAt: "2024-01-02T00:00:00.000Z",
     });
     axiosPrivate.mockResponse("get", {
-      messages: [newerReply],
-      hasMore: false,
-      oldestCreatedAt: newerReply.createdAt,
-      newestCreatedAt: newerReply.createdAt,
+      data: [newerReply],
+      pagination: { hasMore: false },
     });
 
     await act(async () => {
@@ -106,6 +98,6 @@ describe("useMessageThread", () => {
     expect(result.current.replies.map((r) => r.id)).toEqual(["reply-1", "reply-2"]);
 
     const calls = axiosPrivate.calls("get");
-    expect(calls[1].config?.params).toMatchObject({ after: reply.createdAt });
+    expect(calls[1].config?.params).toMatchObject({ after: reply.id });
   });
 });

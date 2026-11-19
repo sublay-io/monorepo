@@ -21,9 +21,18 @@ export interface FetchManyChatMessagesProps extends SpaceReputationContextParams
   conversationId: string;
   /** Restrict to replies of this message (thread view). */
   parentMessageId?: string | null;
-  /** Keyset cursor: messages created before this. UTC ISO datetime ending in `Z` (e.g. `date.toISOString()`); an offset is rejected with a 400. Mutually exclusive with `after`. */
+  /**
+   * A message id: the `limit` messages just before this message. Continue an
+   * older page from the oldest message you hold. It must be a message of this
+   * conversation at the same thread level (`parentMessageId`), or the server
+   * answers `400 chat/invalid-cursor`. Mutually exclusive with `after`.
+   */
   before?: string | null;
-  /** Keyset cursor: messages created after this. UTC ISO datetime ending in `Z` (e.g. `date.toISOString()`); an offset is rejected with a 400. Mutually exclusive with `before`. */
+  /**
+   * A message id: the `limit` messages just after this message. Continue a
+   * newer page from the newest message you hold. Same rules as `before`.
+   * Mutually exclusive with `before`.
+   */
   after?: string | null;
   /** Page size (1–100, defaults to 50 server-side). */
   limit?: number;
@@ -42,16 +51,33 @@ export interface FetchManyChatMessagesProps extends SpaceReputationContextParams
 }
 
 export interface FetchManyChatMessagesResponse {
-  messages: ChatMessage[];
-  hasMore: boolean;
-  oldestCreatedAt: string | null;
-  newestCreatedAt: string | null;
+  /** The page, ordered by `sortDir`. */
+  data: ChatMessage[];
+  pagination: {
+    /**
+     * More messages exist beyond this page in the direction of travel: older
+     * with `before`, newer with `after`; with no anchor, older for `desc` and
+     * newer for `asc`.
+     */
+    hasMore: boolean;
+  };
   /**
    * Present only when a filter combination can't return results — e.g.
    * `hasReplies: true` together with `parentMessageId` (thread replies are one level
    * deep and never have their own replies).
    */
   notice?: string;
+}
+
+/**
+ * Whether a messages request failed because its `before` / `after` anchor is
+ * not a message the server can page from (`chat/invalid-cursor`).
+ */
+export function isInvalidChatCursorError(err: unknown): boolean {
+  return (
+    (err as { response?: { data?: { code?: unknown } } })?.response?.data
+      ?.code === "chat/invalid-cursor"
+  );
 }
 
 /**

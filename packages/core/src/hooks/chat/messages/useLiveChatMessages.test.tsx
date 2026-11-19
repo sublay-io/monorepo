@@ -27,10 +27,8 @@ describe("useLiveChatMessages", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [newer, older],
-            hasMore: true,
-            oldestCreatedAt: older.createdAt,
-            newestCreatedAt: newer.createdAt,
+            data: [newer, older],
+            pagination: { hasMore: true },
           }),
       },
     );
@@ -59,10 +57,8 @@ describe("useLiveChatMessages", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [],
-            hasMore: false,
-            oldestCreatedAt: null,
-            newestCreatedAt: null,
+            data: [],
+            pagination: { hasMore: false },
           }),
       },
     );
@@ -78,10 +74,8 @@ describe("useLiveChatMessages", () => {
     // message row CONTAINS, so a caller changing it on a mounted conversation
     // must get a fresh page rather than silence.
     const page = {
-      messages: [],
-      hasMore: false,
-      oldestCreatedAt: null,
-      newestCreatedAt: null,
+      data: [],
+      pagination: { hasMore: false },
     };
 
     const { result, axiosPrivate, rerender } = renderHookWithAxios(
@@ -129,10 +123,8 @@ describe("useLiveChatMessages", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [],
-            hasMore: false,
-            oldestCreatedAt: null,
-            newestCreatedAt: null,
+            data: [],
+            pagination: { hasMore: false },
           }),
       },
     );
@@ -155,10 +147,8 @@ describe("useLiveChatMessages", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [reply],
-            hasMore: false,
-            oldestCreatedAt: reply.createdAt,
-            newestCreatedAt: reply.createdAt,
+            data: [reply],
+            pagination: { hasMore: false },
           }),
       },
     );
@@ -180,10 +170,8 @@ describe("useLiveChatMessages", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [reply("reply-1", "2024-01-01T00:00:01.000Z")],
-            hasMore: true,
-            oldestCreatedAt: "2024-01-01T00:00:01.000Z",
-            newestCreatedAt: "2024-01-01T00:00:01.000Z",
+            data: [reply("reply-1", "2024-01-01T00:00:01.000Z")],
+            pagination: { hasMore: true },
           }),
       },
     );
@@ -195,16 +183,14 @@ describe("useLiveChatMessages", () => {
     });
 
     axiosPrivate.mockResponse("get", {
-      messages: [reply("reply-2", "2024-01-01T00:00:02.000Z")],
-      hasMore: false,
-      oldestCreatedAt: "2024-01-01T00:00:02.000Z",
-      newestCreatedAt: "2024-01-01T00:00:02.000Z",
+      data: [reply("reply-2", "2024-01-01T00:00:02.000Z")],
+      pagination: { hasMore: false },
     });
     await act(async () => {
       await result.current.loadOlder();
     });
 
-    expect(axiosPrivate.calls("get")[1].config?.params.after).toBe("2024-01-01T00:00:01.000Z");
+    expect(axiosPrivate.calls("get")[1].config?.params.after).toBe("reply-1");
     expect(result.current.messages.map((m) => m.id)).toEqual(["reply-1", "reply-2", "reply-9"]);
     expect(result.current.hasMore).toBe(false);
   });
@@ -222,7 +208,7 @@ describe("useLiveChatMessages", () => {
       {
         initialProps: { parentMessageId: "message-0" },
         beforeRender: ({ axiosPrivate }) =>
-          axiosPrivate.mockResponse("get", { messages: [], hasMore: false, oldestCreatedAt: null, newestCreatedAt: null }),
+          axiosPrivate.mockResponse("get", { data: [], pagination: { hasMore: false } }),
       },
     );
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -246,26 +232,22 @@ describe("useLiveChatMessages", () => {
     await act(async () => {
       firstPage.resolve({
         data: {
-          messages: [reply("reply-1", "2024-01-01T00:00:01.000Z"), reply("reply-2", "2024-01-01T00:00:02.000Z")],
-          hasMore: true,
-          oldestCreatedAt: "2024-01-01T00:00:01.000Z",
-          newestCreatedAt: "2024-01-01T00:00:02.000Z",
+          data: [reply("reply-1", "2024-01-01T00:00:01.000Z"), reply("reply-2", "2024-01-01T00:00:02.000Z")],
+          pagination: { hasMore: true },
         },
       });
     });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     axiosPrivate.mockResponse("get", {
-      messages: [reply("reply-3", "2024-01-01T00:00:03.000Z")],
-      hasMore: false,
-      oldestCreatedAt: "2024-01-01T00:00:03.000Z",
-      newestCreatedAt: "2024-01-01T00:00:03.000Z",
+      data: [reply("reply-3", "2024-01-01T00:00:03.000Z")],
+      pagination: { hasMore: false },
     });
     await act(async () => {
       await result.current.loadOlder();
     });
 
-    expect(axiosPrivate.calls("get")[2].config?.params.after).toBe("2024-01-01T00:00:02.000Z");
+    expect(axiosPrivate.calls("get")[2].config?.params.after).toBe("reply-2");
     expect(result.current.messages.map((m) => m.id)).toEqual(["reply-1", "reply-2", "reply-3", "reply-9"]);
   });
 
@@ -278,10 +260,8 @@ describe("useLiveChatMessages", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [oldest],
-            hasMore: true,
-            oldestCreatedAt: oldest.createdAt,
-            newestCreatedAt: oldest.createdAt,
+            data: [oldest],
+            pagination: { hasMore: true },
           }),
       },
     );
@@ -289,10 +269,8 @@ describe("useLiveChatMessages", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     axiosPrivate.mockResponse("get", {
-      messages: [evenOlder],
-      hasMore: false,
-      oldestCreatedAt: evenOlder.createdAt,
-      newestCreatedAt: evenOlder.createdAt,
+      data: [evenOlder],
+      pagination: { hasMore: false },
     });
 
     await act(async () => {
@@ -303,7 +281,7 @@ describe("useLiveChatMessages", () => {
     expect(result.current.hasMore).toBe(false);
 
     const calls = axiosPrivate.calls("get");
-    expect(calls[1].config?.params).toMatchObject({ before: oldest.createdAt });
+    expect(calls[1].config?.params).toMatchObject({ before: oldest.id });
   });
 
   it("loadOlder is a no-op when there is no more data", async () => {
@@ -312,10 +290,8 @@ describe("useLiveChatMessages", () => {
       {
         beforeRender: ({ axiosPrivate }) =>
           axiosPrivate.mockResponse("get", {
-            messages: [],
-            hasMore: false,
-            oldestCreatedAt: null,
-            newestCreatedAt: null,
+            data: [],
+            pagination: { hasMore: false },
           }),
       },
     );

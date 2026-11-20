@@ -67,7 +67,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 </ParamField>
 
 <ParamField body="pathParts" type="array">
-  Folder segments for the stored image, as a JSON-encoded array. The new file's id is always added after them, so the image and its sizes are stored under `<pathParts>/<fileId>/`. Example: `["avatars", "user-123"]` → `avatars/user-123/<fileId>/<filename>`. Defaults to `["images"]`.
+  Folder segments for the stored image, as a JSON-encoded array. The new file's id is always added after them, so the image and its sizes are stored under `<pathParts>/<fileId>/`. Example: `["avatars", "user-123"]` → `avatars/user-123/<fileId>/<filename>`. Defaults to `["images"]`. A part that is, or contains, a `.` or `..` folder (also written `%2e%2e`), or that contains an encoded slash (`%2f`, `%5c`), is refused with `400 storage/invalid-image-body`.
 </ParamField>
 
 <ParamField body="entityId" type="string">

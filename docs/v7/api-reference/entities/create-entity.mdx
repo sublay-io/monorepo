@@ -117,7 +117,7 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
   - `"original-aspect"` — preserve original ratio, resize by max dimension
   - `"multi-aspect-ratio"` — generate crops at multiple aspect ratios
 
-  Optional fields: `quality` (1–100), `format` (`webp`, `jpeg`, `png`, `original`), `stripExif` (boolean), `pathParts` (string[]).
+  Optional fields: `quality` (1–100), `format` (`webp`, `jpeg`, `png`, `original`), `stripExif` (boolean), `pathParts` (string[]; a `.` or `..` segment is refused with a 400).
 </ParamField>
 
 <ParamField body="files.files" type="file[]">
@@ -125,7 +125,7 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
 </ParamField>
 
 <ParamField body="files.options" type="string">
-  Stringified JSON for file options. Optional `pathParts` (string[]) customizes the storage path.
+  Stringified JSON for file options. Optional `pathParts` (string[]) customizes the storage path; a `.` or `..` segment is refused with a 400.
 </ParamField>
 
 ## Response

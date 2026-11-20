@@ -43,7 +43,7 @@ const uploaded = await sublay.storage.uploadFile({
 <ParamField body="pathParts" type="string[]" required>
   Storage path segments. The file is stored under the joined path with a UUID
   sub-folder appended, e.g. `["documents", "reports"]` →
-  `documents/reports/<uuid>/<filename>`.
+  `documents/reports/<uuid>/<filename>`. A folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
 </ParamField>
 
 <ParamField body="filename" type="string">
@@ -128,7 +128,7 @@ const uploaded = await sublay.storage.uploadImage({
 </ParamField>
 
 <ParamField body="pathParts" type="string[]">
-  Folder segments for the stored image. The new file's id is always added after them (`<pathParts>/<fileId>/<filename>`). Defaults to `["images"]`.
+  Folder segments for the stored image. The new file's id is always added after them (`<pathParts>/<fileId>/<filename>`). Defaults to `["images"]`. A folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
 </ParamField>
 
 **Returns** — `Promise<UploadImageResponse>`:

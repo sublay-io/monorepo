@@ -163,6 +163,25 @@ describe("useUpdateSpace", () => {
     expect(formData.get("avatarFile.options")).toBe(JSON.stringify(options));
   });
 
+  it("leaves out `slug: null` on a multipart update, and sends it on a JSON one", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateSpace());
+    axiosPrivate.mockResponse("patch", makeSpaceDetailed());
+    axiosPrivate.mockResponse("patch", makeSpaceDetailed());
+
+    const file = new File(["binary"], "avatar.png", { type: "image/png" });
+    await act(async () => {
+      await result.current({
+        spaceId: "space-1",
+        update: { slug: null, avatarFile: { file, options: { mode: "original-aspect", sizes: { small: 64 } } } },
+      });
+      await result.current({ spaceId: "space-1", update: { slug: null } });
+    });
+
+    const [multipart, json] = axiosPrivate.calls("patch");
+    expect((multipart.body as FormData).has("slug")).toBe(false);
+    expect(json.body).toEqual({ slug: null });
+  });
+
   it("sends removeFileIds alone as JSON", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateSpace());
     axiosPrivate.mockResponse("patch", makeSpaceDetailed());

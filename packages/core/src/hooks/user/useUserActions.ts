@@ -74,7 +74,12 @@ export function useUserActions() {
           ? update.birthdate.toISOString()
           : update.birthdate;
       if (update.metadata !== undefined) optimisticUpdate.metadata = update.metadata;
-      if (update.avatar !== undefined) {
+      // `avatar: null` clears the URL avatar only on a JSON update (a multipart
+      // field can't carry null), so it isn't applied to one that sends files.
+      if (
+        typeof update.avatar === "string" ||
+        (update.avatar === null && !userUpdateHasFiles(update))
+      ) {
         optimisticUpdate.avatar = update.avatar;
       }
 

@@ -6,7 +6,10 @@ import { appendImageSlot, type ImageSlotUpload } from '../../utils/uploads';
 export interface UpdateUserParams {
   name?: string | null;
   username?: string | null;
-  /** The avatar as an image URL. To upload an image, use `avatarFile`. */
+  /**
+   * The avatar as an image URL. To upload an image, use `avatarFile`. `null`
+   * clears it, on an update without files only.
+   */
   avatar?: string | null;
   bio?: string;
   birthdate?: Date | null;

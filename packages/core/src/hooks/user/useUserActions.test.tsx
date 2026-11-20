@@ -141,6 +141,56 @@ describe("useUserActions", () => {
       expect(selectUserUpdating(store.getState())).toBe(false);
     });
 
+    it("doesn't clear the URL avatar optimistically, or send it, when `avatar: null` rides a multipart update", async () => {
+      const axiosPrivate = mockAxiosPrivate();
+      let resolve!: (v: unknown) => void;
+      const spy = vi.spyOn(axiosPrivate.instance, "patch").mockImplementationOnce(
+        () => new Promise((r) => (resolve = r)) as never,
+      );
+      const { result, store } = renderHookWithStore(() => useUserActions());
+      act(() => result.current.setUser(makeUser({ avatar: "https://cdn.example/old.png" })));
+
+      let pending!: Promise<unknown>;
+      act(() => {
+        pending = result.current.updateUser({
+          projectId: "test-project",
+          userId: "user-1",
+          update: {
+            avatar: null,
+            avatarFile: { file: new File(["x"], "a.png"), options: { mode: "original-aspect", sizes: { small: 64 } } },
+          },
+          currentUser: makeUser({ avatar: "https://cdn.example/old.png" }),
+        });
+      });
+
+      // Mid-flight: the URL avatar is untouched.
+      expect(selectUser(store.getState())?.avatar).toBe("https://cdn.example/old.png");
+      const formData = spy.mock.calls[0][1] as FormData;
+      expect(formData.has("avatar")).toBe(false);
+
+      await act(async () => {
+        resolve({ data: { id: "user-1", avatar: "https://cdn.example/old.png", avatarFileId: "f1" } });
+        await pending;
+      });
+    });
+
+    it("clears the URL avatar optimistically on a JSON `avatar: null`", async () => {
+      fetchHandle.fetchMock.mockImplementationOnce(() => new Promise(() => {}));
+      const { result, store } = renderHookWithStore(() => useUserActions());
+      act(() => result.current.setUser(makeUser({ avatar: "https://cdn.example/old.png" })));
+
+      act(() => {
+        void result.current.updateUser({
+          projectId: "test-project",
+          userId: "user-1",
+          update: { avatar: null },
+          currentUser: makeUser({ avatar: "https://cdn.example/old.png" }),
+        });
+      });
+
+      expect(selectUser(store.getState())?.avatar).toBeNull();
+    });
+
     it("reverts and records the error when a multipart update fails", async () => {
       const axiosPrivate = mockAxiosPrivate();
       axiosPrivate.mockError("patch", 400, { code: "user/invalid-remove-file-ids" });

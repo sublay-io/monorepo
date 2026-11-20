@@ -14,6 +14,7 @@ export interface UpdateSpaceProps {
   spaceId: string;
   update: Partial<{
     name: string;
+    /** `null` clears the slug, on an update without files only. */
     slug: string | null;
     description: string | null;
     /** A new avatar image, replacing the current one. */
@@ -62,8 +63,10 @@ function useUpdateSpace(): (
         if (fields.name !== undefined) {
           formData.append("name", fields.name);
         }
-        if (fields.slug !== undefined) {
-          formData.append("slug", fields.slug || "");
+        // A multipart field can't carry null, and the server refuses an empty
+        // slug: `slug: null` clears the slug only on a JSON update.
+        if (fields.slug !== undefined && fields.slug !== null) {
+          formData.append("slug", fields.slug);
         }
         if (fields.description !== undefined) {
           formData.append("description", fields.description || "");

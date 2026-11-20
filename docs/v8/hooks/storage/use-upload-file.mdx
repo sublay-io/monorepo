@@ -43,7 +43,7 @@ function DocumentUploader() {
 </ParamField>
 
 <ParamField path="pathParts" type="string[]" required>
-  Storage path segments. The file is stored under the joined path, with a UUID sub-folder appended automatically for uniqueness. For example, `["documents", "user-123"]` stores the file at `documents/user-123/<uuid>/<filename>`. A folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
+  Storage path segments. The file is stored under the joined path, with a UUID sub-folder appended automatically for uniqueness. For example, `["documents", "user-123"]` stores the file at `documents/user-123/<uuid>/<filename>`. A folder that is, or contains, `.` or `..` is refused with a 400.
 </ParamField>
 
 <ParamField path="options" type="UploadFileOptions">

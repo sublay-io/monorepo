@@ -134,7 +134,7 @@ Returns the updated [Event](/v8/data-models/event) object.
   </Accordion>
   <Accordion title="Image Too Large — 413">
     ```json
-    { "error": "`cover` is over this endpoint's file size limit.", "code": "event/file-too-large", "param": "cover" }
+    { "error": "`cover` is over the 50 MB per-file limit.", "code": "event/file-too-large", "param": "cover" }
     ```
     A file is over 50 MB. `param` names its field.
   </Accordion>

@@ -206,7 +206,7 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
   <Accordion title="File Too Large — 413">
     The image is over 50 MB. `param` names its field: `avatarFile` or `bannerFile`.
     ```json
-    { "error": "`avatarFile` is over this endpoint's file size limit.", "code": "user/file-too-large", "param": "avatarFile" }
+    { "error": "`avatarFile` is over the 50 MB per-file limit.", "code": "user/file-too-large", "param": "avatarFile" }
     ```
   </Accordion>
   <Accordion title="Invalid Image — 422">

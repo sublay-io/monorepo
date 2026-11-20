@@ -148,7 +148,7 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
   </Accordion>
   <Accordion title="Image Too Large — 413">
     ```json
-    { "error": "`avatarFile` is over this endpoint's file size limit.", "code": "chat/file-too-large", "param": "avatarFile" }
+    { "error": "`avatarFile` is over the 50 MB per-file limit.", "code": "chat/file-too-large", "param": "avatarFile" }
     ```
   </Accordion>
   <Accordion title="Invalid Image — 422">

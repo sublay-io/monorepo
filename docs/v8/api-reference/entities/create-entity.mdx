@@ -245,7 +245,7 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
   </Accordion>
   <Accordion title="File Too Large — 413">
     ```json
-    { "error": "`images.files` is over this endpoint's file size limit.", "code": "entity/file-too-large", "param": "images.files" }
+    { "error": "`images.files` is over the 50 MB per-file limit.", "code": "entity/file-too-large", "param": "images.files" }
     ```
     A file is over 50 MB. `param` names its field (`images.files` or `files.files`).
   </Accordion>

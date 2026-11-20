@@ -141,7 +141,7 @@ const updatedUser = await sublay.users.updateUser({
 </ParamField>
 
 <ParamField body="avatar" type="string">
-  New avatar URL.
+  New avatar URL, stored as given. Separate from `avatarFile`, which uploads an image.
 </ParamField>
 
 <ParamField body="bio" type="string">
@@ -165,11 +165,15 @@ const updatedUser = await sublay.users.updateUser({
 </ParamField>
 
 <ParamField body="avatarFile" type="object">
-  A new avatar image to upload: `{ file: Blob | File; options: ImageOptions }`.
+  A new avatar image to upload, replacing the current one (up to 50 MB): `{ file: Blob | File; options: ImageOptions }`.
 </ParamField>
 
 <ParamField body="bannerFile" type="object">
-  A new banner image to upload: `{ file: Blob | File; options: ImageOptions }`.
+  A new banner image to upload, replacing the current one: `{ file: Blob | File; options: ImageOptions }`.
+</ParamField>
+
+<ParamField body="removeFileIds" type="string[]">
+  Files to remove: the user's `avatarFileId` and/or `bannerFileId`, nothing else. Removing one clears that image. Works alone or with uploads. Any other id throws a `400` (`user/invalid-remove-file-ids`, with `invalidIds`).
 </ParamField>
 
 <Note>

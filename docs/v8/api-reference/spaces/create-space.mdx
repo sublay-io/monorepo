@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/spaces"
 description: "Create a new community space"
 ---
 
-Creates a new space. Its creator — the signed-in user, or the user a service key names in `actingUserId` — is automatically added as an admin. A space always has a creator, so a service key must name one. Supports optional avatar and banner image upload via multipart form data.
+Creates a new space. Its creator — the signed-in user, or the user a service key names in `actingUserId` — is automatically added as an admin. A space always has a creator, so a service key must name one. Send `multipart/form-data` to upload an avatar or banner with it (other fields as form fields, objects as JSON strings); without files, use `application/json`. To change or remove the images later, use [Update Space](/v8/api-reference/spaces/update-space).
 
 **Authentication required.** A request with no credentials returns `401`.
 
@@ -47,11 +47,19 @@ Creates a new space. Its creator — the signed-in user, or the user a service k
 </ParamField>
 
 <ParamField body="avatarFile" type="file">
-  Optional avatar image. Multipart form field. Requires `avatarFile.options` when provided.
+  Optional avatar image, up to 50 MB. Multipart form field. Requires `avatarFile.options`.
+</ParamField>
+
+<ParamField body="avatarFile.options" type="string">
+  Stringified JSON describing how to process the avatar. Must include a `mode` field; see [Upload Image](/v8/api-reference/storage/upload-image) for the modes and optional fields. Ignored when no `avatarFile` is sent.
 </ParamField>
 
 <ParamField body="bannerFile" type="file">
-  Optional banner image. Multipart form field. Requires `bannerFile.options` when provided.
+  Optional banner image, up to 50 MB. Multipart form field. Requires `bannerFile.options`.
+</ParamField>
+
+<ParamField body="bannerFile.options" type="string">
+  Stringified JSON describing how to process the banner, as `avatarFile.options`. Ignored when no `bannerFile` is sent.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -149,10 +157,10 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
     ```
   </Accordion>
   <Accordion title="Image Too Large — 413">
+    The image is over 50 MB. `param` names its field: `avatarFile` or `bannerFile`.
     ```json
-    { "error": "Avatar image exceeds 50MB limit.", "code": "space/file-too-large", "param": "avatarFile" }
+    { "error": "`avatarFile` is over this endpoint's file size limit.", "code": "space/file-too-large", "param": "avatarFile" }
     ```
-    Also returned with `"Banner image exceeds 50MB limit."` and `param: "bannerFile"` for the banner.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
@@ -173,7 +181,7 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
     The `.options` field isn't valid JSON. `param` names the field: `avatarFile.options` or `bannerFile.options`.
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `space/unsupported-file-type` or `space/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `space/unsupported-file-type` or `space/unexpected-file-field` (a file in another field, or a second file in `avatarFile` or `bannerFile`), with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>
 

@@ -8,6 +8,13 @@ Deletes a file record and removes all associated storage objects. For image file
 
 Requires authentication. **The owner deletes:** a file with an owner is deleted only as that user — with their own access token, or with a service key naming them in `actingUserId`, and the request then runs exactly as theirs (suspension included). An app-owned file (uploaded without an `actingUserId`) is deleted only by a service key naming nobody; a user token gets `403`.
 
+Only a file that belongs to nothing is deleted here: one uploaded with [Upload File](/v8/api-reference/storage/upload-file) or [Upload Image](/v8/api-reference/storage/upload-image). A file that belongs to a record is refused with `409 storage/file-attached`, because deleting it would leave the record pointing at nothing:
+
+- an entity's or event's file, a comment's or chat message's file;
+- a user's or space's avatar or banner, a conversation's avatar, or an event's cover.
+
+Remove those through the record itself: a user's or space's avatar or banner with `removeFileIds` on [Update User](/v8/api-reference/users/update-user) or [Update Space](/v8/api-reference/spaces/update-space); a comment's or message's files go when the comment or message is deleted. A file that only carries a `spaceId`, with no space using it as its avatar or banner, belongs to nothing and can be deleted here.
+
 **Rate limit**: 50 requests per 5 minutes.
 
 ## Path Parameters
@@ -44,6 +51,12 @@ Requires authentication. **The owner deletes:** a file with an owner is deleted 
     Returned when the acting user doesn't own the file, or when a user token, or a service key naming a user, deletes an app-owned file.
     ```json
     { "error": "Only the file's owner can delete it.", "code": "storage/forbidden" }
+    ```
+  </Accordion>
+  <Accordion title="File Attached — 409">
+    The file belongs to a record. `error` names the record and how to remove the file. Checked after the owner check, so only the file's owner learns this.
+    ```json
+    { "error": "This file belongs to a user's avatar or banner, so it can't be deleted here. Remove it through the user's update: list its id in `removeFileIds`.", "code": "storage/file-attached" }
     ```
   </Accordion>
   <Accordion title="Missing User ID — 400">

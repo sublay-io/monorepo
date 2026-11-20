@@ -5,6 +5,8 @@ description: "The File and FileImage interface shapes for uploaded media"
 
 A `File` record represents a file uploaded to Sublay's storage system. Files can be attached to users (avatars, banners), entities, comments, chat messages, or spaces. Image files include an additional `image` extension with processed variants at multiple sizes.
 
+A file that belongs to a record is uploaded, replaced and removed through that record's own endpoints (for a user's or space's avatar and banner: `avatarFile`, `bannerFile` and `removeFileIds` on the update). [Delete File](/v8/api-reference/storage/delete-file) deletes only a file that belongs to nothing, and refuses one attached to a record with `409 storage/file-attached`.
+
 ## File
 
 | Property | Type | Description |

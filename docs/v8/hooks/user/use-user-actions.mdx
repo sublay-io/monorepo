@@ -47,7 +47,7 @@ function CustomAuth() {
 </ResponseField>
 
 <ResponseField name="updateUser" type="(params: { projectId: string; userId: string; update: UpdateUserParams; currentUser?: AuthUser }) => Promise<AuthUser>">
-  Calls the update user API and manages loading and error state. Applies optimistic updates for non-file fields. Reverts to `currentUser` if the request fails.
+  Calls the update user API and manages loading and error state. An update with `avatarFile` or `bannerFile` is sent as `multipart/form-data`, any other as JSON. Applies optimistic updates for non-file fields. Reverts to `currentUser` if the request fails.
 
   <Expandable title="params">
     <ResponseField name="projectId" type="string" required>
@@ -57,7 +57,7 @@ function CustomAuth() {
       The authenticated user's ID.
     </ResponseField>
     <ResponseField name="update" type="UpdateUserParams" required>
-      Fields to update. See [`useUser`](/v8/hooks/user/use-user) for the full `UpdateUserParams` reference.
+      Fields to update, including `avatarFile`, `bannerFile` and `removeFileIds`. See [`useUser`](/v8/hooks/user/use-user) for the full `UpdateUserParams` reference.
     </ResponseField>
     <ResponseField name="currentUser" type="AuthUser">
       The current user snapshot used to revert state on failure.

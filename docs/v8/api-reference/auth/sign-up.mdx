@@ -69,9 +69,17 @@ When the project requires email verification before sign-in (Dashboard → Setti
   Requires `avatarFile.options` to also be present.
 </ParamField>
 
+<ParamField body="avatarFile.options" type="string">
+  Stringified JSON describing how to process the avatar. Must include a `mode` field; see [Upload Image](/v8/api-reference/storage/upload-image) for the modes and optional fields. Ignored when no `avatarFile` is sent.
+</ParamField>
+
 <ParamField body="bannerFile" type="file">
   Banner image file (multipart). Maximum 50 MB. Must be a valid image format.
   Requires `bannerFile.options` to also be present.
+</ParamField>
+
+<ParamField body="bannerFile.options" type="string">
+  Stringified JSON describing how to process the banner, as `avatarFile.options`. Ignored when no `bannerFile` is sent.
 </ParamField>
 
 <ParamField body="emailVerification" type="object">
@@ -204,14 +212,10 @@ Validation still runs first, in the same order: an invalid body, an image error,
     ```
   </Accordion>
   <Accordion title="File Too Large — 413">
+    The image is over 50 MB. `param` names its field: `avatarFile` or `bannerFile`.
     ```json
-    {
-      "error": "Avatar image exceeds 50MB limit.",
-      "code": "auth/file-too-large",
-      "param": "avatarFile"
-    }
+    { "error": "`avatarFile` is over this endpoint's file size limit.", "code": "auth/file-too-large", "param": "avatarFile" }
     ```
-    Also returned with `"Banner image exceeds 50MB limit."` and `param: "bannerFile"` for the banner file.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
@@ -244,7 +248,7 @@ Validation still runs first, in the same order: an invalid body, an image error,
     The `.options` field isn't valid JSON. `param` names the field: `avatarFile.options` or `bannerFile.options`.
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `auth/unsupported-file-type` or `auth/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `auth/unsupported-file-type` or `auth/unexpected-file-field` (a file in another field, or a second file in `avatarFile` or `bannerFile`), with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
   <Accordion title="Bundle Not Installed — 403">
     Returned when `avatarFile` or `bannerFile` is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).

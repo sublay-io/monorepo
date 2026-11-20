@@ -4,7 +4,7 @@ api: "PATCH /v8/:projectId/spaces/:spaceId"
 description: "Update a space's settings, name, description, or images"
 ---
 
-Updates a space. Only the space's admin can update it. Supports multipart form data for avatar/banner image uploads.
+Updates a space. Only the space's admin can update it. Send `multipart/form-data` to upload a new avatar or banner; without files, use `application/json`. Every other field goes as a form field on a multipart request (objects and arrays as JSON strings).
 
 ## Path Parameters
 
@@ -49,11 +49,23 @@ All fields are optional. Only provided fields are updated.
 </ParamField>
 
 <ParamField body="avatarFile" type="file">
-  New avatar image. Requires `avatarFile.options` when provided.
+  New avatar image, replacing the current one (the old file is deleted). Requires `avatarFile.options`.
+</ParamField>
+
+<ParamField body="avatarFile.options" type="string">
+  Stringified JSON describing how to process the avatar. Must include a `mode` field; see [Upload Image](/v8/api-reference/storage/upload-image) for the modes and optional fields. Ignored when no `avatarFile` is sent.
 </ParamField>
 
 <ParamField body="bannerFile" type="file">
-  New banner image. Requires `bannerFile.options` when provided.
+  New banner image, replacing the current one (the old file is deleted). Requires `bannerFile.options`.
+</ParamField>
+
+<ParamField body="bannerFile.options" type="string">
+  Stringified JSON describing how to process the banner, as `avatarFile.options`. Ignored when no `bannerFile` is sent.
+</ParamField>
+
+<ParamField body="removeFileIds" type="string[]">
+  Files to remove from the space: its `avatarFileId` and/or `bannerFileId`, nothing else. Removing one clears that image (the pointer becomes `null` and the file is deleted). Works alone or with uploads in the same request; uploading a new avatar while listing the old one is a plain replace. On a multipart request, send it as a JSON string (`'["<fileId>"]'`). Any other id, including a file that only carries this space's `spaceId`, refuses the whole request with `400 space/invalid-remove-file-ids`.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -122,17 +134,24 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
     { "error": "A space with this slug already exists.", "code": "space/slug-taken", "param": "slug" }
     ```
   </Accordion>
+  <Accordion title="Invalid File Ids — 400">
+    `removeFileIds` names a file that isn't this space's current avatar or banner. `invalidIds` lists those ids. Checked before anything is uploaded, so nothing is stored or removed.
+    ```json
+    { "error": "`removeFileIds` may name only this space's own avatar and banner files (its `avatarFileId` and `bannerFileId`).", "code": "space/invalid-remove-file-ids", "param": "removeFileIds", "invalidIds": ["9b2f…"] }
+    ```
+    A `removeFileIds` that isn't an array of file ids gets `400 space/invalid-body` instead.
+  </Accordion>
   <Accordion title="Bundle Not Installed — 403">
-    Returned when an avatar or banner is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    Returned when an avatar or banner is uploaded, or `removeFileIds` is sent, on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
     ```json
     { "error": "Space avatar/banner uploads require the files-images bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
     ```
   </Accordion>
   <Accordion title="Image Too Large — 413">
+    The image is over 50 MB. `param` names its field: `avatarFile` or `bannerFile`.
     ```json
-    { "error": "Avatar image exceeds 50MB limit.", "code": "space/file-too-large", "param": "avatarFile" }
+    { "error": "`avatarFile` is over this endpoint's file size limit.", "code": "space/file-too-large", "param": "avatarFile" }
     ```
-    Also returned with `"Banner image exceeds 50MB limit."` and `param: "bannerFile"` for the banner.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
@@ -153,7 +172,7 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
     The `.options` field isn't valid JSON. `param` names the field: `avatarFile.options` or `bannerFile.options`.
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `space/unsupported-file-type` or `space/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `space/unsupported-file-type` or `space/unexpected-file-field` (a file in another field, or a second file in `avatarFile` or `bannerFile`), with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>
 

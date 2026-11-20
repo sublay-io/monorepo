@@ -56,6 +56,14 @@ if ("accessToken" in result) {
   How the confirmation email is sent when the project requires email verification before sign-in. `mode` defaults to `"link"`; `"code"` emails a 6-digit code and returns a `verificationId`. `redirectUrl` (link mode) must be on the project's Verified Domains. Ignored when the setting is off. See [Sign Up](/v8/api-reference/auth/sign-up#with-email-verification-required).
 </ParamField>
 
+<ParamField body="avatarFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
+  An avatar image to upload, up to 50 MB. Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 auth/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
+</ParamField>
+
+<ParamField body="bannerFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
+  A banner image to upload; same shape as `avatarFile`.
+</ParamField>
+
 **Returns** — `Promise<SignUpResponse | EmailVerificationRequiredResponse>`: `{ user, accessToken, refreshToken }`, or, when the project requires email verification before sign-in, `{ success: true, emailVerificationRequired: true, verificationId? }` with no tokens.
 
 ---

@@ -163,7 +163,7 @@ These can come from any endpoint, because they are about the HTTP request itself
 | Status | Code | When |
 |--------|------|------|
 | `400` | `request/invalid-json` | The body is sent as JSON but doesn't parse, or parses to a value that isn't an object or an array (`"text"`, `42`, `null`). |
-| `413` | `request/body-too-large` | The JSON body is over the 100 KB limit. |
+| `413` | `request/body-too-large` | The JSON body is over the 100 KB limit, or a `multipart/form-data` body is over the 250 MB limit. |
 | `400` | `request/invalid-multipart` | The `multipart/form-data` body is malformed. `param` names the field when the fault is in one. |
 | `413` | `request/field-too-large` | A text field in a multipart body is too large. `param` names the field. |
 | `400` / `415` | `request/unreadable-body` | The body can't be read for another reason: `415` for a charset or content encoding the server can't read, `400` otherwise (for example an aborted request). |
@@ -178,11 +178,13 @@ Endpoints that take a file in a `multipart/form-data` body answer a refused file
 
 | Status | Code | When |
 |--------|------|------|
-| `413` | `<area>/file-too-large` | A file is over the upload limit. `param` names its field. |
+| `413` | `<area>/file-too-large` | A file is over the 50 MB limit. `param` names its field. |
+| `413` | `<area>/too-many-files` | The request carries more than 20 files, counting all its file fields together. |
+| `413` | `request/body-too-large` | The whole body is over 250 MB. |
 | `400` | `<area>/unsupported-file-type` | A file isn't JPEG, PNG, WebP or PDF. `param` names its field. |
 | `400` | `<area>/unexpected-file-field` | A file is in a field the endpoint doesn't take, or a field has more files than it takes. `param` names the field. |
 
-The upload limit is 50 MB per file on every endpoint except chat messages, which take files up to 100 MB. Endpoints that process images add their own checks (for example `422 <area>/invalid-image` for a file that isn't a valid image, with `param` naming its field); each endpoint's page lists them.
+The limits are per request, the same on every endpoint: at most 50 MB per file, 20 files in total, and 250 MB for the whole body. A field that holds a list of files takes up to 20 of them; a field that holds one file (`avatarFile`, `bannerFile`) takes one. They don't cap how many files a record holds: an update can add more. Endpoints that process images add their own checks (for example `422 <area>/invalid-image` for a file that isn't a valid image, with `param` naming its field); each endpoint's page lists them.
 
 ### Same situation, same answer
 
@@ -211,7 +213,7 @@ The same situation gets the same status and the same kind of code on every endpo
 | `403` | Forbidden — token expired or invalid, a caller who may not do this (`<area>/forbidden`, or a code naming the role the action needs), a feature whose bundle isn't installed (`database/tables-not-available`), or a browser origin outside the project's allowed domains (`request/origin-not-allowed`) |
 | `404` | Not found — it doesn't exist, or the caller can't see it (the two answer alike) |
 | `409` | Conflict — the value is already taken (`auth/email-taken`, `<area>/username-taken`, `<area>/foreign-id-taken`), the request is no longer pending (`<area>/not-pending`), or the change would leave nobody in charge (`space/last-admin`, `chat/last-admin`, `workspace/sole-owner`) |
-| `413` | Payload too large — a body over the size limit (`request/body-too-large`) or a file over the upload limit (`<area>/file-too-large`) |
+| `413` | Payload too large — a body over the size limit (`request/body-too-large`), a file over the upload limit (`<area>/file-too-large`), or more files than a request takes (`<area>/too-many-files`) |
 | `429` | Too many requests — the endpoint's rate limit (`request/rate-limited`) or the project's plan quota (`project/quota-reached`) |
 | `500` | Internal server error — `<area>/server-error` |
 

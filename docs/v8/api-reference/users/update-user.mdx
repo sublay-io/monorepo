@@ -6,7 +6,7 @@ description: "Update a user's profile fields, including avatar and banner images
 
 Updates one or more profile fields for the specified user. A user edits only their own profile. A service key edits a user by acting as that user: it must send `actingUserId` naming the user in the path, and the request then behaves exactly as that user's own token would.
 
-Supports direct image uploads for the avatar and banner via `multipart/form-data`. Uploaded images are processed, stored in Supabase, and the old files are automatically cleaned up after a successful update.
+Uploads a new avatar or banner with `multipart/form-data`: the image is processed into the sizes you ask for, and the file it replaces is deleted once the update is saved. `removeFileIds` removes the avatar or banner without a replacement.
 
 <Note>
   Send `application/json` for text-only updates. Use `multipart/form-data`
@@ -42,7 +42,7 @@ All other fields are optional. Only the fields provided are updated.
 </ParamField>
 
 <ParamField body="avatar" type="string">
-  URL of the user's avatar image. Ignored if `avatarFile` is also provided.
+  URL of the user's avatar image, stored as given. Separate from `avatarFile`, which uploads an image file and sets `avatarFileId`.
 </ParamField>
 
 <ParamField body="bio" type="string">
@@ -75,13 +75,25 @@ All other fields are optional. Only the fields provided are updated.
 </ParamField>
 
 <ParamField body="avatarFile" type="file">
-  Avatar image file (multipart). Maximum 50 MB. Must be a valid image.
+  Avatar image file (multipart), replacing the current one. Maximum 50 MB. Must be a valid image.
   Requires `avatarFile.options` to be present in the same request.
 </ParamField>
 
+<ParamField body="avatarFile.options" type="string">
+  Stringified JSON describing how to process the avatar. Must include a `mode` field; see [Upload Image](/v8/api-reference/storage/upload-image) for the modes and optional fields. Ignored when no `avatarFile` is sent.
+</ParamField>
+
 <ParamField body="bannerFile" type="file">
-  Banner image file (multipart). Maximum 50 MB. Must be a valid image.
+  Banner image file (multipart), replacing the current one. Maximum 50 MB. Must be a valid image.
   Requires `bannerFile.options` to be present in the same request.
+</ParamField>
+
+<ParamField body="bannerFile.options" type="string">
+  Stringified JSON describing how to process the banner, as `avatarFile.options`. Ignored when no `bannerFile` is sent.
+</ParamField>
+
+<ParamField body="removeFileIds" type="string[]">
+  Files to remove from the user: their `avatarFileId` and/or `bannerFileId`, nothing else. Removing one clears that image (the pointer becomes `null` and the file is deleted). Works alone or with uploads in the same request; uploading a new avatar while listing the old one is a plain replace. On a multipart request, send it as a JSON string (`'["<fileId>"]'`). Any other id refuses the whole request with `400 user/invalid-remove-file-ids`.
 </ParamField>
 
 ## Response
@@ -192,14 +204,10 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     ```
   </Accordion>
   <Accordion title="File Too Large — 413">
+    The image is over 50 MB. `param` names its field: `avatarFile` or `bannerFile`.
     ```json
-    {
-      "error": "Avatar image exceeds 50MB limit.",
-      "code": "user/file-too-large",
-      "param": "avatarFile"
-    }
+    { "error": "`avatarFile` is over this endpoint's file size limit.", "code": "user/file-too-large", "param": "avatarFile" }
     ```
-    Also returned with `"Banner image exceeds 50MB limit."` and `param: "bannerFile"` for the banner file.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
@@ -294,14 +302,21 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     { "error": "No user with this actingUserId exists in this project.", "code": "user/user-not-found" }
     ```
   </Accordion>
+  <Accordion title="Invalid File Ids — 400">
+    `removeFileIds` names a file that isn't this user's current avatar or banner. `invalidIds` lists those ids. Checked before anything is uploaded, so nothing is stored or removed.
+    ```json
+    { "error": "`removeFileIds` may name only this user's own avatar and banner files (their `avatarFileId` and `bannerFileId`).", "code": "user/invalid-remove-file-ids", "param": "removeFileIds", "invalidIds": ["9b2f…"] }
+    ```
+    A `removeFileIds` that isn't an array of file ids gets `400 user/invalid-body` instead.
+  </Accordion>
   <Accordion title="Bundle Not Installed — 403">
-    Returned when an avatar or banner is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    Returned when an avatar or banner is uploaded, or `removeFileIds` is sent, on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
     ```json
     { "error": "Avatar and banner uploads require the files-images bundle, which is not installed for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `user/unsupported-file-type` or `user/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `user/unsupported-file-type` or `user/unexpected-file-field` (a file in another field, or a second file in `avatarFile` or `bannerFile`), with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>
 

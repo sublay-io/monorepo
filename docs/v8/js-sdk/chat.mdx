@@ -428,7 +428,7 @@ const input = document.querySelector('input[type="file"]');
 const message = await sublay.chat.sendMessage({
   conversationId: "cnv_abc123",
   content: "Here's the doc 👇",
-  files: Array.from(input.files), // up to 10 File/Blob attachments
+  files: Array.from(input.files), // up to 20 File/Blob attachments, 50 MB each
 });
 ```
 

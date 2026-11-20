@@ -45,14 +45,30 @@ function AvatarUpload({ file }: { file: File }) {
 
   const handleUpload = async () => {
     await updateUser({
-      avatar: {
+      avatarFile: {
         file,
-        options: { width: 200, height: 200, fit: "cover" },
+        options: {
+          mode: "exact-dimensions",
+          dimensions: { small: { width: 64, height: 64 }, large: { width: 200, height: 200 } },
+          fit: "cover",
+        },
       },
     });
   };
 
   return <button onClick={handleUpload}>Upload Avatar</button>;
+}
+```
+
+### Removing the Avatar
+
+List the current file's id in `removeFileIds`. It clears `avatarFileId` and deletes the file.
+
+```tsx
+const { user, updateUser } = useUser();
+
+if (user?.avatarFileId) {
+  await updateUser({ removeFileIds: [user.avatarFileId] });
 }
 ```
 
@@ -98,11 +114,17 @@ function AvatarUpload({ file }: { file: File }) {
     <ResponseField name="birthdate" type="Date | null">
       Date of birth. Pass `null` to clear.
     </ResponseField>
-    <ResponseField name="avatar" type="string | null | { file: File | Blob; options: UploadImageOptions }">
-      Avatar image. Pass a URL string, a file object with upload options, or `null` to remove.
+    <ResponseField name="avatar" type="string | null">
+      Avatar image URL, stored as given. Pass `null` to clear it. Separate from `avatarFile`, which uploads an image.
     </ResponseField>
-    <ResponseField name="banner" type="{ file: File | Blob; options: UploadImageOptions }">
-      Banner image. File upload only.
+    <ResponseField name="avatarFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
+      New avatar image to upload, replacing the current one (up to 50 MB). `file` is a `File` or `Blob`, or a React Native file `{ uri, name, type? }`; `options` must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With a file, the update is sent as `multipart/form-data`.
+    </ResponseField>
+    <ResponseField name="bannerFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
+      New banner image to upload, replacing the current one; same shape as `avatarFile`.
+    </ResponseField>
+    <ResponseField name="removeFileIds" type="string[]">
+      Files to remove: the user's `avatarFileId` and/or `bannerFileId`. Removing one clears that image. Any other id refuses the whole update (`400 user/invalid-remove-file-ids`).
     </ResponseField>
     <ResponseField name="location" type="{ latitude: number; longitude: number } | null">
       User's geographic location. Pass `null` to clear.
@@ -127,5 +149,5 @@ function AvatarUpload({ file }: { file: File }) {
 If the server returns an error, the hook automatically reverts the user state to its pre-update value.
 
 <Note>
-  File uploads (avatar as a `File`/`Blob`, and banner) are not applied optimistically because the final URL is unknown until the upload completes.
+  File uploads (`avatarFile`, `bannerFile`) and `removeFileIds` are not applied optimistically: the new file fields are known only once the server answers.
 </Note>

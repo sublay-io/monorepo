@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useUpdateSpace` returns a callable function for updating a space. Only space admins can update a space. Supports updating avatar and banner images.
+`useUpdateSpace` returns a callable function for updating a space. Only space admins can update a space. Supports replacing the avatar and banner images (`avatarFile`, `bannerFile`) and removing them (`removeFileIds`).
 
 <Note>When using `SpaceProvider`, prefer calling `updateSpace` from `useSpace` — it handles state updates automatically.</Note>
 
@@ -24,6 +24,10 @@ function SpaceSettings({ spaceId }: { spaceId: string }) {
       update: { name, description },
     });
     console.log("Updated:", updated.name);
+  };
+
+  const removeAvatar = async (avatarFileId: string) => {
+    await updateSpace({ spaceId, update: { removeFileIds: [avatarFileId] } });
   };
 }
 ```
@@ -65,11 +69,14 @@ function SpaceSettings({ spaceId }: { spaceId: string }) {
     <ParamField path="metadata" type="Record<string, any>">
       Updated metadata.
     </ParamField>
-    <ParamField path="avatar" type="{ file: File | Blob; options: UploadImageOptions }">
-      New avatar image to upload.
+    <ParamField path="avatarFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
+      New avatar image, replacing the current one. `file` is a `File` or `Blob`, or a React Native file `{ uri, name, type? }`; `options` must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
     </ParamField>
-    <ParamField path="banner" type="{ file: File | Blob; options: UploadImageOptions }">
-      New banner image to upload.
+    <ParamField path="bannerFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
+      New banner image, replacing the current one; same shape as `avatarFile`.
+    </ParamField>
+    <ParamField path="removeFileIds" type="string[]">
+      Files to remove: the space's `avatarFileId` and/or `bannerFileId`. Removing one clears that image. Any other id refuses the whole update (`400 space/invalid-remove-file-ids`).
     </ParamField>
   </Expandable>
 </ParamField>

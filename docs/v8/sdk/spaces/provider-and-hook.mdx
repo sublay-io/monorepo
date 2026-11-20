@@ -169,7 +169,7 @@ These flags come from the space's [`memberPermissions`](/v8/data-models/space#sp
 </ResponseField>
 
 <ResponseField name="updateSpace" type="(props: { update }) => Promise<SpaceWithPermissions | undefined>">
-  Update space settings. Only available to admins. Resolves with the updated space and the user's `memberPermissions` after the update; the local space takes both and keeps its `parentSpace` and `childSpaces`.
+  Update space settings. Only available to admins. `update` takes the same fields as [`useUpdateSpace`](/v8/hooks/spaces/use-update-space), `avatarFile`, `bannerFile` and `removeFileIds` included. Resolves with the updated space and the user's `memberPermissions` after the update; the local space takes both and keeps its `parentSpace` and `childSpaces`.
 </ResponseField>
 
 <ResponseField name="deleteSpace" type="() => Promise<void>">

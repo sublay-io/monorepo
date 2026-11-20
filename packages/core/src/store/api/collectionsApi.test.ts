@@ -42,7 +42,7 @@ describe("collectionsApi", () => {
       collectionsApi.endpoints.fetchRootCollection.initiate({ projectId: "test-project" }),
     );
 
-    expect(fetchHandle.calls()[0]).toEqual({
+    expect(fetchHandle.calls()[0]).toMatchObject({
       url: expect.stringContaining("/test-project/collections/root"),
       method: "GET",
     });

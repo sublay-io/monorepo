@@ -980,6 +980,11 @@ export type {
   ImageVariant,
   UploadImageOptions,
 } from "./interfaces/models/Image";
+export type {
+  ImageSlotUpload,
+  UploadFileInput,
+  NativeUploadFile,
+} from "./utils/uploads";
 export type { File } from "./interfaces/models/File";
 
 // -- chat hooks

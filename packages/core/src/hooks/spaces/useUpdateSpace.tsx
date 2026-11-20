@@ -6,15 +6,9 @@ import {
   PostingPermission,
   SpaceVisibility,
 } from "../../interfaces/models/Space";
-import { UploadImageOptions } from "../../interfaces/models/Image";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useSpace from "./useSpace";
-
-// Image upload configuration (similar to useCreateEntity pattern)
-interface ImageUploadConfig {
-  file: File | Blob;
-  options: UploadImageOptions;
-}
+import { appendImageSlot, type ImageSlotUpload } from "../../utils/uploads";
 
 export interface UpdateSpaceProps {
   spaceId: string;
@@ -22,8 +16,15 @@ export interface UpdateSpaceProps {
     name: string;
     slug: string | null;
     description: string | null;
-    avatar: ImageUploadConfig;
-    banner: ImageUploadConfig;
+    /** A new avatar image, replacing the current one. */
+    avatarFile: ImageSlotUpload;
+    /** A new banner image, replacing the current one. */
+    bannerFile: ImageSlotUpload;
+    /**
+     * Files to remove: the space's `avatarFileId` and/or `bannerFileId`.
+     * Removing one clears that image.
+     */
+    removeFileIds: string[];
     readingPermission: ReadingPermission;
     postingPermission: PostingPermission;
     visibility: SpaceVisibility;
@@ -50,90 +51,70 @@ function useUpdateSpace(): (
         throw new Error("Please pass a spaceId");
       }
 
-      // Build FormData if files are present, otherwise use JSON
-      const hasFiles = update.avatar || update.banner;
+      const { avatarFile, bannerFile, ...fields } = update;
+      const path = `/${projectId}/spaces/${spaceId}`;
+      let updatedSpace: SpaceWithPermissions;
 
-      if (hasFiles) {
+      if (avatarFile || bannerFile) {
+        // Files go as multipart form data; every other field as a string
+        // (objects and arrays as JSON).
         const formData = new FormData();
-
-        // Append regular fields
-        if (update.name !== undefined) {
-          formData.append("name", update.name);
+        if (fields.name !== undefined) {
+          formData.append("name", fields.name);
         }
-        if (update.slug !== undefined) {
-          formData.append("slug", update.slug || "");
+        if (fields.slug !== undefined) {
+          formData.append("slug", fields.slug || "");
         }
-        if (update.description !== undefined) {
-          formData.append("description", update.description || "");
+        if (fields.description !== undefined) {
+          formData.append("description", fields.description || "");
         }
-        if (update.readingPermission !== undefined) {
-          formData.append("readingPermission", update.readingPermission);
+        if (fields.readingPermission !== undefined) {
+          formData.append("readingPermission", fields.readingPermission);
         }
-        if (update.postingPermission !== undefined) {
-          formData.append("postingPermission", update.postingPermission);
+        if (fields.postingPermission !== undefined) {
+          formData.append("postingPermission", fields.postingPermission);
         }
-        if (update.visibility !== undefined) {
-          formData.append("visibility", update.visibility);
+        if (fields.visibility !== undefined) {
+          formData.append("visibility", fields.visibility);
         }
-        if (update.requireJoinApproval !== undefined) {
+        if (fields.requireJoinApproval !== undefined) {
           formData.append(
             "requireJoinApproval",
-            String(update.requireJoinApproval),
+            String(fields.requireJoinApproval),
           );
         }
-        if (update.metadata !== undefined) {
-          formData.append("metadata", JSON.stringify(update.metadata));
+        if (fields.metadata !== undefined) {
+          formData.append("metadata", JSON.stringify(fields.metadata));
         }
-        if (update.nsfw !== undefined) {
-          formData.append("nsfw", String(update.nsfw));
+        if (fields.nsfw !== undefined) {
+          formData.append("nsfw", String(fields.nsfw));
         }
-
-        // Append avatar file and options
-        if (update.avatar) {
-          formData.append("avatarFile", update.avatar.file);
-          formData.append(
-            "avatarFile.options",
-            JSON.stringify(update.avatar.options),
-          );
+        if (fields.removeFileIds !== undefined) {
+          formData.append("removeFileIds", JSON.stringify(fields.removeFileIds));
         }
+        if (avatarFile) appendImageSlot(formData, "avatarFile", avatarFile);
+        if (bannerFile) appendImageSlot(formData, "bannerFile", bannerFile);
 
-        // Append banner file and options
-        if (update.banner) {
-          formData.append("bannerFile", update.banner.file);
-          formData.append(
-            "bannerFile.options",
-            JSON.stringify(update.banner.options),
-          );
-        }
-
-        const response = await axios.patch(
-          `/${projectId}/spaces/${spaceId}`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
-        );
-
-        return response.data as SpaceWithPermissions;
+        const response = await axios.patch(path, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        updatedSpace = response.data as SpaceWithPermissions;
       } else {
-        // No files - use JSON request (backward compatibility)
-        const response = await axios.patch(
-          `/${projectId}/spaces/${spaceId}`,
-          update,
-        );
-
-        const updatedSpace = response.data as SpaceWithPermissions;
-        // The response carries the caller's server permissions but not
-        // `parentSpace` / `childSpaces`, so merge it onto the provider's space.
-        setSpace?.((prev) =>
-          prev && prev.id === updatedSpace.id
-            ? { ...prev, ...updatedSpace }
-            : prev,
-        );
-        return updatedSpace;
+        // No files: a JSON request.
+        const response = await axios.patch(path, fields);
+        updatedSpace = response.data as SpaceWithPermissions;
       }
+
+      // The response carries the caller's server permissions but not
+      // `parentSpace` / `childSpaces`, so merge it onto the provider's space.
+      setSpace?.((prev) =>
+        prev && prev.id === updatedSpace.id
+          ? { ...prev, ...updatedSpace }
+          : prev,
+      );
+      return updatedSpace;
     },
-    [projectId, axios],
+    [projectId, axios, setSpace],
   );
 
   return updateSpace;

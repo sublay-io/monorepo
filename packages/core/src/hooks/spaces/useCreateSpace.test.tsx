@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeSpace } from "../../test-utils";
@@ -38,18 +38,51 @@ describe("useCreateSpace", () => {
     await act(async () => {
       await result.current({
         name: "Design",
-        avatar: { file, options: { mode: "original-aspect", sizes: { full: 256 } } },
+        avatarFile: { file, options: { mode: "original-aspect", sizes: { full: 256 } } },
       });
     });
 
     const [call] = axiosPrivate.calls("post");
     expect(call.body instanceof FormData).toBe(true);
     const formData = call.body as FormData;
+    expect([...formData.keys()].sort()).toEqual(["avatarFile", "avatarFile.options", "name"]);
     expect(formData.get("name")).toBe("Design");
     expect(formData.get("avatarFile")).toBeInstanceOf(File);
     expect(formData.get("avatarFile.options")).toBe(
       JSON.stringify({ mode: "original-aspect", sizes: { full: 256 } }),
     );
+  });
+
+  it("sends a banner as bannerFile + bannerFile.options", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useCreateSpace());
+    axiosPrivate.mockResponse("post", makeSpace(), 201);
+
+    const file = new File(["binary"], "banner.png", { type: "image/png" });
+    const options = { mode: "original-aspect" as const, sizes: { full: 1200 } };
+    await act(async () => {
+      await result.current({ name: "Design", bannerFile: { file, options } });
+    });
+
+    const formData = axiosPrivate.calls("post")[0].body as FormData;
+    expect((formData.get("bannerFile") as File).name).toBe("banner.png");
+    expect(formData.get("bannerFile.options")).toBe(JSON.stringify(options));
+    expect(formData.has("avatarFile")).toBe(false);
+  });
+
+  it("appends a React Native file ({ uri, name, type }) as FormData expects it", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useCreateSpace());
+    axiosPrivate.mockResponse("post", makeSpace(), 201);
+
+    const appendSpy = vi.spyOn(FormData.prototype, "append");
+    const nativeFile = { uri: "file:///avatar.jpg", name: "avatar.jpg", type: "image/jpeg" };
+    await act(async () => {
+      await result.current({
+        name: "Design",
+        avatarFile: { file: nativeFile, options: { mode: "original-aspect", sizes: { full: 256 } } },
+      });
+    });
+
+    expect(appendSpy).toHaveBeenCalledWith("avatarFile", nativeFile);
   });
 
   it("rejects when the server returns an error response", async () => {

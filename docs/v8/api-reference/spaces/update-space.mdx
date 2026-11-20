@@ -53,7 +53,7 @@ All fields are optional. Only provided fields are updated.
 </ParamField>
 
 <ParamField body="avatarFile.options" type="string">
-  Stringified JSON describing how to process the avatar. Must include a `mode` field; see [Upload Image](/v8/api-reference/storage/upload-image) for the modes and optional fields. Ignored when no `avatarFile` is sent.
+  Stringified JSON describing how to process the avatar. Must include a `mode` field; see [Upload Image](/v8/api-reference/storage/upload-image) for the modes and optional fields. Not used when no `avatarFile` is sent, but still validated: invalid JSON or options get a `400`.
 </ParamField>
 
 <ParamField body="bannerFile" type="file">
@@ -61,7 +61,7 @@ All fields are optional. Only provided fields are updated.
 </ParamField>
 
 <ParamField body="bannerFile.options" type="string">
-  Stringified JSON describing how to process the banner, as `avatarFile.options`. Ignored when no `bannerFile` is sent.
+  Stringified JSON describing how to process the banner, as `avatarFile.options`. Not used when no `bannerFile` is sent, but still validated: invalid JSON or options get a `400`.
 </ParamField>
 
 <ParamField body="removeFileIds" type="string[]">
@@ -142,7 +142,7 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
     A `removeFileIds` that isn't an array of file ids gets `400 space/invalid-body` instead.
   </Accordion>
   <Accordion title="Bundle Not Installed — 403">
-    Returned when an avatar or banner is uploaded, or `removeFileIds` is sent, on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    Returned when an avatar or banner is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
     ```json
     { "error": "Space avatar/banner uploads require the files-images bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
     ```

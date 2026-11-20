@@ -213,12 +213,14 @@ const updatedUser = await sublay.users.updateUser({
 
 ```typescript
 // Replace the avatar and remove the banner in one request
-await sublay.users.updateUser({
-  userId: user.id,
-  actingUserId: user.id,
-  avatarFile: { file: bytes, filename: "avatar.webp", mimeType: "image/webp", options: { mode: "original-aspect", sizes: { small: 128 } } },
-  removeFileIds: [user.bannerFileId],
-});
+if (user.bannerFileId) {
+  await sublay.users.updateUser({
+    userId: user.id,
+    actingUserId: user.id,
+    avatarFile: { file: bytes, filename: "avatar.webp", mimeType: "image/webp", options: { mode: "original-aspect", sizes: { small: 128 } } },
+    removeFileIds: [user.bannerFileId],
+  });
+}
 ```
 
 **Returns** — `Promise<UserFull>`

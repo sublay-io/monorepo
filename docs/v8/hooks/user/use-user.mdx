@@ -115,7 +115,7 @@ if (user?.avatarFileId) {
       Date of birth. Pass `null` to clear.
     </ResponseField>
     <ResponseField name="avatar" type="string | null">
-      Avatar image URL, stored as given. Pass `null` to clear it. Separate from `avatarFile`, which uploads an image.
+      Avatar image URL, stored as given. Pass `null` to clear it, on an update without files only: next to `avatarFile` or `bannerFile` (a multipart request), `null` isn't sent and the URL stays. Separate from `avatarFile`, which uploads an image.
     </ResponseField>
     <ResponseField name="avatarFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
       New avatar image to upload, replacing the current one (up to 50 MB). `file` is a `File` or `Blob`, or a React Native file `{ uri, name, type? }`; `options` must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With a file, the update is sent as `multipart/form-data`.

@@ -363,7 +363,9 @@ const space = await sublay.spaces.updateSpace({
 
 ```typescript
 // Remove the space's banner
-await sublay.spaces.updateSpace({ spaceId: space.id, removeFileIds: [space.bannerFileId] });
+if (space.bannerFileId) {
+  await sublay.spaces.updateSpace({ spaceId: space.id, removeFileIds: [space.bannerFileId] });
+}
 ```
 
 **Returns** — `Promise<SpaceWithPermissions>`: the updated space plus [`memberPermissions`](/v8/data-models/space#spacememberpermissions), what the user may do in it after the update (no `parentSpace` or `childSpaces`).

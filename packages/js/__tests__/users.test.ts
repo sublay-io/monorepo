@@ -177,6 +177,32 @@ describe("js-sdk users — profile — request shaping", () => {
     );
   });
 
+  it("updateUser sends removeFileIds as a JSON array when there are no files", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateUser(client, { userId: "u1", removeFileIds: ["11111111-1111-4111-8111-111111111111"] });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/users/u1", {
+      removeFileIds: ["11111111-1111-4111-8111-111111111111"],
+    });
+  });
+
+  it("updateUser sends removeFileIds as a JSON string next to an upload", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateUser(client, {
+      userId: "u1",
+      removeFileIds: ["11111111-1111-4111-8111-111111111111"],
+      bannerFile: {
+        file: new File(["b"], "banner.png", { type: "image/png" }),
+        options: { mode: "original-aspect", sizes: { full: 1000 } },
+      },
+    });
+    const [, body] = projectInstance.patch.mock.calls[0];
+    const formData = body as FormData;
+    expect([...formData.keys()].sort()).toEqual(
+      ["bannerFile", "bannerFile.options", "removeFileIds"],
+    );
+    expect(formData.get("removeFileIds")).toBe(JSON.stringify(["11111111-1111-4111-8111-111111111111"]));
+  });
+
   it("updateUser falls back to a generic filename when the avatar Blob has no name", async () => {
     const { client, projectInstance } = makeClient();
     const blob = new Blob(["raw-bytes"], { type: "image/png" });

@@ -599,6 +599,32 @@ describe("js-sdk auth — request shaping", () => {
 });
 
 describe("js-sdk auth — response mapping", () => {
+  it("signUp sends avatarFile/bannerFile with their `.options` as multipart, object fields as JSON", async () => {
+    const { client, projectInstance } = makeRealClient();
+    const avatarOptions = { mode: "original-aspect" as const, sizes: { thumbnail: 200 } };
+    const bannerOptions = { mode: "original-aspect" as const, sizes: { full: 1000 } };
+    await signUp(client, {
+      email: "a@b.com",
+      password: "pw",
+      metadata: { plan: "pro" },
+      avatarFile: { file: new File(["a"], "avatar.png", { type: "image/png" }), options: avatarOptions },
+      bannerFile: { file: new Blob(["b"], { type: "image/png" }), options: bannerOptions },
+    });
+
+    const [path, body] = projectInstance.post.mock.calls[0];
+    expect(path).toBe("/auth/sign-up");
+    expect(body).toBeInstanceOf(FormData);
+    const formData = body as FormData;
+    expect([...formData.keys()].sort()).toEqual(
+      ["avatarFile", "avatarFile.options", "bannerFile", "bannerFile.options", "email", "metadata", "password"],
+    );
+    expect((formData.get("avatarFile") as File).name).toBe("avatar.png");
+    expect(formData.get("avatarFile.options")).toBe(JSON.stringify(avatarOptions));
+    expect((formData.get("bannerFile") as File).name).toBe("banner");
+    expect(formData.get("bannerFile.options")).toBe(JSON.stringify(bannerOptions));
+    expect(formData.get("metadata")).toBe(JSON.stringify({ plan: "pro" }));
+  });
+
   it("signUp returns response.data and stores the returned tokens", async () => {
     const { client, projectInstance } = makeRealClient();
     const result = {

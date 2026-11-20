@@ -231,6 +231,37 @@ describe("js-sdk spaces (lifecycle) — request shaping", () => {
     expect(body).not.toBeInstanceOf(FormData);
   });
 
+  it("updateSpace sends removeFileIds (and requireJoinApproval) as JSON when there are no files", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateSpace(client, {
+      spaceId: "s1",
+      requireJoinApproval: true,
+      removeFileIds: ["11111111-1111-4111-8111-111111111111"],
+    });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1", {
+      requireJoinApproval: true,
+      removeFileIds: ["11111111-1111-4111-8111-111111111111"],
+    });
+  });
+
+  it("updateSpace sends removeFileIds as a JSON string next to an upload", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateSpace(client, {
+      spaceId: "s1",
+      removeFileIds: ["11111111-1111-4111-8111-111111111111"],
+      avatarFile: {
+        file: new File(["a"], "a.png", { type: "image/png" }),
+        options: { mode: "original-aspect", sizes: { thumbnail: 200 } },
+      },
+    });
+    const [, body] = projectInstance.patch.mock.calls[0];
+    const formData = body as FormData;
+    expect([...formData.keys()].sort()).toEqual(
+      ["avatarFile", "avatarFile.options", "removeFileIds"],
+    );
+    expect(formData.get("removeFileIds")).toBe(JSON.stringify(["11111111-1111-4111-8111-111111111111"]));
+  });
+
   it("updateSpace sends multipart/FormData with avatarFile + avatarFile.options when an avatar is attached", async () => {
     const { client, projectInstance } = makeClient();
     const file = new File(["avatar-bytes"], "newavatar.png", {

@@ -10,7 +10,7 @@ Returns a function to submit a content report on behalf of the authenticated use
 
 If the same target already has an **open** report, the user's report is appended to it (reports are deduplicated per user, so reporting the same target twice has no additional effect).
 
-Once a moderator resolves a report — dismissed or actioned — it is closed. A later report of that same target opens a **fresh** report rather than reopening the closed one, so previously-dismissed content can be re-reported and returns to the moderation queue.
+Once a report is resolved — dismissed or actioned by a moderator, or auto-closed by the system — it is closed. A later report of that same target opens a **fresh** report rather than reopening the closed one, so previously-dismissed content can be re-reported and returns to the moderation queue.
 
 <Note>Requires an authenticated user.</Note>
 

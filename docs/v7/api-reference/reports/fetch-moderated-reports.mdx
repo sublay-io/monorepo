@@ -24,7 +24,7 @@ Returns a paginated list of reports for spaces where the authenticated user has 
 </ParamField>
 
 <ParamField query="status" type="string">
-  Filter by report status. One of: `pending`, `on-hold`, `escalated`, `dismissed`, `actioned`.
+  Filter by report status. One of: `pending`, `on-hold`, `escalated`, `dismissed`, `actioned`. A listed report can also be `auto-closed`: closed by the system with no moderator decision, for example when the content's author deleted it, with the reason in `actionTaken`.
 </ParamField>
 
 <ParamField query="sortBy" type="string" default="new">

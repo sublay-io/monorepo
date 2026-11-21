@@ -8,6 +8,8 @@ import reducer, {
   patchMessage,
   removeConversationPreview,
   removeMessage,
+  markMessageRemoved,
+  applyOwnDelete,
   replaceMessages,
   startThreadLoad,
   updateGrants,
@@ -1024,5 +1026,72 @@ describe("chatSlice — replaceMessages", () => {
     expect(bucket.hasMore).toBe(true);
     expect(bucket.oldestMessageId).toBe("message-5");
     expect(bucket.newestMessageId).toBe("message-9");
+  });
+});
+
+describe("chatSlice — deleted and removed placeholders (S#227)", () => {
+  function stateWith(userId: string) {
+    return baseState({
+      messages: {
+        "conversation-1": {
+          items: [
+            makeChatMessage({
+              id: "message-1",
+              userId,
+              content: "hi",
+              grants: { total: 5, count: 1, viewerTotal: 0 },
+            }),
+          ],
+          loading: false,
+          hasMore: false,
+          oldestMessageId: "message-1",
+          newestMessageId: "message-1",
+        },
+      },
+    });
+  }
+  const first = (state: ChatState) => state.messages["conversation-1"].items[0];
+
+  it("markMessageRemoved zeroes the grants summary, for the author too", () => {
+    for (const currentUserId of ["user-1", "user-2"]) {
+      const state = reducer(
+        stateWith("user-1"),
+        markMessageRemoved({ conversationId: "conversation-1", messageId: "message-1", currentUserId }),
+      );
+      expect(first(state).grants).toEqual({ total: 0, count: 0, viewerTotal: 0 });
+    }
+  });
+
+  it("applyOwnDelete with no known user leaves the deleted placeholder, sender kept", () => {
+    const state = reducer(
+      stateWith("user-1"),
+      applyOwnDelete({
+        conversationId: "conversation-1",
+        messageId: "message-1",
+        currentUserId: null,
+        deletedAt: "2024-01-02T00:00:00.000Z",
+      }),
+    );
+    expect(first(state)).toMatchObject({
+      userDeletedAt: "2024-01-02T00:00:00.000Z",
+      userId: "user-1",
+      content: null,
+    });
+    expect(first(state).moderationStatus).not.toBe("removed");
+  });
+
+  it("applyOwnDelete keeps a userDeletedAt the server already set", () => {
+    const state0 = stateWith("user-1");
+    state0.messages["conversation-1"].items[0].userDeletedAt = "2024-01-01T00:00:00.000Z";
+    const state = reducer(
+      state0,
+      applyOwnDelete({
+        conversationId: "conversation-1",
+        messageId: "message-1",
+        currentUserId: "user-1",
+        deletedAt: "2024-01-02T00:00:00.000Z",
+      }),
+    );
+    expect(first(state).userDeletedAt).toBe("2024-01-01T00:00:00.000Z");
   });
 });

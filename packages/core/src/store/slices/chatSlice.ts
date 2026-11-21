@@ -193,9 +193,12 @@ function blankContent(message: ChatMessage): void {
   message.files = undefined;
 }
 
-/** A deleted message: content cleared, sender kept. */
+/**
+ * A deleted message: content cleared, sender kept. An already-set
+ * `userDeletedAt` (the server's, from `message:deleted`) is kept.
+ */
 function toDeletedPlaceholder(message: ChatMessage, userDeletedAt: string): void {
-  message.userDeletedAt = userDeletedAt;
+  message.userDeletedAt = message.userDeletedAt ?? userDeletedAt;
   blankContent(message);
 }
 
@@ -205,6 +208,8 @@ function toRemovedPlaceholder(
   currentUserId: string | null
 ): void {
   message.moderationStatus = "removed";
+  // A removed message's grants are hidden from everyone, its author included.
+  if (message.grants) message.grants = { total: 0, count: 0, viewerTotal: 0 };
   if (message.userId && message.userId === currentUserId) return;
   blankContent(message);
   message.userId = null;
@@ -831,7 +836,9 @@ const chatSlice = createSlice({
     ) {
       const { conversationId, messageId, currentUserId, deletedAt } = action.payload;
       for (const message of findLoadedCopies(state, conversationId, messageId)) {
-        if (message.userId && message.userId === currentUserId) {
+        // With no known current user, assume their own delete: the milder
+        // outcome, and `message:removed` corrects it if it was an admin's.
+        if (!currentUserId || message.userId === currentUserId) {
           toDeletedPlaceholder(message, deletedAt);
         } else {
           toRemovedPlaceholder(message, currentUserId);

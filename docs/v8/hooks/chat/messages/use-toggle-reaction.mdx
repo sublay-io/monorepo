@@ -8,6 +8,8 @@ icon: "plug"
 
 Returns an async function that toggles an emoji reaction on a message. If the current user has not reacted with this emoji, it adds the reaction. If they have, it removes it. The `reactionCounts` and `userReactions` on the message in Redux are updated after the server confirms the toggle.
 
+A [deleted or removed message](/v8/data-models/chat-message#deleted-and-removed-messages) takes no reaction changes: the call answers `404 chat/message-not-found`. Hide the reaction picker when `userDeletedAt` is set or `moderationStatus` is `"removed"`.
+
 <Note>Requires `ChatProvider` in the component tree.</Note>
 
 ## Usage Example

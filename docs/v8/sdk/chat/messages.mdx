@@ -159,7 +159,7 @@ See [`useDeleteMessage`](/v8/hooks/chat/messages/use-delete-message).
 
 ## Reactions
 
-`useToggleReaction` adds or removes an emoji reaction on a message. The response includes updated `reactionCounts` and `userReactions`:
+`useToggleReaction` adds or removes an emoji reaction on a message. A [deleted or removed message](/v8/data-models/chat-message#deleted-and-removed-messages) takes no reaction changes: the call answers `404 chat/message-not-found`. Hide the reaction picker when `userDeletedAt` is set or `moderationStatus` is `"removed"`. The response includes updated `reactionCounts` and `userReactions`:
 
 ```tsx
 import { useToggleReaction } from "@sublay/react-js";

@@ -498,7 +498,7 @@ and cannot report their own message. See [createReport](/v8/node-sdk/reports).
 
 ### toggleReaction
 
-Adds or removes the acting user's emoji reaction on a message.
+Adds or removes the acting user's emoji reaction on a message. A [deleted or removed message](/v8/data-models/chat-message#deleted-and-removed-messages) takes no reaction changes: the call fails with `404 chat/message-not-found`.
 
 ```typescript
 const { delta, reactionCounts } = await sublay.chat.toggleReaction({

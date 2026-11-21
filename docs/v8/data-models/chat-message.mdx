@@ -19,7 +19,7 @@ A `ChatMessage` represents a single message in a conversation. Messages support 
 | `gif` | `GifData \| null` | GIF attachment data. `null` if no GIF was attached. |
 | `mentions` | `Mention[]` | Array of @mentions embedded in the message. |
 | `files` | `File[] \| undefined` | File attachments. On message lists, only populated when `include` contains `"files"`; omitted by default to keep payloads small. A single-message fetch always returns them. |
-| `metadata` | `Record<string, any> \| null` | Custom key-value data. Limited to 10 KB. `null` on a [deleted or removed message](#deleted-and-removed-messages). |
+| `metadata` | `Record<string, any> \| null` | Custom key-value data. Limited to 10 KB. `null` on a [deleted message](#deleted-and-removed-messages), and on a removed one for everyone but its author. |
 | `parentMessageId` | `string \| null` | ID of the parent message if this is a thread reply. Thread replies are excluded from the main conversation stream. |
 | `parentMessage` | `ChatMessage \| null \| undefined` | The parent message for thread replies. |
 | `quotedMessageId` | `string \| null` | ID of a message being quoted. The message remains in the main stream but renders an inline preview of the quoted content. |

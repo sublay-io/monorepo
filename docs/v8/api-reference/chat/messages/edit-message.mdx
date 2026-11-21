@@ -107,7 +107,7 @@ Returns the updated [ChatMessage](/v8/data-models/chat-message), with `editedAt`
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
-    No message has this ID in the conversation, or the message was deleted or removed: a message every read shows as gone can't be edited, and answers like a missing one. Checked before the author check.
+    No message has this ID in the conversation, or the message was [deleted or removed](/v8/data-models/chat-message#deleted-and-removed-messages): it can't be edited, and answers like a missing one. Checked before the author check.
     ```json
     { "error": "Message not found.", "code": "chat/message-not-found" }
     ```

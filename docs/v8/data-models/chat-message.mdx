@@ -116,6 +116,8 @@ Deleting a message clears its content, GIF, mentions and metadata, and deletes i
 
 A removed message's `grants` summary (with `include=grants`) is zero for everyone, its author included, as on [Fetch Many Reputation Grants](/v8/api-reference/reputation-grants/fetch-many-reputation-grants).
 
+Neither can be quoted in a new message (`400 chat/invalid-quote`) or take a new [reputation grant](/v8/data-models/reputation-grant) (`404 reputation-grant/target-not-found`); a deleted message still takes thread replies, and a removed one doesn't (`400 chat/invalid-parent`).
+
 Neither can be edited: [Edit Message](/v8/api-reference/chat/messages/edit-message) answers `404 chat/message-not-found`, as for a missing message. Neither takes reaction changes either ([Toggle Reaction](/v8/api-reference/chat/messages/toggle-reaction) answers the same `404`), but both keep their `reactionCounts`, and [Fetch Reaction Users](/v8/api-reference/chat/messages/fetch-reaction-users) still lists who reacted. To show nothing for them, skip messages with `userDeletedAt` set or `moderationStatus: "removed"` when rendering.
 
 ## Related

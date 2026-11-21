@@ -6,6 +6,8 @@ description: "Approve or remove an entity within a space"
 
 Takes a direct moderation action on an entity in a space. Requires the caller to be a moderator or admin.
 
+Removing an entity that's already removed succeeds and changes nothing: the first removal's record (who, when, why) stays.
+
 ## Path Parameters
 
 <ParamField path="spaceId" type="string" required>

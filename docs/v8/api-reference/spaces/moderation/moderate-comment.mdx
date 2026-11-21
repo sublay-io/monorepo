@@ -6,6 +6,8 @@ description: "Approve or remove a comment within a space"
 
 Takes a direct moderation action on a comment in a space. Requires the caller to be a moderator or admin.
 
+Removing a comment that's already removed, or that its author deleted, succeeds and changes nothing: the first removal's record (who, when, why) stays, and a deleted comment stays deleted. The response then carries the comment's actual status.
+
 ## Path Parameters
 
 <ParamField path="spaceId" type="string" required>
@@ -33,7 +35,7 @@ Takes a direct moderation action on a comment in a space. Requires the caller to
 ## Response
 
 <ResponseField name="moderationStatus" type="string">
-  The resulting status: `"approved"` or `"removed"`.
+  The comment's status after the request: `"approved"` or `"removed"`. Removing a comment its author deleted (and nobody removed) leaves it as it was, so the status is its existing one, `null` or `"approved"`.
 </ResponseField>
 
 ## Error Responses

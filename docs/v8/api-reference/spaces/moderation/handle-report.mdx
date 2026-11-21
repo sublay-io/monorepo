@@ -53,6 +53,8 @@ The request names only the report. The server reads what was reported from the r
 
 Returns `204 No Content` with no body.
 
+A remove action on content that's already removed, or that its author deleted, succeeds and changes nothing on the content: the first removal's record stays, and deleted content stays deleted. The report is still resolved, and the request's other actions (such as `ban-user`) still apply.
+
 ## Error Responses
 
 <AccordionGroup>

@@ -112,7 +112,9 @@ On a placeholder, `content`, `gif` and `metadata` are `null`, and `mentions` is 
 
 A deleted message keeps its sender, so the conversation can show who deleted it. A removed one hides its sender, so a removal doesn't publicly mark the person; its author still sees it in full, with its `moderationStatus`.
 
-Deleting a message clears its content, GIF, mentions and metadata, and deletes its files from storage. Removing one clears nothing, so its author can still read it. Deleting a user deletes each of their messages the same way, and sets their `userId` to `null`.
+Deleting a message clears its content, GIF, mentions and metadata, and deletes its files from storage. Removing one clears nothing, so its author can still read it. Deleting a user turns each of their messages into a deleted message, read back as the same placeholder, and sets their `userId` to `null`.
+
+A removed message's `grants` summary (with `include=grants`) is zero for everyone, its author included, as on [Fetch Many Reputation Grants](/v8/api-reference/reputation-grants/fetch-many-reputation-grants).
 
 Neither can be edited: [Edit Message](/v8/api-reference/chat/messages/edit-message) answers `404 chat/message-not-found`, as for a missing message. To show nothing for them, skip messages with `userDeletedAt` set or `moderationStatus: "removed"` when rendering.
 

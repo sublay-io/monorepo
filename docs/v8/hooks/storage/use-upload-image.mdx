@@ -73,7 +73,7 @@ function AvatarUploader() {
 </ParamField>
 
 <ParamField body="pathParts" type="string[]">
-  Storage path segments. The file is stored under the joined path. Defaults to `["images", <fileId>]`.
+  Folder segments for the stored image. The new file's id is always added after them (`<pathParts>/<fileId>/<filename>`). Defaults to `["images"]`. A folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
 </ParamField>
 
 <ParamField body="onProgress" type="(progress: number) => void">

@@ -17,7 +17,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 </ParamField>
 
 <ParamField body="pathParts" type="array" required>
-  JSON-encoded array of path segments. The file is stored under the joined path with a UUID sub-folder appended. Example: `["documents", "user-123"]` → `documents/user-123/<uuid>/<filename>`.
+  JSON-encoded array of path segments. The file is stored under the joined path with a UUID sub-folder appended. Example: `["documents", "user-123"]` → `documents/user-123/<uuid>/<filename>`. A part that is, or contains, a `.` or `..` folder is refused with `400 storage/invalid-body`.
 </ParamField>
 
 <ParamField body="entityId" type="string">

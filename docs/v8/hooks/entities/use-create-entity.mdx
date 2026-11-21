@@ -100,7 +100,7 @@ const entity = await createEntity({
 </ParamField>
 
 <ParamField path="files" type="{ files: File[]; options?: { pathParts?: string[] } }">
-  Files to upload and attach. Triggers a multipart form request.
+  Files to upload and attach. Triggers a multipart form request. A `pathParts` folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
 </ParamField>
 
 ## Returns

@@ -45,8 +45,8 @@ function EntityModerationActions({ spaceId, entityId }: { spaceId: string; entit
 
 ## Returns
 
-<ResponseField name="moderationStatus" type='"approved" | "removed"'>
-  The resulting status.
+<ResponseField name="moderationStatus" type='"approved" | "removed" | null'>
+  The entity's status after the request. An entity its owner deleted takes no moderation change, so it answers with its existing status, which can be `null`.
 </ResponseField>
 
 For integration guidance, see [Moderation](/v8/sdk/spaces/moderation).

@@ -662,7 +662,7 @@ await sublay.spaces.moderateSpaceChatMessage({
 <ParamField body="reason" type="string">The reason for the removal. Trimmed; up to 1,000 characters.</ParamField>
 <ParamField body="actingUserId" type="string" required>The moderator the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.</ParamField>
 
-**Returns** — `Promise<{ moderationStatus: "removed" }>`
+**Returns** — `Promise<{ moderationStatus: "removed" | null }>`: `null` for a message its author deleted (and nobody removed), which is left as it was.
 
 ---
 

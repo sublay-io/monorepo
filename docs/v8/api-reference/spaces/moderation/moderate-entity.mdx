@@ -6,7 +6,7 @@ description: "Approve or remove an entity within a space"
 
 Takes a direct moderation action on an entity in a space. Requires the caller to be a moderator or admin.
 
-Removing an entity that's already removed succeeds and changes nothing: the first removal's record (who, when, why) stays.
+Removing an entity that's already removed succeeds and changes nothing: the first removal's record (who, when, why) stays. An entity its owner deleted (with the project's soft delete on) takes no moderation change at all, and the response carries its existing status.
 
 ## Path Parameters
 
@@ -35,7 +35,7 @@ Removing an entity that's already removed succeeds and changes nothing: the firs
 ## Response
 
 <ResponseField name="moderationStatus" type="string">
-  The resulting status: `"approved"` or `"removed"`.
+  The entity's status after the request: `"approved"` or `"removed"`, or the existing status (possibly `null`) of an entity its owner deleted.
 </ResponseField>
 
 ## Error Responses

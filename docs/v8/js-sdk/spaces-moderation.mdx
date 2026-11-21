@@ -82,7 +82,7 @@ const result = await sublay.spaces.moderateSpaceEntity({
   The reason for the moderation action.
 </ParamField>
 
-**Returns** — `Promise<{ moderationStatus: "approved" | "removed" }>`
+**Returns** — `Promise<{ moderationStatus: "approved" | "removed" | null }>`: the status after the request. Content its owner deleted takes no moderation change and answers with its existing status, which can be `null`.
 
 ---
 
@@ -142,7 +142,7 @@ const result = await sublay.spaces.moderateSpaceComment({
   The reason for the moderation action.
 </ParamField>
 
-**Returns** — `Promise<{ moderationStatus: "approved" | "removed" }>`
+**Returns** — `Promise<{ moderationStatus: "approved" | "removed" | null }>`: the status after the request. Content its owner deleted takes no moderation change and answers with its existing status, which can be `null`.
 
 ---
 
@@ -175,7 +175,7 @@ const result = await sublay.spaces.moderateSpaceChatMessage({
   The reason for the removal. Trimmed; up to 1,000 characters.
 </ParamField>
 
-**Returns** — `Promise<{ moderationStatus: "removed" }>`
+**Returns** — `Promise<{ moderationStatus: "removed" | null }>`: `null` for a message its author deleted (and nobody removed), which is left as it was.
 
 ---
 

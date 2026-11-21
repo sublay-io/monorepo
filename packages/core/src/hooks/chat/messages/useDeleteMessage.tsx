@@ -1,6 +1,8 @@
 import { useCallback } from "react";
-import { useSublayDispatch } from "../../../store/hooks";
-import { removeMessage } from "../../../store/slices/chatSlice";
+import { useSublayDispatch, useSublaySelector } from "../../../store/hooks";
+import { applyOwnDelete } from "../../../store/slices/chatSlice";
+import { selectUser } from "../../../store/slices/userSlice";
+import { selectUser as selectAuthUser } from "../../../store/slices/authSlice";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
@@ -14,6 +16,9 @@ function useDeleteMessage(): (params: DeleteMessageParams) => Promise<void> {
   const dispatch = useSublayDispatch();
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
+  const user = useSublaySelector(selectUser);
+  const authUser = useSublaySelector(selectAuthUser);
+  const currentUserId = (user || authUser)?.id ?? null;
 
   const deleteMsg = useCallback(
     async ({ conversationId, messageId }: DeleteMessageParams): Promise<void> => {
@@ -23,14 +28,23 @@ function useDeleteMessage(): (params: DeleteMessageParams) => Promise<void> {
         await axios.delete(
           `/${projectId}/chat/conversations/${conversationId}/messages/${messageId}`
         );
-        // Soft-remove locally — mirrors the server-side soft-delete behavior
-        dispatch(removeMessage({ conversationId, messageId }));
+        // The message stays, as the placeholder the server now returns for
+        // it: deleted when it's the user's own, removed when it's someone
+        // else's (a group admin's delete).
+        dispatch(
+          applyOwnDelete({
+            conversationId,
+            messageId,
+            currentUserId,
+            deletedAt: new Date().toISOString(),
+          })
+        );
       } catch (err) {
         handleError(err, "Failed to delete message");
         throw err;
       }
     },
-    [projectId, axios, dispatch]
+    [projectId, axios, dispatch, currentUserId]
   );
 
   return deleteMsg;

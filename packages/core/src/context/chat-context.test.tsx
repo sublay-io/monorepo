@@ -551,7 +551,7 @@ describe("ChatProvider — message-scoped socket events", () => {
     );
   });
 
-  it("message:deleted clears the content but keeps the metadata, as a refetch would", async () => {
+  it("message:deleted clears the content and the metadata, as a refetch would", async () => {
     const { store } = await renderWithLoadedMessage();
     act(() => {
       fakeSocket.trigger(
@@ -581,6 +581,110 @@ describe("ChatProvider — message-scoped socket events", () => {
       content: null,
       gif: null,
       mentions: [],
+      metadata: null,
+    });
+  });
+
+  it("message:removed blanks someone else's message and its sender, as a refetch would", async () => {
+    const { store } = await renderWithLoadedMessage("user-me");
+    act(() => {
+      fakeSocket.trigger(
+        "message:created",
+        makeChatMessage({
+          id: "message-other",
+          conversationId: "conversation-1",
+          userId: "user-other",
+          content: "theirs",
+          metadata: { pinned: true },
+        }),
+      );
+    });
+    act(() => {
+      fakeSocket.trigger("message:removed", {
+        messageId: "message-other",
+        conversationId: "conversation-1",
+      });
+    });
+    const removed = selectMessages("conversation-1")(store.getState()).find(
+      (m) => m.id === "message-other",
+    )!;
+    expect(removed).toMatchObject({
+      moderationStatus: "removed",
+      userId: null,
+      user: null,
+      content: null,
+      gif: null,
+      metadata: null,
+      mentions: [],
+    });
+  });
+
+  it("message:removed and message:deleted also blank the quoted copy inside a message that quotes it", async () => {
+    const { store } = await renderWithLoadedMessage("user-me");
+    const quoted = makeChatMessage({
+      id: "message-q",
+      conversationId: "conversation-1",
+      userId: "user-other",
+      content: "quoted text",
+    });
+    act(() => {
+      fakeSocket.trigger("message:created", quoted);
+      fakeSocket.trigger(
+        "message:created",
+        makeChatMessage({
+          id: "message-quoting",
+          conversationId: "conversation-1",
+          userId: "user-me",
+          quotedMessageId: "message-q",
+          quotedMessage: quoted,
+        }),
+      );
+    });
+    act(() => {
+      fakeSocket.trigger("message:removed", {
+        messageId: "message-q",
+        conversationId: "conversation-1",
+      });
+    });
+    const quoting = () =>
+      selectMessages("conversation-1")(store.getState()).find(
+        (m) => m.id === "message-quoting",
+      )!;
+    expect(quoting().quotedMessage).toMatchObject({
+      moderationStatus: "removed",
+      userId: null,
+      user: null,
+      content: null,
+    });
+  });
+
+  it("message:removed leaves my own message in full", async () => {
+    const { store } = await renderWithLoadedMessage("user-me");
+    act(() => {
+      fakeSocket.trigger(
+        "message:created",
+        makeChatMessage({
+          id: "message-mine",
+          conversationId: "conversation-1",
+          userId: "user-me",
+          content: "mine",
+          metadata: { pinned: true },
+        }),
+      );
+    });
+    act(() => {
+      fakeSocket.trigger("message:removed", {
+        messageId: "message-mine",
+        conversationId: "conversation-1",
+      });
+    });
+    const mine = selectMessages("conversation-1")(store.getState()).find(
+      (m) => m.id === "message-mine",
+    )!;
+    expect(mine).toMatchObject({
+      moderationStatus: "removed",
+      userId: "user-me",
+      content: "mine",
       metadata: { pinned: true },
     });
   });

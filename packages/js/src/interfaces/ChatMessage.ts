@@ -8,12 +8,12 @@ export interface ChatMessage {
   id: string;
   projectId: string;
   conversationId: string;
-  userId: string | null; // null when the sender's account has been deleted
+  userId: string | null; // null when the sender's account has been deleted, and on a removed message for everyone but its author
   content: string | null;
   gif: GifData | null;
   mentions: Mention[];
   files?: File[]; // Opt-in only — omitted by default
-  metadata: Record<string, any>;
+  metadata: Record<string, any> | null; // null on a deleted message, and on a removed one for everyone but its author
   parentMessageId: string | null;
   quotedMessageId: string | null;
   threadReplyCount: number;

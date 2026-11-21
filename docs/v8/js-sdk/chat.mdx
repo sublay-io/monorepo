@@ -591,7 +591,7 @@ and cannot report their own message. See [createReport](/v8/js-sdk/reports).
 
 ### toggleReaction
 
-Toggles (adds or removes) an emoji reaction on a message for the logged-in user.
+Toggles (adds or removes) an emoji reaction on a message for the logged-in user. A [deleted or removed message](/v8/data-models/chat-message#deleted-and-removed-messages) takes no new reaction: adding one fails with `404 chat/message-not-found`, while taking back your own still works.
 
 ```typescript
 const { reactionCounts, userReactions, delta } = await sublay.chat.toggleReaction({

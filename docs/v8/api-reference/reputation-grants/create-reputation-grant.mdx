@@ -137,6 +137,7 @@ Both balances move: the sender's bucket and profile total drop by `amount`, the 
     ```
   </Accordion>
   <Accordion title="Target Not Found — 404">
+    No such target. A chat message that was [deleted or removed](/v8/data-models/chat-message#deleted-and-removed-messages) also answers this: neither takes new grants.
     ```json
     { "error": "The grant target does not exist.", "code": "reputation-grant/target-not-found" }
     ```

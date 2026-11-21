@@ -176,7 +176,7 @@ Moderation/rules: `handleSpaceReport` (one handler for entity, comment and chat 
 
 ### 10. Reports Module (2 functions)
 
-`createReport` (reporter is `actingUserId`), `fetchModeratedReports` (moderator is `actingUserId`). `ReportStatus`: `pending` | `on-hold` | `escalated` | `dismissed` | `actioned`.
+`createReport` (reporter is `actingUserId`), `fetchModeratedReports` (moderator is `actingUserId`). `ReportStatus`: `pending` | `on-hold` | `escalated` | `dismissed` | `actioned` | `auto-closed`.
 
 ### 11. App Notifications Module (4 functions)
 

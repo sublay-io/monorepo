@@ -42,11 +42,9 @@ Reacting to a comment takes part in its entity's space (see [Who can post and ta
 
 ## Deleted and removed comments
 
-A comment its author deleted can't be reacted to: the request returns `403 comment/deleted` and changes nothing. This applies to everyone, including the comment's author, and covers changing an existing reaction to another type too.
+A comment its author deleted can't be reacted to: the request returns `404 comment/not-found`, as for a missing comment (and as [editing it](/v8/api-reference/comments/update-comment) does), and changes nothing. This applies to everyone, including the comment's author, and covers changing an existing reaction to another type too. Removing your own reaction still works ([Remove Reaction](/v8/api-reference/comments/remove-reaction)).
 
 Reacting to a moderator-removed comment returns `404 comment/not-found` — for everyone, including the removed comment's author.
-
-The `403` is only returned for a comment the reacting user can see. A deleted comment that a block hides from them (see [Blocks](#blocks)) returns `404 comment/not-found`, like any other.
 
 Reactions already on a deleted or removed comment can still be taken off with [Remove Comment Reaction](/v8/api-reference/comments/remove-reaction).
 
@@ -119,17 +117,10 @@ Returns the updated [Comment](/v8/data-models/comment) object with the new `reac
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
-    Returned when the comment doesn't exist, when a moderator removed it, when its entity is in a space the reacting user can't read (see [Spaces](#spaces)), or when a block refuses the reaction (see [Blocks](#blocks)).
+    Returned when the comment doesn't exist, when its author deleted it or a moderator removed it, when its entity is in a space the reacting user can't read (see [Spaces](#spaces)), or when a block refuses the reaction (see [Blocks](#blocks)).
 
     ```json
     { "error": "Comment not found.", "code": "comment/not-found" }
-    ```
-  </Accordion>
-  <Accordion title="Comment Deleted — 403">
-    Returned when the comment was deleted by its author (see [Deleted and removed comments](#deleted-and-removed-comments)).
-
-    ```json
-    { "error": "This comment was deleted and can't be reacted to.", "code": "comment/deleted" }
     ```
   </Accordion>
   <Accordion title="Posting Not Allowed — 403">

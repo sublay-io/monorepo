@@ -45,8 +45,8 @@ function CommentModerationActions({ spaceId, commentId }: { spaceId: string; com
 
 ## Returns
 
-<ResponseField name="moderationStatus" type='"approved" | "removed"'>
-  The resulting status.
+<ResponseField name="moderationStatus" type='"approved" | "removed" | null'>
+  The comment's status after the request. A comment its author deleted takes no moderation change, so it answers with its existing status, which can be `null`.
 </ResponseField>
 
 For integration guidance, see [Moderation](/v8/sdk/spaces/moderation).

@@ -6,6 +6,8 @@ description: "Add or remove an emoji reaction on a chat message"
 
 Toggles an emoji reaction on a message. If the current user has not yet reacted with this emoji, the reaction is added. If they already have, it is removed. The caller must be an active member.
 
+A [deleted or removed](/v8/data-models/chat-message#deleted-and-removed-messages) message takes no new reaction, from anyone: adding one answers `404 chat/message-not-found`, as editing it does. Taking back your own reaction still works. Its existing reactions stay, in its `reactionCounts` and in [Fetch Reaction Users](/v8/api-reference/chat/messages/fetch-reaction-users).
+
 In a space chat, the caller must also be an active member of the chat's space and able to see it ([visibility](/v8/data-models/space#visibility)). Anyone else, including a pending, rejected or banned member and someone who left or was removed from the space, gets `403 chat/not-a-member`, as a non-member does, even while they still hold a conversation membership. Deleting their own messages, leaving the conversation and muting it stay allowed: they need the conversation membership and sight of the space, not an active space membership.
 
 Reacting is refused while the caller is banned. Banned in the space itself: `403 chat/not-a-member` (a ban ends the space membership and the chat membership). An active member of the space who is banned in a space above it: `403 chat/banned`.
@@ -108,6 +110,7 @@ The `emoji` must be exactly one grapheme cluster (a single visible character, in
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    No message has this ID in the conversation, or the message was deleted or removed and you haven't reacted to it with this emoji (only taking a reaction back works there).
     ```json
     { "error": "Message not found.", "code": "chat/message-not-found" }
     ```

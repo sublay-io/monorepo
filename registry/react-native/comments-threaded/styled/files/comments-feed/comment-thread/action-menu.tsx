@@ -12,6 +12,10 @@ function ActionMenu({ comment }: ActionMenuProps) {
   const { user } = useUser();
   const { theme, openCommentOptionsSheet, openCommentOptionsSheetOwner } = useUIState();
 
+  // The menu on someone else's comment only reports it, and a comment with no
+  // author (the app's own, or a deleted account's) can't be reported.
+  if (!comment.userId) return null;
+
   return (
     <View style={{ position: 'relative' }}>
       <Pressable

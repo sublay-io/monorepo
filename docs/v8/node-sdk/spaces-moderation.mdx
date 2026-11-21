@@ -101,7 +101,7 @@ const result = await sublay.spaces.moderateSpaceEntity({
   Optional reason for the moderation action, stored for audit purposes.
 </ParamField>
 
-**Returns** — `Promise<{ moderationStatus: "approved" | "removed" }>`
+**Returns** — `Promise<{ moderationStatus: "approved" | "removed" | null }>`: the status after the request. Content its owner deleted takes no moderation change and answers with its existing status, which can be `null`.
 
 ---
 
@@ -171,7 +171,7 @@ const result = await sublay.spaces.moderateSpaceComment({
   Optional reason for the moderation action.
 </ParamField>
 
-**Returns** — `Promise<{ moderationStatus: "approved" | "removed" }>`
+**Returns** — `Promise<{ moderationStatus: "approved" | "removed" | null }>`: the status after the request. Content its owner deleted takes no moderation change and answers with its existing status, which can be `null`.
 
 ---
 

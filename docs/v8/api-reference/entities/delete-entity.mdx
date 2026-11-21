@@ -32,7 +32,7 @@ Deletion behavior depends on your project's `entityDeletion` settings:
 
 ## Response
 
-Returns `204 No Content` on success.
+Returns `204 No Content` on success. A hard delete removes the entity's reports with it; a soft delete keeps them and [closes](/v8/api-reference/reports/create-report) the open one (`status: "auto-closed"`).
 
 ## Error Responses
 

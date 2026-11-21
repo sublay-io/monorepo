@@ -6,6 +6,8 @@ description: "Remove a chat message within a space"
 
 Takes a direct moderation action on a chat message in a space's integrated conversation. Requires the caller to be a moderator or admin of the space.
 
+Removing a message that's already removed, or that its author [deleted](/v8/data-models/chat-message#deleted-and-removed-messages), succeeds and changes nothing: the first removal's record (who, when, why) stays, a deleted message keeps showing its sender, and no `message:removed` event is sent again. The response then carries the message's actual status.
+
 ## Path Parameters
 
 <ParamField path="spaceId" type="string" required>
@@ -33,7 +35,7 @@ Takes a direct moderation action on a chat message in a space's integrated conve
 ## Response
 
 <ResponseField name="moderationStatus" type="string">
-  The resulting status: `"removed"`.
+  The message's status after the request: `"removed"`, or `null` for a message its author deleted (and nobody removed), which is left as it was.
 </ResponseField>
 
 ## Error Responses

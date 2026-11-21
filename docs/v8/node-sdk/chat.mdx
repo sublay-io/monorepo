@@ -498,7 +498,7 @@ and cannot report their own message. See [createReport](/v8/node-sdk/reports).
 
 ### toggleReaction
 
-Adds or removes the acting user's emoji reaction on a message.
+Adds or removes the acting user's emoji reaction on a message. A [deleted or removed message](/v8/data-models/chat-message#deleted-and-removed-messages) takes no new reaction: adding one fails with `404 chat/message-not-found`, while taking back the acting user's own still works.
 
 ```typescript
 const { delta, reactionCounts } = await sublay.chat.toggleReaction({
@@ -662,7 +662,7 @@ await sublay.spaces.moderateSpaceChatMessage({
 <ParamField body="reason" type="string">The reason for the removal. Trimmed; up to 1,000 characters.</ParamField>
 <ParamField body="actingUserId" type="string" required>The moderator the request acts as: they must be a moderator or admin of the space, and the action is recorded as theirs.</ParamField>
 
-**Returns** — `Promise<{ moderationStatus: "removed" }>`
+**Returns** — `Promise<{ moderationStatus: "removed" | null }>`: `null` for a message its author deleted (and nobody removed), which is left as it was.
 
 ---
 

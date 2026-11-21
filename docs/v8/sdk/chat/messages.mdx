@@ -28,7 +28,14 @@ function MessageList({ conversationId }: { conversationId: string }) {
       )}
       {messages.map((msg) => (
         <div key={msg.id}>
-          <strong>{msg.user?.name}</strong>: {msg.content}
+          {msg.moderationStatus === "removed" && !msg.user ? (
+            <em>Message removed</em>
+          ) : (
+            <>
+              <strong>{msg.user?.name ?? "Deleted user"}</strong>:{" "}
+              {msg.userDeletedAt ? <em>Message deleted</em> : msg.content}
+            </>
+          )}
         </div>
       ))}
     </div>
@@ -139,7 +146,7 @@ See [`useEditMessage`](/v8/hooks/chat/messages/use-edit-message).
 
 ## Deleting Messages
 
-`useDeleteMessage` performs a soft delete. The message is removed from the local Redux store immediately; on the server, it is soft-deleted (content cleared, `userDeletedAt` set).
+`useDeleteMessage` deletes a message. The author's delete leaves a placeholder with the sender kept (`userDeletedAt` set, content cleared); a group admin's delete of another member's message removes it (`moderationStatus: "removed"`), a placeholder with the sender hidden for everyone but its author. The local store shows the same placeholder once the server accepts the delete. See [Deleted and removed messages](/v8/data-models/chat-message#deleted-and-removed-messages).
 
 ```tsx
 import { useDeleteMessage } from "@sublay/react-js";
@@ -159,7 +166,7 @@ See [`useDeleteMessage`](/v8/hooks/chat/messages/use-delete-message).
 
 ## Reactions
 
-`useToggleReaction` adds or removes an emoji reaction on a message. The response includes updated `reactionCounts` and `userReactions`:
+`useToggleReaction` adds or removes an emoji reaction on a message. A [deleted or removed message](/v8/data-models/chat-message#deleted-and-removed-messages) takes no new reaction: adding one answers `404 chat/message-not-found`, while taking back your own still works. On such a message, offer only the reactions in `userReactions`, to take back. The response includes updated `reactionCounts` and `userReactions`:
 
 ```tsx
 import { useToggleReaction } from "@sublay/react-js";

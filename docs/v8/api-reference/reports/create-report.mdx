@@ -12,7 +12,9 @@ Resolved reports (`dismissed` / `actioned`) are closed: a later report of the sa
 
 An entity, or a comment, in a space the reporter can't read (see [who can read content](/v8/data-models/space#who-can-read-content); a comment goes by its entity's space) answers `404 report/target-not-found`, exactly like a target that doesn't exist. A ban doesn't stop a user reporting content they can still read.
 
-Content its author deleted (a comment or chat message), and content a moderator removed, can't be reported: `404 report/target-not-found`. When its owner deletes content, or the owner's account is deleted, its open report is closed automatically: `status` becomes `"actioned"` and `actionTaken` is `"The content was deleted."`. The report stays, as history.
+Only content users posted can be reported. Content with no author — the app's own (created with a service key naming nobody), or what a deleted account left behind — answers `400 report/no-author`.
+
+Content its author deleted (a comment or chat message), and content a moderator removed, can't be reported: `404 report/target-not-found`. When its author deletes content, its open report is closed automatically: `status` becomes `"actioned"` and `actionTaken` is `"Deleted by its author."`. When the author's account is deleted, the open reports on everything they wrote close the same way, with `actionTaken` `"Its author's account was deleted."`. The report stays, as history.
 
 ## Body Parameters
 
@@ -95,6 +97,12 @@ The response never shows how many users reported the target or the report's mode
     The target doesn't exist, or it's an entity or comment in a space the reporter can't read. The error message reflects the reported type, e.g. `"entity not found"` or `"comment not found"`.
   </Accordion>
 
+  <Accordion title="No Author — 400">
+    ```json
+    { "error": "This <targetType> has no author: only content users posted can be reported.", "code": "report/no-author" }
+    ```
+    The content has no author: it's the app's own, or a deleted account's.
+  </Accordion>
   <Accordion title="Self Report — 400">
     ```json
     { "error": "You cannot report your own <targetType>.", "code": "report/self-report" }

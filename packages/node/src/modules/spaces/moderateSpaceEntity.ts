@@ -13,6 +13,10 @@ export interface ModerateSpaceEntityProps {
 }
 
 export interface ModerationResponse {
+  // null when the target was deleted by its owner and never moderated:
+  // deleted content takes no moderation change, so the response carries its
+  // existing status.
+  moderationStatus: "approved" | "removed" | null;
 }
 
 export async function moderateSpaceEntity(

@@ -10,7 +10,9 @@ export interface ModerateSpaceChatMessageProps {
 }
 
 export interface ModerateSpaceChatMessageResponse {
-  moderationStatus: "removed";
+  // null for a message its author deleted and nobody removed: it takes no
+  // moderation change, so the response carries its existing status.
+  moderationStatus: "removed" | null;
 }
 
 export async function moderateSpaceChatMessage(

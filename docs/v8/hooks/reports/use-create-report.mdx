@@ -12,7 +12,7 @@ If the same target already has an **open** report, the user's report is appended
 
 Once a moderator resolves a report — dismissed or actioned — it is closed. A later report of that same target opens a **fresh** report rather than reopening the closed one, so previously-dismissed content can be re-reported and returns to the moderation queue.
 
-Content its author deleted, or a moderator removed, can't be reported (`404 report/target-not-found`). When its owner deletes content, its open report is closed automatically (`status: "actioned"`).
+Only content users posted can be reported: content with no author (the app's own, or a deleted account's) answers `400 report/no-author`. Content its author deleted, or a moderator removed, can't be reported either (`404 report/target-not-found`). When its author deletes content, or their account is deleted, its open report is closed automatically (`status: "actioned"`).
 
 <Note>Requires an authenticated user.</Note>
 

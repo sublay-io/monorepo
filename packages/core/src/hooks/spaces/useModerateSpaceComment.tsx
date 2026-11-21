@@ -10,7 +10,10 @@ export interface ModerateSpaceCommentProps {
 }
 
 interface ModerateResponse {
-  moderationStatus: "approved" | "removed";
+  // null when the comment was deleted by its author and never moderated:
+  // deleted content takes no moderation change, so the response carries its
+  // existing status.
+  moderationStatus: "approved" | "removed" | null;
 }
 
 /**

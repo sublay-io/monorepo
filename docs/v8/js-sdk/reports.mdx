@@ -11,7 +11,7 @@ The `reports` module lets end users file reports against entities and comments, 
 
 ### createReport
 
-Files a report against an entity, comment, or chat message. A user has at most one open report of a target: reporting it again returns that same report.
+Files a report against an entity, comment, or chat message. A user has at most one open report of a target: reporting it again returns that same report. Only content users posted can be reported: content with no author (the app's own, or a deleted account's) answers `400 report/no-author`, and content its author deleted or a moderator removed answers `404 report/target-not-found`. See [Create Report](/v8/api-reference/reports/create-report).
 
 ```typescript
 const report = await sublay.reports.createReport({

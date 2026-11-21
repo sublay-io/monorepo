@@ -10,7 +10,10 @@ export interface ModerateSpaceEntityProps {
 }
 
 interface ModerateResponse {
-  moderationStatus: "approved" | "removed";
+  // null when the entity was deleted by its owner and never moderated:
+  // deleted content takes no moderation change, so the response carries its
+  // existing status.
+  moderationStatus: "approved" | "removed" | null;
 }
 
 /**

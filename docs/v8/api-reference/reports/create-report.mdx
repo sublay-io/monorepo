@@ -12,7 +12,7 @@ Resolved reports (`dismissed` / `actioned`) are closed: a later report of the sa
 
 An entity, or a comment, in a space the reporter can't read (see [who can read content](/v8/data-models/space#who-can-read-content); a comment goes by its entity's space) answers `404 report/target-not-found`, exactly like a target that doesn't exist. A ban doesn't stop a user reporting content they can still read.
 
-Content its author deleted (a comment or chat message), and content a moderator removed, can't be reported: `404 report/target-not-found`. When its owner deletes content, its open report is closed automatically: `status` becomes `"actioned"` and `actionTaken` is `"The content was deleted."`. The report stays, as history.
+Content its author deleted (a comment or chat message), and content a moderator removed, can't be reported: `404 report/target-not-found`. When its owner deletes content, or the owner's account is deleted, its open report is closed automatically: `status` becomes `"actioned"` and `actionTaken` is `"The content was deleted."`. The report stays, as history.
 
 ## Body Parameters
 

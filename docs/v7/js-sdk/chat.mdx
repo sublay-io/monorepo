@@ -400,8 +400,8 @@ const message = await sublay.chat.sendMessage({
 });
 ```
 
-Each file can be up to 50 MB (`413 chat/file-too-large` otherwise). Attachments count
-toward the project's file storage: on plans that stop at their storage limit, a message whose files would go over it is refused with `429 project/quota-reached`.
+Each file can be up to 50 MB; a larger file is refused. Attachments count
+toward the project's file storage: on the free plan, or when the project's usage limit behavior is set to strict, a message whose files would go over the storage limit is refused with `429 project/quota-reached`.
 
 <ParamField body="conversationId" type="string" required>
   The conversation ID.

@@ -364,7 +364,7 @@ await sublay.chat.sendMessage({
 <ParamField body="metadata" type="object">Custom key-value data.</ParamField>
 <ParamField body="localId" type="string">Client-generated id echoed back on the created message (not stored).</ParamField>
 <ParamField body="files" type="ChatMessageFile[]">
-  Attachments: `{ file: Uint8Array | Blob; filename?: string; mimeType?: string }[]`, up to 10, each up to 50 MB (`413 chat/file-too-large` otherwise). They count toward the project's file storage: on plans that stop at their storage limit, a message whose files would go over it is refused with `429 project/quota-reached`.
+  Attachments: `{ file: Uint8Array | Blob; filename?: string; mimeType?: string }[]`, up to 10, each up to 50 MB (a larger file is refused). They count toward the project's file storage: on the free plan, or when the project's usage limit behavior is set to strict, a message whose files would go over the storage limit is refused with `429 project/quota-reached`.
 </ParamField>
 <SpaceReputationParams variant="context" field="body" />
 

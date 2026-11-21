@@ -104,7 +104,7 @@ function MessageInput({ conversationId }: { conversationId: string }) {
 
 ### Sending with Files
 
-When `files` is provided, the hook automatically switches to a multipart form upload. Each file can be up to 50 MB, and attachments count toward the project's file storage, so on plans that stop at their storage limit, a message whose files would go over it is refused (`429 project/quota-reached`):
+When `files` is provided, the hook automatically switches to a multipart form upload. Each file can be up to 50 MB, and attachments count toward the project's file storage, so on the free plan, or when the project's usage limit behavior is set to strict, a message whose files would go over the storage limit is refused (`429 project/quota-reached`):
 
 ```tsx
 const handleSendWithFile = async (file: File) => {

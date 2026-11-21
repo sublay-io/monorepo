@@ -11,8 +11,12 @@ import {
 } from "../../store/slices/userSlice";
 import {
   useUpdateUserMutation,
+  buildUserUpdateFormData,
+  userUpdateHasFiles,
   type UpdateUserParams,
 } from "../../store/api/userApi";
+import { baseApi } from "../../store/api/baseApi";
+import useAxiosPrivate from "../../config/useAxiosPrivate";
 
 /**
  * Redux-powered hook that provides current user management actions
@@ -23,6 +27,9 @@ export function useUserActions() {
   
   // RTK Query mutations for current user
   const [updateUserMutation] = useUpdateUserMutation();
+  // Multipart updates (avatar/banner uploads) go through axios: RTK's base
+  // query forces a JSON content type.
+  const axios = useAxiosPrivate();
 
   // User data management actions
   const handleSetUser = useCallback((user: AuthUser | null) => {
@@ -55,7 +62,8 @@ export function useUserActions() {
       const originalUser = currentUser;
 
       // Build optimistic update excluding fields that require server transformation:
-      // - File uploads (avatar/banner as File) - we don't know the final URL
+      // - File uploads (avatarFile/bannerFile) and removals - we don't know the
+      //   final file fields
       // - Location - server transforms { latitude, longitude } to GeoJSON format
       const optimisticUpdate: Partial<AuthUser> = {};
       if (update.name !== undefined) optimisticUpdate.name = update.name;
@@ -66,8 +74,12 @@ export function useUserActions() {
           ? update.birthdate.toISOString()
           : update.birthdate;
       if (update.metadata !== undefined) optimisticUpdate.metadata = update.metadata;
-      // Only apply avatar optimistically if it's a string URL (not a file upload)
-      if (typeof update.avatar === 'string' || update.avatar === null) {
+      // `avatar: null` clears the URL avatar only on a JSON update (a multipart
+      // field can't carry null), so it isn't applied to one that sends files.
+      if (
+        typeof update.avatar === "string" ||
+        (update.avatar === null && !userUpdateHasFiles(update))
+      ) {
         optimisticUpdate.avatar = update.avatar;
       }
 
@@ -77,12 +89,20 @@ export function useUserActions() {
       }
 
       try {
-        const result = await updateUserMutation({ 
-          projectId, 
-          userId, 
-          update 
-        }).unwrap();
-        
+        let result: AuthUser;
+        if (userUpdateHasFiles(update)) {
+          const response = await axios.patch(
+            `/${projectId}/users/${userId}`,
+            buildUserUpdateFormData(update),
+            { headers: { "Content-Type": "multipart/form-data" } }
+          );
+          result = response.data as AuthUser;
+          // Same cache effect as the JSON mutation.
+          dispatch(baseApi.util.invalidateTags([{ type: "User", id: "CURRENT" }]));
+        } else {
+          result = await updateUserMutation({ projectId, userId, update }).unwrap();
+        }
+
         // Replace optimistic update with real server data
         dispatch(setUser(result));
         return result;
@@ -99,7 +119,7 @@ export function useUserActions() {
         dispatch(setUpdating(false));
       }
     },
-    [updateUserMutation, dispatch]
+    [updateUserMutation, axios, dispatch]
   );
 
   // Removed other-user methods - use existing legacy hooks instead:

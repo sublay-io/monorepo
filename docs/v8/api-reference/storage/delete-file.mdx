@@ -8,6 +8,11 @@ Deletes a file record and removes all associated storage objects. For image file
 
 Requires authentication. **The owner deletes:** a file with an owner is deleted only as that user — with their own access token, or with a service key naming them in `actingUserId`, and the request then runs exactly as theirs (suspension included). An app-owned file (uploaded without an `actingUserId`) is deleted only by a service key naming nobody; a user token gets `403`.
 
+The owner can delete any of their files here except two kinds, refused with `409 storage/file-attached`:
+
+- a chat message's file: it's removed when the message is deleted;
+- a user's or space's avatar or banner (the file its `avatarFileId` or `bannerFileId` points at): remove it with `removeFileIds` on [Update User](/v8/api-reference/users/update-user) or [Update Space](/v8/api-reference/spaces/update-space).
+
 **Rate limit**: 50 requests per 5 minutes.
 
 ## Path Parameters
@@ -44,6 +49,12 @@ Requires authentication. **The owner deletes:** a file with an owner is deleted 
     Returned when the acting user doesn't own the file, or when a user token, or a service key naming a user, deletes an app-owned file.
     ```json
     { "error": "Only the file's owner can delete it.", "code": "storage/forbidden" }
+    ```
+  </Accordion>
+  <Accordion title="File Attached — 409">
+    The file is a chat message's file, or a user's or space's avatar or banner. `error` names which, and how to remove it. Checked after the owner check, so only the file's owner learns this.
+    ```json
+    { "error": "This file belongs to a user's avatar or banner, so it can't be deleted here. Remove it through the user's update: list its id in `removeFileIds`.", "code": "storage/file-attached" }
     ```
   </Accordion>
   <Accordion title="Missing User ID — 400">

@@ -6,21 +6,17 @@ import {
   PostingPermission,
   SpaceVisibility,
 } from "../../interfaces/models/Space";
-import { UploadImageOptions } from "../../interfaces/models/Image";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
-
-// Image upload configuration (similar to useCreateEntity pattern)
-interface ImageUploadConfig {
-  file: File | Blob;
-  options: UploadImageOptions;
-}
+import { appendImageSlot, type ImageSlotUpload } from "../../utils/uploads";
 
 export interface CreateSpaceProps {
   name: string;
   slug?: string | null;
   description?: string | null;
-  avatar?: ImageUploadConfig;
-  banner?: ImageUploadConfig;
+  /** The space's avatar image: the file plus its processing options. */
+  avatarFile?: ImageSlotUpload;
+  /** The space's banner image: the file plus its processing options. */
+  bannerFile?: ImageSlotUpload;
   readingPermission?: ReadingPermission;
   postingPermission?: PostingPermission;
   visibility?: SpaceVisibility;
@@ -47,7 +43,7 @@ function useCreateSpace(): (
       }
 
       // Build FormData if files are present, otherwise use JSON
-      const hasFiles = props.avatar || props.banner;
+      const hasFiles = props.avatarFile || props.bannerFile;
 
       if (hasFiles) {
         const formData = new FormData();
@@ -82,16 +78,11 @@ function useCreateSpace(): (
           formData.append("parentSpaceId", props.parentSpaceId);
         }
 
-        // Append avatar file and options
-        if (props.avatar) {
-          formData.append("avatarFile", props.avatar.file);
-          formData.append("avatarFile.options", JSON.stringify(props.avatar.options));
+        if (props.avatarFile) {
+          appendImageSlot(formData, "avatarFile", props.avatarFile);
         }
-
-        // Append banner file and options
-        if (props.banner) {
-          formData.append("bannerFile", props.banner.file);
-          formData.append("bannerFile.options", JSON.stringify(props.banner.options));
+        if (props.bannerFile) {
+          appendImageSlot(formData, "bannerFile", props.bannerFile);
         }
 
         const response = await axios.post(`/${projectId}/spaces`, formData, {
@@ -100,7 +91,7 @@ function useCreateSpace(): (
 
         return response.data as SpaceWithPermissions;
       } else {
-        // No files - use JSON request (backward compatibility)
+        // No files: a JSON request
         const response = await axios.post(`/${projectId}/spaces`, {
           name: props.name,
           slug: props.slug,

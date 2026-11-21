@@ -157,7 +157,7 @@ describe("signUpWithEmailAndPasswordThunk — email verification required", () =
         projectId: "project-1",
         email: "a@b.com",
         password: "secret",
-        avatarFile: new Blob(["x"]),
+        avatarFile: { file: new Blob(["x"]), options: { mode: "original-aspect", sizes: { small: 64 } } },
         emailVerification: { mode: "link", redirectUrl: "https://app.example.com/ok" },
       }),
     );
@@ -166,6 +166,45 @@ describe("signUpWithEmailAndPasswordThunk — email verification required", () =
     expect(body.get("emailVerification")).toBe(
       JSON.stringify({ mode: "link", redirectUrl: "https://app.example.com/ok" }),
     );
+  });
+
+  it("sends avatarFile and bannerFile, each with its `<field>.options`, as multipart", async () => {
+    const store = makeSublayStore();
+    const axios = mockAxiosPublic();
+    axios.mockResponse("post", { success: true, emailVerificationRequired: true }, 202);
+
+    const avatarOptions = { mode: "original-aspect" as const, sizes: { small: 64 } };
+    const bannerOptions = { mode: "original-aspect" as const, sizes: { full: 1200 } };
+    await store.dispatch(
+      signUpWithEmailAndPasswordThunk({
+        projectId: "project-1",
+        email: "a@b.com",
+        password: "secret",
+        name: "Ann",
+        avatarFile: { file: new File(["a"], "a.png", { type: "image/png" }), options: avatarOptions },
+        bannerFile: { file: new File(["b"], "b.png", { type: "image/png" }), options: bannerOptions },
+      }),
+    );
+
+    const [call] = axios.calls("post");
+    expect(call.url).toBe("/project-1/auth/sign-up");
+    const body = call.body as FormData;
+    expect(body).toBeInstanceOf(FormData);
+    expect([...body.keys()].sort()).toEqual(
+      [
+        "avatarFile",
+        "avatarFile.options",
+        "bannerFile",
+        "bannerFile.options",
+        "email",
+        "name",
+        "password",
+      ].sort(),
+    );
+    expect((body.get("avatarFile") as File).name).toBe("a.png");
+    expect(body.get("avatarFile.options")).toBe(JSON.stringify(avatarOptions));
+    expect((body.get("bannerFile") as File).name).toBe("b.png");
+    expect(body.get("bannerFile.options")).toBe(JSON.stringify(bannerOptions));
   });
 });
 

@@ -148,7 +148,7 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
   </Accordion>
   <Accordion title="Image Too Large — 413">
     ```json
-    { "error": "Avatar image exceeds 50MB limit.", "code": "chat/file-too-large", "param": "avatarFile" }
+    { "error": "`avatarFile` is over the 50 MB per-file limit.", "code": "chat/file-too-large", "param": "avatarFile" }
     ```
   </Accordion>
   <Accordion title="Invalid Image — 422">
@@ -170,6 +170,6 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `chat/unsupported-file-type` or `chat/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `chat/unsupported-file-type` or `chat/unexpected-file-field`, with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>

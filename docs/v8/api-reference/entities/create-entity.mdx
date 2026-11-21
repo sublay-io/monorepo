@@ -105,7 +105,7 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
 </Note>
 
 <ParamField body="images.files" type="file[]">
-  Image files to attach. Maximum 10 images, 50 MB each. Must be valid images. Requires `images.options`.
+  Image files to attach, up to 50 MB each. Must be valid images. Requires `images.options`. A request takes at most 20 files over `images.files` and `files.files` together (see [Upload errors](/v8/api-reference/getting-started#upload-errors)).
 </ParamField>
 
 <ParamField body="images.options" type="string">
@@ -120,7 +120,7 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
 </ParamField>
 
 <ParamField body="files.files" type="file[]">
-  Generic files to attach. Maximum 10 files, 50 MB each.
+  Generic files to attach, up to 50 MB each. Counts toward the 20 files a request takes.
 </ParamField>
 
 <ParamField body="files.options" type="string">
@@ -245,9 +245,9 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
   </Accordion>
   <Accordion title="File Too Large — 413">
     ```json
-    { "error": "Image \"photo.jpg\" exceeds 50MB limit.", "code": "entity/file-too-large", "param": "images.files" }
+    { "error": "`images.files` is over the 50 MB per-file limit.", "code": "entity/file-too-large", "param": "images.files" }
     ```
-    Also returned with `File "…" exceeds 50MB limit.` and `param: "files.files"` for a file in `files.files`.
+    A file is over 50 MB. `param` names its field (`images.files` or `files.files`).
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
@@ -302,7 +302,7 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `entity/unsupported-file-type` or `entity/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `entity/unsupported-file-type` or `entity/unexpected-file-field`, with `param` naming the field when there is one, or `413 entity/too-many-files` for more than 20 files in the request. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
   <Accordion title="Server Error — 500">
     ```json

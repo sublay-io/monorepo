@@ -322,6 +322,7 @@ export type {
   ListGrantsResponse,
 } from "./modules/reputation/listGrants";
 export type { File, FileImage, FileImageVariant } from "./interfaces/File";
+export type { UploadFile, ImageSlotFile } from "./core/formData";
 export type {
   ImageOptions,
   ImageFit,

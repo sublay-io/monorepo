@@ -33,6 +33,7 @@ import {
 import { baseApi } from "../api/baseApi";
 import { resetAccountScopedState } from "../actions";
 import { readJwtSub } from "../../utils/jwt";
+import { appendImageSlot, type ImageSlotUpload } from "../../utils/uploads";
 import type { PushDeviceIdentifier } from "../../interfaces/PushTokenAdapter";
 import type {
   AuthRejection,
@@ -98,10 +99,8 @@ const authService = {
       birthdate?: Date;
       metadata?: Record<string, any>;
       secureMetadata?: Record<string, any>;
-      avatarFile?: File | Blob;
-      avatarOptions?: any;
-      bannerFile?: File | Blob;
-      bannerOptions?: any;
+      avatarFile?: ImageSlotUpload;
+      bannerFile?: ImageSlotUpload;
       emailVerification?: EmailVerificationOptions;
     }
   ) {
@@ -114,6 +113,7 @@ const authService = {
       formData.append("password", data.password);
       if (data.name?.trim()) formData.append("name", data.name.trim());
       if (data.username?.trim()) formData.append("username", data.username.trim());
+      if (data.avatar) formData.append("avatar", data.avatar);
       if (data.bio?.trim()) formData.append("bio", data.bio.trim());
       if (data.location) formData.append("location", JSON.stringify(data.location));
       if (data.birthdate) formData.append("birthdate", data.birthdate.toISOString());
@@ -123,21 +123,8 @@ const authService = {
         formData.append("emailVerification", JSON.stringify(data.emailVerification));
       }
 
-      // Append avatar file and options
-      if (data.avatarFile) {
-        formData.append("avatarFile", data.avatarFile);
-        if (data.avatarOptions) {
-          formData.append("avatarFile.options", JSON.stringify(data.avatarOptions));
-        }
-      }
-
-      // Append banner file and options
-      if (data.bannerFile) {
-        formData.append("bannerFile", data.bannerFile);
-        if (data.bannerOptions) {
-          formData.append("bannerFile.options", JSON.stringify(data.bannerOptions));
-        }
-      }
+      if (data.avatarFile) appendImageSlot(formData, "avatarFile", data.avatarFile);
+      if (data.bannerFile) appendImageSlot(formData, "bannerFile", data.bannerFile);
 
       const response = await axios.post(
         `/${projectId}/auth/sign-up`,
@@ -150,7 +137,7 @@ const authService = {
       return response.data;
     }
 
-    // Fallback to regular JSON request (backward compatibility)
+    // No files: a JSON request
     const response = await axios.post(
       `/${projectId}/auth/sign-up`,
       {
@@ -476,10 +463,8 @@ export const signUpWithEmailAndPasswordThunk = createAsyncThunk(
       birthdate?: Date;
       metadata?: Record<string, any>;
       secureMetadata?: Record<string, any>;
-      avatarFile?: File | Blob;
-      avatarOptions?: any;
-      bannerFile?: File | Blob;
-      bannerOptions?: any;
+      avatarFile?: ImageSlotUpload;
+      bannerFile?: ImageSlotUpload;
       emailVerification?: EmailVerificationOptions;
     },
     { dispatch, getState, rejectWithValue }

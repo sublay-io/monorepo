@@ -1,12 +1,16 @@
 import { baseApi } from './baseApi';
 import type { AuthUser } from '../../interfaces/models/User';
-import type { UploadImageOptions } from '../../interfaces/models/Image';
+import { appendImageSlot, type ImageSlotUpload } from '../../utils/uploads';
 
 // Types for user API
 export interface UpdateUserParams {
   name?: string | null;
   username?: string | null;
-  avatar?: string | null | { file: File | Blob; options: UploadImageOptions };
+  /**
+   * The avatar as an image URL. To upload an image, use `avatarFile`. `null`
+   * clears it, on an update without files only.
+   */
+  avatar?: string | null;
   bio?: string;
   birthdate?: Date | null;
   location?: {
@@ -15,7 +19,15 @@ export interface UpdateUserParams {
   } | null;
   metadata?: Record<string, any>;
   secureMetadata?: Record<string, any>;
-  banner?: { file: File | Blob; options: UploadImageOptions };
+  /** A new avatar image, replacing the current one. */
+  avatarFile?: ImageSlotUpload;
+  /** A new banner image, replacing the current one. */
+  bannerFile?: ImageSlotUpload;
+  /**
+   * Files to remove: the user's `avatarFileId` and/or `bannerFileId`.
+   * Removing one clears that image.
+   */
+  removeFileIds?: string[];
 }
 
 export interface UpdateUserRequest {
@@ -24,14 +36,23 @@ export interface UpdateUserRequest {
   update: UpdateUserParams;
 }
 
-// Removed FetchUserRequest and FetchUserByForeignIdRequest - these are for other users, not current user management
+/** Whether the update carries a file, so it has to go as multipart form data. */
+export function userUpdateHasFiles(update: UpdateUserParams): boolean {
+  return !!(update.avatarFile || update.bannerFile);
+}
 
-// Helper to build FormData for file uploads
-function buildUserUpdateFormData(update: UpdateUserParams): FormData {
+/**
+ * The multipart body of a user update that carries files. Every non-file
+ * field goes as a string (objects and arrays as JSON).
+ *
+ * Multipart requests go through `axiosPrivate` (see `useUserActions`), not the
+ * RTK Query endpoint below: RTK's base query sets `Content-Type:
+ * application/json` on every request, which a FormData body can't travel
+ * under.
+ */
+export function buildUserUpdateFormData(update: UpdateUserParams): FormData {
   const formData = new FormData();
-  const avatarIsFile = update.avatar && typeof update.avatar === 'object' && 'file' in update.avatar;
 
-  // Append non-file fields
   if (update.name !== undefined) {
     formData.append("name", update.name === null ? "" : update.name);
   }
@@ -44,11 +65,9 @@ function buildUserUpdateFormData(update: UpdateUserParams): FormData {
   if (update.birthdate !== undefined) {
     formData.append("birthdate", update.birthdate ? update.birthdate.toISOString() : "");
   }
-  // URL-based avatar (legacy support)
-  if (update.avatar && typeof update.avatar === "string") {
+  if (typeof update.avatar === "string") {
     formData.append("avatar", update.avatar);
   }
-  // Object fields as JSON strings
   if (update.location !== undefined) {
     formData.append("location", update.location === null ? "null" : JSON.stringify(update.location));
   }
@@ -58,18 +77,11 @@ function buildUserUpdateFormData(update: UpdateUserParams): FormData {
   if (update.secureMetadata !== undefined) {
     formData.append("secureMetadata", JSON.stringify(update.secureMetadata));
   }
-
-  // Append avatar FILE and options
-  if (avatarIsFile && update.avatar && typeof update.avatar === 'object' && 'file' in update.avatar) {
-    formData.append("avatarFile", update.avatar.file);
-    formData.append("avatarFile.options", JSON.stringify(update.avatar.options));
+  if (update.removeFileIds !== undefined) {
+    formData.append("removeFileIds", JSON.stringify(update.removeFileIds));
   }
-
-  // Append banner FILE and options
-  if (update.banner) {
-    formData.append("bannerFile", update.banner.file);
-    formData.append("bannerFile.options", JSON.stringify(update.banner.options));
-  }
+  if (update.avatarFile) appendImageSlot(formData, "avatarFile", update.avatarFile);
+  if (update.bannerFile) appendImageSlot(formData, "bannerFile", update.bannerFile);
 
   return formData;
 }
@@ -77,28 +89,15 @@ function buildUserUpdateFormData(update: UpdateUserParams): FormData {
 // Inject user-specific endpoints into the base API
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Update current user (supports both JSON and FormData for file uploads)
+    // Update current user, JSON only. An update with files goes as multipart
+    // through `axiosPrivate` instead (`useUserActions`), since RTK's base
+    // query forces a JSON content type.
     updateUser: builder.mutation<AuthUser, UpdateUserRequest>({
-      query: ({ projectId, userId, update }) => {
-        const avatarIsFile = update.avatar && typeof update.avatar === 'object' && 'file' in update.avatar;
-        const hasFiles = avatarIsFile || update.banner;
-
-        if (hasFiles) {
-          return {
-            url: `/${projectId}/users/${userId}`,
-            method: 'PATCH',
-            body: buildUserUpdateFormData(update),
-            formData: true,
-          };
-        }
-
-        // Simple JSON request (no files)
-        return {
-          url: `/${projectId}/users/${userId}`,
-          method: 'PATCH',
-          body: update,
-        };
-      },
+      query: ({ projectId, userId, update }) => ({
+        url: `/${projectId}/users/${userId}`,
+        method: 'PATCH',
+        body: update,
+      }),
       // No complex optimistic updates needed - let useUserActions handle state updates
       invalidatesTags: () => [
         { type: 'User' as const, id: 'CURRENT' },

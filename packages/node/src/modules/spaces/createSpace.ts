@@ -5,6 +5,7 @@ import {
   PostingPermission,
   SpaceVisibility,
 } from "../../interfaces/Space";
+import { appendFields, appendImageSlot, type ImageSlotFile } from "../../core/formData";
 
 export interface CreateSpaceProps {
   /**
@@ -23,12 +24,34 @@ export interface CreateSpaceProps {
   parentSpaceId?: string;
   metadata?: Record<string, any>;
   nsfw?: boolean;
+  /**
+   * The space's avatar image. When present (or `bannerFile` is), the request
+   * is sent as `multipart/form-data` and the server processes the image per
+   * `options`.
+   */
+  avatarFile?: ImageSlotFile;
+  /** The space's banner image; same contract as {@link CreateSpaceProps.avatarFile}. */
+  bannerFile?: ImageSlotFile;
 }
 
 export async function createSpace(
   client: SublayHttpClient,
   data: CreateSpaceProps
 ): Promise<SpaceWithPermissions> {
-  const response = await client.projectInstance.post<SpaceWithPermissions>("/spaces", data);
+  const { avatarFile, bannerFile, ...body } = data;
+
+  if (avatarFile || bannerFile) {
+    const formData = new FormData();
+    appendFields(formData, body);
+    if (avatarFile) appendImageSlot(formData, "avatarFile", avatarFile, "avatar");
+    if (bannerFile) appendImageSlot(formData, "bannerFile", bannerFile, "banner");
+    const response = await client.projectInstance.post<SpaceWithPermissions>(
+      "/spaces",
+      formData
+    );
+    return response.data;
+  }
+
+  const response = await client.projectInstance.post<SpaceWithPermissions>("/spaces", body);
   return response.data;
 }

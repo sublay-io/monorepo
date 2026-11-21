@@ -1,5 +1,7 @@
 import { SublayHttpClient } from "../../core/client";
 import { AuthUser } from "../../interfaces/User";
+import { appendField, appendFields, appendFile } from "../../core/multipart";
+import type { UserImageUpload } from "../users/updateUser";
 import type {
   EmailVerificationOptions,
   EmailVerificationRequiredResponse,
@@ -25,6 +27,13 @@ export interface SignUpProps {
    * verification before sign-in. Ignored when the setting is off.
    */
   emailVerification?: EmailVerificationOptions;
+  /**
+   * Avatar image. When present the request is sent as `multipart/form-data`
+   * and the server processes the image per `options`.
+   */
+  avatarFile?: UserImageUpload;
+  /** Banner image; same contract as {@link SignUpProps.avatarFile}. */
+  bannerFile?: UserImageUpload;
 }
 
 export interface SignUpResponse {
@@ -43,9 +52,25 @@ export async function signUp(
   client: SublayHttpClient,
   data: SignUpProps
 ): Promise<SignUpResponse | EmailVerificationRequiredResponse> {
+  const { avatarFile, bannerFile, ...fields } = data;
+  let payload: FormData | typeof fields = fields;
+  if (avatarFile || bannerFile) {
+    const formData = new FormData();
+    if (avatarFile) {
+      appendFile(formData, "avatarFile", avatarFile.file, { fallback: "avatar" });
+      appendField(formData, "avatarFile.options", avatarFile.options);
+    }
+    if (bannerFile) {
+      appendFile(formData, "bannerFile", bannerFile.file, { fallback: "banner" });
+      appendField(formData, "bannerFile.options", bannerFile.options);
+    }
+    // Object fields (location, metadata, emailVerification...) as JSON strings.
+    appendFields(formData, fields);
+    payload = formData;
+  }
   const response = await client.projectInstance.post<
     SignUpResponse | EmailVerificationRequiredResponse
-  >("/auth/sign-up", data);
+  >("/auth/sign-up", payload);
   const body = response.data;
   // Tokens only come back when the project lets users in at sign-up.
   if (body && "accessToken" in body && body.accessToken) {

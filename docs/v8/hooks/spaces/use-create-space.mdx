@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useCreateSpace` returns a callable function for creating a new space. The request can include avatar and banner image uploads. The creator is automatically added as an admin.
+`useCreateSpace` returns a callable function for creating a new space. The request can include an avatar and a banner image (`avatarFile`, `bannerFile`). The creator is automatically added as an admin.
 
 ## Usage Example
 
@@ -30,6 +30,18 @@ function CreateSpaceForm() {
 }
 ```
 
+With an avatar:
+
+```tsx
+const space = await createSpace({
+  name: "Design Community",
+  avatarFile: {
+    file, // e.g. from an <input type="file">
+    options: { mode: "exact-dimensions", dimensions: { small: { width: 64, height: 64 }, large: { width: 256, height: 256 } } },
+  },
+});
+```
+
 ## Parameters
 
 <ParamField path="name" type="string" required>
@@ -44,12 +56,12 @@ function CreateSpaceForm() {
   Optional description. Up to 1,000 characters.
 </ParamField>
 
-<ParamField path="avatar" type="{ file: File | Blob; options: UploadImageOptions }">
-  Optional avatar image to upload. The `options` object controls format, quality, dimensions, and variants.
+<ParamField path="avatarFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
+  Optional avatar image to upload, up to 50 MB. `file` is a `File` or `Blob`, or a React Native file `{ uri, name, type? }`. `options` controls how the image is processed and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
 </ParamField>
 
-<ParamField path="banner" type="{ file: File | Blob; options: UploadImageOptions }">
-  Optional banner image to upload.
+<ParamField path="bannerFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
+  Optional banner image to upload; same shape as `avatarFile`.
 </ParamField>
 
 <ParamField path="readingPermission" type='"anyone" | "members"'>

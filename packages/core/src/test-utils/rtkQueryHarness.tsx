@@ -39,6 +39,10 @@ class TestRequest {
     this.method = (this.init.method as string) ?? base.method ?? "GET";
     this.headers = this.init.headers ?? base.headers;
   }
+  /** The body fetchBaseQuery built the request with (already serialized). */
+  get body(): unknown {
+    return this.init.body;
+  }
   clone() {
     return new TestRequest(this);
   }
@@ -54,6 +58,10 @@ export function jsonResponse(body: unknown, status = 200): Response {
 export interface FetchCallRecord {
   url: string;
   method: string;
+  /** The request body as sent (a JSON string for a JSON request). */
+  body: unknown;
+  /** The request's `Content-Type` header, when it set one. */
+  contentType: string | null;
 }
 
 export interface FetchMockHandle {
@@ -86,7 +94,17 @@ export function stubFetchMock(
           (typeof req === "string"
             ? (args[1] as RequestInit | undefined)?.method
             : (req as Request).method) ?? "GET";
-        return { url, method };
+        const init =
+          typeof req === "string" ? (args[1] as RequestInit | undefined) : undefined;
+        const body =
+          typeof req === "string" ? init?.body : (req as unknown as TestRequest).body;
+        const rawHeaders =
+          typeof req === "string" ? init?.headers : (req as Request).headers;
+        const contentType =
+          rawHeaders instanceof Headers
+            ? rawHeaders.get("content-type")
+            : ((rawHeaders as Record<string, string> | undefined)?.["content-type"] ?? null);
+        return { url, method, body, contentType };
       });
     },
   };

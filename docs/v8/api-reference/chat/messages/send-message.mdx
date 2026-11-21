@@ -53,7 +53,7 @@ This endpoint accepts `multipart/form-data` to support file attachments alongsid
 </ParamField>
 
 <ParamField body="files" type="file[]">
-  File attachments (multipart/form-data). Up to 10 files per message. Optional.
+  File attachments (multipart/form-data). Up to 20 files per message, 50 MB each. Optional.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -168,7 +168,7 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `chat/file-too-large` (a file over 100 MB), `chat/unsupported-file-type` or `chat/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `413 chat/file-too-large` (a file over 50 MB), `413 chat/too-many-files` (more than 20 files), `chat/unsupported-file-type` or `chat/unexpected-file-field`, with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
   <Accordion title="Bundle Not Installed — 403">
     Returned when `files` are attached on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).

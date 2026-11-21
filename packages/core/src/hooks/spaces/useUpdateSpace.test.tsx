@@ -81,6 +81,37 @@ describe("useUpdateSpace", () => {
     expect(result.current.context.space?.childSpaces).toEqual(childSpaces);
   });
 
+  it("merges a multipart update onto the SpaceProvider's space too", async () => {
+    const space = makeSpaceDetailed({ id: "space-1", avatarFileId: null });
+    const { Wrapper, axiosPrivate } = makeProvidersWrapper({
+      beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", { breadcrumb: [] }),
+    });
+    const { result } = renderHook(
+      () => ({ updateSpace: useUpdateSpace(), context: useContext(SpaceContext) }),
+      {
+        wrapper: ({ children }) => (
+          <Wrapper>
+            <SpaceProvider space={space}>{children}</SpaceProvider>
+          </Wrapper>
+        ),
+      },
+    );
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+    const { parentSpace: _p, childSpaces: _c, ...base } = space;
+    axiosPrivate.mockResponse("patch", { ...base, avatarFileId: "file-new" });
+
+    const file = new File(["binary"], "avatar.png", { type: "image/png" });
+    await act(async () => {
+      await result.current.updateSpace({
+        spaceId: "space-1",
+        update: { avatarFile: { file, options: { mode: "original-aspect", sizes: { small: 64 } } } },
+      });
+    });
+
+    expect(result.current.context.space?.avatarFileId).toBe("file-new");
+  });
+
   it("updates a space via multipart FormData when a banner is provided", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateSpace());
 
@@ -93,16 +124,75 @@ describe("useUpdateSpace", () => {
         spaceId: "space-1",
         update: {
           name: "New name",
-          banner: { file, options: { mode: "original-aspect", sizes: { full: 1200 } } },
+          bannerFile: { file, options: { mode: "original-aspect", sizes: { full: 1200 } } },
+          removeFileIds: ["11111111-1111-4111-8111-111111111111"],
         },
       });
     });
 
     const [call] = axiosPrivate.calls("patch");
+    expect(call.url).toBe("/test-project/spaces/space-1");
     expect(call.body instanceof FormData).toBe(true);
     const formData = call.body as FormData;
+    expect([...formData.keys()].sort()).toEqual(
+      ["bannerFile", "bannerFile.options", "name", "removeFileIds"],
+    );
     expect(formData.get("name")).toBe("New name");
     expect(formData.get("bannerFile")).toBeInstanceOf(File);
+    expect(formData.get("bannerFile.options")).toBe(
+      JSON.stringify({ mode: "original-aspect", sizes: { full: 1200 } }),
+    );
+    expect(formData.get("removeFileIds")).toBe(
+      JSON.stringify(["11111111-1111-4111-8111-111111111111"]),
+    );
+  });
+
+  it("sends avatarFile + avatarFile.options for a new avatar", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateSpace());
+    axiosPrivate.mockResponse("patch", makeSpaceDetailed());
+
+    const file = new File(["binary"], "avatar.png", { type: "image/png" });
+    const options = { mode: "original-aspect" as const, sizes: { small: 64 } };
+    await act(async () => {
+      await result.current({ spaceId: "space-1", update: { avatarFile: { file, options } } });
+    });
+
+    const formData = axiosPrivate.calls("patch")[0].body as FormData;
+    expect([...formData.keys()].sort()).toEqual(["avatarFile", "avatarFile.options"]);
+    expect((formData.get("avatarFile") as File).name).toBe("avatar.png");
+    expect(formData.get("avatarFile.options")).toBe(JSON.stringify(options));
+  });
+
+  it("leaves out `slug: null` on a multipart update, and sends it on a JSON one", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateSpace());
+    axiosPrivate.mockResponse("patch", makeSpaceDetailed());
+    axiosPrivate.mockResponse("patch", makeSpaceDetailed());
+
+    const file = new File(["binary"], "avatar.png", { type: "image/png" });
+    await act(async () => {
+      await result.current({
+        spaceId: "space-1",
+        update: { slug: null, avatarFile: { file, options: { mode: "original-aspect", sizes: { small: 64 } } } },
+      });
+      await result.current({ spaceId: "space-1", update: { slug: null } });
+    });
+
+    const [multipart, json] = axiosPrivate.calls("patch");
+    expect((multipart.body as FormData).has("slug")).toBe(false);
+    expect(json.body).toEqual({ slug: null });
+  });
+
+  it("sends removeFileIds alone as JSON", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateSpace());
+    axiosPrivate.mockResponse("patch", makeSpaceDetailed());
+
+    const id = "11111111-1111-4111-8111-111111111111";
+    await act(async () => {
+      await result.current({ spaceId: "space-1", update: { removeFileIds: [id] } });
+    });
+
+    const [call] = axiosPrivate.calls("patch");
+    expect(call.body).toEqual({ removeFileIds: [id] });
   });
 
   it("rejects when the server returns an error response", async () => {

@@ -93,7 +93,7 @@ Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bu
 </ParamField>
 
 <ParamField body="gallery" type="file[]">
-  Optional gallery images (up to 10). Multipart file field. Requires `gallery.options` when provided.
+  Optional gallery images (up to 20 in a request). Multipart file field. Requires `gallery.options` when provided.
 </ParamField>
 
 <ParamField body="gallery.options" type="string">
@@ -185,8 +185,9 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
   </Accordion>
   <Accordion title="Image Too Large — 413">
     ```json
-    { "error": "Image \"cover.jpg\" exceeds 50MB limit.", "code": "event/file-too-large", "param": "cover" }
+    { "error": "`cover` is over the 50 MB per-file limit.", "code": "event/file-too-large", "param": "cover" }
     ```
+    A file is over 50 MB. `param` names its field.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
@@ -208,7 +209,7 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `event/unsupported-file-type` or `event/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `event/unsupported-file-type` or `event/unexpected-file-field`, with `param` naming the field when there is one, or `413 event/too-many-files` for more than 20 files in the request. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>
 

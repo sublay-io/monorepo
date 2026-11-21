@@ -102,7 +102,7 @@ The `type` field is one of: `image`, `video`, `document`, `other`. It is inferre
   </Accordion>
   <Accordion title="File Too Large — 413">
     ```json
-    { "error": "File size exceeds the allowed limit of 50MB", "code": "storage/file-too-large", "param": "file" }
+    { "error": "`file` is over the 50 MB per-file limit.", "code": "storage/file-too-large", "param": "file" }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
@@ -113,7 +113,7 @@ The `type` field is one of: `image`, `video`, `document`, `other`. It is inferre
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `storage/unsupported-file-type` or `storage/unexpected-file-field`, with `param` naming the field when there is one. A body that can't be read at all gets `request/invalid-multipart` or `request/field-too-large` instead. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `storage/unsupported-file-type` or `storage/unexpected-file-field`, with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
   <Accordion title="Server Error — 500">
     ```json

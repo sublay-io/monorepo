@@ -22,9 +22,9 @@ The API returns three space shapes depending on context:
 | `name` | `string` | Display name of the space (3–100 characters). |
 | `description` | `string \| null` | Optional description (up to 1,000 characters). |
 | `userId` | `string` | ID of the space creator/owner. A child space's `userId` is its root space's creator, and that user is the space creator in every rule that names one. |
-| `avatarFileId` | `string \| null` | ID of the space's avatar image file. |
+| `avatarFileId` | `string \| null` | ID of the space's avatar image file. Set by uploading `avatarFile` on create or update; cleared by listing it in `removeFileIds` on [Update Space](/v8/api-reference/spaces/update-space). |
 | `avatarFile` | `File \| undefined` | Populated avatar file object. Only present when `include: "files"` is requested. |
-| `bannerFileId` | `string \| null` | ID of the space's banner image file. |
+| `bannerFileId` | `string \| null` | ID of the space's banner image file. Set and cleared like `avatarFileId`, with `bannerFile`. |
 | `bannerFile` | `File \| undefined` | Populated banner file object. Only present when `include: "files"` is requested. |
 | `readingPermission` | `"anyone" \| "members"` | Who can read content in the space: `"anyone"` who can read the space above it, or only its active members (`"members"`). Inherited by sub-spaces; see [Who can read content](#who-can-read-content). |
 | `postingPermission` | `"anyone" \| "members" \| "team"` | Who can post entities in the space: `"anyone"`, its active members (`"members"`), or only its active admins and moderators (`"team"`). Commenting and reacting don't follow it; see [Who can post and take part](#who-can-post-and-take-part). Creating an event in the space always needs active membership of it: a non-member, or anyone banned in the space itself, gets `403 event/not-space-member`; an active member banned in a space above it, or without the admin or moderator role in a `"team"` space, gets `403 space/posting-not-allowed`. |

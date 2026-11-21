@@ -1,5 +1,6 @@
 import { SublayHttpClient } from "../../core/client";
 import { AuthUser } from "../../interfaces/User";
+import { appendFields, appendImageSlot, type ImageSlotFile } from "../../core/formData";
 import type {
   EmailVerificationOptions,
   EmailVerificationRequiredResponse,
@@ -25,6 +26,14 @@ export interface SignUpProps {
    * verification before sign-in. Ignored when the setting is off.
    */
   emailVerification?: EmailVerificationOptions;
+  /**
+   * The user's avatar image. When present (or `bannerFile` is), the request is
+   * sent as `multipart/form-data` and the server processes the image per
+   * `options`.
+   */
+  avatarFile?: ImageSlotFile;
+  /** The user's banner image; same contract as {@link SignUpProps.avatarFile}. */
+  bannerFile?: ImageSlotFile;
 }
 
 export interface SignUpResponse {
@@ -42,8 +51,17 @@ export async function signUp(
   client: SublayHttpClient,
   data: SignUpProps
 ): Promise<SignUpResponse | EmailVerificationRequiredResponse> {
+  const { avatarFile, bannerFile, ...body } = data;
+  let payload: FormData | typeof body = body;
+  if (avatarFile || bannerFile) {
+    const formData = new FormData();
+    appendFields(formData, body);
+    if (avatarFile) appendImageSlot(formData, "avatarFile", avatarFile, "avatar");
+    if (bannerFile) appendImageSlot(formData, "bannerFile", bannerFile, "banner");
+    payload = formData;
+  }
   const response = await client.projectInstance.post<
     SignUpResponse | EmailVerificationRequiredResponse
-  >("/auth/sign-up", data);
+  >("/auth/sign-up", payload);
   return response.data;
 }

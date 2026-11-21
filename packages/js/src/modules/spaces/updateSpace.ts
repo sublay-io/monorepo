@@ -11,6 +11,7 @@ export interface UpdateSpaceProps {
   readingPermission?: ReadingPermission;
   postingPermission?: PostingPermission;
   visibility?: SpaceVisibility;
+  requireJoinApproval?: boolean;
   metadata?: Record<string, any>;
   nsfw?: boolean;
   /**
@@ -20,6 +21,12 @@ export interface UpdateSpaceProps {
   avatarFile?: SpaceImageUpload;
   /** New banner image; same contract as {@link UpdateSpaceProps.avatarFile}. */
   bannerFile?: SpaceImageUpload;
+  /**
+   * Files to remove: the space's `avatarFileId` and/or `bannerFileId` (no other
+   * id is accepted). Removing one clears that image. Works with or without
+   * uploads in the same request.
+   */
+  removeFileIds?: string[];
 }
 
 export async function updateSpace(

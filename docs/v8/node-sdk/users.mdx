@@ -180,7 +180,7 @@ const updatedUser = await sublay.users.updateUser({
 </ParamField>
 
 <ParamField body="avatar" type="string">
-  New avatar URL.
+  New avatar URL, stored as given. Separate from `avatarFile`, which uploads an image.
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -191,13 +191,37 @@ const updatedUser = await sublay.users.updateUser({
   Updated secure metadata. No API response returns it to any user. Users can also write their own, so don't treat it as trusted. Merged with existing values.
 </ParamField>
 
-<ParamField body="birthdate" type="string">
-  ISO 8601 date string for the user's birthdate.
+<ParamField body="birthdate" type="Date">
+  The user's birthdate.
 </ParamField>
 
 <ParamField body="location" type="object">
   Geographic location `{ latitude: number; longitude: number }`.
 </ParamField>
+
+<ParamField body="avatarFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
+  A new avatar image, replacing the current one (up to 50 MB). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 user/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
+</ParamField>
+
+<ParamField body="bannerFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
+  A new banner image, replacing the current one; same shape as `avatarFile`.
+</ParamField>
+
+<ParamField body="removeFileIds" type="string[]">
+  Files to remove: the user's `avatarFileId` and/or `bannerFileId`, nothing else. Removing one clears that image. Works alone or with uploads. Any other id throws a `400` (`user/invalid-remove-file-ids`, with `invalidIds`).
+</ParamField>
+
+```typescript
+// Replace the avatar and remove the banner in one request
+if (user.bannerFileId) {
+  await sublay.users.updateUser({
+    userId: user.id,
+    actingUserId: user.id,
+    avatarFile: { file: bytes, filename: "avatar.webp", mimeType: "image/webp", options: { mode: "original-aspect", sizes: { small: 128 } } },
+    removeFileIds: [user.bannerFileId],
+  });
+}
+```
 
 **Returns** — `Promise<UserFull>`
 

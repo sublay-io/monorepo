@@ -15,6 +15,7 @@ import {
   requestNewAccessTokenThunk
 } from '../../store/slices/authThunks';
 import useProject from '../projects/useProject';
+import type { ImageSlotUpload } from '../../utils/uploads';
 import type {
   AuthRejection,
   EmailVerificationOptions,
@@ -54,10 +55,10 @@ export interface SignUpWithEmailAndPasswordProps {
   birthdate?: Date;
   metadata?: Record<string, any>;
   secureMetadata?: Record<string, any>;
-  avatarFile?: File | Blob;
-  avatarOptions?: any;
-  bannerFile?: File | Blob;
-  bannerOptions?: any;
+  /** The user's avatar image: the file plus its processing options. */
+  avatarFile?: ImageSlotUpload;
+  /** The user's banner image: the file plus its processing options. */
+  bannerFile?: ImageSlotUpload;
   /**
    * How the confirmation email is sent when the project requires email
    * verification before sign-in. Ignored when the setting is off.

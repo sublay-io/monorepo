@@ -31,6 +31,12 @@ export interface UpdateUserProps {
   avatarFile?: UserImageUpload;
   /** New banner image; same contract as {@link UpdateUserProps.avatarFile}. */
   bannerFile?: UserImageUpload;
+  /**
+   * Files to remove: the user's `avatarFileId` and/or `bannerFileId` (no other
+   * id is accepted). Removing one clears that image. Works with or without
+   * uploads in the same request.
+   */
+  removeFileIds?: string[];
 }
 
 export async function updateUser(

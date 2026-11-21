@@ -18,8 +18,8 @@ The `User` type is returned when fetching another user's public profile. Sensiti
 | `name` | `string \| null` | Display name. |
 | `username` | `string \| null` | Unique username handle. |
 | `avatar` | `string \| null` | Avatar image URL. |
-| `avatarFileId` | `string \| null` | ID of the managed avatar file record. |
-| `bannerFileId` | `string \| null` | ID of the managed banner file record. |
+| `avatarFileId` | `string \| null` | ID of the managed avatar file record. Set by uploading `avatarFile` at sign-up or on update; cleared by listing it in `removeFileIds` on [Update User](/v8/api-reference/users/update-user). |
+| `bannerFileId` | `string \| null` | ID of the managed banner file record. Set and cleared like `avatarFileId`, with `bannerFile`. |
 | `avatarFile` | `File \| null` | Populated avatar file object when `include` contains `"files"`. |
 | `bannerFile` | `File \| null` | Populated banner file object when `include` contains `"files"`. |
 | `bio` | `string \| null` | Short biography (max 300 characters). |

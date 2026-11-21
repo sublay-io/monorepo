@@ -67,6 +67,29 @@ const space = await sublay.spaces.createSpace({
   Arbitrary metadata attached to the space.
 </ParamField>
 
+<ParamField body="avatarFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
+  An avatar image to upload, up to 50 MB. Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 space/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
+</ParamField>
+
+<ParamField body="bannerFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
+  A banner image to upload; same shape as `avatarFile`.
+</ParamField>
+
+```typescript
+import { readFile } from "node:fs/promises";
+
+const space = await sublay.spaces.createSpace({
+  actingUserId: "usr_abc123",
+  name: "Photography",
+  avatarFile: {
+    file: new Uint8Array(await readFile("./avatar.png")),
+    filename: "avatar.png",
+    mimeType: "image/png",
+    options: { mode: "exact-dimensions", dimensions: { small: { width: 64, height: 64 } } },
+  },
+});
+```
+
 **Returns** — `Promise<SpaceWithPermissions>`: the created space plus [`memberPermissions`](/v8/data-models/space#spacememberpermissions), what the creator may do in it.
 
 ---
@@ -368,8 +391,24 @@ const space = await sublay.spaces.updateSpace({
   Updated NSFW own-flag. Toggling it recomputes this space's effective NSFW and cascades it top-down to every descendant space (and, live, to their entities). See [Space NSFW flagging](/v8/data-models/space#nsfw-flagging).
 </ParamField>
 
+<ParamField body="requireJoinApproval" type="boolean">
+  Whether joining needs approval. Applies to joins from now on.
+</ParamField>
+
 <ParamField body="metadata" type="object">
   Updated metadata. Merged with existing values.
+</ParamField>
+
+<ParamField body="avatarFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
+  A new avatar image, replacing the current one (up to 50 MB). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 space/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
+</ParamField>
+
+<ParamField body="bannerFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
+  A new banner image, replacing the current one; same shape as `avatarFile`.
+</ParamField>
+
+<ParamField body="removeFileIds" type="string[]">
+  Files to remove: the space's `avatarFileId` and/or `bannerFileId`, nothing else. Removing one clears that image. Works alone or with uploads. Any other id throws a `400` (`space/invalid-remove-file-ids`, with `invalidIds`).
 </ParamField>
 
 **Returns** — `Promise<SpaceWithPermissions>`: the updated space plus [`memberPermissions`](/v8/data-models/space#spacememberpermissions), what the acting user may do in it after the update (no `parentSpace` or `childSpaces`).

@@ -62,6 +62,24 @@ const space = await sublay.spaces.createSpace({
   Arbitrary metadata attached to the space.
 </ParamField>
 
+<ParamField body="avatarFile" type="{ file: Blob | File; options: ImageOptions }">
+  An avatar image to upload, up to 50 MB. `options` says how to process it and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
+</ParamField>
+
+<ParamField body="bannerFile" type="{ file: Blob | File; options: ImageOptions }">
+  A banner image to upload; same shape as `avatarFile`.
+</ParamField>
+
+```typescript
+const space = await sublay.spaces.createSpace({
+  name: "Photography",
+  avatarFile: {
+    file, // a File from an <input type="file">, or any Blob
+    options: { mode: "exact-dimensions", dimensions: { small: { width: 64, height: 64 } } },
+  },
+});
+```
+
 **Returns** — `Promise<SpaceWithPermissions>`: the created space plus [`memberPermissions`](/v8/data-models/space#spacememberpermissions), what the creator may do in it.
 
 ---
@@ -323,9 +341,32 @@ const space = await sublay.spaces.updateSpace({
   Updated NSFW own-flag. Toggling it recomputes this space's effective NSFW and cascades it top-down to every descendant space (and, live, to their entities). See [Space NSFW flagging](/v8/data-models/space#nsfw-flagging).
 </ParamField>
 
+<ParamField body="requireJoinApproval" type="boolean">
+  Whether joining needs approval. Applies to joins from now on.
+</ParamField>
+
 <ParamField body="metadata" type="Record<string, any>">
   Arbitrary metadata attached to the space.
 </ParamField>
+
+<ParamField body="avatarFile" type="{ file: Blob | File; options: ImageOptions }">
+  A new avatar image, replacing the current one (up to 50 MB). `options` must include `mode`. With an image, the request is sent as `multipart/form-data`.
+</ParamField>
+
+<ParamField body="bannerFile" type="{ file: Blob | File; options: ImageOptions }">
+  A new banner image, replacing the current one; same shape as `avatarFile`.
+</ParamField>
+
+<ParamField body="removeFileIds" type="string[]">
+  Files to remove: the space's `avatarFileId` and/or `bannerFileId`, nothing else. Removing one clears that image. Works alone or with uploads. Any other id throws a `400` (`space/invalid-remove-file-ids`, with `invalidIds`).
+</ParamField>
+
+```typescript
+// Remove the space's banner
+if (space.bannerFileId) {
+  await sublay.spaces.updateSpace({ spaceId: space.id, removeFileIds: [space.bannerFileId] });
+}
+```
 
 **Returns** — `Promise<SpaceWithPermissions>`: the updated space plus [`memberPermissions`](/v8/data-models/space#spacememberpermissions), what the user may do in it after the update (no `parentSpace` or `childSpaces`).
 

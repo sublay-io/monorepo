@@ -113,10 +113,8 @@ function SignInButton() {
   - `birthdate` (optional) — Date of birth
   - `metadata` (optional) — Public custom fields
   - `secureMetadata` (optional) — Custom fields no API response returns, the user's own included. The user can write them but not read them back, so don't store anything your app needs to trust.
-  - `avatarFile` (optional) — Avatar image file to upload
-  - `avatarOptions` (optional) — Image processing options for the avatar
-  - `bannerFile` (optional) — Banner image file to upload
-  - `bannerOptions` (optional) — Image processing options for the banner
+  - `avatarFile` (optional) — Avatar image to upload: `{ file, options }`, where `file` is a `File`, `Blob` or React Native file `{ uri, name, type? }` and `options` the [image processing options](/v8/api-reference/storage/upload-image) (`mode` required). Sends the sign-up as `multipart/form-data`
+  - `bannerFile` (optional) — Banner image to upload, same shape as `avatarFile`
   - `emailVerification` (optional) — `{ mode?: "link" | "code"; redirectUrl?: string }`: how the confirmation email is sent when the project requires email verification before sign-in. Ignored otherwise. See [Require Email Verification](/v8/sdk/authentication/built-in#require-email-verification).
 
   Also throws [`ACCOUNT_LIMIT_MESSAGE`](#the-account-limit) when the device

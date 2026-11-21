@@ -10,6 +10,8 @@ description: "Remove the authenticated user's reaction from an entity"
 
 Removes the authenticated user's reaction from an entity. The entity's `reactionCounts` map is decremented for the removed reaction type.
 
+This works on an entity a moderator removed too (`moderationStatus: "removed"`): taking back your own reaction is always allowed, as on comments and chat messages, while [adding one](/v8/api-reference/entities/add-reaction) is refused. A draft can't be reached.
+
 **Authentication required.**
 
 ## Path Parameters
@@ -93,7 +95,7 @@ Returns the updated [Entity](/v8/data-models/entity) object with the new `reacti
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
-    Returned when the entity doesn't exist, its author has blocked the user (see [Blocks](#blocks)), or it is in a space the user can't read (see [Reading](#reading)).
+    Returned when the entity doesn't exist or is a draft, its author has blocked the user (see [Blocks](#blocks)), or it is in a space the user can't read (see [Reading](#reading)).
 
     ```json
     { "error": "Entity not found.", "code": "entity/not-found" }

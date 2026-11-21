@@ -793,6 +793,8 @@ const chatSlice = createSlice({
     ) {
       const { conversationId, messageId, userDeletedAt } = action.payload;
       for (const message of findLoadedCopies(state, conversationId, messageId)) {
+        // The server's timestamp wins over a client-clock one set earlier.
+        message.userDeletedAt = userDeletedAt;
         toDeletedPlaceholder(message, userDeletedAt);
       }
     },

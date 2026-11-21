@@ -9,6 +9,7 @@ import reducer, {
   removeConversationPreview,
   removeMessage,
   markMessageRemoved,
+  markMessageDeleted,
   applyOwnDelete,
   replaceMessages,
   startThreadLoad,
@@ -1090,6 +1091,20 @@ describe("chatSlice — deleted and removed placeholders (S#227)", () => {
         messageId: "message-1",
         currentUserId: "user-1",
         deletedAt: "2024-01-02T00:00:00.000Z",
+      }),
+    );
+    expect(first(state).userDeletedAt).toBe("2024-01-01T00:00:00.000Z");
+  });
+
+  it("message:deleted's server timestamp replaces a client-clock one", () => {
+    const state0 = stateWith("user-1");
+    state0.messages["conversation-1"].items[0].userDeletedAt = "2024-01-02T00:00:00.000Z";
+    const state = reducer(
+      state0,
+      markMessageDeleted({
+        conversationId: "conversation-1",
+        messageId: "message-1",
+        userDeletedAt: "2024-01-01T00:00:00.000Z",
       }),
     );
     expect(first(state).userDeletedAt).toBe("2024-01-01T00:00:00.000Z");

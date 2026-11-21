@@ -619,6 +619,45 @@ describe("ChatProvider — message-scoped socket events", () => {
     });
   });
 
+  it("message:removed and message:deleted also blank the quoted copy inside a message that quotes it", async () => {
+    const { store } = await renderWithLoadedMessage("user-me");
+    const quoted = makeChatMessage({
+      id: "message-q",
+      conversationId: "conversation-1",
+      userId: "user-other",
+      content: "quoted text",
+    });
+    act(() => {
+      fakeSocket.trigger("message:created", quoted);
+      fakeSocket.trigger(
+        "message:created",
+        makeChatMessage({
+          id: "message-quoting",
+          conversationId: "conversation-1",
+          userId: "user-me",
+          quotedMessageId: "message-q",
+          quotedMessage: quoted,
+        }),
+      );
+    });
+    act(() => {
+      fakeSocket.trigger("message:removed", {
+        messageId: "message-q",
+        conversationId: "conversation-1",
+      });
+    });
+    const quoting = () =>
+      selectMessages("conversation-1")(store.getState()).find(
+        (m) => m.id === "message-quoting",
+      )!;
+    expect(quoting().quotedMessage).toMatchObject({
+      moderationStatus: "removed",
+      userId: null,
+      user: null,
+      content: null,
+    });
+  });
+
   it("message:removed leaves my own message in full", async () => {
     const { store } = await renderWithLoadedMessage("user-me");
     act(() => {

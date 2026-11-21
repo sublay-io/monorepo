@@ -139,7 +139,7 @@ See [`useEditMessage`](/v8/hooks/chat/messages/use-edit-message).
 
 ## Deleting Messages
 
-`useDeleteMessage` performs a soft delete. The message is removed from the local Redux store immediately; on the server, it is soft-deleted (content cleared, `userDeletedAt` set).
+`useDeleteMessage` deletes a message. The author's delete leaves a placeholder with the sender kept (`userDeletedAt` set, content cleared); a group admin's delete of another member's message removes it (`moderationStatus: "removed"`), a placeholder with the sender hidden for everyone but its author. The local store shows the same placeholder once the server accepts the delete. See [Deleted and removed messages](/v8/data-models/chat-message#deleted-and-removed-messages).
 
 ```tsx
 import { useDeleteMessage } from "@sublay/react-js";

@@ -25,6 +25,7 @@ import {
   setTypingUsers,
   updateReactions,
   patchMessage,
+  markMessageDeleted,
   markMessageRemoved,
   updateGrants,
   setConversation,
@@ -408,19 +409,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     // ── message:deleted ─────────────────────────────────────────────────────
     socket.on("message:deleted", (payload) => {
       dispatch(
-        patchMessage({
+        markMessageDeleted({
           conversationId:
             payload.conversationId ??
             findMessage(payload.messageId)?.conversationId,
           messageId: payload.messageId,
-          patch: {
-            userDeletedAt: payload.userDeletedAt,
-            content: null,
-            gif: null,
-            metadata: null,
-            mentions: [],
-            files: undefined,
-          },
+          userDeletedAt: payload.userDeletedAt,
         })
       );
     });

@@ -163,6 +163,55 @@ function findLoadedMessages(
 }
 
 /**
+ * Every loaded copy of a message: `findLoadedMessages`, plus the
+ * `quotedMessage` embedded in any loaded message that quotes it.
+ */
+function findLoadedCopies(
+  state: ChatState,
+  conversationId: string | undefined,
+  messageId: string
+): ChatMessage[] {
+  const found = findLoadedMessages(state, conversationId, messageId);
+  const buckets = [
+    ...Object.values(state.messages),
+    ...Object.values(state.threads),
+  ];
+  for (const bucket of buckets) {
+    for (const m of bucket?.items ?? []) {
+      if (m.quotedMessage?.id === messageId) found.push(m.quotedMessage);
+    }
+  }
+  return found;
+}
+
+/** Blank a message's content fields, as the server's placeholder does. */
+function blankContent(message: ChatMessage): void {
+  message.content = null;
+  message.gif = null;
+  message.metadata = null;
+  message.mentions = [];
+  message.files = undefined;
+}
+
+/** A deleted message: content cleared, sender kept. */
+function toDeletedPlaceholder(message: ChatMessage, userDeletedAt: string): void {
+  message.userDeletedAt = userDeletedAt;
+  blankContent(message);
+}
+
+/** A removed message: in full for its author, otherwise content and sender cleared. */
+function toRemovedPlaceholder(
+  message: ChatMessage,
+  currentUserId: string | null
+): void {
+  message.moderationStatus = "removed";
+  if (message.userId && message.userId === currentUserId) return;
+  blankContent(message);
+  message.userId = null;
+  message.user = null;
+}
+
+/**
  * Add or update a message in an ASC-ordered list.
  *
  * Deduplication order:
@@ -649,12 +698,9 @@ const chatSlice = createSlice({
       action: PayloadAction<{ conversationId: string; messageId: string }>
     ) {
       const { conversationId, messageId } = action.payload;
+      const userDeletedAt = new Date().toISOString();
       for (const message of findLoadedMessages(state, conversationId, messageId)) {
-        message.userDeletedAt = new Date().toISOString();
-        message.content = null;
-        message.gif = null;
-        message.mentions = [];
-        message.files = undefined;
+        toDeletedPlaceholder(message, userDeletedAt);
       }
     },
 
@@ -726,10 +772,30 @@ const chatSlice = createSlice({
     },
 
     /**
-     * Mark a message moderator-removed, on every loaded copy (conversation and
-     * thread buckets). Its author keeps it in full; for everyone else it
-     * becomes a placeholder with the sender blanked, as the server returns it
-     * on every read.
+     * Mark a message deleted by its author, on every loaded copy
+     * (conversation and thread buckets, and wherever another message quotes
+     * it): a placeholder with its sender kept, as the server returns it.
+     *
+     * Dispatched by ChatProvider on `message:deleted` socket events.
+     */
+    markMessageDeleted(
+      state,
+      action: PayloadAction<{
+        conversationId?: string;
+        messageId: string;
+        userDeletedAt: string;
+      }>
+    ) {
+      const { conversationId, messageId, userDeletedAt } = action.payload;
+      for (const message of findLoadedCopies(state, conversationId, messageId)) {
+        toDeletedPlaceholder(message, userDeletedAt);
+      }
+    },
+
+    /**
+     * Mark a message moderator-removed, on every loaded copy (as above). Its
+     * author keeps it in full; for everyone else it becomes a placeholder with
+     * the sender blanked, as the server returns it on every read.
      *
      * Dispatched by ChatProvider on `message:removed` socket events.
      */
@@ -742,18 +808,34 @@ const chatSlice = createSlice({
       }>
     ) {
       const { conversationId, messageId, currentUserId } = action.payload;
-      for (const message of findLoadedMessages(state, conversationId, messageId)) {
-        message.moderationStatus = "removed";
-        if (message.userId && message.userId === currentUserId) continue;
-        Object.assign(message, {
-          userId: null,
-          user: null,
-          content: null,
-          gif: null,
-          metadata: null,
-          mentions: [],
-          files: undefined,
-        });
+      for (const message of findLoadedCopies(state, conversationId, messageId)) {
+        toRemovedPlaceholder(message, currentUserId);
+      }
+    },
+
+    /**
+     * Apply the current user's own successful delete: their own message
+     * becomes a deleted placeholder; someone else's (a group admin's delete)
+     * becomes a removed one — the same two outcomes the server records.
+     *
+     * Dispatched by `useDeleteMessage`.
+     */
+    applyOwnDelete(
+      state,
+      action: PayloadAction<{
+        conversationId?: string;
+        messageId: string;
+        currentUserId: string | null;
+        deletedAt: string;
+      }>
+    ) {
+      const { conversationId, messageId, currentUserId, deletedAt } = action.payload;
+      for (const message of findLoadedCopies(state, conversationId, messageId)) {
+        if (message.userId && message.userId === currentUserId) {
+          toDeletedPlaceholder(message, deletedAt);
+        } else {
+          toRemovedPlaceholder(message, currentUserId);
+        }
       }
     },
 
@@ -954,7 +1036,9 @@ export const {
   removeMessage,
   updateReactions,
   patchMessage,
+  markMessageDeleted,
   markMessageRemoved,
+  applyOwnDelete,
   updateGrants,
   setThreadReplies,
   mergeThreadReplies,

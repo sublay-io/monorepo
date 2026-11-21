@@ -828,8 +828,8 @@ describe("chatSlice — thread replies", () => {
     state = reducer(state, removeMessage({ conversationId: CONV, messageId: "reply-1" }));
     expect(state.threads["parent-1"].items[0].userDeletedAt).not.toBeNull();
     expect(state.threads["parent-1"].items[0].content).toBeNull();
-    // The server keeps a deleted message's metadata, so the store does too.
-    expect(state.threads["parent-1"].items[0].metadata).toEqual({ pinned: true });
+    // A deleted message's metadata is cleared, as the server returns it.
+    expect(state.threads["parent-1"].items[0].metadata).toBeNull();
   });
 
   it("patchMessage reaches a thread reply when the payload has no conversationId", () => {

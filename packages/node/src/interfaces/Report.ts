@@ -24,7 +24,10 @@ export type ReportStatus =
   | "on-hold"
   | "escalated"
   | "dismissed"
-  | "actioned";
+  | "actioned"
+  // Closed by the system with no moderator decision; the reason is in
+  // actionTaken (e.g. the content was deleted by its author).
+  | "auto-closed";
 
 export interface UserReport {
   id: string;

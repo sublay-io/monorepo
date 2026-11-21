@@ -6,7 +6,7 @@ description: "Submit a content report for an entity, comment, or chat message"
 
 Submits a report on an entity, comment, or chat message. If an **open** report already exists for the target, the authenticated user's report is added to it (increments `reporterCount`). If the same user already reported that open report, nothing new is created and their existing report comes back with `200`.
 
-Resolved reports (`dismissed` / `actioned`) are closed: a later report of the same target creates a **new** report rather than reopening the old one. A target therefore has at most one open report at a time, alongside any number of resolved ones.
+Resolved reports (`dismissed` and `actioned`, a moderator's decisions, and `auto-closed`, closed by the system) are closed: a later report of the same target creates a **new** report rather than reopening the old one. A target therefore has at most one open report at a time, alongside any number of resolved ones.
 
 **Authentication required.** **Rate limit**: 25 requests per 5 minutes.
 
@@ -14,7 +14,7 @@ An entity, or a comment, in a space the reporter can't read (see [who can read c
 
 Only content users posted can be reported. An entity or comment with no author — the app's own (created with a service key naming nobody), or what a deleted account left behind — answers `400 report/no-author`. (A deleted account's chat messages are deleted messages, which answer `404 report/target-not-found`, below.)
 
-Content its author deleted (a comment or chat message), and content a moderator removed, can't be reported: `404 report/target-not-found`. When its author deletes content, its open report is closed automatically: `status` becomes `"actioned"` and `actionTaken` is `"Deleted by its author."`. When the author's account is deleted, the open reports on everything they wrote close the same way, with `actionTaken` `"Its author's account was deleted."`. The report stays, as history.
+Content its author deleted (a comment or chat message), and content a moderator removed, can't be reported: `404 report/target-not-found`. When its author deletes content, its open report is closed automatically: `status` becomes `"auto-closed"` and `actionTaken` is `"Deleted by its author."`. When the author's account is deleted, the open reports on everything they wrote close the same way, with `actionTaken` `"Its author's account was deleted."`. The report stays, as history.
 
 ## Body Parameters
 

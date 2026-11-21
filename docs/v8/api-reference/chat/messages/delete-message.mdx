@@ -35,7 +35,7 @@ The caller must be either the message author or an active group `admin`. An admi
 
 `204 No Content` on success, with no body, for an author self-delete and for an admin moderation delete alike.
 
-An author self-delete also [closes](/v8/api-reference/reports/create-report) the message's open report, if any (`status: "actioned"`, kept as history), and the deleted message can't be reported again.
+An author self-delete also [closes](/v8/api-reference/reports/create-report) the message's open report, if any (`status: "auto-closed"`, kept as history), and the deleted message can't be reported again.
 
 ## Error Responses
 

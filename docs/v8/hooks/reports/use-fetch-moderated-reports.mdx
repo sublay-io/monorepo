@@ -49,7 +49,7 @@ function ModerationQueue({ spaceId }: { spaceId: string }) {
   Filter by target type.
 </ParamField>
 
-<ParamField body="status" type='"pending" | "on-hold" | "escalated" | "dismissed" | "actioned"'>
+<ParamField body="status" type='"pending" | "on-hold" | "escalated" | "dismissed" | "actioned" | "auto-closed"'>
   Filter by report status.
 </ParamField>
 
@@ -97,7 +97,7 @@ Returns `Promise<PaginatedResponse<Report>>`:
 <ResponseField name="targetType" type='"comment" | "entity" | "message"'>Type of the reported content.</ResponseField>
 <ResponseField name="reporterCount" type="number">Total number of users who have reported this target.</ResponseField>
 <ResponseField name="userReports" type="array">Individual user report entries. Each includes `id`, `userId`, `reason`, `details`, and `createdAt`.</ResponseField>
-<ResponseField name="status" type="string">Current moderation status: `pending`, `on-hold`, `escalated`, `dismissed`, or `actioned`.</ResponseField>
+<ResponseField name="status" type="string">Current moderation status: `pending`, `on-hold`, `escalated`, `dismissed`, `actioned`, or `auto-closed` (closed by the system with no moderator decision; the reason is in `actionTaken`).</ResponseField>
 <ResponseField name="actionTaken" type="string | null">Free-text description of action taken, if any.</ResponseField>
 <ResponseField name="target" type="Entity | Comment | ChatMessage | null">The reported content record (includes the author user object). Populated even if the content was soft-deleted. When `spaceReputation` is requested, the embedded author carries an added `spaceReputation` number. See [Reputation](/v8/data-models/reputation).</ResponseField>
 <ResponseField name="space" type="Space | null">The space the reported content belongs to.</ResponseField>

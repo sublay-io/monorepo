@@ -18,7 +18,7 @@ export interface FetchModeratedReportsParams extends SpaceReputationContextParam
    * surface in the dashboard instead.
    */
   targetType?: ReportTargetType;
-  status?: "pending" | "on-hold" | "escalated" | "dismissed" | "actioned";
+  status?: "pending" | "on-hold" | "escalated" | "dismissed" | "actioned" | "auto-closed";
   /** Time order: `createdAt` in `sortDir` (server default desc, newest first). */
   sortBy?: "createdAt";
   sortDir?: "asc" | "desc";
@@ -42,7 +42,7 @@ export interface Report {
   targetType: ReportTargetType;
   reporterCount: number;
   userReports: ReportUserReport[];
-  status: "pending" | "on-hold" | "escalated" | "dismissed" | "actioned";
+  status: "pending" | "on-hold" | "escalated" | "dismissed" | "actioned" | "auto-closed";
   actionTaken: string | null;
   target: Entity | Comment | ChatMessage | null;
   space: Space | null;

@@ -228,7 +228,9 @@ const Comment = React.memo(
           </View>
         ) : (
         <Pressable
-          onLongPress={tombstone ? undefined : () => {
+          // No menu on a comment with no author: it would only offer Report,
+          // which such a comment doesn't take.
+          onLongPress={tombstone || !comment.userId ? undefined : () => {
             Vibration.vibrate(50);
             // Open appropriate sheet based on ownership
             if (isOwner) {

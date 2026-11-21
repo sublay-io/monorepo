@@ -291,7 +291,8 @@ const Comment = React.memo(
                   {strings.reply}
                 </button>
                 )}
-                {hovered && ( // Conditionally render the EllipsisIcon button
+                {/* No menu on a comment with no author: it would only offer Report, which such a comment doesn't take. */}
+                {hovered && !!comment.userId && ( // Conditionally render the EllipsisIcon button
                   <button
                     onClick={() =>
                       user && user.id === comment.userId

@@ -6,8 +6,10 @@ description: "Delete or moderate a chat message"
 
 Deletes a message. The behavior differs based on who is deleting:
 
-- **Author self-delete**: The message is soft-deleted. The row is retained as a `[Message deleted]` placeholder — content, GIF and mentions are cleared (its `metadata` is kept), and `userDeletedAt` is set. File attachments are deleted from storage.
-- **Group admin moderation delete**: The message is marked `moderationStatus: "removed"` and excluded from all future queries. Content is not cleared; the record is retained for moderation audit purposes.
+- **Author self-delete**: `userDeletedAt` is set, and the message's content, GIF, mentions and metadata are cleared. File attachments are deleted from storage. The message stays in the conversation as a placeholder that still shows its sender.
+- **Group admin moderation delete**: The message is marked `moderationStatus: "removed"`. Nothing is cleared: its author still sees it in full, and everyone else gets a placeholder with the sender hidden too.
+
+See [Deleted and removed messages](/v8/data-models/chat-message#deleted-and-removed-messages) for exactly what a placeholder carries.
 
 The caller must be either the message author or an active group `admin`. An admin who left or was removed can still delete their own messages, but not other members'.
 

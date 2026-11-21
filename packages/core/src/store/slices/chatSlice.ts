@@ -726,6 +726,38 @@ const chatSlice = createSlice({
     },
 
     /**
+     * Mark a message moderator-removed, on every loaded copy (conversation and
+     * thread buckets). Its author keeps it in full; for everyone else it
+     * becomes a placeholder with the sender blanked, as the server returns it
+     * on every read.
+     *
+     * Dispatched by ChatProvider on `message:removed` socket events.
+     */
+    markMessageRemoved(
+      state,
+      action: PayloadAction<{
+        conversationId?: string;
+        messageId: string;
+        currentUserId: string | null;
+      }>
+    ) {
+      const { conversationId, messageId, currentUserId } = action.payload;
+      for (const message of findLoadedMessages(state, conversationId, messageId)) {
+        message.moderationStatus = "removed";
+        if (message.userId && message.userId === currentUserId) continue;
+        Object.assign(message, {
+          userId: null,
+          user: null,
+          content: null,
+          gif: null,
+          metadata: null,
+          mentions: [],
+          files: undefined,
+        });
+      }
+    },
+
+    /**
      * Apply a reputation grant that landed on a message.
      *
      * Dispatched by ChatProvider on `message:grant` socket events. Silently
@@ -922,6 +954,7 @@ export const {
   removeMessage,
   updateReactions,
   patchMessage,
+  markMessageRemoved,
   updateGrants,
   setThreadReplies,
   mergeThreadReplies,

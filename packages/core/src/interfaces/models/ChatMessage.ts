@@ -11,7 +11,8 @@ export interface ChatMessage {
   localId?: string;
   projectId: string;
   conversationId: string;
-  // null when the original sender's account has been deleted (FK SET NULL)
+  // null when the original sender's account has been deleted (FK SET NULL),
+  // and on a moderator-removed message for everyone but its author
   userId: string | null;
   content: string | null;
   gif: GifData | null;
@@ -19,7 +20,8 @@ export interface ChatMessage {
   // Opt-in only — populated when the hook's `include` contains "files".
   // Omitted by default to keep message payloads small in large conversations.
   files?: File[];
-  metadata: Record<string, any>;
+  // null on a deleted message, and on a removed one for everyone but its author
+  metadata: Record<string, any> | null;
   parentMessageId: string | null;
   quotedMessageId: string | null;
   threadReplyCount: number;
@@ -59,7 +61,8 @@ export interface ChatMessage {
   updatedAt: string;
 
   // Populated fields
-  // null when userId is null (account deleted) — same pattern as Comment model
+  // null when userId is null (account deleted, or removed and not the viewer's)
+  // — same pattern as Comment model
   user: User | null;
   // Populated one level deep only. Chains are resolved from the Redux store at render time
   // (via quotedMessageId) so that edits to quoted messages propagate automatically.

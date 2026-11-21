@@ -37,7 +37,7 @@ This endpoint accepts `multipart/form-data` to support file attachments alongsid
 </ParamField>
 
 <ParamField body="parentMessageId" type="string">
-  ID of a message in this conversation to reply to in a thread. The referenced message must be a main-stream message (threads are one level deep only). Optional.
+  ID of a message in this conversation to reply to in a thread. The referenced message must be a main-stream message (threads are one level deep only) that isn't [deleted or removed](/v8/data-models/chat-message#deleted-and-removed-messages). Optional.
 </ParamField>
 
 <ParamField body="quotedMessageId" type="string">
@@ -151,8 +151,9 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
     ```
   </Accordion>
   <Accordion title="Invalid Parent — 400 Bad Request">
+    The parent isn't a message in this conversation, was [deleted or removed](/v8/data-models/chat-message#deleted-and-removed-messages), or is itself a reply.
     ```json
-    { "error": "Parent message not found, not in this conversation, already removed, or is itself a reply.", "code": "chat/invalid-parent", "param": "parentMessageId" }
+    { "error": "Parent message not found, not in this conversation, deleted or removed, or is itself a reply.", "code": "chat/invalid-parent", "param": "parentMessageId" }
     ```
   </Accordion>
   <Accordion title="Invalid Quote — 400 Bad Request">

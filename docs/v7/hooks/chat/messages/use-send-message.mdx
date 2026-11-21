@@ -71,7 +71,7 @@ The hook returns a function. That function accepts:
 </ParamField>
 
 <ParamField body="files" type="File[]">
-  File attachments. When provided, the request is sent as `multipart/form-data`.
+  File attachments, up to 10, each up to 50 MB (`413 chat/file-too-large` otherwise). When provided, the request is sent as `multipart/form-data`. Attachments count toward the project's file storage: on plans that stop at their storage limit, a message whose files would go over it is refused with `429 project/quota-reached`.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />

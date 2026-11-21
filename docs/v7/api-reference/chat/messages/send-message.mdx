@@ -49,7 +49,7 @@ This endpoint accepts `multipart/form-data` to support file attachments alongsid
 </ParamField>
 
 <ParamField body="files" type="file[]">
-  File attachments (multipart/form-data). Up to 10 files per message. Optional.
+  File attachments (multipart/form-data). Up to 10 files per message, each up to 50 MB. Optional. Attachments count toward the project's file storage; on plans that stop at the storage limit, a message whose files would go over it is refused (`429`).
 </ParamField>
 
 ## Query Parameters
@@ -87,5 +87,23 @@ Returns the created [ChatMessage](/v7/data-models/chat-message) object, fully po
     ```json
     { "error": "Quoted message not found in this conversation.", "code": "chat/invalid-quote" }
     ```
+  </Accordion>
+  <Accordion title="File Too Large — 413">
+    ```json
+    { "error": "File \"video.mp4\" exceeds the 50MB limit.", "code": "chat/file-too-large" }
+    ```
+    One of the attached files is over 50 MB. No message is created.
+  </Accordion>
+  <Accordion title="Storage Quota Reached — 429">
+    ```json
+    {
+      "error": "Quota reached for storageFileBytes. Current: …, Action size: …, Limit: …",
+      "code": "project/quota-reached",
+      "details": { "current": 0, "actionSize": 0, "limit": 0, "metric": "storageFileBytes" }
+    }
+    ```
+    Returned on plans that stop at their storage limit, when the attached
+    files would take the project past it. No message is created. Messages
+    without files are not affected.
   </Accordion>
 </AccordionGroup>

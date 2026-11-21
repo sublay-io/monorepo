@@ -11,6 +11,8 @@ Deletes a message. The behavior differs based on who is deleting:
 
 See [Deleted and removed messages](/v8/data-models/chat-message#deleted-and-removed-messages) for exactly what a placeholder carries.
 
+A message that's already deleted can't be deleted or removed again, and a removed one can't be removed again: both answer `404 chat/message-not-found`, as for a missing message. A removed message's author can still delete it, which clears its content as above.
+
 The caller must be either the message author or an active group `admin`. An admin who left or was removed can still delete their own messages, but not other members'.
 
 ## Path Parameters
@@ -83,6 +85,7 @@ The caller must be either the message author or an active group `admin`. An admi
     ```
   </Accordion>
   <Accordion title="Not Found — 404">
+    No message has this ID in the conversation, or it was already deleted, or it was already removed and the caller isn't its author.
     ```json
     { "error": "Message not found.", "code": "chat/message-not-found" }
     ```

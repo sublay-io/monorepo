@@ -110,7 +110,7 @@ const entity = await sublay.entities.fetchEntity({ entityId: "ent_xyz789" });
 
 ### fetchEntityByForeignId
 
-Fetches an entity by your application's own identifier. It only reads: an entity that doesn't exist throws a `404`. To create the entity when missing, use [`fetchOrCreateEntityByForeignId`](#fetchorcreateentitybyforeignid).
+Fetches an entity by your application's own identifier. It only reads: an entity that doesn't exist throws a `404`. To create the entity when missing, use [`fetchOrCreateEntityByForeignId`](#fetchorcreateentitybyforeignid). A removed entity is returned in full to its author and as a [placeholder](/v8/data-models/entity#removed-entities) to everyone else.
 
 ```typescript
 const entity = await sublay.entities.fetchEntityByForeignId({
@@ -140,7 +140,7 @@ const entity = await sublay.entities.fetchEntityByForeignId({
 
 ### fetchOrCreateEntityByForeignId
 
-Returns the entity with your application's identifier, or creates it when there is none. The entity it creates carries only the `foreignId`: no title, content or author (an app-owned entity). Because it has no author, the project's **Who can create entities without an author** setting decides who may create it: everyone by default. When it is set to **Signed-in users only** (a visitor with no session is refused) or **No one from the client** (only your backend may create it), a refused caller gets `403 entity/authorless-creation-not-allowed` and nothing is created. A suspended user gets `403 user/suspended`. Props type: `FetchOrCreateEntityByForeignIdProps`.
+Returns the entity with your application's identifier, or creates it when there is none. The entity it creates carries only the `foreignId`: no title, content or author (an app-owned entity). Because it has no author, the project's **Who can create entities without an author** setting decides who may create it: everyone by default. When it is set to **Signed-in users only** (a visitor with no session is refused) or **No one from the client** (only your backend may create it), a refused caller gets `403 entity/authorless-creation-not-allowed` and nothing is created. A suspended user gets `403 user/suspended`. Props type: `FetchOrCreateEntityByForeignIdProps`. A removed entity is returned in full to its author and as a [placeholder](/v8/data-models/entity#removed-entities) to everyone else.
 
 ```typescript
 const { entity, created } = await sublay.entities.fetchOrCreateEntityByForeignId({
@@ -170,7 +170,7 @@ const { entity, created } = await sublay.entities.fetchOrCreateEntityByForeignId
 
 ### fetchEntityByShortId
 
-Fetches an entity by its short, human-readable ID (used in share URLs).
+Fetches an entity by its short, human-readable ID (used in share URLs). A removed entity is returned in full to its author and as a [placeholder](/v8/data-models/entity#removed-entities) to everyone else.
 
 ```typescript
 const entity = await sublay.entities.fetchEntityByShortId({ shortId: "abc12" });
@@ -448,7 +448,7 @@ const entity = await sublay.entities.addReaction({
 
 ### removeReaction
 
-Removes the logged-in user's reaction from an entity and returns the updated entity.
+Removes the logged-in user's reaction from an entity and returns the updated entity. A removed entity is returned in full to its author and as a [placeholder](/v8/data-models/entity#removed-entities) to everyone else.
 
 ```typescript
 const entity = await sublay.entities.removeReaction({

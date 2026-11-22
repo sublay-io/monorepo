@@ -117,11 +117,16 @@ export async function* askContent(
     // A refused request's body arrives as a stream too: read it back to the
     // JSON error body every other call exposes.
     if (isAxiosError(err) && err.response?.data && typeof err.response.data[Symbol.asyncIterator] === "function") {
-      const text = await readAll(err.response.data);
       try {
-        err.response.data = JSON.parse(text);
+        const text = await readAll(err.response.data);
+        try {
+          err.response.data = JSON.parse(text);
+        } catch {
+          err.response.data = text;
+        }
       } catch {
-        err.response.data = text;
+        // The body couldn't be read (connection reset, abort): keep the error.
+        err.response.data = undefined;
       }
     }
     throw err;

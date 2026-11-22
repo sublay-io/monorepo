@@ -374,7 +374,7 @@ await sublay.entities.deleteEntity({ entityId: "ent_xyz789" });
 
 ### fetchDrafts
 
-Fetches the logged-in user's unpublished draft entities.
+Fetches the logged-in user's unpublished draft entities. A draft marked removed (`moderationStatus: "removed"`) is listed too, but it can't be published or edited, only deleted.
 
 ```typescript
 const { data, pagination } = await sublay.entities.fetchDrafts({

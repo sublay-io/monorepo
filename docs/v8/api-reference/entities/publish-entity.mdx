@@ -45,7 +45,7 @@ Returns the published [Entity](/v8/data-models/entity) object with `isDraft: fal
     ```json
     { "error": "Draft entity not found", "code": "entity/not-found" }
     ```
-    Returned when no draft with this ID exists, the entity is not a draft, or the draft has no author.
+    Returned when no draft with this ID exists, the entity is not a draft, the draft has no author, or the draft is marked removed (`moderationStatus: "removed"`; it can't be published, as a removed entity can't be edited).
   </Accordion>
   <Accordion title="Forbidden — 403">
     ```json

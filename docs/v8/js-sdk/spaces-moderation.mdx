@@ -55,7 +55,7 @@ await sublay.spaces.handleSpaceReport({
 
 ### moderateSpaceEntity
 
-Approves or removes an entity in a space.
+Approves or removes an entity in a space. A draft can't be moderated: it answers `404 moderation/entity-not-found`, like a missing entity.
 
 ```typescript
 const result = await sublay.spaces.moderateSpaceEntity({
@@ -88,7 +88,7 @@ const result = await sublay.spaces.moderateSpaceEntity({
 
 ### setSpaceEntityNsfw
 
-Sets the NSFW own-flag on an entity within a space — including other users' entities. Separate from `moderateSpaceEntity`: it **labels** the entity (`nsfw`), it does not approve/remove it. Requires the acting user to be an admin or moderator of the space.
+Sets the NSFW own-flag on an entity within a space — including other users' entities. Separate from `moderateSpaceEntity`: it **labels** the entity (`nsfw`), it does not approve/remove it. Requires the acting user to be an admin or moderator of the space. A draft can't be flagged: it answers `404 moderation/entity-not-found`, like a missing entity.
 
 ```typescript
 const result = await sublay.spaces.setSpaceEntityNsfw({

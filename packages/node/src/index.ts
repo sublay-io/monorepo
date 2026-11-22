@@ -225,6 +225,7 @@ export type {
   ContentSearchChatMessage,
 } from "./modules/search/searchContent";
 export type { SearchUsersProps, UserSearchResult } from "./modules/search/searchUsers";
+export type { AskContentProps, AskContentEvent } from "./modules/search/askContent";
 export type { SearchSpacesProps, SpaceSearchResult } from "./modules/search/searchSpaces";
 export type { VerifyEmailProps } from "./modules/auth/verifyEmail";
 export type { UserSearchParams } from "./interfaces/UserSearch";

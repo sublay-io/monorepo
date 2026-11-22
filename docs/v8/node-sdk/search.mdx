@@ -114,20 +114,22 @@ const results = await sublay.search.searchSpaces({
 
 ### askContent
 
-Asks a natural-language question about your content and returns an AI-generated answer with source references.
+Asks a natural-language question about your content. The server streams the AI-generated answer as it is written, so `askContent` is an **async generator**: iterate it with `for await` to read each event as it arrives.
 
 <Note>
   This feature requires semantic search to be enabled for your project. See the [Semantic Search & AI](/v8/semantic-search-ai) guide for setup instructions.
 </Note>
 
 ```typescript
-const { answer, sources } = await sublay.search.askContent({
+let answer = "";
+for await (const event of sublay.search.askContent({
   query: "What are the best practices for error handling?",
   spaceId: "spc_abc123",
-});
-
-// answer: "Based on the content in this space, best practices include..."
-// sources: [{ entityId: "ent_xyz", title: "Error Handling Guide" }, ...]
+})) {
+  if (event.type === "token") answer += event.content;
+  else if (event.type === "sources") console.log(event.sources);
+  else if (event.type === "error") throw new Error(event.error);
+}
 ```
 
 <ParamField body="query" type="string" required>
@@ -158,9 +160,22 @@ const { answer, sources } = await sublay.search.askContent({
   Maximum number of sources to draw from.
 </ParamField>
 
+<ParamField body="signal" type="AbortSignal">
+  Aborts the request and closes the stream. Leaving the loop with `break` closes it too.
+</ParamField>
+
 <SpaceReputationParams variant="context" field="body" />
 
-**Returns** — `Promise<{ answer: string; sources?: Array<{ entityId: string; title: string | null }> }>`
+**Returns** — `AsyncGenerator<AskContentEvent>`. The events, in order:
+
+| `type` | Fields | When |
+| --- | --- | --- |
+| `"token"` | `content: string` | The next piece of the answer text, many times. |
+| `"sources"` | `sources: ContentSearchResult[]` | Once, after the answer: the records it drew on, in the same shape as [`searchContent`](#searchcontent) results. |
+| `"done"` | — | The answer finished. |
+| `"error"` | `error: string`, `code: string` | The server failed after the stream opened (`code: "search/server-error"`). Nothing follows it. |
+
+A request refused before the stream opens throws, like every other function, with the JSON error body on `err.response.data`: for example `403 project/plan-required` without a paid plan, or a `400` for an invalid body.
 
 ---
 

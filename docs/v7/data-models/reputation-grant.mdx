@@ -35,7 +35,7 @@ Grants belong to the **`reputation`** bundle — every project with reputation h
 | `note` | `string \| null` | Free-text note. Trimmed, up to 2000 characters. |
 | `metadata` | `Record<string, any> \| null` | Your own key-value data. Up to 1 MB. |
 | `createdAt` | `string` | ISO timestamp when the grant was issued. |
-| `updatedAt` | `string` | ISO timestamp. A grant changes only when its sender's account is deleted (its `note` and `metadata` are cleared); otherwise it's never updated. |
+| `updatedAt` | `string` | ISO timestamp. It doesn't change: grants aren't updated, and clearing a deleted sender's `note` and `metadata` leaves it as it was. |
 
 ## Which bucket moves
 

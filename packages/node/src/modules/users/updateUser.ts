@@ -1,6 +1,11 @@
 import { SublayHttpClient } from "../../core/client";
 import { AuthUser } from "../../interfaces/User";
-import { appendFields, appendImageSlot, type ImageSlotFile } from "../../core/formData";
+import {
+  appendFields,
+  appendImageSlot,
+  refuseNullWithFile,
+  type ImageSlotFile,
+} from "../../core/formData";
 
 export interface UpdateUserProps {
   userId: string;
@@ -10,11 +15,16 @@ export interface UpdateUserProps {
    * behaves exactly as that user's own access token would.
    */
   actingUserId: string;
-  name?: string;
+  /** `null` (or an empty string) clears it, on a call without a file. */
+  name?: string | null;
   username?: string;
-  bio?: string;
-  /** The avatar as an image URL. To upload an image, use `avatarFile`. */
-  avatar?: string;
+  /** `null` (or an empty string) clears it, on a call without a file. */
+  bio?: string | null;
+  /**
+   * The avatar as an image URL; `null` clears it, on a call without a file.
+   * To upload an image, use `avatarFile`.
+   */
+  avatar?: string | null;
   metadata?: Record<string, any>;
   secureMetadata?: Record<string, any>;
   /** ISO 8601 datetime string. */
@@ -46,6 +56,7 @@ export async function updateUser(
   const path = `/users/${userId}`;
 
   if (avatarFile || bannerFile) {
+    refuseNullWithFile("updateUser", body);
     const formData = new FormData();
     appendFields(formData, body);
     if (avatarFile) appendImageSlot(formData, "avatarFile", avatarFile, "avatar");

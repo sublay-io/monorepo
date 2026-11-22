@@ -5,13 +5,19 @@ import {
   PostingPermission,
   SpaceVisibility,
 } from "../../interfaces/Space";
-import { appendFields, appendImageSlot, type ImageSlotFile } from "../../core/formData";
+import {
+  appendFields,
+  appendImageSlot,
+  refuseNullWithFile,
+  type ImageSlotFile,
+} from "../../core/formData";
 
 export interface UpdateSpaceProps {
   spaceId: string;
-  name?: string;
-  slug?: string;
-  description?: string;
+  // `null` clears it, on a call without a file.
+  name?: string | null;
+  slug?: string | null;
+  description?: string | null;
   readingPermission?: ReadingPermission;
   postingPermission?: PostingPermission;
   visibility?: SpaceVisibility;
@@ -46,6 +52,7 @@ export async function updateSpace(
   const path = `/spaces/${spaceId}`;
 
   if (avatarFile || bannerFile) {
+    refuseNullWithFile("updateSpace", body);
     const formData = new FormData();
     appendFields(formData, body);
     if (avatarFile) appendImageSlot(formData, "avatarFile", avatarFile, "avatar");

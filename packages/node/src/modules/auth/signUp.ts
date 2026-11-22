@@ -1,6 +1,11 @@
 import { SublayHttpClient } from "../../core/client";
 import { AuthUser } from "../../interfaces/User";
-import { appendFields, appendImageSlot, type ImageSlotFile } from "../../core/formData";
+import {
+  appendFields,
+  appendImageSlot,
+  refuseNullWithFile,
+  type ImageSlotFile,
+} from "../../core/formData";
 import type {
   EmailVerificationOptions,
   EmailVerificationRequiredResponse,
@@ -9,10 +14,13 @@ import type {
 export interface SignUpProps {
   email: string;
   password: string;
-  name?: string;
+  /** `null` (or an empty string) for none; not with a file attached. */
+  name?: string | null;
   username?: string;
-  avatar?: string;
-  bio?: string;
+  /** An image URL, or `null` for none; not with a file attached. */
+  avatar?: string | null;
+  /** `null` (or an empty string) for none; not with a file attached. */
+  bio?: string | null;
   location?: {
     latitude: number;
     longitude: number;
@@ -55,6 +63,7 @@ export async function signUp(
   const { avatarFile, bannerFile, ...body } = data;
   let payload: FormData | typeof body = body;
   if (avatarFile || bannerFile) {
+    refuseNullWithFile("signUp", body);
     const formData = new FormData();
     appendFields(formData, body);
     if (avatarFile) appendImageSlot(formData, "avatarFile", avatarFile, "avatar");

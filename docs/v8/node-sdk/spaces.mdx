@@ -27,15 +27,15 @@ const space = await sublay.spaces.createSpace({
   The user the service key acts as: the space creator, who becomes the initial admin, held to their own permissions. A space always has a creator: leaving it out returns `400 space/missing-user-id`.
 </ParamField>
 
-<ParamField body="name" type="string">
-  Display name for the space (3–100 characters). Left out, the space has no name (`null`).
+<ParamField body="name" type="string | null">
+  Display name for the space (3–100 characters). Left out or `null`, the space has no name.
 </ParamField>
 
-<ParamField body="slug" type="string">
-  URL-friendly identifier. Must be unique within the project. Left out, the space has no slug (`null`).
+<ParamField body="slug" type="string | null">
+  URL-friendly identifier. Must be unique within the project. Left out or `null`, the space has no slug.
 </ParamField>
 
-<ParamField body="description" type="string">
+<ParamField body="description" type="string | null">
   Short description of the space.
 </ParamField>
 
@@ -59,7 +59,7 @@ const space = await sublay.spaces.createSpace({
   The space's own NSFW flag. Defaults to `false`. A space created under an NSFW parent is effectively NSFW regardless of this value. See [Space NSFW flagging](/v8/data-models/space#nsfw-flagging).
 </ParamField>
 
-<ParamField body="parentSpaceId" type="string">
+<ParamField body="parentSpaceId" type="string | null">
   Makes this space a child of the specified parent space. The user the space is created for (`actingUserId`) must be an active admin of the parent space, or the request is refused with `403 space/parent-admin-required`.
 </ParamField>
 
@@ -68,7 +68,7 @@ const space = await sublay.spaces.createSpace({
 </ParamField>
 
 <ParamField body="avatarFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
-  An avatar image to upload, up to 50 MB. Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 space/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
+  An avatar image to upload, up to 50 MB. Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 space/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`. A field set to `null` can't travel with an image: the call throws before sending anything, so clear it in a separate call without one.
 </ParamField>
 
 <ParamField body="bannerFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
@@ -363,16 +363,16 @@ const space = await sublay.spaces.updateSpace({
   The user the request acts as: they must be an admin of the space, and the action is recorded as theirs.
 </ParamField>
 
-<ParamField body="name" type="string">
-  New display name.
+<ParamField body="name" type="string | null">
+  New display name. `null` clears it.
 </ParamField>
 
-<ParamField body="slug" type="string">
-  New slug. Must be unique.
+<ParamField body="slug" type="string | null">
+  New slug. Must be unique. `null` clears it.
 </ParamField>
 
-<ParamField body="description" type="string">
-  New description.
+<ParamField body="description" type="string | null">
+  New description. `null` clears it.
 </ParamField>
 
 <ParamField body="readingPermission" type="string">
@@ -400,7 +400,7 @@ const space = await sublay.spaces.updateSpace({
 </ParamField>
 
 <ParamField body="avatarFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
-  A new avatar image, replacing the current one (up to 50 MB). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 space/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
+  A new avatar image, replacing the current one (up to 50 MB). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 space/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`. A field set to `null` can't travel with an image: the call throws before sending anything, so clear it in a separate call without one.
 </ParamField>
 
 <ParamField body="bannerFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">

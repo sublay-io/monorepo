@@ -160,3 +160,29 @@ describe("node-sdk image slots — signUp", () => {
     expect(body).not.toBeInstanceOf(FormData);
   });
 });
+
+describe("node-sdk image slots — a null field can't travel with a file", () => {
+  const avatarFile = { file: bytes(), mimeType: "image/png", options: avatarOptions };
+
+  it.each([
+    ["createSpace", (c: any) => createSpace(c, { actingUserId: "u1", slug: null, avatarFile }), "slug"],
+    ["updateSpace", (c: any) => updateSpace(c, { spaceId: "s1", actingUserId: "u1", description: null, avatarFile }), "description"],
+    ["updateUser", (c: any) => updateUser(c, { userId: "u1", actingUserId: "u1", bio: null, avatarFile }), "bio"],
+    ["signUp", (c: any) => signUp(c, { email: "a@b.co", password: "pw", name: null, avatarFile }), "name"],
+  ])("%s throws before sending anything", async (fn, call, field) => {
+    const { client, projectInstance } = makeClient();
+    await expect(call(client)).rejects.toThrow(`${fn}: \`${field}: null\` can't be sent with a file`);
+    expect(projectInstance.post).not.toHaveBeenCalled();
+    expect(projectInstance.patch).not.toHaveBeenCalled();
+  });
+
+  it("sends null as JSON when no file is attached", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateSpace(client, { spaceId: "s1", actingUserId: "u1", slug: null, description: null });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1", {
+      actingUserId: "u1",
+      slug: null,
+      description: null,
+    });
+  });
+});

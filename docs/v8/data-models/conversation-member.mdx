@@ -10,13 +10,13 @@ A `ConversationMember` records one user's participation in a conversation. A use
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | `string` | Unique membership identifier (UUID). |
-| `projectId` | `string` | The project this membership belongs to. |
 | `conversationId` | `string` | ID of the conversation. |
 | `userId` | `string` | ID of the member user. |
-| `user` | `User \| undefined` | The member's user profile. Included when listing members. |
+| `user` | `{ id, name, username, avatar, metadata, reputation, spaceReputation? } \| undefined` | The member's user: only these [User](/v8/data-models/user) fields, with `spaceReputation` added when requested. Included when listing members. |
 | `role` | `"admin" \| "member" \| null` | Member role within the conversation. `null` for direct and space conversations — space conversations derive roles from `SpaceMember`. Only `group` conversations use this field. |
 | `lastReadAt` | `Date \| null` | Timestamp of the user's last read event. Used to compute `unreadCount` on `ConversationPreview`. `null` if the user has never read the conversation. |
-| `mutedUntil` | `Date \| null` | Reserved for future mute functionality. Not used in v8. |
+| `mutedUntil` | `Date \| null \| undefined` | When the user's timed mute of the conversation ends. `null` when not muted, or muted with no end (see `mutedForever`). Only on the requesting user's own row; omitted from other members' rows. |
+| `mutedForever` | `boolean \| undefined` | `true` when the user muted the conversation with no end. Only on the requesting user's own row; omitted from other members' rows. |
 | `isActive` | `boolean` | Whether the user is currently an active participant. `false` if they left voluntarily or were removed. |
 | `leftAt` | `Date \| null` | Timestamp when the user left the conversation. `null` if still active. |
 | `createdAt` | `Date` | Timestamp when the membership was created (i.e. when the user joined). |

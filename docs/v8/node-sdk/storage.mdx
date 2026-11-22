@@ -72,7 +72,19 @@ const file = await sublay.storage.uploadFile({
   The user the service key acts as, who owns the upload. Omit it for a backend/project-owned file. A user that doesn't exist returns `404 storage/user-not-found`.
 </ParamField>
 
-**Returns** — `Promise<File>`
+**Returns** — `Promise<UploadFileResponse>`:
+
+```typescript
+{
+  fileId: string;
+  type: "image" | "video" | "document" | "other"; // from the MIME type
+  relativePath: string; // storage path
+  publicPath: string; // proxy URL
+  size: number; // bytes
+  mimeType: string;
+  createdAt: string;
+}
+```
 
 ---
 
@@ -140,7 +152,23 @@ const file = await sublay.storage.uploadImage({
   The user the service key acts as, who owns the upload. Omit it for a backend/project-owned file. A user that doesn't exist returns `404 storage/user-not-found`.
 </ParamField>
 
-**Returns** — `Promise<File>` (the `image` field carries the generated `variants`).
+**Returns** — `Promise<UploadImageResponse>`:
+
+```typescript
+{
+  fileId: string;
+  type: "image";
+  originalPath: string; // proxy URL
+  originalSize: number; // bytes
+  originalWidth: number;
+  originalHeight: number;
+  // keyed by variant name; each { path, publicPath, width, height, size, format }
+  variants: Record<string, UploadedImageVariant>;
+  format: string;
+  quality: number;
+  createdAt: string;
+}
+```
 
 ---
 
@@ -158,7 +186,36 @@ const file = await sublay.storage.getFile({
   The UUID of the file to retrieve.
 </ParamField>
 
-**Returns** — `Promise<File>`
+**Returns** — `Promise<GetFileResponse>`, a flat view of the file:
+
+```typescript
+{
+  fileId: string;
+  type: "image" | "video" | "document" | "other";
+  originalPath: string; // proxy URL
+  originalSize: number; // bytes
+  originalMimeType: string;
+  position: number;
+  metadata: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+  // each present only when set on the file
+  userId?: string;
+  entityId?: string;
+  commentId?: string;
+  spaceId?: string;
+  // image files only
+  image?: {
+    originalWidth: number;
+    originalHeight: number;
+    variants: Record<string, UploadedImageVariant>;
+    processingStatus: "completed" | "failed";
+    format: string;
+    quality: number;
+    exifStripped: boolean;
+  };
+}
+```
 
 ---
 

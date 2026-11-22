@@ -61,12 +61,12 @@ const comment = await sublay.comments.createComment({
   Arbitrary metadata attached to the comment.
 </ParamField>
 
-<ParamField body="createdAt" type="Date">
-  A `Date` used to backdate the comment's creation time. More than five minutes in the future returns `400 comment/invalid-body` (`createdAt can't be in the future.`).
+<ParamField body="createdAt" type="string">
+  An ISO 8601 UTC timestamp (e.g. `date.toISOString()`) used to backdate the comment's creation time. More than five minutes in the future returns `400 comment/invalid-body` (`createdAt can't be in the future.`).
 </ParamField>
 
-<ParamField body="updatedAt" type="Date">
-  A `Date` used to backdate the comment's last update time. More than five minutes in the future returns `400 comment/invalid-body` (`updatedAt can't be in the future.`).
+<ParamField body="updatedAt" type="string">
+  An ISO 8601 UTC timestamp used to backdate the comment's last update time. More than five minutes in the future returns `400 comment/invalid-body` (`updatedAt can't be in the future.`).
 </ParamField>
 
 **Returns** — `Promise<Comment>`
@@ -207,7 +207,7 @@ const next = await sublay.comments.fetchManyComments({
 For a user's comments across entities, use [`users.fetchCommentsByUserId`](/v8/node-sdk/users#fetchcommentsbyuserid).
 
 <Note>
-  Without `actingUserId` the read is anonymous: `isAuthorBlocked` and `isUnavailable` are always `false`, `userReaction` isn't populated, no block rule applies, and moderator-removed comments come back as placeholders. With `actingUserId` you get exactly that user's view: their block flags and rules, their `userReaction`, and their own removed comments in full.
+  Without `actingUserId` the read is anonymous: `isAuthorBlocked` and `isUnavailable` are always `false`, `userReaction` is `null`, no block rule applies, and moderator-removed comments come back as placeholders. With `actingUserId` you get exactly that user's view: their block flags and rules, their `userReaction`, and their own removed comments in full.
 </Note>
 
 <ParamField body="entityId" type="string">

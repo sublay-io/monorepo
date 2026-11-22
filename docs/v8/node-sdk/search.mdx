@@ -11,10 +11,10 @@ The `search` module provides server-side access to Sublay's search and AI capabi
 
 ### searchContent
 
-Searches entities by full-text query, optionally scoped to a space.
+Searches entities, comments and chat messages by meaning, optionally scoped to a space or conversation.
 
 ```typescript
-const { data, pagination } = await sublay.search.searchContent({
+const results = await sublay.search.searchContent({
   query: "getting started guide",
   spaceId: "spc_abc123",
   sourceTypes: ["entity", "comment"],
@@ -52,7 +52,13 @@ const { data, pagination } = await sublay.search.searchContent({
 
 <SpaceReputationParams variant="context" field="body" />
 
-**Returns** — `Promise<PaginatedResponse<Entity>>`
+**Returns** — `Promise<ContentSearchResult[]>`, most similar first. Each result is `{ sourceType, similarity, record }`, where `record`'s type follows `sourceType`: an [`Entity`](/v8/data-models/entity) for `"entity"`, a [`Comment`](/v8/data-models/comment) for `"comment"`, and for `"message"` a `ContentSearchChatMessage` — the stored [chat message](/v8/data-models/chat-message) with its sender as `user` (a [`User`](/v8/data-models/user), or `null`), without reactions, files, grants or the quoted message.
+
+```typescript
+for (const result of results) {
+  if (result.sourceType === "entity") console.log(result.record.title);
+}
+```
 
 ---
 
@@ -61,7 +67,7 @@ const { data, pagination } = await sublay.search.searchContent({
 Searches for users by name or username.
 
 ```typescript
-const { data, pagination } = await sublay.search.searchUsers({
+const results = await sublay.search.searchUsers({
   query: "alice",
   limit: 10,
 });
@@ -79,7 +85,7 @@ const { data, pagination } = await sublay.search.searchUsers({
   The user to search as: the results are exactly what their own access token would get, so users block-edged with them are left out. Omit to search with no viewer.
 </ParamField>
 
-**Returns** — `Promise<PaginatedResponse<User>>`
+**Returns** — `Promise<UserSearchResult[]>`, most similar first: each is `{ similarity: number; record: User }`.
 
 ---
 
@@ -88,7 +94,7 @@ const { data, pagination } = await sublay.search.searchUsers({
 Searches for spaces by name or description.
 
 ```typescript
-const { data, pagination } = await sublay.search.searchSpaces({
+const results = await sublay.search.searchSpaces({
   query: "photography",
   limit: 10,
 });
@@ -102,7 +108,7 @@ const { data, pagination } = await sublay.search.searchSpaces({
   Maximum number of results to return.
 </ParamField>
 
-**Returns** — `Promise<PaginatedResponse<Space>>`
+**Returns** — `Promise<SpaceSearchResult[]>`, most similar first: each is `{ similarity: number; record: Space }`. Only public spaces are returned.
 
 ---
 

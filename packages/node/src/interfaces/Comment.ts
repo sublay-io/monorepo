@@ -1,6 +1,5 @@
 import { GrantSummary } from "./ReputationGrant";
-import { EntityRecord } from "./Entity";
-import { Space } from "./Space";
+import { EntityRecord, SpaceWithViewer } from "./Entity";
 import { Mention } from "./Mention";
 import { User } from "./User";
 import { ReactionCounts, ReactionType } from "./Reaction";
@@ -24,8 +23,9 @@ export interface GifData {
  */
 export type CommentEntity = EntityRecord & {
   // Present only when include contains "space". `null` when the entity isn't
-  // in a space. Carries no avatar/banner file objects.
-  space?: Omit<Space, "avatarFile" | "bannerFile"> | null;
+  // in a space. Carries no avatar/banner file objects; with a viewer it also
+  // carries the viewer's membership (`isMember`, `userRole`, `userStatus`).
+  space?: Omit<SpaceWithViewer, "avatarFile" | "bannerFile"> | null;
 };
 
 export interface Comment {

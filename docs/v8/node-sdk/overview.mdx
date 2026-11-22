@@ -142,4 +142,4 @@ Functions that return lists use a shared `PaginatedResponse<T>` shape:
 }
 ```
 
-Pass `page` and `limit` to any list function to control pagination.
+Pass `page` and `limit` to any list function to control pagination. `search.searchContent`, `searchUsers` and `searchSpaces` are not paginated: they resolve to a plain array of results, most similar first, capped by `limit`.

@@ -41,8 +41,8 @@ await sublay.tables.createTable({
   Sublay stores it as `custom_<tableName>`.
 </ParamField>
 
-<ParamField body="columns" type="CustomColumnDefinition[]" required>
-  The developer columns to create. Each is `{ columnName, dataType, nullable, defaultValue? }`.
+<ParamField body="columns" type="CustomColumnDefinition[]" default="[]">
+  The developer columns to create. Omit it for a table with only its managed columns. Each is `{ columnName, dataType, nullable, defaultValue? }`.
   `dataType` is one of `text`, `integer`, `float`, `decimal`, `boolean`, `date`,
   `timestamp`, `uuid`, `json`. A column may not be named `id`, `createdAt`,
   `updatedAt`, or `deletedAt` (reserved managed columns).

@@ -27,12 +27,12 @@ const space = await sublay.spaces.createSpace({
   The user the service key acts as: the space creator, who becomes the initial admin, held to their own permissions. A space always has a creator: leaving it out returns `400 space/missing-user-id`.
 </ParamField>
 
-<ParamField body="name" type="string" required>
-  Display name for the space.
+<ParamField body="name" type="string">
+  Display name for the space (3–100 characters). Left out, the space has no name (`null`).
 </ParamField>
 
 <ParamField body="slug" type="string">
-  URL-friendly identifier. Must be unique within the project. Generated from `name` if omitted.
+  URL-friendly identifier. Must be unique within the project. Left out, the space has no slug (`null`).
 </ParamField>
 
 <ParamField body="description" type="string">
@@ -396,7 +396,7 @@ const space = await sublay.spaces.updateSpace({
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  Updated metadata. Merged with existing values.
+  Replaces the space's metadata.
 </ParamField>
 
 <ParamField body="avatarFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">

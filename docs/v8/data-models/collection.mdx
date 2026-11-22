@@ -15,10 +15,6 @@ Collections are private — each collection belongs to one user and is not visib
   Unique identifier for the collection (UUID).
 </ResponseField>
 
-<ResponseField name="projectId" type="string">
-  The project this collection belongs to.
-</ResponseField>
-
 <ResponseField name="userId" type="string">
   The user who owns this collection.
 </ResponseField>
@@ -29,6 +25,10 @@ Collections are private — each collection belongs to one user and is not visib
 
 <ResponseField name="name" type="string">
   Display name of the collection, at most 255 characters. The root collection is always named `"root"`.
+</ResponseField>
+
+<ResponseField name="isRoot" type="boolean">
+  `true` on the user's root collection, `false` on every sub-collection.
 </ResponseField>
 
 <ResponseField name="entityCount" type="number">

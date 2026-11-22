@@ -47,8 +47,8 @@ const report = await sublay.reports.createReport({
   rejects anything else — use `other` plus `details` for the rest.
 </ParamField>
 
-<ParamField body="details" type="string">
-  Optional free-text details about the report.
+<ParamField body="details" type="string | null">
+  Optional free-text details about the report. `null` or an empty string stores none.
 </ParamField>
 
 <Note>
@@ -128,7 +128,10 @@ const { data, pagination } = await sublay.reports.fetchModeratedReports({
 
 <SpaceReputationParams variant="context" field="body" />
 
-**Returns** — `Promise<PaginatedResponse<Report>>`
+**Returns** — `Promise<PaginatedResponse<Report>>`. Each report carries every user's individual report in `userReports` (`{ id, reportId, userId, reason, details, createdAt, updatedAt }`), the moderator's `actionTaken` (or `null`), and:
+
+- `target` — the reported content, typed by `targetType`: the stored entity, comment or chat message record with its author as `user` (`User | null`), without the computed fields and associations a regular fetch adds. `null` when the content can no longer be found.
+- `space` — the stored record of the space the report was filed in, or `null`.
 
 <Note>
   To act on a report (remove content, ban the author, or dismiss it), use

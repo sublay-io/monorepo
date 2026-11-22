@@ -79,12 +79,12 @@ const entity = await sublay.entities.createEntity({
   When `true`, the entity is created as an unpublished draft. Defaults to `false`. A draft needs an owner, so it requires `actingUserId` (`400 entity/draft-requires-user` otherwise).
 </ParamField>
 
-<ParamField body="createdAt" type="Date">
-  A `Date` used to backdate the entity's creation time. A service key ability, also with `actingUserId` (for imports with original authors and dates). More than five minutes in the future returns `400 entity/invalid-body` (`createdAt can't be in the future.`).
+<ParamField body="createdAt" type="string">
+  An ISO 8601 UTC timestamp (e.g. `date.toISOString()`) used to backdate the entity's creation time. A service key ability, also with `actingUserId` (for imports with original authors and dates). More than five minutes in the future returns `400 entity/invalid-body` (`createdAt can't be in the future.`).
 </ParamField>
 
-<ParamField body="updatedAt" type="Date">
-  A `Date` used to backdate the entity's last update time. More than five minutes in the future returns `400 entity/invalid-body` (`updatedAt can't be in the future.`).
+<ParamField body="updatedAt" type="string">
+  An ISO 8601 UTC timestamp used to backdate the entity's last update time. More than five minutes in the future returns `400 entity/invalid-body` (`updatedAt can't be in the future.`).
 </ParamField>
 
 **Returns** — `Promise<Entity>`
@@ -433,7 +433,7 @@ const entity = await sublay.entities.incrementEntityViews({
   Number to add to the view counter: an integer of at least `1`. Defaults to `1`. Sent as a JSON number in the request body.
 </ParamField>
 
-**Returns** — `Promise<Entity>`
+**Returns** — `Promise<EntityRecord>`: the stored entity record only, without the computed fields (`commentsCount`, `userReaction`, `nsfwEffective`) or any included associations (`user`, `space`, `files`, `topComments`, `saved`, `grants`). Moderation details (`moderationReason`, `moderatedById`, `moderatedByType`) read as `null`.
 
 ---
 

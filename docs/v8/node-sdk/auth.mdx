@@ -91,7 +91,7 @@ const { user, accessToken, refreshToken } = await sublay.auth.signIn({
   How the new confirmation email is sent when sign-in is refused because the account's email isn't confirmed. Ignored when the project doesn't require email verification before sign-in.
 </ParamField>
 
-**Returns** — `Promise<{ user: AuthUser; accessToken: string; refreshToken: string }>`
+**Returns** — `Promise<{ user: AuthUser; accessToken: string; refreshToken: string }>` (see [AuthUser](/v8/data-models/user#authuser))
 
 When the project requires email verification before sign-in and the account's email isn't confirmed, a correct password rejects with a `403` whose body is `EmailNotVerifiedErrorBody` (`{ error, code: "auth/email-not-verified", verificationId? }`, read from `err.response.data`), and a new confirmation email is sent (unless one went out in the last 10 minutes).
 
@@ -136,25 +136,26 @@ await sublay.auth.signOut({
   [`POST /auth/sign-out`](/v8/api-reference/auth/sign-out#response).
 </Warning>
 
-**Returns** — `Promise<void>`
+**Returns** — `Promise<SignOutPushUnbindSkipped | null>`: `null` when signed out (`204`), or `{ pushUnbindSkipped: true, code: "auth/push-unbind-status-unknown", message }` (`200`) when signed out without the requested push unbind.
 
 ---
 
 ### requestNewAccessToken
 
-Exchanges a valid refresh token for a new access token.
+Exchanges a valid refresh token for a new access token. The refresh token rotates: store the returned `refreshToken` in place of the one you sent.
 
 ```typescript
-const { accessToken } = await sublay.auth.requestNewAccessToken({
-  refreshToken,
-});
+const result = await sublay.auth.requestNewAccessToken({ refreshToken });
+if (result.accessToken) {
+  const { accessToken, refreshToken: nextRefreshToken, user } = result;
+}
 ```
 
 <ParamField body="refreshToken" type="string" required>
   A valid, non-expired refresh token.
 </ParamField>
 
-**Returns** — `Promise<{ accessToken: string }>`
+**Returns** — `Promise<RequestNewAccessTokenResponse>`: `{ success: true, accessToken, refreshToken, user: AuthUser }`, or `{ user: null, accessToken: null }` when `refreshToken` is empty.
 
 ---
 
@@ -172,7 +173,7 @@ const { user, accessToken, refreshToken } = await sublay.auth.verifyExternalUser
   A JWT signed with your project's signing secret, containing user identity claims.
 </ParamField>
 
-**Returns** — `Promise<{ user: AuthUser; accessToken: string; refreshToken: string }>`
+**Returns** — `Promise<{ user: AuthUser; accessToken: string; refreshToken: string }>` (see [AuthUser](/v8/data-models/user#authuser))
 
 ---
 

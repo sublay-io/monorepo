@@ -80,8 +80,8 @@ const { user, created } = await sublay.users.fetchOrCreateUserByForeignId({
   Your application's user identifier, kept exactly as sent. A blank or whitespace-only one is refused with `400 user/invalid-body`.
 </ParamField>
 
-<ParamField body="name" type="string">
-  Display name — used only when creating a new user.
+<ParamField body="name" type="string | null">
+  Display name, or `null` for none — used only when creating a new user.
 </ParamField>
 
 <ParamField body="username" type="string">
@@ -92,8 +92,8 @@ const { user, created } = await sublay.users.fetchOrCreateUserByForeignId({
   Avatar URL, or `null` for none — used only when creating a new user.
 </ParamField>
 
-<ParamField body="bio" type="string">
-  Bio text — used only when creating a new user.
+<ParamField body="bio" type="string | null">
+  Bio text, or `null` for none — used only when creating a new user.
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -184,15 +184,15 @@ const updatedUser = await sublay.users.updateUser({
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  Updated public metadata. Merged with existing metadata.
+  Updated public metadata. Replaces the stored object; send the whole object, including keys you aren't changing.
 </ParamField>
 
 <ParamField body="secureMetadata" type="object">
-  Updated secure metadata. No API response returns it to any user. Users can also write their own, so don't treat it as trusted. Merged with existing values.
+  Updated secure metadata. No API response returns it to any user. Users can also write their own, so don't treat it as trusted. Replaces the stored object, like `metadata`.
 </ParamField>
 
-<ParamField body="birthdate" type="Date">
-  The user's birthdate.
+<ParamField body="birthdate" type="string">
+  The user's birthdate, as an ISO 8601 datetime string.
 </ParamField>
 
 <ParamField body="location" type="object">
@@ -223,7 +223,7 @@ if (user.bannerFileId) {
 }
 ```
 
-**Returns** — `Promise<UserFull>`
+**Returns** — `Promise<AuthUser>` — the updated user as they see themselves (see [AuthUser](/v8/data-models/user#authuser)).
 
 ---
 

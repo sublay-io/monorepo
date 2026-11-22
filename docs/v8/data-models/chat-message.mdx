@@ -11,25 +11,24 @@ A `ChatMessage` represents a single message in a conversation. Messages support 
 |----------|------|-------------|
 | `id` | `string` | Unique message identifier (UUID). |
 | `localId` | `string \| undefined` | Locally-generated UUID echoed by the server. Never stored in the database. Used for optimistic deduplication — matching a temporary local entry to the confirmed server response. |
-| `projectId` | `string` | The project this message belongs to. |
 | `conversationId` | `string` | ID of the conversation this message is in. |
+| `spaceId` | `string \| null` | The space of the message's conversation, for a space chat message. `null` in direct and group conversations. |
 | `userId` | `string \| null` | ID of the user who sent the message. `null` if the sender's account has since been deleted, and on a [removed message](#deleted-and-removed-messages) for everyone but its author. |
-| `user` | `User \| null` | The sender's user profile. `null` when `userId` is `null`. |
+| `user` | `{ id, name, username, avatar, reputation, spaceReputation? } \| null` | The sender: only these [User](/v8/data-models/user) fields, with `spaceReputation` added when requested. `null` when `userId` is `null`. |
 | `content` | `string \| null` | Text content of the message. `null` for GIF-only or file-only messages. |
 | `gif` | `GifData \| null` | GIF attachment data. `null` if no GIF was attached. |
 | `mentions` | `Mention[]` | Array of @mentions embedded in the message. |
-| `files` | `File[] \| undefined` | File attachments. On message lists, only populated when `include` contains `"files"`; omitted by default to keep payloads small. A single-message fetch always returns them. |
+| `files` | `File[] \| undefined` | File attachments. Present only when the `files-images` bundle is installed: always on a single-message fetch, send and edit; on message lists only when `include` contains `"files"`. |
 | `metadata` | `Record<string, any> \| null` | Custom key-value data. Limited to 10 KB. `null` on a [deleted message](#deleted-and-removed-messages), and on a removed one for everyone but its author. |
 | `parentMessageId` | `string \| null` | ID of the parent message if this is a thread reply. Thread replies are excluded from the main conversation stream. |
-| `parentMessage` | `ChatMessage \| null \| undefined` | The parent message for thread replies. |
 | `quotedMessageId` | `string \| null` | ID of a message being quoted. The message remains in the main stream but renders an inline preview of the quoted content. |
-| `quotedMessage` | `ChatMessage \| null \| undefined` | The quoted message, populated one level deep. |
+| `quotedMessage` | `ChatMessage \| null` | The quoted message with its sender, one level deep: without `reactionCounts`, `userReactions`, `files`, `grants` or a `quotedMessage` of its own. `null` when the message quotes nothing. |
 | `threadReplyCount` | `number` | Number of replies in this message's thread. Incremented on reply creation; never decremented. |
-| `reactionCounts` | `Record<string, number>` | Emoji reaction counts, keyed by emoji. Computed server-side (e.g. `{ "👍": 3, "❤️": 1 }`). |
-| `userReactions` | `string[]` | Emojis the requesting user has reacted with on this message. |
+| `reactionCounts` | `Record<string, number>` | Emoji reaction counts, keyed by emoji. Computed server-side (e.g. `{ "👍": 3, "❤️": 1 }`). Not on the message that [Send Message](/v8/api-reference/chat/messages/send-message) and [Edit Message](/v8/api-reference/chat/messages/edit-message) return. |
+| `userReactions` | `string[]` | Emojis the requesting user has reacted with on this message. Not on the message that Send Message and Edit Message return. |
 | `editedAt` | `Date \| null` | Timestamp when the message was last edited. `null` if never edited. |
 | `userDeletedAt` | `Date \| null` | Timestamp when the sender deleted the message, or when the sender's account was deleted (which deletes all of their messages). A deleted message is returned as a [placeholder](#deleted-and-removed-messages). |
-| `moderationStatus` | `"approved" \| "removed" \| null` | Moderation status. A `"removed"` message is returned as a [placeholder](#deleted-and-removed-messages) to everyone but its author. Visible to everyone. |
+| `moderationStatus` | `"removed" \| null` | Moderation status. A `"removed"` message is returned as a [placeholder](#deleted-and-removed-messages) to everyone but its author. Visible to everyone. |
 | `moderatedAt` | `Date \| null` | Timestamp when moderation action was taken. |
 | `moderatedById` | `string \| null` | ID of who removed the message: a user ID when `moderatedByType` is `"user"`, the dashboard account's ID when it is `"client"`. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
 | `moderatedByType` | `"client" \| "user" \| null` | `"user"` when a user removed the message: a space moderator (through a report or directly) or a group conversation admin deleting another member's message. `"client"` when it was removed from the dashboard. A message a space moderator removed through the v7 API also carries `"client"`, with that moderator's user ID (or `null`) in `moderatedById`. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |

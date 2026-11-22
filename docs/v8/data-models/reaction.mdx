@@ -44,14 +44,13 @@ When fetching the list of users who reacted to an entity or comment, each item i
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | `string` | Unique reaction identifier (UUID). |
-| `projectId` | `string` | The project this reaction belongs to. |
 | `targetType` | `"entity" \| "comment"` | Whether the reaction targets an entity or a comment. |
 | `targetId` | `string` | The ID of the entity or comment that was reacted to. |
 | `userId` | `string` | The ID of the user who reacted. |
 | `reactionType` | `ReactionType` | Which of the 8 reaction types was used. |
 | `createdAt` | `string` | ISO timestamp when the reaction was created. |
 | `updatedAt` | `string` | ISO timestamp when the reaction was last updated. |
-| `user` | `User` | The user who reacted. Populated in fetch-reactions responses. |
+| `user` | `{ id, name, username, avatar, reputation, spaceReputation? }` | The user who reacted: only these [User](/v8/data-models/user) fields. `spaceReputation` is added when requested. |
 
 ## See Also
 

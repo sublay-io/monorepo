@@ -13,7 +13,6 @@ Events belong to the `events` bundle. They work standalone, but some behaviors d
 |----------|------|-------------|
 | `id` | `string` | Unique event identifier (UUID). |
 | `shortId` | `string` | Short, URL-safe identifier generated automatically. |
-| `projectId` | `string` | The project this event belongs to. |
 | `userId` | `string \| null` | ID of the event's **owner**: the user who created it. Set to `null` if the owner's account is deleted (the event survives, with no owner). See [Owner and hosts](#owner-and-hosts). |
 | `user` | `User \| null` | Populated creator object. Only present when `include` contains `"user"`. |
 | `title` | `string` | Event title (1–300 characters). |
@@ -27,7 +26,7 @@ Events belong to the `events` bundle. They work standalone, but some behaviors d
 | `address` | `string \| null` | Street address. Required (with or instead of `location`) for `physical` and `hybrid` events. |
 | `location` | `{ type: "Point"; coordinates: [number, number] } \| null` | GeoJSON point as `[longitude, latitude]` (PostGIS). Set from the `latitude`/`longitude` you pass on create/update. Powers proximity search. |
 | `spaceId` | `string \| null` | Optional soft reference to a Space. Required when `visibility` is `"members"`. No enforced cross-bundle FK. |
-| `space` | `Space \| null` | Populated space object. Only present when `include` contains `"space"`. An event in a space the viewer can't read isn't returned at all (see [Visibility](#visibility)), so it's never hidden here. |
+| `space` | `Space \| null` | Populated space object. Only present when `include` contains `"space"`; `null` when the event has no space. With a viewer it also carries the viewer's membership: `isMember`, plus `userRole` and `userStatus` (`null` when the viewer has no membership row). An event in a space the viewer can't read isn't returned at all (see [Visibility](#visibility)), so it's never hidden here. |
 | `visibility` | `"public" \| "members" \| "invite"` | Who can see the event. See [Visibility](#visibility) below. Defaults to `"public"`. |
 | `status` | `"active" \| "cancelled"` | Lifecycle status. A cancelled event stays fetchable but rejects new RSVPs. Defaults to `"active"`. |
 | `allowMaybe` | `boolean` | Whether a `"maybe"` RSVP is permitted. Defaults to `true`. |

@@ -73,6 +73,8 @@ A grant row carries `targetType`, `targetId` and the granter's free-text `note`,
 
 A service key gets no exemption: it is tested as the user it names in `actingUserId`, exactly as that user's token. Naming nobody, it is tested as a signed-in user in no conversation, so it gets no grants on chat messages on either shape.
 
+An entity removed by moderation takes its grants with it too, for everyone: the entity is a [placeholder](/v8/data-models/entity#removed-entities) to everyone but its author and its `grants` summary is zero, so the target shape answers the empty page with the zero summary and the user-keyed shapes drop its grants from the page and `totalItems`. See [A removed entity takes its grants with it](/v8/data-models/reputation-grant#a-removed-entity-takes-its-grants-with-it).
+
 Grants with no target at all are returned by every shape, subject only to [space reading](#grants-follow-space-reading).
 
 <Note>

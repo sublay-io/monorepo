@@ -12,6 +12,8 @@ icon: "plug"
 
 `useFetchEntityByShortId` returns a function that fetches an entity by its `shortId` — the auto-generated short identifier that Sublay assigns to every entity. Short IDs are useful for building readable sharing URLs.
 
+An entity a moderator removed resolves in full for its author and as a [placeholder](/v8/data-models/entity#removed-entities) for everyone else.
+
 ## Usage Example
 
 ```tsx

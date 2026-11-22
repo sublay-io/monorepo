@@ -12,6 +12,8 @@ icon: "plug"
 
 `useFetchEntityByForeignId` returns a function that fetches an entity using the foreign ID from your system. It only reads: an entity that doesn't exist rejects with a `404`. To create the entity when it is missing, use [`useFetchOrCreateEntityByForeignId`](/v8/hooks/entities/use-fetch-or-create-entity-by-foreign-id).
 
+An entity a moderator removed resolves in full for its author and as a [placeholder](/v8/data-models/entity#removed-entities) for everyone else.
+
 ## Usage Example
 
 ```tsx

@@ -83,6 +83,10 @@ Call `refresh` after issuing a grant to pull the new row and updated totals.
 </Note>
 
 <Note>
+  **A removed entity takes its grants with it.** The grants on an entity a moderator removed are hidden from everyone, on every shape: the `targetType: "entity"` shape is empty with a zero summary, and `recipientId` / `senderId` leave them out. See [A removed entity takes its grants with it](/v8/data-models/reputation-grant#a-removed-entity-takes-its-grants-with-it).
+</Note>
+
+<Note>
   `summary` is set from the first page and is not re-read by `loadMore` — it describes the whole target, not the rows loaded so far. Because grant lists are never block-filtered, the rows you render always add up to it.
 </Note>
 

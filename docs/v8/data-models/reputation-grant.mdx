@@ -83,6 +83,16 @@ A grant row carries its `targetType`, `targetId` and the granter's free-text `no
 
 The inline summary on the chat reads follows the same rules: those endpoints refuse a non-member with `403 chat/not-a-member` before they read a message, and a removed message's `grants` summary is zero for everyone, its author included.
 
+## A removed entity takes its grants with it
+
+A grant's recipient is normally the author of what was rewarded, so listing the grants on an entity a moderator removed would name the author its [placeholder](/v8/data-models/entity#removed-entities) hides. A removed entity's grants therefore work like a removed message's, for everyone — its author, the grant's own sender and recipient, and a service key included:
+
+- **Listing** by `targetType: "entity"` + `targetId` answers an empty page with the zero summary, and the `recipientId` and `senderId` shapes leave those grants out of the page and `totalItems` together.
+- **The `grants` summary** on the removed entity is `{ total: 0, count: 0, viewerTotal: 0 }`.
+- **Creating** a grant on it answers `404 reputation-grant/target-not-found`.
+
+The grants still count toward the recipient's reputation; they are only hidden.
+
 ## Grants follow space reading
 
 A grant tied to a space, or given on an entity or comment in a space, says something about that space, so grants follow the space's [reading rules](/v8/data-models/space#who-can-read-content):

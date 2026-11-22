@@ -10,6 +10,8 @@ description: "Get an entity by its short ID"
 
 Returns a single entity matching the given `shortId`. Short IDs are compact, URL-friendly identifiers automatically assigned to each entity. They are useful for building shareable deep links.
 
+An entity a moderator removed is still returned, so a shared link keeps working: in full to its author, and as a [placeholder](/v8/data-models/entity#removed-entities) (content and author blanked, `moderationStatus: "removed"` kept) to everyone else. Drafts are only returned to their author: a user token, or a service key naming the author in `actingUserId`.
+
 An entity in a space the viewer can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) answers `404 entity/not-found`, exactly like an entity that doesn't exist. A service key without `actingUserId` reads as a signed-out caller, so it gets `404` for entities in members-only and private spaces; name a member in `actingUserId` to read them.
 
 ## Query Parameters

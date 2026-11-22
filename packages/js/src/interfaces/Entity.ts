@@ -25,6 +25,9 @@ export interface Entity {
   sourceId: string | null;
   spaceId: string | null;
   space?: Space | null; // Populated when include contains "space"
+  // `userId`, `user`, `title`, `content`, `location`, `metadata` are `null`,
+  // and `mentions`, `attachments`, `files`, `keywords` are `[]`, on
+  // a moderator-removed entity, for everyone but its author (the placeholder).
   userId: string | null;
   user?: User | null;
   title: string | null;
@@ -45,7 +48,7 @@ export interface Entity {
     type: "Point";
     coordinates: [number, number]; // [longitude, latitude]
   } | null;
-  metadata: Record<string, any>;
+  metadata: Record<string, any> | null; // `null` on the placeholder
   nsfw: boolean; // The entity's own NSFW flag
   nsfwEffective: boolean; // Computed live: entity.nsfw OR the entity's space's effective NSFW
   // Populated when include contains "topComments": the best top-level

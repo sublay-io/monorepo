@@ -12,6 +12,8 @@ icon: "plug"
 
 `useFetchOrCreateEntityByForeignId` returns a function that fetches the entity with the foreign ID from your system, or creates it when there is none. The entity it creates carries only the `foreignId`: no title, content or author.
 
+An entity a moderator removed resolves in full for its author and as a [placeholder](/v8/data-models/entity#removed-entities) for everyone else.
+
 Because the new entity has no author, the project's **Who can create entities without an author** setting decides who may create it: everyone by default. When it is set to **Signed-in users only** (a visitor with no session is refused) or **No one from the client** (only your backend may create it), a refused caller gets `403 entity/authorless-creation-not-allowed` and nothing is created. A suspended user gets `403 user/suspended`. A `foreignId` whose entity was deleted stays taken: the call rejects with `409 entity/foreign-id-taken`. See [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id).
 
 Most hooks resolve to the plain record. This one resolves to `{ entity, created }`, because whether the call created the entity is part of its answer.

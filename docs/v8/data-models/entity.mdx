@@ -38,14 +38,14 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `score` | `number` | Computed "hotness" score based on engagement activity. |
 | `scoreUpdatedAt` | `Date` | When the score was last recalculated. |
 | `location` | `GeoPoint \| null` | Optional geo-location stored as a GeoJSON point. |
-| `metadata` | `Record<string, any>` | Custom key-value data (max 10 KB). |
+| `metadata` | `Record<string, any> \| null` | Custom key-value data (max 10 KB). `null` only on a [removed entity's placeholder](#removed-entities). |
 | `topComments` | `Comment[]` | The entity's best top-level comments, as full [Comment](/v8/data-models/comment) objects. Populated when `include` contains `"topComments"`; `[]` when none qualify. See [Top comments](#top-comments). |
 | `saved` | `EntitySaved` | Whether the current user has saved this entity, and in which of their collections. Populated when `include` contains `"saved"`. See [Saved state](#saved-state). |
 | `grants` | `GrantSummary \| undefined` | Per-item [reputation-grant](/v8/data-models/reputation-grant) summary — `{ total, count, viewerTotal }` over **positive** grants. Populated when `include` contains `"grants"`. Zero-filled rather than omitted on a project with no grants, so `undefined` always means "nobody asked". |
 | `isDraft` | `boolean \| null` | Whether this entity is in draft state. A draft is created with an author (a user token, or a service key with `actingUserId`), and only its author sees it. Deleting the author deletes their drafts. A draft with no author is answered as not found (`404`), like a missing entity. |
 | `nsfw` | `boolean` | The entity's **own** NSFW flag. `false` by default. Set on create/update by the owner (a service key acting as the author, or naming nobody for an app-owned entity), or by a space moderator via the [set-NSFW endpoint](/v8/hooks/spaces/use-set-space-entity-nsfw). See [NSFW flagging](#nsfw-flagging). |
 | `nsfwEffective` | `boolean` | **Computed live, read-only.** `true` when the entity's own `nsfw` is `true` **or** its space is effectively NSFW: `entity.nsfw OR (space?.nsfwEffective ?? false)`. This is the value the `nsfwFilter` query param keys off. See [NSFW flagging](#nsfw-flagging). |
-| `moderationStatus` | `"approved" \| "removed" \| null` | Current space moderation status. Visible to everyone. |
+| `moderationStatus` | `"approved" \| "removed" \| null` | Current space moderation status. Visible to everyone. A removed entity is a placeholder for everyone but its author — see [Removed entities](#removed-entities). |
 | `moderatedAt` | `Date \| null` | When the moderation action was taken. |
 | `moderatedById` | `string \| null` | ID of who took the action: the space moderator's user ID when `moderatedByType` is `"user"`, the dashboard account's ID when it is `"client"`. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
 | `moderatedByType` | `"client" \| "user" \| null` | `"user"` when a space moderator took the action (through a report or directly); `"client"` when it was taken from the dashboard. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
@@ -53,6 +53,19 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `createdAt` | `Date` | When the entity was created. |
 | `updatedAt` | `Date` | When the entity was last updated. |
 | `deletedAt` | `Date \| null` | Soft-delete timestamp. `null` for active entities. |
+
+## Removed entities
+
+An entity a moderator removed (`moderationStatus: "removed"`) is returned in full only to its author. Everyone else — other users, moderators, signed-out requests and a service key naming nobody — gets a **placeholder**:
+
+- `userId`, `user`, `title`, `content`, `location` and `metadata` are `null`.
+- `mentions`, `attachments` and `keywords` are `[]`, and so is `files` when `include` contains `"files"`.
+- Everything else is kept: `id`, `shortId`, `foreignId`, `sourceId`, `spaceId`, `space`, `reactionCounts`, `commentsCount`, `views`, `score`, timestamps, `nsfw`, `nsfwEffective`, `moderationStatus`, `topComments`, and the requester's own `userReaction` and `saved`.
+- `grants` is the zero summary for everyone, the author included: a removed entity [takes its grants with it](/v8/data-models/reputation-grant#a-removed-entity-takes-its-grants-with-it).
+
+The placeholder is what [Fetch Entity](/v8/api-reference/entities/fetch-entity), [Fetch Entity by Short ID](/v8/api-reference/entities/fetch-entity-by-short-id), [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id) and [Remove Entity Reaction](/v8/api-reference/entities/remove-reaction) return for a removed entity, so a shared link still opens and your app can show its own "removed" state. Lists leave removed entities out instead: [Fetch Many Entities](/v8/api-reference/entities/fetch-many-entities) includes them only when the requester lists their own entities, saved collections leave them out, and a comment's included `entity` is `null`.
+
+Nothing is written into `title` or `content`; render your own wording. [Notifications](/v8/data-models/app-notification) already sent about the entity, such as a mention, keep the title, content excerpt and author they were sent with. A removed entity can't take new reactions, but a reaction already on it can still be [removed](/v8/api-reference/entities/remove-reaction). Its moderation fields follow [Moderation fields](#moderation-fields): `moderationStatus` is always kept, and the other three are filled only for the requesters listed there.
 
 ## Moderation fields
 

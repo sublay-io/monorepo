@@ -28,6 +28,9 @@ export interface Entity {
   sourceId: string | null;
   spaceId: string | null; // Optional space association - entities can be organized into spaces
   space?: Space | null; // Optional space object populated when include contains "space"
+  // `userId`, `user`, `title`, `content`, `location`, `metadata` are `null`,
+  // and `mentions`, `attachments`, `files`, `keywords` are `[]`, on
+  // a moderator-removed entity, for everyone but its author (the placeholder).
   userId: string | null;
   user?: User | null;
   title: string | null;
@@ -49,7 +52,7 @@ export interface Entity {
     type: "Point";
     coordinates: [number, number]; // [longitude, latitude]
   } | null; // Optional location stored as GeoJSON. For example, if the entity is used to represent hotel listings
-  metadata: Record<string, any>; // JSON object that could contain any other data about the entity which is relevant to the project. Limited to 10KB size.
+  metadata: Record<string, any> | null; // JSON object that could contain any other data about the entity which is relevant to the project. Limited to 10KB size. `null` on the placeholder.
   nsfw: boolean; // The entity's own NSFW flag
   nsfwEffective: boolean; // Computed live: entity.nsfw OR the entity's space's effective NSFW
   // Populated when include contains "topComments": the entity's best top-level

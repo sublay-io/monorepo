@@ -7,7 +7,7 @@ description: "Get the current user's conversations, ordered by most recent activ
 Returns a cursor-paginated list of `ConversationPreview` objects for the acting user. Only active memberships are included. A space chat is included only while the acting user is an active member of its space and can see it ([visibility](/v8/data-models/space#visibility)); a pending, rejected or banned member, or someone who left the space, doesn't get it even while they still hold a conversation membership. Results are ordered by `lastMessageAt` descending (conversations with no messages appear last), then by `createdAt` descending, then by `id`, so every conversation has one place in the order and no page skips or repeats one.
 
 <Note>
-  A `direct` conversation stays out of both parties' lists until it has a visible last message, so an opened-but-never-sent DM is invisible to the other side. If a DM's only message is later deleted or moderated away, it drops back out of the list and reappears when either party sends again. `group` and `space` conversations appear from creation.
+  A `direct` conversation stays out of both parties' lists until it has a first message, so an opened-but-never-sent DM is invisible to the other side. A DM whose messages were later [deleted or removed](/v8/data-models/chat-message#deleted-and-removed-messages) stays listed, its last message the placeholder. `group` and `space` conversations appear from creation.
 </Note>
 
 To fetch a single conversation in this same shape — one that was paginated out, or just created — use [Fetch Conversation Preview](/v8/api-reference/chat/conversations/fetch-conversation-preview). Both endpoints are served by the same query, so the shapes stay identical.
@@ -53,7 +53,7 @@ To fetch a single conversation in this same shape — one that was paginated out
     </ResponseField>
 
     <ResponseField name="lastMessage" type="ChatMessage | null">
-      The most recent visible top-level [message](/v8/data-models/chat-message) in the conversation (thread replies are never the last message), or `null` if there is none. A preview with only the fields below, not the full message the `message:created` socket event delivers: `content` is cut to 100 characters, `user` is set only in group and space conversations, and fields such as `mentions`, `quotedMessage`, `reactionCounts` and `parentMessageId` are not included. Its timestamps are UTC ISO strings ending in `Z`.
+      The most recent top-level [message](/v8/data-models/chat-message) in the conversation (thread replies are never the last message), or `null` if there is none. A [deleted or removed](/v8/data-models/chat-message#deleted-and-removed-messages) last message is shown as its placeholder, by the same rules as everywhere else: `content`, `gif` and `files` are empty, and a removed one's `userId` and `user` are `null` unless it's the viewer's own. A preview with only the fields below, not the full message the `message:created` socket event delivers: `content` is cut to 100 characters, `user` is set only in group and space conversations, and fields such as `mentions`, `quotedMessage`, `reactionCounts` and `parentMessageId` are not included. Its timestamps are UTC ISO strings ending in `Z`.
 
       <Expandable title="lastMessage fields">
         <ResponseField name="id" type="string">
@@ -68,11 +68,14 @@ To fetch a single conversation in this same shape — one that was paginated out
         <ResponseField name="gif" type="object | null">
           Attached GIF, if the message carries one.
         </ResponseField>
-        <ResponseField name="userId" type="string">
-          UUID of the sender.
+        <ResponseField name="userId" type="string | null">
+          UUID of the sender. `null` when the sender's account was deleted, and on a removed message for everyone but its author.
         </ResponseField>
         <ResponseField name="userDeletedAt" type="string | null">
-          Set when the sender's account has been deleted.
+          Set when the message was deleted (by its author, or when their account was deleted).
+        </ResponseField>
+        <ResponseField name="moderationStatus" type="string | null">
+          `"removed"` when a moderator removed the message.
         </ResponseField>
         <ResponseField name="createdAt" type="string">
           ISO timestamp of when the message was sent.

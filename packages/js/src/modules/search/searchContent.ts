@@ -2,6 +2,7 @@ import { SublayHttpClient } from "../../core/client";
 import { Entity } from "../../interfaces/Entity";
 import { Comment } from "../../interfaces/Comment";
 import { ChatMessage } from "../../interfaces/ChatMessage";
+import { User } from "../../interfaces/User";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 
@@ -19,11 +20,23 @@ export interface SearchContentProps extends SpaceReputationContextParams {
   limit?: number;
 }
 
-export interface ContentSearchResult {
-  sourceType: "entity" | "comment" | "message";
-  similarity: number;
-  record: Entity | Comment | ChatMessage;
-}
+/**
+ * A chat message as content search returns it: the stored message and its
+ * sender, without the reactions, files, grants and quoted message the chat
+ * reads attach.
+ */
+export type ContentSearchChatMessage = Omit<
+  ChatMessage,
+  "user" | "quotedMessage" | "reactionCounts" | "userReactions" | "files" | "grants"
+> & {
+  user: User | null; // null when the sender's account has been deleted
+};
+
+/** One search hit, most similar first. `record`'s type follows `sourceType`. */
+export type ContentSearchResult =
+  | { sourceType: "entity"; similarity: number; record: Entity }
+  | { sourceType: "comment"; similarity: number; record: Comment }
+  | { sourceType: "message"; similarity: number; record: ContentSearchChatMessage };
 
 export async function searchContent(
   client: SublayHttpClient,

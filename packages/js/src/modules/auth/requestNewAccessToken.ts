@@ -1,14 +1,21 @@
 import { SublayHttpClient } from "../../core/client";
+import { AuthUser } from "../../interfaces/User";
 
 export interface RequestNewAccessTokenProps {
   /** Defaults to the SDK's stored refresh token (SDK-managed mode). */
   refreshToken?: string;
 }
 
+/**
+ * A new session: a fresh access token, the rotated refresh token (the SDK
+ * stores it in place of the one sent) and the signed-in user.
+ */
 export interface RequestNewAccessTokenResponse {
+  success: true;
   accessToken: string;
   /** The server rotates the refresh token on every refresh and returns the new one. */
-  refreshToken?: string;
+  refreshToken: string;
+  user: AuthUser;
 }
 
 /**

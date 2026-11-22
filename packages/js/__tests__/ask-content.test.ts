@@ -211,6 +211,31 @@ describe("js-sdk askContent — SSE stream parsing", () => {
     expect(events).toEqual([{ type: "done" }]);
   });
 
+  it("yields an in-stream error frame with its error and code", async () => {
+    const client = new SublayHttpClient({ projectId: "proj1" });
+    const reader = makeReader([
+      encodeSseBlock("token", { content: "Partial" }),
+      encodeSseBlock("error", {
+        error: "Internal server error",
+        code: "search/server-error",
+      }),
+    ]);
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(makeStreamResponse(reader)) as unknown as typeof fetch;
+
+    const events = await drain(askContent(client, { query: "hi" }));
+
+    expect(events).toEqual([
+      { type: "token", content: "Partial" },
+      {
+        type: "error",
+        error: "Internal server error",
+        code: "search/server-error",
+      },
+    ]);
+  });
+
   it("releases the reader lock once the stream is fully drained", async () => {
     const client = new SublayHttpClient({ projectId: "proj1" });
     const reader = makeReader([encodeSseBlock("done", {})]);
@@ -237,7 +262,34 @@ describe("js-sdk askContent — error responses", () => {
 
     const events = await drain(askContent(client, { query: "hi" }));
 
-    expect(events).toEqual([{ type: "error", error: "Something broke" }]);
+    expect(events).toEqual([
+      { type: "error", error: "Something broke", status: 500 },
+    ]);
+  });
+
+  it("passes the server's code and status through on a coded refusal", async () => {
+    const client = new SublayHttpClient({ projectId: "proj1" });
+    const response = {
+      ok: false,
+      status: 403,
+      body: {},
+      json: jest.fn().mockResolvedValue({
+        error: "Semantic search requires a paid plan",
+        code: "project/plan-required",
+      }),
+    } as unknown as Response;
+    global.fetch = jest.fn().mockResolvedValue(response) as unknown as typeof fetch;
+
+    const events = await drain(askContent(client, { query: "hi" }));
+
+    expect(events).toEqual([
+      {
+        type: "error",
+        error: "Semantic search requires a paid plan",
+        code: "project/plan-required",
+        status: 403,
+      },
+    ]);
   });
 
   it("falls back to a status-based message when the error body isn't JSON", async () => {
@@ -252,7 +304,13 @@ describe("js-sdk askContent — error responses", () => {
 
     const events = await drain(askContent(client, { query: "hi" }));
 
-    expect(events).toEqual([{ type: "error", error: "Request failed with status 503" }]);
+    expect(events).toEqual([
+      {
+        type: "error",
+        error: "Request failed with status 503",
+        status: 503,
+      },
+    ]);
   });
 
   it("yields an error event when the response is ok but has no body", async () => {
@@ -262,7 +320,13 @@ describe("js-sdk askContent — error responses", () => {
 
     const events = await drain(askContent(client, { query: "hi" }));
 
-    expect(events).toEqual([{ type: "error", error: "Request failed with status 200" }]);
+    expect(events).toEqual([
+      {
+        type: "error",
+        error: "Request failed with status 200",
+        status: 200,
+      },
+    ]);
   });
 
   it("does NOT trigger the SDK's auth-refresh logic on a 403, unlike every axios-based call", async () => {
@@ -274,14 +338,16 @@ describe("js-sdk askContent — error responses", () => {
       ok: false,
       status: 403,
       body: {},
-      json: jest.fn().mockResolvedValue({ error: "Forbidden" }),
+      json: jest.fn().mockRejectedValue(new Error("not json")), // a bare 403 "Forbidden"
     } as unknown as Response;
     global.fetch = jest.fn().mockResolvedValue(response) as unknown as typeof fetch;
     const refreshSpy = jest.spyOn(axios, "post");
 
     const events = await drain(askContent(client, { query: "hi" }));
 
-    expect(events).toEqual([{ type: "error", error: "Forbidden" }]);
+    expect(events).toEqual([
+      { type: "error", error: "Request failed with status 403", status: 403 },
+    ]);
     expect(refreshSpy).not.toHaveBeenCalled();
     expect(global.fetch).toHaveBeenCalledTimes(1); // no retry attempt either
   });

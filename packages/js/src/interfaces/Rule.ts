@@ -1,6 +1,5 @@
 export interface Rule {
   id: string;
-  projectId: string;
   spaceId: string;
   title: string;
   description: string | null;

@@ -1,7 +1,7 @@
 import { SublayHttpClient } from "../../core/client";
 import { SpaceWithPermissions, ReadingPermission, PostingPermission, SpaceVisibility } from "../../interfaces/Space";
 import { ImageOptions } from "../../interfaces/ImageProcessing";
-import { appendField, appendFields, appendFile } from "../../core/multipart";
+import { appendField, appendFields, appendFile, withoutNulls } from "../../core/multipart";
 
 /** A file plus the image-processing options the server requires alongside it. */
 export interface SpaceImageUpload {
@@ -11,14 +11,15 @@ export interface SpaceImageUpload {
 }
 
 export interface CreateSpaceProps {
-  name: string;
-  slug?: string;
-  description?: string;
+  // `null` is the same as leaving the field out.
+  name?: string | null;
+  slug?: string | null;
+  description?: string | null;
   readingPermission?: ReadingPermission;
   postingPermission?: PostingPermission;
   visibility?: SpaceVisibility;
   requireJoinApproval?: boolean;
-  parentSpaceId?: string;
+  parentSpaceId?: string | null; // `null` for a top-level space
   metadata?: Record<string, any>;
   nsfw?: boolean;
   /**
@@ -52,7 +53,7 @@ export async function createSpace(
       appendField(formData, "bannerFile.options", bannerFile.options);
     }
 
-    appendFields(formData, body);
+    appendFields(formData, withoutNulls(body));
 
     const response = await client.projectInstance.post<SpaceWithPermissions>(
       "/spaces",

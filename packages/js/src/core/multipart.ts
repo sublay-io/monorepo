@@ -2,19 +2,27 @@
  * Helpers for building `multipart/form-data` request bodies. Shared by every
  * upload site (storage, chat messages, user avatar/banner) so they encode
  * fields identically: object/array values are JSON-stringified (the server
- * re-parses them), scalars are coerced to strings, and `undefined` is skipped.
+ * re-parses them), a `Date` goes as its ISO string, scalars are coerced to
+ * strings, and `undefined` is skipped.
  *
  * Do NOT set the request's `Content-Type` manually for these bodies — axios sets
  * it to `undefined` for a `FormData` instance so the browser writes the
  * multipart boundary itself.
  */
 
-/** Append a single field: skip `undefined`, JSON-stringify objects/arrays. */
+/**
+ * Append a single field: skip `undefined`, send a `Date` as its ISO string,
+ * JSON-stringify objects/arrays.
+ */
 export function appendField(form: FormData, key: string, value: unknown): void {
   if (value === undefined) return;
   form.append(
     key,
-    typeof value === "object" ? JSON.stringify(value) : String(value)
+    value instanceof Date
+      ? value.toISOString()
+      : typeof value === "object"
+        ? JSON.stringify(value)
+        : String(value)
   );
 }
 
@@ -44,4 +52,32 @@ export function appendFile(
     opts?.fallback ??
     "upload";
   form.append(field, file, name);
+}
+
+/**
+ * On a create, a `null` field means the same as leaving it out, so a
+ * multipart body (which can't carry `null`) simply leaves it out.
+ */
+export function withoutNulls<T extends Record<string, unknown>>(fields: T): T {
+  return Object.fromEntries(
+    Object.entries(fields).filter(([, value]) => value !== null)
+  ) as T;
+}
+
+/**
+ * A multipart field can't carry `null` (it would arrive as the text "null"),
+ * so a field cleared with `null` can't travel with a file. Throws before
+ * anything is sent; send the clear in a separate call without a file.
+ */
+export function refuseNullWithFile(
+  fn: string,
+  fields: Record<string, unknown>
+): void {
+  for (const [key, value] of Object.entries(fields)) {
+    if (value === null) {
+      throw new Error(
+        `[Sublay] ${fn}: \`${key}: null\` can't be sent with a file. Clear it in a separate call without a file.`
+      );
+    }
+  }
 }

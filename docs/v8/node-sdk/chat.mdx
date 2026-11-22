@@ -405,7 +405,7 @@ await sublay.chat.sendMessage({
 <ParamField body="metadata" type="object">Custom key-value data.</ParamField>
 <ParamField body="localId" type="string">Client-generated id echoed back on the created message (not stored).</ParamField>
 <ParamField body="files" type="ChatMessageFile[]">
-  Attachments: `{ file: Uint8Array | Blob; filename?: string; mimeType?: string }[]`, up to 10.
+  Attachments: `{ file: Uint8Array | Blob; filename?: string; mimeType?: string }[]`, up to 20, 50 MB each.
 </ParamField>
 <SpaceReputationParams variant="context" field="body" />
 

@@ -18,6 +18,22 @@ describe("js-sdk reports — request shaping", () => {
     });
   });
 
+  it("createReport sends details: null as-is", async () => {
+    const { client, projectInstance } = makeClient();
+    await createReport(client, {
+      targetType: "comment",
+      targetId: "c1",
+      reason: "spam",
+      details: null,
+    });
+    expect(projectInstance.post).toHaveBeenCalledWith("/reports", {
+      targetType: "comment",
+      targetId: "c1",
+      reason: "spam",
+      details: null,
+    });
+  });
+
   it("createReport posts a message report to /reports with no conversationId", async () => {
     const { client, projectInstance } = makeClient();
     await createReport(client, {

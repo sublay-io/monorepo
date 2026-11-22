@@ -4,7 +4,7 @@ import { Rule } from "../../interfaces/Rule";
 export interface CreateRuleProps {
   spaceId: string;
   title: string;
-  description?: string;
+  description?: string | null;
 }
 
 export async function createRule(

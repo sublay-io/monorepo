@@ -186,7 +186,7 @@ export class SublayHttpClient {
     if (!this.refreshPromise) {
       const refreshToken = this.refreshToken;
       this.refreshPromise = axios
-        .post<{ accessToken: string; refreshToken?: string }>(
+        .post<{ success: true; accessToken: string; refreshToken: string }>(
           `${this.baseURL}/auth/request-new-access-token`,
           { refreshToken }
         )

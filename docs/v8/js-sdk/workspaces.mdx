@@ -193,6 +193,8 @@ const counts = await sublay.workspaces.fetchWorkspaceMembers({ workspaceId: "ws_
 <ParamField body="include" type="WorkspaceMemberIncludeParam">A single value or an array of `"ancestorOwners"`, `"reachHolders"`, `"descendants"`.</ParamField>
 <ParamField body="countOnly" type="boolean" />
 
+On each roster entry's `user` field **only `id` is guaranteed** (`WorkspaceStandingUser`): the full user record when the user row still exists, `{ id }` alone when it does not. Read the rest defensively (`entry.user.username ?? "Deleted user"`).
+
 ### fetchMyWorkspaceMembership
 
 The logged-in user's own resolved standing on a workspace (`GET /workspaces/:workspaceId/members/me`): the same `WorkspaceMemberStanding` record [fetchWorkspaceMemberStanding](#fetchworkspacememberstanding) returns for another user. Your own access is never fenced, so `capabilities`, `permissions`, `rank` and `relativeRank` are always present; `relativeRank` is `0` when you hold a member row on this workspace and `null` when you don't (an owner or ancestor owner without one). A user with no relation to the workspace gets `404 workspace/not-found`, as for a missing workspace. See [Fetch My Membership](/v8/api-reference/workspaces/members/fetch-my-membership).

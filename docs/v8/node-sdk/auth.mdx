@@ -72,7 +72,7 @@ if ("accessToken" in result) {
   Key-value data no API response returns to any user. Users can also write their own, so don't treat it as trusted.
 </ParamField>
 
-<ParamField body="emailVerification" type='{ mode?: "link" | "code"; redirectUrl?: string }'>
+<ParamField body="emailVerification" type='{ mode?: "link" | "code"; redirectUrl?: string | null }'>
   How the confirmation email is sent when the project requires email verification before sign-in. `mode` defaults to `"link"`; `"code"` emails a 6-digit code and returns a `verificationId`. `redirectUrl` (link mode) must be on the project's Verified Domains. Ignored when the setting is off. See [Sign Up](/v8/api-reference/auth/sign-up#with-email-verification-required).
 </ParamField>
 
@@ -107,7 +107,7 @@ const { user, accessToken, refreshToken } = await sublay.auth.signIn({
   The user's password.
 </ParamField>
 
-<ParamField body="emailVerification" type='{ mode?: "link" | "code"; redirectUrl?: string }'>
+<ParamField body="emailVerification" type='{ mode?: "link" | "code"; redirectUrl?: string | null }'>
   How the new confirmation email is sent when sign-in is refused because the account's email isn't confirmed. Ignored when the project doesn't require email verification before sign-in.
 </ParamField>
 
@@ -274,31 +274,31 @@ await sublay.auth.sendVerificationEmail({
 });
 ```
 
-`mode` is always required, and it determines what else is required — enforced by TypeScript as a discriminated union, not just documented:
+`mode` defaults to `"code"`. In code mode `tokenFormat` is required and decides what else applies — `tokenLength` only with a short format, never with `"hex"` — enforced by TypeScript as a discriminated union, not just documented:
 
 <ParamField body="actingUserId" type="string" required>
   The user the service key acts as, who receives the verification email.
 </ParamField>
 
-<ParamField body="mode" type='"code" | "link"' required>
-  `"code"` emails a short token the user enters; `"link"` emails a verification URL.
+<ParamField body="mode" type='"code" | "link"'>
+  `"code"` (the default) emails a short token the user enters; `"link"` emails a verification URL.
 </ParamField>
 
 <ParamField body="tokenFormat" type='"hex" | "numeric" | "alpha" | "alphanumeric"'>
   Format of the generated token.
-  - Required when `mode: "code"` — there's no default, since `"hex"` produces a 64-character token no one would want to type.
+  - Required in code mode — the server's default is `"hex"`, which produces a 64-character token no one would want to type, so the SDK makes you choose.
   - Optional when `mode: "link"` (defaults to `"hex"`) — the token sits in a URL, never read by a human, so format doesn't matter.
 </ParamField>
 
 <ParamField body="tokenLength" type="number">
   Length of the generated token (4–12).
-  - Required when `mode: "code"` and `tokenFormat` isn't `"hex"`.
+  - Optional in code mode with a `"numeric"`, `"alpha"` or `"alphanumeric"` token (defaults to `6`).
   - Not allowed when `tokenFormat` is `"hex"` — hex ignores length and always produces a fixed 64-character token.
   - Optional when `mode: "link"` (defaults to `6`).
 </ParamField>
 
-<ParamField body="redirectUrl" type="string">
-  For `mode: "link"` — where to send the user after the link is verified.
+<ParamField body="redirectUrl" type="string | null">
+  For `mode: "link"` only (TypeScript refuses it in code mode) — where to send the user after the link is verified; `null` for none.
 
   Must be an `https` address on one of your project's **Verified Domains** (Dashboard → Settings → Domains). Each entry covers exactly the host it names, never its subdomains: `example.com` allows `https://example.com/…` on any port, but not `www.example.com`, which needs its own entry. A full address such as `https://app.example.com` covers only that host and port. `localhost` and `*.localhost` are always allowed, over `http` too. Anything else, including a custom-scheme deep link such as `myapp://verified`, is refused with `400 auth/redirect-url-not-allowed` and no email is sent.
 </ParamField>

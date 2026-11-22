@@ -61,8 +61,7 @@ for (const { sourceType, similarity, record } of results) {
 
 <SpaceReputationParams variant="context" field="body" />
 
-**Returns** — `Promise<ContentSearchResult[]>`, where each element is
-`{ sourceType: "entity" | "comment" | "message"; similarity: number; record: Entity | Comment | ChatMessage }`.
+**Returns** — `Promise<ContentSearchResult[]>`, most similar first. Each result is `{ sourceType, similarity, record }`, where `record`'s type follows `sourceType`: an [`Entity`](/v8/data-models/entity) for `"entity"`, a [`Comment`](/v8/data-models/comment) for `"comment"`, and for `"message"` a `ContentSearchChatMessage` — the stored [chat message](/v8/data-models/chat-message) with its sender as `user` (a [`User`](/v8/data-models/user), or `null`), without reactions, files, grants or the quoted message.
 
 ---
 
@@ -193,8 +192,10 @@ type AskContentEvent =
   | { type: "token"; content: string }              // a chunk of answer text
   | { type: "sources"; sources: ContentSearchResult[] } // the cited sources
   | { type: "done" }                                 // stream finished
-  | { type: "error"; error: string };                // a stream/server error
+  | { type: "error"; error: string; code?: string; status?: number }; // the request failed
 ```
+
+An `error` event's `code` is the server's error code when it sent one: `"search/server-error"` when the server fails mid-stream, or the code of a refused request such as `"project/plan-required"`. `status` is the HTTP status when the request failed before the stream opened. A missing or expired access token is refused with a bare `401` or `403` and no `code`, and `askContent` doesn't refresh the token itself: refresh it and ask again.
 
 Completion and errors are signalled **in-band** as `done` / `error` events — the
 generator itself returns `void` and does not throw on a server-reported error.
@@ -218,12 +219,12 @@ const { results } = await sublay.search.matchUsers({
 // results: [{ user, score, matchedFacets: [{ similarity, candidateFacet, askerFacet?, sampleContent? }] }]
 ```
 
-<ParamField body="mode" type="string" required>
+<ParamField body="mode" type='"passive" | "directed"' required>
   `"passive"` or `"directed"`.
 </ParamField>
 
 <ParamField body="query" type="string">
-  The topic to match against. Required in `directed` mode; rejected in `passive` mode.
+  The topic to match against. Required in `directed` mode; not allowed in `passive` mode. TypeScript enforces both.
 </ParamField>
 
 <ParamField body="limit" type="number" default="20">

@@ -1,5 +1,5 @@
 import { User } from "./User";
-import { Space } from "./Space";
+import { SpaceWithViewer } from "./Entity";
 import { File } from "./File";
 
 export type EventType = "online" | "physical" | "hybrid";
@@ -16,7 +16,6 @@ export interface RsvpCounts {
 export interface Event {
   id: string;
   shortId: string;
-  projectId: string;
   userId: string | null; // the event's owner (its creator); null after the owner's account is deleted
   user?: User | null; // Populated when include contains "user"
   title: string;
@@ -33,7 +32,7 @@ export interface Event {
     coordinates: [number, number]; // [longitude, latitude]
   } | null;
   spaceId: string | null; // soft reference — no enforced cross-bundle FK
-  space?: Space | null; // Populated when include contains "space"
+  space?: SpaceWithViewer | null; // Populated when include contains "space"
   visibility: EventVisibility;
   status: EventStatus;
   allowMaybe: boolean;
@@ -43,7 +42,7 @@ export interface Event {
   coverImageId: string | null;
   files?: File[]; // Populated when include contains "files"
   rsvpCounts: RsvpCounts;
-  userRsvp?: RsvpStatus | null; // Present with include "userRsvp" + auth
+  userRsvp: RsvpStatus | null; // The viewer's RSVP; null unless include contains "userRsvp" and there is a viewer
   metadata: Record<string, any>;
   createdAt: string;
   updatedAt: string;

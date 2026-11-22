@@ -1,4 +1,4 @@
-import { User } from "./User";
+import { UserSummary } from "./User";
 
 // 8 reaction types with specific reputation impacts
 export type ReactionType =
@@ -26,12 +26,11 @@ export interface ReactionCounts {
 // Individual Reaction record from the Reactions table
 export interface Reaction {
   id: string;
-  projectId: string;
   targetType: "entity" | "comment";
   targetId: string;
   userId: string;
   reactionType: ReactionType;
   createdAt: string;
   updatedAt: string;
-  user?: User;
+  user: UserSummary;
 }

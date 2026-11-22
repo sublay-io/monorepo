@@ -206,12 +206,12 @@ const { results } = await sublay.search.matchUsers({
   The user to find matches for (the asker). Their interests drive `passive` mode, users block-edged with them are left out, and the result is exactly what their own access token would get.
 </ParamField>
 
-<ParamField body="mode" type="string" required>
+<ParamField body="mode" type='"passive" | "directed"' required>
   `"passive"` or `"directed"`.
 </ParamField>
 
 <ParamField body="query" type="string">
-  The topic to match against. Required in `directed` mode; rejected in `passive` mode.
+  The topic to match against. Required in `directed` mode; not allowed in `passive` mode. TypeScript enforces both.
 </ParamField>
 
 <ParamField body="limit" type="number" default="20">

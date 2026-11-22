@@ -1,20 +1,31 @@
 import { SublayHttpClient } from "../../core/client";
 import { User } from "../../interfaces/User";
 
-export interface MatchUsersProps {
+export interface MatchUsersCommonProps {
   /**
    * The user to find matches for. Their interests drive passive mode, and
    * users block-edged with them are left out.
    */
   actingUserId: string;
-  mode: "passive" | "directed";
-  query?: string;
+  /** 1–50. Defaults to 20. */
   limit?: number;
   spaceId?: string;
+  /** With a `spaceId`, also match users active anywhere in its subtree. */
   includeChildSpaces?: boolean;
   includeSampleContent?: boolean;
+  /** Defaults to true. */
   excludeSelf?: boolean;
 }
+
+/**
+ * `passive` matches on the asker's own interests and takes no `query`;
+ * `directed` matches on a free-text `query`, which it requires.
+ */
+export type MatchUsersProps = MatchUsersCommonProps &
+  (
+    | { mode: "passive"; query?: never }
+    | { mode: "directed"; query: string }
+  );
 
 export interface MatchFacetRef {
   id: string;

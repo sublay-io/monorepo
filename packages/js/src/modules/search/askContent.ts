@@ -24,13 +24,17 @@ export interface AskContentProps extends SpaceReputationContextParams {
  * - `token`   — an incremental chunk of the answer text.
  * - `sources` — the hydrated source records, emitted once after the answer.
  * - `done`    — the stream finished successfully.
- * - `error`   — the server reported an error (the stream ends after this).
+ * - `error`   — the request failed (the stream ends after this). `code` is
+ *               the server's error code when it sent one; `status` is the
+ *               HTTP status when the request failed before the stream opened
+ *               (a missing or expired token gives a bare `401`/`403` with no
+ *               code: refresh it and ask again).
  */
 export type AskContentEvent =
   | { type: "token"; content: string }
   | { type: "sources"; sources: ContentSearchResult[] }
   | { type: "done" }
-  | { type: "error"; error: string };
+  | { type: "error"; error: string; code?: string; status?: number };
 
 function parseSseBlock(block: string): AskContentEvent | null {
   let event = "message";
@@ -61,7 +65,11 @@ function parseSseBlock(block: string): AskContentEvent | null {
     case "done":
       return { type: "done" };
     case "error":
-      return { type: "error", error: payload?.error ?? "Unknown error" };
+      return {
+        type: "error",
+        error: payload?.error ?? "Unknown error",
+        ...(payload?.code ? { code: payload.code } : {}),
+      };
     default:
       return null;
   }
@@ -120,13 +128,21 @@ export async function* askContent(
 
   if (!response.ok || !response.body) {
     let message = `Request failed with status ${response.status}`;
+    let code: string | undefined;
     try {
       const json = await response.json();
       message = json?.error ?? message;
+      code = json?.code;
     } catch {
-      // non-JSON error body; keep the status-based message
+      // non-JSON error body (a bare 401/403, a proxy error); keep the
+      // status-based message
     }
-    yield { type: "error", error: message };
+    yield {
+      type: "error",
+      error: message,
+      ...(code ? { code } : {}),
+      status: response.status,
+    };
     return;
   }
 

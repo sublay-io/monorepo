@@ -53,7 +53,12 @@ if (pagination.hasMore) {
 
 **Returns** — `Promise<CursorPaginatedResponse<ConversationPreview>>`: `{ data: ConversationPreview[]; pagination: { nextCursor: string | null; hasMore: boolean } }`. `nextCursor` is `null` when `hasMore` is `false`.
 
-Each `ConversationPreview` includes `otherMembers` — up to 5 active members other than the current user (`id`, `name`, `username`, `avatar`) for `direct`/`group` conversations, so a DM/group can render the counterparty without a separate members fetch. Capped at 5 (use `memberCount` for the group total); empty for `space` conversations.
+A `ConversationPreview` is the conversation's own fields plus:
+
+- `unreadCount` and `memberCount` (active members).
+- `mutedUntil` and `mutedForever`: the user's mute on the conversation (see [muteConversation](#muteconversation)).
+- `otherMembers` — up to 5 active members other than the current user (`id`, `name`, `username`, `avatar`) for `direct`/`group` conversations, so a DM/group can render the counterparty without a separate members fetch. Capped at 5 (use `memberCount` for the group total); empty for `space` conversations.
+- `lastMessage` (`ConversationPreviewLastMessage | null`): a preview of the newest top-level message — `id`, `conversationId`, `content` (cut to 100 characters), `gif`, `userId`, `moderationStatus`, `userDeletedAt`, `createdAt`, `files`, and `user` (`{ id, name, username, avatar, reputation }`, on `group` and `space` rows only; `null` on `direct` rows). It has no mentions, quotes or reactions. A deleted or removed last message is its [placeholder](/v8/data-models/chat-message#deleted-and-removed-messages).
 
 ---
 
@@ -466,13 +471,13 @@ const message = await sublay.chat.sendMessage({
 </ParamField>
 
 <ParamField body="files" type="(Blob | File)[]">
-  Up to 10 file attachments, as browser `File` / `Blob` objects. Triggers a
-  `multipart/form-data` upload.
+  Up to 20 file attachments, at most 50 MB each, as browser `File` / `Blob`
+  objects. Triggers a `multipart/form-data` upload.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />
 
-**Returns** — `Promise<ChatMessage>`
+**Returns** — `Promise<SendMessageResponse>`: the created message as a `SentChatMessage` (a [ChatMessage](/v8/data-models/chat-message) without `reactionCounts`, `userReactions` and `grants`), with `localId` when you passed one.
 
 ---
 
@@ -541,7 +546,7 @@ const message = await sublay.chat.editMessage({
   Updated metadata, or `null` to clear it.
 </ParamField>
 
-**Returns** — `Promise<ChatMessage>`
+**Returns** — `Promise<SentChatMessage>`: the edited message, without `reactionCounts`, `userReactions` and `grants`.
 
 ---
 
@@ -652,8 +657,8 @@ const { data, pagination } = await sublay.chat.listReactions({
 
 <SpaceReputationParams variant="context" field="body" />
 
-**Returns** — `Promise<{ data: MessageReaction[]; pagination: { page: number; limit: number; total: number; hasMore: boolean } }>`,
-where `MessageReaction` is `{ user: User; emoji: string; createdAt: Date }`.
+**Returns** — `Promise<{ data: MessageReaction[]; pagination: { page: number; pageSize: number; totalPages: number; totalItems: number; hasMore: boolean } }>`,
+where `MessageReaction` is `{ emoji: string; user: UserSummary; createdAt: string }` and the user is `{ id, name, username, avatar, reputation }` (plus `spaceReputation` when requested).
 
 ---
 

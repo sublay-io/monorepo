@@ -23,6 +23,25 @@ describe("node-sdk comments — request shaping", () => {
     });
   });
 
+  it("createComment sends content: null as-is (a gif-only comment)", async () => {
+    const { client, projectInstance } = makeClient();
+    const gif = {
+      id: "g1",
+      url: "u",
+      gifUrl: "g",
+      gifPreviewUrl: "p",
+      altText: "a",
+      aspectRatio: "1.5",
+    };
+    await createComment(client, { actingUserId: "u1", entityId: "e1", content: null, gif });
+    expect(projectInstance.post).toHaveBeenCalledWith("/comments", {
+      actingUserId: "u1",
+      entityId: "e1",
+      content: null,
+      gif,
+    });
+  });
+
   it("fetchComment strips commentId into the path and passes the rest as params", async () => {
     const { client, projectInstance } = makeClient();
     await fetchComment(client, { commentId: "c1", include: "user" });

@@ -1,23 +1,29 @@
 import { SublayHttpClient } from "../../core/client";
 
-// mode: "code" + tokenFormat: "hex" — hex always produces a fixed 64-character
+// Code mode + tokenFormat: "hex" — hex always produces a fixed 64-character
 // string and ignores tokenLength entirely, so pairing it with a human-typed
 // code produces something nobody can type. tokenLength is `?: never`, not just
 // omitted — passing props through a variable (rather than an inline object
 // literal) skips TypeScript's excess-property check, so plain omission alone
 // doesn't stop `tokenLength` from sneaking through.
 export interface SendCodeVerificationEmailHexProps {
-  mode: "code";
+  /** Defaults to `"code"`. */
+  mode?: "code";
   tokenFormat: "hex";
   tokenLength?: never;
+  /** Link mode only: a code email has no link to send the user back from. */
+  redirectUrl?: never;
 }
 
-// mode: "code" + a short format — tokenLength is required so the caller makes
-// a deliberate choice about how long the code a user has to type actually is.
+// Code mode + a short format — the code a user types.
 export interface SendCodeVerificationEmailShortProps {
-  mode: "code";
+  /** Defaults to `"code"`. */
+  mode?: "code";
   tokenFormat: "numeric" | "alpha" | "alphanumeric";
-  tokenLength: number;
+  /** Length of the code, 4–12. Defaults to 6. */
+  tokenLength?: number;
+  /** Link mode only: a code email has no link to send the user back from. */
+  redirectUrl?: never;
 }
 
 // mode: "link" — the token is embedded in a URL, never read by a human, so
@@ -26,16 +32,15 @@ export interface SendLinkVerificationEmailProps {
   mode: "link";
   tokenFormat?: "hex" | "numeric" | "alpha" | "alphanumeric";
   tokenLength?: number;
-  /** Where to send the user after the link is verified. */
-  redirectUrl?: string;
+  /** Where to send the user after the link is verified; `null` for none. */
+  redirectUrl?: string | null;
 }
 
 /**
- * `mode` is required so every caller explicitly decides code vs link, and the
- * `tokenFormat`/`tokenLength` pair for "code" is a discriminated union rather
- * than two independent optionals — pairing `mode: "code"` with the default
- * `tokenFormat: "hex"` used to compile fine and silently email a 64-character
- * string no one could type.
+ * `mode` defaults to `"code"`. In code mode `tokenFormat` is required and the
+ * `tokenFormat`/`tokenLength` pair is a discriminated union rather than two
+ * independent optionals, so a call can't silently fall back to the server's
+ * default `tokenFormat: "hex"` and email a 64-character code no one could type.
  */
 export type SendVerificationEmailProps =
   | SendCodeVerificationEmailHexProps

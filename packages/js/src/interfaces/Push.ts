@@ -72,7 +72,7 @@ export interface NotificationPreferences {
  * ```
  *
  * Mirrors the server's `webPushSubscriptionSchema`
- * (server `src/v7/validation/push-notifications/push-notifications.schema.ts`).
+ * (server `src/v8/validation/push-notifications/push-notifications.schema.ts`).
  */
 export interface WebPushSubscription {
   endpoint: string;
@@ -84,7 +84,7 @@ export interface WebPushSubscription {
 
 /**
  * Identifies one physical device. Mirrors the server's device-identifier body
- * exactly (server `src/v7/validation/push-notifications/push-notifications.schema.ts`):
+ * exactly (server `src/v8/validation/push-notifications/push-notifications.schema.ts`):
  * a provider token for `ios`/`android`, a Web Push subscription for `web`. The
  * union encodes the server's own cross-check — it rejects the same
  * combinations the server's `superRefine` rejects.

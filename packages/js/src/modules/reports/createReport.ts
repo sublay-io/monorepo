@@ -9,7 +9,7 @@ export interface CreateReportProps {
   targetType: ReportTargetType;
   targetId: string;
   reason: ReportReason;
-  details?: string;
+  details?: string | null;
 }
 
 export async function createReport(

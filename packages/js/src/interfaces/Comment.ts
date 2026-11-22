@@ -1,6 +1,5 @@
 import { GrantSummary } from "./ReputationGrant";
-import { Entity } from "./Entity";
-import { Space } from "./Space";
+import { EntityRecord, SpaceWithViewer } from "./Entity";
 import { Mention } from "./Mention";
 import { User } from "./User";
 import { ReactionCounts, ReactionType } from "./Reaction";
@@ -11,8 +10,7 @@ export interface GifData {
   url: string;
   gifUrl: string;
   gifPreviewUrl: string;
-  // The server's gif schema requires both as strings (aspectRatio is a string,
-  // e.g. "1.5", not a number).
+  // Server gifSchema requires both as strings (altText required, aspectRatio a string).
   altText: string;
   aspectRatio: string;
 }
@@ -23,21 +21,11 @@ export interface GifData {
  * fetch adds (`commentsCount`, `userReaction`, `nsfwEffective`, `user`,
  * `files`, `topComments`, `saved`, `grants`) are not included.
  */
-export type CommentEntity = Omit<
-  Entity,
-  | "commentsCount"
-  | "userReaction"
-  | "nsfwEffective"
-  | "user"
-  | "files"
-  | "topComments"
-  | "saved"
-  | "grants"
-  | "space"
-> & {
+export type CommentEntity = EntityRecord & {
   // Present only when include contains "space". `null` when the entity isn't
-  // in a space. Carries no avatar/banner file objects.
-  space?: Omit<Space, "avatarFile" | "bannerFile"> | null;
+  // in a space. Carries no avatar/banner file objects; with a viewer it also
+  // carries the viewer's membership (`isMember`, `userRole`, `userStatus`).
+  space?: Omit<SpaceWithViewer, "avatarFile" | "bannerFile"> | null;
 };
 
 export interface Comment {
@@ -62,7 +50,7 @@ export interface Comment {
   upvotes: string[];   // Legacy v6 — v7 uses reactionCounts
   downvotes: string[]; // Legacy v6 — v7 uses reactionCounts
   reactionCounts: ReactionCounts;
-  userReaction?: ReactionType | null; // Present when authenticated
+  userReaction: ReactionType | null; // The viewer's reaction, or null
   repliesCount: number;
   /**
    * Reputation-grant summary. Opt-in — present exactly when the read requested

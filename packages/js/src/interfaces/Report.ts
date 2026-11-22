@@ -1,6 +1,8 @@
-import { Entity } from "./Entity";
+import { EntityRecord } from "./Entity";
 import { Comment } from "./Comment";
+import { ChatMessage } from "./ChatMessage";
 import { Space } from "./Space";
+import { User } from "./User";
 
 export type ReportTargetType = "entity" | "comment" | "message";
 
@@ -31,29 +33,77 @@ export type ReportStatus =
 
 export interface UserReport {
   id: string;
-  projectId: string;
   reportId: string;
   userId: string;
-  reason: string;
+  reason: ReportReason;
   details: string | null;
   createdAt: string;
+  updatedAt: string;
 }
 
-export interface Report {
+/** A reported entity as the moderation queue returns it: the stored record and its author. */
+export type ReportEntityTarget = EntityRecord & { user: User | null };
+
+/** A reported comment as the moderation queue returns it: the stored record and its author. */
+export type ReportCommentTarget = Omit<
+  Comment,
+  | "entity"
+  | "user"
+  | "parentComment"
+  | "userReaction"
+  | "repliesCount"
+  | "grants"
+  | "isAuthorBlocked"
+  | "isUnavailable"
+  | "replies"
+  | "metadata"
+> & {
+  metadata: Record<string, any>;
+  user: User | null;
+};
+
+/** A reported chat message as the moderation queue returns it: the stored record and its sender. */
+export type ReportMessageTarget = Omit<
+  ChatMessage,
+  | "files"
+  | "reactionCounts"
+  | "userReactions"
+  | "grants"
+  | "quotedMessage"
+  | "user"
+  | "metadata"
+> & {
+  metadata: Record<string, any>;
+  user: User | null;
+};
+
+/** The space a report was filed in, as the moderation queue returns it: the stored record. */
+export type ReportSpace = Omit<
+  Space,
+  "membersCount" | "childSpacesCount" | "isMember" | "avatarFile" | "bannerFile"
+>;
+
+interface ReportBase {
   id: string;
-  projectId: string;
   spaceId: string | null;
   targetId: string;
-  targetType: ReportTargetType;
   status: ReportStatus;
   reporterCount: number;
+  actionTaken: string | null; // What the moderator (or the system, on auto-close) did
   createdAt: string;
   updatedAt: string;
-  userReports?: UserReport[];
-  // Populated when fetched via fetchModeratedReports
-  target?: Entity | Comment | null;
-  space?: Space | null;
+  userReports: UserReport[];
+  space: ReportSpace | null; // The space the report was filed in
 }
+
+/**
+ * A report in the moderation queue. `target` is the reported content, typed by
+ * `targetType`; `null` when it can no longer be found.
+ */
+export type Report =
+  | (ReportBase & { targetType: "entity"; target: ReportEntityTarget | null })
+  | (ReportBase & { targetType: "comment"; target: ReportCommentTarget | null })
+  | (ReportBase & { targetType: "message"; target: ReportMessageTarget | null });
 
 /**
  * What `POST /reports` returns: the caller's own report of the target (201 when

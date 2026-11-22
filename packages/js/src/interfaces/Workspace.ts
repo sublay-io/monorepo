@@ -210,7 +210,7 @@ export interface WorkspaceRosterReason {
 }
 
 export interface WorkspaceRosterEntry {
-  user: User;
+  user: WorkspaceStandingUser;
   reasons: WorkspaceRosterReason[];
 }
 

@@ -1,13 +1,14 @@
 import { SublayHttpClient } from "../../core/client";
 import { SpaceWithPermissions, ReadingPermission, PostingPermission, SpaceVisibility } from "../../interfaces/Space";
-import { appendField, appendFields, appendFile } from "../../core/multipart";
+import { appendField, appendFields, appendFile, refuseNullWithFile } from "../../core/multipart";
 import type { SpaceImageUpload } from "./createSpace";
 
 export interface UpdateSpaceProps {
   spaceId: string;
-  name?: string;
-  slug?: string;
-  description?: string;
+  // `null` clears it, on a call without a file.
+  name?: string | null;
+  slug?: string | null;
+  description?: string | null;
   readingPermission?: ReadingPermission;
   postingPermission?: PostingPermission;
   visibility?: SpaceVisibility;
@@ -37,6 +38,7 @@ export async function updateSpace(
   const path = `/spaces/${spaceId}`;
 
   if (avatarFile || bannerFile) {
+    refuseNullWithFile("updateSpace", body);
     const formData = new FormData();
 
     if (avatarFile) {

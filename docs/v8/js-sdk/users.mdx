@@ -132,28 +132,28 @@ const updatedUser = await sublay.users.updateUser({
   The Sublay user ID to update. A user token may only update itself.
 </ParamField>
 
-<ParamField body="name" type="string">
-  New display name.
+<ParamField body="name" type="string | null">
+  New display name. `null` (or an empty string) clears it, on a call without a file.
 </ParamField>
 
 <ParamField body="username" type="string">
   New username. Must be available: a username another user already holds throws a `409` (`user/username-taken`, with `param: "username"`).
 </ParamField>
 
-<ParamField body="avatar" type="string">
-  New avatar URL, stored as given. Separate from `avatarFile`, which uploads an image.
+<ParamField body="avatar" type="string | null">
+  New avatar URL, stored as given; `null` clears it, on a call without a file. Separate from `avatarFile`, which uploads an image.
 </ParamField>
 
-<ParamField body="bio" type="string">
-  New bio text.
+<ParamField body="bio" type="string | null">
+  New bio text. `null` (or an empty string) clears it, on a call without a file.
 </ParamField>
 
-<ParamField body="birthdate" type="string">
-  ISO 8601 date string for the user's birthdate.
+<ParamField body="birthdate" type="string | Date">
+  The user's birthdate: a `Date`, or a full UTC timestamp string such as `"1990-05-17T00:00:00.000Z"` (a date alone, like `"1990-05-17"`, is refused).
 </ParamField>
 
 <ParamField body="location" type="object">
-  Geographic location `{ latitude: number; longitude: number }`, or `null` to clear it.
+  Geographic location `{ latitude: number; longitude: number }`.
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -180,7 +180,9 @@ const updatedUser = await sublay.users.updateUser({
   When `avatarFile` or `bannerFile` is supplied the request is sent as
   `multipart/form-data` carrying the browser `File`/`Blob`. The image `options`
   (an `ImageOptions` object whose `mode` selects a processing strategy) are sent
-  alongside the file.
+  alongside the file. A multipart field can't carry `null`, so a call with a file
+  and a `null` field throws before anything is sent: clear the field in a
+  separate call without a file.
 </Note>
 
 ```typescript

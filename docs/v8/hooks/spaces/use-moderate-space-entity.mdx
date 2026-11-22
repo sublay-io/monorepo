@@ -8,6 +8,8 @@ icon: "plug"
 
 `useModerateSpaceEntity` returns a callable function for taking moderation action on an entity in a space. Requires the caller to be a moderator or admin.
 
+A draft can't be moderated: it rejects with `404 moderation/entity-not-found`, like a missing entity.
+
 ## Usage Example
 
 ```tsx

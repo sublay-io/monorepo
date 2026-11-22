@@ -84,7 +84,7 @@ Removing an entity that's already removed succeeds and changes nothing: the firs
     ```
   </Accordion>
   <Accordion title="Entity Not Found — 404">
-    No entity with this id is in this space: the id names nothing, or names an entity in another space. Both answer the same way.
+    No published entity with this id is in this space: the id names nothing, names an entity in another space, or names a draft (a draft is its author's private work, so moderators can't act on it). All answer the same way.
     ```json
     { "error": "Entity not found.", "code": "moderation/entity-not-found" }
     ```

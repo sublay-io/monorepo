@@ -37,6 +37,7 @@ export interface SignUpProps {
 }
 
 export interface SignUpResponse {
+  success: true;
   user: AuthUser;
   accessToken: string;
   refreshToken: string;

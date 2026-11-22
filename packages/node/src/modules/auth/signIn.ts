@@ -15,6 +15,7 @@ export interface SignInProps {
 }
 
 export interface SignInResponse {
+  success: true;
   user: AuthUser;
   accessToken: string;
   refreshToken: string;

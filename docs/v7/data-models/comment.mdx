@@ -33,7 +33,7 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `moderatedById` | `string \| null` | ID of the moderator. |
 | `moderatedByType` | `"client" \| "user" \| null` | Whether a client (admin) or user performed moderation. |
 | `moderationReason` | `string \| null` | Reason provided for moderation. |
-| `userDeletedAt` | `Date \| null` | Set when a user soft-deletes their own comment. Content is replaced with a placeholder but the comment record remains (Reddit-style behavior). |
+| `userDeletedAt` | `Date \| null` | Set when the author deletes their own comment, or when their account is deleted. Everything they wrote is cleared (content, GIF, mentions, attachments, metadata) but the comment record remains (Reddit-style behavior). |
 | `createdAt` | `Date` | When the comment was created. |
 | `updatedAt` | `Date` | When the comment was last updated. |
 | `deletedAt` | `Date \| null` | Hard-delete timestamp. `null` for active comments. |

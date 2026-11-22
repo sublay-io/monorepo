@@ -75,7 +75,7 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
 }
 ```
 
-Each report includes the full reported content (`target`), the space it belongs to, and all individual user reports (`userReports`). The `target`'s `user` is the author's public [User](/v7/data-models/user) — no email or other private fields.
+Each report includes the full reported content (`target`), the space it belongs to, and all individual user reports (`userReports`). The `target`'s `user` is the author's public [User](/v7/data-models/user) — no email or other private fields. `target` is `null` when the content is no longer there, including an entity soft-deleted under the project's [entity deletion](/v7/api-reference/entities/delete-entity) setting: a soft delete keeps it for you, not for your app's space moderators.
 
 ## Error Responses
 

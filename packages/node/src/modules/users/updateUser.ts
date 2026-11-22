@@ -27,8 +27,11 @@ export interface UpdateUserProps {
   avatar?: string | null;
   metadata?: Record<string, any>;
   secureMetadata?: Record<string, any>;
-  /** ISO 8601 datetime string. */
-  birthdate?: string;
+  /**
+   * A `Date`, or a full UTC timestamp string such as
+   * `"1990-05-17T00:00:00.000Z"` (a date alone, like `"1990-05-17"`, is refused).
+   */
+  birthdate?: string | Date;
   location?: {
     latitude: number;
     longitude: number;

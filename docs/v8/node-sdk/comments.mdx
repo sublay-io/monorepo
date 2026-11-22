@@ -61,12 +61,12 @@ const comment = await sublay.comments.createComment({
   Arbitrary metadata attached to the comment.
 </ParamField>
 
-<ParamField body="createdAt" type="string">
-  An ISO 8601 UTC timestamp (e.g. `date.toISOString()`) used to backdate the comment's creation time. More than five minutes in the future returns `400 comment/invalid-body` (`createdAt can't be in the future.`).
+<ParamField body="createdAt" type="string | Date">
+  Backdates the comment's creation time: a `Date`, or a full UTC timestamp string such as `"2024-03-01T12:00:00.000Z"` (`date.toISOString()`). A string in another format (a date alone, or a time with an offset) is refused with `400 comment/invalid-body` and `param` naming the field. More than five minutes in the future returns `400 comment/invalid-body` (`createdAt can't be in the future.`).
 </ParamField>
 
-<ParamField body="updatedAt" type="string">
-  An ISO 8601 UTC timestamp used to backdate the comment's last update time. More than five minutes in the future returns `400 comment/invalid-body` (`updatedAt can't be in the future.`).
+<ParamField body="updatedAt" type="string | Date">
+  Same format as `createdAt`, used to backdate the comment's last update time. More than five minutes in the future returns `400 comment/invalid-body` (`updatedAt can't be in the future.`).
 </ParamField>
 
 **Returns** — `Promise<Comment>`

@@ -191,8 +191,8 @@ const updatedUser = await sublay.users.updateUser({
   Updated secure metadata. No API response returns it to any user. Users can also write their own, so don't treat it as trusted. Replaces the stored object, like `metadata`.
 </ParamField>
 
-<ParamField body="birthdate" type="string">
-  The user's birthdate, as an ISO 8601 datetime string.
+<ParamField body="birthdate" type="string | Date">
+  The user's birthdate: a `Date`, or a full UTC timestamp string such as `"1990-05-17T00:00:00.000Z"`. A date alone (`"1990-05-17"`) or a time with an offset is refused with `400 user/invalid-body` and `param: "birthdate"`.
 </ParamField>
 
 <ParamField body="location" type="object">

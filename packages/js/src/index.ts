@@ -338,3 +338,60 @@ export type {
   ConnectionRowStatus,
   ConnectionStatus,
 } from "./interfaces/Connection";
+export type {
+  UnifiedAppNotification,
+  PotentiallyPopulatedUnifiedAppNotification,
+} from "./interfaces/AppNotification";
+export type {
+  ImageOptions,
+  ImageFit,
+  ImageFormat,
+  ExactDimensionsOptions,
+  AspectRatioWidthOptions,
+  AspectRatioHeightOptions,
+  OriginalAspectOptions,
+  MultiAspectRatioOptions,
+} from "./interfaces/ImageProcessing";
+export type { Mention, UserMention, SpaceMention } from "./interfaces/Mention";
+export type { Rule, FetchManyRulesResponse } from "./interfaces/Rule";
+export type {
+  SpaceMemberWithUser,
+  SpaceMembersResponse,
+  SpaceTeamResponse,
+} from "./interfaces/SpaceMember";
+export type {
+  ReadingPermission,
+  PostingPermission,
+  SpaceVisibility,
+  SpaceMemberRole,
+  SpaceMemberStatus,
+  SpaceMemberPermissions,
+  SpaceBreadcrumb,
+  SpaceBreadcrumbEntry,
+  VisibleSpaceBreadcrumbEntry,
+  HiddenSpaceBreadcrumbEntry,
+  MySpaceItem,
+  MySpacesResponse,
+  CheckMyMembershipResponse,
+} from "./interfaces/Space";
+export type {
+  EventType,
+  EventVisibility,
+  EventStatus,
+  RsvpStatus,
+  RsvpCounts,
+  EventRsvp,
+  EventInvite,
+} from "./interfaces/Event";
+export type { ListMessagesResponse, MessageFilters } from "./modules/chat/listMessages";
+export type { ListConversationsResponse } from "./modules/chat/listConversations";
+export type {
+  VerifyExternalUserProps,
+  VerifyExternalUserResponse,
+} from "./modules/auth/verifyExternalUser";
+export type {
+  SendVerificationEmailProps,
+  SendCodeVerificationEmailHexProps,
+  SendCodeVerificationEmailShortProps,
+  SendLinkVerificationEmailProps,
+} from "./modules/auth/sendVerificationEmail";

@@ -380,7 +380,7 @@ await sublay.auth.sendVerificationEmail({
 });
 ```
 
-The argument is required, and `mode` determines what else is required — enforced by TypeScript as a discriminated union, not just documented.
+The argument is required. `mode` defaults to `"code"`. In code mode `tokenFormat` is required and decides what else applies — `tokenLength` only with a short format, never with `"hex"` — enforced by TypeScript as a discriminated union, not just documented.
 
 <ParamField body="mode" type='"code" | "link"'>
   `"code"` (the default) emails a short token the user enters; `"link"` emails a verification URL.
@@ -400,7 +400,7 @@ The argument is required, and `mode` determines what else is required — enforc
 </ParamField>
 
 <ParamField body="redirectUrl" type="string | null">
-  For `mode: "link"` — where to send the user after the link is verified; `null` for none.
+  For `mode: "link"` only (TypeScript refuses it in code mode) — where to send the user after the link is verified; `null` for none.
 
   Must be an `https` address on one of your project's **Verified Domains** (Dashboard → Settings → Domains). Each entry covers exactly the host it names, never its subdomains: `example.com` allows `https://example.com/…` on any port, but not `www.example.com`, which needs its own entry. A full address such as `https://app.example.com` covers only that host and port. `localhost` and `*.localhost` are always allowed, over `http` too. Anything else, including a custom-scheme deep link such as `myapp://verified`, is refused with `400 auth/redirect-url-not-allowed` and no email is sent.
 </ParamField>

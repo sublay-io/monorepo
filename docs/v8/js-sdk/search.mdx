@@ -192,10 +192,10 @@ type AskContentEvent =
   | { type: "token"; content: string }              // a chunk of answer text
   | { type: "sources"; sources: ContentSearchResult[] } // the cited sources
   | { type: "done" }                                 // stream finished
-  | { type: "error"; error: string; code: string };  // a stream/server error
+  | { type: "error"; error: string; code?: string; status?: number }; // the request failed
 ```
 
-An `error` event's `code` is the server's error code (for example `"search/server-error"`), whether the request failed before the stream opened or the server failed mid-stream.
+An `error` event's `code` is the server's error code when it sent one: `"search/server-error"` when the server fails mid-stream, or the code of a refused request such as `"project/plan-required"`. `status` is the HTTP status when the request failed before the stream opened. A missing or expired access token is refused with a bare `401` or `403` and no `code`, and `askContent` doesn't refresh the token itself: refresh it and ask again.
 
 Completion and errors are signalled **in-band** as `done` / `error` events — the
 generator itself returns `void` and does not throw on a server-reported error.

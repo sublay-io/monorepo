@@ -263,7 +263,32 @@ describe("js-sdk askContent — error responses", () => {
     const events = await drain(askContent(client, { query: "hi" }));
 
     expect(events).toEqual([
-      { type: "error", error: "Something broke", code: "search/server-error" },
+      { type: "error", error: "Something broke", status: 500 },
+    ]);
+  });
+
+  it("passes the server's code and status through on a coded refusal", async () => {
+    const client = new SublayHttpClient({ projectId: "proj1" });
+    const response = {
+      ok: false,
+      status: 403,
+      body: {},
+      json: jest.fn().mockResolvedValue({
+        error: "Semantic search requires a paid plan",
+        code: "project/plan-required",
+      }),
+    } as unknown as Response;
+    global.fetch = jest.fn().mockResolvedValue(response) as unknown as typeof fetch;
+
+    const events = await drain(askContent(client, { query: "hi" }));
+
+    expect(events).toEqual([
+      {
+        type: "error",
+        error: "Semantic search requires a paid plan",
+        code: "project/plan-required",
+        status: 403,
+      },
     ]);
   });
 
@@ -283,7 +308,7 @@ describe("js-sdk askContent — error responses", () => {
       {
         type: "error",
         error: "Request failed with status 503",
-        code: "search/server-error",
+        status: 503,
       },
     ]);
   });
@@ -299,7 +324,7 @@ describe("js-sdk askContent — error responses", () => {
       {
         type: "error",
         error: "Request failed with status 200",
-        code: "search/server-error",
+        status: 200,
       },
     ]);
   });
@@ -313,7 +338,7 @@ describe("js-sdk askContent — error responses", () => {
       ok: false,
       status: 403,
       body: {},
-      json: jest.fn().mockResolvedValue({ error: "Forbidden", code: "user/suspended" }),
+      json: jest.fn().mockRejectedValue(new Error("not json")), // a bare 403 "Forbidden"
     } as unknown as Response;
     global.fetch = jest.fn().mockResolvedValue(response) as unknown as typeof fetch;
     const refreshSpy = jest.spyOn(axios, "post");
@@ -321,7 +346,7 @@ describe("js-sdk askContent — error responses", () => {
     const events = await drain(askContent(client, { query: "hi" }));
 
     expect(events).toEqual([
-      { type: "error", error: "Forbidden", code: "user/suspended" },
+      { type: "error", error: "Request failed with status 403", status: 403 },
     ]);
     expect(refreshSpy).not.toHaveBeenCalled();
     expect(global.fetch).toHaveBeenCalledTimes(1); // no retry attempt either

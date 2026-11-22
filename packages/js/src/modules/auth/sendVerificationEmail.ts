@@ -11,6 +11,8 @@ export interface SendCodeVerificationEmailHexProps {
   mode?: "code";
   tokenFormat: "hex";
   tokenLength?: never;
+  /** Link mode only: a code email has no link to send the user back from. */
+  redirectUrl?: never;
 }
 
 // Code mode + a short format — the code a user types.
@@ -20,6 +22,8 @@ export interface SendCodeVerificationEmailShortProps {
   tokenFormat: "numeric" | "alpha" | "alphanumeric";
   /** Length of the code, 4–12. Defaults to 6. */
   tokenLength?: number;
+  /** Link mode only: a code email has no link to send the user back from. */
+  redirectUrl?: never;
 }
 
 // mode: "link" — the token is embedded in a URL, never read by a human, so

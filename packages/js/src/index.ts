@@ -281,7 +281,15 @@ export type { ContentSearchResult, ContentSearchChatMessage } from "./modules/se
 export type { UserSearchResult } from "./modules/search/searchUsers";
 export type { SpaceSearchResult } from "./modules/search/searchSpaces";
 export type { AskContentEvent } from "./modules/search/askContent";
-export type { MatchUsersProps, MatchUsersCommonProps } from "./modules/search/matchUsers";
+export type {
+  MatchUsersProps,
+  MatchUsersCommonProps,
+  MatchUsersResponse,
+  UserMatchResult,
+  MatchedFacet,
+  MatchFacetRef,
+  SampleContent,
+} from "./modules/search/matchUsers";
 export type {
   RequestNewAccessTokenProps,
   RequestNewAccessTokenResponse,

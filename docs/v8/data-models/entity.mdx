@@ -60,7 +60,8 @@ An entity a moderator removed (`moderationStatus: "removed"`) is shown in full o
 
 - `userId`, `user`, `title`, `content`, `location` and `metadata` are `null`.
 - `mentions`, `attachments` and `keywords` are `[]`, and so is `files` when `include` contains `"files"`.
-- Everything else is kept: `id`, `shortId`, `foreignId`, `sourceId`, `spaceId`, `space`, `reactionCounts`, `commentsCount`, `views`, `score`, timestamps, `nsfw`, `nsfwEffective`, `moderationStatus`, `grants`, `topComments`, and the requester's own `userReaction` and `saved`.
+- Everything else is kept: `id`, `shortId`, `foreignId`, `sourceId`, `spaceId`, `space`, `reactionCounts`, `commentsCount`, `views`, `score`, timestamps, `nsfw`, `nsfwEffective`, `moderationStatus`, `topComments`, and the requester's own `userReaction` and `saved`.
+- `grants` is the zero summary for everyone, the author included: a removed entity [takes its grants with it](/v8/data-models/reputation-grant#a-removed-entity-takes-its-grants-with-it).
 
 The placeholder is what [Fetch Entity](/v8/api-reference/entities/fetch-entity), [Fetch Entity by Short ID](/v8/api-reference/entities/fetch-entity-by-short-id), [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id) and [Remove Entity Reaction](/v8/api-reference/entities/remove-reaction) return for a removed entity, so a shared link still opens and your app can show its own "removed" state. Lists leave removed entities out instead: [Fetch Many Entities](/v8/api-reference/entities/fetch-many-entities) includes them only when the requester lists their own entities, saved collections leave them out, and a comment's included `entity` is `null`.
 

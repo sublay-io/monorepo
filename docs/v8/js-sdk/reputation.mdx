@@ -87,6 +87,10 @@ console.log(summary?.total, "points from", summary?.count, "people");
 </Note>
 
 <Note>
+  **A removed entity takes its grants with it.** The grants on an entity a moderator removed are hidden from everyone, on every shape: the `targetType: "entity"` shape is empty with a zero summary, and `recipientId` / `senderId` leave them out. See [A removed entity takes its grants with it](/v8/data-models/reputation-grant#a-removed-entity-takes-its-grants-with-it).
+</Note>
+
+<Note>
   **Only positive grants are returned, and lists are never block-filtered.** Negative grants (an app's moderation deductions) are invisible on every public surface. And unlike entity or comment feeds, grant lists apply no block exclusion — so the amounts you render always add up to the total you render beside them.
 </Note>
 

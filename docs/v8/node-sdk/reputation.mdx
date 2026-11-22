@@ -136,6 +136,10 @@ console.log(summary?.total, "points from", summary?.count, "people");
   **Grants on chat messages are private to their conversation, for a service key too.** Every shape asks whether the viewer can see the underlying message and withholds the grant if they cannot. With `actingUserId` the viewer is that user, exactly as their own token; without it, the key is treated as a signed-in user in no conversation and gets no grants on chat messages. Grants tied to a space the viewer can't read, or given on an entity or comment they can't read, are left out of every shape and its `summary` — see [Grants follow space reading](/v8/data-models/reputation-grant#grants-follow-space-reading).
 </Note>
 
+<Note>
+  **A removed entity takes its grants with it.** The grants on an entity a moderator removed are hidden from everyone, on every shape: the `targetType: "entity"` shape is empty with a zero summary, and `recipientId` / `senderId` leave them out. See [A removed entity takes its grants with it](/v8/data-models/reputation-grant#a-removed-entity-takes-its-grants-with-it).
+</Note>
+
 <Warning>
   **A service key sees no negative grants here.** The `amount > 0` filter is baked into the query for every caller, so this is not the route for auditing moderation deductions — use [Fetch User Grant History](/v8/api-reference/reputation-grants/fetch-user-grant-history), which requires `x-sublay-project-id` alongside your key.
 </Warning>

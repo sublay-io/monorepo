@@ -30,6 +30,7 @@ export interface ChatMessage {
   grants?: GrantSummary;
   editedAt: string | null;
   userDeletedAt: string | null;
+  // The column also allows "approved", but nothing sets it on a chat message.
   moderationStatus: "removed" | null;
   moderatedAt: string | null;
   moderatedById: string | null;

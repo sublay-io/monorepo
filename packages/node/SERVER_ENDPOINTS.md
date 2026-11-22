@@ -280,11 +280,11 @@ Base path: `/v8/:projectId/`
 
 ## OAuth
 
-> **SDK module unmounted** — OAuth is a browser-based redirect flow with no server-side use case. Files kept for future re-enablement.
+> **No SDK module** — OAuth is a browser-based redirect flow with no server-side use case.
 
 | Method | Path | Service Key Access | SDK Function | SDK Call Valid |
 |--------|------|--------------------|--------------|----------------|
-| POST | `/oauth/authorize` | no key needed | `oauth.authorize` | yes |
+| POST | `/oauth/authorize` | no key needed | — | — |
 | POST | `/oauth/link` | user token only | — | — |
 | GET | `/oauth/identities` | user token only | — | — |
 | DELETE | `/oauth/identities/:identityId` | user token only | — | — |

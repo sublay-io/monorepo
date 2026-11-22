@@ -14,7 +14,7 @@ export interface CreateSpaceProps {
    * be an admin of the parent).
    */
   actingUserId: string;
-  name: string;
+  name?: string;
   slug?: string;
   description?: string;
   readingPermission?: ReadingPermission;

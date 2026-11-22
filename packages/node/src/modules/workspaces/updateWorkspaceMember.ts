@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { WorkspaceMember } from "../../interfaces/Workspace";
+import { WorkspaceCapability, WorkspaceMember } from "../../interfaces/Workspace";
 
 export interface UpdateWorkspaceMemberProps {
   workspaceId: string;
@@ -10,7 +10,7 @@ export interface UpdateWorkspaceMemberProps {
   // addresses the target, and the body `actingUserId` addresses the actor.
   actingUserId: string;
   // Powerful fields (require `edit-member-access` + rank rules + no-escalation).
-  capabilities?: string[];
+  capabilities?: WorkspaceCapability[];
   permissions?: string[];
   rank?: number;
   /**

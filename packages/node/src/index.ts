@@ -149,7 +149,9 @@ export type {
 // Export commonly used interfaces
 export type {
   Entity,
+  EntityRecord,
   EntitySaved,
+  SpaceWithViewer,
   EntityInclude,
   EntityIncludeArray,
   EntityIncludeParam,
@@ -194,6 +196,8 @@ export type {
   User,
   UserFull,
   AuthUser,
+  UserSuspension,
+  UserSummary,
   UserRole,
   UserInclude,
   UserIncludeArray,
@@ -210,6 +214,18 @@ export type {
 } from "./interfaces/EmailVerification";
 export type { SignUpProps, SignUpResponse } from "./modules/auth/signUp";
 export type { SignInProps, SignInResponse } from "./modules/auth/signIn";
+export type { SignOutProps, SignOutPushUnbindSkipped } from "./modules/auth/signOut";
+export type {
+  RequestNewAccessTokenProps,
+  RequestNewAccessTokenResponse,
+} from "./modules/auth/requestNewAccessToken";
+export type {
+  SearchContentProps,
+  ContentSearchResult,
+  ContentSearchChatMessage,
+} from "./modules/search/searchContent";
+export type { SearchUsersProps, UserSearchResult } from "./modules/search/searchUsers";
+export type { SearchSpacesProps, SpaceSearchResult } from "./modules/search/searchSpaces";
 export type { VerifyEmailProps } from "./modules/auth/verifyEmail";
 export type { UserSearchParams } from "./interfaces/UserSearch";
 export type { SpaceSearchParams, SpaceSearchFields } from "./interfaces/SpaceSearch";
@@ -219,6 +235,7 @@ export type {
   SpaceDetailed,
   SpaceWithPermissions,
   SpacePreview,
+  ChildSpacePreview,
   SpaceBreadcrumb,
   SpaceBreadcrumbEntry,
   VisibleSpaceBreadcrumbEntry,
@@ -270,6 +287,7 @@ export type {
 export type {
   Conversation,
   ConversationPreview,
+  ConversationPreviewLastMessage,
   ConversationType,
 } from "./interfaces/Conversation";
 export type {
@@ -280,6 +298,8 @@ export type {
 export type { SpaceReportAction } from "./modules/spaces/handleSpaceReport";
 export type {
   ChatMessage,
+  QuotedChatMessage,
+  SentChatMessage,
   ChatMessageListInclude,
   ChatMessageListIncludeArray,
   ChatMessageListIncludeParam,
@@ -287,6 +307,8 @@ export type {
   ChatMessageIncludeArray,
   ChatMessageIncludeParam,
 } from "./interfaces/ChatMessage";
+export type { SendMessageResponse } from "./modules/chat/sendMessage";
+export type { MessageReaction, ListReactionsResponse } from "./modules/chat/listReactions";
 export type { Reaction, ReactionType, ReactionCounts } from "./interfaces/Reaction";
 export type { UnifiedAppNotification, PotentiallyPopulatedUnifiedAppNotification } from "./interfaces/AppNotification";
 export type { PushDeviceResult, SendPushResult } from "./interfaces/Push";
@@ -303,7 +325,18 @@ export type {
   MuteConversationProps,
   MuteConversationResult,
 } from "./modules/chat/muteConversation";
-export type { Report, CreateReportResponse } from "./interfaces/Report";
+export type {
+  Report,
+  CreateReportResponse,
+  UserReport,
+  ReportTargetType,
+  ReportReason,
+  ReportStatus,
+  ReportEntityTarget,
+  ReportCommentTarget,
+  ReportMessageTarget,
+  ReportSpace,
+} from "./interfaces/Report";
 export type {
   ReputationGrant,
   ReputationGrantSourceType,
@@ -322,6 +355,9 @@ export type {
   ListGrantsResponse,
 } from "./modules/reputation/listGrants";
 export type { File, FileImage, FileImageVariant } from "./interfaces/File";
+export type { UploadFileResponse } from "./modules/storage/uploadFile";
+export type { UploadImageResponse, UploadedImageVariant } from "./modules/storage/uploadImage";
+export type { GetFileResponse, GetFileImage } from "./modules/storage/getFile";
 export type { UploadFile, ImageSlotFile } from "./core/formData";
 export type {
   ImageOptions,

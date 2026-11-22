@@ -13,8 +13,10 @@ export interface CreateCommentProps {
   referencedCommentId?: string;
   attachments?: Record<string, any>[];
   metadata?: Record<string, any>;
-  createdAt?: Date;
-  updatedAt?: Date;
+  /** Backdate the comment, as an ISO 8601 UTC timestamp (e.g. `date.toISOString()`). */
+  createdAt?: string;
+  /** Backdate the comment's last update, as an ISO 8601 UTC timestamp. */
+  updatedAt?: string;
 }
 
 export async function createComment(

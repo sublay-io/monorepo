@@ -103,25 +103,25 @@ describe("node-sdk search — request shaping", () => {
 });
 
 describe("node-sdk search — response mapping", () => {
-  it("searchContent returns the full PaginatedResponse envelope", async () => {
+  it("searchContent returns the result array", async () => {
     const { client, projectInstance } = makeClient();
-    const envelope = { data: [{ id: "e1" }], pagination: { page: 1, limit: 10, total: 1 } };
-    projectInstance.post.mockResolvedValueOnce({ data: envelope });
-    await expect(searchContent(client, { query: "hello" })).resolves.toEqual(envelope);
+    const results = [{ sourceType: "entity", similarity: 0.9, record: { id: "e1" } }];
+    projectInstance.post.mockResolvedValueOnce({ data: results });
+    await expect(searchContent(client, { query: "hello" })).resolves.toEqual(results);
   });
 
-  it("searchUsers returns the full PaginatedResponse envelope", async () => {
+  it("searchUsers returns the result array", async () => {
     const { client, projectInstance } = makeClient();
-    const envelope = { data: [{ id: "u1" }], pagination: { page: 1, limit: 10, total: 1 } };
-    projectInstance.post.mockResolvedValueOnce({ data: envelope });
-    await expect(searchUsers(client, { query: "ali" })).resolves.toEqual(envelope);
+    const results = [{ similarity: 0.9, record: { id: "u1" } }];
+    projectInstance.post.mockResolvedValueOnce({ data: results });
+    await expect(searchUsers(client, { query: "ali" })).resolves.toEqual(results);
   });
 
-  it("searchSpaces returns the full PaginatedResponse envelope", async () => {
+  it("searchSpaces returns the result array", async () => {
     const { client, projectInstance } = makeClient();
-    const envelope = { data: [{ id: "s1" }], pagination: { page: 1, limit: 10, total: 1 } };
-    projectInstance.post.mockResolvedValueOnce({ data: envelope });
-    await expect(searchSpaces(client, { query: "design" })).resolves.toEqual(envelope);
+    const results = [{ similarity: 0.9, record: { id: "s1" } }];
+    projectInstance.post.mockResolvedValueOnce({ data: results });
+    await expect(searchSpaces(client, { query: "design" })).resolves.toEqual(results);
   });
 
   it("askContent returns response.data as a plain { answer, sources } object", async () => {

@@ -1,6 +1,16 @@
 import { SublayHttpClient } from "../../core/client";
 import { appendFile, appendFields } from "../../core/formData";
-import { File } from "../../interfaces/File";
+
+/** What `uploadFile` returns. */
+export interface UploadFileResponse {
+  fileId: string;
+  type: "image" | "video" | "document" | "other"; // From the file's MIME type
+  relativePath: string; // Storage path
+  publicPath: string; // Proxy URL
+  size: number; // Bytes
+  mimeType: string;
+  createdAt: string;
+}
 
 export interface UploadFileProps {
   file: Uint8Array | Blob;
@@ -24,13 +34,16 @@ export interface UploadFileProps {
 export async function uploadFile(
   client: SublayHttpClient,
   data: UploadFileProps
-): Promise<File> {
+): Promise<UploadFileResponse> {
   const { file, filename, mimeType, ...fields } = data;
 
   const formData = new FormData();
   appendFile(formData, "file", file, filename, mimeType);
   appendFields(formData, fields);
 
-  const response = await client.projectInstance.post<File>("/storage", formData);
+  const response = await client.projectInstance.post<UploadFileResponse>(
+    "/storage",
+    formData
+  );
   return response.data;
 }

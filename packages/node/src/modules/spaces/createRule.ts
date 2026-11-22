@@ -4,7 +4,7 @@ import { Rule } from "../../interfaces/Rule";
 export interface CreateRuleProps {
   spaceId: string;
   title: string;
-  description?: string;
+  description?: string | null;
   /**
    * The user this request acts as. The request has exactly that user's
    * permissions in the space and is recorded as theirs. Required.

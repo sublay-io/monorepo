@@ -1,7 +1,7 @@
 import { GrantSummary } from "./ReputationGrant";
 import { Mention } from "./Mention";
 import { User } from "./User";
-import { Space } from "./Space";
+import { Space, SpaceMemberRole, SpaceMemberStatus } from "./Space";
 import { ReactionCounts, ReactionType } from "./Reaction";
 import { File } from "./File";
 import { Comment } from "./Comment";
@@ -17,14 +17,23 @@ export interface EntitySaved {
   collections: Array<{ id: string; name: string }>;
 }
 
+/**
+ * The space attached by `include=space`. With a viewer it also carries the
+ * viewer's membership in it: `isMember`, `userRole` and `userStatus` (`null`
+ * when the viewer has no membership row).
+ */
+export type SpaceWithViewer = Space & {
+  userRole?: SpaceMemberRole | null;
+  userStatus?: SpaceMemberStatus | null;
+};
+
 export interface Entity {
   id: string;
   foreignId: string | null;
   shortId: string;
-  projectId: string;
   sourceId: string | null;
   spaceId: string | null;
-  space?: Space | null; // Populated when include contains "space"
+  space?: SpaceWithViewer | null; // Populated when include contains "space"; null with no space or one the viewer can't see
   // `userId`, `user`, `title`, `content`, `location`, `metadata` are `null`,
   // and `mentions`, `attachments`, `files`, `keywords` are `[]`, on
   // a moderator-removed entity, for everyone but its author (the placeholder).
@@ -39,8 +48,9 @@ export interface Entity {
   upvotes: string[];   // Legacy v6 — v7 uses reactionCounts
   downvotes: string[]; // Legacy v6 — v7 uses reactionCounts
   reactionCounts: ReactionCounts;
-  userReaction?: ReactionType | null; // Present when authenticated
+  userReaction: ReactionType | null; // The viewer's reaction, or null
   commentsCount: number; // All of the entity's comments, at any depth
+  sharesCount: number;
   views: number;
   score: number;
   scoreUpdatedAt: string;
@@ -72,6 +82,23 @@ export interface Entity {
   updatedAt: string;
   deletedAt: string | null;
 }
+
+/**
+ * The stored entity record only, without the computed and associated fields
+ * an entity read adds.
+ */
+export type EntityRecord = Omit<
+  Entity,
+  | "commentsCount"
+  | "userReaction"
+  | "nsfwEffective"
+  | "user"
+  | "space"
+  | "files"
+  | "topComments"
+  | "saved"
+  | "grants"
+>;
 
 /** `include` values the entity fetches (by id, short id, foreign id, and lists) accept. */
 export type EntityInclude =

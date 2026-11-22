@@ -89,12 +89,12 @@ describe("node-sdk image slots — updateSpace", () => {
 });
 
 describe("node-sdk image slots — updateUser", () => {
-  it("sends a banner and removeFileIds as multipart, a Date as its ISO string", async () => {
+  it("sends a banner and removeFileIds as multipart", async () => {
     const { client, projectInstance } = makeClient();
     await updateUser(client, {
       userId: "u1",
       actingUserId: "u1",
-      birthdate: new Date("2000-01-02T00:00:00.000Z"),
+      birthdate: "2000-01-02T00:00:00.000Z",
       location: { latitude: 1, longitude: 2 },
       removeFileIds: [FILE_ID],
       bannerFile: { file: bytes(), filename: "b.png", mimeType: "image/png", options: bannerOptions },

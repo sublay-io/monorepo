@@ -1,6 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
 import { User } from "../../interfaces/User";
-import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface SearchUsersProps {
   query: string;
@@ -13,11 +12,17 @@ export interface SearchUsersProps {
   limit?: number;
 }
 
+/** One search hit, most similar first. */
+export interface UserSearchResult {
+  similarity: number;
+  record: User;
+}
+
 export async function searchUsers(
   client: SublayHttpClient,
   data: SearchUsersProps
-): Promise<PaginatedResponse<User>> {
-  const response = await client.projectInstance.post<PaginatedResponse<User>>(
+): Promise<UserSearchResult[]> {
+  const response = await client.projectInstance.post<UserSearchResult[]>(
     "/search/users",
     data
   );

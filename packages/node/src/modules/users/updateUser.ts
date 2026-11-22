@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { UserFull } from "../../interfaces/User";
+import { AuthUser } from "../../interfaces/User";
 import { appendFields, appendImageSlot, type ImageSlotFile } from "../../core/formData";
 
 export interface UpdateUserProps {
@@ -17,7 +17,8 @@ export interface UpdateUserProps {
   avatar?: string;
   metadata?: Record<string, any>;
   secureMetadata?: Record<string, any>;
-  birthdate?: Date;
+  /** ISO 8601 datetime string. */
+  birthdate?: string;
   location?: {
     latitude: number;
     longitude: number;
@@ -40,7 +41,7 @@ export interface UpdateUserProps {
 export async function updateUser(
   client: SublayHttpClient,
   data: UpdateUserProps
-): Promise<UserFull> {
+): Promise<AuthUser> {
   const { userId, avatarFile, bannerFile, ...body } = data;
   const path = `/users/${userId}`;
 
@@ -49,10 +50,10 @@ export async function updateUser(
     appendFields(formData, body);
     if (avatarFile) appendImageSlot(formData, "avatarFile", avatarFile, "avatar");
     if (bannerFile) appendImageSlot(formData, "bannerFile", bannerFile, "banner");
-    const response = await client.projectInstance.patch<UserFull>(path, formData);
+    const response = await client.projectInstance.patch<AuthUser>(path, formData);
     return response.data;
   }
 
-  const response = await client.projectInstance.patch<UserFull>(path, body);
+  const response = await client.projectInstance.patch<AuthUser>(path, body);
   return response.data;
 }

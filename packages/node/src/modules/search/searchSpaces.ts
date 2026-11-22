@@ -1,17 +1,22 @@
 import { SublayHttpClient } from "../../core/client";
 import { Space } from "../../interfaces/Space";
-import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 
 export interface SearchSpacesProps {
   query: string;
   limit?: number;
 }
 
+/** One search hit, most similar first. */
+export interface SpaceSearchResult {
+  similarity: number;
+  record: Space;
+}
+
 export async function searchSpaces(
   client: SublayHttpClient,
   data: SearchSpacesProps
-): Promise<PaginatedResponse<Space>> {
-  const response = await client.projectInstance.post<PaginatedResponse<Space>>(
+): Promise<SpaceSearchResult[]> {
+  const response = await client.projectInstance.post<SpaceSearchResult[]>(
     "/search/spaces",
     data
   );

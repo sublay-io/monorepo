@@ -1,6 +1,6 @@
 import { SublayHttpClient } from "../../core/client";
 import { appendFile, appendFields } from "../../core/formData";
-import { ChatMessage } from "../../interfaces/ChatMessage";
+import { SentChatMessage } from "../../interfaces/ChatMessage";
 import { GifData } from "../../interfaces/Comment";
 import { Mention } from "../../interfaces/Mention";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
@@ -28,10 +28,13 @@ export interface SendMessageProps extends SpaceReputationContextParams {
   files?: ChatMessageFile[];
 }
 
+/** The created message; `localId` is echoed back when the send passed one. */
+export type SendMessageResponse = SentChatMessage & { localId?: string };
+
 export async function sendMessage(
   client: SublayHttpClient,
   data: SendMessageProps
-): Promise<ChatMessage> {
+): Promise<SendMessageResponse> {
   const {
     conversationId,
     files,
@@ -55,13 +58,13 @@ export async function sendMessage(
     for (const f of files) {
       appendFile(formData, "files", f.file, f.filename, f.mimeType);
     }
-    const response = await client.projectInstance.post<ChatMessage>(
+    const response = await client.projectInstance.post<SendMessageResponse>(
       url,
       formData
     );
     return response.data;
   }
 
-  const response = await client.projectInstance.post<ChatMessage>(url, fields);
+  const response = await client.projectInstance.post<SendMessageResponse>(url, fields);
   return response.data;
 }

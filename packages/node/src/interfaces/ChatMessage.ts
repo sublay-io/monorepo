@@ -2,17 +2,19 @@ import { GrantSummary } from "./ReputationGrant";
 import { GifData } from "./Comment";
 import { File } from "./File";
 import { Mention } from "./Mention";
-import { User } from "./User";
+import { UserSummary } from "./User";
 
 export interface ChatMessage {
   id: string;
-  projectId: string;
   conversationId: string;
+  spaceId: string | null; // The conversation's space, for a space chat message
   userId: string | null; // null when the sender's account has been deleted, and on a removed message for everyone but its author
   content: string | null;
   gif: GifData | null;
   mentions: Mention[];
-  files?: File[]; // Opt-in only — omitted by default
+  // Present when the files-images bundle is installed: always on a single
+  // fetch, send and edit; on the list only with `include: "files"`.
+  files?: File[];
   metadata: Record<string, any> | null; // null on a deleted message, and on a removed one for everyone but its author
   parentMessageId: string | null;
   quotedMessageId: string | null;
@@ -28,7 +30,7 @@ export interface ChatMessage {
   grants?: GrantSummary;
   editedAt: string | null;
   userDeletedAt: string | null;
-  moderationStatus: "approved" | "removed" | null;
+  moderationStatus: "removed" | null;
   moderatedAt: string | null;
   moderatedById: string | null;
   moderatedByType: "client" | "user" | null;
@@ -37,10 +39,28 @@ export interface ChatMessage {
   updatedAt: string;
 
   // Populated fields
-  user: User | null;
-  quotedMessage?: ChatMessage | null;
-  parentMessage?: ChatMessage | null;
+  user: UserSummary | null; // null alongside a null `userId`
+  quotedMessage: QuotedChatMessage | null; // null when the message quotes nothing
 }
+
+/**
+ * The message a chat message quotes: its own fields and sender, without
+ * reactions, files, grants or a quote of its own. A deleted or removed quoted
+ * message comes back as its placeholder.
+ */
+export type QuotedChatMessage = Omit<
+  ChatMessage,
+  "files" | "reactionCounts" | "userReactions" | "grants" | "quotedMessage"
+>;
+
+/**
+ * A chat message as `sendMessage` and `editMessage` return it: the message
+ * without the reaction data and grant summary the reads attach.
+ */
+export type SentChatMessage = Omit<
+  ChatMessage,
+  "reactionCounts" | "userReactions" | "grants"
+>;
 
 /** `include` values the message list accepts. */
 export type ChatMessageListInclude = "files" | "grants";

@@ -1,9 +1,9 @@
 export interface Collection {
   id: string;
-  projectId: string;
   userId: string;
   parentCollectionId: string | null;
   name: string;
+  isRoot: boolean; // True on the user's root collection
   /**
    * How many saved entities the viewer can currently see in the collection,
    * computed on every read: deleted, moderator-removed and draft entities, and

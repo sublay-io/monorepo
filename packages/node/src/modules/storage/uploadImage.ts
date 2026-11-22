@@ -1,7 +1,24 @@
 import { SublayHttpClient } from "../../core/client";
 import { appendFile, appendFields } from "../../core/formData";
-import { File } from "../../interfaces/File";
+import { FileImageVariant } from "../../interfaces/File";
 import { ImageOptions } from "../../interfaces/ImageProcessing";
+
+/** One processed size of an uploaded image. */
+export type UploadedImageVariant = FileImageVariant;
+
+/** What `uploadImage` returns. */
+export interface UploadImageResponse {
+  fileId: string;
+  type: "image";
+  originalPath: string; // Proxy URL
+  originalSize: number; // Bytes
+  originalWidth: number;
+  originalHeight: number;
+  variants: Record<string, UploadedImageVariant>; // thumbnail, small, medium, large, etc.
+  format: string;
+  quality: number; // 1-100
+  createdAt: string;
+}
 
 export interface UploadImageProps {
   file: Uint8Array | Blob;
@@ -24,7 +41,7 @@ export interface UploadImageProps {
 export async function uploadImage(
   client: SublayHttpClient,
   data: UploadImageProps
-): Promise<File> {
+): Promise<UploadImageResponse> {
   const { file, filename, mimeType, imageOptions, ...rest } = data;
 
   const formData = new FormData();
@@ -34,7 +51,7 @@ export async function uploadImage(
   // not as a nested object — so flatten imageOptions alongside the other fields.
   appendFields(formData, { ...imageOptions, ...rest });
 
-  const response = await client.projectInstance.post<File>(
+  const response = await client.projectInstance.post<UploadImageResponse>(
     "/storage/images",
     formData
   );

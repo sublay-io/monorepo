@@ -1,5 +1,5 @@
 export interface PushDeviceResult {
-  platform: string;
+  platform: "ios" | "android" | "web";
   success: boolean;
   reason?: string;
 }

@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { User } from "../../interfaces/User";
+import { UserSummary } from "../../interfaces/User";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
 import { PaginationMetadata } from "../../interfaces/IPaginatedResponse";
@@ -17,8 +17,8 @@ export interface ListReactionsProps extends SpaceReputationContextParams {
 
 export interface MessageReaction {
   emoji: string;
-  user: User;
-  createdAt: Date;
+  user: UserSummary;
+  createdAt: string;
 }
 
 export interface ListReactionsResponse {

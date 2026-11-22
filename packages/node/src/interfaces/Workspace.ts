@@ -92,7 +92,7 @@ export interface WorkspaceMember {
   id: string;
   workspaceId: string;
   userId: string;
-  capabilities: string[];
+  capabilities: WorkspaceCapability[];
   permissions: string[];
   rank: number;
   title: string | null;
@@ -119,7 +119,7 @@ export interface WorkspaceInvitation {
   invitedById: string;
   userId: string | null;
   email: string | null;
-  capabilities: string[];
+  capabilities: WorkspaceCapability[];
   permissions: string[];
   rank: number;
   title: string | null;
@@ -211,7 +211,7 @@ export interface WorkspaceRosterReason {
    * consume than one that is uniformly absent.
    */
   relativeRank?: number;
-  capabilities?: string[];
+  capabilities?: WorkspaceCapability[];
   permissions?: string[];
   title?: string | null;
   metadata?: Record<string, any>;
@@ -220,7 +220,7 @@ export interface WorkspaceRosterReason {
 }
 
 export interface WorkspaceRosterEntry {
-  user: User;
+  user: WorkspaceStandingUser;
   reasons: WorkspaceRosterReason[];
 }
 
@@ -263,7 +263,7 @@ export interface WorkspaceMemberStanding {
   //
   // "The caller" is the ACTING USER: a service key that passes
   // `actingUserId` is fenced exactly as that user would be, not as a key.
-  capabilities?: string[];
+  capabilities?: WorkspaceCapability[];
   permissions?: string[];
   rank?: number | null;
   /**
@@ -280,7 +280,7 @@ export interface WorkspaceMemberStanding {
 // The authority-as-a-service read (`GET /workspaces/:workspaceId/authority/me`).
 export interface WorkspaceAuthority {
   reasons: WorkspaceAuthorityReasonDetail[];
-  capabilities: string[];
+  capabilities: WorkspaceCapability[];
   permissions: string[];
   rank: number | null;
   /*

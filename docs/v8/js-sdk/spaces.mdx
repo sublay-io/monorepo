@@ -22,16 +22,16 @@ const space = await sublay.spaces.createSpace({
 });
 ```
 
-<ParamField body="name" type="string" required>
-  Display name for the space.
+<ParamField body="name" type="string | null">
+  Display name for the space (3–100 characters). Left out or `null`, the space has no name.
 </ParamField>
 
-<ParamField body="slug" type="string">
-  URL-friendly identifier. Must be unique within the project. Generated from `name` if omitted.
+<ParamField body="slug" type="string | null">
+  URL-friendly identifier. Must be unique within the project. Left out or `null`, the space has no slug.
 </ParamField>
 
-<ParamField body="description" type="string">
-  Short description of the space.
+<ParamField body="description" type="string | null">
+  Short description of the space. Left out or `null`, the space has no description.
 </ParamField>
 
 <ParamField body="readingPermission" type="string">
@@ -54,8 +54,8 @@ const space = await sublay.spaces.createSpace({
   The space's own NSFW flag. Defaults to `false`. A space created under an NSFW parent is effectively NSFW regardless of this value. See [Space NSFW flagging](/v8/data-models/space#nsfw-flagging).
 </ParamField>
 
-<ParamField body="parentSpaceId" type="string">
-  Makes this space a child of the specified parent space.
+<ParamField body="parentSpaceId" type="string | null">
+  Makes this space a child of the specified parent space. The signed-in user must be an active admin of the parent space, or the request is refused with `403 space/parent-admin-required`. Left out or `null`, the space is top-level.
 </ParamField>
 
 <ParamField body="metadata" type="Record<string, any>">
@@ -313,16 +313,16 @@ const space = await sublay.spaces.updateSpace({
   The Sublay space ID.
 </ParamField>
 
-<ParamField body="name" type="string">
-  New display name for the space.
+<ParamField body="name" type="string | null">
+  New display name. `null` clears it.
 </ParamField>
 
-<ParamField body="slug" type="string">
-  New URL-friendly identifier.
+<ParamField body="slug" type="string | null">
+  New slug. Must be unique. `null` clears it.
 </ParamField>
 
-<ParamField body="description" type="string">
-  New description of the space.
+<ParamField body="description" type="string | null">
+  New description. `null` clears it.
 </ParamField>
 
 <ParamField body="readingPermission" type="string">
@@ -350,7 +350,7 @@ const space = await sublay.spaces.updateSpace({
 </ParamField>
 
 <ParamField body="avatarFile" type="{ file: Blob | File; options: ImageOptions }">
-  A new avatar image, replacing the current one (up to 50 MB). `options` must include `mode`. With an image, the request is sent as `multipart/form-data`.
+  A new avatar image, replacing the current one (up to 50 MB). `options` must include `mode`. With an image, the request is sent as `multipart/form-data`. A field set to `null` can't travel with an image: the call throws before sending anything, so clear it in a separate call without one.
 </ParamField>
 
 <ParamField body="bannerFile" type="{ file: Blob | File; options: ImageOptions }">

@@ -238,7 +238,7 @@ const rule = await sublay.spaces.createRule({
   The rule title.
 </ParamField>
 
-<ParamField body="description" type="string">
+<ParamField body="description" type="string | null">
   The rule description.
 </ParamField>
 
@@ -270,8 +270,8 @@ const rule = await sublay.spaces.updateRule({
   The new rule title.
 </ParamField>
 
-<ParamField body="description" type="string">
-  The new rule description.
+<ParamField body="description" type="string | null">
+  The new rule description. `null` clears it.
 </ParamField>
 
 **Returns** — `Promise<Rule>`

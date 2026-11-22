@@ -101,7 +101,7 @@ await sublay.reputation.mintGrant({
 
 ### listGrants
 
-Lists grants. Exactly one filter shape per request — by recipient, by sender, or by target. The shapes are mutually exclusive and are not AND-ed; supplying none or combining two is a `400`.
+Lists grants. Exactly one filter shape per request — by recipient, by sender, or by target. The shapes are mutually exclusive and are not AND-ed; TypeScript accepts exactly one of them (`ListGrantsFilter`), and the server answers none or two with a `400`.
 
 ```typescript
 const { data, pagination, summary } = await sublay.reputation.listGrants({

@@ -14,8 +14,8 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
   The UUID of the entity this comment belongs to.
 </ParamField>
 
-<ParamField body="content" type="string">
-  The text content of the comment. At least one of `content`, `gif`, or `attachments` must be provided.
+<ParamField body="content" type="string | null">
+  The text content of the comment. At least one of `content`, `gif`, or `attachments` must be provided. `null` or an empty string stores none.
 </ParamField>
 
 <ParamField body="gif" type="object">

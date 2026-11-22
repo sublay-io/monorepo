@@ -28,8 +28,8 @@ const comment = await sublay.comments.createComment({
   Your application's identifier for this comment.
 </ParamField>
 
-<ParamField body="content" type="string">
-  The comment's text content.
+<ParamField body="content" type="string | null">
+  The comment's text content. `null` or an empty string stores none — a comment needs `content`, a `gif` or `attachments`.
 </ParamField>
 
 <ParamField body="gif" type="GifData | null">

@@ -63,7 +63,7 @@ const uploaded = await sublay.storage.uploadFile({
 ```typescript
 {
   fileId: string;
-  type: string;
+  type: "image" | "video" | "document" | "other"; // from the MIME type
   relativePath: string;
   publicPath: string; // proxy URL
   size: number;

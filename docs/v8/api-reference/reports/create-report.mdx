@@ -35,8 +35,8 @@ Content its author deleted (a comment or chat message), and content a moderator 
   use `other` plus `details` for anything the taxonomy doesn't cover.
 </ParamField>
 
-<ParamField body="details" type="string">
-  Optional additional context or description provided by the reporter.
+<ParamField body="details" type="string | null">
+  Optional additional context or description provided by the reporter. `null` or an empty string stores none.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">

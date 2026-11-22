@@ -38,28 +38,28 @@ if ("accessToken" in result) {
   The user's plain-text password (hashed server-side).
 </ParamField>
 
-<ParamField body="name" type="string">
-  Display name for the user.
+<ParamField body="name" type="string | null">
+  Display name for the user. `null` (or an empty string) for none.
 </ParamField>
 
 <ParamField body="username" type="string">
   Unique username for the user.
 </ParamField>
 
-<ParamField body="avatar" type="string">
-  URL of the user's avatar image. To upload an image instead, use `avatarFile`.
+<ParamField body="avatar" type="string | null">
+  URL of the user's avatar image, or `null` for none. To upload an image instead, use `avatarFile`.
 </ParamField>
 
-<ParamField body="bio" type="string">
-  Short biography for the user.
+<ParamField body="bio" type="string | null">
+  Short biography for the user. `null` (or an empty string) for none.
 </ParamField>
 
 <ParamField body="location" type="{ latitude: number; longitude: number }">
   The user's geographic location.
 </ParamField>
 
-<ParamField body="birthdate" type="string">
-  The user's birthdate as an ISO 8601 string.
+<ParamField body="birthdate" type="string | Date">
+  The user's birthdate: a `Date`, or a full UTC timestamp string such as `"1990-05-17T00:00:00.000Z"` (a date alone, like `"1990-05-17"`, is refused).
 </ParamField>
 
 <ParamField body="metadata" type="Record<string, any>">
@@ -70,19 +70,19 @@ if ("accessToken" in result) {
   Custom key-value data. No API response returns it, to this user or anyone else; your backend receives it in webhooks. The user can write it themselves, so don't store anything your app needs to trust here.
 </ParamField>
 
-<ParamField body="emailVerification" type='{ mode?: "link" | "code"; redirectUrl?: string }'>
-  How the confirmation email is sent when the project requires email verification before sign-in. `mode` defaults to `"link"`; `"code"` emails a 6-digit code and returns a `verificationId`. `redirectUrl` (link mode) must be on the project's Verified Domains. Ignored when the setting is off. See [Sign Up](/v8/api-reference/auth/sign-up#with-email-verification-required).
+<ParamField body="emailVerification" type='{ mode?: "link" | "code"; redirectUrl?: string | null }'>
+  How the confirmation email is sent when the project requires email verification before sign-in. `mode` defaults to `"link"`; `"code"` emails a 6-digit code and returns a `verificationId`. `redirectUrl` (link mode) must be on the project's Verified Domains; `null` for none. Ignored when the setting is off. See [Sign Up](/v8/api-reference/auth/sign-up#with-email-verification-required).
 </ParamField>
 
 <ParamField body="avatarFile" type="{ file: Blob | File; options: ImageOptions }">
-  An avatar image to upload, up to 50 MB. `options` says how to process it and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the sign-up is sent as `multipart/form-data`. When it's sent, `avatar` is ignored.
+  An avatar image to upload, up to 50 MB. `options` says how to process it and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the sign-up is sent as `multipart/form-data` (fields set to `null` are left out of it, which means the same). When it's sent, `avatar` is ignored.
 </ParamField>
 
 <ParamField body="bannerFile" type="{ file: Blob | File; options: ImageOptions }">
   A banner image to upload; same shape as `avatarFile`.
 </ParamField>
 
-**Returns** — `Promise<SignUpResponse | EmailVerificationRequiredResponse>`: `{ user, accessToken, refreshToken }`, or, when the project requires email verification before sign-in, `{ success: true, emailVerificationRequired: true, verificationId? }` with no tokens. Tokens are stored only when they come back.
+**Returns** — `Promise<SignUpResponse | EmailVerificationRequiredResponse>`: `{ success: true, user, accessToken, refreshToken }`, or, when the project requires email verification before sign-in, `{ success: true, emailVerificationRequired: true, verificationId? }` with no tokens. Tokens are stored only when they come back.
 
 ```typescript
 const result = await sublay.auth.signUp({
@@ -118,11 +118,11 @@ const { user, accessToken, refreshToken } = await sublay.auth.signIn({
   The user's password.
 </ParamField>
 
-<ParamField body="emailVerification" type='{ mode?: "link" | "code"; redirectUrl?: string }'>
+<ParamField body="emailVerification" type='{ mode?: "link" | "code"; redirectUrl?: string | null }'>
   How the new confirmation email is sent when sign-in is refused because the account's email isn't confirmed. Ignored when the project doesn't require email verification before sign-in.
 </ParamField>
 
-**Returns** — `Promise<{ user: AuthUser; accessToken: string; refreshToken: string }>`
+**Returns** — `Promise<{ success: true; user: AuthUser; accessToken: string; refreshToken: string }>`
 
 When the project requires email verification before sign-in and the account's email isn't confirmed, a correct password rejects with a `403` whose body is `EmailNotVerifiedErrorBody` (`{ error, code: "auth/email-not-verified", verificationId? }`), and a new confirmation email is sent (unless one went out in the last 10 minutes):
 
@@ -252,7 +252,7 @@ const { user, accessToken, refreshToken } = await sublay.auth.verifyExternalUser
   A JWT issued by your application, containing user identity claims.
 </ParamField>
 
-**Returns** — `Promise<{ user: AuthUser; accessToken: string; refreshToken: string }>`
+**Returns** — `Promise<{ success: true; user: AuthUser; accessToken: string; refreshToken: string }>`
 
 ---
 
@@ -261,7 +261,7 @@ const { user, accessToken, refreshToken } = await sublay.auth.verifyExternalUser
 Manually rotates the access token using a refresh token. In SDK-managed mode this happens automatically when a request fails with a `401` or `403` that has no error `code` (a missing or expired access token).
 
 ```typescript
-const { accessToken, refreshToken } = await sublay.auth.requestNewAccessToken();
+const { accessToken, refreshToken, user } = await sublay.auth.requestNewAccessToken();
 ```
 
 The whole argument is optional.
@@ -271,10 +271,10 @@ The whole argument is optional.
 </ParamField>
 
 <Note>
-  Persist the new `refreshToken` if one is present (token rotation), or use SDK-managed mode, which does this for you.
+  The server rotates the refresh token on every refresh: the one sent stops working and a new one comes back. The SDK stores the new pair in SDK-managed mode; in host-managed mode, persist the returned `refreshToken` in place of the old one.
 </Note>
 
-**Returns** — `Promise<{ accessToken: string; refreshToken?: string }>`
+**Returns** — `Promise<{ success: true; accessToken: string; refreshToken: string; user: AuthUser }>`
 
 ---
 
@@ -382,25 +382,25 @@ await sublay.auth.sendVerificationEmail({
 
 The argument is required, and `mode` determines what else is required — enforced by TypeScript as a discriminated union, not just documented.
 
-<ParamField body="mode" type='"code" | "link"' required>
-  `"code"` emails a short token the user enters; `"link"` emails a verification URL.
+<ParamField body="mode" type='"code" | "link"'>
+  `"code"` (the default) emails a short token the user enters; `"link"` emails a verification URL.
 </ParamField>
 
 <ParamField body="tokenFormat" type='"hex" | "numeric" | "alpha" | "alphanumeric"'>
   Format of the generated token.
-  - Required when `mode: "code"` — there's no default, since `"hex"` produces a 64-character token no one would want to type.
+  - Required in code mode — the server's default is `"hex"`, which produces a 64-character token no one would want to type, so the SDK makes you choose.
   - Optional when `mode: "link"` (defaults to `"hex"`) — the token sits in a URL, never read by a human, so format doesn't matter.
 </ParamField>
 
 <ParamField body="tokenLength" type="number">
   Length of the generated token (4–12).
-  - Required when `mode: "code"` and `tokenFormat` isn't `"hex"`.
+  - Optional in code mode with a `"numeric"`, `"alpha"` or `"alphanumeric"` token (defaults to `6`).
   - Not allowed when `tokenFormat` is `"hex"` — hex ignores length and always produces a fixed 64-character token.
   - Optional when `mode: "link"` (defaults to `6`).
 </ParamField>
 
-<ParamField body="redirectUrl" type="string">
-  For `mode: "link"` — where to send the user after the link is verified.
+<ParamField body="redirectUrl" type="string | null">
+  For `mode: "link"` — where to send the user after the link is verified; `null` for none.
 
   Must be an `https` address on one of your project's **Verified Domains** (Dashboard → Settings → Domains). Each entry covers exactly the host it names, never its subdomains: `example.com` allows `https://example.com/…` on any port, but not `www.example.com`, which needs its own entry. A full address such as `https://app.example.com` covers only that host and port. `localhost` and `*.localhost` are always allowed, over `http` too. Anything else, including a custom-scheme deep link such as `myapp://verified`, is refused with `400 auth/redirect-url-not-allowed` and no email is sent.
 </ParamField>

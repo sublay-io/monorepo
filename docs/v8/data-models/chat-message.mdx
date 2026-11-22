@@ -101,7 +101,7 @@ Each entry in the `mentions` array is one of:
 
 ## Deleted and removed messages
 
-A message its author deleted, or that a moderator removed, stays in the conversation as a placeholder: it keeps its place in the list, a deleted or removed parent still anchors the thread replies it already has, and a message quoting it still carries it as `quotedMessage`. Every read returns it this way (list, fetch, and the `quotedMessage` of a message that quotes it).
+A message its author deleted, or that a moderator removed, stays in the conversation as a placeholder: it keeps its place in the list, a deleted or removed parent still anchors the thread replies it already has, and a message quoting it still carries it as `quotedMessage`. Every read returns it this way (list, fetch, the `quotedMessage` of a message that quotes it, and a conversation's `lastMessage` in the conversation list).
 
 | Kind | Marker | Who sees the full message | Sender (`userId` / `user`) |
 |------|--------|---------------------------|----------------------------|

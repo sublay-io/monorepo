@@ -768,9 +768,10 @@ const chatSlice = createSlice({
 
     /**
      * Merge fields into every loaded copy of a message (see
-     * `findLoadedMessages`). Dispatched by ChatProvider for the message-scoped
-     * socket events (edit, delete, removal, reply count), so they reach thread
-     * replies as well as the main stream. No-ops when the message isn't loaded.
+     * `findLoadedCopies`): the main stream, thread replies, copies quoted in
+     * other messages, and a conversation preview's last message. Dispatched by
+     * ChatProvider for `message:updated` (an edit) and `thread:reply_count`.
+     * No-ops when the message isn't loaded.
      */
     patchMessage(
       state,
@@ -781,7 +782,7 @@ const chatSlice = createSlice({
       }>
     ) {
       const { conversationId, messageId, patch } = action.payload;
-      for (const message of findLoadedMessages(state, conversationId, messageId)) {
+      for (const message of findLoadedCopies(state, conversationId, messageId)) {
         Object.assign(message, patch);
       }
     },

@@ -1150,3 +1150,31 @@ describe("chatSlice — a conversation preview's last message (S#227)", () => {
     expect(last(own)).toMatchObject({ moderationStatus: "removed", content: "last words", userId: "user-1" });
   });
 });
+
+describe("chatSlice — an edit reaches every copy (S#227)", () => {
+  it("patchMessage updates a preview's last message and a quoted copy", () => {
+    const original = makeChatMessage({ id: "message-1", content: "before" });
+    const state0 = baseState({
+      conversationList: {
+        items: [makeConversationPreview({ id: "conversation-1", lastMessage: original })],
+        loading: false,
+        hasMore: false,
+      } as never,
+      messages: {
+        "conversation-1": {
+          items: [makeChatMessage({ id: "message-2", quotedMessageId: "message-1", quotedMessage: original })],
+          loading: false,
+          hasMore: false,
+          oldestMessageId: "message-2",
+          newestMessageId: "message-2",
+        },
+      } as never,
+    });
+    const state = reducer(
+      state0,
+      patchMessage({ conversationId: "conversation-1", messageId: "message-1", patch: { content: "after" } }),
+    );
+    expect(state.conversationList.items[0].lastMessage!.content).toBe("after");
+    expect(state.messages["conversation-1"].items[0].quotedMessage!.content).toBe("after");
+  });
+});

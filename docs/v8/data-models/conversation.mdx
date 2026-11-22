@@ -36,10 +36,10 @@ When listing conversations (e.g. in an inbox), the API returns `ConversationPrev
 | `memberCount` | `number` | Total number of active members. |
 | `mutedUntil` | `string \| null` | When the current user's timed mute of the conversation ends (ISO timestamp). `null` when they haven't muted it, or muted it with no end (see `mutedForever`). |
 | `mutedForever` | `boolean` | `true` when the current user muted the conversation with no end. |
-| `lastMessage` | `LastMessagePreview \| null` | The most recent top-level message in the conversation (thread replies are never the last message), as a preview subset — see [LastMessagePreview](#lastmessagepreview). `null` if there is no top-level message. A [deleted or removed](/v8/data-models/chat-message#deleted-and-removed-messages) last message is shown as its placeholder. |
+| `lastMessage` | `ConversationPreviewLastMessage \| null` | The most recent top-level message in the conversation (thread replies are never the last message), as a preview subset — see [ConversationPreviewLastMessage](#conversationpreviewlastmessage). `null` if there is no top-level message. A [deleted or removed](/v8/data-models/chat-message#deleted-and-removed-messages) last message is shown as its placeholder. |
 | `otherMembers` | `{ id, name, username, avatar }[]` | Up to 5 active members other than the current user. Populated for `direct` and `group` conversations (a DM/group has no `name`, so the counterparty supplies the title/avatar); capped at 5 (use `memberCount` for the group total); empty for `space` conversations. |
 
-### LastMessagePreview
+### ConversationPreviewLastMessage
 
 | Property | Type | Description |
 |----------|------|-------------|

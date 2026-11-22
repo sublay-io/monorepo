@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { Workspace } from "../../interfaces/Workspace";
+import { Workspace, WorkspaceCapability } from "../../interfaces/Workspace";
 
 export interface TransferWorkspaceOwnershipProps {
   workspaceId: string;
@@ -25,7 +25,7 @@ export interface TransferWorkspaceOwnershipProps {
   // No relative form on this route; an explicit value here is absolute and is
   // NOT rank-floored.
   previousOwnerRank?: number;
-  previousOwnerCapabilities?: string[];
+  previousOwnerCapabilities?: WorkspaceCapability[];
 }
 
 export async function transferWorkspaceOwnership(

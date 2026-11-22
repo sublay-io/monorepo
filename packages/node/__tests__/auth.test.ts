@@ -176,9 +176,26 @@ describe("node-sdk auth — response mapping", () => {
     ).resolves.toEqual(result);
   });
 
-  it("signOut resolves to undefined", async () => {
-    const { client } = makeClient();
-    await expect(signOut(client, { refreshToken: "rt1" })).resolves.toBeUndefined();
+  it("signOut resolves to null on a 204", async () => {
+    const { client, projectInstance } = makeClient();
+    projectInstance.post.mockResolvedValueOnce({ status: 204, data: "" });
+    await expect(signOut(client, { refreshToken: "rt1" })).resolves.toBeNull();
+  });
+
+  it("signOut returns the push-unbind-skipped body on a 200", async () => {
+    const { client, projectInstance } = makeClient();
+    const result = {
+      pushUnbindSkipped: true,
+      code: "auth/push-unbind-status-unknown",
+      message: "Signed out.",
+    };
+    projectInstance.post.mockResolvedValueOnce({ status: 200, data: result });
+    await expect(
+      signOut(client, {
+        refreshToken: "rt1",
+        pushDevice: { platform: "android", token: "device-token-1" },
+      }),
+    ).resolves.toEqual(result);
   });
 
   it("requestNewAccessToken returns response.data", async () => {

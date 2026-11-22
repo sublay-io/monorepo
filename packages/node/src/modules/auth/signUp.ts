@@ -1,6 +1,11 @@
 import { SublayHttpClient } from "../../core/client";
 import { AuthUser } from "../../interfaces/User";
-import { appendFields, appendImageSlot, type ImageSlotFile } from "../../core/formData";
+import {
+  appendFields,
+  appendImageSlot,
+  withoutNulls,
+  type ImageSlotFile,
+} from "../../core/formData";
 import type {
   EmailVerificationOptions,
   EmailVerificationRequiredResponse,
@@ -9,16 +14,22 @@ import type {
 export interface SignUpProps {
   email: string;
   password: string;
-  name?: string;
+  /** `null` (or an empty string) for none. */
+  name?: string | null;
   username?: string;
-  avatar?: string;
-  bio?: string;
+  /** An image URL, or `null` for none. */
+  avatar?: string | null;
+  /** `null` (or an empty string) for none. */
+  bio?: string | null;
   location?: {
     latitude: number;
     longitude: number;
   };
-  /** ISO 8601 datetime string. */
-  birthdate?: string;
+  /**
+   * A `Date`, or a full UTC timestamp string such as
+   * `"1990-05-17T00:00:00.000Z"` (a date alone, like `"1990-05-17"`, is refused).
+   */
+  birthdate?: string | Date;
   metadata?: Record<string, any>;
   secureMetadata?: Record<string, any>;
   /**
@@ -37,6 +48,7 @@ export interface SignUpProps {
 }
 
 export interface SignUpResponse {
+  success: true;
   user: AuthUser;
   accessToken: string;
   refreshToken: string;
@@ -55,7 +67,7 @@ export async function signUp(
   let payload: FormData | typeof body = body;
   if (avatarFile || bannerFile) {
     const formData = new FormData();
-    appendFields(formData, body);
+    appendFields(formData, withoutNulls(body));
     if (avatarFile) appendImageSlot(formData, "avatarFile", avatarFile, "avatar");
     if (bannerFile) appendImageSlot(formData, "bannerFile", bannerFile, "banner");
     payload = formData;

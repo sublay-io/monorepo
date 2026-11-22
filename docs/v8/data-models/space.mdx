@@ -9,7 +9,7 @@ The API returns three space shapes depending on context:
 
 - **`Space`** — the standard shape, returned when fetching a list of spaces.
 - **`SpaceDetailed`** — returned when fetching a single space by ID, shortId, or slug. A superset of `Space` with added permission and hierarchy context.
-- **`SpacePreview`** — a minimal snapshot, never returned as a standalone response. Only appears embedded inside `SpaceDetailed` as the shape of `parentSpace` and each item in `childSpaces[]`.
+- **`SpacePreview`** — a minimal snapshot, never returned as a standalone response. Only appears embedded inside `SpaceDetailed` as the shape of `parentSpace`, and, with `readingPermission` added, of each item in `childSpaces[]`.
 
 ## Space
 
@@ -17,15 +17,14 @@ The API returns three space shapes depending on context:
 |----------|------|-------------|
 | `id` | `string` | Unique space identifier (UUID). |
 | `shortId` | `string` | Short human-readable ID for the space (URL-safe, generated automatically). |
-| `projectId` | `string` | The project this space belongs to. |
 | `slug` | `string \| null` | Optional URL-friendly slug. Unique per project when set. |
-| `name` | `string` | Display name of the space (3–100 characters). |
+| `name` | `string \| null` | Display name of the space (3–100 characters). `null` when the space was created without one. |
 | `description` | `string \| null` | Optional description (up to 1,000 characters). |
-| `userId` | `string` | ID of the space creator/owner. A child space's `userId` is its root space's creator, and that user is the space creator in every rule that names one. |
+| `userId` | `string \| null` | ID of the space creator/owner. A child space's `userId` is its root space's creator, and that user is the space creator in every rule that names one. |
 | `avatarFileId` | `string \| null` | ID of the space's avatar image file. Set by uploading `avatarFile` on create or update; cleared by listing it in `removeFileIds` on [Update Space](/v8/api-reference/spaces/update-space). |
-| `avatarFile` | `File \| undefined` | Populated avatar file object. Only present when `include: "files"` is requested. |
+| `avatarFile` | `File \| null \| undefined` | Populated avatar file object. Only present when `include: "files"` is requested; `null` when the space has no avatar. |
 | `bannerFileId` | `string \| null` | ID of the space's banner image file. Set and cleared like `avatarFileId`, with `bannerFile`. |
-| `bannerFile` | `File \| undefined` | Populated banner file object. Only present when `include: "files"` is requested. |
+| `bannerFile` | `File \| null \| undefined` | Populated banner file object. Only present when `include: "files"` is requested; `null` when the space has no banner. |
 | `readingPermission` | `"anyone" \| "members"` | Who can read content in the space: `"anyone"` who can read the space above it, or only its active members (`"members"`). Inherited by sub-spaces; see [Who can read content](#who-can-read-content). |
 | `postingPermission` | `"anyone" \| "members" \| "team"` | Who can post entities in the space: `"anyone"`, its active members (`"members"`), or only its active admins and moderators (`"team"`). Commenting and reacting don't follow it; see [Who can post and take part](#who-can-post-and-take-part). Creating an event in the space always needs active membership of it: a non-member, or anyone banned in the space itself, gets `403 event/not-space-member`; an active member banned in a space above it, or without the admin or moderator role in a `"team"` space, gets `403 space/posting-not-allowed`. |
 | `visibility` | `"public" \| "unlisted" \| "private"` | Who can find and see the space — independent of `readingPermission`, which controls who can read the content. `public` (the default) is listed in the directory and search; `unlisted` isn't listed but is reachable by id, short id or slug; `private` is seen only by its active members, and answers `404` to everyone else. See [Visibility](#visibility) below. |
@@ -49,23 +48,21 @@ Returned when fetching a single space by ID, shortId, or slug. Includes all `Spa
 |----------|------|-------------|
 | `memberPermissions` | `SpaceMemberPermissions` | What the viewer may do in this space (the signed-in user, or the user a service key names in `actingUserId`). Always present: a user with no membership gets it with `isMember: false` and `status: null`, and a pending, banned or rejected user with `isMember: false` and their `status`. A signed-out caller, and a service key naming nobody, get the anonymous view. See [How permissions are calculated](#how-permissions-are-calculated). |
 | `parentSpace` | `SpacePreview \| null` | Preview of the parent space. `null` for root-level spaces, and when the viewer can't see the parent (`parentSpaceId` still names it). |
-| `childSpaces` | `SpacePreview[]` | Preview of up to 10 immediate child spaces, A–Z by name: the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of. |
+| `childSpaces` | `(SpacePreview & { readingPermission })[]` | Preview of up to 10 immediate child spaces, A–Z by name: the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of. |
 
 ## SpacePreview
 
-A minimal space shape used only as an embedded reference — never returned directly by any endpoint. Appears as `SpaceDetailed.parentSpace` (the space one level up) and inside `SpaceDetailed.childSpaces[]` (spaces one level down).
+A minimal space shape used only as an embedded reference — never returned directly by any endpoint. Appears as `SpaceDetailed.parentSpace` (the space one level up) and inside `SpaceDetailed.childSpaces[]` (spaces one level down), where each item also carries `readingPermission`.
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | `string` | Space UUID. |
 | `shortId` | `string` | Short identifier. |
-| `name` | `string` | Display name. |
+| `name` | `string \| null` | Display name. |
 | `slug` | `string \| null` | URL slug. |
 | `avatarFileId` | `string \| null` | Avatar file ID. |
-| `readingPermission` | `"anyone" \| "members" \| undefined` | Reading permission level. |
-| `visibility` | `"public" \| "unlisted" \| "private" \| undefined` | Listing/discoverability level. |
-| `parentSpaceId` | `string \| null \| undefined` | Parent space reference. |
-| `depth` | `number \| undefined` | Nesting depth. |
+| `visibility` | `"public" \| "unlisted" \| "private"` | Listing/discoverability level. |
+| `readingPermission` | `"anyone" \| "members"` | Reading permission level. Only on `childSpaces[]` items, not on `parentSpace`. |
 
 ## SpaceMemberPermissions
 

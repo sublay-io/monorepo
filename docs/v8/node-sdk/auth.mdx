@@ -40,16 +40,36 @@ if ("accessToken" in result) {
   The user's plain-text password (hashed server-side).
 </ParamField>
 
-<ParamField body="name" type="string">
-  Display name for the user.
+<ParamField body="name" type="string | null">
+  Display name for the user. `null` or an empty string leaves it unset.
 </ParamField>
 
 <ParamField body="username" type="string">
   Unique username. Must be available — check with `users.checkUsernameAvailability` first.
 </ParamField>
 
+<ParamField body="avatar" type="string | null">
+  Avatar image URL, stored as given. Separate from `avatarFile`, which uploads an image.
+</ParamField>
+
+<ParamField body="bio" type="string | null">
+  Bio text. `null` or an empty string leaves it unset.
+</ParamField>
+
+<ParamField body="location" type="{ latitude: number; longitude: number }">
+  The user's location, stored as a GeoJSON point.
+</ParamField>
+
+<ParamField body="birthdate" type="string | Date">
+  The user's birthdate: a `Date`, or a full UTC timestamp string such as `"1990-05-17T00:00:00.000Z"`. A date alone (`"1990-05-17"`) or a time with an offset is refused with `400 auth/invalid-body` and `param: "birthdate"`.
+</ParamField>
+
 <ParamField body="metadata" type="object">
   Arbitrary key-value data attached to the user at creation time.
+</ParamField>
+
+<ParamField body="secureMetadata" type="object">
+  Key-value data no API response returns to any user. Users can also write their own, so don't treat it as trusted.
 </ParamField>
 
 <ParamField body="emailVerification" type='{ mode?: "link" | "code"; redirectUrl?: string }'>
@@ -64,7 +84,7 @@ if ("accessToken" in result) {
   A banner image to upload; same shape as `avatarFile`.
 </ParamField>
 
-**Returns** — `Promise<SignUpResponse | EmailVerificationRequiredResponse>`: `{ user, accessToken, refreshToken }`, or, when the project requires email verification before sign-in, `{ success: true, emailVerificationRequired: true, verificationId? }` with no tokens.
+**Returns** — `Promise<SignUpResponse | EmailVerificationRequiredResponse>`: `{ success: true, user, accessToken, refreshToken }`, or, when the project requires email verification before sign-in, `{ success: true, emailVerificationRequired: true, verificationId? }` with no tokens.
 
 ---
 
@@ -91,7 +111,7 @@ const { user, accessToken, refreshToken } = await sublay.auth.signIn({
   How the new confirmation email is sent when sign-in is refused because the account's email isn't confirmed. Ignored when the project doesn't require email verification before sign-in.
 </ParamField>
 
-**Returns** — `Promise<{ user: AuthUser; accessToken: string; refreshToken: string }>`
+**Returns** — `Promise<{ success: true; user: AuthUser; accessToken: string; refreshToken: string }>` (see [AuthUser](/v8/data-models/user#authuser))
 
 When the project requires email verification before sign-in and the account's email isn't confirmed, a correct password rejects with a `403` whose body is `EmailNotVerifiedErrorBody` (`{ error, code: "auth/email-not-verified", verificationId? }`, read from `err.response.data`), and a new confirmation email is sent (unless one went out in the last 10 minutes).
 
@@ -136,25 +156,26 @@ await sublay.auth.signOut({
   [`POST /auth/sign-out`](/v8/api-reference/auth/sign-out#response).
 </Warning>
 
-**Returns** — `Promise<void>`
+**Returns** — `Promise<SignOutPushUnbindSkipped | null>`: `null` when signed out (`204`), or `{ pushUnbindSkipped: true, code: "auth/push-unbind-status-unknown", message }` (`200`) when signed out without the requested push unbind.
 
 ---
 
 ### requestNewAccessToken
 
-Exchanges a valid refresh token for a new access token.
+Exchanges a valid refresh token for a new access token. The refresh token rotates: store the returned `refreshToken` in place of the one you sent.
 
 ```typescript
-const { accessToken } = await sublay.auth.requestNewAccessToken({
-  refreshToken,
-});
+const result = await sublay.auth.requestNewAccessToken({ refreshToken });
+if (result.accessToken) {
+  const { accessToken, refreshToken: nextRefreshToken, user } = result;
+}
 ```
 
 <ParamField body="refreshToken" type="string" required>
   A valid, non-expired refresh token.
 </ParamField>
 
-**Returns** — `Promise<{ accessToken: string }>`
+**Returns** — `Promise<RequestNewAccessTokenResponse>`: `{ success: true, accessToken, refreshToken, user: AuthUser }`, or `{ user: null, accessToken: null }` when `refreshToken` is empty.
 
 ---
 
@@ -172,7 +193,7 @@ const { user, accessToken, refreshToken } = await sublay.auth.verifyExternalUser
   A JWT signed with your project's signing secret, containing user identity claims.
 </ParamField>
 
-**Returns** — `Promise<{ user: AuthUser; accessToken: string; refreshToken: string }>`
+**Returns** — `Promise<{ success: true; user: AuthUser; accessToken: string; refreshToken: string }>` (see [AuthUser](/v8/data-models/user#authuser))
 
 ---
 

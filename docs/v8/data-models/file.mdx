@@ -3,7 +3,7 @@ title: "File"
 description: "The File and FileImage interface shapes for uploaded media"
 ---
 
-A `File` record represents a file uploaded to Sublay's storage system. Files can be attached to users (avatars, banners), entities, comments, chat messages, or spaces. Image files include an additional `image` extension with processed variants at multiple sizes.
+A `File` record represents a file uploaded to Sublay's storage system. Files can be attached to users (avatars, banners), entities, events, comments, chat messages, or spaces. Image files include an additional `image` extension with processed variants at multiple sizes.
 
 A user's or space's avatar and banner are uploaded, replaced and removed through that record's update (`avatarFile`, `bannerFile`, `removeFileIds`), and a chat message's files are removed with the message; [Delete File](/v8/api-reference/storage/delete-file) refuses both with `409 storage/file-attached`.
 
@@ -12,9 +12,9 @@ A user's or space's avatar and banner are uploaded, replaced and removed through
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | `string` | Unique file identifier (UUID). |
-| `projectId` | `string` | The project this file belongs to. |
 | `userId` | `string \| null` | The file's owner: the uploader, or the user a service key named in `actingUserId`. `null` for an app-owned file (uploaded by a service key naming nobody), which only a service key naming nobody may delete. |
 | `entityId` | `string \| null` | The entity this file is attached to. |
+| `eventId` | `string \| null` | The event this file is attached to. |
 | `commentId` | `string \| null` | The comment this file is attached to. |
 | `chatMessageId` | `string \| null` | The chat message this file is attached to. |
 | `spaceId` | `string \| null` | The space this file is associated with. |

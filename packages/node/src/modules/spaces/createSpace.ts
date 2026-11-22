@@ -5,7 +5,12 @@ import {
   PostingPermission,
   SpaceVisibility,
 } from "../../interfaces/Space";
-import { appendFields, appendImageSlot, type ImageSlotFile } from "../../core/formData";
+import {
+  appendFields,
+  appendImageSlot,
+  withoutNulls,
+  type ImageSlotFile,
+} from "../../core/formData";
 
 export interface CreateSpaceProps {
   /**
@@ -14,14 +19,15 @@ export interface CreateSpaceProps {
    * be an admin of the parent).
    */
   actingUserId: string;
-  name: string;
-  slug?: string;
-  description?: string;
+  // `null` is the same as leaving the field out.
+  name?: string | null;
+  slug?: string | null;
+  description?: string | null;
   readingPermission?: ReadingPermission;
   postingPermission?: PostingPermission;
   visibility?: SpaceVisibility;
   requireJoinApproval?: boolean;
-  parentSpaceId?: string;
+  parentSpaceId?: string | null; // `null` for a top-level space
   metadata?: Record<string, any>;
   nsfw?: boolean;
   /**
@@ -42,7 +48,7 @@ export async function createSpace(
 
   if (avatarFile || bannerFile) {
     const formData = new FormData();
-    appendFields(formData, body);
+    appendFields(formData, withoutNulls(body));
     if (avatarFile) appendImageSlot(formData, "avatarFile", avatarFile, "avatar");
     if (bannerFile) appendImageSlot(formData, "bannerFile", bannerFile, "banner");
     const response = await client.projectInstance.post<SpaceWithPermissions>(

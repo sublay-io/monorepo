@@ -10,31 +10,51 @@ A `Conversation` represents a messaging thread between two or more participants.
 | Property | Type | Description |
 |----------|------|-------------|
 | `id` | `string` | Unique conversation identifier (UUID). |
-| `projectId` | `string` | The project this conversation belongs to. |
 | `type` | `"direct" \| "group" \| "space"` | Conversation type. |
 | `name` | `string \| null` | Display name. Always `null` for direct conversations. |
 | `description` | `string \| null` | Optional description. Used for group and space conversations. |
 | `spaceId` | `string \| null` | The Space this conversation belongs to. Set only when `type` is `"space"`. |
+| `directKey` | `string \| null` | Identifies the pair of members of a `direct` conversation. Set on direct conversations only; `null` for group and space conversations. |
 | `createdById` | `string \| null` | ID of the user who created the conversation. `null` for auto-created space conversations. |
 | `avatarFileId` | `string \| null` | ID of the uploaded avatar file for this conversation. |
-| `avatarFile` | `File \| undefined` | Populated avatar file object, if `avatarFileId` is set. |
+| `avatarFile` | `File \| null \| undefined` | Populated avatar file object. Returned by [Update Conversation](/v8/api-reference/chat/conversations/update-conversation) when the `files-images` bundle is installed; `null` when the conversation has no avatar. |
 | `lastMessageAt` | `Date \| null` | Timestamp of the most recent message. Used for conversation list sorting. `null` if no messages have been sent. |
 | `postingPermission` | `"members" \| "team" \| null` | Who can post in the conversation: any active member (`"members"`), or only the space's active admins and moderators (`"team"`). Only set for `space` conversations. `null` for direct and group conversations. |
 | `metadata` | `Record<string, any>` | Custom key-value data. Limited to 1 MB. |
-| `memberCount` | `number` | Total number of active members. |
-| `currentMember` | `ConversationMember \| undefined` | The requesting user's own membership row. Included in API responses when applicable. |
+| `memberCount` | `number \| undefined` | Total number of active members. Returned by Fetch Conversation and Fetch Space Conversation, and on every `ConversationPreview`. |
+| `currentMember` | `ConversationMember \| null \| undefined` | The requesting user's own membership row, with their mute state. Returned by Fetch Conversation and Fetch Space Conversation; `null` when they have no row. |
 | `createdAt` | `Date` | Timestamp when the conversation was created. |
 | `updatedAt` | `Date` | Timestamp of the last update. |
 
 ## ConversationPreview
 
-When listing conversations (e.g. in an inbox), the API returns `ConversationPreview` objects, which extend `Conversation` with these additional fields:
+When listing conversations (e.g. in an inbox), the API returns `ConversationPreview` objects, which carry the `Conversation` fields except `currentMember` and `avatarFile`, plus these:
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `unreadCount` | `number` | Number of messages sent after the current user's `lastReadAt`. |
-| `lastMessage` | `ChatMessage \| null` | The most recent top-level message in the conversation (thread replies are never the last message), truncated to 100 characters. `null` if there is no top-level message. A [deleted or removed](/v8/data-models/chat-message#deleted-and-removed-messages) last message is shown as its placeholder. |
+| `memberCount` | `number` | Total number of active members. |
+| `mutedUntil` | `string \| null` | When the current user's timed mute of the conversation ends (ISO timestamp). `null` when they haven't muted it, or muted it with no end (see `mutedForever`). |
+| `mutedForever` | `boolean` | `true` when the current user muted the conversation with no end. |
+| `lastMessage` | `ConversationPreviewLastMessage \| null` | The most recent top-level message in the conversation (thread replies are never the last message), as a preview subset — see [ConversationPreviewLastMessage](#conversationpreviewlastmessage). `null` if there is no top-level message. A [deleted or removed](/v8/data-models/chat-message#deleted-and-removed-messages) last message is shown as its placeholder. |
 | `otherMembers` | `{ id, name, username, avatar }[]` | Up to 5 active members other than the current user. Populated for `direct` and `group` conversations (a DM/group has no `name`, so the counterparty supplies the title/avatar); capped at 5 (use `memberCount` for the group total); empty for `space` conversations. |
+
+### ConversationPreviewLastMessage
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `string` | The message's ID. |
+| `conversationId` | `string` | The conversation's ID. |
+| `content` | `string \| null` | The message text, cut to 100 characters. `null` on a placeholder. |
+| `gif` | `GifData \| null` | The GIF, if any. `null` on a placeholder. |
+| `userId` | `string \| null` | The sender's ID. `null` on a removed message for everyone but its author, and when the sender's account was deleted. |
+| `moderationStatus` | `"removed" \| null` | The message's moderation status. |
+| `userDeletedAt` | `Date \| null` | Set when the sender deleted the message, or their account was deleted. |
+| `createdAt` | `Date` | When the message was sent. |
+| `files` | `File[]` | The message's files. `[]` on a placeholder and without the `files-images` bundle. |
+| `user` | `{ id, name, username, avatar, reputation } \| null` | The sender, on `group` and `space` conversations only (a DM's counterparty is in `otherMembers`). `null` on `direct` conversations and whenever `userId` is `null`. |
+
+The preview carries no mentions, quotes or reactions.
 
 ## Conversation Types
 

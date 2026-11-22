@@ -6,6 +6,7 @@ export interface VerifyExternalUserProps {
 }
 
 export interface VerifyExternalUserResponse {
+  success: true;
   user: AuthUser;
   accessToken: string;
   refreshToken: string;

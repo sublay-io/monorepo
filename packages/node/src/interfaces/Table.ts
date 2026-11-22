@@ -67,7 +67,8 @@ export interface CustomColumnDefinition {
 export interface CreateTableProps {
   /** Logical name — the server prepends `custom_`. */
   tableName: string;
-  columns: CustomColumnDefinition[];
+  /** The table's own columns. Default none: the table has only its managed columns. */
+  columns?: CustomColumnDefinition[];
   /** Emit createdAt/updatedAt. Default true. */
   timestamps?: boolean;
   /** Emit deletedAt (soft delete). Requires timestamps. Default false. */

@@ -65,9 +65,8 @@ src/
 └── index.ts                # Main entry point with SublayClient class
 ```
 
-> **Not bound (unmounted):** `oauth` only. It's a browser redirect flow with no
-> meaningful server-to-server contract — the directory stays on disk but is not
-> exposed on `SublayClient`.
+> **No `oauth` module:** OAuth sign-in is a browser redirect flow with no
+> server-to-server use, so the SDK has no functions for it.
 >
 > The space-scoped chat endpoints (`getSpaceConversation`, `moderateSpaceChatMessage`)
 > and the one report handler (`handleSpaceReport`, every report type) live on
@@ -106,7 +105,7 @@ const client = await SublayClient.init({
 
 **Acting on behalf of a user**: the SDK authenticates as the project (service key), not as an end user. So user-scoped functions take `actingUserId` — the user the operation is performed as — on every v8 route, in the body or query where the server reads it. `userId` only ever names a user the request is about: a path target (`users.*ByUserId`, the follow/connection/block pairs, `spaces.fetchMutualSpaces`, `workspaces.fetchMutualWorkspaces`), a body target (`chat.createDirectConversation` / `chat.addMember`, event hosts and invites, `workspaces.createWorkspaceInvite`), or the author filter on `entities.fetchManyEntities`. The server answers an old actor `userId` with 400 `<resource>/unsupported-param`. An `actingUserId` that isn't a user in the project gets 404 `<resource>/user-not-found` on every route that takes one; a route that needs an acting user answers a missing one with 400 `<resource>/missing-user-id`. Open reads take an optional `actingUserId` to get exactly that user's view (user profiles, follower/following/connection lists and counts, `fetchCommentsByUserId`, `search.searchUsers`/`searchContent`/`askContent`, the entity and comment reads and reaction lists, the event reads and `fetchEventRsvps`, the space reads, member and team lists and child spaces, `reputation.listGrants`); without it they return exactly the anonymous view (for `listGrants`, a signed-in user in no conversation). **The owner acts**: `updateEntity`/`deleteEntity`, `updateComment`/`deleteComment` and `storage.deleteFile` need `actingUserId` naming the author when the record has one (400 `<area>/missing-user-id` without it), and omit it only for an app-owned record. `publishDraft` requires `actingUserId` (typed required), the draft's author: an author-less draft is 404 everywhere on v8. Creates without `actingUserId` (`createEntity`, uploads) make an app-owned record; a draft needs an owner. `createdAt`/`updatedAt` backdating on entity and comment create is a service-key ability, also with `actingUserId`. Routes that need the user's own access token (password change/set, account deletion, OAuth link/identities, push device register/deregister) refuse service keys, so the SDK has no methods for them.
 
-**Intentionally NOT bound**: `oauth` only (a browser redirect flow). The directory exists under `src/modules/` but is not exposed on `SublayClient`; do not document it.
+**No `oauth` module**: OAuth sign-in is a browser redirect flow, so the SDK has no functions for it; do not document any.
 
 ### 1. Entities Module (15 functions)
 

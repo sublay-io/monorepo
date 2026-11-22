@@ -19,29 +19,30 @@ export interface SpaceMemberPermissions {
   canRead: boolean;
 }
 
+// The parent space carried by a single-space read
 export interface SpacePreview {
   id: string;
   shortId: string;
-  name: string;
+  name: string | null;
   slug: string | null;
   avatarFileId: string | null;
-  readingPermission?: ReadingPermission;
-  visibility?: SpaceVisibility;
-  parentSpaceId?: string | null;
-  depth?: number;
-  avatarFile?: File;
+  visibility: SpaceVisibility;
+}
+
+// A sub-space in a single-space read's `childSpaces` preview
+export interface ChildSpacePreview extends SpacePreview {
+  readingPermission: ReadingPermission;
 }
 
 export interface Space {
   id: string;
-  projectId: string;
   shortId: string;
   slug: string | null;
-  name: string;
+  name: string | null;
   description: string | null;
   avatarFileId: string | null;
   bannerFileId: string | null;
-  userId: string;
+  userId: string | null;
   readingPermission: ReadingPermission;
   postingPermission: PostingPermission;
   visibility: SpaceVisibility;
@@ -53,12 +54,11 @@ export interface Space {
   metadata: Record<string, any>;
   createdAt: string;
   updatedAt: string;
-  deletedAt: string | null;
   membersCount: number;
   childSpacesCount: number;
   isMember?: boolean; // Only present when user is authenticated
-  avatarFile?: File;
-  bannerFile?: File;
+  avatarFile?: File | null;
+  bannerFile?: File | null;
 }
 
 // Returned from create and update — the space plus the caller's permissions in it
@@ -75,7 +75,7 @@ export interface SpaceWithPermissions extends Space {
 // Returned from single-space fetch endpoints — extends Space with extra context
 export interface SpaceDetailed extends SpaceWithPermissions {
   parentSpace: SpacePreview | null;
-  childSpaces: SpacePreview[];
+  childSpaces: ChildSpacePreview[];
 }
 
 export interface MySpaceItem {
@@ -113,7 +113,7 @@ export interface CheckMyMembershipResponse {
 export interface VisibleSpaceBreadcrumbEntry {
   id: string;
   shortId: string;
-  name: string;
+  name: string | null;
   slug: string | null;
   avatarFileId: string | null;
   visibility: SpaceVisibility;

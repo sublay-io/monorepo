@@ -80,8 +80,8 @@ const { user, created } = await sublay.users.fetchOrCreateUserByForeignId({
   Your application's user identifier, kept exactly as sent. A blank or whitespace-only one is refused with `400 user/invalid-body`.
 </ParamField>
 
-<ParamField body="name" type="string">
-  Display name — used only when creating a new user.
+<ParamField body="name" type="string | null">
+  Display name, or `null` for none — used only when creating a new user.
 </ParamField>
 
 <ParamField body="username" type="string">
@@ -92,8 +92,8 @@ const { user, created } = await sublay.users.fetchOrCreateUserByForeignId({
   Avatar URL, or `null` for none — used only when creating a new user.
 </ParamField>
 
-<ParamField body="bio" type="string">
-  Bio text — used only when creating a new user.
+<ParamField body="bio" type="string | null">
+  Bio text, or `null` for none — used only when creating a new user.
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -167,32 +167,32 @@ const updatedUser = await sublay.users.updateUser({
   The user the request acts as. Must be the same user as `userId`.
 </ParamField>
 
-<ParamField body="name" type="string">
-  New display name.
+<ParamField body="name" type="string | null">
+  New display name. `null` or an empty string clears it.
 </ParamField>
 
 <ParamField body="username" type="string">
   New username. Must be available: a username another user already holds throws a `409` (`user/username-taken`, with `param: "username"`).
 </ParamField>
 
-<ParamField body="bio" type="string">
-  New bio text.
+<ParamField body="bio" type="string | null">
+  New bio text. `null` or an empty string clears it.
 </ParamField>
 
-<ParamField body="avatar" type="string">
-  New avatar URL, stored as given. Separate from `avatarFile`, which uploads an image.
+<ParamField body="avatar" type="string | null">
+  New avatar URL, stored as given; `null` clears it. Separate from `avatarFile`, which uploads an image.
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  Updated public metadata. Merged with existing metadata.
+  Updated public metadata. Replaces the stored object; send the whole object, including keys you aren't changing.
 </ParamField>
 
 <ParamField body="secureMetadata" type="object">
-  Updated secure metadata. No API response returns it to any user. Users can also write their own, so don't treat it as trusted. Merged with existing values.
+  Updated secure metadata. No API response returns it to any user. Users can also write their own, so don't treat it as trusted. Replaces the stored object, like `metadata`.
 </ParamField>
 
-<ParamField body="birthdate" type="Date">
-  The user's birthdate.
+<ParamField body="birthdate" type="string | Date">
+  The user's birthdate: a `Date`, or a full UTC timestamp string such as `"1990-05-17T00:00:00.000Z"`. A date alone (`"1990-05-17"`) or a time with an offset is refused with `400 user/invalid-body` and `param: "birthdate"`.
 </ParamField>
 
 <ParamField body="location" type="object">
@@ -200,7 +200,7 @@ const updatedUser = await sublay.users.updateUser({
 </ParamField>
 
 <ParamField body="avatarFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
-  A new avatar image, replacing the current one (up to 50 MB). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 user/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
+  A new avatar image, replacing the current one (up to 50 MB). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 user/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`. A field set to `null` can't travel with an image: the call throws before sending anything, so clear it in a separate call without one.
 </ParamField>
 
 <ParamField body="bannerFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
@@ -223,7 +223,7 @@ if (user.bannerFileId) {
 }
 ```
 
-**Returns** — `Promise<UserFull>`
+**Returns** — `Promise<AuthUser>` — the updated user as they see themselves (see [AuthUser](/v8/data-models/user#authuser)).
 
 ---
 

@@ -1,5 +1,6 @@
 import { PaginatedResponse } from "./IPaginatedResponse";
 import { SpaceMemberRole, SpaceMemberStatus } from "./Space";
+import { User } from "./User";
 
 /**
  * A membership record: what the member actions (join, add, approve, decline,
@@ -21,13 +22,7 @@ export interface SpaceMemberWithUser {
   role: SpaceMemberRole;
   status: SpaceMemberStatus;
   joinedAt: string;
-  user: {
-    id: string;
-    username: string;
-    displayName: string;
-    avatar: string;
-    metadata: object;
-  };
+  user: User | null;
 }
 
 export type SpaceMembersResponse = PaginatedResponse<SpaceMemberWithUser>;

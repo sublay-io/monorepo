@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { WorkspaceInvitation } from "../../interfaces/Workspace";
+import { WorkspaceCapability, WorkspaceInvitation } from "../../interfaces/Workspace";
 
 export interface CreateWorkspaceInviteProps {
   workspaceId: string;
@@ -9,7 +9,7 @@ export interface CreateWorkspaceInviteProps {
   email?: string;
   userId?: string;
   username?: string;
-  capabilities?: string[];
+  capabilities?: WorkspaceCapability[];
   permissions?: string[];
   /**
    * The invited rank, ABSOLUTE — a position on this workspace's ladder (smaller

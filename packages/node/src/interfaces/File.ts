@@ -25,9 +25,9 @@ export interface FileImage {
 
 export interface File {
   id: string;
-  projectId: string;
   userId: string | null;
   entityId: string | null;
+  eventId: string | null;
   commentId: string | null;
   chatMessageId: string | null;
   spaceId: string | null;

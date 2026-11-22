@@ -89,7 +89,7 @@ describe("node-sdk image slots — updateSpace", () => {
 });
 
 describe("node-sdk image slots — updateUser", () => {
-  it("sends a banner and removeFileIds as multipart, a Date as its ISO string", async () => {
+  it("sends a banner and removeFileIds as multipart", async () => {
     const { client, projectInstance } = makeClient();
     await updateUser(client, {
       userId: "u1",
@@ -158,5 +158,41 @@ describe("node-sdk image slots — signUp", () => {
     await signUp(client, { email: "a@b.com", password: "pw" });
     const [, body] = projectInstance.post.mock.calls[0];
     expect(body).not.toBeInstanceOf(FormData);
+  });
+});
+
+describe("node-sdk image slots — a null field can't travel with a file", () => {
+  const avatarFile = { file: bytes(), mimeType: "image/png", options: avatarOptions };
+
+  it.each([
+    ["updateSpace", (c: any) => updateSpace(c, { spaceId: "s1", actingUserId: "u1", description: null, avatarFile }), "description"],
+    ["updateUser", (c: any) => updateUser(c, { userId: "u1", actingUserId: "u1", bio: null, avatarFile }), "bio"],
+  ])("%s throws before sending anything", async (fn, call, field) => {
+    const { client, projectInstance } = makeClient();
+    await expect(call(client)).rejects.toThrow(`${fn}: \`${field}: null\` can't be sent with a file`);
+    expect(projectInstance.post).not.toHaveBeenCalled();
+    expect(projectInstance.patch).not.toHaveBeenCalled();
+  });
+
+  it("leaves a null field out of a create's multipart body (null there means none)", async () => {
+    const { client, projectInstance } = makeClient();
+    await createSpace(client, { actingUserId: "u1", slug: null, parentSpaceId: null, avatarFile });
+    await signUp(client, { email: "a@b.co", password: "pw", name: null, avatarFile });
+    const spaceForm = projectInstance.post.mock.calls[0][1] as FormData;
+    const signUpForm = projectInstance.post.mock.calls[1][1] as FormData;
+    expect(spaceForm.has("slug")).toBe(false);
+    expect(spaceForm.has("parentSpaceId")).toBe(false);
+    expect(signUpForm.has("name")).toBe(false);
+    expect(signUpForm.get("email")).toBe("a@b.co");
+  });
+
+  it("sends null as JSON when no file is attached", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateSpace(client, { spaceId: "s1", actingUserId: "u1", slug: null, description: null });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/spaces/s1", {
+      actingUserId: "u1",
+      slug: null,
+      description: null,
+    });
   });
 });

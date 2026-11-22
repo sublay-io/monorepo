@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { Entity } from "../../interfaces/Entity";
+import { EntityRecord } from "../../interfaces/Entity";
 
 export interface IncrementEntityViewsProps {
   entityId: string;
@@ -9,10 +9,11 @@ export interface IncrementEntityViewsProps {
 export async function incrementEntityViews(
   client: SublayHttpClient,
   data: IncrementEntityViewsProps
-): Promise<Entity> {
+): Promise<EntityRecord> {
   const { entityId, ...body } = data;
   const path = `/entities/${entityId}/increment-views`;
-  // `count` is a JSON integer in the body (default 1 when omitted).
-  const response = await client.projectInstance.post<Entity>(path, body);
+  // `count` is a JSON integer in the body (default 1 when omitted). The server
+  // returns the stored entity record only (no computed or included fields).
+  const response = await client.projectInstance.post<EntityRecord>(path, body);
   return response.data;
 }

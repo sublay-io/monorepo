@@ -46,11 +46,7 @@ Returned by the list members and list team endpoints. Includes embedded public u
 | `role` | `"admin" \| "moderator" \| "member"` | Member's role. |
 | `status` | `"pending" \| "active" \| "banned" \| "rejected"` | Member's status. |
 | `joinedAt` | `Date` | When the user joined. |
-| `user.id` | `string` | User UUID. |
-| `user.username` | `string` | Username. |
-| `user.displayName` | `string` | Display name. |
-| `user.avatar` | `string` | Avatar URL. |
-| `user.metadata` | `object` | Public metadata. |
+| `user` | [`User`](/v8/data-models/user) \| `null` | The member's public user record (with `spaceReputation` when requested). `null` when the user record no longer exists. |
 
 <Note>Sensitive user fields (email, password hash, `secureMetadata`) are excluded from `SpaceMemberWithUser` responses.</Note>
 

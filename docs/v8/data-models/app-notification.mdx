@@ -20,6 +20,7 @@ All notification types include these fields:
 | `title` | `string \| undefined` | Display title derived from the notification template. Only present when the notification has been populated — not guaranteed on every notification object. |
 | `content` | `string \| undefined` | Display content derived from the notification template. Only present when the notification has been populated — not guaranteed on every notification object. |
 | `createdAt` | `string` | ISO timestamp when the notification was created. |
+| `updatedAt` | `string` | ISO timestamp when the notification was last updated (e.g. marked as read). |
 
 ## Notification Types
 
@@ -32,15 +33,21 @@ Triggered when someone comments on the user's entity.
 | Metadata Field | Type | Description |
 |----------------|------|-------------|
 | `entityId` | `string` | ID of the entity. |
+| `entityForeignId` | `string \| null` | Your system's ID for the entity. |
 | `entityShortId` | `string` | Short ID for sharing links. |
 | `entityTitle` | `string \| null` | Entity title. |
 | `entityContent` | `string \| null` | Entity content preview. |
 | `commentId` | `string` | ID of the new comment. |
+| `commentForeignId` | `string \| null` | Your system's ID for the comment. |
 | `commentContent` | `string \| null` | Comment content preview. |
+| `spaceId`, `spaceShortId`, `spaceSlug` | `string \| null \| undefined` | Id forms of the space the entity is in. Absent or `null` outside a space. |
 | `initiatorId` | `string` | ID of the user who commented. |
 | `initiatorName` | `string \| null` | Display name of the commenter. |
 | `initiatorUsername` | `string \| null` | Username of the commenter. |
+| `initiatorForeignId` | `string \| null \| undefined` | Your system's ID for the initiator. |
 | `initiatorAvatar` | `string \| null` | Avatar URL of the commenter. |
+| `entityMetadata` | `Record<string, any> \| null` | The entity's `metadata`. |
+| `commentMetadata` | `Record<string, any> \| null` | The comment's `metadata`. |
 
 ### `comment-reply`
 
@@ -64,13 +71,17 @@ Triggered when a user is mentioned in an entity.
 | Metadata Field | Type | Description |
 |----------------|------|-------------|
 | `entityId` | `string` | ID of the entity containing the mention. |
+| `entityForeignId` | `string \| null` | Your system's ID for the entity. |
 | `entityShortId` | `string` | Short ID for sharing links. |
 | `entityTitle` | `string \| null` | Entity title. |
 | `entityContent` | `string \| null` | Entity content preview. |
+| `spaceId`, `spaceShortId`, `spaceSlug` | `string \| null \| undefined` | Id forms of the space the entity is in. Absent or `null` outside a space. |
 | `initiatorId` | `string` | ID of the user who made the mention. |
 | `initiatorName` | `string \| null` | Display name. |
 | `initiatorUsername` | `string \| null` | Username. |
+| `initiatorForeignId` | `string \| null \| undefined` | Your system's ID for the initiator. |
 | `initiatorAvatar` | `string \| null` | Avatar URL. |
+| `entityMetadata` | `Record<string, any> \| null` | The entity's `metadata`. |
 
 ### `comment-mention`
 
@@ -83,7 +94,9 @@ Same as `entity-mention` metadata, plus:
 | Metadata Field | Type | Description |
 |----------------|------|-------------|
 | `commentId` | `string` | ID of the comment containing the mention. |
+| `commentForeignId` | `string \| null` | Your system's ID for the comment. |
 | `commentContent` | `string \| null` | Comment content preview. |
+| `commentMetadata` | `Record<string, any> \| null` | The comment's `metadata`. |
 
 ### `entity-upvote`
 
@@ -91,7 +104,7 @@ Triggered when someone upvotes the user's entity.
 
 **Action**: `"open-entity"`
 
-Same as `entity-mention` metadata.
+Same as `entity-mention` metadata, without the space fields (`spaceId`, `spaceShortId`, `spaceSlug`) and `initiatorForeignId`.
 
 ### `comment-upvote`
 
@@ -99,7 +112,7 @@ Triggered when someone upvotes the user's comment.
 
 **Action**: `"open-comment"`
 
-Same as `comment-mention` metadata.
+Same as `comment-mention` metadata, without the space fields (`spaceId`, `spaceShortId`, `spaceSlug`) and `initiatorForeignId`.
 
 ### `entity-reaction`
 
@@ -130,12 +143,15 @@ Triggered when an entity reaches a milestone count for a specific reaction type.
 | Metadata Field | Type | Description |
 |----------------|------|-------------|
 | `entityId` | `string` | ID of the entity. |
+| `entityForeignId` | `string \| null` | Your system's ID for the entity. |
 | `entityShortId` | `string` | Short ID. |
 | `entityTitle` | `string \| null` | Entity title. |
 | `entityContent` | `string \| null` | Content preview. |
 | `reactionType` | `string` | The reaction type that hit the milestone. |
 | `milestoneCount` | `number` | The milestone count reached. |
 | `lastThreeUsers` | `MilestoneUser[]` | The three most recent reactors. |
+| `spaceId`, `spaceShortId`, `spaceSlug` | `string \| null \| undefined` | Id forms of the space the entity is in. Absent or `null` outside a space. |
+| `entityMetadata` | `Record<string, any> \| null` | The entity's `metadata`. |
 
 ### `entity-reaction-milestone-total`
 
@@ -146,12 +162,15 @@ Triggered when an entity reaches a milestone for total reactions across all type
 | Metadata Field | Type | Description |
 |----------------|------|-------------|
 | `entityId` | `string` | ID of the entity. |
+| `entityForeignId` | `string \| null` | Your system's ID for the entity. |
 | `entityShortId` | `string` | Short ID. |
 | `entityTitle` | `string \| null` | Entity title. |
 | `entityContent` | `string \| null` | Content preview. |
 | `milestoneCount` | `number` | The total reaction milestone reached. |
 | `reactionCounts` | `Record<string, number>` | Breakdown of counts by reaction type. |
 | `lastThreeUsers` | `MilestoneUser[]` | The three most recent reactors. |
+| `spaceId`, `spaceShortId`, `spaceSlug` | `string \| null \| undefined` | Id forms of the space the entity is in. Absent or `null` outside a space. |
+| `entityMetadata` | `Record<string, any> \| null` | The entity's `metadata`. |
 
 ### `comment-reaction-milestone-specific`
 
@@ -162,14 +181,19 @@ Triggered when a comment reaches a milestone count for a specific reaction type.
 | Metadata Field | Type | Description |
 |----------------|------|-------------|
 | `entityId` | `string` | ID of the entity the comment belongs to. |
+| `entityForeignId` | `string \| null` | Your system's ID for the entity. |
 | `entityShortId` | `string` | Short ID. |
 | `entityTitle` | `string \| null` | Entity title. |
 | `entityContent` | `string \| null` | Entity content preview. |
 | `commentId` | `string` | ID of the comment. |
+| `commentForeignId` | `string \| null` | Your system's ID for the comment. |
 | `commentContent` | `string \| null` | Comment content preview. |
 | `reactionType` | `string` | The reaction type that hit the milestone. |
 | `milestoneCount` | `number` | The milestone count reached. |
 | `lastThreeUsers` | `MilestoneUser[]` | Up to three of the most recent reactors, newest first. Reactors who are block-edged with the comment's author (in either direction) are skipped, so the list can hold fewer than three even when the count is higher. The milestone count itself includes every reaction. |
+| `spaceId`, `spaceShortId`, `spaceSlug` | `string \| null \| undefined` | Id forms of the space the entity is in. Absent or `null` outside a space. |
+| `entityMetadata` | `Record<string, any> \| null` | The entity's `metadata`. |
+| `commentMetadata` | `Record<string, any> \| null` | The comment's `metadata`. |
 
 ### `comment-reaction-milestone-total`
 
@@ -180,14 +204,19 @@ Triggered when a comment reaches a milestone for total reactions across all type
 | Metadata Field | Type | Description |
 |----------------|------|-------------|
 | `entityId` | `string` | ID of the entity the comment belongs to. |
+| `entityForeignId` | `string \| null` | Your system's ID for the entity. |
 | `entityShortId` | `string` | Short ID. |
 | `entityTitle` | `string \| null` | Entity title. |
 | `entityContent` | `string \| null` | Entity content preview. |
 | `commentId` | `string` | ID of the comment. |
+| `commentForeignId` | `string \| null` | Your system's ID for the comment. |
 | `commentContent` | `string \| null` | Comment content preview. |
 | `milestoneCount` | `number` | The total reaction milestone reached. |
 | `reactionCounts` | `Record<string, number>` | Breakdown of counts by reaction type. |
 | `lastThreeUsers` | `MilestoneUser[]` | Up to three of the most recent reactors, newest first. Reactors who are block-edged with the comment's author (in either direction) are skipped, so the list can hold fewer than three even when the count is higher. The milestone count itself includes every reaction. |
+| `spaceId`, `spaceShortId`, `spaceSlug` | `string \| null \| undefined` | Id forms of the space the entity is in. Absent or `null` outside a space. |
+| `entityMetadata` | `Record<string, any> \| null` | The entity's `metadata`. |
+| `commentMetadata` | `Record<string, any> \| null` | The comment's `metadata`. |
 
 ### `new-follow`
 
@@ -200,6 +229,7 @@ Triggered when someone follows the user.
 | `initiatorId` | `string` | ID of the new follower. |
 | `initiatorName` | `string \| null` | Display name. |
 | `initiatorUsername` | `string \| null` | Username. |
+| `initiatorForeignId` | `string \| null \| undefined` | Your system's ID for the initiator. |
 | `initiatorAvatar` | `string \| null` | Avatar URL. |
 
 ### `connection-request`
@@ -214,6 +244,7 @@ Triggered when someone sends the user a connection request.
 | `initiatorId` | `string` | ID of the requester. |
 | `initiatorName` | `string \| null` | Display name. |
 | `initiatorUsername` | `string \| null` | Username. |
+| `initiatorForeignId` | `string \| null \| undefined` | Your system's ID for the initiator. |
 | `initiatorAvatar` | `string \| null` | Avatar URL. |
 
 ### `connection-accepted`

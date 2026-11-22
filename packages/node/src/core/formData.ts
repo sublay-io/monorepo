@@ -84,3 +84,31 @@ export function appendFields(
     );
   }
 }
+
+/**
+ * A multipart field can't carry `null` (it would arrive as the text "null"),
+ * so a field cleared with `null` can't travel with a file. Throws before
+ * anything is sent; send the clear in a separate call without a file.
+ */
+export function refuseNullWithFile(
+  fn: string,
+  fields: Record<string, unknown>
+): void {
+  for (const [key, value] of Object.entries(fields)) {
+    if (value === null) {
+      throw new Error(
+        `[Sublay] ${fn}: \`${key}: null\` can't be sent with a file. Clear it in a separate call without a file.`
+      );
+    }
+  }
+}
+
+/**
+ * On a create, a `null` field means the same as leaving it out, so a
+ * multipart body (which can't carry `null`) simply leaves it out.
+ */
+export function withoutNulls<T extends Record<string, unknown>>(fields: T): T {
+  return Object.fromEntries(
+    Object.entries(fields).filter(([, value]) => value !== null)
+  ) as T;
+}

@@ -30,16 +30,18 @@ export interface CreateEntityProps {
   /** Save as a draft. A draft needs an owner, so this requires `actingUserId`. */
   isDraft?: boolean;
   /**
-   * Backdate the entity (service key only, also with `actingUserId`). More
-   * than five minutes in the future: 400 `entity/invalid-body`.
+   * Backdate the entity (service key only, also with `actingUserId`): a
+   * `Date`, or a full UTC timestamp string such as
+   * `"2024-03-01T12:00:00.000Z"` (`date.toISOString()`). More than five
+   * minutes in the future: 400 `entity/invalid-body`.
    */
-  createdAt?: Date;
+  createdAt?: string | Date;
   /**
    * Backdate the entity's last update (service key only, also with
-   * `actingUserId`). More than five minutes in the future: 400
-   * `entity/invalid-body`.
+   * `actingUserId`); same format as `createdAt`. More than five minutes in
+   * the future: 400 `entity/invalid-body`.
    */
-  updatedAt?: Date;
+  updatedAt?: string | Date;
 }
 
 export async function createEntity(

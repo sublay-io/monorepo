@@ -1,6 +1,11 @@
 import { SublayHttpClient } from "../../core/client";
-import { UserFull } from "../../interfaces/User";
-import { appendFields, appendImageSlot, type ImageSlotFile } from "../../core/formData";
+import { AuthUser } from "../../interfaces/User";
+import {
+  appendFields,
+  appendImageSlot,
+  refuseNullWithFile,
+  type ImageSlotFile,
+} from "../../core/formData";
 
 export interface UpdateUserProps {
   userId: string;
@@ -10,14 +15,23 @@ export interface UpdateUserProps {
    * behaves exactly as that user's own access token would.
    */
   actingUserId: string;
-  name?: string;
+  /** `null` (or an empty string) clears it, on a call without a file. */
+  name?: string | null;
   username?: string;
-  bio?: string;
-  /** The avatar as an image URL. To upload an image, use `avatarFile`. */
-  avatar?: string;
+  /** `null` (or an empty string) clears it, on a call without a file. */
+  bio?: string | null;
+  /**
+   * The avatar as an image URL; `null` clears it, on a call without a file.
+   * To upload an image, use `avatarFile`.
+   */
+  avatar?: string | null;
   metadata?: Record<string, any>;
   secureMetadata?: Record<string, any>;
-  birthdate?: Date;
+  /**
+   * A `Date`, or a full UTC timestamp string such as
+   * `"1990-05-17T00:00:00.000Z"` (a date alone, like `"1990-05-17"`, is refused).
+   */
+  birthdate?: string | Date;
   location?: {
     latitude: number;
     longitude: number;
@@ -40,19 +54,20 @@ export interface UpdateUserProps {
 export async function updateUser(
   client: SublayHttpClient,
   data: UpdateUserProps
-): Promise<UserFull> {
+): Promise<AuthUser> {
   const { userId, avatarFile, bannerFile, ...body } = data;
   const path = `/users/${userId}`;
 
   if (avatarFile || bannerFile) {
+    refuseNullWithFile("updateUser", body);
     const formData = new FormData();
     appendFields(formData, body);
     if (avatarFile) appendImageSlot(formData, "avatarFile", avatarFile, "avatar");
     if (bannerFile) appendImageSlot(formData, "bannerFile", bannerFile, "banner");
-    const response = await client.projectInstance.patch<UserFull>(path, formData);
+    const response = await client.projectInstance.patch<AuthUser>(path, formData);
     return response.data;
   }
 
-  const response = await client.projectInstance.patch<UserFull>(path, body);
+  const response = await client.projectInstance.patch<AuthUser>(path, body);
   return response.data;
 }

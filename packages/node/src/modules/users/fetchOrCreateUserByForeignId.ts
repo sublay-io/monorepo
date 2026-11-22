@@ -7,8 +7,8 @@ export interface FetchOrCreateUserByForeignIdProps
   extends SpaceReputationUserParams {
   /** Your own id for the user, used exactly as sent. A blank or whitespace-only one is a 400. */
   foreignId: string;
-  /** Used only when the user is created. */
-  name?: string;
+  /** Used only when the user is created. `null` (or an empty string) for none. */
+  name?: string | null;
   /**
    * Used only when the user is created. Must be unique in the project, 3 to 30
    * characters after trimming, and only letters, numbers, `_` and `-` (as on
@@ -17,8 +17,8 @@ export interface FetchOrCreateUserByForeignIdProps
   username?: string;
   /** Used only when the user is created. A URL, or `null` for none. */
   avatar?: string | null;
-  /** Used only when the user is created. */
-  bio?: string;
+  /** Used only when the user is created. `null` (or an empty string) for none. */
+  bio?: string | null;
   /** Used only when the user is created. A JSON object, up to 1 MB. */
   metadata?: Record<string, any>;
   /**

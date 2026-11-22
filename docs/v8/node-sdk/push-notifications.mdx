@@ -108,7 +108,7 @@ interface SendPushResult {
 }
 
 interface PushDeviceResult {
-  platform: string;   // "ios" | "android" | "web"
+  platform: "ios" | "android" | "web";
   success: boolean;
   reason?: string;    // present when success is false
 }

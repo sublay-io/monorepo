@@ -23,7 +23,7 @@ export interface AskContentProps extends SpaceReputationContextParams {
    * filtering, no comment moderation details.
    */
   actingUserId?: string;
-  /** Abort the in-flight stream. */
+  /** Abort the in-flight stream: the loop then throws a `CanceledError`. */
   signal?: AbortSignal;
 }
 
@@ -96,7 +96,8 @@ async function readAll(stream: AsyncIterable<Uint8Array>): Promise<string> {
  *
  * A request the server refuses before the stream opens (no paid plan, an
  * invalid body, a rate limit) throws, like every other call, with the JSON
- * error body on `err.response.data`. Stop early with `break` or `signal`.
+ * error body on `err.response.data`. Stop early with `break` (ends the loop
+ * quietly) or `signal` (the loop throws a `CanceledError`).
  */
 export async function* askContent(
   client: SublayHttpClient,

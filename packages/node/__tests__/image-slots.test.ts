@@ -94,7 +94,7 @@ describe("node-sdk image slots — updateUser", () => {
     await updateUser(client, {
       userId: "u1",
       actingUserId: "u1",
-      birthdate: "2000-01-02T00:00:00.000Z",
+      birthdate: new Date("2000-01-02T00:00:00.000Z"),
       location: { latitude: 1, longitude: 2 },
       removeFileIds: [FILE_ID],
       bannerFile: { file: bytes(), filename: "b.png", mimeType: "image/png", options: bannerOptions },
@@ -165,15 +165,25 @@ describe("node-sdk image slots — a null field can't travel with a file", () =>
   const avatarFile = { file: bytes(), mimeType: "image/png", options: avatarOptions };
 
   it.each([
-    ["createSpace", (c: any) => createSpace(c, { actingUserId: "u1", slug: null, avatarFile }), "slug"],
     ["updateSpace", (c: any) => updateSpace(c, { spaceId: "s1", actingUserId: "u1", description: null, avatarFile }), "description"],
     ["updateUser", (c: any) => updateUser(c, { userId: "u1", actingUserId: "u1", bio: null, avatarFile }), "bio"],
-    ["signUp", (c: any) => signUp(c, { email: "a@b.co", password: "pw", name: null, avatarFile }), "name"],
   ])("%s throws before sending anything", async (fn, call, field) => {
     const { client, projectInstance } = makeClient();
     await expect(call(client)).rejects.toThrow(`${fn}: \`${field}: null\` can't be sent with a file`);
     expect(projectInstance.post).not.toHaveBeenCalled();
     expect(projectInstance.patch).not.toHaveBeenCalled();
+  });
+
+  it("leaves a null field out of a create's multipart body (null there means none)", async () => {
+    const { client, projectInstance } = makeClient();
+    await createSpace(client, { actingUserId: "u1", slug: null, parentSpaceId: null, avatarFile });
+    await signUp(client, { email: "a@b.co", password: "pw", name: null, avatarFile });
+    const spaceForm = projectInstance.post.mock.calls[0][1] as FormData;
+    const signUpForm = projectInstance.post.mock.calls[1][1] as FormData;
+    expect(spaceForm.has("slug")).toBe(false);
+    expect(spaceForm.has("parentSpaceId")).toBe(false);
+    expect(signUpForm.has("name")).toBe(false);
+    expect(signUpForm.get("email")).toBe("a@b.co");
   });
 
   it("sends null as JSON when no file is attached", async () => {

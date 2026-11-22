@@ -102,3 +102,13 @@ export function refuseNullWithFile(
     }
   }
 }
+
+/**
+ * On a create, a `null` field means the same as leaving it out, so a
+ * multipart body (which can't carry `null`) simply leaves it out.
+ */
+export function withoutNulls<T extends Record<string, unknown>>(fields: T): T {
+  return Object.fromEntries(
+    Object.entries(fields).filter(([, value]) => value !== null)
+  ) as T;
+}

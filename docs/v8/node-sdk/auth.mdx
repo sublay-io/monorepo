@@ -56,8 +56,20 @@ if ("accessToken" in result) {
   Bio text. `null` or an empty string leaves it unset.
 </ParamField>
 
+<ParamField body="location" type="{ latitude: number; longitude: number }">
+  The user's location, stored as a GeoJSON point.
+</ParamField>
+
+<ParamField body="birthdate" type="string | Date">
+  The user's birthdate: a `Date`, or a full UTC timestamp string such as `"1990-05-17T00:00:00.000Z"`. A date alone (`"1990-05-17"`) or a time with an offset is refused with `400 auth/invalid-body` and `param: "birthdate"`.
+</ParamField>
+
 <ParamField body="metadata" type="object">
   Arbitrary key-value data attached to the user at creation time.
+</ParamField>
+
+<ParamField body="secureMetadata" type="object">
+  Key-value data no API response returns to any user. Users can also write their own, so don't treat it as trusted.
 </ParamField>
 
 <ParamField body="emailVerification" type='{ mode?: "link" | "code"; redirectUrl?: string }'>
@@ -65,7 +77,7 @@ if ("accessToken" in result) {
 </ParamField>
 
 <ParamField body="avatarFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
-  An avatar image to upload, up to 50 MB. Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 auth/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`. A field set to `null` can't travel with an image: the call throws before sending anything, so clear it in a separate call without one.
+  An avatar image to upload, up to 50 MB. Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 auth/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
 </ParamField>
 
 <ParamField body="bannerFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">

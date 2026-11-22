@@ -161,7 +161,7 @@ for await (const event of sublay.search.askContent({
 </ParamField>
 
 <ParamField body="signal" type="AbortSignal">
-  Aborts the request and closes the stream. Leaving the loop with `break` closes it too.
+  Aborts the request and closes the stream; the `for await` loop then throws a `CanceledError` (axios). Leaving the loop with `break` closes the stream too and ends quietly.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />

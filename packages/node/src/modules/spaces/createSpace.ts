@@ -8,7 +8,7 @@ import {
 import {
   appendFields,
   appendImageSlot,
-  refuseNullWithFile,
+  withoutNulls,
   type ImageSlotFile,
 } from "../../core/formData";
 
@@ -19,7 +19,7 @@ export interface CreateSpaceProps {
    * be an admin of the parent).
    */
   actingUserId: string;
-  // `null` (no name / slug / description) only on a call without a file.
+  // `null` is the same as leaving the field out.
   name?: string | null;
   slug?: string | null;
   description?: string | null;
@@ -27,7 +27,7 @@ export interface CreateSpaceProps {
   postingPermission?: PostingPermission;
   visibility?: SpaceVisibility;
   requireJoinApproval?: boolean;
-  parentSpaceId?: string | null; // `null` for a top-level space; not with a file
+  parentSpaceId?: string | null; // `null` for a top-level space
   metadata?: Record<string, any>;
   nsfw?: boolean;
   /**
@@ -47,9 +47,8 @@ export async function createSpace(
   const { avatarFile, bannerFile, ...body } = data;
 
   if (avatarFile || bannerFile) {
-    refuseNullWithFile("createSpace", body);
     const formData = new FormData();
-    appendFields(formData, body);
+    appendFields(formData, withoutNulls(body));
     if (avatarFile) appendImageSlot(formData, "avatarFile", avatarFile, "avatar");
     if (bannerFile) appendImageSlot(formData, "bannerFile", bannerFile, "banner");
     const response = await client.projectInstance.post<SpaceWithPermissions>(

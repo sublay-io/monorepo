@@ -41,7 +41,7 @@ Returns a [Conversation](/v8/data-models/conversation) extended with the followi
 </ResponseField>
 
 <ResponseField name="lastMessage" type="ChatMessage | null">
-  The most recent **visible** top-level [message](/v8/data-models/chat-message) in the conversation (thread replies are never the last message), with its `content` truncated to 100 characters and its `files` populated. Deleted and moderated-away messages are excluded, so this is `null` when the conversation has no visible messages — including a `group` or `space` conversation whose only messages have since been removed.
+  The most recent top-level [message](/v8/data-models/chat-message) in the conversation (thread replies are never the last message), with its `content` truncated to 100 characters and its `files` populated; `null` when the conversation has none. A [deleted or removed](/v8/data-models/chat-message#deleted-and-removed-messages) last message is its placeholder: `content`, `gif` and `files` empty, and a removed one's sender (`userId`, `user`) `null` unless it's the viewer's own.
 </ResponseField>
 
 <ResponseField name="mutedUntil" type="string | null">

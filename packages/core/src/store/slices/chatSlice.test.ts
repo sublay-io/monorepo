@@ -1110,3 +1110,71 @@ describe("chatSlice — deleted and removed placeholders (S#227)", () => {
     expect(first(state).userDeletedAt).toBe("2024-01-01T00:00:00.000Z");
   });
 });
+
+describe("chatSlice — a conversation preview's last message (S#227)", () => {
+  function stateWithPreview(userId: string) {
+    return baseState({
+      conversationList: {
+        items: [
+          makeConversationPreview({
+            id: "conversation-1",
+            lastMessage: makeChatMessage({ id: "message-1", userId, content: "last words" }),
+          }),
+        ],
+        loading: false,
+        hasMore: false,
+      } as never,
+    });
+  }
+  const last = (state: ChatState) => state.conversationList.items[0].lastMessage!;
+
+  it("becomes the deleted placeholder, sender kept", () => {
+    const state = reducer(
+      stateWithPreview("user-1"),
+      markMessageDeleted({ conversationId: "conversation-1", messageId: "message-1", userDeletedAt: "2024-01-02T00:00:00.000Z" }),
+    );
+    expect(last(state)).toMatchObject({ content: null, userId: "user-1", userDeletedAt: "2024-01-02T00:00:00.000Z" });
+  });
+
+  it("becomes the removed placeholder, sender blanked, unless it's the viewer's own", () => {
+    const others = reducer(
+      stateWithPreview("user-1"),
+      markMessageRemoved({ conversationId: "conversation-1", messageId: "message-1", currentUserId: "user-2" }),
+    );
+    expect(last(others)).toMatchObject({ moderationStatus: "removed", content: null, userId: null, user: null });
+
+    const own = reducer(
+      stateWithPreview("user-1"),
+      markMessageRemoved({ conversationId: "conversation-1", messageId: "message-1", currentUserId: "user-1" }),
+    );
+    expect(last(own)).toMatchObject({ moderationStatus: "removed", content: "last words", userId: "user-1" });
+  });
+});
+
+describe("chatSlice — an edit reaches every copy (S#227)", () => {
+  it("patchMessage updates a preview's last message and a quoted copy", () => {
+    const original = makeChatMessage({ id: "message-1", content: "before" });
+    const state0 = baseState({
+      conversationList: {
+        items: [makeConversationPreview({ id: "conversation-1", lastMessage: original })],
+        loading: false,
+        hasMore: false,
+      } as never,
+      messages: {
+        "conversation-1": {
+          items: [makeChatMessage({ id: "message-2", quotedMessageId: "message-1", quotedMessage: original })],
+          loading: false,
+          hasMore: false,
+          oldestMessageId: "message-2",
+          newestMessageId: "message-2",
+        },
+      } as never,
+    });
+    const state = reducer(
+      state0,
+      patchMessage({ conversationId: "conversation-1", messageId: "message-1", patch: { content: "after" } }),
+    );
+    expect(state.conversationList.items[0].lastMessage!.content).toBe("after");
+    expect(state.messages["conversation-1"].items[0].quotedMessage!.content).toBe("after");
+  });
+});

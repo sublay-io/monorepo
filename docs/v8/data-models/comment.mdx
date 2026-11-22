@@ -35,7 +35,7 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `moderatedById` | `string \| null` | ID of who took the action: the space moderator's user ID when `moderatedByType` is `"user"`, the dashboard account's ID when it is `"client"`. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
 | `moderatedByType` | `"client" \| "user" \| null` | `"user"` when a space moderator took the action (through a report or directly); `"client"` when it was taken from the dashboard. Visible only to some requesters — see [Moderation fields](#moderation-fields); `null` for everyone else. |
 | `moderationReason` | `string \| null` | Reason provided for moderation. Visible only to some requesters, including the comment's author — see [Moderation fields](#moderation-fields); `null` for everyone else. |
-| `userDeletedAt` | `Date \| null` | Set when the author deletes their own comment. The comment stays in threads as a [placeholder](#placeholders), so the replies under it remain. |
+| `userDeletedAt` | `Date \| null` | Set when the author deletes their own comment, or when their account is deleted. Everything they wrote is cleared, and the comment stays in threads as a [placeholder](#placeholders), so the replies under it remain. |
 | `createdAt` | `Date` | When the comment was created. |
 | `updatedAt` | `Date` | When the comment was last updated. |
 | `deletedAt` | `Date \| null` | Legacy field; always `null` in responses. A user-deleted comment is marked by `userDeletedAt`. |
@@ -98,7 +98,7 @@ A comment that can't be shown in full stays in place as a **placeholder**, so th
 
 | Kind | Marker | Who sees the full comment |
 |------|--------|---------------------------|
-| Deleted by its author | `userDeletedAt` is set | Nobody |
+| Deleted by its author, or its author's account was deleted | `userDeletedAt` is set | Nobody |
 | Removed by a moderator | `moderationStatus: "removed"` | Its author |
 | Unavailable to this user | `isUnavailable: true` | — |
 

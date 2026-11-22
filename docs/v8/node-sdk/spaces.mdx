@@ -36,7 +36,7 @@ const space = await sublay.spaces.createSpace({
 </ParamField>
 
 <ParamField body="description" type="string | null">
-  Short description of the space.
+  Short description of the space. Left out or `null`, the space has no description.
 </ParamField>
 
 <ParamField body="readingPermission" type="string">
@@ -60,7 +60,7 @@ const space = await sublay.spaces.createSpace({
 </ParamField>
 
 <ParamField body="parentSpaceId" type="string | null">
-  Makes this space a child of the specified parent space. The user the space is created for (`actingUserId`) must be an active admin of the parent space, or the request is refused with `403 space/parent-admin-required`.
+  Makes this space a child of the specified parent space. The user the space is created for (`actingUserId`) must be an active admin of the parent space, or the request is refused with `403 space/parent-admin-required`. Left out or `null`, the space is top-level.
 </ParamField>
 
 <ParamField body="metadata" type="object">

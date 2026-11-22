@@ -49,6 +49,38 @@ describe("js-sdk spaces (lifecycle) — request shaping", () => {
     expect(obj).not.toHaveProperty("bannerFile");
   });
 
+  it("createSpace leaves a null field out of the multipart body (null there means none)", async () => {
+    const { client, projectInstance } = makeClient();
+    await createSpace(client, {
+      name: "My Space",
+      description: null,
+      parentSpaceId: null,
+      avatarFile: {
+        file: new File(["a"], "a.png", { type: "image/png" }),
+        options: { mode: "original-aspect", sizes: { thumbnail: 200 } },
+      },
+    });
+    const obj = formDataToObject(projectInstance.post.mock.calls[0][1] as FormData);
+    expect(obj.name).toBe("My Space");
+    expect(obj).not.toHaveProperty("description");
+    expect(obj).not.toHaveProperty("parentSpaceId");
+  });
+
+  it("updateSpace refuses a null field together with a file, sending nothing", async () => {
+    const { client, projectInstance } = makeClient();
+    await expect(
+      updateSpace(client, {
+        spaceId: "s1",
+        name: null,
+        avatarFile: {
+          file: new File(["a"], "a.png", { type: "image/png" }),
+          options: { mode: "original-aspect", sizes: { thumbnail: 200 } },
+        },
+      })
+    ).rejects.toThrow("`name: null` can't be sent with a file");
+    expect(projectInstance.patch).not.toHaveBeenCalled();
+  });
+
   it("createSpace sends multipart/FormData when a banner image is present", async () => {
     const { client, projectInstance } = makeClient();
     const file = new File(["banner-bytes"], "banner.png", {

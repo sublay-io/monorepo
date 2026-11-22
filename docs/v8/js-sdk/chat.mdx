@@ -657,7 +657,7 @@ const { data, pagination } = await sublay.chat.listReactions({
 
 <SpaceReputationParams variant="context" field="body" />
 
-**Returns** — `Promise<{ data: MessageReaction[]; pagination: { page: number; limit: number; total: number; hasMore: boolean } }>`,
+**Returns** — `Promise<{ data: MessageReaction[]; pagination: { page: number; pageSize: number; totalPages: number; totalItems: number; hasMore: boolean } }>`,
 where `MessageReaction` is `{ emoji: string; user: UserSummary; createdAt: string }` and the user is `{ id, name, username, avatar, reputation }` (plus `spaceReputation` when requested).
 
 ---

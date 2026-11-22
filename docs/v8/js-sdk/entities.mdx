@@ -80,7 +80,7 @@ const entity = await sublay.entities.createEntity({
 
 ### fetchEntity
 
-Fetches a single entity by its Sublay ID.
+Fetches a single entity by its Sublay ID. A removed entity is returned in full to its author and as a [placeholder](/v8/data-models/entity#removed-entities) to everyone else.
 
 ```typescript
 const entity = await sublay.entities.fetchEntity({ entityId: "ent_xyz789" });

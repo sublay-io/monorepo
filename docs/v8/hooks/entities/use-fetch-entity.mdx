@@ -14,6 +14,8 @@ import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx"
 
 `useFetchEntity` returns a function that fetches a single entity by its Sublay entity ID. Use this for on-demand fetches outside of `EntityProvider`.
 
+An entity a moderator removed resolves in full for its author and as a [placeholder](/v8/data-models/entity#removed-entities) for everyone else.
+
 ## Usage Example
 
 ```tsx

@@ -10,7 +10,7 @@ icon: "plug"
 
 ## Overview
 
-`useFetchDrafts` returns a function that retrieves the authenticated user's unpublished draft entities in a paginated response.
+`useFetchDrafts` returns a function that retrieves the authenticated user's unpublished draft entities in a paginated response. A draft marked removed (`moderationStatus: "removed"`) is listed too, but it can't be published or edited, only deleted.
 
 <Note>Requires an authenticated user. Only the user's own drafts are returned.</Note>
 

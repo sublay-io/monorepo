@@ -8,7 +8,7 @@ description: "Get the authenticated user's draft entities"
   **Requires the `entities` bundle.** A project without the entities bundle returns `403 database/tables-not-available`. See [Bundles](/v8/bundles).
 </Note>
 
-Returns a paginated list of draft entities belonging to the authenticated user. Drafts are invisible to all other users and excluded from all other entity list endpoints until published.
+Returns a paginated list of draft entities belonging to the authenticated user. Drafts are invisible to all other users and excluded from all other entity list endpoints until published. A draft marked removed (`moderationStatus: "removed"`) is listed too, but it can't be published or edited, only deleted.
 
 **Authentication required.**
 

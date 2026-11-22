@@ -439,7 +439,7 @@ const entity = await sublay.entities.incrementEntityViews({
 
 ### fetchDrafts
 
-Fetches a user's unpublished draft entities.
+Fetches a user's unpublished draft entities. A draft marked removed (`moderationStatus: "removed"`) is listed too, but it can't be published or edited, only deleted.
 
 ```typescript
 const { data, pagination } = await sublay.entities.fetchDrafts({

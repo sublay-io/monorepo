@@ -35,7 +35,7 @@ Grants belong to the **`reputation`** bundle — every project with reputation h
 | `note` | `string \| null` | Free-text note. Trimmed, up to 2000 characters. |
 | `metadata` | `Record<string, any> \| null` | Your own key-value data. Up to 1 MB. |
 | `createdAt` | `string` | ISO timestamp when the grant was issued. |
-| `updatedAt` | `string` | ISO timestamp. Grants are never updated; this exists for model parity. |
+| `updatedAt` | `string` | ISO timestamp. A grant changes only when its sender's account is deleted (its `note` and `metadata` are cleared); otherwise it's never updated. |
 
 ## Which bucket moves
 
@@ -100,13 +100,13 @@ The only way to read them is the dashboard history route, [Fetch User Grant Hist
 
 ## Immutability
 
-Grant rows are append-only. There is no undo, revoke, cancel window, or editing of the note or metadata. To reverse a grant, issue a compensating negative mint — both records stand.
+Grant rows are append-only. There is no undo, revoke, cancel window, or editing of the note or metadata (apart from the sender's account being deleted, below). To reverse a grant, issue a compensating negative mint — both records stand.
 
 Grant creation is **not idempotent**. A retried request creates a second grant and moves the points a second time, so clients are responsible for not double-submitting.
 
 ## Lifecycle
 
-- **Sender deleted** — the grant record survives with `senderId` set to `null`, so a target's displayed total does not silently shrink.
+- **Sender deleted** — the grant record survives with `senderId` set to `null`, so a target's displayed total does not silently shrink. Its `note` and `metadata` are cleared (`null`): they're what the sender wrote.
 - **Recipient deleted** — their grants are removed along with their reputation buckets, consistent with how reputation already behaves on user deletion.
 - **Target deleted** — the grant stands; only the attachment stops rendering.
 - **`reputation` bundle uninstalled** — grant history is destroyed along with the buckets.

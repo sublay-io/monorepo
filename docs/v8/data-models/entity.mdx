@@ -56,7 +56,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 
 ## Removed entities
 
-An entity a moderator removed (`moderationStatus: "removed"`) is shown in full only to its author. Everyone else — other users, moderators, signed-out requests and a service key naming nobody — gets a **placeholder**:
+An entity a moderator removed (`moderationStatus: "removed"`) is returned in full only to its author. Everyone else — other users, moderators, signed-out requests and a service key naming nobody — gets a **placeholder**:
 
 - `userId`, `user`, `title`, `content`, `location` and `metadata` are `null`.
 - `mentions`, `attachments` and `keywords` are `[]`, and so is `files` when `include` contains `"files"`.
@@ -65,7 +65,7 @@ An entity a moderator removed (`moderationStatus: "removed"`) is shown in full o
 
 The placeholder is what [Fetch Entity](/v8/api-reference/entities/fetch-entity), [Fetch Entity by Short ID](/v8/api-reference/entities/fetch-entity-by-short-id), [Fetch Entity by Foreign ID](/v8/api-reference/entities/fetch-entity-by-foreign-id) and [Remove Entity Reaction](/v8/api-reference/entities/remove-reaction) return for a removed entity, so a shared link still opens and your app can show its own "removed" state. Lists leave removed entities out instead: [Fetch Many Entities](/v8/api-reference/entities/fetch-many-entities) includes them only when the requester lists their own entities, saved collections leave them out, and a comment's included `entity` is `null`.
 
-Nothing is written into `title` or `content`; render your own wording. A removed entity can't take new reactions, but a reaction already on it can still be [removed](/v8/api-reference/entities/remove-reaction). Its moderation fields follow [Moderation fields](#moderation-fields): `moderationStatus` is always kept, and the other three are filled only for the requesters listed there.
+Nothing is written into `title` or `content`; render your own wording. [Notifications](/v8/data-models/app-notification) already sent about the entity, such as a mention, keep the title, content excerpt and author they were sent with. A removed entity can't take new reactions, but a reaction already on it can still be [removed](/v8/api-reference/entities/remove-reaction). Its moderation fields follow [Moderation fields](#moderation-fields): `moderationStatus` is always kept, and the other three are filled only for the requesters listed there.
 
 ## Moderation fields
 

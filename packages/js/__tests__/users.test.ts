@@ -220,6 +220,44 @@ describe("js-sdk users — profile — request shaping", () => {
     expect(entries).toHaveLength(1);
     expect((entries[0] as File).name).toBe("avatar");
   });
+
+  it("updateUser sends a Date birthdate as its ISO string in a multipart body", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateUser(client, {
+      userId: "u1",
+      birthdate: new Date("1990-05-17T00:00:00.000Z"),
+      avatarFile: {
+        file: new Blob(["a"], { type: "image/png" }),
+        options: { mode: "original-aspect", sizes: { thumbnail: 200 } },
+      },
+    });
+    const [, body] = projectInstance.patch.mock.calls[0];
+    expect((body as FormData).get("birthdate")).toBe("1990-05-17T00:00:00.000Z");
+  });
+
+  it("updateUser sends a null clear as JSON when there are no files", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateUser(client, { userId: "u1", bio: null, avatar: null });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/users/u1", {
+      bio: null,
+      avatar: null,
+    });
+  });
+
+  it("updateUser refuses a null clear alongside a file, before sending anything", async () => {
+    const { client, projectInstance } = makeClient();
+    await expect(
+      updateUser(client, {
+        userId: "u1",
+        bio: null,
+        avatarFile: {
+          file: new Blob(["a"], { type: "image/png" }),
+          options: { mode: "original-aspect", sizes: { thumbnail: 200 } },
+        },
+      })
+    ).rejects.toThrow("`bio: null` can't be sent with a file");
+    expect(projectInstance.patch).not.toHaveBeenCalled();
+  });
 });
 
 describe("js-sdk users — graph queries (arbitrary target user) — request shaping", () => {

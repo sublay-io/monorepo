@@ -141,7 +141,9 @@ export type {
 } from "./interfaces/Comment";
 export type {
   Entity,
+  EntityRecord,
   EntitySaved,
+  SpaceWithViewer,
   EntityInclude,
   EntityIncludeArray,
   EntityIncludeParam,
@@ -157,7 +159,7 @@ export type {
   SpaceReputationContextParams,
   SpaceReputationUserParams,
 } from "./interfaces/SpaceReputation";
-export type { DeleteCollectionResponse } from "./interfaces/Collection";
+export type { Collection, DeleteCollectionResponse } from "./interfaces/Collection";
 export type { UserSearchParams } from "./interfaces/UserSearch";
 export type { SpaceSearchParams, SpaceSearchFields } from "./interfaces/SpaceSearch";
 export type {
@@ -173,6 +175,7 @@ export type {
 export type { CreateGrantProps } from "./modules/reputation/createGrant";
 export type {
   ListGrantsProps,
+  ListGrantsFilter,
   ListGrantsResponse,
 } from "./modules/reputation/listGrants";
 export type {
@@ -206,22 +209,37 @@ export type {
 } from "./interfaces/Workspace";
 export type { UpdateMyWorkspaceMembershipProps } from "./modules/workspaces/updateMyWorkspaceMembership";
 export type {
+  User,
+  UserFull,
+  AuthUser,
+  UserRole,
+  UserSuspension,
+  UserSummary,
   UserInclude,
   UserIncludeArray,
   UserIncludeParam,
 } from "./interfaces/User";
 export type {
+  Space,
+  SpaceDetailed,
+  SpaceWithPermissions,
+  SpacePreview,
+  ChildSpacePreview,
   SpaceInclude,
   SpaceIncludeArray,
   SpaceIncludeParam,
 } from "./interfaces/Space";
 export type { SpaceMember } from "./interfaces/SpaceMember";
 export type {
+  Event,
   EventInclude,
   EventIncludeArray,
   EventIncludeParam,
 } from "./interfaces/Event";
 export type {
+  ChatMessage,
+  QuotedChatMessage,
+  SentChatMessage,
   ChatMessageListInclude,
   ChatMessageListIncludeArray,
   ChatMessageListIncludeParam,
@@ -229,8 +247,45 @@ export type {
   ChatMessageIncludeArray,
   ChatMessageIncludeParam,
 } from "./interfaces/ChatMessage";
-export type { ConversationType } from "./interfaces/Conversation";
-export type { CheckMyConversationMembershipResponse } from "./interfaces/ConversationMember";
+export type {
+  Conversation,
+  ConversationPreview,
+  ConversationPreviewLastMessage,
+  ConversationType,
+} from "./interfaces/Conversation";
+export type {
+  ConversationMember,
+  ConversationMemberRole,
+  CheckMyConversationMembershipResponse,
+} from "./interfaces/ConversationMember";
+export type { SendMessageResponse } from "./modules/chat/sendMessage";
+export type { MessageReaction, ListReactionsResponse } from "./modules/chat/listReactions";
+export type { Reaction, ReactionType, ReactionCounts } from "./interfaces/Reaction";
+export type {
+  Report,
+  CreateReportResponse,
+  UserReport,
+  ReportTargetType,
+  ReportReason,
+  ReportStatus,
+  ReportEntityTarget,
+  ReportCommentTarget,
+  ReportMessageTarget,
+  ReportSpace,
+} from "./interfaces/Report";
+export type { File, FileImage, FileImageVariant } from "./interfaces/File";
+export type { UploadFileResponse } from "./modules/storage/uploadFile";
+export type { UploadImageResponse, UploadedImageVariant } from "./modules/storage/uploadImage";
+export type { GetFileResponse, GetFileImage } from "./modules/storage/getFile";
+export type { ContentSearchResult, ContentSearchChatMessage } from "./modules/search/searchContent";
+export type { UserSearchResult } from "./modules/search/searchUsers";
+export type { SpaceSearchResult } from "./modules/search/searchSpaces";
+export type { AskContentEvent } from "./modules/search/askContent";
+export type { MatchUsersProps, MatchUsersCommonProps } from "./modules/search/matchUsers";
+export type {
+  RequestNewAccessTokenProps,
+  RequestNewAccessTokenResponse,
+} from "./modules/auth/requestNewAccessToken";
 export type { SpaceReportAction } from "./modules/spaces/handleSpaceReport";
 export { PUSH_EVENT_TYPES, MUTE_DURATIONS } from "./interfaces/Push";
 export type {

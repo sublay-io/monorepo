@@ -25,9 +25,9 @@ export interface FileImage {
 
 export interface File {
   id: string;
-  projectId: string;
   userId: string | null;
   entityId: string | null;
+  eventId: string | null;
   commentId: string | null;
   chatMessageId: string | null;
   spaceId: string | null;
@@ -37,7 +37,10 @@ export interface File {
   originalMimeType: string;
   position: number;
   metadata: Record<string, any>;
-  image?: FileImage;       // Only present for type: "image"
+  // The image data. On entity, event, space and user files: the data on an
+  // image file, `null` on any other type. Not returned on chat-message and
+  // conversation-avatar files.
+  image?: FileImage | null;
   createdAt: string;
   updatedAt: string;
 }

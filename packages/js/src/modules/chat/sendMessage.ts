@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { ChatMessage } from "../../interfaces/ChatMessage";
+import { SentChatMessage } from "../../interfaces/ChatMessage";
 import { GifData } from "../../interfaces/Comment";
 import { Mention } from "../../interfaces/Mention";
 import { appendFields, appendFile } from "../../core/multipart";
@@ -17,16 +17,20 @@ export interface SendMessageProps extends SpaceReputationContextParams {
   /** Client-generated id echoed back on the created message (not stored). */
   localId?: string;
   /**
-   * Optional file attachments (browser `File`/`Blob`), up to 10. When present
-   * the request is sent as `multipart/form-data`; otherwise it's a JSON body.
+   * Optional file attachments (browser `File`/`Blob`), up to 20, at most 50 MB
+   * each. When present the request is sent as `multipart/form-data`;
+   * otherwise it's a JSON body.
    */
   files?: (Blob | File)[];
 }
 
+/** The created message; `localId` is echoed back when the send passed one. */
+export type SendMessageResponse = SentChatMessage & { localId?: string };
+
 export async function sendMessage(
   client: SublayHttpClient,
   data: SendMessageProps
-): Promise<ChatMessage> {
+): Promise<SendMessageResponse> {
   const {
     conversationId,
     files,
@@ -52,13 +56,13 @@ export async function sendMessage(
     // parseChatMessageFields middleware JSON-parses gif/mentions/metadata back,
     // so object/array fields must be stringified here.
     appendFields(formData, fields);
-    const response = await client.projectInstance.post<ChatMessage>(
+    const response = await client.projectInstance.post<SendMessageResponse>(
       path,
       formData
     );
     return response.data;
   }
 
-  const response = await client.projectInstance.post<ChatMessage>(path, fields);
+  const response = await client.projectInstance.post<SendMessageResponse>(path, fields);
   return response.data;
 }

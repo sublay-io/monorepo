@@ -3,7 +3,7 @@ import { appendFields, appendFile } from "../../core/multipart";
 
 export interface UploadFileResponse {
   fileId: string;
-  type: string;
+  type: "image" | "video" | "document" | "other"; // From the file's MIME type
   relativePath: string;
   publicPath: string;
   size: number;

@@ -1,7 +1,7 @@
 import { createGrant, listGrants } from "../src/modules/reputation";
 import * as Reputation from "../src/modules/reputation";
 import { getMessage, listMessages } from "../src/modules/chat";
-import type { ReputationGrantTargetFilter } from "../src/interfaces/ReputationGrant";
+import type { ListGrantsFilter } from "../src/modules/reputation/listGrants";
 import { makeClient } from "./helpers/client";
 
 describe("js-sdk reputation — request shaping", () => {
@@ -297,18 +297,39 @@ describe("js-sdk reputation — target pair contract", () => {
     expect(projectInstance.get).toHaveBeenCalledTimes(1);
   });
 
-  it("lets a caller build the pair conditionally via the exported filter type", async () => {
-    // The documented escape hatch for the one shape the union makes awkward:
-    // an inline `...(item ? { targetType, targetId } : {})` widens both keys to
-    // `T | undefined` and matches neither branch, so name the type on a helper
-    // and spread that instead.
+  it("requires exactly one filter shape at compile time on listGrants", async () => {
     const { client, projectInstance } = makeClient();
-    const build = (item: { id: string } | null): ReputationGrantTargetFilter =>
-      item ? { targetType: "entity", targetId: item.id } : {};
 
-    await listGrants(client, { recipientId: "r1", ...build(null) });
-    await listGrants(client, { ...build({ id: "entity-1" }) });
+    // @ts-expect-error a filter shape is required.
+    await listGrants(client, {});
 
+    // @ts-expect-error the filter shapes are mutually exclusive.
+    await listGrants(client, { recipientId: "r1", senderId: "s1" });
+
+    await listGrants(client, {
+      senderId: "s1",
+      // @ts-expect-error the filter shapes are mutually exclusive.
+      targetType: "entity",
+      targetId: "entity-1",
+    });
+
+    expect(projectInstance.get).toHaveBeenCalledTimes(3);
+  });
+
+  it("lets a caller choose the filter conditionally via the exported filter type", async () => {
+    // An inline `...(item ? { targetType, targetId } : { recipientId })`
+    // widens the keys and matches no branch, so name the type on a helper and
+    // spread that instead.
+    const { client, projectInstance } = makeClient();
+    const filterFor = (item: { id: string } | null): ListGrantsFilter =>
+      item ? { targetType: "entity", targetId: item.id } : { recipientId: "r1" };
+
+    await listGrants(client, { ...filterFor(null) });
+    await listGrants(client, { ...filterFor({ id: "entity-1" }) });
+
+    expect(projectInstance.get.mock.calls[0][1].params).toMatchObject({
+      recipientId: "r1",
+    });
     expect(projectInstance.get.mock.calls[0][1].params).not.toHaveProperty(
       "targetType"
     );

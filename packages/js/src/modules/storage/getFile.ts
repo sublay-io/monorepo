@@ -14,12 +14,12 @@ export interface GetFileImage {
 /** Shape returned by `GET /storage/:fileId` (a flat projection, not the populated `File` model). */
 export interface GetFileResponse {
   fileId: string;
-  type: string;
+  type: "image" | "video" | "document" | "other";
   originalPath: string;
   originalSize: number;
   originalMimeType: string;
-  position: number | null;
-  metadata: Record<string, any> | null;
+  position: number;
+  metadata: Record<string, any>;
   /** ISO-8601 timestamp. */
   createdAt: string;
   /** ISO-8601 timestamp. */

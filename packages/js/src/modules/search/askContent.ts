@@ -24,13 +24,14 @@ export interface AskContentProps extends SpaceReputationContextParams {
  * - `token`   — an incremental chunk of the answer text.
  * - `sources` — the hydrated source records, emitted once after the answer.
  * - `done`    — the stream finished successfully.
- * - `error`   — the server reported an error (the stream ends after this).
+ * - `error`   — the server reported an error (the stream ends after this);
+ *               `code` is the error code (e.g. `"search/server-error"`).
  */
 export type AskContentEvent =
   | { type: "token"; content: string }
   | { type: "sources"; sources: ContentSearchResult[] }
   | { type: "done" }
-  | { type: "error"; error: string };
+  | { type: "error"; error: string; code: string };
 
 function parseSseBlock(block: string): AskContentEvent | null {
   let event = "message";
@@ -61,7 +62,11 @@ function parseSseBlock(block: string): AskContentEvent | null {
     case "done":
       return { type: "done" };
     case "error":
-      return { type: "error", error: payload?.error ?? "Unknown error" };
+      return {
+        type: "error",
+        error: payload?.error ?? "Unknown error",
+        code: payload?.code ?? "search/server-error",
+      };
     default:
       return null;
   }
@@ -120,13 +125,15 @@ export async function* askContent(
 
   if (!response.ok || !response.body) {
     let message = `Request failed with status ${response.status}`;
+    let code = "search/server-error";
     try {
       const json = await response.json();
       message = json?.error ?? message;
+      code = json?.code ?? code;
     } catch {
       // non-JSON error body; keep the status-based message
     }
-    yield { type: "error", error: message };
+    yield { type: "error", error: message, code };
     return;
   }
 

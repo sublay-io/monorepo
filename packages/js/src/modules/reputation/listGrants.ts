@@ -3,8 +3,8 @@ import { SublayHttpClient } from "../../core/client";
 import {
   GrantSummary,
   ReputationGrant,
-  ReputationGrantTargetFilter,
   ReputationGrantIncludeParam,
+  ReputationGrantTargetType,
 } from "../../interfaces/ReputationGrant";
 import { PaginatedResponse } from "../../interfaces/IPaginatedResponse";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
@@ -14,31 +14,44 @@ interface ListGrantsBaseProps extends SpaceReputationContextParams {
   page?: number;
   limit?: number; // 1 to 100; over 100 is a 400, never clamped
 
-  // ── Filters — exactly ONE shape per request ─────────────────────────────
-  /** What this user received. */
-  recipientId?: string;
-  /** What this user sent. */
-  senderId?: string;
-
   /** Associations to expand. Only `"user"` is supported (hydrates both parties). */
   include?: ReputationGrantIncludeParam;
 }
 
 /**
- * The third filter shape — "who rewarded this item" — is the
- * {@link ReputationGrantTargetFilter} pair, so a half-filled target is a
- * compile error rather than a `400 reputation-grant/invalid-query`.
- *
- * Mutual exclusivity between the three shapes is NOT expressed in the type: a
- * three-way exclusive union would multiply out across every pagination and
- * space-reputation field and make the props unreadable, for a rule the server
- * reports clearly. Only the both-or-neither pairing is typed.
+ * The filter: exactly one shape per request — what a user received
+ * (`recipientId`), what a user sent (`senderId`), or who rewarded an item
+ * (`targetType` + `targetId`, always together).
  */
-export type ListGrantsProps = ListGrantsBaseProps & ReputationGrantTargetFilter;
+export type ListGrantsFilter =
+  | {
+      /** What this user received. */
+      recipientId: string;
+      senderId?: never;
+      targetType?: never;
+      targetId?: never;
+    }
+  | {
+      /** What this user sent. */
+      senderId: string;
+      recipientId?: never;
+      targetType?: never;
+      targetId?: never;
+    }
+  | {
+      /** The kind of item rewarded. */
+      targetType: ReputationGrantTargetType;
+      /** The rewarded item's id. */
+      targetId: string;
+      recipientId?: never;
+      senderId?: never;
+    };
+
+export type ListGrantsProps = ListGrantsBaseProps & ListGrantsFilter;
 
 /**
  * The `summary` block rides alongside the page envelope, and only on the
- * target filter shape.
+ * target filter shape (`targetType` + `targetId`), where it is always present.
  */
 export interface ListGrantsResponse extends PaginatedResponse<ReputationGrant> {
   summary?: GrantSummary;
@@ -48,8 +61,8 @@ export interface ListGrantsResponse extends PaginatedResponse<ReputationGrant> {
  * Lists reputation grants.
  *
  * Exactly one filter shape per request — `recipientId`, `senderId`, or
- * `targetType` + `targetId`. Supplying none or combining two is a `400`; the
- * shapes are not AND-ed, which is what keeps the `summary` block reconcilable
+ * `targetType` + `targetId` (see {@link ListGrantsFilter}); the shapes are
+ * not AND-ed, which is what keeps the `summary` block reconcilable
  * with the rows beneath it.
  *
  * Only positive grants are ever returned. Negative grants are app moderation

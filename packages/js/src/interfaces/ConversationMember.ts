@@ -1,10 +1,7 @@
-import { User } from "./User";
-
 export type ConversationMemberRole = "admin" | "member";
 
 export interface ConversationMember {
   id: string;
-  projectId: string;
   conversationId: string;
   userId: string;
   role: ConversationMemberRole | null;
@@ -20,7 +17,17 @@ export interface ConversationMember {
   leftAt: string | null;
   createdAt: string;
   updatedAt: string;
-  user?: User;
+  // The member's user, on listMembers. `spaceReputation` is present when
+  // requested.
+  user?: {
+    id: string;
+    name: string | null;
+    username: string | null;
+    avatar: string | null;
+    metadata: Record<string, any>;
+    reputation: number;
+    spaceReputation?: number;
+  };
 }
 
 /**

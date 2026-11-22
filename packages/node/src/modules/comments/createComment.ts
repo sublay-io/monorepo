@@ -6,7 +6,7 @@ export interface CreateCommentProps {
   foreignId?: string;
   actingUserId: string;
   entityId: string;
-  content?: string;
+  content?: string | null;
   gif?: GifData | null;
   mentions?: Mention[];
   parentCommentId?: string | null;

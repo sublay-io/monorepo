@@ -227,6 +227,12 @@ export type {
 export type { SearchUsersProps, UserSearchResult } from "./modules/search/searchUsers";
 export type { AskContentProps, AskContentEvent } from "./modules/search/askContent";
 export type { SearchSpacesProps, SpaceSearchResult } from "./modules/search/searchSpaces";
+export type {
+  MatchUsersProps,
+  MatchUsersCommonProps,
+  MatchUsersResponse,
+  UserMatchResult,
+} from "./modules/search/matchUsers";
 export type { VerifyEmailProps } from "./modules/auth/verifyEmail";
 export type { UserSearchParams } from "./interfaces/UserSearch";
 export type { SpaceSearchParams, SpaceSearchFields } from "./interfaces/SpaceSearch";
@@ -353,6 +359,7 @@ export type { CreateGrantProps } from "./modules/reputation/createGrant";
 export type { MintGrantProps } from "./modules/reputation/mintGrant";
 export type {
   ListGrantsProps,
+  ListGrantsFilter,
   ListGrantsResponse,
 } from "./modules/reputation/listGrants";
 export type { File, FileImage, FileImageVariant } from "./interfaces/File";

@@ -5,7 +5,7 @@ export interface UpdateRuleProps {
   spaceId: string;
   ruleId: string;
   title?: string;
-  description?: string;
+  description?: string | null;
 }
 
 export async function updateRule(

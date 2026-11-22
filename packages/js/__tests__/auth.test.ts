@@ -625,6 +625,25 @@ describe("js-sdk auth — response mapping", () => {
     expect(formData.get("metadata")).toBe(JSON.stringify({ plan: "pro" }));
   });
 
+  it("signUp leaves null fields out of a multipart body", async () => {
+    const { client, projectInstance } = makeRealClient();
+    await signUp(client, {
+      email: "a@b.com",
+      password: "pw",
+      name: null,
+      bio: null,
+      avatarFile: {
+        file: new Blob(["a"], { type: "image/png" }),
+        options: { mode: "original-aspect", sizes: { thumbnail: 200 } },
+      },
+    });
+    const [, body] = projectInstance.post.mock.calls[0];
+    const formData = body as FormData;
+    expect(formData.has("name")).toBe(false);
+    expect(formData.has("bio")).toBe(false);
+    expect(formData.get("email")).toBe("a@b.com");
+  });
+
   it("signUp returns response.data and stores the returned tokens", async () => {
     const { client, projectInstance } = makeRealClient();
     const result = {

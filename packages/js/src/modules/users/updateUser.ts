@@ -1,7 +1,12 @@
 import { SublayHttpClient } from "../../core/client";
 import { AuthUser } from "../../interfaces/User";
 import { ImageOptions } from "../../interfaces/ImageProcessing";
-import { appendField, appendFields, appendFile } from "../../core/multipart";
+import {
+  appendField,
+  appendFields,
+  appendFile,
+  refuseNullWithFile,
+} from "../../core/multipart";
 
 /** A file plus the image-processing options the server requires alongside it. */
 export interface UserImageUpload {
@@ -13,15 +18,25 @@ export interface UserImageUpload {
 export interface UpdateUserProps {
   /** The user to update (the target). A user token may only update itself. */
   userId: string;
-  name?: string;
+  /** `null` (or an empty string) clears it, on a call without a file. */
+  name?: string | null;
   username?: string;
-  avatar?: string;
-  bio?: string;
-  birthdate?: string;
+  /**
+   * The avatar as an image URL; `null` clears it, on a call without a file.
+   * To upload an image, use `avatarFile`.
+   */
+  avatar?: string | null;
+  /** `null` (or an empty string) clears it, on a call without a file. */
+  bio?: string | null;
+  /**
+   * A `Date`, or a full UTC timestamp string such as
+   * `"1990-05-17T00:00:00.000Z"` (a date alone, like `"1990-05-17"`, is refused).
+   */
+  birthdate?: string | Date;
   location?: {
     latitude: number;
     longitude: number;
-  } | null;
+  };
   metadata?: Record<string, any>;
   secureMetadata?: Record<string, any>;
   /**
@@ -47,6 +62,7 @@ export async function updateUser(
   const path = `/users/${userId}`;
 
   if (avatarFile || bannerFile) {
+    refuseNullWithFile("updateUser", body);
     const formData = new FormData();
 
     // Files go under `avatarFile`/`bannerFile`; their options ride alongside as

@@ -1,6 +1,11 @@
 import { SublayHttpClient } from "../../core/client";
 import { AuthUser } from "../../interfaces/User";
-import { appendField, appendFields, appendFile } from "../../core/multipart";
+import {
+  appendField,
+  appendFields,
+  appendFile,
+  withoutNulls,
+} from "../../core/multipart";
 import type { UserImageUpload } from "../users/updateUser";
 import type {
   EmailVerificationOptions,
@@ -10,16 +15,22 @@ import type {
 export interface SignUpProps {
   email: string;
   password: string;
-  name?: string;
+  /** `null` (or an empty string) for none. */
+  name?: string | null;
   username?: string;
-  avatar?: string;
-  bio?: string;
+  /** An image URL, or `null` for none. */
+  avatar?: string | null;
+  /** `null` (or an empty string) for none. */
+  bio?: string | null;
   location?: {
     latitude: number;
     longitude: number;
   };
-  /** ISO 8601 datetime string. */
-  birthdate?: string;
+  /**
+   * A `Date`, or a full UTC timestamp string such as
+   * `"1990-05-17T00:00:00.000Z"` (a date alone, like `"1990-05-17"`, is refused).
+   */
+  birthdate?: string | Date;
   metadata?: Record<string, any>;
   secureMetadata?: Record<string, any>;
   /**
@@ -37,6 +48,7 @@ export interface SignUpProps {
 }
 
 export interface SignUpResponse {
+  success: true;
   user: AuthUser;
   accessToken: string;
   refreshToken: string;
@@ -65,7 +77,7 @@ export async function signUp(
       appendField(formData, "bannerFile.options", bannerFile.options);
     }
     // Object fields (location, metadata, emailVerification...) as JSON strings.
-    appendFields(formData, fields);
+    appendFields(formData, withoutNulls(fields));
     payload = formData;
   }
   const response = await client.projectInstance.post<

@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-`useUpdateEvent` returns a callable that edits an event. **Host-only** (`403 event/forbidden`): the logged-in user must be the owner or in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member`). The space's admins and moderators can't edit events they don't host. The mutable fields go under `update`; `hostIds`, `status`, and `spaceId` are not editable here. Pass `cover` to **replace** the cover, `gallery` to **append** images, and `update.removeImageIds` to remove existing event images — any image operation sends `multipart/form-data` and requires the `files-images` bundle.
+`useUpdateEvent` returns a callable that edits an event. **Host-only** (`403 event/forbidden`): the logged-in user must be the owner or in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member`). The space's admins and moderators can't edit events they don't host. The mutable fields go under `update`; `hostIds`, `status`, and `spaceId` are not editable here. Pass `coverFile` to **replace** the cover, `gallery` to **append** images, and `update.removeFileIds` to remove the event's files (gallery images and/or the cover). Uploads send `multipart/form-data`; any image operation requires the `files-images` bundle.
 
 ## Usage Example
 
@@ -20,9 +20,13 @@ function EditEvent({ eventId }: { eventId: string }) {
     const event = await updateEvent({
       eventId,
       update: { capacity: 150, description: "Now with more space!" },
-      cover: { file: newCover, options: { mode: "original-aspect", sizes: { full: 1600 } } },
+      coverFile: { file: newCover, options: { mode: "original-aspect", sizes: { full: 1600 } } },
     });
     console.log("Updated:", event.id);
+  };
+
+  const removeCover = async (coverImageId: string) => {
+    await updateEvent({ eventId, update: { removeFileIds: [coverImageId] } });
   };
 }
 ```
@@ -34,12 +38,14 @@ function EditEvent({ eventId }: { eventId: string }) {
   The mutable fields to change. All optional:
   `title`, `description`, `startTime`, `endTime`, `timezone`, `type`, `url`,
   `venueName`, `address`, `location` (`{ latitude, longitude }`), `visibility`,
-  `capacity`, `allowMaybe`, `guestListVisible`, `metadata`, and `removeImageIds`
-  (`string[]` — File IDs of existing event images to remove). `startTime` and
+  `capacity`, `allowMaybe`, `guestListVisible`, `metadata`, and `removeFileIds`
+  (`string[]` — ids of the event's files to remove: gallery images and/or the
+  cover, `coverImageId`, which removing clears; any other id refuses the whole
+  update with `400 event/invalid-remove-file-ids`). `startTime` and
   `endTime` take an ISO 8601 datetime in UTC, or a `Date` (sent as its ISO string).
 </ParamField>
-<ParamField path="cover" type="{ file: File | RNFile; options?: UploadImageOptions }">
-  New cover image — replaces the existing cover. Sends multipart.
+<ParamField path="coverFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
+  New cover image and its processing options (`mode` is required) — replaces the existing cover, whose file is deleted. Sends multipart.
 </ParamField>
 <ParamField path="gallery" type="{ files: (File | RNFile)[]; options?: UploadImageOptions }">
   Gallery images to append. Sends multipart.

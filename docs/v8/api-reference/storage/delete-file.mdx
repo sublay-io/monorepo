@@ -8,10 +8,12 @@ Deletes a file record and removes all associated storage objects. For image file
 
 Requires authentication. **The owner deletes:** a file with an owner is deleted only as that user — with their own access token, or with a service key naming them in `actingUserId`, and the request then runs exactly as theirs (suspension included). An app-owned file (uploaded without an `actingUserId`) is deleted only by a service key naming nobody; a user token gets `403`.
 
-The owner can delete any of their files here except two kinds, refused with `409 storage/file-attached`:
+The owner can delete any of their files here except these, refused with `409 storage/file-attached`:
 
 - a chat message's file: it's removed when the message is deleted;
-- a user's or space's avatar or banner (the file its `avatarFileId` or `bannerFileId` points at): remove it with `removeFileIds` on [Update User](/v8/api-reference/users/update-user) or [Update Space](/v8/api-reference/spaces/update-space).
+- a user's or space's avatar or banner (the file its `avatarFileId` or `bannerFileId` points at): remove it with `removeFileIds` on [Update User](/v8/api-reference/users/update-user) or [Update Space](/v8/api-reference/spaces/update-space);
+- a conversation's avatar (the file its `avatarFileId` points at): remove it with `removeFileIds` on [Update Conversation](/v8/api-reference/chat/conversations/update-conversation);
+- an event's file, its cover included: remove it with `removeFileIds` on [Update Event](/v8/api-reference/events/update-event).
 
 **Rate limit**: 50 requests per 5 minutes.
 
@@ -52,7 +54,7 @@ The owner can delete any of their files here except two kinds, refused with `409
     ```
   </Accordion>
   <Accordion title="File Attached — 409">
-    The file is a chat message's file, or a user's or space's avatar or banner. `error` names which, and how to remove it. Checked after the owner check, so only the file's owner learns this.
+    The file is a chat message's file, a user's or space's avatar or banner, a conversation's avatar, or an event's file. `error` names which, and how to remove it. Checked after the owner check, so only the file's owner learns this.
     ```json
     { "error": "This file belongs to a user's avatar or banner, so it can't be deleted here. Remove it through the user's update: list its id in `removeFileIds`.", "code": "storage/file-attached" }
     ```

@@ -76,7 +76,7 @@ Authentication is optional (`optionalUserAuth`). Several filters interact with t
   Associations to expand, as a comma-separated value (`include=user,space`) or repeated params. Values:
   - `user` — the creator's user profile
   - `space` — the space the event belongs to
-  - `files` — the cover and gallery file objects
+  - `files` — the event's files: the cover (the file `coverImageId` points at) first, then the gallery images in the order they were uploaded
   - `userRsvp` — the caller's own RSVP status (needs a viewer; otherwise `null`)
 
   Matching ignores case. An unknown value returns `400 event/invalid-query`.

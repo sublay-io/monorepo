@@ -6,6 +6,8 @@ description: "Create a new multi-member group conversation"
 
 Creates a group conversation. The caller is automatically added as an `admin`. All provided `memberIds` are validated to belong to the project and added as `member`.
 
+Send a JSON body, or `multipart/form-data` when uploading the group's avatar with it. On a multipart request every field is a string: send `memberIds` and `metadata` as JSON strings.
+
 ## Body Parameters
 
 <ParamField body="type" type="string" required>
@@ -28,17 +30,28 @@ Creates a group conversation. The caller is automatically added as an `admin`. A
   Custom key-value data to attach to the conversation. Optional.
 </ParamField>
 
+<ParamField body="avatarFile" type="file">
+  The group's avatar image: JPEG, PNG or WebP, maximum 50 MB. Requires `avatarFile.options`. The image is processed into the variants the options ask for, and the conversation's `avatarFileId` points at it. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField body="avatarFile.options" type="string">
+  JSON-encoded image-processing options for `avatarFile`: a `mode` and the fields it needs, for example `{ "mode": "original-aspect", "sizes": { "small": 64, "large": 256 } }`. See [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes).
+</ParamField>
+
 <ParamField body="actingUserId" type="string">
   Service key only, and required with one: the user this request acts as. They create the group and become its `admin`. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
 
-Returns the created [Conversation](/v8/data-models/conversation) object with HTTP `201`.
+Returns the created [Conversation](/v8/data-models/conversation) object with HTTP `201`, with `avatarFile` populated when an avatar was uploaded.
 
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Not signed in — 401 / 403">
+    Returned with no JSON body: `401` when no `Authorization` header is sent, `403` when the access token is invalid or expired. Checked before any uploaded file is read, so a request with no credentials gets `401` rather than a body or acting-user error.
+  </Accordion>
   <Accordion title="Acting User Not Allowed — 400">
     A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
     ```json
@@ -85,5 +98,37 @@ Returns the created [Conversation](/v8/data-models/conversation) object with HTT
     { "error": "User 'abc' does not belong to this project.", "code": "chat/invalid-member" }
     ```
     One or more provided user IDs do not exist in this project.
+  </Accordion>
+  <Accordion title="Bundle Not Installed — 403">
+    Returned when an avatar is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    ```json
+    { "error": "Conversation avatar uploads require the files-images bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
+    ```
+  </Accordion>
+  <Accordion title="Image Too Large — 413">
+    ```json
+    { "error": "`avatarFile` is over the 50 MB per-file limit.", "code": "chat/file-too-large", "param": "avatarFile" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Image — 422">
+    The file can't be read as an image.
+    ```json
+    { "error": "Avatar file is not a valid image.", "code": "chat/invalid-image", "param": "avatarFile" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    `avatarFile` was uploaded without `avatarFile.options`.
+    ```json
+    { "error": "Image options are required when uploading an avatar. Must include mode property.", "code": "chat/missing-image-options", "param": "avatarFile.options" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Image Options — 400">
+    `avatarFile.options` isn't valid JSON, or isn't valid image options.
+    ```json
+    { "error": "Invalid JSON in avatarFile.options field.", "code": "chat/invalid-body", "param": "avatarFile.options" }
+    ```
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    A file was refused as the body was read: `chat/unsupported-file-type` or `chat/unexpected-file-field` (a file in another field, or a second file in `avatarFile`), with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>

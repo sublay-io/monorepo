@@ -8,7 +8,7 @@ Updates an event. **Host-only**: the caller must be the owner or in `hostIds`, a
 
 `hostIds`, `status`, and `spaceId` are **not** editable here — manage hosts via the [host endpoints](/v8/api-reference/events/add-host), cancel via [Cancel Event](/v8/api-reference/events/cancel-event); the space is immutable.
 
-Images can be curated in one request: a new `cover` **replaces** the existing cover, `gallery` files are **appended**, and `removeImageIds` deletes existing event images by File ID. Any image operation requires the `files-images` bundle.
+Images can be curated in one request: a new `coverFile` **replaces** the existing cover, `gallery` files are **appended** after the event's existing images, and `removeFileIds` deletes existing event files by File ID. Any image operation requires the `files-images` bundle.
 
 When a time field (`startTime`/`endTime`/`timezone`) or a location field (`location`/`url`/`venueName`/`address`) actually changes, an `event-updated` notification is fanned out to the `going`/`maybe` RSVP holders who can still see the event (best-effort, requires the `notifications` bundle).
 
@@ -36,15 +36,15 @@ When a time field (`startTime`/`endTime`/`timezone`) or a location field (`locat
 <ParamField body="guestListVisible" type="boolean">Whether everyone who can see the event can view the guest list. When `false`, only hosts who are active members of the event's space and not banned in it or a space above it and the space's admins and moderators can.</ParamField>
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB.</ParamField>
 
-<ParamField body="removeImageIds" type="string[]">
-  File IDs of existing event images to remove (gallery photos and/or the current cover). Each must belong to this event. On multipart requests, send as a JSON string.
+<ParamField body="removeFileIds" type="string[]">
+  Files to remove from the event: its gallery images and/or the current cover (`coverImageId`). Removing the cover clears it (`coverImageId` becomes `null`). Each file and its blobs are deleted. Works alone or with uploads in the same request; uploading a new cover while listing the old one is a plain replace. On a multipart request, send it as a JSON string (`'["<fileId>"]'`). Any id that isn't one of this event's files refuses the whole request with `400 event/invalid-remove-file-ids`.
 </ParamField>
 
-<ParamField body="cover" type="file">
-  New cover image (replaces the current cover). Multipart file field. Requires `cover.options`.
+<ParamField body="coverFile" type="file">
+  New cover image (replaces the current cover; the old cover file is deleted). Multipart file field. Requires `coverFile.options`. Adding a cover doesn't move the gallery images.
 </ParamField>
 
-<ParamField body="cover.options" type="string">
+<ParamField body="coverFile.options" type="string">
   JSON-stringified image-processing options for the new cover.
 </ParamField>
 
@@ -98,6 +98,17 @@ Returns the updated [Event](/v8/data-models/event) object.
     }
     ```
   </Accordion>
+  <Accordion title="Unsupported Parameter — 400">
+    The request sent `removeImageIds` or `cover.options`. Files are removed with `removeFileIds`, and the cover is uploaded as `coverFile` with its options in `coverFile.options`. `param` names the field.
+
+    ```json
+    {
+      "error": "`removeImageIds` was renamed to `removeFileIds`.",
+      "code": "event/unsupported-param",
+      "param": "removeImageIds"
+    }
+    ```
+  </Accordion>
   <Accordion title="User Not Found — 404">
     Returned when a service key names an `actingUserId` that isn't a user in this project.
     ```json
@@ -122,36 +133,38 @@ Returns the updated [Event](/v8/data-models/event) object.
     ```
   </Accordion>
   <Accordion title="Bundle Not Installed — 403">
-    Returned when images are uploaded or `removeImageIds` is sent on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    Returned when images are uploaded or `removeFileIds` is sent on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
     ```json
     { "error": "Event cover/gallery images require the files-images bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
     ```
   </Accordion>
-  <Accordion title="Invalid removeImageIds — 400">
+  <Accordion title="Invalid File Ids — 400">
+    `removeFileIds` names a file that isn't one of this event's files. `invalidIds` lists those ids. Checked before anything is uploaded, so nothing is stored or removed.
     ```json
-    { "error": "Some removeImageIds do not belong to this event.", "code": "event/invalid-remove-image-ids", "param": "removeImageIds", "invalidIds": ["..."] }
+    { "error": "Some removeFileIds do not belong to this event.", "code": "event/invalid-remove-file-ids", "param": "removeFileIds", "invalidIds": ["9b2f…"] }
     ```
+    A `removeFileIds` that isn't an array of file ids gets `400 event/invalid-body` instead.
   </Accordion>
   <Accordion title="Image Too Large — 413">
     ```json
-    { "error": "`cover` is over the 50 MB per-file limit.", "code": "event/file-too-large", "param": "cover" }
+    { "error": "`coverFile` is over the 50 MB per-file limit.", "code": "event/file-too-large", "param": "coverFile" }
     ```
     A file is over 50 MB. `param` names its field.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
-    { "error": "File \"cover.jpg\" is not a valid image.", "code": "event/invalid-image", "param": "cover" }
+    { "error": "File \"cover.jpg\" is not a valid image.", "code": "event/invalid-image", "param": "coverFile" }
     ```
-    A cover or gallery file can't be read as an image. `param` is `cover` or `gallery`.
+    A cover or gallery file can't be read as an image. `param` is `coverFile` or `gallery`.
   </Accordion>
   <Accordion title="Missing Image Options — 400">
-    A cover or gallery image was uploaded without its options. `param` is `cover.options` or `gallery.options`.
+    A cover or gallery image was uploaded without its options. `param` is `coverFile.options` or `gallery.options`.
     ```json
-    { "error": "`cover.options` is required when a cover image is uploaded.", "code": "event/missing-image-options", "param": "cover.options" }
+    { "error": "`coverFile.options` is required when a cover image is uploaded.", "code": "event/missing-image-options", "param": "coverFile.options" }
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `event/unsupported-file-type` or `event/unexpected-file-field`, with `param` naming the field when there is one, or `413 event/too-many-files` for more than 20 files in the request. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `event/unsupported-file-type` or `event/unexpected-file-field` (a file in another field, `cover` included, or a second file in `coverFile`), with `param` naming the field when there is one, or `413 event/too-many-files` for more than 20 files in the request. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>
 

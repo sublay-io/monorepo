@@ -107,6 +107,13 @@ const conversation = await sublay.chat.createGroupConversation({
   Arbitrary key-value data attached to the conversation.
 </ParamField>
 
+<ParamField body="avatarFile" type="{ file: Blob | File; options: ImageOptions }">
+  The group's avatar image and its processing options (a `mode` and the fields
+  it needs; see [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes)).
+  The request is then sent as `multipart/form-data`. Requires the
+  `files-images` bundle.
+</ParamField>
+
 **Returns** — `Promise<Conversation>`
 
 ---
@@ -157,6 +164,12 @@ const conversation = await sublay.chat.updateConversation({
   needs; see [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes)).
   The request is then sent as `multipart/form-data`, and the previous avatar,
   if any, is deleted.
+</ParamField>
+
+<ParamField body="removeFileIds" type="string[]">
+  Files to remove: the conversation's `avatarFileId`, nothing else. Removing it
+  clears the avatar. Works alone or with a new `avatarFile`. Any other id throws
+  a `400` (`chat/invalid-remove-file-ids`, with `invalidIds`).
 </ParamField>
 
 <ParamField body="postingPermission" type='"members" | "team"'>

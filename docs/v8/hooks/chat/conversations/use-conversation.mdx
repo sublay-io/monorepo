@@ -48,14 +48,15 @@ function ConversationHeader({ conversationId }: { conversationId: string }) {
   `true` while the initial fetch is in progress.
 </ResponseField>
 
-<ResponseField name="update" type="(params: { name?: string; description?: string; avatarFile?: { file: File | Blob; options: UploadImageOptions }; postingPermission?: 'members' | 'team' }) => Promise<Conversation | undefined>">
+<ResponseField name="update" type="(params: { name?: string; description?: string; avatarFile?: { file: UploadFileInput; options: UploadImageOptions }; removeFileIds?: string[]; postingPermission?: 'members' | 'team' }) => Promise<Conversation | undefined>">
   Updates the conversation. Dispatches the updated conversation to Redux on success. `conversationId` is already bound from the hook props and should not be passed here.
 
   | Field | Type | Description |
   |-------|------|-------------|
   | `name` | `string` | New conversation name |
   | `description` | `string` | New description |
-  | `avatarFile` | `{ file: File \| Blob; options: UploadImageOptions }` | New avatar image and its processing options; the previous avatar is deleted |
+  | `avatarFile` | `{ file: UploadFileInput; options: UploadImageOptions }` | New avatar image and its processing options; the previous avatar is deleted |
+  | `removeFileIds` | `string[]` | Files to remove: the conversation's `avatarFileId` (removing it clears the avatar); any other id refuses the update |
   | `postingPermission` | `'members' \| 'team'` | Who can post (space chats only): any active member, or only the space's active admins and moderators |
 </ResponseField>
 

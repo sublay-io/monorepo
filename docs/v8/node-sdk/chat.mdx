@@ -114,6 +114,24 @@ const conversation = await sublay.chat.createGroupConversation({
 <ParamField body="description" type="string">Group description.</ParamField>
 <ParamField body="memberIds" type="string[]">Initial members to add.</ParamField>
 <ParamField body="metadata" type="object">Custom key-value data.</ParamField>
+<ParamField body="avatarFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
+  The group's avatar image, up to 50 MB. Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 chat/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`. Requires the `files-images` bundle.
+</ParamField>
+
+```typescript
+import { readFile } from "node:fs/promises";
+
+const group = await sublay.chat.createGroupConversation({
+  actingUserId: "usr_abc123",
+  name: "Project Falcon",
+  avatarFile: {
+    file: new Uint8Array(await readFile("./falcon.png")),
+    filename: "falcon.png",
+    mimeType: "image/png",
+    options: { mode: "exact-dimensions", dimensions: { small: { width: 64, height: 64 } } },
+  },
+});
+```
 
 **Returns** — `Promise<Conversation>`
 
@@ -154,11 +172,15 @@ const conversation = await sublay.chat.updateConversation({
 <ParamField body="actingUserId" type="string" required>The acting user (must be a group admin).</ParamField>
 <ParamField body="name" type="string" />
 <ParamField body="description" type="string" />
+<ParamField body="avatarFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
+  A new avatar image, replacing the current one (up to 50 MB). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 chat/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
+</ParamField>
+<ParamField body="removeFileIds" type="string[]">
+  Files to remove: the conversation's `avatarFileId`, nothing else. Removing it clears the avatar. Works alone or with a new `avatarFile`. Any other id throws a `400` (`chat/invalid-remove-file-ids`, with `invalidIds`).
+</ParamField>
 <ParamField body="postingPermission" type='"members" | "team"'>Space conversations only: who may post — any active member (`"members"`) or only the space's active admins and moderators (`"team"`).</ParamField>
 
 **Returns** — `Promise<Conversation>`
-
-The Node SDK can't set a conversation's avatar: the avatar is an image uploaded with [Update Conversation](/v8/api-reference/chat/conversations/update-conversation), which the browser [JS SDK](/v8/js-sdk/chat) and the [React SDK](/v8/hooks/chat/conversations/use-update-conversation) send.
 
 ---
 

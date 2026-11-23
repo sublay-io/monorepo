@@ -23,7 +23,7 @@ Requires the `events` bundle on the project. Space-scoping needs `spaces`, image
 | [`useFetchEvent`](/v8/hooks/events/use-fetch-event) | Fetch a single event by ID. |
 | [`useFetchManyEvents`](/v8/hooks/events/use-fetch-many-events) | One-shot list query (low-level). |
 | [`useFetchManyEventsWrapper`](/v8/hooks/events/use-fetch-many-events-wrapper) | Stateful, paginated list with sort + load-more. |
-| [`useUpdateEvent`](/v8/hooks/events/use-update-event) | Edit an event; replace cover, append/remove gallery images. |
+| [`useUpdateEvent`](/v8/hooks/events/use-update-event) | Edit an event; replace or remove the cover, append or remove gallery images. |
 | [`useDeleteEvent`](/v8/hooks/events/use-delete-event) | Delete an event (owner, or the space's admins and moderators). |
 | [`useCancelEvent`](/v8/hooks/events/use-cancel-event) | Cancel an event (owner, or the space's admins and moderators). |
 | [`useSetRsvp`](/v8/hooks/events/use-set-rsvp) | Set/change an RSVP. |
@@ -36,7 +36,7 @@ Requires the `events` bundle on the project. Space-scoping needs `spaces`, image
 
 ## Creating an event
 
-`useCreateEvent` returns a callable. Cover and gallery uploads are inline — pass a `cover` and/or `gallery` and the hook sends `multipart/form-data` automatically. The logged-in user becomes the event's owner and is auto-added as a host.
+`useCreateEvent` returns a callable. Cover and gallery uploads are inline — pass a `coverFile` and/or `gallery` and the hook sends `multipart/form-data` automatically. The logged-in user becomes the event's owner and is auto-added as a host.
 
 ```tsx
 import { useCreateEvent } from "@sublay/react-js";
@@ -44,7 +44,7 @@ import { useCreateEvent } from "@sublay/react-js";
 function NewEventButton() {
   const createEvent = useCreateEvent();
 
-  const handleCreate = async (coverFile: File) => {
+  const handleCreate = async (cover: File) => {
     const event = await createEvent({
       title: "Launch Party",
       type: "physical",
@@ -52,8 +52,8 @@ function NewEventButton() {
       venueName: "The Loft",
       address: "123 Main St, New York, NY",
       capacity: 100,
-      cover: {
-        file: coverFile,
+      coverFile: {
+        file: cover,
         options: { mode: "original-aspect", sizes: { full: 1600 }, format: "webp" },
       },
     });

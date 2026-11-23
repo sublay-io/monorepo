@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/events"
 description: "Create an event, optionally with a cover image and gallery"
 ---
 
-Creates an event. The acting user (the token's own user, or the `actingUserId` a service key sends) becomes the event's **owner** (`userId`) and is automatically added to `hostIds`. See [Owner and hosts](/v8/data-models/event#owner-and-hosts). Supports inline cover and gallery image upload via `multipart/form-data`.
+Creates an event. The acting user (the token's own user, or the `actingUserId` a service key sends) becomes the event's **owner** (`userId`) and is automatically added to `hostIds`. See [Owner and hosts](/v8/data-models/event#owner-and-hosts). Supports inline cover (`coverFile`) and gallery image upload via `multipart/form-data`; on a multipart request every field is a string, so send `location`, `hostIds` and `metadata` as JSON strings.
 
 The required location fields depend on `type`: `online` needs a `url`; `physical` needs an `address` or `location`; `hybrid` needs both a `url` and an `address`/`location`.
 
@@ -84,11 +84,11 @@ Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bu
   Service key only, and required with one: the user this request acts as, who becomes the creator and first host, held to their own permissions. A user that doesn't exist returns `404 event/user-not-found`. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
-<ParamField body="cover" type="file">
-  Optional single cover image. Multipart file field. Requires `cover.options` when provided.
+<ParamField body="coverFile" type="file">
+  Optional cover image (one image). Multipart file field. Requires `coverFile.options`. The cover is one of the event's `files`, and `coverImageId` points at it; it sorts before the gallery images. See [Cover and gallery](/v8/data-models/event#cover-and-gallery).
 </ParamField>
 
-<ParamField body="cover.options" type="string">
+<ParamField body="coverFile.options" type="string">
   JSON-stringified image-processing options for the cover (the same discriminated union used by [Upload Image](/v8/api-reference/storage/upload-image)).
 </ParamField>
 
@@ -123,6 +123,16 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
+    The request sent `cover.options`. The cover is uploaded as `coverFile`, with its options in `coverFile.options`.
+
+    ```json
+    {
+      "error": "`cover.options` was renamed to `coverFile.options`: send the cover image as `coverFile`.",
+      "code": "event/unsupported-param",
+      "param": "cover.options"
+    }
+    ```
+
     The request sent `userId`. On this route the user a service key acts as is `actingUserId`.
 
     With a service key:
@@ -185,20 +195,20 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
   </Accordion>
   <Accordion title="Image Too Large — 413">
     ```json
-    { "error": "`cover` is over the 50 MB per-file limit.", "code": "event/file-too-large", "param": "cover" }
+    { "error": "`coverFile` is over the 50 MB per-file limit.", "code": "event/file-too-large", "param": "coverFile" }
     ```
     A file is over 50 MB. `param` names its field.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
-    { "error": "File \"cover.jpg\" is not a valid image.", "code": "event/invalid-image", "param": "cover" }
+    { "error": "File \"cover.jpg\" is not a valid image.", "code": "event/invalid-image", "param": "coverFile" }
     ```
-    A cover or gallery file can't be read as an image. `param` is `cover` or `gallery`.
+    A cover or gallery file can't be read as an image. `param` is `coverFile` or `gallery`.
   </Accordion>
   <Accordion title="Missing Image Options — 400">
-    A cover or gallery image was uploaded without its options. `param` is `cover.options` or `gallery.options`.
+    A cover or gallery image was uploaded without its options. `param` is `coverFile.options` or `gallery.options`.
     ```json
-    { "error": "`cover.options` is required when a cover image is uploaded.", "code": "event/missing-image-options", "param": "cover.options" }
+    { "error": "`coverFile.options` is required when a cover image is uploaded.", "code": "event/missing-image-options", "param": "coverFile.options" }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">
@@ -209,7 +219,7 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `event/unsupported-file-type` or `event/unexpected-file-field`, with `param` naming the field when there is one, or `413 event/too-many-files` for more than 20 files in the request. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `event/unsupported-file-type` or `event/unexpected-file-field` (a file in another field, `cover` included, or a second file in `coverFile`), with `param` naming the field when there is one, or `413 event/too-many-files` for more than 20 files in the request. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
 </AccordionGroup>
 

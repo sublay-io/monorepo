@@ -6,7 +6,7 @@ description: "Update a group or space conversation's name, description, avatar, 
 
 Updates one or more fields on a conversation. Only `group` and `space` conversations can be updated — direct conversations return a 400.
 
-Send a JSON body, or `multipart/form-data` when uploading a new avatar.
+Send a JSON body, or `multipart/form-data` when uploading a new avatar. `removeFileIds` removes the current avatar.
 
 **Authorization:**
 - `group` conversations: caller must be an active `admin` member.
@@ -36,6 +36,10 @@ All fields are optional. Only provided fields are updated.
 
 <ParamField body="avatarFile.options" type="object">
   JSON-encoded image-processing options for `avatarFile`: a `mode` and the fields it needs, for example `{ "mode": "original-aspect", "sizes": { "small": 64, "large": 256 } }`. See [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes).
+</ParamField>
+
+<ParamField body="removeFileIds" type="string[]">
+  Files to remove from the conversation: its `avatarFileId`, nothing else. Removing it clears the avatar (`avatarFileId` becomes `null` and the file is deleted). Works alone or with a new `avatarFile` in the same request; uploading a new avatar while listing the old one is a plain replace. On a multipart request, send it as a JSON string (`'["<fileId>"]'`). Any other id refuses the whole request with `400 chat/invalid-remove-file-ids`.
 </ParamField>
 
 <ParamField body="postingPermission" type="string">
@@ -139,6 +143,13 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
     ```json
     { "error": "Only space admins and moderators can update the space conversation.", "code": "chat/forbidden" }
     ```
+  </Accordion>
+  <Accordion title="Invalid File Ids — 400">
+    `removeFileIds` names a file that isn't this conversation's current avatar. `invalidIds` lists those ids. Checked before anything is uploaded, so nothing is stored or removed.
+    ```json
+    { "error": "`removeFileIds` may name only this conversation's own avatar file (its `avatarFileId`).", "code": "chat/invalid-remove-file-ids", "param": "removeFileIds", "invalidIds": ["9b2f…"] }
+    ```
+    A `removeFileIds` that isn't an array of file ids gets `400 chat/invalid-body` instead.
   </Accordion>
   <Accordion title="Bundle Not Installed — 403">
     Returned when an avatar is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).

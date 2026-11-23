@@ -48,7 +48,7 @@ An event holds one cover image and any number of gallery images, all of them [Fi
 
 - **Upload** the cover as `coverFile` (with `coverFile.options`) and gallery images as `gallery` (with `gallery.options`), on [Create Event](/v8/api-reference/events/create-event) or [Update Event](/v8/api-reference/events/update-event). Uploads need the `files-images` bundle.
 - **Replace** the cover by sending a new `coverFile` on update; the old cover file is deleted. Gallery images sent on update are added after the existing ones.
-- **Remove** files with `removeFileIds` on update: gallery images and/or the cover (removing the cover sets `coverImageId` to `null`). [Delete File](/v8/api-reference/storage/delete-file) refuses an event's files.
+- **Remove** files with `removeFileIds` on update: gallery images and/or the cover (removing the cover sets `coverImageId` to `null`). [Delete File](/v8/api-reference/storage/delete-file) refuses the files of a live event; once the event is soft-deleted with its files kept, their owner can delete them there.
 - **Order:** gallery images count up from `0` in upload order. A cover uploaded through v8 has `position` `-1`, so it comes back first; a cover uploaded through the v7 API has `0`. Always find the cover by `coverImageId`.
 
 Uninstalling the `events` bundle deletes every event's files and their stored blobs. What deleting one event does to its files is described in [Delete Event](/v8/api-reference/events/delete-event).

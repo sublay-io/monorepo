@@ -5,7 +5,7 @@ description: "The File and FileImage interface shapes for uploaded media"
 
 A `File` record represents a file uploaded to Sublay's storage system. Files can be attached to users (avatars, banners), entities, events, comments, chat messages, or spaces. Image files include an additional `image` extension with processed variants at multiple sizes.
 
-A user's or space's avatar and banner, a conversation's avatar, and an event's cover and gallery are uploaded, replaced and removed through that record's own create and update (`avatarFile`, `bannerFile`, `coverFile`, `removeFileIds`), and a chat message's files are removed with the message; [Delete File](/v8/api-reference/storage/delete-file) refuses all of them with `409 storage/file-attached`.
+A user's or space's avatar and banner, a conversation's avatar, and an event's cover and gallery are uploaded, replaced and removed through that record's own create and update (`avatarFile`, `bannerFile`, `coverFile`, `removeFileIds`), and a chat message's files are removed with the message; [Delete File](/v8/api-reference/storage/delete-file) refuses all of them with `409 storage/file-attached`. The files a soft-deleted event kept belong to nothing, and their owner deletes them through Delete File.
 
 ## File
 

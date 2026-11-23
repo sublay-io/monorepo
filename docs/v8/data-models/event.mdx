@@ -34,7 +34,7 @@ Events belong to the `events` bundle. They work standalone, but some behaviors d
 | `capacity` | `number \| null` | Maximum number of `going` RSVPs. `null` means unlimited. Enforced under a row lock so it can't be oversold. |
 | `hostIds` | `string[]` | UUIDs of the event's hosts. Always includes the owner (`userId`) when the event has one, and always has at least one entry. |
 | `coverImageId` | `string \| null` | File ID of the cover image, which is one of the event's `files`. Requires the `files-images` bundle. See [Cover and gallery](#cover-and-gallery). |
-| `files` | `File[]` | The event's files: the cover first, then the gallery images in upload order. Only present when `include` contains `"files"`. |
+| `files` | `File[]` | The event's files: the cover and the gallery images, gallery in upload order. Find the cover by `coverImageId`. Only present when `include` contains `"files"`. |
 | `rsvpCounts` | `{ going: number; maybe: number; "not-going": number }` | Denormalized RSVP totals, always returned. |
 | `userRsvp` | `"going" \| "maybe" \| "not-going" \| null` | The requesting user's own RSVP status. Only populated when `include` contains `"userRsvp"` and the caller is authenticated; otherwise `null`. |
 | `metadata` | `Record<string, any>` | Arbitrary key-value data. Up to 1 MB. Use this for ticketing, tags, or any custom fields. |
@@ -49,7 +49,7 @@ An event holds one cover image and any number of gallery images, all of them [Fi
 - **Upload** the cover as `coverFile` (with `coverFile.options`) and gallery images as `gallery` (with `gallery.options`), on [Create Event](/v8/api-reference/events/create-event) or [Update Event](/v8/api-reference/events/update-event). Uploads need the `files-images` bundle.
 - **Replace** the cover by sending a new `coverFile` on update; the old cover file is deleted. Gallery images sent on update are added after the existing ones.
 - **Remove** files with `removeFileIds` on update: gallery images and/or the cover (removing the cover sets `coverImageId` to `null`). [Delete File](/v8/api-reference/storage/delete-file) refuses an event's files.
-- **Order:** the cover's `position` is `-1` and gallery images count up from `0` in upload order, so `files` comes back cover first.
+- **Order:** gallery images count up from `0` in upload order. A cover uploaded through v8 has `position` `-1`, so it comes back first; a cover uploaded through the v7 API has `0`. Always find the cover by `coverImageId`.
 
 Uninstalling the `events` bundle deletes every event's files and their stored blobs. What deleting one event does to its files is described in [Delete Event](/v8/api-reference/events/delete-event).
 

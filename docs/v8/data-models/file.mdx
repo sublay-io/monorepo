@@ -22,7 +22,7 @@ A user's or space's avatar and banner, a conversation's avatar, and an event's c
 | `originalPath` | `string` | Proxied URL to the original uploaded file. |
 | `originalSize` | `number` | Size of the original file in bytes. |
 | `originalMimeType` | `string` | MIME type of the original file (e.g. `"image/jpeg"`). |
-| `position` | `number` | Display order when multiple files are attached to the same record: the first file is `0`, and each file added later takes the next number. An event's cover is `-1`, so it sorts before the gallery. |
+| `position` | `number` | Display order when multiple files are attached to the same record: the first file is `0`, and each file added later takes the next number. An event cover uploaded through v8 is `-1`, so it sorts before the gallery; one uploaded through the v7 API is `0`. Find an event's cover by `coverImageId`, not by position. |
 | `metadata` | `Record<string, any>` | Custom key-value data for this file. |
 | `image` | `FileImage \| null \| undefined` | Processed image variants. On entity, event, space and user files: the image data when `type` is `"image"`, `null` for any other type. Not returned on chat-message and conversation-avatar files. |
 | `createdAt` | `Date` | When the file was uploaded. |

@@ -37,7 +37,7 @@ describe("js-sdk events — request shaping", () => {
       title: "Launch party",
       startTime: "2026-07-01T18:00:00Z",
       type: "physical",
-      cover: {
+      coverFile: {
         file,
         options: { mode: "original-aspect", sizes: { thumbnail: 200 } },
       },
@@ -52,11 +52,12 @@ describe("js-sdk events — request shaping", () => {
     expect(obj.title).toBe("Launch party");
     expect(obj.startTime).toBe("2026-07-01T18:00:00Z");
     expect(obj.type).toBe("physical");
-    expect(obj["cover.options"]).toBe(
+    expect(obj["coverFile.options"]).toBe(
       JSON.stringify({ mode: "original-aspect", sizes: { thumbnail: 200 } })
     );
-    expect(obj.cover).toBeInstanceOf(File);
-    expect((obj.cover as File).name).toBe("cover.png");
+    expect(obj.coverFile).toBeInstanceOf(File);
+    expect(obj).not.toHaveProperty("cover");
+    expect((obj.coverFile as File).name).toBe("cover.png");
   });
 
   it("createEvent sends Date start and end times as ISO strings in multipart", async () => {
@@ -66,7 +67,7 @@ describe("js-sdk events — request shaping", () => {
       startTime: new Date("2026-07-01T18:00:00.000Z"),
       endTime: new Date("2026-07-01T20:00:00.000Z"),
       type: "physical",
-      cover: {
+      coverFile: {
         file: new File(["cover-bytes"], "cover.png", { type: "image/png" }),
         options: { mode: "original-aspect", sizes: { thumbnail: 200 } },
       },
@@ -198,26 +199,26 @@ describe("js-sdk events — request shaping", () => {
     });
   });
 
-  it("updateEvent sends removeImageIds in the plain JSON body", async () => {
+  it("updateEvent sends removeFileIds in the plain JSON body", async () => {
     const { client, projectInstance } = makeClient();
     await updateEvent(client, {
       eventId: "ev1",
-      removeImageIds: ["img1", "img2"],
+      removeFileIds: ["img1", "img2"],
     });
     expect(projectInstance.patch).toHaveBeenCalledWith("/events/ev1", {
-      removeImageIds: ["img1", "img2"],
+      removeFileIds: ["img1", "img2"],
     });
   });
 
-  it("updateEvent sends multipart/FormData with a JSON-stringified removeImageIds when a cover image is attached", async () => {
+  it("updateEvent sends multipart/FormData with a JSON-stringified removeFileIds when a cover image is attached", async () => {
     const { client, projectInstance } = makeClient();
     const file = new File(["cover-bytes"], "newcover.png", {
       type: "image/png",
     });
     await updateEvent(client, {
       eventId: "ev1",
-      removeImageIds: ["old-cover-id"],
-      cover: {
+      removeFileIds: ["old-cover-id"],
+      coverFile: {
         file,
         options: { mode: "original-aspect", sizes: { thumbnail: 200 } },
       },
@@ -228,10 +229,12 @@ describe("js-sdk events — request shaping", () => {
     expect(body).toBeInstanceOf(FormData);
 
     const obj = formDataToObject(body as FormData);
-    expect(obj.removeImageIds).toBe(JSON.stringify(["old-cover-id"]));
-    expect(obj.cover).toBeInstanceOf(File);
-    expect((obj.cover as File).name).toBe("newcover.png");
-    expect(obj["cover.options"]).toBe(
+    expect(obj.removeFileIds).toBe(JSON.stringify(["old-cover-id"]));
+    expect(obj).not.toHaveProperty("removeImageIds");
+    expect(obj.coverFile).toBeInstanceOf(File);
+    expect(obj).not.toHaveProperty("cover");
+    expect((obj.coverFile as File).name).toBe("newcover.png");
+    expect(obj["coverFile.options"]).toBe(
       JSON.stringify({ mode: "original-aspect", sizes: { thumbnail: 200 } })
     );
   });
@@ -368,7 +371,7 @@ describe("js-sdk events — response mapping", () => {
       title: "Launch party",
       startTime: "2026-07-01T18:00:00Z",
       type: "physical",
-      cover: { file, options: { mode: "original-aspect", sizes: {} } },
+      coverFile: { file, options: { mode: "original-aspect", sizes: {} } },
     });
 
     expect(result).toEqual(event);
@@ -424,7 +427,7 @@ describe("js-sdk events — response mapping", () => {
 
     const result = await updateEvent(client, {
       eventId: "ev1",
-      cover: { file, options: { mode: "original-aspect", sizes: {} } },
+      coverFile: { file, options: { mode: "original-aspect", sizes: {} } },
     });
 
     expect(result).toEqual(event);

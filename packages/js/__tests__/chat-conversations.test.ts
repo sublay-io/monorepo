@@ -68,6 +68,28 @@ describe("js-sdk chat conversations — request shaping", () => {
     });
   });
 
+  it("createGroupConversation sends an avatar as multipart avatarFile + avatarFile.options, with type 'group'", async () => {
+    const { client, projectInstance } = makeClient();
+    const file = new File(["bytes"], "a.png", { type: "image/png" });
+    const options = { mode: "original-aspect" as const, sizes: { small: 64 } };
+    await createGroupConversation(client, {
+      name: "Engineering",
+      memberIds: ["u1", "u2"],
+      metadata: { topic: "eng" },
+      avatarFile: { file, options },
+    });
+    const [path, body] = projectInstance.post.mock.calls[0];
+    expect(path).toBe("/chat/conversations");
+    expect(body).toBeInstanceOf(FormData);
+    const fields = formDataToObject(body as FormData);
+    expect(fields.type).toBe("group");
+    expect(fields.name).toBe("Engineering");
+    expect(fields.memberIds).toBe(JSON.stringify(["u1", "u2"]));
+    expect(fields.metadata).toBe(JSON.stringify({ topic: "eng" }));
+    expect(fields.avatarFile).toBeInstanceOf(File);
+    expect(fields["avatarFile.options"]).toBe(JSON.stringify(options));
+  });
+
   it("createDirectConversation posts the full body to /chat/conversations/direct (no actingUserId — actor derived from token)", async () => {
     const { client, projectInstance } = makeClient();
     const data = { userId: "target1" };
@@ -117,6 +139,25 @@ describe("js-sdk chat conversations — request shaping", () => {
     expect(fields.avatarFile).toBeInstanceOf(File);
     expect(fields["avatarFile.options"]).toBe(JSON.stringify(options));
     expect(fields.name).toBe("New name");
+  });
+
+  it("updateConversation sends removeFileIds as a JSON array, alone or as a JSON string next to an avatar", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateConversation(client, { conversationId: "c1", removeFileIds: ["f1"] });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/chat/conversations/c1", {
+      removeFileIds: ["f1"],
+    });
+
+    const file = new File(["bytes"], "a.png", { type: "image/png" });
+    await updateConversation(client, {
+      conversationId: "c1",
+      removeFileIds: ["f1"],
+      avatarFile: { file, options: { mode: "original-aspect", sizes: { small: 64 } } },
+    });
+    const [, body] = projectInstance.patch.mock.calls[1];
+    const fields = formDataToObject(body as FormData);
+    expect(fields.removeFileIds).toBe(JSON.stringify(["f1"]));
+    expect(fields.avatarFile).toBeInstanceOf(File);
   });
 
   it("deleteConversation deletes /chat/conversations/:conversationId", async () => {

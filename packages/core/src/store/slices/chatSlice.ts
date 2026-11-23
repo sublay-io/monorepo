@@ -856,7 +856,7 @@ const chatSlice = createSlice({
           // A preview carries only its subset of fields, content cut to 100.
           if (patch.content !== undefined) {
             message.content =
-              patch.content === null ? null : patch.content.slice(0, 100);
+              patch.content === null ? null : Array.from(patch.content).slice(0, 100).join("");
           }
           if (patch.gif !== undefined) message.gif = patch.gif;
           continue;

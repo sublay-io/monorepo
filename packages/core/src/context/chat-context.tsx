@@ -63,7 +63,7 @@ export function toPreviewLastMessage(
   return {
     id: message.id,
     conversationId: message.conversationId,
-    content: message.content === null ? null : message.content.slice(0, 100),
+    content: message.content === null ? null : Array.from(message.content).slice(0, 100).join(""),
     gif: message.gif,
     userId: message.userId,
     moderationStatus: message.moderationStatus,

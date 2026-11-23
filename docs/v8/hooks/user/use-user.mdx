@@ -126,7 +126,7 @@ if (user?.avatarFile) {
       New banner image to upload, replacing the current one; same shape as `avatarFile`.
     </ResponseField>
     <ResponseField name="removeFileIds" type="string[]">
-      Files to remove: the user's `avatarFileId` and/or `bannerFileId`. Removing one clears that image. Any other id refuses the whole update (`400 user/invalid-remove-file-ids`).
+      Files to remove: the id of `user.avatarFile` and/or `user.bannerFile`. Removing one clears that image. Any other id refuses the whole update (`400 user/invalid-remove-file-ids`).
     </ResponseField>
     <ResponseField name="location" type="{ latitude: number; longitude: number }">
       User's geographic location.

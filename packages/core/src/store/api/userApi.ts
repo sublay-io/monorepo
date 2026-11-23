@@ -34,7 +34,7 @@ export interface UpdateUserParams {
   /** A new banner image, replacing the current one. */
   bannerFile?: ImageSlotUpload;
   /**
-   * Files to remove: the user's `avatarFileId` and/or `bannerFileId`.
+   * Files to remove: the id of the user's `avatarFile` and/or `bannerFile`.
    * Removing one clears that image.
    */
   removeFileIds?: string[];

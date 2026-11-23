@@ -4,6 +4,7 @@ import useProject from "../projects/useProject";
 import { Event, EventType, EventVisibility } from "../../interfaces/models/Event";
 import { UploadImageOptions } from "../../interfaces/models/Image";
 import { toIsoString } from "../../utils/dates";
+import { appendImageSlot, type ImageSlotUpload } from "../../utils/uploads";
 
 // Universal file typing (mirrors useCreateEntity).
 type BrowserFile = File;
@@ -18,12 +19,6 @@ export type UniversalFile = BrowserFile | RNFile;
 
 export function isBrowserFile(file: UniversalFile): file is BrowserFile {
   return typeof File !== "undefined" && file instanceof File;
-}
-
-// Single-image cover slot (Event.coverImageId). Shared with useUpdateEvent.
-export interface CoverUploadConfig {
-  file: UniversalFile;
-  options?: UploadImageOptions;
 }
 
 // Multi-image gallery slot (Files with eventId + position). Shared with useUpdateEvent.
@@ -54,8 +49,12 @@ export interface CreateEventProps {
   /** Additional host user IDs (the logged-in user is auto-added as a host). */
   hostIds?: string[];
   metadata?: Record<string, any>;
-  /** Inline cover image upload (single). Requires the files-images bundle. */
-  cover?: CoverUploadConfig;
+  /**
+   * The cover image (one image, processed per `options`; `mode` is required).
+   * Its file is returned in the event's `files`, and `coverImageId` points at
+   * it. Requires the files-images bundle.
+   */
+  coverFile?: ImageSlotUpload;
   /** Inline gallery image upload (multi). Requires the files-images bundle. */
   gallery?: GalleryUploadConfig;
 }
@@ -84,7 +83,7 @@ function useCreateEvent(): (props: CreateEventProps) => Promise<Event> {
         guestListVisible,
         hostIds,
         metadata,
-        cover,
+        coverFile,
         gallery,
       } = props;
 
@@ -92,13 +91,13 @@ function useCreateEvent(): (props: CreateEventProps) => Promise<Event> {
         throw new Error("No projectId available.");
       }
 
-      const hasCover = !!cover && !!cover.file;
+      const hasCover = !!coverFile && !!coverFile.file;
       const hasGallery = !!gallery && gallery.files.length > 0;
 
       if (hasCover || hasGallery) {
         // Multipart path — inline cover/gallery upload. Field names mirror the
-        // server route's `upload.fields([{ cover }, { gallery }])` and schema
-        // (`cover.options` / `gallery.options`).
+        // server route: `coverFile` + `coverFile.options`, `gallery` +
+        // `gallery.options`.
         const formData = new FormData();
 
         if (title !== undefined) formData.append("title", title);
@@ -120,21 +119,7 @@ function useCreateEvent(): (props: CreateEventProps) => Promise<Event> {
         if (hostIds !== undefined) formData.append("hostIds", JSON.stringify(hostIds));
         if (metadata !== undefined) formData.append("metadata", JSON.stringify(metadata));
 
-        if (hasCover) {
-          const file = cover!.file;
-          if (isBrowserFile(file)) {
-            formData.append("cover", file, file.name);
-          } else {
-            formData.append("cover", {
-              uri: file.uri,
-              type: file.type || "image/jpeg",
-              name: file.name,
-            } as any);
-          }
-          if (cover!.options) {
-            formData.append("cover.options", JSON.stringify(cover!.options));
-          }
-        }
+        if (hasCover) appendImageSlot(formData, "coverFile", coverFile!);
 
         if (hasGallery) {
           gallery!.files.forEach((file) => {

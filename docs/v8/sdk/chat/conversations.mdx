@@ -91,7 +91,7 @@ function NewGroupButton() {
 }
 ```
 
-`createGroup` resolves to the created conversation. The group's inbox row is then fetched and added to the conversation list.
+`createGroup` resolves to the created conversation. The group's inbox row is then fetched and added to the conversation list. Pass `avatarFile: { file, options }` to upload the group's avatar with it; `useConversation().update` replaces it the same way, and `removeFileIds: [conversation.avatarFileId]` removes it.
 
 ## Accessing a Single Conversation
 

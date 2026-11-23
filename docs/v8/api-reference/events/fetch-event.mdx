@@ -22,7 +22,7 @@ The response always includes inline `rsvpCounts`. Authentication is optional; pa
   Associations to expand, as a comma-separated value (`include=user,space`) or repeated params. Values:
   - `user` — the creator's user profile
   - `space` — the space the event belongs to
-  - `files` — the cover and gallery file objects
+  - `files` — the event's files: the cover and the gallery images, gallery in the order they were uploaded. Find the cover by `coverImageId`; one uploaded through v8 comes first
   - `userRsvp` — the caller's own RSVP status (needs a viewer; otherwise `null`)
 
   Matching ignores case. An unknown value returns `400 event/invalid-query`.

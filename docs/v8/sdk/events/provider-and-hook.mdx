@@ -85,7 +85,7 @@ function EventDetail() {
 </ResponseField>
 
 <ResponseField name="updateEvent" type="(props: { update }) => Promise<Event | undefined>">
-  Update the event's mutable fields. Hosts only, and on an event in a space only while they are active members of it. The response is merged onto the local event on success.
+  Update the event's mutable fields. `update` takes what [`useUpdateEvent`](/v8/hooks/events/use-update-event)'s `update` takes, including `coverFile`, `gallery` and `removeFileIds`. Hosts only, and on an event in a space only while they are active members of it. The response is merged onto the local event on success.
 </ResponseField>
 
 <ResponseField name="deleteEvent" type="() => Promise<void>">

@@ -45,7 +45,7 @@ describe("useCreateEvent", () => {
         title: "With cover",
         startTime: "2024-06-01T00:00:00.000Z",
         type: "online",
-        cover: { file, options: { mode: "original-aspect", sizes: { full: 1200 } } },
+        coverFile: { file, options: { mode: "original-aspect", sizes: { full: 1200 } } },
       });
     });
 
@@ -53,10 +53,12 @@ describe("useCreateEvent", () => {
     expect(call.body instanceof FormData).toBe(true);
     const formData = call.body as FormData;
     expect(formData.get("title")).toBe("With cover");
-    expect(formData.get("cover")).toBeInstanceOf(File);
-    expect(formData.get("cover.options")).toBe(
+    expect(formData.get("coverFile")).toBeInstanceOf(File);
+    expect(formData.get("coverFile.options")).toBe(
       JSON.stringify({ mode: "original-aspect", sizes: { full: 1200 } }),
     );
+    expect(formData.has("cover")).toBe(false);
+    expect(formData.has("cover.options")).toBe(false);
     expect(call.config?.headers).toMatchObject({
       "Content-Type": "multipart/form-data",
     });
@@ -79,8 +81,9 @@ describe("useCreateEvent", () => {
         startTime,
         endTime,
         type: "online",
-        cover: {
+        coverFile: {
           file: new File(["binary"], "cover.png", { type: "image/png" }),
+          options: { mode: "original-aspect", sizes: { full: 1200 } },
         },
       });
     });

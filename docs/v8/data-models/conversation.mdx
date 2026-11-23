@@ -16,8 +16,8 @@ A `Conversation` represents a messaging thread between two or more participants.
 | `spaceId` | `string \| null` | The Space this conversation belongs to. Set only when `type` is `"space"`. |
 | `directKey` | `string \| null` | Identifies the pair of members of a `direct` conversation. Set on direct conversations only; `null` for group and space conversations. |
 | `createdById` | `string \| null` | ID of the user who created the conversation. `null` for auto-created space conversations. |
-| `avatarFileId` | `string \| null` | ID of the uploaded avatar file for this conversation. |
-| `avatarFile` | `File \| null \| undefined` | Populated avatar file object. Returned by [Update Conversation](/v8/api-reference/chat/conversations/update-conversation) when the `files-images` bundle is installed; `null` when the conversation has no avatar. |
+| `avatarFileId` | `string \| null` | ID of the conversation's avatar file: uploaded as `avatarFile` on [Create Group Conversation](/v8/api-reference/chat/conversations/create-group) or [Update Conversation](/v8/api-reference/chat/conversations/update-conversation), and removed with `removeFileIds` on the update. |
+| `avatarFile` | `File \| null \| undefined` | Populated avatar file object. Returned by [Create Group Conversation](/v8/api-reference/chat/conversations/create-group) and [Update Conversation](/v8/api-reference/chat/conversations/update-conversation) when the `files-images` bundle is installed; `null` when the conversation has no avatar. |
 | `lastMessageAt` | `Date \| null` | Timestamp of the most recent message. Used for conversation list sorting. `null` if no messages have been sent. |
 | `postingPermission` | `"members" \| "team" \| null` | Who can post in the conversation: any active member (`"members"`), or only the space's active admins and moderators (`"team"`). Only set for `space` conversations. `null` for direct and group conversations. |
 | `metadata` | `Record<string, any>` | Custom key-value data. Limited to 1 MB. |

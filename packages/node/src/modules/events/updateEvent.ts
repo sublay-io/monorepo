@@ -1,5 +1,10 @@
 import { SublayHttpClient } from "../../core/client";
 import { Event, EventType, EventVisibility } from "../../interfaces/Event";
+import {
+  appendFields,
+  appendImageSlot,
+  type ImageSlotFile,
+} from "../../core/formData";
 
 export interface UpdateEventProps {
   eventId: string;
@@ -22,6 +27,18 @@ export interface UpdateEventProps {
   guestListVisible?: boolean;
   metadata?: Record<string, any>;
   /**
+   * A new cover image, replacing the current one. When present the request
+   * is sent as `multipart/form-data`. Requires the `files-images` bundle.
+   */
+  coverFile?: ImageSlotFile;
+  /**
+   * Ids of the event's files to remove: its images and/or the current cover
+   * (`coverImageId`; removing it clears the cover). Each must be one of this
+   * event's files, or the whole update is refused. Works with or without
+   * uploads in the same request.
+   */
+  removeFileIds?: string[];
+  /**
    * The event host this request acts as. It has exactly that user's powers
    * on the event and is recorded as theirs. Required.
    */
@@ -38,10 +55,17 @@ export async function updateEvent(
   client: SublayHttpClient,
   data: UpdateEventProps
 ): Promise<Event> {
-  const { eventId, ...restOfProps } = data;
-  const response = await client.projectInstance.patch<Event>(
-    `/events/${eventId}`,
-    restOfProps
-  );
+  const { eventId, coverFile, ...body } = data;
+  const path = `/events/${eventId}`;
+
+  if (coverFile) {
+    const formData = new FormData();
+    appendFields(formData, body);
+    appendImageSlot(formData, "coverFile", coverFile, "cover");
+    const response = await client.projectInstance.patch<Event>(path, formData);
+    return response.data;
+  }
+
+  const response = await client.projectInstance.patch<Event>(path, body);
   return response.data;
 }

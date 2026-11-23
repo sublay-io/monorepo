@@ -45,6 +45,40 @@ describe("useUpdateConversation", () => {
     expect(formData.get("avatarFile.options")).toBe(JSON.stringify(options));
     expect(formData.get("name")).toBe("New name");
     expect(formData.has("avatar")).toBe(false);
+    expect(formData.has("removeFileIds")).toBe(false);
+  });
+
+  it("sends removeFileIds alone as a JSON array", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateConversation());
+    axiosPrivate.mockResponse("patch", makeConversation());
+
+    await act(async () => {
+      await result.current({ conversationId: "conversation-1", removeFileIds: ["file-1"] });
+    });
+
+    const [call] = axiosPrivate.calls("patch");
+    expect(call.body instanceof FormData).toBe(false);
+    expect(call.body).toEqual({ removeFileIds: ["file-1"] });
+  });
+
+  it("sends removeFileIds as a JSON string next to a new avatar", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateConversation());
+    axiosPrivate.mockResponse("patch", makeConversation());
+
+    const file = new File(["bytes"], "a.png", { type: "image/png" });
+    const options = { mode: "original-aspect" as const, sizes: { small: 64 } };
+    await act(async () => {
+      await result.current({
+        conversationId: "conversation-1",
+        avatarFile: { file, options },
+        removeFileIds: ["old-avatar"],
+      });
+    });
+
+    const [call] = axiosPrivate.calls("patch");
+    const formData = call.body as FormData;
+    expect(formData.get("removeFileIds")).toBe(JSON.stringify(["old-avatar"]));
+    expect(formData.get("avatarFile")).toBeInstanceOf(File);
   });
 
   it("rejects when the server returns an error response", async () => {

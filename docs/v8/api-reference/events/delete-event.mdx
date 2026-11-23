@@ -9,7 +9,7 @@ Deletes an event. Allowed for the event's **owner** (also when they are no longe
 Deletion honors the project's `eventDeletion` settings:
 
 - `softDelete` (default `false`) — when `true`, the event is soft-deleted (a `deletedAt` timestamp is set) and drops out of listings while the row is retained.
-- `preserveFilesOnSoftDelete` (default `true`) — on a soft delete, keep the event's files. On a hard delete, files are always removed.
+- `preserveFilesOnSoftDelete` (default `true`) — on a soft delete, keep the event's files. The kept files, its cover included, then belong to nothing: each file's owner can delete it with [Delete File](/v8/api-reference/storage/delete-file). On a hard delete, files are always removed.
 
 ## Path Parameters
 

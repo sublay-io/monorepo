@@ -12,6 +12,12 @@ export interface UpdateConversationProps {
    * and the server processes the image per `options`, replacing the old avatar.
    */
   avatarFile?: SpaceImageUpload;
+  /**
+   * Files to remove: the conversation's `avatarFileId` (no other id is
+   * accepted). Removing it clears the avatar. Works with or without a new
+   * avatar in the same request.
+   */
+  removeFileIds?: string[];
   /** Space conversations only: who may post. */
   postingPermission?: "members" | "team";
 }

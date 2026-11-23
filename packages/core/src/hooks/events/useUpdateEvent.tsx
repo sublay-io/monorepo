@@ -2,12 +2,9 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { Event, EventType, EventVisibility } from "../../interfaces/models/Event";
-import {
-  CoverUploadConfig,
-  GalleryUploadConfig,
-  isBrowserFile,
-} from "./useCreateEvent";
+import { GalleryUploadConfig, isBrowserFile } from "./useCreateEvent";
 import { toIsoString } from "../../utils/dates";
+import { appendImageSlot, type ImageSlotUpload } from "../../utils/uploads";
 
 export interface UpdateEventProps {
   eventId: string;
@@ -31,16 +28,17 @@ export interface UpdateEventProps {
     guestListVisible?: boolean;
     metadata?: Record<string, any>;
     /**
-     * File IDs of existing event images to REMOVE (gallery photos and/or the
-     * current cover). Combine with `gallery` (append) + `cover` (replace) to
-     * fully curate the image set in one update.
+     * Ids of the event's files to remove: gallery images and/or the current
+     * cover (`coverImageId`; removing it clears the cover). Each must be one
+     * of this event's files, or the whole update is refused. Works alone or
+     * with `gallery` (append) and `coverFile` (replace).
      */
-    removeImageIds?: string[];
+    removeFileIds?: string[];
+    /** New cover image (one image) — REPLACES the existing cover. Sends multipart. */
+    coverFile?: ImageSlotUpload;
+    /** Gallery images (multi) — APPENDED to the event's images. Sends multipart. */
+    gallery?: GalleryUploadConfig;
   };
-  /** New cover image (single) — REPLACES the existing cover. Sends multipart. */
-  cover?: CoverUploadConfig;
-  /** Gallery images (multi) — APPENDED to the event. Sends multipart. */
-  gallery?: GalleryUploadConfig;
 }
 
 /**
@@ -54,20 +52,24 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
   const { projectId } = useProject();
 
   const updateEvent = useCallback(
-    async ({ eventId, update, cover, gallery }: UpdateEventProps) => {
+    async ({ eventId, update }: UpdateEventProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
 
-      const hasCover = !!cover && !!cover.file;
+      // The files go as multipart parts; everything else in `update` is a field.
+      const { coverFile, gallery, ...fields } = update;
+
+      const hasCover = !!coverFile && !!coverFile.file;
       const hasGallery = !!gallery && gallery.files.length > 0;
 
       if (hasCover || hasGallery) {
         // Multipart path — inline cover/gallery upload. Field names mirror the
-        // server PATCH route's `upload.fields([{ cover }, { gallery }])`.
+        // server PATCH route: `coverFile` + `coverFile.options`, `gallery` +
+        // `gallery.options`.
         const formData = new FormData();
 
-        const u = update;
+        const u = fields;
         if (u.title !== undefined) formData.append("title", u.title);
         if (u.description !== undefined) formData.append("description", u.description);
         if (u.startTime !== undefined) formData.append("startTime", toIsoString(u.startTime));
@@ -84,24 +86,10 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
         if (u.guestListVisible !== undefined)
           formData.append("guestListVisible", u.guestListVisible.toString());
         if (u.metadata !== undefined) formData.append("metadata", JSON.stringify(u.metadata));
-        if (u.removeImageIds !== undefined)
-          formData.append("removeImageIds", JSON.stringify(u.removeImageIds));
+        if (u.removeFileIds !== undefined)
+          formData.append("removeFileIds", JSON.stringify(u.removeFileIds));
 
-        if (hasCover) {
-          const file = cover!.file;
-          if (isBrowserFile(file)) {
-            formData.append("cover", file, file.name);
-          } else {
-            formData.append("cover", {
-              uri: file.uri,
-              type: file.type || "image/jpeg",
-              name: file.name,
-            } as any);
-          }
-          if (cover!.options) {
-            formData.append("cover.options", JSON.stringify(cover!.options));
-          }
-        }
+        if (hasCover) appendImageSlot(formData, "coverFile", coverFile!);
 
         if (hasGallery) {
           gallery!.files.forEach((file) => {
@@ -129,10 +117,10 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
       }
 
       const response = await axios.patch(`/${projectId}/events/${eventId}`, {
-        ...update,
+        ...fields,
         startTime:
-          update.startTime === undefined ? undefined : toIsoString(update.startTime),
-        endTime: update.endTime === undefined ? undefined : toIsoString(update.endTime),
+          fields.startTime === undefined ? undefined : toIsoString(fields.startTime),
+        endTime: fields.endTime === undefined ? undefined : toIsoString(fields.endTime),
       });
 
       return response.data as Event;

@@ -184,7 +184,7 @@ Endpoints that take a file in a `multipart/form-data` body answer a refused file
 | `400` | `<area>/unsupported-file-type` | A file isn't JPEG, PNG, WebP or PDF. `param` names its field. |
 | `400` | `<area>/unexpected-file-field` | A file is in a field the endpoint doesn't take, or a field has more files than it takes. `param` names the field. |
 
-The limits are per request, the same on every endpoint: at most 50 MB per file, 20 files in total, and 250 MB for the whole body. A field that holds a list of files takes up to 20 of them; a field that holds one file (`avatarFile`, `bannerFile`) takes one. They don't cap how many files a record holds: an update can add more. Endpoints that process images add their own checks (for example `422 <area>/invalid-image` for a file that isn't a valid image, with `param` naming its field); each endpoint's page lists them.
+The limits are per request, the same on every endpoint: at most 50 MB per file, 20 files in total, and 250 MB for the whole body. A field that holds a list of files takes up to 20 of them; a field that holds one file (`avatarFile`, `bannerFile`, `coverFile`) takes one. They don't cap how many files a record holds: an update can add more. Endpoints that process images add their own checks (for example `422 <area>/invalid-image` for a file that isn't a valid image, with `param` naming its field); each endpoint's page lists them.
 
 ### Same situation, same answer
 

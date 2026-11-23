@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { Conversation } from "../../../interfaces/models/Conversation";
-import { UploadImageOptions } from "../../../interfaces/models/Image";
+import { appendImageSlot, type ImageSlotUpload } from "../../../utils/uploads";
 
 export interface UpdateConversationParams {
   conversationId: string;
@@ -12,7 +12,12 @@ export interface UpdateConversationParams {
    * New avatar image. When present the request is sent as multipart form data
    * and the server processes the image per `options`, replacing the old avatar.
    */
-  avatarFile?: { file: File | Blob; options: UploadImageOptions };
+  avatarFile?: ImageSlotUpload;
+  /**
+   * Files to remove: the conversation's `avatarFileId`. Removing it clears
+   * the avatar. Any other id refuses the whole update.
+   */
+  removeFileIds?: string[];
   postingPermission?: "members" | "team";
 }
 
@@ -42,8 +47,10 @@ function useUpdateConversation(): (
         if (rest.postingPermission !== undefined) {
           formData.append("postingPermission", rest.postingPermission);
         }
-        formData.append("avatarFile", avatarFile.file);
-        formData.append("avatarFile.options", JSON.stringify(avatarFile.options));
+        if (rest.removeFileIds !== undefined) {
+          formData.append("removeFileIds", JSON.stringify(rest.removeFileIds));
+        }
+        appendImageSlot(formData, "avatarFile", avatarFile);
 
         const response = await axios.patch(path, formData, {
           headers: { "Content-Type": "multipart/form-data" },

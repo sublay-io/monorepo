@@ -46,8 +46,12 @@ The hook returns a function. That function accepts:
   New conversation description.
 </ParamField>
 
-<ParamField body="avatarFile" type="{ file: File | Blob; options: UploadImageOptions }">
-  New avatar image and its processing options (a `mode` and the fields it needs; see [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes)). The request is sent as multipart form data, and the previous avatar, if any, is deleted.
+<ParamField body="avatarFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
+  New avatar image and its processing options (a `mode` and the fields it needs; see [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes)). `file` is a browser `File` or `Blob`, or a React Native `{ uri, name, type }`. The request is sent as multipart form data, and the previous avatar, if any, is deleted.
+</ParamField>
+
+<ParamField body="removeFileIds" type="string[]">
+  Files to remove: the conversation's `avatarFileId`. Removing it clears the avatar. Works alone or with a new `avatarFile`. Any other id refuses the whole update (`400 chat/invalid-remove-file-ids`).
 </ParamField>
 
 <ParamField body="postingPermission" type="'members' | 'team'">

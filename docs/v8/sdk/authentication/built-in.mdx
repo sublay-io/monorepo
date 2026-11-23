@@ -47,12 +47,12 @@ You can pass additional profile data at registration time:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | `string` | Display name |
+| `name` | `string \| null` | Display name (`null` is the same as leaving it out) |
 | `username` | `string` | Unique username within the project |
-| `avatar` | `string` | URL of avatar image |
-| `bio` | `string` | Short bio text |
+| `avatar` | `string \| null` | URL of avatar image (`null` is the same as leaving it out) |
+| `bio` | `string \| null` | Short bio text (`null` is the same as leaving it out) |
 | `location` | `{ latitude: number; longitude: number }` | Geographic location |
-| `birthdate` | `Date` | Date of birth |
+| `birthdate` | `string \| Date` | Date of birth: a `Date`, or a full UTC timestamp string such as `"1990-05-17T00:00:00.000Z"` (a date alone is refused) |
 | `metadata` | `Record<string, any>` | Public custom data |
 | `secureMetadata` | `Record<string, any>` | Custom data no API response returns, the user's own included. The user can write it, so don't store anything your app needs to trust here. |
 | `avatarFile` | `{ file: File \| Blob \| { uri, name, type? }; options: UploadImageOptions }` | Upload an avatar image directly: the file plus its [processing options](/v8/api-reference/storage/upload-image) (`mode` required) |
@@ -361,12 +361,12 @@ await sendVerificationEmail({
 
 | Option | Type | Required | Description |
 |--------|------|----------|-------------|
-| `mode` | `"code" \| "link"` | always | Whether to send a code to enter, or a link to click |
-| `tokenFormat` | `"hex" \| "numeric" \| "alpha" \| "alphanumeric"` | when `mode: "code"` (optional, defaults to `"hex"`, for `mode: "link"`) | Character set for the token |
-| `tokenLength` | `number` (4–12) | when `mode: "code"` and `tokenFormat` isn't `"hex"` (not allowed when it is `"hex"`; optional for `mode: "link"`, defaults to `6`) | Length of the token |
-| `redirectUrl` | `string` | never | Where to redirect after link verification (only valid with `mode: "link"`). Must be an `https` address on one of your project's Verified Domains, or `localhost` |
+| `mode` | `"code" \| "link"` | never (defaults to `"code"`) | Whether to send a code to enter, or a link to click |
+| `tokenFormat` | `"hex" \| "numeric" \| "alpha" \| "alphanumeric"` | in code mode (optional, defaults to `"hex"`, for `mode: "link"`) | Character set for the token |
+| `tokenLength` | `number` (4–12) | never (defaults to `6`; not allowed when `tokenFormat` is `"hex"`) | Length of the token |
+| `redirectUrl` | `string \| null` | never | Where to redirect after link verification; `null` for none (only valid with `mode: "link"`). Must be an `https` address on one of your project's Verified Domains, or `localhost` |
 
-TypeScript enforces this combination at compile time — `sendVerificationEmail({ mode: "code" })` or `sendVerificationEmail({ mode: "code", tokenFormat: "numeric" })` (missing `tokenLength`) won't type-check.
+TypeScript enforces this combination at compile time — `sendVerificationEmail({ mode: "code" })` (missing `tokenFormat`) or `sendVerificationEmail({ mode: "code", tokenFormat: "hex", tokenLength: 6 })` won't type-check.
 
 ### Verify with a code
 

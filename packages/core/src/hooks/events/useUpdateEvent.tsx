@@ -7,14 +7,15 @@ import {
   GalleryUploadConfig,
   isBrowserFile,
 } from "./useCreateEvent";
+import { toIsoString } from "../../utils/dates";
 
 export interface UpdateEventProps {
   eventId: string;
   update: {
     title?: string;
     description?: string;
-    startTime?: string; // ISO datetime
-    endTime?: string; // ISO datetime
+    startTime?: string | Date; // ISO datetime string, or a Date
+    endTime?: string | Date; // ISO datetime string, or a Date
     timezone?: string;
     type?: EventType;
     url?: string;
@@ -69,8 +70,8 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
         const u = update;
         if (u.title !== undefined) formData.append("title", u.title);
         if (u.description !== undefined) formData.append("description", u.description);
-        if (u.startTime !== undefined) formData.append("startTime", u.startTime);
-        if (u.endTime !== undefined) formData.append("endTime", u.endTime);
+        if (u.startTime !== undefined) formData.append("startTime", toIsoString(u.startTime));
+        if (u.endTime !== undefined) formData.append("endTime", toIsoString(u.endTime));
         if (u.timezone !== undefined) formData.append("timezone", u.timezone);
         if (u.type !== undefined) formData.append("type", u.type);
         if (u.url !== undefined) formData.append("url", u.url);
@@ -127,10 +128,12 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
         return response.data as Event;
       }
 
-      const response = await axios.patch(
-        `/${projectId}/events/${eventId}`,
-        update
-      );
+      const response = await axios.patch(`/${projectId}/events/${eventId}`, {
+        ...update,
+        startTime:
+          update.startTime === undefined ? undefined : toIsoString(update.startTime),
+        endTime: update.endTime === undefined ? undefined : toIsoString(update.endTime),
+      });
 
       return response.data as Event;
     },

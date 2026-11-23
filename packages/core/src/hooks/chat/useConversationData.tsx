@@ -1,6 +1,9 @@
 import useLiveChatMessages from "./messages/useLiveChatMessages";
 import useSendMessage from "./messages/useSendMessage";
-import { SendMessageParams } from "./messages/useSendMessage";
+import {
+  SendMessageParams,
+  SendMessageResult,
+} from "./messages/useSendMessage";
 import useConversationMembers, {
   UseConversationMembersValues,
 } from "./conversations/useConversationMembers";
@@ -20,7 +23,7 @@ export interface UseConversationDataValues {
   loadOlder: () => Promise<void>;
 
   // Send
-  send: (params: SendMessageParams) => Promise<ChatMessage>;
+  send: (params: SendMessageParams) => Promise<SendMessageResult>;
 
   // Members
   members: UseConversationMembersValues["members"];

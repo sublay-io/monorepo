@@ -60,6 +60,24 @@ describe("useFetchManyEvents", () => {
     });
   });
 
+  it("sends Date startsAfter / startsBefore as ISO strings", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyEvents());
+    axiosPrivate.mockResponse("get", makePage([]));
+
+    await act(async () => {
+      await result.current({
+        startsAfter: new Date("2024-06-01T00:00:00.000Z"),
+        startsBefore: "2024-07-01T00:00:00.000Z",
+      });
+    });
+
+    const [call] = axiosPrivate.calls("get");
+    expect(call.config?.params).toMatchObject({
+      startsAfter: "2024-06-01T00:00:00.000Z",
+      startsBefore: "2024-07-01T00:00:00.000Z",
+    });
+  });
+
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyEvents());
 

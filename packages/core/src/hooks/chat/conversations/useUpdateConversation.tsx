@@ -12,7 +12,7 @@ export interface UpdateConversationParams {
    * New avatar image. When present the request is sent as multipart form data
    * and the server processes the image per `options`, replacing the old avatar.
    */
-  avatar?: { file: File | Blob; options: UploadImageOptions };
+  avatarFile?: { file: File | Blob; options: UploadImageOptions };
   postingPermission?: "members" | "team";
 }
 
@@ -25,7 +25,7 @@ function useUpdateConversation(): (
   const update = useCallback(
     async ({
       conversationId,
-      avatar,
+      avatarFile,
       ...rest
     }: UpdateConversationParams): Promise<Conversation> => {
       if (!projectId) throw new Error("No projectId available.");
@@ -33,7 +33,7 @@ function useUpdateConversation(): (
 
       const path = `/${projectId}/chat/conversations/${conversationId}`;
 
-      if (avatar) {
+      if (avatarFile) {
         const formData = new FormData();
         if (rest.name !== undefined) formData.append("name", rest.name);
         if (rest.description !== undefined) {
@@ -42,8 +42,8 @@ function useUpdateConversation(): (
         if (rest.postingPermission !== undefined) {
           formData.append("postingPermission", rest.postingPermission);
         }
-        formData.append("avatarFile", avatar.file);
-        formData.append("avatarFile.options", JSON.stringify(avatar.options));
+        formData.append("avatarFile", avatarFile.file);
+        formData.append("avatarFile.options", JSON.stringify(avatarFile.options));
 
         const response = await axios.patch(path, formData, {
           headers: { "Content-Type": "multipart/form-data" },

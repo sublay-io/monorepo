@@ -1,6 +1,9 @@
 import { ChatMessage } from "../../../interfaces/models/ChatMessage";
 import useLiveChatMessages from "./useLiveChatMessages";
-import useSendMessage, { SendMessageParams } from "./useSendMessage";
+import useSendMessage, {
+  SendMessageParams,
+  SendMessageResult,
+} from "./useSendMessage";
 
 export interface UseMessageThreadProps {
   conversationId: string;
@@ -13,7 +16,9 @@ export interface UseMessageThreadValues {
   loading: boolean;
   hasMore: boolean;
   loadMore: () => Promise<void>;
-  sendReply: (params: Omit<SendMessageParams, "parentMessageId">) => Promise<ChatMessage>;
+  sendReply: (
+    params: Omit<SendMessageParams, "parentMessageId">
+  ) => Promise<SendMessageResult>;
 }
 
 function useMessageThread({

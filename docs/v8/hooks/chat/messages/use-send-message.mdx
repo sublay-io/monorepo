@@ -50,8 +50,8 @@ The hook returns a function. That function accepts:
   Plain text content of the message.
 </ParamField>
 
-<ParamField body="gif" type="GifData">
-  GIF attachment data.
+<ParamField body="gif" type="GifData | null">
+  GIF attachment data. `null` sends no GIF.
 </ParamField>
 
 <ParamField body="mentions" type="Mention[]">
@@ -62,15 +62,15 @@ The hook returns a function. That function accepts:
   Arbitrary key-value data attached to the message.
 </ParamField>
 
-<ParamField body="quotedMessageId" type="string | null">
-  ID of the message being quoted. Populates `quotedMessage` on the stored message.
+<ParamField body="quotedMessageId" type="string">
+  ID of the message being quoted. Populates `quotedMessage` on the server-confirmed message.
 </ParamField>
 
-<ParamField body="parentMessageId" type="string | null">
+<ParamField body="parentMessageId" type="string">
   ID of the parent message when sending a thread reply.
 </ParamField>
 
-<ParamField body="files" type="File[]">
+<ParamField body="files" type="(File | Blob)[]">
   File attachments. When provided, the request is sent as `multipart/form-data`.
 </ParamField>
 
@@ -78,8 +78,8 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-<ResponseField name="ChatMessage" type="ChatMessage">
-  The server-confirmed [ChatMessage](/v8/data-models/chat-message) object. When `spaceReputation` is requested, its embedded sender carries an added `spaceReputation` number. See [Reputation](/v8/data-models/reputation).
+<ResponseField name="SendMessageResult" type="SentChatMessage & { localId?: string }">
+  The server-confirmed [ChatMessage](/v8/data-models/chat-message), without `reactionCounts`, `userReactions` and `grants` (a new message has none), and with `localId` echoed back. When `spaceReputation` is requested, its embedded sender carries an added `spaceReputation` number. See [Reputation](/v8/data-models/reputation).
 </ResponseField>
 
 ## Notes

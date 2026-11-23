@@ -74,8 +74,8 @@ This hook returns an object. Call `search` with:
     <ResponseField name="similarity" type="number">
       Cosine similarity score (0–1).
     </ResponseField>
-    <ResponseField name="record" type="Entity | Comment | ChatMessage">
-      The full matched record. When `spaceReputation` is requested, its embedded author carries an added `spaceReputation` number. See [Reputation](/v8/data-models/reputation).
+    <ResponseField name="record" type="Entity | Comment | ContentSearchChatMessage">
+      The matched record; its type follows `sourceType` (`ContentSearchResult` is a union discriminated by it). A message comes as `ContentSearchChatMessage`: the stored [chat message](/v8/data-models/chat-message) and its sender (`user: User | null`, `null` when the sender's account has been deleted), without `quotedMessage`, `reactionCounts`, `userReactions`, `files` or `grants`. When `spaceReputation` is requested, its embedded author carries an added `spaceReputation` number. See [Reputation](/v8/data-models/reputation).
     </ResponseField>
   </Expandable>
 </ResponseField>

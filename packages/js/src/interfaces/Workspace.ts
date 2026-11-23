@@ -137,8 +137,11 @@ export interface WorkspaceInvitationInviter {
 // read per invitation.
 export interface MyWorkspaceInvitation extends WorkspaceInvitation {
   workspace: { id: string; name: string };
-  /** The inviter (their id is also in `invitedById`). */
-  invitedBy: WorkspaceInvitationInviter;
+  /**
+   * The inviter (their id is also in `invitedById`), or `null` when the
+   * inviter's user record no longer exists.
+   */
+  invitedBy: WorkspaceInvitationInviter | null;
 }
 
 // One entry in the unified roster read — one entry per distinct user, carrying a

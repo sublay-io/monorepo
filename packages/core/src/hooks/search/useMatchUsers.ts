@@ -29,15 +29,26 @@ export interface UserMatchResult {
   matchedFacets: MatchedFacet[];
 }
 
-export interface UseMatchUsersProps {
-  mode: "passive" | "directed";
-  query?: string;
+export interface UseMatchUsersCommonProps {
+  /** 1–50. Defaults to 20. */
   limit?: number;
   spaceId?: string;
+  /** With a `spaceId`, also match users active anywhere in its subtree. */
   includeChildSpaces?: boolean;
   includeSampleContent?: boolean;
+  /** Defaults to true. */
   excludeSelf?: boolean;
 }
+
+/**
+ * `passive` matches on the asker's own interests and takes no `query`;
+ * `directed` matches on a free-text `query`, which it requires.
+ */
+export type UseMatchUsersProps = UseMatchUsersCommonProps &
+  (
+    | { mode: "passive"; query?: never }
+    | { mode: "directed"; query: string }
+  );
 
 export interface UseMatchUsersReturn {
   results: UserMatchResult[];

@@ -4,10 +4,14 @@ import {
   addOptimisticMessage,
   upsertMessage,
   failOptimisticMessage,
+  selectConversation,
 } from "../../../store/slices/chatSlice";
 import { selectUser } from "../../../store/slices/userSlice";
 import { selectUser as selectAuthUser } from "../../../store/slices/authSlice";
-import { ChatMessage } from "../../../interfaces/models/ChatMessage";
+import {
+  ChatMessage,
+  SentChatMessage,
+} from "../../../interfaces/models/ChatMessage";
 import { GifData } from "../../../interfaces/models/Comment";
 import { Mention } from "../../../interfaces/models/Mention";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
@@ -18,13 +22,16 @@ import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams
 
 export interface SendMessageParams extends SpaceReputationContextParams {
   content?: string;
-  gif?: GifData;
+  gif?: GifData | null;
   mentions?: Mention[];
   metadata?: Record<string, any>;
-  quotedMessageId?: string | null;
-  parentMessageId?: string | null;
-  files?: File[];
+  quotedMessageId?: string;
+  parentMessageId?: string;
+  files?: (File | Blob)[];
 }
+
+/** The created message; `localId` is the one this send generated. */
+export type SendMessageResult = SentChatMessage & { localId?: string };
 
 export interface UseSendMessageProps {
   conversationId: string;
@@ -32,7 +39,9 @@ export interface UseSendMessageProps {
 
 function useSendMessage({
   conversationId,
-}: UseSendMessageProps): (params: SendMessageParams) => Promise<ChatMessage> {
+}: UseSendMessageProps): (
+  params: SendMessageParams
+) => Promise<SendMessageResult> {
   const dispatch = useSublayDispatch();
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
@@ -41,6 +50,8 @@ function useSendMessage({
   const user = useSublaySelector(selectUser);
   const authUser = useSublaySelector(selectAuthUser);
   const currentUser = user || authUser;
+  const conversation = useSublaySelector(selectConversation(conversationId));
+  const spaceId = conversation?.spaceId ?? null;
 
   const send = useCallback(
     async ({
@@ -52,7 +63,7 @@ function useSendMessage({
       parentMessageId,
       files,
       spaceReputation,
-    }: SendMessageParams): Promise<ChatMessage> => {
+    }: SendMessageParams): Promise<SendMessageResult> => {
       if (!projectId) throw new Error("No projectId available.");
       if (!conversationId) throw new Error("No conversationId provided.");
 
@@ -67,8 +78,8 @@ function useSendMessage({
       const optimisticMsg: ChatMessage = {
         id: `temp-${localId}`,
         localId,
-        projectId,
         conversationId,
+        spaceId,
         userId: currentUser?.id ?? null,
         content: content ?? null,
         gif: gif ?? null,
@@ -89,6 +100,7 @@ function useSendMessage({
         createdAt: now,
         updatedAt: now,
         user: currentUser ?? null,
+        quotedMessage: null,
       };
       dispatch(addOptimisticMessage(optimisticMsg));
 
@@ -114,6 +126,7 @@ function useSendMessage({
               "spaceReputationDescendants",
               String(reputationFields.spaceReputationDescendants)
             );
+          // A multipart field can't carry null: a null `gif` (no GIF) is left out.
           files.forEach((file) => formData.append("files", file));
           response = await axios.post(
             `/${projectId}/chat/conversations/${conversationId}/messages`,
@@ -137,7 +150,7 @@ function useSendMessage({
           );
         }
 
-        const confirmedMsg = response.data as ChatMessage;
+        const confirmedMsg = response.data as SendMessageResult;
         dispatch(upsertMessage(confirmedMsg));
         return confirmedMsg;
       } catch (err) {
@@ -146,7 +159,7 @@ function useSendMessage({
         throw err;
       }
     },
-    [projectId, conversationId, currentUser, axios, dispatch]
+    [projectId, conversationId, spaceId, currentUser, axios, dispatch]
   );
 
   return send;

@@ -124,7 +124,7 @@ interface CreateEntityParams {
   };
   metadata?: Record<string, any>;
   sourceId?: string | null;
-  spaceId?: string | null;
+  spaceId?: string;
 }
 
 interface UpdateEntityParams {

@@ -59,6 +59,25 @@ describe("js-sdk events — request shaping", () => {
     expect((obj.cover as File).name).toBe("cover.png");
   });
 
+  it("createEvent sends Date start and end times as ISO strings in multipart", async () => {
+    const { client, projectInstance } = makeClient();
+    await createEvent(client, {
+      title: "Launch party",
+      startTime: new Date("2026-07-01T18:00:00.000Z"),
+      endTime: new Date("2026-07-01T20:00:00.000Z"),
+      type: "physical",
+      cover: {
+        file: new File(["cover-bytes"], "cover.png", { type: "image/png" }),
+        options: { mode: "original-aspect", sizes: { thumbnail: 200 } },
+      },
+    });
+
+    const [, body] = projectInstance.post.mock.calls[0];
+    const obj = formDataToObject(body as FormData);
+    expect(obj.startTime).toBe("2026-07-01T18:00:00.000Z");
+    expect(obj.endTime).toBe("2026-07-01T20:00:00.000Z");
+  });
+
   it("createEvent sends multipart/FormData with all gallery files when gallery is present", async () => {
     const { client, projectInstance } = makeClient();
     const file1 = new File(["a"], "g1.png", { type: "image/png" });
@@ -121,6 +140,17 @@ describe("js-sdk events — request shaping", () => {
     expect(projectInstance.get).toHaveBeenCalledWith("/events", {
       params: query,
     });
+  });
+
+  it("fetchManyEvents sends Date startsAfter / startsBefore as ISO strings", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchManyEvents(client, {
+      startsAfter: new Date("2026-07-01T00:00:00.000Z"),
+      startsBefore: "2026-08-01T00:00:00.000Z",
+    });
+    const [, config] = projectInstance.get.mock.calls[0];
+    expect(config.params.startsAfter).toBe("2026-07-01T00:00:00.000Z");
+    expect(config.params.startsBefore).toBe("2026-08-01T00:00:00.000Z");
   });
 
   it("fetchManyEvents defaults to an empty params object when called with no args", async () => {

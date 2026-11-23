@@ -105,17 +105,17 @@ function SignInButton() {
   **Parameters:**
   - `email` (required) — User's email address
   - `password` (required) — Password
-  - `name` (optional) — Display name
+  - `name` (optional) — Display name, `string | null` (`null` is the same as leaving it out)
   - `username` (optional) — Unique username
-  - `avatar` (optional) — Avatar URL
-  - `bio` (optional) — Bio text
+  - `avatar` (optional) — Avatar URL, `string | null` (`null` is the same as leaving it out)
+  - `bio` (optional) — Bio text, `string | null` (`null` is the same as leaving it out)
   - `location` (optional) — `{ latitude, longitude }`
-  - `birthdate` (optional) — Date of birth
+  - `birthdate` (optional) — Date of birth: a `Date`, or a full UTC timestamp string such as `"1990-05-17T00:00:00.000Z"` (a date alone, like `"1990-05-17"`, is refused)
   - `metadata` (optional) — Public custom fields
   - `secureMetadata` (optional) — Custom fields no API response returns, the user's own included. The user can write them but not read them back, so don't store anything your app needs to trust.
   - `avatarFile` (optional) — Avatar image to upload: `{ file, options }`, where `file` is a `File`, `Blob` or React Native file `{ uri, name, type? }` and `options` the [image processing options](/v8/api-reference/storage/upload-image) (`mode` required). Sends the sign-up as `multipart/form-data`
   - `bannerFile` (optional) — Banner image to upload, same shape as `avatarFile`
-  - `emailVerification` (optional) — `{ mode?: "link" | "code"; redirectUrl?: string }`: how the confirmation email is sent when the project requires email verification before sign-in. Ignored otherwise. See [Require Email Verification](/v8/sdk/authentication/built-in#require-email-verification).
+  - `emailVerification` (optional) — `{ mode?: "link" | "code"; redirectUrl?: string | null }`: how the confirmation email is sent when the project requires email verification before sign-in. Ignored otherwise. See [Require Email Verification](/v8/sdk/authentication/built-in#require-email-verification).
 
   Also throws [`ACCOUNT_LIMIT_MESSAGE`](#the-account-limit) when the device
   already stores 5 accounts. Normally this happens before any network call, so
@@ -124,7 +124,7 @@ function SignInButton() {
 </ResponseField>
 
 <ResponseField name="signInWithEmailAndPassword" type="function">
-  Sign in with an existing account. Accepts `{ email: string; password: string; emailVerification?: { mode?: "link" | "code"; redirectUrl?: string } }`.
+  Sign in with an existing account. Accepts `{ email: string; password: string; emailVerification?: { mode?: "link" | "code"; redirectUrl?: string | null } }`.
   Throws if credentials are invalid. The thrown `Error` (typed `SublayAuthError`)
   has the server's `error` text as its `message` and carries the server's
   `code` (and `param` when the server names the failing input):

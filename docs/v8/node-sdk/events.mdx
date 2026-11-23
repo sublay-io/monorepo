@@ -40,7 +40,7 @@ const event = await sublay.events.createEvent({
 ```
 
 <ParamField body="title" type="string" required>Event title. 1–300 characters.</ParamField>
-<ParamField body="startTime" type="string" required>ISO datetime when the event starts.</ParamField>
+<ParamField body="startTime" type="string | Date" required>When the event starts: an ISO 8601 datetime in UTC (ending in `Z`), or a `Date` (sent as its ISO string).</ParamField>
 <ParamField body="type" type='"online" | "physical" | "hybrid"' required>
   Event format. `online` requires `url`; `physical` requires `address` or `location`; `hybrid` requires both.
 </ParamField>
@@ -48,7 +48,7 @@ const event = await sublay.events.createEvent({
   The user the service key acts as: the event's creator and first host, held to their own permissions (a space-scoped event needs them to be an active member). A user that doesn't exist returns `404 event/user-not-found`.
 </ParamField>
 <ParamField body="description" type="string">Optional description.</ParamField>
-<ParamField body="endTime" type="string">Optional ISO end datetime.</ParamField>
+<ParamField body="endTime" type="string | Date">When the event ends: an ISO 8601 datetime in UTC, or a `Date`.</ParamField>
 <ParamField body="timezone" type="string">Optional IANA timezone.</ParamField>
 <ParamField body="url" type="string">Join/stream URL.</ParamField>
 <ParamField body="venueName" type="string">Venue name.</ParamField>
@@ -110,8 +110,8 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
 <ParamField body="sortBy" type='"startTime" | "going"'>Sort field. Defaults to `"startTime"`.</ParamField>
 <ParamField body="sortDir" type='"asc" | "desc"'>Sort direction. Left out, the sort's natural direction: soonest first for `"startTime"`, most going first for `"going"`.</ParamField>
 <ParamField body="timeWindow" type='"upcoming" | "ongoing" | "past"'>Derived time window.</ParamField>
-<ParamField body="startsAfter" type="string">ISO datetime lower bound on `startTime`.</ParamField>
-<ParamField body="startsBefore" type="string">ISO datetime upper bound on `startTime`.</ParamField>
+<ParamField body="startsAfter" type="string | Date">Lower bound on `startTime`: an ISO 8601 datetime in UTC, or a `Date`.</ParamField>
+<ParamField body="startsBefore" type="string | Date">Upper bound on `startTime`: an ISO 8601 datetime in UTC, or a `Date`.</ParamField>
 <ParamField body="spaceId" type='string | "none"'>Only this space's events, or `"none"` for events not in any space. Left out: every event.</ParamField>
 <ParamField body="hostId" type="string">Only events this user hosts: events whose `hostIds` contain them, and events they own.</ParamField>
 <ParamField body="type" type='"online" | "physical" | "hybrid"'>Filter by type.</ParamField>
@@ -144,8 +144,8 @@ const event = await sublay.events.updateEvent({
 <ParamField body="actingUserId" type="string" required>The user the call acts as: one of the event's hosts. It has exactly their powers on the event, and the action is recorded as theirs.</ParamField>
 <ParamField body="title" type="string">New title.</ParamField>
 <ParamField body="description" type="string">New description.</ParamField>
-<ParamField body="startTime" type="string">New ISO start datetime.</ParamField>
-<ParamField body="endTime" type="string">New ISO end datetime.</ParamField>
+<ParamField body="startTime" type="string | Date">New start: an ISO 8601 datetime in UTC, or a `Date`.</ParamField>
+<ParamField body="endTime" type="string | Date">New end: an ISO 8601 datetime in UTC, or a `Date`.</ParamField>
 <ParamField body="timezone" type="string">New timezone.</ParamField>
 <ParamField body="type" type='"online" | "physical" | "hybrid"'>New type (re-validates location fields).</ParamField>
 <ParamField body="url" type="string">New URL.</ParamField>

@@ -21,7 +21,7 @@ function SpaceTeam({ spaceId }: { spaceId: string }) {
   const loadTeam = async () => {
     const team = await fetchTeam({ spaceId });
     team.forEach(({ user, role }) => {
-      console.log(user.displayName, role);
+      console.log(user?.name ?? "Deleted user", role);
     });
   };
 }
@@ -37,4 +37,4 @@ function SpaceTeam({ spaceId }: { spaceId: string }) {
 
 ## Returns
 
-Returns a `SpaceMemberWithUser[]` array: all admins and moderators with active status, including embedded user details. When `spaceReputation` is requested, each embedded user carries an added `spaceReputation` number. See [SpaceMember](/v8/data-models/space-member) and [Reputation](/v8/data-models/reputation).
+Returns a `SpaceMemberWithUser[]` array: all admins and moderators with active status, including embedded user details (`user` is `null` when the user record no longer exists). When `spaceReputation` is requested, each embedded user carries an added `spaceReputation` number. See [SpaceMember](/v8/data-models/space-member) and [Reputation](/v8/data-models/reputation).

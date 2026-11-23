@@ -23,10 +23,10 @@ let fetchHandle: FetchMockHandle;
 
 const ROOT: Collection = {
   id: "root",
-  projectId: "test-project",
   userId: "user-1",
   parentCollectionId: null,
   name: "Root",
+  isRoot: true,
   entityCount: 0,
   createdAt: "2024-01-01T00:00:00.000Z",
   updatedAt: "2024-01-01T00:00:00.000Z",
@@ -52,13 +52,13 @@ describe("useCollectionsActions", () => {
     expect(selectCurrentCollection(store.getState())).toEqual(ROOT);
 
     act(() =>
-      result.current.openCollection({ ...ROOT, id: "child", parentCollectionId: "root" }),
+      result.current.openCollection({ ...ROOT, id: "child", parentCollectionId: "root", isRoot: false }),
     );
     act(() => result.current.goBack());
     expect(selectCurrentCollection(store.getState())?.id).toBe("root");
 
     act(() =>
-      result.current.openCollection({ ...ROOT, id: "child", parentCollectionId: "root" }),
+      result.current.openCollection({ ...ROOT, id: "child", parentCollectionId: "root", isRoot: false }),
     );
     act(() => result.current.goToRoot());
     expect(selectCurrentCollection(store.getState())?.id).toBe("root");
@@ -90,7 +90,7 @@ describe("useCollectionsActions", () => {
 
   it("fetchSubCollections maps the result under the parent collection", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      jsonResponse({ data: [{ ...ROOT, id: "child", parentCollectionId: "root" }] }),
+      jsonResponse({ data: [{ ...ROOT, id: "child", parentCollectionId: "root", isRoot: false }] }),
     );
     const { result, store } = renderHookWithStore(() => useCollectionsActions());
 
@@ -103,7 +103,7 @@ describe("useCollectionsActions", () => {
 
   it("createCollection adds and navigates into the new collection", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      jsonResponse({ ...ROOT, id: "child", parentCollectionId: "root" }, 201),
+      jsonResponse({ ...ROOT, id: "child", parentCollectionId: "root", isRoot: false }, 201),
     );
     const { result, store } = renderHookWithStore(() => useCollectionsActions());
     act(() => result.current.openCollection(ROOT));
@@ -287,7 +287,7 @@ describe("useCollectionsActions", () => {
   });
 
   describe("loaded entity lists", () => {
-    const LATER: Collection = { ...ROOT, id: "later", parentCollectionId: "root", name: "Later" };
+    const LATER: Collection = { ...ROOT, id: "later", parentCollectionId: "root", isRoot: false, name: "Later" };
     const savedIn = (...collections: Array<{ id: string; name: string }>) =>
       makeEntity({
         title: "Kept",

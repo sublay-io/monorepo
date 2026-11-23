@@ -36,10 +36,10 @@ import type { Entity } from "../../interfaces/models/Entity";
 
 const makeCollection = (overrides: Partial<Collection> = {}): Collection => ({
   id: "col-1",
-  projectId: "project-1",
   userId: "user-1",
   parentCollectionId: null,
   name: "Root",
+  isRoot: true,
   entityCount: 0,
   createdAt: "2024-01-01T00:00:00.000Z",
   updatedAt: "2024-01-01T00:00:00.000Z",

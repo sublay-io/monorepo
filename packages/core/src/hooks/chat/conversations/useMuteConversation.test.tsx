@@ -9,9 +9,11 @@ import {
   jsonResponse,
   makeAuthUser,
   makeConversationMember,
+  makeConversationPreview,
   type FetchMockHandle,
 } from "../../../test-utils";
 import { setUser } from "../../../store/slices/userSlice";
+import { setConversationList } from "../../../store/slices/chatSlice";
 import useMuteConversation from "./useMuteConversation";
 import type { ConversationMember } from "../../../interfaces/models/ConversationMember";
 
@@ -67,6 +69,28 @@ describe("useMuteConversation", () => {
     expect(call.method).toBe("POST");
     expect(call.url).toMatch(/\/test-project\/chat\/conversations\/conversation-1\/mute$/);
     expect(sentBody()).toEqual({ duration: "8h" });
+  });
+
+  it("updates the conversation's inbox row to the new mute state", async () => {
+    const member = makeConversationMember({
+      conversationId: "conversation-1",
+      mutedUntil: null,
+      mutedForever: true,
+    });
+    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ currentMember: member }));
+
+    const store = storeWithUser();
+    store.dispatch(setConversationList([makeConversationPreview({ id: "conversation-1" })]));
+    const { result } = renderHookWithStore(() => useMuteConversation(), { store });
+
+    await act(async () => {
+      await result.current.muteConversation({ conversationId: "conversation-1", duration: "forever" });
+    });
+
+    expect(store.getState().sublay.chat.conversationList.items[0]).toMatchObject({
+      mutedUntil: null,
+      mutedForever: true,
+    });
   });
 
   it("sends `forever` as the choice and surfaces the member's mutedForever signal", async () => {

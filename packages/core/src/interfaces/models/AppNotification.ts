@@ -1,10 +1,3 @@
-interface MilestoneUser {
-  id: string;
-  name: string | null | undefined;
-  username: string | null | undefined;
-  avatar: string | null | undefined;
-}
-
 type AppNotificationType =
   | "system"
   | "entity-comment"
@@ -28,17 +21,6 @@ type AppNotificationType =
   | "event-updated"
   | "event-cancelled"
   | "reputation-grant";
-// | "followRequest"
-// | "followRequestAccepted"
-// | "friendRequest"
-// | "friendRequestAccepted"
-// | "postShare"
-// | "eventInvite"
-// | "groupInvite"
-// | "groupJoinRequest"
-// | "groupJoinRequestApproved"
-// | "system"
-// | "custom";
 
 interface BaseAppNotification {
   id: string; // Unique identifier (UUID)
@@ -47,6 +29,7 @@ interface BaseAppNotification {
   isRead: boolean; // Read status
   metadata: Record<string, any>; // Additional data specific to the notification type
   createdAt: string; // ISO timestamp string
+  updatedAt: string; // ISO timestamp string
 }
 
 // User need to sett from dashboard:
@@ -72,17 +55,27 @@ export interface EntityCommentNotification extends BaseAppNotification {
   action: "open-comment";
   metadata: {
     entityId: string;
+    entityForeignId: string | null | undefined;
     entityShortId: string;
     entityTitle: string | null | undefined;
     entityContent: string | null | undefined;
 
     commentId: string;
+    commentForeignId: string | null | undefined;
     commentContent: string | null | undefined;
+
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
 
     initiatorId: string;
     initiatorName: string | null | undefined;
     initiatorUsername: string | null | undefined;
+    initiatorForeignId?: string | null | undefined;
     initiatorAvatar: string | null | undefined;
+
+    entityMetadata: Record<string, any> | null | undefined;
+    commentMetadata: Record<string, any> | null | undefined;
   };
 }
 
@@ -91,20 +84,30 @@ export interface CommentReplyNotification extends BaseAppNotification {
   action: "open-comment";
   metadata: {
     entityId: string;
+    entityForeignId: string | null | undefined;
     entityShortId: string;
     entityTitle: string | null | undefined;
     entityContent: string | null | undefined;
 
     commentId: string;
+    commentForeignId: string | null | undefined;
     commentContent: string | null | undefined;
 
     replyId: string;
     replyContent: string | null | undefined;
 
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
+
     initiatorId: string;
     initiatorName: string | null | undefined;
     initiatorUsername: string | null | undefined;
+    initiatorForeignId?: string | null | undefined;
     initiatorAvatar: string | null | undefined;
+
+    entityMetadata: Record<string, any> | null | undefined;
+    commentMetadata: Record<string, any> | null | undefined;
   };
 }
 
@@ -113,14 +116,22 @@ export interface EntityMentionNotification extends BaseAppNotification {
   action: "open-entity";
   metadata: {
     entityId: string;
+    entityForeignId: string | null | undefined;
     entityShortId: string;
     entityTitle: string | null | undefined;
     entityContent: string | null | undefined;
 
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
+
     initiatorId: string;
     initiatorName: string | null | undefined;
     initiatorUsername: string | null | undefined;
+    initiatorForeignId?: string | null | undefined;
     initiatorAvatar: string | null | undefined;
+
+    entityMetadata: Record<string, any> | null | undefined;
   };
 }
 
@@ -129,17 +140,27 @@ export interface CommentMentionNotification extends BaseAppNotification {
   action: "open-comment";
   metadata: {
     entityId: string;
+    entityForeignId: string | null | undefined;
     entityShortId: string;
     entityTitle: string | null | undefined;
     entityContent: string | null | undefined;
 
     commentId: string;
+    commentForeignId: string | null | undefined;
     commentContent: string | null | undefined;
+
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
 
     initiatorId: string;
     initiatorName: string | null | undefined;
     initiatorUsername: string | null | undefined;
+    initiatorForeignId?: string | null | undefined;
     initiatorAvatar: string | null | undefined;
+
+    entityMetadata: Record<string, any> | null | undefined;
+    commentMetadata: Record<string, any> | null | undefined;
   };
 }
 
@@ -148,6 +169,7 @@ export interface EntityUpvoteNotification extends BaseAppNotification {
   action: "open-entity";
   metadata: {
     entityId: string;
+    entityForeignId: string | null | undefined;
     entityShortId: string;
     entityTitle: string | null | undefined;
     entityContent: string | null | undefined;
@@ -156,6 +178,8 @@ export interface EntityUpvoteNotification extends BaseAppNotification {
     initiatorName: string | null | undefined;
     initiatorUsername: string | null | undefined;
     initiatorAvatar: string | null | undefined;
+
+    entityMetadata: Record<string, any> | null | undefined;
   };
 }
 
@@ -164,17 +188,22 @@ export interface CommentUpvoteNotification extends BaseAppNotification {
   action: "open-comment";
   metadata: {
     entityId: string;
+    entityForeignId: string | null | undefined;
     entityShortId: string;
     entityTitle: string | null | undefined;
     entityContent: string | null | undefined;
 
     commentId: string;
+    commentForeignId: string | null | undefined;
     commentContent: string | null | undefined;
 
     initiatorId: string;
     initiatorName: string | null | undefined;
     initiatorUsername: string | null | undefined;
     initiatorAvatar: string | null | undefined;
+
+    entityMetadata: Record<string, any> | null | undefined;
+    commentMetadata: Record<string, any> | null | undefined;
   };
 }
 
@@ -183,16 +212,24 @@ export interface EntityReactionNotification extends BaseAppNotification {
   action: "open-entity";
   metadata: {
     entityId: string;
+    entityForeignId: string | null | undefined;
     entityShortId: string;
     entityTitle: string | null | undefined;
     entityContent: string | null | undefined;
 
     reactionType: string;
 
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
+
     initiatorId: string;
     initiatorName: string | null | undefined;
     initiatorUsername: string | null | undefined;
+    initiatorForeignId?: string | null | undefined;
     initiatorAvatar: string | null | undefined;
+
+    entityMetadata: Record<string, any> | null | undefined;
   };
 }
 
@@ -201,20 +238,37 @@ export interface CommentReactionNotification extends BaseAppNotification {
   action: "open-comment";
   metadata: {
     entityId: string;
+    entityForeignId: string | null | undefined;
     entityShortId: string;
     entityTitle: string | null | undefined;
     entityContent: string | null | undefined;
 
     commentId: string;
+    commentForeignId: string | null | undefined;
     commentContent: string | null | undefined;
 
     reactionType: string;
 
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
+
     initiatorId: string;
     initiatorName: string | null | undefined;
     initiatorUsername: string | null | undefined;
+    initiatorForeignId?: string | null | undefined;
     initiatorAvatar: string | null | undefined;
+
+    entityMetadata: Record<string, any> | null | undefined;
+    commentMetadata: Record<string, any> | null | undefined;
   };
+}
+
+interface MilestoneUser {
+  id: string;
+  name: string | null | undefined;
+  username: string | null | undefined;
+  avatar: string | null | undefined;
 }
 
 export interface EntityReactionMilestoneSpecificNotification extends BaseAppNotification {
@@ -222,6 +276,7 @@ export interface EntityReactionMilestoneSpecificNotification extends BaseAppNoti
   action: "open-entity";
   metadata: {
     entityId: string;
+    entityForeignId: string | null | undefined;
     entityShortId: string;
     entityTitle: string | null | undefined;
     entityContent: string | null | undefined;
@@ -229,6 +284,12 @@ export interface EntityReactionMilestoneSpecificNotification extends BaseAppNoti
     reactionType: string;
     milestoneCount: number;
     lastThreeUsers: MilestoneUser[];
+
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
+
+    entityMetadata: Record<string, any> | null | undefined;
   };
 }
 
@@ -237,6 +298,7 @@ export interface EntityReactionMilestoneTotalNotification extends BaseAppNotific
   action: "open-entity";
   metadata: {
     entityId: string;
+    entityForeignId: string | null | undefined;
     entityShortId: string;
     entityTitle: string | null | undefined;
     entityContent: string | null | undefined;
@@ -244,6 +306,12 @@ export interface EntityReactionMilestoneTotalNotification extends BaseAppNotific
     milestoneCount: number;
     reactionCounts: Record<string, number>;
     lastThreeUsers: MilestoneUser[];
+
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
+
+    entityMetadata: Record<string, any> | null | undefined;
   };
 }
 
@@ -252,16 +320,25 @@ export interface CommentReactionMilestoneSpecificNotification extends BaseAppNot
   action: "open-comment";
   metadata: {
     entityId: string;
+    entityForeignId: string | null | undefined;
     entityShortId: string;
     entityTitle: string | null | undefined;
     entityContent: string | null | undefined;
 
     commentId: string;
+    commentForeignId: string | null | undefined;
     commentContent: string | null | undefined;
 
     reactionType: string;
     milestoneCount: number;
     lastThreeUsers: MilestoneUser[];
+
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
+
+    entityMetadata: Record<string, any> | null | undefined;
+    commentMetadata: Record<string, any> | null | undefined;
   };
 }
 
@@ -270,51 +347,25 @@ export interface CommentReactionMilestoneTotalNotification extends BaseAppNotifi
   action: "open-comment";
   metadata: {
     entityId: string;
+    entityForeignId: string | null | undefined;
     entityShortId: string;
     entityTitle: string | null | undefined;
     entityContent: string | null | undefined;
 
     commentId: string;
+    commentForeignId: string | null | undefined;
     commentContent: string | null | undefined;
 
     milestoneCount: number;
     reactionCounts: Record<string, number>;
     lastThreeUsers: MilestoneUser[];
-  };
-}
 
-export interface NewFollowNotification extends BaseAppNotification {
-  type: "new-follow";
-  action: "open-profile";
-  metadata: {
-    initiatorId: string;
-    initiatorName: string | null | undefined;
-    initiatorUsername: string | null | undefined;
-    initiatorAvatar: string | null | undefined;
-  };
-}
+    spaceId?: string | null | undefined;
+    spaceShortId?: string | null | undefined;
+    spaceSlug?: string | null | undefined;
 
-export interface ConnectionRequestNotification extends BaseAppNotification {
-  type: "connection-request";
-  action: "open-profile";
-  metadata: {
-    connectionId: string;
-    initiatorId: string;
-    initiatorName: string | null | undefined;
-    initiatorUsername: string | null | undefined;
-    initiatorAvatar: string | null | undefined;
-  };
-}
-
-export interface ConnectionAcceptedNotification extends BaseAppNotification {
-  type: "connection-accepted";
-  action: "open-profile";
-  metadata: {
-    connectionId: string;
-    initiatorId: string;
-    initiatorName: string | null | undefined;
-    initiatorUsername: string | null | undefined;
-    initiatorAvatar: string | null | undefined;
+    entityMetadata: Record<string, any> | null | undefined;
+    commentMetadata: Record<string, any> | null | undefined;
   };
 }
 
@@ -451,6 +502,44 @@ export interface ReputationGrantNotification extends BaseAppNotification {
   };
 }
 
+export interface NewFollowNotification extends BaseAppNotification {
+  type: "new-follow";
+  action: "open-profile";
+  metadata: {
+    initiatorId: string;
+    initiatorName: string | null | undefined;
+    initiatorUsername: string | null | undefined;
+    initiatorForeignId?: string | null | undefined;
+    initiatorAvatar: string | null | undefined;
+  };
+}
+
+export interface ConnectionRequestNotification extends BaseAppNotification {
+  type: "connection-request";
+  action: "open-profile";
+  metadata: {
+    connectionId: string;
+    initiatorId: string;
+    initiatorName: string | null | undefined;
+    initiatorUsername: string | null | undefined;
+    initiatorForeignId?: string | null | undefined;
+    initiatorAvatar: string | null | undefined;
+  };
+}
+
+export interface ConnectionAcceptedNotification extends BaseAppNotification {
+  type: "connection-accepted";
+  action: "open-profile";
+  metadata: {
+    connectionId: string;
+    initiatorId: string;
+    initiatorName: string | null | undefined;
+    initiatorUsername: string | null | undefined;
+    initiatorForeignId?: string | null | undefined;
+    initiatorAvatar: string | null | undefined;
+  };
+}
+
 // export interface FollowRequestNotification extends BaseAppNotification {
 //   type: "followRequest";
 //   metadata: {
@@ -532,7 +621,6 @@ export interface ReputationGrantNotification extends BaseAppNotification {
 //   metadata: Record<string, any>; // Flexible metadata for custom notifications
 // }
 
-// Unified Notification Type
 export type UnifiedAppNotification =
   | SystemNotification
   | EntityCommentNotification
@@ -556,21 +644,6 @@ export type UnifiedAppNotification =
   | EventUpdatedNotification
   | EventCancelledNotification
   | ReputationGrantNotification;
-// | LikeNotification
-// | ReplyNotification
-// | MentionNotification
-// | TagNotification
-// | FollowRequestNotification
-// | FollowRequestAcceptedNotification
-// | FriendRequestNotification
-// | FriendRequestAcceptedNotification
-// | PostShareNotification
-// | EventInviteNotification
-// | GroupInviteNotification
-// | GroupJoinRequestNotification
-// | GroupJoinRequestApprovedNotification
-// | SystemNotification
-// | CustomNotification;
 
 // --- Template variable types (one per notification type) ---
 

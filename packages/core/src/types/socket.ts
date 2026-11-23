@@ -1,4 +1,8 @@
-import type { ChatMessage } from "../interfaces/models/ChatMessage";
+import type {
+  ChatMessage,
+  QuotedChatMessage,
+  SentChatMessage,
+} from "../interfaces/models/ChatMessage";
 import type { ReputationGrant } from "../interfaces/models/ReputationGrant";
 import type {
   Conversation,
@@ -11,13 +15,35 @@ import type { ConversationMember } from "../interfaces/models/ConversationMember
 type ModerationDetailKey = "moderationReason" | "moderatedById" | "moderatedByType";
 
 /**
- * A message as `message:created` sends it: the moderation details
- * (`moderationReason`, `moderatedById`, `moderatedByType`) are never in a
- * broadcast, on the message or its `quotedMessage`. Read them over REST.
+ * A message as `message:created` sends it: the sent message (no reaction data
+ * or grant summary) without the moderation details (`moderationReason`,
+ * `moderatedById`, `moderatedByType`), on the message or its `quotedMessage`.
+ * Read them over REST. `localId` is echoed when the sender passed one.
  */
-export type SocketChatMessage = Omit<ChatMessage, ModerationDetailKey | "quotedMessage"> & {
-  quotedMessage?: Omit<ChatMessage, ModerationDetailKey | "quotedMessage"> | null;
+export type SocketChatMessage = Omit<
+  SentChatMessage,
+  ModerationDetailKey | "quotedMessage"
+> & {
+  localId?: string;
+  quotedMessage: Omit<QuotedChatMessage, ModerationDetailKey> | null;
 };
+
+/**
+ * A member as `member:joined` sends it: the row without its user and without
+ * the personal mute state (the new member is never the viewer's own row).
+ */
+export type SocketConversationMember = Omit<
+  ConversationMember,
+  "user" | "mutedUntil" | "mutedForever"
+>;
+
+/**
+ * The fields an update changed, as `conversation:updated` sends them. The
+ * payload doesn't name the conversation (server-hosted#443).
+ */
+export type SocketConversationPatch = Partial<
+  Pick<Conversation, "name" | "description" | "avatarFileId" | "postingPermission">
+>;
 
 // This is a hand-maintained mirror of the server's own copy (server
 // src/types/socket.ts) — nothing typechecks the two against each other, so a
@@ -81,13 +107,13 @@ export interface ServerToClientEvents {
   }) => void;
   "member:joined": (payload: {
     conversationId: string;
-    member: ConversationMember;
+    member: SocketConversationMember;
   }) => void;
   "member:left": (payload: {
     conversationId: string;
     userId: string;
   }) => void;
-  "conversation:updated": (patch: Partial<Conversation> & { id: string }) => void;
+  "conversation:updated": (patch: SocketConversationPatch) => void;
   "conversation:deleted": (payload: { conversationId: string }) => void;
   // Fired to a recipient when they're added to a brand-new conversation (DM
   // target, group initial members, newly added group member). Carries that

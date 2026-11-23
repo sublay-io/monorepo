@@ -6,13 +6,14 @@ import {
   selectAccessToken,
   requestOAuthAuthorizationUrl,
   handleOAuthRedirect,
+  type OAuthProvider,
 } from "@sublay/core";
 
 export interface UseOAuthSignInReturn {
   /** Initiate OAuth sign-in / sign-up (unauthenticated). */
-  initiateOAuth: ({ provider, redirectAfterAuth }: { provider: string; redirectAfterAuth?: string }) => Promise<void>;
+  initiateOAuth: ({ provider, redirectAfterAuth }: { provider: OAuthProvider; redirectAfterAuth?: string }) => Promise<void>;
   /** Link a new OAuth provider to the current authenticated user. */
-  linkOAuthProvider: ({ provider, redirectAfterAuth }: { provider: string; redirectAfterAuth?: string }) => Promise<void>;
+  linkOAuthProvider: ({ provider, redirectAfterAuth }: { provider: OAuthProvider; redirectAfterAuth?: string }) => Promise<void>;
   /** Call on the callback page to extract tokens from the URL fragment. */
   handleOAuthCallback: () => boolean;
   isLoading: boolean;
@@ -43,7 +44,7 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
 
   // Shared helper for both /authorize and /link endpoints
   const startOAuthFlow = useCallback(
-    async (endpoint: "authorize" | "link", provider: string, redirectAfterAuth?: string) => {
+    async (endpoint: "authorize" | "link", provider: OAuthProvider, redirectAfterAuth?: string) => {
       if (!projectId) {
         setError("No projectId available.");
         return;
@@ -82,13 +83,13 @@ function useOAuthSignIn(): UseOAuthSignInReturn {
   );
 
   const initiateOAuth = useCallback(
-    ({ provider, redirectAfterAuth }: { provider: string; redirectAfterAuth?: string }) =>
+    ({ provider, redirectAfterAuth }: { provider: OAuthProvider; redirectAfterAuth?: string }) =>
       startOAuthFlow("authorize", provider, redirectAfterAuth),
     [startOAuthFlow]
   );
 
   const linkOAuthProvider = useCallback(
-    ({ provider, redirectAfterAuth }: { provider: string; redirectAfterAuth?: string }) =>
+    ({ provider, redirectAfterAuth }: { provider: OAuthProvider; redirectAfterAuth?: string }) =>
       startOAuthFlow("link", provider, redirectAfterAuth),
     [startOAuthFlow]
   );

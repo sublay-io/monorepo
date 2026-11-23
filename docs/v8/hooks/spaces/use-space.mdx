@@ -103,8 +103,8 @@ function SpaceHeader() {
   Preview of the parent space. `null` for root spaces, and when the user can't see the parent.
 </ResponseField>
 
-<ResponseField name="childSpaces" type="SpacePreview[]">
-  Previews of direct child spaces (up to 10): the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of.
+<ResponseField name="childSpaces" type="ChildSpacePreview[]">
+  Previews of direct child spaces (up to 10): the direct sub-spaces the viewer can see that are `public` or that the viewer is an active member of. Each is a `SpacePreview` plus its `readingPermission`.
 </ResponseField>
 
 <ResponseField name="joinSpace" type="() => Promise<void>">

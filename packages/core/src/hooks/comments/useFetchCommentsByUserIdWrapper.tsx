@@ -66,8 +66,8 @@ function useFetchCommentsByUserIdWrapper(
     (cursor: string | null, sort: CommentListSort) =>
       fetchCommentsByUserId({
         userId: userId as string,
-        entityId,
-        sourceId,
+        entityId: entityId ?? undefined,
+        sourceId: sourceId ?? undefined,
         blockedFilter,
         cursor,
         limit,

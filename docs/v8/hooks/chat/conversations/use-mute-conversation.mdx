@@ -66,4 +66,5 @@ The hook returns `{ muteConversation, muting }`. `muteConversation` accepts:
 
 - Available on `@sublay/react-js`, `@sublay/react-native`, and `@sublay/expo` (inherited from `@sublay/core`).
 - Mute state is personal — it's returned only on the viewer's own member row, never on other members'.
+- On success the conversation's row in the loaded inbox (`mutedUntil`, `mutedForever`) and the loaded conversation's `currentMember` are updated to the new mute state.
 - For per-type push toggles, see [`useNotificationPreferences`](/v8/hooks/push/use-notification-preferences).

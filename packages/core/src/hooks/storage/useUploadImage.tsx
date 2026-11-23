@@ -1,7 +1,10 @@
 import { useCallback, useState } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
-import { Image, UploadImageOptions } from "../../interfaces/models/Image";
+import {
+  UploadImageOptions,
+  UploadImageResponse,
+} from "../../interfaces/models/Image";
 
 // Type guard to detect browser File vs React Native file object
 function isBrowserFile(file: UniversalFile): file is BrowserFile {
@@ -19,7 +22,7 @@ interface RNFile {
 type UniversalFile = BrowserFile | RNFile;
 
 export interface UseUploadImageValues {
-  uploadImage: (file: UniversalFile, options: UploadImageOptions) => Promise<Image>;
+  uploadImage: (file: UniversalFile, options: UploadImageOptions) => Promise<UploadImageResponse>;
   uploading: boolean;
   progress: number;
 }
@@ -34,7 +37,7 @@ function useUploadImage(): UseUploadImageValues {
     async (
       file: UniversalFile,
       options: UploadImageOptions
-    ): Promise<Image> => {
+    ): Promise<UploadImageResponse> => {
       // Validate required inputs
       if (!projectId) {
         throw new Error("No projectId available.");
@@ -74,6 +77,9 @@ function useUploadImage(): UseUploadImageValues {
           formData.append("aspectRatio", JSON.stringify(options.aspectRatio));
           formData.append("heights", JSON.stringify(options.heights));
         } else if (options.mode === "original-aspect") {
+          formData.append("sizes", JSON.stringify(options.sizes));
+        } else if (options.mode === "multi-aspect-ratio") {
+          formData.append("aspectRatios", JSON.stringify(options.aspectRatios));
           formData.append("sizes", JSON.stringify(options.sizes));
         }
 
@@ -118,7 +124,7 @@ function useUploadImage(): UseUploadImageValues {
           }
         );
 
-        return response.data as Image;
+        return response.data as UploadImageResponse;
       } finally {
         setUploading(false);
         setProgress(0);

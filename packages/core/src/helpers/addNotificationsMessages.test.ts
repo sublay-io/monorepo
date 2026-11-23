@@ -8,6 +8,7 @@ const base = {
   userId: "u1",
   isRead: false,
   createdAt: "2026-10-26T00:00:00.000Z",
+  updatedAt: "2026-10-26T00:00:00.000Z",
 };
 
 const initiator = {

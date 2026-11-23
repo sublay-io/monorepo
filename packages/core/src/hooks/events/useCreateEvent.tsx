@@ -3,6 +3,7 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { Event, EventType, EventVisibility } from "../../interfaces/models/Event";
 import { UploadImageOptions } from "../../interfaces/models/Image";
+import { toIsoString } from "../../utils/dates";
 
 // Universal file typing (mirrors useCreateEntity).
 type BrowserFile = File;
@@ -34,8 +35,8 @@ export interface GalleryUploadConfig {
 export interface CreateEventProps {
   title: string;
   description?: string;
-  startTime: string; // ISO datetime
-  endTime?: string; // ISO datetime
+  startTime: string | Date; // ISO datetime string, or a Date
+  endTime?: string | Date; // ISO datetime string, or a Date
   timezone?: string;
   type: EventType;
   url?: string;
@@ -102,8 +103,8 @@ function useCreateEvent(): (props: CreateEventProps) => Promise<Event> {
 
         if (title !== undefined) formData.append("title", title);
         if (description !== undefined) formData.append("description", description);
-        if (startTime !== undefined) formData.append("startTime", startTime);
-        if (endTime !== undefined) formData.append("endTime", endTime);
+        if (startTime !== undefined) formData.append("startTime", toIsoString(startTime));
+        if (endTime !== undefined) formData.append("endTime", toIsoString(endTime));
         if (timezone !== undefined) formData.append("timezone", timezone);
         if (type !== undefined) formData.append("type", type);
         if (url !== undefined) formData.append("url", url);
@@ -165,8 +166,8 @@ function useCreateEvent(): (props: CreateEventProps) => Promise<Event> {
       const response = await axios.post<Event>(`/${projectId}/events`, {
         title,
         description,
-        startTime,
-        endTime,
+        startTime: toIsoString(startTime),
+        endTime: endTime === undefined ? undefined : toIsoString(endTime),
         timezone,
         type,
         url,

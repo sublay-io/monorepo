@@ -65,8 +65,8 @@ function ConversationList() {
   Resets the cursor and re-fetches the conversation list from the beginning.
 </ResponseField>
 
-<ResponseField name="createGroup" type="(params: { name?: string; metadata?: Record<string, unknown>; memberIds?: string[] }) => Promise<ConversationPreview>">
-  Creates a new group conversation and prepends it to the loaded list. Resolves to the created `ConversationPreview`. Pass `memberIds` to add initial members in the same request — the server creates their member rows in one transaction. The creator is added as admin automatically and is de-duplicated if also present in `memberIds`.
+<ResponseField name="createGroup" type="(params: { name?: string; description?: string; metadata?: Record<string, unknown>; memberIds?: string[] }) => Promise<Conversation>">
+  Creates a new group conversation and resolves to the created [`Conversation`](/v8/data-models/conversation). The group's inbox row (its `ConversationPreview`) is then fetched and added to `conversations`; if that fetch fails, the group is still created and the next refresh lists it. `name` is up to 200 characters and `description` up to 1000. Pass `memberIds` to add initial members in the same request — the server creates their member rows in one transaction. The creator is added as admin automatically and is de-duplicated if also present in `memberIds`.
 </ResponseField>
 
 ## Notes

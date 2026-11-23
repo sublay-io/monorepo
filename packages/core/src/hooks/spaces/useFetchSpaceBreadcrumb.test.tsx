@@ -3,14 +3,17 @@ import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks } from "../../test-utils";
 import useFetchSpaceBreadcrumb from "./useFetchSpaceBreadcrumb";
-import type { SpaceBreadcrumbEntry } from "../../interfaces/SpaceBreadcrumb";
+import type {
+  SpaceBreadcrumb,
+  SpaceBreadcrumbEntry,
+} from "../../interfaces/SpaceBreadcrumb";
 
 afterEach(() => {
   resetAxiosMocks();
 });
 
 describe("useFetchSpaceBreadcrumb", () => {
-  it("returns the breadcrumb trail for a space as an array", async () => {
+  it("returns the breadcrumb trail and the space's depth", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() =>
       useFetchSpaceBreadcrumb(),
     );
@@ -31,12 +34,12 @@ describe("useFetchSpaceBreadcrumb", () => {
     ];
     axiosPrivate.mockResponse("get", { breadcrumb, depth: 1 });
 
-    let returned: SpaceBreadcrumbEntry[] | undefined;
+    let returned: SpaceBreadcrumb | undefined;
     await act(async () => {
       returned = await result.current({ spaceId: "space-1" });
     });
 
-    expect(returned).toEqual(breadcrumb);
+    expect(returned).toEqual({ breadcrumb, depth: 1 });
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/spaces/space-1/breadcrumb");

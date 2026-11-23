@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useSublayDispatch } from "../../../store/hooks";
 import { upsertMessage } from "../../../store/slices/chatSlice";
-import { ChatMessage } from "../../../interfaces/models/ChatMessage";
+import { SentChatMessage } from "../../../interfaces/models/ChatMessage";
 import { GifData } from "../../../interfaces/models/Comment";
 import { Mention } from "../../../interfaces/models/Mention";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
@@ -17,7 +17,7 @@ export interface EditMessageParams {
   metadata?: Record<string, any>;
 }
 
-function useEditMessage(): (params: EditMessageParams) => Promise<ChatMessage> {
+function useEditMessage(): (params: EditMessageParams) => Promise<SentChatMessage> {
   const dispatch = useSublayDispatch();
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
@@ -30,7 +30,7 @@ function useEditMessage(): (params: EditMessageParams) => Promise<ChatMessage> {
       gif,
       mentions,
       metadata,
-    }: EditMessageParams): Promise<ChatMessage> => {
+    }: EditMessageParams): Promise<SentChatMessage> => {
       if (!projectId) throw new Error("No projectId available.");
 
       try {
@@ -38,7 +38,7 @@ function useEditMessage(): (params: EditMessageParams) => Promise<ChatMessage> {
           `/${projectId}/chat/conversations/${conversationId}/messages/${messageId}`,
           { content, gif, mentions, metadata }
         );
-        const updated = response.data as ChatMessage;
+        const updated = response.data as SentChatMessage;
         dispatch(upsertMessage(updated));
         return updated;
       } catch (err) {

@@ -34,7 +34,7 @@ describe("useUpdateConversation", () => {
     const file = new File(["bytes"], "a.png", { type: "image/png" });
     const options = { mode: "original-aspect" as const, sizes: { small: 64 } };
     await act(async () => {
-      await result.current({ conversationId: "conversation-1", name: "New name", avatar: { file, options } });
+      await result.current({ conversationId: "conversation-1", name: "New name", avatarFile: { file, options } });
     });
 
     const [call] = axiosPrivate.calls("patch");

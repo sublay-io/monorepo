@@ -24,7 +24,8 @@ describe("useCheckSlugAvailability", () => {
     expect(returned).toBe(true);
 
     const [call] = axiosPrivate.calls("get");
-    expect(call.url).toBe("/test-project/spaces/check-slug?slug=design");
+    expect(call.url).toBe("/test-project/spaces/check-slug");
+    expect(call.config?.params).toEqual({ slug: "design" });
   });
 
   it("rejects when the server returns an error response", async () => {

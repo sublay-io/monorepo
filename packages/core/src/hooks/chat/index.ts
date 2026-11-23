@@ -15,6 +15,7 @@ export {
 export type {
   UseConversationsProps,
   UseConversationsValues,
+  CreateGroupParams,
   UseConversationProps,
   UseConversationValues,
   UpdateConversationParams,
@@ -55,6 +56,7 @@ export type {
   UseFetchManyChatMessagesWrapperValues,
   MessageFilters,
   SendMessageParams,
+  SendMessageResult,
   UseSendMessageProps,
   EditMessageParams,
   DeleteMessageParams,

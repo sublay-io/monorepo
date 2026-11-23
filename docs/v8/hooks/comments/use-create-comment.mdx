@@ -36,12 +36,12 @@ function PostComment({ entityId }: { entityId: string }) {
   The entity to comment on.
 </ParamField>
 
-<ParamField path="content" type="string">
-  Text content of the comment. Required if `gif` is not provided.
+<ParamField path="content" type="string | null">
+  Text content of the comment. A comment needs at least one of `content`, `gif` or `attachments`; the call throws before sending when all three are empty.
 </ParamField>
 
-<ParamField path="gif" type="GifData">
-  GIF attachment. Required if `content` is not provided.
+<ParamField path="gif" type="GifData | null">
+  GIF attachment.
 </ParamField>
 
 <ParamField path="parentCommentId" type="string | null">

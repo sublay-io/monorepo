@@ -4,7 +4,7 @@ import { SpaceVisibility } from "./models/Space";
 export interface VisibleSpaceBreadcrumbEntry {
   id: string;
   shortId: string;
-  name: string;
+  name: string | null;
   slug: string | null;
   avatarFileId: string | null;
   visibility: SpaceVisibility;
@@ -24,3 +24,9 @@ export interface HiddenSpaceBreadcrumbEntry {
 export type SpaceBreadcrumbEntry =
   | VisibleSpaceBreadcrumbEntry
   | HiddenSpaceBreadcrumbEntry;
+
+export interface SpaceBreadcrumb {
+  /** The path from the top-level space down to the requested one, root first. */
+  breadcrumb: SpaceBreadcrumbEntry[];
+  depth: number;
+}

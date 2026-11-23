@@ -153,10 +153,11 @@ export interface WorkspaceInvitationInviter {
 // workspace (a direct workspace read 404s for a non-member) or the inviter,
 // so both are embedded directly on the row instead of requiring a follow-up
 // read per invitation. The inviter's id stays in `invitedById`; `invitedBy`
-// is the inviter's user object.
+// is the inviter's user object, or `null` when the inviter's user record no
+// longer exists.
 export interface MyWorkspaceInvitation extends WorkspaceInvitation {
   workspace: { id: string; name: string };
-  invitedBy: WorkspaceInvitationInviter;
+  invitedBy: WorkspaceInvitationInviter | null;
 }
 
 // One entry in the unified roster read — one entry per distinct user, carrying a
@@ -228,7 +229,7 @@ export interface WorkspaceRosterReason {
 }
 
 export interface WorkspaceRosterEntry {
-  user: User;
+  user: WorkspaceStandingUser;
   reasons: WorkspaceRosterReason[];
 }
 

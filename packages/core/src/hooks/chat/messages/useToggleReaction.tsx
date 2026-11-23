@@ -16,6 +16,8 @@ export interface ToggleReactionParams {
 export interface ToggleReactionResult {
   reactionCounts: Record<string, number>;
   userReactions: string[];
+  /** 1 when the toggle added the reaction, -1 when it removed it. */
+  delta: 1 | -1;
 }
 
 function useToggleReaction(): (
@@ -60,7 +62,7 @@ function useToggleReaction(): (
           })
         );
 
-        return { reactionCounts, userReactions };
+        return { reactionCounts, userReactions, delta };
       } catch (err) {
         handleError(err, "Failed to toggle reaction");
         throw err;

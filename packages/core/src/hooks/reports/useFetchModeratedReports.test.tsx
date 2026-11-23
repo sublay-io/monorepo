@@ -4,7 +4,7 @@ import { act } from "@testing-library/react";
 import { renderHookWithAxios, resetAxiosMocks, makeEntity } from "../../test-utils";
 import useFetchModeratedReports from "./useFetchModeratedReports";
 import type { PaginatedResponse } from "../../interfaces/PaginatedResponse";
-import type { Report } from "./useFetchModeratedReports";
+import type { Report } from "../../interfaces/models/Report";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -13,7 +13,6 @@ afterEach(() => {
 function makeReport(overrides: Partial<Report> = {}): Report {
   return {
     id: "report-1",
-    projectId: "test-project",
     spaceId: "space-1",
     targetId: "entity-1",
     targetType: "entity",
@@ -21,13 +20,12 @@ function makeReport(overrides: Partial<Report> = {}): Report {
     userReports: [],
     status: "pending",
     actionTaken: null,
-    target: makeEntity({ id: "entity-1" }),
+    target: { ...makeEntity({ id: "entity-1" }), user: null },
     space: null,
     createdAt: "2024-01-01T00:00:00.000Z",
     updatedAt: "2024-01-01T00:00:00.000Z",
-    deletedAt: null,
     ...overrides,
-  };
+  } as Report;
 }
 
 function makePage(reports: Report[]): PaginatedResponse<Report> {

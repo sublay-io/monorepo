@@ -16,10 +16,10 @@ let store: RtkQueryStore;
 
 const ROOT: Collection = {
   id: "root",
-  projectId: "test-project",
   userId: "user-1",
   parentCollectionId: null,
   name: "Root",
+  isRoot: true,
   entityCount: 0,
   createdAt: "2024-01-01T00:00:00.000Z",
   updatedAt: "2024-01-01T00:00:00.000Z",
@@ -124,7 +124,7 @@ describe("collectionsApi", () => {
 
   it("createCollection issues a POST with the collection name as the body", async () => {
     fetchHandle.fetchMock.mockResolvedValueOnce(
-      jsonResponse({ ...ROOT, id: "child", parentCollectionId: "root" }, 201),
+      jsonResponse({ ...ROOT, id: "child", parentCollectionId: "root", isRoot: false }, 201),
     );
 
     await store.dispatch(

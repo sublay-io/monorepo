@@ -61,6 +61,41 @@ describe("useCreateComment", () => {
     expect(call.body).not.toHaveProperty("parentId");
   });
 
+  it("posts a comment that has only attachments", async () => {
+    const user = makeAuthUser({ id: "user-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(() => useCreateComment(), {
+      projectId: "project-1",
+      user,
+    });
+
+    axiosPrivate.mockResponse("post", { id: "comment-1" }, 201);
+
+    await act(async () => {
+      await result.current({
+        entityId: "entity-1",
+        attachments: [{ url: "https://example.com/a.png" }],
+      });
+    });
+
+    const [call] = axiosPrivate.calls("post");
+    expect(call.body).toMatchObject({
+      attachments: [{ url: "https://example.com/a.png" }],
+    });
+  });
+
+  it("throws before making a request when there is no content, gif or attachment", async () => {
+    const user = makeAuthUser({ id: "user-1" });
+    const { result, axiosPrivate } = renderHookWithAxios(() => useCreateComment(), {
+      projectId: "project-1",
+      user,
+    });
+
+    await expect(
+      result.current({ entityId: "entity-1", content: "   ", attachments: [] }),
+    ).rejects.toThrow("No content, gif or attachments were provided");
+    expect(axiosPrivate.calls("post")).toHaveLength(0);
+  });
+
   it("rejects when the server returns an error response", async () => {
     const user = makeAuthUser({ id: "user-1" });
     const { result, axiosPrivate } = renderHookWithAxios(() => useCreateComment(), {

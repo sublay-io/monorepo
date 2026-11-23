@@ -9,13 +9,19 @@ export type {
   CreateEntityReportProps,
   CreateMessageReportProps,
   CreateReportResponse,
-  ReportTargetType,
 } from "./useCreateReport";
+export type { FetchModeratedReportsParams } from "./useFetchModeratedReports";
 export type {
-  FetchModeratedReportsParams,
-  ReportUserReport,
+  ReportTargetType,
+  ReportReason,
+  ReportStatus,
+  UserReport,
+  ReportEntityTarget,
+  ReportCommentTarget,
+  ReportMessageTarget,
+  ReportSpace,
   Report,
-} from "./useFetchModeratedReports";
+} from "../../interfaces/models/Report";
 export type {
   HandleSpaceReportProps,
   SpaceReportAction,

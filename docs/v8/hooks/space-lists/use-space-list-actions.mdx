@@ -34,8 +34,8 @@ function CustomSpaceLoader({ listId }: { listId: string }) {
   Fetch spaces for the given list. Updates Redux state with the results. `params` takes `page`, `limit`, `sortBy` (`"createdAt"`, `"members"` or `"alphabetical"`), an optional `sortDir` (`"asc"` or `"desc"`; left out, the sort's natural direction) and the same filters as [useSpaceList](/v8/hooks/space-lists/use-space-list).
 </ResponseField>
 
-<ResponseField name="createSpace" type="(listId: string, props: CreateSpaceProps) => Promise<Space | undefined>">
-  Create a space and insert it into the given list's state.
+<ResponseField name="createSpace" type="(listId: string, props: CreateSpaceProps) => Promise<SpaceWithPermissions | undefined>">
+  Create a space and insert it into the given list's state. `props` takes the same fields as [useSpaceList](/v8/hooks/space-lists/use-space-list)'s `createSpace` (every one optional, `name` included). Resolves with the created space plus `memberPermissions`; a failed request rejects.
 </ResponseField>
 
 <ResponseField name="deleteSpace" type="(listId: string, props: { spaceId: string }) => Promise<void>">

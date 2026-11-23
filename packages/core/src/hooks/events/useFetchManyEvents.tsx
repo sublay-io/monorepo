@@ -9,6 +9,7 @@ import {
   RsvpStatus,
 } from "../../interfaces/models/Event";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
+import { toIsoString } from "../../utils/dates";
 
 // Serialize nested filter objects into bracket notation (mirrors
 // useFetchManyEntities so the server's qs parser reconstructs them).
@@ -63,10 +64,10 @@ export interface FetchManyEventsProps {
   sortBy?: "startTime" | "going";
   sortDir?: "asc" | "desc";
   timeWindow?: "upcoming" | "ongoing" | "past";
-  startsAfter?: string; // ISO datetime
-  startsBefore?: string; // ISO datetime
-  /** Only this space's events, or `"none"` for events not in any space. `null` or left out: every event. */
-  spaceId?: string | "none" | null;
+  startsAfter?: string | Date; // ISO datetime string, or a Date
+  startsBefore?: string | Date; // ISO datetime string, or a Date
+  /** Only this space's events, or `"none"` for events not in any space. Left out: every event. */
+  spaceId?: string | "none";
   hostId?: string;
   type?: EventType;
   status?: EventStatus;
@@ -100,8 +101,8 @@ function useFetchManyEvents(): (
       if (props?.sortBy) params.sortBy = props.sortBy;
       if (props?.sortDir) params.sortDir = props.sortDir;
       if (props?.timeWindow) params.timeWindow = props.timeWindow;
-      if (props?.startsAfter) params.startsAfter = props.startsAfter;
-      if (props?.startsBefore) params.startsBefore = props.startsBefore;
+      if (props?.startsAfter) params.startsAfter = toIsoString(props.startsAfter);
+      if (props?.startsBefore) params.startsBefore = toIsoString(props.startsBefore);
       if (props?.spaceId) params.spaceId = props.spaceId;
       if (props?.hostId) params.hostId = props.hostId;
       if (props?.type) params.type = props.type;

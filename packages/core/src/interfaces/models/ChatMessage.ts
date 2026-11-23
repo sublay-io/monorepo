@@ -1,34 +1,29 @@
+import { GrantSummary } from "./ReputationGrant";
 import { GifData } from "./Comment";
 import { File } from "./File";
 import { Mention } from "./Mention";
-import { GrantSummary } from "./ReputationGrant";
-import { User } from "./User";
+import { UserSummary } from "./User";
 
 export interface ChatMessage {
   id: string;
   // Locally-generated UUID echoed by the server in the REST response and socket payload.
   // Never stored in the DB. Used for optimistic deduplication (matching temp entries to confirmed ones).
   localId?: string;
-  projectId: string;
   conversationId: string;
-  // null when the original sender's account has been deleted (FK SET NULL),
-  // and on a moderator-removed message for everyone but its author
-  userId: string | null;
+  spaceId: string | null; // The conversation's space, for a space chat message
+  userId: string | null; // null when the sender's account has been deleted, and on a removed message for everyone but its author
   content: string | null;
   gif: GifData | null;
   mentions: Mention[];
-  // Opt-in only — populated when the hook's `include` contains "files".
-  // Omitted by default to keep message payloads small in large conversations.
+  // Present when the files-images bundle is installed: always on a single
+  // fetch, send and edit; on the list only with `include: "files"`.
   files?: File[];
-  // null on a deleted message, and on a removed one for everyone but its author
-  metadata: Record<string, any> | null;
+  metadata: Record<string, any> | null; // null on a deleted message, and on a removed one for everyone but its author
   parentMessageId: string | null;
   quotedMessageId: string | null;
   threadReplyCount: number;
-  // emoji → count (computed server-side, not a DB column)
-  reactionCounts: Record<string, number>;
-  // emojis the requesting user has reacted with on this message (computed server-side)
-  userReactions: string[];
+  reactionCounts: Record<string, number>; // emoji → count
+  userReactions: string[];               // emojis the requesting user reacted with
   // Reputation-grant summary. Opt-in on the READ — the server populates it
   // exactly when the hook's `include` contains "grants", and once
   // requested it always returns the object, zero-filled
@@ -52,7 +47,8 @@ export interface ChatMessage {
   grants?: GrantSummary;
   editedAt: string | null;
   userDeletedAt: string | null;
-  moderationStatus: "approved" | "removed" | null;
+  // The column also allows "approved", but nothing sets it on a chat message.
+  moderationStatus: "removed" | null;
   moderatedAt: string | null;
   moderatedById: string | null;
   moderatedByType: "client" | "user" | null;
@@ -61,18 +57,38 @@ export interface ChatMessage {
   updatedAt: string;
 
   // Populated fields
-  // null when userId is null (account deleted, or removed and not the viewer's)
-  // — same pattern as Comment model
-  user: User | null;
-  // Populated one level deep only. Chains are resolved from the Redux store at render time
-  // (via quotedMessageId) so that edits to quoted messages propagate automatically.
-  quotedMessage?: ChatMessage | null;
-  parentMessage?: ChatMessage | null;
+  user: UserSummary | null; // null alongside a null `userId`
+  quotedMessage: QuotedChatMessage | null; // null when the message quotes nothing
 
   // Client-only flag — never comes from the server.
   // Set to true by failOptimisticMessage when a send request fails.
   sendFailed?: boolean;
 }
+
+/**
+ * The message a chat message quotes: its own fields and sender, without
+ * reactions, files, grants or a quote of its own. A deleted or removed quoted
+ * message comes back as its placeholder.
+ */
+export type QuotedChatMessage = Omit<
+  ChatMessage,
+  | "files"
+  | "reactionCounts"
+  | "userReactions"
+  | "grants"
+  | "quotedMessage"
+  | "localId"
+  | "sendFailed"
+>;
+
+/**
+ * A chat message as `sendMessage` and `editMessage` return it: the message
+ * without the reaction data and grant summary the reads attach.
+ */
+export type SentChatMessage = Omit<
+  ChatMessage,
+  "reactionCounts" | "userReactions" | "grants" | "localId" | "sendFailed"
+>;
 
 /** `include` values the message list accepts. */
 export type ChatMessageListInclude = "files" | "grants";
@@ -80,3 +96,10 @@ export type ChatMessageListIncludeArray = ChatMessageListInclude[];
 export type ChatMessageListIncludeParam =
   | ChatMessageListInclude
   | ChatMessageListIncludeArray;
+
+/** `include` values the single-message fetch accepts (its files always come back). */
+export type ChatMessageInclude = "grants";
+export type ChatMessageIncludeArray = ChatMessageInclude[];
+export type ChatMessageIncludeParam =
+  | ChatMessageInclude
+  | ChatMessageIncludeArray;

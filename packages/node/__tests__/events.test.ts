@@ -49,6 +49,17 @@ describe("node-sdk events — request shaping", () => {
     });
   });
 
+  it("fetchManyEvents sends Date startsAfter / startsBefore as ISO strings", async () => {
+    const { client, projectInstance } = makeClient();
+    await fetchManyEvents(client, {
+      startsAfter: new Date("2026-07-01T00:00:00.000Z"),
+      startsBefore: "2026-08-01T00:00:00.000Z",
+    });
+    const [, config] = projectInstance.get.mock.calls[0];
+    expect(config.params.startsAfter).toBe("2026-07-01T00:00:00.000Z");
+    expect(config.params.startsBefore).toBe("2026-08-01T00:00:00.000Z");
+  });
+
   it("fetchManyEvents defaults to an empty params object when called with no args", async () => {
     const { client, projectInstance } = makeClient();
     await fetchManyEvents(client);

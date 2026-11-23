@@ -4,6 +4,8 @@ import reducer, {
   addOptimisticMessage,
   failOptimisticMessage,
   insertConversationPreview,
+  setConversation,
+  applyOwnMute,
   mergeThreadReplies,
   patchMessage,
   removeConversationPreview,
@@ -20,6 +22,9 @@ import reducer, {
 } from "./chatSlice";
 import {
   makeChatMessage,
+  makeConversation,
+  makeConversationMember,
+  makePreviewLastMessage,
   makeConversationPreview,
   makeReputationGrant,
 } from "../../test-utils";
@@ -1118,7 +1123,12 @@ describe("chatSlice — a conversation preview's last message (S#227)", () => {
         items: [
           makeConversationPreview({
             id: "conversation-1",
-            lastMessage: makeChatMessage({ id: "message-1", userId, content: "last words" }),
+            lastMessage: makePreviewLastMessage({
+              id: "message-1",
+              userId,
+              content: "last words",
+              files: [{ id: "file-1" } as never],
+            }),
           }),
         ],
         loading: false,
@@ -1134,6 +1144,10 @@ describe("chatSlice — a conversation preview's last message (S#227)", () => {
       markMessageDeleted({ conversationId: "conversation-1", messageId: "message-1", userDeletedAt: "2024-01-02T00:00:00.000Z" }),
     );
     expect(last(state)).toMatchObject({ content: null, userId: "user-1", userDeletedAt: "2024-01-02T00:00:00.000Z" });
+    // A placeholder preview carries no files, but keeps the preview's shape.
+    expect(last(state).files).toEqual([]);
+    expect(last(state)).not.toHaveProperty("mentions");
+    expect(last(state)).not.toHaveProperty("metadata");
   });
 
   it("becomes the removed placeholder, sender blanked, unless it's the viewer's own", () => {
@@ -1156,7 +1170,12 @@ describe("chatSlice — an edit reaches every copy (S#227)", () => {
     const original = makeChatMessage({ id: "message-1", content: "before" });
     const state0 = baseState({
       conversationList: {
-        items: [makeConversationPreview({ id: "conversation-1", lastMessage: original })],
+        items: [
+          makeConversationPreview({
+            id: "conversation-1",
+            lastMessage: makePreviewLastMessage({ id: "message-1", content: "before" }),
+          }),
+        ],
         loading: false,
         hasMore: false,
       } as never,
@@ -1176,5 +1195,126 @@ describe("chatSlice — an edit reaches every copy (S#227)", () => {
     );
     expect(state.conversationList.items[0].lastMessage!.content).toBe("after");
     expect(state.messages["conversation-1"].items[0].quotedMessage!.content).toBe("after");
+  });
+
+  it("patchMessage gives a preview's last message only its own fields, content cut to 100", () => {
+    const state0 = baseState({
+      conversationList: {
+        items: [
+          makeConversationPreview({
+            id: "conversation-1",
+            lastMessage: makePreviewLastMessage({ id: "message-1", content: "before" }),
+          }),
+        ],
+        loading: false,
+        hasMore: false,
+      } as never,
+    });
+    const state = reducer(
+      state0,
+      patchMessage({
+        conversationId: "conversation-1",
+        messageId: "message-1",
+        patch: { content: "x".repeat(150), mentions: [], metadata: {}, editedAt: "2024-01-02T00:00:00.000Z" },
+      }),
+    );
+    const last = state.conversationList.items[0].lastMessage!;
+    expect(last.content).toBe("x".repeat(100));
+    expect(last).not.toHaveProperty("mentions");
+    expect(last).not.toHaveProperty("metadata");
+    expect(last).not.toHaveProperty("editedAt");
+  });
+});
+
+describe("chatSlice — conversation writes merge into what's held", () => {
+  const member = makeConversationMember({ id: "member-me", userId: "user-me", role: "admin" });
+
+  it("setConversation keeps the loaded currentMember and memberCount", () => {
+    const state0 = baseState({
+      conversations: {
+        "conversation-1": {
+          data: makeConversation({ id: "conversation-1", currentMember: member, memberCount: 4 }),
+          loading: false,
+          error: null,
+        },
+      },
+    });
+    const state = reducer(
+      state0,
+      setConversation(makeConversation({ id: "conversation-1", name: "Renamed" })),
+    );
+    const data = state.conversations["conversation-1"].data!;
+    expect(data.name).toBe("Renamed");
+    expect(data.currentMember).toEqual(member);
+    expect(data.memberCount).toBe(4);
+  });
+
+  it("setConversation still applies a field the incoming copy carries", () => {
+    const state0 = baseState({
+      conversations: {
+        "conversation-1": {
+          data: makeConversation({ id: "conversation-1", currentMember: member }),
+          loading: false,
+          error: null,
+        },
+      },
+    });
+    const state = reducer(
+      state0,
+      setConversation(makeConversation({ id: "conversation-1", currentMember: null })),
+    );
+    expect(state.conversations["conversation-1"].data!.currentMember).toBeNull();
+  });
+
+  it("insertConversationPreview keeps the loaded conversation's currentMember", () => {
+    const state0 = baseState({
+      conversations: {
+        "conversation-1": {
+          data: makeConversation({ id: "conversation-1", currentMember: member, memberCount: 4 }),
+          loading: false,
+          error: null,
+        },
+      },
+    });
+    const state = reducer(
+      state0,
+      insertConversationPreview(makeConversationPreview({ id: "conversation-1", memberCount: 5 })),
+    );
+    const data = state.conversations["conversation-1"].data!;
+    expect(data.currentMember).toEqual(member);
+    expect(data.memberCount).toBe(5);
+  });
+});
+
+describe("chatSlice — applyOwnMute", () => {
+  it("updates the inbox row's mute state and the loaded currentMember", () => {
+    const member = makeConversationMember({ id: "member-me", userId: "user-me", mutedUntil: null, mutedForever: false });
+    const state0 = baseState({
+      conversationList: {
+        items: [makeConversationPreview({ id: "conversation-1" })],
+        loading: false,
+        hasMore: false,
+        cursor: null,
+      },
+      conversations: {
+        "conversation-1": {
+          data: makeConversation({ id: "conversation-1", currentMember: member }),
+          loading: false,
+          error: null,
+        },
+      },
+    });
+    const state = reducer(
+      state0,
+      applyOwnMute({
+        conversationId: "conversation-1",
+        currentMember: { ...member, mutedUntil: null, mutedForever: true },
+      }),
+    );
+    expect(state.conversationList.items[0]).toMatchObject({ mutedUntil: null, mutedForever: true });
+    expect(state.conversations["conversation-1"].data!.currentMember).toMatchObject({
+      id: "member-me",
+      mutedForever: true,
+    });
   });
 });

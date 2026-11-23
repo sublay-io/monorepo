@@ -128,6 +128,7 @@ export {
   handleOAuthRedirect,
   type OAuthRedirectParams,
   type HandleOAuthRedirectResult,
+  type OAuthProvider,
 } from "./hooks/auth/oauthCore";
 
 // -- store internals (for platform-specific hooks in react-js / react-native)
@@ -247,7 +248,6 @@ export {
   useUserActions,
   type UseUserProps,
   type UseUserValues,
-  type ActiveSuspension,
   type UpdateUserParams,
 } from "./hooks/user";
 
@@ -728,8 +728,14 @@ export {
   type CreateReportResponse,
   type ReportTargetType,
   type FetchModeratedReportsParams,
-  type ReportUserReport,
   type Report,
+  type UserReport,
+  type ReportReason,
+  type ReportStatus,
+  type ReportEntityTarget,
+  type ReportCommentTarget,
+  type ReportMessageTarget,
+  type ReportSpace,
   type HandleSpaceReportProps,
   type SpaceReportAction,
 } from "./hooks/reports";
@@ -756,6 +762,7 @@ export {
   type UseSearchContentProps,
   type UseSearchContentReturn,
   type ContentSearchResult,
+  type ContentSearchChatMessage,
   type UseSearchUsersProps,
   type UseSearchUsersReturn,
   type UserSearchResult,
@@ -765,6 +772,7 @@ export {
   type UseAskContentProps,
   type UseAskContentReturn,
   type UseMatchUsersProps,
+  type UseMatchUsersCommonProps,
   type UseMatchUsersReturn,
   type UserMatchResult,
   type MatchedFacet,
@@ -793,6 +801,8 @@ export type {
   User,
   AuthUser,
   UserRole,
+  UserSuspension,
+  UserSummary,
   UserInclude,
   UserIncludeArray,
   UserIncludeParam,
@@ -800,6 +810,8 @@ export type {
 export * as AppNotification from "./interfaces/models/AppNotification";
 export type {
   Entity,
+  EntityRecord,
+  SpaceWithViewer,
   EntitySaved,
   EntityInclude,
   EntityIncludeArray,
@@ -875,6 +887,7 @@ export type {
   SpaceDetailed,
   SpaceWithPermissions,
   SpacePreview,
+  ChildSpacePreview,
   SpaceMemberPermissions,
   ReadingPermission,
   PostingPermission,
@@ -916,6 +929,7 @@ export type {
   SpaceMemberRole,
   SpaceMemberStatus,
   SpaceMemberWithUser,
+  SpaceTeamResponse,
   SpaceMembersResponse,
 } from "./interfaces/models/SpaceMember";
 export type {
@@ -933,6 +947,7 @@ export type {
   WorkspaceListFetchOptions,
 } from "./store/slices/workspaceListsSlice";
 export type {
+  SpaceBreadcrumb,
   SpaceBreadcrumbEntry,
   VisibleSpaceBreadcrumbEntry,
   HiddenSpaceBreadcrumbEntry,
@@ -976,8 +991,8 @@ export type {
 export type { FollowRow, FollowStatus } from "./interfaces/models/Follow";
 export type { BlockRow, BlockStatus } from "./interfaces/models/Block";
 export type {
-  Image,
-  ImageVariant,
+  UploadImageResponse,
+  UploadedImageVariant,
   UploadImageOptions,
 } from "./interfaces/models/Image";
 export type {
@@ -1057,12 +1072,15 @@ export type {
   UseTypingIndicatorProps,
   UseTypingIndicatorValues,
   UseChatSocketValues,
+  CreateGroupParams,
+  SendMessageResult,
 } from "./hooks/chat";
 
 // -- chat interfaces
 export type {
   Conversation,
   ConversationPreview,
+  ConversationPreviewLastMessage,
   ConversationType,
 } from "./interfaces/models/Conversation";
 export type {
@@ -1072,10 +1090,20 @@ export type {
 } from "./interfaces/models/ConversationMember";
 export type {
   ChatMessage,
+  QuotedChatMessage,
+  SentChatMessage,
   ChatMessageListInclude,
   ChatMessageListIncludeArray,
   ChatMessageListIncludeParam,
+  ChatMessageInclude,
+  ChatMessageIncludeArray,
+  ChatMessageIncludeParam,
 } from "./interfaces/models/ChatMessage";
+export type {
+  SocketChatMessage,
+  SocketConversationMember,
+  SocketConversationPatch,
+} from "./types/socket";
 
 // -- chat slice
 export {

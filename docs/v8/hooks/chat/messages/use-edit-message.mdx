@@ -70,8 +70,8 @@ The hook returns a function. That function accepts:
 
 ## Returns
 
-<ResponseField name="ChatMessage" type="ChatMessage">
-  The updated [ChatMessage](/v8/data-models/chat-message) returned by the server.
+<ResponseField name="SentChatMessage" type="SentChatMessage">
+  The updated [ChatMessage](/v8/data-models/chat-message) returned by the server, without `reactionCounts`, `userReactions` and `grants`. The stored copy keeps the reactions it already had.
 </ResponseField>
 
 ## Notes

@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeAuthUser } from "../../test-utils";
+import { renderHookWithAxios, resetAxiosMocks, makeUser } from "../../test-utils";
 import useSearchUsers from "./useSearchUsers";
 import type { UserSearchResult } from "./useSearchUsers";
 
@@ -13,7 +13,7 @@ describe("useSearchUsers", () => {
   it("searches users and stores the results", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useSearchUsers());
 
-    const results: UserSearchResult[] = [{ similarity: 0.8, record: makeAuthUser() }];
+    const results: UserSearchResult[] = [{ similarity: 0.8, record: makeUser() }];
     axiosPrivate.mockResponse("post", results);
 
     await act(async () => {
@@ -53,7 +53,7 @@ describe("useSearchUsers", () => {
   it("reset() clears results and error", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useSearchUsers());
 
-    axiosPrivate.mockResponse("post", [{ similarity: 0.5, record: makeAuthUser() }]);
+    axiosPrivate.mockResponse("post", [{ similarity: 0.5, record: makeUser() }]);
 
     await act(async () => {
       await result.current.search({ query: "alice" });

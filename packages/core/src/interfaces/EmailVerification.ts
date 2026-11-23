@@ -12,9 +12,10 @@ export interface EmailVerificationOptions {
   mode?: "link" | "code";
   /**
    * Where the confirmation link sends the user after confirming. Must be on
-   * the project's Verified Domains. Link mode only.
+   * the project's Verified Domains (400 `auth/redirect-url-not-allowed`
+   * otherwise). Link mode only. `null` for none.
    */
-  redirectUrl?: string;
+  redirectUrl?: string | null;
 }
 
 /**

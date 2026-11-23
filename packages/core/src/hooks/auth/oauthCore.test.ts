@@ -225,7 +225,7 @@ describe("requestOAuthAuthorizationUrl", () => {
       requestOAuthAuthorizationUrl({
         projectId: "project-1",
         endpoint: "authorize",
-        provider: "unknown",
+        provider: "unknown" as never,
         redirectAfterAuth: "https://app.example.com/done",
       }),
     ).rejects.toThrow("Unsupported provider");

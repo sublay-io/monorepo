@@ -1,9 +1,8 @@
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { ReportReasonKey } from "../../constants/reportReasons";
+import { ReportTargetType } from "../../interfaces/models/Report";
 import useProject from "../projects/useProject";
 import { useUser } from "../user";
-
-export type ReportTargetType = "comment" | "entity" | "message";
 
 export interface UseCreateReportProps {
   targetType: ReportTargetType;
@@ -13,19 +12,19 @@ export interface CreateReportProps {
   targetId: string;
   targetType: ReportTargetType;
   reason: ReportReasonKey;
-  details?: string;
+  details?: string | null;
 }
 
 export interface CreateCommentReportProps {
   targetId: string;
   reason: ReportReasonKey;
-  details?: string;
+  details?: string | null;
 }
 
 export interface CreateEntityReportProps {
   targetId: string;
   reason: ReportReasonKey;
-  details?: string;
+  details?: string | null;
 }
 
 /**
@@ -36,7 +35,7 @@ export interface CreateEntityReportProps {
 export interface CreateMessageReportProps {
   targetId: string;
   reason: ReportReasonKey;
-  details?: string;
+  details?: string | null;
 }
 
 /**

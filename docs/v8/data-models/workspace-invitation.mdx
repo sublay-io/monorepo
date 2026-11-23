@@ -31,7 +31,7 @@ Acceptance is **identity-matched + verified-email, with no token** — see [Acce
   | Property | Type | Description |
   |----------|------|-------------|
   | `workspace` | `{ id: string, name: string }` | The target workspace, embedded. `workspaceId` is still present alongside it. |
-  | `invitedBy` | `{ id: string, name: string \| null, username: string \| null, avatar: string \| null, reputation: number }` | The inviter, embedded. `invitedById` is still present alongside it. |
+  | `invitedBy` | `{ id: string, name: string \| null, username: string \| null, avatar: string \| null, reputation: number } \| null` | The inviter, embedded, or `null` when the inviter's user record no longer exists. `invitedById` is still present alongside it. |
 </Note>
 
 ## Lazy expiry

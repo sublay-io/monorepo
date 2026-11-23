@@ -72,8 +72,8 @@ The hook returns `createCommentReport`, `createEntityReport`, or `createMessageR
   doesn't cover.
 </ParamField>
 
-<ParamField body="details" type="string">
-  Optional free-text elaboration on the reason.
+<ParamField body="details" type="string | null">
+  Optional free-text elaboration on the reason. An empty string is stored as `null`.
 </ParamField>
 
 ## Returns

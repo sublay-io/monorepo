@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { ConversationMember } from "../../../interfaces/models/ConversationMember";
+import {
+  ConversationMember,
+  ConversationMemberRole,
+} from "../../../interfaces/models/ConversationMember";
+import type { SocketConversationMember } from "../../../types/socket";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
@@ -10,15 +14,42 @@ export interface UseConversationMembersProps extends SpaceReputationContextParam
   conversationId: string;
 }
 
+/**
+ * `incoming` merged into the listed copy of the same member, or appended.
+ * The add, role-change and `member:joined` rows carry no `user`, so a merge
+ * keeps the one the list loaded.
+ */
+function mergeMember(
+  prev: ConversationMember[],
+  incoming: ConversationMember | SocketConversationMember
+): ConversationMember[] {
+  const idx = prev.findIndex((m) => m.userId === incoming.userId);
+  if (idx === -1) return [...prev, incoming];
+  const next = [...prev];
+  next[idx] = { ...prev[idx], ...incoming };
+  return next;
+}
+
 export interface UseConversationMembersValues {
   members: ConversationMember[];
   loading: boolean;
-  addMember: ({ userId }: { userId: string }) => Promise<void>;
+  /** Adds the user and resolves to their member row (without `user`). */
+  addMember: ({ userId }: { userId: string }) => Promise<ConversationMember>;
   removeMember: ({ userId }: { userId: string }) => Promise<void>;
   leave: () => Promise<void>;
-  changeRole: ({ userId, role }: { userId: string; role: "admin" | "member" }) => Promise<void>;
-  /** Upsert a member into the local list (for real-time socket updates). */
-  upsertMember: (member: ConversationMember) => void;
+  /** Changes the member's role and resolves to their member row (without `user`). */
+  changeRole: ({
+    userId,
+    role,
+  }: {
+    userId: string;
+    role: ConversationMemberRole;
+  }) => Promise<ConversationMember>;
+  /**
+   * Upsert a member into the local list (for real-time socket updates). A
+   * member already listed keeps its loaded `user`.
+   */
+  upsertMember: (member: ConversationMember | SocketConversationMember) => void;
   /** Remove a member from the local list by userId (for real-time socket updates). */
   removeMemberLocally: ({ userId }: { userId: string }) => void;
 }
@@ -59,24 +90,17 @@ function useConversationMembers({
   }, [projectId, conversationId, reputationKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addMember = useCallback(
-    async ({ userId }: { userId: string }) => {
-      if (!projectId || !conversationId) return;
+    async ({ userId }: { userId: string }): Promise<ConversationMember> => {
+      if (!projectId) throw new Error("No projectId available.");
+      if (!conversationId) throw new Error("No conversationId provided.");
       try {
         const response = await axios.post(
           `/${projectId}/chat/conversations/${conversationId}/members`,
           { userId }
         );
         const newMember = response.data as ConversationMember;
-        setMembers((prev) => {
-          // Replace existing entry or append
-          const idx = prev.findIndex((m) => m.userId === newMember.userId);
-          if (idx !== -1) {
-            const next = [...prev];
-            next[idx] = newMember;
-            return next;
-          }
-          return [...prev, newMember];
-        });
+        setMembers((prev) => mergeMember(prev, newMember));
+        return newMember;
       } catch (err) {
         handleError(err, "Failed to add member");
         throw err;
@@ -113,40 +137,37 @@ function useConversationMembers({
     }
   }, [projectId, conversationId, axios]);
 
-  const upsertMember = useCallback((member: ConversationMember) => {
-    setMembers((prev) => {
-      const idx = prev.findIndex((m) => m.userId === member.userId);
-      if (idx !== -1) {
-        const next = [...prev];
-        next[idx] = member;
-        return next;
-      }
-      return [...prev, member];
-    });
-  }, []);
+  const upsertMember = useCallback(
+    (member: ConversationMember | SocketConversationMember) => {
+      setMembers((prev) => mergeMember(prev, member));
+    },
+    []
+  );
 
   const removeMemberLocally = useCallback(({ userId }: { userId: string }) => {
     setMembers((prev) => prev.filter((m) => m.userId !== userId));
   }, []);
 
   const changeRole = useCallback(
-    async ({ userId, role }: { userId: string; role: "admin" | "member" }) => {
-      if (!projectId || !conversationId) return;
+    async ({
+      userId,
+      role,
+    }: {
+      userId: string;
+      role: ConversationMemberRole;
+    }): Promise<ConversationMember> => {
+      if (!projectId) throw new Error("No projectId available.");
+      if (!conversationId) throw new Error("No conversationId provided.");
       try {
         const response = await axios.patch(
           `/${projectId}/chat/conversations/${conversationId}/members/${userId}/role`,
           { role }
         );
         const updated = response.data as ConversationMember;
-        setMembers((prev) => {
-          const idx = prev.findIndex((m) => m.userId === userId);
-          if (idx !== -1) {
-            const next = [...prev];
-            next[idx] = updated;
-            return next;
-          }
-          return prev;
-        });
+        setMembers((prev) =>
+          prev.some((m) => m.userId === userId) ? mergeMember(prev, updated) : prev
+        );
+        return updated;
       } catch (err) {
         handleError(err, "Failed to change member role");
         throw err;

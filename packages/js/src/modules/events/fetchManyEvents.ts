@@ -38,8 +38,8 @@ export interface FetchManyEventsProps {
 
   // Time filtering: derived window OR explicit range
   timeWindow?: "upcoming" | "ongoing" | "past";
-  startsAfter?: string; // ISO datetime
-  startsBefore?: string; // ISO datetime
+  startsAfter?: string | Date; // ISO datetime string, or a Date
+  startsBefore?: string | Date; // ISO datetime string, or a Date
 
   // Scope / attribute filters
   /** Only this space's events, or `"none"` for events not in any space. Left out: every event. */
@@ -74,6 +74,14 @@ export async function fetchManyEvents(
     {
       params: {
         ...data,
+        startsAfter:
+          data.startsAfter instanceof Date
+            ? data.startsAfter.toISOString()
+            : data.startsAfter,
+        startsBefore:
+          data.startsBefore instanceof Date
+            ? data.startsBefore.toISOString()
+            : data.startsBefore,
         // One comma-separated value, like `include`.
         myRsvp: serializeInclude(data.myRsvp),
         include: serializeInclude(data.include),

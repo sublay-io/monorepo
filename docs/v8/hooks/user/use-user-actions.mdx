@@ -46,8 +46,8 @@ function CustomAuth() {
   Clears the current user from Redux state and resets any error.
 </ResponseField>
 
-<ResponseField name="updateUser" type="(params: { projectId: string; userId: string; update: UpdateUserParams; currentUser?: AuthUser }) => Promise<AuthUser>">
-  Calls the update user API and manages loading and error state. An update with `avatarFile` or `bannerFile` is sent as `multipart/form-data`, any other as JSON. Applies optimistic updates for non-file fields. Reverts to `currentUser` if the request fails.
+<ResponseField name="updateUser" type="(params: { projectId: string; userId: string; update: UpdateUserParams; currentUser?: AuthUser | null }) => Promise<AuthUser>">
+  Calls the update user API and manages loading and error state. An update with `avatarFile` or `bannerFile` is sent as `multipart/form-data`, any other as JSON. Applies optimistic updates for non-file fields (location and birthdate excepted). A `null` field next to a file throws before anything is sent or changed. Reverts to `currentUser` if the request fails.
 
   <Expandable title="params">
     <ResponseField name="projectId" type="string" required>
@@ -59,7 +59,7 @@ function CustomAuth() {
     <ResponseField name="update" type="UpdateUserParams" required>
       Fields to update, including `avatarFile`, `bannerFile` and `removeFileIds`. See [`useUser`](/v8/hooks/user/use-user) for the full `UpdateUserParams` reference.
     </ResponseField>
-    <ResponseField name="currentUser" type="AuthUser">
+    <ResponseField name="currentUser" type="AuthUser | null">
       The current user snapshot used to revert state on failure.
     </ResponseField>
   </Expandable>

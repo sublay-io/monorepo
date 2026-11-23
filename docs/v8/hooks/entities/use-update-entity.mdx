@@ -38,12 +38,12 @@ function EditPost({ entityId }: { entityId: string }) {
   The ID of the entity to update.
 </ParamField>
 
-<ParamField path="update.title" type="string | null">
-  New title. Pass `null` to clear.
+<ParamField path="update.title" type="string">
+  New title.
 </ParamField>
 
-<ParamField path="update.content" type="string | null">
-  New content body. Pass `null` to clear.
+<ParamField path="update.content" type="string">
+  New content body.
 </ParamField>
 
 <ParamField path="update.attachments" type="Record<string, any>[]">

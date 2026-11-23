@@ -8,7 +8,11 @@ import type {
   SpaceMemberPermissions,
 } from "../interfaces/models/Space";
 import type { User } from "../interfaces/models/User";
-import type { Conversation, ConversationPreview } from "../interfaces/models/Conversation";
+import type {
+  Conversation,
+  ConversationPreview,
+  ConversationPreviewLastMessage,
+} from "../interfaces/models/Conversation";
 import type { ConversationMember } from "../interfaces/models/ConversationMember";
 import type { ChatMessage } from "../interfaces/models/ChatMessage";
 import type { ReputationGrant } from "../interfaces/models/ReputationGrant";
@@ -16,11 +20,11 @@ import type { ReputationGrant } from "../interfaces/models/ReputationGrant";
 export function makeConversation(overrides: Partial<Conversation> = {}): Conversation {
   return {
     id: "conversation-1",
-    projectId: "test-project",
     type: "direct",
     name: null,
     description: null,
     spaceId: null,
+    directKey: null,
     createdById: "user-1",
     avatarFileId: null,
     lastMessageAt: null,
@@ -38,8 +42,29 @@ export function makeConversationPreview(
   return {
     ...makeConversation(),
     unreadCount: 0,
+    memberCount: 2,
+    mutedUntil: null,
+    mutedForever: false,
     lastMessage: null,
     otherMembers: [],
+    ...overrides,
+  };
+}
+
+export function makePreviewLastMessage(
+  overrides: Partial<ConversationPreviewLastMessage> = {},
+): ConversationPreviewLastMessage {
+  return {
+    id: "message-1",
+    conversationId: "conversation-1",
+    content: "hello",
+    gif: null,
+    userId: "user-1",
+    moderationStatus: null,
+    userDeletedAt: null,
+    createdAt: "2024-01-01T00:00:00.000Z",
+    files: [],
+    user: null,
     ...overrides,
   };
 }
@@ -49,7 +74,6 @@ export function makeConversationMember(
 ): ConversationMember {
   return {
     id: "member-1",
-    projectId: "test-project",
     conversationId: "conversation-1",
     userId: "user-1",
     role: "member",
@@ -66,8 +90,8 @@ export function makeConversationMember(
 export function makeChatMessage(overrides: Partial<ChatMessage> = {}): ChatMessage {
   return {
     id: "message-1",
-    projectId: "test-project",
     conversationId: "conversation-1",
+    spaceId: null,
     userId: "user-1",
     content: "hello",
     gif: null,
@@ -88,6 +112,7 @@ export function makeChatMessage(overrides: Partial<ChatMessage> = {}): ChatMessa
     createdAt: "2024-01-01T00:00:00.000Z",
     updatedAt: "2024-01-01T00:00:00.000Z",
     user: makeUser(),
+    quotedMessage: null,
     ...overrides,
   };
 }
@@ -121,7 +146,6 @@ export function makeSpaceDetailed(overrides: Partial<SpaceDetailed> = {}): Space
 export function makeUser(overrides: Partial<User> = {}): User {
   return {
     id: "user-1",
-    projectId: "test-project",
     foreignId: null,
     role: "visitor",
     name: "Test User",
@@ -135,6 +159,7 @@ export function makeUser(overrides: Partial<User> = {}): User {
     metadata: {},
     reputation: 0,
     createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
     ...overrides,
   };
 }
@@ -142,7 +167,6 @@ export function makeUser(overrides: Partial<User> = {}): User {
 export function makeSpace(overrides: Partial<Space> = {}): Space {
   return {
     id: "space-1",
-    projectId: "test-project",
     shortId: "space-short-1",
     slug: "space-1",
     name: "Space name",
@@ -161,7 +185,6 @@ export function makeSpace(overrides: Partial<Space> = {}): Space {
     metadata: {},
     createdAt: "2024-01-01T00:00:00.000Z",
     updatedAt: "2024-01-01T00:00:00.000Z",
-    deletedAt: null,
     membersCount: 0,
     childSpacesCount: 0,
     ...overrides,
@@ -171,13 +194,19 @@ export function makeSpace(overrides: Partial<Space> = {}): Space {
 export function makeReaction(overrides: Partial<Reaction> = {}): Reaction {
   return {
     id: "reaction-1",
-    projectId: "test-project",
     targetType: "entity",
     targetId: "entity-1",
     userId: "user-1",
     reactionType: "upvote",
     createdAt: "2024-01-01T00:00:00.000Z",
     updatedAt: "2024-01-01T00:00:00.000Z",
+    user: {
+      id: "user-1",
+      name: "Test User",
+      username: "testuser",
+      avatar: null,
+      reputation: 0,
+    },
     ...overrides,
   };
 }
@@ -228,7 +257,6 @@ export function makeEvent(overrides: Partial<Event> = {}): Event {
   return {
     id: "event-1",
     shortId: "event-short-1",
-    projectId: "test-project",
     userId: "user-1",
     title: "Event title",
     description: null,
@@ -249,6 +277,7 @@ export function makeEvent(overrides: Partial<Event> = {}): Event {
     hostIds: ["user-1"],
     coverImageId: null,
     rsvpCounts: { going: 0, maybe: 0, "not-going": 0 },
+    userRsvp: null,
     metadata: {},
     createdAt: "2024-01-01T00:00:00.000Z",
     updatedAt: "2024-01-01T00:00:00.000Z",
@@ -262,7 +291,6 @@ export function makeEntity(overrides: Partial<Entity> = {}): Entity {
     id: "entity-1",
     foreignId: null,
     shortId: "short-1",
-    projectId: "test-project",
     sourceId: null,
     spaceId: null,
     userId: "user-1",
@@ -285,6 +313,7 @@ export function makeEntity(overrides: Partial<Entity> = {}): Entity {
     },
     userReaction: null,
     commentsCount: 0,
+    sharesCount: 0,
     views: 0,
     score: 0,
     scoreUpdatedAt: "2024-01-01T00:00:00.000Z",

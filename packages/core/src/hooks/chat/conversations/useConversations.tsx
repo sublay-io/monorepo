@@ -10,18 +10,31 @@ import {
   setConversationListLoading,
   setConversationListHasMore,
   setConversationListCursor,
+  insertConversationPreview,
 } from "../../../store/slices/chatSlice";
 import {
+  Conversation,
   ConversationPreview,
   ConversationType,
 } from "../../../interfaces/models/Conversation";
 import useAxiosPrivate from "../../../config/useAxiosPrivate";
 import useProject from "../../projects/useProject";
+import useFetchConversationPreview from "./useFetchConversationPreview";
 import { handleError } from "../../../utils/handleError";
 import { CursorPaginatedResponse } from "../../../interfaces/PaginatedResponse";
 
 export interface UseConversationsProps {
   types?: ConversationType[];
+}
+
+export interface CreateGroupParams {
+  name?: string;
+  description?: string;
+  metadata?: Record<string, unknown>;
+  // Initial members to add at creation time (the server creates their member
+  // rows in the same transaction). The creator is added as admin automatically
+  // and is de-duplicated server-side if present here.
+  memberIds?: string[];
 }
 
 export interface UseConversationsValues {
@@ -30,14 +43,9 @@ export interface UseConversationsValues {
   hasMore: boolean;
   loadMore: () => Promise<void>;
   refresh: () => Promise<void>;
-  createGroup: (params: {
-    name?: string;
-    metadata?: Record<string, unknown>;
-    // Initial members to add at creation time (the server creates their member
-    // rows in the same transaction). The creator is added as admin automatically
-    // and is de-duplicated server-side if present here.
-    memberIds?: string[];
-  }) => Promise<ConversationPreview>;
+  // Resolves to the created conversation. The group's inbox row (its
+  // preview) is fetched and added to `conversations`.
+  createGroup: (params: CreateGroupParams) => Promise<Conversation>;
 }
 
 function useConversations({
@@ -46,6 +54,7 @@ function useConversations({
   const dispatch = useSublayDispatch();
   const { projectId } = useProject();
   const axios = useAxiosPrivate();
+  const fetchConversationPreview = useFetchConversationPreview();
 
   const conversations = useSublaySelector(selectConversationList);
   const loading = useSublaySelector(selectConversationListLoading);
@@ -144,27 +153,30 @@ function useConversations({
   }, [socketConnected, refresh]);
 
   const createGroup = useCallback(
-    async (params: {
-      name?: string;
-      metadata?: Record<string, unknown>;
-      memberIds?: string[];
-    }): Promise<ConversationPreview> => {
+    async (params: CreateGroupParams): Promise<Conversation> => {
       if (!projectId) throw new Error("No project ID");
 
-      const response = await axios.post(
+      const response = await axios.post<Conversation>(
         `/${projectId}/chat/conversations`,
         { type: "group", ...params }
       );
 
-      const conversation = response.data as ConversationPreview;
+      const conversation = response.data;
 
-      // Prepend to the current list so it appears immediately
-      const current = conversationsRef.current;
-      dispatch(setConversationList([conversation, ...current]));
+      // The create returns the bare conversation; the inbox holds previews,
+      // so fetch the new group's preview and insert that.
+      try {
+        const preview = await fetchConversationPreview({
+          conversationId: conversation.id,
+        });
+        dispatch(insertConversationPreview(preview));
+      } catch {
+        // ignore — the group is created; the next refresh lists it
+      }
 
       return conversation;
     },
-    [projectId, axios, dispatch]
+    [projectId, axios, dispatch, fetchConversationPreview]
   );
 
   return { conversations, loading, hasMore, loadMore, refresh, createGroup };

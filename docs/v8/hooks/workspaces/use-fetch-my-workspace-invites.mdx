@@ -39,7 +39,7 @@ None — the user is derived from the token.
 
 ## Returns
 
-Returns a `MyWorkspaceInvitation[]` array: each item a [WorkspaceInvitation](/v8/data-models/workspace-invitation) with `workspace` and `invitedBy` embedded (see the note on that page). Never paginated.
+Returns a `MyWorkspaceInvitation[]` array: each item a [WorkspaceInvitation](/v8/data-models/workspace-invitation) with `workspace` and `invitedBy` embedded (see the note on that page). `invitedBy` is `null` when the inviter's user record no longer exists. Never paginated.
 
 ## Related
 

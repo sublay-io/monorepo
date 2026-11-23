@@ -39,8 +39,10 @@ describe("useUpdateSpace", () => {
   });
 
   it("merges a JSON update onto the SpaceProvider's space, keeping its hierarchy", async () => {
-    const parentSpace = { id: "parent-1", shortId: "p1", name: "Parent", slug: null, avatarFileId: null };
-    const childSpaces = [{ id: "child-1", shortId: "c1", name: "Child", slug: null, avatarFileId: null }];
+    const parentSpace = { id: "parent-1", shortId: "p1", name: "Parent", slug: null, avatarFileId: null, visibility: "public" as const };
+    const childSpaces = [
+      { id: "child-1", shortId: "c1", name: "Child", slug: null, avatarFileId: null, visibility: "public" as const, readingPermission: "anyone" as const },
+    ];
     const space = makeSpaceDetailed({ id: "space-1", name: "Old", parentSpace, childSpaces });
 
     const { Wrapper, axiosPrivate } = makeProvidersWrapper({
@@ -163,23 +165,40 @@ describe("useUpdateSpace", () => {
     expect(formData.get("avatarFile.options")).toBe(JSON.stringify(options));
   });
 
-  it("leaves out `slug: null` on a multipart update, and sends it on a JSON one", async () => {
+  it.each(["name", "slug", "description"] as const)(
+    "throws on `%s: null` with a file, before sending anything",
+    async (field) => {
+      const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateSpace());
+
+      const file = new File(["binary"], "avatar.png", { type: "image/png" });
+      await expect(
+        result.current({
+          spaceId: "space-1",
+          update: {
+            [field]: null,
+            avatarFile: { file, options: { mode: "original-aspect", sizes: { small: 64 } } },
+          },
+        }),
+      ).rejects.toThrow(
+        `[Sublay] updateSpace: \`${field}: null\` can't be sent with a file. Clear it in a separate call without a file.`,
+      );
+      expect(axiosPrivate.calls("patch")).toHaveLength(0);
+    },
+  );
+
+  it("sends `null` clears on a JSON update", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateSpace());
     axiosPrivate.mockResponse("patch", makeSpaceDetailed());
-    axiosPrivate.mockResponse("patch", makeSpaceDetailed());
 
-    const file = new File(["binary"], "avatar.png", { type: "image/png" });
     await act(async () => {
       await result.current({
         spaceId: "space-1",
-        update: { slug: null, avatarFile: { file, options: { mode: "original-aspect", sizes: { small: 64 } } } },
+        update: { name: null, slug: null, description: null },
       });
-      await result.current({ spaceId: "space-1", update: { slug: null } });
     });
 
-    const [multipart, json] = axiosPrivate.calls("patch");
-    expect((multipart.body as FormData).has("slug")).toBe(false);
-    expect(json.body).toEqual({ slug: null });
+    const [call] = axiosPrivate.calls("patch");
+    expect(call.body).toEqual({ name: null, slug: null, description: null });
   });
 
   it("sends removeFileIds alone as JSON", async () => {

@@ -95,13 +95,44 @@ describe("useCreateSpace", () => {
     });
   });
 
-  it("throws before making a request when no name is passed", async () => {
+  it("creates a space without a name", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useCreateSpace());
+    axiosPrivate.mockResponse("post", makeSpace({ name: null }), 201);
 
-    await expect(result.current({ name: "" })).rejects.toThrow(
-      "Space name is required",
-    );
-    expect(axiosPrivate.calls("post")).toHaveLength(0);
+    await act(async () => {
+      await result.current({});
+    });
+
+    const [call] = axiosPrivate.calls("post");
+    expect(call.body).toEqual({});
+  });
+
+  it("leaves `null` fields out of a multipart create", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useCreateSpace());
+    axiosPrivate.mockResponse("post", makeSpace(), 201);
+
+    const file = new File(["binary"], "avatar.png", { type: "image/png" });
+    await act(async () => {
+      await result.current({
+        name: null,
+        slug: null,
+        description: null,
+        parentSpaceId: null,
+        nsfw: true,
+        metadata: { a: 1 },
+        avatarFile: { file, options: { mode: "original-aspect", sizes: { full: 256 } } },
+      });
+    });
+
+    const formData = axiosPrivate.calls("post")[0].body as FormData;
+    expect([...formData.keys()].sort()).toEqual([
+      "avatarFile",
+      "avatarFile.options",
+      "metadata",
+      "nsfw",
+    ]);
+    expect(formData.get("nsfw")).toBe("true");
+    expect(formData.get("metadata")).toBe(JSON.stringify({ a: 1 }));
   });
 
   it("throws before making a request when there is no project", async () => {

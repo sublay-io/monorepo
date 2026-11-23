@@ -132,4 +132,31 @@ describe("buildUserUpdateFormData", () => {
     expect(JSON.parse(formData.get("metadata") as string)).toEqual({ foo: "bar" });
     expect(JSON.parse(formData.get("secureMetadata") as string)).toEqual({ s: 1 });
   });
+
+  it("sends birthdate as an ISO string, from a Date or a string", () => {
+    const file = new File(["x"], "a.png");
+    const fromDate = buildUserUpdateFormData({
+      birthdate: new Date("1990-05-17T00:00:00.000Z"),
+      avatarFile: { file, options },
+    });
+    expect(fromDate.get("birthdate")).toBe("1990-05-17T00:00:00.000Z");
+
+    const fromString = buildUserUpdateFormData({
+      birthdate: "1990-05-17T00:00:00.000Z",
+      avatarFile: { file, options },
+    });
+    expect(fromString.get("birthdate")).toBe("1990-05-17T00:00:00.000Z");
+  });
+
+  it("throws on a null field instead of sending it with a file", () => {
+    const file = new File(["x"], "a.png");
+    expect(() =>
+      buildUserUpdateFormData({ bio: null, avatarFile: { file, options } }),
+    ).toThrow(
+      "[Sublay] updateUser: `bio: null` can't be sent with a file. Clear it in a separate call without a file.",
+    );
+    expect(() =>
+      buildUserUpdateFormData({ avatar: null, avatarFile: { file, options } }),
+    ).toThrow("`avatar: null`");
+  });
 });

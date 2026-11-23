@@ -1,10 +1,15 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { act } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeChatMessage, makeAuthUser } from "../../../test-utils";
-import useSendMessage from "./useSendMessage";
-import { selectMessages } from "../../../store/slices/chatSlice";
-import type { ChatMessage } from "../../../interfaces/models/ChatMessage";
+import {
+  renderHookWithAxios,
+  resetAxiosMocks,
+  makeChatMessage,
+  makeConversation,
+  makeAuthUser,
+} from "../../../test-utils";
+import useSendMessage, { type SendMessageResult } from "./useSendMessage";
+import { selectMessages, setConversation } from "../../../store/slices/chatSlice";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -26,7 +31,7 @@ describe("useSendMessage", () => {
       }),
     );
 
-    let promise!: Promise<ChatMessage>;
+    let promise!: Promise<SendMessageResult>;
     act(() => {
       promise = result.current({ content: "hi" });
     });
@@ -49,6 +54,68 @@ describe("useSendMessage", () => {
 
     const final = selectMessages("conversation-1")(store.getState());
     expect(final).toEqual([{ ...confirmedTemplate, localId: (call.body as any).localId }]);
+  });
+
+  it("builds the optimistic message with the stored conversation's spaceId, no quote", async () => {
+    const { result, store, axiosPrivate } = renderHookWithAxios(
+      () => useSendMessage({ conversationId: "conversation-1" }),
+      { user: makeAuthUser({ id: "user-1" }) },
+    );
+    act(() => {
+      store.dispatch(
+        setConversation(makeConversation({ id: "conversation-1", type: "space", spaceId: "space-1" })),
+      );
+    });
+
+    axiosPrivate.mockResponse("post", makeChatMessage({ id: "message-1", spaceId: "space-1" }));
+
+    let promise!: Promise<SendMessageResult>;
+    act(() => {
+      promise = result.current({ content: "hi", quotedMessageId: "message-0" });
+    });
+
+    const [optimistic] = selectMessages("conversation-1")(store.getState());
+    expect(optimistic.spaceId).toBe("space-1");
+    expect(optimistic.quotedMessageId).toBe("message-0");
+    expect(optimistic.quotedMessage).toBeNull();
+    expect(optimistic).not.toHaveProperty("projectId");
+
+    await act(async () => {
+      await promise;
+    });
+  });
+
+  it("uses a null spaceId on the optimistic message when the conversation isn't loaded", async () => {
+    const { result, store, axiosPrivate } = renderHookWithAxios(() =>
+      useSendMessage({ conversationId: "conversation-1" }),
+    );
+    axiosPrivate.mockResponse("post", makeChatMessage({ id: "message-1" }));
+
+    let promise!: Promise<SendMessageResult>;
+    act(() => {
+      promise = result.current({ content: "hi" });
+    });
+    expect(selectMessages("conversation-1")(store.getState())[0].spaceId).toBeNull();
+    await act(async () => {
+      await promise;
+    });
+  });
+
+  it("leaves a null gif out of a multipart send", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() =>
+      useSendMessage({ conversationId: "conversation-1" }),
+    );
+    axiosPrivate.mockResponse("post", makeChatMessage());
+
+    await act(async () => {
+      await result.current({ content: "hi", gif: null, files: [new Blob(["x"])] });
+    });
+
+    const [call] = axiosPrivate.calls("post");
+    const form = call.body as FormData;
+    expect(form).toBeInstanceOf(FormData);
+    expect(form.has("gif")).toBe(false);
+    expect(form.get("content")).toBe("hi");
   });
 
   it("sends gif/mentions/metadata/quotedMessageId/parentMessageId as JSON when there are no files", async () => {

@@ -2,6 +2,8 @@ import { useCallback } from "react";
 import useProject from "../../projects/useProject";
 import { useUser } from "../../user";
 import { useMuteConversationMutation } from "../../../store/api/notificationPreferencesApi";
+import { useSublayDispatch } from "../../../store/hooks";
+import { applyOwnMute } from "../../../store/slices/chatSlice";
 import { handleError } from "../../../utils/handleError";
 import type { MuteDuration } from "../../../interfaces/MuteDuration";
 import type { ConversationMember } from "../../../interfaces/models/ConversationMember";
@@ -21,7 +23,8 @@ export interface UseMuteConversationValues {
   /**
    * Set or clear the acting user's mute on a conversation. Resolves to the
    * updated (self-serialized) `currentMember` — read `mutedForever` /
-   * `mutedUntil` off it for the resulting state.
+   * `mutedUntil` off it for the resulting state. The conversation's inbox row
+   * and its loaded `currentMember` are updated to match.
    */
   muteConversation: (props: MuteConversationProps) => Promise<ConversationMember>;
   muting: boolean;
@@ -34,6 +37,7 @@ export interface UseMuteConversationValues {
 function useMuteConversation(): UseMuteConversationValues {
   const { projectId } = useProject();
   const { user } = useUser();
+  const dispatch = useSublayDispatch();
   const [muteMutation, { isLoading: muting }] = useMuteConversationMutation();
 
   const muteConversation = useCallback(
@@ -52,13 +56,14 @@ function useMuteConversation(): UseMuteConversationValues {
           conversationId,
           duration,
         }).unwrap();
+        dispatch(applyOwnMute({ conversationId, currentMember }));
         return currentMember;
       } catch (err) {
         handleError(err, "Failed to mute conversation");
         throw err;
       }
     },
-    [projectId, user, muteMutation]
+    [projectId, user, muteMutation, dispatch]
   );
 
   return { muteConversation, muting };

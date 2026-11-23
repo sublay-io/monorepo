@@ -3,32 +3,34 @@ import { act, waitFor } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks } from "../../test-utils";
 import useUploadImage from "./useUploadImage";
-import type { Image } from "../../interfaces/models/Image";
+import type { UploadImageResponse } from "../../interfaces/models/Image";
 
 afterEach(() => {
   resetAxiosMocks();
 });
 
-function makeImageResponse(overrides: Partial<Image> = {}): Image {
+function makeImageResponse(
+  overrides: Partial<UploadImageResponse> = {},
+): UploadImageResponse {
   return {
     fileId: "file-1",
-    imageId: "file-1",
-    status: "completed",
-    original: {
-      path: "images/original.webp",
-      publicPath: "/files/original.webp",
-      width: 1080,
-      height: 1080,
-      size: 2048,
-      format: "webp",
+    type: "image",
+    originalPath: "/files/original.webp",
+    originalSize: 4096,
+    originalWidth: 1080,
+    originalHeight: 1080,
+    variants: {
+      thumbnail: {
+        path: "images/thumbnail.webp",
+        publicPath: "/files/thumbnail.webp",
+        width: 100,
+        height: 100,
+        size: 512,
+        format: "webp",
+      },
     },
-    variants: {},
-    metadata: {
-      originalFormat: "png",
-      originalSize: 4096,
-      exifStripped: true,
-      processingTime: 120,
-    },
+    format: "webp",
+    quality: 85,
     createdAt: "2024-01-01T00:00:00.000Z",
     ...overrides,
   };
@@ -43,7 +45,7 @@ describe("useUploadImage", () => {
 
     const file = new File(["binary"], "photo.png", { type: "image/png" });
 
-    let returned: Image | undefined;
+    let returned: UploadImageResponse | undefined;
     await act(async () => {
       returned = await result.current.uploadImage(file, {
         mode: "exact-dimensions",
@@ -85,6 +87,36 @@ describe("useUploadImage", () => {
     expect(formData.get("widths")).toBe(JSON.stringify({ small: 320, large: 1280 }));
   });
 
+  it("uploads an image in multi-aspect-ratio mode", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUploadImage());
+
+    axiosPrivate.mockResponse("post", makeImageResponse());
+
+    const file = new File(["binary"], "photo.png", { type: "image/png" });
+
+    await act(async () => {
+      await result.current.uploadImage(file, {
+        mode: "multi-aspect-ratio",
+        aspectRatios: [
+          { width: 1, height: 1 },
+          { width: 16, height: 9 },
+        ],
+        sizes: { small: 320, large: 1280 },
+      });
+    });
+
+    const [call] = axiosPrivate.calls("post");
+    const formData = call.body as FormData;
+    expect(formData.get("mode")).toBe("multi-aspect-ratio");
+    expect(formData.get("aspectRatios")).toBe(
+      JSON.stringify([
+        { width: 1, height: 1 },
+        { width: 16, height: 9 },
+      ]),
+    );
+    expect(formData.get("sizes")).toBe(JSON.stringify({ small: 320, large: 1280 }));
+  });
+
   it("tracks upload progress via onUploadProgress and resets after completion", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUploadImage());
 
@@ -93,7 +125,7 @@ describe("useUploadImage", () => {
     const file = new File(["binary"], "photo.png", { type: "image/png" });
     const onProgress = vi.fn();
 
-    let uploadPromise!: Promise<Image>;
+    let uploadPromise!: Promise<UploadImageResponse>;
     act(() => {
       uploadPromise = result.current.uploadImage(file, {
         mode: "original-aspect",

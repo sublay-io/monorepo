@@ -12,20 +12,10 @@ import {
 import { useUserActions } from "./useUserActions";
 import useProject from "../projects/useProject";
 import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
-import type { AuthUser } from "../../interfaces/models/User";
+import type { AuthUser, UserSuspension } from "../../interfaces/models/User";
 import type { UpdateUserParams } from "../../store/api/userApi";
 
 export interface UseUserProps {}
-
-/**
- * The furthest-reaching active suspension for the current user, or null.
- * Mirrors the server's "effective suspension" definition.
- */
-export type ActiveSuspension = {
-  reason: string | null;
-  startDate: string;
-  endDate: string | null;
-};
 
 export interface UseUserValues {
   user: AuthUser | null;
@@ -35,7 +25,11 @@ export interface UseUserValues {
 
   // Derived suspension state (matches the server's effective-suspension definition)
   isSuspended: boolean;
-  activeSuspension: ActiveSuspension | null;
+  /**
+   * The furthest-reaching active suspension for the current user, or null.
+   * Mirrors the server's "effective suspension" definition.
+   */
+  activeSuspension: UserSuspension | null;
 
   // Current user management actions
   updateUser: (update: UpdateUserParams) => Promise<AuthUser>;
@@ -53,7 +47,7 @@ export interface UseUserValues {
  */
 function computeActiveSuspension(
   suspensions: AuthUser["suspensions"] | undefined | null,
-): ActiveSuspension | null {
+): UserSuspension | null {
   if (!suspensions || suspensions.length === 0) return null;
 
   const now = Date.now();

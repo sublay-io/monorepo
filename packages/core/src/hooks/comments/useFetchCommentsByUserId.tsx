@@ -18,12 +18,12 @@ import useAxiosPrivate from "../../config/useAxiosPrivate";
 export interface FetchCommentsByUserIdBaseProps extends SpaceReputationContextParams {
   userId: string;
   /** Only comments on this entity. */
-  entityId?: string | null;
+  entityId?: string;
   /**
    * Only comments on entities from this source, or `"none"` for comments on
-   * entities with no source. `null` or left out: any source.
+   * entities with no source. Left out: any source.
    */
-  sourceId?: string | "none" | null;
+  sourceId?: string | "none";
   /** Server default: `"exclude"`. */
   blockedFilter?: BlockedFilter | null;
   /** Server default: `"createdAt"`. */

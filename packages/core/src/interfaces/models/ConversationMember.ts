@@ -1,45 +1,54 @@
-import { User } from "./User";
-
 export type ConversationMemberRole = "admin" | "member";
 
 export interface ConversationMember {
   id: string;
-  projectId: string;
   conversationId: string;
   userId: string;
   role: ConversationMemberRole | null;
   lastReadAt: string | null;
-  // Personal mute state, present ONLY on the viewer's own row (omitted for other
-  // members). For a timed mute this is a real ISO timestamp; when muted
-  // "forever" this is `null` and `mutedForever` is `true` (the storage sentinel
-  // is never exposed as a magic date). `null` + `mutedForever: false` = not muted.
+  // Personal mute state, present ONLY on the viewer's own row (omitted for
+  // other members). Timed mute → real ISO timestamp; muted "forever" →
+  // `mutedUntil: null` with `mutedForever: true` (the storage sentinel is never
+  // exposed as a magic date). `null` + `mutedForever: false` = not muted.
   mutedUntil?: string | null;
-  // Explicit "forever" signal for the viewer's own row (self-serialized). Absent
-  // on other members' rows.
+  // Explicit "forever" signal for the viewer's own row. Absent on others' rows.
   mutedForever?: boolean;
   isActive: boolean;
   leftAt: string | null;
   createdAt: string;
   updatedAt: string;
-  // Populated
-  user?: User;
+  // The member's user, on listMembers. `spaceReputation` is present when
+  // requested.
+  user?: {
+    id: string;
+    name: string | null;
+    username: string | null;
+    avatar: string | null;
+    metadata: Record<string, any>;
+    reputation: number;
+    spaceReputation?: number;
+  };
 }
 
 /**
- * `GET /chat/conversations/:conversationId/members/me`. Fields that describe a
- * membership the caller doesn't have are left out, never sent as null: `role`,
- * `lastReadAt`, `mutedForever` and `mutedUntil` are present only when
- * `isMember` is true; `leftAt` only when the caller left or was removed (an
- * inactive membership row). A caller with no row at all (a space chat they
- * haven't opened yet) gets `{ isMember: false }`.
+ * `GET /chat/conversations/:conversationId/members/me`: the caller's own
+ * membership in a conversation. A field that describes a relationship the
+ * caller doesn't have is omitted, not null:
+ * - active member: `{ isMember: true, role, lastReadAt, mutedForever, mutedUntil }`
+ * - left or removed: `{ isMember: false, leftAt }`
+ * - never a member (a space chat not opened yet): `{ isMember: false }`
  */
 export interface CheckMyConversationMembershipResponse {
   isMember: boolean;
+  /** Present when `isMember` is true. */
   role?: ConversationMemberRole | null;
+  /** Present when `isMember` is true. */
   lastReadAt?: string | null;
-  /** `true` when muted with no end; `mutedUntil` is then `null`. */
+  /** Present when `isMember` is true. */
   mutedForever?: boolean;
-  /** End of a timed mute; `null` when not muted or muted forever. */
+  /** Present when `isMember` is true. A timed mute's ISO end; `null` when not
+   * muted or muted forever (see `mutedForever`). */
   mutedUntil?: string | null;
+  /** Present when the caller left or was removed. */
   leftAt?: string | null;
 }

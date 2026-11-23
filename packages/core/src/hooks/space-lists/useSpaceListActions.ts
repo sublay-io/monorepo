@@ -18,8 +18,10 @@ import { handleError as handleErrorUtil } from "../../utils/handleError";
 import useProject from "../projects/useProject";
 import type {
   Space,
+  SpaceWithPermissions,
   ReadingPermission,
   PostingPermission,
+  SpaceVisibility,
 } from "../../interfaces/models/Space";
 import type { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions";
 import type { SortDirection } from "../../interfaces/EntityListSortByOptions";
@@ -39,15 +41,18 @@ export interface FetchSpacesOptions {
 }
 
 export interface CreateSpaceOptions {
-  name: string;
+  // `null` is the same as leaving the field out.
+  name?: string | null;
   slug?: string | null;
   description?: string | null;
   // Space images are multipart-only on the server; set them with
   // `useCreateSpace` / `useUpdateSpace` rather than through the list actions.
   readingPermission?: ReadingPermission;
   postingPermission?: PostingPermission;
+  visibility?: SpaceVisibility;
   requireJoinApproval?: boolean;
   metadata?: Record<string, any>;
+  nsfw?: boolean;
   parentSpaceId?: string | null;
   insertPosition?: "first" | "last";
 }
@@ -131,13 +136,9 @@ export function useSpaceListActions() {
     async (
       listId: string,
       options: CreateSpaceOptions
-    ): Promise<Space | undefined> => {
+    ): Promise<SpaceWithPermissions | undefined> => {
       if (!projectId) {
         throw new Error("No project ID available");
-      }
-
-      if (!options.name) {
-        throw new Error("Space name is required");
       }
 
       try {

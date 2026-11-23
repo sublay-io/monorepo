@@ -28,7 +28,7 @@ export interface Conversation {
   // The requesting user's own member row, on getConversation and
   // getSpaceConversation; null when they have none
   currentMember?: ConversationMember | null;
-  avatarFile?: File | null; // On updateConversation, when the files-images bundle is installed
+  avatarFile?: File | null; // On group create and updateConversation, when the files-images bundle is installed
 }
 
 /**

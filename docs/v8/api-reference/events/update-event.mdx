@@ -99,13 +99,21 @@ Returns the updated [Event](/v8/data-models/event) object.
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
-    The request sent `removeImageIds` or `cover.options`. Files are removed with `removeFileIds`, and the cover is uploaded as `coverFile` with its options in `coverFile.options`. `param` names the field.
+    The request sent `removeImageIds` or `cover.options`. Files are removed with `removeFileIds`, and the cover is uploaded as `coverFile` with its options in `coverFile.options`.
 
     ```json
     {
-      "error": "`removeImageIds` was renamed to `removeFileIds`.",
+      "error": "`removeImageIds` isn't supported in v8. Send the ids of the files to remove as `removeFileIds`.",
       "code": "event/unsupported-param",
       "param": "removeImageIds"
+    }
+    ```
+
+    ```json
+    {
+      "error": "`cover.options` isn't supported in v8. Send the cover image as the `coverFile` file, with its options as `coverFile.options`.",
+      "code": "event/unsupported-param",
+      "param": "cover.options"
     }
     ```
   </Accordion>
@@ -141,7 +149,7 @@ Returns the updated [Event](/v8/data-models/event) object.
   <Accordion title="Invalid File Ids — 400">
     `removeFileIds` names a file that isn't one of this event's files. `invalidIds` lists those ids. Checked before anything is uploaded, so nothing is stored or removed.
     ```json
-    { "error": "Some removeFileIds do not belong to this event.", "code": "event/invalid-remove-file-ids", "param": "removeFileIds", "invalidIds": ["9b2f…"] }
+    { "error": "`removeFileIds` may name only this event's own files: its cover (`coverImageId`) and the files in its `files`.", "code": "event/invalid-remove-file-ids", "param": "removeFileIds", "invalidIds": ["9b2f…"] }
     ```
     A `removeFileIds` that isn't an array of file ids gets `400 event/invalid-body` instead.
   </Accordion>
@@ -153,14 +161,21 @@ Returns the updated [Event](/v8/data-models/event) object.
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
-    { "error": "File \"cover.jpg\" is not a valid image.", "code": "event/invalid-image", "param": "coverFile" }
+    { "error": "Cover file is not a valid image.", "code": "event/invalid-image", "param": "coverFile" }
     ```
-    A cover or gallery file can't be read as an image. `param` is `coverFile` or `gallery`.
+    The cover can't be read as an image. A gallery image that can't be read gets the same code with `param: "gallery"`:
+    ```json
+    { "error": "File \"photo.jpg\" is not a valid image.", "code": "event/invalid-image", "param": "gallery" }
+    ```
   </Accordion>
   <Accordion title="Missing Image Options — 400">
     A cover or gallery image was uploaded without its options. `param` is `coverFile.options` or `gallery.options`.
     ```json
-    { "error": "`coverFile.options` is required when a cover image is uploaded.", "code": "event/missing-image-options", "param": "coverFile.options" }
+    { "error": "Image options are required when uploading a cover image. Must include mode property.", "code": "event/missing-image-options", "param": "coverFile.options" }
+    ```
+    For the gallery:
+    ```json
+    { "error": "`gallery.options` is required when `gallery` images are uploaded. Must include mode property.", "code": "event/missing-image-options", "param": "gallery.options" }
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">

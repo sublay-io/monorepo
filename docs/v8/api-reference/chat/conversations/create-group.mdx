@@ -44,7 +44,7 @@ Send a JSON body, or `multipart/form-data` when uploading the group's avatar wit
 
 ## Response
 
-Returns the created [Conversation](/v8/data-models/conversation) object with HTTP `201`, with `avatarFile` populated when an avatar was uploaded.
+Returns the created [Conversation](/v8/data-models/conversation) object with HTTP `201`. When the `files-images` bundle is installed it includes `avatarFile`: the avatar's file, or `null` when the group was created without one.
 
 ## Error Responses
 
@@ -84,6 +84,17 @@ Returns the created [Conversation](/v8/data-models/conversation) object with HTT
       "error": "`userId` isn't accepted here: a user's own token always acts as that user.",
       "code": "chat/unsupported-param",
       "param": "userId"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Unsupported Parameter (avatarFileId) — 400">
+    The request sent `avatarFileId`. The avatar is the image itself, uploaded as `avatarFile`; this endpoint never takes the id of a file uploaded elsewhere.
+
+    ```json
+    {
+      "error": "`avatarFileId` isn't accepted: send the avatar image itself as the `avatarFile` file.",
+      "code": "chat/unsupported-param",
+      "param": "avatarFileId"
     }
     ```
   </Accordion>

@@ -584,7 +584,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         dispatch(insertConversationPreview(preview));
       } else {
         const id = (preview as { id?: string } | null)?.id;
-        if (id) void fetchAndInsertPreview(id);
+        if (id) {
+          dispatch(forgetCurrentMember(id));
+          void fetchAndInsertPreview(id);
+        }
       }
     });
 

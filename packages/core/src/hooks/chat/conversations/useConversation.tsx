@@ -40,9 +40,11 @@ function useConversation({
 
   // Fetch the conversation unless it's fully loaded. A copy that came from an
   // inbox preview has no `currentMember` key (a fetched one always has it,
-  // `null` when there's no row), so it is fetched too — on mount, and again if
-  // the key goes away (re-added to the conversation).
+  // `null` when there's no row), so it is fetched too — on mount, and again
+  // whenever a held copy lacks the key (re-added to the conversation). A copy
+  // that disappears (removed, deleted) is not refetched.
   const fullyLoaded = !!conversation && "currentMember" in conversation;
+  const heldWithoutMember = !!conversation && !fullyLoaded;
   useEffect(() => {
     if (!projectId || !conversationId || fullyLoaded) return;
 
@@ -50,7 +52,10 @@ function useConversation({
       dispatch(setConversationLoading({ conversationId, loading: true }));
       try {
         const fetched = await fetchConversation({ conversationId });
-        dispatch(setConversation(fetched));
+        // A fetched copy always carries the key, so this never refetches it.
+        dispatch(
+          setConversation({ ...fetched, currentMember: fetched.currentMember ?? null }),
+        );
       } catch (err) {
         handleError(err, "Failed to fetch conversation");
         dispatch(setConversationLoading({ conversationId, loading: false }));
@@ -58,7 +63,7 @@ function useConversation({
     };
 
     load();
-  }, [projectId, conversationId, fullyLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [projectId, conversationId, heldWithoutMember]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = useCallback(
     async (

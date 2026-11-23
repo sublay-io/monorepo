@@ -8,7 +8,11 @@ import {
   makeConversationMember,
   makeConversationPreview,
 } from "../../../test-utils";
-import { insertConversationPreview, forgetCurrentMember } from "../../../store/slices/chatSlice";
+import {
+  insertConversationPreview,
+  forgetCurrentMember,
+  removeConversationPreview,
+} from "../../../store/slices/chatSlice";
 import useConversation from "./useConversation";
 
 afterEach(() => {
@@ -17,7 +21,7 @@ afterEach(() => {
 
 describe("useConversation", () => {
   it("fetches the conversation on mount when not already in the store", async () => {
-    const conversation = makeConversation({ id: "conversation-1" });
+    const conversation = makeConversation({ id: "conversation-1", currentMember: null });
 
     const { result } = renderHookWithAxios(
       () => useConversation({ conversationId: "conversation-1" }),
@@ -67,6 +71,29 @@ describe("useConversation", () => {
     expect(axiosPrivate.calls("get")).toHaveLength(2);
   });
 
+  it("doesn't refetch when the open conversation is removed, and refetches when re-added", async () => {
+    const before = makeConversation({ id: "conversation-1", currentMember: makeConversationMember({ role: "member" }) });
+    const after = makeConversation({ id: "conversation-1", currentMember: makeConversationMember({ role: "admin" }) });
+
+    const { result, axiosPrivate, store } = renderHookWithAxios(
+      () => useConversation({ conversationId: "conversation-1" }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", before) },
+    );
+    await waitFor(() => expect(result.current.conversation?.currentMember?.role).toBe("member"));
+
+    act(() => {
+      store.dispatch(removeConversationPreview("conversation-1"));
+    });
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
+
+    axiosPrivate.mockResponse("get", after);
+    act(() => {
+      store.dispatch(insertConversationPreview(makeConversationPreview({ id: "conversation-1" })));
+    });
+    await waitFor(() => expect(result.current.conversation?.currentMember?.role).toBe("admin"));
+    expect(axiosPrivate.calls("get")).toHaveLength(2);
+  });
+
   it("does not throw and stops loading when the fetch fails", async () => {
     const { result } = renderHookWithAxios(
       () => useConversation({ conversationId: "conversation-1" }),
@@ -81,7 +108,7 @@ describe("useConversation", () => {
   });
 
   it("updates the conversation and reflects the change", async () => {
-    const conversation = makeConversation({ id: "conversation-1", name: "Old" });
+    const conversation = makeConversation({ id: "conversation-1", name: "Old", currentMember: null });
 
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useConversation({ conversationId: "conversation-1" }),
@@ -109,7 +136,7 @@ describe("useConversation", () => {
   });
 
   it("deletes the conversation", async () => {
-    const conversation = makeConversation({ id: "conversation-1" });
+    const conversation = makeConversation({ id: "conversation-1", currentMember: null });
 
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useConversation({ conversationId: "conversation-1" }),

@@ -2,6 +2,7 @@ export { default as useConversations } from "./useConversations";
 export type {
   UseConversationsProps,
   UseConversationsValues,
+  CreateGroupParams,
 } from "./useConversations";
 
 export { default as useConversation } from "./useConversation";

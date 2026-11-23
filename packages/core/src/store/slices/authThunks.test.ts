@@ -206,6 +206,50 @@ describe("signUpWithEmailAndPasswordThunk — email verification required", () =
     expect((body.get("bannerFile") as File).name).toBe("b.png");
     expect(body.get("bannerFile.options")).toBe(JSON.stringify(bannerOptions));
   });
+
+  it("leaves null fields out of a multipart sign-up and sends birthdate as an ISO string", async () => {
+    const store = makeSublayStore();
+    const axios = mockAxiosPublic();
+    axios.mockResponse("post", { success: true, emailVerificationRequired: true }, 202);
+
+    await store.dispatch(
+      signUpWithEmailAndPasswordThunk({
+        projectId: "project-1",
+        email: "a@b.com",
+        password: "secret",
+        name: null,
+        avatar: null,
+        bio: null,
+        birthdate: "1990-05-17T00:00:00.000Z",
+        avatarFile: { file: new Blob(["x"]), options: { mode: "original-aspect", sizes: { small: 64 } } },
+      }),
+    );
+
+    const body = axios.calls("post")[0].body as FormData;
+    expect(body.has("name")).toBe(false);
+    expect(body.has("avatar")).toBe(false);
+    expect(body.has("bio")).toBe(false);
+    expect(body.get("birthdate")).toBe("1990-05-17T00:00:00.000Z");
+  });
+
+  it("sends a Date birthdate as its ISO string on a multipart sign-up", async () => {
+    const store = makeSublayStore();
+    const axios = mockAxiosPublic();
+    axios.mockResponse("post", { success: true, emailVerificationRequired: true }, 202);
+
+    await store.dispatch(
+      signUpWithEmailAndPasswordThunk({
+        projectId: "project-1",
+        email: "a@b.com",
+        password: "secret",
+        birthdate: new Date("1990-05-17T00:00:00.000Z"),
+        avatarFile: { file: new Blob(["x"]), options: { mode: "original-aspect", sizes: { small: 64 } } },
+      }),
+    );
+
+    const body = axios.calls("post")[0].body as FormData;
+    expect(body.get("birthdate")).toBe("1990-05-17T00:00:00.000Z");
+  });
 });
 
 describe("signInWithEmailAndPasswordThunk", () => {
@@ -819,6 +863,8 @@ describe("setPasswordThunk", () => {
     expect(setPasswordThunk.fulfilled.match(result)).toBe(true);
     expect(store.getState().sublay.auth.isAuthenticating).toBe(false);
     expect(axios.calls("post")[0].url).toBe("/project-1/auth/set-password");
+    // Only the password: the server refuses a body `projectId`.
+    expect(axios.calls("post")[0].body).toEqual({ newPassword: "new" });
     // Regression: set-password runs behind requireUserAuth and must carry the
     // bearer even though it goes through the default (tokenless) axios instance.
     expect(axios.calls("post")[0].config?.headers?.Authorization).toBe(

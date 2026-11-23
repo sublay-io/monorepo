@@ -67,18 +67,18 @@ interface FetchManyEntitiesBaseParams
   sortDir?: SortDirection | null;
   sortType?: SortType;
   timeFrame?: TimeFrame | null;
-  /** Only entities from this source, or `"none"` for entities with no source. `null` or left out: any source. */
-  sourceId?: string | "none" | null;
-  /** Only entities in this space, or `"none"` for entities in no space. `null` or left out: any space, or none. */
-  spaceId?: string | "none" | null;
-  userId?: string | null;
+  /** Only entities from this source, or `"none"` for entities with no source. Left out: any source. */
+  sourceId?: string | "none";
+  /** Only entities in this space, or `"none"` for entities in no space. Left out: any space, or none. */
+  spaceId?: string | "none";
+  userId?: string;
   followedOnly?: boolean;
-  keywordsFilters?: KeywordsFilters | null;
-  titleFilters?: TitleFilters | null;
-  contentFilters?: ContentFilters | null;
-  attachmentsFilters?: AttachmentsFilters | null;
-  locationFilters?: LocationFilters | null;
-  metadataFilters?: MetadataFilters | null;
+  keywordsFilters?: KeywordsFilters;
+  titleFilters?: TitleFilters;
+  contentFilters?: ContentFilters;
+  attachmentsFilters?: AttachmentsFilters;
+  locationFilters?: LocationFilters;
+  metadataFilters?: MetadataFilters;
   nsfwFilter?: NsfwFilter | null;
   blockedFilter?: BlockedFilter | null;
   include?: EntityIncludeParam;

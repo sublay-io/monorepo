@@ -2,13 +2,13 @@ import { useCallback } from "react";
 import useProject from "../projects/useProject";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { PaginatedResponse } from "../../interfaces/PaginatedResponse";
-import { Entity } from "../../interfaces/models/Entity";
-import { Comment } from "../../interfaces/models/Comment";
-import { ChatMessage } from "../../interfaces/models/ChatMessage";
-import { Space } from "../../interfaces/models/Space";
+import {
+  Report,
+  ReportStatus,
+  ReportTargetType,
+} from "../../interfaces/models/Report";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
-import type { ReportTargetType } from "./useCreateReport";
 
 export interface FetchModeratedReportsParams extends SpaceReputationContextParams {
   spaceId?: string;
@@ -18,37 +18,12 @@ export interface FetchModeratedReportsParams extends SpaceReputationContextParam
    * surface in the dashboard instead.
    */
   targetType?: ReportTargetType;
-  status?: "pending" | "on-hold" | "escalated" | "dismissed" | "actioned" | "auto-closed";
+  status?: ReportStatus;
   /** Time order: `createdAt` in `sortDir` (server default desc, newest first). */
   sortBy?: "createdAt";
   sortDir?: "asc" | "desc";
   page?: number;
   limit?: number;
-}
-
-export interface ReportUserReport {
-  id: string;
-  userId: string;
-  reason: string;
-  details: string | null;
-  createdAt: string;
-}
-
-export interface Report {
-  id: string;
-  projectId: string;
-  spaceId: string | null;
-  targetId: string;
-  targetType: ReportTargetType;
-  reporterCount: number;
-  userReports: ReportUserReport[];
-  status: "pending" | "on-hold" | "escalated" | "dismissed" | "actioned" | "auto-closed";
-  actionTaken: string | null;
-  target: Entity | Comment | ChatMessage | null;
-  space: Space | null;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
 }
 
 /**

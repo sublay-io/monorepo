@@ -24,7 +24,11 @@ export type {
 } from "./useFetchManyChatMessagesWrapper";
 
 export { default as useSendMessage } from "./useSendMessage";
-export type { SendMessageParams, UseSendMessageProps } from "./useSendMessage";
+export type {
+  SendMessageParams,
+  SendMessageResult,
+  UseSendMessageProps,
+} from "./useSendMessage";
 
 export { default as useEditMessage } from "./useEditMessage";
 export type { EditMessageParams } from "./useEditMessage";

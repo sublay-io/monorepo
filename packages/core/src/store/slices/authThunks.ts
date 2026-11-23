@@ -91,12 +91,13 @@ const authService = {
     data: {
       email: string;
       password: string;
-      name?: string;
+      name?: string | null;
       username?: string;
-      avatar?: string;
-      bio?: string;
+      avatar?: string | null;
+      bio?: string | null;
       location?: { latitude: number; longitude: number };
-      birthdate?: Date;
+      /** A `Date`, or a full UTC timestamp string (`z.iso.datetime()`). */
+      birthdate?: string | Date;
       metadata?: Record<string, any>;
       secureMetadata?: Record<string, any>;
       avatarFile?: ImageSlotUpload;
@@ -111,12 +112,21 @@ const authService = {
       // Append regular fields
       formData.append("email", data.email);
       formData.append("password", data.password);
+      // A null field means the same as leaving it out on a sign-up, so the
+      // multipart body (which can't carry null) leaves it out.
       if (data.name?.trim()) formData.append("name", data.name.trim());
       if (data.username?.trim()) formData.append("username", data.username.trim());
       if (data.avatar) formData.append("avatar", data.avatar);
       if (data.bio?.trim()) formData.append("bio", data.bio.trim());
       if (data.location) formData.append("location", JSON.stringify(data.location));
-      if (data.birthdate) formData.append("birthdate", data.birthdate.toISOString());
+      if (data.birthdate) {
+        formData.append(
+          "birthdate",
+          typeof data.birthdate === "string"
+            ? data.birthdate
+            : data.birthdate.toISOString()
+        );
+      }
       if (data.metadata) formData.append("metadata", JSON.stringify(data.metadata));
       if (data.secureMetadata) formData.append("secureMetadata", JSON.stringify(data.secureMetadata));
       if (data.emailVerification) {
@@ -455,12 +465,13 @@ export const signUpWithEmailAndPasswordThunk = createAsyncThunk(
       projectId: string;
       email: string;
       password: string;
-      name?: string;
+      name?: string | null;
       username?: string;
-      avatar?: string;
-      bio?: string;
+      avatar?: string | null;
+      bio?: string | null;
       location?: { latitude: number; longitude: number };
-      birthdate?: Date;
+      /** A `Date`, or a full UTC timestamp string (`z.iso.datetime()`). */
+      birthdate?: string | Date;
       metadata?: Record<string, any>;
       secureMetadata?: Record<string, any>;
       avatarFile?: ImageSlotUpload;
@@ -1018,7 +1029,11 @@ export const setPasswordThunk = createAsyncThunk(
         return rejectWithValue("No user is authenticated");
       }
 
-      await authService.setPassword(data.projectId, data, authorization);
+      await authService.setPassword(
+        data.projectId,
+        { newPassword: data.newPassword },
+        authorization
+      );
 
       return;
     } catch (error) {

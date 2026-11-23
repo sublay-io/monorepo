@@ -46,7 +46,7 @@ The hook returns a function. That function accepts:
   New conversation description.
 </ParamField>
 
-<ParamField body="avatar" type="{ file: File | Blob; options: UploadImageOptions }">
+<ParamField body="avatarFile" type="{ file: File | Blob; options: UploadImageOptions }">
   New avatar image and its processing options (a `mode` and the fields it needs; see [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes)). The request is sent as multipart form data, and the previous avatar, if any, is deleted.
 </ParamField>
 

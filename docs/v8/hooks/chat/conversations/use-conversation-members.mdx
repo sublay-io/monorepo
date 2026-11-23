@@ -66,8 +66,8 @@ function MemberList({ conversationId }: { conversationId: string }) {
   `true` while the initial fetch is in progress.
 </ResponseField>
 
-<ResponseField name="addMember" type="({ userId: string }) => Promise<void>">
-  Adds a user to the conversation. Updates the local member list on success.
+<ResponseField name="addMember" type="({ userId: string }) => Promise<ConversationMember>">
+  Adds a user to the conversation and resolves to their member row, which has no `user`. Updates the local member list on success; a member already listed keeps the `user` the list loaded.
 </ResponseField>
 
 <ResponseField name="removeMember" type="({ userId: string }) => Promise<void>">
@@ -78,12 +78,12 @@ function MemberList({ conversationId }: { conversationId: string }) {
   Removes the current user from the conversation (`DELETE /chat/conversations/:conversationId/members/me`).
 </ResponseField>
 
-<ResponseField name="changeRole" type="({ userId: string; role: 'admin' | 'member' }) => Promise<void>">
-  Updates another member's role. Updates the local member list on success.
+<ResponseField name="changeRole" type="({ userId: string; role: 'admin' | 'member' }) => Promise<ConversationMember>">
+  Updates another member's role and resolves to their member row, which has no `user`. Updates the local member list on success, keeping the member's loaded `user`.
 </ResponseField>
 
-<ResponseField name="upsertMember" type="(member: ConversationMember) => void">
-  Inserts or replaces a member in the local list by `userId`. Intended for use with real-time socket event handlers.
+<ResponseField name="upsertMember" type="(member: ConversationMember | SocketConversationMember) => void">
+  Inserts a member into the local list, or merges it into the listed member with the same `userId` (keeping fields the incoming row lacks, such as `user`). Intended for use with real-time socket event handlers: a `member:joined` row carries no `user`.
 </ResponseField>
 
 <ResponseField name="removeMemberLocally" type="({ userId: string }) => void">

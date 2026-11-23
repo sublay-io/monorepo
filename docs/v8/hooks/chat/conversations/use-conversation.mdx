@@ -6,7 +6,7 @@ icon: "cube"
 
 ## Overview
 
-Fetches the full details of a single conversation by ID and provides `update` and `deleteConversation` actions. The conversation is loaded once on mount if it is not already in Redux state, and kept in sync by `conversation:updated` socket events.
+Fetches the full details of a single conversation by ID and provides `update` and `deleteConversation` actions. The conversation is loaded once on mount if it is not already in Redux state. A change made through `update` updates it at once; a change another member makes, and `memberCount`, are as of the last fetch. A copy that came from the inbox (for example a group you just created) is fetched in full when you open it, so `currentMember` is always loaded.
 
 <Note>Requires `ChatProvider` in the component tree.</Note>
 
@@ -48,14 +48,14 @@ function ConversationHeader({ conversationId }: { conversationId: string }) {
   `true` while the initial fetch is in progress.
 </ResponseField>
 
-<ResponseField name="update" type="(params: { name?: string; description?: string; avatar?: { file: File | Blob; options: UploadImageOptions }; postingPermission?: 'members' | 'team' }) => Promise<Conversation | undefined>">
+<ResponseField name="update" type="(params: { name?: string; description?: string; avatarFile?: { file: File | Blob; options: UploadImageOptions }; postingPermission?: 'members' | 'team' }) => Promise<Conversation | undefined>">
   Updates the conversation. Dispatches the updated conversation to Redux on success. `conversationId` is already bound from the hook props and should not be passed here.
 
   | Field | Type | Description |
   |-------|------|-------------|
   | `name` | `string` | New conversation name |
   | `description` | `string` | New description |
-  | `avatar` | `{ file: File \| Blob; options: UploadImageOptions }` | New avatar image and its processing options; the previous avatar is deleted |
+  | `avatarFile` | `{ file: File \| Blob; options: UploadImageOptions }` | New avatar image and its processing options; the previous avatar is deleted |
   | `postingPermission` | `'members' \| 'team'` | Who can post (space chats only): any active member, or only the space's active admins and moderators |
 </ResponseField>
 

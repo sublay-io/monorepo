@@ -35,7 +35,8 @@ function EditEvent({ eventId }: { eventId: string }) {
   `title`, `description`, `startTime`, `endTime`, `timezone`, `type`, `url`,
   `venueName`, `address`, `location` (`{ latitude, longitude }`), `visibility`,
   `capacity`, `allowMaybe`, `guestListVisible`, `metadata`, and `removeImageIds`
-  (`string[]` — File IDs of existing event images to remove).
+  (`string[]` — File IDs of existing event images to remove). `startTime` and
+  `endTime` take an ISO 8601 datetime in UTC, or a `Date` (sent as its ISO string).
 </ParamField>
 <ParamField path="cover" type="{ file: File | RNFile; options?: UploadImageOptions }">
   New cover image — replaces the existing cover. Sends multipart.

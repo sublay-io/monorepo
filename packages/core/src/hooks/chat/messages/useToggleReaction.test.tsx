@@ -36,7 +36,7 @@ describe("useToggleReaction", () => {
       });
     });
 
-    expect(returned).toEqual({ reactionCounts: { "👍": 1 }, userReactions: ["👍"] });
+    expect(returned).toEqual({ reactionCounts: { "👍": 1 }, userReactions: ["👍"], delta: 1 });
 
     const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe(

@@ -14,11 +14,16 @@ import { selectUser } from "../store/slices/userSlice";
 import { selectUser as selectAuthUser } from "../store/slices/authSlice";
 import useProject from "../hooks/projects/useProject";
 import { BASE_URL } from "../config/axios";
-import type { ServerToClientEvents, ClientToServerEvents } from "../types/socket";
+import type {
+  ServerToClientEvents,
+  ClientToServerEvents,
+  SocketChatMessage,
+} from "../types/socket";
 import {
   upsertMessage,
   upsertConversationPreview,
   insertConversationPreview,
+  forgetCurrentMember,
   removeConversationPreview,
   incrementUnread,
   setSocketConnected,
@@ -38,7 +43,37 @@ import type { ChatMessage } from "../interfaces/models/ChatMessage";
 import type {
   Conversation,
   ConversationPreview,
+  ConversationPreviewLastMessage,
+  ConversationType,
 } from "../interfaces/models/Conversation";
+
+/**
+ * A live message as the inbox row's `lastMessage`, in the shape the
+ * conversation list returns: `content` cut to 100 characters, the sender on
+ * `group` and `space` rows only (a DM's counterparty is in `otherMembers`).
+ */
+export function toPreviewLastMessage(
+  message: SocketChatMessage,
+  conversationType: ConversationType | undefined
+): ConversationPreviewLastMessage {
+  let user: ConversationPreviewLastMessage["user"] = null;
+  if (conversationType !== "direct" && message.user) {
+    const { id, name, username, avatar, reputation } = message.user;
+    user = { id, name, username, avatar, reputation };
+  }
+  return {
+    id: message.id,
+    conversationId: message.conversationId,
+    content: message.content === null ? null : Array.from(message.content).slice(0, 100).join(""),
+    gif: message.gif,
+    userId: message.userId,
+    moderationStatus: message.moderationStatus,
+    userDeletedAt: message.userDeletedAt,
+    createdAt: message.createdAt,
+    files: message.files ?? [],
+    user,
+  };
+}
 
 // ─── Context shape ────────────────────────────────────────────────────────────
 
@@ -355,19 +390,18 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         return;
       }
 
-      const isLoaded = conversationListRef.current.some(
+      const loadedPreview = conversationListRef.current.find(
         (c) => c.id === message.conversationId
       );
 
-      if (isLoaded) {
+      if (loadedPreview) {
         // Already in the inbox — bump + reorder and increment unread as before.
         dispatch(
           upsertConversationPreview({
             conversationId: message.conversationId,
             patch: {
               lastMessageAt: message.createdAt,
-              // The preview never carries moderation details (REST or socket).
-              lastMessage: message as ChatMessage,
+              lastMessage: toPreviewLastMessage(message, loadedPreview.type),
             },
           })
         );
@@ -529,8 +563,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     });
 
     // ── conversation:updated ────────────────────────────────────────────────
+    // The payload doesn't name the conversation yet (server-hosted#443), so
+    // this only applies once it carries an `id`.
     socket.on("conversation:updated", (patch) => {
-      const existing = conversationsRef.current[patch.id]?.data;
+      const id = (patch as { id?: string }).id;
+      if (!id) return;
+      const existing = conversationsRef.current[id]?.data;
       if (existing) {
         dispatch(setConversation({ ...existing, ...patch }));
       }
@@ -542,10 +580,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     // emitter ever sends only an id.
     socket.on("conversation:created", (preview) => {
       if (preview && typeof preview === "object" && "unreadCount" in preview) {
+        dispatch(forgetCurrentMember(preview.id));
         dispatch(insertConversationPreview(preview));
       } else {
         const id = (preview as { id?: string } | null)?.id;
-        if (id) void fetchAndInsertPreview(id);
+        if (id) {
+          dispatch(forgetCurrentMember(id));
+          void fetchAndInsertPreview(id);
+        }
       }
     });
 

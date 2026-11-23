@@ -423,7 +423,7 @@ describe("useSpaceData", () => {
   });
 
   it("updates the space via updateSpace, keeping the server's permissions and the hierarchy", async () => {
-    const parentSpace = { id: "parent-1", shortId: "p1", name: "Parent", slug: null, avatarFileId: null };
+    const parentSpace = { id: "parent-1", shortId: "p1", name: "Parent", slug: null, avatarFileId: null, visibility: "public" as const };
     const space = makeSpaceDetailed({ id: "space-1", name: "Old", parentSpace });
 
     const { result, axiosPrivate } = renderHookWithAxios(

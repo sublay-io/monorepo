@@ -14,17 +14,19 @@ export interface UseProjectDataValues {
 function useProjectData({
   projectId,
 }: UseProjectDataProps): UseProjectDataValues {
-  const [project, setProject] = useState<Project | null>(null);
+  const [project, setProject] =
+    useState<UseProjectDataValues["project"]>(null);
 
   if (!projectId) throw new Error("Please pass a project ID");
 
   useEffect(() => {
     const handleFetchProject = async () => {
       try {
-        const response = await axios.get(`/${projectId}/projects/lean`);
+        const response = await axios.get<
+          Pick<Project, "id" | "integrations">
+        >(`/${projectId}/projects/lean`);
 
-        const fetchedProject = response.data as Project;
-        setProject(fetchedProject);
+        setProject(response.data);
       } catch (err) {
         handleError(err, "Failed to fetch project");
       }

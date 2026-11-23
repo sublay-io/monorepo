@@ -4,8 +4,13 @@ import { resetAccountScopedState } from "../actions";
 import type {
   Conversation,
   ConversationPreview,
+  ConversationPreviewLastMessage,
 } from "../../interfaces/models/Conversation";
-import type { ChatMessage } from "../../interfaces/models/ChatMessage";
+import type {
+  ChatMessage,
+  QuotedChatMessage,
+} from "../../interfaces/models/ChatMessage";
+import type { ConversationMember } from "../../interfaces/models/ConversationMember";
 import type { ReputationGrant } from "../../interfaces/models/ReputationGrant";
 import type { SublayState } from "../sublayReducers";
 
@@ -163,6 +168,20 @@ function findLoadedMessages(
 }
 
 /**
+ * One loaded copy of a message: the message itself, the `quotedMessage`
+ * embedded in a message that quotes it, or a conversation preview's
+ * `lastMessage` (a preview subset: no mentions, metadata or grants).
+ */
+type LoadedCopy = ChatMessage | QuotedChatMessage | ConversationPreviewLastMessage;
+
+/** Whether a copy is a conversation preview's `lastMessage`. */
+function isPreviewCopy(
+  message: LoadedCopy
+): message is ConversationPreviewLastMessage {
+  return !("mentions" in message);
+}
+
+/**
  * Every loaded copy of a message: `findLoadedMessages`, the `quotedMessage`
  * embedded in any loaded message that quotes it, and a conversation
  * preview's `lastMessage` (the inbox list, and its mirror on the loaded
@@ -173,8 +192,8 @@ function findLoadedCopies(
   state: ChatState,
   conversationId: string | undefined,
   messageId: string
-): ChatMessage[] {
-  const found = findLoadedMessages(state, conversationId, messageId);
+): LoadedCopy[] {
+  const found: LoadedCopy[] = findLoadedMessages(state, conversationId, messageId);
   const buckets = [
     ...Object.values(state.messages),
     ...Object.values(state.threads),
@@ -188,38 +207,44 @@ function findLoadedCopies(
     if (preview.lastMessage?.id === messageId) found.push(preview.lastMessage);
   }
   for (const entry of Object.values(state.conversations)) {
-    const last = (entry?.data as { lastMessage?: ChatMessage | null } | null)?.lastMessage;
+    const last = (
+      entry?.data as { lastMessage?: ConversationPreviewLastMessage | null } | null
+    )?.lastMessage;
     if (last?.id === messageId) found.push(last);
   }
   return found;
 }
 
 /** Blank a message's content fields, as the server's placeholder does. */
-function blankContent(message: ChatMessage): void {
+function blankContent(message: LoadedCopy): void {
   message.content = null;
   message.gif = null;
+  if (isPreviewCopy(message)) {
+    message.files = [];
+    return;
+  }
   message.metadata = null;
   message.mentions = [];
-  message.files = undefined;
+  if ("files" in message) message.files = undefined;
 }
 
 /**
  * A deleted message: content cleared, sender kept. An already-set
  * `userDeletedAt` (the server's, from `message:deleted`) is kept.
  */
-function toDeletedPlaceholder(message: ChatMessage, userDeletedAt: string): void {
+function toDeletedPlaceholder(message: LoadedCopy, userDeletedAt: string): void {
   message.userDeletedAt = message.userDeletedAt ?? userDeletedAt;
   blankContent(message);
 }
 
 /** A removed message: in full for its author, otherwise content and sender cleared. */
 function toRemovedPlaceholder(
-  message: ChatMessage,
+  message: LoadedCopy,
   currentUserId: string | null
 ): void {
   message.moderationStatus = "removed";
   // A removed message's grants are hidden from everyone, its author included.
-  if (message.grants) message.grants = { total: 0, count: 0, viewerTotal: 0 };
+  if ("grants" in message && message.grants) message.grants = { total: 0, count: 0, viewerTotal: 0 };
   if (message.userId && message.userId === currentUserId) return;
   blankContent(message);
   message.userId = null;
@@ -357,6 +382,8 @@ const chatSlice = createSlice({
     /**
      * Upsert a single conversation into the conversations map AND patch the
      * matching preview in conversationList.items so both stores stay in sync.
+     * Merges into what's held: a response without `currentMember` or
+     * `memberCount` (an update, a create) keeps the loaded ones.
      */
     setConversation(state, action: PayloadAction<Conversation>) {
       const conversation = action.payload;
@@ -365,7 +392,10 @@ const chatSlice = createSlice({
       if (!state.conversations[id]) {
         state.conversations[id] = { data: null, loading: false, error: null };
       }
-      state.conversations[id].data = conversation;
+      state.conversations[id].data = {
+        ...state.conversations[id].data,
+        ...conversation,
+      };
       state.conversations[id].loading = false;
       state.conversations[id].error = null;
 
@@ -444,7 +474,8 @@ const chatSlice = createSlice({
      * Insert a full ConversationPreview into the inbox list. If a preview with
      * the same id already exists, patch it in place (idempotent — no duplicate,
      * no positional change unless lastMessageAt changed). On a fresh insert the
-     * list is re-sorted by lastMessageAt DESC NULLS LAST.
+     * list is re-sorted by lastMessageAt DESC NULLS LAST. The mirror on the
+     * conversation entry merges, so its `currentMember` is kept.
      *
      * Deliberately does NOT touch totalUnreadCount / unreadConversationCount:
      * those globals are owned by setUnreadSummary / increment / clearUnread, and
@@ -476,7 +507,55 @@ const chatSlice = createSlice({
           error: null,
         };
       }
-      state.conversations[preview.id].data = preview;
+      state.conversations[preview.id].data = {
+        ...state.conversations[preview.id].data,
+        ...preview,
+      };
+    },
+
+    /**
+     * Forget the held `currentMember` of a conversation the user was just
+     * added to (`conversation:created`): one held from before a removal is
+     * stale. `useConversation` refetches it when the key is gone.
+     */
+    forgetCurrentMember: (state, action: PayloadAction<string>) => {
+      const data = state.conversations[action.payload]?.data;
+      if (data) delete (data as Partial<Conversation>).currentMember;
+    },
+
+    /**
+     * Apply the current user's own mute change: the inbox row's
+     * `mutedUntil` / `mutedForever`, and the loaded conversation's
+     * `currentMember`. Dispatched by `useMuteConversation`.
+     */
+    applyOwnMute(
+      state,
+      action: PayloadAction<{
+        conversationId: string;
+        currentMember: ConversationMember;
+      }>
+    ) {
+      const { conversationId, currentMember } = action.payload;
+      const mutedUntil = currentMember.mutedUntil ?? null;
+      const mutedForever = currentMember.mutedForever ?? false;
+
+      const preview = state.conversationList.items.find(
+        (c) => c.id === conversationId
+      );
+      if (preview) {
+        preview.mutedUntil = mutedUntil;
+        preview.mutedForever = mutedForever;
+      }
+
+      const data = state.conversations[conversationId]?.data;
+      if (data) {
+        data.currentMember = { ...data.currentMember, ...currentMember };
+        // The entry can hold a preview (inserted from the inbox); keep its
+        // mute fields in step too.
+        if ("mutedForever" in data) {
+          Object.assign(data, { mutedUntil, mutedForever });
+        }
+      }
     },
 
     /**
@@ -783,6 +862,15 @@ const chatSlice = createSlice({
     ) {
       const { conversationId, messageId, patch } = action.payload;
       for (const message of findLoadedCopies(state, conversationId, messageId)) {
+        if (isPreviewCopy(message)) {
+          // A preview carries only its subset of fields, content cut to 100.
+          if (patch.content !== undefined) {
+            message.content =
+              patch.content === null ? null : Array.from(patch.content).slice(0, 100).join("");
+          }
+          if (patch.gif !== undefined) message.gif = patch.gif;
+          continue;
+        }
         Object.assign(message, patch);
       }
     },
@@ -1035,6 +1123,7 @@ const chatSlice = createSlice({
 // ─── Action exports ──────────────────────────────────────────────────────────
 
 export const {
+  applyOwnMute,
   setConversation,
   setConversationLoading,
   setConversationList,
@@ -1043,6 +1132,7 @@ export const {
   setConversationListCursor,
   upsertConversationPreview,
   insertConversationPreview,
+  forgetCurrentMember,
   removeConversationPreview,
   incrementUnread,
   clearUnread,

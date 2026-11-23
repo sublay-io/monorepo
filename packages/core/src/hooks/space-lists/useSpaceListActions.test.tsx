@@ -172,14 +172,27 @@ describe("useSpaceListActions", () => {
       );
     });
 
-    it("throws when name is missing", async () => {
-      const { result } = renderHookWithStore(() => useSpaceListActions(), {
+    it("creates a space without a name, sending nsfw and visibility", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ id: "s1", name: null }, 201));
+      const { result, store } = renderHookWithStore(() => useSpaceListActions(), {
         projectId: "test-project",
       });
+      act(() => store.dispatch(initializeList({ listId: "feed" })));
 
-      await expect(
-        result.current.createSpace("feed", { name: "" }),
-      ).rejects.toThrow("Space name is required");
+      await act(async () => {
+        await result.current.createSpace("feed", {
+          name: null,
+          nsfw: true,
+          visibility: "unlisted",
+        });
+      });
+
+      expect(JSON.parse(fetchHandle.calls()[0].body as string)).toEqual({
+        name: null,
+        nsfw: true,
+        visibility: "unlisted",
+      });
+      expect(selectSpaceListSpaces(store.getState(), "feed").map((s) => s.id)).toEqual(["s1"]);
     });
 
     it("re-throws on a failed request without mutating the list", async () => {

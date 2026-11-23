@@ -62,6 +62,39 @@ describe("useCreateEvent", () => {
     });
   });
 
+  it("sends Date start and end times as ISO strings, as JSON and as multipart", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useCreateEvent());
+    axiosPrivate.mockResponse("post", makeEvent(), 201);
+    axiosPrivate.mockResponse("post", makeEvent(), 201);
+
+    const startTime = new Date("2024-06-01T10:00:00.000Z");
+    const endTime = new Date("2024-06-01T12:00:00.000Z");
+
+    await act(async () => {
+      await result.current({ title: "Dated", startTime, endTime, type: "online" });
+    });
+    await act(async () => {
+      await result.current({
+        title: "Dated",
+        startTime,
+        endTime,
+        type: "online",
+        cover: {
+          file: new File(["binary"], "cover.png", { type: "image/png" }),
+        },
+      });
+    });
+
+    const [jsonCall, multipartCall] = axiosPrivate.calls("post");
+    expect(jsonCall.body).toMatchObject({
+      startTime: "2024-06-01T10:00:00.000Z",
+      endTime: "2024-06-01T12:00:00.000Z",
+    });
+    const formData = multipartCall.body as FormData;
+    expect(formData.get("startTime")).toBe("2024-06-01T10:00:00.000Z");
+    expect(formData.get("endTime")).toBe("2024-06-01T12:00:00.000Z");
+  });
+
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useCreateEvent());
 

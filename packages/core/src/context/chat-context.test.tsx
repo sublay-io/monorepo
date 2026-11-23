@@ -5,7 +5,9 @@ import {
   resetAxiosMocks,
   makeChatMessage,
   makeConversationPreview,
+  makePreviewLastMessage,
   makeAuthUser,
+  makeUser,
 } from "../test-utils";
 import { makeProvidersWrapper, createFakeSocket, type FakeSocket } from "./testHelpers";
 import {
@@ -106,6 +108,65 @@ describe("ChatProvider", () => {
     expect(selectMessages("conversation-1")(store.getState())).toEqual([message]);
     expect(store.getState().sublay.chat.totalUnreadCount).toBe(1);
     expect(store.getState().sublay.chat.unreadConversationCount).toBe(1);
+  });
+
+  it("sets the inbox row's last message in the list's preview shape", async () => {
+    const { store, axiosPrivate } = renderChatProvider("token-1");
+    await waitFor(() => expect(axiosPrivate.calls("get")).toHaveLength(1));
+
+    act(() => {
+      store.dispatch(
+        setConversationList([
+          makeConversationPreview({ id: "group-1", type: "group" }),
+          makeConversationPreview({ id: "direct-1", type: "direct" }),
+        ]),
+      );
+    });
+
+    const sender = makeUser({ id: "user-2", name: "Sam" });
+    const long = "y".repeat(140);
+    act(() => {
+      fakeSocket.trigger(
+        "message:created",
+        makeChatMessage({
+          id: "m-group",
+          conversationId: "group-1",
+          content: long,
+          user: { ...sender, spaceReputation: 3 },
+          files: [{ id: "file-1" } as never],
+        }),
+      );
+      fakeSocket.trigger(
+        "message:created",
+        makeChatMessage({ id: "m-direct", conversationId: "direct-1", user: sender }),
+      );
+    });
+
+    const list = selectConversationList(store.getState());
+    const group = list.find((c) => c.id === "group-1")!.lastMessage!;
+    expect(group).toEqual({
+      id: "m-group",
+      conversationId: "group-1",
+      content: "y".repeat(100),
+      gif: null,
+      userId: "user-1",
+      moderationStatus: null,
+      userDeletedAt: null,
+      createdAt: "2024-01-01T00:00:00.000Z",
+      files: [{ id: "file-1" }],
+      user: {
+        id: sender.id,
+        name: sender.name,
+        username: sender.username,
+        avatar: sender.avatar,
+        reputation: sender.reputation,
+      },
+    });
+
+    const direct = list.find((c) => c.id === "direct-1")!.lastMessage!;
+    expect(direct.user).toBeNull();
+    expect(direct.files).toEqual([]);
+    expect(direct).not.toHaveProperty("mentions");
   });
 
   it("does not bump unread for a conversation registered as active", async () => {
@@ -805,7 +866,11 @@ describe("ChatProvider — thread replies", () => {
           makeConversationPreview({
             id: "conversation-1",
             unreadCount: 0,
-            lastMessage: PARENT,
+            lastMessage: makePreviewLastMessage({
+              id: PARENT.id,
+              conversationId: PARENT.conversationId,
+              createdAt: PARENT.createdAt,
+            }),
             lastMessageAt: PARENT.createdAt,
           }),
         ]),

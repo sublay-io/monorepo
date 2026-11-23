@@ -44,16 +44,16 @@ const space = await createSpace({
 
 ## Parameters
 
-<ParamField path="name" type="string" required>
-  Display name for the space. 3–100 characters.
+<ParamField path="name" type="string | null">
+  Optional display name for the space. 3–100 characters. A space can have no name; `null` is the same as leaving it out.
 </ParamField>
 
-<ParamField path="slug" type="string">
-  Optional URL slug. Must be unique per project. Supports letters, numbers, hyphens, and underscores (Unicode allowed).
+<ParamField path="slug" type="string | null">
+  Optional URL slug. Must be unique per project. Supports letters, numbers, hyphens, and underscores (Unicode allowed). `null` is the same as leaving it out.
 </ParamField>
 
-<ParamField path="description" type="string">
-  Optional description. Up to 1,000 characters.
+<ParamField path="description" type="string | null">
+  Optional description. Up to 1,000 characters. `null` is the same as leaving it out.
 </ParamField>
 
 <ParamField path="avatarFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
@@ -88,9 +88,11 @@ const space = await createSpace({
   Optional custom metadata. Up to 1 MB.
 </ParamField>
 
-<ParamField path="parentSpaceId" type="string">
-  Optional UUID of a parent space. The creator must be an admin of the parent space.
+<ParamField path="parentSpaceId" type="string | null">
+  Optional UUID of a parent space. The creator must be an admin of the parent space. `null` or left out: a top-level space.
 </ParamField>
+
+With `avatarFile` or `bannerFile`, the request is `multipart/form-data`, which can't carry `null`, so `null` fields are left out of it (the same result as on a JSON request).
 
 ## Returns
 

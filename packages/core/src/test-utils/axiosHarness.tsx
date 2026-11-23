@@ -193,6 +193,7 @@ export interface RenderHookWithAxiosOptions<Props>
   beforeRender?: (handles: {
     axiosPrivate: AxiosMockHandle;
     axiosPublic: AxiosMockHandle;
+    store: ReturnType<typeof makeSublayStore>;
   }) => void;
 }
 
@@ -243,7 +244,7 @@ export function renderHookWithAxios<Result, Props>(
   const axiosPrivateHandle = mockAxiosPrivate();
   const axiosPublicHandle = mockAxiosPublic();
 
-  beforeRender?.({ axiosPrivate: axiosPrivateHandle, axiosPublic: axiosPublicHandle });
+  beforeRender?.({ axiosPrivate: axiosPrivateHandle, axiosPublic: axiosPublicHandle, store });
 
   const rendered = renderHook(callback, { wrapper: Wrapper, ...renderOptions });
 
@@ -258,26 +259,22 @@ export function renderHookWithAxios<Result, Props>(
 export function makeAuthUser(overrides: Partial<AuthUser> = {}): AuthUser {
   return {
     id: "test-user-id",
-    projectId: "test-project",
     foreignId: null,
     role: "visitor",
     email: "test@example.com",
     name: "Test User",
     username: "testuser",
     avatar: null,
-    avatarFileId: null,
-    bannerFileId: null,
     bio: null,
-    birthdate: null,
-    location: null,
     metadata: {},
     reputation: 0,
     isVerified: false,
     isActive: true,
     lastActive: "2024-01-01T00:00:00.000Z",
     createdAt: "2024-01-01T00:00:00.000Z",
-    updatedAt: "2024-01-01T00:00:00.000Z",
     suspensions: [],
+    avatarFile: null,
+    bannerFile: null,
     authMethods: ["password"],
     ...overrides,
   };

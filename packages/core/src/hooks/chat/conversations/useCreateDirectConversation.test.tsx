@@ -1,9 +1,14 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeConversation } from "../../../test-utils";
+import {
+  renderHookWithAxios,
+  resetAxiosMocks,
+  makeConversation,
+  makeConversationMember,
+} from "../../../test-utils";
 import useCreateDirectConversation from "./useCreateDirectConversation";
-import { selectConversation } from "../../../store/slices/chatSlice";
+import { selectConversation, setConversation } from "../../../store/slices/chatSlice";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -29,6 +34,31 @@ describe("useCreateDirectConversation", () => {
     const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/chat/conversations/direct");
     expect(call.body).toEqual({ userId: "user-2" });
+  });
+
+  it("merges into a loaded copy, keeping its currentMember and memberCount", async () => {
+    const { result, store, axiosPrivate } = renderHookWithAxios(() =>
+      useCreateDirectConversation(),
+    );
+    const currentMember = makeConversationMember({ id: "member-me" });
+    act(() => {
+      store.dispatch(
+        setConversation(makeConversation({ type: "direct", currentMember, memberCount: 2 })),
+      );
+    });
+
+    const conversation = makeConversation({ type: "direct", lastMessageAt: "2024-01-03T00:00:00.000Z" });
+    axiosPrivate.mockResponse("post", conversation, 200);
+
+    await act(async () => {
+      await result.current({ userId: "user-2" });
+    });
+
+    expect(selectConversation(conversation.id)(store.getState())).toEqual({
+      ...conversation,
+      currentMember,
+      memberCount: 2,
+    });
   });
 
   it("reports created: false on 200 when the conversation already exists", async () => {

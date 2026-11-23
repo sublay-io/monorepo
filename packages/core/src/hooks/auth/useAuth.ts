@@ -44,15 +44,22 @@ function toAuthError(payload: unknown): SublayAuthError {
 export interface SignUpWithEmailAndPasswordProps {
   email: string;
   password: string;
-  name?: string;
+  /** `null` is the same as leaving it out. */
+  name?: string | null;
   username?: string;
-  avatar?: string;
-  bio?: string;
+  /** The avatar as an image URL; `null` is the same as leaving it out. */
+  avatar?: string | null;
+  /** `null` is the same as leaving it out. */
+  bio?: string | null;
   location?: {
     latitude: number;
     longitude: number;
   };
-  birthdate?: Date;
+  /**
+   * A `Date`, or a full UTC timestamp string such as
+   * `"1990-05-17T00:00:00.000Z"` (a date alone, like `"1990-05-17"`, is refused).
+   */
+  birthdate?: string | Date;
   metadata?: Record<string, any>;
   secureMetadata?: Record<string, any>;
   /** The user's avatar image: the file plus its processing options. */

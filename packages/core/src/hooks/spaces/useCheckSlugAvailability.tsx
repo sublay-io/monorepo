@@ -21,7 +21,8 @@ function useCheckSlugAvailability(): (props: CheckSlugAvailabilityProps) => Prom
       }
 
       const response = await axios.get<{ available: boolean }>(
-        `/${projectId}/spaces/check-slug?slug=${slug}`
+        `/${projectId}/spaces/check-slug`,
+        { params: { slug } }
       );
 
       return response.data.available;

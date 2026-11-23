@@ -8,8 +8,8 @@ import {
 export interface CreateEventProps {
   title: string;
   description?: string;
-  startTime: string; // ISO datetime
-  endTime?: string; // ISO datetime
+  startTime: string | Date; // ISO datetime string, or a Date
+  endTime?: string | Date; // ISO datetime string, or a Date
   timezone?: string;
   type: EventType;
   url?: string;

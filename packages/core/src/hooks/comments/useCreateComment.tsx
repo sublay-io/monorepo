@@ -7,12 +7,12 @@ import { useUser } from "../user";
 
 export interface CreateCommentProps {
   entityId: string;
-  foreignId?: string | null | undefined;
-  parentCommentId?: string | null | undefined;
-  content?: string;
-  gif?: GifData;
+  foreignId?: string;
+  parentCommentId?: string | null;
+  content?: string | null;
+  gif?: GifData | null;
   mentions?: Mention[];
-  referencedCommentId?: string | null | undefined;
+  referencedCommentId?: string;
   attachments?: Record<string, any>[];
   metadata?: Record<string, any>;
 }
@@ -48,8 +48,9 @@ function useCreateComment(): (props: CreateCommentProps) => Promise<Comment> {
         throw new Error("No authenticated user");
       }
 
-      if (!content && !gif) {
-        throw new Error("No content was provided");
+      // The server needs at least one of content, a gif, or attachments.
+      if (!content?.trim() && !gif && !attachments?.length) {
+        throw new Error("No content, gif or attachments were provided");
       }
 
       const response = await axios.post(`/${projectId}/comments`, {

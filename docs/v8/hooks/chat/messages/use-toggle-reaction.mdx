@@ -72,6 +72,10 @@ The hook returns a function. That function accepts:
   Updated list of emojis the current user has reacted with on this message.
 </ResponseField>
 
+<ResponseField name="delta" type="1 | -1">
+  `1` when the toggle added the reaction, `-1` when it removed it.
+</ResponseField>
+
 ## Notes
 
 - Other participants see the reaction update in real-time via the `message:reaction` socket event, handled automatically by `ChatProvider`.

@@ -1,6 +1,9 @@
 import { useCallback } from "react";
 import useProject from "../projects/useProject";
-import { SpaceMemberWithUser } from "../../interfaces/models/SpaceMember";
+import {
+  SpaceMemberWithUser,
+  SpaceTeamResponse,
+} from "../../interfaces/models/SpaceMember";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
@@ -30,7 +33,7 @@ function useFetchSpaceTeam(): (props: FetchSpaceTeamProps) => Promise<SpaceMembe
         ...buildSpaceReputationParams({ spaceReputation }),
       };
 
-      const response = await axios.get<{ data: SpaceMemberWithUser[] }>(url, {
+      const response = await axios.get<SpaceTeamResponse>(url, {
         params,
       });
 

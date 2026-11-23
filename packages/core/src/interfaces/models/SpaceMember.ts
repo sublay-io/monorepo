@@ -1,4 +1,5 @@
 import { PaginatedResponse } from "../PaginatedResponse";
+import { User } from "./User";
 
 export type SpaceMemberRole = "admin" | "moderator" | "member";
 export type SpaceMemberStatus = "pending" | "active" | "banned" | "rejected";
@@ -23,15 +24,12 @@ export interface SpaceMemberWithUser {
   role: SpaceMemberRole;
   status: SpaceMemberStatus;
   joinedAt: string;
-  user: {
-    id: string;
-    username: string;
-    displayName: string;
-    avatar: string;
-    metadata: object;
-    // Excludes: hash, salt, email, isVerified, isActive, lastActive, secureMetadata
-  };
+  user: User | null;
 }
 
 export type SpaceMembersResponse = PaginatedResponse<SpaceMemberWithUser>;
 
+// Response for fetching space team (admins + moderators, no pagination)
+export interface SpaceTeamResponse {
+  data: SpaceMemberWithUser[];
+}

@@ -36,9 +36,9 @@ function useUpcoming() {
 <ParamField path="sortBy" type='"startTime" | "going"'>Sort field. Defaults to `"startTime"`.</ParamField>
 <ParamField path="sortDir" type='"asc" | "desc"'>Sort direction. Left out, the sort's natural direction: soonest first for `"startTime"`, most going first for `"going"`.</ParamField>
 <ParamField path="timeWindow" type='"upcoming" | "ongoing" | "past"'>Derived time window.</ParamField>
-<ParamField path="startsAfter" type="string">ISO datetime lower bound on `startTime`.</ParamField>
-<ParamField path="startsBefore" type="string">ISO datetime upper bound on `startTime`.</ParamField>
-<ParamField path="spaceId" type='string | "none" | null'>Only this space's events, or `"none"` for events not in any space. Left out or `null`: every event.</ParamField>
+<ParamField path="startsAfter" type="string | Date">Lower bound on `startTime`: an ISO 8601 datetime in UTC, or a `Date`.</ParamField>
+<ParamField path="startsBefore" type="string | Date">Upper bound on `startTime`: an ISO 8601 datetime in UTC, or a `Date`.</ParamField>
+<ParamField path="spaceId" type='string | "none"'>Only this space's events, or `"none"` for events not in any space. Left out: every event.</ParamField>
 <ParamField path="hostId" type="string">Only events this user hosts: events whose `hostIds` contain them, and events they own.</ParamField>
 <ParamField path="type" type='"online" | "physical" | "hybrid"'>Filter by type.</ParamField>
 <ParamField path="status" type='"active" | "cancelled"'>Defaults to `"active"`.</ParamField>

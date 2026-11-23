@@ -8,13 +8,17 @@ import {
 } from "../../interfaces/models/Space";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useSpace from "./useSpace";
-import { appendImageSlot, type ImageSlotUpload } from "../../utils/uploads";
+import {
+  appendImageSlot,
+  refuseNullWithFile,
+  type ImageSlotUpload,
+} from "../../utils/uploads";
 
 export interface UpdateSpaceProps {
   spaceId: string;
   update: Partial<{
-    name: string;
-    /** `null` clears the slug, on an update without files only. */
+    // `null` clears it, on an update without a file.
+    name: string | null;
     slug: string | null;
     description: string | null;
     /** A new avatar image, replacing the current one. */
@@ -58,42 +62,15 @@ function useUpdateSpace(): (
 
       if (avatarFile || bannerFile) {
         // Files go as multipart form data; every other field as a string
-        // (objects and arrays as JSON).
+        // (objects and arrays as JSON). A multipart field can't carry null.
+        refuseNullWithFile("updateSpace", fields);
         const formData = new FormData();
-        if (fields.name !== undefined) {
-          formData.append("name", fields.name);
-        }
-        // A multipart field can't carry null, and the server refuses an empty
-        // slug: `slug: null` clears the slug only on a JSON update.
-        if (fields.slug !== undefined && fields.slug !== null) {
-          formData.append("slug", fields.slug);
-        }
-        if (fields.description !== undefined) {
-          formData.append("description", fields.description || "");
-        }
-        if (fields.readingPermission !== undefined) {
-          formData.append("readingPermission", fields.readingPermission);
-        }
-        if (fields.postingPermission !== undefined) {
-          formData.append("postingPermission", fields.postingPermission);
-        }
-        if (fields.visibility !== undefined) {
-          formData.append("visibility", fields.visibility);
-        }
-        if (fields.requireJoinApproval !== undefined) {
+        for (const [key, value] of Object.entries(fields)) {
+          if (value === undefined) continue;
           formData.append(
-            "requireJoinApproval",
-            String(fields.requireJoinApproval),
+            key,
+            typeof value === "object" ? JSON.stringify(value) : String(value),
           );
-        }
-        if (fields.metadata !== undefined) {
-          formData.append("metadata", JSON.stringify(fields.metadata));
-        }
-        if (fields.nsfw !== undefined) {
-          formData.append("nsfw", String(fields.nsfw));
-        }
-        if (fields.removeFileIds !== undefined) {
-          formData.append("removeFileIds", JSON.stringify(fields.removeFileIds));
         }
         if (avatarFile) appendImageSlot(formData, "avatarFile", avatarFile);
         if (bannerFile) appendImageSlot(formData, "bannerFile", bannerFile);

@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-Uploads an image to Sublay storage. The server processes the image using Sharp, generates named variants according to the specified mode, and returns an [`Image`](/v8/data-models/file) object with proxy URLs for all variants.
+Uploads an image to Sublay storage. The server processes the image using Sharp, generates named variants according to the specified mode, and returns an `UploadImageResponse` with proxy URLs for the original and every variant.
 
 Works in both browser and React Native environments. Provides upload progress tracking.
 
@@ -33,7 +33,7 @@ function AvatarUploader() {
       quality: 85,
     });
 
-    console.log(image.original.publicPath);
+    console.log(image.originalPath);
     console.log(image.variants.avatar.publicPath);
   };
 
@@ -150,8 +150,8 @@ Generates variants across multiple aspect ratios with explicit sizes.
 
 ## Returns
 
-<ResponseField name="uploadImage" type="(file, options) => Promise<Image>">
-  Async function that performs the upload and returns an [`Image`](/v8/data-models/file) object on success.
+<ResponseField name="uploadImage" type="(file, options) => Promise<UploadImageResponse>">
+  Async function that performs the upload and returns an `UploadImageResponse` on success.
 </ResponseField>
 
 <ResponseField name="uploading" type="boolean">
@@ -162,21 +162,29 @@ Generates variants across multiple aspect ratios with explicit sizes.
   Upload percentage (0–100). Resets to `0` when the upload finishes.
 </ResponseField>
 
-## Return Value Shape (`Image`)
+## Return Value Shape (`UploadImageResponse`)
 
 ```ts
 {
   fileId: string;
-  imageId: string;         // Same as fileId
-  status: "completed" | "failed";
-  original: ImageVariant;  // { path, publicPath, width, height, size, format }
-  variants: Record<string, ImageVariant>;
-  metadata: {
-    originalFormat: string;
-    originalSize: number;
-    exifStripped: boolean;
-    processingTime: number; // ms
-  };
+  type: "image";
+  originalPath: string;    // Proxy URL of the processed original
+  originalSize: number;    // Bytes, as uploaded
+  originalWidth: number;
+  originalHeight: number;
+  variants: Record<string, UploadedImageVariant>; // Keyed by variant name
+  format: string;          // Output format
+  quality: number;         // Output quality (85 when none was given)
   createdAt: string;       // ISO 8601
+}
+
+// UploadedImageVariant
+{
+  path: string;       // Relative storage path
+  publicPath: string; // Proxy URL
+  width: number;
+  height: number;
+  size: number;       // Bytes
+  format: string;
 }
 ```

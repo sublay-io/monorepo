@@ -19,6 +19,9 @@ import { getAuthorizedTokenForAccount } from "../../config/authGate";
 // env-aware and would diverge from the web hook's production-only behavior.
 export const OAUTH_BASE_URL = "https://api.sublay.io/v8";
 
+/** The OAuth providers Sublay can sign a user in with or link to an account. */
+export type OAuthProvider = "google" | "github" | "apple" | "facebook";
+
 /**
  * Server-call head: POST to `/{projectId}/oauth/{authorize|link}` and return the
  * `authorizationUrl` (a one-time Sublay URL that forwards to the provider).
@@ -51,7 +54,7 @@ export async function requestOAuthAuthorizationUrl({
 }: {
   projectId: string;
   endpoint: "authorize" | "link";
-  provider: string;
+  provider: OAuthProvider;
   redirectAfterAuth: string;
   /** Required for `link`, omitted for `authorize`. */
   accessToken?: string | null;

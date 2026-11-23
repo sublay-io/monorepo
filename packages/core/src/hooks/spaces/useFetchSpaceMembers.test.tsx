@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks } from "../../test-utils";
+import { makeUser } from "../../test-utils/modelFactories";
 import useFetchSpaceMembers from "./useFetchSpaceMembers";
 import type { SpaceMembersResponse, SpaceMemberWithUser } from "../../interfaces/models/SpaceMember";
 
@@ -15,7 +16,7 @@ function makeMember(overrides: Partial<SpaceMemberWithUser> = {}): SpaceMemberWi
     role: "member",
     status: "active",
     joinedAt: "2024-01-01T00:00:00.000Z",
-    user: { id: "user-1", username: "alice", displayName: "Alice", avatar: "", metadata: {} },
+    user: makeUser({ id: "user-1", username: "alice", name: "Alice" }),
     ...overrides,
   };
 }

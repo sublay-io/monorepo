@@ -50,10 +50,16 @@ export function useUserActions() {
 
   // Update user with optimistic updates for instant UI feedback
   const updateUser = useCallback(
-    async ({ projectId, userId, update, currentUser }: { projectId: string; userId: string; update: UpdateUserParams; currentUser?: any }) => {
+    async ({ projectId, userId, update, currentUser }: { projectId: string; userId: string; update: UpdateUserParams; currentUser?: AuthUser | null }) => {
       if (!projectId || !userId) {
         throw new Error("Project ID and User ID are required");
       }
+
+      // Built before anything changes: a `null` field can't travel with a
+      // file, and this throws on one before the update starts.
+      const formData = userUpdateHasFiles(update)
+        ? buildUserUpdateFormData(update)
+        : null;
 
       dispatch(setUpdating(true));
       dispatch(clearError());
@@ -65,23 +71,13 @@ export function useUserActions() {
       // - File uploads (avatarFile/bannerFile) and removals - we don't know the
       //   final file fields
       // - Location - server transforms { latitude, longitude } to GeoJSON format
+      // - Birthdate - not part of the signed-in user (`AuthUser`)
       const optimisticUpdate: Partial<AuthUser> = {};
       if (update.name !== undefined) optimisticUpdate.name = update.name;
       if (update.username !== undefined) optimisticUpdate.username = update.username;
       if (update.bio !== undefined) optimisticUpdate.bio = update.bio;
-      if (update.birthdate !== undefined)
-        optimisticUpdate.birthdate = update.birthdate
-          ? update.birthdate.toISOString()
-          : update.birthdate;
       if (update.metadata !== undefined) optimisticUpdate.metadata = update.metadata;
-      // `avatar: null` clears the URL avatar only on a JSON update (a multipart
-      // field can't carry null), so it isn't applied to one that sends files.
-      if (
-        typeof update.avatar === "string" ||
-        (update.avatar === null && !userUpdateHasFiles(update))
-      ) {
-        optimisticUpdate.avatar = update.avatar;
-      }
+      if (update.avatar !== undefined) optimisticUpdate.avatar = update.avatar;
 
       // OPTIMISTIC UPDATE: Apply changes immediately for instant UI feedback
       if (Object.keys(optimisticUpdate).length > 0) {
@@ -90,10 +86,10 @@ export function useUserActions() {
 
       try {
         let result: AuthUser;
-        if (userUpdateHasFiles(update)) {
+        if (formData) {
           const response = await axios.patch(
             `/${projectId}/users/${userId}`,
-            buildUserUpdateFormData(update),
+            formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );
           result = response.data as AuthUser;

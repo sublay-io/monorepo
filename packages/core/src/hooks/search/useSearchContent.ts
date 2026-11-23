@@ -5,14 +5,27 @@ import { handleError } from "../../utils/handleError";
 import { Entity } from "../../interfaces/models/Entity";
 import { Comment } from "../../interfaces/models/Comment";
 import { ChatMessage } from "../../interfaces/models/ChatMessage";
+import { User } from "../../interfaces/models/User";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
 
-export interface ContentSearchResult {
-  sourceType: "entity" | "comment" | "message";
-  similarity: number;
-  record: Entity | Comment | ChatMessage;
-}
+/**
+ * A chat message as content search returns it: the stored message and its
+ * sender, without the reactions, files, grants and quoted message the chat
+ * reads attach.
+ */
+export type ContentSearchChatMessage = Omit<
+  ChatMessage,
+  "user" | "quotedMessage" | "reactionCounts" | "userReactions" | "files" | "grants"
+> & {
+  user: User | null; // null when the sender's account has been deleted
+};
+
+/** One search hit, most similar first. `record`'s type follows `sourceType`. */
+export type ContentSearchResult =
+  | { sourceType: "entity"; similarity: number; record: Entity }
+  | { sourceType: "comment"; similarity: number; record: Comment }
+  | { sourceType: "message"; similarity: number; record: ContentSearchChatMessage };
 
 export interface UseSearchContentProps extends SpaceReputationContextParams {
   query: string;

@@ -12,7 +12,6 @@ afterEach(() => {
 function makeRule(overrides: Partial<Rule> = {}): Rule {
   return {
     id: "rule-1",
-    projectId: "test-project",
     spaceId: "space-1",
     title: "Be respectful",
     description: null,

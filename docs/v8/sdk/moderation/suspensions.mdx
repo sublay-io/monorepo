@@ -97,7 +97,7 @@ function Composer() {
 }
 ```
 
-`activeSuspension` is `{ reason, startDate, endDate } | null` — the furthest-reaching active suspension, or `null` when the user isn't suspended.
+`activeSuspension` is a `UserSuspension | null` (`{ id, userId, reason, startDate, endDate, createdBy, createdAt, updatedAt }`) — the furthest-reaching active suspension, or `null` when the user isn't suspended.
 
 ### Reactive error — `SuspendedError`
 

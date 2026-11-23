@@ -1,13 +1,10 @@
 import { Mention } from "./Mention";
 import { User } from "./User";
-import { Space } from "./Space";
+import { Space, SpaceMemberRole, SpaceMemberStatus } from "./Space";
 import { ReactionCounts, ReactionType } from "./Reaction";
 import { File } from "./File";
 import { GrantSummary } from "./ReputationGrant";
 import { Comment } from "./Comment";
-
-// Alias for backward compatibility - EntityFile is now just File
-export type EntityFile = File;
 
 /**
  * The viewer's saved state for an entity, present when the read requested
@@ -20,14 +17,23 @@ export interface EntitySaved {
   collections: Array<{ id: string; name: string }>;
 }
 
+/**
+ * The space attached by `include=space`. With a viewer it also carries the
+ * viewer's membership in it: `isMember`, `userRole` and `userStatus` (`null`
+ * when the viewer has no membership row).
+ */
+export type SpaceWithViewer = Space & {
+  userRole?: SpaceMemberRole | null;
+  userStatus?: SpaceMemberStatus | null;
+};
+
 export interface Entity {
   id: string; // Unique entity ID
   foreignId: string | null; // If integrated on top of existing data, this would be the id of the item in your system. Could also accept static values such as "about-page"
   shortId: string; // Automatically generated - also unique - could be used to generate sharing links
-  projectId: string;
   sourceId: string | null;
   spaceId: string | null; // Optional space association - entities can be organized into spaces
-  space?: Space | null; // Optional space object populated when include contains "space"
+  space?: SpaceWithViewer | null; // Populated when include contains "space"; null with no space or one the viewer can't see
   // `userId`, `user`, `title`, `content`, `location`, `metadata` are `null`,
   // and `mentions`, `attachments`, `files`, `keywords` are `[]`, on
   // a moderator-removed entity, for everyone but its author (the placeholder).
@@ -37,14 +43,14 @@ export interface Entity {
   content: string | null;
   mentions: Mention[]; // Array of mentions of other users
   attachments: Record<string, any>[]; // Array of JSON objects representing information about media items (e.g. url, size, format etc). Flexible structure.
-  files?: EntityFile[]; // Optional - System-managed file associations (populated when entity created with files or when include contains "files")
+  files?: File[]; // Populated when include contains "files"
   keywords: string[]; // An array of keywords/tags. These could be used to filter the feed
   upvotes: string[]; // An array of ids of users that upvoted the entity (v6 legacy - v7 uses reactionCounts)
   downvotes: string[]; // An array of ids of users that downvoted the entity (v6 legacy - v7 uses reactionCounts)
   reactionCounts: ReactionCounts; // v7 reaction system - counts for all 8 reaction types
-  userReaction?: ReactionType | null; // v7 - current user's reaction (populated when authenticated)
+  userReaction: ReactionType | null; // The viewer's reaction, or null
   commentsCount: number; // How many comments the entity has, at any depth (user-deleted, removed and block-edged comments included — the same number for every viewer)
-  // sharesCount: number;
+  sharesCount: number;
   views: number; // A number representing a count of how many views the entity received
   score: number; // A "hotness" score of ths entity. Automatically generated based on activity
   scoreUpdatedAt: string; // Last tme the score was updated
@@ -71,6 +77,23 @@ export interface Entity {
   moderatedByType: "client" | "user" | null;
   moderationReason: string | null;
 }
+
+/**
+ * The stored entity record only, without the computed and associated fields
+ * an entity read adds.
+ */
+export type EntityRecord = Omit<
+  Entity,
+  | "commentsCount"
+  | "userReaction"
+  | "nsfwEffective"
+  | "user"
+  | "space"
+  | "files"
+  | "topComments"
+  | "saved"
+  | "grants"
+>;
 
 /** `include` values the entity fetches (by id, short id, foreign id, and lists) accept. */
 export type EntityInclude =

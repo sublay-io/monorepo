@@ -4,7 +4,7 @@ import { act } from "@testing-library/react";
 import { renderHookWithAxios, resetAxiosMocks, makeChatMessage } from "../../../test-utils";
 import useEditMessage from "./useEditMessage";
 import { selectMessages } from "../../../store/slices/chatSlice";
-import type { ChatMessage } from "../../../interfaces/models/ChatMessage";
+import type { SentChatMessage } from "../../../interfaces/models/ChatMessage";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -17,7 +17,7 @@ describe("useEditMessage", () => {
     const { result, store, axiosPrivate } = renderHookWithAxios(() => useEditMessage());
     axiosPrivate.mockResponse("patch", updated);
 
-    let returned: ChatMessage | undefined;
+    let returned: SentChatMessage | undefined;
     await act(async () => {
       returned = await result.current({
         conversationId: "conversation-1",

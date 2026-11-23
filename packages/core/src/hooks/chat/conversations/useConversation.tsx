@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useSublayDispatch, useSublaySelector } from "../../../store/hooks";
 import {
   selectConversation,
@@ -38,15 +38,29 @@ function useConversation({
   const _update = useUpdateConversation();
   const _delete = useDeleteConversation();
 
-  // Fetch conversation on mount if not already loaded
+  // Fetch the conversation unless it's fully loaded. A copy that came from an
+  // inbox preview has no `currentMember` key (a fetched one always has it,
+  // `null` when there's no row), so it is fetched too — on mount, and again
+  // whenever a held copy lacks the key (re-added to the conversation). A copy
+  // that disappears (removed, deleted) is not refetched.
+  const fullyLoaded = !!conversation && "currentMember" in conversation;
+  const heldWithoutMember = !!conversation && !fullyLoaded;
+  const attemptedFor = useRef<string | null>(null);
   useEffect(() => {
-    if (!projectId || !conversationId || conversation) return;
+    if (!projectId || !conversationId || fullyLoaded) return;
+    // A conversation that disappeared after an attempt (removed, deleted) is
+    // not fetched again.
+    if (!conversation && attemptedFor.current === conversationId) return;
+    attemptedFor.current = conversationId;
 
     const load = async () => {
       dispatch(setConversationLoading({ conversationId, loading: true }));
       try {
         const fetched = await fetchConversation({ conversationId });
-        dispatch(setConversation(fetched));
+        // A fetched copy always carries the key, so this never refetches it.
+        dispatch(
+          setConversation({ ...fetched, currentMember: fetched.currentMember ?? null }),
+        );
       } catch (err) {
         handleError(err, "Failed to fetch conversation");
         dispatch(setConversationLoading({ conversationId, loading: false }));
@@ -54,7 +68,7 @@ function useConversation({
     };
 
     load();
-  }, [projectId, conversationId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [projectId, conversationId, heldWithoutMember]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = useCallback(
     async (

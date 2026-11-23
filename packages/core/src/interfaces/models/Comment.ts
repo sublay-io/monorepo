@@ -1,5 +1,4 @@
-import { Entity } from "./Entity";
-import { Space } from "./Space";
+import { EntityRecord, SpaceWithViewer } from "./Entity";
 import { Mention } from "./Mention";
 import { User } from "./User";
 import { ReactionCounts, ReactionType } from "./Reaction";
@@ -23,21 +22,11 @@ export interface GifData {
  * fetch adds (`commentsCount`, `userReaction`, `nsfwEffective`, `user`,
  * `files`, `topComments`, `saved`, `grants`) are not included.
  */
-export type CommentEntity = Omit<
-  Entity,
-  | "commentsCount"
-  | "userReaction"
-  | "nsfwEffective"
-  | "user"
-  | "files"
-  | "topComments"
-  | "saved"
-  | "grants"
-  | "space"
-> & {
+export type CommentEntity = EntityRecord & {
   // Present only when include contains "space". `null` when the entity isn't
-  // in a space. Carries no avatar/banner file objects.
-  space?: Omit<Space, "avatarFile" | "bannerFile"> | null;
+  // in a space. Carries no avatar/banner file objects; with a viewer it also
+  // carries the viewer's membership (`isMember`, `userRole`, `userStatus`).
+  space?: Omit<SpaceWithViewer, "avatarFile" | "bannerFile"> | null;
 };
 
 export interface Comment {
@@ -63,7 +52,7 @@ export interface Comment {
   upvotes: string[]; // Array of user IDs (v6 legacy - v7 uses reactionCounts)
   downvotes: string[]; // Array of user IDs (v6 legacy - v7 uses reactionCounts)
   reactionCounts: ReactionCounts; // v7 reaction system - counts for all 8 reaction types
-  userReaction?: ReactionType | null; // v7 - current user's reaction (populated when authenticated)
+  userReaction: ReactionType | null; // The viewer's reaction, or null
   repliesCount: number; // Count of replies
   grants?: GrantSummary; // Optional - reputation-grant summary, populated when include contains "grants". Zero-filled (never omitted) on projects without the grants table.
   metadata: Record<string, any> | null; // JSON object that could contain any other data about the comment which is relevant. Limited to 10KB size. `null` on placeholders.

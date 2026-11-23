@@ -20,36 +20,35 @@ export interface SpaceMemberPermissions {
 }
 export type PaginationMeta = PaginationMetadata;
 
+// The parent space carried by a single-space read
 export interface SpacePreview {
   id: string;
   shortId: string;
-  name: string;
+  name: string | null;
   slug: string | null;
   avatarFileId: string | null;
-  readingPermission?: ReadingPermission;
-  visibility?: SpaceVisibility;
-  parentSpaceId?: string | null;
-  depth?: number;
+  visibility: SpaceVisibility;
+}
 
-  // File associations (populated via joins)
-  avatarFile?: File;
+// A sub-space in a single-space read's `childSpaces` preview
+export interface ChildSpacePreview extends SpacePreview {
+  readingPermission: ReadingPermission;
 }
 
 export interface Space {
   // Core identifiers
   id: string;
-  projectId: string;
   shortId: string;
   slug: string | null;
 
   // Display info
-  name: string;
+  name: string | null;
   description: string | null;
   avatarFileId: string | null;
   bannerFileId: string | null;
 
   // Ownership & permissions
-  userId: string;
+  userId: string | null;
   readingPermission: ReadingPermission;
   postingPermission: PostingPermission;
   visibility: SpaceVisibility;
@@ -69,7 +68,6 @@ export interface Space {
   // Timestamps
   createdAt: string;
   updatedAt: string;
-  deletedAt: string | null;
 
   // Computed fields
   membersCount: number;
@@ -77,8 +75,8 @@ export interface Space {
   isMember?: boolean; // Optional: only present when user is authenticated
 
   // File associations (populated via joins)
-  avatarFile?: File;
-  bannerFile?: File;
+  avatarFile?: File | null;
+  bannerFile?: File | null;
 }
 
 // A space with the caller's permissions in it (returned from create and update)
@@ -98,7 +96,7 @@ export interface SpaceDetailed extends SpaceWithPermissions {
   parentSpace: SpacePreview | null;
 
   // Child spaces preview (always included, empty array if no children)
-  childSpaces: SpacePreview[];
+  childSpaces: ChildSpacePreview[];
 }
 
 // My Spaces response types

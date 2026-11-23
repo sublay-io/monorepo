@@ -35,12 +35,12 @@ function CreateEvent() {
 ## Parameters
 
 <ParamField path="title" type="string" required>Event title. 1–300 characters.</ParamField>
-<ParamField path="startTime" type="string" required>ISO datetime when the event starts.</ParamField>
+<ParamField path="startTime" type="string | Date" required>When the event starts: an ISO 8601 datetime in UTC (ending in `Z`), or a `Date` (sent as its ISO string).</ParamField>
 <ParamField path="type" type='"online" | "physical" | "hybrid"' required>
   `online` requires `url`; `physical` requires `address` or `location`; `hybrid` requires both.
 </ParamField>
 <ParamField path="description" type="string">Optional description.</ParamField>
-<ParamField path="endTime" type="string">Optional ISO end datetime.</ParamField>
+<ParamField path="endTime" type="string | Date">When the event ends: an ISO 8601 datetime in UTC, or a `Date`.</ParamField>
 <ParamField path="timezone" type="string">Optional IANA timezone.</ParamField>
 <ParamField path="url" type="string">Join/stream URL.</ParamField>
 <ParamField path="venueName" type="string">Venue name.</ParamField>

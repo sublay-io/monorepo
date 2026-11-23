@@ -23,8 +23,10 @@ import useSpaceListActions from "./useSpaceListActions";
 
 import {
   Space,
+  SpaceWithPermissions,
   ReadingPermission,
   PostingPermission,
+  SpaceVisibility,
 } from "../../interfaces/models/Space";
 import { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions";
 import type { SortDirection } from "../../interfaces/EntityListSortByOptions";
@@ -36,15 +38,18 @@ export interface UseSpaceListProps {
 }
 
 export interface SpaceListCreateSpaceProps {
-  name: string;
+  // `null` is the same as leaving the field out.
+  name?: string | null;
   slug?: string | null;
   description?: string | null;
   // Space images are multipart-only on the server; set them with
   // `useCreateSpace` / `useUpdateSpace`.
   readingPermission?: ReadingPermission;
   postingPermission?: PostingPermission;
+  visibility?: SpaceVisibility;
   requireJoinApproval?: boolean;
   metadata?: Record<string, any>;
+  nsfw?: boolean;
   parentSpaceId?: string | null;
   insertPosition?: "first" | "last";
 }
@@ -76,7 +81,9 @@ export interface UseSpaceListValues {
     options?: SpaceListFetchOptions
   ) => void;
   loadMore: () => void;
-  createSpace: (props: SpaceListCreateSpaceProps) => Promise<Space | undefined>;
+  createSpace: (
+    props: SpaceListCreateSpaceProps
+  ) => Promise<SpaceWithPermissions | undefined>;
   deleteSpace: (props: SpaceListDeleteSpaceProps) => Promise<void>;
 }
 

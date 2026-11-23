@@ -91,7 +91,7 @@ function NewGroupButton() {
 }
 ```
 
-After creation, the new conversation is prepended to the conversation list in Redux state.
+`createGroup` resolves to the created conversation. The group's inbox row is then fetched and added to the conversation list.
 
 ## Accessing a Single Conversation
 

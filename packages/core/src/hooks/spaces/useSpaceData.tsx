@@ -16,6 +16,7 @@ import {
   SpaceDetailed,
   SpaceIncludeParam,
   SpacePreview,
+  ChildSpacePreview,
   SpaceWithPermissions,
 } from "../../interfaces/models/Space";
 import { SpaceMemberStatus } from "../../interfaces/models/SpaceMember";
@@ -48,7 +49,7 @@ export interface UseSpaceDataValues {
   // Root first. A space above that the viewer can't see is `{ hidden: true }`.
   breadcrumb: SpaceBreadcrumbEntry[];
   parentSpace: SpacePreview | null;
-  childSpaces: SpacePreview[];
+  childSpaces: ChildSpacePreview[];
 
   // Operations
   updateSpace(
@@ -301,7 +302,7 @@ function useSpaceData({
       }
 
       try {
-        const breadcrumbEntries = await fetchSpaceBreadcrumb({
+        const { breadcrumb: breadcrumbEntries } = await fetchSpaceBreadcrumb({
           spaceId: space.id,
         });
         setBreadcrumb(breadcrumbEntries);

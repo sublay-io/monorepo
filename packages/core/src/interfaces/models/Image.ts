@@ -1,24 +1,24 @@
-export interface ImageVariant {
-  path: string;           // Relative storage path (e.g., "avatars/abc123/original.webp")
-  publicPath: string;     // Proxy URL for client access
-  width: number;          // Pixel width
-  height: number;         // Pixel height
-  size: number;           // File size in bytes
-  format: string;         // Image format (webp, jpeg, png)
+// A processed variant of an uploaded image
+export interface UploadedImageVariant {
+  path: string;       // Relative storage path
+  width: number;
+  height: number;
+  size: number;       // Bytes
+  format: string;     // webp, jpeg, png
+  publicPath: string; // Proxy URL for client access
 }
 
-export interface Image {
-  fileId: string;         // Primary file ID (links to File table)
-  imageId: string;        // Same as fileId (backward compatibility)
-  status: "completed" | "failed";
-  original: ImageVariant; // Original processed image
-  variants: Record<string, ImageVariant>; // Named variants (thumbnail, small, medium, large)
-  metadata: {
-    originalFormat: string;    // Format before processing
-    originalSize: number;      // Size before processing (bytes)
-    exifStripped: boolean;     // Whether EXIF data was removed
-    processingTime: number;    // Sharp processing time (milliseconds)
-  };
+// What an image upload returns
+export interface UploadImageResponse {
+  fileId: string;
+  type: "image";
+  originalPath: string;   // Proxy URL of the processed original
+  originalSize: number;   // Bytes
+  originalWidth: number;
+  originalHeight: number;
+  variants: Record<string, UploadedImageVariant>; // Keyed by variant name
+  format: string;
+  quality: number;
   createdAt: string;      // ISO 8601 timestamp
 }
 

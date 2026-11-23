@@ -10,8 +10,8 @@ import { updateEntityInLists } from "../../store/slices/entityListsSlice";
 export interface UpdateEntityProps {
   entityId: string;
   update: {
-    title?: string | null | undefined;
-    content?: string | null | undefined;
+    title?: string;
+    content?: string;
     attachments?: Record<string, any>[];
     keywords?: string[];
     location?: {

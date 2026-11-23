@@ -62,13 +62,13 @@ function AvatarUpload({ file }: { file: File }) {
 
 ### Removing the Avatar
 
-List the current file's id in `removeFileIds`. It clears `avatarFileId` and deletes the file.
+List the current file's id in `removeFileIds`. It clears the user's avatar file and deletes it.
 
 ```tsx
 const { user, updateUser } = useUser();
 
-if (user?.avatarFileId) {
-  await updateUser({ removeFileIds: [user.avatarFileId] });
+if (user?.avatarFile) {
+  await updateUser({ removeFileIds: [user.avatarFile.id] });
 }
 ```
 
@@ -94,28 +94,30 @@ if (user?.avatarFileId) {
   `true` while the authenticated user has an active [suspension](/v8/sdk/moderation/suspensions). Derived from the user's `suspensions` using the same effective definition as the server.
 </ResponseField>
 
-<ResponseField name="activeSuspension" type="{ reason: string | null; startDate: string; endDate: string | null } | null">
-  The user's effective (furthest-reaching) active suspension, or `null` when they aren't suspended. `endDate: null` means the suspension is indefinite. Bind a "suspended until X" banner or a disabled composer to this. See [Suspensions](/v8/sdk/moderation/suspensions).
+<ResponseField name="activeSuspension" type="UserSuspension | null">
+  The user's effective (furthest-reaching) active suspension — one of `user.suspensions` (`{ id, userId, reason, startDate, endDate, createdBy, createdAt, updatedAt }`) — or `null` when they aren't suspended. `endDate: null` means the suspension is indefinite. Bind a "suspended until X" banner or a disabled composer to this. See [Suspensions](/v8/sdk/moderation/suspensions).
 </ResponseField>
 
 <ResponseField name="updateUser" type="(update: UpdateUserParams) => Promise<AuthUser>">
   Updates the authenticated user's profile. Applies optimistic updates immediately and reverts on failure.
 
+  A `null` field can't travel with `avatarFile` or `bannerFile` (a multipart request): such an update throws before anything is sent, naming the field. Send the clear in a separate call without a file.
+
   <Expandable title="UpdateUserParams fields">
     <ResponseField name="name" type="string | null">
-      Display name. Pass `null` to clear.
+      Display name. Pass `null` (or an empty string) to clear it, on an update without files.
     </ResponseField>
-    <ResponseField name="username" type="string | null">
-      Unique username. Pass `null` to clear. Must be available.
+    <ResponseField name="username" type="string">
+      Unique username. Must be available.
     </ResponseField>
-    <ResponseField name="bio" type="string">
-      Short biography. Limited to 300 characters.
+    <ResponseField name="bio" type="string | null">
+      Short biography. Limited to 300 characters. Pass `null` (or an empty string) to clear it, on an update without files.
     </ResponseField>
-    <ResponseField name="birthdate" type="Date | null">
-      Date of birth. Pass `null` to clear.
+    <ResponseField name="birthdate" type="string | Date">
+      Date of birth: a `Date`, or a full UTC timestamp string such as `"1990-05-17T00:00:00.000Z"` (a date alone, like `"1990-05-17"`, is refused). Not applied optimistically: it isn't part of `AuthUser`.
     </ResponseField>
     <ResponseField name="avatar" type="string | null">
-      Avatar image URL, stored as given. Pass `null` to clear it, on an update without files only: next to `avatarFile` or `bannerFile` (a multipart request), `null` isn't sent and the URL stays. Separate from `avatarFile`, which uploads an image.
+      Avatar image URL, stored as given. Pass `null` to clear it, on an update without files. Separate from `avatarFile`, which uploads an image.
     </ResponseField>
     <ResponseField name="avatarFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
       New avatar image to upload, replacing the current one (up to 50 MB). `file` is a `File` or `Blob`, or a React Native file `{ uri, name, type? }`; `options` must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With a file, the update is sent as `multipart/form-data`.
@@ -124,10 +126,10 @@ if (user?.avatarFileId) {
       New banner image to upload, replacing the current one; same shape as `avatarFile`.
     </ResponseField>
     <ResponseField name="removeFileIds" type="string[]">
-      Files to remove: the user's `avatarFileId` and/or `bannerFileId`. Removing one clears that image. Any other id refuses the whole update (`400 user/invalid-remove-file-ids`).
+      Files to remove: the id of `user.avatarFile` and/or `user.bannerFile`. Removing one clears that image. Any other id refuses the whole update (`400 user/invalid-remove-file-ids`).
     </ResponseField>
-    <ResponseField name="location" type="{ latitude: number; longitude: number } | null">
-      User's geographic location. Pass `null` to clear.
+    <ResponseField name="location" type="{ latitude: number; longitude: number }">
+      User's geographic location.
     </ResponseField>
     <ResponseField name="metadata" type="Record<string, any>">
       Arbitrary project-specific data. Limited to 10 KB. Visible to other users (embedded in entity and comment data).
@@ -144,7 +146,7 @@ if (user?.avatarFileId) {
 
 ## Optimistic Updates
 
-`updateUser` applies changes to local state before the server responds. This makes the UI feel instant. Fields that cannot be optimistically applied (file uploads, location) wait for the server response.
+`updateUser` applies changes to local state before the server responds. This makes the UI feel instant. Fields that cannot be optimistically applied (file uploads, location, birthdate) wait for the server response.
 
 If the server returns an error, the hook automatically reverts the user state to its pre-update value.
 

@@ -3,7 +3,10 @@ import { buildSearchParams } from "../../utils/searchParams";
 import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import type {
   Space,
+  SpaceWithPermissions,
+  ReadingPermission,
   PostingPermission,
+  SpaceVisibility,
 } from "../../interfaces/models/Space";
 import type { SpaceListSortByOptions } from "../../interfaces/SpaceListSortByOptions";
 import type { PaginatedResponse } from "../../interfaces/PaginatedResponse";
@@ -16,18 +19,20 @@ import type { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 
 interface CreateSpaceParams {
   projectId: string;
-  name: string;
+  // `null` is the same as leaving the field out.
+  name?: string | null;
   slug?: string | null;
   description?: string | null;
   // No avatar/banner here: the server dropped URL-string image fields in
   // favour of multipart `avatarFile`/`bannerFile` uploads, which this RTK
   // Query layer cannot send (baseApi pins Content-Type to application/json).
   // Use `useCreateSpace` / `useUpdateSpace` to set space images.
-  readingPermission?: "anyone" | "members";
+  readingPermission?: ReadingPermission;
   postingPermission?: PostingPermission;
-  visibility?: "public" | "unlisted" | "private";
+  visibility?: SpaceVisibility;
   requireJoinApproval?: boolean;
   metadata?: Record<string, any>;
+  nsfw?: boolean;
   parentSpaceId?: string | null;
 }
 
@@ -58,7 +63,7 @@ interface DeleteSpaceParams {
 export const spacesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Create a new space
-    createSpace: builder.mutation<Space, CreateSpaceParams>({
+    createSpace: builder.mutation<SpaceWithPermissions, CreateSpaceParams>({
       query: ({ projectId, ...body }) => ({
         url: `/${projectId}/spaces`,
         method: "POST",

@@ -48,12 +48,12 @@ function DraftsList() {
   Results per page: a whole number from `1` to `100`. Defaults to `10`. A larger value is rejected with `400 entity/invalid-query`, never lowered to `100`.
 </ParamField>
 
-<ParamField path="sourceId" type='string | "none" | null'>
-  Only drafts from this source, or `"none"` for drafts with no source. Left out or `null`: any source.
+<ParamField path="sourceId" type='string | "none"'>
+  Only drafts from this source, or `"none"` for drafts with no source. Left out: any source.
 </ParamField>
 
-<ParamField path="spaceId" type='string | "none" | null'>
-  Only drafts in this space, or `"none"` for drafts in no space. Left out or `null`: any space, or none.
+<ParamField path="spaceId" type='string | "none"'>
+  Only drafts in this space, or `"none"` for drafts in no space. Left out: any space, or none.
 </ParamField>
 
 <ParamField path="include" type="DraftIncludeParam">

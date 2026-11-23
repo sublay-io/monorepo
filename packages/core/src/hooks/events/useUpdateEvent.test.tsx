@@ -58,6 +58,21 @@ describe("useUpdateEvent", () => {
     });
   });
 
+  it("sends a Date start time as an ISO string", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEvent());
+    axiosPrivate.mockResponse("patch", makeEvent());
+
+    await act(async () => {
+      await result.current({
+        eventId: "event-1",
+        update: { startTime: new Date("2024-06-01T10:00:00.000Z") },
+      });
+    });
+
+    const [call] = axiosPrivate.calls("patch");
+    expect(call.body).toEqual({ startTime: "2024-06-01T10:00:00.000Z" });
+  });
+
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEvent());
 

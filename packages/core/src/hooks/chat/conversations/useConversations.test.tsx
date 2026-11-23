@@ -1,7 +1,12 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeConversationPreview } from "../../../test-utils";
+import {
+  renderHookWithAxios,
+  resetAxiosMocks,
+  makeConversation,
+  makeConversationPreview,
+} from "../../../test-utils";
 import { makeProvidersWrapper } from "../../../context/testHelpers";
 import { setSocketConnected } from "../../../store/slices/chatSlice";
 import useConversations, { type UseConversationsProps } from "./useConversations";
@@ -126,7 +131,7 @@ describe("useConversations", () => {
     expect(call.config?.params).toMatchObject({ types: "group,direct" });
   });
 
-  it("creates a group conversation and prepends it to the list", async () => {
+  it("creates a group, then fetches its preview and inserts that into the list", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useConversations(),
       {
@@ -137,20 +142,65 @@ describe("useConversations", () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    const group = makeConversationPreview({ id: "group-1", type: "group", name: "Team" });
-    axiosPrivate.mockResponse("post", group);
+    const group = makeConversation({ id: "group-1", type: "group", name: "Team", description: "Planning" });
+    const preview = makeConversationPreview({
+      id: "group-1",
+      type: "group",
+      name: "Team",
+      description: "Planning",
+      memberCount: 2,
+      otherMembers: [{ id: "user-2", name: null, username: "sam", avatar: null }],
+    });
+    axiosPrivate.mockResponse("post", group, 201);
+    axiosPrivate.mockResponse("get", preview);
 
     let returned;
     await act(async () => {
-      returned = await result.current.createGroup({ name: "Team", memberIds: ["user-2"] });
+      returned = await result.current.createGroup({
+        name: "Team",
+        description: "Planning",
+        memberIds: ["user-2"],
+      });
     });
 
     expect(returned).toEqual(group);
-    expect(result.current.conversations).toEqual([group]);
+    // The list holds the preview, not the bare conversation.
+    expect(result.current.conversations).toEqual([preview]);
 
     const [call] = axiosPrivate.calls("post");
     expect(call.url).toBe("/test-project/chat/conversations");
-    expect(call.body).toEqual({ type: "group", name: "Team", memberIds: ["user-2"] });
+    expect(call.body).toEqual({
+      type: "group",
+      name: "Team",
+      description: "Planning",
+      memberIds: ["user-2"],
+    });
+    const gets = axiosPrivate.calls("get");
+    expect(gets[gets.length - 1].url).toBe("/test-project/chat/conversations/group-1/preview");
+  });
+
+  it("still resolves to the created group when its preview fetch fails", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useConversations(),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", listPage([])),
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    const group = makeConversation({ id: "group-1", type: "group" });
+    axiosPrivate.mockResponse("post", group, 201);
+    axiosPrivate.mockError("get", 500);
+
+    let returned;
+    await act(async () => {
+      returned = await result.current.createGroup({ name: "Team" });
+    });
+
+    expect(returned).toEqual(group);
+    expect(result.current.conversations).toEqual([]);
   });
 
   // ── Reconnect reconciliation ────────────────────────────────────────────────

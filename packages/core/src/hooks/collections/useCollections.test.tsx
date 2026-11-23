@@ -23,10 +23,10 @@ let axiosPrivate: AxiosMockHandle;
 
 const ROOT: Collection = {
   id: "root",
-  projectId: "test-project",
   userId: "user-1",
   parentCollectionId: null,
   name: "Root",
+  isRoot: true,
   entityCount: 0,
   createdAt: "2024-01-01T00:00:00.000Z",
   updatedAt: "2024-01-01T00:00:00.000Z",
@@ -34,7 +34,7 @@ const ROOT: Collection = {
 
 /** Sub-collections by parent id, for the default GET responder below. */
 const SUBCOLLECTIONS: Record<string, Collection[]> = {
-  root: [{ ...ROOT, id: "child", parentCollectionId: "root" }],
+  root: [{ ...ROOT, id: "child", parentCollectionId: "root", isRoot: false }],
   child: [],
 };
 
@@ -141,7 +141,7 @@ describe("useCollections", () => {
       fetchHandle.fetchMock.mockImplementation(async (...args: unknown[]) => {
         const { url, method } = requestUrlAndMethod(args);
         if (method === "POST" && url.endsWith("/collections/root/sub-collections")) {
-          return jsonResponse({ ...ROOT, id: "child", parentCollectionId: "root" }, 201);
+          return jsonResponse({ ...ROOT, id: "child", parentCollectionId: "root", isRoot: false }, 201);
         }
         return defaultCollectionsResponder(...args);
       });

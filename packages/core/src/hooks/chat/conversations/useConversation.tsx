@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useSublayDispatch, useSublaySelector } from "../../../store/hooks";
 import {
   selectConversation,
@@ -45,8 +45,13 @@ function useConversation({
   // that disappears (removed, deleted) is not refetched.
   const fullyLoaded = !!conversation && "currentMember" in conversation;
   const heldWithoutMember = !!conversation && !fullyLoaded;
+  const attemptedFor = useRef<string | null>(null);
   useEffect(() => {
     if (!projectId || !conversationId || fullyLoaded) return;
+    // A conversation that disappeared after an attempt (removed, deleted) is
+    // not fetched again.
+    if (!conversation && attemptedFor.current === conversationId) return;
+    attemptedFor.current = conversationId;
 
     const load = async () => {
       dispatch(setConversationLoading({ conversationId, loading: true }));

@@ -23,6 +23,7 @@ import {
   upsertMessage,
   upsertConversationPreview,
   insertConversationPreview,
+  forgetCurrentMember,
   removeConversationPreview,
   incrementUnread,
   setSocketConnected,
@@ -579,6 +580,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     // emitter ever sends only an id.
     socket.on("conversation:created", (preview) => {
       if (preview && typeof preview === "object" && "unreadCount" in preview) {
+        dispatch(forgetCurrentMember(preview.id));
         dispatch(insertConversationPreview(preview));
       } else {
         const id = (preview as { id?: string } | null)?.id;

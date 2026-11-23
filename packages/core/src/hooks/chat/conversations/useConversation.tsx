@@ -38,16 +38,13 @@ function useConversation({
   const _update = useUpdateConversation();
   const _delete = useDeleteConversation();
 
-  // Fetch the conversation on mount unless it's fully loaded. A copy that came
-  // from an inbox preview has no `currentMember` key (a fetched one always
-  // has it, `null` when there's no row), so it is fetched too.
+  // Fetch the conversation unless it's fully loaded. A copy that came from an
+  // inbox preview has no `currentMember` key (a fetched one always has it,
+  // `null` when there's no row), so it is fetched too — on mount, and again if
+  // the key goes away (re-added to the conversation).
+  const fullyLoaded = !!conversation && "currentMember" in conversation;
   useEffect(() => {
-    if (
-      !projectId ||
-      !conversationId ||
-      (conversation && "currentMember" in conversation)
-    )
-      return;
+    if (!projectId || !conversationId || fullyLoaded) return;
 
     const load = async () => {
       dispatch(setConversationLoading({ conversationId, loading: true }));
@@ -61,7 +58,7 @@ function useConversation({
     };
 
     load();
-  }, [projectId, conversationId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [projectId, conversationId, fullyLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = useCallback(
     async (

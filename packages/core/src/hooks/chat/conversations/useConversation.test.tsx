@@ -8,7 +8,7 @@ import {
   makeConversationMember,
   makeConversationPreview,
 } from "../../../test-utils";
-import { insertConversationPreview } from "../../../store/slices/chatSlice";
+import { insertConversationPreview, forgetCurrentMember } from "../../../store/slices/chatSlice";
 import useConversation from "./useConversation";
 
 afterEach(() => {
@@ -47,6 +47,24 @@ describe("useConversation", () => {
 
     await waitFor(() => expect(result.current.conversation?.currentMember?.role).toBe("admin"));
     expect(axiosPrivate.calls("get")).toHaveLength(1);
+  });
+
+  it("refetches an open conversation when its currentMember is forgotten (re-added)", async () => {
+    const first = makeConversation({ id: "conversation-1", currentMember: makeConversationMember({ role: "member" }) });
+    const second = makeConversation({ id: "conversation-1", currentMember: makeConversationMember({ role: "admin" }) });
+
+    const { result, axiosPrivate, store } = renderHookWithAxios(
+      () => useConversation({ conversationId: "conversation-1" }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockResponse("get", first) },
+    );
+    await waitFor(() => expect(result.current.conversation?.currentMember?.role).toBe("member"));
+
+    axiosPrivate.mockResponse("get", second);
+    act(() => {
+      store.dispatch(forgetCurrentMember("conversation-1"));
+    });
+    await waitFor(() => expect(result.current.conversation?.currentMember?.role).toBe("admin"));
+    expect(axiosPrivate.calls("get")).toHaveLength(2);
   });
 
   it("does not throw and stops loading when the fetch fails", async () => {

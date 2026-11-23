@@ -4,6 +4,7 @@ import reducer, {
   addOptimisticMessage,
   failOptimisticMessage,
   insertConversationPreview,
+  forgetCurrentMember,
   setConversation,
   applyOwnMute,
   mergeThreadReplies,
@@ -1266,7 +1267,7 @@ describe("chatSlice — conversation writes merge into what's held", () => {
     expect(state.conversations["conversation-1"].data!.currentMember).toBeNull();
   });
 
-  it("insertConversationPreview drops a held currentMember (a preview says nothing about membership)", () => {
+  it("insertConversationPreview keeps the loaded conversation's currentMember", () => {
     const state0 = baseState({
       conversations: {
         "conversation-1": {
@@ -1281,8 +1282,22 @@ describe("chatSlice — conversation writes merge into what's held", () => {
       insertConversationPreview(makeConversationPreview({ id: "conversation-1", memberCount: 5 })),
     );
     const data = state.conversations["conversation-1"].data!;
-    expect("currentMember" in data).toBe(false);
+    expect(data.currentMember).toEqual(member);
     expect(data.memberCount).toBe(5);
+  });
+
+  it("forgetCurrentMember removes the held currentMember key", () => {
+    const state0 = baseState({
+      conversations: {
+        "conversation-1": {
+          data: makeConversation({ id: "conversation-1", currentMember: member }),
+          loading: false,
+          error: null,
+        },
+      },
+    });
+    const state = reducer(state0, forgetCurrentMember("conversation-1"));
+    expect("currentMember" in state.conversations["conversation-1"].data!).toBe(false);
   });
 });
 

@@ -507,12 +507,20 @@ const chatSlice = createSlice({
           error: null,
         };
       }
-      // A preview says nothing about the viewer's membership, so a held
-      // `currentMember` (possibly from before a removal and re-add) is
-      // dropped: `useConversation` fetches it fresh on the next open.
-      const { currentMember: _staleMember, ...held } =
-        state.conversations[preview.id].data ?? ({} as Conversation);
-      state.conversations[preview.id].data = { ...held, ...preview };
+      state.conversations[preview.id].data = {
+        ...state.conversations[preview.id].data,
+        ...preview,
+      };
+    },
+
+    /**
+     * Forget the held `currentMember` of a conversation the user was just
+     * added to (`conversation:created`): one held from before a removal is
+     * stale. `useConversation` refetches it when the key is gone.
+     */
+    forgetCurrentMember: (state, action: PayloadAction<string>) => {
+      const data = state.conversations[action.payload]?.data;
+      if (data) delete (data as Partial<Conversation>).currentMember;
     },
 
     /**
@@ -1124,6 +1132,7 @@ export const {
   setConversationListCursor,
   upsertConversationPreview,
   insertConversationPreview,
+  forgetCurrentMember,
   removeConversationPreview,
   incrementUnread,
   clearUnread,

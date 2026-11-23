@@ -179,6 +179,49 @@ describe("useConversations", () => {
     expect(gets[gets.length - 1].url).toBe("/test-project/chat/conversations/group-1/preview");
   });
 
+  it("creates a group with an avatar as multipart avatarFile + avatarFile.options", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useConversations(),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", listPage([])),
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    const group = makeConversation({ id: "group-1", type: "group", name: "Team" });
+    axiosPrivate.mockResponse("post", group, 201);
+    axiosPrivate.mockResponse("get", makeConversationPreview({ id: "group-1", type: "group" }));
+
+    const file = new File(["bytes"], "a.png", { type: "image/png" });
+    const options = { mode: "original-aspect" as const, sizes: { small: 64 } };
+    let returned;
+    await act(async () => {
+      returned = await result.current.createGroup({
+        name: "Team",
+        memberIds: ["user-2", "user-3"],
+        metadata: { topic: "launch" },
+        avatarFile: { file, options },
+      });
+    });
+
+    expect(returned).toEqual(group);
+
+    const [call] = axiosPrivate.calls("post");
+    expect(call.url).toBe("/test-project/chat/conversations");
+    expect(call.body).toBeInstanceOf(FormData);
+    expect(call.config?.headers).toMatchObject({ "Content-Type": "multipart/form-data" });
+    const formData = call.body as FormData;
+    expect(formData.get("type")).toBe("group");
+    expect(formData.get("name")).toBe("Team");
+    expect(formData.get("memberIds")).toBe(JSON.stringify(["user-2", "user-3"]));
+    expect(formData.get("metadata")).toBe(JSON.stringify({ topic: "launch" }));
+    expect(formData.get("avatarFile")).toBeInstanceOf(File);
+    expect(formData.get("avatarFile.options")).toBe(JSON.stringify(options));
+    expect(formData.has("description")).toBe(false);
+  });
+
   it("still resolves to the created group when its preview fetch fails", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useConversations(),

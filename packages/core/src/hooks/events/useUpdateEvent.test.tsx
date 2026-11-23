@@ -42,7 +42,7 @@ describe("useUpdateEvent", () => {
     await act(async () => {
       await result.current({
         eventId: "event-1",
-        update: { title: "With gallery", removeImageIds: ["file-1"] },
+        update: { title: "With gallery", removeFileIds: ["file-1"] },
         gallery: { files: [file], options: { mode: "original-aspect", sizes: { full: 1200 } } },
       });
     });
@@ -51,11 +51,52 @@ describe("useUpdateEvent", () => {
     expect(call.body instanceof FormData).toBe(true);
     const formData = call.body as FormData;
     expect(formData.get("title")).toBe("With gallery");
-    expect(formData.get("removeImageIds")).toBe(JSON.stringify(["file-1"]));
+    expect(formData.get("removeFileIds")).toBe(JSON.stringify(["file-1"]));
+    expect(formData.has("removeImageIds")).toBe(false);
     expect(formData.get("gallery")).toBeInstanceOf(File);
     expect(call.config?.headers).toMatchObject({
       "Content-Type": "multipart/form-data",
     });
+  });
+
+  it("replaces the cover via multipart coverFile + coverFile.options", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEvent());
+    axiosPrivate.mockResponse("patch", makeEvent());
+
+    const file = new File(["binary"], "cover.png", { type: "image/png" });
+    const options = { mode: "original-aspect" as const, sizes: { full: 1200 } };
+    await act(async () => {
+      await result.current({
+        eventId: "event-1",
+        update: { removeFileIds: ["old-cover"] },
+        coverFile: { file, options },
+      });
+    });
+
+    const [call] = axiosPrivate.calls("patch");
+    expect(call.url).toBe("/test-project/events/event-1");
+    const formData = call.body as FormData;
+    expect(formData.get("coverFile")).toBeInstanceOf(File);
+    expect(formData.get("coverFile.options")).toBe(JSON.stringify(options));
+    expect(formData.get("removeFileIds")).toBe(JSON.stringify(["old-cover"]));
+    expect(formData.has("cover")).toBe(false);
+    expect(formData.has("cover.options")).toBe(false);
+  });
+
+  it("sends removeFileIds alone as a JSON array", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEvent());
+    axiosPrivate.mockResponse("patch", makeEvent());
+
+    await act(async () => {
+      await result.current({
+        eventId: "event-1",
+        update: { removeFileIds: ["file-1", "file-2"] },
+      });
+    });
+
+    const [call] = axiosPrivate.calls("patch");
+    expect(call.body instanceof FormData).toBe(false);
+    expect(call.body).toEqual({ removeFileIds: ["file-1", "file-2"] });
   });
 
   it("sends a Date start time as an ISO string", async () => {

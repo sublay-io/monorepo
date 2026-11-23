@@ -22,6 +22,7 @@ import useProject from "../../projects/useProject";
 import useFetchConversationPreview from "./useFetchConversationPreview";
 import { handleError } from "../../../utils/handleError";
 import { CursorPaginatedResponse } from "../../../interfaces/PaginatedResponse";
+import { appendImageSlot, type ImageSlotUpload } from "../../../utils/uploads";
 
 export interface UseConversationsProps {
   types?: ConversationType[];
@@ -35,6 +36,11 @@ export interface CreateGroupParams {
   // rows in the same transaction). The creator is added as admin automatically
   // and is de-duplicated server-side if present here.
   memberIds?: string[];
+  /**
+   * The group's avatar image, processed per `options` (`mode` is required).
+   * When present the request is sent as multipart form data.
+   */
+  avatarFile?: ImageSlotUpload;
 }
 
 export interface UseConversationsValues {
@@ -156,10 +162,32 @@ function useConversations({
     async (params: CreateGroupParams): Promise<Conversation> => {
       if (!projectId) throw new Error("No project ID");
 
-      const response = await axios.post<Conversation>(
-        `/${projectId}/chat/conversations`,
-        { type: "group", ...params }
-      );
+      const path = `/${projectId}/chat/conversations`;
+      const { avatarFile, ...fields } = params;
+      let response: { data: Conversation };
+
+      if (avatarFile) {
+        // The avatar goes as multipart form data; every other field as a
+        // string (objects and arrays as JSON).
+        const formData = new FormData();
+        formData.append("type", "group");
+        for (const [key, value] of Object.entries(fields)) {
+          if (value === undefined) continue;
+          formData.append(
+            key,
+            typeof value === "object" ? JSON.stringify(value) : String(value)
+          );
+        }
+        appendImageSlot(formData, "avatarFile", avatarFile);
+        response = await axios.post<Conversation>(path, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } else {
+        response = await axios.post<Conversation>(path, {
+          type: "group",
+          ...fields,
+        });
+      }
 
       const conversation = response.data;
 

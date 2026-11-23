@@ -6,7 +6,7 @@ icon: "cube"
 
 ## Overview
 
-Fetches the full details of a single conversation by ID and provides `update` and `deleteConversation` actions. The conversation is loaded once on mount if it is not already in Redux state. A change made through `update` updates it at once; a change another member makes shows on the next fetch.
+Fetches the full details of a single conversation by ID and provides `update` and `deleteConversation` actions. The conversation is loaded once on mount if it is not already in Redux state. A change made through `update` updates it at once; a change another member makes, and `memberCount`, are as of the last fetch. A copy that came from the inbox (for example a group you just created) is fetched in full when you open it, so `currentMember` is always loaded.
 
 <Note>Requires `ChatProvider` in the component tree.</Note>
 

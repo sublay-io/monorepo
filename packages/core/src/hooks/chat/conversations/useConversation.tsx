@@ -38,9 +38,16 @@ function useConversation({
   const _update = useUpdateConversation();
   const _delete = useDeleteConversation();
 
-  // Fetch conversation on mount if not already loaded
+  // Fetch the conversation on mount unless it's fully loaded. A copy that came
+  // from an inbox preview has no `currentMember` key (a fetched one always
+  // has it, `null` when there's no row), so it is fetched too.
   useEffect(() => {
-    if (!projectId || !conversationId || conversation) return;
+    if (
+      !projectId ||
+      !conversationId ||
+      (conversation && "currentMember" in conversation)
+    )
+      return;
 
     const load = async () => {
       dispatch(setConversationLoading({ conversationId, loading: true }));

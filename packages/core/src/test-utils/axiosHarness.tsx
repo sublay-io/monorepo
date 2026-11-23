@@ -193,6 +193,7 @@ export interface RenderHookWithAxiosOptions<Props>
   beforeRender?: (handles: {
     axiosPrivate: AxiosMockHandle;
     axiosPublic: AxiosMockHandle;
+    store: ReturnType<typeof makeSublayStore>;
   }) => void;
 }
 
@@ -243,7 +244,7 @@ export function renderHookWithAxios<Result, Props>(
   const axiosPrivateHandle = mockAxiosPrivate();
   const axiosPublicHandle = mockAxiosPublic();
 
-  beforeRender?.({ axiosPrivate: axiosPrivateHandle, axiosPublic: axiosPublicHandle });
+  beforeRender?.({ axiosPrivate: axiosPrivateHandle, axiosPublic: axiosPublicHandle, store });
 
   const rendered = renderHook(callback, { wrapper: Wrapper, ...renderOptions });
 

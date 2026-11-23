@@ -507,10 +507,12 @@ const chatSlice = createSlice({
           error: null,
         };
       }
-      state.conversations[preview.id].data = {
-        ...state.conversations[preview.id].data,
-        ...preview,
-      };
+      // A preview says nothing about the viewer's membership, so a held
+      // `currentMember` (possibly from before a removal and re-add) is
+      // dropped: `useConversation` fetches it fresh on the next open.
+      const { currentMember: _staleMember, ...held } =
+        state.conversations[preview.id].data ?? ({} as Conversation);
+      state.conversations[preview.id].data = { ...held, ...preview };
     },
 
     /**

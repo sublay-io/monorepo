@@ -1266,7 +1266,7 @@ describe("chatSlice — conversation writes merge into what's held", () => {
     expect(state.conversations["conversation-1"].data!.currentMember).toBeNull();
   });
 
-  it("insertConversationPreview keeps the loaded conversation's currentMember", () => {
+  it("insertConversationPreview drops a held currentMember (a preview says nothing about membership)", () => {
     const state0 = baseState({
       conversations: {
         "conversation-1": {
@@ -1281,7 +1281,7 @@ describe("chatSlice — conversation writes merge into what's held", () => {
       insertConversationPreview(makeConversationPreview({ id: "conversation-1", memberCount: 5 })),
     );
     const data = state.conversations["conversation-1"].data!;
-    expect(data.currentMember).toEqual(member);
+    expect("currentMember" in data).toBe(false);
     expect(data.memberCount).toBe(5);
   });
 });

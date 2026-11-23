@@ -1,7 +1,14 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeConversation } from "../../../test-utils";
+import {
+  renderHookWithAxios,
+  resetAxiosMocks,
+  makeConversation,
+  makeConversationMember,
+  makeConversationPreview,
+} from "../../../test-utils";
+import { insertConversationPreview } from "../../../store/slices/chatSlice";
 import useConversation from "./useConversation";
 
 afterEach(() => {
@@ -22,6 +29,24 @@ describe("useConversation", () => {
     expect(result.current.loading).toBe(true);
     await waitFor(() => expect(result.current.conversation).toEqual(conversation));
     expect(result.current.loading).toBe(false);
+  });
+
+  it("fetches when the store holds only an inbox preview (e.g. a group just created)", async () => {
+    const admin = makeConversationMember({ id: "member-me", role: "admin" });
+    const conversation = makeConversation({ id: "conversation-1", currentMember: admin, memberCount: 1 });
+
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useConversation({ conversationId: "conversation-1" }),
+      {
+        beforeRender: ({ axiosPrivate, store }) => {
+          store.dispatch(insertConversationPreview(makeConversationPreview({ id: "conversation-1" })));
+          axiosPrivate.mockResponse("get", conversation);
+        },
+      },
+    );
+
+    await waitFor(() => expect(result.current.conversation?.currentMember?.role).toBe("admin"));
+    expect(axiosPrivate.calls("get")).toHaveLength(1);
   });
 
   it("does not throw and stops loading when the fetch fails", async () => {

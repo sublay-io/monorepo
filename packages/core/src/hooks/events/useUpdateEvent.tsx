@@ -34,11 +34,11 @@ export interface UpdateEventProps {
      * with `gallery` (append) and `coverFile` (replace).
      */
     removeFileIds?: string[];
+    /** New cover image (one image) — REPLACES the existing cover. Sends multipart. */
+    coverFile?: ImageSlotUpload;
+    /** Gallery images (multi) — APPENDED to the event's images. Sends multipart. */
+    gallery?: GalleryUploadConfig;
   };
-  /** New cover image (one image) — REPLACES the existing cover. Sends multipart. */
-  coverFile?: ImageSlotUpload;
-  /** Gallery images (multi) — APPENDED to the event. Sends multipart. */
-  gallery?: GalleryUploadConfig;
 }
 
 /**
@@ -52,10 +52,13 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
   const { projectId } = useProject();
 
   const updateEvent = useCallback(
-    async ({ eventId, update, coverFile, gallery }: UpdateEventProps) => {
+    async ({ eventId, update }: UpdateEventProps) => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
+
+      // The files go as multipart parts; everything else in `update` is a field.
+      const { coverFile, gallery, ...fields } = update;
 
       const hasCover = !!coverFile && !!coverFile.file;
       const hasGallery = !!gallery && gallery.files.length > 0;
@@ -66,7 +69,7 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
         // `gallery.options`.
         const formData = new FormData();
 
-        const u = update;
+        const u = fields;
         if (u.title !== undefined) formData.append("title", u.title);
         if (u.description !== undefined) formData.append("description", u.description);
         if (u.startTime !== undefined) formData.append("startTime", toIsoString(u.startTime));
@@ -114,10 +117,10 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
       }
 
       const response = await axios.patch(`/${projectId}/events/${eventId}`, {
-        ...update,
+        ...fields,
         startTime:
-          update.startTime === undefined ? undefined : toIsoString(update.startTime),
-        endTime: update.endTime === undefined ? undefined : toIsoString(update.endTime),
+          fields.startTime === undefined ? undefined : toIsoString(fields.startTime),
+        endTime: fields.endTime === undefined ? undefined : toIsoString(fields.endTime),
       });
 
       return response.data as Event;

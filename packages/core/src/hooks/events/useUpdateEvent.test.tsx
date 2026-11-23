@@ -42,8 +42,11 @@ describe("useUpdateEvent", () => {
     await act(async () => {
       await result.current({
         eventId: "event-1",
-        update: { title: "With gallery", removeFileIds: ["file-1"] },
-        gallery: { files: [file], options: { mode: "original-aspect", sizes: { full: 1200 } } },
+        update: {
+          title: "With gallery",
+          removeFileIds: ["file-1"],
+          gallery: { files: [file], options: { mode: "original-aspect", sizes: { full: 1200 } } },
+        },
       });
     });
 
@@ -68,8 +71,7 @@ describe("useUpdateEvent", () => {
     await act(async () => {
       await result.current({
         eventId: "event-1",
-        update: { removeFileIds: ["old-cover"] },
-        coverFile: { file, options },
+        update: { removeFileIds: ["old-cover"], coverFile: { file, options } },
       });
     });
 
@@ -81,6 +83,23 @@ describe("useUpdateEvent", () => {
     expect(formData.get("removeFileIds")).toBe(JSON.stringify(["old-cover"]));
     expect(formData.has("cover")).toBe(false);
     expect(formData.has("cover.options")).toBe(false);
+    expect(formData.getAll("coverFile")).toHaveLength(1);
+  });
+
+  it("leaves an empty gallery and no cover out of a JSON update", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEvent());
+    axiosPrivate.mockResponse("patch", makeEvent());
+
+    await act(async () => {
+      await result.current({
+        eventId: "event-1",
+        update: { title: "T", gallery: { files: [] } },
+      });
+    });
+
+    const [call] = axiosPrivate.calls("patch");
+    expect(call.body instanceof FormData).toBe(false);
+    expect(call.body).toEqual({ title: "T" });
   });
 
   it("sends removeFileIds alone as a JSON array", async () => {

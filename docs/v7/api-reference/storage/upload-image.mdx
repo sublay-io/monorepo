@@ -79,7 +79,11 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  Associates the file with a space. Only a space admin can attach to it (a service key can attach to any space).
+  Associates the file with a space. Only an active admin of the space can attach to it (a service key can attach to any space).
+</ParamField>
+
+<ParamField body="eventId" type="string">
+  Associates the image with an event. Only one of the event's hosts can attach to it (a service key can attach to any event). Requires the `events` bundle: without it the upload is refused with `403 storage/events-bundle-required`.
 </ParamField>
 
 <ParamField body="userId" type="string">
@@ -135,12 +139,12 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     ```json
     { "error": "Not authorized to attach a file to this entity.", "code": "storage/unauthorized" }
     ```
-    The caller can't update the record named by `entityId`, `commentId` or `spaceId`. The message names the record type. Nothing is stored.
+    The caller can't update the record named by `entityId`, `commentId`, `spaceId` or `eventId`: they aren't the entity's or comment's author, an active admin of the space, or a host of the event. The message names the record type. Nothing is stored.
   </Accordion>
   <Accordion title="Record Not Found — 404">
     ```json
     { "error": "Entity not found", "code": "storage/entity-not-found" }
     ```
-    The record named by `entityId`, `commentId` or `spaceId` doesn't exist or was deleted. The code is `storage/entity-not-found`, `storage/comment-not-found` or `storage/space-not-found`. Nothing is stored.
+    The record named by `entityId`, `commentId`, `spaceId` or `eventId` doesn't exist, or counts as missing: a deleted record, an entity removed by moderation, a comment its author deleted, and a space the caller can't see (a private space they aren't in, for example) all answer 404. The code is `storage/entity-not-found`, `storage/comment-not-found`, `storage/space-not-found` or `storage/event-not-found`. Nothing is stored.
   </Accordion>
 </AccordionGroup>

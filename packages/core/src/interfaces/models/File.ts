@@ -40,8 +40,7 @@ export interface File {
   // The image data: on an image uploaded as an image (an image slot, an
   // `images` list or `POST /storage/images`), `null` on any other file (a
   // `files` list or `POST /storage` stores the file as uploaded, so it has
-  // none even when its `type` is "image"). Left out only where a response
-  // doesn't load it.
+  // none even when its `type` is "image"). The same on every File v8 returns.
   image?: FileImage | null;
   createdAt: string;
   updatedAt: string;

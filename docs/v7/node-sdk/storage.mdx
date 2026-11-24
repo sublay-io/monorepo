@@ -76,14 +76,14 @@ const file = await sublay.storage.uploadFile({
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  Associates the file with a space. Only an active admin of the space can attach to it (a service key can attach to any space).
+  Associates the file with a space.
 </ParamField>
 
 <ParamField body="userId" type="string">
   Attribute the upload to a user. Omit for a backend/project-owned file.
 </ParamField>
 
-Naming a record in `entityId`, `commentId` or `spaceId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found`, `storage/comment-not-found` or `storage/space-not-found`): a deleted record, an entity removed by moderation, a comment its author deleted, and a space the caller can't see (a service key sees every space) all count as missing. Nothing is stored on either refusal.
+Naming a record in `entityId` or `commentId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found` or `storage/comment-not-found`): a deleted record, an entity removed by moderation and a comment its author deleted all count as missing. Nothing is stored on either refusal.
 
 **Returns** — `Promise<File>`
 
@@ -159,7 +159,7 @@ const file = await sublay.storage.uploadImage({
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  Associates the image with a space. Only an active admin of the space can attach to it (a service key can attach to any space).
+  Associates the image with a space.
 </ParamField>
 
 <ParamField body="eventId" type="string">
@@ -172,7 +172,7 @@ const file = await sublay.storage.uploadImage({
   Attribute the upload to a user. Omit for a backend/project-owned file.
 </ParamField>
 
-Naming a record in `entityId`, `commentId`, `spaceId` or `eventId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found`, `storage/comment-not-found`, `storage/space-not-found` or `storage/event-not-found`): a deleted record, an entity removed by moderation, a comment its author deleted, and a space the caller can't see (a service key sees every space) all count as missing. Nothing is stored on either refusal.
+Naming a record in `entityId`, `commentId` or `eventId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found`, `storage/comment-not-found` or `storage/event-not-found`): a deleted record, an entity removed by moderation and a comment its author deleted all count as missing. Nothing is stored on either refusal.
 
 **Returns** — `Promise<File>` (the `image` field carries the generated `variants`).
 

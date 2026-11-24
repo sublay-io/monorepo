@@ -66,10 +66,10 @@ const uploaded = await sublay.storage.uploadFile({
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  Associates the file with a space. Only an active admin of the space can attach to it.
+  Associates the file with a space.
 </ParamField>
 
-Naming a record in `entityId`, `commentId` or `spaceId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found`, `storage/comment-not-found` or `storage/space-not-found`): a deleted record, an entity removed by moderation, a comment its author deleted, and a space the caller can't see all count as missing. Nothing is stored on either refusal.
+Naming a record in `entityId` or `commentId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found` or `storage/comment-not-found`): a deleted record, an entity removed by moderation and a comment its author deleted all count as missing. Nothing is stored on either refusal.
 
 **Returns** — `Promise<UploadFileResponse>`:
 
@@ -154,7 +154,7 @@ const uploaded = await sublay.storage.uploadImage({
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  Associates the image with a space. Only an active admin of the space can attach to it.
+  Associates the image with a space.
 </ParamField>
 
 <ParamField body="eventId" type="string">
@@ -163,7 +163,7 @@ const uploaded = await sublay.storage.uploadImage({
   to attach an image to an existing event out-of-band. Only one of the event's hosts can attach to it.
 </ParamField>
 
-Naming a record in `entityId`, `commentId`, `spaceId` or `eventId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found`, `storage/comment-not-found`, `storage/space-not-found` or `storage/event-not-found`): a deleted record, an entity removed by moderation, a comment its author deleted, and a space the caller can't see all count as missing. Nothing is stored on either refusal.
+Naming a record in `entityId`, `commentId` or `eventId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found`, `storage/comment-not-found` or `storage/event-not-found`): a deleted record, an entity removed by moderation and a comment its author deleted all count as missing. Nothing is stored on either refusal.
 
 **Returns** — `Promise<UploadImageResponse>`:
 

@@ -29,7 +29,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  Associates the file with a space. Only an active admin of the space can attach to it (a service key can attach to any space).
+  Associates the file with a space.
 </ParamField>
 
 <ParamField body="position" type="number">
@@ -79,12 +79,12 @@ The `type` field is one of: `image`, `video`, `document`, `other`. It is inferre
     ```json
     { "error": "Not authorized to attach a file to this entity.", "code": "storage/unauthorized" }
     ```
-    The caller can't update the record named by `entityId`, `commentId` or `spaceId`: they aren't the entity's or comment's author, or an active admin of the space. The message names the record type. Nothing is stored.
+    The caller can't update the record named by `entityId` or `commentId`: they aren't the entity's or comment's author. The message names the record type. Nothing is stored.
   </Accordion>
   <Accordion title="Record Not Found — 404">
     ```json
     { "error": "Entity not found", "code": "storage/entity-not-found" }
     ```
-    The record named by `entityId`, `commentId`, or `spaceId` doesn't exist, or counts as missing: a deleted record, an entity removed by moderation, a comment its author deleted, and a space the caller can't see (a private space they aren't in, for example) all answer 404. The code is `storage/entity-not-found`, `storage/comment-not-found` or `storage/space-not-found`. Nothing is stored.
+    The record named by `entityId` or `commentId` doesn't exist, or counts as missing: a deleted record, an entity removed by moderation and a comment its author deleted all answer 404. The code is `storage/entity-not-found` or `storage/comment-not-found`. Nothing is stored.
   </Accordion>
 </AccordionGroup>

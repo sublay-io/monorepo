@@ -138,7 +138,7 @@ Every error is JSON with the same two keys:
 
 Some errors add keys:
 
-- `param` names the failing input when the error is about one: a validation `400` (`<area>/invalid-body`, `<area>/invalid-query`, `<area>/invalid-params`), including a key the endpoint doesn't take and a malformed or misspelled `actingUserId`; an id that isn't a UUID, the project id in the path included (`project/invalid-id`); a value another record already holds (`<area>/foreign-id-taken`, `<area>/username-taken`, `auth/email-taken`, `space/slug-taken`); a referenced record that can't be used (`chat/invalid-parent`, `chat/invalid-quote`, `collection/invalid-parent`); a single value the endpoint refuses (`chat/invalid-emoji`, `auth/redirect-url-not-allowed`); an image-options field that is missing or isn't valid JSON; a refused file (`<area>/file-too-large`, `<area>/unsupported-file-type`, `<area>/unexpected-file-field`, `<area>/invalid-image`). It is the input's dot path, as you sent it (`email`, `metadata.title`, `images.options`, `images.files`). A validation rule that checks several fields together names the field it's about, or leaves `param` out when no single field is. It is left out when the error is about the request as a whole: a body sent with a content type the server doesn't read, or a query string with more parameters than the server reads.
+- `param` names the failing input when the error is about one: a validation `400` (`<area>/invalid-body`, `<area>/invalid-query`, `<area>/invalid-params`), including a key the endpoint doesn't take and a malformed or misspelled `actingUserId`; an id that isn't a UUID, the project id in the path included (`project/invalid-id`); a value another record already holds (`<area>/foreign-id-taken`, `<area>/username-taken`, `auth/email-taken`, `space/slug-taken`); a referenced record that can't be used (`chat/invalid-parent`, `chat/invalid-quote`, `collection/invalid-parent`); a single value the endpoint refuses (`chat/invalid-emoji`, `auth/redirect-url-not-allowed`); an image-options field that is missing or isn't valid JSON; a refused file (`<area>/file-too-large`, `<area>/unsupported-file-type`, `<area>/unexpected-file-field`, `<area>/invalid-image`). It is the input's dot path, as you sent it (`email`, `metadata.title`, `images.options`, `images`). A validation rule that checks several fields together names the field it's about, or leaves `param` out when no single field is. It is left out when the error is about the request as a whole: a body sent with a content type the server doesn't read, or a query string with more parameters than the server reads.
 
   ```json
   {
@@ -174,7 +174,7 @@ These can come from any endpoint, because they are about the HTTP request itself
 
 ### Upload errors
 
-Endpoints that take a file in a `multipart/form-data` body answer a refused file with a code in the endpoint's area (`entity`, `event`, `space`, `user`, `auth`, `chat`, `storage`):
+Endpoints that take a file in a `multipart/form-data` body answer a refused file with a code in the endpoint's area (`entity`, `event`, `comment`, `space`, `user`, `auth`, `chat`, `storage`):
 
 | Status | Code | When |
 |--------|------|------|
@@ -184,7 +184,7 @@ Endpoints that take a file in a `multipart/form-data` body answer a refused file
 | `400` | `<area>/unsupported-file-type` | A file isn't JPEG, PNG, WebP or PDF. `param` names its field. |
 | `400` | `<area>/unexpected-file-field` | A file is in a field the endpoint doesn't take, or a field has more files than it takes. `param` names the field. |
 
-The limits are per request, the same on every endpoint: at most 50 MB per file, 20 files in total, and 250 MB for the whole body. A field that holds a list of files takes up to 20 of them; a field that holds one file (`avatarFile`, `bannerFile`, `coverFile`) takes one. They don't cap how many files a record holds: an update can add more. Endpoints that process images add their own checks (for example `422 <area>/invalid-image` for a file that isn't a valid image, with `param` naming its field); each endpoint's page lists them.
+The limits are per request, the same on every endpoint: at most 50 MB per file, 20 files in total, and 250 MB for the whole body. A field that holds a list of files takes up to 20 of them; a field that holds one file (`avatarFile`, `bannerFile`, `coverFile`) takes one. They don't cap how many files a record holds: an update can add more. A record's files are sent in the same fields everywhere: one image in a slot (`avatarFile`, `bannerFile`, `coverFile`) with its options in `<field>.options`, and a list as `images` (processed into sizes, `images.options` required) and `files` (stored as uploaded, `files.options` optional). An update that holds files takes `removeFileIds`. Endpoints that process images add their own checks (for example `422 <area>/invalid-image` for a file that isn't a valid image, with `param` naming its field, and `400 <area>/missing-image-options` for images sent without their options); an id in `removeFileIds` that isn't the record's own file gets `400 <area>/invalid-remove-file-ids`, and uploads that would take the project past its plan's file-storage limit get `429 project/quota-reached`. Each endpoint's page lists them.
 
 ### Same situation, same answer
 

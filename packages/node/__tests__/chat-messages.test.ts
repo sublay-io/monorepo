@@ -36,7 +36,11 @@ describe("node-sdk chat (messages) — request shaping", () => {
       conversationId: "conv1",
       actingUserId: "u1",
       content: "see attached",
-      files: [{ file: new Uint8Array([1, 2, 3]), filename: "photo.png", mimeType: "image/png" }],
+      images: {
+        files: [{ file: new Uint8Array([1, 2, 3]), filename: "photo.png", mimeType: "image/png" }],
+        options: { mode: "original-aspect", sizes: { full: 1000 } },
+      },
+      files: { files: [{ file: new Uint8Array([4]), filename: "doc.pdf", mimeType: "application/pdf" }] },
     });
 
     expect(projectInstance.post).toHaveBeenCalledTimes(1);
@@ -48,8 +52,14 @@ describe("node-sdk chat (messages) — request shaping", () => {
     const fd = formData as FormData;
     expect(fd.get("actingUserId")).toBe("u1");
     expect(fd.get("content")).toBe("see attached");
-    expect(fd.get("files")).toBeInstanceOf(Blob);
-    expect((fd.get("files") as File).name).toBe("photo.png");
+    expect(fd.get("images")).toBeInstanceOf(Blob);
+    expect((fd.get("images") as File).name).toBe("photo.png");
+    expect((fd.get("images") as File).type).toBe("image/png");
+    expect(fd.get("images.options")).toBe(
+      JSON.stringify({ mode: "original-aspect", sizes: { full: 1000 } }),
+    );
+    expect((fd.get("files") as File).name).toBe("doc.pdf");
+    expect(fd.has("files.options")).toBe(false);
   });
 
   it("sendMessage sends the spaceReputation options in the JSON body, never the query", async () => {
@@ -78,7 +88,7 @@ describe("node-sdk chat (messages) — request shaping", () => {
       conversationId: "conv1",
       actingUserId: "u1",
       spaceReputation: { spaceId: "rep1", includeDescendants: false },
-      files: [{ file: new Uint8Array([1]), filename: "a.png", mimeType: "image/png" }],
+      files: { files: [{ file: new Uint8Array([1]), filename: "a.png", mimeType: "image/png" }] },
     });
     const [, formData, config] = projectInstance.post.mock.calls[0];
     expect(config).toBeUndefined();
@@ -173,7 +183,7 @@ describe("node-sdk chat (messages) — response mapping", () => {
         conversationId: "conv1",
         actingUserId: "u1",
         content: "see attached",
-        files: [{ file: new Uint8Array([1]) }],
+        files: { files: [{ file: new Uint8Array([1]) }], options: { pathParts: ["chat"] } },
       }),
     ).resolves.toEqual(message);
   });

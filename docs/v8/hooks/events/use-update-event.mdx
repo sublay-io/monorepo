@@ -1,12 +1,12 @@
 ---
 title: "useUpdateEvent"
-description: "Edit an event's fields and curate its cover and gallery images (host-only)"
+description: "Edit an event's fields and curate its cover, images and files (host-only)"
 icon: "plug"
 ---
 
 ## Overview
 
-`useUpdateEvent` returns a callable that edits an event. **Host-only** (`403 event/forbidden`): the logged-in user must be the owner or in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member`). The space's admins and moderators can't edit events they don't host. Everything to change goes under `update`; `hostIds`, `status`, and `spaceId` are not editable here. In `update`, pass `coverFile` to **replace** the cover, `gallery` to **append** images, and `removeFileIds` to remove the event's files (gallery images and/or the cover). Uploads send `multipart/form-data`; any image operation requires the `files-images` bundle.
+`useUpdateEvent` returns a callable that edits an event. **Host-only** (`403 event/forbidden`): the logged-in user must be the owner or in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member`). The space's admins and moderators can't edit events they don't host. Everything to change goes under `update`; `hostIds`, `status`, and `spaceId` are not editable here. In `update`, pass `coverFile` to **replace** the cover, `images` and `files` to **append** to the event's files, and `removeFileIds` to remove the event's files (list files and/or the cover). Uploads send `multipart/form-data`; any file operation requires the `files-images` bundle.
 
 ## Usage Example
 
@@ -52,11 +52,17 @@ function EditEvent({ eventId }: { eventId: string }) {
     <ParamField path="coverFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
       New cover image and its processing options (`mode` is required) — replaces the existing cover, whose file is deleted. `file` is a `File` or `Blob`, or a React Native file `{ uri, name, type? }`. Sends multipart.
     </ParamField>
-    <ParamField path="gallery" type="{ files: (File | RNFile)[]; options?: UploadImageOptions }">
-      Gallery images to append after the event's existing images (up to 20 in a request). Sends multipart.
+    <ParamField path="images" type="{ files: UploadFileInput[]; options: UploadImageOptions }">
+      Images to append after the event's existing files, processed into sizes per `options` (`mode` is required). A request takes at most 20 files in all. Sends multipart.
+    </ParamField>
+    <ParamField path="files" type="{ files: UploadFileInput[]; options?: { pathParts?: string[] } }">
+      Files to append after the event's existing files, stored as uploaded. Sends multipart.
+    </ParamField>
+    <ParamField path="include" type='"files" | "files"[]'>
+      What the response adds: `"files"`, the event's files as they now are (cover first) and the host's avatar and banner files. Defaults to `"files"` when the update uploads or removes files; otherwise the response has no `files`, and the event's cached files (in [`useEvent`](/v8/hooks/events/use-event)) are kept.
     </ParamField>
     <ParamField path="removeFileIds" type="string[]">
-      Ids of the event's files to remove: gallery images and/or the cover (`coverImageId`; removing it clears the cover). Works alone or with uploads. Any other id refuses the whole update (`400 event/invalid-remove-file-ids`).
+      Ids of the event's files to remove: list files and/or the cover (`coverImageId`; removing it clears the cover). Works alone or with uploads. Any other id refuses the whole update (`400 event/invalid-remove-file-ids`).
     </ParamField>
   </Expandable>
 </ParamField>

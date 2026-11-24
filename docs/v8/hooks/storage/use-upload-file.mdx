@@ -53,7 +53,7 @@ function DocumentUploader() {
 ### Options
 
 <ParamField body="position" type="number">
-  A number stored on the file as `position`. Defaults to `0`.
+  A number stored on the file as `position`, from `0` to `10000`. Defaults to `0`. A value outside that range is refused with `400 storage/invalid-body`.
 </ParamField>
 
 <ParamField body="metadata" type="Record<string, any>">

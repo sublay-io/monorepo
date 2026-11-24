@@ -123,6 +123,16 @@ export type DraftInclude = "user" | "space" | "files" | "grants";
 export type DraftIncludeArray = DraftInclude[];
 export type DraftIncludeParam = DraftInclude | DraftIncludeArray;
 
+/**
+ * `include` values the entity update accepts (in its body): `"files"` adds
+ * the entity's files to the response.
+ */
+export type EntityUpdateInclude = "files";
+export type EntityUpdateIncludeArray = EntityUpdateInclude[];
+export type EntityUpdateIncludeParam =
+  | EntityUpdateInclude
+  | EntityUpdateIncludeArray;
+
 /** Options for `include=topComments` (rejected without that include). */
 export interface TopCommentsParams {
   /** How many top comments per entity (default 1, max 5). */

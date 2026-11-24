@@ -119,6 +119,16 @@ export type DraftIncludeArray = DraftInclude[];
 export type DraftIncludeParam = DraftInclude | DraftIncludeArray;
 
 /**
+ * `include` values the entity update accepts (in its body): `"files"` adds
+ * the entity's files to the response.
+ */
+export type EntityUpdateInclude = "files";
+export type EntityUpdateIncludeArray = EntityUpdateInclude[];
+export type EntityUpdateIncludeParam =
+  | EntityUpdateInclude
+  | EntityUpdateIncludeArray;
+
+/**
  * Options for `include=topComments` (sending either without that include is
  * rejected by the server).
  */

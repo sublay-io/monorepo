@@ -25,6 +25,32 @@ describe("js-sdk comments — request shaping", () => {
     expect(projectInstance.post).toHaveBeenCalledWith("/comments", data);
   });
 
+  it("createComment sends images and files as multipart, leaving null fields out", async () => {
+    const { client, projectInstance } = makeClient();
+    const photo = new File(["a"], "p.png", { type: "image/png" });
+    const options = { mode: "original-aspect" as const, sizes: { full: 1000 } };
+    await createComment(client, {
+      entityId: "e1",
+      content: null,
+      parentCommentId: null,
+      mentions: [],
+      images: { files: [photo], options },
+      files: { files: [new File(["b"], "d.pdf", { type: "application/pdf" })] },
+    });
+    const [path, body] = projectInstance.post.mock.calls[0];
+    expect(path).toBe("/comments");
+    const form = body as FormData;
+    expect(form).toBeInstanceOf(FormData);
+    expect(form.get("entityId")).toBe("e1");
+    expect(form.has("content")).toBe(false);
+    expect(form.has("parentCommentId")).toBe(false);
+    expect(form.get("mentions")).toBe("[]");
+    expect(form.getAll("images")).toHaveLength(1);
+    expect(form.get("images.options")).toBe(JSON.stringify(options));
+    expect(form.getAll("files")).toHaveLength(1);
+    expect(form.has("files.options")).toBe(false);
+  });
+
   it("createComment sends content: null as-is (a gif-only comment)", async () => {
     const { client, projectInstance } = makeClient();
     const gif = {

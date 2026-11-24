@@ -822,6 +822,9 @@ export type {
   DraftInclude,
   DraftIncludeArray,
   DraftIncludeParam,
+  EntityUpdateInclude,
+  EntityUpdateIncludeArray,
+  EntityUpdateIncludeParam,
   TopCommentsParams,
 } from "./interfaces/models/Entity";
 export type {
@@ -839,6 +842,9 @@ export type {
   EventInclude,
   EventIncludeArray,
   EventIncludeParam,
+  EventUpdateInclude,
+  EventUpdateIncludeArray,
+  EventUpdateIncludeParam,
 } from "./interfaces/models/Event";
 export type {
   Collection,
@@ -997,6 +1003,8 @@ export type {
 } from "./interfaces/models/Image";
 export type {
   ImageSlotUpload,
+  ImageListUpload,
+  FileListUpload,
   UploadFileInput,
   NativeUploadFile,
 } from "./utils/uploads";

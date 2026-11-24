@@ -9,7 +9,7 @@ afterEach(() => {
 });
 
 describe("useUpdateEvent", () => {
-  it("updates an event via a plain JSON request when there is no cover/gallery", async () => {
+  it("updates an event via a plain JSON request when there is no cover or list files", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEvent());
 
     const updated = makeEvent({ title: "New title" });
@@ -31,10 +31,10 @@ describe("useUpdateEvent", () => {
     expect(call.body instanceof FormData).toBe(false);
   });
 
-  it("updates an event via multipart FormData when a gallery is provided", async () => {
+  it("updates an event via multipart FormData when images and files are provided", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEvent());
 
-    const updated = makeEvent({ title: "With gallery" });
+    const updated = makeEvent({ title: "With images" });
     axiosPrivate.mockResponse("patch", updated);
 
     const file = new File(["binary"], "photo.png", { type: "image/png" });
@@ -43,9 +43,10 @@ describe("useUpdateEvent", () => {
       await result.current({
         eventId: "event-1",
         update: {
-          title: "With gallery",
+          title: "With images",
           removeFileIds: ["file-1"],
-          gallery: { files: [file], options: { mode: "original-aspect", sizes: { full: 1200 } } },
+          images: { files: [file], options: { mode: "original-aspect", sizes: { full: 1200 } } },
+          files: { files: [new File(["pdf"], "doc.pdf", { type: "application/pdf" })] },
         },
       });
     });
@@ -53,10 +54,18 @@ describe("useUpdateEvent", () => {
     const [call] = axiosPrivate.calls("patch");
     expect(call.body instanceof FormData).toBe(true);
     const formData = call.body as FormData;
-    expect(formData.get("title")).toBe("With gallery");
+    expect(formData.get("title")).toBe("With images");
     expect(formData.get("removeFileIds")).toBe(JSON.stringify(["file-1"]));
     expect(formData.has("removeImageIds")).toBe(false);
-    expect(formData.get("gallery")).toBeInstanceOf(File);
+    expect(formData.get("images")).toBeInstanceOf(File);
+    expect(formData.get("images.options")).toBe(
+      JSON.stringify({ mode: "original-aspect", sizes: { full: 1200 } }),
+    );
+    expect(formData.getAll("files")).toHaveLength(1);
+    expect(formData.has("files.options")).toBe(false);
+    expect(formData.has("gallery")).toBe(false);
+    expect(formData.has("images.files")).toBe(false);
+    expect(formData.has("files.files")).toBe(false);
     expect(call.config?.headers).toMatchObject({
       "Content-Type": "multipart/form-data",
     });
@@ -86,14 +95,18 @@ describe("useUpdateEvent", () => {
     expect(formData.getAll("coverFile")).toHaveLength(1);
   });
 
-  it("leaves an empty gallery and no cover out of a JSON update", async () => {
+  it("leaves empty lists and no cover out of a JSON update", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEvent());
     axiosPrivate.mockResponse("patch", makeEvent());
 
     await act(async () => {
       await result.current({
         eventId: "event-1",
-        update: { title: "T", gallery: { files: [] } },
+        update: {
+          title: "T",
+          images: { files: [], options: { mode: "original-aspect", sizes: { full: 1200 } } },
+          files: { files: [] },
+        },
       });
     });
 
@@ -115,7 +128,34 @@ describe("useUpdateEvent", () => {
 
     const [call] = axiosPrivate.calls("patch");
     expect(call.body instanceof FormData).toBe(false);
-    expect(call.body).toEqual({ removeFileIds: ["file-1", "file-2"] });
+    // A removal asks for the event's files, so the cached copy gets the new list.
+    expect(call.body).toEqual({ removeFileIds: ["file-1", "file-2"], include: "files" });
+  });
+
+  it("sends include: files with an upload, none on a plain edit, and the caller's include as given", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEvent());
+    axiosPrivate.mockResponse("patch", makeEvent());
+    axiosPrivate.mockResponse("patch", makeEvent());
+    axiosPrivate.mockResponse("patch", makeEvent());
+
+    const file = new File(["binary"], "photo.png", { type: "image/png" });
+    await act(async () => {
+      await result.current({
+        eventId: "event-1",
+        update: { images: { files: [file], options: { mode: "original-aspect", sizes: { full: 1200 } } } },
+      });
+    });
+    await act(async () => {
+      await result.current({ eventId: "event-1", update: { title: "T" } });
+    });
+    await act(async () => {
+      await result.current({ eventId: "event-1", update: { title: "T", include: ["files"] } });
+    });
+
+    const [upload, plain, asked] = axiosPrivate.calls("patch");
+    expect((upload.body as FormData).get("include")).toBe("files");
+    expect(plain.body).toEqual({ title: "T" });
+    expect(asked.body).toEqual({ title: "T", include: ["files"] });
   });
 
   it("sends a Date start time as an ISO string", async () => {

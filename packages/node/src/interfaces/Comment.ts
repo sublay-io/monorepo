@@ -1,3 +1,4 @@
+import { File } from "./File";
 import { GrantSummary } from "./ReputationGrant";
 import { EntityRecord, SpaceWithViewer } from "./Entity";
 import { Mention } from "./Mention";
@@ -47,6 +48,11 @@ export interface Comment {
   gif: GifData | null;
   mentions: Mention[];
   attachments: Record<string, any>[]; // `[]` on placeholders
+  // The comment's images and files, in upload order, images with their
+  // variants. Present when the read's include contains "files", and on the
+  // created comment whenever files-images is installed (`[]` for none).
+  // `[]` on placeholders.
+  files?: File[];
   upvotes: string[];   // Legacy v6 — v7 uses reactionCounts
   downvotes: string[]; // Legacy v6 — v7 uses reactionCounts
   reactionCounts: ReactionCounts;
@@ -89,12 +95,18 @@ export interface Comment {
 }
 
 /** `include` values of a user's comment history and single-comment fetches. */
-export type CommentInclude = "user" | "entity" | "space" | "parent" | "grants";
+export type CommentInclude =
+  | "user"
+  | "entity"
+  | "space"
+  | "parent"
+  | "grants"
+  | "files";
 export type CommentIncludeArray = CommentInclude[];
 export type CommentIncludeParam = CommentInclude | CommentIncludeArray;
 
 /** `include` values the thread endpoint (`GET /comments`) accepts. */
-export type CommentThreadInclude = "user" | "grants";
+export type CommentThreadInclude = "user" | "grants" | "files";
 export type CommentThreadIncludeArray = CommentThreadInclude[];
 export type CommentThreadIncludeParam =
   | CommentThreadInclude

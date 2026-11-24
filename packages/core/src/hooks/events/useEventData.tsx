@@ -26,10 +26,14 @@ function isFullEvent(
   return "shortId" in body;
 }
 
-// Mutation responses carry only `user` and `userRsvp` of the includes, so
-// they're merged onto the current event rather than replacing it: the
-// `space` / `files` the hook fetched stay, and so do the owner's
-// `avatarFile` / `bannerFile` (`user` is merged one level deep).
+// Mutation responses carry `user` and `userRsvp` of the includes, and an
+// update also `files` (with the owner's `avatarFile` / `bannerFile`) when it
+// asked with `include: "files"`, which useUpdateEvent does whenever it
+// changes the event's files. So they're merged onto the current event
+// rather than replacing it: what a response leaves out (`space`, and
+// `files` and the owner's files when not asked for) stays as the hook
+// fetched it, and what it carries replaces the old value (`user` is merged
+// one level deep).
 function mergeEventResponse(
   current: Event | null | undefined,
   response: Event

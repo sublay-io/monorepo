@@ -11,7 +11,7 @@ The `comments` module provides full server-side control over comments on entitie
 
 ### createComment
 
-Creates a new comment on an entity.
+Creates a new comment on an entity, with optional images and files.
 
 ```typescript
 const comment = await sublay.comments.createComment({
@@ -30,7 +30,7 @@ const comment = await sublay.comments.createComment({
 </ParamField>
 
 <ParamField body="content" type="string | null">
-  The comment text content. `null` or an empty string stores none — a comment needs `content`, a `gif` or `attachments`.
+  The comment text content. `null` or an empty string stores none — a comment needs `content`, a `gif`, `attachments`, `images` or `files`.
 </ParamField>
 
 <ParamField body="foreignId" type="string">
@@ -69,7 +69,15 @@ const comment = await sublay.comments.createComment({
   Same format as `createdAt`, used to backdate the comment's last update time. More than five minutes in the future returns `400 comment/invalid-body` (`updatedAt can't be in the future.`).
 </ParamField>
 
-**Returns** — `Promise<Comment>`
+<ParamField body="images" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options: ImageOptions }">
+  Images on the comment, processed into sizes per `options` (`mode` is required). Pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 comment/unsupported-file-type`); a `Blob` keeps its own type. A PDF goes in `files`: in `images` it isn't a valid image (`422 comment/invalid-image`). With images or files, the request is sent as `multipart/form-data`. A request takes at most 20 files in all. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField body="files" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options?: { pathParts?: string[] } }">
+  Files on the comment, stored as uploaded (JPEG, PNG, WebP or PDF: pass `mimeType` with a `Uint8Array`). Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. Requires the `files-images` bundle.
+</ParamField>
+
+**Returns** — `Promise<Comment>`. With the `files-images` bundle installed, the created comment carries `files` (`[]` for none).
 
 When the server refuses the comment, the call rejects with its error — among them `403 comment/parent-deleted` and `403 comment/parent-removed` for a reply to a deleted or removed comment, `403 comment/referenced-deleted` and `403 comment/referenced-removed` for a quote of one, and `409 comment/foreign-id-taken` for a `foreignId` already in use. See [Create Comment → Error Responses](/v8/api-reference/comments/create-comment#error-responses) for the full list.
 
@@ -92,7 +100,7 @@ const comment = await sublay.comments.fetchComment({ commentId: "cmt_abc123" });
 </ParamField>
 
 <ParamField body="include" type="CommentIncludeParam">
-  Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
+  Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`, `"files"` (the comment's images and files; requires the `files-images` bundle).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />
@@ -120,7 +128,7 @@ const comment = await sublay.comments.fetchCommentByForeignId({
 </ParamField>
 
 <ParamField body="include" type="CommentIncludeParam">
-  Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
+  Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`, `"files"` (the comment's images and files; requires the `files-images` bundle).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />
@@ -262,8 +270,8 @@ For a user's comments across entities, use [`users.fetchCommentsByUserId`](/v8/n
   The user to list as: you get exactly what their own access token would get (blocks, their own removed comments in full, moderation details only where they may see them). Omit it for the anonymous view, with no moderation details.
 </ParamField>
 
-<ParamField body="include" type='"user" | "grants" | ("user" | "grants")[]'>
-  Related data to populate, at every level.
+<ParamField body="include" type='"user" | "grants" | "files" | ("user" | "grants" | "files")[]'>
+  Related data to populate, at every level. `"files"` adds the comment's images and files (requires the `files-images` bundle).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />

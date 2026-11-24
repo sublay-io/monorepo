@@ -52,11 +52,11 @@ function DocumentUploader({ entityId }: { entityId: string }) {
 ### Options
 
 <ParamField body="entityId" type="string">
-  Associates the file with an entity. The file is deleted when the entity is deleted.
+  Associates the file with an entity. The file is deleted when the entity is deleted. Only the entity's author can attach to it.
 </ParamField>
 
 <ParamField body="commentId" type="string">
-  Associates the file with a comment. The file is deleted when the comment is deleted.
+  Associates the file with a comment. The file is deleted when the comment is deleted. Only the comment's author can attach to it.
 </ParamField>
 
 <ParamField body="spaceId" type="string">
@@ -64,12 +64,14 @@ function DocumentUploader({ entityId }: { entityId: string }) {
 </ParamField>
 
 <ParamField body="position" type="number">
-  Display order when a record has multiple attachments. Defaults to `0`.
+  Display order when a record has multiple attachments, from `0` to `10000`. Defaults to `0`.
 </ParamField>
 
 <ParamField body="metadata" type="Record<string, any>">
   Custom key-value data stored alongside the file record.
 </ParamField>
+
+Naming a record in `entityId` or `commentId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found` or `storage/comment-not-found`): a deleted record, an entity removed by moderation and a comment its author deleted all count as missing. Nothing is stored on either refusal.
 
 ## Returns
 

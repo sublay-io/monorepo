@@ -3,9 +3,9 @@ title: "Event"
 description: "The shape of an Event object returned by the Events API and SDKs"
 ---
 
-An Event is a scheduled happening — online, physical, or hybrid — that users can RSVP to. Events support hosts, capacity limits, invite-only or space-scoped visibility, a guest list, a single cover image, and a multi-image gallery. RSVP counts are denormalized onto the event so every read carries up-to-date `going` / `maybe` / `not-going` totals without an extra query.
+An Event is a scheduled happening — online, physical, or hybrid — that users can RSVP to. Events support hosts, capacity limits, invite-only or space-scoped visibility, a guest list, a single cover image, and any number of images and files. RSVP counts are denormalized onto the event so every read carries up-to-date `going` / `maybe` / `not-going` totals without an extra query.
 
-Events belong to the `events` bundle. They work standalone, but some behaviors depend on other bundles: space-scoping and `members` visibility require the `spaces` bundle, cover/gallery images require the `files-images` bundle, and invite/update/cancel notifications require the `notifications` bundle. When a dependency is absent, that specific behavior is rejected or skipped — the rest of the events surface keeps working.
+Events belong to the `events` bundle. They work standalone, but some behaviors depend on other bundles: space-scoping and `members` visibility require the `spaces` bundle, the cover, images and files require the `files-images` bundle, and invite/update/cancel notifications require the `notifications` bundle. When a dependency is absent, that specific behavior is rejected or skipped — the rest of the events surface keeps working.
 
 ## Event
 
@@ -33,8 +33,8 @@ Events belong to the `events` bundle. They work standalone, but some behaviors d
 | `guestListVisible` | `boolean` | Whether everyone who can see the event can see the named RSVP/guest list (counts are always public). When `false`, the list is visible only to hosts who are active members of the event's space and not banned in it or a space above it (any host, for an event with no space) and to the space's admins and moderators. Defaults to `true`. |
 | `capacity` | `number \| null` | Maximum number of `going` RSVPs. `null` means unlimited. Enforced under a row lock so it can't be oversold. |
 | `hostIds` | `string[]` | UUIDs of the event's hosts. Always includes the owner (`userId`) when the event has one, and always has at least one entry. |
-| `coverImageId` | `string \| null` | File ID of the cover image, which is one of the event's `files`. Requires the `files-images` bundle. See [Cover and gallery](#cover-and-gallery). |
-| `files` | `File[]` | The event's files: the cover and the gallery images, gallery in upload order. Find the cover by `coverImageId`. Only present when `include` contains `"files"`. |
+| `coverImageId` | `string \| null` | File ID of the cover image, which is one of the event's `files`. Requires the `files-images` bundle. See [Cover and files](#cover-and-files). |
+| `files` | `File[]` | The event's files: the cover, then its images and files in upload order. Find the cover by `coverImageId`. Present when `include` contains `"files"` (on the reads, and in the body of [Update Event](/v8/api-reference/events/update-event)), and on the created event whenever the `files-images` bundle is installed (`[]` for none). |
 | `rsvpCounts` | `{ going: number; maybe: number; "not-going": number }` | Denormalized RSVP totals, always returned. |
 | `userRsvp` | `"going" \| "maybe" \| "not-going" \| null` | The requesting user's own RSVP status. Only populated when `include` contains `"userRsvp"` and the caller is authenticated; otherwise `null`. |
 | `metadata` | `Record<string, any>` | Arbitrary key-value data. Up to 1 MB. Use this for ticketing, tags, or any custom fields. |
@@ -42,14 +42,14 @@ Events belong to the `events` bundle. They work standalone, but some behaviors d
 | `updatedAt` | `string` | ISO timestamp when the event was last updated. |
 | `deletedAt` | `string \| null` | Soft-delete timestamp when `eventDeletion.softDelete` is enabled; otherwise `null`. |
 
-## Cover and gallery
+## Cover and files
 
-An event holds one cover image and any number of gallery images, all of them [File](/v8/data-models/file) records with the event's `eventId`, returned together in `files` (with `include=files`). Find the cover in `files` by `coverImageId`.
+An event holds one cover image and a list of any number of images and files, all of them [File](/v8/data-models/file) records with the event's `eventId`, returned together in `files` (with `include=files`). Find the cover in `files` by `coverImageId`.
 
-- **Upload** the cover as `coverFile` (with `coverFile.options`) and gallery images as `gallery` (with `gallery.options`), on [Create Event](/v8/api-reference/events/create-event) or [Update Event](/v8/api-reference/events/update-event). Uploads need the `files-images` bundle.
-- **Replace** the cover by sending a new `coverFile` on update; the old cover file is deleted. Gallery images sent on update are added after the existing ones.
-- **Remove** files with `removeFileIds` on update: gallery images and/or the cover (removing the cover sets `coverImageId` to `null`). [Delete File](/v8/api-reference/storage/delete-file) refuses the files of a live event; once the event is soft-deleted with its files kept, their owner can delete them there.
-- **Order:** gallery images count up from `0` in upload order. A cover uploaded through v8 has `position` `-1`, so it comes back first; a cover uploaded through the v7 API has `0`. Always find the cover by `coverImageId`.
+- **Upload** the cover as `coverFile` (with `coverFile.options`), images as `images` (with `images.options`; processed into sizes) and other files as `files` (optional `files.options`; stored as uploaded), on [Create Event](/v8/api-reference/events/create-event) or [Update Event](/v8/api-reference/events/update-event). Uploads need the `files-images` bundle.
+- **Replace** the cover by sending a new `coverFile` on update; the old cover file is deleted. Images and files sent on update are added after the existing ones.
+- **Remove** files with `removeFileIds` on update: list files and/or the cover (removing the cover sets `coverImageId` to `null`). [Delete File](/v8/api-reference/storage/delete-file) refuses the files of a live event; once the event is soft-deleted with its files kept, their owner can delete them there.
+- **Order:** the list counts up from `0` in upload order, a request's images before its files. A cover uploaded through v8 has `position` `-1`, so it comes back first; a cover uploaded through the v7 API has `0`. Always find the cover by `coverImageId`.
 
 Uninstalling the `events` bundle deletes every event's files and their stored blobs. What deleting one event does to its files is described in [Delete Event](/v8/api-reference/events/delete-event).
 

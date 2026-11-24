@@ -2,30 +2,16 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { Event, EventType, EventVisibility } from "../../interfaces/models/Event";
-import { UploadImageOptions } from "../../interfaces/models/Image";
 import { toIsoString } from "../../utils/dates";
-import { appendImageSlot, type ImageSlotUpload } from "../../utils/uploads";
-
-// Universal file typing (mirrors useCreateEntity).
-type BrowserFile = File;
-
-interface RNFile {
-  uri: string;
-  name: string;
-  type?: string;
-}
-
-export type UniversalFile = BrowserFile | RNFile;
-
-export function isBrowserFile(file: UniversalFile): file is BrowserFile {
-  return typeof File !== "undefined" && file instanceof File;
-}
-
-// Multi-image gallery slot (Files with eventId + position). Shared with useUpdateEvent.
-export interface GalleryUploadConfig {
-  files: UniversalFile[];
-  options?: UploadImageOptions;
-}
+import {
+  appendFileList,
+  appendImageList,
+  appendImageSlot,
+  hasListFiles,
+  type FileListUpload,
+  type ImageListUpload,
+  type ImageSlotUpload,
+} from "../../utils/uploads";
 
 export interface CreateEventProps {
   title: string;
@@ -55,8 +41,13 @@ export interface CreateEventProps {
    * it. Requires the files-images bundle.
    */
   coverFile?: ImageSlotUpload;
-  /** Inline gallery image upload (multi). Requires the files-images bundle. */
-  gallery?: GalleryUploadConfig;
+  /**
+   * Images in the event's files, processed into sizes per `options` (`mode`
+   * is required). Requires the files-images bundle.
+   */
+  images?: ImageListUpload;
+  /** Files in the event's files, stored as uploaded. Requires the files-images bundle. */
+  files?: FileListUpload;
 }
 
 function useCreateEvent(): (props: CreateEventProps) => Promise<Event> {
@@ -84,7 +75,8 @@ function useCreateEvent(): (props: CreateEventProps) => Promise<Event> {
         hostIds,
         metadata,
         coverFile,
-        gallery,
+        images,
+        files,
       } = props;
 
       if (!projectId) {
@@ -92,12 +84,13 @@ function useCreateEvent(): (props: CreateEventProps) => Promise<Event> {
       }
 
       const hasCover = !!coverFile && !!coverFile.file;
-      const hasGallery = !!gallery && gallery.files.length > 0;
+      const hasImages = hasListFiles(images);
+      const hasFiles = hasListFiles(files);
 
-      if (hasCover || hasGallery) {
-        // Multipart path — inline cover/gallery upload. Field names mirror the
-        // server route: `coverFile` + `coverFile.options`, `gallery` +
-        // `gallery.options`.
+      if (hasCover || hasImages || hasFiles) {
+        // Multipart path. Field names mirror the server route: `coverFile` +
+        // `coverFile.options`, `images` + `images.options`, `files` +
+        // `files.options`.
         const formData = new FormData();
 
         if (title !== undefined) formData.append("title", title);
@@ -121,22 +114,8 @@ function useCreateEvent(): (props: CreateEventProps) => Promise<Event> {
 
         if (hasCover) appendImageSlot(formData, "coverFile", coverFile!);
 
-        if (hasGallery) {
-          gallery!.files.forEach((file) => {
-            if (isBrowserFile(file)) {
-              formData.append("gallery", file, file.name);
-            } else {
-              formData.append("gallery", {
-                uri: file.uri,
-                type: file.type || "image/jpeg",
-                name: file.name,
-              } as any);
-            }
-          });
-          if (gallery!.options) {
-            formData.append("gallery.options", JSON.stringify(gallery!.options));
-          }
-        }
+        if (hasImages) appendImageList(formData, images!);
+        if (hasFiles) appendFileList(formData, files!);
 
         const response = await axios.post<Event>(
           `/${projectId}/events`,

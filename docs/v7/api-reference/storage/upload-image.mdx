@@ -71,15 +71,19 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 </ParamField>
 
 <ParamField body="entityId" type="string">
-  Associates the file with an entity for cascade deletion.
+  Associates the file with an entity for cascade deletion. Only the entity's author can attach to it (a service key can attach to any entity).
 </ParamField>
 
 <ParamField body="commentId" type="string">
-  Associates the file with a comment for cascade deletion.
+  Associates the file with a comment for cascade deletion. Only the comment's author can attach to it (a service key can attach to any comment).
 </ParamField>
 
 <ParamField body="spaceId" type="string">
   Associates the file with a space.
+</ParamField>
+
+<ParamField body="eventId" type="string">
+  Associates the image with an event. Only one of the event's hosts can attach to it (a service key can attach to any event). Requires the `events` bundle: without it the upload is refused with `403 storage/events-bundle-required`.
 </ParamField>
 
 <ParamField body="userId" type="string">
@@ -130,5 +134,17 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     ```json
     { "error": "Invalid image file", "code": "storage/invalid-image" }
     ```
+  </Accordion>
+  <Accordion title="Not Allowed To Attach — 403">
+    ```json
+    { "error": "Not authorized to attach a file to this entity.", "code": "storage/unauthorized" }
+    ```
+    The caller can't update the record named by `entityId`, `commentId` or `eventId`: they aren't the entity's or comment's author, or a host of the event. The message names the record type. Nothing is stored.
+  </Accordion>
+  <Accordion title="Record Not Found — 404">
+    ```json
+    { "error": "Entity not found", "code": "storage/entity-not-found" }
+    ```
+    The record named by `entityId`, `commentId` or `eventId` doesn't exist, or counts as missing: a deleted record, an entity removed by moderation and a comment its author deleted all answer 404. The code is `storage/entity-not-found`, `storage/comment-not-found` or `storage/event-not-found`. Nothing is stored.
   </Accordion>
 </AccordionGroup>

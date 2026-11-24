@@ -100,6 +100,7 @@ export interface UseEntityListValues {
   ) => void;
 
   loadMore: () => void;
+  /** JSON only: to create an entity with images or files, use `useCreateEntity`. */
   createEntity: (props: EntityListCreateEntityProps) => Promise<Entity | undefined>;
   deleteEntity: (props: EntityListDeleteEntityProps) => Promise<void>;
 }

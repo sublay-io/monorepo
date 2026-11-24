@@ -17,7 +17,7 @@ import {
 import { formDataToObject, makeClient } from "./helpers/client";
 
 describe("js-sdk events — request shaping", () => {
-  it("createEvent posts the full body to /events as JSON when there is no cover/gallery", async () => {
+  it("createEvent posts the full body to /events as JSON when there is no cover or list files", async () => {
     const { client, projectInstance } = makeClient();
     const data = {
       title: "Launch party",
@@ -79,7 +79,7 @@ describe("js-sdk events — request shaping", () => {
     expect(obj.endTime).toBe("2026-07-01T20:00:00.000Z");
   });
 
-  it("createEvent sends multipart/FormData with all gallery files when gallery is present", async () => {
+  it("createEvent sends multipart/FormData with the event's images and files", async () => {
     const { client, projectInstance } = makeClient();
     const file1 = new File(["a"], "g1.png", { type: "image/png" });
     const file2 = new File(["b"], "g2.png", { type: "image/png" });
@@ -87,9 +87,13 @@ describe("js-sdk events — request shaping", () => {
       title: "Gallery event",
       startTime: "2026-08-01T18:00:00Z",
       type: "online",
-      gallery: {
+      images: {
         files: [file1, file2],
         options: { mode: "original-aspect", sizes: { full: 1000 } },
+      },
+      files: {
+        files: [new File(["c"], "doc.pdf", { type: "application/pdf" })],
+        options: { pathParts: ["events"] },
       },
     });
 
@@ -98,22 +102,28 @@ describe("js-sdk events — request shaping", () => {
     expect(body).toBeInstanceOf(FormData);
 
     const formData = body as FormData;
-    const galleryEntries = formData.getAll("gallery");
-    expect(galleryEntries).toHaveLength(2);
-    expect((galleryEntries[0] as File).name).toBe("g1.png");
-    expect((galleryEntries[1] as File).name).toBe("g2.png");
-    expect(formData.get("gallery.options")).toBe(
+    const imageEntries = formData.getAll("images");
+    expect(imageEntries).toHaveLength(2);
+    expect((imageEntries[0] as File).name).toBe("g1.png");
+    expect((imageEntries[1] as File).name).toBe("g2.png");
+    expect(formData.get("images.options")).toBe(
       JSON.stringify({ mode: "original-aspect", sizes: { full: 1000 } })
     );
+    expect(formData.getAll("files")).toHaveLength(1);
+    expect(formData.get("files.options")).toBe(
+      JSON.stringify({ pathParts: ["events"] })
+    );
+    expect(formData.has("gallery")).toBe(false);
   });
 
-  it("createEvent ignores an empty gallery.files array and sends plain JSON", async () => {
+  it("createEvent ignores empty images and files lists and sends plain JSON", async () => {
     const { client, projectInstance } = makeClient();
     await createEvent(client, {
       title: "No actual files",
       startTime: "2026-08-01T18:00:00Z",
       type: "online",
-      gallery: { files: [], options: { mode: "original-aspect", sizes: {} } },
+      images: { files: [], options: { mode: "original-aspect", sizes: {} } },
+      files: { files: [] },
     });
 
     const [path, body] = projectInstance.post.mock.calls[0];
@@ -191,7 +201,7 @@ describe("js-sdk events — request shaping", () => {
     });
   });
 
-  it("updateEvent strips eventId into the path and patches the rest as JSON when there is no cover/gallery", async () => {
+  it("updateEvent strips eventId into the path and patches the rest as JSON when there is no cover or list files", async () => {
     const { client, projectInstance } = makeClient();
     await updateEvent(client, { eventId: "ev1", title: "New title" });
     expect(projectInstance.patch).toHaveBeenCalledWith("/events/ev1", {
@@ -239,12 +249,12 @@ describe("js-sdk events — request shaping", () => {
     );
   });
 
-  it("updateEvent sends multipart/FormData with all gallery files when gallery is present", async () => {
+  it("updateEvent sends multipart/FormData with appended images", async () => {
     const { client, projectInstance } = makeClient();
     const file1 = new File(["a"], "g1.png", { type: "image/png" });
     await updateEvent(client, {
       eventId: "ev1",
-      gallery: {
+      images: {
         files: [file1],
         options: { mode: "original-aspect", sizes: { full: 1000 } },
       },
@@ -255,18 +265,39 @@ describe("js-sdk events — request shaping", () => {
     expect(body).toBeInstanceOf(FormData);
 
     const formData = body as FormData;
-    expect(formData.getAll("gallery")).toHaveLength(1);
-    expect(formData.get("gallery.options")).toBe(
+    expect(formData.getAll("images")).toHaveLength(1);
+    expect(formData.get("images.options")).toBe(
       JSON.stringify({ mode: "original-aspect", sizes: { full: 1000 } })
     );
   });
 
-  it("updateEvent ignores an empty gallery.files array and sends plain JSON", async () => {
+  it("updateEvent sends include in the body: as given in JSON, comma-joined in multipart", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateEvent(client, { eventId: "ev1", title: "t", include: "files" });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/events/ev1", {
+      title: "t",
+      include: "files",
+    });
+    await updateEvent(client, {
+      eventId: "ev1",
+      include: ["files"],
+      images: {
+        files: [new File(["a"], "g1.png", { type: "image/png" })],
+        options: { mode: "original-aspect", sizes: { full: 1000 } },
+      },
+    });
+    const [, body] = projectInstance.patch.mock.calls[1];
+    // One `include` field holding exactly "files" (never a JSON array string).
+    expect((body as FormData).getAll("include")).toEqual(["files"]);
+  });
+
+  it("updateEvent ignores empty images and files lists and sends plain JSON", async () => {
     const { client, projectInstance } = makeClient();
     await updateEvent(client, {
       eventId: "ev1",
       title: "still json",
-      gallery: { files: [], options: { mode: "original-aspect", sizes: {} } },
+      images: { files: [], options: { mode: "original-aspect", sizes: {} } },
+      files: { files: [] },
     });
 
     const [path, body] = projectInstance.patch.mock.calls[0];

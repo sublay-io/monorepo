@@ -44,7 +44,7 @@ The caller must be a member. Former members (who left) can only read messages up
 
 <ParamField query="include" type="string">
   Extra fields to include, as a comma-separated value (`include=files,grants`) or repeated params. Values:
-  - `files` — the message's file attachments
+  - `files` — the message's images and files, images with their variants
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary) for each message
 
   Matching ignores case. An unknown value returns `400 chat/invalid-query`.

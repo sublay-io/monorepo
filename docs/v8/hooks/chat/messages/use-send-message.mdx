@@ -27,6 +27,12 @@ function MessageInput({ conversationId }: { conversationId: string }) {
     setText("");
   };
 
+  const handlePhoto = async (photo: File) => {
+    await send({
+      images: { files: [photo], options: { mode: "original-aspect", sizes: { full: 1080, thumbnail: 200 } } },
+    });
+  };
+
   return (
     <div>
       <input value={text} onChange={(e) => setText(e.target.value)} />
@@ -70,8 +76,12 @@ The hook returns a function. That function accepts:
   ID of the parent message when sending a thread reply.
 </ParamField>
 
-<ParamField body="files" type="(File | Blob)[]">
-  File attachments. When provided, the request is sent as `multipart/form-data`.
+<ParamField body="images" type="{ files: UploadFileInput[]; options: UploadImageOptions }">
+  Images on the message, processed into sizes per `options` (`mode` is required); each comes back with `image` and its variants. Each file is a `File` or `Blob`, or a React Native file `{ uri, name, type? }`. A request takes at most 20 files in all. When provided, the request is sent as `multipart/form-data`. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField body="files" type="{ files: UploadFileInput[]; options?: { pathParts?: string[] } }">
+  Files on the message, stored as uploaded (`image` is `null`, an image sent here included). When provided, the request is sent as `multipart/form-data`. Requires the `files-images` bundle.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />
@@ -84,5 +94,5 @@ The hook returns a function. That function accepts:
 
 ## Notes
 
-- At least one of `content`, `gif`, `files`, or non-empty `metadata` should be provided for a meaningful message.
+- A message needs at least one of `content`, `gif`, `images` or `files`; otherwise the server refuses it with `400 chat/empty-message`.
 - For integration guidance, see [Chat: Messages](/v8/sdk/chat/messages).

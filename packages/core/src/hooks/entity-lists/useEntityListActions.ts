@@ -88,6 +88,7 @@ interface DeleteEntityOptions {
 
 export interface UseEntityListActionsValues {
   fetchEntities: (listId: string, options: FetchEntitiesOptions) => Promise<Entity[] | null>;
+  /** JSON only: to create an entity with images or files, use `useCreateEntity`. */
   createEntity: (listId: string, options: CreateEntityOptions) => Promise<Entity | undefined>;
   deleteEntity: (listId: string, options: DeleteEntityOptions) => Promise<void>;
 }

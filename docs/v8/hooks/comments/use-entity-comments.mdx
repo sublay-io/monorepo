@@ -90,8 +90,8 @@ function CommentList({ entityId }: { entityId: string }) {
   The reaction replies rank by when their sort is `"top"`. Defaults to the current `sortByReaction` when the section is also sorted by `"top"`, else `"upvote"`. Not changeable at runtime.
 </ParamField>
 
-<ParamField path="include" type='"user" | "grants" | ("user" | "grants")[]'>
-  Related data to populate, at every level. Default: `"user"`.
+<ParamField path="include" type='"user" | "grants" | "files" | ("user" | "grants" | "files")[]'>
+  Related data to populate, at every level. `"files"` adds the comment's images and files (requires the `files-images` bundle). Default: `"user"`.
 </ParamField>
 
 A page can return at most 500 comments, nested replies included (see [Request size limit](/v8/api-reference/comments/fetch-many-comments#request-size-limit)). The hook sends `limit`, `replyDepth` and `replyLimit` as given; a combination over the limit fails with an error in `error`, and a development build logs which values to lower.

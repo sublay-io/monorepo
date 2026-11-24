@@ -6,7 +6,7 @@ description: "Fetch a single message by ID"
 
 import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
 
-Returns a single [ChatMessage](/v8/data-models/chat-message) by ID, fully populated with `user`, `quotedMessage`, `files`, `reactionCounts`, and `userReactions`. The caller must be a member of the conversation.
+Returns a single [ChatMessage](/v8/data-models/chat-message) by ID, fully populated with `user`, `quotedMessage`, `files` (images with their variants), `reactionCounts`, and `userReactions`. The caller must be a member of the conversation.
 
 A deleted or removed message is returned as a placeholder, not a `404`; a removed message is returned in full to its author. The same goes for `quotedMessage`. See [Deleted and removed messages](/v8/data-models/chat-message#deleted-and-removed-messages).
 

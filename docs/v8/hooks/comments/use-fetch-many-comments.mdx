@@ -105,8 +105,8 @@ Pass exactly one of `entityId` or `parentCommentId`; the props type refuses neit
   The reaction the nested levels rank by, when their sort is `"top"`.
 </ParamField>
 
-<ParamField path="include" type='"user" | "grants" | ("user" | "grants")[]'>
-  Related data to populate, at every level.
+<ParamField path="include" type='"user" | "grants" | "files" | ("user" | "grants" | "files")[]'>
+  Related data to populate, at every level. `"files"` adds the comment's images and files (requires the `files-images` bundle).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="path" />

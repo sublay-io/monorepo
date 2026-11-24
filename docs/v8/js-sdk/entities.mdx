@@ -15,7 +15,7 @@ Entities are the central content objects in Sublay — posts, articles, products
 
 ### createEntity
 
-Creates a new entity, optionally as a draft. A signed-in user's entity is always theirs. Without a signed-in user, the entity has no author, and the request is allowed only while the project's **Who can create entities without an author** setting is **Everyone** (the default); otherwise it fails with `403 entity/authorless-creation-not-allowed`. See [Create Entity](/v8/api-reference/entities/create-entity).
+Creates a new entity, optionally as a draft, with optional images and files. A signed-in user's entity is always theirs. Without a signed-in user, the entity has no author, and the request is allowed only while the project's **Who can create entities without an author** setting is **Everyone** (the default); otherwise it fails with `403 entity/authorless-creation-not-allowed`. See [Create Entity](/v8/api-reference/entities/create-entity).
 
 ```typescript
 const entity = await sublay.entities.createEntity({
@@ -72,6 +72,14 @@ const entity = await sublay.entities.createEntity({
 
 <ParamField body="isDraft" type="boolean">
   When `true`, the entity is created as an unpublished draft.
+</ParamField>
+
+<ParamField body="images" type="{ files: (Blob | File)[]; options: ImageOptions }">
+  Images to attach, processed into sizes per `options` (`mode` is required). With images or files the request is sent as `multipart/form-data`. A request takes at most 20 files in all. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField body="files" type="{ files: (Blob | File)[]; options?: { pathParts?: string[] } }">
+  Files to attach, stored as uploaded. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. Requires the `files-images` bundle.
 </ParamField>
 
 **Returns** — `Promise<Entity>`
@@ -306,7 +314,7 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 
 ### updateEntity
 
-Updates fields on an existing entity.
+Updates fields on an existing entity, and adds or removes its files.
 
 ```typescript
 const entity = await sublay.entities.updateEntity({
@@ -345,14 +353,30 @@ const entity = await sublay.entities.updateEntity({
 </ParamField>
 
 <ParamField body="metadata" type="Record<string, any>">
-  Updated metadata. Merged with existing values.
+  Updated metadata. Replaces the existing metadata.
 </ParamField>
 
 <ParamField body="nsfw" type="boolean">
   Updated NSFW own-flag. A space moderator flagging another user's entity uses `spaces.setSpaceEntityNsfw` instead. See [Entity NSFW flagging](/v8/data-models/entity#nsfw-flagging).
 </ParamField>
 
-**Returns** — `Promise<Entity>`
+<ParamField body="images" type="{ files: (Blob | File)[]; options: ImageOptions }">
+  Images to append after the entity's files, processed into sizes per `options` (`mode` is required). With images or files the request is sent as `multipart/form-data`. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField body="files" type="{ files: (Blob | File)[]; options?: { pathParts?: string[] } }">
+  Files to append after the entity's files, stored as uploaded. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField body="removeFileIds" type="string[]">
+  Ids of the entity's files to remove (ids in its `files`). Works alone or with uploads. Any other id throws a `400` (`entity/invalid-remove-file-ids`, with `invalidIds`).
+</ParamField>
+
+<ParamField body="include" type='"files" | "files"[]'>
+  What the response adds: `"files"`, the entity's files as they now are. Without it the response has no `files`, even after an upload or removal.
+</ParamField>
+
+**Returns** — `Promise<Entity>`. With `include: "files"`, the entity carries its `files` as they now are.
 
 ---
 

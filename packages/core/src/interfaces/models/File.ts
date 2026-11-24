@@ -32,16 +32,18 @@ export interface File {
   chatMessageId: string | null;
   spaceId: string | null;
 
-  type: "image" | "video" | "document" | "other";
+  type: "image" | "video" | "document" | "other"; // From the MIME type
   originalPath: string;   // Proxied URL after transformFileForResponse
   originalSize: number;
   originalMimeType: string;
   position: number;
 
   metadata: Record<string, any>;
-  // The image data. On entity, event, space and user files: the data on an
-  // image file, `null` on any other type. Not returned on chat-message and
-  // conversation-avatar files.
+  // The image data. On entity, event, comment, chat-message, space and user
+  // files: the data on an image uploaded as an image (an `images` list or an
+  // image slot), `null` on any other file (a `files` upload is stored as
+  // uploaded, so it has none even when its `type` is "image"). Not returned
+  // on conversation-avatar files.
   image?: FileImage | null;
   createdAt: string;
   updatedAt: string;

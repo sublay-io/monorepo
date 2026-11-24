@@ -1,6 +1,6 @@
 ---
 title: "Update entity"
-description: "Update an existing entity's content fields"
+description: "Update an existing entity's content fields, and add or remove its files"
 icon: "plug"
 ---
 
@@ -10,7 +10,7 @@ icon: "plug"
 
 ## Overview
 
-`useUpdateEntity` returns a function that updates an entity's content fields. After a successful update, the nearest `EntityProvider` shows the edit when it holds the same entity (one holding another entity is left as it is), and so does every loaded entity list holding it: the response's fields replace those of the provider's and the list's copy, and fields the response doesn't carry or doesn't fill for the viewer (such as `saved`, `space`, the viewer's `userReaction` and the author's files) are kept.
+`useUpdateEntity` returns a function that updates an entity's content fields, and adds or removes its files. In `update`, pass `images` and `files` to **append** files (the request is then sent as multipart) and `removeFileIds` to remove the entity's files. After a successful update, the nearest `EntityProvider` shows the edit when it holds the same entity (one holding another entity is left as it is), and so does every loaded entity list holding it: the response's fields replace those of the provider's and the list's copy, and fields the response doesn't carry or doesn't fill for the viewer (such as `saved`, `space`, the viewer's `userReaction` and the author's files) are kept. The response carries the entity's `files` only with `include: "files"`; then they replace the copy's. The hook sends `include: "files"` itself when the update uploads or removes files (and you passed no `include`), so the copies get the new list; a response without `files` leaves the copies' files as they are.
 
 ## Usage Example
 
@@ -26,6 +26,17 @@ function EditPost({ entityId }: { entityId: string }) {
       update: { content: newContent },
     });
     console.log("Updated:", updated.id);
+  };
+
+  // Append an image and remove an old file in one request.
+  const replacePhoto = async (photo: File, oldFileId: string) => {
+    await updateEntity({
+      entityId,
+      update: {
+        images: { files: [photo], options: { mode: "original-aspect", sizes: { full: 1200 } } },
+        removeFileIds: [oldFileId],
+      },
+    });
   };
 
   return <button onClick={() => handleSave("Revised content")}>Save</button>;
@@ -68,6 +79,22 @@ function EditPost({ entityId }: { entityId: string }) {
 
 <ParamField path="update.nsfw" type="boolean">
   Updated NSFW own-flag. Subject to the same owner / service authorization as the rest of the update. To flag another user's entity, a space moderator uses [useSetSpaceEntityNsfw](/v8/hooks/spaces/use-set-space-entity-nsfw) instead. See [Entity NSFW flagging](/v8/data-models/entity#nsfw-flagging).
+</ParamField>
+
+<ParamField path="update.images" type="{ files: UploadFileInput[]; options: UploadImageOptions }">
+  Images to append after the entity's files, processed into sizes per `options` (`mode` is required). Each file is a `File` or `Blob`, or a React Native file `{ uri, name, type? }`. Sends multipart. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField path="update.files" type="{ files: UploadFileInput[]; options?: { pathParts?: string[] } }">
+  Files to append after the entity's files, stored as uploaded. Sends multipart. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField path="update.include" type='"files" | "files"[]'>
+  What the response adds: `"files"`, the entity's files as they now are. Defaults to `"files"` when the update uploads or removes files; otherwise the response has no `files`.
+</ParamField>
+
+<ParamField path="update.removeFileIds" type="string[]">
+  Ids of the entity's files to remove (ids in its `files`). Works alone or with uploads. Any other id refuses the whole update (`400 entity/invalid-remove-file-ids`, with `invalidIds`).
 </ParamField>
 
 ## Returns

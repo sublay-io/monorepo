@@ -6,7 +6,7 @@ description: "Upload an image with server-side processing and named variant gene
 
 Uploads an image, processes it with Sharp, and stores the original plus all requested variants. Returns proxy URLs for all variants immediately.
 
-The uploaded file isn't attached to anything: it has no entity, comment, space or event. A file that belongs to a record is sent with that record's own request (for example, the images of [Create Entity](/v8/api-reference/entities/create-entity), or the cover and gallery of [Update Event](/v8/api-reference/events/update-event)).
+The uploaded file isn't attached to anything: it has no entity, comment, space or event. A file that belongs to a record is sent with that record's own request (for example, the `images` and `files` of [Create Entity](/v8/api-reference/entities/create-entity) or [Create Comment](/v8/api-reference/comments/create-comment), or the cover of [Update Event](/v8/api-reference/events/update-event)).
 
 This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 

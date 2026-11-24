@@ -49,7 +49,7 @@ const uploaded = await sublay.storage.uploadFile({
 </ParamField>
 
 <ParamField body="position" type="number">
-  Display order when a record has multiple attachments.
+  Display order when a record has multiple attachments, from `0` to `10000`.
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -58,16 +58,18 @@ const uploaded = await sublay.storage.uploadFile({
 
 <ParamField body="entityId" type="string">
   Associates the file with an entity for cascade deletion. Only one of
-  `entityId` / `commentId` / `spaceId` may be set.
+  `entityId` / `commentId` / `spaceId` may be set. Only the entity's author can attach to it.
 </ParamField>
 
 <ParamField body="commentId" type="string">
-  Associates the file with a comment for cascade deletion.
+  Associates the file with a comment for cascade deletion. Only the comment's author can attach to it.
 </ParamField>
 
 <ParamField body="spaceId" type="string">
   Associates the file with a space.
 </ParamField>
+
+Naming a record in `entityId` or `commentId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found` or `storage/comment-not-found`): a deleted record, an entity removed by moderation and a comment its author deleted all count as missing. Nothing is stored on either refusal.
 
 **Returns** — `Promise<UploadFileResponse>`:
 
@@ -144,11 +146,11 @@ const uploaded = await sublay.storage.uploadImage({
 
 <ParamField body="entityId" type="string">
   Associates the image with an entity. Only one of `entityId` / `commentId` /
-  `spaceId` / `eventId` may be set.
+  `spaceId` / `eventId` may be set. Only the entity's author can attach to it.
 </ParamField>
 
 <ParamField body="commentId" type="string">
-  Associates the image with a comment.
+  Associates the image with a comment. Only the comment's author can attach to it.
 </ParamField>
 
 <ParamField body="spaceId" type="string">
@@ -158,8 +160,10 @@ const uploaded = await sublay.storage.uploadImage({
 <ParamField body="eventId" type="string">
   Associates the image with an event. Most apps attach event images inline via
   `sublay.events.createEvent`/`updateEvent` (`cover` / `gallery`); use this only
-  to attach an image to an existing event out-of-band.
+  to attach an image to an existing event out-of-band. Only one of the event's hosts can attach to it.
 </ParamField>
+
+Naming a record in `entityId`, `commentId` or `eventId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found`, `storage/comment-not-found` or `storage/event-not-found`): a deleted record, an entity removed by moderation and a comment its author deleted all count as missing. Nothing is stored on either refusal.
 
 **Returns** — `Promise<UploadImageResponse>`:
 

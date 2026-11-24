@@ -16,6 +16,8 @@ import {
 } from "../src/modules/entities";
 import { makeClient } from "./helpers/client";
 
+const imageOptions = { mode: "original-aspect" as const, sizes: { full: 1000 } };
+
 describe("js-sdk entities — request shaping", () => {
   it("createEntity posts the full body to /entities (no implicit actor)", async () => {
     const { client, projectInstance } = makeClient();
@@ -189,6 +191,76 @@ describe("js-sdk entities — request shaping", () => {
     await updateEntity(client, { entityId: "e1", title: "new" });
     expect(projectInstance.patch).toHaveBeenCalledWith("/entities/e1", {
       title: "new",
+    });
+  });
+
+  it("createEntity sends images and files as multipart, leaving null fields out", async () => {
+    const { client, projectInstance } = makeClient();
+    const photo = new File(["a"], "p.png", { type: "image/png" });
+    const doc = new File(["b"], "d.pdf", { type: "application/pdf" });
+    await createEntity(client, {
+      title: "x",
+      sourceId: null,
+      keywords: ["a"],
+      images: { files: [photo], options: imageOptions },
+      files: { files: [doc], options: { pathParts: ["docs"] } },
+    });
+    const [path, body] = projectInstance.post.mock.calls[0];
+    expect(path).toBe("/entities");
+    const form = body as FormData;
+    expect(form).toBeInstanceOf(FormData);
+    expect(form.get("title")).toBe("x");
+    expect(form.has("sourceId")).toBe(false);
+    expect(form.get("keywords")).toBe(JSON.stringify(["a"]));
+    expect((form.get("images") as File).name).toBe("p.png");
+    expect(form.get("images.options")).toBe(JSON.stringify(imageOptions));
+    expect((form.get("files") as File).name).toBe("d.pdf");
+    expect(form.get("files.options")).toBe(JSON.stringify({ pathParts: ["docs"] }));
+    expect(form.has("images.files")).toBe(false);
+    expect(form.has("files.files")).toBe(false);
+  });
+
+  it("updateEntity uploads as multipart with removeFileIds as a JSON string", async () => {
+    const { client, projectInstance } = makeClient();
+    const photo = new File(["a"], "p.png", { type: "image/png" });
+    await updateEntity(client, {
+      entityId: "e1",
+      title: "new",
+      removeFileIds: ["f1"],
+      images: { files: [photo], options: imageOptions },
+    });
+    const [path, body] = projectInstance.patch.mock.calls[0];
+    expect(path).toBe("/entities/e1");
+    const form = body as FormData;
+    expect(form).toBeInstanceOf(FormData);
+    expect(form.get("title")).toBe("new");
+    expect(form.get("removeFileIds")).toBe(JSON.stringify(["f1"]));
+    expect(form.getAll("images")).toHaveLength(1);
+    expect(form.has("files")).toBe(false);
+  });
+
+  it("updateEntity sends include in the body: as given in JSON, comma-joined in multipart", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateEntity(client, { entityId: "e1", title: "t", include: ["files"] });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/entities/e1", {
+      title: "t",
+      include: ["files"],
+    });
+    await updateEntity(client, {
+      entityId: "e1",
+      include: ["files"],
+      files: { files: [new File(["b"], "d.pdf", { type: "application/pdf" })] },
+    });
+    const [, body] = projectInstance.patch.mock.calls[1];
+    // One `include` field holding exactly "files" (never a JSON array string).
+    expect((body as FormData).getAll("include")).toEqual(["files"]);
+  });
+
+  it("updateEntity sends removeFileIds alone as JSON", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateEntity(client, { entityId: "e1", removeFileIds: ["f1"], files: { files: [] } });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/entities/e1", {
+      removeFileIds: ["f1"],
     });
   });
 

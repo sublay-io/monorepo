@@ -77,7 +77,7 @@ function LatestComments({ userId }: { userId: string }) {
 </ParamField>
 
 <ParamField path="include" type="CommentIncludeParam">
-  Related data to populate: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
+  Related data to populate: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`, `"files"`. `"files"` adds the comment's images and files (requires the `files-images` bundle).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="path" />

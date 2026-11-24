@@ -3,7 +3,7 @@ title: "Events"
 description: "Create and manage events, RSVPs, hosts, and invites from the browser"
 ---
 
-The `events` module covers the full events surface: creating and editing events (with inline cover/gallery image upload), the RSVP lifecycle, host and invite management, and the guest list. It maps directly to the [Events API](/v8/api-reference/events/create-event).
+The `events` module covers the full events surface: creating and editing events (with inline cover, image and file upload), the RSVP lifecycle, host and invite management, and the guest list. It maps directly to the [Events API](/v8/api-reference/events/create-event).
 
 Because the JS SDK authenticates as an **end user** (bearer token), you never send `actingUserId` — the server derives who is acting from the token. The only `userId` arguments are **targets**: the host or invitee on the host/invite functions.
 
@@ -13,7 +13,7 @@ Requires the `events` bundle. Space-scoping needs the `spaces` bundle; images ne
 
 ### createEvent
 
-Creates an event. The logged-in user becomes the event's [owner](/v8/data-models/event#owner-and-hosts) and first host. For an event in a space it's refused when the creator isn't an active member of the space, banned in it included (`403 event/not-space-member`), when they're banned in a space above it or the space's `postingPermission` is `"team"` and they aren't one of its admins or moderators (`403 space/posting-not-allowed`), or when a user in `hostIds` isn't an active member of the space (`409 event/host-not-member`). Pass `coverFile` and/or `gallery` to upload images inline (the request is sent as `multipart/form-data`).
+Creates an event. The logged-in user becomes the event's [owner](/v8/data-models/event#owner-and-hosts) and first host. For an event in a space it's refused when the creator isn't an active member of the space, banned in it included (`403 event/not-space-member`), when they're banned in a space above it or the space's `postingPermission` is `"team"` and they aren't one of its admins or moderators (`403 space/posting-not-allowed`), or when a user in `hostIds` isn't an active member of the space (`409 event/host-not-member`). Pass `coverFile`, `images` and/or `files` to upload them inline (the request is sent as `multipart/form-data`).
 
 ```typescript
 const event = await sublay.events.createEvent({
@@ -52,11 +52,14 @@ const event = await sublay.events.createEvent({
 <ParamField body="coverFile" type="{ file: Blob | File; options: ImageOptions }">
   The cover image plus its processing options (`mode` is required). It is returned in the event's `files`, and `coverImageId` points at it. Requires the `files-images` bundle.
 </ParamField>
-<ParamField body="gallery" type="{ files: (Blob | File)[]; options: ImageOptions }">
-  Gallery image set (up to 20 in a request) plus shared processing options. Requires the `files-images` bundle.
+<ParamField body="images" type="{ files: (Blob | File)[]; options: ImageOptions }">
+  Images in the event's files, plus the processing options applied to every one (`mode` is required). A request takes at most 20 files in all. Requires the `files-images` bundle.
+</ParamField>
+<ParamField body="files" type="{ files: (Blob | File)[]; options?: { pathParts?: string[] } }">
+  Files in the event's files, stored as uploaded. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. Requires the `files-images` bundle.
 </ParamField>
 
-**Returns** — `Promise<Event>`
+**Returns** — `Promise<Event>`: the created event, with `files` (`[]` for none, the cover first) and the host's `user.avatarFile` / `user.bannerFile` whenever the `files-images` bundle is installed; without the bundle, no `files`.
 
 ---
 
@@ -120,7 +123,7 @@ const { data, pagination } = await sublay.events.fetchManyEvents({
 
 Edits an event's mutable fields. Host-only (`403 event/forbidden`): the logged-in user must be the owner or in `hostIds`, and, for an event in a space, an active member of that space who isn't banned in it or a space above it (`403 event/not-space-member`). The space's admins and moderators can't edit events they don't host. `hostIds`, `status`, and `spaceId` are not editable here.
 
-Pass `coverFile` to **replace** the cover, `gallery` to **append** images, and `removeFileIds` to remove the event's files. Uploads send `multipart/form-data`; any image operation requires the `files-images` bundle.
+Pass `coverFile` to **replace** the cover, `images` and `files` to **append** to the event's files, and `removeFileIds` to remove the event's files. Uploads send `multipart/form-data`; any file operation requires the `files-images` bundle.
 
 ```typescript
 const event = await sublay.events.updateEvent({
@@ -149,11 +152,17 @@ const event = await sublay.events.updateEvent({
 <ParamField body="coverFile" type="{ file: Blob | File; options: ImageOptions }">
   New cover image plus its processing options — replaces the current cover, whose file is deleted.
 </ParamField>
-<ParamField body="gallery" type="{ files: (Blob | File)[]; options: ImageOptions }">
-  Gallery images to append after the event's existing images (up to 20 in a request), plus shared processing options.
+<ParamField body="images" type="{ files: (Blob | File)[]; options: ImageOptions }">
+  Images to append after the event's existing files, plus their processing options (`mode` is required).
+</ParamField>
+<ParamField body="files" type="{ files: (Blob | File)[]; options?: { pathParts?: string[] } }">
+  Files to append after the event's existing files, stored as uploaded.
 </ParamField>
 <ParamField body="removeFileIds" type="string[]">
-  Ids of the event's files to remove: gallery images and/or the cover (`coverImageId`; removing it clears the cover). Works alone or with uploads. Any other id throws a `400` (`event/invalid-remove-file-ids`, with `invalidIds`).
+  Ids of the event's files to remove: list files and/or the cover (`coverImageId`; removing it clears the cover). Works alone or with uploads. Any other id throws a `400` (`event/invalid-remove-file-ids`, with `invalidIds`).
+</ParamField>
+<ParamField body="include" type='"files" | "files"[]'>
+  What the response adds: `"files"`, the event's files as they now are (cover first) and the host's avatar and banner files. Without it the response has no `files`, even after an upload or removal.
 </ParamField>
 
 **Returns** — `Promise<Event>`

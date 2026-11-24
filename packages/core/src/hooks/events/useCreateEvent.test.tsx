@@ -9,7 +9,7 @@ afterEach(() => {
 });
 
 describe("useCreateEvent", () => {
-  it("creates an event via a plain JSON request when there is no cover/gallery", async () => {
+  it("creates an event via a plain JSON request when there is no cover or list files", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useCreateEvent());
 
     const created = makeEvent({ title: "Launch party" });
@@ -62,6 +62,34 @@ describe("useCreateEvent", () => {
     expect(call.config?.headers).toMatchObject({
       "Content-Type": "multipart/form-data",
     });
+  });
+
+  it("sends the event's list as `images` + `images.options` and `files` + `files.options`", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useCreateEvent());
+    axiosPrivate.mockResponse("post", makeEvent(), 201);
+
+    const photo = new File(["binary"], "photo.png", { type: "image/png" });
+    const doc = new File(["pdf"], "doc.pdf", { type: "application/pdf" });
+    const options = { mode: "original-aspect" as const, sizes: { full: 1200 } };
+
+    await act(async () => {
+      await result.current({
+        title: "With images",
+        startTime: "2024-06-01T00:00:00.000Z",
+        type: "online",
+        images: { files: [photo, photo], options },
+        files: { files: [doc], options: { pathParts: ["events"] } },
+      });
+    });
+
+    const [call] = axiosPrivate.calls("post");
+    const formData = call.body as FormData;
+    expect(formData.getAll("images")).toHaveLength(2);
+    expect(formData.get("images.options")).toBe(JSON.stringify(options));
+    expect(formData.getAll("files")).toHaveLength(1);
+    expect(formData.get("files.options")).toBe(JSON.stringify({ pathParts: ["events"] }));
+    expect(formData.has("gallery")).toBe(false);
+    expect(formData.has("gallery.options")).toBe(false);
   });
 
   it("sends Date start and end times as ISO strings, as JSON and as multipart", async () => {

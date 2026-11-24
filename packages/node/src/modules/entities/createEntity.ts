@@ -1,6 +1,14 @@
 import { SublayHttpClient } from "../../core/client";
 import { Entity } from "../../interfaces/Entity";
 import { Mention } from "../../interfaces/Mention";
+import {
+  appendFields,
+  appendListUploads,
+  hasListUploads,
+  withoutNulls,
+  type FileListUpload,
+  type ImageListUpload,
+} from "../../core/formData";
 
 export interface CreateEntityProps {
   foreignId?: string;
@@ -42,6 +50,19 @@ export interface CreateEntityProps {
    * the future: 400 `entity/invalid-body`.
    */
   updatedAt?: string | Date;
+  /**
+   * Images on the entity, processed into sizes per `options` (`mode` is required).
+   * Each carries its bytes and, for raw bytes, a `filename` and `mimeType`.
+   * When present the request is sent as `multipart/form-data`. Requires the
+   * `files-images` bundle.
+   */
+  images?: ImageListUpload;
+  /**
+   * Files on the entity, stored as uploaded (`options.pathParts` optional). When
+   * present the request is sent as `multipart/form-data`. Requires the
+   * `files-images` bundle.
+   */
+  files?: FileListUpload;
 }
 
 export async function createEntity(
@@ -49,6 +70,18 @@ export async function createEntity(
   data: CreateEntityProps
 ): Promise<Entity> {
   const path = `/entities`;
-  const response = await client.projectInstance.post<Entity>(path, data);
+  const { images, files, ...body } = data;
+
+  if (hasListUploads({ images, files })) {
+    const formData = new FormData();
+    // Object fields go as JSON strings (the server parses them back). On a
+    // create a null field means the same as leaving it out.
+    appendFields(formData, withoutNulls(body));
+    appendListUploads(formData, { images, files });
+    const response = await client.projectInstance.post<Entity>(path, formData);
+    return response.data;
+  }
+
+  const response = await client.projectInstance.post<Entity>(path, body);
   return response.data;
 }

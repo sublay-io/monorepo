@@ -6,7 +6,7 @@ description: "Send a message to a conversation"
 
 import { SpaceReputationParams } from "/snippets/v8/space-reputation-params.mdx";
 
-Creates a new message in a conversation. The caller must be an active member. At least one of `content`, `gif`, or a file attachment is required.
+Creates a new message in a conversation. The caller must be an active member. At least one of `content`, `gif`, or an uploaded image or file is required.
 
 For space conversations with `postingPermission: "team"`, only users with `admin` or `moderator` role in the parent Space can send messages.
 
@@ -14,7 +14,7 @@ In a space chat, the caller must also be an active member of the chat's space an
 
 Sending is refused while the caller is banned. Banned in the space itself: `403 chat/not-a-member` (a ban ends the space membership and the chat membership). An active member of the space who is banned in a space above it: `403 chat/banned`.
 
-This endpoint accepts `multipart/form-data` to support file attachments alongside message content.
+This endpoint accepts `multipart/form-data` to upload images and files with the message. A message's files are set when it is sent: editing a message changes its text only, and deleting it deletes its files.
 
 ## Path Parameters
 
@@ -52,9 +52,23 @@ This endpoint accepts `multipart/form-data` to support file attachments alongsid
   Client-generated identifier for optimistic deduplication. The server echoes it back in the response but never stores it. Optional.
 </ParamField>
 
-<ParamField body="files" type="file[]">
-  File attachments (multipart/form-data). Up to 20 files per message, 50 MB each. Optional.
+<ParamField body="images" type="file[]">
+  Images (multipart/form-data), up to 50 MB each, processed into sizes per `images.options`: each comes back with `image` and its variants. Requires `images.options`. A request takes at most 20 files over `images` and `files` together. Optional.
 </ParamField>
+
+<ParamField body="images.options" type="string">
+  JSON-stringified image-processing options applied to every image (`mode` is required), the same options as [Create Entity](/v8/api-reference/entities/create-entity)'s.
+</ParamField>
+
+<ParamField body="files" type="file[]">
+  Files (multipart/form-data), up to 50 MB each, stored as uploaded. Each file's `type` comes from its MIME type, and its `image` is `null`, an image sent here included. Optional.
+</ParamField>
+
+<ParamField body="files.options" type="string">
+  Optional JSON-stringified file options: `pathParts` (string[]) customizes the storage path.
+</ParamField>
+
+The message's `files` list the images first, then the files, each in upload order. An `images.options` or `files.options` sent without its files is ignored. Uploads require the `files-images` bundle.
 
 <ParamField body="actingUserId" type="string">
   Service key only, and required with one: the user this request acts as. The message author; must be an active member. On a multipart request, send it as a form field. A user token always acts as its own user and must not send it (`400 chat/acting-user-not-allowed`).
@@ -72,7 +86,7 @@ This endpoint has a space in context, so it accepts the opt-in reputation params
 
 ## Response
 
-Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully populated with `user`, `quotedMessage`, `files`, `reactionCounts` (empty on creation), and `userReactions` (empty on creation). If `localId` was provided, it is echoed in the response.
+Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully populated with `user`, `quotedMessage`, `files` (images with their variants), `reactionCounts` (empty on creation), and `userReactions` (empty on creation). If `localId` was provided, it is echoed in the response.
 
 ## Error Responses
 
@@ -169,12 +183,34 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `413 chat/file-too-large` (a file over 50 MB), `413 chat/too-many-files` (more than 20 files), `chat/unsupported-file-type` or `chat/unexpected-file-field`, with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `413 chat/file-too-large` (a file over 50 MB), `413 chat/too-many-files` (more than 20 files), `chat/unsupported-file-type` or `chat/unexpected-file-field` (a file in a field other than `images` and `files`), with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
   <Accordion title="Bundle Not Installed — 403">
-    Returned when `files` are attached on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    Returned when images or files are uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
     ```json
-    { "error": "File attachments require the files-images bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
+    { "error": "Message images and files require the files-images bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
     ```
+  </Accordion>
+  <Accordion title="Invalid Image — 422">
+    ```json
+    { "error": "File \"photo.png\" is not a valid image.", "code": "chat/invalid-image", "param": "images" }
+    ```
+    A file in `images` can't be read as an image. `error` names the file as it was uploaded.
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    `images` was sent without `images.options`. Checked before the validation webhook and before anything is uploaded, so nothing is stored.
+    ```json
+    { "error": "`images.options` is required when `images` are uploaded. Must include mode property.", "code": "chat/missing-image-options", "param": "images.options" }
+    ```
+  </Accordion>
+  <Accordion title="Storage Quota Reached — 429">
+    ```json
+    {
+      "error": "Quota reached for storageFileBytes. Current: …, Action size: …, Limit: …",
+      "code": "project/quota-reached",
+      "details": { "current": 0, "actionSize": 0, "limit": 0, "metric": "storageFileBytes" }
+    }
+    ```
+    The uploaded files would take the project past its plan's file-storage limit. Nothing is sent or stored.
   </Accordion>
 </AccordionGroup>

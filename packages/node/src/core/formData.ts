@@ -26,6 +26,32 @@ export interface ImageSlotFile extends UploadFile {
 }
 
 /**
+ * A list of images (`images`): the files plus the processing options applied
+ * to every one (`mode` is required).
+ */
+export interface ImageListUpload {
+  files: UploadFile[];
+  options: ImageOptions;
+}
+
+/**
+ * A list of files stored as uploaded (`files`), with optional options
+ * (`pathParts`, the folder they are stored under).
+ */
+export interface FileListUpload {
+  files: UploadFile[];
+  options?: {
+    pathParts?: string[];
+  };
+}
+
+/** The list uploads a request carries. */
+export interface ListUploads {
+  images?: ImageListUpload;
+  files?: FileListUpload;
+}
+
+/**
  * Wraps file bytes in a Blob so they can be appended to FormData. A Blob is
  * returned unchanged; a Uint8Array is wrapped with the given (or default) MIME type.
  */
@@ -111,4 +137,36 @@ export function withoutNulls<T extends Record<string, unknown>>(fields: T): T {
   return Object.fromEntries(
     Object.entries(fields).filter(([, value]) => value !== null)
   ) as T;
+}
+
+/** Whether `lists` has any file to send (empty lists send nothing). */
+export function hasListUploads(lists: ListUploads): boolean {
+  return (
+    (!!lists.images && lists.images.files.length > 0) ||
+    (!!lists.files && lists.files.files.length > 0)
+  );
+}
+
+/**
+ * Appends a record's list uploads: images as `images` plus `images.options`,
+ * raw files as `files` plus (when given) `files.options`, the options as JSON
+ * strings. Empty lists are left out. A part without a `filename` is named
+ * `image` / `file`.
+ */
+export function appendListUploads(formData: FormData, lists: ListUploads): void {
+  const { images, files } = lists;
+  if (images && images.files.length > 0) {
+    for (const f of images.files) {
+      appendFile(formData, "images", f.file, f.filename ?? "image", f.mimeType);
+    }
+    formData.append("images.options", JSON.stringify(images.options));
+  }
+  if (files && files.files.length > 0) {
+    for (const f of files.files) {
+      appendFile(formData, "files", f.file, f.filename ?? "file", f.mimeType);
+    }
+    if (files.options) {
+      formData.append("files.options", JSON.stringify(files.options));
+    }
+  }
 }

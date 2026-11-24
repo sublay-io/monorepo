@@ -8,7 +8,7 @@ Deletes a comment. Only the comment's author may delete it: with their own acces
 
 **Authentication required.**
 
-All deletes are soft-deletes: the comment's content, gif, mentions, attachments and metadata are cleared and `userDeletedAt` is set. The record is preserved as a stripped placeholder in thread view to maintain the reply tree structure (Reddit-style).
+All deletes are soft-deletes: the comment's content, gif, mentions, attachments and metadata are cleared and `userDeletedAt` is set. The record is preserved as a stripped placeholder in thread view to maintain the reply tree structure (Reddit-style). The comment's images and files are deleted, stored blobs included; the placeholder has none (`files: []` with `include=files`).
 
 ## Path Parameters
 

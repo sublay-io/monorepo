@@ -40,7 +40,7 @@ const entity = await createEntity({
   title: "Photo post",
   images: {
     files: [imageFile],
-    options: { width: 1200, height: 800, fit: "cover" },
+    options: { mode: "original-aspect", sizes: { full: 1200, thumbnail: 300 } },
   },
 });
 ```
@@ -95,12 +95,12 @@ const entity = await createEntity({
   If `true`, creates the entity as a draft (not publicly visible). Default `false`.
 </ParamField>
 
-<ParamField path="images" type="{ files: File[]; options?: UploadImageOptions }">
-  Images to upload and attach. Triggers a multipart form request.
+<ParamField path="images" type="{ files: UploadFileInput[]; options: UploadImageOptions }">
+  Images to upload and attach, processed into sizes per `options` (`mode` is required). Each file is a `File` or `Blob`, or a React Native file `{ uri, name, type? }`. Sends a multipart request. Requires the `files-images` bundle.
 </ParamField>
 
-<ParamField path="files" type="{ files: File[]; options?: { pathParts?: string[] } }">
-  Files to upload and attach. Triggers a multipart form request. A `pathParts` folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
+<ParamField path="files" type="{ files: UploadFileInput[]; options?: { pathParts?: string[] } }">
+  Files to upload and attach, stored as uploaded. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. Sends a multipart request. A `pathParts` folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
 </ParamField>
 
 ## Returns

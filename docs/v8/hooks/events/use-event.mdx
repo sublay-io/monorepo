@@ -55,7 +55,7 @@ function EventCard({ eventId }: { eventId: string }) {
 
 <ResponseField name="event" type="Event | null | undefined">The event. `undefined` while loading, `null` if not found or inaccessible — also after the event is deleted, and after a cancel or withdraw answers with a short body because the user can no longer see it. Such an event stays `null` for that `eventId`: the hook doesn't fetch it again.</ResponseField>
 <ResponseField name="setEvent" type="React.Dispatch">Set the event state directly (optimistic updates).</ResponseField>
-<ResponseField name="updateEvent" type="(props: { update }) => Promise<Event | undefined>">Update mutable fields, the cover and gallery (`update` as in [`useUpdateEvent`](/v8/hooks/events/use-update-event)); hosts who are active members of the event's space.</ResponseField>
+<ResponseField name="updateEvent" type="(props: { update }) => Promise<Event | undefined>">Update mutable fields, the cover, images and files (`update` as in [`useUpdateEvent`](/v8/hooks/events/use-update-event)); hosts who are active members of the event's space.</ResponseField>
 <ResponseField name="deleteEvent" type="() => Promise<void>">Delete the event (its [owner](/v8/data-models/event#owner-and-hosts), or the space's admins and moderators). Sets `event` to `null`.</ResponseField>
 <ResponseField name="cancelEvent" type="() => Promise<CancelEventResponse | undefined>">Cancel the event (its owner, or the space's admins and moderators). Resolves with the event, or with `{ id, status: "cancelled" }` when the user can't see it, which sets `event` to `null`.</ResponseField>
 <ResponseField name="setRsvp" type="(status: RsvpStatus) => Promise<Event | undefined>">Set/change the caller's RSVP.</ResponseField>

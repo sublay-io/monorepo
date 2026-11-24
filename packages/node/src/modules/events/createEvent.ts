@@ -7,6 +7,10 @@ import {
 import {
   appendFields,
   appendImageSlot,
+  appendListUploads,
+  hasListUploads,
+  type FileListUpload,
+  type ImageListUpload,
   type ImageSlotFile,
 } from "../../core/formData";
 
@@ -39,6 +43,19 @@ export interface CreateEventProps {
    */
   coverFile?: ImageSlotFile;
   /**
+   * Images in the event's files, processed into sizes per `options` (`mode` is required).
+   * Each carries its bytes and, for raw bytes, a `filename` and `mimeType`.
+   * When present the request is sent as `multipart/form-data`. Requires the
+   * `files-images` bundle.
+   */
+  images?: ImageListUpload;
+  /**
+   * Files in the event's files, stored as uploaded (`options.pathParts` optional). When
+   * present the request is sent as `multipart/form-data`. Requires the
+   * `files-images` bundle.
+   */
+  files?: FileListUpload;
+  /**
    * The user the service key acts as: the event's creator, who is
    * auto-added to `hostIds`. Held to that user's own permissions (in a space,
    * they must be an active member).
@@ -50,12 +67,13 @@ export async function createEvent(
   client: SublayHttpClient,
   data: CreateEventProps
 ): Promise<Event> {
-  const { coverFile, ...body } = data;
+  const { coverFile, images, files, ...body } = data;
 
-  if (coverFile) {
+  if (coverFile || hasListUploads({ images, files })) {
     const formData = new FormData();
     appendFields(formData, body);
-    appendImageSlot(formData, "coverFile", coverFile, "cover");
+    if (coverFile) appendImageSlot(formData, "coverFile", coverFile, "cover");
+    appendListUploads(formData, { images, files });
     const response = await client.projectInstance.post<Event>(`/events`, formData);
     return response.data;
   }

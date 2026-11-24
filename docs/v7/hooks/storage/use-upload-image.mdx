@@ -75,20 +75,22 @@ function AvatarUploader() {
 </ParamField>
 
 <ParamField body="entityId" type="string">
-  Associates the file with an entity for cascade deletion.
+  Associates the file with an entity for cascade deletion. Only the entity's author can attach to it.
 </ParamField>
 
 <ParamField body="commentId" type="string">
-  Associates the file with a comment for cascade deletion.
+  Associates the file with a comment for cascade deletion. Only the comment's author can attach to it.
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  Associates the file with a space for cascade deletion.
+  Associates the file with a space for cascade deletion. Only an active admin of the space can attach to it.
 </ParamField>
 
 <ParamField body="onProgress" type="(progress: number) => void">
   Called with upload percentage (0–100) during the multipart upload.
 </ParamField>
+
+Naming a record in `entityId`, `commentId` or `spaceId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found`, `storage/comment-not-found` or `storage/space-not-found`): a deleted record, an entity removed by moderation, a comment its author deleted, and a space the caller can't see all count as missing. Nothing is stored on either refusal.
 
 ## Processing Modes
 

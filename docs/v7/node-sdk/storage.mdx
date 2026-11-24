@@ -59,7 +59,7 @@ const file = await sublay.storage.uploadFile({
 </ParamField>
 
 <ParamField body="position" type="number">
-  Display order when a record has multiple attachments. Defaults to `0`.
+  Display order when a record has multiple attachments, from `0` to `10000`. Defaults to `0`.
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -68,20 +68,22 @@ const file = await sublay.storage.uploadFile({
 
 <ParamField body="entityId" type="string">
   Associates the file with an entity for cascade deletion. Only one of
-  `entityId` / `commentId` / `spaceId` may be set.
+  `entityId` / `commentId` / `spaceId` may be set. Only the entity's author can attach to it (a service key can attach to any entity).
 </ParamField>
 
 <ParamField body="commentId" type="string">
-  Associates the file with a comment for cascade deletion.
+  Associates the file with a comment for cascade deletion. Only the comment's author can attach to it (a service key can attach to any comment).
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  Associates the file with a space.
+  Associates the file with a space. Only an active admin of the space can attach to it (a service key can attach to any space).
 </ParamField>
 
 <ParamField body="userId" type="string">
   Attribute the upload to a user. Omit for a backend/project-owned file.
 </ParamField>
+
+Naming a record in `entityId`, `commentId` or `spaceId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found`, `storage/comment-not-found` or `storage/space-not-found`): a deleted record, an entity removed by moderation, a comment its author deleted, and a space the caller can't see (a service key sees every space) all count as missing. Nothing is stored on either refusal.
 
 **Returns** — `Promise<File>`
 
@@ -149,26 +151,28 @@ const file = await sublay.storage.uploadImage({
 
 <ParamField body="entityId" type="string">
   Associates the image with an entity. Only one of `entityId` / `commentId` /
-  `spaceId` / `eventId` may be set.
+  `spaceId` / `eventId` may be set. Only the entity's author can attach to it (a service key can attach to any entity).
 </ParamField>
 
 <ParamField body="commentId" type="string">
-  Associates the image with a comment.
+  Associates the image with a comment. Only the comment's author can attach to it (a service key can attach to any comment).
 </ParamField>
 
 <ParamField body="spaceId" type="string">
-  Associates the image with a space.
+  Associates the image with a space. Only an active admin of the space can attach to it (a service key can attach to any space).
 </ParamField>
 
 <ParamField body="eventId" type="string">
   Associates the image with an event. Use this to attach a cover or gallery image
   to an event created via `sublay.events.createEvent` (the Node SDK does not
-  support inline event image upload). See the [Events module](/v7/node-sdk/events).
+  support inline event image upload). See the [Events module](/v7/node-sdk/events). Only one of the event's hosts can attach to it (a service key can attach to any event).
 </ParamField>
 
 <ParamField body="userId" type="string">
   Attribute the upload to a user. Omit for a backend/project-owned file.
 </ParamField>
+
+Naming a record in `entityId`, `commentId`, `spaceId` or `eventId` needs the right to update it. When the caller may not, the upload is refused with `403 storage/unauthorized` (`Not authorized to attach a file to this entity.`, naming the record type). A record that doesn't exist or counts as missing gets `404` (`storage/entity-not-found`, `storage/comment-not-found`, `storage/space-not-found` or `storage/event-not-found`): a deleted record, an entity removed by moderation, a comment its author deleted, and a space the caller can't see (a service key sees every space) all count as missing. Nothing is stored on either refusal.
 
 **Returns** — `Promise<File>` (the `image` field carries the generated `variants`).
 

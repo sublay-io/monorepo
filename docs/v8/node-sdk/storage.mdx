@@ -3,7 +3,7 @@ title: "Storage"
 description: "Upload, retrieve, and delete files and images from your server"
 ---
 
-The `storage` module uploads files and images to managed cloud storage and returns proxy URLs, plus reads and deletes existing files. Uploads are sent as `multipart/form-data` — pass the file bytes as a `Uint8Array` or a `Blob`.
+The `storage` module uploads files and images to managed cloud storage, plus reads and deletes existing files. Both uploads and `getFile` return the one [`File`](/v8/data-models/file) shape, with proxy URLs. Uploads are sent as `multipart/form-data` — pass the file bytes as a `Uint8Array` or a `Blob`.
 
 A file uploaded with this module isn't attached to anything: it has no entity, comment, space or event.
 
@@ -45,10 +45,12 @@ const file = await sublay.storage.uploadFile({
   The file bytes to upload. Maximum 50 MB.
 </ParamField>
 
-<ParamField body="pathParts" type="string[]" required>
-  Storage path segments. The file is stored under the joined path with a UUID
-  sub-folder appended, e.g. `["documents", "usr_abc123"]` →
-  `documents/usr_abc123/<uuid>/<filename>`. A folder that is, or contains, `.` or `..` is refused with a 400.
+<ParamField body="pathParts" type="string[]">
+  The folder segments the file is stored under, sent as `file.options`. The new
+  file's id is always added after them, e.g. `["documents", "usr_abc123"]` →
+  `documents/usr_abc123/<fileId>/<filename>`. Each part is slugified. Defaults to
+  `["files"]`. A folder that is, or becomes, `.` or `..` is refused with
+  `400 storage/invalid-body`.
 </ParamField>
 
 <ParamField body="filename" type="string">
@@ -60,37 +62,24 @@ const file = await sublay.storage.uploadFile({
   `"application/octet-stream"`. Ignored when `file` is already a `Blob`.
 </ParamField>
 
-<ParamField body="position" type="number">
-  A number stored on the file as `position`, from `0` to `10000`. Defaults to `0`. A value outside that range is refused with `400 storage/invalid-body`.
-</ParamField>
-
 <ParamField body="metadata" type="object">
-  Custom key-value data stored alongside the file record.
+  Custom key-value data stored on the file. The server adds `originalName` and
+  `uploadedAt` alongside, replacing any values of yours under those keys.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
   The user the service key acts as, who owns the upload. Omit it for a backend/project-owned file. A user that doesn't exist returns `404 storage/user-not-found`.
 </ParamField>
 
-**Returns** — `Promise<UploadFileResponse>`:
-
-```typescript
-{
-  fileId: string;
-  type: "image" | "video" | "document" | "other"; // from the MIME type
-  relativePath: string; // storage path
-  publicPath: string; // proxy URL
-  size: number; // bytes
-  mimeType: string;
-  createdAt: string;
-}
-```
+**Returns** — `Promise<File>`: the [`File`](/v8/data-models/file), keyed `id`;
+`originalPath` is its proxy URL. The file is stored as uploaded, so `image` is
+`null`, even for an image.
 
 ---
 
 ### uploadImage
 
-Uploads an image, processes it with Sharp, and stores the original plus all requested variants. The `imageOptions` object is a discriminated union on `mode` — the shape of the other fields depends on the mode you pick.
+Uploads an image, processes it, and stores the original plus all requested variants. The `imageOptions` object is a discriminated union on `mode` — the shape of the other fields depends on the mode you pick. It is sent as one JSON field, `file.options`, the same options a record's own images take (`avatarFile.options`, `images.options`).
 
 ```typescript
 import { readFile } from "node:fs/promises";
@@ -131,9 +120,12 @@ const file = await sublay.storage.uploadImage({
   | `original-aspect` | `sizes` (`{ [variant]: number }`) | Preserves source ratio; `fit` limited to `inside`/`outside`. |
   | `multi-aspect-ratio` | `aspectRatios` (`{ width, height }[]`), `sizes` | 1–10 aspect ratios. |
 
-  All modes also accept optional `quality` (1–100), `format` (`webp` \| `jpeg` \|
-  `png` \| `original`), `stripExif` (boolean), and `fit` (`cover` \| `contain` \|
-  `inside` \| `outside`). Dimension/size values are 50–10000.
+  All modes also accept optional `quality` (1–100, default 85), `format` (`webp` \|
+  `jpeg` \| `png` \| `original`, default `webp`), `stripExif` (boolean, default
+  `true`), `fit` (`cover` \| `contain` \| `inside` \| `outside`, default
+  `inside`), `originalMaxSize` (50–10000, default 3840: the longest side the
+  stored original is shrunk to) and `pathParts`. Every requested size is
+  1–10000 px. See [Upload Image](/v8/api-reference/storage/upload-image) for every field.
 </ParamField>
 
 <ParamField body="filename" type="string">
@@ -145,36 +137,27 @@ const file = await sublay.storage.uploadImage({
 </ParamField>
 
 <ParamField body="pathParts" type="string[]">
-  Folder segments for the stored image. The new file's id is always added after them (`<pathParts>/<fileId>/<filename>`). Defaults to `["images"]`. A folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
+  Folder segments for the stored image, sent inside `file.options` (when given, it takes the place of `imageOptions.pathParts`). The new file's id is always added after them (`<pathParts>/<fileId>/<filename>`). Defaults to `["images"]`. A folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Custom key-value data stored on the file. The server adds `originalName` and
+  `uploadedAt` alongside, replacing any values of yours under those keys.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
   The user the service key acts as, who owns the upload. Omit it for a backend/project-owned file. A user that doesn't exist returns `404 storage/user-not-found`.
 </ParamField>
 
-**Returns** — `Promise<UploadImageResponse>`:
-
-```typescript
-{
-  fileId: string;
-  type: "image";
-  originalPath: string; // proxy URL
-  originalSize: number; // bytes
-  originalWidth: number;
-  originalHeight: number;
-  // keyed by variant name; each { path, publicPath, width, height, size, format }
-  variants: Record<string, UploadedImageVariant>;
-  format: string;
-  quality: number;
-  createdAt: string;
-}
-```
+**Returns** — `Promise<File>`: the [`File`](/v8/data-models/file), keyed `id`,
+with its `image` data (`originalWidth`, `originalHeight`, `variants`, and the
+processing details). Each variant is `{ publicPath, width, height, size, format }`.
 
 ---
 
 ### getFile
 
-Fetches a file's metadata and proxy URLs by ID. For images, the `image` extension (variants, processing details) is included. Reads are project-scoped.
+Fetches a file by ID. For a processed image, its `image` data (variants, processing details) is included. Reads are project-scoped.
 
 ```typescript
 const file = await sublay.storage.getFile({
@@ -186,36 +169,10 @@ const file = await sublay.storage.getFile({
   The UUID of the file to retrieve.
 </ParamField>
 
-**Returns** — `Promise<GetFileResponse>`, a flat view of the file:
-
-```typescript
-{
-  fileId: string;
-  type: "image" | "video" | "document" | "other";
-  originalPath: string; // proxy URL
-  originalSize: number; // bytes
-  originalMimeType: string;
-  position: number;
-  metadata: Record<string, any>;
-  createdAt: string;
-  updatedAt: string;
-  // each present only when set on the file
-  userId?: string;
-  entityId?: string;
-  commentId?: string;
-  spaceId?: string;
-  // image files only
-  image?: {
-    originalWidth: number;
-    originalHeight: number;
-    variants: Record<string, UploadedImageVariant>;
-    processingStatus: "completed" | "failed";
-    format: string;
-    quality: number;
-    exifStripped: boolean;
-  };
-}
-```
+**Returns** — `Promise<File>`: the [`File`](/v8/data-models/file), the same
+shape the uploads return. Every owner column (`userId`, `entityId`, `eventId`,
+`commentId`, `chatMessageId`, `spaceId`) is present, `null` when unset; `image`
+is the image data of a processed image and `null` otherwise.
 
 ---
 

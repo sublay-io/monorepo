@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-Uploads a file to Sublay storage without any server-side processing. The raw file is stored and a proxy URL is returned. Use this for a PDF, or a JPEG, PNG or WebP image you don't need variants of; other file types are refused with `storage/unsupported-file-type`.
+Uploads a file to Sublay storage without any server-side processing. The raw file is stored, and the returned [File](/v8/data-models/file) carries its proxy URL. Use this for a PDF, or a JPEG, PNG or WebP image you don't need variants of; other file types are refused with `storage/unsupported-file-type`.
 
 For images that need resizing or format conversion, use [`useUploadImage`](/v8/hooks/storage/use-upload-image) instead.
 
@@ -27,7 +27,7 @@ function DocumentUploader() {
       metadata: { label: "Attachment" },
     });
 
-    console.log(result.publicPath); // Use this URL to reference the file
+    console.log(result.originalPath); // Use this URL to reference the file
   };
 
   return <input type="file" onChange={e => e.target.files && handleFile(e.target.files[0])} />;
@@ -36,44 +36,28 @@ function DocumentUploader() {
 
 ## Parameters
 
-`uploadFile(file, pathParts, options?)` accepts three arguments:
+`uploadFile(file, pathParts?, options?)` accepts three arguments:
 
 <ParamField path="file" type="BrowserFile | RNFile" required>
   The file to upload. In the browser, pass a standard `File` object. In React Native, pass `{ uri, name, type? }`.
 </ParamField>
 
-<ParamField path="pathParts" type="string[]" required>
-  Storage path segments. The file is stored under the joined path, with a UUID sub-folder appended automatically for uniqueness. For example, `["documents", "user-123"]` stores the file at `documents/user-123/<uuid>/<filename>`. A folder that is, or contains, `.` or `..` is refused with a 400.
+<ParamField path="pathParts" type="string[]">
+  The folder segments the file is stored under, sent as `file.options`. The new file's id is always added after them: `["documents", "user-123"]` stores the file at `documents/user-123/<fileId>/<filename>`. Each part is slugified. Defaults to `["files"]`; pass `undefined` to use it with options. A folder that is, or becomes, `.` or `..` is refused with `400 storage/invalid-body`.
 </ParamField>
 
 <ParamField path="options" type="UploadFileOptions">
-  Optional position and metadata.
+  Optional metadata.
 </ParamField>
 
 ### Options
 
-<ParamField body="position" type="number">
-  A number stored on the file as `position`, from `0` to `10000`. Defaults to `0`. A value outside that range is refused with `400 storage/invalid-body`.
-</ParamField>
-
 <ParamField body="metadata" type="Record<string, any>">
-  Custom key-value data stored alongside the file record.
+  Custom key-value data stored on the file. The server adds `originalName` and `uploadedAt` alongside, replacing any values of yours under those keys.
 </ParamField>
 
 ## Returns
 
-The hook returns the `uploadFile` function directly (no state wrappers). The function returns a `Promise<UploadResponse>`:
-
-```ts
-{
-  fileId: string;
-  type: "image" | "video" | "document" | "other"; // Inferred from MIME type
-  relativePath: string;    // Internal storage path
-  publicPath: string;      // Proxy URL for client access
-  size: number;            // Bytes
-  mimeType: string;
-  createdAt: string;       // ISO 8601
-}
-```
+The hook returns the `uploadFile` function directly (no state wrappers). The function returns a `Promise<File>`: the [File](/v8/data-models/file), keyed `id`, the same shape [Fetch File](/v8/api-reference/storage/fetch-file) returns. The file is stored as uploaded, so `image` is `null`, even for an image; `originalPath` is its proxy URL.
 
 <Note>The `type` field is inferred automatically from the file's MIME type: a PDF becomes `"document"` and an image becomes `"image"`.</Note>

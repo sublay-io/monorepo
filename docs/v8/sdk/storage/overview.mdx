@@ -18,7 +18,7 @@ A file uploaded with these hooks isn't attached to anything: it has no entity, c
 Sublay provides two hooks for uploading assets:
 
 - **Image upload** — server-side processing with automatic variant generation (resizing, format conversion, EXIF stripping). Returns named variants for responsive display.
-- **File upload** — upload for PDFs and JPEG, PNG or WebP images. No server-side processing — the file is stored as-is and a proxy URL is returned.
+- **File upload** — upload for PDFs and JPEG, PNG or WebP images. No server-side processing — the file is stored as-is, and the returned File carries its proxy URL.
 
 ## Image Processing Modes
 
@@ -31,6 +31,10 @@ When uploading images, you choose a **processing mode** that defines how variant
 | `aspect-ratio-height-based` | All variants share an aspect ratio; you specify heights. Widths are computed. |
 | `original-aspect` | Preserves the source aspect ratio; you specify the longest-edge size for each variant. |
 | `multi-aspect-ratio` | Multiple aspect ratios combined with explicit sizes. |
+
+Every requested size is 1–10000 px. The stored original is shrunk to fit `originalMaxSize` on its longest side (50–10000, default 3840). The options are one JSON object, the same on [Upload Image](/v8/api-reference/storage/upload-image) (`file.options`) and on a record's own images (`avatarFile.options`, `images.options`, `coverFile.options`); [Upload Image](/v8/api-reference/storage/upload-image) lists every field.
+
+Both uploads, and every file embedded in a record, return the one [File](/v8/data-models/file) shape.
 
 ## File Size Limits
 

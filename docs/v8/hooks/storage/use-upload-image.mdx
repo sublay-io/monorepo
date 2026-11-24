@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-Uploads an image to Sublay storage. The server processes the image using Sharp, generates named variants according to the specified mode, and returns an `UploadImageResponse` with proxy URLs for the original and every variant.
+Uploads an image to Sublay storage. The server processes the image, generates named variants according to the specified mode, and returns the [File](/v8/data-models/file) with proxy URLs for the original and every variant. The options are sent as one JSON field, `file.options`: the same options a record's own images take (for example `avatarFile` on [`useUser`](/v8/hooks/user/use-user)).
 
 Works in both browser and React Native environments. Provides upload progress tracking.
 
@@ -34,7 +34,7 @@ function AvatarUploader() {
     });
 
     console.log(image.originalPath);
-    console.log(image.variants.avatar.publicPath);
+    console.log(image.image?.variants.avatar.publicPath);
   };
 
   return (
@@ -54,8 +54,8 @@ function AvatarUploader() {
   The image to upload. In the browser, pass a standard `File` object. In React Native, pass `{ uri, name, type? }`.
 </ParamField>
 
-<ParamField path="options" type="UploadImageOptions" required>
-  Processing configuration. Must include a `mode` field. See [Processing Modes](#processing-modes) below.
+<ParamField path="options" type="UseUploadImageOptions" required>
+  Processing configuration (`UploadImageOptions`) plus the call's own `onProgress` and `metadata`. Must include a `mode` field. See [Processing Modes](#processing-modes) below. Every requested size is 1–10000 px.
 </ParamField>
 
 ### Common Options (all modes)
@@ -72,12 +72,24 @@ function AvatarUploader() {
   Whether to remove EXIF metadata from the output. Defaults to `true`.
 </ParamField>
 
+<ParamField body="fit" type="string">
+  How each variant fits its requested size. Defaults to `"inside"`. The values each mode takes are listed under [Processing Modes](#processing-modes).
+</ParamField>
+
+<ParamField body="originalMaxSize" type="number">
+  The longest side, in px, the stored original is shrunk to (50–10000). Defaults to `3840`. An original already within it keeps its size. `originalSize`, `originalWidth` and `originalHeight` describe the stored original. A larger original takes more storage, which counts toward the project's file-storage limit.
+</ParamField>
+
 <ParamField body="pathParts" type="string[]">
   Folder segments for the stored image. The new file's id is always added after them (`<pathParts>/<fileId>/<filename>`). Defaults to `["images"]`. A folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
 </ParamField>
 
 <ParamField body="onProgress" type="(progress: number) => void">
-  Called with upload percentage (0–100) during the multipart upload.
+  Called with upload percentage (0–100) during the multipart upload. Not sent to the server.
+</ParamField>
+
+<ParamField body="metadata" type="Record<string, any>">
+  Custom key-value data stored on the file, sent as its own field (not inside `file.options`). The server adds `originalName` and `uploadedAt` alongside, replacing any values of yours under those keys.
 </ParamField>
 
 ## Processing Modes
@@ -93,7 +105,7 @@ Each variant has an explicit pixel width and height.
     thumbnail: { width: 64, height: 64 },
     card:      { width: 400, height: 300 },
   },
-  fit?: "cover" | "contain" | "inside" | "outside", // default: "cover"
+  fit?: "cover" | "contain" | "inside" | "outside", // default: "inside"
 }
 ```
 
@@ -150,8 +162,8 @@ Generates variants across multiple aspect ratios with explicit sizes.
 
 ## Returns
 
-<ResponseField name="uploadImage" type="(file, options) => Promise<UploadImageResponse>">
-  Async function that performs the upload and returns an `UploadImageResponse` on success.
+<ResponseField name="uploadImage" type="(file, options) => Promise<File>">
+  Async function that performs the upload and resolves with the [File](/v8/data-models/file) on success.
 </ResponseField>
 
 <ResponseField name="uploading" type="boolean">
@@ -162,25 +174,39 @@ Generates variants across multiple aspect ratios with explicit sizes.
   Upload percentage (0–100). Resets to `0` when the upload finishes.
 </ResponseField>
 
-## Return Value Shape (`UploadImageResponse`)
+## Return Value Shape (`File`)
+
+The [File](/v8/data-models/file), the same shape [Fetch File](/v8/api-reference/storage/fetch-file) returns, its `image` data included:
 
 ```ts
 {
-  fileId: string;
+  id: string;
+  userId: string | null;
+  entityId: null; eventId: null; commentId: null; chatMessageId: null; spaceId: null;
   type: "image";
   originalPath: string;    // Proxy URL of the processed original
-  originalSize: number;    // Bytes, as uploaded
-  originalWidth: number;
-  originalHeight: number;
-  variants: Record<string, UploadedImageVariant>; // Keyed by variant name
-  format: string;          // Output format
-  quality: number;         // Output quality (85 when none was given)
+  originalSize: number;    // Bytes, of the stored original
+  originalMimeType: string;
+  position: number;
+  metadata: Record<string, any>; // Yours, plus originalName and uploadedAt
+  image: {
+    originalWidth: number;   // Of the stored original
+    originalHeight: number;
+    variants: Record<string, FileImageVariant>; // Keyed by variant name
+    processingStatus: "completed" | "failed";
+    processingError: string | null;
+    format: string;        // Output format
+    quality: number;       // Output quality (85 when none was given)
+    exifStripped: boolean;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
   createdAt: string;       // ISO 8601
+  updatedAt: string;
 }
 
-// UploadedImageVariant
+// FileImageVariant
 {
-  path: string;       // Relative storage path
   publicPath: string; // Proxy URL
   width: number;
   height: number;

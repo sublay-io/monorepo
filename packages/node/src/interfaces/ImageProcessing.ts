@@ -12,6 +12,10 @@ export type ImageFormat = "webp" | "jpeg" | "png" | "original";
 interface BaseImageOptions {
   /** 1–100. Output quality. */
   quality?: number;
+  /**
+   * Default "webp". "original" keeps the upload's format when it is JPEG, PNG
+   * or WebP, and stores anything else (an AVIF or HEIC, say) as WebP.
+   */
   format?: ImageFormat;
   stripExif?: boolean;
   /** 50–10000, default 3840. The longest side the stored original is shrunk to, in px. */

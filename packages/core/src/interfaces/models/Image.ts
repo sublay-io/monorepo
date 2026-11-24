@@ -7,7 +7,9 @@
 // Common properties across all modes
 interface BaseImageOptions {
   quality?: number; // 1-100, default: 85
-  format?: "webp" | "jpeg" | "png" | "original"; // default: "webp"
+  // default: "webp". "original" keeps the upload's format when it is JPEG,
+  // PNG or WebP, and stores anything else (an AVIF or HEIC, say) as WebP.
+  format?: "webp" | "jpeg" | "png" | "original";
   stripExif?: boolean; // default: true
   /** The longest side the stored original is shrunk to, in px: 50–10000, default 3840. */
   originalMaxSize?: number;

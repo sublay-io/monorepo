@@ -14,7 +14,7 @@ export interface FileImage {
   variants: Record<string, FileImageVariant>; // thumbnail, small, medium, large, etc.
   processingStatus: "completed" | "failed";
   processingError: string | null;
-  format: string;     // Requested format
+  format: string;     // The stored file's format (webp, jpeg, png)
   quality: number;    // Requested quality (1-100)
   exifStripped: boolean;
   createdAt: string;
@@ -32,7 +32,7 @@ export interface File {
   type: "image" | "video" | "document" | "other"; // From the MIME type
   originalPath: string;    // Proxied URL
   originalSize: number;
-  originalMimeType: string;
+  originalMimeType: string; // The stored file's type: for a processed image, image/<format>
   position: number;
   metadata: Record<string, any>;
   // The image data: on an image uploaded as an image (an image slot, an

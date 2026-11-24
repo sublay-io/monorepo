@@ -62,7 +62,7 @@ const event = await sublay.events.createEvent({
   Images in the event's files, up to 50 MB each, processed per `options` (`mode` is required). Pass `mimeType` with a `Uint8Array`, as for `coverFile`; a part without a `filename` is named `image`. A request takes at most 20 files in all. Sends `multipart/form-data`.
 </ParamField>
 <ParamField body="files" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options?: { pathParts?: string[] } }">
-  Files in the event's files, stored as uploaded, up to 50 MB each. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. A part without a `filename` is named `file`. Sends `multipart/form-data`.
+  Files in the event's files, stored as uploaded (JPEG, PNG, WebP or PDF: pass `mimeType` with a `Uint8Array`), up to 50 MB each. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. A part without a `filename` is named `file`. Sends `multipart/form-data`.
 </ParamField>
 
 **Returns** — `Promise<Event>`
@@ -167,7 +167,7 @@ const event = await sublay.events.updateEvent({
   Images appended after the event's existing files, up to 50 MB each, processed per `options` (`mode` is required). Pass `mimeType` with a `Uint8Array`, as for `coverFile`; a part without a `filename` is named `image`. A request takes at most 20 files in all. Sends `multipart/form-data`.
 </ParamField>
 <ParamField body="files" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options?: { pathParts?: string[] } }">
-  Files appended after the event's existing files, stored as uploaded, up to 50 MB each. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. A part without a `filename` is named `file`. Sends `multipart/form-data`.
+  Files appended after the event's existing files, stored as uploaded (JPEG, PNG, WebP or PDF: pass `mimeType` with a `Uint8Array`), up to 50 MB each. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. A part without a `filename` is named `file`. Sends `multipart/form-data`.
 </ParamField>
 <ParamField body="removeFileIds" type="string[]">
   Ids of the event's files to remove: list files and/or the cover (`coverImageId`; removing it clears the cover). Works alone or with uploads. Any other id throws a `400` (`event/invalid-remove-file-ids`, with `invalidIds`).

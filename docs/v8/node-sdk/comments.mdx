@@ -70,11 +70,11 @@ const comment = await sublay.comments.createComment({
 </ParamField>
 
 <ParamField body="images" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options: ImageOptions }">
-  Images on the comment, processed into sizes per `options` (`mode` is required). Pass `mimeType` with a `Uint8Array` (JPEG, PNG, WebP or PDF; without it the file goes as `application/octet-stream` and is refused with `400 comment/unsupported-file-type`); a `Blob` keeps its own type. With images or files, the request is sent as `multipart/form-data`. A request takes at most 20 files in all. Requires the `files-images` bundle.
+  Images on the comment, processed into sizes per `options` (`mode` is required). Pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 comment/unsupported-file-type`); a `Blob` keeps its own type. A PDF goes in `files`: in `images` it isn't a valid image (`422 comment/invalid-image`). With images or files, the request is sent as `multipart/form-data`. A request takes at most 20 files in all. Requires the `files-images` bundle.
 </ParamField>
 
 <ParamField body="files" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options?: { pathParts?: string[] } }">
-  Files on the comment, stored as uploaded. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. Requires the `files-images` bundle.
+  Files on the comment, stored as uploaded (JPEG, PNG, WebP or PDF: pass `mimeType` with a `Uint8Array`). Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. Requires the `files-images` bundle.
 </ParamField>
 
 **Returns** — `Promise<Comment>`. With the `files-images` bundle installed, the created comment carries `files` (`[]` for none).

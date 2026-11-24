@@ -433,7 +433,7 @@ await sublay.chat.sendMessage({
   Images, 50 MB each, processed per `options` (`mode` is required); each comes back with `image` and its variants. Pass `mimeType` with a `Uint8Array`; a part without a `filename` is named `image`. A request takes at most 20 files in all. Requires the `files-images` bundle.
 </ParamField>
 <ParamField body="files" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options?: { pathParts?: string[] } }">
-  Files, 50 MB each, stored as uploaded (`image` is `null`, an image sent here included). A part without a `filename` is named `file`. Requires the `files-images` bundle.
+  Files, 50 MB each, stored as uploaded (JPEG, PNG, WebP or PDF: pass `mimeType` with a `Uint8Array`) (`image` is `null`, an image sent here included). A part without a `filename` is named `file`. Requires the `files-images` bundle.
 </ParamField>
 <SpaceReputationParams variant="context" field="body" />
 

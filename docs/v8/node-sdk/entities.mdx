@@ -88,11 +88,11 @@ const entity = await sublay.entities.createEntity({
 </ParamField>
 
 <ParamField body="images" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options: ImageOptions }">
-  Images to attach, up to 50 MB each, processed per `options` (`mode` is required). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (JPEG, PNG, WebP or PDF; without it the file goes as `application/octet-stream` and is refused with `400 entity/unsupported-file-type`); a `Blob` keeps its own type. A part without a `filename` is named `image`. With images or files, the request is sent as `multipart/form-data`. A request takes at most 20 files in all. Requires the `files-images` bundle.
+  Images to attach, up to 50 MB each, processed per `options` (`mode` is required). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 entity/unsupported-file-type`); a `Blob` keeps its own type. A PDF goes in `files`: in `images` it isn't a valid image (`422 entity/invalid-image`). A part without a `filename` is named `image`. With images or files, the request is sent as `multipart/form-data`. A request takes at most 20 files in all. Requires the `files-images` bundle.
 </ParamField>
 
 <ParamField body="files" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options?: { pathParts?: string[] } }">
-  Files to attach, stored as uploaded, up to 50 MB each. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. A part without a `filename` is named `file`. Requires the `files-images` bundle.
+  Files to attach, stored as uploaded (JPEG, PNG, WebP or PDF: pass `mimeType` with a `Uint8Array`), up to 50 MB each. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. A part without a `filename` is named `file`. Requires the `files-images` bundle.
 </ParamField>
 
 **Returns** — `Promise<Entity>`
@@ -399,11 +399,11 @@ const entity = await sublay.entities.updateEntity({
 </ParamField>
 
 <ParamField body="images" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options: ImageOptions }">
-  Images to append after the entity's files, processed per `options` (`mode` is required). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (JPEG, PNG, WebP or PDF; without it the file goes as `application/octet-stream` and is refused with `400 entity/unsupported-file-type`); a `Blob` keeps its own type. With images or files, the request is sent as `multipart/form-data`. Requires the `files-images` bundle.
+  Images to append after the entity's files, processed per `options` (`mode` is required). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 entity/unsupported-file-type`); a `Blob` keeps its own type. A PDF goes in `files`: in `images` it isn't a valid image (`422 entity/invalid-image`). With images or files, the request is sent as `multipart/form-data`. Requires the `files-images` bundle.
 </ParamField>
 
 <ParamField body="files" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options?: { pathParts?: string[] } }">
-  Files to append after the entity's files, stored as uploaded. Requires the `files-images` bundle.
+  Files to append after the entity's files, stored as uploaded (JPEG, PNG, WebP or PDF: pass `mimeType` with a `Uint8Array`). Requires the `files-images` bundle.
 </ParamField>
 
 <ParamField body="removeFileIds" type="string[]">

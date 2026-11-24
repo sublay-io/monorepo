@@ -1,7 +1,7 @@
 ---
 title: "Update Entity"
 api: "PATCH /v8/:projectId/entities/:entityId"
-description: "Update an entity's content and metadata"
+description: "Update an entity's content and metadata, and add or remove its files"
 ---
 
 <Note>
@@ -15,6 +15,8 @@ Updates the fields of an existing entity. Only the fields you include in the req
 Editing an entity in a space is posting there, so the author must still be allowed to post in it, by the same rules as [creating](/v8/api-reference/entities/create-entity) (see [Who can post and take part](/v8/data-models/space#who-can-post-and-take-part)). An author who can no longer read the space's content (they left a space whose `readingPermission` is `"members"`, or were banned in one) gets `404 entity/not-found`. An author who can still read it but may not post — banned in the space or a space above it, or left out by its `postingPermission` (for example after it changed to `"team"`) — gets `403 space/posting-not-allowed`. Deleting stays allowed. App-owned entities, edited by a service key naming nobody, aren't checked.
 
 Anyone other than the author gets `404 entity/not-found` for an entity in a space they can't read, the same as a missing entity, and `403` otherwise.
+
+Files can be changed in the same request: `images` and `files` are **appended** after the entity's existing files, and `removeFileIds` deletes existing ones by File ID. Uploads are sent as `multipart/form-data`; without files, use `application/json`. Any file change requires the `files-images` bundle.
 
 ## Path Parameters
 
@@ -61,9 +63,39 @@ Anyone other than the author gets `404 entity/not-found` for an entity in a spac
   Replaces the entity's `metadata` object entirely.
 </ParamField>
 
+<ParamField body="nsfw" type="boolean">
+  The entity's own NSFW flag. On a multipart request, send `"true"` or `"false"`.
+</ParamField>
+
+<ParamField body="removeFileIds" type="string[]">
+  Files to remove from the entity: ids in its `files`. Each file and its blobs are deleted. Works alone or with uploads in the same request. On a multipart request, send it as a JSON string (`'["<fileId>"]'`). Any id that isn't one of this entity's files refuses the whole request with `400 entity/invalid-remove-file-ids`.
+</ParamField>
+
+### File Uploads (multipart/form-data)
+
+On a multipart request every field is a string: send `attachments`, `keywords`, `mentions`, `location`, `metadata` and `removeFileIds` as JSON strings.
+
+<ParamField body="images" type="file[]">
+  Images to append, up to 50 MB each, processed into sizes per `images.options`. Requires `images.options`. A request takes at most 20 files over `images` and `files` together (see [Upload errors](/v8/api-reference/getting-started#upload-errors)).
+</ParamField>
+
+<ParamField body="images.options" type="string">
+  JSON-stringified image-processing options, applied to every image (`mode` is required). The same options as [Create Entity](/v8/api-reference/entities/create-entity).
+</ParamField>
+
+<ParamField body="files" type="file[]">
+  Files to append, stored as uploaded, up to 50 MB each. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data.
+</ParamField>
+
+<ParamField body="files.options" type="string">
+  Stringified JSON for file options. Optional `pathParts` (string[]) customizes the storage path.
+</ParamField>
+
+New files come after the entity's existing ones, images first and then files, each in upload order. An `images.options` or `files.options` sent without its files is ignored.
+
 ## Response
 
-Returns the updated [Entity](/v8/data-models/entity) object, populated with the author's user profile.
+Returns the updated [Entity](/v8/data-models/entity) object, populated with the author's user profile. When the request uploaded or removed files, it also carries `files`: the entity's files as they now are, images with their variants.
 
 <Note>
   If `title` or `content` changed, the entity's semantic search embeddings are automatically re-queued for projects with AI search enabled.
@@ -112,6 +144,50 @@ Returns the updated [Entity](/v8/data-models/entity) object, populated with the 
     ```json
     { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "entity/acting-user-not-allowed" }
     ```
+  </Accordion>
+  <Accordion title="Bundle Not Installed — 403">
+    Returned when files are uploaded or `removeFileIds` is sent on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    ```json
+    { "error": "File and image uploads require the files-images bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
+    ```
+  </Accordion>
+  <Accordion title="Invalid File Ids — 400">
+    `removeFileIds` names a file that isn't one of this entity's files. `invalidIds` lists those ids. Checked before anything is uploaded, so nothing is stored or removed.
+    ```json
+    { "error": "`removeFileIds` may name only this entity's own files (the files in its `files`).", "code": "entity/invalid-remove-file-ids", "param": "removeFileIds", "invalidIds": ["9b2f…"] }
+    ```
+    A `removeFileIds` that isn't an array of file ids gets `400 entity/invalid-body` instead.
+  </Accordion>
+  <Accordion title="File Too Large — 413">
+    ```json
+    { "error": "`images` is over the 50 MB per-file limit.", "code": "entity/file-too-large", "param": "images" }
+    ```
+    A file is over 50 MB. `param` names its field (`images` or `files`).
+  </Accordion>
+  <Accordion title="Invalid Image — 422">
+    ```json
+    { "error": "File \"photo.png\" is not a valid image.", "code": "entity/invalid-image", "param": "images" }
+    ```
+    A file in `images` can't be read as an image. `error` names the file as it was uploaded.
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    `images` was sent without `images.options`. Checked before the validation webhook and before anything is uploaded, so nothing is stored.
+    ```json
+    { "error": "`images.options` is required when `images` are uploaded. Must include mode property.", "code": "entity/missing-image-options", "param": "images.options" }
+    ```
+  </Accordion>
+  <Accordion title="Storage Quota Reached — 429">
+    ```json
+    {
+      "error": "Quota reached for storageFileBytes. Current: …, Action size: …, Limit: …",
+      "code": "project/quota-reached",
+      "details": { "current": 0, "actionSize": 0, "limit": 0, "metric": "storageFileBytes" }
+    }
+    ```
+    The uploaded files would take the project past its plan's file-storage limit. The entity is unchanged and nothing is stored.
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    A file was refused as the body was read: `entity/unsupported-file-type` or `entity/unexpected-file-field` (a file in another field, the old `images.files` and `files.files` included), with `param` naming the field when there is one, or `413 entity/too-many-files` for more than 20 files in the request. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
   <Accordion title="User Not Found — 404">
     Returned when a service key names an `actingUserId` that isn't a user in this project.

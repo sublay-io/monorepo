@@ -40,7 +40,7 @@ function MyComment({ myCommentId }: { myCommentId: string }) {
 </ParamField>
 
 <ParamField path="include" type="CommentIncludeParam">
-  Populate related data, as a single value or an array. Accepted values: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
+  Populate related data, as a single value or an array. Accepted values: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`, `"files"`. `"files"` adds the comment's images and files (requires the `files-images` bundle).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="path" />

@@ -25,7 +25,7 @@ An entity is the central content unit in Sublay — it can represent a post, art
 | `content` | `string \| null` | Optional text content. |
 | `mentions` | `Mention[]` | Array of user mentions embedded in the content. |
 | `attachments` | `Record<string, any>[]` | Flexible array of media/attachment metadata objects. |
-| `files` | `File[]` | System-managed file associations. Populated when `include` contains `"files"`. |
+| `files` | `File[]` | The entity's images and files ([File](/v8/data-models/file) records with its `entityId`), in upload order, images with their variants. Uploaded with [Create Entity](/v8/api-reference/entities/create-entity) and added or removed with [Update Entity](/v8/api-reference/entities/update-entity) (`images`, `files`, `removeFileIds`). Populated when `include` contains `"files"`, on a create that uploaded files, and on an update that uploaded or removed files. |
 | `keywords` | `string[]` | Tags used for filtering and discovery. |
 | `upvotes` | `string[]` | Legacy v6 field — array of user IDs that upvoted. Use `reactionCounts` instead. |
 | `downvotes` | `string[]` | Legacy v6 field — array of user IDs that downvoted. Use `reactionCounts` instead. |

@@ -56,7 +56,7 @@ function EntityContent() {
 </ResponseField>
 
 <ResponseField name="updateEntity" type="(props: { update }) => Promise<Entity | undefined>">
-  Updates the entity on the server and syncs local state. Accepts `title`, `content`, `attachments`, `keywords`, `location`, `metadata`, and `mentions`.
+  Updates the entity on the server and syncs local state. Accepts what [`useUpdateEntity`](/v8/hooks/entities/use-update-entity)'s `update` takes: `title`, `content`, `attachments`, `keywords`, `location`, `metadata`, `mentions`, `nsfw`, `images` and `files` (appended, sent as multipart) and `removeFileIds`.
 </ResponseField>
 
 <ResponseField name="deleteEntity" type="() => Promise<void>">

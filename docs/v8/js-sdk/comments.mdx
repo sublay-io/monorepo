@@ -11,7 +11,7 @@ Comments are threaded discussions attached to entities. The `comments` module le
 
 ### createComment
 
-Creates a comment on an entity. Optionally a reply, with a GIF, mentions, attachments, or metadata.
+Creates a comment on an entity. Optionally a reply, with a GIF, mentions, attachments, metadata, images or files.
 
 ```typescript
 const comment = await sublay.comments.createComment({
@@ -29,7 +29,7 @@ const comment = await sublay.comments.createComment({
 </ParamField>
 
 <ParamField body="content" type="string | null">
-  The comment's text content. `null` or an empty string stores none — a comment needs `content`, a `gif` or `attachments`.
+  The comment's text content. `null` or an empty string stores none — a comment needs `content`, a `gif`, `attachments`, `images` or `files`.
 </ParamField>
 
 <ParamField body="gif" type="GifData | null">
@@ -56,7 +56,15 @@ const comment = await sublay.comments.createComment({
   Arbitrary public metadata.
 </ParamField>
 
-**Returns** — `Promise<Comment>`
+<ParamField body="images" type="{ files: (Blob | File)[]; options: ImageOptions }">
+  Images on the comment, processed into sizes per `options` (`mode` is required). With images or files, the request is sent as `multipart/form-data`. A request takes at most 20 files in all. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField body="files" type="{ files: (Blob | File)[]; options?: { pathParts?: string[] } }">
+  Files on the comment, stored as uploaded. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. Requires the `files-images` bundle.
+</ParamField>
+
+**Returns** — `Promise<Comment>`. With the `files-images` bundle installed, the created comment carries `files` (`[]` for none).
 
 When the server refuses the comment, the call rejects with its error — among them `403 comment/parent-deleted` and `403 comment/parent-removed` for a reply to a deleted or removed comment, `403 comment/referenced-deleted` and `403 comment/referenced-removed` for a quote of one, and `409 comment/foreign-id-taken` for a `foreignId` already in use. See [Create Comment → Error Responses](/v8/api-reference/comments/create-comment#error-responses) for the full list.
 
@@ -75,7 +83,7 @@ const comment = await sublay.comments.fetchComment({ commentId: "cmt_abc123" });
 </ParamField>
 
 <ParamField body="include" type="CommentIncludeParam">
-  Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
+  Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`, `"files"` (the comment's images and files; requires the `files-images` bundle).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />
@@ -99,7 +107,7 @@ const comment = await sublay.comments.fetchCommentByForeignId({
 </ParamField>
 
 <ParamField body="include" type="CommentIncludeParam">
-  Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
+  Associations to populate, as a single value or an array: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`, `"files"` (the comment's images and files; requires the `files-images` bundle).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />
@@ -220,8 +228,8 @@ For a user's comments across entities, use [`users.fetchCommentsByUserId`](/v8/j
   The reaction the nested levels rank by, when their sort is `"top"`.
 </ParamField>
 
-<ParamField body="include" type='"user" | "grants" | ("user" | "grants")[]'>
-  Related data to populate, at every level.
+<ParamField body="include" type='"user" | "grants" | "files" | ("user" | "grants" | "files")[]'>
+  Related data to populate, at every level. `"files"` adds the comment's images and files (requires the `files-images` bundle).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />

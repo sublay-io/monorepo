@@ -416,7 +416,7 @@ const withReplies = await sublay.chat.listMessages({
 </ParamField>
 
 <ParamField body="include" type="ChatMessageListIncludeParam">
-  Associations to populate, as a single value or an array: `"files"` (message attachments) and `"grants"` (each message's [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). Pass `["files", "grants"]` for both.
+  Associations to populate, as a single value or an array: `"files"` (the message's images and files) and `"grants"` (each message's [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)). Pass `["files", "grants"]` for both.
 </ParamField>
 
 <ParamField body="filters" type="MessageFilters">
@@ -436,9 +436,10 @@ const withReplies = await sublay.chat.listMessages({
 
 ### sendMessage
 
-Sends a message to a conversation, optionally with file attachments. When `files`
-is provided the request is sent as `multipart/form-data` (pass browser `File` /
-`Blob` objects); otherwise it is a plain JSON body.
+Sends a message to a conversation, optionally with images and files. When `images`
+or `files` is provided the request is sent as `multipart/form-data` (pass browser
+`File` / `Blob` objects); otherwise it is a plain JSON body. A message needs
+content, a GIF, or at least one image or file.
 
 ```typescript
 const input = document.querySelector('input[type="file"]');
@@ -446,7 +447,16 @@ const input = document.querySelector('input[type="file"]');
 const message = await sublay.chat.sendMessage({
   conversationId: "cnv_abc123",
   content: "Here's the doc 👇",
-  files: Array.from(input.files), // up to 20 File/Blob attachments, 50 MB each
+  files: { files: Array.from(input.files) }, // stored as uploaded
+});
+
+// Images are processed into sizes; each comes back with its variants.
+await sublay.chat.sendMessage({
+  conversationId: "cnv_abc123",
+  images: {
+    files: [photo],
+    options: { mode: "original-aspect", sizes: { full: 1080, thumbnail: 200 } },
+  },
 });
 ```
 
@@ -483,9 +493,17 @@ const message = await sublay.chat.sendMessage({
   not stored.
 </ParamField>
 
-<ParamField body="files" type="(Blob | File)[]">
-  Up to 20 file attachments, at most 50 MB each, as browser `File` / `Blob`
-  objects. Triggers a `multipart/form-data` upload.
+<ParamField body="images" type="{ files: (Blob | File)[]; options: ImageOptions }">
+  Images, at most 50 MB each, processed into sizes per `options` (`mode` is
+  required); each comes back with `image` and its variants. A request takes at
+  most 20 files in all. Triggers a `multipart/form-data` upload. Requires the
+  `files-images` bundle.
+</ParamField>
+
+<ParamField body="files" type="{ files: (Blob | File)[]; options?: { pathParts?: string[] } }">
+  Files, at most 50 MB each, stored as uploaded (`image` is `null`, an image sent
+  here included). Triggers a `multipart/form-data` upload. Requires the
+  `files-images` bundle.
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />

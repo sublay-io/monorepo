@@ -1,12 +1,14 @@
 ---
 title: "Create Comment"
 api: "POST /v8/:projectId/comments"
-description: "Create a new comment or reply on an entity"
+description: "Create a new comment or reply on an entity, optionally with images and files"
 ---
 
 Creates a new comment on an entity, or a reply to an existing comment. The comment is attributed to the authenticated user. Notifications are sent to the entity owner (for a top-level comment), the parent comment's author (for a reply), and mentioned users.
 
 **Authentication required.**
+
+A comment can carry images and files, uploaded with it as `multipart/form-data` (see File Uploads below); without them, use `application/json`. A comment's files are set when it is created: editing a comment changes its text only, and deleting it deletes its files.
 
 ## Body Parameters
 
@@ -15,11 +17,11 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
 </ParamField>
 
 <ParamField body="content" type="string | null">
-  The text content of the comment. At least one of `content`, `gif`, or `attachments` must be provided. `null` or an empty string stores none.
+  The text content of the comment. At least one of `content`, `gif`, `attachments`, `images` or `files` must be provided. `null` or an empty string stores none.
 </ParamField>
 
 <ParamField body="gif" type="object">
-  A GIF to attach to the comment. At least one of `content`, `gif`, or `attachments` must be provided.
+  A GIF to attach to the comment. At least one of `content`, `gif`, `attachments`, `images` or `files` must be provided.
 
   ```json
   {
@@ -36,7 +38,7 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
 </ParamField>
 
 <ParamField body="attachments" type="object[]">
-  An array of generic attachment objects. At least one of `content`, `gif`, or `attachments` must be provided.
+  An array of generic attachment objects. At least one of `content`, `gif`, `attachments`, `images` or `files` must be provided.
 </ParamField>
 
 <ParamField body="parentCommentId" type="string | null">
@@ -85,6 +87,36 @@ Creates a new comment on an entity, or a reply to an existing comment. The comme
   Requires `createdAt`, and must be the same as or later than it; otherwise the request returns `400 comment/invalid-timestamp`. When only `createdAt` is sent, `updatedAt` is set to the same time. More than five minutes in the future returns `400 comment/invalid-body` (`updatedAt can't be in the future.`).
 </ParamField>
 
+### File Uploads (multipart/form-data)
+
+Send the comment as `multipart/form-data` to upload files with it. Every field is then a string: send `gif`, `mentions`, `attachments` and `metadata` as JSON strings. A comment with only images or files (no text) is valid. Uploads require the `files-images` bundle.
+
+<ParamField body="images" type="file[]">
+  Images, up to 50 MB each, processed into sizes per `images.options`. Requires `images.options`. A request takes at most 20 files over `images` and `files` together (see [Upload errors](/v8/api-reference/getting-started#upload-errors)).
+</ParamField>
+
+<ParamField body="images.options" type="string">
+  JSON-stringified image-processing options applied to every image (`mode` is required), the same options as [Create Entity](/v8/api-reference/entities/create-entity)'s.
+</ParamField>
+
+<ParamField body="files" type="file[]">
+  Files stored as uploaded, up to 50 MB each. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data.
+</ParamField>
+
+<ParamField body="files.options" type="string">
+  Optional JSON-stringified file options: `pathParts` (string[]) customizes the storage path.
+</ParamField>
+
+The comment's `files` list the images first, then the files, each in upload order. An `images.options` or `files.options` sent without its files is ignored.
+
+```js
+const form = new FormData();
+form.append("entityId", entityId);
+form.append("content", "Here's the screenshot");
+form.append("images", file);
+form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: { full: 1080 } }));
+```
+
 ## Blocks
 
 When the `moderation` bundle is installed, three people are checked: the entity's author, the parent comment's author (for replies), and the quoted comment's author (with `referencedCommentId`).
@@ -115,7 +147,7 @@ These responses are only returned for a comment the commenting user can see. A d
 
 ## Response
 
-Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, populated with the author's user profile.
+Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, populated with the author's user profile. When the `files-images` bundle is installed it also carries `files`: the comment's files, images with their variants (`[]` for none), so you can show an upload without fetching the comment again.
 
 ## Error Responses
 
@@ -147,7 +179,7 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
   <Accordion title="Invalid Body — 400">
     Returned when the body fails validation. `error` names the field and the problem:
 
-    - none of `content`, `gif` or `attachments` is provided — `content` that is empty or only whitespace, and an empty `attachments` array, don't count;
+    - none of `content`, `gif`, `attachments`, `images` or `files` is provided — `content` that is empty or only whitespace, and an empty `attachments` array, don't count;
     - `entityId`, `parentCommentId`, `referencedCommentId` or `actingUserId` isn't a UUID (a missing `entityId` included);
     - `gif` is missing one of its six fields, or one has the wrong type;
     - a `mentions` item doesn't match one of the two shapes;
@@ -157,7 +189,7 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     - from a service key, `createdAt` or `updatedAt` is more than five minutes in the future (`createdAt can't be in the future.` / `updatedAt can't be in the future.`, with `param` naming the field).
 
     ```json
-    { "error": "At least one of content, gif, or attachments must be provided", "code": "comment/invalid-body" }
+    { "error": "At least one of content, gif, attachments, images or files must be provided", "code": "comment/invalid-body" }
     ```
 
     ```json
@@ -256,6 +288,43 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     ```json
     { "error": "This comment was removed and can't be quoted.", "code": "comment/referenced-removed" }
     ```
+  </Accordion>
+  <Accordion title="Bundle Not Installed — 403">
+    Returned when images or files are uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
+    ```json
+    { "error": "Comment images and files require the files-images bundle. Enable it for this project.", "code": "database/tables-not-available", "missingTables": ["Files", "Images"], "bundleId": "files-images", "dashboardUrl": "https://…/<projectId>/database" }
+    ```
+  </Accordion>
+  <Accordion title="File Too Large — 413">
+    ```json
+    { "error": "`images` is over the 50 MB per-file limit.", "code": "comment/file-too-large", "param": "images" }
+    ```
+    A file is over 50 MB. `param` names its field (`images` or `files`).
+  </Accordion>
+  <Accordion title="Invalid Image — 422">
+    ```json
+    { "error": "File \"photo.png\" is not a valid image.", "code": "comment/invalid-image", "param": "images" }
+    ```
+    A file in `images` can't be read as an image. `error` names the file as it was uploaded.
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    `images` was sent without `images.options`. Checked before the validation webhook and before anything is uploaded, so nothing is stored.
+    ```json
+    { "error": "`images.options` is required when `images` are uploaded. Must include mode property.", "code": "comment/missing-image-options", "param": "images.options" }
+    ```
+  </Accordion>
+  <Accordion title="Storage Quota Reached — 429">
+    ```json
+    {
+      "error": "Quota reached for storageFileBytes. Current: …, Action size: …, Limit: …",
+      "code": "project/quota-reached",
+      "details": { "current": 0, "actionSize": 0, "limit": 0, "metric": "storageFileBytes" }
+    }
+    ```
+    The uploaded files would take the project past its plan's file-storage limit. Nothing is created or stored.
+  </Accordion>
+  <Accordion title="Upload Refused — 400 / 413">
+    A file was refused as the body was read: `comment/unsupported-file-type` or `comment/unexpected-file-field` (a file in a field other than `images` and `files`), with `param` naming the field when there is one, or `413 comment/too-many-files` for more than 20 files in the request. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
   <Accordion title="Foreign ID Taken — 409">
     Returned when another comment already uses the supplied `foreignId`.

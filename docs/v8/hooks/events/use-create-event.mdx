@@ -1,12 +1,12 @@
 ---
 title: "useCreateEvent"
-description: "Create an event, optionally with an inline cover image and gallery"
+description: "Create an event, optionally with an inline cover image, images and files"
 icon: "plug"
 ---
 
 ## Overview
 
-`useCreateEvent` returns a callable that creates an event. The logged-in user becomes the event's [owner](/v8/data-models/event#owner-and-hosts) (`userId`) and is auto-added to `hostIds`. For an event in a space, the request is refused when the user isn't an active member of the space, banned in it included (`403 event/not-space-member`), when they are banned in a space above it or the space's `postingPermission` is `"team"` and they aren't one of its admins or moderators (`403 space/posting-not-allowed`), or when a user in `hostIds` isn't an active member of the space (`409 event/host-not-member`). Pass `coverFile` and/or `gallery` to upload images inline — the hook sends `multipart/form-data` automatically (requires the `files-images` bundle).
+`useCreateEvent` returns a callable that creates an event. The logged-in user becomes the event's [owner](/v8/data-models/event#owner-and-hosts) (`userId`) and is auto-added to `hostIds`. For an event in a space, the request is refused when the user isn't an active member of the space, banned in it included (`403 event/not-space-member`), when they are banned in a space above it or the space's `postingPermission` is `"team"` and they aren't one of its admins or moderators (`403 space/posting-not-allowed`), or when a user in `hostIds` isn't an active member of the space (`409 event/host-not-member`). Pass `coverFile`, `images` and/or `files` to upload them inline — the hook sends `multipart/form-data` automatically (requires the `files-images` bundle).
 
 ## Usage Example
 
@@ -56,8 +56,11 @@ function CreateEvent() {
 <ParamField path="coverFile" type="{ file: UploadFileInput; options: UploadImageOptions }">
   The cover image and its processing options (`mode` is required). Sends multipart. The cover is returned in the event's `files`, and `coverImageId` points at it. Requires the `files-images` bundle.
 </ParamField>
-<ParamField path="gallery" type="{ files: (File | RNFile)[]; options?: UploadImageOptions }">
-  Gallery images to upload (up to 20 in a request). Sends multipart. Requires the `files-images` bundle.
+<ParamField path="images" type="{ files: UploadFileInput[]; options: UploadImageOptions }">
+  Images in the event's files, processed into sizes per `options` (`mode` is required). Each file is a `File` or `Blob`, or a React Native file `{ uri, name, type? }`. A request takes at most 20 files in all. Sends multipart. Requires the `files-images` bundle.
+</ParamField>
+<ParamField path="files" type="{ files: UploadFileInput[]; options?: { pathParts?: string[] } }">
+  Files in the event's files, stored as uploaded. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. Sends multipart. Requires the `files-images` bundle.
 </ParamField>
 
 ## Returns

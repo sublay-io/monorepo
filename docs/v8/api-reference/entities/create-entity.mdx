@@ -96,7 +96,7 @@ form.append("keywords", JSON.stringify(["sunset", "bay"]));
 form.append("location", JSON.stringify({ latitude: 40.7128, longitude: -74.006 }));
 form.append("metadata", JSON.stringify({ category: "photo" }));
 form.append("nsfw", "false");
-form.append("images.files", file);
+form.append("images", file);
 form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: { full: 1080 } }));
 ```
 
@@ -104,8 +104,8 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
   The SDKs handle this for you — [`useCreateEntity`](/v8/hooks/entities/use-create-entity) switches to `multipart/form-data` and stringifies these fields automatically as soon as you pass `images` or `files`.
 </Note>
 
-<ParamField body="images.files" type="file[]">
-  Image files to attach, up to 50 MB each. Must be valid images. Requires `images.options`. A request takes at most 20 files over `images.files` and `files.files` together (see [Upload errors](/v8/api-reference/getting-started#upload-errors)).
+<ParamField body="images" type="file[]">
+  Images to attach, up to 50 MB each, processed into sizes per `images.options`. Must be valid images. Requires `images.options`. A request takes at most 20 files over `images` and `files` together (see [Upload errors](/v8/api-reference/getting-started#upload-errors)).
 </ParamField>
 
 <ParamField body="images.options" type="string">
@@ -119,17 +119,19 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
   Optional fields: `quality` (1–100), `format` (`webp`, `jpeg`, `png`, `original`), `stripExif` (boolean), `pathParts` (string[]; a folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash, is refused with a 400).
 </ParamField>
 
-<ParamField body="files.files" type="file[]">
-  Generic files to attach, up to 50 MB each. Counts toward the 20 files a request takes.
+<ParamField body="files" type="file[]">
+  Files to attach, stored as uploaded, up to 50 MB each. Each file's `type` comes from its MIME type (`image`, `video`, `document` or `other`); an image sent here isn't processed, so it has no `image` data. Counts toward the 20 files a request takes.
 </ParamField>
 
 <ParamField body="files.options" type="string">
   Stringified JSON for file options. Optional `pathParts` (string[]) customizes the storage path, with the same folder rule as image options.
 </ParamField>
 
+Images come first in the entity's `files`, then the files, each in upload order. An `images.options` or `files.options` sent without its files is ignored. The old field names `images.files` and `files.files` are refused with `400 entity/unexpected-file-field`.
+
 ## Response
 
-Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. When files are uploaded, the entity includes a `files` array with signed URLs for each attachment.
+Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. When files are uploaded, the entity includes a `files` array with a URL for each one, images with their variants.
 
 <Note>
   Draft entities are invisible to everyone but their author until published. Use [Fetch Drafts](/v8/api-reference/entities/fetch-drafts) to list an author's unpublished drafts.
@@ -245,20 +247,20 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
   </Accordion>
   <Accordion title="File Too Large — 413">
     ```json
-    { "error": "`images.files` is over the 50 MB per-file limit.", "code": "entity/file-too-large", "param": "images.files" }
+    { "error": "`images` is over the 50 MB per-file limit.", "code": "entity/file-too-large", "param": "images" }
     ```
-    A file is over 50 MB. `param` names its field (`images.files` or `files.files`).
+    A file is over 50 MB. `param` names its field (`images` or `files`).
   </Accordion>
   <Accordion title="Invalid Image — 422">
     ```json
-    { "error": "File \"photo.png\" is not a valid image.", "code": "entity/invalid-image", "param": "images.files" }
+    { "error": "File \"photo.png\" is not a valid image.", "code": "entity/invalid-image", "param": "images" }
     ```
     A file can't be read as an image. `error` names the file as it was uploaded.
   </Accordion>
   <Accordion title="Missing Image Options — 400">
-    `images.files` was sent without `images.options`. Checked before the validation webhook and before anything is uploaded, so nothing is stored.
+    `images` was sent without `images.options`. Checked before the validation webhook and before anything is uploaded, so nothing is stored.
     ```json
-    { "error": "Image options are required when uploading images. Must include mode property.", "code": "entity/missing-image-options", "param": "images.options" }
+    { "error": "`images.options` is required when `images` are uploaded. Must include mode property.", "code": "entity/missing-image-options", "param": "images.options" }
     ```
   </Accordion>
   <Accordion title="Invalid Reference — 400">
@@ -295,6 +297,16 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     { "error": "No user with this actingUserId exists in this project.", "code": "entity/user-not-found" }
     ```
   </Accordion>
+  <Accordion title="Storage Quota Reached — 429">
+    ```json
+    {
+      "error": "Quota reached for storageFileBytes. Current: …, Action size: …, Limit: …",
+      "code": "project/quota-reached",
+      "details": { "current": 0, "actionSize": 0, "limit": 0, "metric": "storageFileBytes" }
+    }
+    ```
+    The uploaded files would take the project past its plan's file-storage limit. Nothing is created or stored.
+  </Accordion>
   <Accordion title="Bundle Not Installed — 403">
     Returned when a file or image is uploaded on a project without the files-images bundle. `missingTables` lists the tables that aren't installed and `bundleId` the bundle to install. While the bundle is still being installed, the response is `503 database/tables-provisioning` instead. See [Bundles](/v8/bundles).
     ```json
@@ -302,7 +314,7 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
-    A file was refused as the body was read: `entity/unsupported-file-type` or `entity/unexpected-file-field`, with `param` naming the field when there is one, or `413 entity/too-many-files` for more than 20 files in the request. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
+    A file was refused as the body was read: `entity/unsupported-file-type` or `entity/unexpected-file-field` (also for the old field names `images.files` and `files.files`), with `param` naming the field when there is one, or `413 entity/too-many-files` for more than 20 files in the request. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).
   </Accordion>
   <Accordion title="Server Error — 500">
     ```json

@@ -108,7 +108,7 @@ The `config` object passed to `fetchEntities` accepts an optional `spaceReputati
 </ResponseField>
 
 <ResponseField name="createEntity" type="(props: EntityListCreateEntityProps) => Promise<Entity | undefined>">
-  Creates a new entity and inserts it into the list. Accepts the same fields as `useCreateEntity`, plus `insertPosition: "first" | "last"`.
+  Creates a new entity and inserts it into the list. Accepts `foreignId`, `title`, `content`, `attachments`, `keywords`, `location` and `metadata`, plus `insertPosition: "first" | "last"`; the source and space come from the list. JSON only: it takes no `images` or `files`. To create an entity with uploads, use [`useCreateEntity`](/v8/hooks/entities/use-create-entity).
 </ResponseField>
 
 <ResponseField name="deleteEntity" type="(props: { entityId: string }) => Promise<void>">

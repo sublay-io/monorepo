@@ -7,9 +7,9 @@ The `events` module covers the full events surface: creating and editing events,
 
 Because the Node SDK authenticates with a **service key** (it acts as the whole project, not a single end user), functions that act as a user take that user in [`actingUserId`](/v8/node-sdk/overview#acting-on-behalf-of-a-user). On the event-management functions (`updateEvent`, `cancelEvent`, `deleteEvent`, the host and invite functions, `fetchInvitees`), `actingUserId` is the user the call acts as (a host, the owner, or an admin or moderator of the event's space, depending on the function), with exactly that user's powers. On the host and invite functions, `userId` is the **target** user (the host or invitee).
 
-Requires the `events` bundle. Space-scoping needs the `spaces` bundle; a cover image needs `files-images`; notifications need `notifications`.
+Requires the `events` bundle. Space-scoping needs the `spaces` bundle; the cover, images and files need `files-images`; notifications need `notifications`.
 
-The Node SDK uploads an event's cover (`coverFile`) and removes its files (`removeFileIds`). Gallery images are uploaded through the browser [JS SDK](/v8/js-sdk/events), the [React SDK](/v8/sdk/events/overview) or the [Create Event](/v8/api-reference/events/create-event) and [Update Event](/v8/api-reference/events/update-event) endpoints.
+The Node SDK uploads an event's cover (`coverFile`), images (`images`) and files (`files`), and removes its files (`removeFileIds`).
 
 ---
 
@@ -57,6 +57,12 @@ const event = await sublay.events.createEvent({
 <ParamField body="metadata" type="object">Arbitrary key-value data. Up to 1 MB.</ParamField>
 <ParamField body="coverFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
   The cover image, up to 50 MB. Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 event/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`. The cover is returned in the event's `files`, and `coverImageId` points at it.
+</ParamField>
+<ParamField body="images" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options: ImageOptions }">
+  Images in the event's files, up to 50 MB each, processed per `options` (`mode` is required). Pass `mimeType` with a `Uint8Array`, as for `coverFile`; a part without a `filename` is named `image`. A request takes at most 20 files in all. Sends `multipart/form-data`.
+</ParamField>
+<ParamField body="files" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options?: { pathParts?: string[] } }">
+  Files in the event's files, stored as uploaded, up to 50 MB each. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. A part without a `filename` is named `file`. Sends `multipart/form-data`.
 </ParamField>
 
 **Returns** — `Promise<Event>`
@@ -157,8 +163,14 @@ const event = await sublay.events.updateEvent({
 <ParamField body="coverFile" type="{ file: Uint8Array | Blob; filename?: string; mimeType?: string; options: ImageOptions }">
   A new cover image, replacing the current one, whose file is deleted (up to 50 MB). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (`image/jpeg`, `image/png` or `image/webp`; without it the file goes as `application/octet-stream` and is refused with `400 event/unsupported-file-type`); a `Blob` keeps its own type. `options` says how to process the image and must include `mode` (see [Upload Image](/v8/api-reference/storage/upload-image)). With an image, the request is sent as `multipart/form-data`.
 </ParamField>
+<ParamField body="images" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options: ImageOptions }">
+  Images appended after the event's existing files, up to 50 MB each, processed per `options` (`mode` is required). Pass `mimeType` with a `Uint8Array`, as for `coverFile`; a part without a `filename` is named `image`. A request takes at most 20 files in all. Sends `multipart/form-data`.
+</ParamField>
+<ParamField body="files" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options?: { pathParts?: string[] } }">
+  Files appended after the event's existing files, stored as uploaded, up to 50 MB each. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. A part without a `filename` is named `file`. Sends `multipart/form-data`.
+</ParamField>
 <ParamField body="removeFileIds" type="string[]">
-  Ids of the event's files to remove: its gallery images and/or the cover (`coverImageId`; removing it clears the cover). Works alone or with a new `coverFile`. Any other id throws a `400` (`event/invalid-remove-file-ids`, with `invalidIds`).
+  Ids of the event's files to remove: list files and/or the cover (`coverImageId`; removing it clears the cover). Works alone or with uploads. Any other id throws a `400` (`event/invalid-remove-file-ids`, with `invalidIds`).
 </ParamField>
 
 **Returns** — `Promise<Event>`

@@ -16,7 +16,7 @@ The author may delete their own entity even after losing read access to its spac
 
 Deletion behavior depends on your project's `entityDeletion` settings:
 - **Hard delete** (default): The entity and all its files are permanently removed.
-- **Soft delete**: The entity is marked as deleted but retained in the database. File preservation is configurable separately.
+- **Soft delete**: The entity is marked as deleted but retained in the database. File preservation is configurable separately. Files a soft-deleted entity keeps belong to nothing: their owner can delete them with [Delete File](/v8/api-reference/storage/delete-file).
 
 ## Path Parameters
 

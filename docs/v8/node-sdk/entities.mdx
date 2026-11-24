@@ -15,7 +15,7 @@ Entities are the central content objects in Sublay — posts, articles, products
 
 ### createEntity
 
-Creates a new entity.
+Creates a new entity, with optional images and files.
 
 ```typescript
 const entity = await sublay.entities.createEntity({
@@ -85,6 +85,14 @@ const entity = await sublay.entities.createEntity({
 
 <ParamField body="updatedAt" type="string | Date">
   Same format as `createdAt`, used to backdate the entity's last update time. More than five minutes in the future returns `400 entity/invalid-body` (`updatedAt can't be in the future.`).
+</ParamField>
+
+<ParamField body="images" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options: ImageOptions }">
+  Images to attach, up to 50 MB each, processed per `options` (`mode` is required). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (JPEG, PNG, WebP or PDF; without it the file goes as `application/octet-stream` and is refused with `400 entity/unsupported-file-type`); a `Blob` keeps its own type. A part without a `filename` is named `image`. With images or files, the request is sent as `multipart/form-data`. A request takes at most 20 files in all. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField body="files" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options?: { pathParts?: string[] } }">
+  Files to attach, stored as uploaded, up to 50 MB each. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. A part without a `filename` is named `file`. Requires the `files-images` bundle.
 </ParamField>
 
 **Returns** — `Promise<Entity>`
@@ -339,7 +347,7 @@ const { data, pagination } = await sublay.entities.fetchManyEntities({
 
 ### updateEntity
 
-Updates fields on an existing entity, as its author.
+Updates fields on an existing entity, as its author, and adds or removes its files.
 
 ```typescript
 const entity = await sublay.entities.updateEntity({
@@ -390,7 +398,19 @@ const entity = await sublay.entities.updateEntity({
   Updated NSFW own-flag (the owner's). A space moderator flagging another user's entity uses `spaces.setSpaceEntityNsfw` instead. See [Entity NSFW flagging](/v8/data-models/entity#nsfw-flagging).
 </ParamField>
 
-**Returns** — `Promise<Entity>`
+<ParamField body="images" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options: ImageOptions }">
+  Images to append after the entity's files, processed per `options` (`mode` is required). Raw bytes carry no type, so pass `mimeType` with a `Uint8Array` (JPEG, PNG, WebP or PDF; without it the file goes as `application/octet-stream` and is refused with `400 entity/unsupported-file-type`); a `Blob` keeps its own type. With images or files, the request is sent as `multipart/form-data`. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField body="files" type="{ files: { file: Uint8Array | Blob; filename?: string; mimeType?: string }[]; options?: { pathParts?: string[] } }">
+  Files to append after the entity's files, stored as uploaded. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField body="removeFileIds" type="string[]">
+  Ids of the entity's files to remove (ids in its `files`). Works alone or with uploads. Any other id throws a `400` (`entity/invalid-remove-file-ids`, with `invalidIds`).
+</ParamField>
+
+**Returns** — `Promise<Entity>`. When the update uploaded or removed files, the entity carries its `files` as they now are.
 
 ---
 

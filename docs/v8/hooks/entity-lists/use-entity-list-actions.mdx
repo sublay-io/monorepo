@@ -68,7 +68,7 @@ function RefreshButton() {
 </ResponseField>
 
 <ResponseField name="createEntity" type="(listId: string, options: CreateEntityOptions) => Promise<Entity | undefined>">
-  Creates an entity and inserts it into the specified list.
+  Creates an entity and inserts it into the specified list. JSON only: it takes no `images` or `files`. To create an entity with uploads, use [`useCreateEntity`](/v8/hooks/entities/use-create-entity).
 </ResponseField>
 
 <ResponseField name="deleteEntity" type="(listId: string, options: { entityId: string }) => Promise<void>">

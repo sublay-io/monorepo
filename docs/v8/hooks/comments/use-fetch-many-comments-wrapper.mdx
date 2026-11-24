@@ -77,8 +77,8 @@ function ReplyList({ commentId }: { commentId: string }) {
   With `sortBy: "top"`: the reaction to rank by (raw count). Server default: `"upvote"`.
 </ParamField>
 
-<ParamField body="include" type='"user" | "grants" | ("user" | "grants")[]' optional>
-  Related data to populate, at every level.
+<ParamField body="include" type='"user" | "grants" | "files" | ("user" | "grants" | "files")[]' optional>
+  Related data to populate, at every level. `"files"` adds the comment's images and files (requires the `files-images` bundle).
 </ParamField>
 
 <ParamField body="replyDepth" type="number" optional>

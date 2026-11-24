@@ -71,7 +71,7 @@ function ProfileComments({ userId }: { userId: string }) {
 </ParamField>
 
 <ParamField body="include" type="CommentIncludeParam" optional>
-  Related data to populate: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
+  Related data to populate: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`, `"files"`. `"files"` adds the comment's images and files (requires the `files-images` bundle).
 </ParamField>
 
 <ParamField body="defaultSortBy" type="CommentsSortByOptions" optional>

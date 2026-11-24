@@ -351,7 +351,7 @@ const next = await sublay.users.fetchCommentsByUserId({
 </ParamField>
 
 <ParamField body="include" type="CommentIncludeParam">
-  Related data to populate: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`.
+  Related data to populate: `"user"`, `"entity"`, `"space"`, `"parent"`, `"grants"`, `"files"` (the comment's images and files; requires the `files-images` bundle).
 </ParamField>
 
 <SpaceReputationParams variant="context" field="body" />

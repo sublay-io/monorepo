@@ -1,12 +1,12 @@
 ---
 title: "Create comment"
-description: "Create a new comment or reply on an entity"
+description: "Create a new comment or reply on an entity, optionally with images and files"
 icon: "plug"
 ---
 
 ## Overview
 
-`useCreateComment` returns a function that creates a new comment. Use it directly for low-level comment creation. Inside a `CommentSectionProvider`, prefer `createComment` from `useCommentSection` — it adds optimistic UI and manages the comment tree automatically.
+`useCreateComment` returns a function that creates a new comment. Use it directly for low-level comment creation. Inside a `CommentSectionProvider`, prefer `createComment` from `useCommentSection` — it adds optimistic UI and manages the comment tree automatically. That `createComment` sends text, a GIF and mentions only: to upload images or files with a comment, use `useCreateComment`. With `images` or `files`, the request is sent as multipart.
 
 <Note>Requires an authenticated user.</Note>
 
@@ -26,6 +26,14 @@ function PostComment({ entityId }: { entityId: string }) {
     console.log("Created:", comment.id);
   };
 
+  // A comment with an image: `comment.files` holds it, with its variants.
+  const handlePhoto = async (photo: File) => {
+    await createComment({
+      entityId,
+      images: { files: [photo], options: { mode: "original-aspect", sizes: { full: 1080 } } },
+    });
+  };
+
   return <button onClick={() => handleSubmit("Hello!")}>Comment</button>;
 }
 ```
@@ -37,7 +45,7 @@ function PostComment({ entityId }: { entityId: string }) {
 </ParamField>
 
 <ParamField path="content" type="string | null">
-  Text content of the comment. A comment needs at least one of `content`, `gif` or `attachments`; the call throws before sending when all three are empty.
+  Text content of the comment. A comment needs at least one of `content`, `gif`, `attachments`, `images` or `files`; the call throws before sending when all of them are empty.
 </ParamField>
 
 <ParamField path="gif" type="GifData | null">
@@ -68,10 +76,20 @@ function PostComment({ entityId }: { entityId: string }) {
   Arbitrary project-specific data.
 </ParamField>
 
+<ParamField path="images" type="{ files: UploadFileInput[]; options: UploadImageOptions }">
+  Images on the comment, processed into sizes per `options` (`mode` is required). Each file is a `File` or `Blob`, or a React Native file `{ uri, name, type? }`. A request takes at most 20 files in all. Sends multipart. Requires the `files-images` bundle.
+</ParamField>
+
+<ParamField path="files" type="{ files: UploadFileInput[]; options?: { pathParts?: string[] } }">
+  Files on the comment, stored as uploaded. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. Sends multipart. Requires the `files-images` bundle.
+</ParamField>
+
+A comment's files are set when it is created: editing changes its text only, and deleting it deletes its files.
+
 ## Returns
 
 <ResponseField name="Comment" type="Comment">
-  The newly created comment. See [Comment data model](/v8/data-models/comment).
+  The newly created comment. With the `files-images` bundle installed it carries `files` (`[]` for none). See [Comment data model](/v8/data-models/comment).
 </ResponseField>
 
 When the server refuses the comment, the call rejects with its error — among them `403 comment/parent-deleted` and `403 comment/parent-removed` for a reply to a deleted or removed comment, `403 comment/referenced-deleted` and `403 comment/referenced-removed` for a quote of one, and `409 comment/foreign-id-taken` for a `foreignId` already in use. See [Create Comment → Error Responses](/v8/api-reference/comments/create-comment#error-responses) for the full list.

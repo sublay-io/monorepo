@@ -108,6 +108,10 @@ function EntityDetail() {
   - `location` — `{ latitude, longitude }`
   - `metadata` — arbitrary JSON object
   - `mentions` — array of `Mention` objects
+  - `nsfw` — the entity's own NSFW flag
+  - `images`, `files` — files to append (sends multipart), and `removeFileIds` — ids of the entity's files to remove
+
+  `update` takes what [`useUpdateEntity`](/v8/hooks/entities/use-update-entity)'s `update` takes.
 </ResponseField>
 
 <ResponseField name="deleteEntity" type="() => Promise<void>">

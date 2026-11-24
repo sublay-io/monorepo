@@ -23,6 +23,7 @@ A comment represents a user-authored response to an entity. Comments support nes
 | `gif` | `GifData \| null` | Attached GIF, if any. `null` on placeholders. |
 | `mentions` | `Mention[]` | Array of user mentions embedded in the comment. `[]` on placeholders. |
 | `attachments` | `Record<string, any>[]` | Generic attachment objects. `[]` on placeholders. |
+| `files` | `File[] \| undefined` | The comment's images and files ([File](/v8/data-models/file) records with its `commentId`), uploaded with [Create Comment](/v8/api-reference/comments/create-comment), in upload order, images with their variants. Populated when `include` contains `"files"`, and on the created comment whenever the `files-images` bundle is installed (`[]` for none). `[]` on placeholders. Deleting the comment deletes its files. |
 | `upvotes` | `string[]` | Legacy v6 field — array of user IDs that upvoted. Use `reactionCounts` in v8. |
 | `downvotes` | `string[]` | Legacy v6 field — array of user IDs that downvoted. Use `reactionCounts` in v8. |
 | `reactionCounts` | `ReactionCounts` | Counts for all 8 reaction types. See [Reaction](/v8/data-models/reaction). |
@@ -70,6 +71,7 @@ Pass `include` to populate optional fields. What each endpoint accepts:
 | `"entity"` | `entity` — the entity the comment is on | | ✓ |
 | `"space"` | `entity` with its `space` populated | | ✓ |
 | `"parent"` | `parentComment` — the parent comment, for replies | | ✓ |
+| `"files"` | `files` — the comment's images and files (requires the `files-images` bundle) | ✓ | ✓ |
 
 On a thread fetch, `include` applies at every nested level.
 
@@ -102,7 +104,7 @@ A comment that can't be shown in full stays in place as a **placeholder**, so th
 | Removed by a moderator | `moderationStatus: "removed"` | Its author |
 | Unavailable to this user | `isUnavailable: true` | — |
 
-On a placeholder, `userId`, `user`, `content`, `gif` and `metadata` are `null`, and `mentions` and `attachments` are `[]`. Everything else is kept: `id`, `entityId`, `parentCommentId`, `foreignId`, timestamps, `reactionCounts`, `repliesCount` and the markers.
+On a placeholder, `userId`, `user`, `content`, `gif` and `metadata` are `null`, and `mentions` and `attachments` are `[]` (and `files`, when `include` asks for it). Everything else is kept: `id`, `entityId`, `parentCommentId`, `foreignId`, timestamps, `reactionCounts`, `repliesCount` and the markers.
 
 Markers can combine — for example, a deleted comment whose author blocked the requesting user carries both `userDeletedAt` and `isUnavailable: true`. Render `isUnavailable` first: show the neutral unavailable row, without reply or reaction controls.
 

@@ -45,7 +45,7 @@ function MessageList({ conversationId }: { conversationId: string }) {
 
 Messages are sorted oldest-first in the returned array. `loadOlder` fetches messages older than the oldest currently loaded.
 
-To include attached files in the response, pass `include: "files"` (or an array, such as `["files", "grants"]`):
+To include the messages' images and files in the response, pass `include: "files"` (or an array, such as `["files", "grants"]`):
 
 ```tsx
 const { messages } = useLiveChatMessages({ conversationId, include: "files" });
@@ -107,17 +107,19 @@ function MessageInput({ conversationId }: { conversationId: string }) {
 | `metadata` | `Record<string, any>` | Arbitrary key-value data |
 | `quotedMessageId` | `string \| null` | ID of the message being quoted/replied to |
 | `parentMessageId` | `string \| null` | ID of the parent message (for thread replies) |
-| `files` | `File[]` | File attachments (triggers multipart upload) |
+| `images` | `{ files: UploadFileInput[]; options: UploadImageOptions }` | Images, processed into sizes per `options` (triggers multipart upload) |
+| `files` | `{ files: UploadFileInput[]; options?: { pathParts?: string[] } }` | Files stored as uploaded (triggers multipart upload) |
 
-### Sending with Files
+### Sending with Images and Files
 
-When `files` is provided, the hook automatically switches to a multipart form upload:
+When `images` or `files` is provided, the hook automatically switches to a multipart form upload. Images are processed into sizes per `options` (`mode` is required) and come back with their variants; files are stored as uploaded.
 
 ```tsx
-const handleSendWithFile = async (file: File) => {
+const handleSendWithFiles = async (photo: File, doc: File) => {
   await send({
     content: "Check this out",
-    files: [file],
+    images: { files: [photo], options: { mode: "original-aspect", sizes: { full: 1080 } } },
+    files: { files: [doc] },
   });
 };
 ```

@@ -11,11 +11,13 @@ Requires authentication. **The owner deletes:** a file with an owner is deleted 
 The owner can delete any of their files here except these, refused with `409 storage/file-attached`:
 
 - a chat message's file: it's removed when the message is deleted;
+- a live comment's file: it's removed when the comment is deleted;
+- a live entity's file: remove it with `removeFileIds` on [Update Entity](/v8/api-reference/entities/update-entity);
 - a user's or space's avatar or banner (the file its `avatarFileId` or `bannerFileId` points at): remove it with `removeFileIds` on [Update User](/v8/api-reference/users/update-user) or [Update Space](/v8/api-reference/spaces/update-space);
 - a conversation's avatar (the file its `avatarFileId` points at): remove it with `removeFileIds` on [Update Conversation](/v8/api-reference/chat/conversations/update-conversation);
 - a live event's file, its cover included: remove it with `removeFileIds` on [Update Event](/v8/api-reference/events/update-event).
 
-A file whose event was soft-deleted (the event's files were kept, see [Delete Event](/v8/api-reference/events/delete-event)) or no longer exists belongs to nothing, its cover included: its owner deletes it here like any other file.
+A file whose comment was deleted, or whose entity or event was soft-deleted with its files kept (see [Delete Entity](/v8/api-reference/entities/delete-entity) and [Delete Event](/v8/api-reference/events/delete-event)), belongs to nothing, an event's cover included, as does a file whose record no longer exists: its owner deletes it here like any other file.
 
 **Rate limit**: 50 requests per 5 minutes.
 
@@ -56,9 +58,21 @@ A file whose event was soft-deleted (the event's files were kept, see [Delete Ev
     ```
   </Accordion>
   <Accordion title="File Attached — 409">
-    The file is a chat message's file, a user's or space's avatar or banner, a conversation's avatar, or a live event's file (its cover included). `error` names which, and how to remove it. Checked after the owner check, so only the file's owner learns this.
+    The file is a chat message's file, a live comment's or entity's file, a user's or space's avatar or banner, a conversation's avatar, or a live event's file (its cover included). `error` names which, and how to remove it. Checked after the owner check, so only the file's owner learns this.
     ```json
     { "error": "This file belongs to a user's avatar or banner, so it can't be deleted here. Remove it through the user's update: list its id in `removeFileIds`.", "code": "storage/file-attached" }
+    ```
+    A chat message's file:
+    ```json
+    { "error": "This file belongs to a chat message, so it can't be deleted here. It's removed when the message is deleted.", "code": "storage/file-attached" }
+    ```
+    A live comment's file:
+    ```json
+    { "error": "This file belongs to a comment, so it can't be deleted here. It's removed when the comment is deleted.", "code": "storage/file-attached" }
+    ```
+    A live entity's file:
+    ```json
+    { "error": "This file belongs to an entity, so it can't be deleted here. Remove it through the entity's update: list its id in `removeFileIds`.", "code": "storage/file-attached" }
     ```
     A live event's file or cover:
     ```json

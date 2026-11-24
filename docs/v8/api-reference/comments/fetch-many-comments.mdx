@@ -114,6 +114,7 @@ using the values after `limit` and `replyLimit` are capped at 100. Requests abov
   Associations to include, as a comma-separated value (`include=user,grants`) or repeated params, applied at every level (nested replies included). Values:
   - `user` — the comment author, with the avatar file URLs
   - `grants` — the [reputation-grant summary](/v8/data-models/reputation-grant#grantsummary)
+  - `files` — the comment's images and files, in upload order, images with their variants. A placeholder (a deleted, removed or unavailable comment) has `files: []`. Requires the `files-images` bundle
 
   Matching ignores case. Every comment in a thread belongs to the entity you asked for, so `entity`, `space` and `parent` aren't available here: they return `400 comment/unsupported-param` (see [Unsupported parameters](#unsupported-parameters)). Any other unknown value returns `400 comment/invalid-query`.
 </ParamField>
@@ -229,7 +230,7 @@ These parameters return `400` with code `comment/unsupported-param`, a `param` f
 | `userId` | [`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id). |
 | `blockedFilter` | Threads always include comments by users the caller blocked, marked `isAuthorBlocked: true`. `blockedFilter` is available on [`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id). |
 | `sourceId` | A thread already belongs to one entity. To filter a user's comments by source, use [`GET /users/:userId/comments?sourceId=…`](/v8/api-reference/users/fetch-comments-by-user-id). |
-| `include=entity`, `include=space` | Every comment in a thread belongs to the entity you requested. Supported values: `user`, `grants`. |
+| `include=entity`, `include=space` | Every comment in a thread belongs to the entity you requested. Supported values: `user`, `grants`, `files`. |
 | `include=parent` | Top-level comments have no parent, and replies all share the one you requested. Available on [`GET /users/:userId/comments`](/v8/api-reference/users/fetch-comments-by-user-id) and the single-comment fetches. |
 | `sortBy=new` | `sortBy=createdAt` (newest first by default). |
 | `sortBy=old` | `sortBy=createdAt&sortDir=asc`. |
@@ -282,7 +283,7 @@ Checks run in this order; the first failing check is returned.
     ```
 
     ```json
-    { "error": "include: Unknown include `replies`. Allowed: user, grants.", "code": "comment/invalid-query" }
+    { "error": "include: Unknown include `replies`. Allowed: user, grants, files.", "code": "comment/invalid-query" }
     ```
   </Accordion>
   <Accordion title="Request too large — 400">

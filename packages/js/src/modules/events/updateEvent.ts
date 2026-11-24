@@ -92,7 +92,7 @@ export async function updateEvent(
     }
     appendListUploads(formData, { images, files });
 
-    // `include` as one comma-separated field (a JSON array isn't read).
+    // `include` as one comma-separated field.
     const { include, ...fields } = body;
     appendFields(formData, {
       ...fields,

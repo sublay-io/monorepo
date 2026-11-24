@@ -88,7 +88,7 @@ export async function updateEvent(
 
   if (coverFile || hasListUploads({ images, files })) {
     const formData = new FormData();
-    // `include` as one comma-separated field (a JSON array isn't read).
+    // `include` as one comma-separated field.
     const { include, ...fields } = body;
     appendFields(formData, {
       ...fields,

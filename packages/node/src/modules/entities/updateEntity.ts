@@ -65,7 +65,7 @@ export async function updateEntity(
     const formData = new FormData();
     // Object fields (and `removeFileIds`) go as JSON strings; the server
     // parses them back.
-    // `include` as one comma-separated field (a JSON array isn't read).
+    // `include` as one comma-separated field.
     const { include, ...fields } = restOfProps;
     appendFields(formData, {
       ...fields,

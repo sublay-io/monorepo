@@ -1,29 +1,7 @@
 import { SublayHttpClient } from "../../core/client";
 import { ImageOptions } from "../../interfaces/ImageProcessing";
+import { File as SublayFile } from "../../interfaces/File";
 import { appendFields, appendFile } from "../../core/multipart";
-
-export interface UploadedImageVariant {
-  path: string;
-  width: number;
-  height: number;
-  size: number;
-  format: string;
-  publicPath: string;
-}
-
-export interface UploadImageResponse {
-  fileId: string;
-  type: "image";
-  originalPath: string;
-  originalSize: number;
-  originalWidth: number;
-  originalHeight: number;
-  variants: Record<string, UploadedImageVariant>;
-  format: string;
-  quality: number;
-  /** ISO-8601 timestamp. */
-  createdAt: string;
-}
 
 export interface UploadImageProps {
   /** The image to upload, as a browser `File` or `Blob`. */
@@ -31,30 +9,42 @@ export interface UploadImageProps {
   /** Optional filename for the multipart part (defaults to the `File.name` or `"upload"`). */
   filename?: string;
   /**
-   * Image-processing configuration. A discriminated union on `mode` mirroring
-   * the server's `uploadImageBodySchema` — see {@link ImageOptions}.
+   * Image-processing configuration, a discriminated union on `mode` — see
+   * {@link ImageOptions}. Sent as `file.options`, one JSON object.
    */
   imageOptions: ImageOptions;
-  /** Storage path segments, e.g. ["uploads", "photos"]. */
+  /**
+   * The folder the image is stored under, e.g. ["uploads", "photos"]. Sent
+   * inside `file.options`; when given, it takes the place of
+   * `imageOptions.pathParts`.
+   */
   pathParts?: string[];
+  /** Stored on the file, with the server's `originalName` and `uploadedAt` alongside. */
+  metadata?: Record<string, any>;
 }
 
+/**
+ * `POST /storage/images`: processes an image into its variants and stores
+ * it. Resolves with the File, its `image` included.
+ */
 export async function uploadImage(
   client: SublayHttpClient,
   data: UploadImageProps
-): Promise<UploadImageResponse> {
-  const { file, filename, imageOptions, ...rest } = data;
+): Promise<SublayFile> {
+  const { file, filename, imageOptions, pathParts, metadata } = data;
 
   const formData = new FormData();
   // The server's multer config reads the file from the `file` field.
   appendFile(formData, "file", file, { filename });
+  // The processing options go as one JSON field, `file.options` (the folder
+  // inside it), as an inline `<field>.options` does.
+  appendFields(formData, {
+    "file.options":
+      pathParts !== undefined ? { ...imageOptions, pathParts } : imageOptions,
+    metadata,
+  });
 
-  // The server reads the image-processing options as individual top-level
-  // multipart fields (mode + mode-specific keys + quality/format/stripExif/fit),
-  // not as a nested object — so flatten imageOptions alongside the other fields.
-  appendFields(formData, { ...imageOptions, ...rest });
-
-  const response = await client.projectInstance.post<UploadImageResponse>(
+  const response = await client.projectInstance.post<SublayFile>(
     "/storage/images",
     formData
   );

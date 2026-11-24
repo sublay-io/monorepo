@@ -112,16 +112,26 @@ export function appendFileList(
 }
 
 /**
- * The `include` an update sends: the caller's, or `"files"` when the update
- * changes the record's files (an upload or a removal) and the caller passed
- * none, so the response carries the record's files as they now are.
+ * The `include` an update sends. An empty one (`""`, `[]`, only commas) is
+ * the same as none. When the update changes the record's files (an upload
+ * or a removal), `"files"` is always in it, so the response carries the
+ * record's files as they now are: added to the caller's values when they
+ * left it out, or sent alone when they passed none. Otherwise the caller's
+ * `include` goes as given.
  */
 export function updateIncludeFor<T extends string>(
   include: T | T[] | undefined,
   changesFiles: boolean,
 ): T | T[] | undefined {
-  if (include !== undefined) return include;
-  return changesFiles ? ("files" as T) : undefined;
+  const values = (include === undefined ? [] : Array.isArray(include) ? include : [include])
+    .flatMap((part) => part.split(","))
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+  if (values.length === 0) return changesFiles ? ("files" as T) : undefined;
+  if (changesFiles && !values.some((value) => value.toLowerCase() === "files")) {
+    return [...values, "files"] as T[];
+  }
+  return include;
 }
 
 /** An `include` as one multipart field (a comma-separated value). */

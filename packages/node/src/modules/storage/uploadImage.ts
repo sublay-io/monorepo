@@ -1,36 +1,25 @@
 import { SublayHttpClient } from "../../core/client";
 import { appendFile, appendFields } from "../../core/formData";
-import { FileImageVariant } from "../../interfaces/File";
+import { File } from "../../interfaces/File";
 import { ImageOptions } from "../../interfaces/ImageProcessing";
-
-/** One processed size of an uploaded image. */
-export type UploadedImageVariant = FileImageVariant;
-
-/** What `uploadImage` returns. */
-export interface UploadImageResponse {
-  fileId: string;
-  type: "image";
-  originalPath: string; // Proxy URL
-  originalSize: number; // Bytes
-  originalWidth: number;
-  originalHeight: number;
-  variants: Record<string, UploadedImageVariant>; // thumbnail, small, medium, large, etc.
-  format: string;
-  quality: number; // 1-100
-  createdAt: string;
-}
 
 export interface UploadImageProps {
   file: Uint8Array | Blob;
   filename?: string;
   mimeType?: string;
   /**
-   * Image-processing configuration. A discriminated union on `mode` mirroring
-   * the server's `uploadImageBodySchema` — see {@link ImageOptions}.
+   * Image-processing configuration, a discriminated union on `mode` — see
+   * {@link ImageOptions}. Sent as `file.options`, one JSON object.
    */
   imageOptions: ImageOptions;
-  /** Storage path segments, e.g. ["uploads", "photos"]. */
+  /**
+   * The folder the image is stored under, e.g. ["uploads", "photos"]. Sent
+   * inside `file.options`; when given, it takes the place of
+   * `imageOptions.pathParts`.
+   */
   pathParts?: string[];
+  /** Stored on the file, with the server's `originalName` and `uploadedAt` alongside. */
+  metadata?: Record<string, any>;
   /**
    * The user the service key acts as, who owns the upload. Omit for an
    * app-owned file.
@@ -38,20 +27,28 @@ export interface UploadImageProps {
   actingUserId?: string;
 }
 
+/**
+ * `POST /storage/images`: processes an image into its variants and stores
+ * it. Resolves with the File, its `image` included.
+ */
 export async function uploadImage(
   client: SublayHttpClient,
   data: UploadImageProps
-): Promise<UploadImageResponse> {
-  const { file, filename, mimeType, imageOptions, ...rest } = data;
+): Promise<File> {
+  const { file, filename, mimeType, imageOptions, pathParts, metadata, actingUserId } = data;
 
   const formData = new FormData();
   appendFile(formData, "file", file, filename, mimeType);
-  // The server reads the image-processing options as individual top-level
-  // multipart fields (mode + mode-specific keys + quality/format/stripExif/fit),
-  // not as a nested object — so flatten imageOptions alongside the other fields.
-  appendFields(formData, { ...imageOptions, ...rest });
+  // The processing options go as one JSON field, `file.options` (the folder
+  // inside it), as an inline `<field>.options` does.
+  appendFields(formData, {
+    "file.options":
+      pathParts !== undefined ? { ...imageOptions, pathParts } : imageOptions,
+    metadata,
+    actingUserId,
+  });
 
-  const response = await client.projectInstance.post<UploadImageResponse>(
+  const response = await client.projectInstance.post<File>(
     "/storage/images",
     formData
   );

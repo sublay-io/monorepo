@@ -369,9 +369,6 @@ export type {
   ListGrantsResponse,
 } from "./modules/reputation/listGrants";
 export type { File, FileImage, FileImageVariant } from "./interfaces/File";
-export type { UploadFileResponse } from "./modules/storage/uploadFile";
-export type { UploadImageResponse, UploadedImageVariant } from "./modules/storage/uploadImage";
-export type { GetFileResponse, GetFileImage } from "./modules/storage/getFile";
 export type {
   UploadFile,
   ImageSlotFile,

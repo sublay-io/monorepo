@@ -201,6 +201,14 @@ Returns the updated [Event](/v8/data-models/event) object. With `include: "files
     ```json
     { "error": "File \"photo.jpg\" is not a valid image.", "code": "event/invalid-image", "param": "images" }
     ```
+    An image over 10000 px on a side gets the same code. `error` gives its size:
+    ```json
+    { "error": "Cover file is 12000 x 800 px; an image can be at most 10000 px on each side.", "code": "event/invalid-image", "param": "coverFile" }
+    ```
+    A file in `images`:
+    ```json
+    { "error": "File \"photo.jpg\" is 12000 x 800 px; an image can be at most 10000 px on each side.", "code": "event/invalid-image", "param": "images" }
+    ```
   </Accordion>
   <Accordion title="Missing Image Options — 400">
     A cover or `images` were uploaded without their options. `param` is `coverFile.options` or `images.options`.
@@ -211,6 +219,17 @@ Returns the updated [Event](/v8/data-models/event) object. With `include: "files
     ```json
     { "error": "`images.options` is required when `images` are uploaded. Must include mode property.", "code": "event/missing-image-options", "param": "images.options" }
     ```
+  </Accordion>
+  <Accordion title="Invalid Image Options — 400">
+    `coverFile.options` without `mode`, or with a `mode` that isn't one of the five (other options fields the same way, named in `error` and `param`):
+    ```json
+    { "error": "coverFile.options.mode: Invalid input", "code": "event/invalid-body", "param": "coverFile.options.mode" }
+    ```
+    In an aspect-ratio mode, a variant's computed side would be outside 1–10000 px. Checked once the image is read, before anything is stored. `param` names the option:
+    ```json
+    { "error": "`coverFile.options.widths.s` gives a height of 0 px at the 3:1 aspect ratio. Each side of a variant must be 1–10000 px.", "code": "event/invalid-body", "param": "coverFile.options.widths.s" }
+    ```
+    In `aspect-ratio-height-based` it names a `heights` option and gives a width. In `multi-aspect-ratio` it names a `sizes` option, and the ratio is the one in `aspectRatios` closest to the image, so the text reads "… at the 3:1 aspect ratio, the one in `aspectRatios` closest to this image. Each side of a variant must be 1–10000 px."
   </Accordion>
   <Accordion title="Storage Quota Reached — 429">
     ```json

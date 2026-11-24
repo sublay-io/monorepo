@@ -158,6 +158,14 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
     { "error": "Avatar file is not a valid image.", "code": "space/invalid-image", "param": "avatarFile" }
     ```
     The file can't be read as an image. Also returned for the banner, with `param: "bannerFile"`.
+    An image over 10000 px on a side gets the same code. `error` gives its size:
+    ```json
+    { "error": "Avatar file is 12000 x 800 px; an image can be at most 10000 px on each side.", "code": "space/invalid-image", "param": "avatarFile" }
+    ```
+    For `bannerFile`:
+    ```json
+    { "error": "Banner file is 12000 x 800 px; an image can be at most 10000 px on each side.", "code": "space/invalid-image", "param": "bannerFile" }
+    ```
   </Accordion>
   <Accordion title="Missing Image Options — 400">
     ```json
@@ -170,6 +178,15 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
     { "error": "Invalid JSON in avatarFile.options field.", "code": "space/invalid-body", "param": "avatarFile.options" }
     ```
     The `.options` field isn't valid JSON. `param` names the field: `avatarFile.options` or `bannerFile.options`.
+    `avatarFile.options` without `mode`, or with a `mode` that isn't one of the five (other options fields the same way, named in `error` and `param`):
+    ```json
+    { "error": "avatarFile.options.mode: Invalid input", "code": "space/invalid-body", "param": "avatarFile.options.mode" }
+    ```
+    In an aspect-ratio mode, a variant's computed side would be outside 1–10000 px. Checked once the image is read, before anything is stored. `param` names the option:
+    ```json
+    { "error": "`avatarFile.options.widths.s` gives a height of 0 px at the 3:1 aspect ratio. Each side of a variant must be 1–10000 px.", "code": "space/invalid-body", "param": "avatarFile.options.widths.s" }
+    ```
+    In `aspect-ratio-height-based` it names a `heights` option and gives a width. In `multi-aspect-ratio` it names a `sizes` option, and the ratio is the one in `aspectRatios` closest to the image, so the text reads "… at the 3:1 aspect ratio, the one in `aspectRatios` closest to this image. Each side of a variant must be 1–10000 px."
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
     A file was refused as the body was read: `space/unsupported-file-type` or `space/unexpected-file-field` (a file in another field, or a second file in `avatarFile` or `bannerFile`), with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).

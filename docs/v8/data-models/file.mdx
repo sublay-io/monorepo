@@ -17,7 +17,7 @@ A record's files are uploaded, replaced and removed through that record's own re
 | `eventId` | `string \| null` | The event this file is attached to. |
 | `commentId` | `string \| null` | The comment this file is attached to. |
 | `chatMessageId` | `string \| null` | The chat message this file is attached to. |
-| `spaceId` | `string \| null` | The space this file is associated with. |
+| `spaceId` | `string \| null` | The space this file is associated with. It is set on a space's own avatar and banner; files uploaded through the v7 API (an entity's or event's files, or a `POST /storage` upload associated with a space) may also carry a space. |
 | `type` | `"image" \| "video" \| "document" \| "other"` | The file category, from its MIME type: `image/*` is `"image"`, `video/*` is `"video"`, PDF, Word and other `application/vnd.*` types are `"document"`, anything else `"other"`. A processed image is always `"image"`. |
 | `originalPath` | `string` | Proxied URL to the original uploaded file. |
 | `originalSize` | `number` | Size of the original file in bytes. |

@@ -1,8 +1,79 @@
 import { deleteFile, getFile, uploadFile, uploadImage } from "../src/modules/storage";
+import type { File as SublayFile } from "../src/interfaces/File";
+import type { ImageOptions } from "../src/interfaces/ImageProcessing";
 import { formDataToObject, makeClient } from "./helpers/client";
 
+/** The fields the old flat encoding sent; the server now refuses each one. */
+const FLAT_FIELDS = [
+  "mode",
+  "dimensions",
+  "aspectRatio",
+  "widths",
+  "heights",
+  "sizes",
+  "aspectRatios",
+  "fit",
+  "quality",
+  "format",
+  "stripExif",
+  "pathParts",
+];
+
+function expectNoFlatFields(fields: Record<string, unknown>) {
+  for (const field of FLAT_FIELDS) expect(fields).not.toHaveProperty(field);
+  expect(fields).not.toHaveProperty("imageOptions");
+}
+
+const FILE = {
+  id: "f1",
+  userId: "u1",
+  entityId: null,
+  eventId: null,
+  commentId: null,
+  chatMessageId: null,
+  spaceId: null,
+  type: "document" as const,
+  originalPath: "https://api.example.com/files/p1/files/f1/doc.pdf",
+  originalSize: 1234,
+  originalMimeType: "application/pdf",
+  position: 0,
+  metadata: { originalName: "doc.pdf", uploadedAt: "2026-06-01T00:00:00.000Z" },
+  image: null,
+  createdAt: "2026-06-01T00:00:00.000Z",
+  updatedAt: "2026-06-01T00:00:00.000Z",
+};
+
+const IMAGE_FILE = {
+  ...FILE,
+  id: "f2",
+  type: "image" as const,
+  originalPath: "https://api.example.com/files/p1/pics/f2/original.webp",
+  originalMimeType: "image/png",
+  metadata: { originalName: "banner.png", uploadedAt: "2026-06-01T00:00:00.000Z" },
+  image: {
+    originalWidth: 2000,
+    originalHeight: 1000,
+    variants: {
+      full: {
+        width: 1000,
+        height: 500,
+        size: 2000,
+        format: "webp",
+        publicPath: "https://api.example.com/files/p1/pics/f2/full.webp",
+      },
+    },
+    processingStatus: "completed" as const,
+    processingError: null,
+    format: "webp",
+    quality: 80,
+    exifStripped: true,
+    createdAt: "2026-06-01T00:00:00.000Z",
+    updatedAt: "2026-06-01T00:00:00.000Z",
+  },
+};
+
 describe("js-sdk storage — uploadFile request shaping", () => {
-  it("posts multipart FormData to /storage with the file blob and JSON-stringified object fields", async () => {
+  it("posts the file, the folder inside `file.options` and the metadata", async () => {
     const { client, projectInstance } = makeClient();
     const file = new File(["avatar-bytes"], "avatar.png", {
       type: "image/png",
@@ -11,7 +82,6 @@ describe("js-sdk storage — uploadFile request shaping", () => {
       file,
       filename: "custom-name.png",
       pathParts: ["avatars", "u1"],
-      position: 1,
       metadata: { source: "upload" },
     });
 
@@ -21,10 +91,10 @@ describe("js-sdk storage — uploadFile request shaping", () => {
     expect(body).toBeInstanceOf(FormData);
 
     const fields = formDataToObject(body as FormData);
+    expect(Object.keys(fields).sort()).toEqual(["file", "file.options", "metadata"]);
     expect(fields.file).toBeInstanceOf(File);
     expect((fields.file as File).name).toBe("custom-name.png");
-    expect(fields.pathParts).toBe(JSON.stringify(["avatars", "u1"]));
-    expect(fields.position).toBe("1");
+    expect(fields["file.options"]).toBe(JSON.stringify({ pathParts: ["avatars", "u1"] }));
     expect(fields.metadata).toBe(JSON.stringify({ source: "upload" }));
   });
 
@@ -48,22 +118,19 @@ describe("js-sdk storage — uploadFile request shaping", () => {
     expect((fields.file as File).name).toBe("upload");
   });
 
-  it("skips undefined optional fields (position/metadata) entirely", async () => {
+  it("without pathParts or metadata sends the file alone (the server's `files` folder)", async () => {
     const { client, projectInstance } = makeClient();
     const file = new File(["bytes"], "f.png", { type: "image/png" });
-    await uploadFile(client, { file, pathParts: ["files"] });
+    await uploadFile(client, { file });
 
     const [, body] = projectInstance.post.mock.calls[0];
     const fields = formDataToObject(body as FormData);
-    expect(fields).not.toHaveProperty("position");
-    expect(fields).not.toHaveProperty("metadata");
-    // pathParts (array) still present and JSON-stringified.
-    expect(fields.pathParts).toBe(JSON.stringify(["files"]));
+    expect(Object.keys(fields)).toEqual(["file"]);
   });
 });
 
 describe("js-sdk storage — uploadImage request shaping", () => {
-  it("flattens exact-dimensions imageOptions as top-level multipart fields (object dims JSON-stringified)", async () => {
+  it("sends the options as one `file.options` JSON field, never as flat fields", async () => {
     const { client, projectInstance } = makeClient();
     const file = new File(["bytes"], "banner.png", { type: "image/png" });
     await uploadImage(client, {
@@ -73,7 +140,6 @@ describe("js-sdk storage — uploadImage request shaping", () => {
         dimensions: { thumbnail: { width: 100, height: 100 } },
         fit: "cover",
       },
-      pathParts: ["spaces", "s1", "banner"],
     });
 
     expect(projectInstance.post).toHaveBeenCalledTimes(1);
@@ -82,99 +148,109 @@ describe("js-sdk storage — uploadImage request shaping", () => {
     expect(body).toBeInstanceOf(FormData);
 
     const fields = formDataToObject(body as FormData);
+    expect(Object.keys(fields).sort()).toEqual(["file", "file.options"]);
     expect(fields.file).toBeInstanceOf(File);
-    expect(fields.mode).toBe("exact-dimensions");
-    expect(fields.dimensions).toBe(
-      JSON.stringify({ thumbnail: { width: 100, height: 100 } })
+    expect(fields["file.options"]).toBe(
+      JSON.stringify({
+        mode: "exact-dimensions",
+        dimensions: { thumbnail: { width: 100, height: 100 } },
+        fit: "cover",
+      })
     );
-    expect(fields.fit).toBe("cover");
-    expect(fields.pathParts).toBe(JSON.stringify(["spaces", "s1", "banner"]));
-    // imageOptions itself is never sent as a nested field/object.
-    expect(fields).not.toHaveProperty("imageOptions");
+    expectNoFlatFields(fields);
   });
 
-  it("flattens aspect-ratio-width-based imageOptions as top-level multipart fields", async () => {
+  it.each<ImageOptions>([
+    {
+      mode: "aspect-ratio-width-based",
+      aspectRatio: { width: 16, height: 9 },
+      widths: { hero: 1200 },
+    },
+    {
+      mode: "aspect-ratio-height-based",
+      aspectRatio: { width: 4, height: 3 },
+      heights: { card: 400 },
+    },
+    {
+      mode: "original-aspect",
+      sizes: { thumbnail: 1, full: 10000 },
+      fit: "inside",
+    },
+    {
+      mode: "multi-aspect-ratio",
+      aspectRatios: [
+        { width: 16, height: 9 },
+        { width: 1, height: 1 },
+      ],
+      sizes: { hero: 1200 },
+    },
+  ])("sends $mode options whole inside `file.options`", async (imageOptions) => {
     const { client, projectInstance } = makeClient();
     const file = new File(["bytes"], "hero.png", { type: "image/png" });
-    await uploadImage(client, {
-      file,
-      imageOptions: {
-        mode: "aspect-ratio-width-based",
-        aspectRatio: { width: 16, height: 9 },
-        widths: { hero: 1200 },
-      },
-    });
+    await uploadImage(client, { file, imageOptions });
 
     const [, body] = projectInstance.post.mock.calls[0];
     const fields = formDataToObject(body as FormData);
-    expect(fields.mode).toBe("aspect-ratio-width-based");
-    expect(fields.aspectRatio).toBe(JSON.stringify({ width: 16, height: 9 }));
-    expect(fields.widths).toBe(JSON.stringify({ hero: 1200 }));
+    expect(JSON.parse(fields["file.options"] as string)).toEqual(imageOptions);
+    expectNoFlatFields(fields);
   });
 
-  it("flattens aspect-ratio-height-based imageOptions as top-level multipart fields", async () => {
+  it("puts pathParts inside `file.options`, with originalMaxSize and the common options", async () => {
     const { client, projectInstance } = makeClient();
-    const file = new File(["bytes"], "hero.png", { type: "image/png" });
-    await uploadImage(client, {
-      file,
-      imageOptions: {
-        mode: "aspect-ratio-height-based",
-        aspectRatio: { width: 4, height: 3 },
-        heights: { card: 400 },
-      },
-    });
-
-    const [, body] = projectInstance.post.mock.calls[0];
-    const fields = formDataToObject(body as FormData);
-    expect(fields.mode).toBe("aspect-ratio-height-based");
-    expect(fields.aspectRatio).toBe(JSON.stringify({ width: 4, height: 3 }));
-    expect(fields.heights).toBe(JSON.stringify({ card: 400 }));
-  });
-
-  it("flattens original-aspect imageOptions as top-level multipart fields", async () => {
-    const { client, projectInstance } = makeClient();
-    const file = new File(["bytes"], "avatar.png", { type: "image/png" });
+    const file = new File(["bytes"], "banner.png", { type: "image/png" });
     await uploadImage(client, {
       file,
       imageOptions: {
         mode: "original-aspect",
-        sizes: { thumbnail: 200, full: 1000 },
-        fit: "inside",
+        sizes: { full: 1000 },
+        quality: 80,
+        format: "jpeg",
+        stripExif: false,
+        originalMaxSize: 2000,
       },
+      pathParts: ["spaces", "s1", "banner"],
     });
 
     const [, body] = projectInstance.post.mock.calls[0];
     const fields = formDataToObject(body as FormData);
-    expect(fields.mode).toBe("original-aspect");
-    expect(fields.sizes).toBe(JSON.stringify({ thumbnail: 200, full: 1000 }));
-    expect(fields.fit).toBe("inside");
+    expect(JSON.parse(fields["file.options"] as string)).toEqual({
+      mode: "original-aspect",
+      sizes: { full: 1000 },
+      quality: 80,
+      format: "jpeg",
+      stripExif: false,
+      originalMaxSize: 2000,
+      pathParts: ["spaces", "s1", "banner"],
+    });
+    expectNoFlatFields(fields);
   });
 
-  it("flattens multi-aspect-ratio imageOptions as top-level multipart fields", async () => {
+  it("keeps `imageOptions.pathParts` when no top-level pathParts is given", async () => {
     const { client, projectInstance } = makeClient();
-    const file = new File(["bytes"], "gallery.png", { type: "image/png" });
+    const file = new File(["bytes"], "x.png", { type: "image/png" });
     await uploadImage(client, {
       file,
-      imageOptions: {
-        mode: "multi-aspect-ratio",
-        aspectRatios: [
-          { width: 16, height: 9 },
-          { width: 1, height: 1 },
-        ],
-        sizes: { hero: 1200 },
-      },
+      imageOptions: { mode: "original-aspect", sizes: { full: 100 }, pathParts: ["pics"] },
     });
 
     const [, body] = projectInstance.post.mock.calls[0];
     const fields = formDataToObject(body as FormData);
-    expect(fields.mode).toBe("multi-aspect-ratio");
-    expect(fields.aspectRatios).toBe(
-      JSON.stringify([
-        { width: 16, height: 9 },
-        { width: 1, height: 1 },
-      ])
-    );
-    expect(fields.sizes).toBe(JSON.stringify({ hero: 1200 }));
+    expect(JSON.parse(fields["file.options"] as string).pathParts).toEqual(["pics"]);
+  });
+
+  it("sends metadata as its own JSON field", async () => {
+    const { client, projectInstance } = makeClient();
+    const file = new File(["bytes"], "x.png", { type: "image/png" });
+    await uploadImage(client, {
+      file,
+      imageOptions: { mode: "original-aspect", sizes: { full: 100 } },
+      metadata: { label: "cover" },
+    });
+
+    const [, body] = projectInstance.post.mock.calls[0];
+    const fields = formDataToObject(body as FormData);
+    expect(fields.metadata).toBe(JSON.stringify({ label: "cover" }));
+    expect(JSON.parse(fields["file.options"] as string)).not.toHaveProperty("metadata");
   });
 
   it("uses the explicit filename over the File's own name when both are given", async () => {
@@ -189,19 +265,6 @@ describe("js-sdk storage — uploadImage request shaping", () => {
     const [, body] = projectInstance.post.mock.calls[0];
     const fields = formDataToObject(body as FormData);
     expect((fields.file as File).name).toBe("renamed.png");
-  });
-
-  it("skips an undefined pathParts", async () => {
-    const { client, projectInstance } = makeClient();
-    const file = new File(["bytes"], "x.png", { type: "image/png" });
-    await uploadImage(client, {
-      file,
-      imageOptions: { mode: "original-aspect", sizes: {} },
-    });
-
-    const [, body] = projectInstance.post.mock.calls[0];
-    const fields = formDataToObject(body as FormData);
-    expect(fields).not.toHaveProperty("pathParts");
   });
 });
 
@@ -222,90 +285,39 @@ describe("js-sdk storage — getFile/deleteFile request shaping", () => {
 });
 
 describe("js-sdk storage — response mapping", () => {
-  it("uploadFile returns the UploadFileResponse", async () => {
+  it("uploadFile returns the File", async () => {
     const { client, projectInstance } = makeClient();
-    const result = {
-      fileId: "f1",
-      type: "file",
-      relativePath: "avatars/u1/f1.png",
-      publicPath: "https://cdn.example.com/avatars/u1/f1.png",
-      size: 1234,
-      mimeType: "image/png",
-      createdAt: "2026-06-01T00:00:00Z",
-    };
-    projectInstance.post.mockResolvedValueOnce({ data: result });
-    const file = new File(["bytes"], "f.png", { type: "image/png" });
+    projectInstance.post.mockResolvedValueOnce({ data: FILE });
+    const file = new File(["bytes"], "doc.pdf", { type: "application/pdf" });
 
-    const response = await uploadFile(client, {
+    const response: SublayFile = await uploadFile(client, {
       file,
-      pathParts: ["avatars"],
+      pathParts: ["docs"],
     });
 
-    expect(response).toEqual(result);
+    expect(response).toEqual(FILE);
   });
 
-  it("uploadImage returns the UploadImageResponse with variants", async () => {
+  it("uploadImage returns the File with its image", async () => {
     const { client, projectInstance } = makeClient();
-    const result = {
-      fileId: "f2",
-      type: "image" as const,
-      originalPath: "spaces/s1/banner/orig.png",
-      originalSize: 5000,
-      originalWidth: 2000,
-      originalHeight: 1000,
-      variants: {
-        full: {
-          path: "spaces/s1/banner/full.webp",
-          width: 1000,
-          height: 500,
-          size: 2000,
-          format: "webp",
-          publicPath: "https://cdn.example.com/spaces/s1/banner/full.webp",
-        },
-      },
-      format: "webp",
-      quality: 80,
-      createdAt: "2026-06-01T00:00:00Z",
-    };
-    projectInstance.post.mockResolvedValueOnce({ data: result });
+    projectInstance.post.mockResolvedValueOnce({ data: IMAGE_FILE });
     const file = new File(["bytes"], "banner.png", { type: "image/png" });
 
-    const response = await uploadImage(client, {
+    const response: SublayFile = await uploadImage(client, {
       file,
       imageOptions: { mode: "original-aspect", sizes: { full: 1000 } },
     });
 
-    expect(response).toEqual(result);
+    expect(response).toEqual(IMAGE_FILE);
   });
 
-  it("getFile returns the GetFileResponse, including the image projection when present", async () => {
+  it("getFile returns the File", async () => {
     const { client, projectInstance } = makeClient();
-    const result = {
-      fileId: "f1",
-      type: "image",
-      originalPath: "avatars/u1/orig.png",
-      originalSize: 4096,
-      originalMimeType: "image/png",
-      position: null,
-      metadata: null,
-      createdAt: "2026-06-01T00:00:00Z",
-      updatedAt: "2026-06-01T00:00:00Z",
-      userId: "u1",
-      image: {
-        originalWidth: 800,
-        originalHeight: 600,
-        variants: {},
-        processingStatus: "completed" as const,
-        format: "webp",
-        quality: 80,
-        exifStripped: true,
-      },
-    };
-    projectInstance.get.mockResolvedValueOnce({ data: result });
+    projectInstance.get.mockResolvedValueOnce({ data: IMAGE_FILE });
 
-    const response = await getFile(client, { fileId: "f1" });
+    const response: SublayFile = await getFile(client, { fileId: "f2" });
 
-    expect(response).toEqual(result);
+    expect(response).toEqual(IMAGE_FILE);
   });
 
   it("deleteFile resolves to undefined (void)", async () => {

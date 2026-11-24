@@ -280,9 +280,6 @@ export type {
   ReportSpace,
 } from "./interfaces/Report";
 export type { File, FileImage, FileImageVariant } from "./interfaces/File";
-export type { UploadFileResponse } from "./modules/storage/uploadFile";
-export type { UploadImageResponse, UploadedImageVariant } from "./modules/storage/uploadImage";
-export type { GetFileResponse, GetFileImage } from "./modules/storage/getFile";
 export type { ContentSearchResult, ContentSearchChatMessage } from "./modules/search/searchContent";
 export type { UserSearchResult } from "./modules/search/searchUsers";
 export type { SpaceSearchResult } from "./modules/search/searchSpaces";

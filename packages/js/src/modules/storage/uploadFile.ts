@@ -1,16 +1,6 @@
 import { SublayHttpClient } from "../../core/client";
 import { appendFields, appendFile } from "../../core/multipart";
-
-export interface UploadFileResponse {
-  fileId: string;
-  type: "image" | "video" | "document" | "other"; // From the file's MIME type
-  relativePath: string;
-  publicPath: string;
-  size: number;
-  mimeType: string;
-  /** ISO-8601 timestamp. */
-  createdAt: string;
-}
+import { File as SublayFile } from "../../interfaces/File";
 
 export interface UploadFileProps {
   /** The file to upload, as a browser `File` or `Blob`. */
@@ -18,27 +8,33 @@ export interface UploadFileProps {
   /** Optional filename for the multipart part (defaults to the `File.name` or `"upload"`). */
   filename?: string;
   /**
-   * Storage path segments for the file, e.g. ["avatars", userId]. Required by
-   * the server (`uploadFileBodySchema.pathParts`).
+   * The folder the file is stored under, e.g. ["documents", "q1"] (sent as
+   * `file.options`). Without it the file goes in `files`.
    */
-  pathParts: string[];
-  /** Stored on the file as `position`. */
-  position?: number;
+  pathParts?: string[];
+  /** Stored on the file, with the server's `originalName` and `uploadedAt` alongside. */
   metadata?: Record<string, any>;
 }
 
+/**
+ * `POST /storage`: stores a file as uploaded. Resolves with the File
+ * (`image: null`).
+ */
 export async function uploadFile(
   client: SublayHttpClient,
   data: UploadFileProps
-): Promise<UploadFileResponse> {
-  const { file, filename, ...fields } = data;
+): Promise<SublayFile> {
+  const { file, filename, pathParts, metadata } = data;
 
   const formData = new FormData();
   // The server's multer config reads the file from the `file` field.
   appendFile(formData, "file", file, { filename });
-  appendFields(formData, fields);
+  appendFields(formData, {
+    "file.options": pathParts !== undefined ? { pathParts } : undefined,
+    metadata,
+  });
 
-  const response = await client.projectInstance.post<UploadFileResponse>(
+  const response = await client.projectInstance.post<SublayFile>(
     "/storage",
     formData
   );

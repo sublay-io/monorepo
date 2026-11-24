@@ -92,3 +92,12 @@ export interface EventInvite {
 export type EventInclude = "user" | "space" | "files" | "userRsvp";
 export type EventIncludeArray = EventInclude[];
 export type EventIncludeParam = EventInclude | EventIncludeArray;
+
+/**
+ * `include` values the event update accepts (in its body): `"files"` adds
+ * the event's files (cover first) and the host's avatar and banner files to
+ * the response.
+ */
+export type EventUpdateInclude = "files";
+export type EventUpdateIncludeArray = EventUpdateInclude[];
+export type EventUpdateIncludeParam = EventUpdateInclude | EventUpdateIncludeArray;

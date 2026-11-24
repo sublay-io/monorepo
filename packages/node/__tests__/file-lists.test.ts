@@ -85,6 +85,25 @@ describe("node-sdk file lists — updateEntity", () => {
   });
 });
 
+describe("node-sdk file lists — include on updates", () => {
+  it("updateEntity and updateEvent send include as given in JSON, comma-joined in multipart", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateEntity(client, { entityId: "e1", actingUserId: "u1", include: ["files"] });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/entities/e1", {
+      actingUserId: "u1",
+      include: ["files"],
+    });
+    await updateEvent(client, {
+      eventId: "ev1",
+      actingUserId: "u1",
+      include: ["files"],
+      files: { files: [{ file: bytes(), mimeType: "application/pdf" }] },
+    });
+    const [, body] = projectInstance.patch.mock.calls[1];
+    expect((body as FormData).get("include")).toBe("files");
+  });
+});
+
 describe("node-sdk file lists — events", () => {
   it("createEvent sends images and files without a cover", async () => {
     const { client, projectInstance } = makeClient();

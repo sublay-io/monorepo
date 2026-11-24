@@ -1,5 +1,10 @@
 import { SublayHttpClient } from "../../core/client";
-import { Event, EventType, EventVisibility } from "../../interfaces/Event";
+import {
+  Event,
+  EventType,
+  EventUpdateIncludeParam,
+  EventVisibility,
+} from "../../interfaces/Event";
 import {
   appendFields,
   appendImageSlot,
@@ -56,6 +61,12 @@ export interface UpdateEventProps {
    */
   removeFileIds?: string[];
   /**
+   * What the response adds: `"files"`, the event's files as they now are
+   * (cover first) and the host's avatar and banner files. Without it the
+   * response has no `files`, even after an upload or removal.
+   */
+  include?: EventUpdateIncludeParam;
+  /**
    * The event host this request acts as. It has exactly that user's powers
    * on the event and is recorded as theirs. Required.
    */
@@ -77,7 +88,12 @@ export async function updateEvent(
 
   if (coverFile || hasListUploads({ images, files })) {
     const formData = new FormData();
-    appendFields(formData, body);
+    // `include` as one comma-separated field (a JSON array isn't read).
+    const { include, ...fields } = body;
+    appendFields(formData, {
+      ...fields,
+      include: Array.isArray(include) ? include.join(",") : include,
+    });
     if (coverFile) appendImageSlot(formData, "coverFile", coverFile, "cover");
     appendListUploads(formData, { images, files });
     const response = await client.projectInstance.patch<Event>(path, formData);

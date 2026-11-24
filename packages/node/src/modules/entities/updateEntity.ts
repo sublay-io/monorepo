@@ -1,5 +1,5 @@
 import { SublayHttpClient } from "../../core/client";
-import { Entity } from "../../interfaces/Entity";
+import { Entity, EntityUpdateIncludeParam } from "../../interfaces/Entity";
 import { Mention } from "../../interfaces/Mention";
 import {
   appendFields,
@@ -35,6 +35,11 @@ export interface UpdateEntityProps {
    */
   removeFileIds?: string[];
   /**
+   * What the response adds: `"files"`, the entity's files as they now are.
+   * Without it the response has no `files`, even after an upload or removal.
+   */
+  include?: EntityUpdateIncludeParam;
+  /**
    * Images APPENDED to the entity's files, processed into sizes per `options` (`mode` is required).
    * Each carries its bytes and, for raw bytes, a `filename` and `mimeType`.
    * When present the request is sent as `multipart/form-data`. Requires the
@@ -60,7 +65,12 @@ export async function updateEntity(
     const formData = new FormData();
     // Object fields (and `removeFileIds`) go as JSON strings; the server
     // parses them back.
-    appendFields(formData, restOfProps);
+    // `include` as one comma-separated field (a JSON array isn't read).
+    const { include, ...fields } = restOfProps;
+    appendFields(formData, {
+      ...fields,
+      include: Array.isArray(include) ? include.join(",") : include,
+    });
     appendListUploads(formData, { images, files });
     const response = await client.projectInstance.patch<Entity>(path, formData);
     return response.data;

@@ -1,7 +1,7 @@
 import { useCallback, useRef } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
-import { Entity } from "../../interfaces/models/Entity";
+import { Entity, EntityUpdateIncludeParam } from "../../interfaces/models/Entity";
 import { Mention } from "../../interfaces/models/Mention";
 import useEntity from "./useEntity";
 import { useSublayDispatch } from "../../store/hooks";
@@ -10,6 +10,8 @@ import {
   appendFileList,
   appendImageList,
   hasListFiles,
+  includeField,
+  updateIncludeFor,
   type FileListUpload,
   type ImageListUpload,
 } from "../../utils/uploads";
@@ -41,6 +43,12 @@ export interface UpdateEntityProps {
     images?: ImageListUpload;
     /** Files APPENDED to the entity's files, stored as uploaded. Sends multipart. */
     files?: FileListUpload;
+    /**
+     * What the response adds: `"files"`, the entity's files as they now are.
+     * Defaults to `"files"` when the update uploads or removes files, so the
+     * copies the hook updates get the new list; otherwise none.
+     */
+    include?: EntityUpdateIncludeParam;
   };
 }
 
@@ -49,7 +57,8 @@ export interface UpdateEntityProps {
  * entity already held (an `EntityProvider`'s, a loaded list's). Fields the
  * response doesn't carry (`saved`, `space`, `topComments`, ...) stay as the
  * copy has them; `files` comes back (and replaces the copy's) only when the
- * update uploaded or removed files. Two fields it does carry are left out: its
+ * update asked for it with `include: "files"`, which the hook sends whenever
+ * the update uploads or removes files. Two fields it does carry are left out: its
  * `userReaction` is always null (the response isn't read as the viewer), and
  * its `user` has no avatar or banner files.
  */
@@ -82,7 +91,7 @@ function useUpdateEntity(): (props: UpdateEntityProps) => Promise<Entity> {
     async (props: UpdateEntityProps) => {
       const { entityId, update } = props;
       // The files go as multipart parts; everything else in `update` is a field.
-      const { images, files, ...fields } = update;
+      const { images, files, include: includeProp, ...fields } = update;
 
       if (!projectId) {
         throw new Error("No projectId available.");
@@ -90,6 +99,10 @@ function useUpdateEntity(): (props: UpdateEntityProps) => Promise<Entity> {
 
       const hasImages = hasListFiles(images);
       const hasFiles = hasListFiles(files);
+      const include = updateIncludeFor(
+        includeProp,
+        hasImages || hasFiles || (fields.removeFileIds?.length ?? 0) > 0,
+      );
       const path = `/${projectId}/entities/${entityId}`;
 
       let response;
@@ -109,6 +122,7 @@ function useUpdateEntity(): (props: UpdateEntityProps) => Promise<Entity> {
         if (u.nsfw !== undefined) formData.append("nsfw", u.nsfw.toString());
         if (u.removeFileIds !== undefined)
           formData.append("removeFileIds", JSON.stringify(u.removeFileIds));
+        if (include !== undefined) formData.append("include", includeField(include));
 
         if (hasImages) appendImageList(formData, images!);
         if (hasFiles) appendFileList(formData, files!);
@@ -138,6 +152,7 @@ function useUpdateEntity(): (props: UpdateEntityProps) => Promise<Entity> {
           mentions,
           nsfw,
           removeFileIds,
+          include,
         });
       }
 

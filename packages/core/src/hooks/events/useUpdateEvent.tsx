@@ -1,13 +1,20 @@
 import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
-import { Event, EventType, EventVisibility } from "../../interfaces/models/Event";
+import {
+  Event,
+  EventType,
+  EventUpdateIncludeParam,
+  EventVisibility,
+} from "../../interfaces/models/Event";
 import { toIsoString } from "../../utils/dates";
 import {
   appendFileList,
   appendImageList,
   appendImageSlot,
   hasListFiles,
+  includeField,
+  updateIncludeFor,
   type FileListUpload,
   type ImageListUpload,
   type ImageSlotUpload,
@@ -50,6 +57,12 @@ export interface UpdateEventProps {
     images?: ImageListUpload;
     /** Files APPENDED to the event's files, stored as uploaded. Sends multipart. */
     files?: FileListUpload;
+    /**
+     * What the response adds: `"files"`, the event's files as they now are
+     * (cover first) and the host's avatar and banner files. Defaults to
+     * `"files"` when the update uploads or removes files; otherwise none.
+     */
+    include?: EventUpdateIncludeParam;
   };
 }
 
@@ -70,11 +83,15 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
       }
 
       // The files go as multipart parts; everything else in `update` is a field.
-      const { coverFile, images, files, ...fields } = update;
+      const { coverFile, images, files, include: includeProp, ...fields } = update;
 
       const hasCover = !!coverFile && !!coverFile.file;
       const hasImages = hasListFiles(images);
       const hasFiles = hasListFiles(files);
+      const include = updateIncludeFor(
+        includeProp,
+        hasCover || hasImages || hasFiles || (fields.removeFileIds?.length ?? 0) > 0,
+      );
 
       if (hasCover || hasImages || hasFiles) {
         // Multipart path. Field names mirror the server PATCH route:
@@ -101,6 +118,7 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
         if (u.metadata !== undefined) formData.append("metadata", JSON.stringify(u.metadata));
         if (u.removeFileIds !== undefined)
           formData.append("removeFileIds", JSON.stringify(u.removeFileIds));
+        if (include !== undefined) formData.append("include", includeField(include));
 
         if (hasCover) appendImageSlot(formData, "coverFile", coverFile!);
 
@@ -117,6 +135,7 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
 
       const response = await axios.patch(`/${projectId}/events/${eventId}`, {
         ...fields,
+        ...(include !== undefined && { include }),
         startTime:
           fields.startTime === undefined ? undefined : toIsoString(fields.startTime),
         endTime: fields.endTime === undefined ? undefined : toIsoString(fields.endTime),

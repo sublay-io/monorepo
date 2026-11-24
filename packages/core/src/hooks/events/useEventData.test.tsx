@@ -72,6 +72,23 @@ describe("useEventData", () => {
     expect(result.current.event).toEqual(updated);
   });
 
+  it("keeps the event's files when the update's response carries none", async () => {
+    const files = [{ id: "file-1" }] as any;
+    const event = makeEvent({ id: "event-1", title: "Old", files });
+    const { result, axiosPrivate } = renderHookWithAxios(() => useEventData({ event }));
+
+    // Without `include: "files"` the response has no `files` key.
+    const { files: _files, ...withoutFiles } = makeEvent({ id: "event-1", title: "New" }) as any;
+    axiosPrivate.mockResponse("patch", withoutFiles);
+
+    await act(async () => {
+      await result.current.updateEvent({ update: { title: "New" } });
+    });
+
+    expect(result.current.event?.title).toBe("New");
+    expect(result.current.event?.files).toBe(files);
+  });
+
   it("no-ops updateEvent when there is no event yet", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useEventData({} as any));
 

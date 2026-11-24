@@ -112,6 +112,24 @@ export function appendFileList(
 }
 
 /**
+ * The `include` an update sends: the caller's, or `"files"` when the update
+ * changes the record's files (an upload or a removal) and the caller passed
+ * none, so the response carries the record's files as they now are.
+ */
+export function updateIncludeFor<T extends string>(
+  include: T | T[] | undefined,
+  changesFiles: boolean,
+): T | T[] | undefined {
+  if (include !== undefined) return include;
+  return changesFiles ? ("files" as T) : undefined;
+}
+
+/** An `include` as one multipart field (a comma-separated value). */
+export function includeField(include: string | string[]): string {
+  return Array.isArray(include) ? include.join(",") : include;
+}
+
+/**
  * On a create, a `null` field means the same as leaving it out, so a
  * multipart body (which can't carry `null`) simply leaves it out.
  */

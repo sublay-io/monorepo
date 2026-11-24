@@ -128,7 +128,34 @@ describe("useUpdateEvent", () => {
 
     const [call] = axiosPrivate.calls("patch");
     expect(call.body instanceof FormData).toBe(false);
-    expect(call.body).toEqual({ removeFileIds: ["file-1", "file-2"] });
+    // A removal asks for the event's files, so the cached copy gets the new list.
+    expect(call.body).toEqual({ removeFileIds: ["file-1", "file-2"], include: "files" });
+  });
+
+  it("sends include: files with an upload, none on a plain edit, and the caller's include as given", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEvent());
+    axiosPrivate.mockResponse("patch", makeEvent());
+    axiosPrivate.mockResponse("patch", makeEvent());
+    axiosPrivate.mockResponse("patch", makeEvent());
+
+    const file = new File(["binary"], "photo.png", { type: "image/png" });
+    await act(async () => {
+      await result.current({
+        eventId: "event-1",
+        update: { images: { files: [file], options: { mode: "original-aspect", sizes: { full: 1200 } } } },
+      });
+    });
+    await act(async () => {
+      await result.current({ eventId: "event-1", update: { title: "T" } });
+    });
+    await act(async () => {
+      await result.current({ eventId: "event-1", update: { title: "T", include: ["files"] } });
+    });
+
+    const [upload, plain, asked] = axiosPrivate.calls("patch");
+    expect((upload.body as FormData).get("include")).toBe("files");
+    expect(plain.body).toEqual({ title: "T" });
+    expect(asked.body).toEqual({ title: "T", include: ["files"] });
   });
 
   it("sends a Date start time as an ISO string", async () => {

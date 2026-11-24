@@ -123,7 +123,21 @@ The `type` field is one of: `image`, `video`, `document`, `other`. It is inferre
     ```
   </Accordion>
   <Accordion title="Invalid Body — 400">
-    `file.options` or `metadata` isn't valid JSON, `file.options` isn't `{ pathParts? }` with `pathParts` a list of folder names, or `metadata` isn't a JSON object. `param` names the field, for example `file.options.pathParts` or `metadata`.
+    `file.options` or `metadata` was refused. Nothing is stored. `param` names the field.
+
+    `file.options` isn't valid JSON:
+
+    ```json
+    { "error": "file.options: Must be a valid JSON string", "code": "storage/invalid-body", "param": "file.options" }
+    ```
+
+    A folder in `pathParts` is, or becomes once slugified, `.` or `..`:
+
+    ```json
+    { "error": "file.options.pathParts: pathParts can't contain '.' or '..' segments, '?', '#' or encoded slashes", "code": "storage/invalid-body", "param": "file.options.pathParts" }
+    ```
+
+    When the folder only becomes `.` or `..` through slugifying, `error` is the message alone, without the `file.options.pathParts: ` prefix. A `file.options` that isn't `{ pathParts? }`, or `metadata` that isn't a JSON object, gets the same code, with `param` naming the value.
   </Accordion>
   <Accordion title="No File — 400 Bad Request">
     ```json

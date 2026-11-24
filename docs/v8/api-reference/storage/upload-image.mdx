@@ -39,7 +39,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     </ParamField>
 
     <ParamField body="aspectRatio" type="object">
-      Required for `aspect-ratio-width-based` and `aspect-ratio-height-based` modes. `{ width, height }` ratio, positive whole numbers. A side computed from the ratio must also be 1–10000 px; one outside that range is refused with a `400`.
+      Required for `aspect-ratio-width-based` and `aspect-ratio-height-based` modes. `{ width, height }` ratio, positive whole numbers. A side computed from the ratio must also be 1–10000 px; one outside that range gets `400 storage/invalid-body` (see Errors).
     </ParamField>
 
     <ParamField body="widths" type="object">
@@ -55,7 +55,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     </ParamField>
 
     <ParamField body="aspectRatios" type="array">
-      Required for `multi-aspect-ratio` mode. 1 to 10 `{ width, height }` aspect ratio objects. Each variant's computed width and height must be 1–10000 px; a side outside that range is refused with a `400`.
+      Required for `multi-aspect-ratio` mode. 1 to 10 `{ width, height }` aspect ratio objects. Each variant's computed width and height must be 1–10000 px; a side outside that range gets `400 storage/invalid-body` (see Errors).
     </ParamField>
 
     <ParamField body="fit" type="string">
@@ -96,7 +96,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 
 ## Response
 
-`201 Created` with the [File](/v8/data-models/file), the same shape [Fetch File](/v8/api-reference/storage/fetch-file) returns, its `image` data included.
+`201 Created` with the [File](/v8/data-models/file), the same shape [Fetch File](/v8/api-reference/storage/fetch-file) returns, its `image` data included. `originalSize`, `originalMimeType` and the image's `originalWidth` and `originalHeight` describe the stored original: the image in its output `format`, shrunk to `originalMaxSize`.
 
 ```json
 {
@@ -110,7 +110,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
   "type": "image",
   "originalPath": "https://api.sublay.io/internal/files/...",
   "originalSize": 204800,
-  "originalMimeType": "image/png",
+  "originalMimeType": "image/webp",
   "position": 0,
   "metadata": { "originalName": "photo.png", "uploadedAt": "2025-01-01T00:00:00.000Z" },
   "image": {
@@ -194,7 +194,35 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     ```
   </Accordion>
   <Accordion title="Invalid Body — 400">
-    `file.options` or `metadata` isn't valid JSON, `file.options` isn't valid image options (no `mode` or an unknown one, a size outside 1–10000, an `originalMaxSize` outside 50–10000, a computed side outside 1–10000 in an aspect-ratio mode, a `fit` the mode doesn't take, a refused folder in `pathParts`), or `metadata` isn't a JSON object. `param` names the field, for example `file.options.pathParts` or `metadata`. Nothing is stored.
+    `file.options` or `metadata` was refused. Nothing is stored. `error` names the field first, and `param` names it alone.
+
+    `file.options` without `mode`, or with a `mode` that isn't one of the five:
+
+    ```json
+    { "error": "file.options.mode: Invalid input", "code": "storage/invalid-body", "param": "file.options.mode" }
+    ```
+
+    `file.options` isn't valid JSON:
+
+    ```json
+    { "error": "file.options: Must be a valid JSON string", "code": "storage/invalid-body", "param": "file.options" }
+    ```
+
+    A folder in `pathParts` is refused:
+
+    ```json
+    { "error": "file.options.pathParts: pathParts can't contain '.' or '..' segments, '?', '#' or encoded slashes", "code": "storage/invalid-body", "param": "file.options.pathParts" }
+    ```
+
+    In an aspect-ratio mode, a variant's computed side would be outside 1–10000 px. Checked once the image is read, before anything is processed or stored. `param` names the option:
+
+    ```json
+    { "error": "`file.options.widths.s` gives a height of 0 px at the 3:1 aspect ratio. Each side of a variant must be 1–10000 px.", "code": "storage/invalid-body", "param": "file.options.widths.s" }
+    ```
+
+    In `aspect-ratio-height-based` it names a `heights` option and gives a width. In `multi-aspect-ratio` it names a `sizes` option, and the ratio is the one in `aspectRatios` closest to this image: "`file.options.sizes.s` gives a height of 0 px at the 3:1 aspect ratio, the one in \`aspectRatios\` closest to this image. Each side of a variant must be 1–10000 px."
+
+    Any other value outside its rules (a size outside 1–10000, an `originalMaxSize` outside 50–10000, a `fit` the mode doesn't take, `metadata` that isn't a JSON object) gets the same code, with `param` naming the value.
   </Accordion>
   <Accordion title="No File — 400 Bad Request">
     ```json
@@ -207,8 +235,16 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     ```
   </Accordion>
   <Accordion title="Invalid Image — 422">
+    The file can't be read as a JPEG, PNG or WebP image:
+
     ```json
     { "error": "Invalid image file", "code": "storage/invalid-image", "param": "file" }
+    ```
+
+    The image is over 10000 px on a side. `error` gives its size:
+
+    ```json
+    { "error": "The image is 12000 x 800 px; an image can be at most 10000 px on each side.", "code": "storage/invalid-image", "param": "file" }
     ```
   </Accordion>
   <Accordion title="Missing Image Options — 400">

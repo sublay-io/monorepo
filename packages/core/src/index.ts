@@ -997,6 +997,8 @@ export type {
 } from "./interfaces/models/Image";
 export type {
   ImageSlotUpload,
+  ImageListUpload,
+  FileListUpload,
   UploadFileInput,
   NativeUploadFile,
 } from "./utils/uploads";

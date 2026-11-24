@@ -19,6 +19,13 @@ import useProject from "../../projects/useProject";
 import { handleError } from "../../../utils/handleError";
 import { SpaceReputationContextParams } from "../../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../../utils/spaceReputationParams";
+import {
+  appendFileList,
+  appendImageList,
+  hasListFiles,
+  type FileListUpload,
+  type ImageListUpload,
+} from "../../../utils/uploads";
 
 export interface SendMessageParams extends SpaceReputationContextParams {
   content?: string;
@@ -27,7 +34,16 @@ export interface SendMessageParams extends SpaceReputationContextParams {
   metadata?: Record<string, any>;
   quotedMessageId?: string;
   parentMessageId?: string;
-  files?: (File | Blob)[];
+  /**
+   * Images on the message, processed into sizes per `options` (`mode` is
+   * required). Sends multipart. Requires the files-images bundle.
+   */
+  images?: ImageListUpload;
+  /**
+   * Files on the message, stored as uploaded. Sends multipart. Requires the
+   * files-images bundle.
+   */
+  files?: FileListUpload;
 }
 
 /** The created message; `localId` is the one this send generated. */
@@ -61,6 +77,7 @@ function useSendMessage({
       metadata,
       quotedMessageId,
       parentMessageId,
+      images,
       files,
       spaceReputation,
     }: SendMessageParams): Promise<SendMessageResult> => {
@@ -107,8 +124,11 @@ function useSendMessage({
       try {
         let response;
 
-        if (files && files.length > 0) {
-          // Multipart upload when files are attached
+        const hasImages = hasListFiles(images);
+        const hasFiles = hasListFiles(files);
+
+        if (hasImages || hasFiles) {
+          // Multipart upload when images or files are attached
           const formData = new FormData();
           formData.append("localId", localId);
           if (content) formData.append("content", content);
@@ -127,7 +147,8 @@ function useSendMessage({
               String(reputationFields.spaceReputationDescendants)
             );
           // A multipart field can't carry null: a null `gif` (no GIF) is left out.
-          files.forEach((file) => formData.append("files", file));
+          if (hasImages) appendImageList(formData, images!);
+          if (hasFiles) appendFileList(formData, files!);
           response = await axios.post(
             `/${projectId}/chat/conversations/${conversationId}/messages`,
             formData,

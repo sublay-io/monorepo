@@ -31,6 +31,62 @@ describe("useUpdateEntity", () => {
     expect(call.body).toMatchObject({ title: "New title" });
   });
 
+  it("uploads images and files as multipart, with removeFileIds as a JSON string", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEntity());
+    axiosPrivate.mockResponse("patch", makeEntity());
+
+    const photo = new File(["binary"], "photo.png", { type: "image/png" });
+    const doc = new File(["pdf"], "doc.pdf", { type: "application/pdf" });
+    const options = { mode: "original-aspect" as const, sizes: { full: 1080 } };
+
+    await act(async () => {
+      await result.current({
+        entityId: "entity-1",
+        update: {
+          title: "New title",
+          keywords: ["a"],
+          nsfw: false,
+          removeFileIds: ["file-1"],
+          images: { files: [photo], options },
+          files: { files: [doc], options: { pathParts: ["docs"] } },
+        },
+      });
+    });
+
+    const [call] = axiosPrivate.calls("patch");
+    expect(call.url).toBe("/test-project/entities/entity-1");
+    const form = call.body as FormData;
+    expect(form).toBeInstanceOf(FormData);
+    expect(form.get("title")).toBe("New title");
+    expect(form.get("keywords")).toBe(JSON.stringify(["a"]));
+    expect(form.get("nsfw")).toBe("false");
+    expect(form.get("removeFileIds")).toBe(JSON.stringify(["file-1"]));
+    expect(form.get("images")).toBeInstanceOf(File);
+    expect(form.get("images.options")).toBe(JSON.stringify(options));
+    expect(form.get("files")).toBeInstanceOf(File);
+    expect(form.get("files.options")).toBe(JSON.stringify({ pathParts: ["docs"] }));
+    expect(call.config?.headers).toMatchObject({
+      "Content-Type": "multipart/form-data",
+    });
+  });
+
+  it("sends removeFileIds alone as a JSON array", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEntity());
+    axiosPrivate.mockResponse("patch", makeEntity());
+
+    await act(async () => {
+      await result.current({
+        entityId: "entity-1",
+        update: { removeFileIds: ["file-1", "file-2"], images: { files: [], options: { mode: "original-aspect", sizes: { full: 1080 } } } },
+      });
+    });
+
+    const [call] = axiosPrivate.calls("patch");
+    expect(call.body).not.toBeInstanceOf(FormData);
+    expect(call.body).toMatchObject({ removeFileIds: ["file-1", "file-2"] });
+    expect(call.body).not.toHaveProperty("images");
+  });
+
   it("rejects when the server returns an error response", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUpdateEntity());
 

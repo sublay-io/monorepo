@@ -50,13 +50,40 @@ describe("useCreateEntity", () => {
     expect(call.body instanceof FormData).toBe(true);
     const formData = call.body as FormData;
     expect(formData.get("title")).toBe("With image");
-    expect(formData.get("images.files")).toBeInstanceOf(File);
+    expect(formData.get("images")).toBeInstanceOf(File);
+    expect(formData.has("images.files")).toBe(false);
     expect(formData.get("images.options")).toBe(
       JSON.stringify({ mode: "original-aspect", sizes: { full: 1080 } }),
     );
     expect(call.config?.headers).toMatchObject({
       "Content-Type": "multipart/form-data",
     });
+  });
+
+  it("sends raw files as `files` with optional `files.options`", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useCreateEntity());
+    axiosPrivate.mockResponse("post", makeEntity(), 201);
+    axiosPrivate.mockResponse("post", makeEntity(), 201);
+
+    const doc = new File(["pdf"], "doc.pdf", { type: "application/pdf" });
+    await act(async () => {
+      await result.current({ title: "Doc", files: { files: [doc, doc] } });
+    });
+    await act(async () => {
+      await result.current({
+        title: "Doc",
+        files: { files: [doc], options: { pathParts: ["docs"] } },
+      });
+    });
+
+    const [plain, withOptions] = axiosPrivate.calls("post");
+    const first = plain.body as FormData;
+    expect(first.getAll("files")).toHaveLength(2);
+    expect(first.has("files.options")).toBe(false);
+    expect(first.has("files.files")).toBe(false);
+    expect((withOptions.body as FormData).get("files.options")).toBe(
+      JSON.stringify({ pathParts: ["docs"] }),
+    );
   });
 
   it("sourceId null: JSON sends null (no source); multipart leaves the field out", async () => {
@@ -71,7 +98,10 @@ describe("useCreateEntity", () => {
       await result.current({
         title: "With image",
         sourceId: null,
-        images: { files: [new File(["b"], "p.png", { type: "image/png" })] },
+        images: {
+          files: [new File(["b"], "p.png", { type: "image/png" })],
+          options: { mode: "original-aspect", sizes: { full: 1080 } },
+        },
       });
     });
 

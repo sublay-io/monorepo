@@ -2,9 +2,16 @@ import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
 import { Event, EventType, EventVisibility } from "../../interfaces/models/Event";
-import { GalleryUploadConfig, isBrowserFile } from "./useCreateEvent";
 import { toIsoString } from "../../utils/dates";
-import { appendImageSlot, type ImageSlotUpload } from "../../utils/uploads";
+import {
+  appendFileList,
+  appendImageList,
+  appendImageSlot,
+  hasListFiles,
+  type FileListUpload,
+  type ImageListUpload,
+  type ImageSlotUpload,
+} from "../../utils/uploads";
 
 export interface UpdateEventProps {
   eventId: string;
@@ -28,16 +35,21 @@ export interface UpdateEventProps {
     guestListVisible?: boolean;
     metadata?: Record<string, any>;
     /**
-     * Ids of the event's files to remove: gallery images and/or the current
+     * Ids of the event's files to remove: list files and/or the current
      * cover (`coverImageId`; removing it clears the cover). Each must be one
      * of this event's files, or the whole update is refused. Works alone or
-     * with `gallery` (append) and `coverFile` (replace).
+     * with `images` / `files` (append) and `coverFile` (replace).
      */
     removeFileIds?: string[];
     /** New cover image (one image) — REPLACES the existing cover. Sends multipart. */
     coverFile?: ImageSlotUpload;
-    /** Gallery images (multi) — APPENDED to the event's images. Sends multipart. */
-    gallery?: GalleryUploadConfig;
+    /**
+     * Images APPENDED to the event's files, processed into sizes per
+     * `options` (`mode` is required). Sends multipart.
+     */
+    images?: ImageListUpload;
+    /** Files APPENDED to the event's files, stored as uploaded. Sends multipart. */
+    files?: FileListUpload;
   };
 }
 
@@ -58,15 +70,16 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
       }
 
       // The files go as multipart parts; everything else in `update` is a field.
-      const { coverFile, gallery, ...fields } = update;
+      const { coverFile, images, files, ...fields } = update;
 
       const hasCover = !!coverFile && !!coverFile.file;
-      const hasGallery = !!gallery && gallery.files.length > 0;
+      const hasImages = hasListFiles(images);
+      const hasFiles = hasListFiles(files);
 
-      if (hasCover || hasGallery) {
-        // Multipart path — inline cover/gallery upload. Field names mirror the
-        // server PATCH route: `coverFile` + `coverFile.options`, `gallery` +
-        // `gallery.options`.
+      if (hasCover || hasImages || hasFiles) {
+        // Multipart path. Field names mirror the server PATCH route:
+        // `coverFile` + `coverFile.options`, `images` + `images.options`,
+        // `files` + `files.options`.
         const formData = new FormData();
 
         const u = fields;
@@ -91,22 +104,8 @@ function useUpdateEvent(): (props: UpdateEventProps) => Promise<Event> {
 
         if (hasCover) appendImageSlot(formData, "coverFile", coverFile!);
 
-        if (hasGallery) {
-          gallery!.files.forEach((file) => {
-            if (isBrowserFile(file)) {
-              formData.append("gallery", file, file.name);
-            } else {
-              formData.append("gallery", {
-                uri: file.uri,
-                type: file.type || "image/jpeg",
-                name: file.name,
-              } as any);
-            }
-          });
-          if (gallery!.options) {
-            formData.append("gallery.options", JSON.stringify(gallery!.options));
-          }
-        }
+        if (hasImages) appendImageList(formData, images!);
+        if (hasFiles) appendFileList(formData, files!);
 
         const response = await axios.patch<Event>(
           `/${projectId}/events/${eventId}`,

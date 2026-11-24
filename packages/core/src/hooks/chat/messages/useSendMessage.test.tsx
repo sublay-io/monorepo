@@ -108,7 +108,7 @@ describe("useSendMessage", () => {
     axiosPrivate.mockResponse("post", makeChatMessage());
 
     await act(async () => {
-      await result.current({ content: "hi", gif: null, files: [new Blob(["x"])] });
+      await result.current({ content: "hi", gif: null, files: { files: [new Blob(["x"])] } });
     });
 
     const [call] = axiosPrivate.calls("post");
@@ -156,7 +156,7 @@ describe("useSendMessage", () => {
     const file = new File(["binary"], "photo.png", { type: "image/png" });
 
     await act(async () => {
-      await result.current({ content: "look", files: [file] });
+      await result.current({ content: "look", files: { files: [file] } });
     });
 
     const [call] = axiosPrivate.calls("post");
@@ -165,6 +165,37 @@ describe("useSendMessage", () => {
     expect(formData.get("content")).toBe("look");
     expect(formData.get("files")).toBeInstanceOf(File);
     expect(formData.getAll("files")).toHaveLength(1);
+    expect(formData.has("files.options")).toBe(false);
+    expect(formData.has("images")).toBe(false);
+  });
+
+  it("sends images with images.options and files with files.options", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() =>
+      useSendMessage({ conversationId: "conversation-1" }),
+    );
+
+    axiosPrivate.mockResponse("post", makeChatMessage());
+
+    const photo = new File(["binary"], "photo.png", { type: "image/png" });
+    const doc = new File(["pdf"], "doc.pdf", { type: "application/pdf" });
+
+    await act(async () => {
+      await result.current({
+        images: { files: [photo, photo], options: { mode: "original-aspect" } as any },
+        files: { files: [doc], options: { pathParts: ["chat"] } },
+      });
+    });
+
+    const [call] = axiosPrivate.calls("post");
+    const formData = call.body as FormData;
+    expect(formData.getAll("images")).toHaveLength(2);
+    expect(JSON.parse(formData.get("images.options") as string)).toEqual({
+      mode: "original-aspect",
+    });
+    expect(formData.getAll("files")).toHaveLength(1);
+    expect(JSON.parse(formData.get("files.options") as string)).toEqual({
+      pathParts: ["chat"],
+    });
   });
 
   it("sends the spaceReputation options in the JSON body, no query", async () => {
@@ -201,7 +232,7 @@ describe("useSendMessage", () => {
 
     await act(async () => {
       await result.current({
-        files: [file],
+        files: { files: [file] },
         spaceReputation: { spaceId: "space-1", includeDescendants: false },
       });
     });

@@ -23,11 +23,35 @@ function isBlob(file: UploadFileInput): file is Blob {
   return typeof Blob !== "undefined" && file instanceof Blob;
 }
 
-/** Appends a file under `field`, as the platform's FormData expects it. */
+/**
+ * A list of images (`images`): the files plus the processing options the
+ * server needs with them (`mode` is required), applied to every image.
+ */
+export interface ImageListUpload {
+  files: UploadFileInput[];
+  options: UploadImageOptions;
+}
+
+/**
+ * A list of files stored as uploaded (`files`), with optional options
+ * (`pathParts`, the folder they are stored under).
+ */
+export interface FileListUpload {
+  files: UploadFileInput[];
+  options?: {
+    pathParts?: string[];
+  };
+}
+
+/**
+ * Appends a file under `field`, as the platform's FormData expects it. A
+ * React Native file without a `type` goes as `nativeDefaultType`.
+ */
 export function appendUploadFile(
   formData: FormData,
   field: string,
   file: UploadFileInput,
+  nativeDefaultType = "image/jpeg",
 ): void {
   if (isBlob(file)) {
     if (typeof File !== "undefined" && file instanceof File) {
@@ -41,7 +65,7 @@ export function appendUploadFile(
   formData.append(field, {
     uri: file.uri,
     name: file.name,
-    type: file.type || "image/jpeg",
+    type: file.type || nativeDefaultType,
   } as any);
 }
 
@@ -53,6 +77,38 @@ export function appendImageSlot(
 ): void {
   appendUploadFile(formData, field, upload.file);
   formData.append(`${field}.options`, JSON.stringify(upload.options));
+}
+
+/** Whether a list upload has files to send. */
+export function hasListFiles(
+  upload: ImageListUpload | FileListUpload | undefined,
+): boolean {
+  return !!upload && upload.files.length > 0;
+}
+
+/** Appends a list's images as `images` plus their options as `images.options` (JSON). */
+export function appendImageList(
+  formData: FormData,
+  upload: ImageListUpload,
+): void {
+  for (const file of upload.files) appendUploadFile(formData, "images", file);
+  formData.append("images.options", JSON.stringify(upload.options));
+}
+
+/**
+ * Appends a list's raw files as `files` plus, when given, their options as
+ * `files.options` (JSON).
+ */
+export function appendFileList(
+  formData: FormData,
+  upload: FileListUpload,
+): void {
+  for (const file of upload.files) {
+    appendUploadFile(formData, "files", file, "application/octet-stream");
+  }
+  if (upload.options) {
+    formData.append("files.options", JSON.stringify(upload.options));
+  }
 }
 
 /**

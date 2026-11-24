@@ -116,7 +116,7 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
   - `"original-aspect"` — preserve original ratio, resize by max dimension
   - `"multi-aspect-ratio"` — generate crops at multiple aspect ratios
 
-  Every requested size is 1–10000 px. Optional fields: `fit`, `quality` (1–100), `format` (`webp`, `jpeg`, `png`, `original`), `stripExif` (boolean), `originalMaxSize` (50–10000, default 3840: the longest side the stored original is shrunk to), `pathParts` (string[]; a folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash, is refused with a 400). See [Upload Image](/v8/api-reference/storage/upload-image) for every field of each mode.
+  Every requested size is 1–10000 px. Optional fields: `fit`, `quality` (1–100), `format` (`webp`, `jpeg`, `png`, `original`; `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores anything else (an AVIF or HEIC, for example) as WebP), `stripExif` (boolean), `originalMaxSize` (50–10000, default 3840: the longest side the stored original is shrunk to), `pathParts` (string[]; a folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash, is refused with a 400). See [Upload Image](/v8/api-reference/storage/upload-image) for every field of each mode.
 </ParamField>
 
 <ParamField body="files" type="file[]">

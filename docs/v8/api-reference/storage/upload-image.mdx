@@ -69,7 +69,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     </ParamField>
 
     <ParamField body="format" type="string">
-      Output format: `webp`, `jpeg`, `png`, or `original`. Defaults to `webp`.
+      Output format: `webp`, `jpeg`, `png`, or `original`. Defaults to `webp`. `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores anything else (an AVIF or HEIC, for example) as WebP.
     </ParamField>
 
     <ParamField body="stripExif" type="boolean">
@@ -81,7 +81,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     </ParamField>
 
     <ParamField body="pathParts" type="string[]">
-      Folder segments for the stored image. The new file's id is always added after them, so the image and its sizes are stored under `<pathParts>/<fileId>/`. Example: `["avatars", "user-123"]` → `avatars/user-123/<fileId>/<filename>`. Defaults to `["images"]`. A part that is, or contains, a `.` or `..` folder (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with `400 storage/invalid-body` and `param` `file.options.pathParts`.
+      Folder segments for the stored image. The new file's id is always added after them, so the image and its sizes are stored under `<pathParts>/<fileId>/`. Example: `["avatars", "user-123"]` → `avatars/user-123/<fileId>/<filename>`, the file name taking the stored format's extension (`photo.png` stored as WebP is `photo.webp`). Defaults to `["images"]`. A part that is, or contains, a `.` or `..` folder (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with `400 storage/invalid-body` and `param` `file.options.pathParts`.
     </ParamField>
   </Expandable>
 </ParamField>

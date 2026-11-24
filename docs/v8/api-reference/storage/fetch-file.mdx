@@ -4,7 +4,7 @@ api: "GET /v8/:projectId/storage/:fileId"
 description: "Retrieve file metadata and proxy URLs by file ID"
 ---
 
-Returns metadata and proxy URLs for a file. For image files, also returns the image extension data including all variants.
+Returns a [File](/v8/data-models/file): the same shape [Upload File](/v8/api-reference/storage/upload-file) and [Upload Image](/v8/api-reference/storage/upload-image) return, and the same as a File embedded in any record. For a processed image it includes the image data and every variant.
 
 Requires an authenticated user.
 
@@ -18,14 +18,76 @@ Requires an authenticated user.
 
 ## Response
 
-### Base fields (all file types)
+```json
+{
+  "id": "uuid",
+  "userId": "uuid",
+  "entityId": null,
+  "eventId": null,
+  "commentId": null,
+  "chatMessageId": null,
+  "spaceId": null,
+  "type": "image",
+  "originalPath": "https://api.sublay.io/internal/files/...",
+  "originalSize": 204800,
+  "originalMimeType": "image/png",
+  "position": 0,
+  "metadata": { "originalName": "photo.png", "uploadedAt": "2025-01-01T00:00:00.000Z" },
+  "image": {
+    "originalWidth": 1920,
+    "originalHeight": 1080,
+    "variants": {
+      "thumbnail": {
+        "width": 64,
+        "height": 64,
+        "size": 3200,
+        "format": "webp",
+        "publicPath": "https://api.sublay.io/internal/files/..."
+      }
+    },
+    "processingStatus": "completed",
+    "processingError": null,
+    "format": "webp",
+    "quality": 85,
+    "exifStripped": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z"
+}
+```
 
-<ResponseField name="fileId" type="string">
+<ResponseField name="id" type="string">
   The file's UUID.
 </ResponseField>
 
+<ResponseField name="userId" type="string | null">
+  The file's owner: the uploader, or the user a service key named in `actingUserId`. `null` for an app-owned file.
+</ResponseField>
+
+<ResponseField name="entityId" type="string | null">
+  The entity the file belongs to, or `null`.
+</ResponseField>
+
+<ResponseField name="eventId" type="string | null">
+  The event the file belongs to, or `null`.
+</ResponseField>
+
+<ResponseField name="commentId" type="string | null">
+  The comment the file belongs to, or `null`.
+</ResponseField>
+
+<ResponseField name="chatMessageId" type="string | null">
+  The chat message the file belongs to, or `null`.
+</ResponseField>
+
+<ResponseField name="spaceId" type="string | null">
+  The space the file is associated with, or `null`. It is set on a space's own avatar and banner; files uploaded through the v7 API (an entity's or event's files, or a `POST /storage` upload associated with a space) may also carry a space.
+</ResponseField>
+
 <ResponseField name="type" type="string">
-  One of: `image`, `video`, `document`, `other`.
+  One of: `image`, `video`, `document`, `other`, from the MIME type.
 </ResponseField>
 
 <ResponseField name="originalPath" type="string">
@@ -33,7 +95,7 @@ Requires an authenticated user.
 </ResponseField>
 
 <ResponseField name="originalSize" type="number">
-  File size in bytes at the time of upload.
+  Size in bytes of the stored original. For a processed image that is the original as stored, after it is shrunk to its `originalMaxSize`.
 </ResponseField>
 
 <ResponseField name="originalMimeType" type="string">
@@ -41,54 +103,31 @@ Requires an authenticated user.
 </ResponseField>
 
 <ResponseField name="position" type="number">
-  Display order in a multi-attachment context.
+  Display order among the files of the record it belongs to. `0` for a file uploaded through the storage endpoints.
 </ResponseField>
 
 <ResponseField name="metadata" type="object">
   Custom metadata stored at upload time. Always includes `originalName` and `uploadedAt`.
 </ResponseField>
 
-<ResponseField name="userId" type="string">
-  ID of the user who uploaded the file (present if associated).
-</ResponseField>
-
-<ResponseField name="entityId" type="string">
-  ID of the entity the file belongs to (present when it belongs to one).
-</ResponseField>
-
-<ResponseField name="commentId" type="string">
-  ID of the comment the file belongs to (present when it belongs to one).
-</ResponseField>
-
-<ResponseField name="spaceId" type="string">
-  ID of the space the file is associated with (present when there is one). It is set on a space's own avatar and banner; files uploaded through the v7 API (an entity's or event's files, or a `POST /storage` upload associated with a space) may also carry a space.
-</ResponseField>
-
-<ResponseField name="createdAt" type="string">
-  ISO 8601 timestamp.
-</ResponseField>
-
-<ResponseField name="updatedAt" type="string">
-  ISO 8601 timestamp.
-</ResponseField>
-
-### Image extension (only when `type === "image"`)
-
-<ResponseField name="image" type="object">
-  Image processing details.
+<ResponseField name="image" type="object | null">
+  The image data of a processed image; `null` for a file stored as uploaded (an image sent through Upload File or in a `files` list included).
 
   <Expandable title="image fields">
     <ResponseField name="originalWidth" type="number">
-      Pixel width of the source image before processing.
+      Pixel width of the stored original (after it is shrunk to its `originalMaxSize`).
     </ResponseField>
     <ResponseField name="originalHeight" type="number">
-      Pixel height of the source image before processing.
+      Pixel height of the stored original (after it is shrunk to its `originalMaxSize`).
     </ResponseField>
     <ResponseField name="variants" type="object">
-      Named variants. Each key maps to `{ publicPath, width, height, size, format }`.
+      Named variants. Each key maps to `{ publicPath, width, height, size, format }`, `publicPath` being the variant's proxy URL.
     </ResponseField>
     <ResponseField name="processingStatus" type="string">
       `"completed"` or `"failed"`.
+    </ResponseField>
+    <ResponseField name="processingError" type="string | null">
+      The error when processing failed.
     </ResponseField>
     <ResponseField name="format" type="string">
       Output format (e.g., `"webp"`).
@@ -99,7 +138,21 @@ Requires an authenticated user.
     <ResponseField name="exifStripped" type="boolean">
       Whether EXIF metadata was removed.
     </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp.
+    </ResponseField>
+    <ResponseField name="updatedAt" type="string">
+      ISO 8601 timestamp.
+    </ResponseField>
   </Expandable>
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO 8601 timestamp.
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 timestamp.
 </ResponseField>
 
 ## Error Responses

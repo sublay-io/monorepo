@@ -45,7 +45,7 @@ When a time field (`startTime`/`endTime`/`timezone`) or a location field (`locat
 </ParamField>
 
 <ParamField body="coverFile.options" type="string">
-  JSON-stringified image-processing options for the new cover.
+  JSON-stringified image-processing options for the new cover (`mode` is required). The same options as [Upload Image](/v8/api-reference/storage/upload-image)'s `file.options`.
 </ParamField>
 
 <ParamField body="images" type="file[]">
@@ -53,7 +53,7 @@ When a time field (`startTime`/`endTime`/`timezone`) or a location field (`locat
 </ParamField>
 
 <ParamField body="images.options" type="string">
-  JSON-stringified image-processing options for the appended images.
+  JSON-stringified image-processing options for the appended images (`mode` is required). The same options as [Upload Image](/v8/api-reference/storage/upload-image)'s `file.options`.
 </ParamField>
 
 <ParamField body="files" type="file[]">

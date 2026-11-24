@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/storage/images"
 description: "Upload an image with server-side processing and named variant generation"
 ---
 
-Uploads an image, processes it with Sharp, and stores the original plus all requested variants. Returns proxy URLs for all variants immediately.
+Uploads an image, processes it, and stores the original plus all requested variants. Returns the [File](/v8/data-models/file) with its image data and the proxy URL of every variant.
 
 The uploaded file isn't attached to anything: it has no entity, comment, space or event. A file that belongs to a record is sent with that record's own request (for example, the `images` and `files` of [Create Entity](/v8/api-reference/entities/create-entity) or [Create Comment](/v8/api-reference/comments/create-comment), or the cover of [Update Event](/v8/api-reference/events/update-event)).
 
@@ -15,61 +15,79 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 ## Body Parameters
 
 <ParamField body="file" type="file" required>
-  The image file to upload: JPEG, PNG or WebP. Maximum 50 MB.
+  The image file to upload: JPEG, PNG or WebP. Maximum 50 MB, and from 1 × 1 to 10000 × 10000 px.
 </ParamField>
 
-<ParamField body="mode" type="string" required>
-  Processing mode. One of: `exact-dimensions`, `aspect-ratio-width-based`, `aspect-ratio-height-based`, `original-aspect`, `multi-aspect-ratio`.
-</ParamField>
-
-<ParamField body="dimensions" type="object">
-  Required for `exact-dimensions` mode. An object mapping variant names to `{ width, height }` pairs.
+<ParamField body="file.options" type="string" required>
+  Stringified JSON: the image-processing options, one object. These are the same options, with the same rules, as an inline `<field>.options` (for example `avatarFile.options` on [Update User](/v8/api-reference/users/update-user) or `images.options` on [Create Entity](/v8/api-reference/entities/create-entity)). Must include `mode`. A request without `file.options` gets `400 storage/missing-image-options`; options that aren't valid JSON or valid image options (`mode` missing included) get `400 storage/invalid-body`.
 
   ```json
-  { "thumbnail": { "width": 64, "height": 64 }, "card": { "width": 400, "height": 300 } }
+  { "mode": "original-aspect", "sizes": { "small": 64, "large": 512 }, "pathParts": ["avatars", "user-123"] }
   ```
+
+  <Expandable title="file.options fields">
+    <ParamField body="mode" type="string" required>
+      Processing mode. One of: `exact-dimensions`, `aspect-ratio-width-based`, `aspect-ratio-height-based`, `original-aspect`, `multi-aspect-ratio`.
+    </ParamField>
+
+    <ParamField body="dimensions" type="object">
+      Required for `exact-dimensions` mode. An object mapping variant names to `{ width, height }` pairs, each from 1 to 10000 px.
+
+      ```json
+      { "thumbnail": { "width": 64, "height": 64 }, "card": { "width": 400, "height": 300 } }
+      ```
+    </ParamField>
+
+    <ParamField body="aspectRatio" type="object">
+      Required for `aspect-ratio-width-based` and `aspect-ratio-height-based` modes. `{ width, height }` ratio, positive whole numbers. A side computed from the ratio must also be 1–10000 px; one outside that range is refused with a `400`.
+    </ParamField>
+
+    <ParamField body="widths" type="object">
+      Required for `aspect-ratio-width-based` mode. An object mapping variant names to pixel widths, each from 1 to 10000.
+    </ParamField>
+
+    <ParamField body="heights" type="object">
+      Required for `aspect-ratio-height-based` mode. An object mapping variant names to pixel heights, each from 1 to 10000.
+    </ParamField>
+
+    <ParamField body="sizes" type="object">
+      Required for `original-aspect` and `multi-aspect-ratio` modes. An object mapping variant names to longest-edge pixel sizes, each from 1 to 10000.
+    </ParamField>
+
+    <ParamField body="aspectRatios" type="array">
+      Required for `multi-aspect-ratio` mode. 1 to 10 `{ width, height }` aspect ratio objects. Each variant's computed width and height must be 1–10000 px; a side outside that range is refused with a `400`.
+    </ParamField>
+
+    <ParamField body="fit" type="string">
+      How each variant fits its requested size. Defaults to `inside`. Valid values depend on the mode:
+      - `exact-dimensions`, `aspect-ratio-width-based`, `aspect-ratio-height-based`, `multi-aspect-ratio`: `cover`, `contain`, `inside`, or `outside`
+      - `original-aspect`: `inside` or `outside` only (`cover`/`contain` are not valid for this mode)
+    </ParamField>
+
+    <ParamField body="quality" type="number">
+      Output quality (1–100). Applies to JPEG and WebP. Defaults to `85`.
+    </ParamField>
+
+    <ParamField body="format" type="string">
+      Output format: `webp`, `jpeg`, `png`, or `original`. Defaults to `webp`.
+    </ParamField>
+
+    <ParamField body="stripExif" type="boolean">
+      Remove EXIF metadata from output. Defaults to `true`.
+    </ParamField>
+
+    <ParamField body="originalMaxSize" type="number">
+      The longest side, in px, the stored original is shrunk to (50–10000). Defaults to `3840`. An original already within it keeps its size. The File's `originalSize` and its image's `originalWidth` and `originalHeight` describe the stored original. A larger original takes more storage, which counts toward the project's file-storage limit.
+    </ParamField>
+
+    <ParamField body="pathParts" type="string[]">
+      Folder segments for the stored image. The new file's id is always added after them, so the image and its sizes are stored under `<pathParts>/<fileId>/`. Example: `["avatars", "user-123"]` → `avatars/user-123/<fileId>/<filename>`. Defaults to `["images"]`. A part that is, or contains, a `.` or `..` folder (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with `400 storage/invalid-body` and `param` `file.options.pathParts`.
+    </ParamField>
+  </Expandable>
 </ParamField>
 
-<ParamField body="aspectRatio" type="object">
-  Required for `aspect-ratio-width-based` and `aspect-ratio-height-based` modes. `{ width, height }` ratio.
-</ParamField>
-
-<ParamField body="widths" type="object">
-  Required for `aspect-ratio-width-based` mode. An object mapping variant names to pixel widths.
-</ParamField>
-
-<ParamField body="heights" type="object">
-  Required for `aspect-ratio-height-based` mode. An object mapping variant names to pixel heights.
-</ParamField>
-
-<ParamField body="sizes" type="object">
-  Required for `original-aspect` and `multi-aspect-ratio` modes. An object mapping variant names to longest-edge pixel sizes.
-</ParamField>
-
-<ParamField body="aspectRatios" type="array">
-  Required for `multi-aspect-ratio` mode. Array of `{ width, height }` aspect ratio objects.
-</ParamField>
-
-<ParamField body="fit" type="string">
-  Sharp fit strategy. Defaults to `cover`. Valid values depend on the mode:
-  - `exact-dimensions`, `aspect-ratio-width-based`, `aspect-ratio-height-based`, `multi-aspect-ratio`: `cover`, `contain`, `inside`, or `outside`
-  - `original-aspect`: `inside` or `outside` only (`cover`/`contain` are not valid for this mode)
-</ParamField>
-
-<ParamField body="quality" type="number">
-  Output quality (1–100). Applies to JPEG and WebP. Defaults to `85`.
-</ParamField>
-
-<ParamField body="format" type="string">
-  Output format: `webp`, `jpeg`, `png`, or `original`. Defaults to `webp`.
-</ParamField>
-
-<ParamField body="stripExif" type="boolean">
-  Remove EXIF metadata from output. Defaults to `true`.
-</ParamField>
-
-<ParamField body="pathParts" type="array">
-  Folder segments for the stored image, as a JSON-encoded array. The new file's id is always added after them, so the image and its sizes are stored under `<pathParts>/<fileId>/`. Example: `["avatars", "user-123"]` → `avatars/user-123/<fileId>/<filename>`. Defaults to `["images"]`. A part that is, or contains, a `.` or `..` folder (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with `400 storage/invalid-body`.
+<ParamField body="metadata" type="string">
+  Stringified JSON object of custom key-value data stored on the file. The server adds `originalName` and `uploadedAt` alongside, replacing any values of yours under those keys. Anything other than a JSON object is refused with `400 storage/invalid-body`.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -78,26 +96,45 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 
 ## Response
 
+`201 Created` with the [File](/v8/data-models/file), the same shape [Fetch File](/v8/api-reference/storage/fetch-file) returns, its `image` data included.
+
 ```json
 {
-  "fileId": "uuid",
+  "id": "uuid",
+  "userId": "uuid",
+  "entityId": null,
+  "eventId": null,
+  "commentId": null,
+  "chatMessageId": null,
+  "spaceId": null,
   "type": "image",
   "originalPath": "https://api.sublay.io/internal/files/...",
   "originalSize": 204800,
-  "originalWidth": 1920,
-  "originalHeight": 1080,
-  "variants": {
-    "thumbnail": {
-      "publicPath": "https://api.sublay.io/internal/files/...",
-      "width": 64,
-      "height": 64,
-      "size": 3200,
-      "format": "webp"
-    }
+  "originalMimeType": "image/png",
+  "position": 0,
+  "metadata": { "originalName": "photo.png", "uploadedAt": "2025-01-01T00:00:00.000Z" },
+  "image": {
+    "originalWidth": 1920,
+    "originalHeight": 1080,
+    "variants": {
+      "thumbnail": {
+        "width": 64,
+        "height": 64,
+        "size": 3200,
+        "format": "webp",
+        "publicPath": "https://api.sublay.io/internal/files/..."
+      }
+    },
+    "processingStatus": "completed",
+    "processingError": null,
+    "format": "webp",
+    "quality": 85,
+    "exifStripped": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
   },
-  "format": "webp",
-  "quality": 85,
-  "createdAt": "2025-01-01T00:00:00.000Z"
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z"
 }
 ```
 
@@ -114,6 +151,16 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
+    The request sent an image option as its own field: `mode`, `dimensions`, `aspectRatio`, `widths`, `heights`, `sizes`, `aspectRatios`, `fit`, `quality`, `format`, `stripExif` or `pathParts`. They go inside `file.options`. Refused even next to a valid `file.options`, and nothing is stored. `param` names the field:
+
+    ```json
+    {
+      "error": "`mode` isn't supported in v8. Send it inside `file.options`, the image options as one JSON object.",
+      "code": "storage/unsupported-param",
+      "param": "mode"
+    }
+    ```
+
     The request sent `entityId`, `commentId`, `spaceId` or `eventId`. A file uploaded here isn't attached to anything, so these fields are refused rather than ignored, and nothing is stored. `param` names the field:
 
     ```json
@@ -146,6 +193,9 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     }
     ```
   </Accordion>
+  <Accordion title="Invalid Body — 400">
+    `file.options` or `metadata` isn't valid JSON, `file.options` isn't valid image options (no `mode` or an unknown one, a size outside 1–10000, an `originalMaxSize` outside 50–10000, a computed side outside 1–10000 in an aspect-ratio mode, a `fit` the mode doesn't take, a refused folder in `pathParts`), or `metadata` isn't a JSON object. `param` names the field, for example `file.options.pathParts` or `metadata`. Nothing is stored.
+  </Accordion>
   <Accordion title="No File — 400 Bad Request">
     ```json
     { "error": "No file provided", "code": "storage/no-file", "param": "file" }
@@ -159,6 +209,17 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
   <Accordion title="Invalid Image — 422">
     ```json
     { "error": "Invalid image file", "code": "storage/invalid-image", "param": "file" }
+    ```
+  </Accordion>
+  <Accordion title="Missing Image Options — 400">
+    The request sent no `file.options`. Checked after the image itself is checked, and nothing is stored.
+
+    ```json
+    {
+      "error": "Image options are required when uploading an image. Must include mode property.",
+      "code": "storage/missing-image-options",
+      "param": "file.options"
+    }
     ```
   </Accordion>
   <Accordion title="User Not Found — 404">

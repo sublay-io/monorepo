@@ -3,7 +3,9 @@ title: "File"
 description: "The File and FileImage interface shapes for uploaded media"
 ---
 
-A `File` record represents a file uploaded to Sublay's storage system. Files can be attached to users (avatars, banners), entities, events, comments, chat messages, or spaces. An image uploaded as an image (an `images` list, or a slot such as `avatarFile` or `coverFile`) is processed, and carries an `image` extension with variants at multiple sizes. A file uploaded in a `files` list is stored as uploaded.
+A `File` record represents a file uploaded to Sublay's storage system. Files can be attached to users (avatars, banners), entities, events, comments, chat messages, conversations (avatars) or spaces. An image uploaded as an image (an `images` list, a slot such as `avatarFile` or `coverFile`, or [Upload Image](/v8/api-reference/storage/upload-image)) is processed, and carries an `image` extension with variants at multiple sizes. A file uploaded in a `files` list or through [Upload File](/v8/api-reference/storage/upload-file) is stored as uploaded.
+
+A File has the same shape everywhere it is returned: embedded in a record, from both storage uploads, and from [Fetch File](/v8/api-reference/storage/fetch-file).
 
 A record's files are uploaded, replaced and removed through that record's own requests: a user's or space's avatar and banner, a conversation's avatar and an event's cover through their create and update (`avatarFile`, `bannerFile`, `coverFile`, `removeFileIds`); an entity's or event's `images` and `files` through their create and update (`removeFileIds` on update); a comment's or chat message's `images` and `files` on create, removed with the comment or message. [Delete File](/v8/api-reference/storage/delete-file) refuses all of them with `409 storage/file-attached`. The files a deleted comment, or a soft-deleted entity or event, kept belong to nothing, and their owner deletes them through Delete File.
 
@@ -20,11 +22,11 @@ A record's files are uploaded, replaced and removed through that record's own re
 | `spaceId` | `string \| null` | The space this file is associated with. It is set on a space's own avatar and banner; files uploaded through the v7 API (an entity's or event's files, or a `POST /storage` upload associated with a space) may also carry a space. |
 | `type` | `"image" \| "video" \| "document" \| "other"` | The file category, from its MIME type: `image/*` is `"image"`, `video/*` is `"video"`, PDF, Word and other `application/vnd.*` types are `"document"`, anything else `"other"`. A processed image is always `"image"`. |
 | `originalPath` | `string` | Proxied URL to the original uploaded file. |
-| `originalSize` | `number` | Size of the original file in bytes. |
+| `originalSize` | `number` | Size in bytes of the stored original. A processed image's original is stored shrunk to its `originalMaxSize` (default 3840 px on the longest side), and this is its size as stored. |
 | `originalMimeType` | `string` | MIME type of the original file (e.g. `"image/jpeg"`). |
 | `position` | `number` | Display order when multiple files are attached to the same record: the first file is `0`, and each file added later takes the next number. An event cover uploaded through v8 is `-1`, so it sorts before the event's other files; one uploaded through the v7 API is `0`. Find an event's cover by `coverImageId`, not by position. |
 | `metadata` | `Record<string, any>` | Custom key-value data for this file. |
-| `image` | `FileImage \| null \| undefined` | Processed image variants. On entity, event, comment, chat-message, space and user files: the image data of a processed image (uploaded through `images` or a slot), `null` for every other file, an image sent in `files` included (it is stored as uploaded, so its `type` is `"image"` but it has no variants). Not returned on conversation-avatar files. |
+| `image` | `FileImage \| null` | Processed image variants: the image data of a processed image (uploaded through `images`, a slot or Upload Image), `null` for every other file, an image sent in `files` or through Upload File included (it is stored as uploaded, so its `type` is `"image"` but it has no variants). |
 | `createdAt` | `Date` | When the file was uploaded. |
 | `updatedAt` | `Date` | When the file record was last updated. |
 
@@ -34,9 +36,8 @@ For processed images, the `image` field contains processing results and variant 
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `fileId` | `string` | The parent file's ID. |
-| `originalWidth` | `number` | Width of the original image in pixels. |
-| `originalHeight` | `number` | Height of the original image in pixels. |
+| `originalWidth` | `number` | Width in pixels of the stored original (after it is shrunk to its `originalMaxSize`). |
+| `originalHeight` | `number` | Height in pixels of the stored original (after it is shrunk to its `originalMaxSize`). |
 | `variants` | `Record<string, FileImageVariant>` | Processed variants keyed by size name (e.g. `thumbnail`, `small`, `medium`, `large`). |
 | `processingStatus` | `"completed" \| "failed"` | Whether image processing succeeded. |
 | `processingError` | `string \| null` | Error message if processing failed. |
@@ -52,7 +53,6 @@ Each entry in `FileImage.variants` has this shape:
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `path` | `string` | Relative storage path for this variant. |
 | `publicPath` | `string` | Proxied public URL for this variant. |
 | `width` | `number` | Width of this variant in pixels. |
 | `height` | `number` | Height of this variant in pixels. |
@@ -63,6 +63,7 @@ Each entry in `FileImage.variants` has this shape:
 
 - [Upload Image](/v8/api-reference/storage/upload-image)
 - [Upload File](/v8/api-reference/storage/upload-file)
+- [Fetch File](/v8/api-reference/storage/fetch-file)
 - [useUploadImage hook](/v8/hooks/storage/use-upload-image)
 - [useUploadFile hook](/v8/hooks/storage/use-upload-file)
 - [User](/v8/data-models/user)

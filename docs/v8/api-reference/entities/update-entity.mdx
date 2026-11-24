@@ -72,7 +72,7 @@ Files can be changed in the same request: `images` and `files` are **appended** 
 </ParamField>
 
 <ParamField body="include" type="string | string[]">
-  What the response adds: `files`, the entity's images and files as they now are, in order, images with their variants. A comma-separated value or an array; matching ignores case. In the body like every other field (JSON, or a multipart field such as `include=files`), never the query. Without it the response has no `files`, even when the update uploaded or removed files. Without the files-images bundle it adds nothing.
+  What the response adds: `files`, the entity's images and files as they now are, in order, images with their variants. A comma-separated value or an array; in a multipart body also a JSON-string array such as `'["files"]'`. Matching ignores case. In the body like every other field (JSON, or a multipart field such as `include=files`), never the query. Without it the response has no `files`, even when the update uploaded or removed files. Without the files-images bundle it adds nothing.
 </ParamField>
 
 ### File Uploads (multipart/form-data)

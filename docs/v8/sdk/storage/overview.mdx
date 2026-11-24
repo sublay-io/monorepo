@@ -32,7 +32,7 @@ When uploading images, you choose a **processing mode** that defines how variant
 | `original-aspect` | Preserves the source aspect ratio; you specify the longest-edge size for each variant. |
 | `multi-aspect-ratio` | Multiple aspect ratios combined with explicit sizes. |
 
-Every requested size is 1–10000 px. The stored original is shrunk to fit `originalMaxSize` on its longest side (50–10000, default 3840). The options are one JSON object, the same on [Upload Image](/v8/api-reference/storage/upload-image) (`file.options`) and on a record's own images (`avatarFile.options`, `images.options`, `coverFile.options`); [Upload Image](/v8/api-reference/storage/upload-image) lists every field.
+Every requested size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). The stored original is shrunk to fit `originalMaxSize` on its longest side (50–10000, default 3840). The options are one JSON object, the same on [Upload Image](/v8/api-reference/storage/upload-image) (`file.options`) and on a record's own images (`avatarFile.options`, `images.options`, `coverFile.options`); [Upload Image](/v8/api-reference/storage/upload-image) lists every field.
 
 Both uploads, and every file embedded in a record, return the one [File](/v8/data-models/file) shape.
 

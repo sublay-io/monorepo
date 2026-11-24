@@ -2,7 +2,8 @@
 // (sent as `file.options`) and inline, as `<field>.options` on an image slot
 // (`avatarFile`, `bannerFile`, `coverFile`) or an `images` list. One JSON
 // object, a discriminated union on `mode`, mirroring the server's
-// `imageOptionsSchema`. Every requested size is 1–10000 px.
+// `imageOptionsSchema`. Every requested size is 1–10000 px, and `dimensions`,
+// `widths`, `heights` and `sizes` take at most 30 entries (one variant each).
 
 // Common properties across all modes
 interface BaseImageOptions {
@@ -19,7 +20,7 @@ interface BaseImageOptions {
 // Mode 1: Exact Dimensions
 export interface ExactDimensionsMode extends BaseImageOptions {
   mode: "exact-dimensions";
-  dimensions: Record<string, { width: number; height: number }>; // 1-10000 each
+  dimensions: Record<string, { width: number; height: number }>; // 1-10000 each, at most 30 entries
   fit?: "cover" | "contain" | "inside" | "outside";
 }
 
@@ -27,7 +28,7 @@ export interface ExactDimensionsMode extends BaseImageOptions {
 export interface AspectRatioWidthMode extends BaseImageOptions {
   mode: "aspect-ratio-width-based";
   aspectRatio: { width: number; height: number };
-  widths: Record<string, number>; // 1-10000 each
+  widths: Record<string, number>; // 1-10000 each, at most 30 entries
   fit?: "cover" | "contain" | "inside" | "outside";
 }
 
@@ -35,14 +36,14 @@ export interface AspectRatioWidthMode extends BaseImageOptions {
 export interface AspectRatioHeightMode extends BaseImageOptions {
   mode: "aspect-ratio-height-based";
   aspectRatio: { width: number; height: number };
-  heights: Record<string, number>; // 1-10000 each
+  heights: Record<string, number>; // 1-10000 each, at most 30 entries
   fit?: "cover" | "contain" | "inside" | "outside";
 }
 
 // Mode 3: Original Aspect Ratio
 export interface OriginalAspectMode extends BaseImageOptions {
   mode: "original-aspect";
-  sizes: Record<string, number>; // 1-10000 each
+  sizes: Record<string, number>; // 1-10000 each, at most 30 entries
   fit?: "inside" | "outside";
 }
 
@@ -50,7 +51,7 @@ export interface OriginalAspectMode extends BaseImageOptions {
 export interface MultiAspectRatioMode extends BaseImageOptions {
   mode: "multi-aspect-ratio";
   aspectRatios: Array<{ width: number; height: number }>; // 1-10
-  sizes: Record<string, number>; // 1-10000 each
+  sizes: Record<string, number>; // 1-10000 each, at most 30 entries
   fit?: "cover" | "contain" | "inside" | "outside";
 }
 

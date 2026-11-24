@@ -1,10 +1,8 @@
 import { useCallback, useState } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
-import {
-  UploadImageOptions,
-  UploadImageResponse,
-} from "../../interfaces/models/Image";
+import { UploadImageOptions } from "../../interfaces/models/Image";
+import type { File as SublayFile } from "../../interfaces/models/File";
 
 // Type guard to detect browser File vs React Native file object
 function isBrowserFile(file: UniversalFile): file is BrowserFile {
@@ -21,8 +19,19 @@ interface RNFile {
 
 type UniversalFile = BrowserFile | RNFile;
 
+/**
+ * What `uploadImage` takes: the image-processing options (sent as
+ * `file.options`, one JSON object), plus the call's own `onProgress` and the
+ * optional `metadata` stored on the file. Neither of those two goes inside
+ * `file.options`.
+ */
+export type UseUploadImageOptions = UploadImageOptions & {
+  onProgress?: (progress: number) => void; // Callback for upload progress
+  metadata?: Record<string, any>;
+};
+
 export interface UseUploadImageValues {
-  uploadImage: (file: UniversalFile, options: UploadImageOptions) => Promise<UploadImageResponse>;
+  uploadImage: (file: UniversalFile, options: UseUploadImageOptions) => Promise<SublayFile>;
   uploading: boolean;
   progress: number;
 }
@@ -36,8 +45,8 @@ function useUploadImage(): UseUploadImageValues {
   const uploadImage = useCallback(
     async (
       file: UniversalFile,
-      options: UploadImageOptions
-    ): Promise<UploadImageResponse> => {
+      options: UseUploadImageOptions
+    ): Promise<SublayFile> => {
       // Validate required inputs
       if (!projectId) {
         throw new Error("No projectId available.");
@@ -64,44 +73,12 @@ function useUploadImage(): UseUploadImageValues {
           } as any);
         }
 
-        // Append mode (required)
-        formData.append("mode", options.mode);
-
-        // Append mode-specific fields
-        if (options.mode === "exact-dimensions") {
-          formData.append("dimensions", JSON.stringify(options.dimensions));
-        } else if (options.mode === "aspect-ratio-width-based") {
-          formData.append("aspectRatio", JSON.stringify(options.aspectRatio));
-          formData.append("widths", JSON.stringify(options.widths));
-        } else if (options.mode === "aspect-ratio-height-based") {
-          formData.append("aspectRatio", JSON.stringify(options.aspectRatio));
-          formData.append("heights", JSON.stringify(options.heights));
-        } else if (options.mode === "original-aspect") {
-          formData.append("sizes", JSON.stringify(options.sizes));
-        } else if (options.mode === "multi-aspect-ratio") {
-          formData.append("aspectRatios", JSON.stringify(options.aspectRatios));
-          formData.append("sizes", JSON.stringify(options.sizes));
-        }
-
-        // Append common optional fields
-        if (options.pathParts) {
-          formData.append("pathParts", JSON.stringify(options.pathParts));
-        }
-
-        if (options.quality !== undefined) {
-          formData.append("quality", options.quality.toString());
-        }
-
-        if (options.format) {
-          formData.append("format", options.format);
-        }
-
-        if (options.stripExif !== undefined) {
-          formData.append("stripExif", options.stripExif.toString());
-        }
-
-        if (options.fit) {
-          formData.append("fit", options.fit);
+        // The processing options go as one JSON field, `file.options`
+        // (`pathParts` inside); `metadata` goes as its own field.
+        const { onProgress, metadata, ...imageOptions } = options;
+        formData.append("file.options", JSON.stringify(imageOptions));
+        if (metadata) {
+          formData.append("metadata", JSON.stringify(metadata));
         }
 
         // Make request with progress tracking
@@ -118,13 +95,13 @@ function useUploadImage(): UseUploadImageValues {
                   (progressEvent.loaded * 100) / progressEvent.total
                 );
                 setProgress(percentCompleted);
-                options.onProgress?.(percentCompleted);
+                onProgress?.(percentCompleted);
               }
             },
           }
         );
 
-        return response.data as UploadImageResponse;
+        return response.data as SublayFile;
       } finally {
         setUploading(false);
         setProgress(0);

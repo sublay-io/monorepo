@@ -1,6 +1,5 @@
 // Image variant structure returned by the API
 export interface FileImageVariant {
-  path: string;           // Relative storage path
   publicPath: string;     // Proxy URL added by transformFileForResponse
   width: number;
   height: number;
@@ -10,7 +9,6 @@ export interface FileImageVariant {
 
 // Image extension data (populated for type: "image" files)
 export interface FileImage {
-  fileId: string;
   originalWidth: number;
   originalHeight: number;
   variants: Record<string, FileImageVariant>;  // thumbnail, small, medium, large, etc.
@@ -39,11 +37,11 @@ export interface File {
   position: number;
 
   metadata: Record<string, any>;
-  // The image data. On entity, event, comment, chat-message, space and user
-  // files: the data on an image uploaded as an image (an `images` list or an
-  // image slot), `null` on any other file (a `files` upload is stored as
-  // uploaded, so it has none even when its `type` is "image"). Not returned
-  // on conversation-avatar files.
+  // The image data: on an image uploaded as an image (an image slot, an
+  // `images` list or `POST /storage/images`), `null` on any other file (a
+  // `files` list or `POST /storage` stores the file as uploaded, so it has
+  // none even when its `type` is "image"). Left out only where a response
+  // doesn't load it.
   image?: FileImage | null;
   createdAt: string;
   updatedAt: string;

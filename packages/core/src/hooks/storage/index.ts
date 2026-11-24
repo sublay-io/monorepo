@@ -2,6 +2,9 @@ export {
   default as useUploadFile,
   type RNFile,
   type UploadFileOptions,
-  type UploadResponse,
 } from "./useUploadFile";
-export { default as useUploadImage } from "./useUploadImage";
+export {
+  default as useUploadImage,
+  type UseUploadImageOptions,
+  type UseUploadImageValues,
+} from "./useUploadImage";

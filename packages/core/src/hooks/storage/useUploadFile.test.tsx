@@ -2,21 +2,31 @@ import { describe, it, expect, afterEach } from "vitest";
 import { act } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks } from "../../test-utils";
-import useUploadFile, { type UploadResponse } from "./useUploadFile";
+import useUploadFile from "./useUploadFile";
+import type { File as SublayFile } from "../../interfaces/models/File";
 
 afterEach(() => {
   resetAxiosMocks();
 });
 
-function makeUploadResponse(overrides: Partial<UploadResponse> = {}): UploadResponse {
+function makeUploadResponse(overrides: Partial<SublayFile> = {}): SublayFile {
   return {
-    fileId: "file-1",
+    id: "file-1",
+    userId: "user-1",
+    entityId: null,
+    eventId: null,
+    commentId: null,
+    chatMessageId: null,
+    spaceId: null,
     type: "document",
-    relativePath: "uploads/file-1.pdf",
-    publicPath: "/files/file-1.pdf",
-    size: 1024,
-    mimeType: "application/pdf",
+    originalPath: "/files/file-1.pdf",
+    originalSize: 1024,
+    originalMimeType: "application/pdf",
+    position: 0,
+    metadata: { originalName: "doc.pdf", uploadedAt: "2024-01-01T00:00:00.000Z" },
+    image: null,
     createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
     ...overrides,
   };
 }
@@ -30,7 +40,7 @@ describe("useUploadFile", () => {
 
     const file = new File(["binary"], "doc.pdf", { type: "application/pdf" });
 
-    let returned: UploadResponse | undefined;
+    let returned: SublayFile | undefined;
     await act(async () => {
       returned = await result.current(file, ["uploads"]);
     });
@@ -42,7 +52,27 @@ describe("useUploadFile", () => {
     expect(call.body instanceof FormData).toBe(true);
     const formData = call.body as FormData;
     expect(formData.get("file")).toBeInstanceOf(File);
-    expect(formData.get("pathParts")).toBe(JSON.stringify(["uploads"]));
+    // The folder goes inside `file.options`, never as a top-level field.
+    expect(formData.get("file.options")).toBe(JSON.stringify({ pathParts: ["uploads"] }));
+    expect(formData.has("pathParts")).toBe(false);
+    expect(formData.has("position")).toBe(false);
+  });
+
+  it("sends no `file.options` without pathParts (the server's `files` folder)", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUploadFile());
+
+    axiosPrivate.mockResponse("post", makeUploadResponse());
+
+    const file = new File(["binary"], "doc.pdf", { type: "application/pdf" });
+
+    await act(async () => {
+      await result.current(file);
+    });
+
+    const [call] = axiosPrivate.calls("post");
+    const formData = call.body as FormData;
+    expect(formData.has("file.options")).toBe(false);
+    expect(formData.has("pathParts")).toBe(false);
   });
 
   it("uploads a React Native-shaped file object", async () => {
@@ -62,7 +92,7 @@ describe("useUploadFile", () => {
     expect(formData.get("file")).not.toBeInstanceOf(File);
   });
 
-  it("includes position and metadata in the FormData", async () => {
+  it("includes metadata in the FormData, and never a position", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUploadFile());
 
     axiosPrivate.mockResponse("post", makeUploadResponse());
@@ -71,14 +101,13 @@ describe("useUploadFile", () => {
 
     await act(async () => {
       await result.current(file, ["uploads"], {
-        position: 2,
         metadata: { source: "test" },
       });
     });
 
     const [call] = axiosPrivate.calls("post");
     const formData = call.body as FormData;
-    expect(formData.get("position")).toBe("2");
+    expect(formData.has("position")).toBe(false);
     expect(formData.get("metadata")).toBe(JSON.stringify({ source: "test" }));
   });
 
@@ -94,13 +123,22 @@ describe("useUploadFile", () => {
     });
   });
 
-  it("throws before making a request when file or pathParts is invalid", async () => {
+  it("throws before making a request when no file is provided", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useUploadFile());
+
+    await expect(result.current(null as any, ["uploads"])).rejects.toThrow(
+      "No file provided.",
+    );
+    expect(axiosPrivate.calls("post")).toHaveLength(0);
+  });
+
+  it("throws before making a request when pathParts isn't an array", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUploadFile());
 
     const file = new File(["binary"], "doc.pdf", { type: "application/pdf" });
 
-    await expect(result.current(file, undefined as any)).rejects.toThrow(
-      "Invalid arguments. File and pathParts are required.",
+    await expect(result.current(file, "uploads" as any)).rejects.toThrow(
+      "Invalid arguments. pathParts must be an array.",
     );
     expect(axiosPrivate.calls("post")).toHaveLength(0);
   });

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import useAxiosPrivate from "../../config/useAxiosPrivate";
 import useProject from "../projects/useProject";
+import type { File as SublayFile } from "../../interfaces/models/File";
 
 // Type guard to detect if it's a real browser File
 function isBrowserFile(file: UniversalFile): file is BrowserFile {
@@ -18,36 +19,33 @@ export interface RNFile {
 type UniversalFile = BrowserFile | RNFile;
 
 export interface UploadFileOptions {
-  position?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any>; // Stored on the file
 }
 
-export interface UploadResponse {
-  fileId: string;
-  type: "image" | "video" | "document" | "other";
-  relativePath: string;
-  publicPath: string;
-  size: number;
-  mimeType: string;
-  createdAt: string;
-}
-
-function useUploadFile(): (file: UniversalFile, pathParts: string[], options?: UploadFileOptions) => Promise<UploadResponse> {
+/**
+ * Uploads a file stored as uploaded (`POST /storage`). `pathParts` is the
+ * folder (sent as `file.options`); without it the file goes in `files`.
+ * Resolves with the File.
+ */
+function useUploadFile(): (file: UniversalFile, pathParts?: string[], options?: UploadFileOptions) => Promise<SublayFile> {
   const axios = useAxiosPrivate();
   const { projectId } = useProject();
 
   const uploadFile = useCallback(
     async (
       file: UniversalFile,
-      pathParts: string[],
+      pathParts?: string[],
       options?: UploadFileOptions
-    ): Promise<UploadResponse> => {
+    ): Promise<SublayFile> => {
       if (!projectId) {
         throw new Error("No projectId available.");
       }
 
-      if (!file || !pathParts || !Array.isArray(pathParts)) {
-        throw new Error("Invalid arguments. File and pathParts are required.");
+      if (!file) {
+        throw new Error("No file provided.");
+      }
+      if (pathParts !== undefined && !Array.isArray(pathParts)) {
+        throw new Error("Invalid arguments. pathParts must be an array.");
       }
 
       const formData = new FormData();
@@ -63,11 +61,9 @@ function useUploadFile(): (file: UniversalFile, pathParts: string[], options?: U
         } as any);
       }
 
-      // Append pathParts
-      formData.append("pathParts", JSON.stringify(pathParts));
-
-      if (options?.position !== undefined) {
-        formData.append("position", options.position.toString());
+      // The folder goes inside `file.options`, one JSON field
+      if (pathParts !== undefined) {
+        formData.append("file.options", JSON.stringify({ pathParts }));
       }
       if (options?.metadata) {
         formData.append("metadata", JSON.stringify(options.metadata));
@@ -80,7 +76,7 @@ function useUploadFile(): (file: UniversalFile, pathParts: string[], options?: U
         },
       });
 
-      return response.data as UploadResponse;
+      return response.data as SublayFile;
     },
     [projectId, axios]
   );

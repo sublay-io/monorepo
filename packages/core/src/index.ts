@@ -786,7 +786,8 @@ export {
   useUploadImage,
   type RNFile,
   type UploadFileOptions,
-  type UploadResponse,
+  type UseUploadImageOptions,
+  type UseUploadImageValues,
 } from "./hooks/storage";
 
 // Interfaces
@@ -996,11 +997,7 @@ export type {
 } from "./interfaces/models/Connection";
 export type { FollowRow, FollowStatus } from "./interfaces/models/Follow";
 export type { BlockRow, BlockStatus } from "./interfaces/models/Block";
-export type {
-  UploadImageResponse,
-  UploadedImageVariant,
-  UploadImageOptions,
-} from "./interfaces/models/Image";
+export type { UploadImageOptions } from "./interfaces/models/Image";
 export type {
   ImageSlotUpload,
   ImageListUpload,

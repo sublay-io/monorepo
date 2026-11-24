@@ -65,7 +65,7 @@ function AvatarUploader() {
 </ParamField>
 
 <ParamField body="format" type='"webp" | "jpeg" | "png" | "original"'>
-  Output format for all variants. Defaults to `"webp"`.
+  Output format for all variants. Defaults to `"webp"`. `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores anything else (an AVIF or HEIC, for example) as WebP.
 </ParamField>
 
 <ParamField body="stripExif" type="boolean">
@@ -81,7 +81,7 @@ function AvatarUploader() {
 </ParamField>
 
 <ParamField body="pathParts" type="string[]">
-  Folder segments for the stored image. The new file's id is always added after them (`<pathParts>/<fileId>/<filename>`). Defaults to `["images"]`. A folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
+  Folder segments for the stored image. The new file's id is always added after them (`<pathParts>/<fileId>/<filename>`, the file name taking the stored format's extension). Defaults to `["images"]`. A folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
 </ParamField>
 
 <ParamField body="onProgress" type="(progress: number) => void">

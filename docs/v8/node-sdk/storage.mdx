@@ -121,7 +121,7 @@ const file = await sublay.storage.uploadImage({
   | `multi-aspect-ratio` | `aspectRatios` (`{ width, height }[]`), `sizes` | 1–10 aspect ratios. |
 
   All modes also accept optional `quality` (1–100, default 85), `format` (`webp` \|
-  `jpeg` \| `png` \| `original`, default `webp`), `stripExif` (boolean, default
+  `jpeg` \| `png` \| `original`, default `webp`; `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores anything else (an AVIF or HEIC, for example) as WebP), `stripExif` (boolean, default
   `true`), `fit` (`cover` \| `contain` \| `inside` \| `outside`, default
   `inside`), `originalMaxSize` (50–10000, default 3840: the longest side the
   stored original is shrunk to) and `pathParts`. Every requested size is
@@ -137,7 +137,7 @@ const file = await sublay.storage.uploadImage({
 </ParamField>
 
 <ParamField body="pathParts" type="string[]">
-  Folder segments for the stored image, sent inside `file.options` (when given, it takes the place of `imageOptions.pathParts`). The new file's id is always added after them (`<pathParts>/<fileId>/<filename>`). Defaults to `["images"]`. A folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
+  Folder segments for the stored image, sent inside `file.options` (when given, the top-level `pathParts` wins over `imageOptions.pathParts`). The new file's id is always added after them (`<pathParts>/<fileId>/<filename>`, the file name taking the stored format's extension). Defaults to `["images"]`. A folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
 </ParamField>
 
 <ParamField body="metadata" type="object">

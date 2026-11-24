@@ -30,7 +30,7 @@ Requires an authenticated user.
   "type": "image",
   "originalPath": "https://api.sublay.io/internal/files/...",
   "originalSize": 204800,
-  "originalMimeType": "image/png",
+  "originalMimeType": "image/webp",
   "position": 0,
   "metadata": { "originalName": "photo.png", "uploadedAt": "2025-01-01T00:00:00.000Z" },
   "image": {
@@ -99,7 +99,7 @@ Requires an authenticated user.
 </ResponseField>
 
 <ResponseField name="originalMimeType" type="string">
-  MIME type of the uploaded file.
+  The stored file's type. For a file stored as uploaded, the uploaded type; for a processed image, `image/<format>` of the stored original (for example `image/webp`).
 </ResponseField>
 
 <ResponseField name="position" type="number">
@@ -130,7 +130,7 @@ Requires an authenticated user.
       The error when processing failed.
     </ResponseField>
     <ResponseField name="format" type="string">
-      Output format (e.g., `"webp"`).
+      The stored file's format (`"webp"`, `"jpeg"` or `"png"`).
     </ResponseField>
     <ResponseField name="quality" type="number">
       Quality setting used during processing.

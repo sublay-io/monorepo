@@ -23,7 +23,7 @@ A record's files are uploaded, replaced and removed through that record's own re
 | `type` | `"image" \| "video" \| "document" \| "other"` | The file category, from its MIME type: `image/*` is `"image"`, `video/*` is `"video"`, PDF, Word and other `application/vnd.*` types are `"document"`, anything else `"other"`. A processed image is always `"image"`. |
 | `originalPath` | `string` | Proxied URL to the original uploaded file. |
 | `originalSize` | `number` | Size in bytes of the stored original. A processed image's original is stored shrunk to its `originalMaxSize` (default 3840 px on the longest side), and this is its size as stored. |
-| `originalMimeType` | `string` | MIME type of the original file (e.g. `"image/jpeg"`). |
+| `originalMimeType` | `string` | The stored file's MIME type: the uploaded type for a file stored as uploaded, `image/<format>` of the stored original for a processed image (e.g. `"image/webp"`). |
 | `position` | `number` | Display order when multiple files are attached to the same record: the first file is `0`, and each file added later takes the next number. An event cover uploaded through v8 is `-1`, so it sorts before the event's other files; one uploaded through the v7 API is `0`. Find an event's cover by `coverImageId`, not by position. |
 | `metadata` | `Record<string, any>` | Custom key-value data for this file. |
 | `image` | `FileImage \| null` | Processed image variants: the image data of a processed image (uploaded through `images`, a slot or Upload Image), `null` for every other file, an image sent in `files` or through Upload File included (it is stored as uploaded, so its `type` is `"image"` but it has no variants). |
@@ -41,7 +41,7 @@ For processed images, the `image` field contains processing results and variant 
 | `variants` | `Record<string, FileImageVariant>` | Processed variants keyed by size name (e.g. `thumbnail`, `small`, `medium`, `large`). |
 | `processingStatus` | `"completed" \| "failed"` | Whether image processing succeeded. |
 | `processingError` | `string \| null` | Error message if processing failed. |
-| `format` | `string` | The output format requested by the uploader (e.g. `"webp"`). |
+| `format` | `string` | The stored file's format: `"webp"`, `"jpeg"` or `"png"`. |
 | `quality` | `number` | The output quality requested (1–100). |
 | `exifStripped` | `boolean` | Whether EXIF metadata was removed from the output. |
 | `createdAt` | `Date` | When the image record was created. |

@@ -259,6 +259,10 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     ```json
     { "error": "avatarFile.options.sizes: An image can have at most 30 variants.", "code": "user/invalid-body", "param": "avatarFile.options.sizes" }
     ```
+    A variant name that is empty or `original`, or that contains `/`, `\` or `..`. `param` names the option:
+    ```json
+    { "error": "avatarFile.options.sizes: Variant names can't be empty, `original`, or contain `/`, `\\` or `..`.", "code": "user/invalid-body", "param": "avatarFile.options.sizes" }
+    ```
   </Accordion>
   <Accordion title="Username Taken — 409">
     Another user already holds the `username` sent. Nothing is changed, and any file uploaded with the request is removed.

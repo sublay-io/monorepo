@@ -110,11 +110,11 @@ const uploaded = await sublay.storage.uploadImage({
   | `multi-aspect-ratio` | `aspectRatios` (`{ width, height }[]`), `sizes` | 1–10 aspect ratios. |
 
   All modes also accept optional `quality` (1–100, default 85), `format` (`webp` \|
-  `jpeg` \| `png` \| `original`, default `webp`; `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores anything else (an AVIF or HEIC, for example) as WebP), `stripExif` (boolean, default
+  `jpeg` \| `png` \| `original`, default `webp`; `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores an image whose content is HEIC or AVIF (sent under a JPEG, PNG or WebP type) as WebP), `stripExif` (boolean, default
   `true`), `fit` (`cover` \| `contain` \| `inside` \| `outside`, default
   `inside`), `originalMaxSize` (50–10000, default 3840: the longest side the
   stored original is shrunk to) and `pathParts`. Every requested size is
-  1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). See [Upload Image](/v8/api-reference/storage/upload-image) for every field.
+  1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). A variant name can't be empty or `original`, and can't contain `/`, `\` or `..`. See [Upload Image](/v8/api-reference/storage/upload-image) for every field.
 </ParamField>
 
 <ParamField body="filename" type="string">

@@ -31,7 +31,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     </ParamField>
 
     <ParamField body="dimensions" type="object">
-      Required for `exact-dimensions` mode. An object mapping variant names to `{ width, height }` pairs, each from 1 to 10000 px; at most 30 entries (one variant each).
+      Required for `exact-dimensions` mode. An object mapping variant names to `{ width, height }` pairs, each from 1 to 10000 px; at most 30 entries (one variant each). A variant name can't be empty or `original`, and can't contain `/`, `\` or `..`.
 
       ```json
       { "thumbnail": { "width": 64, "height": 64 }, "card": { "width": 400, "height": 300 } }
@@ -43,15 +43,15 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     </ParamField>
 
     <ParamField body="widths" type="object">
-      Required for `aspect-ratio-width-based` mode. An object mapping variant names to pixel widths, each from 1 to 10000; at most 30 entries (one variant each).
+      Required for `aspect-ratio-width-based` mode. An object mapping variant names to pixel widths, each from 1 to 10000; at most 30 entries (one variant each). A variant name can't be empty or `original`, and can't contain `/`, `\` or `..`.
     </ParamField>
 
     <ParamField body="heights" type="object">
-      Required for `aspect-ratio-height-based` mode. An object mapping variant names to pixel heights, each from 1 to 10000; at most 30 entries (one variant each).
+      Required for `aspect-ratio-height-based` mode. An object mapping variant names to pixel heights, each from 1 to 10000; at most 30 entries (one variant each). A variant name can't be empty or `original`, and can't contain `/`, `\` or `..`.
     </ParamField>
 
     <ParamField body="sizes" type="object">
-      Required for `original-aspect` and `multi-aspect-ratio` modes. An object mapping variant names to longest-edge pixel sizes, each from 1 to 10000; at most 30 entries (one variant each). In `multi-aspect-ratio` the server uses the one ratio in `aspectRatios` closest to the image, so the variants are one per `sizes` entry.
+      Required for `original-aspect` and `multi-aspect-ratio` modes. An object mapping variant names to longest-edge pixel sizes, each from 1 to 10000; at most 30 entries (one variant each). A variant name can't be empty or `original`, and can't contain `/`, `\` or `..`. In `multi-aspect-ratio` the server uses the one ratio in `aspectRatios` closest to the image, so the variants are one per `sizes` entry.
     </ParamField>
 
     <ParamField body="aspectRatios" type="array">
@@ -69,7 +69,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     </ParamField>
 
     <ParamField body="format" type="string">
-      Output format: `webp`, `jpeg`, `png`, or `original`. Defaults to `webp`. `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores anything else (an AVIF or HEIC, for example) as WebP.
+      Output format: `webp`, `jpeg`, `png`, or `original`. Defaults to `webp`. `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores an image whose content is HEIC or AVIF (sent under a JPEG, PNG or WebP type) as WebP.
     </ParamField>
 
     <ParamField body="stripExif" type="boolean">
@@ -77,11 +77,11 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     </ParamField>
 
     <ParamField body="originalMaxSize" type="number">
-      The longest side, in px, the stored original is shrunk to (50–10000). Defaults to `3840`. An original already within it keeps its size. The File's `originalSize` and its image's `originalWidth` and `originalHeight` describe the stored original. A larger original takes more storage, which counts toward the project's file-storage limit.
+      The longest side, in px, the stored original is shrunk to (50–10000). Defaults to `3840`. An original already within it keeps its dimensions. The File's `originalSize` and its image's `originalWidth` and `originalHeight` describe the stored original. A larger original takes more storage, which counts toward the project's file-storage limit.
     </ParamField>
 
     <ParamField body="pathParts" type="string[]">
-      Folder segments for the stored image. The new file's id is always added after them, so the image and its sizes are stored under `<pathParts>/<fileId>/`. Example: `["avatars", "user-123"]` → `avatars/user-123/<fileId>/<filename>`, the file name taking the stored format's extension (`photo.png` stored as WebP is `photo.webp`). Defaults to `["images"]`. A part that is, or contains, a `.` or `..` folder (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with `400 storage/invalid-body` and `param` `file.options.pathParts`.
+      Folder segments for the stored image. The new file's id is always added after them, so the image and its sizes are stored under `<pathParts>/<fileId>/`. Example: `["avatars", "user-123"]` → `avatars/user-123/<fileId>/<filename>`, the file name taking the stored format's extension (`photo.png` stored as WebP is `photo.webp`). Without it, or with an empty array, the image is stored under `images`. A part that is, or contains, a `.` or `..` folder (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with `400 storage/invalid-body` and `param` `file.options.pathParts`.
     </ParamField>
   </Expandable>
 </ParamField>
@@ -151,13 +151,23 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">
-    The request sent an image option as its own field: `mode`, `dimensions`, `aspectRatio`, `widths`, `heights`, `sizes`, `aspectRatios`, `fit`, `quality`, `format`, `stripExif` or `pathParts`. They go inside `file.options`. Refused even next to a valid `file.options`, and nothing is stored. `param` names the field:
+    The request sent an image option as its own field: `mode`, `dimensions`, `aspectRatio`, `widths`, `heights`, `sizes`, `aspectRatios`, `fit`, `quality`, `format`, `stripExif`, `originalMaxSize` or `pathParts`. They go inside `file.options`. Refused even next to a valid `file.options`, and nothing is stored. `param` names the field:
 
     ```json
     {
       "error": "`mode` isn't supported in v8. Send it inside `file.options`, the image options as one JSON object.",
       "code": "storage/unsupported-param",
       "param": "mode"
+    }
+    ```
+
+    The request sent `position`. A file uploaded here belongs to no record, so nothing is stored:
+
+    ```json
+    {
+      "error": "`position` isn't accepted: a file uploaded here belongs to no record, so it has no place in a list.",
+      "code": "storage/unsupported-param",
+      "param": "position"
     }
     ```
 
@@ -226,6 +236,12 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 
     ```json
     { "error": "file.options.sizes: An image can have at most 30 variants.", "code": "storage/invalid-body", "param": "file.options.sizes" }
+    ```
+
+    A variant name that is empty or `original`, or that contains `/`, `\` or `..`. `param` names the option:
+
+    ```json
+    { "error": "file.options.sizes: Variant names can't be empty, `original`, or contain `/`, `\\` or `..`.", "code": "storage/invalid-body", "param": "file.options.sizes" }
     ```
 
     Any other value outside its rules (a size outside 1–10000, an `originalMaxSize` outside 50–10000, a `fit` the mode doesn't take, `metadata` that isn't a JSON object) gets the same code, with `param` naming the value.

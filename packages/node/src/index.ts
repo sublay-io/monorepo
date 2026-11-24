@@ -366,7 +366,12 @@ export type { File, FileImage, FileImageVariant } from "./interfaces/File";
 export type { UploadFileResponse } from "./modules/storage/uploadFile";
 export type { UploadImageResponse, UploadedImageVariant } from "./modules/storage/uploadImage";
 export type { GetFileResponse, GetFileImage } from "./modules/storage/getFile";
-export type { UploadFile, ImageSlotFile } from "./core/formData";
+export type {
+  UploadFile,
+  ImageSlotFile,
+  ImageListUpload,
+  FileListUpload,
+} from "./core/formData";
 export type {
   ImageOptions,
   ImageFit,

@@ -1,16 +1,17 @@
 import { SublayHttpClient } from "../../core/client";
-import { appendFile, appendFields } from "../../core/formData";
+import {
+  appendFields,
+  appendListUploads,
+  hasListUploads,
+  withoutNulls,
+  type FileListUpload,
+  type ImageListUpload,
+} from "../../core/formData";
 import { SentChatMessage } from "../../interfaces/ChatMessage";
 import { GifData } from "../../interfaces/Comment";
 import { Mention } from "../../interfaces/Mention";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../core/spaceReputationParams";
-
-export interface ChatMessageFile {
-  file: Uint8Array | Blob;
-  filename?: string;
-  mimeType?: string;
-}
 
 export interface SendMessageProps extends SpaceReputationContextParams {
   conversationId: string;
@@ -24,8 +25,19 @@ export interface SendMessageProps extends SpaceReputationContextParams {
   metadata?: Record<string, any>;
   /** Client-generated id echoed back on the created message (not stored). */
   localId?: string;
-  /** Attachments. When present, the request is sent as multipart/form-data. */
-  files?: ChatMessageFile[];
+  /**
+   * Images on the message, processed into sizes per `options` (`mode` is required).
+   * Each carries its bytes and, for raw bytes, a `filename` and `mimeType`.
+   * When present the request is sent as `multipart/form-data`. Requires the
+   * `files-images` bundle.
+   */
+  images?: ImageListUpload;
+  /**
+   * Files on the message, stored as uploaded (`options.pathParts` optional). When
+   * present the request is sent as `multipart/form-data`. Requires the
+   * `files-images` bundle.
+   */
+  files?: FileListUpload;
 }
 
 /** The created message; `localId` is echoed back when the send passed one. */
@@ -37,6 +49,7 @@ export async function sendMessage(
 ): Promise<SendMessageResponse> {
   const {
     conversationId,
+    images,
     files,
     spaceReputation,
     ...body
@@ -50,14 +63,13 @@ export async function sendMessage(
     ...buildSpaceReputationParams({ spaceReputation }),
   };
 
-  // With attachments, send multipart: object fields are JSON-stringified (the
+  // With images or files, send multipart: object fields are JSON-stringified (the
   // server parses them back) and the files are appended. Otherwise send JSON.
-  if (files && files.length > 0) {
+  if (hasListUploads({ images, files })) {
     const formData = new FormData();
-    appendFields(formData, fields);
-    for (const f of files) {
-      appendFile(formData, "files", f.file, f.filename, f.mimeType);
-    }
+    // A multipart field can't carry null: a null `gif` (no GIF) is left out.
+    appendFields(formData, withoutNulls(fields));
+    appendListUploads(formData, { images, files });
     const response = await client.projectInstance.post<SendMessageResponse>(
       url,
       formData

@@ -287,7 +287,8 @@ describe("js-sdk events — request shaping", () => {
       },
     });
     const [, body] = projectInstance.patch.mock.calls[1];
-    expect((body as FormData).get("include")).toBe("files");
+    // One `include` field holding exactly "files" (never a JSON array string).
+    expect((body as FormData).getAll("include")).toEqual(["files"]);
   });
 
   it("updateEvent ignores empty images and files lists and sends plain JSON", async () => {

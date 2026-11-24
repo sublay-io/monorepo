@@ -100,7 +100,8 @@ describe("node-sdk file lists — include on updates", () => {
       files: { files: [{ file: bytes(), mimeType: "application/pdf" }] },
     });
     const [, body] = projectInstance.patch.mock.calls[1];
-    expect((body as FormData).get("include")).toBe("files");
+    // One `include` field holding exactly "files" (never a JSON array string).
+    expect((body as FormData).getAll("include")).toEqual(["files"]);
   });
 });
 

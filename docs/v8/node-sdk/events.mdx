@@ -65,7 +65,7 @@ const event = await sublay.events.createEvent({
   Files in the event's files, stored as uploaded (JPEG, PNG, WebP or PDF: pass `mimeType` with a `Uint8Array`), up to 50 MB each. Each file's `type` comes from its MIME type; an image sent here isn't processed, so it has no `image` data. A part without a `filename` is named `file`. Sends `multipart/form-data`.
 </ParamField>
 
-**Returns** — `Promise<Event>`
+**Returns** — `Promise<Event>`: the created event, with `files` (`[]` for none, the cover first) and the host's `user.avatarFile` / `user.bannerFile` whenever the `files-images` bundle is installed; without the bundle, no `files`.
 
 ---
 

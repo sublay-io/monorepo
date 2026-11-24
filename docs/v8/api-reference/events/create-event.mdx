@@ -112,7 +112,7 @@ The event's files list the cover first, then the images, then the files, each in
 
 ## Response
 
-Returns `201` with the created [Event](/v8/data-models/event) object, including inline `rsvpCounts` and (with uploads) the `files` association, images with their variants.
+Returns `201` with the created [Event](/v8/data-models/event) object, including inline `rsvpCounts`. When the `files-images` bundle is installed it also carries `files` (`[]` for none; the cover first, then its images and files, images with their variants) and the host's `user.avatarFile` / `user.bannerFile`; without the bundle there is no `files` key.
 
 ## Error Responses
 

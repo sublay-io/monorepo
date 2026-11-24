@@ -31,7 +31,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     </ParamField>
 
     <ParamField body="dimensions" type="object">
-      Required for `exact-dimensions` mode. An object mapping variant names to `{ width, height }` pairs, each from 1 to 10000 px.
+      Required for `exact-dimensions` mode. An object mapping variant names to `{ width, height }` pairs, each from 1 to 10000 px; at most 30 entries (one variant each).
 
       ```json
       { "thumbnail": { "width": 64, "height": 64 }, "card": { "width": 400, "height": 300 } }
@@ -43,15 +43,15 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     </ParamField>
 
     <ParamField body="widths" type="object">
-      Required for `aspect-ratio-width-based` mode. An object mapping variant names to pixel widths, each from 1 to 10000.
+      Required for `aspect-ratio-width-based` mode. An object mapping variant names to pixel widths, each from 1 to 10000; at most 30 entries (one variant each).
     </ParamField>
 
     <ParamField body="heights" type="object">
-      Required for `aspect-ratio-height-based` mode. An object mapping variant names to pixel heights, each from 1 to 10000.
+      Required for `aspect-ratio-height-based` mode. An object mapping variant names to pixel heights, each from 1 to 10000; at most 30 entries (one variant each).
     </ParamField>
 
     <ParamField body="sizes" type="object">
-      Required for `original-aspect` and `multi-aspect-ratio` modes. An object mapping variant names to longest-edge pixel sizes, each from 1 to 10000.
+      Required for `original-aspect` and `multi-aspect-ratio` modes. An object mapping variant names to longest-edge pixel sizes, each from 1 to 10000; at most 30 entries (one variant each). In `multi-aspect-ratio` the server uses the one ratio in `aspectRatios` closest to the image, so the variants are one per `sizes` entry.
     </ParamField>
 
     <ParamField body="aspectRatios" type="array">
@@ -221,6 +221,12 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     ```
 
     In `aspect-ratio-height-based` it names a `heights` option and gives a width. In `multi-aspect-ratio` it names a `sizes` option, and the ratio is the one in `aspectRatios` closest to this image: "`file.options.sizes.s` gives a height of 0 px at the 3:1 aspect ratio, the one in \`aspectRatios\` closest to this image. Each side of a variant must be 1–10000 px."
+
+    More than 30 entries in `dimensions`, `widths`, `heights` or `sizes`. `param` names the option:
+
+    ```json
+    { "error": "file.options.sizes: An image can have at most 30 variants.", "code": "storage/invalid-body", "param": "file.options.sizes" }
+    ```
 
     Any other value outside its rules (a size outside 1–10000, an `originalMaxSize` outside 50–10000, a `fit` the mode doesn't take, `metadata` that isn't a JSON object) gets the same code, with `param` naming the value.
   </Accordion>

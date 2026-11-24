@@ -4,7 +4,8 @@
 // slot (`avatarFile`, `bannerFile`, `coverFile`) or an `images` list. The
 // server validates it as a discriminated union on `mode`; the SDK exposes the
 // same shapes so callers build valid options at compile time. Every requested
-// size is 1–10000 px.
+// size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take
+// at most 30 entries (one variant each).
 
 export type ImageFit = "cover" | "contain" | "inside" | "outside";
 export type ImageFormat = "webp" | "jpeg" | "png" | "original";
@@ -27,7 +28,7 @@ interface BaseImageOptions {
 /** Mode 1 — explicit width/height per named variant. */
 export interface ExactDimensionsOptions extends BaseImageOptions {
   mode: "exact-dimensions";
-  /** Keyed by variant name, e.g. `{ thumbnail: { width, height } }`. 1–10000. */
+  /** Keyed by variant name, e.g. `{ thumbnail: { width, height } }`. 1–10000, at most 30 entries. */
   dimensions: Record<string, { width: number; height: number }>;
   fit?: ImageFit;
 }
@@ -36,7 +37,7 @@ export interface ExactDimensionsOptions extends BaseImageOptions {
 export interface AspectRatioWidthOptions extends BaseImageOptions {
   mode: "aspect-ratio-width-based";
   aspectRatio: { width: number; height: number };
-  /** Keyed by variant name → target width (1–10000). */
+  /** Keyed by variant name → target width (1–10000), at most 30 entries. */
   widths: Record<string, number>;
   fit?: ImageFit;
 }
@@ -45,7 +46,7 @@ export interface AspectRatioWidthOptions extends BaseImageOptions {
 export interface AspectRatioHeightOptions extends BaseImageOptions {
   mode: "aspect-ratio-height-based";
   aspectRatio: { width: number; height: number };
-  /** Keyed by variant name → target height (1–10000). */
+  /** Keyed by variant name → target height (1–10000), at most 30 entries. */
   heights: Record<string, number>;
   fit?: ImageFit;
 }
@@ -53,7 +54,7 @@ export interface AspectRatioHeightOptions extends BaseImageOptions {
 /** Mode 3 — preserve the source aspect ratio, bounded per variant. */
 export interface OriginalAspectOptions extends BaseImageOptions {
   mode: "original-aspect";
-  /** Keyed by variant name → bounding size (1–10000). */
+  /** Keyed by variant name → bounding size (1–10000), at most 30 entries. */
   sizes: Record<string, number>;
   /** Server restricts this mode to `inside` | `outside`. */
   fit?: "inside" | "outside";
@@ -64,7 +65,7 @@ export interface MultiAspectRatioOptions extends BaseImageOptions {
   mode: "multi-aspect-ratio";
   /** 1–10 aspect ratios. */
   aspectRatios: { width: number; height: number }[];
-  /** Keyed by variant name → target size (1–10000). */
+  /** Keyed by variant name → target size (1–10000), at most 30 entries. */
   sizes: Record<string, number>;
   fit?: ImageFit;
 }

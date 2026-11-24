@@ -116,7 +116,7 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
   - `"original-aspect"` — preserve original ratio, resize by max dimension
   - `"multi-aspect-ratio"` — generate crops at multiple aspect ratios
 
-  Every requested size is 1–10000 px. Optional fields: `fit`, `quality` (1–100), `format` (`webp`, `jpeg`, `png`, `original`; `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores anything else (an AVIF or HEIC, for example) as WebP), `stripExif` (boolean), `originalMaxSize` (50–10000, default 3840: the longest side the stored original is shrunk to), `pathParts` (string[]; a folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash, is refused with a 400). See [Upload Image](/v8/api-reference/storage/upload-image) for every field of each mode.
+  Every requested size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). Optional fields: `fit`, `quality` (1–100), `format` (`webp`, `jpeg`, `png`, `original`; `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores anything else (an AVIF or HEIC, for example) as WebP), `stripExif` (boolean), `originalMaxSize` (50–10000, default 3840: the longest side the stored original is shrunk to), `pathParts` (string[]; a folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash, is refused with a 400). See [Upload Image](/v8/api-reference/storage/upload-image) for every field of each mode.
 </ParamField>
 
 <ParamField body="files" type="file[]">
@@ -277,6 +277,10 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     { "error": "`images.options.widths.s` gives a height of 0 px at the 3:1 aspect ratio. Each side of a variant must be 1–10000 px.", "code": "entity/invalid-body", "param": "images.options.widths.s" }
     ```
     In `aspect-ratio-height-based` it names a `heights` option and gives a width. In `multi-aspect-ratio` it names a `sizes` option, and the ratio is the one in `aspectRatios` closest to the image, so the text reads "… at the 3:1 aspect ratio, the one in `aspectRatios` closest to this image. Each side of a variant must be 1–10000 px."
+    More than 30 entries in `dimensions`, `widths`, `heights` or `sizes` (one variant each). `param` names the option:
+    ```json
+    { "error": "images.options.sizes: An image can have at most 30 variants.", "code": "entity/invalid-body", "param": "images.options.sizes" }
+    ```
   </Accordion>
   <Accordion title="Invalid Reference — 400">
     A value refers to a record that doesn't exist. `constraint` names the database constraint that refused it.

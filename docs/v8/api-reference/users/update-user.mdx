@@ -255,6 +255,10 @@ On success, returns HTTP `200` with the updated user's authenticated profile:
     { "error": "`avatarFile.options.widths.s` gives a height of 0 px at the 3:1 aspect ratio. Each side of a variant must be 1–10000 px.", "code": "user/invalid-body", "param": "avatarFile.options.widths.s" }
     ```
     In `aspect-ratio-height-based` it names a `heights` option and gives a width. In `multi-aspect-ratio` it names a `sizes` option, and the ratio is the one in `aspectRatios` closest to the image, so the text reads "… at the 3:1 aspect ratio, the one in `aspectRatios` closest to this image. Each side of a variant must be 1–10000 px."
+    More than 30 entries in `dimensions`, `widths`, `heights` or `sizes` (one variant each). `param` names the option:
+    ```json
+    { "error": "avatarFile.options.sizes: An image can have at most 30 variants.", "code": "user/invalid-body", "param": "avatarFile.options.sizes" }
+    ```
   </Accordion>
   <Accordion title="Username Taken — 409">
     Another user already holds the `username` sent. Nothing is changed, and any file uploaded with the request is removed.

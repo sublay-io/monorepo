@@ -263,6 +263,10 @@ Validation still runs first, in the same order: an invalid body, an image error,
     { "error": "`avatarFile.options.widths.s` gives a height of 0 px at the 3:1 aspect ratio. Each side of a variant must be 1–10000 px.", "code": "auth/invalid-body", "param": "avatarFile.options.widths.s" }
     ```
     In `aspect-ratio-height-based` it names a `heights` option and gives a width. In `multi-aspect-ratio` it names a `sizes` option, and the ratio is the one in `aspectRatios` closest to the image, so the text reads "… at the 3:1 aspect ratio, the one in `aspectRatios` closest to this image. Each side of a variant must be 1–10000 px."
+    More than 30 entries in `dimensions`, `widths`, `heights` or `sizes` (one variant each). `param` names the option:
+    ```json
+    { "error": "avatarFile.options.sizes: An image can have at most 30 variants.", "code": "auth/invalid-body", "param": "avatarFile.options.sizes" }
+    ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
     A file was refused as the body was read: `auth/unsupported-file-type` or `auth/unexpected-file-field` (a file in another field, or a second file in `avatarFile` or `bannerFile`), with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).

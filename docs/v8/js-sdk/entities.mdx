@@ -372,7 +372,11 @@ const entity = await sublay.entities.updateEntity({
   Ids of the entity's files to remove (ids in its `files`). Works alone or with uploads. Any other id throws a `400` (`entity/invalid-remove-file-ids`, with `invalidIds`).
 </ParamField>
 
-**Returns** — `Promise<Entity>`. When the update uploaded or removed files, the entity carries its `files` as they now are.
+<ParamField body="include" type='"files" | "files"[]'>
+  What the response adds: `"files"`, the entity's files as they now are. Without it the response has no `files`, even after an upload or removal.
+</ParamField>
+
+**Returns** — `Promise<Entity>`. With `include: "files"`, the entity carries its `files` as they now are.
 
 ---
 

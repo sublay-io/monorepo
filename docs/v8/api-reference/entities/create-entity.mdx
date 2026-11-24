@@ -131,7 +131,7 @@ Images come first in the entity's `files`, then the files, each in upload order.
 
 ## Response
 
-Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. When files are uploaded, the entity includes a `files` array with a URL for each one, images with their variants.
+Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. When the files-images bundle is installed, the entity includes `files` (`[]` for none), with a URL for each file, in order, images with their variants.
 
 <Note>
   Draft entities are invisible to everyone but their author until published. Use [Fetch Drafts](/v8/api-reference/entities/fetch-drafts) to list an author's unpublished drafts.

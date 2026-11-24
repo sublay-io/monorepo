@@ -66,13 +66,17 @@ When a time field (`startTime`/`endTime`/`timezone`) or a location field (`locat
 
 New files come after the event's existing ones, images first and then files, each in upload order. An `images.options` or `files.options` sent without its files is ignored.
 
+<ParamField body="include" type="string | string[]">
+  What the response adds: `files`, the event's files as they now are (the cover first, then its images and files), images with their variants, along with the host's `user.avatarFile` and `user.bannerFile`, as [Fetch Event](/v8/api-reference/events/fetch-event) returns them. A comma-separated value or an array; matching ignores case. In the body like every other field (JSON, or a multipart field), never the query. Without it the response has no `files`, even when the update uploaded or removed files. Without the files-images bundle it adds nothing.
+</ParamField>
+
 <ParamField body="actingUserId" type="string">
   Required with a service key: the user this request acts as. It has exactly that user's powers, so it is refused unless they are a host of the event with active membership of its space, and it is recorded as theirs. A user token always acts as its own user and must not send it (`400 event/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
 
-Returns the updated [Event](/v8/data-models/event) object.
+Returns the updated [Event](/v8/data-models/event) object. With `include: "files"` it also carries `files` (the cover first, then its images and files, images with their variants) and the host's avatar and banner files. To show a file change without fetching the event again, send `include: "files"` with it.
 
 ## Error Responses
 
@@ -106,6 +110,18 @@ Returns the updated [Event](/v8/data-models/event) object.
       "code": "event/wrong-location",
       "param": "actingUserId"
     }
+    ```
+  </Accordion>
+  <Accordion title="Invalid Include — 400">
+    `include` names a value this endpoint doesn't add. The only value is `files`.
+    ```json
+    { "error": "include: Unknown include `user`. Allowed: files.", "code": "event/invalid-body", "param": "include" }
+    ```
+  </Accordion>
+  <Accordion title="Include in the Query — 400">
+    `include` was sent in the query string. On this endpoint it goes in the request body, with the other fields.
+    ```json
+    { "error": "`include` goes in the request body on this endpoint.", "code": "event/wrong-location", "param": "include" }
     ```
   </Accordion>
   <Accordion title="Unsupported Parameter — 400">

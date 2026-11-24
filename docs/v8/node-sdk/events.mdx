@@ -172,6 +172,9 @@ const event = await sublay.events.updateEvent({
 <ParamField body="removeFileIds" type="string[]">
   Ids of the event's files to remove: list files and/or the cover (`coverImageId`; removing it clears the cover). Works alone or with uploads. Any other id throws a `400` (`event/invalid-remove-file-ids`, with `invalidIds`).
 </ParamField>
+<ParamField body="include" type='"files" | "files"[]'>
+  What the response adds: `"files"`, the event's files as they now are (cover first) and the host's avatar and banner files. Without it the response has no `files`, even after an upload or removal.
+</ParamField>
 
 **Returns** — `Promise<Event>`
 

@@ -71,6 +71,10 @@ Files can be changed in the same request: `images` and `files` are **appended** 
   Files to remove from the entity: ids in its `files`. Each file and its blobs are deleted. Works alone or with uploads in the same request. On a multipart request, send it as a JSON string (`'["<fileId>"]'`). Any id that isn't one of this entity's files refuses the whole request with `400 entity/invalid-remove-file-ids`.
 </ParamField>
 
+<ParamField body="include" type="string | string[]">
+  What the response adds: `files`, the entity's images and files as they now are, in order, images with their variants. A comma-separated value or an array; matching ignores case. In the body like every other field (JSON, or a multipart field such as `include=files`), never the query. Without it the response has no `files`, even when the update uploaded or removed files. Without the files-images bundle it adds nothing.
+</ParamField>
+
 ### File Uploads (multipart/form-data)
 
 On a multipart request every field is a string: send `attachments`, `keywords`, `mentions`, `location`, `metadata` and `removeFileIds` as JSON strings.
@@ -95,7 +99,7 @@ New files come after the entity's existing ones, images first and then files, ea
 
 ## Response
 
-Returns the updated [Entity](/v8/data-models/entity) object, populated with the author's user profile. When the request uploaded or removed files, it also carries `files`: the entity's files as they now are, images with their variants.
+Returns the updated [Entity](/v8/data-models/entity) object, populated with the author's user profile. With `include: "files"` it also carries `files`: the entity's files as they now are, images with their variants. To show a file change without fetching the entity again, send `include: "files"` with it.
 
 <Note>
   If `title` or `content` changed, the entity's semantic search embeddings are automatically re-queued for projects with AI search enabled.
@@ -104,6 +108,18 @@ Returns the updated [Entity](/v8/data-models/entity) object, populated with the 
 ## Error Responses
 
 <AccordionGroup>
+  <Accordion title="Invalid Include — 400">
+    `include` names a value this endpoint doesn't add. The only value is `files`.
+    ```json
+    { "error": "include: Unknown include `user`. Allowed: files.", "code": "entity/invalid-body", "param": "include" }
+    ```
+  </Accordion>
+  <Accordion title="Include in the Query — 400">
+    `include` was sent in the query string. On this endpoint it goes in the request body, with the other fields.
+    ```json
+    { "error": "`include` goes in the request body on this endpoint.", "code": "entity/wrong-location", "param": "include" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
     The entity doesn't exist, or it's in a space the caller can't read (the author included).
 

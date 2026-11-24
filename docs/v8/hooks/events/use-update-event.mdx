@@ -58,6 +58,9 @@ function EditEvent({ eventId }: { eventId: string }) {
     <ParamField path="files" type="{ files: UploadFileInput[]; options?: { pathParts?: string[] } }">
       Files to append after the event's existing files, stored as uploaded. Sends multipart.
     </ParamField>
+    <ParamField path="include" type='"files" | "files"[]'>
+      What the response adds: `"files"`, the event's files as they now are (cover first) and the host's avatar and banner files. Defaults to `"files"` when the update uploads or removes files; otherwise the response has no `files`, and the event's cached files (in [`useEvent`](/v8/hooks/events/use-event)) are kept.
+    </ParamField>
     <ParamField path="removeFileIds" type="string[]">
       Ids of the event's files to remove: list files and/or the cover (`coverImageId`; removing it clears the cover). Works alone or with uploads. Any other id refuses the whole update (`400 event/invalid-remove-file-ids`).
     </ParamField>

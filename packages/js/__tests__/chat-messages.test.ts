@@ -147,7 +147,11 @@ describe("js-sdk chat messages — request shaping", () => {
       mentions,
       metadata: { source: "test" },
       spaceReputation: { spaceId: "space1", includeDescendants: true },
-      files: [file1, file2],
+      images: {
+        files: [file1],
+        options: { mode: "original-aspect", sizes: { full: 1000 } },
+      },
+      files: { files: [file2] },
     });
 
     expect(projectInstance.post).toHaveBeenCalledTimes(1);
@@ -157,10 +161,16 @@ describe("js-sdk chat messages — request shaping", () => {
     expect(config).toBeUndefined();
 
     const formData = body as FormData;
+    const imageEntries = formData.getAll("images");
+    expect(imageEntries).toHaveLength(1);
+    expect((imageEntries[0] as File).name).toBe("photo.png");
+    expect(formData.get("images.options")).toBe(
+      JSON.stringify({ mode: "original-aspect", sizes: { full: 1000 } })
+    );
     const fileEntries = formData.getAll("files");
-    expect(fileEntries).toHaveLength(2);
-    expect((fileEntries[0] as File).name).toBe("photo.png");
-    expect((fileEntries[1] as File).name).toBe("doc.pdf");
+    expect(fileEntries).toHaveLength(1);
+    expect((fileEntries[0] as File).name).toBe("doc.pdf");
+    expect(formData.has("files.options")).toBe(false);
 
     const fields = formDataToObject(formData);
     expect(fields.content).toBe("see attached");
@@ -177,14 +187,15 @@ describe("js-sdk chat messages — request shaping", () => {
 
     await sendMessage(client, {
       conversationId: "c1",
-      files: [blob],
+      files: { files: [blob], options: { pathParts: ["chat"] } },
     });
 
     const [, body] = projectInstance.post.mock.calls[0];
     const formData = body as FormData;
     const entries = formData.getAll("files");
     expect(entries).toHaveLength(1);
-    expect((entries[0] as File).name).toBe("attachment");
+    expect((entries[0] as File).name).toBe("file");
+    expect(formData.get("files.options")).toBe(JSON.stringify({ pathParts: ["chat"] }));
   });
 
   it("sendMessage takes the JSON path (not multipart) when files is an empty array", async () => {
@@ -192,7 +203,7 @@ describe("js-sdk chat messages — request shaping", () => {
     await sendMessage(client, {
       conversationId: "c1",
       content: "no attachments",
-      files: [],
+      files: { files: [] },
     });
 
     const [, body] = projectInstance.post.mock.calls[0];
@@ -334,7 +345,7 @@ describe("js-sdk chat messages — response mapping", () => {
     const result = await sendMessage(client, {
       conversationId: "c1",
       content: "see attached",
-      files: [file],
+      files: { files: [file] },
     });
 
     expect(result).toEqual(message);

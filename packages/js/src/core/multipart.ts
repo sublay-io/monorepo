@@ -1,3 +1,5 @@
+import type { ImageOptions } from "../interfaces/ImageProcessing";
+
 /**
  * Helpers for building `multipart/form-data` request bodies. Shared by every
  * upload site (storage, chat messages, user avatar/banner) so they encode
@@ -79,5 +81,61 @@ export function refuseNullWithFile(
         `[Sublay] ${fn}: \`${key}: null\` can't be sent with a file. Clear it in a separate call without a file.`
       );
     }
+  }
+}
+
+/**
+ * A list of images (`images`): the files plus the processing options applied
+ * to every one (`mode` is required).
+ */
+export interface ImageListUpload {
+  files: (Blob | File)[];
+  /** Image-processing config (must include `mode`) — see {@link ImageOptions}. */
+  options: ImageOptions;
+}
+
+/**
+ * A list of files stored as uploaded (`files`), with optional options
+ * (`pathParts`, the folder they are stored under).
+ */
+export interface FileListUpload {
+  files: (Blob | File)[];
+  options?: {
+    pathParts?: string[];
+  };
+}
+
+/** The list uploads a request carries, or `undefined` for none. */
+export interface ListUploads {
+  images?: ImageListUpload;
+  files?: FileListUpload;
+}
+
+/** Whether `lists` has any file to send (empty lists send nothing). */
+export function hasListUploads(lists: ListUploads): boolean {
+  return (
+    (!!lists.images && lists.images.files.length > 0) ||
+    (!!lists.files && lists.files.files.length > 0)
+  );
+}
+
+/**
+ * Appends a record's list uploads: images as `images` plus `images.options`,
+ * raw files as `files` plus (when given) `files.options`, the options as JSON
+ * strings. Empty lists are left out.
+ */
+export function appendListUploads(form: FormData, lists: ListUploads): void {
+  const { images, files } = lists;
+  if (images && images.files.length > 0) {
+    images.files.forEach((file) =>
+      appendFile(form, "images", file, { fallback: "image" })
+    );
+    appendField(form, "images.options", images.options);
+  }
+  if (files && files.files.length > 0) {
+    files.files.forEach((file) =>
+      appendFile(form, "files", file, { fallback: "file" })
+    );
+    appendField(form, "files.options", files.options);
   }
 }

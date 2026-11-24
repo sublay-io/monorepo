@@ -1,7 +1,15 @@
 import { SublayHttpClient } from "../../core/client";
 import { Event, EventType, EventVisibility } from "../../interfaces/Event";
-import { appendField, appendFields, appendFile } from "../../core/multipart";
-import type { EventCoverUpload, EventGalleryUpload } from "./createEvent";
+import {
+  appendField,
+  appendFields,
+  appendFile,
+  appendListUploads,
+  hasListUploads,
+  type FileListUpload,
+  type ImageListUpload,
+} from "../../core/multipart";
+import type { EventCoverUpload } from "./createEvent";
 
 export interface UpdateEventProps {
   eventId: string;
@@ -24,10 +32,10 @@ export interface UpdateEventProps {
   guestListVisible?: boolean;
   metadata?: Record<string, any>;
   /**
-   * Ids of the event's files to remove: gallery images and/or the current
-   * cover (`coverImageId`; removing it clears the cover). Each must be one of
-   * this event's files, or the whole update is refused. Works alone or with
-   * `gallery` (append) and `coverFile` (replace).
+   * Ids of the event's files to remove: list files and/or the current cover
+   * (`coverImageId`; removing it clears the cover). Each must be one of this
+   * event's files, or the whole update is refused. Works alone or with
+   * `images` / `files` (append) and `coverFile` (replace).
    */
   removeFileIds?: string[];
   /**
@@ -36,11 +44,17 @@ export interface UpdateEventProps {
    */
   coverFile?: EventCoverUpload;
   /**
-   * Gallery images (multi) — APPENDED to the event's existing images. When
-   * present the request is sent as `multipart/form-data`. Requires the
-   * `files-images` bundle.
+   * Images APPENDED to the event's files, processed into sizes per `options`
+   * (`mode` is required). When present the request is sent as
+   * `multipart/form-data`. Requires the `files-images` bundle.
    */
-  gallery?: EventGalleryUpload;
+  images?: ImageListUpload;
+  /**
+   * Files APPENDED to the event's files, stored as uploaded. When present the
+   * request is sent as `multipart/form-data`. Requires the `files-images`
+   * bundle.
+   */
+  files?: FileListUpload;
 }
 
 /**
@@ -53,25 +67,19 @@ export async function updateEvent(
   client: SublayHttpClient,
   data: UpdateEventProps
 ): Promise<Event> {
-  const { eventId, coverFile, gallery, ...body } = data;
+  const { eventId, coverFile, images, files, ...body } = data;
   const path = `/events/${eventId}`;
 
   const hasCover = !!coverFile;
-  const hasGallery = !!gallery && gallery.files.length > 0;
 
-  if (hasCover || hasGallery) {
+  if (hasCover || hasListUploads({ images, files })) {
     const formData = new FormData();
 
     if (coverFile) {
       appendFile(formData, "coverFile", coverFile.file, { fallback: "cover" });
       appendField(formData, "coverFile.options", coverFile.options);
     }
-    if (hasGallery) {
-      gallery!.files.forEach((file) =>
-        appendFile(formData, "gallery", file, { fallback: "gallery" })
-      );
-      appendField(formData, "gallery.options", gallery!.options);
-    }
+    appendListUploads(formData, { images, files });
 
     appendFields(formData, body);
 

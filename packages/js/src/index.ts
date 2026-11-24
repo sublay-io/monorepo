@@ -543,8 +543,11 @@ export type {
 export type {
   CreateEventProps,
   EventCoverUpload,
-  EventGalleryUpload,
 } from "./modules/events/createEvent";
+export type {
+  ImageListUpload,
+  FileListUpload,
+} from "./core/multipart";
 export type {
   FetchEventProps,
 } from "./modules/events/fetchEvent";

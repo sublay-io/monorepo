@@ -1,19 +1,20 @@
 import { SublayHttpClient } from "../../core/client";
 import { Event, EventType, EventVisibility } from "../../interfaces/Event";
 import { ImageOptions } from "../../interfaces/ImageProcessing";
-import { appendField, appendFields, appendFile } from "../../core/multipart";
+import {
+  appendField,
+  appendFields,
+  appendFile,
+  appendListUploads,
+  hasListUploads,
+  type FileListUpload,
+  type ImageListUpload,
+} from "../../core/multipart";
 
 /** The cover image plus its processing options (its file id is `Event.coverImageId`). */
 export interface EventCoverUpload {
   file: Blob | File;
   /** Image-processing config (must include `mode`) — see {@link ImageOptions}. */
-  options: ImageOptions;
-}
-
-/** A gallery image set plus shared processing options (Files with eventId + position). */
-export interface EventGalleryUpload {
-  files: (Blob | File)[];
-  /** Image-processing config applied to every gallery image — see {@link ImageOptions}. */
   options: ImageOptions;
 }
 
@@ -46,38 +47,38 @@ export interface CreateEventProps {
    */
   coverFile?: EventCoverUpload;
   /**
-   * Inline gallery images (multi). When present the request is sent as
-   * `multipart/form-data`. Requires the `files-images` bundle.
+   * Images in the event's files, processed into sizes per `options` (`mode`
+   * is required). When present the request is sent as `multipart/form-data`.
+   * Requires the `files-images` bundle.
    */
-  gallery?: EventGalleryUpload;
+  images?: ImageListUpload;
+  /**
+   * Files in the event's files, stored as uploaded. When present the request
+   * is sent as `multipart/form-data`. Requires the `files-images` bundle.
+   */
+  files?: FileListUpload;
 }
 
 export async function createEvent(
   client: SublayHttpClient,
   data: CreateEventProps
 ): Promise<Event> {
-  const { coverFile, gallery, ...body } = data;
+  const { coverFile, images, files, ...body } = data;
 
   const hasCover = !!coverFile;
-  const hasGallery = !!gallery && gallery.files.length > 0;
 
-  if (hasCover || hasGallery) {
+  if (hasCover || hasListUploads({ images, files })) {
     const formData = new FormData();
 
-    // Files go under `coverFile`/`gallery`; their options ride alongside as
-    // `coverFile.options` / `gallery.options` JSON strings (the createEvent
-    // schema parses them). Object fields (location/hostIds/metadata) and
+    // Files go under `coverFile` / `images` / `files`; their options ride
+    // alongside as `coverFile.options` / `images.options` / `files.options`
+    // JSON strings (the createEvent schema parses them). Object fields (location/hostIds/metadata) and
     // booleans are stringified by appendFields; the server coerces them back.
     if (coverFile) {
       appendFile(formData, "coverFile", coverFile.file, { fallback: "cover" });
       appendField(formData, "coverFile.options", coverFile.options);
     }
-    if (hasGallery) {
-      gallery!.files.forEach((file) =>
-        appendFile(formData, "gallery", file, { fallback: "gallery" })
-      );
-      appendField(formData, "gallery.options", gallery!.options);
-    }
+    appendListUploads(formData, { images, files });
 
     appendFields(formData, body);
 

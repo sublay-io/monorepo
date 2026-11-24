@@ -271,6 +271,25 @@ describe("js-sdk events — request shaping", () => {
     );
   });
 
+  it("updateEvent sends include in the body: as given in JSON, comma-joined in multipart", async () => {
+    const { client, projectInstance } = makeClient();
+    await updateEvent(client, { eventId: "ev1", title: "t", include: "files" });
+    expect(projectInstance.patch).toHaveBeenCalledWith("/events/ev1", {
+      title: "t",
+      include: "files",
+    });
+    await updateEvent(client, {
+      eventId: "ev1",
+      include: ["files"],
+      images: {
+        files: [new File(["a"], "g1.png", { type: "image/png" })],
+        options: { mode: "original-aspect", sizes: { full: 1000 } },
+      },
+    });
+    const [, body] = projectInstance.patch.mock.calls[1];
+    expect((body as FormData).get("include")).toBe("files");
+  });
+
   it("updateEvent ignores empty images and files lists and sends plain JSON", async () => {
     const { client, projectInstance } = makeClient();
     await updateEvent(client, {

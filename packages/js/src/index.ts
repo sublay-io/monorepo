@@ -153,6 +153,9 @@ export type {
   DraftInclude,
   DraftIncludeArray,
   DraftIncludeParam,
+  EntityUpdateInclude,
+  EntityUpdateIncludeArray,
+  EntityUpdateIncludeParam,
   TopCommentsParams,
 } from "./interfaces/Entity";
 export type {
@@ -235,6 +238,9 @@ export type {
   EventInclude,
   EventIncludeArray,
   EventIncludeParam,
+  EventUpdateInclude,
+  EventUpdateIncludeArray,
+  EventUpdateIncludeParam,
 } from "./interfaces/Event";
 export type {
   ChatMessage,

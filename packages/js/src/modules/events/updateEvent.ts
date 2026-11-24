@@ -1,5 +1,10 @@
 import { SublayHttpClient } from "../../core/client";
-import { Event, EventType, EventVisibility } from "../../interfaces/Event";
+import {
+  Event,
+  EventType,
+  EventUpdateIncludeParam,
+  EventVisibility,
+} from "../../interfaces/Event";
 import {
   appendField,
   appendFields,
@@ -38,6 +43,12 @@ export interface UpdateEventProps {
    * `images` / `files` (append) and `coverFile` (replace).
    */
   removeFileIds?: string[];
+  /**
+   * What the response adds: `"files"`, the event's files as they now are
+   * (cover first) and the host's avatar and banner files. Without it the
+   * response has no `files`, even after an upload or removal.
+   */
+  include?: EventUpdateIncludeParam;
   /**
    * New cover image (one image) — REPLACES the existing cover. When present the
    * request is sent as `multipart/form-data`. Requires the `files-images` bundle.
@@ -81,7 +92,12 @@ export async function updateEvent(
     }
     appendListUploads(formData, { images, files });
 
-    appendFields(formData, body);
+    // `include` as one comma-separated field (a JSON array isn't read).
+    const { include, ...fields } = body;
+    appendFields(formData, {
+      ...fields,
+      include: Array.isArray(include) ? include.join(",") : include,
+    });
 
     const response = await client.projectInstance.patch<Event>(path, formData);
     return response.data;

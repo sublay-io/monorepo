@@ -19,7 +19,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 </ParamField>
 
 <ParamField body="file.options" type="string">
-  Stringified JSON: `{ "pathParts": [...] }`, the same object as an inline `files.options`. `pathParts` are the folder segments the file is stored under; the new file's id is always added after them, so the file is stored under `<pathParts>/<fileId>/<filename>`. Example: `{ "pathParts": ["documents", "user-123"] }` → `documents/user-123/<fileId>/<filename>`. Each part is slugified. Without `file.options` (or `pathParts`), the file is stored under `files`. A part that is, or becomes, a `.` or `..` folder is refused with `400 storage/invalid-body` and `param` `file.options.pathParts`.
+  Stringified JSON: `{ "pathParts": [...] }`, the same object as an inline `files.options`. `pathParts` are the folder segments the file is stored under; the new file's id is always added after them, so the file is stored under `<pathParts>/<fileId>/<filename>`. Example: `{ "pathParts": ["documents", "user-123"] }` → `documents/user-123/<fileId>/<filename>`. Each part is slugified. Without `file.options`, or with no or an empty `pathParts`, the file is stored under `files`. `pathParts` is the only key `file.options` takes; any other (an image option such as `mode`, sent here by mistake) is refused with `400 storage/invalid-body`, `param` naming it. A part that is, or becomes, a `.` or `..` folder is refused with `400 storage/invalid-body` and `param` `file.options.pathParts`.
 </ParamField>
 
 <ParamField body="metadata" type="string">
@@ -137,7 +137,15 @@ The `type` field is one of: `image`, `video`, `document`, `other`. It is inferre
     { "error": "file.options.pathParts: pathParts can't contain '.' or '..' segments, '?', '#' or encoded slashes", "code": "storage/invalid-body", "param": "file.options.pathParts" }
     ```
 
-    When the folder only becomes `.` or `..` through slugifying, `error` is the message alone, without the `file.options.pathParts: ` prefix. A `file.options` that isn't `{ pathParts? }`, or `metadata` that isn't a JSON object, gets the same code, with `param` naming the value.
+    When the folder only becomes `.` or `..` through slugifying, `error` is the message alone, without the `file.options.pathParts: ` prefix.
+
+    `file.options` has a key other than `pathParts`. `param` names the first one:
+
+    ```json
+    { "error": "file.options: Unrecognized keys: \"mode\", \"sizes\"", "code": "storage/invalid-body", "param": "file.options.mode" }
+    ```
+
+    A `file.options` that isn't a JSON object, a `pathParts` that isn't an array of strings, or `metadata` that isn't a JSON object, gets the same code, with `param` naming the value.
   </Accordion>
   <Accordion title="No File — 400 Bad Request">
     ```json

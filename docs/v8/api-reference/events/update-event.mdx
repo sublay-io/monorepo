@@ -234,6 +234,10 @@ Returns the updated [Event](/v8/data-models/event) object. With `include: "files
     ```json
     { "error": "coverFile.options.sizes: An image can have at most 30 variants.", "code": "event/invalid-body", "param": "coverFile.options.sizes" }
     ```
+    A variant name that is empty or `original`, or that contains `/`, `\` or `..`. `param` names the option:
+    ```json
+    { "error": "coverFile.options.sizes: Variant names can't be empty, `original`, or contain `/`, `\\` or `..`.", "code": "event/invalid-body", "param": "coverFile.options.sizes" }
+    ```
   </Accordion>
   <Accordion title="Storage Quota Reached — 429">
     ```json

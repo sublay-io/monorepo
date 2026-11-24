@@ -55,7 +55,7 @@ function AvatarUploader() {
 </ParamField>
 
 <ParamField path="options" type="UseUploadImageOptions" required>
-  Processing configuration (`UploadImageOptions`) plus the call's own `onProgress` and `metadata`. Must include a `mode` field. See [Processing Modes](#processing-modes) below. Every requested size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each).
+  Processing configuration (`UploadImageOptions`) plus the call's own `onProgress` and `metadata`. Must include a `mode` field. See [Processing Modes](#processing-modes) below. Every requested size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). A variant name can't be empty or `original`, and can't contain `/`, `\` or `..`.
 </ParamField>
 
 ### Common Options (all modes)
@@ -65,7 +65,7 @@ function AvatarUploader() {
 </ParamField>
 
 <ParamField body="format" type='"webp" | "jpeg" | "png" | "original"'>
-  Output format for all variants. Defaults to `"webp"`. `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores anything else (an AVIF or HEIC, for example) as WebP.
+  Output format for all variants. Defaults to `"webp"`. `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores an image whose content is HEIC or AVIF (sent under a JPEG, PNG or WebP type) as WebP.
 </ParamField>
 
 <ParamField body="stripExif" type="boolean">
@@ -77,7 +77,7 @@ function AvatarUploader() {
 </ParamField>
 
 <ParamField body="originalMaxSize" type="number">
-  The longest side, in px, the stored original is shrunk to (50–10000). Defaults to `3840`. An original already within it keeps its size. `originalSize`, `originalWidth` and `originalHeight` describe the stored original. A larger original takes more storage, which counts toward the project's file-storage limit.
+  The longest side, in px, the stored original is shrunk to (50–10000). Defaults to `3840`. An original already within it keeps its dimensions. `originalSize`, `originalWidth` and `originalHeight` describe the stored original. A larger original takes more storage, which counts toward the project's file-storage limit.
 </ParamField>
 
 <ParamField body="pathParts" type="string[]">
@@ -149,7 +149,7 @@ Preserves the original image's aspect ratio. You specify the longest-edge size f
 
 ### `multi-aspect-ratio`
 
-Generates variants across multiple aspect ratios with explicit sizes.
+Picks the ratio in `aspectRatios` closest to the image and generates one variant per `sizes` entry.
 
 ```ts
 {

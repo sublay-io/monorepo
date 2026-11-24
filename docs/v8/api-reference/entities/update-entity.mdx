@@ -210,6 +210,10 @@ Returns the updated [Entity](/v8/data-models/entity) object, populated with the 
     ```json
     { "error": "images.options.sizes: An image can have at most 30 variants.", "code": "entity/invalid-body", "param": "images.options.sizes" }
     ```
+    A variant name that is empty or `original`, or that contains `/`, `\` or `..`. `param` names the option:
+    ```json
+    { "error": "images.options.sizes: Variant names can't be empty, `original`, or contain `/`, `\\` or `..`.", "code": "entity/invalid-body", "param": "images.options.sizes" }
+    ```
   </Accordion>
   <Accordion title="Storage Quota Reached — 429">
     ```json

@@ -200,6 +200,10 @@ Returns the created [Space](/v8/data-models/space) object with `membersCount`, `
     ```json
     { "error": "avatarFile.options.sizes: An image can have at most 30 variants.", "code": "space/invalid-body", "param": "avatarFile.options.sizes" }
     ```
+    A variant name that is empty or `original`, or that contains `/`, `\` or `..`. `param` names the option:
+    ```json
+    { "error": "avatarFile.options.sizes: Variant names can't be empty, `original`, or contain `/`, `\\` or `..`.", "code": "space/invalid-body", "param": "avatarFile.options.sizes" }
+    ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
     A file was refused as the body was read: `space/unsupported-file-type` or `space/unexpected-file-field` (a file in another field, or a second file in `avatarFile` or `bannerFile`), with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).

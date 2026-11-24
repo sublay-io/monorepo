@@ -15,7 +15,7 @@ interface BaseImageOptions {
   quality?: number;
   /**
    * Default "webp". "original" keeps the upload's format when it is JPEG, PNG
-   * or WebP, and stores anything else (an AVIF or HEIC, say) as WebP.
+   * or WebP, and stores an image whose content is HEIC or AVIF as WebP.
    */
   format?: ImageFormat;
   stripExif?: boolean;
@@ -60,7 +60,7 @@ export interface OriginalAspectOptions extends BaseImageOptions {
   fit?: "inside" | "outside";
 }
 
-/** Mode 4 — multiple aspect ratios, sized per variant. */
+/** Mode 4 — the ratio in `aspectRatios` closest to the image; one variant per `sizes` entry. */
 export interface MultiAspectRatioOptions extends BaseImageOptions {
   mode: "multi-aspect-ratio";
   /** 1–10 aspect ratios. */

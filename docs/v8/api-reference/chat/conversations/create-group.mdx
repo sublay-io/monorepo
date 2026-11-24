@@ -155,6 +155,10 @@ Returns the created [Conversation](/v8/data-models/conversation) object with HTT
     ```json
     { "error": "avatarFile.options.sizes: An image can have at most 30 variants.", "code": "chat/invalid-body", "param": "avatarFile.options.sizes" }
     ```
+    A variant name that is empty or `original`, or that contains `/`, `\` or `..`. `param` names the option:
+    ```json
+    { "error": "avatarFile.options.sizes: Variant names can't be empty, `original`, or contain `/`, `\\` or `..`.", "code": "chat/invalid-body", "param": "avatarFile.options.sizes" }
+    ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">
     A file was refused as the body was read: `chat/unsupported-file-type` or `chat/unexpected-file-field` (a file in another field, or a second file in `avatarFile`), with `param` naming the field when there is one. A body over 250 MB gets `413 request/body-too-large`; one that can't be read at all gets `request/invalid-multipart` or `request/field-too-large`. See [Upload errors](/v8/api-reference/getting-started#upload-errors).

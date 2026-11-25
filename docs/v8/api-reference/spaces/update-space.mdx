@@ -191,9 +191,9 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
     ```json
     { "error": "avatarFile.options.sizes: An image can have at most 30 variants.", "code": "space/invalid-body", "param": "avatarFile.options.sizes" }
     ```
-    A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that contains `..`, or that is `original`. `param` names the option:
+    A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that is longer than 64 characters, that contains `..`, or that is `original`. `param` names the option:
     ```json
-    { "error": "avatarFile.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, can't contain `..`, and can't be `original`.", "code": "space/invalid-body", "param": "avatarFile.options.sizes" }
+    { "error": "avatarFile.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, are at most 64 characters, can't contain `..`, and can't be `original`.", "code": "space/invalid-body", "param": "avatarFile.options.sizes" }
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">

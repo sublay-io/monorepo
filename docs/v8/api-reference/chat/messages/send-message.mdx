@@ -221,9 +221,9 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
     ```json
     { "error": "images.options.sizes: An image can have at most 30 variants.", "code": "chat/invalid-body", "param": "images.options.sizes" }
     ```
-    A variant name that is empty or `original`, or that contains `/`, `\` or `..`. `param` names the option:
+    A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that contains `..`, or that is `original`. `param` names the option:
     ```json
-    { "error": "images.options.sizes: Variant names can't be empty, `original`, or contain `/`, `\\` or `..`.", "code": "chat/invalid-body", "param": "images.options.sizes" }
+    { "error": "images.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, can't contain `..`, and can't be `original`.", "code": "chat/invalid-body", "param": "images.options.sizes" }
     ```
   </Accordion>
   <Accordion title="Storage Quota Reached — 429">

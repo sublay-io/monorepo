@@ -116,7 +116,7 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
   - `"original-aspect"` — preserve original ratio, resize by max dimension
   - `"multi-aspect-ratio"` — picks the ratio in `aspectRatios` closest to the image; one variant per `sizes` entry
 
-  Every requested size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). A variant name can't be empty or `original`, and can't contain `/`, `\` or `..`. Optional fields: `fit`, `quality` (1–100), `format` (`webp`, `jpeg`, `png`, `original`; `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores an image whose content is HEIC or AVIF (sent under a JPEG, PNG or WebP type) as WebP), `stripExif` (boolean), `originalMaxSize` (50–10000, default 3840: the longest side the stored original is shrunk to), `pathParts` (string[]; a folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash, is refused with a 400). See [Upload Image](/v8/api-reference/storage/upload-image) for every field of each mode.
+  Every requested size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). A variant name uses only letters, digits, `_`, `-` and `.`, can't contain `..`, and can't be `original`. Optional fields: `fit`, `quality` (1–100), `format` (`webp`, `jpeg`, `png`, `original`; `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores an image whose content is HEIC or AVIF (sent under a JPEG, PNG or WebP type) as WebP), `stripExif` (boolean), `originalMaxSize` (50–10000, default 3840: the longest side the stored original is shrunk to), `pathParts` (string[]; a folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash, is refused with a 400). See [Upload Image](/v8/api-reference/storage/upload-image) for every field of each mode.
 </ParamField>
 
 <ParamField body="files" type="file[]">
@@ -281,9 +281,9 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     ```json
     { "error": "images.options.sizes: An image can have at most 30 variants.", "code": "entity/invalid-body", "param": "images.options.sizes" }
     ```
-    A variant name that is empty or `original`, or that contains `/`, `\` or `..`. `param` names the option:
+    A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that contains `..`, or that is `original`. `param` names the option:
     ```json
-    { "error": "images.options.sizes: Variant names can't be empty, `original`, or contain `/`, `\\` or `..`.", "code": "entity/invalid-body", "param": "images.options.sizes" }
+    { "error": "images.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, can't contain `..`, and can't be `original`.", "code": "entity/invalid-body", "param": "images.options.sizes" }
     ```
   </Accordion>
   <Accordion title="Invalid Reference — 400">

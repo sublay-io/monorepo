@@ -89,7 +89,7 @@ function AvatarUploader() {
 </ParamField>
 
 <ParamField body="metadata" type="Record<string, any>">
-  Custom key-value data stored on the file, sent as its own field (not inside `file.options`). The server adds `originalName` and `uploadedAt` alongside, replacing any values of yours under those keys.
+  Custom key-value data stored on the file, sent as its own field (not inside `file.options`). The server adds `originalFilename`, `originalFormat` and `originalDimensions` (the uploaded image's own name, format and size) alongside, replacing any values of yours under those keys.
 </ParamField>
 
 ## Processing Modes
@@ -188,7 +188,7 @@ The [File](/v8/data-models/file), the same shape [Fetch File](/v8/api-reference/
   originalSize: number;    // Bytes, of the stored original
   originalMimeType: string;
   position: number;
-  metadata: Record<string, any>; // Yours, plus originalName and uploadedAt
+  metadata: Record<string, any>; // Yours, plus originalFilename, originalFormat, originalDimensions
   image: {
     originalWidth: number;   // Of the stored original
     originalHeight: number;

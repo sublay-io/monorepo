@@ -23,7 +23,7 @@ function makeUploadResponse(overrides: Partial<SublayFile> = {}): SublayFile {
     originalSize: 1024,
     originalMimeType: "application/pdf",
     position: 0,
-    metadata: { originalName: "doc.pdf", uploadedAt: "2024-01-01T00:00:00.000Z" },
+    metadata: { originalFilename: "doc.pdf" },
     image: null,
     createdAt: "2024-01-01T00:00:00.000Z",
     updatedAt: "2024-01-01T00:00:00.000Z",

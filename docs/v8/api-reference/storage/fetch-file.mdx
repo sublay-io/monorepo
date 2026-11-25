@@ -32,7 +32,7 @@ Requires an authenticated user.
   "originalSize": 204800,
   "originalMimeType": "image/webp",
   "position": 0,
-  "metadata": { "originalName": "photo.png", "uploadedAt": "2025-01-01T00:00:00.000Z" },
+  "metadata": { "originalFilename": "photo.png", "originalFormat": "png", "originalDimensions": { "width": 4000, "height": 3000 } },
   "image": {
     "originalWidth": 1920,
     "originalHeight": 1080,
@@ -107,7 +107,7 @@ Requires an authenticated user.
 </ResponseField>
 
 <ResponseField name="metadata" type="object">
-  Custom metadata stored at upload time. Always includes `originalName` and `uploadedAt`.
+  Metadata stored at upload time: the uploader's own keys (on `POST /storage` and `POST /storage/images`), plus the server's `originalFilename` and, on an image, `originalFormat` and `originalDimensions` (the uploaded image's own format and size, before processing). Older files may carry other keys.
 </ResponseField>
 
 <ResponseField name="image" type="object | null">

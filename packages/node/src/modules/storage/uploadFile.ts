@@ -11,7 +11,7 @@ export interface UploadFileProps {
    * `file.options`). Without it the file goes in `files`.
    */
   pathParts?: string[];
-  /** Stored on the file, with the server's `originalName` and `uploadedAt` alongside. */
+  /** Stored on the file, with the server's `originalFilename` alongside. */
   metadata?: Record<string, any>;
   /**
    * The user the service key acts as, who owns the upload. Omit for an

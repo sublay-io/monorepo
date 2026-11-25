@@ -18,6 +18,8 @@ export interface AvatarFileVariant {
 }
 
 export interface AvatarFile {
+  id?: string | null | undefined; // The file's id: fresh links are asked for by it
+  linksExpireAt?: string | null | undefined; // When its links stop working
   type?: string | null | undefined; // "image" for an avatar
   originalPath?: string | null | undefined; // URL of the original upload
   image?:

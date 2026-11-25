@@ -19,5 +19,8 @@ export * from "./pushApi";
 // Export notification preferences + conversation mute API
 export * from "./notificationPreferencesApi";
 
+// Export file links API (S#144)
+export * from "./fileLinksApi";
+
 // Future API exports will go here:
 // export * from "./commentsApi";

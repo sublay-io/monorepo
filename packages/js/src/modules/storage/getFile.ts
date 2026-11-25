@@ -5,7 +5,11 @@ export interface GetFileProps {
   fileId: string;
 }
 
-/** `GET /storage/:fileId`: the File, the same shape the uploads return. */
+/**
+ * `GET /storage/:fileId`: the File, the same shape the uploads return. A file
+ * attached to a record comes back only to someone who can see that record;
+ * otherwise 404, like a missing one.
+ */
 export async function getFile(
   client: SublayHttpClient,
   data: GetFileProps

@@ -1,3 +1,4 @@
+import { useFileLinks, useReportFileLoadError } from "@sublay/react-js";
 import { resetImg } from "./reset-styles";
 import { getUserAvatar } from "./get-user-avatar";
 import { type AvatarFile, pickAvatarSource } from "./pick-avatar-source";
@@ -22,13 +23,20 @@ function UserAvatar({
   borderRadius?: number | undefined;
   theme?: UITheme; // Colors to draw with (default: light)
 }) {
+  // An uploaded avatar's links expire a day or two after they were read:
+  // past that, a fresh link is fetched by the file's id (batched with every
+  // other image on screen), and a load error asks once more.
+  const avatarFile = useFileLinks(user?.avatarFile ?? null);
+  const reportLoadError = useReportFileLoadError();
+
   if (!user) return null;
 
   // The uploaded avatar file, then the `avatar` URL, then a generated avatar.
   // There is no window during server rendering: a pixel ratio of 1 is assumed.
   const pixelRatio =
     typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-  const source = pickAvatarSource(user, size, pixelRatio);
+  const source = pickAvatarSource({ ...user, avatarFile }, size, pixelRatio);
+  const fromFile = !!avatarFile && source !== null && source !== user.avatar;
 
   return (
     <div
@@ -48,6 +56,7 @@ function UserAvatar({
       <img
         src={source ?? getUserAvatar(user.id!)}
         alt={user.name || user.id}
+        onError={fromFile ? () => reportLoadError(avatarFile) : undefined}
         style={{
           ...resetImg,
           width: "100%",

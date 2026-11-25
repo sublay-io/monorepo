@@ -1,4 +1,4 @@
-import { deleteFile, getFile, uploadFile, uploadImage } from "../src/modules/storage";
+import { deleteFile, getFile, refreshFileLinks, uploadFile, uploadImage } from "../src/modules/storage";
 import type { File as SublayFile } from "../src/interfaces/File";
 import type { ImageOptions } from "../src/interfaces/ImageProcessing";
 import { makeClient } from "./helpers/mockClient";
@@ -207,7 +207,28 @@ describe("node-sdk storage — getFile/deleteFile request shaping", () => {
   it("getFile hits /storage/:fileId", async () => {
     const { client, projectInstance } = makeClient();
     await getFile(client, { fileId: "f1" });
-    expect(projectInstance.get).toHaveBeenCalledWith("/storage/f1");
+    expect(projectInstance.get).toHaveBeenCalledWith("/storage/f1", {
+      params: { actingUserId: undefined },
+    });
+  });
+
+  it("getFile sends the acting user as ?actingUserId", async () => {
+    const { client, projectInstance } = makeClient();
+    await getFile(client, { fileId: "f1", actingUserId: "u1" });
+    expect(projectInstance.get).toHaveBeenCalledWith("/storage/f1", {
+      params: { actingUserId: "u1" },
+    });
+  });
+
+  it("refreshFileLinks posts the ids (and the acting user) to /files/links", async () => {
+    const { client, projectInstance } = makeClient();
+    projectInstance.post.mockResolvedValueOnce({ data: { files: [FILE] } });
+    const res = await refreshFileLinks(client, { fileIds: ["f1", "f2"], actingUserId: "u1" });
+    expect(projectInstance.post).toHaveBeenCalledWith("/files/links", {
+      fileIds: ["f1", "f2"],
+      actingUserId: "u1",
+    });
+    expect(res).toEqual({ files: [FILE] });
   });
 
   it("deleteFile deletes /storage/:fileId", async () => {

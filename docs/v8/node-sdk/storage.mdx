@@ -170,7 +170,7 @@ const file = await sublay.storage.getFile({
   The UUID of the file to retrieve.
 </ParamField>
 
-<ParamField body="actingUserId" type="string">
+<ParamField query="actingUserId" type="string">
   The user this read acts as: the answer is exactly what that user sees. Without it, only files that belong to nothing, and those anyone can see, come back.
 </ParamField>
 

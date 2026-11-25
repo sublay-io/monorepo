@@ -12,7 +12,7 @@ Every file link Sublay returns stops working at its File's `linksExpireAt`, 24 t
 
 - **Batched:** every image on screen that needs fresh links is asked for in one request.
 - **By id:** nothing else is read again, so lists and scroll positions stay as they are.
-- **Bounded:** each file is asked for at most once per expiry. A file the viewer can no longer see gets no fresh link: the old one is returned and stops working. A failed request is retried once.
+- **Bounded:** each link is asked about at most twice: once when it expires, once if it fails to load. A file the viewer can no longer see gets no fresh link: the old one is returned and stops working. A failed request is retried once.
 
 `useReportFileLoadError` is for an image's `onError`: it asks once for a fresh link, in case the device's clock is off and the link expired earlier than it thinks.
 

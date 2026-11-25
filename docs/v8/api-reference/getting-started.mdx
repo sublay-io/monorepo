@@ -196,6 +196,7 @@ Loading a file through its link (an `originalPath` or `publicPath`, which is how
 | `403` | `files/link-expired` | The link is past its File's `linksExpireAt`. Get a fresh one by reading the record again, or from [Refresh File Links](/v8/api-reference/storage/refresh-file-links). |
 | `404` | `files/not-found` | The file is no longer stored. |
 | `429` | `project/quota-reached` | The project is over its plan's monthly download (egress) limit. |
+| `400` / `404` | — | The project id in the link isn't a valid id, or names no project. |
 
 ### Same situation, same answer
 

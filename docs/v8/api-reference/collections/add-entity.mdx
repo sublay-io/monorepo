@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/collections/:collectionId/entities"
 description: "Save an entity into a collection"
 ---
 
-Saves an entity into the specified collection. Saving an entity that is already in the collection is not an error: it answers `200` with the same body and creates no duplicate. A new save answers `201`. Two saves of the same entity sent at the same time get one `201` and one `200`, with the same summary, never a server error.
+Saves an entity into the specified collection. Saving an entity that is already in the collection is not an error: it answers `200` with the same body and creates no duplicate (unless the user can no longer read it, which answers `404` as below, and leaves it saved). A new save answers `201`. Two saves of the same entity sent at the same time get one `201` and one `200`, with the same summary, never a server error.
 
 An entity the user can't read can't be saved: one in a space the user can't read (see [who can read content](/v8/data-models/space#who-can-read-content)), or one whose author has blocked the user. It answers `404 entity/not-found`, the same as a missing entity.
 

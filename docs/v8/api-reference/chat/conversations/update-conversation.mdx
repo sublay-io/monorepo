@@ -35,7 +35,7 @@ All fields are optional. Only provided fields are updated.
 </ParamField>
 
 <ParamField body="avatarFile.options" type="object">
-  JSON-encoded image-processing options for `avatarFile`: a `mode` and the fields it needs, for example `{ "mode": "original-aspect", "sizes": { "small": 64, "large": 256 } }`. See [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes).
+  JSON-encoded image-processing options for `avatarFile`: a `mode` and the fields it needs, for example `{ "mode": "original-aspect", "sizes": { "small": 64, "large": 256 } }`. See [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes). A key the options don't take, a key of another mode included (for example `sizes` with `exact-dimensions`), is refused with `400 chat/invalid-body`, `param` naming it.
 </ParamField>
 
 <ParamField body="removeFileIds" type="string[]">
@@ -199,6 +199,10 @@ Returns the updated [Conversation](/v8/data-models/conversation) object, with `a
     A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that is longer than 64 characters, that contains `..`, or that is `original`. `param` names the option:
     ```json
     { "error": "avatarFile.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, are at most 64 characters, can't contain `..`, and can't be `original`.", "code": "chat/invalid-body", "param": "avatarFile.options.sizes" }
+    ```
+    A key the options don't take (also a key of another mode). `error` names the object holding it, `param` the key itself:
+    ```json
+    { "error": "avatarFile.options: Unrecognized key: \"typo\"", "code": "chat/invalid-body", "param": "avatarFile.options.typo" }
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">

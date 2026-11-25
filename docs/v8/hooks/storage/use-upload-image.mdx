@@ -55,7 +55,7 @@ function AvatarUploader() {
 </ParamField>
 
 <ParamField path="options" type="UseUploadImageOptions" required>
-  Processing configuration (`UploadImageOptions`) plus the call's own `onProgress` and `metadata`. Must include a `mode` field. See [Processing Modes](#processing-modes) below. Every requested size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). A variant name uses only letters, digits, `_`, `-` and `.`, is at most 64 characters, can't contain `..`, and can't be `original`.
+  Processing configuration (`UploadImageOptions`) plus the call's own `onProgress` and `metadata`. Must include a `mode` field. See [Processing Modes](#processing-modes) below. Every requested size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). Unknown keys in the options, a key of another mode included, are refused with `400 storage/invalid-body`. A variant name uses only letters, digits, `_`, `-` and `.`, is at most 64 characters, can't contain `..`, and can't be `original`.
 </ParamField>
 
 ### Common Options (all modes)

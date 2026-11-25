@@ -96,7 +96,7 @@ Send the comment as `multipart/form-data` to upload files with it. Every field i
 </ParamField>
 
 <ParamField body="images.options" type="string">
-  JSON-stringified image-processing options applied to every image (`mode` is required), the same options as [Create Entity](/v8/api-reference/entities/create-entity)'s.
+  JSON-stringified image-processing options applied to every image (`mode` is required), the same options as [Create Entity](/v8/api-reference/entities/create-entity)'s. A key the options don't take, a key of another mode included (for example `sizes` with `exact-dimensions`), is refused with `400 comment/invalid-body`, `param` naming it.
 </ParamField>
 
 <ParamField body="files" type="file[]">
@@ -104,7 +104,7 @@ Send the comment as `multipart/form-data` to upload files with it. Every field i
 </ParamField>
 
 <ParamField body="files.options" type="string">
-  Optional JSON-stringified file options: `pathParts` (string[]) customizes the storage path.
+  Optional JSON-stringified file options: `pathParts` (string[]) customizes the storage path. A key other than `pathParts` is refused with `400 comment/invalid-body`, `param` naming it.
 </ParamField>
 
 The comment's `files` list the images first, then the files, each in upload order. An `images.options` or `files.options` sent without its files is ignored.
@@ -334,6 +334,14 @@ Returns `201 Created` with the new [Comment](/v8/data-models/comment) object, po
     A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that is longer than 64 characters, that contains `..`, or that is `original`. `param` names the option:
     ```json
     { "error": "images.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, are at most 64 characters, can't contain `..`, and can't be `original`.", "code": "comment/invalid-body", "param": "images.options.sizes" }
+    ```
+    A key the options don't take (also a key of another mode). `error` names the object holding it, `param` the key itself:
+    ```json
+    { "error": "images.options: Unrecognized key: \"typo\"", "code": "comment/invalid-body", "param": "images.options.typo" }
+    ```
+    `files.options` takes only `pathParts`; any other key gets the same code:
+    ```json
+    { "error": "files.options: Unrecognized key: \"typo\"", "code": "comment/invalid-body", "param": "files.options.typo" }
     ```
   </Accordion>
   <Accordion title="Storage Quota Reached — 429">

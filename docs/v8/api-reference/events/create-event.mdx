@@ -89,7 +89,7 @@ Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bu
 </ParamField>
 
 <ParamField body="coverFile.options" type="string">
-  JSON-stringified image-processing options for the cover (the same discriminated union used by [Upload Image](/v8/api-reference/storage/upload-image)).
+  JSON-stringified image-processing options for the cover (the same discriminated union used by [Upload Image](/v8/api-reference/storage/upload-image)). A key the options don't take, a key of another mode included (for example `sizes` with `exact-dimensions`), is refused with `400 event/invalid-body`, `param` naming it.
 </ParamField>
 
 <ParamField body="images" type="file[]">
@@ -97,7 +97,7 @@ Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bu
 </ParamField>
 
 <ParamField body="images.options" type="string">
-  JSON-stringified image-processing options applied to every image in `images` (`mode` is required). The same options as [Upload Image](/v8/api-reference/storage/upload-image)'s `file.options`.
+  JSON-stringified image-processing options applied to every image in `images` (`mode` is required). The same options as [Upload Image](/v8/api-reference/storage/upload-image)'s `file.options`. A key the options don't take, a key of another mode included (for example `sizes` with `exact-dimensions`), is refused with `400 event/invalid-body`, `param` naming it.
 </ParamField>
 
 <ParamField body="files" type="file[]">
@@ -105,7 +105,7 @@ Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bu
 </ParamField>
 
 <ParamField body="files.options" type="string">
-  Optional JSON-stringified file options: `pathParts` (string[]) customizes the storage path.
+  Optional JSON-stringified file options: `pathParts` (string[]) customizes the storage path. A key other than `pathParts` is refused with `400 event/invalid-body`, `param` naming it.
 </ParamField>
 
 The event's files list the cover first, then the images, then the files, each in upload order. An `images.options` or `files.options` sent without its files is ignored.
@@ -261,6 +261,14 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that is longer than 64 characters, that contains `..`, or that is `original`. `param` names the option:
     ```json
     { "error": "coverFile.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, are at most 64 characters, can't contain `..`, and can't be `original`.", "code": "event/invalid-body", "param": "coverFile.options.sizes" }
+    ```
+    A key the options don't take (also a key of another mode). `error` names the object holding it, `param` the key itself:
+    ```json
+    { "error": "coverFile.options: Unrecognized key: \"typo\"", "code": "event/invalid-body", "param": "coverFile.options.typo" }
+    ```
+    `files.options` takes only `pathParts`; any other key gets the same code:
+    ```json
+    { "error": "files.options: Unrecognized key: \"typo\"", "code": "event/invalid-body", "param": "files.options.typo" }
     ```
   </Accordion>
   <Accordion title="Storage Quota Reached — 429">

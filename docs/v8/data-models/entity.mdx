@@ -142,7 +142,7 @@ In the React and React Native SDKs, adding an entity to a collection or removing
 - Only **top-level** comments, ranked by the raw count of one reaction (`topCommentsSortByReaction`, default `upvote`), ties newest first.
 - `topCommentsLimit` sets how many per entity: a whole number of at least `1`, default `1`, maximum `5` (larger values are treated as `5`). `0`, a negative number or a non-integer value returns `400`.
 - **Real content only:** deleted and moderator-removed comments are left out (for everyone, the author included), and so are comments whose author is block-edged with the requesting user, in either direction. So `isAuthorBlocked` and `isUnavailable` are always `false` here.
-- `[]` when no comment qualifies, on a project without the `comments` bundle, and on an entity whose author has blocked the requesting user (for example, one they saved to a collection before the block).
+- `[]` when no comment qualifies, and on a project without the `comments` bundle.
 
 Sending `topCommentsLimit` or `topCommentsSortByReaction` without `include=topComments` returns `400`.
 

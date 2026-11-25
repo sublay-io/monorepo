@@ -210,9 +210,9 @@ Returns the updated [Entity](/v8/data-models/entity) object, populated with the 
     ```json
     { "error": "images.options.sizes: An image can have at most 30 variants.", "code": "entity/invalid-body", "param": "images.options.sizes" }
     ```
-    A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that contains `..`, or that is `original`. `param` names the option:
+    A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that is longer than 64 characters, that contains `..`, or that is `original`. `param` names the option:
     ```json
-    { "error": "images.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, can't contain `..`, and can't be `original`.", "code": "entity/invalid-body", "param": "images.options.sizes" }
+    { "error": "images.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, are at most 64 characters, can't contain `..`, and can't be `original`.", "code": "entity/invalid-body", "param": "images.options.sizes" }
     ```
   </Accordion>
   <Accordion title="Storage Quota Reached — 429">

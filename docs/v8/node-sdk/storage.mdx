@@ -125,7 +125,7 @@ const file = await sublay.storage.uploadImage({
   `true`), `fit` (`cover` \| `contain` \| `inside` \| `outside`, default
   `inside`), `originalMaxSize` (50–10000, default 3840: the longest side the
   stored original is shrunk to) and `pathParts`. Every requested size is
-  1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). A variant name can't be empty or `original`, and can't contain `/`, `\` or `..`. See [Upload Image](/v8/api-reference/storage/upload-image) for every field.
+  1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). A variant name uses only letters, digits, `_`, `-` and `.`, can't contain `..`, and can't be `original`. See [Upload Image](/v8/api-reference/storage/upload-image) for every field.
 </ParamField>
 
 <ParamField body="filename" type="string">

@@ -258,9 +258,9 @@ Returns `201` with the created [Event](/v8/data-models/event) object, including 
     ```json
     { "error": "coverFile.options.sizes: An image can have at most 30 variants.", "code": "event/invalid-body", "param": "coverFile.options.sizes" }
     ```
-    A variant name that is empty or `original`, or that contains `/`, `\` or `..`. `param` names the option:
+    A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that contains `..`, or that is `original`. `param` names the option:
     ```json
-    { "error": "coverFile.options.sizes: Variant names can't be empty, `original`, or contain `/`, `\\` or `..`.", "code": "event/invalid-body", "param": "coverFile.options.sizes" }
+    { "error": "coverFile.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, can't contain `..`, and can't be `original`.", "code": "event/invalid-body", "param": "coverFile.options.sizes" }
     ```
   </Accordion>
   <Accordion title="Storage Quota Reached — 429">

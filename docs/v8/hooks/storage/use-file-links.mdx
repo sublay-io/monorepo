@@ -16,7 +16,7 @@ Every file link Sublay returns stops working at its File's `linksExpireAt`, 24 t
 
 `useReportFileLoadError` is for an image's `onError`: it asks once for a fresh link, in case the device's clock is off and the link expired earlier than it thinks.
 
-The image components installed with `sublay add` already do both.
+The avatar the components installed with `sublay add` draw already does both. Any other File your app renders (an entity's or a message's images, for example) needs to go through `useFileLinks` for its links to be refreshed.
 
 A File without `linksExpireAt` (and a link without `exp`) doesn't expire, and is returned as is.
 

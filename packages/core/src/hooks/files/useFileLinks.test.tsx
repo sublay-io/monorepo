@@ -11,6 +11,7 @@ import {
 } from "../../test-utils";
 import { useFileLinks, useReportFileLoadError } from "./useFileLinks";
 import { resetFileLinkBatchers } from "../../helpers/fileLinkBatcher";
+import { resetAccountScopedState } from "../../store/actions";
 import {
   fileIdFromLink,
   fileLinksExpireAt,
@@ -132,6 +133,24 @@ describe("useFileLinks", () => {
     expect(fetch.calls()).toHaveLength(1);
     expect(result.current).toBe(old);
     expect(store.getState().sublay.fileLinks.unavailable[ID]).toBe(true);
+  });
+
+  it("after an account change, a file the last account couldn't see is asked for again", async () => {
+    const fresh = file(ID, Date.now() + 30 * HOUR);
+    fetch.fetchMock
+      .mockResolvedValueOnce(jsonResponse({ files: [] }))
+      .mockResolvedValueOnce(jsonResponse({ files: [fresh] }));
+    const old = file(ID, Date.now() - HOUR);
+    const store = makeRtkQueryStore();
+    const { result } = renderHookWithStore(() => useFileLinks(old), { store });
+    await waitFor(() => expect(store.getState().sublay.fileLinks.unavailable[ID]).toBe(true));
+
+    act(() => {
+      store.dispatch(resetAccountScopedState());
+    });
+
+    await waitFor(() => expect(result.current.originalPath).toBe(fresh.originalPath));
+    expect(fetch.calls()).toHaveLength(2);
   });
 
   it("a failed request doesn't loop", async () => {

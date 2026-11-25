@@ -46,6 +46,7 @@ export function useFileLinks<T extends FileOrLink>(input: T): T {
   const { id, expiresAt } = idAndExpiry(input);
   const fresh = useSublaySelector((s) => (id ? s.sublay.fileLinks?.byId[id] : undefined));
   const unavailable = useSublaySelector((s) => (id ? !!s.sublay.fileLinks?.unavailable[id] : false));
+  const generation = useSublaySelector((s) => s.sublay.fileLinks?.generation ?? 0);
 
   const freshExpiresAt = fileLinksExpireAt(fresh);
   const useFresh = !!fresh && freshExpiresAt !== null && (expiresAt === null || freshExpiresAt > expiresAt);
@@ -57,8 +58,8 @@ export function useFileLinks<T extends FileOrLink>(input: T): T {
   const stale = linksNeedRefresh(currentExpiresAt);
   useEffect(() => {
     if (!stale || unavailable || !id || !projectId) return;
-    getFileLinkBatcher(projectId, dispatch).request(id, `exp:${currentExpiresAt}`);
-  }, [stale, unavailable, id, projectId, currentExpiresAt, dispatch]);
+    getFileLinkBatcher(projectId, dispatch).request(id, `${generation}:exp:${currentExpiresAt}`);
+  }, [stale, unavailable, id, projectId, currentExpiresAt, generation, dispatch]);
 
   return current;
 }
@@ -71,12 +72,13 @@ export function useFileLinks<T extends FileOrLink>(input: T): T {
 export function useReportFileLoadError(): (input: FileOrLink) => void {
   const dispatch = useSublayDispatch();
   const { projectId } = useProject();
+  const generation = useSublaySelector((s) => s.sublay.fileLinks?.generation ?? 0);
   return useCallback(
     (input: FileOrLink) => {
       const { id, expiresAt } = idAndExpiry(input);
       if (!id || !projectId) return;
-      getFileLinkBatcher(projectId, dispatch).request(id, `error:${expiresAt}`);
+      getFileLinkBatcher(projectId, dispatch).request(id, `${generation}:error:${expiresAt}`);
     },
-    [projectId, dispatch]
+    [projectId, dispatch, generation]
   );
 }

@@ -13,7 +13,7 @@ A record's files are uploaded, replaced and removed through that record's own re
 
 Every link in a File (`originalPath`, and each variant's `publicPath`) is a signed link that stops working at the File's `linksExpireAt`, 24 to 48 hours after it was read. Within one UTC day the same file always gets the same link, so browser and image caches keep working.
 
-A file's links come only with a record the viewer can see. To get fresh links, read the record again, or send the file's `id` to [Refresh File Links](/v8/api-reference/storage/refresh-file-links), which answers only for files the viewer can still see. Store a file's `id`, never its link. The React and React Native SDKs refresh the links of the files they hold on their own ([useFileLinks](/v8/hooks/storage/use-file-links)).
+A file's links come only with a record the viewer can see. To get fresh links, read the record again, or send the file's `id` to [Refresh File Links](/v8/api-reference/storage/refresh-file-links), which answers only for files the viewer can still see. Store a file's `id`, never its link. In React and React Native, render a File through [useFileLinks](/v8/hooks/storage/use-file-links) and its links are refreshed when they expire; the components installed with `sublay add` already do this for avatars.
 
 A file can be seen by whoever can see the record it belongs to:
 

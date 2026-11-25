@@ -10,7 +10,7 @@ A file the viewer can't see, or one that doesn't exist, is left out of the answe
 
 Open to a user token, a service key, or no credentials. A service key sees what the user named in `actingUserId` sees; naming nobody, it sees files that belong to nothing and those anyone can see. With no credentials, only files anyone can see come back.
 
-The React and React Native SDKs call this on their own for the files they hold ([useFileLinks](/v8/hooks/storage/use-file-links)).
+In React and React Native, [useFileLinks](/v8/hooks/storage/use-file-links) calls this for the Files rendered through it.
 
 **Rate limit**: 100 requests per 5 minutes.
 

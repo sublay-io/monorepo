@@ -13,6 +13,7 @@ import {
   loadMore,
 } from "./slices/appNotificationsSlice";
 import { initializeTableView } from "./slices/tablesSlice";
+import { fileLinksRefreshed, fileLinksUnavailable } from "./slices/fileLinksSlice";
 
 /**
  * Every hand-rolled feature slice must return to its initial state when the
@@ -122,5 +123,19 @@ describe("resetAccountScopedState", () => {
     expect(store.getState().sublay.appNotifications.notifications).toEqual([]);
     expect(store.getState().sublay.appNotifications.page).toBe(1);
     expect(store.getState().sublay.appNotifications.unreadCount).toBe(4);
+  });
+
+  it("resets the fileLinks slice, and moves on to a new generation", () => {
+    const store = makeSublayStore();
+    store.dispatch(fileLinksRefreshed([{ id: "f1" } as any]));
+    store.dispatch(fileLinksUnavailable(["f2"]));
+    const before = store.getState().sublay.fileLinks.generation;
+
+    store.dispatch(resetAccountScopedState());
+
+    const state = store.getState().sublay.fileLinks;
+    expect(state.byId).toEqual({});
+    expect(state.unavailable).toEqual({});
+    expect(state.generation).toBe(before + 1);
   });
 });

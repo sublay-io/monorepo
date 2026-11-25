@@ -7,7 +7,8 @@ import { fileLinksRefreshed, fileLinksUnavailable } from "../store/slices/fileLi
  *
  * Bounded by design, so a broken image can never turn into a flood:
  * - each id is asked for at most once per `reason` (its expiry, or a load
- *   error at that expiry), so a fresh link is needed before it's asked again;
+ *   error at that expiry, within one account), so a fresh link is needed
+ *   before it's asked again;
  * - an id the server leaves out is marked unavailable and never asked again;
  * - a failed request (rate limit, network) is retried once, after a pause,
  *   and then given up for those ids.
@@ -57,7 +58,11 @@ class FileLinkBatcher {
   private async send(fileIds: string[], attempt: number): Promise<void> {
     try {
       const { files } = await this.dispatch(
-        fileLinksApi.endpoints.refreshFileLinks.initiate({ projectId: this.projectId, fileIds })
+        fileLinksApi.endpoints.refreshFileLinks.initiate(
+          { projectId: this.projectId, fileIds },
+          // Nothing reads the mutation's state: don't keep every answer in the cache.
+          { track: false }
+        )
       ).unwrap();
       this.dispatch(fileLinksRefreshed(files));
       const returned = new Set(files.map((f: { id: string }) => f.id));

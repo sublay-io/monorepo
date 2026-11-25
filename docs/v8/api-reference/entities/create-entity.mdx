@@ -127,7 +127,7 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
   Stringified JSON for file options. Optional `pathParts` (string[]) customizes the storage path, with the same folder rule as image options. A key other than `pathParts` is refused with `400 entity/invalid-body`, `param` naming it.
 </ParamField>
 
-Images come first in the entity's `files`, then the files, each in upload order. An `images.options` or `files.options` sent without its files is ignored. The old field names `images.files` and `files.files` are refused with `400 entity/unexpected-file-field`.
+Images come first in the entity's `files`, then the files, each in upload order. An `images.options` or `files.options` sent without its files isn't used, but is still validated: invalid options get a `400`. The old field names `images.files` and `files.files` are refused with `400 entity/unexpected-file-field`.
 
 ## Response
 

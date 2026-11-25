@@ -95,7 +95,7 @@ On a multipart request every field is a string: send `attachments`, `keywords`, 
   Stringified JSON for file options. Optional `pathParts` (string[]) customizes the storage path. A key other than `pathParts` is refused with `400 entity/invalid-body`, `param` naming it.
 </ParamField>
 
-New files come after the entity's existing ones, images first and then files, each in upload order. An `images.options` or `files.options` sent without its files is ignored.
+New files come after the entity's existing ones, images first and then files, each in upload order. An `images.options` or `files.options` sent without its files isn't used, but is still validated: invalid options get a `400`.
 
 ## Response
 

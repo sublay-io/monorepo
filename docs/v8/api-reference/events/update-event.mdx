@@ -64,7 +64,7 @@ When a time field (`startTime`/`endTime`/`timezone`) or a location field (`locat
   Optional JSON-stringified file options: `pathParts` (string[]) customizes the storage path. A key other than `pathParts` is refused with `400 event/invalid-body`, `param` naming it.
 </ParamField>
 
-New files come after the event's existing ones, images first and then files, each in upload order. An `images.options` or `files.options` sent without its files is ignored.
+New files come after the event's existing ones, images first and then files, each in upload order. An `images.options` or `files.options` sent without its files isn't used, but is still validated: invalid options get a `400`.
 
 <ParamField body="include" type="string | string[]">
   What the response adds: `files`, the event's files as they now are (the cover first, then its images and files), images with their variants, along with the host's `user.avatarFile` and `user.bannerFile`, as [Fetch Event](/v8/api-reference/events/fetch-event) returns them. A comma-separated value or an array; in a multipart body also a JSON-string array such as `'["files"]'`. Matching ignores case. In the body like every other field (JSON, or a multipart field), never the query. Without it the response has no `files`, even when the update uploaded or removed files. Without the files-images bundle it adds nothing.

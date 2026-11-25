@@ -108,7 +108,7 @@ Requires authentication. Space-scoped events (`spaceId`) require the `spaces` bu
   Optional JSON-stringified file options: `pathParts` (string[]) customizes the storage path. A key other than `pathParts` is refused with `400 event/invalid-body`, `param` naming it.
 </ParamField>
 
-The event's files list the cover first, then the images, then the files, each in upload order. An `images.options` or `files.options` sent without its files is ignored.
+The event's files list the cover first, then the images, then the files, each in upload order. An `images.options` or `files.options` sent without its files isn't used, but is still validated: invalid options get a `400`.
 
 ## Response
 

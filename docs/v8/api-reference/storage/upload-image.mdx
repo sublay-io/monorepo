@@ -4,7 +4,7 @@ api: "POST /v8/:projectId/storage/images"
 description: "Upload an image with server-side processing and named variant generation"
 ---
 
-Uploads an image, processes it, and stores the original plus all requested variants. Returns the [File](/v8/data-models/file) with its image data and the proxy URL of every variant.
+Uploads an image, processes it, and stores the original plus all requested variants. Returns the [File](/v8/data-models/file) with its image data and a signed link to every variant. The links expire at the File's `linksExpireAt` ([File links](/v8/data-models/file#file-links)): store the file's `id`, not a link.
 
 The uploaded file isn't attached to anything: it has no entity, comment, space or event. A file that belongs to a record is sent with that record's own request (for example, the `images` and `files` of [Create Entity](/v8/api-reference/entities/create-entity) or [Create Comment](/v8/api-reference/comments/create-comment), or the cover of [Update Event](/v8/api-reference/events/update-event)).
 
@@ -108,7 +108,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
   "chatMessageId": null,
   "spaceId": null,
   "type": "image",
-  "originalPath": "https://api.sublay.io/internal/files/...",
+  "originalPath": "https://api.sublay.io/files/<projectId>/.../photo.webp?exp=1764201600&sig=...",
   "originalSize": 204800,
   "originalMimeType": "image/webp",
   "position": 0,
@@ -122,7 +122,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
         "height": 64,
         "size": 3200,
         "format": "webp",
-        "publicPath": "https://api.sublay.io/internal/files/..."
+        "publicPath": "https://api.sublay.io/files/<projectId>/.../thumbnail.webp?exp=1764201600&sig=..."
       }
     },
     "processingStatus": "completed",
@@ -133,6 +133,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
+  "linksExpireAt": "2025-11-27T00:00:00.000Z",
   "createdAt": "2025-01-01T00:00:00.000Z",
   "updatedAt": "2025-01-01T00:00:00.000Z"
 }

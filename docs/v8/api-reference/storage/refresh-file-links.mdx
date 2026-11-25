@@ -1,0 +1,83 @@
+---
+title: "Refresh File Links"
+api: "POST /v8/:projectId/files/links"
+description: "Get fresh signed links for files whose links expired"
+---
+
+Every file link Sublay returns stops working at its File's `linksExpireAt`, 24 to 48 hours after it was read (see [File links](/v8/data-models/file#file-links)). This endpoint returns fresh Files, with new links, for files the viewer can still see: send the ids of the files whose links expired.
+
+A file the viewer can't see, or one that doesn't exist, is left out of the answer, with no reason given. A viewer who has lost access to a file's record gets no fresh link for it.
+
+Open to a user token, a service key, or no credentials. A service key sees what the user named in `actingUserId` sees; naming nobody, it sees files that belong to nothing and those anyone can see. With no credentials, only files anyone can see come back.
+
+The React and React Native SDKs call this on their own for the files they hold ([useFileLinks](/v8/hooks/storage/use-file-links)).
+
+**Rate limit**: 100 requests per 5 minutes.
+
+## Body
+
+<ParamField body="fileIds" type="string[]" required>
+  The ids of the files to refresh: 1 to 100 UUIDs. Each file's id is its `id`, and is also the second-to-last segment of every link to it.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  Service key only: the user this read acts as. A user token always acts as its own user and must not send it (`400 files/acting-user-not-allowed`).
+</ParamField>
+
+## Response
+
+```json
+{
+  "files": [
+    {
+      "id": "uuid",
+      "type": "image",
+      "originalPath": "https://api.sublay.io/files/<projectId>/.../photo.webp?exp=1764201600&sig=...",
+      "linksExpireAt": "2025-11-27T00:00:00.000Z",
+      "image": {
+        "variants": {
+          "thumbnail": {
+            "width": 64,
+            "height": 64,
+            "size": 3200,
+            "format": "webp",
+            "publicPath": "https://api.sublay.io/files/<projectId>/.../thumbnail.webp?exp=1764201600&sig=..."
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+<ResponseField name="files" type="File[]">
+  A full [File](/v8/data-models/file) for each id the viewer can see, in the order asked for (an id sent twice comes back once), with fresh links and a new `linksExpireAt`.
+</ResponseField>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="Invalid Body — 400">
+    Returned when `fileIds` is missing, empty, longer than 100 or holds a value that isn't a UUID, or the body has a field this endpoint doesn't take.
+    ```json
+    { "error": "...", "code": "files/invalid-body" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token, or a request with no credentials, sent `actingUserId`. Only a service key names the user it acts as.
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "files/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "files/user-not-found" }
+    ```
+  </Accordion>
+  <Accordion title="Server Error — 500">
+    ```json
+    { "error": "Failed to refresh file links", "code": "files/server-error" }
+    ```
+  </Accordion>
+</AccordionGroup>

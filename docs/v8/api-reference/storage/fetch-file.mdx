@@ -1,12 +1,14 @@
 ---
 title: "Fetch File"
 api: "GET /v8/:projectId/storage/:fileId"
-description: "Retrieve file metadata and proxy URLs by file ID"
+description: "Retrieve a file and fresh signed links by file ID"
 ---
 
 Returns a [File](/v8/data-models/file): the same shape [Upload File](/v8/api-reference/storage/upload-file) and [Upload Image](/v8/api-reference/storage/upload-image) return, and the same as a File embedded in any record. For a processed image it includes the image data and every variant.
 
-Requires an authenticated user.
+A file comes back only to a viewer who can see it: a file that belongs to a record goes to whoever can see that record, and a file that belongs to nothing to any signed-in user (see [who can see a file](/v8/data-models/file#file-links)). A file the viewer can't see answers exactly like a missing one, `404 storage/file-not-found`.
+
+Requires an authenticated user, or a service key. A service key sees what the user named in `actingUserId` sees; naming nobody, it sees files that belong to nothing and those anyone can see.
 
 **Rate limit**: 100 requests per 5 minutes.
 
@@ -14,6 +16,12 @@ Requires an authenticated user.
 
 <ParamField path="fileId" type="string" required>
   The UUID of the file to retrieve.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="actingUserId" type="string">
+  Service key only: the user this read acts as. The answer is exactly what that user's own access token gets. A user token always acts as its own user and must not send it (`400 storage/acting-user-not-allowed`).
 </ParamField>
 
 ## Response
@@ -28,7 +36,7 @@ Requires an authenticated user.
   "chatMessageId": null,
   "spaceId": null,
   "type": "image",
-  "originalPath": "https://api.sublay.io/internal/files/...",
+  "originalPath": "https://api.sublay.io/files/<projectId>/.../photo.webp?exp=1764201600&sig=...",
   "originalSize": 204800,
   "originalMimeType": "image/webp",
   "position": 0,
@@ -42,7 +50,7 @@ Requires an authenticated user.
         "height": 64,
         "size": 3200,
         "format": "webp",
-        "publicPath": "https://api.sublay.io/internal/files/..."
+        "publicPath": "https://api.sublay.io/files/<projectId>/.../thumbnail.webp?exp=1764201600&sig=..."
       }
     },
     "processingStatus": "completed",
@@ -53,6 +61,7 @@ Requires an authenticated user.
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
+  "linksExpireAt": "2025-11-27T00:00:00.000Z",
   "createdAt": "2025-01-01T00:00:00.000Z",
   "updatedAt": "2025-01-01T00:00:00.000Z"
 }
@@ -91,7 +100,7 @@ Requires an authenticated user.
 </ResponseField>
 
 <ResponseField name="originalPath" type="string">
-  Proxy URL for the original file.
+  Signed link to the original file. It stops working at `linksExpireAt`.
 </ResponseField>
 
 <ResponseField name="originalSize" type="number">
@@ -121,7 +130,7 @@ Requires an authenticated user.
       Pixel height of the stored original (after it is shrunk to its `originalMaxSize`).
     </ResponseField>
     <ResponseField name="variants" type="object">
-      Named variants. Each key maps to `{ publicPath, width, height, size, format }`, `publicPath` being the variant's proxy URL.
+      Named variants. Each key maps to `{ publicPath, width, height, size, format }`, `publicPath` being the variant's signed link (it stops working at `linksExpireAt`).
     </ResponseField>
     <ResponseField name="processingStatus" type="string">
       `"completed"` or `"failed"`.
@@ -147,6 +156,10 @@ Requires an authenticated user.
   </Expandable>
 </ResponseField>
 
+<ResponseField name="linksExpireAt" type="string">
+  When every link on this File stops working (ISO 8601), 24 to 48 hours after the read. Get fresh ones from [Refresh File Links](/v8/api-reference/storage/refresh-file-links), or by reading the file or its record again.
+</ResponseField>
+
 <ResponseField name="createdAt" type="string">
   ISO 8601 timestamp.
 </ResponseField>
@@ -164,7 +177,28 @@ Requires an authenticated user.
     { "error": "Invalid file id: expected a UUID.", "code": "storage/invalid-params", "param": "fileId" }
     ```
   </Accordion>
+  <Accordion title="Invalid Query — 400">
+    Returned for a query parameter this endpoint doesn't take, or an `actingUserId` that isn't a UUID.
+    ```json
+    { "error": "...", "code": "storage/invalid-query" }
+    ```
+  </Accordion>
+  <Accordion title="Acting User Not Allowed — 400">
+    A user token sent `actingUserId`, even naming its own user. Only a service key names the user it acts as; a user token always acts as its own user.
+
+    ```json
+    { "error": "actingUserId is only accepted with a service key. A user's own token always acts as that user.", "code": "storage/acting-user-not-allowed" }
+    ```
+  </Accordion>
+  <Accordion title="User Not Found — 404">
+    Returned when a service key names an `actingUserId` that isn't a user in this project.
+
+    ```json
+    { "error": "No user with this actingUserId exists in this project.", "code": "storage/user-not-found" }
+    ```
+  </Accordion>
   <Accordion title="Not Found — 404">
+    Returned when no file has this id, or the viewer can't see it.
     ```json
     { "error": "File not found", "code": "storage/file-not-found" }
     ```

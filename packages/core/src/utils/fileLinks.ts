@@ -5,8 +5,8 @@
  * A fresh link comes from `POST /files/links`, by the file's id — which every
  * link holds as its second-to-last path segment.
  *
- * A File with no `linksExpireAt`, or a link with no `exp`, is permanent (a
- * file a v7 app sent over a shared live chat): nothing to refresh.
+ * A File with no `linksExpireAt`, or a link with no `exp`, doesn't expire:
+ * nothing to refresh.
  */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

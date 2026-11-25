@@ -44,8 +44,7 @@ export interface File {
   // `publicPath`) stops working, as an ISO timestamp: 24–48 h after it was
   // read. Get fresh links by reading the record again, or from
   // `POST /files/links` by the File's `id`. Store the id, never a link.
-  // Missing only on a file a v7 app sent over a shared live chat, whose
-  // links don't expire.
+  // Missing only on a File whose links don't expire.
   linksExpireAt?: string;
   createdAt: string;
   updatedAt: string;

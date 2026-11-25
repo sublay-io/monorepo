@@ -81,7 +81,7 @@ To fetch a single conversation in this same shape — one that was paginated out
           ISO timestamp of when the message was sent.
         </ResponseField>
         <ResponseField name="files" type="File[]">
-          Attached [files](/v8/data-models/file), with proxy URLs and image variants resolved. Empty array when the message has no attachments.
+          Attached [files](/v8/data-models/file), with signed links and image variants resolved. Empty array when the message has no attachments.
         </ResponseField>
         <ResponseField name="user" type="object | null">
           Sender identity (`id`, `name`, `username`, `avatar`, `reputation`) — populated for `group` and `space` conversations only. Always `null` for `direct` conversations, where the counterparty is already in `otherMembers`.

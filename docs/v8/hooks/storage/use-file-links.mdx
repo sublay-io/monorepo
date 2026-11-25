@@ -1,0 +1,73 @@
+---
+title: "File links"
+description: "Keep file links working after they expire: useFileLinks and useReportFileLoadError"
+icon: "plug"
+---
+
+## Overview
+
+Every file link Sublay returns stops working at its File's `linksExpireAt`, 24 to 48 hours after it was read ([File links](/v8/data-models/file#file-links)). An app left open longer than that would show broken images.
+
+`useFileLinks` keeps them working. Pass it a File (or a bare link, such as a notification's `spaceAvatar`) and render what it returns. While the links work it returns what it was given. Once they have expired, or are about to, it asks [Refresh File Links](/v8/api-reference/storage/refresh-file-links) for fresh ones and re-renders with them:
+
+- **Batched:** every image on screen that needs fresh links is asked for in one request.
+- **By id:** nothing else is read again, so lists and scroll positions stay as they are.
+- **Bounded:** each file is asked for at most once per expiry. A file the viewer can no longer see gets no fresh link: the old one is returned and stops working. A failed request is retried once.
+
+`useReportFileLoadError` is for an image's `onError`: it asks once for a fresh link, in case the device's clock is off and the link expired earlier than it thinks.
+
+The image components installed with `sublay add` already do both.
+
+A File without `linksExpireAt` (and a link without `exp`) doesn't expire, and is returned as is.
+
+## Usage Example
+
+```tsx
+import { useFileLinks, useReportFileLoadError, type File } from "@sublay/react-js";
+
+function EntityImage({ file }: { file: File }) {
+  const current = useFileLinks(file);
+  const reportLoadError = useReportFileLoadError();
+
+  return (
+    <img
+      src={current.image?.variants.medium?.publicPath ?? current.originalPath}
+      onError={() => reportLoadError(current)}
+    />
+  );
+}
+```
+
+## Parameters
+
+### useFileLinks
+
+<ParamField path="file" type="File | string | null | undefined" required>
+  The File whose links to keep working, or a bare link (a string). `null` and `undefined` are returned as they are.
+</ParamField>
+
+### useReportFileLoadError
+
+Takes no parameters.
+
+## Returns
+
+### useFileLinks
+
+The same kind of value it was given: the File (or link) with links that work, once fresh ones have arrived; until then, what it was given.
+
+### useReportFileLoadError
+
+<ResponseField name="reportLoadError" type="(file: File | string | null | undefined) => void">
+  Asks once for a fresh link for this File or link.
+</ResponseField>
+
+## Notes
+
+- Store a file's `id`, never a link: a stored link stops working within two days.
+- On React Native, an image library that caches by URL downloads an image again when its link changes, at most about once a day per file.
+
+## Related
+
+- [File](/v8/data-models/file)
+- [Refresh File Links](/v8/api-reference/storage/refresh-file-links)

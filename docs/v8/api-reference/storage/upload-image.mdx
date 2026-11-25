@@ -19,7 +19,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 </ParamField>
 
 <ParamField body="file.options" type="string" required>
-  Stringified JSON: the image-processing options, one object. These are the same options, with the same rules, as an inline `<field>.options` (for example `avatarFile.options` on [Update User](/v8/api-reference/users/update-user) or `images.options` on [Create Entity](/v8/api-reference/entities/create-entity)). Must include `mode`. A request without `file.options` gets `400 storage/missing-image-options`; options that aren't valid JSON or valid image options (`mode` missing included) get `400 storage/invalid-body`.
+  Stringified JSON: the image-processing options, one object. These are the same options, with the same rules, as an inline `<field>.options` (for example `avatarFile.options` on [Update User](/v8/api-reference/users/update-user) or `images.options` on [Create Entity](/v8/api-reference/entities/create-entity)). Must include `mode`, and takes only the fields below for that mode: any other key, a key of another mode included (for example `sizes` with `exact-dimensions`), and any unknown key inside `dimensions`, `aspectRatio` or `aspectRatios`, is refused with `400 storage/invalid-body`. A request without `file.options` gets `400 storage/missing-image-options`; options that aren't valid JSON or valid image options (`mode` missing included) get `400 storage/invalid-body`.
 
   ```json
   { "mode": "original-aspect", "sizes": { "small": 64, "large": 512 }, "pathParts": ["avatars", "user-123"] }
@@ -231,6 +231,16 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
     ```
 
     In `aspect-ratio-height-based` it names a `heights` option and gives a width. In `multi-aspect-ratio` it names a `sizes` option, and the ratio is the one in `aspectRatios` closest to this image: "`file.options.sizes.s` gives a height of 0 px at the 3:1 aspect ratio, the one in \`aspectRatios\` closest to this image. Each side of a variant must be 1–10000 px."
+
+    A key `file.options` doesn't take, here or in one of its nested objects. `error` names the object holding it, `param` the key itself; several unknown keys are listed together ("Unrecognized keys: \"a\", \"b\"") and `param` names the first:
+
+    ```json
+    { "error": "file.options: Unrecognized key: \"typo\"", "code": "storage/invalid-body", "param": "file.options.typo" }
+    ```
+
+    ```json
+    { "error": "file.options.dimensions.s: Unrecognized key: \"depth\"", "code": "storage/invalid-body", "param": "file.options.dimensions.s.depth" }
+    ```
 
     More than 30 entries in `dimensions`, `widths`, `heights` or `sizes`. `param` names the option:
 

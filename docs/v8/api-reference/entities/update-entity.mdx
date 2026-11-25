@@ -84,7 +84,7 @@ On a multipart request every field is a string: send `attachments`, `keywords`, 
 </ParamField>
 
 <ParamField body="images.options" type="string">
-  JSON-stringified image-processing options, applied to every image (`mode` is required). The same options as [Create Entity](/v8/api-reference/entities/create-entity).
+  JSON-stringified image-processing options, applied to every image (`mode` is required). The same options as [Create Entity](/v8/api-reference/entities/create-entity). A key the options don't take, a key of another mode included (for example `sizes` with `exact-dimensions`), is refused with `400 entity/invalid-body`, `param` naming it.
 </ParamField>
 
 <ParamField body="files" type="file[]">
@@ -92,7 +92,7 @@ On a multipart request every field is a string: send `attachments`, `keywords`, 
 </ParamField>
 
 <ParamField body="files.options" type="string">
-  Stringified JSON for file options. Optional `pathParts` (string[]) customizes the storage path.
+  Stringified JSON for file options. Optional `pathParts` (string[]) customizes the storage path. A key other than `pathParts` is refused with `400 entity/invalid-body`, `param` naming it.
 </ParamField>
 
 New files come after the entity's existing ones, images first and then files, each in upload order. An `images.options` or `files.options` sent without its files is ignored.
@@ -213,6 +213,14 @@ Returns the updated [Entity](/v8/data-models/entity) object, populated with the 
     A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that is longer than 64 characters, that contains `..`, or that is `original`. `param` names the option:
     ```json
     { "error": "images.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, are at most 64 characters, can't contain `..`, and can't be `original`.", "code": "entity/invalid-body", "param": "images.options.sizes" }
+    ```
+    A key the options don't take (also a key of another mode). `error` names the object holding it, `param` the key itself:
+    ```json
+    { "error": "images.options: Unrecognized key: \"typo\"", "code": "entity/invalid-body", "param": "images.options.typo" }
+    ```
+    `files.options` takes only `pathParts`; any other key gets the same code:
+    ```json
+    { "error": "files.options: Unrecognized key: \"typo\"", "code": "entity/invalid-body", "param": "files.options.typo" }
     ```
   </Accordion>
   <Accordion title="Storage Quota Reached — 429">

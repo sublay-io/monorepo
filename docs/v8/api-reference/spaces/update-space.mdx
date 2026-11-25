@@ -53,7 +53,7 @@ All fields are optional. Only provided fields are updated.
 </ParamField>
 
 <ParamField body="avatarFile.options" type="string">
-  Stringified JSON describing how to process the avatar. Must include a `mode` field; see [Upload Image](/v8/api-reference/storage/upload-image) for the modes and optional fields. Not used when no `avatarFile` is sent, but still validated: invalid JSON or options get a `400`.
+  Stringified JSON describing how to process the avatar. Must include a `mode` field; see [Upload Image](/v8/api-reference/storage/upload-image) for the modes and optional fields. Not used when no `avatarFile` is sent, but still validated: invalid JSON or options get a `400`. A key the options don't take, a key of another mode included (for example `sizes` with `exact-dimensions`), is refused with `400 space/invalid-body`, `param` naming it.
 </ParamField>
 
 <ParamField body="bannerFile" type="file">
@@ -194,6 +194,10 @@ Returns the updated [Space](/v8/data-models/space) object with `memberPermission
     A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that is longer than 64 characters, that contains `..`, or that is `original`. `param` names the option:
     ```json
     { "error": "avatarFile.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, are at most 64 characters, can't contain `..`, and can't be `original`.", "code": "space/invalid-body", "param": "avatarFile.options.sizes" }
+    ```
+    A key the options don't take (also a key of another mode). `error` names the object holding it, `param` the key itself:
+    ```json
+    { "error": "avatarFile.options: Unrecognized key: \"typo\"", "code": "space/invalid-body", "param": "avatarFile.options.typo" }
     ```
   </Accordion>
   <Accordion title="Upload Refused — 400 / 413">

@@ -116,7 +116,7 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
   - `"original-aspect"` — preserve original ratio, resize by max dimension
   - `"multi-aspect-ratio"` — picks the ratio in `aspectRatios` closest to the image; one variant per `sizes` entry
 
-  Every requested size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). A variant name uses only letters, digits, `_`, `-` and `.`, is at most 64 characters, can't contain `..`, and can't be `original`. Optional fields: `fit`, `quality` (1–100), `format` (`webp`, `jpeg`, `png`, `original`; `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores an image whose content is HEIC or AVIF (sent under a JPEG, PNG or WebP type) as WebP), `stripExif` (boolean), `originalMaxSize` (50–10000, default 3840: the longest side the stored original is shrunk to), `pathParts` (string[]; a folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash, is refused with a 400). See [Upload Image](/v8/api-reference/storage/upload-image) for every field of each mode.
+  Every requested size is 1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). A variant name uses only letters, digits, `_`, `-` and `.`, is at most 64 characters, can't contain `..`, and can't be `original`. Optional fields: `fit`, `quality` (1–100), `format` (`webp`, `jpeg`, `png`, `original`; `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores an image whose content is HEIC or AVIF (sent under a JPEG, PNG or WebP type) as WebP), `stripExif` (boolean), `originalMaxSize` (50–10000, default 3840: the longest side the stored original is shrunk to), `pathParts` (string[]; a folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash, is refused with a 400). See [Upload Image](/v8/api-reference/storage/upload-image) for every field of each mode. A key the options don't take, a key of another mode included (for example `sizes` with `exact-dimensions`), is refused with `400 entity/invalid-body`, `param` naming it.
 </ParamField>
 
 <ParamField body="files" type="file[]">
@@ -124,7 +124,7 @@ form.append("images.options", JSON.stringify({ mode: "original-aspect", sizes: {
 </ParamField>
 
 <ParamField body="files.options" type="string">
-  Stringified JSON for file options. Optional `pathParts` (string[]) customizes the storage path, with the same folder rule as image options.
+  Stringified JSON for file options. Optional `pathParts` (string[]) customizes the storage path, with the same folder rule as image options. A key other than `pathParts` is refused with `400 entity/invalid-body`, `param` naming it.
 </ParamField>
 
 Images come first in the entity's `files`, then the files, each in upload order. An `images.options` or `files.options` sent without its files is ignored. The old field names `images.files` and `files.files` are refused with `400 entity/unexpected-file-field`.
@@ -284,6 +284,14 @@ Returns HTTP `201` with the created [Entity](/v8/data-models/entity) object. Whe
     A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that is longer than 64 characters, that contains `..`, or that is `original`. `param` names the option:
     ```json
     { "error": "images.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, are at most 64 characters, can't contain `..`, and can't be `original`.", "code": "entity/invalid-body", "param": "images.options.sizes" }
+    ```
+    A key the options don't take (also a key of another mode). `error` names the object holding it, `param` the key itself:
+    ```json
+    { "error": "images.options: Unrecognized key: \"typo\"", "code": "entity/invalid-body", "param": "images.options.typo" }
+    ```
+    `files.options` takes only `pathParts`; any other key gets the same code:
+    ```json
+    { "error": "files.options: Unrecognized key: \"typo\"", "code": "entity/invalid-body", "param": "files.options.typo" }
     ```
   </Accordion>
   <Accordion title="Invalid Reference — 400">

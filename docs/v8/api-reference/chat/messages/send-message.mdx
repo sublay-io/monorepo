@@ -57,7 +57,7 @@ This endpoint accepts `multipart/form-data` to upload images and files with the 
 </ParamField>
 
 <ParamField body="images.options" type="string">
-  JSON-stringified image-processing options applied to every image (`mode` is required), the same options as [Create Entity](/v8/api-reference/entities/create-entity)'s.
+  JSON-stringified image-processing options applied to every image (`mode` is required), the same options as [Create Entity](/v8/api-reference/entities/create-entity)'s. A key the options don't take, a key of another mode included (for example `sizes` with `exact-dimensions`), is refused with `400 chat/invalid-body`, `param` naming it.
 </ParamField>
 
 <ParamField body="files" type="file[]">
@@ -65,7 +65,7 @@ This endpoint accepts `multipart/form-data` to upload images and files with the 
 </ParamField>
 
 <ParamField body="files.options" type="string">
-  Optional JSON-stringified file options: `pathParts` (string[]) customizes the storage path.
+  Optional JSON-stringified file options: `pathParts` (string[]) customizes the storage path. A key other than `pathParts` is refused with `400 chat/invalid-body`, `param` naming it.
 </ParamField>
 
 The message's `files` list the images first, then the files, each in upload order. An `images.options` or `files.options` sent without its files is ignored. Uploads require the `files-images` bundle.
@@ -224,6 +224,14 @@ Returns the created [ChatMessage](/v8/data-models/chat-message) object, fully po
     A variant name that uses a character other than letters, digits, `_`, `-` and `.`, that is longer than 64 characters, that contains `..`, or that is `original`. `param` names the option:
     ```json
     { "error": "images.options.sizes: Variant names use only letters, digits, `_`, `-` and `.`, are at most 64 characters, can't contain `..`, and can't be `original`.", "code": "chat/invalid-body", "param": "images.options.sizes" }
+    ```
+    A key the options don't take (also a key of another mode). `error` names the object holding it, `param` the key itself:
+    ```json
+    { "error": "images.options: Unrecognized key: \"typo\"", "code": "chat/invalid-body", "param": "images.options.typo" }
+    ```
+    `files.options` takes only `pathParts`; any other key gets the same code:
+    ```json
+    { "error": "files.options: Unrecognized key: \"typo\"", "code": "chat/invalid-body", "param": "files.options.typo" }
     ```
   </Accordion>
   <Accordion title="Storage Quota Reached — 429">

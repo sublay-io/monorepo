@@ -207,8 +207,8 @@ describe("js-sdk storage — uploadImage request shaping", () => {
         format: "jpeg",
         stripExif: false,
         originalMaxSize: 2000,
+        pathParts: ["spaces", "s1", "banner"],
       },
-      pathParts: ["spaces", "s1", "banner"],
     });
 
     const [, body] = projectInstance.post.mock.calls[0];
@@ -225,7 +225,7 @@ describe("js-sdk storage — uploadImage request shaping", () => {
     expectNoFlatFields(fields);
   });
 
-  it("keeps `imageOptions.pathParts` when no top-level pathParts is given", async () => {
+  it("sends `imageOptions.pathParts` inside `file.options`", async () => {
     const { client, projectInstance } = makeClient();
     const file = new File(["bytes"], "x.png", { type: "image/png" });
     await uploadImage(client, {

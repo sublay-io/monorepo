@@ -127,8 +127,8 @@ describe("node-sdk storage — uploadImage request shaping", () => {
         dimensions: { thumbnail: { width: 100, height: 100 } },
         fit: "cover",
         originalMaxSize: 2000,
+        pathParts: ["spaces", "s1", "banner"],
       },
-      pathParts: ["spaces", "s1", "banner"],
       actingUserId: "u1",
     });
 
@@ -171,7 +171,7 @@ describe("node-sdk storage — uploadImage request shaping", () => {
     expectNoFlatFields(fields);
   });
 
-  it("keeps `imageOptions.pathParts` when no top-level pathParts is given", async () => {
+  it("sends `imageOptions.pathParts` inside `file.options`", async () => {
     const { client, projectInstance } = makeClient();
     await uploadImage(client, {
       file: new Uint8Array([1]),

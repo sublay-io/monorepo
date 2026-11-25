@@ -16,6 +16,7 @@ const FLAT_FIELDS = [
   "quality",
   "format",
   "stripExif",
+  "originalMaxSize",
   "pathParts",
 ];
 
@@ -37,7 +38,7 @@ const FILE = {
   originalSize: 1234,
   originalMimeType: "application/pdf",
   position: 0,
-  metadata: { originalName: "doc.pdf", uploadedAt: "2026-06-01T00:00:00.000Z" },
+  metadata: { originalFilename: "doc.pdf" },
   image: null,
   createdAt: "2026-06-01T00:00:00.000Z",
   updatedAt: "2026-06-01T00:00:00.000Z",
@@ -48,8 +49,12 @@ const IMAGE_FILE = {
   id: "f2",
   type: "image" as const,
   originalPath: "https://api.example.com/files/p1/pics/f2/original.webp",
-  originalMimeType: "image/png",
-  metadata: { originalName: "banner.png", uploadedAt: "2026-06-01T00:00:00.000Z" },
+  originalMimeType: "image/webp",
+  metadata: {
+    originalFilename: "banner.png",
+    originalFormat: "png",
+    originalDimensions: { width: 2000, height: 1000 },
+  },
   image: {
     originalWidth: 2000,
     originalHeight: 1000,

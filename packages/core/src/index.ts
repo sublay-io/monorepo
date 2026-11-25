@@ -1005,7 +1005,7 @@ export type {
   UploadFileInput,
   NativeUploadFile,
 } from "./utils/uploads";
-export type { File } from "./interfaces/models/File";
+export type { File, FileImage, FileImageVariant } from "./interfaces/models/File";
 
 // -- chat hooks
 export {

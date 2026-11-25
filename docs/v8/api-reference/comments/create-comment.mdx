@@ -107,7 +107,7 @@ Send the comment as `multipart/form-data` to upload files with it. Every field i
   Optional JSON-stringified file options: `pathParts` (string[]) customizes the storage path. A key other than `pathParts` is refused with `400 comment/invalid-body`, `param` naming it.
 </ParamField>
 
-The comment's `files` list the images first, then the files, each in upload order. An `images.options` or `files.options` sent without its files is ignored.
+The comment's `files` list the images first, then the files, each in upload order. An `images.options` or `files.options` sent without its files isn't used, but is still validated: invalid options get a `400`.
 
 ```js
 const form = new FormData();

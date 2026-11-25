@@ -87,7 +87,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
 </ParamField>
 
 <ParamField body="metadata" type="string">
-  Stringified JSON object of custom key-value data stored on the file. The server adds `originalName` and `uploadedAt` alongside, replacing any values of yours under those keys. Anything other than a JSON object is refused with `400 storage/invalid-body`.
+  Stringified JSON object of custom key-value data stored on the file. The server adds `originalFilename`, `originalFormat` and `originalDimensions` (the uploaded image's own name, format and size) alongside, replacing any values of yours under those keys. Anything other than a JSON object is refused with `400 storage/invalid-body`.
 </ParamField>
 
 <ParamField body="actingUserId" type="string">
@@ -112,7 +112,7 @@ This endpoint accepts `multipart/form-data`. Requires an authenticated user.
   "originalSize": 204800,
   "originalMimeType": "image/webp",
   "position": 0,
-  "metadata": { "originalName": "photo.png", "uploadedAt": "2025-01-01T00:00:00.000Z" },
+  "metadata": { "originalFilename": "photo.png", "originalFormat": "png", "originalDimensions": { "width": 4000, "height": 3000 } },
   "image": {
     "originalWidth": 1920,
     "originalHeight": 1080,

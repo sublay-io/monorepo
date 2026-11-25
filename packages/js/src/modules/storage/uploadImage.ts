@@ -19,7 +19,7 @@ export interface UploadImageProps {
    * `imageOptions.pathParts`.
    */
   pathParts?: string[];
-  /** Stored on the file, with the server's `originalName` and `uploadedAt` alongside. */
+  /** Stored on the file, with the server's `originalFilename`, `originalFormat` and `originalDimensions` alongside. */
   metadata?: Record<string, any>;
 }
 

@@ -43,7 +43,7 @@ function makeImageResponse(overrides: Partial<SublayFile> = {}): SublayFile {
     originalSize: 4096,
     originalMimeType: "image/png",
     position: 0,
-    metadata: { originalName: "photo.png", uploadedAt: "2024-01-01T00:00:00.000Z" },
+    metadata: { originalFilename: "photo.png", originalFormat: "png", originalDimensions: { width: 800, height: 600 } },
     image: {
       originalWidth: 1080,
       originalHeight: 1080,

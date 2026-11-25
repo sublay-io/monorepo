@@ -54,8 +54,8 @@ const uploaded = await sublay.storage.uploadFile({
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  Custom key-value data stored on the file. The server adds `originalName` and
-  `uploadedAt` alongside, replacing any values of yours under those keys.
+  Custom key-value data stored on the file. The server adds `originalFilename` alongside, replacing any
+  value of yours under that key.
 </ParamField>
 
 **Returns** — `Promise<File>`: the [`File`](/v8/data-models/file), keyed `id`.
@@ -127,8 +127,9 @@ const uploaded = await sublay.storage.uploadImage({
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  Custom key-value data stored on the file. The server adds `originalName` and
-  `uploadedAt` alongside, replacing any values of yours under those keys.
+  Custom key-value data stored on the file. The server adds `originalFilename`, `originalFormat` and
+  `originalDimensions` (the uploaded image's own name, format and size)
+  alongside, replacing any values of yours under those keys.
 </ParamField>
 
 **Returns** — `Promise<File>`: the [`File`](/v8/data-models/file), keyed `id`,

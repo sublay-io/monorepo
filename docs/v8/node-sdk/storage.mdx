@@ -98,8 +98,8 @@ const file = await sublay.storage.uploadImage({
     },
     format: "webp",
     quality: 85,
+    pathParts: ["avatars", "usr_abc123"],
   },
-  pathParts: ["avatars", "usr_abc123"],
   actingUserId: "usr_abc123",
 });
 ```
@@ -124,7 +124,7 @@ const file = await sublay.storage.uploadImage({
   `jpeg` \| `png` \| `original`, default `webp`; `original` keeps the upload's format when it is JPEG, PNG or WebP, and stores an image whose content is HEIC or AVIF (sent under a JPEG, PNG or WebP type) as WebP), `stripExif` (boolean, default
   `true`), `fit` (`cover` \| `contain` \| `inside` \| `outside`, default
   `inside`), `originalMaxSize` (50–10000, default 3840: the longest side the
-  stored original is shrunk to) and `pathParts`. Every requested size is
+  stored original is shrunk to) and `pathParts` (the folder: the new file's id is always added after it, as `<pathParts>/<fileId>/<filename>`, the file name taking the stored format's extension; defaults to `["images"]`; a folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400). Every requested size is
   1–10000 px, and `dimensions`, `widths`, `heights` and `sizes` take at most 30 entries (one variant each). A variant name uses only letters, digits, `_`, `-` and `.`, can't contain `..`, and can't be `original`. See [Upload Image](/v8/api-reference/storage/upload-image) for every field.
 </ParamField>
 
@@ -134,10 +134,6 @@ const file = await sublay.storage.uploadImage({
 
 <ParamField body="mimeType" type="string">
   MIME type used when wrapping a `Uint8Array`. Ignored when `file` is a `Blob`.
-</ParamField>
-
-<ParamField body="pathParts" type="string[]">
-  Folder segments for the stored image, sent inside `file.options` (when given, the top-level `pathParts` wins over `imageOptions.pathParts`). The new file's id is always added after them (`<pathParts>/<fileId>/<filename>`, the file name taking the stored format's extension). Defaults to `["images"]`. A folder that is, or contains, `.` or `..` (also written `%2e%2e`), or that contains `?`, `#` or an encoded slash (`%2f`, `%5c`), is refused with a 400.
 </ParamField>
 
 <ParamField body="metadata" type="object">

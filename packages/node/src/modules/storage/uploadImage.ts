@@ -12,12 +12,6 @@ export interface UploadImageProps {
    * {@link ImageOptions}. Sent as `file.options`, one JSON object.
    */
   imageOptions: ImageOptions;
-  /**
-   * The folder the image is stored under, e.g. ["uploads", "photos"]. Sent
-   * inside `file.options`; when given, it takes the place of
-   * `imageOptions.pathParts`.
-   */
-  pathParts?: string[];
   /** Stored on the file, with the server's `originalFilename`, `originalFormat` and `originalDimensions` alongside. */
   metadata?: Record<string, any>;
   /**
@@ -35,15 +29,14 @@ export async function uploadImage(
   client: SublayHttpClient,
   data: UploadImageProps
 ): Promise<File> {
-  const { file, filename, mimeType, imageOptions, pathParts, metadata, actingUserId } = data;
+  const { file, filename, mimeType, imageOptions, metadata, actingUserId } = data;
 
   const formData = new FormData();
   appendFile(formData, "file", file, filename, mimeType);
   // The processing options go as one JSON field, `file.options` (the folder
   // inside it), as an inline `<field>.options` does.
   appendFields(formData, {
-    "file.options":
-      pathParts !== undefined ? { ...imageOptions, pathParts } : imageOptions,
+    "file.options": imageOptions,
     metadata,
     actingUserId,
   });

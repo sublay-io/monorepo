@@ -132,7 +132,7 @@ describe("useFileLinks", () => {
     await new Promise((r) => setTimeout(r, 150));
     expect(fetch.calls()).toHaveLength(1);
     expect(result.current).toBe(old);
-    expect(store.getState().sublay.fileLinks.unavailable[ID]).toBe(true);
+    expect(store.getState().sublay.fileLinks.unavailable[ID]).toBe(old.originalPath);
   });
 
   it("after an account change, a file the last account couldn't see is asked for again", async () => {
@@ -143,7 +143,7 @@ describe("useFileLinks", () => {
     const old = file(ID, Date.now() - HOUR);
     const store = makeRtkQueryStore();
     const { result } = renderHookWithStore(() => useFileLinks(old), { store });
-    await waitFor(() => expect(store.getState().sublay.fileLinks.unavailable[ID]).toBe(true));
+    await waitFor(() => expect(store.getState().sublay.fileLinks.unavailable[ID]).toBe(old.originalPath));
 
     act(() => {
       store.dispatch(resetAccountScopedState());
@@ -151,6 +151,30 @@ describe("useFileLinks", () => {
 
     await waitFor(() => expect(result.current.originalPath).toBe(fresh.originalPath));
     expect(fetch.calls()).toHaveLength(2);
+  });
+
+  it("the same window signed again (a changed signing secret) replaces a link that fails to load", async () => {
+    const exp = Date.now() + 24 * HOUR;
+    const f = file(ID, exp);
+    const resigned = { ...file(ID, exp), originalPath: f.originalPath.replace("sig=abc", "sig=new") };
+    fetch.fetchMock.mockResolvedValue(jsonResponse({ files: [resigned] }));
+    const store = makeRtkQueryStore();
+    const links = renderHookWithStore(() => useFileLinks(f), { store });
+    const report = renderHookWithStore(() => useReportFileLoadError(), { store });
+    act(() => report.result.current(f));
+    await waitFor(() => expect(links.result.current.originalPath).toBe(resigned.originalPath));
+  });
+
+  it("a refused link isn't asked about again, but a newer link for the same file is", async () => {
+    fetch.fetchMock.mockResolvedValue(jsonResponse({ files: [] }));
+    const store = makeRtkQueryStore();
+    const old = file(ID, Date.now() - HOUR);
+    renderHookWithStore(() => useFileLinks(old), { store });
+    await waitFor(() => expect(fetch.calls()).toHaveLength(1));
+    // A newer read of the record (the viewer regained access) brings a new link.
+    const reread = { ...file(ID, Date.now() - 1000), originalPath: link(ID, Date.now() - 1000).replace("sig=abc", "sig=re") };
+    renderHookWithStore(() => useFileLinks(reread), { store });
+    await waitFor(() => expect(fetch.calls()).toHaveLength(2));
   });
 
   it("a failed request doesn't loop", async () => {

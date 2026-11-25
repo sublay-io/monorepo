@@ -128,7 +128,7 @@ describe("resetAccountScopedState", () => {
   it("resets the fileLinks slice, and moves on to a new generation", () => {
     const store = makeSublayStore();
     store.dispatch(fileLinksRefreshed([{ id: "f1" } as any]));
-    store.dispatch(fileLinksUnavailable(["f2"]));
+    store.dispatch(fileLinksUnavailable([{ id: "f2", link: null }]));
     const before = store.getState().sublay.fileLinks.generation;
 
     store.dispatch(resetAccountScopedState());

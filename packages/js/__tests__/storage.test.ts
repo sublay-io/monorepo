@@ -1,4 +1,4 @@
-import { deleteFile, getFile, uploadFile, uploadImage } from "../src/modules/storage";
+import { deleteFile, getFile, refreshFileLinks, uploadFile, uploadImage } from "../src/modules/storage";
 import type { File as SublayFile } from "../src/interfaces/File";
 import type { ImageOptions } from "../src/interfaces/ImageProcessing";
 import { formDataToObject, makeClient } from "./helpers/client";
@@ -274,6 +274,14 @@ describe("js-sdk storage — uploadImage request shaping", () => {
 });
 
 describe("js-sdk storage — getFile/deleteFile request shaping", () => {
+  it("refreshFileLinks posts the ids to /files/links", async () => {
+    const { client, projectInstance } = makeClient();
+    projectInstance.post.mockResolvedValueOnce({ data: { files: [FILE] } });
+    const res = await refreshFileLinks(client, { fileIds: ["f1"] });
+    expect(projectInstance.post).toHaveBeenCalledWith("/files/links", { fileIds: ["f1"] });
+    expect(res).toEqual({ files: [FILE] });
+  });
+
   it("getFile gets /storage/:fileId with no params", async () => {
     const { client, projectInstance } = makeClient();
     await getFile(client, { fileId: "f1" });

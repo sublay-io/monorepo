@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-Uploads a file to Sublay storage without any server-side processing. The raw file is stored, and the returned [File](/v8/data-models/file) carries its proxy URL. Use this for a PDF, or a JPEG, PNG or WebP image you don't need variants of; other file types are refused with `storage/unsupported-file-type`.
+Uploads a file to Sublay storage without any server-side processing. The raw file is stored, and the returned [File](/v8/data-models/file) carries a signed link to it, which expires at the File's `linksExpireAt` ([File links](/v8/data-models/file#file-links)). Use this for a PDF, or a JPEG, PNG or WebP image you don't need variants of; other file types are refused with `storage/unsupported-file-type`.
 
 For images that need resizing or format conversion, use [`useUploadImage`](/v8/hooks/storage/use-upload-image) instead.
 
@@ -27,7 +27,7 @@ function DocumentUploader() {
       metadata: { label: "Attachment" },
     });
 
-    console.log(result.originalPath); // Use this URL to reference the file
+    saveFileId(result.id); // Store the id: the link in result.originalPath expires
   };
 
   return <input type="file" onChange={e => e.target.files && handleFile(e.target.files[0])} />;
@@ -58,6 +58,6 @@ function DocumentUploader() {
 
 ## Returns
 
-The hook returns the `uploadFile` function directly (no state wrappers). The function returns a `Promise<File>`: the [File](/v8/data-models/file), keyed `id`, the same shape [Fetch File](/v8/api-reference/storage/fetch-file) returns. The file is stored as uploaded, so `image` is `null`, even for an image; `originalPath` is its proxy URL.
+The hook returns the `uploadFile` function directly (no state wrappers). The function returns a `Promise<File>`: the [File](/v8/data-models/file), keyed `id`, the same shape [Fetch File](/v8/api-reference/storage/fetch-file) returns. The file is stored as uploaded, so `image` is `null`, even for an image; `originalPath` is its signed link.
 
 <Note>The `type` field is inferred automatically from the file's MIME type: a PDF becomes `"document"` and an image becomes `"image"`.</Note>

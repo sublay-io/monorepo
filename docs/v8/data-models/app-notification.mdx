@@ -267,7 +267,7 @@ Triggered when a space moderator approves the user's pending membership request.
 | `spaceName` | `string` | Name of the space. |
 | `spaceShortId` | `string` | Short ID for sharing links. |
 | `spaceSlug` | `string \| null \| undefined` | URL slug of the space. |
-| `spaceAvatar` | `string \| null \| undefined` | Avatar URL of the space. |
+| `spaceAvatar` | `string \| null \| undefined` | Signed link to the space's avatar. It stops working 24 to 48 hours after the notification was read; the file's id is the link's second-to-last path segment, for [Refresh File Links](/v8/api-reference/storage/refresh-file-links). |
 
 ### `space-member-added`
 

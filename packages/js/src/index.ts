@@ -852,6 +852,10 @@ export type {
   DeleteFileProps,
 } from "./modules/storage/deleteFile";
 export type {
+  RefreshFileLinksProps,
+  RefreshFileLinksResponse,
+} from "./modules/storage/refreshFileLinks";
+export type {
   AuthorizeProps,
   OAuthProvider,
   AuthorizeResponse,

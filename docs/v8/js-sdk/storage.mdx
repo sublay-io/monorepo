@@ -5,7 +5,7 @@ description: "Upload, retrieve, and delete files and images from the browser"
 
 The `storage` module uploads files and images to managed cloud storage, plus
 reads and deletes existing files. Both uploads and `getFile` return the one
-[`File`](/v8/data-models/file) shape, with proxy URLs. Uploads are sent as
+[`File`](/v8/data-models/file) shape, with signed links that expire at the File's `linksExpireAt` ([File links](/v8/data-models/file#file-links)). Uploads are sent as
 `multipart/form-data` — pass a browser **`File`** (e.g. from an `<input type="file">`)
 or a **`Blob`**. There is no `Uint8Array` + `mimeType` path; the browser supplies
 the content type.
@@ -15,8 +15,10 @@ A file uploaded with this module isn't attached to anything: it has no entity, c
 
 <Note>
   Uploads are attributed to the logged-in user automatically (from the token) —
-  there is no `userId` param. A user may delete files they own; reads are
-  project-scoped.
+  there is no `userId` param. A user may delete files they own. Reads
+  (`getFile`, `refreshFileLinks`) return only files the user can see: a file that
+  belongs to a record goes to whoever can see that record
+  ([who can see a file](/v8/data-models/file#file-links)).
 </Note>
 
 ---
@@ -34,7 +36,7 @@ const uploaded = await sublay.storage.uploadFile({
   filename: "report.pdf",
   pathParts: ["documents", "reports"],
 });
-// uploaded.originalPath → proxy URL
+// uploaded.originalPath → a signed link (expires at uploaded.linksExpireAt): store uploaded.id
 ```
 
 <ParamField body="file" type="Blob | File" required>
@@ -136,7 +138,8 @@ processing details). Each variant is `{ publicPath, width, height, size, format 
 ### getFile
 
 Fetches a file by ID. For a processed image, its `image` data (variants,
-processing details) is included. Reads are project-scoped.
+processing details) is included. A file the user can't see answers 404, like a
+missing one.
 
 ```typescript
 const file = await sublay.storage.getFile({ fileId: "fil_abc123" });
@@ -150,6 +153,29 @@ const file = await sublay.storage.getFile({ fileId: "fil_abc123" });
 shape the uploads return. Every owner column (`userId`, `entityId`, `eventId`,
 `commentId`, `chatMessageId`, `spaceId`) is present, `null` when unset; `image`
 is the image data of a processed image and `null` otherwise.
+
+---
+
+### refreshFileLinks
+
+Fresh links for files whose links expired. Every file link stops working at its
+File's `linksExpireAt`, 24 to 48 hours after it was read; store file ids, and
+ask for fresh links when you need them.
+
+```typescript
+const { files } = await sublay.storage.refreshFileLinks({
+  fileIds: ["fil_abc123", "fil_def456"],
+});
+```
+
+<ParamField body="fileIds" type="string[]" required>
+  Up to 100 file ids.
+</ParamField>
+
+**Returns** — `Promise<{ files: File[] }>`: a fresh [`File`](/v8/data-models/file)
+for each id the user can see, in the order asked for. A file that's missing, or
+that the user can't see, is left out. See
+[Refresh File Links](/v8/api-reference/storage/refresh-file-links).
 
 ---
 

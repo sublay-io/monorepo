@@ -3,7 +3,7 @@ title: "Storage"
 description: "Upload, retrieve, and delete files and images from your server"
 ---
 
-The `storage` module uploads files and images to managed cloud storage, plus reads and deletes existing files. Both uploads and `getFile` return the one [`File`](/v8/data-models/file) shape, with proxy URLs. Uploads are sent as `multipart/form-data` — pass the file bytes as a `Uint8Array` or a `Blob`.
+The `storage` module uploads files and images to managed cloud storage, plus reads and deletes existing files. Both uploads and `getFile` return the one [`File`](/v8/data-models/file) shape, with signed links that expire at the File's `linksExpireAt` ([File links](/v8/data-models/file#file-links)). Uploads are sent as `multipart/form-data` — pass the file bytes as a `Uint8Array` or a `Blob`.
 
 A file uploaded with this module isn't attached to anything: it has no entity, comment, space or event.
 
@@ -15,8 +15,11 @@ A file uploaded with this module isn't attached to anything: it has no entity, c
 </Note>
 
 <Warning>
-  **Access model.** Reads (`getFile`) are project-scoped — reachable for any file
-  in your project. **The owner deletes:** a file with an owner is deleted as that
+  **Access model.** Reads (`getFile`, `refreshFileLinks`) return only files the
+  viewer can see: a file that belongs to a record goes to whoever can see that
+  record ([who can see a file](/v8/data-models/file#file-links)). Pass
+  `actingUserId` to read as a user; without it, your service key sees files that
+  belong to nothing and those anyone can see. **The owner deletes:** a file with an owner is deleted as that
   user, so pass them as `actingUserId`. Backend-owned files (uploaded without an
   `actingUserId`) are deletable only by your service key naming nobody.
 </Warning>
@@ -72,7 +75,7 @@ const file = await sublay.storage.uploadFile({
 </ParamField>
 
 **Returns** — `Promise<File>`: the [`File`](/v8/data-models/file), keyed `id`;
-`originalPath` is its proxy URL. The file is stored as uploaded, so `image` is
+`originalPath` is its signed link. The file is stored as uploaded, so `image` is
 `null`, even for an image.
 
 ---
@@ -154,11 +157,12 @@ processing details). Each variant is `{ publicPath, width, height, size, format 
 
 ### getFile
 
-Fetches a file by ID. For a processed image, its `image` data (variants, processing details) is included. Reads are project-scoped.
+Fetches a file by ID. For a processed image, its `image` data (variants, processing details) is included. A file the viewer can't see answers 404, like a missing one.
 
 ```typescript
 const file = await sublay.storage.getFile({
   fileId: "fil_abc123",
+  actingUserId: "usr_abc123",
 });
 ```
 
@@ -166,10 +170,42 @@ const file = await sublay.storage.getFile({
   The UUID of the file to retrieve.
 </ParamField>
 
+<ParamField query="actingUserId" type="string">
+  The user this read acts as: the answer is exactly what that user sees. Without it, only files that belong to nothing, and those anyone can see, come back.
+</ParamField>
+
 **Returns** — `Promise<File>`: the [`File`](/v8/data-models/file), the same
 shape the uploads return. Every owner column (`userId`, `entityId`, `eventId`,
 `commentId`, `chatMessageId`, `spaceId`) is present, `null` when unset; `image`
 is the image data of a processed image and `null` otherwise.
+
+---
+
+### refreshFileLinks
+
+Fresh links for files whose links expired. Every file link stops working at its
+File's `linksExpireAt`, 24 to 48 hours after it was read; store file ids, and
+ask for fresh links when you need them.
+
+```typescript
+const { files } = await sublay.storage.refreshFileLinks({
+  fileIds: ["fil_abc123", "fil_def456"],
+  actingUserId: "usr_abc123",
+});
+```
+
+<ParamField body="fileIds" type="string[]" required>
+  Up to 100 file ids.
+</ParamField>
+
+<ParamField body="actingUserId" type="string">
+  The user this read acts as. Without it, only files that belong to nothing, and those anyone can see, come back.
+</ParamField>
+
+**Returns** — `Promise<{ files: File[] }>`: a fresh [`File`](/v8/data-models/file)
+for each id the viewer can see, in the order asked for. A file that's missing,
+or that the viewer can't see, is left out. See
+[Refresh File Links](/v8/api-reference/storage/refresh-file-links).
 
 ---
 

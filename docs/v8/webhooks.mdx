@@ -41,7 +41,9 @@ The `notification.created` event is the primary mechanism for bridging Sublay's 
 
 The `message.created.complete` event's `data` carries the `message`, its `sender`, the `conversationType`, and who it's for: `recipientIds` lists the conversation's active members who can see the conversation, other than the sender and anyone who had it open over a real-time connection when the message was sent. In a space chat, `recipientIds` lists only active members of the space who can see it ([visibility](/v8/data-models/space#visibility)), even if someone else still holds an active conversation membership. Muted members are included. `recipientIds` holds at most 500 ids; `totalRecipientCount` is the full count.
 
-The entity events' `data` (`entity.created.complete`, `entity.updated.complete`) carries the entity, with its `files` (proxy URLs, in order, images with their variants) whenever the files-images bundle is installed, whatever the request asked for.
+The entity events' `data` (`entity.created.complete`, `entity.updated.complete`) carries the entity, with its `files` (signed links, in order, images with their variants) whenever the files-images bundle is installed, whatever the request asked for.
+
+Every file link in a payload (a File's `originalPath` and variant `publicPath`, a notification's `spaceAvatar`) is signed and stops working 24 to 48 hours after the event was sent ([File links](/v8/data-models/file#file-links)). Store file ids, and get fresh links from [Refresh File Links](/v8/api-reference/storage/refresh-file-links) when you need them.
 
 The space events' `data` carries the space's fields, `postingPermission` among them: `"anyone"`, `"members"`, or `"team"` (only the space's admins and moderators may post).
 

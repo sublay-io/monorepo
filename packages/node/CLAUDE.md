@@ -189,9 +189,10 @@ Moderation/rules: `handleSpaceReport` (one handler for entity, comment and chat 
 
 `fetchHostedApp` — fetches hosted app configuration (uses the internal axios instance).
 
-### 14. Storage Module (4 functions)
+### 14. Storage Module (5 functions)
 
-File and image uploads, plus read/delete. `uploadFile`, `uploadImage`, `getFile`, `deleteFile`.
+File and image uploads, plus read/delete and fresh links. `uploadFile`, `uploadImage`, `getFile`,
+`deleteFile`, `refreshFileLinks`.
 
 - **Uploads** are multipart (`FormData`); `file` accepts a `Uint8Array` or `Blob`. Content-Type is left
   to axios so the multipart boundary is set correctly — do not hand-set it.
@@ -203,8 +204,14 @@ File and image uploads, plus read/delete. `uploadFile`, `uploadImage`, `getFile`
   `aspect-ratio-width-based`, `aspect-ratio-height-based`, `original-aspect`, `multi-aspect-ratio`),
   mirroring the server schema (see `interfaces/ImageProcessing.ts`), sent whole as `file.options`
   with the folder inside it (`imageOptions.pathParts`); plus optional `metadata` and `actingUserId`.
-- **Access model:** reads (`getFile`) are project-scoped (any caller in the project); **delete
-  follows "the owner acts"**: a file with an owner is deleted only as that owner (`actingUserId`
+- **File links expire** (S#144): every `originalPath` / variant `publicPath` is a signed link that
+  stops working at the File's `linksExpireAt` (24–48 h after the read). `refreshFileLinks({ fileIds,
+  actingUserId? })` (`POST /files/links`, up to 100 ids) returns fresh Files for the ones the viewer
+  can see, leaving the rest out. Store file ids, never links.
+- **Access model:** `getFile` and `refreshFileLinks` answer only files the viewer can see: a file
+  attached to a record goes to whoever can read that record (pass `actingUserId` to read as a
+  user); without it, a key sees files attached to nothing and those anyone can see. A hidden file
+  answers 404 like a missing one. **Delete follows "the owner acts"**: a file with an owner is deleted only as that owner (`actingUserId`
   required, 400 `storage/missing-user-id` without it), an app-owned file only by a key naming nobody.
 
 ### 15. Chat Module (22 functions)

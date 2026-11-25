@@ -532,7 +532,8 @@
                 "group": "Storage",
                 "pages": [
                   "v8/hooks/storage/use-upload-file",
-                  "v8/hooks/storage/use-upload-image"
+                  "v8/hooks/storage/use-upload-image",
+                  "v8/hooks/storage/use-file-links"
                 ]
               },
               {
@@ -910,6 +911,7 @@
                   "v8/api-reference/storage/upload-image",
                   "v8/api-reference/storage/upload-file",
                   "v8/api-reference/storage/fetch-file",
+                  "v8/api-reference/storage/refresh-file-links",
                   "v8/api-reference/storage/delete-file"
                 ]
               },

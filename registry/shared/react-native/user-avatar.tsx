@@ -1,4 +1,5 @@
 import { View, Image, PixelRatio, StyleSheet } from "react-native";
+import { useFileLinks, useReportFileLoadError } from "@sublay/react-native";
 import Svg, { Circle, Polygon, Rect } from "react-native-svg";
 import {
   getUserAvatar,
@@ -86,10 +87,17 @@ const UserAvatar = ({
   borderRadius?: number | undefined;
   theme?: UITheme; // colors to draw with (default: light)
 }) => {
+  // An uploaded avatar's links expire a day or two after they were read:
+  // past that, a fresh link is fetched by the file's id (batched with every
+  // other image on screen), and a load error asks once more.
+  const avatarFile = useFileLinks(user?.avatarFile ?? null);
+  const reportLoadError = useReportFileLoadError();
+
   if (!user) return null;
 
   // The uploaded avatar file, then the `avatar` URL, then a generated avatar
-  const source = pickAvatarSource(user, size, PixelRatio.get());
+  const source = pickAvatarSource({ ...user, avatarFile }, size, PixelRatio.get());
+  const fromFile = !!avatarFile && source !== null && source !== user.avatar;
 
   return (
     <View
@@ -108,6 +116,7 @@ const UserAvatar = ({
           source={{
             uri: source,
           }}
+          onError={fromFile ? () => reportLoadError(avatarFile) : undefined}
           style={[
             styles.image,
             {

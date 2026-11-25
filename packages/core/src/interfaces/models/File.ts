@@ -1,6 +1,6 @@
 // Image variant structure returned by the API
 export interface FileImageVariant {
-  publicPath: string;     // Proxy URL added by transformFileForResponse
+  publicPath: string;     // A signed link; stops working at the File's `linksExpireAt`
   width: number;
   height: number;
   size: number;           // Bytes
@@ -31,7 +31,7 @@ export interface File {
   spaceId: string | null;
 
   type: "image" | "video" | "document" | "other"; // From the MIME type
-  originalPath: string;   // Proxied URL after transformFileForResponse
+  originalPath: string;   // A signed link; stops working at `linksExpireAt`
   originalSize: number;
   originalMimeType: string; // The stored file's type: for a processed image, image/<format>
   position: number;
@@ -42,6 +42,12 @@ export interface File {
   // `files` list or `POST /storage` stores the file as uploaded, so it has
   // none even when its `type` is "image"). The same on every File v8 returns.
   image?: FileImage | null;
+  // When every link on this File (`originalPath` and each variant's
+  // `publicPath`) stops working, as an ISO timestamp: 24–48 h after it was
+  // read. Get fresh links by reading the record again, or from
+  // `POST /files/links` by the File's `id`. Store the id, never a link.
+  // Missing only on a File whose links don't expire.
+  linksExpireAt?: string;
   createdAt: string;
   updatedAt: string;
 }

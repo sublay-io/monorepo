@@ -790,6 +790,15 @@ export {
   type UseUploadImageValues,
 } from "./hooks/storage";
 
+// -- file links (S#144)
+export { useFileLinks, useReportFileLoadError, type FileLinkCarrier } from "./hooks/files";
+export {
+  fileIdFromLink,
+  fileLinksExpireAt,
+  linkExpiresAt,
+  linksNeedRefresh,
+} from "./utils/fileLinks";
+
 // Interfaces
 export type {
   PaginatedResponse,

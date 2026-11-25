@@ -186,6 +186,19 @@ Endpoints that take a file in a `multipart/form-data` body answer a refused file
 
 The limits are per request, the same on every endpoint: at most 50 MB per file, 20 files in total, and 250 MB for the whole body. A field that holds a list of files takes up to 20 of them; a field that holds one file (`avatarFile`, `bannerFile`, `coverFile`) takes one. They don't cap how many files a record holds: an update can add more. A record's files are sent in the same fields everywhere: one image in a slot (`avatarFile`, `bannerFile`, `coverFile`) with its options in `<field>.options`, and a list as `images` (processed into sizes, `images.options` required) and `files` (stored as uploaded, `files.options` optional). An update that holds files takes `removeFileIds`. Endpoints that process images add their own checks (for example `422 <area>/invalid-image` for a file that isn't a valid image, with `param` naming its field, and `400 <area>/missing-image-options` for images sent without their options); an id in `removeFileIds` that isn't the record's own file gets `400 <area>/invalid-remove-file-ids`, and uploads that would take the project past its plan's file-storage limit get `429 project/quota-reached`. Each endpoint's page lists them.
 
+### File link errors
+
+Loading a file through its link (an `originalPath` or `publicPath`, which is how `<img>` and image components load it) needs no credentials: the link itself is the proof. A link that doesn't work answers:
+
+| Status | Code | When |
+|--------|------|------|
+| `403` | `files/invalid-link` | The link was changed, cut short, or never came from Sublay. Use it exactly as it was returned. |
+| `403` | `files/link-expired` | The link is past its File's `linksExpireAt`. Get a fresh one by reading the record again, or from [Refresh File Links](/v8/api-reference/storage/refresh-file-links). |
+| `404` | `files/not-found` | The file is no longer stored. |
+| `429` | `project/quota-reached` | The project is over its plan's monthly download (egress) limit. |
+| `400` | `project/invalid-id` | The project id in the link isn't a valid id. |
+| `404` | `project/not-found` | The project id in the link names no project. |
+
 ### Same situation, same answer
 
 The same situation gets the same status and the same kind of code on every endpoint, so you can handle each one once:

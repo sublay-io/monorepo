@@ -5,7 +5,7 @@ description: "Upload, retrieve, and manage files and images in Sublay"
 
 ## Overview
 
-Sublay's storage system lets you upload files and images on behalf of authenticated users. Uploaded assets are stored in managed cloud storage and served through a proxy URL so direct storage credentials are never exposed to the client.
+Sublay's storage system lets you upload files and images on behalf of authenticated users. Uploaded assets are stored in managed cloud storage and served through signed links: each link works for 24 to 48 hours and comes only with a record the viewer can see, so storage credentials are never exposed and a link can't be reused for long ([File links](/v8/data-models/file#file-links)).
 
 <Note>
   **Requires the `files-images` bundle.** File and image uploads are only available when the `files-images` bundle is installed on your project. See [Bundles](/v8/bundles) to add it.
@@ -18,7 +18,7 @@ A file uploaded with these hooks isn't attached to anything: it has no entity, c
 Sublay provides two hooks for uploading assets:
 
 - **Image upload** — server-side processing with automatic variant generation (resizing, format conversion, EXIF stripping). Returns named variants for responsive display.
-- **File upload** — upload for PDFs and JPEG, PNG or WebP images. No server-side processing — the file is stored as-is, and the returned File carries its proxy URL.
+- **File upload** — upload for PDFs and JPEG, PNG or WebP images. No server-side processing — the file is stored as-is, and the returned File carries a signed link to it.
 
 ## Image Processing Modes
 
@@ -50,7 +50,7 @@ Both uploads, and every file embedded in a record, return the one [File](/v8/dat
     Upload and process an image with automatic variant generation.
   </Card>
   <Card title="useUploadFile" href="/v8/hooks/storage/use-upload-file">
-    Upload a generic file and receive a proxy URL.
+    Upload a generic file and receive its File, with a signed link.
   </Card>
 </CardGroup>
 

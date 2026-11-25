@@ -93,7 +93,7 @@ Source under [src/modules/](src/modules/); each folder has one file per function
 - **appNotifications** — `fetchNotifications`, `countUnreadNotifications`, `markNotificationAsRead`, `markAllNotificationsAsRead`
 - **reports** — `createReport`, `fetchModeratedReports`
 - **search** — `searchContent`, `searchUsers`, `searchSpaces` (return raw arrays of `{ similarity, record }`), and `askContent` — an **SSE async generator** (`for await` it; cancel via `AbortSignal` or `break`). It uses `fetch` (not axios), so it reads the token via `client.getAuthHeader()` and does NOT get the auto-refresh retry.
-- **storage** — `uploadFile`, `uploadImage`, `getFile`, `deleteFile` (browser `File`/`Blob`)
+- **storage** — `uploadFile`, `uploadImage`, `getFile`, `deleteFile` (browser `File`/`Blob`), `refreshFileLinks` (fresh signed links by file id: every file link expires at the File's `linksExpireAt`, S#144)
 - **oauth** — `authorize`, `linkIdentity` (both: `{ provider, redirectAfterAuth }` → `{ authorizationUrl }`, redirect flow), `listIdentities`, `unlinkIdentity`
 - **chat** (22 fns) — conversations (incl. **cursor** pagination on `listConversations`/`listMessages`), members, messages (`sendMessage` supports multipart `files`), reactions, `markAsRead` (`{ messageId }`). Reporting a message is **not** here — use `reports.createReport` with `targetType: "message"`.
 

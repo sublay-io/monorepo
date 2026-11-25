@@ -6,7 +6,7 @@ icon: "plug"
 
 ## Overview
 
-Uploads an image to Sublay storage. The server processes the image, generates named variants according to the specified mode, and returns the [File](/v8/data-models/file) with proxy URLs for the original and every variant. The options are sent as one JSON field, `file.options`: the same options a record's own images take (for example `avatarFile` on [`useUser`](/v8/hooks/user/use-user)).
+Uploads an image to Sublay storage. The server processes the image, generates named variants according to the specified mode, and returns the [File](/v8/data-models/file) with signed links to the original and every variant. The links expire at the File's `linksExpireAt` ([File links](/v8/data-models/file#file-links)), so store the file's `id`, not a link. The options are sent as one JSON field, `file.options`: the same options a record's own images take (for example `avatarFile` on [`useUser`](/v8/hooks/user/use-user)).
 
 Works in both browser and React Native environments. Provides upload progress tracking.
 
@@ -33,7 +33,7 @@ function AvatarUploader() {
       quality: 85,
     });
 
-    console.log(image.originalPath);
+    saveFileId(image.id); // Store the id: the links below expire
     console.log(image.image?.variants.avatar.publicPath);
   };
 
@@ -184,7 +184,7 @@ The [File](/v8/data-models/file), the same shape [Fetch File](/v8/api-reference/
   userId: string | null;
   entityId: null; eventId: null; commentId: null; chatMessageId: null; spaceId: null;
   type: "image";
-  originalPath: string;    // Proxy URL of the processed original
+  originalPath: string;    // Signed link to the processed original; expires at linksExpireAt
   originalSize: number;    // Bytes, of the stored original
   originalMimeType: string;
   position: number;
@@ -201,13 +201,14 @@ The [File](/v8/data-models/file), the same shape [Fetch File](/v8/api-reference/
     createdAt: string;
     updatedAt: string;
   } | null;
+  linksExpireAt: string;   // ISO 8601: when every link on this File stops working
   createdAt: string;       // ISO 8601
   updatedAt: string;
 }
 
 // FileImageVariant
 {
-  publicPath: string; // Proxy URL
+  publicPath: string; // Signed link; expires at the File's linksExpireAt
   width: number;
   height: number;
   size: number;       // Bytes

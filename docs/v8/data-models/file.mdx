@@ -9,6 +9,27 @@ A File has the same shape everywhere it is returned: embedded in a record, from 
 
 A record's files are uploaded, replaced and removed through that record's own requests: a user's or space's avatar and banner, a conversation's avatar and an event's cover through their create and update (`avatarFile`, `bannerFile`, `coverFile`, `removeFileIds`); an entity's or event's `images` and `files` through their create and update (`removeFileIds` on update); a comment's or chat message's `images` and `files` on create, removed with the comment or message. [Delete File](/v8/api-reference/storage/delete-file) refuses all of them with `409 storage/file-attached`. The files a deleted comment, or a soft-deleted entity or event, kept belong to nothing, and their owner deletes them through Delete File.
 
+## File links
+
+Every link in a File (`originalPath`, and each variant's `publicPath`) is a signed link that stops working at the File's `linksExpireAt`, 24 to 48 hours after it was read. Within one UTC day the same file always gets the same link, so browser and image caches keep working.
+
+A file's links come only with a record the viewer can see. To get fresh links, read the record again, or send the file's `id` to [Refresh File Links](/v8/api-reference/storage/refresh-file-links), which answers only for files the viewer can still see. Store a file's `id`, never its link. In React and React Native, render a File through [useFileLinks](/v8/hooks/storage/use-file-links) and its links are refreshed when they expire; the components installed with `sublay add` already do this for avatars.
+
+A file can be seen by whoever can see the record it belongs to:
+
+| The file belongs to | Who can see it |
+|---|---|
+| an entity | whoever can read the entity: not someone else's draft, not moderator-removed (except to its author), not by an author who blocked the viewer, and in no space or one the viewer can read |
+| a comment | whoever can read the comment in full: not deleted, not moderator-removed (except to its author), and not hidden by a block |
+| a chat message | members of its conversation (a former member, only for messages from before they left); a deleted message's files are shown to nobody, a moderator-removed one's only to its author |
+| a conversation (its avatar) | anyone with a membership in the conversation, current or former, and the active members of a space's chat |
+| an event (its cover and files) | whoever can see the event |
+| a space (its avatar and banner, or a file that carries only its `spaceId`) | whoever can see the space |
+| a user (their avatar and banner) | anyone in the project |
+| nothing (an upload through Upload File or Upload Image) | any signed-in user, and a service key |
+
+A file whose record was deleted is shown to nobody. A service key sees what the user named in `actingUserId` sees; naming nobody, it sees files that belong to nothing and those anyone can see.
+
 ## File
 
 | Property | Type | Description |
@@ -21,11 +42,12 @@ A record's files are uploaded, replaced and removed through that record's own re
 | `chatMessageId` | `string \| null` | The chat message this file is attached to. |
 | `spaceId` | `string \| null` | The space this file is associated with. It is set on a space's own avatar and banner; older files (an entity's or event's files, or a `POST /storage` upload associated with a space) may also carry a space. |
 | `type` | `"image" \| "video" \| "document" \| "other"` | The file category, from its MIME type: `image/*` is `"image"`, `video/*` is `"video"`, PDF, Word and other `application/vnd.*` types are `"document"`, anything else `"other"`. A processed image is always `"image"`. |
-| `originalPath` | `string` | Proxied URL to the original uploaded file. |
+| `originalPath` | `string` | Signed link to the original file. Stops working at `linksExpireAt`. |
 | `originalSize` | `number` | Size in bytes of the stored original. A processed image's original is stored shrunk to its `originalMaxSize` (default 3840 px on the longest side), and this is its size as stored. |
 | `originalMimeType` | `string` | The stored file's MIME type: the uploaded type for a file stored as uploaded, `image/<format>` of the stored original for a processed image (e.g. `"image/webp"`). |
 | `position` | `number` | Display order when multiple files are attached to the same record: the first file is `0`, and each file added later takes the next number. An event cover is `-1`, so it sorts before the event's other files; an older cover may be `0`. Find an event's cover by `coverImageId`, not by position. |
 | `metadata` | `Record<string, any>` | Key-value data for this file: the uploader's own keys (storage uploads only), plus the server's `originalFilename` and, on an image, `originalFormat` and `originalDimensions` (the uploaded image's own format and size). |
+| `linksExpireAt` | `string` | When every link on this File stops working (ISO 8601), 24 to 48 hours after it was read. See [File links](#file-links). |
 | `image` | `FileImage \| null` | Processed image variants: the image data of a processed image (uploaded through `images`, a slot or Upload Image), `null` for every other file, an image sent in `files` or through Upload File included (it is stored as uploaded, so its `type` is `"image"` but it has no variants). |
 | `createdAt` | `Date` | When the file was uploaded. |
 | `updatedAt` | `Date` | When the file record was last updated. |
@@ -53,7 +75,7 @@ Each entry in `FileImage.variants` has this shape:
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `publicPath` | `string` | Proxied public URL for this variant. |
+| `publicPath` | `string` | Signed link to this variant. Stops working at the File's `linksExpireAt`. |
 | `width` | `number` | Width of this variant in pixels. |
 | `height` | `number` | Height of this variant in pixels. |
 | `size` | `number` | File size of this variant in bytes. |
@@ -64,6 +86,8 @@ Each entry in `FileImage.variants` has this shape:
 - [Upload Image](/v8/api-reference/storage/upload-image)
 - [Upload File](/v8/api-reference/storage/upload-file)
 - [Fetch File](/v8/api-reference/storage/fetch-file)
+- [Refresh File Links](/v8/api-reference/storage/refresh-file-links)
+- [useFileLinks hook](/v8/hooks/storage/use-file-links)
 - [useUploadImage hook](/v8/hooks/storage/use-upload-image)
 - [useUploadFile hook](/v8/hooks/storage/use-upload-file)
 - [User](/v8/data-models/user)

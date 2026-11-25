@@ -32,7 +32,7 @@ Collections are private — each collection belongs to one user and is not visib
 </ResponseField>
 
 <ResponseField name="entityCount" type="number">
-  Number of entities directly saved in this collection (not counting sub-collections) that the collection's owner can see in it: entities that are deleted, removed by moderation or turned back into drafts aren't counted, and neither are entities in a space the owner can't read (see [who can read content](/v8/data-models/space#who-can-read-content)). Computed on every response, by the same rule as `totalItems` on [Fetch Collection Entities](/v8/api-reference/collections/fetch-entities), so the two always match. See [entityCount](#entitycount).
+  Number of entities directly saved in this collection (not counting sub-collections) that the collection's owner can see in it: entities that are deleted, removed by moderation or turned back into drafts aren't counted, and neither are entities in a space the owner can't read (see [who can read content](/v8/data-models/space#who-can-read-content)) or entities whose author has blocked the owner. Computed on every response, by the same rule as `totalItems` on [Fetch Collection Entities](/v8/api-reference/collections/fetch-entities), so the two always match. See [entityCount](#entitycount).
 </ResponseField>
 
 <ResponseField name="createdAt" type="string (ISO 8601)">
@@ -45,7 +45,7 @@ Collections are private — each collection belongs to one user and is not visib
 
 ## entityCount
 
-A collection's `entityCount` is worked out when it's returned, from the entities the owner can see in it. Saving or removing an entity returns the count after that change. An entity saved before its owner lost read access to its space (for example after leaving a members-only space) stays saved but isn't counted or listed; it comes back if they regain access. Such an entity can still be removed from the collection.
+A collection's `entityCount` is worked out when it's returned, from the entities the owner can see in it. Saving or removing an entity returns the count after that change. An entity the owner can no longer see stays saved but isn't counted or listed: one in a space they lost read access to (for example after leaving a members-only space), or one whose author blocked them after they saved it. It comes back if they regain access, or the author unblocks them. An entity whose author the owner blocked is still listed and counted. Such an entity can still be removed from the collection.
 
 ## Notes
 

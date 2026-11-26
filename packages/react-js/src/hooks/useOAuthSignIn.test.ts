@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
+import { SublayError } from "@sublay/core";
 
 const useProject = vi.fn();
 const useSublayDispatch = vi.fn();
@@ -8,14 +9,20 @@ const requestOAuthAuthorizationUrl = vi.fn();
 const handleOAuthRedirect = vi.fn();
 const dispatch = vi.fn();
 
-vi.mock("@sublay/core", () => ({
-  useProject: () => useProject(),
-  useSublayDispatch: () => useSublayDispatch(),
-  useSublaySelector: (selector: unknown) => useSublaySelector(selector),
-  selectAccessToken: "selectAccessToken-placeholder",
-  requestOAuthAuthorizationUrl: (...args: unknown[]) => requestOAuthAuthorizationUrl(...args),
-  handleOAuthRedirect: (...args: unknown[]) => handleOAuthRedirect(...args),
-}));
+vi.mock("@sublay/core", async (importOriginal) => {
+  // The real error class and helper: the hook builds its errors with them.
+  const { SublayError, toSublayError } = await importOriginal<typeof import("@sublay/core")>();
+  return {
+    SublayError,
+    toSublayError,
+    useProject: () => useProject(),
+    useSublayDispatch: () => useSublayDispatch(),
+    useSublaySelector: (selector: unknown) => useSublaySelector(selector),
+    selectAccessToken: "selectAccessToken-placeholder",
+    requestOAuthAuthorizationUrl: (...args: unknown[]) => requestOAuthAuthorizationUrl(...args),
+    handleOAuthRedirect: (...args: unknown[]) => handleOAuthRedirect(...args),
+  };
+});
 
 import useOAuthSignIn from "./useOAuthSignIn";
 
@@ -160,7 +167,10 @@ describe("useOAuthSignIn (react-js)", () => {
     });
 
     it("sets the error, cleans the URL, and returns false on a redirect error", () => {
-      handleOAuthRedirect.mockReturnValue({ success: false, error: "access_denied" });
+      handleOAuthRedirect.mockReturnValue({
+        success: false,
+        error: new SublayError("access_denied", { code: "access_denied" }),
+      });
       const { result } = renderHook(() => useOAuthSignIn());
 
       let callbackResult: boolean;

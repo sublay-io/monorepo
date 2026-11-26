@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import {
   CollectionEntityIncludeParam,
   Entity,
@@ -6,7 +6,8 @@ import {
 } from "../../interfaces/models/Entity";
 import { SortByReaction } from "../../interfaces/EntityListSortByOptions";
 import { useLazyFetchCollectionEntitiesQuery } from "../../store/api/collectionsApi";
-import { handleError } from "../../utils/handleError";
+import { useListLoader } from "../list/useListLoader";
+import { pageNumberPaging } from "../list/paging";
 import useProject from "../projects/useProject";
 import useCollections from "./useCollections";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
@@ -29,6 +30,9 @@ export interface UseCollectionEntitiesWrapperProps extends TopCommentsParams {
 export interface UseCollectionEntitiesWrapperValues {
   entities: Entity[];
   loading: boolean;
+  /** The last load failure. Cleared when the next load starts; `loadMore()` retries it. */
+  error: Error | null;
+  /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
   sortBy: "createdAt" | "addedAt" | "top" | "hot";
   sortByReaction: SortByReaction;
@@ -36,8 +40,14 @@ export interface UseCollectionEntitiesWrapperValues {
   setSortBy: (newSortBy: "createdAt" | "addedAt" | "top" | "hot") => void;
   setSortByReaction: (newSortByReaction: SortByReaction) => void;
   setSortDir: (newSortDir: "asc" | "desc") => void;
-  loadMore: () => void;
-  refetch: () => void;
+  /**
+   * Load the next page, or retry the load that failed (a failed first page
+   * included). Does nothing while loading or when there is nothing more.
+   * Never rejects.
+   */
+  loadMore: () => Promise<void>;
+  /** Reload from page 1 with the current sort. Never rejects. */
+  refetch: () => Promise<void>;
 }
 
 function useCollectionEntitiesWrapper(
@@ -64,152 +74,60 @@ function useCollectionEntitiesWrapper(
   // Read entities from shared Redux state — written here and by useCollectionsActions for optimistic updates
   const entities = useSublaySelector(selectCollectionEntities(effectiveCollectionId));
 
-  const includeString = useMemo(
-    () => (Array.isArray(include) ? include.join(",") : include),
-    [include]
-  );
-
-  const loading = useRef(false);
-  const [loadingState, setLoadingState] = useState(false);
-
-  const hasMore = useRef(true);
-  const [hasMoreState, setHasMoreState] = useState(true);
-
   const [sortBy, setSortBy] = useState<"createdAt" | "addedAt" | "top" | "hot">(defaultSortBy);
   // Only sent when sortBy is "top" (see collectionsApi).
   const [sortByReaction, setSortByReaction] = useState<SortByReaction>(defaultSortByReaction);
   const [sortDir, setSortDir] = useState<"asc" | "desc">(defaultSortDir);
-  const [page, setPage] = useState(1);
 
-  const resetEntities = useCallback(async () => {
-    if (!projectId || !effectiveCollectionId) {
-      return;
-    }
-
-    try {
-      loading.current = true;
-      setLoadingState(true);
-
-      hasMore.current = true;
-      setHasMoreState(true);
-
-      setPage(1);
-
-      const response = await fetchCollectionEntitiesQuery({
-        projectId,
-        collectionId: effectiveCollectionId,
-        page: 1,
-        limit,
-        sortBy,
-        sortByReaction,
-        sortDir,
-        include,
-        topCommentsLimit,
-        topCommentsSortByReaction,
-      }).unwrap();
-
-      if (response) {
-        const { data: newEntities, pagination } = response;
-        dispatch(setCollectionEntities({ collectionId: effectiveCollectionId, entities: newEntities }));
-        hasMore.current = pagination.hasMore;
-        setHasMoreState(pagination.hasMore);
-      }
-    } catch (err) {
-      handleError(err, "Failed to fetch collection entities:");
-    } finally {
-      loading.current = false;
-      setLoadingState(false);
-    }
-  }, [
-    dispatch,
-    fetchCollectionEntitiesQuery,
-    projectId,
-    effectiveCollectionId,
-    limit,
-    sortBy,
-    sortByReaction,
-    sortDir,
-    includeString,
-    topCommentsLimit,
-    topCommentsSortByReaction,
-  ]);
-
-  const loadMore = useCallback(() => {
-    if (loading.current || !hasMore.current) return;
-    setPage((prevPage) => prevPage + 1);
-  }, []);
-
-  useEffect(() => {
-    resetEntities();
-  }, [resetEntities]);
-
-  useEffect(() => {
-    const loadMoreEntities = async () => {
-      if (!projectId || !effectiveCollectionId) {
-        return;
-      }
-
-      loading.current = true;
-      setLoadingState(true);
-
-      try {
-        const response = await fetchCollectionEntitiesQuery({
-          projectId,
-          collectionId: effectiveCollectionId,
-          page,
-          limit,
-          sortBy,
-          sortByReaction,
-          sortDir,
-          include,
-          topCommentsLimit,
-          topCommentsSortByReaction,
-        }).unwrap();
-
-        if (response) {
-          const { data: newEntities, pagination } = response;
-          dispatch(appendCollectionEntities({ collectionId: effectiveCollectionId, entities: newEntities }));
-          hasMore.current = pagination.hasMore;
-          setHasMoreState(pagination.hasMore);
-        }
-      } catch (err) {
-        handleError(err, "Loading more collection entities failed:");
-      } finally {
-        loading.current = false;
-        setLoadingState(false);
-      }
-    };
-
-    if (page > 1 && hasMore.current && !loading.current) {
-      loadMoreEntities();
-    }
-  }, [
+  // The one request builder for every page.
+  const buildParams = (page: number) => ({
+    projectId: projectId as string,
+    collectionId: effectiveCollectionId as string,
     page,
-    dispatch,
-    fetchCollectionEntitiesQuery,
-    projectId,
-    effectiveCollectionId,
     limit,
     sortBy,
     sortByReaction,
     sortDir,
-    includeString,
+    include,
     topCommentsLimit,
     topCommentsSortByReaction,
-  ]);
+  });
+
+  // The entities live in the shared store (useCollectionsActions writes to
+  // them optimistically), so a reset leaves them in place until page 1
+  // replaces them.
+  const list = useListLoader<Entity, number>({
+    enabled: !!projectId && !!effectiveCollectionId,
+    // Serialized, so an inline `include` array (a fresh reference every
+    // render) doesn't restart the list.
+    resetKey: JSON.stringify(buildParams(1)),
+    fetchPage: pageNumberPaging((page) =>
+      fetchCollectionEntitiesQuery(buildParams(page)).unwrap()
+    ),
+    onPage: (page, replace) => {
+      const collectionId = effectiveCollectionId as string;
+      dispatch(
+        replace
+          ? setCollectionEntities({ collectionId, entities: page.items })
+          : appendCollectionEntities({ collectionId, entities: page.items })
+      );
+    },
+    errorLabel: "Failed to fetch collection entities:",
+  });
 
   return {
     entities,
-    loading: loadingState,
-    hasMore: hasMoreState,
+    loading: list.loading,
+    error: list.error,
+    hasMore: list.hasMore,
     sortBy,
     sortByReaction,
     sortDir,
     setSortBy,
     setSortByReaction,
     setSortDir,
-    loadMore,
-    refetch: resetEntities,
+    loadMore: list.loadMore,
+    refetch: list.refetch,
   };
 }
 

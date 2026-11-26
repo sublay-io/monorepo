@@ -94,7 +94,7 @@ describe("useFetchManyEventsWrapper", () => {
     });
   });
 
-  it("refresh() re-runs the query from page 1", async () => {
+  it("refetch() re-runs the query from page 1", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useFetchManyEventsWrapper({}),
       {
@@ -108,7 +108,7 @@ describe("useFetchManyEventsWrapper", () => {
     axiosPrivate.mockResponse("get", makePage([makeEvent({ id: "event-2" })], false));
 
     act(() => {
-      result.current.refresh();
+      result.current.refetch();
     });
 
     await waitFor(() =>

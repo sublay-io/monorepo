@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import {
   Event,
   EventInclude,
@@ -12,7 +12,8 @@ import useFetchManyEvents, {
   EventLocationFilters,
   EventTitleFilters,
 } from "./useFetchManyEvents";
-import { handleError } from "../../utils/handleError";
+import { useListEngine } from "../list/useListEngine";
+import { pageNumberPaging } from "../list/paging";
 
 type EventSortBy = "startTime" | "going";
 type EventSortDir = "asc" | "desc";
@@ -44,15 +45,26 @@ export interface UseFetchManyEventsWrapperProps {
 export interface UseFetchManyEventsWrapperValues {
   events: Event[];
   loading: boolean;
+  /** The last load failure. Cleared when the next load starts; `loadMore()` retries it. */
+  error: Error | null;
+  /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
   sortBy: EventSortBy;
   /** null: the sort's natural direction. */
   sortDir: EventSortDir | null;
   setSortBy: (newSortBy: EventSortBy) => void;
   setSortDir: (newSortDir: EventSortDir | null) => void;
-  loadMore: () => void;
-  /** Re-run the query from page 1 (e.g. after creating/cancelling an event). */
-  refresh: () => void;
+  /**
+   * Load the next page, or retry the load that failed (a failed first page
+   * included). Does nothing while loading or when there is nothing more.
+   * Never rejects.
+   */
+  loadMore: () => Promise<void>;
+  /**
+   * Reload from page 1 with the current filters and sort (e.g. after
+   * creating or cancelling an event). Never rejects.
+   */
+  refetch: () => Promise<void>;
 }
 
 function useFetchManyEventsWrapper(
@@ -76,149 +88,60 @@ function useFetchManyEventsWrapper(
     defaultSortDir = null,
   } = props;
 
-  // `include` and `myRsvp` are flattened to the strings the wire carries, and
-  // those strings — never the raw values — go into the dep arrays. An inline
-  // array is a fresh reference every render; raw in a dep array it re-fires the
-  // reset effect on every render, an unbounded request loop.
+  // `include` and `myRsvp` are flattened to the strings the wire carries. An
+  // inline array is a fresh reference every render; only the strings go into
+  // the reset key.
   const includeKey = Array.isArray(include) ? include.join(",") : include;
-  const includeList = useMemo(
-    () => (includeKey ? (includeKey.split(",") as EventInclude[]) : undefined),
-    [includeKey]
-  );
   const myRsvpKey = Array.isArray(myRsvp) ? myRsvp.join(",") : myRsvp;
-  const myRsvpList = useMemo(
-    () => (myRsvpKey ? (myRsvpKey.split(",") as RsvpStatus[]) : undefined),
-    [myRsvpKey]
-  );
-  // Same for the filter objects: an inline `{ ... }` is a fresh reference every
-  // render, so the dep array carries their serialized form, not the raw objects.
-  const filtersKey = JSON.stringify([locationFilters, titleFilters, descriptionFilters]);
 
   const fetchManyEvents = useFetchManyEvents();
 
-  const loading = useRef(true);
-  const [loadingState, setLoadingState] = useState(true);
-
-  const hasMore = useRef(true);
-  const [hasMoreState, setHasMoreState] = useState(true);
-
   const [sortBy, setSortBy] = useState<EventSortBy>(defaultSortBy);
   const [sortDir, setSortDir] = useState<EventSortDir | null>(defaultSortDir);
-  const [page, setPage] = useState(1);
-  const [events, setEvents] = useState<Event[]>([]);
 
-  const buildParams = useCallback(
-    (pageArg: number) => ({
-      page: pageArg,
-      limit,
-      sortBy,
-      sortDir: sortDir ?? undefined,
-      spaceId: spaceId ?? undefined,
-      hostId: hostId ?? undefined,
-      type: type ?? undefined,
-      status: status ?? undefined,
-      timeWindow: timeWindow ?? undefined,
-      startsAfter: startsAfter ?? undefined,
-      startsBefore: startsBefore ?? undefined,
-      myRsvp: myRsvpList,
-      locationFilters: locationFilters ?? undefined,
-      titleFilters: titleFilters ?? undefined,
-      descriptionFilters: descriptionFilters ?? undefined,
-      include: includeList,
-    }),
-    [
-      limit,
-      sortBy,
-      sortDir,
-      spaceId,
-      hostId,
-      type,
-      status,
-      timeWindow,
-      startsAfter,
-      startsBefore,
-      myRsvpList,
-      filtersKey,
-      includeList,
-    ] // eslint-disable-line react-hooks/exhaustive-deps
-  );
+  // The one request builder for every page: a param can't be sent with page 1
+  // and left off page 2.
+  const buildParams = (page: number) => ({
+    page,
+    limit,
+    sortBy,
+    sortDir: sortDir ?? undefined,
+    spaceId: spaceId ?? undefined,
+    hostId: hostId ?? undefined,
+    type: type ?? undefined,
+    status: status ?? undefined,
+    timeWindow: timeWindow ?? undefined,
+    startsAfter: startsAfter ?? undefined,
+    startsBefore: startsBefore ?? undefined,
+    myRsvp: myRsvpKey ? (myRsvpKey.split(",") as RsvpStatus[]) : undefined,
+    locationFilters: locationFilters ?? undefined,
+    titleFilters: titleFilters ?? undefined,
+    descriptionFilters: descriptionFilters ?? undefined,
+    include: includeKey ? (includeKey.split(",") as EventInclude[]) : undefined,
+  });
 
-  const resetEvents = useCallback(async () => {
-    try {
-      loading.current = true;
-      setLoadingState(true);
+  // Serialized, so an inline filter object or array (a fresh reference every
+  // render) doesn't restart the list.
+  const resetKey = JSON.stringify(buildParams(1));
 
-      hasMore.current = true;
-      setHasMoreState(true);
-
-      setPage(1);
-
-      const response = await fetchManyEvents(buildParams(1));
-
-      if (response) {
-        const { data: newEvents, pagination } = response;
-        setEvents(newEvents);
-        hasMore.current = pagination.hasMore;
-        setHasMoreState(pagination.hasMore);
-      }
-    } catch (err) {
-      handleError(err, "Failed to reset events:");
-    } finally {
-      loading.current = false;
-      setLoadingState(false);
-    }
-  }, [fetchManyEvents, buildParams]);
-
-  const loadMore = () => {
-    if (loading.current || !hasMore.current) return;
-    setPage((prevPage) => prevPage + 1);
-  };
-
-  const refresh = () => {
-    resetEvents();
-  };
-
-  useEffect(() => {
-    resetEvents();
-  }, [resetEvents]);
-
-  useEffect(() => {
-    const loadMoreEvents = async () => {
-      loading.current = true;
-      setLoadingState(true);
-      try {
-        const response = await fetchManyEvents(buildParams(page));
-
-        if (response) {
-          const { data: newEvents, pagination } = response;
-          setEvents((prevEvents) => [...prevEvents, ...newEvents]);
-          hasMore.current = pagination.hasMore;
-          setHasMoreState(pagination.hasMore);
-        }
-      } catch (err) {
-        handleError(err, "Loading more events failed:");
-      } finally {
-        loading.current = false;
-        setLoadingState(false);
-      }
-    };
-
-    // Only load more when the page advances past 1.
-    if (page > 1 && hasMore.current && !loading.current) {
-      loadMoreEvents();
-    }
-  }, [page, fetchManyEvents, buildParams]);
+  const list = useListEngine<Event, number>({
+    enabled: true,
+    resetKey,
+    fetchPage: pageNumberPaging((page) => fetchManyEvents(buildParams(page))),
+    errorLabel: "Failed to fetch events:",
+  });
 
   return {
-    events,
-    loading: loadingState,
-    hasMore: hasMoreState,
+    events: list.items,
+    loading: list.loading,
+    error: list.error,
+    hasMore: list.hasMore,
     sortBy,
     sortDir,
     setSortBy,
     setSortDir,
-    loadMore,
-    refresh,
+    loadMore: list.loadMore,
+    refetch: list.refetch,
   };
 }
 

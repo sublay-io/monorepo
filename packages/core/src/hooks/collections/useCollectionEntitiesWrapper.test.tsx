@@ -92,7 +92,7 @@ describe("useCollectionEntitiesWrapper", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([makeEntity("e2")], false));
-    act(() => result.current.loadMore());
+    await act(async () => { await result.current.loadMore(); });
     await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["e1", "e2"]));
     expect(result.current.hasMore).toBe(false);
 
@@ -100,7 +100,7 @@ describe("useCollectionEntitiesWrapper", () => {
     expect(pageCall).toBeTruthy();
 
     // A further loadMore is a no-op since hasMore is now false.
-    act(() => result.current.loadMore());
+    await act(async () => { await result.current.loadMore(); });
     expect(fetchHandle.calls()).toHaveLength(2);
   });
 
@@ -150,6 +150,7 @@ describe("useCollectionEntitiesWrapper", () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.entities).toEqual([]);
+    expect(result.current.error).toBeInstanceOf(Error);
   });
 
   it("refetch re-runs the page-1 query", async () => {

@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Comment } from "../../interfaces/models/Comment";
 import { CommentsSortByOptions } from "../../interfaces/CommentsSortByOptions";
 import { ReactionType } from "../../interfaces/models/Reaction";
 import { CursorPaginatedResponse } from "../../interfaces/PaginatedResponse";
-import { handleError } from "../../utils/handleError";
+import { useListEngine } from "../list/useListEngine";
+import { cursorPaging } from "../list/paging";
 
 export interface CommentListSort {
   sortBy: CommentsSortByOptions;
@@ -33,16 +34,19 @@ export interface CursorCommentListValues {
    * in `error`).
    */
   loadMore: () => Promise<void>;
+  /**
+   * Reload from the first page with the current sort. What is loaded stays
+   * until the new first page replaces it. Never throws (failures land in
+   * `error`).
+   */
+  refetch: () => Promise<void>;
 }
-
-const toError = (err: unknown): Error =>
-  err instanceof Error ? err : new Error(String(err));
 
 /**
  * The shared engine behind the flat, cursor-paged comment-list wrappers
- * (`useFetchManyCommentsWrapper`, `useFetchCommentsByUserIdWrapper`). Resets
- * whenever `resetKey` or the sort changes; responses from before a reset are
- * dropped.
+ * (`useFetchManyCommentsWrapper`, `useFetchCommentsByUserIdWrapper`): the
+ * list engine plus the sort state. Resets whenever `resetKey` or the sort
+ * changes; responses from before a reset are dropped.
  */
 export function useCursorCommentList({
   enabled,
@@ -68,110 +72,34 @@ export function useCursorCommentList({
     defaultSortByReaction,
   );
 
-  const [comments, setComments] = useState<Comment[]>([]);
-  // As before the cursor rewrite: `loading` starts true and stays true until
-  // there's something to fetch.
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-
-  const loadingRef = useRef(false);
-  const hasMoreRef = useRef(true);
-  const cursorRef = useRef<string | null>(null);
-  const generationRef = useRef(0);
-
-  // Always the latest props, so loadMore keeps a stable identity.
-  const fetchPageRef = useRef(fetchPage);
-  fetchPageRef.current = fetchPage;
-  const sortRef = useRef<CommentListSort>({ sortBy, sortDir, sortByReaction });
-  sortRef.current = { sortBy, sortDir, sortByReaction };
-
-  const runFetch = useCallback(async (reset: boolean) => {
-    const generation = reset ? ++generationRef.current : generationRef.current;
-    loadingRef.current = true;
-    setLoading(true);
-    // Every load (a reset, the next page, a retry) starts without the last
-    // failure.
-    setError(null);
-    if (reset) {
-      cursorRef.current = null;
-      hasMoreRef.current = true;
-      setHasMore(true);
-      setComments([]);
-    }
-    try {
-      const response = await fetchPageRef.current(
-        reset ? null : cursorRef.current,
-        sortRef.current,
-      );
-      if (generation !== generationRef.current) return;
-      const { data, pagination } = response;
-      setComments((prev) => {
-        if (reset) return data;
-        const seen = new Set(prev.map((c) => c.id));
-        return [...prev, ...data.filter((c) => !seen.has(c.id))];
-      });
-      cursorRef.current = pagination.nextCursor;
-      hasMoreRef.current = pagination.hasMore;
-      setHasMore(pagination.hasMore);
-      setError(null);
-    } catch (err) {
-      if (generation !== generationRef.current) return;
-      setError(toError(err));
-      handleError(err, "Failed to fetch comments:");
-    } finally {
-      if (generation === generationRef.current) {
-        loadingRef.current = false;
-        setLoading(false);
-      }
-    }
-  }, []);
-
   // The reaction only matters to `top`; changing it under another sort
   // doesn't reset the list.
   const effectiveSortByReaction = sortBy === "top" ? sortByReaction : undefined;
-  const hadTargetRef = useRef(false);
-  useEffect(() => {
-    if (!enabled) {
-      // Drop any in-flight response for the previous target.
-      generationRef.current++;
-      // The target went away: its list and state go with it, and a load
-      // that was in flight (now dropped) doesn't leave `loading` stuck.
-      // Before there has been a target, `loading` stays as it started.
-      if (hadTargetRef.current) {
-        hadTargetRef.current = false;
-        loadingRef.current = false;
-        cursorRef.current = null;
-        hasMoreRef.current = true;
-        setComments([]);
-        setLoading(false);
-        setError(null);
-        setHasMore(true);
-      }
-      return;
-    }
-    hadTargetRef.current = true;
-    runFetch(true);
-  }, [enabled, resetKey, sortBy, sortDir, effectiveSortByReaction, runFetch]);
+  const sort: CommentListSort = { sortBy, sortDir, sortByReaction };
 
-  const enabledRef = useRef(enabled);
-  enabledRef.current = enabled;
-  const loadMore = useCallback(async () => {
-    if (!enabledRef.current || loadingRef.current || !hasMoreRef.current) return;
-    await runFetch(false);
-  }, [runFetch]);
+  const list = useListEngine<Comment, string>({
+    enabled,
+    resetKey: JSON.stringify([resetKey, sortBy, sortDir, effectiveSortByReaction]),
+    // As before the cursor rewrite: `loading` starts true and stays true
+    // until there's something to fetch.
+    pendingUntilEnabled: true,
+    getKey: (comment) => comment.id,
+    fetchPage: cursorPaging((cursor) => fetchPage(cursor, sort)),
+    errorLabel: "Failed to fetch comments:",
+  });
 
   return {
-    comments,
-    loading,
-    error,
-    hasMore,
+    comments: list.items,
+    loading: list.loading,
+    error: list.error,
+    hasMore: list.hasMore,
     sortBy,
     setSortBy,
     sortDir,
     setSortDir,
     sortByReaction,
     setSortByReaction,
-    loadMore,
+    loadMore: list.loadMore,
+    refetch: list.refetch,
   };
 }

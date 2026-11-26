@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import { EntityListSortByOptions, SortByReaction, SortDirection, SortType } from "../../interfaces/EntityListSortByOptions";
 import {
@@ -17,7 +17,8 @@ import { MetadataFilters } from "../../interfaces/entity-filters/MetadataFilters
 import { NsfwFilter } from "../../interfaces/NsfwFilter";
 import { BlockedFilter } from "../../interfaces/BlockedFilter";
 import useFetchManyEntities from "./useFetchManyEntities";
-import { handleError } from "../../utils/handleError";
+import { useListEngine } from "../list/useListEngine";
+import { pageNumberPaging } from "../list/paging";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 
 export interface UseFetchManyEntitiesWrapperProps
@@ -49,6 +50,9 @@ export interface UseFetchManyEntitiesWrapperProps
 export interface UseFetchManyEntitiesWrapperValues {
   entities: Entity[];
   loading: boolean;
+  /** The last load failure. Cleared when the next load starts; `loadMore()` retries it. */
+  error: Error | null;
+  /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
   sortBy: EntityListSortByOptions;
   sortByReaction: SortByReaction;
@@ -58,7 +62,14 @@ export interface UseFetchManyEntitiesWrapperValues {
   setSortByReaction: (newSortByReaction: SortByReaction) => void;
   setSortDir: (newSortDir: SortDirection) => void;
   setSortType: (newSortType: SortType) => void;
-  loadMore: () => void;
+  /**
+   * Load the next page, or retry the load that failed (a failed first page
+   * included). Does nothing while loading or when there is nothing more.
+   * Never rejects.
+   */
+  loadMore: () => Promise<void>;
+  /** Reload from page 1 with the current filters and sort. Never rejects. */
+  refetch: () => Promise<void>;
 }
 
 function useFetchManyEntitiesWrapper(
@@ -89,201 +100,62 @@ function useFetchManyEntitiesWrapper(
     spaceReputation,
   } = props;
 
-  // Forwarded to the leaf fetcher, which flattens it via
-  // buildSpaceReputationParams before it reaches the serializer.
   const reputation = { spaceReputation };
-  const reputationKey = JSON.stringify(reputation);
 
-  // Same for the filter objects: an inline `{ ... }` is a fresh reference every
-  // render, so the dep arrays carry their serialized form, not the raw objects.
-  const filtersKey = JSON.stringify([
-    keywordsFilters,
-    titleFilters,
-    contentFilters,
-    attachmentsFilters,
-    locationFilters,
-    metadataFilters,
-  ]);
-
-  // `include` is flattened to the string the wire carries, and the string —
-  // never the raw value — goes into the dep arrays. An inline array is a fresh
-  // reference every render; raw in a dep array it re-fires the reset effect on
-  // every render, an unbounded request loop.
+  // `include` is flattened to the string the wire carries. An inline array is
+  // a fresh reference every render; only the string goes into the reset key.
   const includeKey = Array.isArray(include) ? include.join(",") : include;
-  const includeList = useMemo(
-    () => (includeKey ? (includeKey.split(",") as EntityInclude[]) : undefined),
-    [includeKey]
-  );
 
   const fetchManyEntities = useFetchManyEntities();
-
-  const loading = useRef(true);
-  const [loadingState, setLoadingState] = useState(true);
-
-  const hasMore = useRef(true);
-  const [hasMoreState, setHasMoreState] = useState(true);
 
   const [sortBy, setSortBy] = useState<EntityListSortByOptions>(defaultSortBy);
   const [sortByReaction, setSortByReaction] = useState<SortByReaction>(defaultSortByReaction);
   const [sortDir, setSortDir] = useState<SortDirection>(defaultSortDir);
   const [sortType, setSortType] = useState<SortType>(defaultSortType);
-  const [page, setPage] = useState(1);
-  const [entities, setEntities] = useState<Entity[]>([]);
 
-  const resetEntities = useCallback(async () => {
-    try {
-      loading.current = true;
-      setLoadingState(true);
-
-      hasMore.current = true;
-      setHasMoreState(true);
-
-      setPage(1);
-
-      const response = await fetchManyEntities({
-        userId: userId ?? undefined,
-        page: 1,
-        ...oneWaySortFields(sortBy, sortDir),
-        sortByReaction,
-        sortType,
-        timeFrame,
-        sourceId: sourceId ?? undefined,
-        spaceId: spaceId ?? undefined,
-        limit,
-        include: includeList,
-        topCommentsLimit,
-        topCommentsSortByReaction,
-        followedOnly,
-        keywordsFilters: keywordsFilters ?? undefined,
-        titleFilters: titleFilters ?? undefined,
-        contentFilters: contentFilters ?? undefined,
-        attachmentsFilters: attachmentsFilters ?? undefined,
-        locationFilters: locationFilters ?? undefined,
-        metadataFilters: metadataFilters ?? undefined,
-        nsfwFilter,
-        blockedFilter,
-        ...reputation,
-      });
-
-      if (response) {
-        const { data: newEntities, pagination } = response;
-        setEntities(newEntities);
-        hasMore.current = pagination.hasMore;
-        setHasMoreState(pagination.hasMore);
-      }
-    } catch (err) {
-      handleError(err, "Failed to reset profile entities:");
-    } finally {
-      loading.current = false;
-      setLoadingState(false);
-    }
-  }, [
-    fetchManyEntities,
-    limit,
-    sortBy,
-    sortByReaction,
-    sortDir,
-    sortType,
-    timeFrame,
-    sourceId,
-    spaceId,
-    userId,
-    includeList,
-    topCommentsLimit,
-    topCommentsSortByReaction,
-    followedOnly,
-    filtersKey,
-    nsfwFilter,
-    blockedFilter,
-    reputationKey,
-  ]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const loadMore = () => {
-    if (loading.current || !hasMore.current) return;
-    setPage((prevPage) => {
-      return prevPage + 1;
-    });
-  };
-
-  useEffect(() => {
-    resetEntities();
-  }, [resetEntities]);
-
-  // useEffect to get a new batch of entities
-  useEffect(() => {
-    const loadMoreEntities = async () => {
-      loading.current = true;
-      setLoadingState(true);
-      try {
-        const response = await fetchManyEntities({
-          userId: userId ?? undefined,
-          page,
-          ...oneWaySortFields(sortBy, sortDir),
-          sortByReaction,
-          sortType,
-          timeFrame,
-          sourceId: sourceId ?? undefined,
-          spaceId: spaceId ?? undefined,
-          limit,
-          include: includeList,
-          topCommentsLimit,
-          topCommentsSortByReaction,
-          followedOnly,
-          keywordsFilters: keywordsFilters ?? undefined,
-          titleFilters: titleFilters ?? undefined,
-          contentFilters: contentFilters ?? undefined,
-          attachmentsFilters: attachmentsFilters ?? undefined,
-          locationFilters: locationFilters ?? undefined,
-          metadataFilters: metadataFilters ?? undefined,
-          nsfwFilter,
-          blockedFilter,
-          ...reputation,
-        });
-
-        if (response) {
-          const { data: newEntities, pagination } = response;
-          setEntities((prevEntities) => [...prevEntities, ...newEntities]);
-          hasMore.current = pagination.hasMore;
-          setHasMoreState(pagination.hasMore);
-        }
-      } catch (err) {
-        handleError(err, "Loading more entities failed:");
-      } finally {
-        loading.current = false;
-        setLoadingState(false);
-      }
-    };
-
-    // We only load more if the page changed
-    if (page > 1 && hasMore.current && !loading.current) {
-      loadMoreEntities();
-    }
-  }, [
+  // The one request builder for every page: a param can't be sent with page 1
+  // and left off page 2.
+  const buildParams = (page: number) => ({
+    userId: userId ?? undefined,
     page,
-    fetchManyEntities,
-    userId,
-    sortBy,
+    ...oneWaySortFields(sortBy, sortDir),
     sortByReaction,
-    sortDir,
     sortType,
     timeFrame,
-    sourceId,
-    spaceId,
+    sourceId: sourceId ?? undefined,
+    spaceId: spaceId ?? undefined,
     limit,
-    includeList,
+    include: includeKey ? (includeKey.split(",") as EntityInclude[]) : undefined,
     topCommentsLimit,
     topCommentsSortByReaction,
     followedOnly,
-    filtersKey,
+    keywordsFilters: keywordsFilters ?? undefined,
+    titleFilters: titleFilters ?? undefined,
+    contentFilters: contentFilters ?? undefined,
+    attachmentsFilters: attachmentsFilters ?? undefined,
+    locationFilters: locationFilters ?? undefined,
+    metadataFilters: metadataFilters ?? undefined,
     nsfwFilter,
     blockedFilter,
-    reputationKey,
-  ]); // eslint-disable-line react-hooks/exhaustive-deps
+    ...reputation,
+  });
+
+  // Serialized, so an inline filter object or `include` array (a fresh
+  // reference every render) doesn't restart the list.
+  const resetKey = JSON.stringify(buildParams(1));
+
+  const list = useListEngine<Entity, number>({
+    enabled: true,
+    resetKey,
+    fetchPage: pageNumberPaging((page) => fetchManyEntities(buildParams(page))),
+    errorLabel: "Failed to fetch entities:",
+  });
 
   return {
-    entities,
-    loading: loadingState,
-    hasMore: hasMoreState,
+    entities: list.items,
+    loading: list.loading,
+    error: list.error,
+    hasMore: list.hasMore,
     sortBy,
     sortByReaction,
     sortDir,
@@ -292,7 +164,8 @@ function useFetchManyEntitiesWrapper(
     setSortByReaction,
     setSortDir,
     setSortType,
-    loadMore,
+    loadMore: list.loadMore,
+    refetch: list.refetch,
   };
 }
 

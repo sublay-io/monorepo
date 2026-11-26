@@ -1,3 +1,5 @@
+import { useSublaySelector } from "../../store/hooks";
+import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
 import useProject from "../projects/useProject";
 import { useState } from "react";
 import {
@@ -112,8 +114,10 @@ function useFetchManyReputationGrantsWrapper(
   ].filter(Boolean).length;
   const canFetch = filterCount === 1 && !halfTarget;
 
-  // A different project is a different list.
+  // A different project is a different list, and so is a different viewer
+  // (results carry the viewer's reactions, follows, blocks).
   const { projectId } = useProject();
+  const viewerId = useSublaySelector(selectAuthUser)?.id ?? null;
 
   // The one request builder for every page: a filter can't be applied to
   // page 1 and dropped from page 2.
@@ -139,7 +143,7 @@ function useFetchManyReputationGrantsWrapper(
     enabled: canFetch,
     // Serialized, so an inline `include` array or `spaceReputation` object
     // doesn't restart the list.
-    resetKey: JSON.stringify([projectId, buildParams(1)]),
+    resetKey: JSON.stringify([projectId, viewerId, buildParams(1)]),
     fetchPage: async (cursor) => {
       const page = cursor ?? 1;
       const response = await fetchManyReputationGrants(buildParams(page));

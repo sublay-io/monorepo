@@ -1,3 +1,4 @@
+import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
 import { useState } from "react";
 import {
   CollectionEntityIncludeParam,
@@ -69,6 +70,10 @@ function useCollectionEntitiesWrapper(
   const { currentCollection } = useCollections();
   const [fetchCollectionEntitiesQuery] = useLazyFetchCollectionEntitiesQuery();
 
+  // A different viewer is a different list (an account change empties the
+  // collections in the store too).
+  const viewerId = useSublaySelector(selectAuthUser)?.id ?? null;
+
   const effectiveCollectionId = passedCollectionId ?? currentCollection?.id;
 
   // Read entities from shared Redux state — written here and by useCollectionsActions for optimistic updates
@@ -100,7 +105,7 @@ function useCollectionEntitiesWrapper(
     enabled: !!projectId && !!effectiveCollectionId,
     // Serialized, so an inline `include` array (a fresh reference every
     // render) doesn't restart the list.
-    resetKey: JSON.stringify(buildParams(1)),
+    resetKey: JSON.stringify([viewerId, buildParams(1)]),
     fetchPage: pageNumberPaging((page) =>
       fetchCollectionEntitiesQuery(buildParams(page)).unwrap()
     ),

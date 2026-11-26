@@ -1,3 +1,5 @@
+import { useSublaySelector } from "../../../store/hooks";
+import { selectUser as selectAuthUser } from "../../../store/slices/authSlice";
 import useProject from "../../projects/useProject";
 import {
   ChatMessage,
@@ -68,8 +70,10 @@ function useFetchManyChatMessagesWrapper(
 
   const fetchMany = useFetchManyChatMessages();
 
-  // A different project is a different list.
+  // A different project is a different list, and so is a different viewer
+  // (results carry the viewer's reactions, follows, blocks).
   const { projectId } = useProject();
+  const viewerId = useSublaySelector(selectAuthUser)?.id ?? null;
 
   // The one request builder for every page. The cursor is the id of the last
   // message loaded, the furthest one in the direction of travel (the oldest
@@ -93,7 +97,7 @@ function useFetchManyChatMessagesWrapper(
     enabled: !!conversationId,
     // Serialized, so an inline `filters` object or `include` array (a fresh
     // reference every render) doesn't restart the list.
-    resetKey: JSON.stringify([projectId, buildParams(null)]),
+    resetKey: JSON.stringify([projectId, viewerId, buildParams(null)]),
     fetchPage: async (cursor) => {
       const res = await fetchMany(buildParams(cursor));
       const last = res.data[res.data.length - 1];

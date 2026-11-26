@@ -6,7 +6,9 @@ import {
   resetAxiosMocks,
   makeEntity,
   okAxiosResponse,
+  makeAuthUser,
 } from "../../test-utils";
+import { setUser } from "../../store/slices/authSlice";
 import { axiosPrivate as axiosPrivateInstance } from "../../config/axios";
 import useFetchManyEntitiesWrapper from "./useFetchManyEntitiesWrapper";
 import type { PaginatedResponse } from "../../interfaces/PaginatedResponse";
@@ -417,5 +419,28 @@ describe("useFetchManyEntitiesWrapper", () => {
     const calls = axiosPrivate.calls("get");
     expect(calls).toHaveLength(2);
     expect(JSON.stringify(calls[1].config?.params)).toContain("blue");
+  });
+});
+
+describe("useFetchManyEntitiesWrapper — the viewer changing", () => {
+  it("starts over from page 1 when the signed-in user changes", async () => {
+    const { result, axiosPrivate, store } = renderHookWithAxios(
+      () => useFetchManyEntitiesWrapper({ followedOnly: true }),
+      {
+        user: makeAuthUser({ id: "user-a" }),
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "a-feed" })], true)),
+      },
+    );
+    await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["a-feed"]));
+
+    axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "b-feed" })], false));
+    act(() => {
+      store.dispatch(setUser(makeAuthUser({ id: "user-b" })));
+    });
+    await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["b-feed"]));
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(2);
+    expect(calls[1].config?.params).toMatchObject({ page: 1, followedOnly: true });
   });
 });

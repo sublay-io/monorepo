@@ -1,3 +1,5 @@
+import { useSublaySelector } from "../../store/hooks";
+import { selectUser as selectAuthUser } from "../../store/slices/authSlice";
 import useProject from "../projects/useProject";
 import { useState } from "react";
 import { oneWaySortFields } from "../../helpers/oneWaySorts";
@@ -114,8 +116,10 @@ function useFetchManyEntitiesWrapper(
   const [sortDir, setSortDir] = useState<SortDirection>(defaultSortDir);
   const [sortType, setSortType] = useState<SortType>(defaultSortType);
 
-  // A different project is a different list.
+  // A different project is a different list, and so is a different viewer
+  // (results carry the viewer's reactions, follows, blocks).
   const { projectId } = useProject();
+  const viewerId = useSublaySelector(selectAuthUser)?.id ?? null;
 
   // The one request builder for every page: a param can't be sent with page 1
   // and left off page 2.
@@ -146,7 +150,7 @@ function useFetchManyEntitiesWrapper(
 
   // Serialized, so an inline filter object or `include` array (a fresh
   // reference every render) doesn't restart the list.
-  const resetKey = JSON.stringify([projectId, buildParams(1)]);
+  const resetKey = JSON.stringify([projectId, viewerId, buildParams(1)]);
 
   const list = useListEngine<Entity, number>({
     enabled: true,

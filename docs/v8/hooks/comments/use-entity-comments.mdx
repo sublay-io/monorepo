@@ -122,6 +122,10 @@ A page can return at most 500 comments, nested replies included (see [Request si
   Loads the next page of top-level comments, or retries the page that failed. Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
 </ResponseField>
 
+<ResponseField name="refetch" type="() => Promise<void>">
+  Reloads the top-level comments from the first page with the current sort. The loaded comments stay until the new first page replaces them. Never throws — failures land in `error`, and `loadMore()` retries.
+</ResponseField>
+
 <ResponseField name="getComment" type="(commentId: string) => Comment | undefined">
   A loaded comment by ID — top-level or a reply — without its nested `replies`.
 </ResponseField>

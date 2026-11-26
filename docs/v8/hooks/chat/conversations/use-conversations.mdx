@@ -16,7 +16,7 @@ Fetches the authenticated user's conversation list with cursor-based pagination.
 import { useConversations } from "@sublay/react-js";
 
 function ConversationList() {
-  const { conversations, loading, hasMore, loadMore, refresh } =
+  const { conversations, loading, hasMore, loadMore, refetch } =
     useConversations({ types: ["direct", "group"] });
 
   return (
@@ -53,24 +53,28 @@ function ConversationList() {
   `true` while a fetch is in progress.
 </ResponseField>
 
+<ResponseField name="error" type="Error | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook showing the inbox.
+</ResponseField>
+
 <ResponseField name="hasMore" type="boolean">
-  `true` if there are more conversations to load.
+  `true` while `loadMore()` has something to fetch: a next page, or a load that failed.
 </ResponseField>
 
 <ResponseField name="loadMore" type="() => Promise<void>">
-  Fetches the next page of conversations and appends them to the list. No-ops if `loading` is `true` or `hasMore` is `false`.
+  Fetches the next page of conversations and appends it, or retries the load that failed (a failed first page is retried as the first page). Does nothing while a page is loading or when there is nothing more. Never rejects: a failure lands in `error`.
 </ResponseField>
 
-<ResponseField name="refresh" type="() => Promise<void>">
-  Resets the cursor and re-fetches the conversation list from the beginning.
+<ResponseField name="refetch" type="() => Promise<void>">
+  Reloads the first page of conversations. The loaded conversations stay until the new first page replaces them. Never rejects: a failure lands in `error`.
 </ResponseField>
 
 <ResponseField name="createGroup" type="(params: { name?: string; description?: string; metadata?: Record<string, unknown>; memberIds?: string[]; avatarFile?: { file: UploadFileInput; options: UploadImageOptions } }) => Promise<Conversation>">
-  Creates a new group conversation and resolves to the created [`Conversation`](/v8/data-models/conversation). The group's inbox row (its `ConversationPreview`) is then fetched and added to `conversations`; if that fetch fails, the group is still created and the next refresh lists it. `name` is up to 200 characters and `description` up to 1000. Pass `memberIds` to add initial members in the same request — the server creates their member rows in one transaction. The creator is added as admin automatically and is de-duplicated if also present in `memberIds`. Pass `avatarFile` (a browser `File` or `Blob`, or a React Native `{ uri, name, type }`, plus its processing options with a `mode`; see [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes)) to give the group its avatar in the same request: it is then sent as `multipart/form-data`, and needs the `files-images` bundle.
+  Creates a new group conversation and resolves to the created [`Conversation`](/v8/data-models/conversation). The group's inbox row (its `ConversationPreview`) is then fetched and added to `conversations`; if that fetch fails, the group is still created and the next `refetch` lists it. `name` is up to 200 characters and `description` up to 1000. Pass `memberIds` to add initial members in the same request — the server creates their member rows in one transaction. The creator is added as admin automatically and is de-duplicated if also present in `memberIds`. Pass `avatarFile` (a browser `File` or `Blob`, or a React Native `{ uri, name, type }`, plus its processing options with a `mode`; see [Image Processing Modes](/v8/sdk/storage/overview#image-processing-modes)) to give the group its avatar in the same request: it is then sent as `multipart/form-data`, and needs the `files-images` bundle.
 </ResponseField>
 
 ## Notes
 
-- The initial fetch runs on mount. Re-runs automatically when the authenticated project changes.
-- New messages received via socket update the `lastMessage` and `lastMessageAt` of the relevant conversation in the list automatically — no manual refresh needed.
+- The initial fetch runs on mount. Re-runs automatically when the authenticated project changes, and the first page reloads by itself after the chat socket reconnects.
+- New messages received via socket update the `lastMessage` and `lastMessageAt` of the relevant conversation in the list automatically — no `refetch` needed.
 - For integration guidance, see [Chat: Conversations](/v8/sdk/chat/conversations).

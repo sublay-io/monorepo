@@ -64,12 +64,16 @@ function NotificationFeed() {
   `true` while a fetch is in progress.
 </ResponseField>
 
-<ResponseField name="hasMore" type="boolean">
-  `true` if there are more notifications to load beyond the currently loaded set.
+<ResponseField name="error" type="Error | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted `useAppNotifications`: there is one notifications list.
 </ResponseField>
 
-<ResponseField name="loadMore" type="() => void">
-  Increments the internal page counter, triggering a fetch of the next page and appending results to `appNotifications`.
+<ResponseField name="hasMore" type="boolean">
+  `true` while `loadMore()` has something to fetch: a next page, or a load that failed.
+</ResponseField>
+
+<ResponseField name="loadMore" type="() => Promise<void>">
+  Load the next page of notifications and append it, or retry the load that failed (a failed first page is retried as the first page). Does nothing while a page is loading or when there is nothing more. Never rejects: a failure lands in `error`.
 </ResponseField>
 
 <ResponseField name="markNotificationAsRead" type="({ notificationId: string }) => Promise<void>">
@@ -80,8 +84,8 @@ function NotificationFeed() {
   Marks all of the current user's notifications as read. Applies an optimistic update immediately.
 </ResponseField>
 
-<ResponseField name="resetAppNotifications" type="() => Promise<void>">
-  Clears the current notification list and re-fetches from page 1. Useful for pull-to-refresh.
+<ResponseField name="refetch" type="() => Promise<void>">
+  Reload page 1. The loaded notifications stay until the new first page replaces them. Useful for pull-to-refresh. Never rejects: a failure lands in `error`.
 </ResponseField>
 
 <Note>

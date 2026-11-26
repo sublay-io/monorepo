@@ -130,16 +130,24 @@ const children = await fetchMySpaces({ parentSpaceId: "parent-space-id" });
   `true` while fetching.
 </ResponseField>
 
+<ResponseField name="error" type="Error | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it.
+</ResponseField>
+
 <ResponseField name="hasMore" type="boolean">
-  `true` if there are more pages to load.
+  `true` while `loadMore()` has something to fetch: a next page, or a load that failed.
 </ResponseField>
 
 <ResponseField name="fetchSpaces" type="function">
   Trigger a new fetch with the given filters and configuration. Resets to page 1.
 </ResponseField>
 
-<ResponseField name="loadMore" type="function">
-  Fetch the next page of results and append to the current list.
+<ResponseField name="loadMore" type="() => Promise<void>">
+  Fetch the next page of results and append it, or retry the load that failed. Never rejects: a failure lands in `error`.
+</ResponseField>
+
+<ResponseField name="refetch" type="() => Promise<void>">
+  Reload page 1 with the list's stored filters, sort and config. The loaded spaces stay until the new first page replaces them. Never rejects.
 </ResponseField>
 
 <ResponseField name="createSpace" type="function">

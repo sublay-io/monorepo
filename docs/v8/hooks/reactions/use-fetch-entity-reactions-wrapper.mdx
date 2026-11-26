@@ -73,14 +73,18 @@ function WhoReacted({ entityId }: { entityId: string }) {
   `true` while fetching the initial page or loading more.
 </ResponseField>
 
+<ResponseField name="error" type="Error | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it.
+</ResponseField>
+
 <ResponseField name="hasMore" type="boolean">
-  `true` if additional pages are available.
+  `true` while `loadMore()` has something to fetch: a next page, or a load that failed.
 </ResponseField>
 
-<ResponseField name="loadMore" type="() => void">
-  Load the next page of reactions. Appends to the existing list.
+<ResponseField name="loadMore" type="() => Promise<void>">
+  Load the next page of reactions and append it, or retry the load that failed. With `autoFetch` off, the first call loads page 1. Does nothing while a load is running or when there is nothing more. Never rejects: a failure lands in `error`.
 </ResponseField>
 
-<ResponseField name="refetch" type="() => void">
-  Reset and re-fetch from page 1.
+<ResponseField name="refetch" type="() => Promise<void>">
+  Reload from page 1. The loaded reactions stay until the new first page replaces them. Never rejects: a failure lands in `error`.
 </ResponseField>

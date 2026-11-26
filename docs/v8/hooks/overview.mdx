@@ -8,3 +8,33 @@ Browse the full reference for all Sublay hooks, organized by feature area. Each 
 Hooks resolve to the plain value: a count is a `number`, an unpaged list an array and a single record the record itself, with no one-field wrapper such as `{ count }` or `{ data }`. Answers that carry several fields (a status check, for example) stay records, paginated hooks keep their paging, and fetch-or-create hooks ([`useFetchOrCreateEntityByForeignId`](/v8/hooks/entities/use-fetch-or-create-entity-by-foreign-id), [`useCreateDirectConversation`](/v8/hooks/chat/conversations/use-create-direct-conversation)) resolve to `{ <record>, created }`, where `created` is `true` when the call created the record. Actions that are safe to repeat, such as adding a chat member, blocking a user or joining a space, are not fetch-or-create: they give the same response whether or not this call made the change.
 
 For higher-level integration guidance, see the [SDK Reference](/v8/sdk/getting-started).
+
+## List hooks
+
+Every hook that returns a paged list with paging controls (`useEntityList`, `useSpaceList`, `useWorkspaceList`, `useAppNotifications`, `useConversations`, `useLiveChatMessages`, `useMessageThread`, `useEntityComments`, `useCommentSection`, `useReplies` and the `use…Wrapper` hooks) returns the same controls:
+
+- **`loading: boolean`** — `true` while a page is loading.
+- **`error: Error | null`** — the last load failure. Cleared when the next load starts.
+- **`hasMore: boolean`** — whether `loadMore()` has anything to fetch: a next page, or a load that failed. After a failure it is `true`.
+- **`loadMore: () => Promise<void>`** — loads the next page in the list's own reading order, or retries the load that failed (a failed first page is retried as the first page). Does nothing while a load is running or when there is nothing more. Never rejects: failures land in `error`.
+- **`refetch: () => Promise<void>`** — reloads from the first page with the current filters and sort. What is loaded stays until the new first page replaces it. Never rejects.
+
+A response that arrives after the query changed (new filters, sort or ids, or a `refetch` that started since) is dropped. Two `loadMore()` calls in the same tick load one page, and filter objects or `include` arrays written inline don't cause refetching.
+
+The store-backed lists (`useEntityList`, `useSpaceList`, `useWorkspaceList`, `useAppNotifications`, `useConversations`, `useLiveChatMessages`) share `loading` and `error` across every mounted hook on the same list: the same `listId`, the same conversation or thread, the one notifications list, the one inbox. On `useEntityList`, `useSpaceList` and `useWorkspaceList`, `loadMore` also does nothing while a debounced filter change is waiting to be fetched.
+
+```tsx
+const { entities, loading, error, hasMore, loadMore } = useFetchManyEntitiesWrapper({ limit: 20 });
+
+return (
+  <>
+    {entities.map((entity) => <EntityCard key={entity.id} entity={entity} />)}
+    {error && <p>Couldn't load entities.</p>}
+    {hasMore && (
+      <button onClick={() => loadMore()} disabled={loading}>
+        {error ? "Try again" : "Load more"}
+      </button>
+    )}
+  </>
+);
+```

@@ -15,14 +15,14 @@ This guide covers working with messages inside a conversation: loading the messa
 import { useLiveChatMessages } from "@sublay/react-js";
 
 function MessageList({ conversationId }: { conversationId: string }) {
-  const { messages, loading, hasMore, loadOlder } = useLiveChatMessages({
+  const { messages, loading, hasMore, loadMore } = useLiveChatMessages({
     conversationId,
   });
 
   return (
     <div>
       {hasMore && (
-        <button onClick={loadOlder} disabled={loading}>
+        <button onClick={loadMore} disabled={loading}>
           Load older messages
         </button>
       )}
@@ -43,7 +43,7 @@ function MessageList({ conversationId }: { conversationId: string }) {
 }
 ```
 
-Messages are sorted oldest-first in the returned array. `loadOlder` fetches messages older than the oldest currently loaded.
+Messages are sorted oldest-first in the returned array. `loadMore` fetches messages older than the oldest currently loaded, or retries a load that failed (the failure is in `error`); `refetch` reloads the latest page.
 
 To include the messages' images and files in the response, pass `include: "files"` (or an array, such as `["files", "grants"]`):
 
@@ -66,6 +66,8 @@ const { messages, loading, hasMore, loadMore, refetch } =
     filters: { hasReplies: true },
   });
 ```
+
+Its `loadMore` follows `sortDir`: older messages with `"desc"` (the default), newer ones with `"asc"`.
 
 See [`useFetchManyChatMessages`](/v8/hooks/chat/messages/use-fetch-many-chat-messages).
 

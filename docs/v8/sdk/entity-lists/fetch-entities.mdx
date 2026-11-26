@@ -126,7 +126,7 @@ Choose it based on how often new entities arrive:
 
 ## Infinite Scroll
 
-Call `loadMore()` to append the next page. The hook tracks pagination state internally.
+Call `loadMore()` to append the next page. The hook tracks pagination state internally. A failed load lands in `error` and keeps `hasMore` `true`, so the same `loadMore()` retries it; `refetch()` reloads page 1 with the list's stored filters, sort and config.
 
 ```tsx
 <button onClick={loadMore} disabled={loading || !hasMore}>
@@ -134,7 +134,7 @@ Call `loadMore()` to append the next page. The hook tracks pagination state inte
 </button>
 ```
 
-`hasMore` reflects the value returned by the server, based on the total item count.
+`hasMore` reflects the value returned by the server, based on the total item count, and is also `true` after a failed load.
 
 ## Creating Entities Within a List
 

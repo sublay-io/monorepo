@@ -19,7 +19,7 @@ Requires the `reputation` bundle on the project. See [Bundles](/v8/bundles) and 
 |------|---------|
 | [`useCreateReputationGrant`](/v8/hooks/reputation/use-create-reputation-grant) | Transfer reputation from the logged-in user to another user. |
 | [`useFetchManyReputationGrants`](/v8/hooks/reputation/use-fetch-many-reputation-grants) | One-shot list query (low-level). |
-| [`useFetchManyReputationGrantsWrapper`](/v8/hooks/reputation/use-fetch-many-reputation-grants-wrapper) | Stateful, paginated list with `loadMore` and `refresh`. |
+| [`useFetchManyReputationGrantsWrapper`](/v8/hooks/reputation/use-fetch-many-reputation-grants-wrapper) | Stateful, paginated list with `loadMore` and `refetch`. |
 
 There is **no Redux store and no provider** for grants. Lists are local state held by the wrapper hook, and per-item totals ride along on the items themselves.
 

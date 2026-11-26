@@ -285,6 +285,10 @@ function CommentList() {
   Loads the next page of top-level comments (with the section's `replyDepth`), or retries the page that failed. When the entity lookup failed, it retries that lookup first; the comments then load on their own once the entity is found. Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
 </ResponseField>
 
+<ResponseField name="refetch" type="() => Promise<void>">
+  Reloads the top-level comments from the first page with the current sort. The loaded comments stay until the new first page replaces them. When the entity lookup failed, it retries that lookup instead. Never throws — failures land in `error`.
+</ResponseField>
+
 <ResponseField name="getComment" type="(commentId: string) => Comment | undefined">
   A loaded comment by ID — top-level or a reply — without its nested `replies`.
 </ResponseField>

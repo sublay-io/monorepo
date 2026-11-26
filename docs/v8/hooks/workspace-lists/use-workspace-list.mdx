@@ -59,8 +59,12 @@ function WorkspaceSwitcher() {
   `true` while fetching.
 </ResponseField>
 
+<ResponseField name="error" type="Error | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook on the same `listId`.
+</ResponseField>
+
 <ResponseField name="hasMore" type="boolean">
-  `true` if more pages are available.
+  `true` while `loadMore()` has something to fetch: a next page, or a load that failed.
 </ResponseField>
 
 <ResponseField name="fetchWorkspaces" type="function">
@@ -86,12 +90,12 @@ function WorkspaceSwitcher() {
   Every page, including `loadMore` and `refetch`, is fetched with the filters in use.
 </ResponseField>
 
-<ResponseField name="loadMore" type="() => void">
-  Fetch the next page and append it. Does nothing before the first `fetchWorkspaces`, while a fetch is running, or when `hasMore` is `false`.
+<ResponseField name="loadMore" type="() => Promise<void>">
+  Load the next page of workspaces and append it, or retry the load that failed (a failed first page is retried as the first page). Does nothing before the first `fetchWorkspaces`, while a load is running on this list, while a debounced filter change is waiting to be fetched, or when there is nothing more. Never rejects: a failure lands in `error`.
 </ResponseField>
 
-<ResponseField name="refetch" type="() => void">
-  Fetch page 1 again with the current filters and page size, replacing the list. Does nothing before the first `fetchWorkspaces`.
+<ResponseField name="refetch" type="() => Promise<void>">
+  Reload page 1 with the list's stored filters, sort and config; a debounced filter change still waiting runs now instead. The loaded workspaces stay until the new first page replaces them. Does nothing before the first `fetchWorkspaces`. Never rejects: a failure lands in `error`.
 </ResponseField>
 
 <ResponseField name="createWorkspace" type="function">

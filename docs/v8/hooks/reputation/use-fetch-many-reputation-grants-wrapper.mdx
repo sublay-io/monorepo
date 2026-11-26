@@ -1,14 +1,14 @@
 ---
 title: "useFetchManyReputationGrantsWrapper"
-description: "Stateful, paginated reputation-grants list with load-more and refresh"
+description: "Stateful, paginated reputation-grants list with load-more and refetch"
 icon: "plug"
 ---
 
 ## Overview
 
-`useFetchManyReputationGrantsWrapper` wraps [`useFetchManyReputationGrants`](/v8/hooks/reputation/use-fetch-many-reputation-grants) into a ready-to-render list: it holds the accumulated `grants`, tracks `loading` / `hasMore`, keeps the target `summary`, and exposes `loadMore` and `refresh`.
+`useFetchManyReputationGrantsWrapper` wraps [`useFetchManyReputationGrants`](/v8/hooks/reputation/use-fetch-many-reputation-grants) into a ready-to-render list: it holds the accumulated `grants`, tracks `loading` / `hasMore`, keeps the target `summary`, and exposes `loadMore` and `refetch`.
 
-Changing any filter prop (or calling `refresh`) resets the list to page 1.
+Changing any filter prop (or calling `refetch`) reloads the list from page 1.
 
 The server requires exactly one filter shape. With none supplied — or with two — the hook stays **idle** rather than issuing a request it knows will fail: `grants` is empty, `summary` is `null`, `loading` is `false`, and `hasMore` is `false`. That makes it safe to mount with a `targetId` that hasn't resolved yet.
 
@@ -20,7 +20,7 @@ Requires the `reputation` bundle.
 import { useFetchManyReputationGrantsWrapper } from "@sublay/react-js";
 
 function WhoRewardedThis({ commentId }: { commentId: string }) {
-  const { grants, summary, loading, hasMore, loadMore, refresh } =
+  const { grants, summary, loading, hasMore, loadMore, refetch } =
     useFetchManyReputationGrantsWrapper({
       targetType: "comment",
       targetId: commentId,
@@ -49,7 +49,7 @@ function WhoRewardedThis({ commentId }: { commentId: string }) {
 }
 ```
 
-Call `refresh` after issuing a grant to pull the new row and updated totals.
+Call `refetch` after issuing a grant to pull the new row and updated totals.
 
 ## Parameters
 
@@ -74,9 +74,10 @@ Call `refresh` after issuing a grant to pull the new row and updated totals.
   `{ total, count, viewerTotal }` for the target. Populated **only** on the target filter shape; `null` otherwise.
 </ResponseField>
 <ResponseField name="loading" type="boolean">`true` while fetching.</ResponseField>
-<ResponseField name="hasMore" type="boolean">Whether more pages remain.</ResponseField>
-<ResponseField name="loadMore" type="() => void">Advance to the next page and append.</ResponseField>
-<ResponseField name="refresh" type="() => void">Re-run the query from page 1.</ResponseField>
+<ResponseField name="error" type="Error | null">The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it.</ResponseField>
+<ResponseField name="hasMore" type="boolean">`true` while `loadMore()` has something to fetch: a next page, or a load that failed.</ResponseField>
+<ResponseField name="loadMore" type="() => Promise<void>">Load the next page and append it, or retry the load that failed. Does nothing while a load is running or when there is nothing more. Never rejects: a failure lands in `error`.</ResponseField>
+<ResponseField name="refetch" type="() => Promise<void>">Reload from page 1 with the current filters. The loaded grants stay until the new first page replaces them. Never rejects: a failure lands in `error`.</ResponseField>
 
 <Note>
   **Chat message targets are private to their conversation.** With `targetType: "message"`, the list is populated only when the logged-in user is a member of that message's conversation — someone who has left it still counts; for anyone outside it, `grants` stays empty and `summary` comes back as `{ total: 0, count: 0, viewerTotal: 0 }` rather than erroring. The `recipientId` / `senderId` shapes apply the same test per row, so a user's own feed keeps the grants made on messages in their own conversations while a caller outside them never sees those rows. Grants on a message moderation has removed are hidden on both shapes, members included. Grants tied to a space the viewer can't read, or given on an entity or comment they can't read, are left out of every shape and its `summary` — see [Grants follow space reading](/v8/data-models/reputation-grant#grants-follow-space-reading). See [useFetchManyReputationGrants](/v8/hooks/reputation/use-fetch-many-reputation-grants#chat-message-targets).

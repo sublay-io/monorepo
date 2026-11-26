@@ -95,16 +95,24 @@ The `config` object passed to `fetchEntities` accepts an optional `spaceReputati
   `true` while a fetch or load-more is in progress.
 </ResponseField>
 
+<ResponseField name="error" type="Error | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook on the same `listId`.
+</ResponseField>
+
 <ResponseField name="hasMore" type="boolean">
-  `true` when there are more pages to load.
+  `true` while `loadMore()` has something to fetch: a next page, or a load that failed.
 </ResponseField>
 
 <ResponseField name="fetchEntities" type="(filters, sort?, config?, options?) => void">
   Loads the first page with the given filters, sort, and config. Debounced by default (800ms). See [Fetching Entities](/v8/sdk/entity-lists/fetch-entities) for the full parameter reference.
 </ResponseField>
 
-<ResponseField name="loadMore" type="() => void">
-  Appends the next page of results. Must be called after `fetchEntities` has been invoked at least once.
+<ResponseField name="loadMore" type="() => Promise<void>">
+  Load the next page of entities and append it, or retry the load that failed (a failed first page is retried as the first page). Does nothing before the first `fetchEntities`, while a load is running on this list, while a debounced filter change is waiting to be fetched, or when there is nothing more. Never rejects: a failure lands in `error`.
+</ResponseField>
+
+<ResponseField name="refetch" type="() => Promise<void>">
+  Reload page 1 with the list's stored filters, sort and config; a debounced filter change still waiting runs now instead. The loaded entities stay until the new first page replaces them. Does nothing before the first `fetchEntities`. Never rejects: a failure lands in `error`.
 </ResponseField>
 
 <ResponseField name="createEntity" type="(props: EntityListCreateEntityProps) => Promise<Entity | undefined>">

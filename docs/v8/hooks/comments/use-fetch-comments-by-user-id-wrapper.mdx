@@ -110,6 +110,10 @@ The opt-in `spaceReputation` object is accepted too; only spaces the viewer can 
   Loads the next page, or retries the page that failed. Does nothing while a page is loading or when `hasMore` is `false`, and never throws — failures land in `error`.
 </ResponseField>
 
+<ResponseField name="refetch" type="() => Promise<void>">
+  Reloads from the first page with the current filters and sort. The loaded comments stay until the new first page replaces them. Never rejects — failures land in `error`.
+</ResponseField>
+
 <ResponseField name="sortBy" type="CommentsSortByOptions">
   Current sort.
 </ResponseField>

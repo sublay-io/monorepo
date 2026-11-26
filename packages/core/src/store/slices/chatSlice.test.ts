@@ -1034,6 +1034,49 @@ describe("chatSlice — replaceMessages", () => {
     expect(bucket.oldestMessageId).toBe("message-5");
     expect(bucket.newestMessageId).toBe("message-9");
   });
+
+  it("keeps the held files and grants of a message the page brings again without them", () => {
+    const files = [{ id: "file-1" }] as any;
+    const grants = { total: 2 } as any;
+    const plain = (id: string, at: string) => {
+      const { files: _f, grants: _g, ...rest } = msg(id, at) as any;
+      return rest;
+    };
+    let state = baseState({
+      messages: {
+        [CONV]: {
+          items: [msg("message-1", "2024-01-01T00:00:01.000Z", { files, grants })],
+          loading: false,
+          hasMore: false,
+          oldestMessageId: "message-1",
+          newestMessageId: "message-1",
+        },
+      },
+    });
+    state = reducer(
+      state,
+      replaceMessages({
+        conversationId: CONV,
+        messages: [plain("message-1", "2024-01-01T00:00:01.000Z"), plain("message-2", "2024-01-01T00:00:02.000Z")],
+        hasMore: false,
+      }),
+    );
+    const [first, second] = state.messages[CONV].items;
+    expect(first.files).toEqual(files);
+    expect(first.grants).toEqual(grants);
+    expect("files" in second).toBe(false);
+
+    // A page that carries the field wins.
+    state = reducer(
+      state,
+      replaceMessages({
+        conversationId: CONV,
+        messages: [msg("message-1", "2024-01-01T00:00:01.000Z", { files: [] })],
+        hasMore: false,
+      }),
+    );
+    expect(state.messages[CONV].items[0].files).toEqual([]);
+  });
 });
 
 describe("chatSlice — deleted and removed placeholders (S#227)", () => {

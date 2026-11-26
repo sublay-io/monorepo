@@ -44,7 +44,7 @@ describe("useConnectionManager", () => {
     axiosPrivate.mockResponse("post", sent, 201);
 
     await act(async () => {
-      await result.current.sendConnectionRequest("Hi there");
+      await result.current.sendConnectionRequest({ message: "Hi there" });
     });
 
     expect(result.current.connectionStatus).toBe("pending-sent");

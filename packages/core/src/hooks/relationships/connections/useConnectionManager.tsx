@@ -32,7 +32,7 @@ export interface UseConnectionManagerValues {
   /** The connection row (`user` = `userId`), or null when there is none. */
   connection: ConnectionRow | null;
   loading: boolean;
-  sendConnectionRequest: (message?: string) => Promise<void>;
+  sendConnectionRequest: (props?: { message?: string }) => Promise<void>;
   acceptConnectionRequest: () => Promise<void>;
   declineConnectionRequest: () => Promise<void>;
   withdrawConnectionRequest: () => Promise<void>;
@@ -87,7 +87,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
   }, [loadConnectionStatus]);
 
   const sendConnectionRequest = useCallback(
-    async (message?: string) => {
+    async ({ message }: { message?: string } = {}) => {
       if (
         (connectionStatus !== "none" && connectionStatus !== "declined-received") ||
         loading ||

@@ -219,7 +219,7 @@ export interface UseCommentSectionDataValues {
   repliedToComment: Partial<Comment> | null;
   setRepliedToComment: (newRepliedToComment: Comment | null) => void;
   showReplyBanner: boolean;
-  setShowReplyBanner: ({ newState }: { newState: boolean }) => void;
+  setShowReplyBanner: (show: boolean) => void;
   /** Reply under `comment`: it becomes the reply target and the banner shows. */
   handleDeepReply: (comment: Comment) => void;
   /**
@@ -532,9 +532,6 @@ export function useCommentSectionDataInternal(
   const [repliedToComment, setRepliedToComment] =
     useState<Partial<Comment> | null>(null);
   const [showReplyBanner, setShowReplyBanner] = useState(false);
-  const setShowReplyBannerHandler = useCallback(({ newState }: { newState: boolean }) => {
-    setShowReplyBanner(newState);
-  }, []);
   const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
   // The latest reply target, for a create that settles after it changed.
   const replyTargetRef = useRef(repliedToComment);
@@ -1278,7 +1275,7 @@ export function useCommentSectionDataInternal(
     repliedToComment,
     setRepliedToComment,
     showReplyBanner,
-    setShowReplyBanner: setShowReplyBannerHandler,
+    setShowReplyBanner,
 
     handleShallowReply,
     handleDeepReply,

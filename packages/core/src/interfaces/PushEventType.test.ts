@@ -10,7 +10,7 @@ import { PUSH_EVENT_TYPES, type PushEventType } from "./PushEventType";
  * server, and the server's own compile-time exhaustiveness check only guards
  * its array against its own union. So the mirror has drifted silently before —
  * `reputation-grant` shipped server-side and was missing here, which made
- * `updatePreferences(["reputation-grant"])` a compile error and hid the type
+ * `updatePreferences({ disabledTypes: ["reputation-grant"] })` a compile error and hid the type
  * from any settings UI built by iterating this list.
  *
  * When the server adds a type, add it here in the server's position and to
@@ -49,7 +49,7 @@ describe("PUSH_EVENT_TYPES", () => {
     // `notification-preferences.schema.ts` list can never receive it.
     expect(PUSH_EVENT_TYPES).toContain("reputation-grant");
 
-    // Type-level half of the same guarantee: this is the exact argument
+    // Type-level half of the same guarantee: this is the exact `disabledTypes` that
     // `useNotificationPreferences().updatePreferences` takes, and it stops
     // compiling if "reputation-grant" is not a member of the union.
     const disabledTypes: PushEventType[] = ["reputation-grant"];

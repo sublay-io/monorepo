@@ -786,8 +786,10 @@ export {
   useUploadFile,
   useUploadImage,
   type RNFile,
-  type UploadFileOptions,
+  type UploadFileProps,
+  type UseUploadFileValues,
   type UseUploadImageOptions,
+  type UploadImageProps,
   type UseUploadImageValues,
 } from "./hooks/storage";
 

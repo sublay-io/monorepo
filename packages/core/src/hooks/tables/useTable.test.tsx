@@ -180,7 +180,7 @@ describe("useTable", () => {
     act(() => result.current.setPage(5));
     await waitFor(() => expect(result.current.view.page).toBe(5));
 
-    act(() => result.current.setSort("name", "desc"));
+    act(() => result.current.setSort({ sortBy: "name", sortDir: "desc" }));
     await waitFor(() => expect(result.current.view.sortBy).toBe("name"));
     expect(result.current.view.sortDir).toBe("desc");
     expect(result.current.view.page).toBe(1);
@@ -194,7 +194,7 @@ describe("useTable", () => {
 
     let updated: { id: string; name: string } | undefined;
     await act(async () => {
-      updated = await result.current.updateRow("1", { name: "updated" });
+      updated = await result.current.updateRow({ rowId: "1", data: { name: "updated" } });
     });
     expect(updated?.name).toBe("updated");
 
@@ -208,7 +208,7 @@ describe("useTable", () => {
 
     let outcome: unknown = "unset";
     await act(async () => {
-      outcome = await result.current.deleteRow("1");
+      outcome = await result.current.deleteRow({ rowId: "1" });
     });
     expect(outcome).toBeUndefined();
 
@@ -221,7 +221,7 @@ describe("useTable", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     await act(async () => {
-      await result.current.deleteRow("1", { force: true });
+      await result.current.deleteRow({ rowId: "1", force: true });
     });
 
     const deleteCall = fetchHandle.calls().find((c) => c.method === "DELETE");
@@ -236,7 +236,7 @@ describe("useTable", () => {
 
     let restored: { id: string; deletedAt: string | null } | undefined;
     await act(async () => {
-      restored = await result.current.restoreRow("1");
+      restored = await result.current.restoreRow({ rowId: "1" });
     });
     expect(restored?.deletedAt).toBeNull();
 
@@ -361,7 +361,7 @@ describe("useTable", () => {
       act(() => result.current.setFilters([{ column: "name", operator: "eq", value: "x" }]));
       await waitFor(() => expect(lastUrl()).toContain("filters="));
 
-      act(() => result.current.setSort("name", "desc"));
+      act(() => result.current.setSort({ sortBy: "name", sortDir: "desc" }));
       await waitFor(() => expect(lastUrl()).toContain("sortBy=name"));
       expect(lastUrl()).toContain("sortDir=desc");
 

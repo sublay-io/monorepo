@@ -81,7 +81,8 @@ describe("useUploadImage", () => {
 
     let returned: SublayFile | undefined;
     await act(async () => {
-      returned = await result.current.uploadImage(file, {
+      returned = await result.current.uploadImage({
+        file,
         mode: "exact-dimensions",
         dimensions: { thumbnail: { width: 100, height: 100 } },
       });
@@ -112,7 +113,8 @@ describe("useUploadImage", () => {
     const file = new File(["binary"], "photo.png", { type: "image/png" });
 
     await act(async () => {
-      await result.current.uploadImage(file, {
+      await result.current.uploadImage({
+        file,
         mode: "aspect-ratio-width-based",
         aspectRatio: { width: 16, height: 9 },
         widths: { small: 320, large: 1280 },
@@ -137,7 +139,8 @@ describe("useUploadImage", () => {
     const file = new File(["binary"], "photo.png", { type: "image/png" });
 
     await act(async () => {
-      await result.current.uploadImage(file, {
+      await result.current.uploadImage({
+        file,
         mode: "multi-aspect-ratio",
         aspectRatios: [
           { width: 1, height: 1 },
@@ -168,7 +171,8 @@ describe("useUploadImage", () => {
     const file = new File(["binary"], "photo.png", { type: "image/png" });
 
     await act(async () => {
-      await result.current.uploadImage(file, {
+      await result.current.uploadImage({
+        file,
         mode: "original-aspect",
         sizes: { full: 1080 },
         fit: "inside",
@@ -203,7 +207,8 @@ describe("useUploadImage", () => {
     const file = new File(["binary"], "photo.png", { type: "image/png" });
 
     await act(async () => {
-      await result.current.uploadImage(file, {
+      await result.current.uploadImage({
+        file,
         mode: "original-aspect",
         sizes: { full: 1080 },
         metadata: { label: "cover" },
@@ -229,7 +234,8 @@ describe("useUploadImage", () => {
 
     let uploadPromise!: Promise<SublayFile>;
     act(() => {
-      uploadPromise = result.current.uploadImage(file, {
+      uploadPromise = result.current.uploadImage({
+        file,
         mode: "original-aspect",
         sizes: { full: 1080 },
         onProgress,
@@ -267,7 +273,7 @@ describe("useUploadImage", () => {
     const file = new File(["binary"], "photo.png", { type: "image/png" });
 
     await expect(
-      result.current.uploadImage(file, { mode: "original-aspect", sizes: { full: 1080 } }),
+      result.current.uploadImage({ file,  mode: "original-aspect", sizes: { full: 1080 } }),
     ).rejects.toMatchObject({ response: { status: 500 } });
 
     await waitFor(() => expect(result.current.uploading).toBe(false));
@@ -281,7 +287,7 @@ describe("useUploadImage", () => {
     const file = new File(["binary"], "photo.png", { type: "image/png" });
 
     await expect(
-      result.current.uploadImage(file, { mode: "original-aspect", sizes: { full: 1080 } }),
+      result.current.uploadImage({ file,  mode: "original-aspect", sizes: { full: 1080 } }),
     ).rejects.toThrow("No projectId available.");
     expect(axiosPrivate.calls("post")).toHaveLength(0);
   });
@@ -290,7 +296,8 @@ describe("useUploadImage", () => {
     const { result, axiosPrivate } = renderHookWithAxios(() => useUploadImage());
 
     await expect(
-      result.current.uploadImage(null as any, {
+      result.current.uploadImage({
+        file: null as any,
         mode: "original-aspect",
         sizes: { full: 1080 },
       }),

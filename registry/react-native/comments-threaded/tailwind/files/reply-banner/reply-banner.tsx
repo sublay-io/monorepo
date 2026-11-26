@@ -52,7 +52,7 @@ function ReplyBanner() {
       <Pressable
         onPress={() => {
           setRepliedToComment?.(null);
-          setShowReplyBanner?.({ newState: false });
+          setShowReplyBanner?.(false);
         }}
         accessibilityRole="button"
         accessibilityLabel={strings.cancelReply}

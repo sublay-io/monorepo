@@ -22,7 +22,7 @@ export interface UseNotificationPreferencesValues {
   /**
    * Replace the user's disabled-types set (upsert). Server-exact type names.
    */
-  updatePreferences: (disabledTypes: PushEventType[]) => Promise<void>;
+  updatePreferences: (props: { disabledTypes: PushEventType[] }) => Promise<void>;
 }
 
 /**
@@ -50,7 +50,7 @@ function useNotificationPreferences(): UseNotificationPreferencesValues {
     useUpdateNotificationPreferencesMutation();
 
   const updatePreferences = useCallback(
-    async (disabledTypes: PushEventType[]): Promise<void> => {
+    async ({ disabledTypes }: { disabledTypes: PushEventType[] }): Promise<void> => {
       if (!projectId || !user) {
         throw new Error("No project ID or authenticated user available");
       }

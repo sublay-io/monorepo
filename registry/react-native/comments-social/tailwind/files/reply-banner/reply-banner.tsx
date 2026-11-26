@@ -38,7 +38,7 @@ const ReplyBanner = () => {
         <TouchableOpacity
           onPress={() => {
             setRepliedToComment?.(null);
-            setShowReplyBanner?.({ newState: false });
+            setShowReplyBanner?.(false);
           }}
           hitSlop={8}
           // 🎨 CUSTOMIZATION: Close button spacing from the screen's edge

@@ -45,17 +45,14 @@ export interface UseTableValues<T extends TableRow = TableRow> {
   setView: (view: Partial<TableViewState>) => void;
   setPage: (page: number) => void;
   setFilters: (filters: DbFilter[]) => void;
-  setSort: (sortBy: string | undefined, sortDir?: "asc" | "desc") => void;
+  setSort: (sort: { sortBy: string | undefined; sortDir?: "asc" | "desc" }) => void;
   setIncludeDeleted: (includeDeleted: boolean) => void;
 
   // Row mutations (projectId + tableName injected).
   createRow: (data: Record<string, unknown>) => Promise<T>;
-  updateRow: (rowId: string, data: Record<string, unknown>) => Promise<T>;
-  deleteRow: (
-    rowId: string,
-    opts?: { force?: boolean },
-  ) => Promise<void>;
-  restoreRow: (rowId: string) => Promise<T>;
+  updateRow: (props: { rowId: string; data: Record<string, unknown> }) => Promise<T>;
+  deleteRow: (props: { rowId: string; force?: boolean }) => Promise<void>;
+  restoreRow: (props: { rowId: string }) => Promise<T>;
 }
 
 /**
@@ -184,7 +181,7 @@ export function useTable<T extends TableRow = TableRow>(
   );
 
   const updateRow = useCallback(
-    async (rowId: string, rowData: Record<string, unknown>) => {
+    async ({ rowId, data: rowData }: { rowId: string; data: Record<string, unknown> }) => {
       const row = await updateRowMutation({
         projectId: projectId as string,
         tableName,
@@ -197,19 +194,19 @@ export function useTable<T extends TableRow = TableRow>(
   );
 
   const deleteRow = useCallback(
-    async (rowId: string, opts?: { force?: boolean }) => {
+    async ({ rowId, force }: { rowId: string; force?: boolean }) => {
       await deleteRowMutation({
         projectId: projectId as string,
         tableName,
         rowId,
-        force: opts?.force,
+        force,
       }).unwrap();
     },
     [deleteRowMutation, projectId, tableName],
   );
 
   const restoreRow = useCallback(
-    async (rowId: string) => {
+    async ({ rowId }: { rowId: string }) => {
       const row = await restoreRowMutation({
         projectId: projectId as string,
         tableName,
@@ -234,7 +231,7 @@ export function useTable<T extends TableRow = TableRow>(
       setView: update,
       setPage: (page) => update({ page }),
       setFilters: (filters) => update({ filters, page: 1 }),
-      setSort: (sortBy, sortDir) => update({ sortBy, sortDir, page: 1 }),
+      setSort: ({ sortBy, sortDir }) => update({ sortBy, sortDir, page: 1 }),
       setIncludeDeleted: (includeDeleted) => update({ includeDeleted, page: 1 }),
       createRow,
       updateRow,

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
 
 import {
@@ -85,6 +85,18 @@ function useAppNotifications({
   useEffect(() => {
     dispatch(setLimit(limit));
   }, [dispatch, limit]);
+
+  // A new page size after mount reloads page 1, so the next page isn't asked
+  // for at the new size (which would skip or repeat notifications). The mount
+  // itself is covered by the first-page effect below.
+  const limitRef = useRef(limit);
+  useEffect(() => {
+    if (limitRef.current === limit) return;
+    limitRef.current = limit;
+    if (projectId && user) refetch();
+    // Only a limit change triggers this; the other deps are read, not watched.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [limit]);
 
   // Fetch unread count on mount and when dependencies change
   useEffect(() => {

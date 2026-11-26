@@ -26,6 +26,7 @@ import {
 import type { ChatMessage } from "../interfaces/models/ChatMessage";
 import type { ConversationMember } from "../interfaces/models/ConversationMember";
 import { handleError } from "../utils/handleError";
+import { useSharedListStatus } from "../hooks/list/sharedListStatus";
 
 // ─── Context shape ────────────────────────────────────────────────────────────
 
@@ -69,6 +70,12 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
   const mark = useMarkConversationAsRead({ conversationId });
 
+  // The load status `useLiveChatMessages` keeps for this conversation: the
+  // reconnect catch-up below updates it too.
+  const { status: messagesStatus } = useSharedListStatus(
+    `chatMessages:${conversationId}`,
+  );
+
   // Keep a ref to the messages state so socket handlers can find latest messages
   const messagesRef = useRef<ChatMessage[]>([]);
   const reduxMessages = useSublaySelector(
@@ -106,6 +113,8 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     try {
       if (!anchorId) {
         await loadLatestPage();
+        // The conversation is up to date: a failed load is no longer pending.
+        messagesStatus.clearFailure();
         return;
       }
 
@@ -121,6 +130,9 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
           });
         } catch (err) {
           if (!isInvalidChatCursorError(err)) throw err;
+          // A fresh start: an older page still in flight (`loadMore`) must
+          // not land after it and reopen the gap.
+          messagesStatus.invalidate();
           const latest = await fetchMany({ conversationId, sortDir: "desc" });
           dispatch(
             replaceMessages({
@@ -130,6 +142,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
               hasMore: latest.pagination.hasMore,
             }),
           );
+          messagesStatus.clearFailure();
           return;
         }
         page.data.forEach((msg) => dispatch(upsertMessage(msg)));
@@ -140,10 +153,11 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         }
         after = last.id;
       }
+      messagesStatus.clearFailure();
     } catch (err) {
       handleError(err, "Failed to fetch missed messages");
     }
-  }, [projectId, conversationId, fetchMany, dispatch]);
+  }, [projectId, conversationId, fetchMany, dispatch, messagesStatus]);
 
   // ── Conversation data (messages, send, members, etc.) ─────────────────────
   // Called before the socket effects so upsertMember / removeMemberLocally are

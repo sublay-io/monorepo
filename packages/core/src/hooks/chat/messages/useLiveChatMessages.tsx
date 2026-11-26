@@ -336,13 +336,16 @@ function useLiveChatMessages({
         } catch (err) {
           if (after === null || !isInvalidChatCursorError(err)) throw err;
           // Start the fetched run over, as on open: forgetting the cursor
-          // keeps the next `loadMore` from paging from it again.
+          // keeps the next `loadMore` from paging from it again, and a page
+          // still in flight from it is dropped.
+          status.invalidate();
           dispatch(startThreadLoad({ parentMessageId }));
           try {
             merge(await fetchReplies(null));
           } finally {
             dispatch(setThreadLoading({ parentMessageId, loading: false }));
           }
+          status.clearFailure();
           return;
         }
         merge(page);
@@ -359,10 +362,12 @@ function useLiveChatMessages({
         }
         after = last.id;
       }
+      // The thread is up to date: a failed load is no longer pending.
+      status.clearFailure();
     } catch (err) {
       handleError(err, "Failed to fetch missed thread replies");
     }
-  }, [projectId, conversationId, parentMessageId, limit, include, fetchMany, dispatch]);
+  }, [projectId, conversationId, parentMessageId, limit, include, fetchMany, dispatch, status]);
 
   useEffect(() => {
     if (!socket || !isThread) return;

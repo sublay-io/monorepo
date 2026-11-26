@@ -682,6 +682,76 @@ describe("ConversationProvider", () => {
       expect(all[2].config.params).toMatchObject({ before: "message-2", sortDir: "desc" });
     });
 
+    it("a successful catch-up clears the error of a failed load", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")], true),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      await waitForMarked(axiosPrivate, "message-1");
+
+      axiosPrivate.mockError("get", 500);
+      await act(async () => {
+        await result.current.loadMore!();
+      });
+      await waitFor(() => expect(result.current.messagesError).toBeInstanceOf(Error));
+
+      axiosPrivate.mockResponse("get", page([msg("message-2", "2024-01-01T00:00:02.000Z")]));
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+      await waitFor(() => expect(result.current.messagesError).toBeNull());
+      await waitForMarked(axiosPrivate, "message-2");
+      vi.mocked(console.error).mockRestore();
+    });
+
+    it("an older page still in flight doesn't land after the catch-up started over", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")], true),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      await waitForMarked(axiosPrivate, "message-1");
+
+      let release!: (v: unknown) => void;
+      vi.mocked(axiosPrivateInstance.get).mockImplementationOnce(
+        () => new Promise((r) => { release = r; }) as never,
+      );
+      act(() => {
+        result.current.loadMore!();
+      });
+      axiosPrivate.mockError("get", 400, {
+        error: "Invalid cursor",
+        code: "chat/invalid-cursor",
+        param: "after",
+      });
+      axiosPrivate.mockResponse(
+        "get",
+        page(
+          [msg("message-3", "2024-01-01T00:00:03.000Z"), msg("message-2", "2024-01-01T00:00:02.000Z")],
+          true,
+        ),
+      );
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+      await waitFor(() =>
+        expect(result.current.messages!.map((m) => m.id)).toEqual(["message-2", "message-3"]),
+      );
+      await waitForMarked(axiosPrivate, "message-3");
+
+      await act(async () => {
+        release(okAxiosResponse(page([msg("message-0", "2024-01-01T00:00:00.500Z")], true), 200));
+        await new Promise((r) => setTimeout(r, 20));
+      });
+      expect(result.current.messages!.map((m) => m.id)).toEqual(["message-2", "message-3"]);
+    });
+
     it("anchors on the newest real message, not an optimistic one, when the socket drops", async () => {
       const fakeSocket = createFakeSocket();
       fakeSocket.connected = true;

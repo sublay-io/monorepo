@@ -2,7 +2,11 @@ import { useCallback } from "react";
 import { useStore } from "react-redux";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
 import type { SublayState } from "../../store/sublayReducers";
-import { runSharedListLoad, useSharedListStatus } from "../list/sharedListStatus";
+import {
+  runSharedListLoad,
+  sharedLoadMore,
+  useSharedListStatus,
+} from "../list/sharedListStatus";
 import {
   setPage,
   setLoading,
@@ -112,7 +116,7 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
     (first: boolean) =>
       runSharedListLoad(
         status,
-        first,
+        { first, errorLabel: "Failed to fetch notifications:" },
         async (isCurrent) => {
           if (!projectId || !user) return;
           const state = store.getState();
@@ -138,22 +142,18 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
           } finally {
             if (isCurrent()) dispatch(setLoading(false));
           }
-        },
-        "Failed to fetch notifications:"
+        }
       ),
     [status, store, dispatch, projectId, user, triggerFetchNotifications]
   );
 
   const loadMore = useCallback(async () => {
-    if (!projectId || !user || status.inFlight) return;
-    if (status.failed === "first") {
-      await loadPage(true);
-    } else if (
-      status.failed === "next" ||
-      selectAppNotificationsHasMore(store.getState())
-    ) {
-      await loadPage(false);
-    }
+    if (!projectId || !user) return;
+    await sharedLoadMore(status, {
+      hasMore: () => selectAppNotificationsHasMore(store.getState()),
+      retryFirst: () => loadPage(true),
+      next: () => loadPage(false),
+    });
   }, [projectId, user, status, store, loadPage]);
 
   // Reload page 1. The notifications stay until the new page replaces them.

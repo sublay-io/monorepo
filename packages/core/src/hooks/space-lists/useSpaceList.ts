@@ -3,7 +3,11 @@ import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
 import { useStore } from "react-redux";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
 import type { SublayState } from "../../store/sublayReducers";
-import { runSharedListLoad, useSharedListStatus } from "../list/sharedListStatus";
+import {
+  runSharedListLoad,
+  sharedLoadMore,
+  useSharedListStatus,
+} from "../list/sharedListStatus";
 
 import {
   initializeList,
@@ -151,7 +155,8 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
     (first: boolean) =>
       runSharedListLoad(
         status,
-        first,
+        // useSpaceListActions logs the failure.
+        { first, errorLabel: null },
         async (isCurrent) => {
           const list = getList();
           if (!list || !list.sortBy) return;
@@ -173,9 +178,7 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
           if (isCurrent() && data) {
             dispatch(setSpaceListPage({ listId, page }));
           }
-        },
-        // useSpaceListActions logs the failure.
-        null
+        }
       ),
     [status, getList, dispatch, listId, spaceActions.fetchSpaces]
   );
@@ -247,12 +250,11 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
       );
       return;
     }
-    if (status.inFlight || status.pendingReset) return;
-    if (status.failed === "first") {
-      await loadPage(true);
-    } else if (status.failed === "next" || list.hasMore) {
-      await loadPage(false);
-    }
+    await sharedLoadMore(status, {
+      hasMore: () => !!getList()?.hasMore,
+      retryFirst: () => loadPage(true),
+      next: () => loadPage(false),
+    });
   }, [getList, listId, status, loadPage]);
 
   // Reload page 1 with the stored filters and page size.

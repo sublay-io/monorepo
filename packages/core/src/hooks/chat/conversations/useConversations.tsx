@@ -4,6 +4,7 @@ import { useSublayDispatch, useSublaySelector } from "../../../store/hooks";
 import type { SublayState } from "../../../store/sublayReducers";
 import {
   runSharedListLoad,
+  sharedLoadMore,
   useSharedListStatus,
 } from "../../list/sharedListStatus";
 import {
@@ -96,7 +97,7 @@ function useConversations({
     (first: boolean) =>
       runSharedListLoad(
         status,
-        first,
+        { first, errorLabel: "Failed to load conversations:" },
         async (isCurrent) => {
           if (!projectId) return;
           const cursor = first ? null : selectConversationListCursor(store.getState());
@@ -136,8 +137,7 @@ function useConversations({
           } finally {
             if (isCurrent()) dispatch(setConversationListLoading(false));
           }
-        },
-        "Failed to load conversations:"
+        }
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [status, store, dispatch, axios, projectId, typesKey]
@@ -151,15 +151,12 @@ function useConversations({
   }, [projectId, typesKey]);
 
   const loadMore = useCallback(async () => {
-    if (!projectId || status.inFlight) return;
-    if (status.failed === "first") {
-      await loadPage(true);
-    } else if (
-      status.failed === "next" ||
-      selectConversationListHasMore(store.getState())
-    ) {
-      await loadPage(false);
-    }
+    if (!projectId) return;
+    await sharedLoadMore(status, {
+      hasMore: () => selectConversationListHasMore(store.getState()),
+      retryFirst: () => loadPage(true),
+      next: () => loadPage(false),
+    });
   }, [projectId, status, store, loadPage]);
 
   const refetch = useCallback(async () => {

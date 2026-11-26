@@ -4,6 +4,7 @@ import { useSublayDispatch, useSublaySelector } from "../../../store/hooks";
 import type { SublayState } from "../../../store/sublayReducers";
 import {
   runSharedListLoad,
+  sharedLoadMore,
   useSharedListStatus,
 } from "../../list/sharedListStatus";
 import {
@@ -153,7 +154,17 @@ function useLiveChatMessages({
     (kind: "open" | "refetch" | "next") =>
       runSharedListLoad(
         status,
-        kind !== "next",
+        {
+          first: kind !== "next",
+          // Opening only adds to what is held: a provider and a child
+          // opening the same conversation with different `include`s both
+          // land (merged by id). A refetch starts over.
+          supersede: kind === "refetch",
+          kind,
+          errorLabel: isThread
+            ? "Failed to load thread replies:"
+            : "Failed to load messages:",
+        },
         async (isCurrent) => {
           if (!projectId || !conversationId) return;
 
@@ -237,9 +248,7 @@ function useLiveChatMessages({
               dispatch(setMessagesLoading({ conversationId, loading: false }));
             }
           }
-        },
-        isThread ? "Failed to load thread replies:" : "Failed to load messages:",
-        kind
+        }
       ),
     [status, store, projectId, conversationId, parentMessageId, isThread, limit, include, fetchMany, dispatch]
   );
@@ -265,18 +274,20 @@ function useLiveChatMessages({
   // The next page in reading order (older messages; newer thread replies), or
   // a retry of the load that failed.
   const loadMore = useCallback(async () => {
-    if (!projectId || !conversationId || status.inFlight) return;
-    if (status.failed === "first") {
-      // A failed refetch is retried as a refetch (a fresh start), so no gap is
-      // left between what was held and the latest page.
-      await loadPage(status.failedKind === "refetch" ? "refetch" : "open");
-      return;
-    }
-    const state = store.getState();
-    const more = isThread
-      ? selectThreadHasMore(parentMessageId!)(state)
-      : selectMessagesHasMore(conversationId)(state);
-    if (status.failed === "next" || more) await loadPage("next");
+    if (!projectId || !conversationId) return;
+    await sharedLoadMore(status, {
+      hasMore: () => {
+        const state = store.getState();
+        return isThread
+          ? selectThreadHasMore(parentMessageId!)(state)
+          : selectMessagesHasMore(conversationId)(state);
+      },
+      // A failed refetch is retried as a refetch (a fresh start), so no gap
+      // is left between what was held and the latest page.
+      retryFirst: (failedKind) =>
+        loadPage(failedKind === "refetch" ? "refetch" : "open"),
+      next: () => loadPage("next"),
+    });
   }, [projectId, conversationId, parentMessageId, isThread, status, store, loadPage]);
 
   const refetch = useCallback(async () => {

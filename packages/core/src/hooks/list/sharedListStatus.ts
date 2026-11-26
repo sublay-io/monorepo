@@ -11,16 +11,21 @@ import { toError } from "../../utils/toError";
  * hook that shows it. The items, `loading` and paging state stay in the Redux
  * slice; this holds what has to be synchronous or isn't serializable:
  *
- * - `generation`: bumped by every load and by `invalidate()`; a response from
- *   an older generation is dropped.
- * - `inFlight`: set synchronously, so two `loadMore()` calls in the same tick
- *   (from one hook or from two hooks on the same list) load one page.
+ * - `generation`: bumped by a load that supersedes the others (a reset, a
+ *   refetch, a retry of the first page) and by `invalidate()`; a response from
+ *   an older generation is dropped. Loads that only add to the list (opening
+ *   a conversation, the next page) don't bump it, so two hooks opening the
+ *   same list with different options both land.
+ * - `inFlight`: set synchronously while any load of the current generation
+ *   runs, so two `loadMore()` calls in the same tick (from one hook or from
+ *   two hooks on the same list) load one page.
  * - `failed`: which load failed last, so `loadMore()` retries it.
  * - `error`: the last failure, as an `Error` (subscribed to by the hooks).
  */
 export class SharedListStatus {
   generation = 0;
-  inFlight = false;
+  /** The loads of the current generation still running. */
+  private running = new Set<object>();
   /** A reset is scheduled (a debounced filter change): no page loads until it runs. */
   pendingReset = false;
   failed: "first" | "next" | null = null;
@@ -38,6 +43,28 @@ export class SharedListStatus {
 
   getError = () => this.error;
 
+  get inFlight(): boolean {
+    return this.running.size > 0;
+  }
+
+  /** Mark a load of the current generation as running; returns its token. */
+  begin(): object {
+    const token = {};
+    this.running.add(token);
+    return token;
+  }
+
+  end(token: object) {
+    this.running.delete(token);
+  }
+
+  /** A load that wasn't run through `runSharedListLoad` (a reconnect catch-up) brought the list up to date. */
+  clearFailure() {
+    this.failed = null;
+    this.failedKind = null;
+    this.setError(null);
+  }
+
   setError(error: Error | null) {
     if (error === this.error) return;
     this.error = error;
@@ -47,7 +74,7 @@ export class SharedListStatus {
   /** Drop every load in flight (the list's query changed). */
   invalidate() {
     this.generation++;
-    this.inFlight = false;
+    this.running = new Set();
     this.pendingReset = false;
     this.failed = null;
     this.failedKind = null;
@@ -98,30 +125,41 @@ export function useSharedListStatus(key: string): {
   return { status, error };
 }
 
+export interface SharedListLoadOptions {
+  /** A first-page load (failures are retried as the first page). */
+  first: boolean;
+  /**
+   * The load replaces what the others would bring (a reset, a refetch): it
+   * starts a new generation, so loads still in flight are dropped. `false`:
+   * it only adds to the list (opening it, the next page) and runs alongside.
+   * Default `true` for a first page, `false` otherwise.
+   */
+  supersede?: boolean;
+  /** Kept as `failedKind` when the load fails, for a retry that repeats it. Default "first" / "next". */
+  kind?: string;
+  /** Prefix for the logged failure; `null` when `load` logs it already. */
+  errorLabel: string | null;
+}
+
 /**
  * Run one load of a shared list. `load` does the request and writes the
- * result to the store, but only while `isCurrent()` is true — after a newer
- * load or an `invalidate()`, it must write nothing (not even `loading:
- * false`). A failure is recorded on the status (`error`, `failed`) and
- * logged under `errorLabel` (`null`: `load` logs it already); the returned
- * promise never rejects. `kind` (default: "first" or "next") is kept as
- * `failedKind` when the load fails, for a retry that has to repeat the same
- * kind of load.
+ * result to the store, but only while `isCurrent()` is true — after a
+ * superseding load or an `invalidate()`, it must write nothing (not even
+ * `loading: false`). A failure is recorded on the status (`error`, `failed`,
+ * `failedKind`) and logged; the returned promise never rejects.
  */
 export async function runSharedListLoad(
   status: SharedListStatus,
-  first: boolean,
+  options: SharedListLoadOptions,
   load: (isCurrent: () => boolean) => Promise<void>,
-  errorLabel: string | null,
-  kind?: string,
 ): Promise<void> {
-  const generation = ++status.generation;
+  const { first, supersede = first, kind, errorLabel } = options;
+  if (supersede) status.invalidate();
+  const generation = status.generation;
   const isCurrent = () => generation === status.generation;
-  status.inFlight = true;
+  const token = status.begin();
   status.pendingReset = false;
-  status.failed = null;
-  status.failedKind = null;
-  status.setError(null);
+  status.clearFailure();
   try {
     await load(isCurrent);
   } catch (err) {
@@ -131,6 +169,28 @@ export async function runSharedListLoad(
     status.setError(toError(err));
     if (errorLabel !== null) handleError(err, errorLabel);
   } finally {
-    if (isCurrent()) status.inFlight = false;
+    status.end(token);
+  }
+}
+
+/**
+ * The `loadMore()` of every store-backed list: nothing while a load runs or a
+ * reset is scheduled; a failed first page is retried as the first page
+ * (`retryFirst`, given the failed load's `kind`); otherwise the next page,
+ * when it failed or there is one.
+ */
+export async function sharedLoadMore(
+  status: SharedListStatus,
+  handlers: {
+    hasMore: () => boolean;
+    retryFirst: (failedKind: string | null) => Promise<void>;
+    next: () => Promise<void>;
+  },
+): Promise<void> {
+  if (status.inFlight || status.pendingReset) return;
+  if (status.failed === "first") {
+    await handlers.retryFirst(status.failedKind);
+  } else if (status.failed === "next" || handlers.hasMore()) {
+    await handlers.next();
   }
 }

@@ -16,6 +16,9 @@ import { makeProvidersWrapper, createFakeSocket, type FakeSocket } from "./testH
 import { ChatContext, type ChatContextValue } from "./chat-context";
 import { ConversationProvider, useConversationContext } from "./conversation-context";
 import { SublayContext, type SublayContextValues } from "./sublay-context";
+import { axiosPrivate as axiosPrivateInstance } from "../config/axios";
+import { okAxiosResponse } from "../test-utils";
+import useLiveChatMessages from "../hooks/chat/messages/useLiveChatMessages";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -771,5 +774,41 @@ describe("ConversationProvider", () => {
       expect(calls[0].config.params).toEqual({ limit: 50, sortDir: "desc" });
       await waitForMarked(axiosPrivate, "message-2");
     });
+  });
+});
+
+describe("ConversationProvider — a child opening the same conversation", () => {
+  it("keeps the child's page: a child asking for include=files gets files, alongside the provider's own load", async () => {
+    const { Wrapper } = makeProvidersWrapper();
+    const file = { id: "file-1" } as any;
+    vi.mocked(axiosPrivateInstance.get).mockImplementation(async (url: string, config?: any) => {
+      if (url.endsWith("/members")) return okAxiosResponse(emptyMembersPage(), 200);
+      const withFiles = String(config?.params?.include ?? "").includes("files");
+      const message = makeChatMessage({ id: "message-1", conversationId: "conversation-1" });
+      const { files: _files, ...withoutFiles } = message as any;
+      return okAxiosResponse(
+        { data: [withFiles ? { ...message, files: [file] } : withoutFiles], pagination: { hasMore: false } },
+        200,
+      );
+    });
+
+    const { result } = renderHook(
+      () => useLiveChatMessages({ conversationId: "conversation-1", include: "files" }),
+      {
+        wrapper: ({ children }) => (
+          <Wrapper>
+            <ConversationProvider conversationId="conversation-1">{children}</ConversationProvider>
+          </Wrapper>
+        ),
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    await waitFor(() => expect(result.current.messages).toHaveLength(1));
+    const messageCalls = vi
+      .mocked(axiosPrivateInstance.get)
+      .mock.calls.filter((c) => String(c[0]).endsWith("/messages"));
+    expect(messageCalls).toHaveLength(2);
+    expect(result.current.messages[0].files).toEqual([file]);
   });
 });

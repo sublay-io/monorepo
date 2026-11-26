@@ -2,7 +2,11 @@ import { useCallback, useMemo, useRef } from "react";
 import { useStore } from "react-redux";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
 import type { SublayState } from "../../store/sublayReducers";
-import { runSharedListLoad, useSharedListStatus } from "../list/sharedListStatus";
+import {
+  runSharedListLoad,
+  sharedLoadMore,
+  useSharedListStatus,
+} from "../list/sharedListStatus";
 
 import {
   initializeList,
@@ -145,7 +149,8 @@ function useWorkspaceList({
     (first: boolean) =>
       runSharedListLoad(
         status,
-        first,
+        // useSpaceListActions logs the failure.
+        { first, errorLabel: null },
         async (isCurrent) => {
           const list = getList();
           if (!list) return;
@@ -166,9 +171,7 @@ function useWorkspaceList({
           if (isCurrent() && data) {
             dispatch(setWorkspaceListPage({ listId, page }));
           }
-        },
-        // useWorkspaceListActions logs the failure.
-        null
+        }
       ),
     [status, getList, dispatch, listId, workspaceActions.fetchWorkspaces]
   );
@@ -240,12 +243,11 @@ function useWorkspaceList({
       );
       return;
     }
-    if (status.inFlight || status.pendingReset) return;
-    if (status.failed === "first") {
-      await loadPage(true);
-    } else if (status.failed === "next" || list.hasMore) {
-      await loadPage(false);
-    }
+    await sharedLoadMore(status, {
+      hasMore: () => !!getList()?.hasMore,
+      retryFirst: () => loadPage(true),
+      next: () => loadPage(false),
+    });
   }, [getList, listId, status, loadPage]);
 
   // Reload page 1 with the stored filters and page size.

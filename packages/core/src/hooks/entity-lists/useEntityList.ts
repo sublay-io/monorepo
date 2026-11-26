@@ -2,7 +2,11 @@ import { useCallback, useMemo, useRef } from "react";
 import { useStore } from "react-redux";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
 import type { SublayState } from "../../store/sublayReducers";
-import { runSharedListLoad, useSharedListStatus } from "../list/sharedListStatus";
+import {
+  runSharedListLoad,
+  sharedLoadMore,
+  useSharedListStatus,
+} from "../list/sharedListStatus";
 
 import {
   initializeList,
@@ -178,7 +182,8 @@ function useEntityList({
     (first: boolean) =>
       runSharedListLoad(
         status,
-        first,
+        // useEntityListActions logs the failure.
+        { first, errorLabel: null },
         async (isCurrent) => {
           const list = getList();
           if (!list || !list.sortBy) return;
@@ -217,9 +222,7 @@ function useEntityList({
           if (isCurrent() && data) {
             dispatch(setEntityListPage({ listId, page }));
           }
-        },
-        // useEntityListActions logs the failure.
-        null
+        }
       ),
     [status, getList, dispatch, listId, entityActions.fetchEntities]
   );
@@ -302,12 +305,11 @@ function useEntityList({
       );
       return;
     }
-    if (status.inFlight || status.pendingReset) return;
-    if (status.failed === "first") {
-      await loadPage(true);
-    } else if (status.failed === "next" || list.hasMore) {
-      await loadPage(false);
-    }
+    await sharedLoadMore(status, {
+      hasMore: () => !!getList()?.hasMore,
+      retryFirst: () => loadPage(true),
+      next: () => loadPage(false),
+    });
   }, [getList, listId, status, loadPage]);
 
   // Reload page 1 with the stored filters, sort and config.

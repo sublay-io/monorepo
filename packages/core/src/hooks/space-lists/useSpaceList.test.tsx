@@ -38,7 +38,7 @@ describe("useSpaceList", () => {
       projectId: "test-project",
     });
 
-    act(() => result.current.fetchSpaces({}));
+    act(() => result.current.fetchSpaces());
 
     await waitFor(() => expect(result.current.spaces.map((s) => s.id)).toEqual(["s1"]));
     expect(result.current.hasMore).toBe(true);
@@ -54,7 +54,7 @@ describe("useSpaceList", () => {
       projectId: "test-project",
     });
 
-    act(() => result.current.fetchSpaces({ query: "foo" }));
+    act(() => result.current.fetchSpaces({ filters: { query: "foo" } }));
     expect(fetchHandle.calls()).toHaveLength(0); // not yet — debounced
 
     await waitFor(() => expect(fetchHandle.calls()).toHaveLength(1), {
@@ -70,7 +70,7 @@ describe("useSpaceList", () => {
     });
 
     await act(async () => {
-      result.current.fetchSpaces({ query: "foo" }, undefined, { fetchImmediately: true });
+      result.current.fetchSpaces({ filters: { query: "foo" }, options: { fetchImmediately: true } });
       await Promise.resolve();
     });
 
@@ -82,12 +82,12 @@ describe("useSpaceList", () => {
     const { result } = renderHookWithStore(() => useSpaceList({ listId: "feed" }), {
       projectId: "test-project",
     });
-    act(() => result.current.fetchSpaces({}, undefined, { fetchImmediately: true }));
+    act(() => result.current.fetchSpaces({ options: { fetchImmediately: true } }));
     await waitFor(() => expect(result.current.spaces).toHaveLength(1));
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s2" }], false));
     act(() =>
-      result.current.fetchSpaces({ query: "bar" }, undefined, { clearImmediately: true }),
+      result.current.fetchSpaces({ filters: { query: "bar" }, options: { clearImmediately: true } }),
     );
     expect(result.current.spaces).toEqual([]); // cleared synchronously, before the debounce fires
 
@@ -102,16 +102,18 @@ describe("useSpaceList", () => {
       projectId: "test-project",
     });
     act(() =>
-      result.current.fetchSpaces({ query: "foo" }, undefined, { fetchImmediately: true }),
+      result.current.fetchSpaces({ filters: { query: "foo" }, options: { fetchImmediately: true } }),
     );
     await waitFor(() => expect(result.current.query).toBe("foo"));
 
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
     act(() =>
-      result.current.fetchSpaces({}, undefined, {
+      result.current.fetchSpaces({
+  options: {
         fetchImmediately: true,
         resetUnspecified: true,
-      }),
+      },
+}),
     );
     await waitFor(() => expect(result.current.query).toBeNull());
   });
@@ -124,11 +126,7 @@ describe("useSpaceList", () => {
     expect(result.current.sortDir).toBeNull();
 
     act(() =>
-      result.current.fetchSpaces(
-        { sortBy: "alphabetical", sortDir: "desc" },
-        undefined,
-        { fetchImmediately: true },
-      ),
+      result.current.fetchSpaces({ filters: { sortBy: "alphabetical", sortDir: "desc" }, options: { fetchImmediately: true } }),
     );
     await waitFor(() => expect(result.current.spaces).toHaveLength(1));
     expect(result.current.sortDir).toBe("desc");
@@ -150,10 +148,12 @@ describe("useSpaceList", () => {
     // natural direction.
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s3" }], false));
     act(() =>
-      result.current.fetchSpaces({}, undefined, {
+      result.current.fetchSpaces({
+  options: {
         fetchImmediately: true,
         resetUnspecified: true,
-      }),
+      },
+}),
     );
     await waitFor(() => expect(result.current.spaces.map((s) => s.id)).toEqual(["s3"]));
     expect(result.current.sortDir).toBeNull();
@@ -169,7 +169,7 @@ describe("useSpaceList", () => {
       });
       expect(result.current.parentSpaceId).toBe("none");
 
-      act(() => result.current.fetchSpaces({}));
+      act(() => result.current.fetchSpaces());
       await waitFor(() => expect(result.current.spaces).toHaveLength(1));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s2" }], false));
@@ -180,7 +180,7 @@ describe("useSpaceList", () => {
 
       fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s3" }], false));
       act(() =>
-        result.current.fetchSpaces({ sortBy: "alphabetical" }, undefined, { fetchImmediately: true }),
+        result.current.fetchSpaces({ filters: { sortBy: "alphabetical" }, options: { fetchImmediately: true } }),
       );
       await waitFor(() => expect(result.current.spaces.map((s) => s.id)).toEqual(["s3"]));
 
@@ -200,7 +200,7 @@ describe("useSpaceList", () => {
       });
 
       act(() =>
-        result.current.fetchSpaces({ parentSpaceId: "p1" }, undefined, { fetchImmediately: true }),
+        result.current.fetchSpaces({ filters: { parentSpaceId: "p1" }, options: { fetchImmediately: true } }),
       );
       await waitFor(() => expect(result.current.spaces).toHaveLength(1));
       expect(result.current.parentSpaceId).toBe("p1");
@@ -212,7 +212,7 @@ describe("useSpaceList", () => {
 
       fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s3" }], false));
       act(() =>
-        result.current.fetchSpaces({ parentSpaceId: null }, undefined, { fetchImmediately: true }),
+        result.current.fetchSpaces({ filters: { parentSpaceId: null }, options: { fetchImmediately: true } }),
       );
       await waitFor(() => expect(result.current.spaces.map((s) => s.id)).toEqual(["s3"]));
 
@@ -228,7 +228,7 @@ describe("useSpaceList", () => {
       });
 
       act(() =>
-        result.current.fetchSpaces({ parentSpaceId: "any" }, undefined, { fetchImmediately: true }),
+        result.current.fetchSpaces({ filters: { parentSpaceId: "any" }, options: { fetchImmediately: true } }),
       );
       await waitFor(() => expect(result.current.spaces).toHaveLength(1));
       expect(result.current.parentSpaceId).toBe("any");
@@ -265,7 +265,7 @@ describe("useSpaceList", () => {
       const { result } = renderHookWithStore(() => useSpaceList({ listId: "feed" }), {
         projectId: "test-project",
       });
-      act(() => result.current.fetchSpaces({}));
+      act(() => result.current.fetchSpaces());
       await waitFor(() => expect(result.current.spaces).toHaveLength(1));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "s2" }], false));
@@ -287,7 +287,7 @@ describe("useSpaceList", () => {
       const { result } = renderHookWithStore(() => useSpaceList({ listId: "feed" }), {
         projectId: "test-project",
       });
-      act(() => result.current.fetchSpaces({}));
+      act(() => result.current.fetchSpaces());
       await waitFor(() => expect(result.current.spaces).toHaveLength(1));
       expect(result.current.hasMore).toBe(false);
 
@@ -304,7 +304,7 @@ describe("useSpaceList", () => {
       const { result } = renderHookWithStore(() => useSpaceList({ listId: "feed" }), {
         projectId: "test-project",
       });
-      act(() => result.current.fetchSpaces({}, undefined, { fetchImmediately: true }));
+      act(() => result.current.fetchSpaces({ options: { fetchImmediately: true } }));
       await waitFor(() => expect(result.current.hasMore).toBe(false));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ id: "s1" }, 201));
@@ -322,7 +322,7 @@ describe("useSpaceList", () => {
       const { result } = renderHookWithStore(() => useSpaceList({ listId: "feed" }), {
         projectId: "test-project",
       });
-      act(() => result.current.fetchSpaces({}));
+      act(() => result.current.fetchSpaces());
       await waitFor(() => expect(result.current.spaces).toHaveLength(1));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ success: true }));
@@ -346,10 +346,10 @@ describeStoreListContract({
       hasMore: list.hasMore,
       loadMore: list.loadMore,
       refetch: list.refetch,
-      start: () => list.fetchSpaces({}),
-      changeFilterDebounced: () => list.fetchSpaces({ query: "garden" }),
+      start: () => list.fetchSpaces(),
+      changeFilterDebounced: () => list.fetchSpaces({ filters: { query: "garden" } }),
       changeFilterNow: () =>
-        list.fetchSpaces({ query: "garden" }, undefined, { fetchImmediately: true }),
+        list.fetchSpaces({ filters: { query: "garden" }, options: { fetchImmediately: true } }),
     };
   },
   fetchHandle: () => fetchHandle,

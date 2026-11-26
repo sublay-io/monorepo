@@ -270,7 +270,11 @@ function Feed() {
   const { entities, fetchEntities } = useEntityList({ listId: 'feed' });
 
   useEffect(() => {
-    fetchEntities({}, { sortBy: 'createdAt', sortDir: 'desc' }, { limit: 10 }, { fetchImmediately: true });
+    fetchEntities({
+      sort: { sortBy: 'createdAt', sortDir: 'desc' },
+      config: { limit: 10 },
+      options: { fetchImmediately: true },
+    });
   }, []);
 
   return (

@@ -38,7 +38,7 @@ function EventsTable() {
       {rows.map((e) => (
         <div key={e.id}>{e.name} — {e.capacity}</div>
       ))}
-      <button onClick={() => createRow({ name: "New event", capacity: 50 })}>
+      <button onClick={() => createRow({ data: { name: "New event", capacity: 50 } })}>
         Add
       </button>
     </>

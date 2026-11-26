@@ -50,7 +50,8 @@ describe("entity-lists spaceReputation serialization regression guard", () => {
     });
 
     await act(async () => {
-      await result.current.fetchEntities("feed", {
+      await result.current.fetchEntities({
+        listId: "feed",
         page: 1,
         sortBy: "hot",
         limit: 10,
@@ -77,7 +78,8 @@ describe("entity-lists spaceReputation serialization regression guard", () => {
     });
 
     await act(async () => {
-      await result.current.fetchEntities("feed", {
+      await result.current.fetchEntities({
+        listId: "feed",
         page: 1,
         sortBy: "hot",
         limit: 10,

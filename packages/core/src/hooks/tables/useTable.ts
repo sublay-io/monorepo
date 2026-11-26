@@ -49,7 +49,7 @@ export interface UseTableValues<T extends TableRow = TableRow> {
   setIncludeDeleted: (includeDeleted: boolean) => void;
 
   // Row mutations (projectId + tableName injected).
-  createRow: (data: Record<string, unknown>) => Promise<T>;
+  createRow: (props: { data: Record<string, unknown> }) => Promise<T>;
   updateRow: (props: { rowId: string; data: Record<string, unknown> }) => Promise<T>;
   deleteRow: (props: { rowId: string; force?: boolean }) => Promise<void>;
   restoreRow: (props: { rowId: string }) => Promise<T>;
@@ -169,7 +169,7 @@ export function useTable<T extends TableRow = TableRow>(
   );
 
   const createRow = useCallback(
-    async (rowData: Record<string, unknown>) => {
+    async ({ data: rowData }: { data: Record<string, unknown> }) => {
       const row = await createRowMutation({
         projectId: projectId as string,
         tableName,

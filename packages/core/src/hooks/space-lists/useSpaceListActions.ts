@@ -62,7 +62,18 @@ export interface DeleteSpaceOptions {
   spaceId: string;
 }
 
-export function useSpaceListActions() {
+export interface UseSpaceListActionsValues {
+  fetchSpaces: (props: { listId: string } & FetchSpacesOptions) => Promise<Space[] | null>;
+  createSpace: (props: { listId: string } & CreateSpaceOptions) => Promise<SpaceWithPermissions | undefined>;
+  deleteSpace: (props: { listId: string } & DeleteSpaceOptions) => Promise<void>;
+}
+
+/**
+ * The implementation: `fetchSpaces` also takes the list hooks' internal
+ * `isCurrent` guard as a second argument (a load superseded meanwhile writes
+ * nothing). Internal — not exported from the package.
+ */
+export function useSpaceListActionsWithGuard() {
   const dispatch = useSublayDispatch();
 
   // Get project context
@@ -76,8 +87,7 @@ export function useSpaceListActions() {
   // Fetch spaces action
   const fetchSpaces = useCallback(
     async (
-      listId: string,
-      options: FetchSpacesOptions,
+      { listId, ...options }: { listId: string } & FetchSpacesOptions,
       isCurrent: () => boolean = () => true
     ): Promise<Space[] | null> => {
       if (!projectId) {
@@ -139,10 +149,10 @@ export function useSpaceListActions() {
 
   // Create space action
   const createSpace = useCallback(
-    async (
-      listId: string,
-      options: CreateSpaceOptions
-    ): Promise<SpaceWithPermissions | undefined> => {
+    async ({
+      listId,
+      ...options
+    }: { listId: string } & CreateSpaceOptions): Promise<SpaceWithPermissions | undefined> => {
       if (!projectId) {
         throw new SublayError("No project ID available");
       }
@@ -179,7 +189,7 @@ export function useSpaceListActions() {
 
   // Delete space action
   const deleteSpace = useCallback(
-    async (listId: string, options: DeleteSpaceOptions): Promise<void> => {
+    async ({ listId, ...options }: { listId: string } & DeleteSpaceOptions): Promise<void> => {
       if (!projectId) {
         throw new SublayError("No project ID available");
       }
@@ -218,6 +228,11 @@ export function useSpaceListActions() {
     createSpace,
     deleteSpace,
   };
+}
+
+/** The list's low-level actions. Each takes one object: `{ listId, ... }`. */
+export function useSpaceListActions(): UseSpaceListActionsValues {
+  return useSpaceListActionsWithGuard();
 }
 
 export default useSpaceListActions;

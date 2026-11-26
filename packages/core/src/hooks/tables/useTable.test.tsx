@@ -143,7 +143,7 @@ describe("useTable", () => {
 
     let created: { id: string } | undefined;
     await act(async () => {
-      created = await result.current.createRow({ name: "charlie" });
+      created = await result.current.createRow({ data: { name: "charlie" } });
     });
     expect(created?.id).toBe("3");
 
@@ -287,7 +287,7 @@ describe("useTable", () => {
 
     await expect(
       act(async () => {
-        await result.current.createRow({ name: "broken" });
+        await result.current.createRow({ data: { name: "broken" } });
       }),
     ).rejects.toBeTruthy();
   });
@@ -402,7 +402,7 @@ describe("useTable", () => {
       await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
       eventRows = [...EVENT_ROWS, { id: "3", name: "charlie" }];
-      await result.current.createRow({ name: "charlie" });
+      await result.current.createRow({ data: { name: "charlie" } });
 
       await waitFor(() => expect(result.current.rows).toHaveLength(3));
       expect(result.current.rows.map((r) => r.id)).toEqual(["1", "2", "3"]);

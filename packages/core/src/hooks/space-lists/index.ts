@@ -2,6 +2,7 @@ export { default as useSpaceList } from "./useSpaceList";
 export type {
   UseSpaceListProps,
   UseSpaceListValues,
+  SpaceListFetchSpacesProps,
   SpaceListCreateSpaceProps,
   SpaceListDeleteSpaceProps,
 } from "./useSpaceList";

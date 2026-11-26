@@ -27,7 +27,7 @@ import {
   type WorkspaceListFetchOptions,
 } from "../../store/slices/workspaceListsSlice";
 
-import useWorkspaceListActions from "./useWorkspaceListActions";
+import { useWorkspaceListActionsWithGuard } from "./useWorkspaceListActions";
 
 import type {
   Workspace,
@@ -41,6 +41,16 @@ import type { SublayError } from "../../errors/SublayError";
 
 export interface UseWorkspaceListProps {
   listId: string;
+}
+
+/**
+ * What `fetchWorkspaces` takes. `filters` merge into the list's current filters;
+ * `config` is the list's settings; `options` controls this fetch.
+ */
+export interface WorkspaceListFetchWorkspacesProps {
+  filters?: Partial<WorkspaceListFilters>;
+  config?: WorkspaceListConfig;
+  options?: WorkspaceListFetchOptions;
 }
 
 export interface WorkspaceListCreateWorkspaceProps {
@@ -76,11 +86,7 @@ export interface UseWorkspaceListValues {
   include: WorkspaceInclude[] | null;
 
   // Operations
-  fetchWorkspaces: (
-    filters: Partial<WorkspaceListFilters>,
-    config?: WorkspaceListConfig,
-    options?: WorkspaceListFetchOptions
-  ) => void;
+  fetchWorkspaces: (props?: WorkspaceListFetchWorkspacesProps) => void;
   /**
    * Load the next page, or retry the load that failed (a failed first page
    * included). Does nothing while a page of this list is loading, while a
@@ -130,7 +136,7 @@ function useWorkspaceList({
     selectWorkspaceListConfig(state, listId)
   );
 
-  const workspaceActions = useWorkspaceListActions();
+  const workspaceActions = useWorkspaceListActionsWithGuard();
 
   // Load bookkeeping shared by every hook showing this list.
   const store = useStore<{ sublay: SublayState }>();
@@ -158,8 +164,8 @@ function useWorkspaceList({
           const page = first ? 1 : list.page + 1;
           dispatch(setWorkspaceListLoading({ listId, loading: true }));
           const data = await workspaceActions.fetchWorkspaces(
-            listId,
             {
+              listId,
               page,
               relation: list.relation,
               parentWorkspaceId: list.parentWorkspaceId,
@@ -179,11 +185,11 @@ function useWorkspaceList({
 
   // Fetch workspaces (always triggers a fetch of page 1)
   const handleFetchWorkspaces = useCallback(
-    (
-      newFilters: Partial<WorkspaceListFilters>,
-      newConfig?: WorkspaceListConfig,
-      options?: WorkspaceListFetchOptions
-    ) => {
+    ({
+      filters: newFilters = {},
+      config: newConfig,
+      options,
+    }: WorkspaceListFetchWorkspacesProps = {}) => {
       const configWithDefaults = {
         limit: 20,
         ...newConfig,
@@ -273,7 +279,8 @@ function useWorkspaceList({
   const createWorkspace = useCallback(
     async (props: WorkspaceListCreateWorkspaceProps) => {
       try {
-        return await workspaceActions.createWorkspace(listId, {
+        return await workspaceActions.createWorkspace({
+          listId,
           ...props,
           include: normalizeWorkspaceInclude(includeKey),
         });
@@ -287,7 +294,7 @@ function useWorkspaceList({
   const deleteWorkspace = useCallback(
     async ({ workspaceId }: WorkspaceListDeleteWorkspaceProps) => {
       try {
-        await workspaceActions.deleteWorkspace(listId, { workspaceId });
+        await workspaceActions.deleteWorkspace({ listId, workspaceId });
       } catch (err) {
         handleError(err, "Failed to delete workspace");
       }

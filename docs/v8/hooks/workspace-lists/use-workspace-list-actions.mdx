@@ -19,7 +19,8 @@ function CustomWorkspaceLoader({ listId }: { listId: string }) {
   const actions = useWorkspaceListActions();
 
   const loadWorkspaces = async () => {
-    await actions.fetchWorkspaces(listId, {
+    await actions.fetchWorkspaces({
+      listId,
       page: 1,
       limit: 20,
       relation: "direct",
@@ -31,15 +32,15 @@ function CustomWorkspaceLoader({ listId }: { listId: string }) {
 
 ## Methods
 
-<ResponseField name="fetchWorkspaces" type="(listId: string, params: FetchWorkspacesOptions) => Promise<Workspace[] | null>">
+<ResponseField name="fetchWorkspaces" type="({ listId, ...props }: { listId: string } & FetchWorkspacesOptions) => Promise<Workspace[] | null>">
   Fetch one page for the given list and store it in Redux state: page 1 replaces the list, a later page is appended. `params` takes `page` and `limit` (both required) and the optional filters `relation`, `parentWorkspaceId`, `sortDir` and `include` (an array). A filter that is `null` or left out isn't sent, so the server's default applies. Throws on a failed request, after recording the error on the list.
 </ResponseField>
 
-<ResponseField name="createWorkspace" type="(listId: string, props: CreateWorkspaceOptions) => Promise<Workspace | undefined>">
+<ResponseField name="createWorkspace" type="({ listId, ...props }: { listId: string } & CreateWorkspaceOptions) => Promise<Workspace | undefined>">
   Create a workspace (`name`, optional `metadata` and `parentWorkspaceId`), read it back with the optional `include` flags so it carries `reasons`, and add it to the given list where the server would list it — see [`createWorkspace`](/v8/hooks/workspace-lists/use-workspace-list) on `useWorkspaceList`. If the read-back fails, the workspace the create returned is added, without `reasons`. Throws if the create fails.
 </ResponseField>
 
-<ResponseField name="deleteWorkspace" type="(listId: string, props: { workspaceId: string }) => Promise<void>">
+<ResponseField name="deleteWorkspace" type="({ listId, workspaceId }: { listId: string; workspaceId: string }) => Promise<void>">
   Delete a workspace and remove it from the given list's state. Throws on a failed request, leaving the list as it was.
 </ResponseField>
 

@@ -3,17 +3,17 @@ title: "Filters"
 description: "Complete filter reference for entity list queries"
 ---
 
-Filters are passed as the first argument to `fetchEntities`. They narrow down which entities are returned without affecting the sort order.
+Filters are passed as `filters` in the object `fetchEntities` takes. They narrow down which entities are returned without affecting the sort order.
 
 ```tsx
-fetchEntities(
-  {
+fetchEntities({
+  filters: {
     followedOnly: true,
     keywordsFilters: { includes: ["react"] },
     metadataFilters: { includes: { category: "tutorial" } },
   },
-  { sortBy: "createdAt" }
-);
+  sort: { sortBy: "createdAt" },
+});
 ```
 
 ---
@@ -30,7 +30,7 @@ Limits results to entities created within a recent window.
 | `"year"` | Last 365 days |
 
 ```tsx
-fetchEntities({ timeFrame: "week" }, { sortBy: "top" });
+fetchEntities({ filters: { timeFrame: "week" }, sort: { sortBy: "top" } });
 ```
 
 ---
@@ -40,7 +40,7 @@ fetchEntities({ timeFrame: "week" }, { sortBy: "top" });
 Filters to entities created by a specific user.
 
 ```tsx
-fetchEntities({ userId: "user_abc123" }, { sortBy: "createdAt" });
+fetchEntities({ filters: { userId: "user_abc123" }, sort: { sortBy: "createdAt" } });
 ```
 
 ---
@@ -50,7 +50,7 @@ fetchEntities({ userId: "user_abc123" }, { sortBy: "createdAt" });
 When `true`, returns only entities from users the authenticated user follows.
 
 ```tsx
-fetchEntities({ followedOnly: true }, { sortBy: "hot" });
+fetchEntities({ filters: { followedOnly: true }, sort: { sortBy: "hot" } });
 ```
 
 ---
@@ -68,10 +68,10 @@ interface KeywordsFilters {
 
 ```tsx
 // Entities tagged with both "react" and "typescript"
-fetchEntities({ keywordsFilters: { includes: ["react", "typescript"] } }, { sortBy: "createdAt" });
+fetchEntities({ filters: { keywordsFilters: { includes: ["react", "typescript"] } }, sort: { sortBy: "createdAt" } });
 
 // Exclude entities tagged "archived"
-fetchEntities({ keywordsFilters: { doesNotInclude: ["archived"] } }, { sortBy: "hot" });
+fetchEntities({ filters: { keywordsFilters: { doesNotInclude: ["archived"] } }, sort: { sortBy: "hot" } });
 ```
 
 ---
@@ -89,7 +89,7 @@ interface TitleFilters {
 ```
 
 ```tsx
-fetchEntities({ titleFilters: { includes: "product launch" } }, { sortBy: "createdAt" });
+fetchEntities({ filters: { titleFilters: { includes: "product launch" } }, sort: { sortBy: "createdAt" } });
 ```
 
 ---
@@ -120,7 +120,7 @@ interface AttachmentsFilters {
 
 ```tsx
 // Only entities with attachments
-fetchEntities({ attachmentsFilters: { hasAttachments: true } }, { sortBy: "createdAt" });
+fetchEntities({ filters: { attachmentsFilters: { hasAttachments: true } }, sort: { sortBy: "createdAt" } });
 ```
 
 ---
@@ -140,16 +140,16 @@ interface LocationFilters {
 A `radius` outside that range, or one that isn't a finite number, is rejected with `400 entity/invalid-query`. 20,000 km is about half the Earth's circumference, so the largest radius already reaches any point.
 
 ```tsx
-fetchEntities(
-  {
+fetchEntities({
+  filters: {
     locationFilters: {
       latitude: 37.7749,
       longitude: -122.4194,
       radius: 10000, // 10 km
     },
   },
-  { sortBy: "createdAt" }
-);
+  sort: { sortBy: "createdAt" },
+});
 ```
 
 ---
@@ -172,26 +172,20 @@ Keys and values can't contain a NUL character (`\u0000`), which metadata can nev
 
 ```tsx
 // Only "tutorial" category entities
-fetchEntities(
-  { metadataFilters: { includes: { category: "tutorial" } } },
-  { sortBy: "hot" }
-);
+fetchEntities({ filters: { metadataFilters: { includes: { category: "tutorial" } } }, sort: { sortBy: "hot" } });
 
 // Entities that have a "price" metadata key
-fetchEntities(
-  { metadataFilters: { exists: ["price"] } },
-  { sortBy: "createdAt" }
-);
+fetchEntities({ filters: { metadataFilters: { exists: ["price"] } }, sort: { sortBy: "createdAt" } });
 
 // Entities in either "news" or "announcements" category
-fetchEntities(
-  {
+fetchEntities({
+  filters: {
     metadataFilters: {
       includesAny: [{ category: "news" }, { category: "announcements" }],
     },
   },
-  { sortBy: "hot" }
-);
+  sort: { sortBy: "hot" },
+});
 ```
 
 ---
@@ -208,7 +202,7 @@ Filters by an entity's **effective** NSFW status — `entity.nsfw OR its space's
 
 ```tsx
 // Hide NSFW content from the feed
-fetchEntities({ nsfwFilter: "exclude" }, { sortBy: "hot" });
+fetchEntities({ filters: { nsfwFilter: "exclude" }, sort: { sortBy: "hot" } });
 ```
 
 Sublay only labels (`nsfw`) and filters (`nsfwFilter`) NSFW content — it does not blur, age-gate, or store a per-viewer preference. Presentation is your app's responsibility. See [Entity NSFW flagging](/v8/data-models/entity#nsfw-flagging).
@@ -220,14 +214,14 @@ Sublay only labels (`nsfw`) and filters (`nsfwFilter`) NSFW content — it does 
 All filters can be combined. An entity must satisfy all specified conditions.
 
 ```tsx
-fetchEntities(
-  {
+fetchEntities({
+  filters: {
     timeFrame: "week",
     keywordsFilters: { includes: ["design"] },
     metadataFilters: { includes: { status: "published" } },
     attachmentsFilters: { hasAttachments: true },
   },
-  { sortBy: "top" },
-  { limit: 20, include: ["user"] }
-);
+  sort: { sortBy: "top" },
+  config: { limit: 20, include: ["user"] },
+});
 ```

@@ -17,11 +17,10 @@ function Feed() {
   });
 
   useEffect(() => {
-    fetchEntities(
-      {},                         // filters (empty = no filters)
-      { sortBy: "hot" },          // sort config
-      { limit: 20, include: ["user"] } // list config
-    );
+    fetchEntities({
+      sort: { sortBy: "hot" },                     // sort config (no filters: every entity)
+      config: { limit: 20, include: ["user"] },    // list config
+    });
   }, []);
 
   return (
@@ -43,12 +42,12 @@ function Feed() {
 ## `fetchEntities` Signature
 
 ```ts
-fetchEntities(
-  filters: Partial<EntityListFilters>,
+fetchEntities({
+  filters?: Partial<EntityListFilters>, // merged into the list's current filters
   sort?: Partial<EntityListSort>,
   config?: EntityListConfig,
-  options?: EntityListFetchOptions
-) => void
+  options?: EntityListFetchOptions,
+}) => void
 ```
 
 ### Filters
@@ -176,10 +175,7 @@ await deleteEntity({ entityId: "ent_abc123" });
 You can sort by any metadata field using the `metadata.fieldName` syntax:
 
 ```tsx
-fetchEntities(
-  {},
-  { sortBy: "metadata.price", sortType: "numeric", sortDir: "asc" }
-);
+fetchEntities({ sort: { sortBy: "metadata.price", sortType: "numeric", sortDir: "asc" } });
 ```
 
 <Note>

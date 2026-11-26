@@ -461,7 +461,7 @@ function AllWorkspaces() {
     useWorkspaceList({ listId: "all-workspaces" });
 
   useEffect(() => {
-    fetchWorkspaces({});
+    fetchWorkspaces();
   }, []);
 
   return (
@@ -500,11 +500,7 @@ function WorkspaceSwitcher() {
     useWorkspaceList({ listId: "switcher" });
 
   useEffect(() => {
-    fetchWorkspaces(
-      { relation: "direct", parentWorkspaceId: "any", sortDir: "asc" },
-      { limit: 50 },
-      { fetchImmediately: true }
-    );
+    fetchWorkspaces({ filters: { relation: "direct", parentWorkspaceId: "any", sortDir: "asc" }, config: { limit: 50 }, options: { fetchImmediately: true } });
   }, []);
 
   // One pass: oldest first means a parent's node exists before its children arrive.

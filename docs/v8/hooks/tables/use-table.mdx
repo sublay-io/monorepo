@@ -123,7 +123,7 @@ function Events() {
   On a paranoid table, toggles whether soft-deleted rows are included (resets to page 1).
 </ResponseField>
 
-<ResponseField name="createRow" type="(data: Record<string, unknown>) => Promise<T>">
+<ResponseField name="createRow" type="({ data }: { data: Record<string, unknown> }) => Promise<T>">
   Inserts a row. Managed columns (`id`/`createdAt`/`updatedAt`/`deletedAt`) are server-set and rejected from the body.
 </ResponseField>
 

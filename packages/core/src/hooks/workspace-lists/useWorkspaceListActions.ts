@@ -56,7 +56,18 @@ export interface DeleteWorkspaceOptions {
   workspaceId: string;
 }
 
-export function useWorkspaceListActions() {
+export interface UseWorkspaceListActionsValues {
+  fetchWorkspaces: (props: { listId: string } & FetchWorkspacesOptions) => Promise<Workspace[] | null>;
+  createWorkspace: (props: { listId: string } & CreateWorkspaceOptions) => Promise<Workspace | undefined>;
+  deleteWorkspace: (props: { listId: string } & DeleteWorkspaceOptions) => Promise<void>;
+}
+
+/**
+ * The implementation: `fetchWorkspaces` also takes the list hooks' internal
+ * `isCurrent` guard as a second argument (a load superseded meanwhile writes
+ * nothing). Internal — not exported from the package.
+ */
+export function useWorkspaceListActionsWithGuard() {
   const dispatch = useSublayDispatch();
   const { projectId } = useProject();
 
@@ -67,8 +78,7 @@ export function useWorkspaceListActions() {
 
   const fetchWorkspaces = useCallback(
     async (
-      listId: string,
-      options: FetchWorkspacesOptions,
+      { listId, ...options }: { listId: string } & FetchWorkspacesOptions,
       isCurrent: () => boolean = () => true
     ): Promise<Workspace[] | null> => {
       if (!projectId) {
@@ -135,10 +145,10 @@ export function useWorkspaceListActions() {
    * from the create is added without them.
    */
   const createWorkspace = useCallback(
-    async (
-      listId: string,
-      options: CreateWorkspaceOptions
-    ): Promise<Workspace | undefined> => {
+    async ({
+      listId,
+      ...options
+    }: { listId: string } & CreateWorkspaceOptions): Promise<Workspace | undefined> => {
       if (!projectId) {
         throw new SublayError("No project ID available");
       }
@@ -185,7 +195,7 @@ export function useWorkspaceListActions() {
   );
 
   const deleteWorkspace = useCallback(
-    async (listId: string, options: DeleteWorkspaceOptions): Promise<void> => {
+    async ({ listId, ...options }: { listId: string } & DeleteWorkspaceOptions): Promise<void> => {
       if (!projectId) {
         throw new SublayError("No project ID available");
       }
@@ -218,6 +228,11 @@ export function useWorkspaceListActions() {
     createWorkspace,
     deleteWorkspace,
   };
+}
+
+/** The list's low-level actions. Each takes one object: `{ listId, ... }`. */
+export function useWorkspaceListActions(): UseWorkspaceListActionsValues {
+  return useWorkspaceListActionsWithGuard();
 }
 
 export default useWorkspaceListActions;

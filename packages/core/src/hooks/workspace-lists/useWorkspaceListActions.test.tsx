@@ -45,7 +45,8 @@ describe("useWorkspaceListActions", () => {
       });
 
       await act(async () => {
-        await result.current.fetchWorkspaces("feed", {
+        await result.current.fetchWorkspaces({
+          listId: "feed",
           page: 1,
           limit: 20,
           relation: "direct",
@@ -71,12 +72,12 @@ describe("useWorkspaceListActions", () => {
         projectId: "test-project",
       });
       await act(async () => {
-        await result.current.fetchWorkspaces("feed", { page: 1, limit: 1 });
+        await result.current.fetchWorkspaces({ listId: "feed", page: 1, limit: 1 });
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(page([{ id: "w2" }], false));
       await act(async () => {
-        await result.current.fetchWorkspaces("feed", { page: 2, limit: 1 });
+        await result.current.fetchWorkspaces({ listId: "feed", page: 2, limit: 1 });
       });
 
       expect(selectWorkspaceListWorkspaces(store.getState(), "feed").map((w) => w.id)).toEqual(["w1", "w2"]);
@@ -85,7 +86,7 @@ describe("useWorkspaceListActions", () => {
     it("throws without a projectId", async () => {
       const { result } = renderHookWithStore(() => useWorkspaceListActions(), { projectId: "" });
       await expect(
-        result.current.fetchWorkspaces("feed", { page: 1, limit: 20 }),
+        result.current.fetchWorkspaces({ listId: "feed", page: 1, limit: 20 }),
       ).rejects.toThrow("No project ID available");
     });
 
@@ -98,7 +99,7 @@ describe("useWorkspaceListActions", () => {
 
       await act(async () => {
         await expect(
-          result.current.fetchWorkspaces("feed", { page: 1, limit: 20 }),
+          result.current.fetchWorkspaces({ listId: "feed", page: 1, limit: 20 }),
         ).rejects.toBeTruthy();
       });
 
@@ -120,7 +121,7 @@ describe("useWorkspaceListActions", () => {
 
       let created: { id: string; reasons?: unknown } | undefined;
       await act(async () => {
-        created = await result.current.createWorkspace("feed", { name: "Acme", include: ["memberCount"] });
+        created = await result.current.createWorkspace({ listId: "feed", name: "Acme", include: ["memberCount"] });
       });
 
       expect(created?.reasons).toEqual([{ type: "owner" }]);
@@ -145,7 +146,7 @@ describe("useWorkspaceListActions", () => {
       act(() => store.dispatch(initializeList({ listId: "feed" })));
 
       await act(async () => {
-        await result.current.createWorkspace("feed", { name: "Acme" });
+        await result.current.createWorkspace({ listId: "feed", name: "Acme" });
       });
 
       expect(selectWorkspaceListWorkspaces(store.getState(), "feed").map((w) => w.id)).toEqual(["w1"]);
@@ -165,7 +166,7 @@ describe("useWorkspaceListActions", () => {
 
       let created: { id: string } | undefined;
       await act(async () => {
-        created = await result.current.createWorkspace("feed", { name: "Child", parentWorkspaceId: "p1" });
+        created = await result.current.createWorkspace({ listId: "feed", name: "Child", parentWorkspaceId: "p1" });
       });
 
       expect(created?.id).toBe("child");
@@ -174,12 +175,12 @@ describe("useWorkspaceListActions", () => {
 
     it("throws without a projectId or a name", async () => {
       const noProject = renderHookWithStore(() => useWorkspaceListActions(), { projectId: "" });
-      await expect(noProject.result.current.createWorkspace("feed", { name: "Acme" })).rejects.toThrow(
+      await expect(noProject.result.current.createWorkspace({ listId: "feed", name: "Acme" })).rejects.toThrow(
         "No project ID available",
       );
 
       const noName = renderHookWithStore(() => useWorkspaceListActions(), { projectId: "test-project" });
-      await expect(noName.result.current.createWorkspace("feed", { name: "" })).rejects.toThrow(
+      await expect(noName.result.current.createWorkspace({ listId: "feed", name: "" })).rejects.toThrow(
         "Workspace name is required",
       );
     });
@@ -192,7 +193,7 @@ describe("useWorkspaceListActions", () => {
       act(() => store.dispatch(initializeList({ listId: "feed" })));
 
       await act(async () => {
-        await expect(result.current.createWorkspace("feed", { name: "Acme" })).rejects.toBeTruthy();
+        await expect(result.current.createWorkspace({ listId: "feed", name: "Acme" })).rejects.toBeTruthy();
       });
 
       expect(selectWorkspaceListWorkspaces(store.getState(), "feed")).toEqual([]);
@@ -206,12 +207,12 @@ describe("useWorkspaceListActions", () => {
         projectId: "test-project",
       });
       await act(async () => {
-        await result.current.fetchWorkspaces("feed", { page: 1, limit: 20 });
+        await result.current.fetchWorkspaces({ listId: "feed", page: 1, limit: 20 });
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
       await act(async () => {
-        await result.current.deleteWorkspace("feed", { workspaceId: "w1" });
+        await result.current.deleteWorkspace({ listId: "feed", workspaceId: "w1" });
       });
 
       expect(selectWorkspaceListWorkspaces(store.getState(), "feed")).toEqual([]);
@@ -219,12 +220,12 @@ describe("useWorkspaceListActions", () => {
 
     it("throws without a projectId or a workspaceId", async () => {
       const noProject = renderHookWithStore(() => useWorkspaceListActions(), { projectId: "" });
-      await expect(noProject.result.current.deleteWorkspace("feed", { workspaceId: "w1" })).rejects.toThrow(
+      await expect(noProject.result.current.deleteWorkspace({ listId: "feed", workspaceId: "w1" })).rejects.toThrow(
         "No project ID available",
       );
 
       const noId = renderHookWithStore(() => useWorkspaceListActions(), { projectId: "test-project" });
-      await expect(noId.result.current.deleteWorkspace("feed", { workspaceId: "" })).rejects.toThrow(
+      await expect(noId.result.current.deleteWorkspace({ listId: "feed", workspaceId: "" })).rejects.toThrow(
         "Workspace ID is required",
       );
     });
@@ -235,12 +236,12 @@ describe("useWorkspaceListActions", () => {
         projectId: "test-project",
       });
       await act(async () => {
-        await result.current.fetchWorkspaces("feed", { page: 1, limit: 20 });
+        await result.current.fetchWorkspaces({ listId: "feed", page: 1, limit: 20 });
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
       await act(async () => {
-        await expect(result.current.deleteWorkspace("feed", { workspaceId: "w1" })).rejects.toBeTruthy();
+        await expect(result.current.deleteWorkspace({ listId: "feed", workspaceId: "w1" })).rejects.toBeTruthy();
       });
 
       expect(selectWorkspaceListWorkspaces(store.getState(), "feed").map((w) => w.id)).toEqual(["w1"]);

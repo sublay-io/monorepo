@@ -19,7 +19,8 @@ function CustomSpaceLoader({ listId }: { listId: string }) {
   const actions = useSpaceListActions();
 
   const loadSpaces = async () => {
-    await actions.fetchSpaces(listId, {
+    await actions.fetchSpaces({
+      listId,
       page: 1,
       sortBy: "createdAt",
       limit: 20,
@@ -30,15 +31,15 @@ function CustomSpaceLoader({ listId }: { listId: string }) {
 
 ## Methods
 
-<ResponseField name="fetchSpaces" type="(listId: string, params: FetchParams) => Promise<Space[] | null>">
+<ResponseField name="fetchSpaces" type="({ listId, ...props }: { listId: string } & FetchParams) => Promise<Space[] | null>">
   Fetch spaces for the given list. Updates Redux state with the results. `params` takes `page`, `limit`, `sortBy` (`"createdAt"`, `"members"` or `"alphabetical"`), an optional `sortDir` (`"asc"` or `"desc"`; left out, the sort's natural direction) and the same filters as [useSpaceList](/v8/hooks/space-lists/use-space-list).
 </ResponseField>
 
-<ResponseField name="createSpace" type="(listId: string, props: CreateSpaceProps) => Promise<SpaceWithPermissions | undefined>">
+<ResponseField name="createSpace" type="({ listId, ...props }: { listId: string } & CreateSpaceProps) => Promise<SpaceWithPermissions | undefined>">
   Create a space and insert it into the given list's state. `props` takes the same fields as [useSpaceList](/v8/hooks/space-lists/use-space-list)'s `createSpace` (every one optional, `name` included). Resolves with the created space plus `memberPermissions`; a failed request rejects.
 </ResponseField>
 
-<ResponseField name="deleteSpace" type="(listId: string, props: { spaceId: string }) => Promise<void>">
+<ResponseField name="deleteSpace" type="({ listId, spaceId }: { listId: string; spaceId: string }) => Promise<void>">
   Delete a space and remove it from the given list's state.
 </ResponseField>
 

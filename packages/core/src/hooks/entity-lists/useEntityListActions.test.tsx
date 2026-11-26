@@ -42,12 +42,33 @@ describe("useEntityListActions", () => {
       });
 
       await act(async () => {
-        await result.current.fetchEntities("feed", { page: 1, sortBy: "hot", limit: 10 });
+        await result.current.fetchEntities({ listId: "feed", page: 1, sortBy: "hot", limit: 10 });
       });
 
       expect(selectEntityListEntities(store.getState(), "feed").map((e) => e.id)).toEqual(["e1"]);
       expect(selectEntityListHasMore(store.getState(), "feed")).toBe(true);
       expect(selectEntityListLoading(store.getState(), "feed")).toBe(false);
+    });
+
+    it("takes listId in the one object without sending it", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(
+        jsonResponse({
+          data: [],
+          pagination: { page: 1, pageSize: 10, totalPages: 1, totalItems: 0, hasMore: false },
+        }),
+      );
+      const { result } = renderHookWithStore(() => useEntityListActions(), {
+        projectId: "test-project",
+      });
+
+      await act(async () => {
+        await result.current.fetchEntities({ listId: "feed", page: 1, sortBy: "hot", limit: 7 });
+      });
+
+      const params = new URL(fetchHandle.calls()[0].url).searchParams;
+      expect(params.has("listId")).toBe(false);
+      expect(params.get("limit")).toBe("7");
+      expect(params.get("sortBy")).toBe("hot");
     });
 
     it("appends on page > 1", async () => {
@@ -61,7 +82,7 @@ describe("useEntityListActions", () => {
         projectId: "test-project",
       });
       await act(async () => {
-        await result.current.fetchEntities("feed", { page: 1, sortBy: "hot", limit: 1 });
+        await result.current.fetchEntities({ listId: "feed", page: 1, sortBy: "hot", limit: 1 });
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(
@@ -71,7 +92,7 @@ describe("useEntityListActions", () => {
         }),
       );
       await act(async () => {
-        await result.current.fetchEntities("feed", { page: 2, sortBy: "hot", limit: 1 });
+        await result.current.fetchEntities({ listId: "feed", page: 2, sortBy: "hot", limit: 1 });
       });
 
       expect(
@@ -86,7 +107,8 @@ describe("useEntityListActions", () => {
 
       let returned: unknown;
       await act(async () => {
-        returned = await result.current.fetchEntities("feed", {
+        returned = await result.current.fetchEntities({
+          listId: "feed",
           page: 1,
           sortBy: undefined as never,
           limit: 10,
@@ -101,7 +123,7 @@ describe("useEntityListActions", () => {
       const { result } = renderHookWithStore(() => useEntityListActions(), { projectId: "" });
 
       await expect(
-        result.current.fetchEntities("feed", { page: 1, sortBy: "hot", limit: 10 }),
+        result.current.fetchEntities({ listId: "feed", page: 1, sortBy: "hot", limit: 10 }),
       ).rejects.toThrow("No project ID available");
     });
 
@@ -116,7 +138,7 @@ describe("useEntityListActions", () => {
 
       await act(async () => {
         await expect(
-          result.current.fetchEntities("feed", { page: 1, sortBy: "hot", limit: 10 }),
+          result.current.fetchEntities({ listId: "feed", page: 1, sortBy: "hot", limit: 10 }),
         ).rejects.toBeTruthy();
       });
 
@@ -135,7 +157,7 @@ describe("useEntityListActions", () => {
 
       let created: { id: string } | undefined;
       await act(async () => {
-        created = await result.current.createEntity("feed", { title: "Hello" });
+        created = await result.current.createEntity({ listId: "feed", title: "Hello" });
       });
 
       expect(created?.id).toBe("e1");
@@ -149,12 +171,12 @@ describe("useEntityListActions", () => {
       });
       act(() => store.dispatch(initializeList({ listId: "feed" })));
       await act(async () => {
-        await result.current.createEntity("feed", { title: "First" });
+        await result.current.createEntity({ listId: "feed", title: "First" });
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ id: "e2" }, 201));
       await act(async () => {
-        await result.current.createEntity("feed", { title: "Second", insertPosition: "last" });
+        await result.current.createEntity({ listId: "feed", title: "Second", insertPosition: "last" });
       });
 
       expect(
@@ -165,7 +187,7 @@ describe("useEntityListActions", () => {
     it("throws without a projectId", async () => {
       const { result } = renderHookWithStore(() => useEntityListActions(), { projectId: "" });
 
-      await expect(result.current.createEntity("feed", { title: "Hello" })).rejects.toThrow(
+      await expect(result.current.createEntity({ listId: "feed", title: "Hello" })).rejects.toThrow(
         "No project ID available",
       );
     });
@@ -179,7 +201,7 @@ describe("useEntityListActions", () => {
 
       await act(async () => {
         await expect(
-          result.current.createEntity("feed", { title: "Hello" }),
+          result.current.createEntity({ listId: "feed", title: "Hello" }),
         ).rejects.toBeTruthy();
       });
 
@@ -195,14 +217,14 @@ describe("useEntityListActions", () => {
       });
       act(() => store.dispatch(initializeList({ listId: "feed" })));
       await act(async () => {
-        await result.current.createEntity("feed", { title: "Hello" });
+        await result.current.createEntity({ listId: "feed", title: "Hello" });
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(
         new Response(null, { status: 204 }),
       );
       await act(async () => {
-        await result.current.deleteEntity("feed", { entityId: "e1" });
+        await result.current.deleteEntity({ listId: "feed", entityId: "e1" });
       });
 
       expect(selectEntityListEntities(store.getState(), "feed")).toEqual([]);
@@ -211,7 +233,7 @@ describe("useEntityListActions", () => {
     it("throws without a projectId", async () => {
       const { result } = renderHookWithStore(() => useEntityListActions(), { projectId: "" });
 
-      await expect(result.current.deleteEntity("feed", { entityId: "e1" })).rejects.toThrow(
+      await expect(result.current.deleteEntity({ listId: "feed", entityId: "e1" })).rejects.toThrow(
         "No project ID available",
       );
     });
@@ -223,13 +245,13 @@ describe("useEntityListActions", () => {
       });
       act(() => store.dispatch(initializeList({ listId: "feed" })));
       await act(async () => {
-        await result.current.createEntity("feed", { title: "Hello" });
+        await result.current.createEntity({ listId: "feed", title: "Hello" });
       });
 
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
       await act(async () => {
         await expect(
-          result.current.deleteEntity("feed", { entityId: "e1" }),
+          result.current.deleteEntity({ listId: "feed", entityId: "e1" }),
         ).rejects.toBeTruthy();
       });
 

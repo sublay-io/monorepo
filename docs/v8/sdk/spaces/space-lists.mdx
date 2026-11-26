@@ -21,7 +21,7 @@ function SpaceDirectory() {
   } = useSpaceList({ listId: "directory" });
 
   useEffect(() => {
-    fetchSpaces({ sortBy: "createdAt" });
+    fetchSpaces({ filters: { sortBy: "createdAt" } });
   }, []);
 
   return (
@@ -43,19 +43,19 @@ function SpaceDirectory() {
 
 ```tsx
 // Search by name
-fetchSpaces({ sortBy: "createdAt", query: "gaming", searchFields: "name" });
+fetchSpaces({ filters: { sortBy: "createdAt", query: "gaming", searchFields: "name" } });
 
 // Search the slug, name and description (null clears a searchFields set by an earlier call)
-fetchSpaces({ sortBy: "createdAt", query: "design", searchFields: null });
+fetchSpaces({ filters: { sortBy: "createdAt", query: "design", searchFields: null } });
 
 // A space's sub-spaces the user can see (public ones, plus ones they're an active member of), A–Z
-fetchSpaces({ sortBy: "alphabetical", parentSpaceId: "parent-space-id" });
+fetchSpaces({ filters: { sortBy: "alphabetical", parentSpaceId: "parent-space-id" } });
 
 // Spaces at every level, top-level and sub-spaces together
-fetchSpaces({ sortBy: "members", parentSpaceId: "any" });
+fetchSpaces({ filters: { sortBy: "members", parentSpaceId: "any" } });
 
 // Back to top-level spaces only (the default; null does the same)
-fetchSpaces({ sortBy: "createdAt", parentSpaceId: "none" });
+fetchSpaces({ filters: { sortBy: "createdAt", parentSpaceId: "none" } });
 ```
 
 A space list shows top-level spaces by default: it sends `parentSpaceId: "none"` on every page, including `loadMore` and a re-sort, until you name a parent or `"any"`.
@@ -68,7 +68,7 @@ A space list shows top-level spaces by default: it sends `parentSpaceId: "none"`
 | `"members"` | Most members first |
 | `"alphabetical"` | Sorted by name, A–Z |
 
-Pass `sortDir: "asc"` or `"desc"` to reverse any of them, for example `fetchSpaces({ sortBy: "createdAt", sortDir: "asc" })` for oldest first. Left out, each sort uses the direction above.
+Pass `sortDir: "asc"` or `"desc"` to reverse any of them, for example `fetchSpaces({ filters: { sortBy: "createdAt", sortDir: "asc" } })` for oldest first. Left out, each sort uses the direction above.
 
 ## Creating and Deleting from a List
 
@@ -99,8 +99,8 @@ const newest = useSpaceList({ listId: "newest" });
 const subSpaces = useSpaceList({ listId: "sub-spaces" });
 
 // Both lists are independent
-newest.fetchSpaces({ sortBy: "createdAt" });
-subSpaces.fetchSpaces({ sortBy: "alphabetical", parentSpaceId: "parent-space-id" });
+newest.fetchSpaces({ filters: { sortBy: "createdAt" } });
+subSpaces.fetchSpaces({ filters: { sortBy: "alphabetical", parentSpaceId: "parent-space-id" } });
 ```
 
 ## My Spaces
@@ -138,8 +138,8 @@ const children = await fetchMySpaces({ parentSpaceId: "parent-space-id" });
   `true` while `loadMore()` has something to fetch: a next page, or a load that failed.
 </ResponseField>
 
-<ResponseField name="fetchSpaces" type="function">
-  Trigger a new fetch with the given filters and configuration. Resets to page 1.
+<ResponseField name="fetchSpaces" type="({ filters?, config?, options? }) => void">
+  Trigger a new fetch with the given filters and configuration, as one object. Resets to page 1.
 </ResponseField>
 
 <ResponseField name="loadMore" type="() => Promise<void>">

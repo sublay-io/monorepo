@@ -28,7 +28,7 @@ function Feed() {
   } = useEntityList({ listId: "main-feed" });
 
   useEffect(() => {
-    fetchEntities({}, { sortBy: "hot" }, { limit: 20, include: ["user"] });
+    fetchEntities({ sort: { sortBy: "hot" }, config: { limit: 20, include: ["user"] } });
   }, []);
 
   return (
@@ -103,8 +103,8 @@ The `config` object passed to `fetchEntities` accepts an optional `spaceReputati
   `true` while `loadMore()` has something to fetch: a next page, or a load that failed.
 </ResponseField>
 
-<ResponseField name="fetchEntities" type="(filters, sort?, config?, options?) => void">
-  Loads the first page with the given filters, sort, and config. Debounced by default (800ms). See [Fetching Entities](/v8/sdk/entity-lists/fetch-entities) for the full parameter reference.
+<ResponseField name="fetchEntities" type="({ filters?, sort?, config?, options? }) => void">
+  Loads the first page with the given filters, sort, and config, passed as one object: `filters` merge into the list's current filters, `sort` and `config` are the list's settings, and `options` control this fetch. Debounced by default (800ms). See [Fetching Entities](/v8/sdk/entity-lists/fetch-entities) for the full parameter reference.
 </ResponseField>
 
 <ResponseField name="loadMore" type="() => Promise<void>">

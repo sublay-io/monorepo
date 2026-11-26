@@ -337,4 +337,23 @@ describe("replaceRepliesPage", () => {
     expect(next.nodes.p.childIds).toEqual(["pinned", "mine", "fresh"]);
     expect(next.nodes.p.repliesCursor).toBeNull();
   });
+
+  it("relinks the viewer's new reply-to-a-reply under the reply the page brings again", () => {
+    const p = makeComment({ id: "p", parentCommentId: null });
+    const r = makeComment({ id: "r", parentCommentId: "p" });
+    const n = makeComment({ id: "n", parentCommentId: "r" });
+    let store = insertComments(emptyCommentStore(), [p]);
+    store = applyRepliesPage(store, "p", page([r], null));
+    store = insertComments(store, [n], { newlyAdded: true });
+    expect(selectReplies(store, "r").newReplies.map((c) => c.id)).toEqual(["n"]);
+
+    // The page brings r again with a nested page of its own, without n.
+    const rAgain = {
+      ...makeComment({ id: "r", parentCommentId: "p" }),
+      replies: page([makeComment({ id: "s", parentCommentId: "r" })], null),
+    } as Comment;
+    const next = replaceRepliesPage(store, "p", page([rAgain], null));
+    expect(selectReplies(next, "r").replies.map((c) => c.id)).toEqual(["s"]);
+    expect(selectReplies(next, "r").newReplies.map((c) => c.id)).toEqual(["n"]);
+  });
 });

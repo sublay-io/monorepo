@@ -276,7 +276,8 @@ export function carryOverOnRefetch(
  * loaded before are unlinked from the parent and dropped from the store with
  * everything under them — except the viewer's own new replies and the
  * `pinned` ids (the highlighted comment and its parent) — and the page is
- * applied as by `applyRepliesPage`.
+ * applied as by `applyRepliesPage`. A kept new reply whose parent the page
+ * brought again is linked under it again.
  */
 export function replaceRepliesPage(
   store: CommentStore,
@@ -299,7 +300,19 @@ export function replaceRepliesPage(
     delete nodes[id];
     stack.push(...node.childIds);
   }
-  return applyRepliesPage({ ...store, nodes }, parentId, page);
+  const next = applyRepliesPage({ ...store, nodes }, parentId, page);
+  // A kept new reply under a reply the page brought again (a fresh node,
+  // with only the page's own children) is linked under it once more.
+  let relinked: Record<string, CommentNode> | null = null;
+  for (const [id, node] of Object.entries(next.nodes)) {
+    const parentOf = node.comment.parentCommentId;
+    if (!node.new || !parentOf) continue;
+    const current = (relinked ?? next.nodes)[parentOf];
+    if (!current || current.childIds.includes(id)) continue;
+    relinked = relinked ?? { ...next.nodes };
+    relinked[parentOf] = { ...current, childIds: [...current.childIds, id] };
+  }
+  return relinked ? { ...next, nodes: relinked } : next;
 }
 
 /**

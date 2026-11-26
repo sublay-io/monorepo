@@ -52,7 +52,7 @@ Messages are sorted oldest-first in the returned array. `loadMore` fetches messa
 - `messages`, `messagesLoading`, `hasMore`
 - `messagesError` — the last failure loading messages, or `null`. Cleared when the next load starts.
 - `loadMore()` — loads older messages, or retries the load that failed. Never rejects.
-- `refetchMessages()` — reloads the latest page, replacing the loaded messages (optimistic and newer live ones are kept, and a message on the new page keeps the `files` / `grants` another hook fetched for it). Never rejects.
+- `refetchMessages()` — reloads the latest page, replacing the loaded messages (optimistic and newer live ones are kept, and a message on the new page keeps the `files` / `grants` another hook fetched for it, unless the page shows it deleted or removed). Never rejects.
 
 They share their state with every `useLiveChatMessages` on the same conversation. A `useLiveChatMessages` inside the provider with its own `include` loads alongside the provider's load, and what each brings is merged.
 

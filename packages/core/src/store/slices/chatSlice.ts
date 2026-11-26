@@ -295,6 +295,13 @@ function withModerationDetails<T extends Record<string, any>>(
 /** Fields a message carries only when fetched with that `include`. */
 const INCLUDE_ONLY_FIELDS = ["files", "grants"] as const;
 
+/**
+ * A deleted or removed message: the server blanks its attachments and grants
+ * (when it sends them), so a held copy's must never be kept on it.
+ */
+const isPlaceholder = (message: Partial<ChatMessage>) =>
+  !!message.userDeletedAt || message.moderationStatus === "removed";
+
 function upsertInto(
   items: ChatMessage[],
   incoming: ChatMessage | SocketChatMessage
@@ -312,6 +319,13 @@ function upsertInto(
       merged.quotedMessage = withModerationDetails(message.quotedMessage, held);
     }
     if (!message.id.startsWith("temp-")) delete merged.sendFailed;
+    // A placeholder fetched without an `include` doesn't keep the held
+    // copy's files or grants.
+    if (isPlaceholder(merged)) {
+      for (const key of INCLUDE_ONLY_FIELDS) {
+        if (!(key in message)) delete merged[key];
+      }
+    }
     return merged;
   };
 
@@ -713,7 +727,8 @@ const chatSlice = createSlice({
      * Kept: optimistic `temp-` messages, and messages newer than the page's
      * newest (live ones that landed while the page was in flight). A message
      * on the page keeps its held `files` / `grants` when the page's copy has
-     * none (fetched without that `include`).
+     * none (fetched without that `include`), unless the page shows it deleted
+     * or removed.
      */
     replaceMessages(
       state,
@@ -744,7 +759,7 @@ const chatSlice = createSlice({
       for (const m of messages) {
         const prev = heldById.get(m.id);
         const kept: Partial<ChatMessage> = {};
-        if (prev) {
+        if (prev && !isPlaceholder(m)) {
           for (const key of INCLUDE_ONLY_FIELDS) {
             if (!(key in m) && key in prev) (kept as any)[key] = prev[key];
           }

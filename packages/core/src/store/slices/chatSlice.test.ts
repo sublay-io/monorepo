@@ -1077,6 +1077,60 @@ describe("chatSlice — replaceMessages", () => {
     );
     expect(state.messages[CONV].items[0].files).toEqual([]);
   });
+
+  describe("a deleted or removed message never keeps its held files and grants", () => {
+    const files = [{ id: "file-1" }] as any;
+    const grants = { total: 2 } as any;
+    const held = () =>
+      baseState({
+        messages: {
+          [CONV]: {
+            items: [msg("message-1", "2024-01-01T00:00:01.000Z", { files, grants })],
+            loading: false,
+            hasMore: false,
+            oldestMessageId: "message-1",
+            newestMessageId: "message-1",
+          },
+        },
+      });
+    // The placeholder copy, fetched without `include` (no files / grants keys).
+    const placeholder = (extra: Record<string, unknown>) => {
+      const { files: _f, grants: _g, ...rest } = msg("message-1", "2024-01-01T00:00:01.000Z", {
+        content: null,
+        ...extra,
+      }) as any;
+      return rest;
+    };
+    const cases: Array<[string, Record<string, unknown>]> = [
+      ["deleted", { userDeletedAt: "2024-01-02T00:00:00.000Z" }],
+      ["removed", { moderationStatus: "removed" }],
+    ];
+
+    for (const [label, extra] of cases) {
+      it(`replaceMessages: ${label}`, () => {
+        const state = reducer(
+          held(),
+          replaceMessages({ conversationId: CONV, messages: [placeholder(extra)], hasMore: false }),
+        );
+        const [m] = state.messages[CONV].items;
+        expect(m.files).toBeUndefined();
+        expect(m.grants).toBeUndefined();
+      });
+
+      it(`upsertMessage (open / catch-up merge): ${label}`, () => {
+        const state = reducer(held(), upsertMessage(placeholder(extra)));
+        const [m] = state.messages[CONV].items;
+        expect(m.files).toBeUndefined();
+        expect(m.grants).toBeUndefined();
+      });
+    }
+
+    it("a plain re-delivery without include still keeps them (merge)", () => {
+      const { files: _f, grants: _g, ...plain } = msg("message-1", "2024-01-01T00:00:01.000Z") as any;
+      const state = reducer(held(), upsertMessage(plain));
+      expect(state.messages[CONV].items[0].files).toEqual(files);
+    });
+  });
 });
 
 describe("chatSlice — deleted and removed placeholders (S#227)", () => {

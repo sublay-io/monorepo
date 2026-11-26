@@ -90,7 +90,7 @@ function MessageList({ conversationId }: { conversationId: string }) {
 </ResponseField>
 
 <ResponseField name="refetch" type="() => Promise<void>">
-  Reloads from the first page. For the main stream: the latest page replaces the loaded messages, keeping optimistic messages and newer live ones; a message on the page keeps the `files` / `grants` another hook on the conversation fetched for it. For threads: starts over from the thread's first reply. Never rejects: a failure lands in `error`.
+  Reloads from the first page. For the main stream: the latest page replaces the loaded messages, keeping optimistic messages and newer live ones; a message on the page keeps the `files` / `grants` another hook on the conversation fetched for it, unless the page shows it deleted or removed. For threads: starts over from the thread's first reply. Never rejects: a failure lands in `error`.
 </ResponseField>
 
 ## Notes

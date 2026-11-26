@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { act, cleanup, waitFor } from "@testing-library/react";
 
 import {
@@ -178,5 +178,110 @@ describe("useAppNotifications", () => {
     });
 
     expect(result.current.appNotifications.map((n) => n.id)).toEqual(["n-refreshed"]);
+  });
+});
+
+describe("useAppNotifications — the list contract", () => {
+  type Reply = Response | Promise<Response>;
+  /** List requests are answered from `replies` in order (then a last page); other GETs as usual. */
+  function route(replies: Array<() => Reply>) {
+    fetchHandle.fetchMock.mockImplementation(async (...args: unknown[]) => {
+      const req = args[0] as Request | string;
+      const url = typeof req === "string" ? req : req.url;
+      if (url.includes("/app-notifications/unread-count")) return jsonResponse({ count: 0 });
+      if (url.includes("/app-notifications")) {
+        const next = replies.shift();
+        return next ? next() : listPage([], false);
+      }
+      return jsonResponse({}, 404);
+    });
+  }
+  function listPage(ids: string[], hasMore: boolean) {
+    return jsonResponse({
+      data: ids.map((id) => notification(id)),
+      pagination: { page: 1, pageSize: 1, totalPages: 1, totalItems: ids.length, hasMore },
+    });
+  }
+  const listUrls = () =>
+    fetchHandle
+      .calls()
+      .map((c) => new URL(c.url))
+      .filter((u) => /\/app-notifications$/.test(u.pathname));
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it("retries a failed first page as page 1", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    route([() => jsonResponse({ message: "boom" }, 500), () => listPage(["n1"], true)]);
+    const { result, store } = renderHookWithStore(() => useAppNotifications({ limit: 1 }));
+    act(() => store.dispatch(setUser(makeAuthUser())));
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+    expect(result.current.hasMore).toBe(true);
+
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    expect(result.current.error).toBeNull();
+    expect(result.current.appNotifications.map((n) => n.id)).toEqual(["n1"]);
+    expect(listUrls().map((u) => u.searchParams.get("page"))).toEqual(["1", "1"]);
+  });
+
+  it("drops a page that lands after a refetch started", async () => {
+    let release!: (r: Response) => void;
+    route([
+      () => listPage(["n1"], true),
+      () => new Promise<Response>((r) => { release = r; }),
+      () => listPage(["fresh"], true),
+    ]);
+    const { result, store } = renderHookWithStore(() => useAppNotifications({ limit: 1 }));
+    act(() => store.dispatch(setUser(makeAuthUser())));
+    await waitFor(() => expect(result.current.appNotifications.map((n) => n.id)).toEqual(["n1"]));
+
+    act(() => {
+      result.current.loadMore();
+    });
+    await waitFor(() => expect(listUrls()).toHaveLength(2));
+    await act(async () => {
+      await result.current.refetch();
+    });
+    expect(result.current.appNotifications.map((n) => n.id)).toEqual(["fresh"]);
+
+    await act(async () => {
+      release(await listPage(["stale-2"], false));
+      await new Promise((r) => setTimeout(r, 20));
+    });
+    expect(result.current.appNotifications.map((n) => n.id)).toEqual(["fresh"]);
+    expect(result.current.hasMore).toBe(true);
+  });
+
+  it("two loadMore calls in the same tick make one request", async () => {
+    route([() => listPage(["n1"], true), () => listPage(["n2"], true)]);
+    const { result, store } = renderHookWithStore(() => useAppNotifications({ limit: 1 }));
+    act(() => store.dispatch(setUser(makeAuthUser())));
+    await waitFor(() => expect(result.current.appNotifications).toHaveLength(1));
+
+    await act(async () => {
+      await Promise.all([result.current.loadMore(), result.current.loadMore()]);
+    });
+    expect(listUrls().map((u) => u.searchParams.get("page"))).toEqual(["1", "2"]);
+    expect(result.current.appNotifications.map((n) => n.id)).toEqual(["n1", "n2"]);
+  });
+
+  it("a limit change after mount reloads page 1 at the new size", async () => {
+    route([() => listPage(["n1"], true), () => listPage(["n1", "n2"], true)]);
+    const { result, store, rerender } = renderHookWithStore(
+      ({ limit }: { limit: number }) => useAppNotifications({ limit }),
+      { initialProps: { limit: 1 } },
+    );
+    act(() => store.dispatch(setUser(makeAuthUser())));
+    await waitFor(() => expect(result.current.appNotifications).toHaveLength(1));
+    expect(listUrls()).toHaveLength(1);
+
+    rerender({ limit: 2 });
+    await waitFor(() => expect(result.current.appNotifications).toHaveLength(2));
+    const last = listUrls()[listUrls().length - 1].searchParams;
+    expect(listUrls()).toHaveLength(2);
+    expect(last.get("page")).toBe("1");
+    expect(last.get("limit")).toBe("2");
   });
 });

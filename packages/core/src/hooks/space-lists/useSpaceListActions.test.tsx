@@ -14,7 +14,6 @@ import {
   selectSpaceListSpaces,
   selectSpaceListLoading,
   selectSpaceListHasMore,
-  selectSpaceList,
 } from "../../store/slices/spaceListsSlice";
 
 let fetchHandle: FetchMockHandle;
@@ -110,7 +109,7 @@ describe("useSpaceListActions", () => {
       ).rejects.toThrow("No project ID available");
     });
 
-    it("records the error and re-throws on a failed request", async () => {
+    it("re-throws on a failed request and stops loading", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
       const { result, store } = renderHookWithStore(() => useSpaceListActions(), {
         projectId: "test-project",
@@ -123,7 +122,6 @@ describe("useSpaceListActions", () => {
         ).rejects.toBeTruthy();
       });
 
-      expect(selectSpaceList(store.getState(), "feed")?.error).toBe("Failed to fetch spaces");
       expect(selectSpaceListLoading(store.getState(), "feed")).toBe(false);
     });
   });

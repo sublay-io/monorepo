@@ -4,7 +4,6 @@ import {
   setEntityListLoading,
   setEntityListEntities,
   setEntityListHasMore,
-  setEntityListError,
   addEntity,
   removeEntity,
 } from "../../store/slices/entityListsSlice";
@@ -188,9 +187,6 @@ export function useEntityListActionsWithGuard() {
           err
         );
         handleErrorUtil(err, "Failed to fetch entities:");
-        dispatch(
-          setEntityListError({ listId, error: "Failed to fetch entities" })
-        );
         throw toSublayError(err);
       } finally {
         if (isCurrent()) dispatch(setEntityListLoading({ listId, loading: false }));

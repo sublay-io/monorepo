@@ -14,7 +14,6 @@ import {
   selectEntityListEntities,
   selectEntityListLoading,
   selectEntityListHasMore,
-  selectEntityList,
 } from "../../store/slices/entityListsSlice";
 import { SuspendedError, isSuspendedError } from "../../errors/SuspendedError";
 
@@ -128,8 +127,8 @@ describe("useEntityListActions", () => {
       ).rejects.toThrow("No project ID available");
     });
 
-    it("records the error and re-throws on a failed request", async () => {
-      // The slice's setEntityListError/setEntityListLoading reducers are no-ops for a
+    it("re-throws on a failed request and stops loading", async () => {
+      // The slice's setEntityListLoading reducer is a no-op for a
       // list that was never initialized — mirror useEntityList's real call order.
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
       const { result, store } = renderHookWithStore(() => useEntityListActions(), {
@@ -143,7 +142,6 @@ describe("useEntityListActions", () => {
         ).rejects.toBeTruthy();
       });
 
-      expect(selectEntityList(store.getState(), "feed")?.error).toBe("Failed to fetch entities");
       expect(selectEntityListLoading(store.getState(), "feed")).toBe(false);
     });
   });

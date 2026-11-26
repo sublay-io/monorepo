@@ -15,7 +15,6 @@ export interface WorkspaceListState {
   page: number;
   loading: boolean;
   hasMore: boolean;
-  error: string | null;
   lastFetched: number | null;
 
   // Configuration (set when fetchWorkspaces is called)
@@ -62,7 +61,6 @@ const createDefaultWorkspaceListState = (): WorkspaceListState => ({
   page: 1,
   loading: true,
   hasMore: true,
-  error: null,
   lastFetched: null,
 
   // Default configuration
@@ -221,7 +219,6 @@ export const workspaceListsSlice = createSlice({
       // Reset pagination when filters change
       list.page = 1;
       list.hasMore = true;
-      list.error = null;
     },
 
     setWorkspaceListLoading: (
@@ -282,16 +279,6 @@ export const workspaceListsSlice = createSlice({
       }
     },
 
-    setWorkspaceListError: (
-      state,
-      action: PayloadAction<{ listId: string; error: string | null }>
-    ) => {
-      const { listId, error } = action.payload;
-      if (state.lists[listId]) {
-        state.lists[listId].error = error;
-        state.lists[listId].loading = false;
-      }
-    },
 
     /**
      * Adds a newly created workspace where the server would list it. It is the
@@ -364,7 +351,6 @@ export const {
   setWorkspaceListWorkspaces,
   setWorkspaceListPage,
   setWorkspaceListHasMore,
-  setWorkspaceListError,
   addWorkspace,
   removeWorkspace,
   updateWorkspace,

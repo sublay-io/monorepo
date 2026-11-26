@@ -4,7 +4,6 @@ import {
   setWorkspaceListLoading,
   setWorkspaceListWorkspaces,
   setWorkspaceListHasMore,
-  setWorkspaceListError,
   addWorkspace,
   removeWorkspace,
 } from "../../store/slices/workspaceListsSlice";
@@ -127,9 +126,6 @@ export function useWorkspaceListActionsWithGuard() {
           err
         );
         handleErrorUtil(err, "Failed to fetch workspaces:");
-        dispatch(
-          setWorkspaceListError({ listId, error: "Failed to fetch workspaces" })
-        );
         throw toSublayError(err);
       } finally {
         if (isCurrent()) dispatch(setWorkspaceListLoading({ listId, loading: false }));

@@ -16,7 +16,6 @@ import {
   selectWorkspaceListWorkspaces,
   selectWorkspaceListLoading,
   selectWorkspaceListHasMore,
-  selectWorkspaceList,
 } from "../../store/slices/workspaceListsSlice";
 
 let fetchHandle: FetchMockHandle;
@@ -90,7 +89,7 @@ describe("useWorkspaceListActions", () => {
       ).rejects.toThrow("No project ID available");
     });
 
-    it("records the error and re-throws on a failed request", async () => {
+    it("re-throws on a failed request and stops loading", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
       const { result, store } = renderHookWithStore(() => useWorkspaceListActions(), {
         projectId: "test-project",
@@ -103,7 +102,6 @@ describe("useWorkspaceListActions", () => {
         ).rejects.toBeTruthy();
       });
 
-      expect(selectWorkspaceList(store.getState(), "feed")?.error).toBe("Failed to fetch workspaces");
       expect(selectWorkspaceListLoading(store.getState(), "feed")).toBe(false);
     });
   });

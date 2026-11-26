@@ -5,7 +5,6 @@ import {
   setSpaceListLoading,
   setSpaceListSpaces,
   setSpaceListHasMore,
-  setSpaceListError,
   addSpace,
   removeSpace,
 } from "../../store/slices/spaceListsSlice";
@@ -136,9 +135,6 @@ export function useSpaceListActionsWithGuard() {
           err
         );
         handleErrorUtil(err, "Failed to fetch spaces:");
-        dispatch(
-          setSpaceListError({ listId, error: "Failed to fetch spaces" })
-        );
         throw toSublayError(err);
       } finally {
         if (isCurrent()) dispatch(setSpaceListLoading({ listId, loading: false }));

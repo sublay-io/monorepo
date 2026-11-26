@@ -28,7 +28,7 @@ import {
   CommentStore,
   emptyCommentStore,
   insertComments,
-  keepNewComments,
+  carryOverOnRefetch,
   selectRootComments,
 } from "../../helpers/commentStore";
 import {
@@ -286,12 +286,12 @@ export function useEntityCommentsInternal(props: UseEntityCommentsProps): {
       const response = await requestRef.current!(reset ? null : cursorRef.current);
       if (generation !== generationRef.current) return;
       const { data, pagination } = response;
-      // A refetch keeps the viewer's own new comments (and the highlight seed).
+      // A refetch keeps the highlight seed, the viewer's own new comments and
+      // the reply pages loaded under comments that are still listed.
       setStore((prev) =>
-        insertComments(
-          reset && keep ? keepNewComments(prev, startOver(prev)) : prev,
-          data,
-        ),
+        reset && keep
+          ? carryOverOnRefetch(prev, insertComments(startOver(prev), data))
+          : insertComments(prev, data),
       );
       cursorRef.current = pagination.nextCursor;
       hasMoreRef.current = pagination.hasMore;

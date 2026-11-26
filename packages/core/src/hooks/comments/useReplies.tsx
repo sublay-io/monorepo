@@ -228,7 +228,8 @@ function useReplies({
     newReplies,
     loading,
     error,
-    hasMore,
+    // A failed load is still to do: `loadMore()` retries it.
+    hasMore: hasMore || error !== null,
     loadMore,
     refetch,
   };

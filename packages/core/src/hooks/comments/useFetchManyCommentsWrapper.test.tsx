@@ -408,8 +408,8 @@ describe("useFetchManyCommentsWrapper — the list contract", () => {
     await expect(result.current.loadMore()).resolves.toBeUndefined();
     axiosPrivate.mockNetworkError("get");
     await expect(result.current.refetch()).resolves.toBeUndefined();
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.error).toBeInstanceOf(Error);
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+    expect(result.current.loading).toBe(false);
     expect(result.current.comments.map((c) => c.id)).toEqual(["c1"]);
   });
 });

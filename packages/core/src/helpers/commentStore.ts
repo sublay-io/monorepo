@@ -194,27 +194,80 @@ export function applyRepliesPage(
 }
 
 /**
- * Carry the viewer's own new top-level comments (and everything under them)
- * from `previous` into `next`, for a reload that starts the list over from its
- * first page. Comments `next` already holds are left as they are there.
+ * Carry over what a top-level refetch should keep, from `previous` (the store
+ * before) into `next` (the fresh store with the new first page in it):
+ *
+ * - the reply pages loaded under a comment that is still listed: its loaded
+ *   replies (and everything under them), cursor and `hasMore`, when the new
+ *   page didn't bring its replies itself;
+ * - the viewer's own new comments, at any level, wherever their parent is
+ *   still in the store (or at the top level), with everything under them,
+ *   linked under that parent again.
+ *
+ * Comments `next` already holds keep `next`'s copy.
  */
-export function keepNewComments(
+export function carryOverOnRefetch(
   previous: CommentStore,
   next: CommentStore,
 ): CommentStore {
-  const newRoots = previous.rootIds.filter((id) => previous.nodes[id]?.new);
-  if (newRoots.length === 0) return next;
-  const nodes = { ...next.nodes };
+  const nodes: Record<string, CommentNode> = { ...next.nodes };
   const rootIds = [...next.rootIds];
-  const stack = [...newRoots];
-  while (stack.length) {
-    const id = stack.pop()!;
-    const node = previous.nodes[id];
-    if (!node || nodes[id]) continue;
-    nodes[id] = node;
-    stack.push(...node.childIds);
+  const copySubtree = (rootId: string) => {
+    const stack = [rootId];
+    while (stack.length) {
+      const id = stack.pop()!;
+      const node = previous.nodes[id];
+      if (!node || nodes[id]) continue;
+      nodes[id] = node;
+      stack.push(...node.childIds);
+    }
+  };
+  const link = (parentId: string, childId: string) => {
+    const parent = nodes[parentId];
+    if (parent && !parent.childIds.includes(childId)) {
+      nodes[parentId] = { ...parent, childIds: [...parent.childIds, childId] };
+    }
+  };
+
+  // Reply pages loaded under comments that are still listed.
+  for (const id of Object.keys(next.nodes)) {
+    const before = previous.nodes[id];
+    const now = nodes[id];
+    if (!before?.repliesLoaded || now.repliesLoaded) continue;
+    nodes[id] = {
+      ...now,
+      repliesLoaded: true,
+      repliesCursor: before.repliesCursor,
+      repliesHasMore: before.repliesHasMore,
+    };
+    for (const childId of before.childIds) {
+      copySubtree(childId);
+      link(id, childId);
+    }
   }
-  for (const id of newRoots) if (!rootIds.includes(id)) rootIds.push(id);
+
+  // The viewer's new comments whose parent is still there. Repeated until
+  // nothing changes, so a new reply under another carried comment finds it.
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const [id, node] of Object.entries(previous.nodes)) {
+      if (!node.new || nodes[id]) continue;
+      const parentId = node.comment.parentCommentId;
+      if (parentId && !nodes[parentId]) continue;
+      copySubtree(id);
+      if (parentId) link(parentId, id);
+      else if (!rootIds.includes(id)) rootIds.push(id);
+      changed = true;
+    }
+  }
+  // A new comment already carried (inside a subtree) is linked to its parent.
+  for (const [id, node] of Object.entries(nodes)) {
+    const parentId = node.comment.parentCommentId;
+    if (node.new && parentId && nodes[parentId]) link(parentId, id);
+    else if (node.new && !parentId && !rootIds.includes(id)) rootIds.push(id);
+  }
+
   return { nodes, rootIds };
 }
 

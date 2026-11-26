@@ -287,8 +287,8 @@ describe("useFetchManyEntitiesWrapper", () => {
 
     axiosPrivate.mockNetworkError("get");
     await expect(result.current.refetch()).resolves.toBeUndefined();
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.error).toBeInstanceOf(Error);
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+    expect(result.current.loading).toBe(false);
     expect(result.current.entities.map((e) => e.id)).toEqual(["e1"]);
   });
 

@@ -35,6 +35,7 @@ function NotificationControl({
     appNotifications,
     unreadAppNotificationsCount,
     loading,
+    error,
     hasMore,
     loadMore,
     markNotificationAsRead,
@@ -315,6 +316,7 @@ function NotificationControl({
             <NotificationList
               notifications={appNotifications}
               loading={loading}
+              error={error}
               hasMore={hasMore}
               onLoadMore={loadMore}
               onNotificationClick={handleNotificationClick}

@@ -57,6 +57,8 @@ const getColors = (isDark = false) => ({
 interface NotificationListProps {
   notifications: AppNotification.PotentiallyPopulatedUnifiedAppNotification[];
   loading: boolean;
+  /** The last load failure; "Try again" calls `onLoadMore`, which retries it. */
+  error: Error | null;
   hasMore: boolean;
   onLoadMore: () => void;
   onNotificationClick?: (
@@ -210,9 +212,59 @@ function LoadingState({ isDarkTheme }: { isDarkTheme: boolean }) {
   );
 }
 
+function ErrorState({
+  isDarkTheme,
+  onRetry,
+}: {
+  isDarkTheme: boolean;
+  onRetry: () => void;
+}) {
+  const colors = getColors(isDarkTheme);
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "32px",
+        textAlign: "center",
+      }}
+    >
+      <h3
+        style={{
+          fontSize: "14px",
+          fontWeight: "500",
+          color: colors.foreground,
+          margin: 0,
+          marginBottom: "8px",
+        }}
+      >
+        Couldn't load notifications
+      </h3>
+      <button
+        onClick={onRetry}
+        style={{
+          background: "transparent",
+          border: "none",
+          padding: "8px",
+          fontSize: "14px",
+          color: colors.mutedForeground,
+          cursor: "pointer",
+          borderRadius: "4px",
+        }}
+      >
+        Try again
+      </button>
+    </div>
+  );
+}
+
 function NotificationList({
   notifications,
   loading,
+  error,
   hasMore,
   onLoadMore,
   onNotificationClick,
@@ -223,6 +275,11 @@ function NotificationList({
   // Show loading state for initial load
   if (loading && notifications.length === 0) {
     return <LoadingState isDarkTheme={isDarkTheme} />;
+  }
+
+  // A failed first page: offer a retry, not the empty state
+  if (!loading && error && notifications.length === 0) {
+    return <ErrorState isDarkTheme={isDarkTheme} onRetry={onLoadMore} />;
   }
 
   // Show empty state when no notifications
@@ -340,7 +397,9 @@ function NotificationList({
                     e.currentTarget.style.color = colors.mutedForeground;
                   }}
                 >
-                  Load more notifications
+                  {error
+                    ? "Couldn't load more. Try again"
+                    : "Load more notifications"}
                 </button>
               )}
             </div>

@@ -19,7 +19,7 @@ export interface UseOAuthIdentitiesReturn {
   hasPassword: boolean;
   fetchIdentities: () => Promise<void>;
   unlinkIdentity: ({ identityId }: { identityId: string }) => Promise<void>;
-  isLoading: boolean;
+  loading: boolean;
   error: SublayError | null;
 }
 
@@ -28,12 +28,12 @@ function useOAuthIdentities(): UseOAuthIdentitiesReturn {
   const axios = useAxiosPrivate();
   const [identities, setIdentities] = useState<OAuthIdentity[]>([]);
   const [hasPassword, setHasPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<SublayError | null>(null);
 
   const fetchIdentities = useCallback(async () => {
     if (!projectId) return;
-    setIsLoading(true);
+    setLoading(true);
     setError(null);
     try {
       const response = await axios.get(`/${projectId}/oauth/identities`);
@@ -42,14 +42,14 @@ function useOAuthIdentities(): UseOAuthIdentitiesReturn {
     } catch (err) {
       setError(toSublayError(err));
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }, [projectId, axios]);
 
   const unlinkIdentity = useCallback(
     async ({ identityId }: { identityId: string }) => {
       if (!projectId) return;
-      setIsLoading(true);
+      setLoading(true);
       setError(null);
       try {
         await axios.delete(`/${projectId}/oauth/identities/${identityId}`);
@@ -57,13 +57,13 @@ function useOAuthIdentities(): UseOAuthIdentitiesReturn {
       } catch (err) {
         setError(toSublayError(err));
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     },
     [projectId, axios]
   );
 
-  return { identities, hasPassword, fetchIdentities, unlinkIdentity, isLoading, error };
+  return { identities, hasPassword, fetchIdentities, unlinkIdentity, loading, error };
 }
 
 export default useOAuthIdentities;

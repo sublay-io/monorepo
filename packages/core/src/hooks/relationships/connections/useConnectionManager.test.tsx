@@ -36,7 +36,7 @@ describe("useConnectionManager", () => {
   it("loads 'none' when no connection exists and sends a connection request", async () => {
     const { result, axiosPrivate } = renderWithStatus({ isConnected: false });
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.connectionStatus).toBe("none");
     expect(result.current.connection).toBeNull();
 
@@ -58,7 +58,7 @@ describe("useConnectionManager", () => {
 
   it("a repeat request (200 with the existing row) keeps that row", async () => {
     const { result, axiosPrivate } = renderWithStatus({ isConnected: false });
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     // The two were connected meanwhile: the server answers 200 with that row.
     const accepted = makeRow({ status: "accepted", respondedAt: "2024-01-02T00:00:00.000Z" });
@@ -74,7 +74,7 @@ describe("useConnectionManager", () => {
 
   it("a request the other user already sent shows their row and still fails", async () => {
     const { result, axiosPrivate } = renderWithStatus({ isConnected: false });
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     const received = makeRow({ type: "received" });
     axiosPrivate.mockError("post", 409, {
@@ -263,7 +263,7 @@ describe("useConnectionManager", () => {
       { user },
     );
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.connectionStatus).toBe("none");
     expect(axiosPrivate.calls("get")).toHaveLength(0);
   });
@@ -280,7 +280,7 @@ describe("useConnectionManager", () => {
       },
     );
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.connectionStatus).toBe("none");
   });
 });

@@ -37,7 +37,7 @@ describe("useOAuthIdentities", () => {
 
     expect(result.current.identities).toEqual(identities);
     expect(result.current.hasPassword).toBe(true);
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();
 
     const [call] = axiosPrivate.calls("get");
@@ -53,7 +53,7 @@ describe("useOAuthIdentities", () => {
       await result.current.fetchIdentities();
     });
 
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.loading).toBe(false);
     expect(result.current.error?.message).toBe("Internal error");
   });
 
@@ -104,6 +104,6 @@ describe("useOAuthIdentities", () => {
     });
 
     expect(axiosPrivate.calls("get")).toHaveLength(0);
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.loading).toBe(false);
   });
 });

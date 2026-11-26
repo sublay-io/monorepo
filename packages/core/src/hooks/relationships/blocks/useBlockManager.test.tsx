@@ -24,7 +24,7 @@ describe("useBlockManager", () => {
       },
     );
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.isBlocking).toBe(true);
 
     axiosPrivate.mockResponse("delete", undefined, 204);
@@ -91,7 +91,7 @@ describe("useBlockManager", () => {
       },
     );
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.isBlocking).toBe(false);
   });
 });

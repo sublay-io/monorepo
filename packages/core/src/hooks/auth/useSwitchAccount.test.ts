@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
+import { SublayError } from "../../errors/SublayError";
 import { act, waitFor } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeAuthUser } from "../../test-utils";
@@ -52,7 +53,7 @@ describe("useSwitchAccount", () => {
     expect(store.getState().sublay.accounts.activeAccountId).toBe("user-2");
     expect(store.getState().sublay.auth.accessToken).toBe("access-2");
     expect(store.getState().sublay.auth.refreshToken).toBe("refresh-2-rotated");
-    expect(result.current.isSwitching).toBe(false);
+    expect(result.current.switching).toBe(false);
     expect(result.current.error).toBeNull();
 
     const [call] = axiosPublic.calls("post");
@@ -241,8 +242,13 @@ describe("useSwitchAccount", () => {
 
     await expect(result.current.switchAccount({ userId: "user-2" })).rejects.toThrow();
 
-    await waitFor(() => expect(result.current.isSwitching).toBe(false));
+    await waitFor(() => expect(result.current.switching).toBe(false));
     await waitFor(() => expect(result.current.error).not.toBeNull());
+    // The typed transition error, as a SublayError with the server's answer.
+    expect(result.current.error).toBeInstanceOf(AccountTransitionError);
+    expect(result.current.error).toBeInstanceOf(SublayError);
+    expect(result.current.error?.message).toBe("Refresh token revoked");
+    expect(result.current.error?.status).toBe(403);
 
     const state = store.getState();
     // Still signed in as user-1: selection, tokens, gate and cached feature

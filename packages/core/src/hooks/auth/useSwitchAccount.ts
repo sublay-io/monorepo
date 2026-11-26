@@ -12,7 +12,7 @@ import { SublayError, toSublayError } from "../../errors/SublayError";
 
 export interface UseSwitchAccountReturn {
   switchAccount: ({ userId }: { userId: string }) => Promise<void>;
-  isSwitching: boolean;
+  switching: boolean;
   error: SublayError | null;
 }
 
@@ -24,7 +24,7 @@ export default function useSwitchAccount(): UseSwitchAccountReturn {
   const store = useStore<{ sublay: SublayState }>();
   const { projectId } = useProject();
   const activeAccountId = useSublaySelector(selectActiveAccountId);
-  const [isSwitching, setIsSwitching] = useState(false);
+  const [switching, setSwitching] = useState(false);
   const [error, setError] = useState<SublayError | null>(null);
 
   const switchAccount = useCallback(
@@ -71,7 +71,7 @@ export default function useSwitchAccount(): UseSwitchAccountReturn {
       );
       if (userId === activeAccountId && hasLiveSession) return;
 
-      setIsSwitching(true);
+      setSwitching(true);
       setError(null);
 
       try {
@@ -92,11 +92,11 @@ export default function useSwitchAccount(): UseSwitchAccountReturn {
         setError(toSublayError(err));
         throw err;
       } finally {
-        setIsSwitching(false);
+        setSwitching(false);
       }
     },
     [dispatch, store, projectId, activeAccountId]
   );
 
-  return { switchAccount, isSwitching, error };
+  return { switchAccount, switching, error };
 }

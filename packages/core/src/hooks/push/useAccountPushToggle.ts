@@ -36,7 +36,7 @@ export interface UseAccountPushToggleValues {
   ) => Promise<boolean>;
   /** Whether a given stored account currently wants push on this device. */
   isAccountPushEnabled: (userId: string) => boolean;
-  isUpdating: boolean;
+  updating: boolean;
   error: SublayError | null;
 }
 
@@ -65,7 +65,7 @@ export default function useAccountPushToggle(): UseAccountPushToggleValues {
   const store = useStore<{ sublay: SublayState }>();
   const { projectId } = useProject();
   const accounts = useSublaySelector(selectAccounts);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<SublayError | null>(null);
 
   const setEnabled = useCallback(
@@ -87,7 +87,7 @@ export default function useAccountPushToggle(): UseAccountPushToggleValues {
         );
       }
 
-      setIsUpdating(true);
+      setUpdating(true);
       setError(null);
 
       try {
@@ -149,7 +149,7 @@ export default function useAccountPushToggle(): UseAccountPushToggleValues {
         setError(toSublayError(err));
         throw err;
       } finally {
-        setIsUpdating(false);
+        setUpdating(false);
       }
     },
     [dispatch, store, projectId]
@@ -166,7 +166,7 @@ export default function useAccountPushToggle(): UseAccountPushToggleValues {
   return {
     setAccountPushEnabled: setEnabled,
     isAccountPushEnabled: isEnabled,
-    isUpdating,
+    updating,
     error,
   };
 }

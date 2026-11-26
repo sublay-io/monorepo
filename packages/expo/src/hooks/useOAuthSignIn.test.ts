@@ -58,7 +58,7 @@ describe("useOAuthSignIn (expo)", () => {
       });
 
       expect(requestOAuthAuthorizationUrl).not.toHaveBeenCalled();
-      expect(result.current.error).toBe("redirectAfterAuth is required on mobile.");
+      expect(result.current.error?.message).toBe("redirectAfterAuth is required on mobile.");
     });
 
     it("sets an error and skips the request when projectId is unavailable", async () => {
@@ -73,7 +73,7 @@ describe("useOAuthSignIn (expo)", () => {
       });
 
       expect(requestOAuthAuthorizationUrl).not.toHaveBeenCalled();
-      expect(result.current.error).toBe("No projectId available.");
+      expect(result.current.error?.message).toBe("No projectId available.");
     });
 
     it("opens the system browser and dispatches tokens on a successful redirect", async () => {
@@ -115,11 +115,11 @@ describe("useOAuthSignIn (expo)", () => {
         projectId: "project-1",
         params: { accessToken: "a1", refreshToken: "r1", error: null, errorDescription: null },
       });
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.loading).toBe(false);
       expect(result.current.error).toBeNull();
     });
 
-    it("quietly clears isLoading without an error when the user cancels/dismisses the browser", async () => {
+    it("quietly clears loading without an error when the user cancels/dismisses the browser", async () => {
       requestOAuthAuthorizationUrl.mockResolvedValue("https://provider/auth");
       openAuthSessionAsync.mockResolvedValue({ type: "dismiss" });
 
@@ -133,7 +133,7 @@ describe("useOAuthSignIn (expo)", () => {
       });
 
       expect(handleOAuthRedirect).not.toHaveBeenCalled();
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.loading).toBe(false);
       expect(result.current.error).toBeNull();
     });
 
@@ -154,7 +154,8 @@ describe("useOAuthSignIn (expo)", () => {
         });
       });
 
-      expect(result.current.error).toBe("access_denied");
+      expect(result.current.error?.message).toBe("access_denied");
+      expect(result.current.error?.code).toBe("access_denied");
     });
 
     it("reports a generic failure when no tokens come back and there is no explicit error", async () => {
@@ -174,7 +175,7 @@ describe("useOAuthSignIn (expo)", () => {
         });
       });
 
-      expect(result.current.error).toBe("OAuth sign-in failed: no tokens were returned.");
+      expect(result.current.error?.message).toBe("OAuth sign-in failed: no tokens were returned.");
     });
 
     it("merges expo-linking's query error fields with the core fragment parse", async () => {
@@ -213,10 +214,10 @@ describe("useOAuthSignIn (expo)", () => {
           errorDescription: "User cancelled",
         },
       });
-      expect(result.current.error).toBe("User cancelled");
+      expect(result.current.error?.message).toBe("User cancelled");
     });
 
-    it("surfaces the rejection message and clears isLoading when the authorize request throws", async () => {
+    it("surfaces the rejection message and clears loading when the authorize request throws", async () => {
       requestOAuthAuthorizationUrl.mockRejectedValue(new Error("network down"));
       const { result } = renderHook(() => useOAuthSignIn());
 
@@ -227,8 +228,8 @@ describe("useOAuthSignIn (expo)", () => {
         });
       });
 
-      expect(result.current.error).toBe("network down");
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error?.message).toBe("network down");
+      expect(result.current.loading).toBe(false);
     });
   });
 
@@ -256,8 +257,8 @@ describe("useOAuthSignIn (expo)", () => {
       expect(requestOAuthAuthorizationUrl).toHaveBeenCalledWith(
         expect.objectContaining({ endpoint: "link", accessToken: null }),
       );
-      expect(result.current.error).toBe("Must be authenticated to link an OAuth provider.");
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error?.message).toBe("Must be authenticated to link an OAuth provider.");
+      expect(result.current.loading).toBe(false);
     });
 
     it("attaches the current access token when linking a provider", async () => {

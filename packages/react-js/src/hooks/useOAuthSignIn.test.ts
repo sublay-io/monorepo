@@ -84,10 +84,10 @@ describe("useOAuthSignIn (react-js)", () => {
       });
 
       expect(requestOAuthAuthorizationUrl).not.toHaveBeenCalled();
-      expect(result.current.error).toBe("No projectId available.");
+      expect(result.current.error?.message).toBe("No projectId available.");
     });
 
-    it("surfaces the rejection message and clears isLoading on failure", async () => {
+    it("surfaces the rejection message and clears loading on failure", async () => {
       requestOAuthAuthorizationUrl.mockRejectedValue(new Error("network down"));
       const { result } = renderHook(() => useOAuthSignIn());
 
@@ -95,8 +95,8 @@ describe("useOAuthSignIn (react-js)", () => {
         await result.current.initiateOAuth({ provider: "google" });
       });
 
-      expect(result.current.error).toBe("network down");
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error?.message).toBe("network down");
+      expect(result.current.loading).toBe(false);
     });
   });
 
@@ -120,8 +120,8 @@ describe("useOAuthSignIn (react-js)", () => {
       expect(requestOAuthAuthorizationUrl).toHaveBeenCalledWith(
         expect.objectContaining({ endpoint: "link", accessToken: null }),
       );
-      expect(result.current.error).toBe("Must be authenticated to link an OAuth provider.");
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error?.message).toBe("Must be authenticated to link an OAuth provider.");
+      expect(result.current.loading).toBe(false);
     });
 
     it("attaches the current access token when linking a provider", async () => {
@@ -169,7 +169,8 @@ describe("useOAuthSignIn (react-js)", () => {
       });
 
       expect(callbackResult!).toBe(false);
-      expect(result.current.error).toBe("access_denied");
+      expect(result.current.error?.message).toBe("access_denied");
+      expect(result.current.error?.code).toBe("access_denied");
       expect(window.history.replaceState).toHaveBeenCalled();
     });
 

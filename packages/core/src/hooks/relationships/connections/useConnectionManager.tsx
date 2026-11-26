@@ -31,7 +31,7 @@ export interface UseConnectionManagerValues {
   connectionId: string | null;
   /** The connection row (`user` = `userId`), or null when there is none. */
   connection: ConnectionRow | null;
-  isLoading: boolean;
+  loading: boolean;
   sendConnectionRequest: (message?: string) => Promise<void>;
   acceptConnectionRequest: () => Promise<void>;
   declineConnectionRequest: () => Promise<void>;
@@ -51,7 +51,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
   const { user } = useUser();
 
   const [connection, setConnection] = useState<ConnectionRow | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const connectionStatus = stateOf(connection);
   const connectionId = connection?.id ?? null;
@@ -66,19 +66,19 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
   const loadConnectionStatus = useCallback(async () => {
     if (!userId || user?.id === userId) {
       setConnection(null);
-      setIsLoading(false);
+      setLoading(false);
       return;
     }
 
     try {
-      setIsLoading(true);
+      setLoading(true);
       const status = await getConnectionStatus({ userId });
       setConnection("connection" in status ? status.connection : null);
     } catch (error) {
       console.error("Failed to fetch connection status:", error);
       setConnection(null);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }, [userId, user?.id, getConnectionStatus]);
 
@@ -90,7 +90,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
     async (message?: string) => {
       if (
         (connectionStatus !== "none" && connectionStatus !== "declined-received") ||
-        isLoading ||
+        loading ||
         user?.id === userId
       )
         return;
@@ -112,11 +112,11 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
         throw error;
       }
     },
-    [connectionStatus, isLoading, userId, user?.id, requestConnection]
+    [connectionStatus, loading, userId, user?.id, requestConnection]
   );
 
   const acceptConnectionRequest = useCallback(async () => {
-    if (connectionStatus !== "pending-received" || !connectionId || isLoading)
+    if (connectionStatus !== "pending-received" || !connectionId || loading)
       return;
 
     try {
@@ -126,10 +126,10 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
       console.error("Failed to accept connection request:", error);
       throw error;
     }
-  }, [connectionStatus, connectionId, isLoading, acceptConnection]);
+  }, [connectionStatus, connectionId, loading, acceptConnection]);
 
   const declineConnectionRequest = useCallback(async () => {
-    if (connectionStatus !== "pending-received" || !connectionId || isLoading)
+    if (connectionStatus !== "pending-received" || !connectionId || loading)
       return;
 
     try {
@@ -139,10 +139,10 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
       console.error("Failed to decline connection request:", error);
       throw error;
     }
-  }, [connectionStatus, connectionId, isLoading, declineConnection]);
+  }, [connectionStatus, connectionId, loading, declineConnection]);
 
   const withdrawConnectionRequest = useCallback(async () => {
-    if (connectionStatus !== "pending-sent" || !connectionId || isLoading)
+    if (connectionStatus !== "pending-sent" || !connectionId || loading)
       return;
 
     try {
@@ -152,10 +152,10 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
       console.error("Failed to withdraw connection request:", error);
       throw error;
     }
-  }, [connectionStatus, connectionId, isLoading, removeConnection]);
+  }, [connectionStatus, connectionId, loading, removeConnection]);
 
   const disconnectUser = useCallback(async () => {
-    if (connectionStatus !== "accepted" || !connectionId || isLoading) return;
+    if (connectionStatus !== "accepted" || !connectionId || loading) return;
 
     try {
       await removeConnection({ connectionId });
@@ -164,7 +164,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
       console.error("Failed to disconnect user:", error);
       throw error;
     }
-  }, [connectionStatus, connectionId, isLoading, removeConnection]);
+  }, [connectionStatus, connectionId, loading, removeConnection]);
 
   const removeConnectionSmart = useCallback(async () => {
     if (
@@ -172,7 +172,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
       connectionStatus === "declined-sent" ||
       // Already declined: the server has nothing left to remove (404).
       connectionStatus === "declined-received" ||
-      isLoading ||
+      loading ||
       user?.id === userId
     )
       return;
@@ -192,7 +192,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
     }
   }, [
     connectionStatus,
-    isLoading,
+    loading,
     userId,
     user?.id,
     removeConnectionByUserId,
@@ -203,7 +203,7 @@ function useConnectionManager({ userId }: UseConnectionManagerProps): UseConnect
     connectionStatus,
     connectionId,
     connection,
-    isLoading,
+    loading,
     sendConnectionRequest,
     acceptConnectionRequest,
     declineConnectionRequest,

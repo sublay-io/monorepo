@@ -10,7 +10,7 @@ export interface UseFollowToggleProps {
 
 export interface UseFollowManagerValues {
   isFollowing: boolean | null;
-  isLoading: boolean;
+  loading: boolean;
   toggleFollow: () => Promise<void>;
 }
 
@@ -18,7 +18,7 @@ function useFollowManager({ userId }: UseFollowToggleProps): UseFollowManagerVal
   const { user } = useUser();
 
   const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const followUser = useFollowUser();
   const unfollowUserByUserId = useUnfollowUserByUserId();
@@ -31,14 +31,14 @@ function useFollowManager({ userId }: UseFollowToggleProps): UseFollowManagerVal
   useEffect(() => {
     const loadFollowStatus = async () => {
       try {
-        setIsLoading(true);
+        setLoading(true);
         const result = await fetchFollowStatusRef.current({ userId });
         setIsFollowing(result.isFollowing);
       } catch (error) {
         console.error("Failed to fetch follow status:", error);
         setIsFollowing(false);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
@@ -48,7 +48,7 @@ function useFollowManager({ userId }: UseFollowToggleProps): UseFollowManagerVal
   }, [userId, user?.id]);
 
   const toggleFollow = useCallback(async () => {
-    if (isFollowing === null || isLoading || user?.id === userId) return;
+    if (isFollowing === null || loading || user?.id === userId) return;
 
     try {
       if (isFollowing) {
@@ -61,11 +61,11 @@ function useFollowManager({ userId }: UseFollowToggleProps): UseFollowManagerVal
     } catch (error) {
       console.error("Failed to toggle follow status:", error);
     }
-  }, [isFollowing, isLoading, userId, followUser, unfollowUserByUserId]);
+  }, [isFollowing, loading, userId, followUser, unfollowUserByUserId]);
 
   return {
     isFollowing,
-    isLoading,
+    loading,
     toggleFollow,
   };
 }

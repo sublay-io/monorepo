@@ -24,7 +24,7 @@ describe("useFollowManager", () => {
       },
     );
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.isFollowing).toBe(true);
 
     axiosPrivate.mockResponse("delete", undefined, 204);
@@ -91,7 +91,7 @@ describe("useFollowManager", () => {
       },
     );
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.isFollowing).toBe(false);
   });
 });

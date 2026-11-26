@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 
 import { handleError, setSublayLogLevel, getSublayLogLevel } from "./handleError";
+import { SublayError } from "../errors/SublayError";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -19,6 +20,16 @@ describe("handleError", () => {
 
     expect(result).toBe("Failed to sign up: - Bad request - email is required");
     expect(consoleSpy).toHaveBeenCalledWith("Failed to sign up: - Bad request - email is required");
+  });
+
+  it("logs a SublayError's body error and details", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const err = new SublayError("Server error", {
+      status: 500,
+      body: { error: "Server error", details: "db timeout" },
+    });
+
+    expect(handleError(err, "Failed:")).toBe("Failed: - Server error - db timeout");
   });
 
   it("omits the details segment when the response has only an error message", () => {

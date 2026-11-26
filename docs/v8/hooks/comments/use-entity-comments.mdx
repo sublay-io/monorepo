@@ -123,7 +123,7 @@ A page can return at most 500 comments, nested replies included (see [Request si
 </ResponseField>
 
 <ResponseField name="refetch" type="() => Promise<void>">
-  Reloads the top-level comments from the first page with the current sort. The loaded comments stay until the new first page replaces them. Never throws — failures land in `error`, and `loadMore()` retries.
+  Reloads the top-level comments from the first page with the current sort. The loaded comments stay until the new first page replaces them; after it lands, the section still holds the viewer's own new comments and replies, the highlighted comment, and the reply pages loaded under comments that are still listed (with their place, so loading more replies continues from there). Top-level comments that are not on the new first page are dropped. Never throws — failures land in `error`, and `loadMore()` retries.
 </ResponseField>
 
 <ResponseField name="getComment" type="(commentId: string) => Comment | undefined">

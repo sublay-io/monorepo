@@ -133,6 +133,8 @@ function SavedFeed({ collectionId }) {
   Load the next page of entities and append it, or retry the load that failed. Does nothing while a load is running or when there is nothing more. Never rejects: a failure lands in `error`.
 </ResponseField>
 
+<Note>The entities are kept in the shared store under the collection, so saving or removing an entity shows in every hook on that collection, but each hook pages and sorts on its own. Show a collection's entities with one `useCollectionEntitiesWrapper` at a time: a second one on the same collection replaces them with its own first page.</Note>
+
 <ResponseField name="refetch" type="() => Promise<void>">
   Reload from the first page with the current sort. The loaded entities stay until the new first page replaces them. Never rejects: a failure lands in `error`.
 </ResponseField>

@@ -11,19 +11,23 @@ For higher-level integration guidance, see the [SDK Reference](/v8/sdk/getting-s
 
 ## List hooks
 
-Every hook that returns a paged list with paging controls (`useEntityList`, `useSpaceList`, `useWorkspaceList`, `useAppNotifications`, `useConversations`, `useLiveChatMessages`, `useMessageThread`, `useEntityComments`, `useCommentSection`, `useReplies` and the `use…Wrapper` hooks) returns the same controls:
+Every hook that returns a paged list with paging controls (`useEntityList`, `useSpaceList`, `useWorkspaceList`, `useAppNotifications`, `useConversations`, `useLiveChatMessages`, `useMessageThread`, `useEntityComments`, `useCommentSection`, `useReplies` and the `use…Wrapper` hooks) returns the same controls. `useConversationData` and the `ConversationProvider` context (`useConversationContext`) return them for the conversation's messages as `messagesLoading`, `messagesError`, `hasMore`, `loadMore` and `refetchMessages`, beside the members:
 
 - **`loading: boolean`** — `true` while a page is loading.
 - **`error: Error | null`** — the last load failure. Cleared when the next load starts.
 - **`hasMore: boolean`** — whether `loadMore()` has anything to fetch: a next page, or a load that failed. After a failure it is `true`.
 - **`loadMore: () => Promise<void>`** — loads the next page in the list's own reading order, or retries the load that failed (a failed first page is retried as the first page). Does nothing while a load is running or when there is nothing more. Never rejects: failures land in `error`.
-- **`refetch: () => Promise<void>`** — reloads from the first page with the current filters and sort. What is loaded stays until the new first page replaces it. Never rejects.
+- **`refetch: () => Promise<void>`** — reloads from the first page with the current filters and sort. What is loaded stays until the new first page replaces it (each hook's page says what it keeps beyond that page, e.g. a comment section keeps the viewer's new comments and loaded replies). Never rejects.
 
 A list that loads its next page on its own (on scroll, or when a sentinel comes into view) should not call `loadMore()` while `error` is set: `hasMore` stays `true` after a failure, so an automatic trigger would retry over and over while the server keeps failing. Show the error with a "Try again" button that calls `loadMore()` instead, as in the example below.
 
 A response that arrives after the query changed (new filters, sort or ids, or a `refetch` that started since) is dropped. Two `loadMore()` calls in the same tick load one page, and filter objects or `include` arrays written inline don't cause refetching.
 
-The store-backed lists (`useEntityList`, `useSpaceList`, `useWorkspaceList`, `useAppNotifications`, `useConversations`, `useLiveChatMessages`) share `loading` and `error` across every mounted hook on the same list: the same `listId`, the same conversation or thread, the one notifications list, the one inbox. On `useEntityList`, `useSpaceList` and `useWorkspaceList`, `loadMore` also does nothing while a debounced filter change is waiting to be fetched.
+The store-backed lists (`useEntityList`, `useSpaceList`, `useWorkspaceList`, `useAppNotifications`, `useConversations`, `useLiveChatMessages`) share `loading`, `error` and paging across every mounted hook on the same list: the same `listId`, the same conversation or thread, the one notifications list, the one inbox. Two hooks opening the same conversation (a `ConversationProvider` and a `useLiveChatMessages` inside it with its own `include`, for example) both load, and what each brings is merged. On `useEntityList`, `useSpaceList` and `useWorkspaceList`, `loadMore` also does nothing while a debounced filter change is waiting to be fetched. An account change empties them and clears their errors; a load still in flight for the previous account is dropped.
+
+`useCollectionEntitiesWrapper` is in between: the entities live in the shared store under the collection (so saving or removing an entity updates every hook showing that collection), but each hook pages and sorts on its own. Show a collection's entities with one hook at a time; a second hook on the same collection replaces them with its own first page.
+
+Every other `use…Wrapper` hook keeps its list in the component and starts over when its props, the project or the signed-in user change.
 
 ```tsx
 const { entities, loading, error, hasMore, loadMore } = useFetchManyEntitiesWrapper({ limit: 20 });

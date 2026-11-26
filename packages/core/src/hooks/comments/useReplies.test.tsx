@@ -524,6 +524,9 @@ describe("useReplies — refetch", () => {
     });
     expect(result.current.replies.replies.map((r) => r.id)).toEqual([R2]);
     expect(result.current.replies.newReplies.map((r) => r.id)).toEqual([MINE]);
+    // The replaced reply is gone from the store, the viewer's own one isn't.
+    expect(result.current.section.getComment!(R1)).toBeUndefined();
+    expect(result.current.section.getComment!(MINE)).toBeDefined();
     const calls = axiosPrivate.calls("get");
     expect(calls[calls.length - 1].config?.params).not.toHaveProperty("cursor");
   });

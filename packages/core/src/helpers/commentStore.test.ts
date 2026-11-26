@@ -3,6 +3,7 @@ import { describe, it, expect } from "vitest";
 import { makeComment } from "../test-utils";
 import type { Comment } from "../interfaces/models/Comment";
 import {
+  replaceRepliesPage,
   applyRepliesPage,
   emptyCommentStore,
   insertComments,
@@ -313,5 +314,27 @@ describe("commentStore — insert cost (one copy per batch, not per comment)", (
     expect(third.nodes.p.childIds).toEqual(["r1", "r2", "r3"]);
     // Only replies arrived: the root list is the same array.
     expect(third.rootIds).toBe(next.rootIds);
+  });
+});
+
+describe("replaceRepliesPage", () => {
+  it("drops the replaced replies and what's under them, keeping new and pinned ones", () => {
+    const parent = makeComment({ id: "p", parentCommentId: null });
+    const old = makeComment({ id: "old", parentCommentId: "p" });
+    const oldChild = makeComment({ id: "old-child", parentCommentId: "old" });
+    const pinned = makeComment({ id: "pinned", parentCommentId: "p" });
+    const mine = makeComment({ id: "mine", parentCommentId: "p" });
+    let store = insertComments(emptyCommentStore(), [parent]);
+    store = applyRepliesPage(store, "p", page([old, pinned], "c2"));
+    store = insertComments(store, [oldChild]);
+    store = insertComments(store, [mine], { newlyAdded: true });
+
+    const next = replaceRepliesPage(store, "p", page([makeComment({ id: "fresh", parentCommentId: "p" })], null), new Set(["pinned"]));
+    expect(next.nodes.old).toBeUndefined();
+    expect(next.nodes["old-child"]).toBeUndefined();
+    expect(next.nodes.pinned).toBeDefined();
+    expect(next.nodes.mine).toBeDefined();
+    expect(next.nodes.p.childIds).toEqual(["pinned", "mine", "fresh"]);
+    expect(next.nodes.p.repliesCursor).toBeNull();
   });
 });

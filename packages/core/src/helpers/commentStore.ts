@@ -273,22 +273,33 @@ export function carryOverOnRefetch(
 
 /**
  * Store a comment's first page of replies again (a refetch): the replies
- * loaded before are unlinked from the parent — except the viewer's own new
- * ones — and the page is applied as by `applyRepliesPage`.
+ * loaded before are unlinked from the parent and dropped from the store with
+ * everything under them — except the viewer's own new replies and the
+ * `pinned` ids (the highlighted comment and its parent) — and the page is
+ * applied as by `applyRepliesPage`.
  */
 export function replaceRepliesPage(
   store: CommentStore,
   parentId: string,
   page: CursorPaginatedResponse<Comment>,
+  pinned: ReadonlySet<string> = new Set(),
 ): CommentStore {
   const parent = store.nodes[parentId];
   if (!parent) return applyRepliesPage(store, parentId, page);
-  const kept = parent.childIds.filter((id) => store.nodes[id]?.new);
-  const cleared: CommentStore = {
-    ...store,
-    nodes: { ...store.nodes, [parentId]: { ...parent, childIds: kept } },
+  const keep = (id: string) => !!store.nodes[id]?.new || pinned.has(id);
+  const nodes = {
+    ...store.nodes,
+    [parentId]: { ...parent, childIds: parent.childIds.filter(keep) },
   };
-  return applyRepliesPage(cleared, parentId, page);
+  const stack = parent.childIds.filter((id) => !keep(id));
+  while (stack.length) {
+    const id = stack.pop()!;
+    const node = nodes[id];
+    if (!node || keep(id)) continue;
+    delete nodes[id];
+    stack.push(...node.childIds);
+  }
+  return applyRepliesPage({ ...store, nodes }, parentId, page);
 }
 
 /**

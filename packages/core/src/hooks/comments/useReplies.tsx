@@ -8,6 +8,7 @@ import { isUUID } from "../../utils/isUUID";
 import { CommentSectionInternalContext } from "./useEntityComments";
 import {
   applyRepliesPage,
+  emptyCommentStore,
   nodeRepliesHasMore,
   replaceRepliesPage,
   selectReplies,
@@ -176,11 +177,16 @@ function useReplies({
         if (generation !== ctx.generationRef.current) return;
         // Stored under the comment it was fetched for, whichever comment
         // this instance shows by now.
-        ctx.setStore((prev) =>
-          refetch
-            ? replaceRepliesPage(prev, commentId, response)
-            : applyRepliesPage(prev, commentId, response),
-        );
+        ctx.setStore((prev) => {
+          if (!refetch) return applyRepliesPage(prev, commentId, response);
+          // The highlighted comment (and its parent) stay: they're what the
+          // section's highlight seed holds.
+          const seed = ctx.seedRef.current;
+          const pinned = new Set(
+            seed ? Object.keys(seed(emptyCommentStore(), prev).nodes) : [],
+          );
+          return replaceRepliesPage(prev, commentId, response, pinned);
+        });
         clearFailure();
       } catch (err) {
         if (generation !== ctx.generationRef.current) return;

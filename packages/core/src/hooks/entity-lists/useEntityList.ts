@@ -1,12 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
+import { useStore } from "react-redux";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
+import type { SublayState } from "../../store/sublayReducers";
+import { runSharedListLoad, useSharedListStatus } from "../list/sharedListStatus";
 
 import {
   initializeList,
   updateFiltersAndSortConfig,
   setEntityListLoading,
   setEntityListEntities,
-  incrementPage,
+  setEntityListPage,
   selectEntityList,
   selectEntityListEntities,
   selectEntityListLoading,
@@ -68,6 +71,12 @@ export interface UseEntityListValues {
   infusedEntities: (Entity & Record<string, any>)[];
 
   loading: boolean;
+  /**
+   * The last load failure, shared by every hook on this `listId`. Cleared
+   * when the next load starts; `loadMore()` retries it.
+   */
+  error: Error | null;
+  /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
 
   // Individual sort properties (flat access for convenience)
@@ -99,7 +108,18 @@ export interface UseEntityListValues {
     options?: EntityListFetchOptions
   ) => void;
 
-  loadMore: () => void;
+  /**
+   * Load the next page, or retry the load that failed (a failed first page
+   * included). Does nothing while a page of this list is loading, while a
+   * filter change is waiting to be fetched, or when there is nothing more.
+   * Never rejects.
+   */
+  loadMore: () => Promise<void>;
+  /**
+   * Reload page 1 with the list's current filters, sort and config. The
+   * entities stay until the new page replaces them. Never rejects.
+   */
+  refetch: () => Promise<void>;
   /** JSON only: to create an entity with images or files, use `useCreateEntity`. */
   createEntity: (props: EntityListCreateEntityProps) => Promise<Entity | undefined>;
   deleteEntity: (props: EntityListDeleteEntityProps) => Promise<void>;
@@ -140,8 +160,69 @@ function useEntityList({
   // Infused data
   const infusedEntities = useInfusedData({ entities, infuseData });
 
+  // Load bookkeeping shared by every hook showing this list.
+  const store = useStore<{ sublay: SublayState }>();
+  const { status, error } = useSharedListStatus(`entityList:${listId}`);
+  const getList = useCallback(
+    () => selectEntityList(store.getState(), listId),
+    [store, listId]
+  );
+
   // Debounce timer for filter changes
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load page 1 (`first`) or the page after the last one loaded, with the
+  // filters, sort and config stored for the list — the one request builder,
+  // so every page carries the same params.
+  const loadPage = useCallback(
+    (first: boolean) =>
+      runSharedListLoad(
+        status,
+        first,
+        async (isCurrent) => {
+          const list = getList();
+          if (!list || !list.sortBy) return;
+          const page = first ? 1 : list.page + 1;
+          dispatch(setEntityListLoading({ listId, loading: true }));
+          const data = await entityActions.fetchEntities(
+            listId,
+            {
+              page,
+              sortBy: list.sortBy,
+              sortByReaction: list.sortByReaction,
+              sortDir: list.sortDir,
+              sortType: list.sortType,
+              timeFrame: list.timeFrame,
+              userId: list.userId,
+              followedOnly: list.followedOnly,
+              locationFilters: list.locationFilters,
+              keywordsFilters: list.keywordsFilters,
+              metadataFilters: list.metadataFilters,
+              titleFilters: list.titleFilters,
+              contentFilters: list.contentFilters,
+              attachmentsFilters: list.attachmentsFilters,
+              nsfwFilter: list.nsfwFilter,
+              limit: list.limit,
+              sourceId: list.sourceId,
+              spaceId: list.spaceId,
+              include: list.include,
+              topCommentsLimit: list.topCommentsLimit,
+              topCommentsSortByReaction: list.topCommentsSortByReaction,
+              // Flattened downstream by useEntityListActions before reaching
+              // the serializer.
+              spaceReputation: list.spaceReputation,
+            },
+            isCurrent
+          );
+          if (isCurrent() && data) {
+            dispatch(setEntityListPage({ listId, page }));
+          }
+        },
+        // useEntityListActions logs the failure.
+        null
+      ),
+    [status, getList, dispatch, listId, entityActions.fetchEntities]
+  );
 
   // Fetch entities function (always triggers a fetch)
   const handleFetchEntities = useCallback(
@@ -166,6 +247,11 @@ function useEntityList({
         ...newConfig,
       };
 
+      // A new query: whatever is loading belongs to the old one, and no page
+      // loads until this one's first page has been requested.
+      status.invalidate();
+      status.pendingReset = true;
+
       // Ensure Redux state is initialized and update filters/sort/config
       dispatch(initializeList({ listId }));
       dispatch(updateFiltersAndSortConfig({
@@ -183,200 +269,56 @@ function useEntityList({
         );
       }
 
-      // Define the fetch logic
-      const performFetch = async () => {
-        // Use the applied config (configWithDefaults is the source of truth for this fetch)
-        const currentConfig = {
-          sourceId: configWithDefaults.sourceId,
-          spaceId: configWithDefaults.spaceId,
-          limit: configWithDefaults.limit,
-          include: configWithDefaults.include,
-          topCommentsLimit: configWithDefaults.topCommentsLimit,
-          topCommentsSortByReaction: configWithDefaults.topCommentsSortByReaction,
-          // Flattened downstream by useEntityListActions before reaching the
-          // serializer.
-          spaceReputation: configWithDefaults.spaceReputation,
-        };
-
-        // Build final filters by taking current state and applying new filters
-        // Use entityList if available, otherwise get current state from Redux after our updates
-        const currentState = entityList || {
-          sortBy: "hot",
-          sortByReaction: "upvote",
-          sortDir: null,
-          sortType: "auto",
-          timeFrame: null,
-          userId: null,
-          followedOnly: false,
-          keywordsFilters: null,
-          titleFilters: null,
-          contentFilters: null,
-          attachmentsFilters: null,
-          locationFilters: null,
-          metadataFilters: null,
-          nsfwFilter: null,
-        };
-        const finalFilters = { ...currentState };
-
-        // Apply resetFilters flag - reset only filter properties
-        if (options?.resetFilters) {
-          finalFilters.timeFrame = null;
-          finalFilters.userId = null;
-          finalFilters.followedOnly = false;
-          finalFilters.keywordsFilters = null;
-          finalFilters.titleFilters = null;
-          finalFilters.contentFilters = null;
-          finalFilters.attachmentsFilters = null;
-          finalFilters.locationFilters = null;
-          finalFilters.metadataFilters = null;
-          finalFilters.nsfwFilter = null;
-        }
-
-        // Apply resetSort flag - reset only sort properties
-        if (options?.resetSort) {
-          finalFilters.sortBy = "hot";
-          finalFilters.sortByReaction = "upvote";
-          finalFilters.sortDir = null;
-          finalFilters.sortType = "auto";
-        }
-
-        // Apply new filters
-        Object.keys(newFilters).forEach((key) => {
-          if (newFilters[key as keyof typeof newFilters] !== undefined) {
-            (finalFilters as any)[key] =
-              newFilters[key as keyof typeof newFilters];
-          }
-        });
-
-        // Apply new sort
-        if (newSort) {
-          if (newSort.sortBy !== undefined) finalFilters.sortBy = newSort.sortBy;
-          if (newSort.sortByReaction !== undefined) finalFilters.sortByReaction = newSort.sortByReaction;
-          if (newSort.sortDir !== undefined) finalFilters.sortDir = newSort.sortDir;
-          if (newSort.sortType !== undefined) finalFilters.sortType = newSort.sortType;
-        }
-
-        if (!finalFilters.sortBy) return; // sortBy is required
-
-        dispatch(setEntityListLoading({ listId, loading: true }));
-
-        try {
-          await entityActions.fetchEntities(listId, {
-            page: 1,
-            // User-controlled filters from Redux state + new filters
-            sortBy: finalFilters.sortBy,
-            sortByReaction: finalFilters.sortByReaction,
-            sortDir: finalFilters.sortDir,
-            sortType: finalFilters.sortType,
-            timeFrame: finalFilters.timeFrame,
-            userId: finalFilters.userId,
-            followedOnly: finalFilters.followedOnly,
-            locationFilters: finalFilters.locationFilters,
-            keywordsFilters: finalFilters.keywordsFilters,
-            metadataFilters: finalFilters.metadataFilters,
-            titleFilters: finalFilters.titleFilters,
-            contentFilters: finalFilters.contentFilters,
-            attachmentsFilters: finalFilters.attachmentsFilters,
-            nsfwFilter: finalFilters.nsfwFilter,
-            // Configuration parameters from current config
-            limit: currentConfig.limit,
-            sourceId: currentConfig.sourceId,
-            spaceId: currentConfig.spaceId,
-            include: currentConfig.include,
-            topCommentsLimit: currentConfig.topCommentsLimit,
-            topCommentsSortByReaction: currentConfig.topCommentsSortByReaction,
-            spaceReputation: currentConfig.spaceReputation,
-          });
-        } catch (err) {
-          console.error(
-            `[EntityListRedux] Failed to fetch entities for listId: ${listId}`,
-            err
-          );
-        }
-      };
-
       // Execute immediately if requested, otherwise debounce
       // For initial loads (empty filters and no sort), make it immediate by default
       const shouldBeImmediate =
         options?.fetchImmediately ||
         (Object.keys(newFilters).length === 0 && !newSort);
 
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
+      }
       if (shouldBeImmediate) {
-        performFetch();
+        loadPage(true);
       } else {
-        // Clear existing debounce timer
-        if (debounceTimer.current) {
-          clearTimeout(debounceTimer.current);
-        }
-
         // Debounce the actual fetch
         debounceTimer.current = setTimeout(() => {
-          performFetch();
+          debounceTimer.current = null;
+          loadPage(true);
         }, 800); // 800ms debounce delay
       }
     },
-    [dispatch, listId, entityList, config, entityActions.fetchEntities]
+    [dispatch, listId, status, loadPage]
   );
 
   // Load more function
   const loadMore = useCallback(async () => {
-    if (!entityList || loading || !hasMore) return;
-
-    // Check if fetchEntities has been called before (safeguard)
-    if (!config) {
+    const list = getList();
+    if (!list) {
       console.error(
         `[EntityListRedux] loadMore called before fetchEntities for listId: ${listId}. ` +
         `fetchEntities must be called first to initialize configuration.`
       );
       return;
     }
-
-    const nextPage = entityList.page + 1;
-    dispatch(incrementPage(listId));
-
-    // Directly fetch the next page
-    try {
-      await entityActions.fetchEntities(listId, {
-        page: nextPage,
-        // User-controlled filters from Redux state
-        userId: entityList.userId,
-        followedOnly: entityList.followedOnly,
-        sortBy: entityList.sortBy,
-        sortByReaction: entityList.sortByReaction,
-        sortDir: entityList.sortDir,
-        sortType: entityList.sortType,
-        timeFrame: entityList.timeFrame,
-        locationFilters: entityList.locationFilters,
-        keywordsFilters: entityList.keywordsFilters,
-        metadataFilters: entityList.metadataFilters,
-        titleFilters: entityList.titleFilters,
-        contentFilters: entityList.contentFilters,
-        attachmentsFilters: entityList.attachmentsFilters,
-        nsfwFilter: entityList.nsfwFilter,
-        // Configuration parameters from state (single source of truth)
-        limit: config.limit,
-        sourceId: config.sourceId,
-        spaceId: config.spaceId,
-        include: config.include,
-        topCommentsLimit: config.topCommentsLimit,
-        topCommentsSortByReaction: config.topCommentsSortByReaction,
-        spaceReputation: config.spaceReputation,
-      });
-    } catch (err) {
-      console.error(
-        `[EntityListRedux] Failed to load more entities for listId: ${listId}`,
-        err
-      );
+    if (status.inFlight || status.pendingReset) return;
+    if (status.failed === "first") {
+      await loadPage(true);
+    } else if (status.failed === "next" || list.hasMore) {
+      await loadPage(false);
     }
-  }, [
-    dispatch,
-    listId,
-    config,
-    entityList,
-    loading,
-    hasMore,
-    entityActions.fetchEntities,
-  ]);
+  }, [getList, listId, status, loadPage]);
+
+  // Reload page 1 with the stored filters, sort and config.
+  const refetch = useCallback(async () => {
+    if (!getList()) return;
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+      debounceTimer.current = null;
+    }
+    await loadPage(true);
+  }, [getList, loadPage]);
 
   // Create entity function
   const createEntity = useCallback(
@@ -453,7 +395,9 @@ function useEntityList({
       infusedEntities,
 
       loading,
-      hasMore,
+      error,
+      // A failed load is still to do: `loadMore()` retries it.
+      hasMore: hasMore || error !== null,
 
       // Individual sort properties (flat access for convenience)
       sortBy: sort?.sortBy || null,
@@ -477,6 +421,7 @@ function useEntityList({
       fetchEntities: handleFetchEntities,
 
       loadMore,
+      refetch,
       createEntity,
       deleteEntity,
     }),
@@ -484,12 +429,14 @@ function useEntityList({
       entities,
       infusedEntities,
       loading,
+      error,
       hasMore,
       sort,
       filters,
       config,
       handleFetchEntities,
       loadMore,
+      refetch,
       createEntity,
       deleteEntity,
     ]

@@ -259,6 +259,18 @@ export const workspaceListsSlice = createSlice({
       list.lastFetched = Date.now();
     },
 
+    // The page last loaded (set when a page lands, so a failed page is
+    // fetched again rather than skipped)
+    setWorkspaceListPage: (
+      state,
+      action: PayloadAction<{ listId: string; page: number }>
+    ) => {
+      const { listId, page } = action.payload;
+      if (state.lists[listId]) {
+        state.lists[listId].page = page;
+      }
+    },
+
     incrementPage: (state, action: PayloadAction<string>) => {
       const listId = action.payload;
       if (state.lists[listId]) {
@@ -357,6 +369,7 @@ export const {
   setWorkspaceListLoading,
   setWorkspaceListWorkspaces,
   incrementPage,
+  setWorkspaceListPage,
   setWorkspaceListHasMore,
   setWorkspaceListError,
   addWorkspace,

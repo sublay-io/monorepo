@@ -244,7 +244,7 @@ describe("useWorkspaceList", () => {
       await waitFor(() => expect(result.current.workspaces).toHaveLength(1));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "w1" }, { id: "w2" }], false));
-      act(() => result.current.refetch());
+      await act(async () => { await result.current.refetch(); });
       await waitFor(() => expect(result.current.workspaces.map((w) => w.id)).toEqual(["w1", "w2"]));
 
       const last = listUrls()[1].searchParams;

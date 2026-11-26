@@ -1,12 +1,15 @@
 import { useCallback, useMemo, useRef } from "react";
+import { useStore } from "react-redux";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
+import type { SublayState } from "../../store/sublayReducers";
+import { runSharedListLoad, useSharedListStatus } from "../list/sharedListStatus";
 
 import {
   initializeList,
   updateFilters,
   setWorkspaceListLoading,
   setWorkspaceListWorkspaces,
-  incrementPage,
+  setWorkspaceListPage,
   selectWorkspaceList,
   selectWorkspaceListWorkspaces,
   selectWorkspaceListLoading,
@@ -49,6 +52,12 @@ export interface WorkspaceListDeleteWorkspaceProps {
 export interface UseWorkspaceListValues {
   workspaces: Workspace[];
   loading: boolean;
+  /**
+   * The last load failure, shared by every hook on this `listId`. Cleared
+   * when the next load starts; `loadMore()` retries it.
+   */
+  error: Error | null;
+  /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
 
   // Current filters
@@ -67,8 +76,18 @@ export interface UseWorkspaceListValues {
     config?: WorkspaceListConfig,
     options?: WorkspaceListFetchOptions
   ) => void;
-  loadMore: () => void;
-  refetch: () => void;
+  /**
+   * Load the next page, or retry the load that failed (a failed first page
+   * included). Does nothing while a page of this list is loading, while a
+   * filter change is waiting to be fetched, or when there is nothing more.
+   * Never rejects.
+   */
+  loadMore: () => Promise<void>;
+  /**
+   * Reload page 1 with the list's current filters and page size. The
+   * workspaces stay until the new page replaces them. Never rejects.
+   */
+  refetch: () => Promise<void>;
   createWorkspace: (
     props: WorkspaceListCreateWorkspaceProps
   ) => Promise<Workspace | undefined>;
@@ -108,8 +127,51 @@ function useWorkspaceList({
 
   const workspaceActions = useWorkspaceListActions();
 
+  // Load bookkeeping shared by every hook showing this list.
+  const store = useStore<{ sublay: SublayState }>();
+  const { status, error } = useSharedListStatus(`workspaceList:${listId}`);
+  const getList = useCallback(
+    () => selectWorkspaceList(store.getState(), listId),
+    [store, listId]
+  );
+
   // Debounce timer for filter changes
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load page 1 (`first`) or the page after the last one loaded, with the
+  // filters and page size stored for the list — the one request builder, so
+  // every page carries the same params.
+  const loadPage = useCallback(
+    (first: boolean) =>
+      runSharedListLoad(
+        status,
+        first,
+        async (isCurrent) => {
+          const list = getList();
+          if (!list) return;
+          const page = first ? 1 : list.page + 1;
+          dispatch(setWorkspaceListLoading({ listId, loading: true }));
+          const data = await workspaceActions.fetchWorkspaces(
+            listId,
+            {
+              page,
+              relation: list.relation,
+              parentWorkspaceId: list.parentWorkspaceId,
+              sortDir: list.sortDir,
+              include: list.include,
+              limit: list.limit,
+            },
+            isCurrent
+          );
+          if (isCurrent() && data) {
+            dispatch(setWorkspaceListPage({ listId, page }));
+          }
+        },
+        // useWorkspaceListActions logs the failure.
+        null
+      ),
+    [status, getList, dispatch, listId, workspaceActions.fetchWorkspaces]
+  );
 
   // Fetch workspaces (always triggers a fetch of page 1)
   const handleFetchWorkspaces = useCallback(
@@ -123,6 +185,13 @@ function useWorkspaceList({
         ...newConfig,
       };
 
+      // A new query: whatever is loading belongs to the old one, and no page
+      // loads until this one's first page has been requested.
+      status.invalidate();
+      status.pendingReset = true;
+
+      // The slice applies the filters: `undefined` keeps a filter, `null`
+      // puts it back to its default.
       dispatch(initializeList({ listId }));
       dispatch(
         updateFilters({
@@ -139,56 +208,6 @@ function useWorkspaceList({
         );
       }
 
-      const performFetch = async () => {
-        // Same rules as the slice: start from the current filters (or the
-        // defaults after resetUnspecified), `undefined` keeps a filter, `null`
-        // puts it back to its default.
-        const base: ResolvedFilters =
-          workspaceList && !options?.resetUnspecified
-            ? {
-                relation: workspaceList.relation,
-                parentWorkspaceId: workspaceList.parentWorkspaceId,
-                sortDir: workspaceList.sortDir,
-                include: workspaceList.include,
-              }
-            : { ...WORKSPACE_LIST_DEFAULT_FILTERS };
-
-        const finalFilters: ResolvedFilters = {
-          relation:
-            newFilters.relation === undefined
-              ? base.relation
-              : newFilters.relation ?? WORKSPACE_LIST_DEFAULT_FILTERS.relation,
-          parentWorkspaceId:
-            newFilters.parentWorkspaceId === undefined
-              ? base.parentWorkspaceId
-              : newFilters.parentWorkspaceId ??
-                WORKSPACE_LIST_DEFAULT_FILTERS.parentWorkspaceId,
-          sortDir:
-            newFilters.sortDir === undefined
-              ? base.sortDir
-              : newFilters.sortDir ?? WORKSPACE_LIST_DEFAULT_FILTERS.sortDir,
-          include:
-            newFilters.include === undefined
-              ? base.include
-              : normalizeWorkspaceInclude(newFilters.include),
-        };
-
-        dispatch(setWorkspaceListLoading({ listId, loading: true }));
-
-        try {
-          await workspaceActions.fetchWorkspaces(listId, {
-            page: 1,
-            ...finalFilters,
-            limit: configWithDefaults.limit,
-          });
-        } catch (err) {
-          console.error(
-            `[WorkspaceList] Failed to fetch workspaces for listId: ${listId}`,
-            err
-          );
-        }
-      };
-
       // Immediate if requested, or for an initial load (empty filters object);
       // otherwise debounced.
       const shouldBeImmediate =
@@ -200,71 +219,50 @@ function useWorkspaceList({
       }
 
       if (shouldBeImmediate) {
-        performFetch();
+        loadPage(true);
       } else {
         debounceTimer.current = setTimeout(() => {
           debounceTimer.current = null;
-          performFetch();
+          loadPage(true);
         }, 800);
       }
     },
-    [dispatch, listId, workspaceList, workspaceActions.fetchWorkspaces]
+    [dispatch, listId, status, loadPage]
   );
 
+  // Load more function
   const loadMore = useCallback(async () => {
-    if (!workspaceList || loading || !hasMore) return;
-
-    if (!config) {
+    const list = getList();
+    if (!list) {
       console.error(
         `[WorkspaceList] loadMore called before fetchWorkspaces for listId: ${listId}. ` +
           `fetchWorkspaces must be called first to initialize configuration.`
       );
       return;
     }
-
-    const nextPage = workspaceList.page + 1;
-    dispatch(incrementPage(listId));
-
-    try {
-      await workspaceActions.fetchWorkspaces(listId, {
-        page: nextPage,
-        relation: workspaceList.relation,
-        parentWorkspaceId: workspaceList.parentWorkspaceId,
-        sortDir: workspaceList.sortDir,
-        include: workspaceList.include,
-        limit: config.limit,
-      });
-    } catch (err) {
-      console.error(
-        `[WorkspaceList] Failed to load more workspaces for listId: ${listId}`,
-        err
-      );
+    if (status.inFlight || status.pendingReset) return;
+    if (status.failed === "first") {
+      await loadPage(true);
+    } else if (status.failed === "next" || list.hasMore) {
+      await loadPage(false);
     }
-  }, [
-    dispatch,
-    listId,
-    config,
-    workspaceList,
-    loading,
-    hasMore,
-    workspaceActions.fetchWorkspaces,
-  ]);
+  }, [getList, listId, status, loadPage]);
 
-  // Reload page 1 with the current filters and page size.
-  const refetch = useCallback(() => {
-    if (!config) {
+  // Reload page 1 with the stored filters and page size.
+  const refetch = useCallback(async () => {
+    if (!getList()) {
       console.error(
         `[WorkspaceList] refetch called before fetchWorkspaces for listId: ${listId}. ` +
           `fetchWorkspaces must be called first to initialize configuration.`
       );
       return;
     }
-    handleFetchWorkspaces(
-      {},
-      { limit: config.limit },
-      { fetchImmediately: true }
-    );
-  }, [config, listId, handleFetchWorkspaces]);
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+      debounceTimer.current = null;
+    }
+    await loadPage(true);
+  }, [getList, listId, loadPage]);
 
   // Keyed as a string, never the array itself, in the dependency list below.
   const includeKey = workspaceList?.include?.join(",") ?? "";
@@ -298,7 +296,9 @@ function useWorkspaceList({
     () => ({
       workspaces,
       loading,
-      hasMore,
+      error,
+      // A failed load is still to do: `loadMore()` retries it.
+      hasMore: hasMore || error !== null,
 
       relation: filters?.relation ?? WORKSPACE_LIST_DEFAULT_FILTERS.relation,
       parentWorkspaceId:
@@ -316,6 +316,7 @@ function useWorkspaceList({
     [
       workspaces,
       loading,
+      error,
       hasMore,
       filters,
       handleFetchWorkspaces,

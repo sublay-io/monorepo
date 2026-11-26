@@ -366,6 +366,18 @@ const entityListsSlice = createSlice({
     },
 
     // Increment page for load more
+    // The page last loaded (set when a page lands, so a failed page is
+    // fetched again rather than skipped)
+    setEntityListPage: (
+      state,
+      action: PayloadAction<{ listId: string; page: number }>
+    ) => {
+      const { listId, page } = action.payload;
+      if (state.lists[listId]) {
+        state.lists[listId].page = page;
+      }
+    },
+
     incrementPage: (state, action: PayloadAction<string>) => {
       const listId = action.payload;
       if (state.lists[listId]) {
@@ -636,6 +648,7 @@ export const {
   setEntityListLoading,
   setEntityListEntities,
   incrementPage,
+  setEntityListPage,
   setEntityListHasMore,
   setEntityListError,
   addEntity,

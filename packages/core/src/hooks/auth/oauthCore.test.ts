@@ -16,6 +16,7 @@ import {
 } from "../../test-utils";
 import { armAuthGate, syncAuthGate, resetAuthGate } from "../../config/authGate";
 import { SublayError } from "../../errors/SublayError";
+import { SuspendedError } from "../../errors/SuspendedError";
 
 /** Minimal unsigned JWT carrying a `sub` and a far-future `exp`. */
 function jwtFor(sub: string) {
@@ -230,6 +231,33 @@ describe("requestOAuthAuthorizationUrl", () => {
         redirectAfterAuth: "https://app.example.com/done",
       }),
     ).rejects.toThrow("Unsupported provider");
+  });
+
+  it("rejects a suspended user's request with a SuspendedError", async () => {
+    stubFetchMock(async () =>
+      jsonResponse({ error: "Suspended.", code: "user/suspended", reason: null, endDate: null }, 403),
+    );
+
+    const err = await requestOAuthAuthorizationUrl({
+      projectId: "project-1",
+      endpoint: "authorize",
+      provider: "google",
+      redirectAfterAuth: "https://app.example.com/done",
+    }).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(SuspendedError);
+  });
+
+  it("falls back to its own message for a non-JSON failure, keeping the status", async () => {
+    stubFetchMock(async () => new Response("<html>Bad gateway</html>", { status: 502 }));
+
+    const err = await requestOAuthAuthorizationUrl({
+      projectId: "project-1",
+      endpoint: "authorize",
+      provider: "google",
+      redirectAfterAuth: "https://app.example.com/done",
+    }).catch((e: unknown) => e);
+    expect(err).toMatchObject({ message: "Failed to initiate OAuth", status: 502 });
+    expect((err as SublayError).body).toBeUndefined();
   });
 
   it("rejects with a SublayError carrying the response's code, param and status", async () => {

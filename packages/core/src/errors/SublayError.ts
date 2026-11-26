@@ -199,6 +199,49 @@ function readHttpFailure(
 }
 
 /**
+ * The `SublayError` for a response the server answered with: the body's
+ * `error` as the message, its `code` / `param`, the `status`, and the body
+ * itself when it is a JSON object. A `user/suspended` body becomes a
+ * {@link SuspendedError}. `toSublayError` uses it for axios and RTK Query
+ * failures; code that reads a response itself (`fetch`) uses it directly.
+ */
+export function sublayErrorFromResponse({
+  status,
+  body: rawBody,
+  fallbackMessage,
+  cause,
+}: {
+  status: number;
+  /** The parsed response body (anything: a non-object gives no `body`). */
+  body: unknown;
+  /** The message when the body has no `error`. */
+  fallbackMessage?: string;
+  cause?: unknown;
+}): SublayError {
+  const body = isPlainObject(rawBody) ? rawBody : null;
+  if (body?.code === SUSPENDED_ERROR_CODE) {
+    return new SuspendedError({
+      message: nonEmptyString(body.error),
+      reason: stringOrNull(body.reason),
+      endDate: stringOrNull(body.endDate),
+      body,
+      cause,
+    });
+  }
+  const message =
+    nonEmptyString(body?.error) ??
+    nonEmptyString(fallbackMessage) ??
+    `Request failed with status ${status}`;
+  return new SublayError(message, {
+    code: nonEmptyString(body?.code),
+    param: nonEmptyString(body?.param),
+    status,
+    body: body ?? undefined,
+    cause,
+  });
+}
+
+/**
  * Turns any failure into a {@link SublayError}:
  *
  * - a `SublayError` (including `SuspendedError` and `AccountTransitionError`)
@@ -216,25 +259,10 @@ export function toSublayError(err: unknown): SublayError {
 
   const http = readHttpFailure(err);
   if (http) {
-    const body = isPlainObject(http.body) ? http.body : null;
-    if (body?.code === SUSPENDED_ERROR_CODE) {
-      return new SuspendedError({
-        message: nonEmptyString(body.error),
-        reason: stringOrNull(body.reason),
-        endDate: stringOrNull(body.endDate),
-        body,
-        cause: err,
-      });
-    }
-    const message =
-      nonEmptyString(body?.error) ??
-      nonEmptyString((err as { message?: unknown }).message) ??
-      `Request failed with status ${http.status}`;
-    return new SublayError(message, {
-      code: nonEmptyString(body?.code),
-      param: nonEmptyString(body?.param),
+    return sublayErrorFromResponse({
       status: http.status,
-      body: body ?? undefined,
+      body: http.body,
+      fallbackMessage: nonEmptyString((err as { message?: unknown }).message),
       cause: err,
     });
   }

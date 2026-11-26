@@ -2,7 +2,7 @@ import type { AppDispatch } from "../../store/types";
 import { setTokens, setInitialized } from "../../store/slices/authSlice";
 import { completeOAuthSignInThunk } from "../../store/slices/authThunks";
 import { getAuthorizedTokenForAccount } from "../../config/authGate";
-import { SublayError, toSublayError, isPlainObject } from "../../errors/SublayError";
+import { SublayError, toSublayError, sublayErrorFromResponse } from "../../errors/SublayError";
 
 /**
  * Platform-agnostic OAuth helpers shared by the web (`@sublay/react-js`) and
@@ -87,18 +87,10 @@ export async function requestOAuthAuthorizationUrl({
   }).catch((err: unknown) => Promise.reject(toSublayError(err)));
 
   if (!response.ok) {
-    const data = (await response.json().catch(() => null)) as {
-      error?: unknown;
-      code?: unknown;
-      param?: unknown;
-    } | null;
-    const text = (value: unknown) =>
-      typeof value === "string" && value ? value : undefined;
-    throw new SublayError(text(data?.error) ?? "Failed to initiate OAuth", {
-      code: text(data?.code),
-      param: text(data?.param),
+    throw sublayErrorFromResponse({
       status: response.status,
-      body: isPlainObject(data) ? data : undefined,
+      body: await response.json().catch(() => null),
+      fallbackMessage: "Failed to initiate OAuth",
     });
   }
 

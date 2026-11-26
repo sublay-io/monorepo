@@ -7,7 +7,12 @@ import { getAuthorizedToken } from "../../config/authGate";
 import { ContentSearchResult } from "./useSearchContent";
 import { SpaceReputationContextParams } from "../../interfaces/SpaceReputation";
 import { buildSpaceReputationParams } from "../../utils/spaceReputationParams";
-import { SublayError, toSublayError, isPlainObject } from "../../errors/SublayError";
+import {
+  SublayError,
+  toSublayError,
+  isPlainObject,
+  sublayErrorFromResponse,
+} from "../../errors/SublayError";
 
 function safeParseJson(
   text: string
@@ -25,12 +30,10 @@ const textField = (value: unknown): string | undefined =>
 
 /** A failed response as a `SublayError`: the body's `error`, `code` and `param`, and the status. */
 function responseError(status: number, text: string): SublayError {
-  const body = safeParseJson(text);
-  return new SublayError(textField(body?.error) ?? `Request failed (${status})`, {
-    code: textField(body?.code),
-    param: textField(body?.param),
+  return sublayErrorFromResponse({
     status,
-    body: isPlainObject(body) ? body : undefined,
+    body: safeParseJson(text),
+    fallbackMessage: `Request failed (${status})`,
   });
 }
 

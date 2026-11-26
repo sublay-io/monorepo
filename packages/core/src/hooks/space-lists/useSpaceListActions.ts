@@ -76,7 +76,8 @@ export function useSpaceListActions() {
   const fetchSpaces = useCallback(
     async (
       listId: string,
-      options: FetchSpacesOptions
+      options: FetchSpacesOptions,
+      isCurrent: () => boolean = () => true
     ): Promise<Space[] | null> => {
       if (!projectId) {
         throw new Error("No project ID available");
@@ -101,6 +102,9 @@ export function useSpaceListActions() {
           limit: options.limit,
         }).unwrap();
 
+        // A newer load (or a reset) replaced this one: it writes nothing.
+        if (!isCurrent()) return null;
+
         if (result) {
           const append = options.page > 1;
           dispatch(setSpaceListSpaces({ listId, spaces: result.data, append }));
@@ -115,6 +119,7 @@ export function useSpaceListActions() {
 
         return null;
       } catch (err) {
+        if (!isCurrent()) throw err;
         console.error(
           `[SpaceListActions] Failed to fetch spaces for listId: ${listId}`,
           err
@@ -125,7 +130,7 @@ export function useSpaceListActions() {
         );
         throw err;
       } finally {
-        dispatch(setSpaceListLoading({ listId, loading: false }));
+        if (isCurrent()) dispatch(setSpaceListLoading({ listId, loading: false }));
       }
     },
     [dispatch, projectId, triggerFetchSpaces]

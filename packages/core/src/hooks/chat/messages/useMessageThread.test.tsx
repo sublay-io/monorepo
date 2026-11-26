@@ -61,7 +61,7 @@ describe("useMessageThread", () => {
     expect(call.body).toMatchObject({ content: "a reply", parentMessageId: "message-1" });
   });
 
-  it("loadMore delegates to the underlying thread's loadOlder using the after cursor", async () => {
+  it("loadMore pages the thread forward from the after cursor", async () => {
     const reply = makeChatMessage({
       id: "reply-1",
       parentMessageId: "message-1",

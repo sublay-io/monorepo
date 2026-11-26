@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
 
 import {
@@ -8,7 +8,6 @@ import {
   selectUnreadCount,
   selectAppNotificationsLoading,
   selectAppNotificationsHasMore,
-  selectAppNotificationsPage,
   selectCurrentProjectId,
 } from "../../store/slices/appNotificationsSlice";
 import { useAppNotificationsActions } from "./useAppNotificationsActions";
@@ -26,11 +25,23 @@ export interface UseAppNotificationsValues {
   appNotifications: UnifiedAppNotification[];
   unreadAppNotificationsCount: number;
   loading: boolean;
+  /** The last load failure. Cleared when the next load starts; `loadMore()` retries it. */
+  error: Error | null;
+  /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
-  loadMore: () => void;
+  /**
+   * Load the next page, or retry the load that failed (a failed first page
+   * included). Does nothing while a page is loading or when there is nothing
+   * more. Never rejects.
+   */
+  loadMore: () => Promise<void>;
+  /**
+   * Reload page 1. The notifications stay until the new page replaces them.
+   * Never rejects.
+   */
+  refetch: () => Promise<void>;
   markNotificationAsRead: ({ notificationId }: { notificationId: string }) => Promise<void>;
   markAllNotificationsAsRead: () => Promise<void>;
-  resetAppNotifications: () => Promise<void>;
 }
 
 /**
@@ -52,16 +63,15 @@ function useAppNotifications({
   const unreadAppNotificationsCount = useSublaySelector(selectUnreadCount);
   const loading = useSublaySelector(selectAppNotificationsLoading);
   const hasMore = useSublaySelector(selectAppNotificationsHasMore);
-  const currentPage = useSublaySelector(selectAppNotificationsPage);
   const currentProjectId = useSublaySelector(selectCurrentProjectId);
 
   // Get actions (templates are applied at display time, not fetch time)
   const {
+    error,
     loadMore,
+    refetch,
     markNotificationAsRead,
     markAllNotificationsAsRead,
-    resetAppNotifications,
-    fetchMoreNotifications,
     updateUnreadCount,
   } = useAppNotificationsActions();
 
@@ -76,6 +86,18 @@ function useAppNotifications({
     dispatch(setLimit(limit));
   }, [dispatch, limit]);
 
+  // A new page size after mount reloads page 1, so the next page isn't asked
+  // for at the new size (which would skip or repeat notifications). The mount
+  // itself is covered by the first-page effect below.
+  const limitRef = useRef(limit);
+  useEffect(() => {
+    if (limitRef.current === limit) return;
+    limitRef.current = limit;
+    if (projectId && user) refetch();
+    // Only a limit change triggers this; the other deps are read, not watched.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [limit]);
+
   // Fetch unread count on mount and when dependencies change
   useEffect(() => {
     if (projectId && user) {
@@ -83,19 +105,12 @@ function useAppNotifications({
     }
   }, [updateUnreadCount, projectId, user]);
 
-  // Reset and fetch initial notifications when dependencies change
+  // Fetch the first page when dependencies change
   useEffect(() => {
     if (projectId && user) {
-      resetAppNotifications();
+      refetch();
     }
-  }, [resetAppNotifications, projectId, user]);
-
-  // Handle page changes (load more notifications)
-  useEffect(() => {
-    if (currentPage > 1 && projectId && user) {
-      fetchMoreNotifications({ pageToFetch: currentPage });
-    }
-  }, [currentPage, fetchMoreNotifications, projectId, user]);
+  }, [refetch, projectId, user]);
 
   // Apply templates at display time (not at fetch time)
   // This ensures templates are always applied fresh from props
@@ -110,21 +125,24 @@ function useAppNotifications({
       appNotifications: templatedNotifications,
       unreadAppNotificationsCount,
       loading,
-      hasMore,
+      error,
+      // A failed load is still to do: `loadMore()` retries it.
+      hasMore: hasMore || error !== null,
       loadMore,
+      refetch,
       markNotificationAsRead,
       markAllNotificationsAsRead,
-      resetAppNotifications,
     }),
     [
       templatedNotifications,
       unreadAppNotificationsCount,
       loading,
+      error,
       hasMore,
       loadMore,
+      refetch,
       markNotificationAsRead,
       markAllNotificationsAsRead,
-      resetAppNotifications,
     ]
   );
 }

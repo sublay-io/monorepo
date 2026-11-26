@@ -58,7 +58,7 @@ function ThreadPanel({
 }
 ```
 
-Replies are loaded in ascending order (oldest first) and `loadMore` fetches newer replies.
+Replies are loaded in ascending order (oldest first) and `loadMore` fetches newer replies, or retries a load that failed (the failure is in `error`); `refetch` reloads the thread from its first reply.
 
 ## Live Updates
 
@@ -79,10 +79,11 @@ For more control, use `useLiveChatMessages` with a `parentMessageId` to load thr
 ```tsx
 import { useLiveChatMessages, useSendMessage } from "@sublay/react-js";
 
-const { messages: replies, loading, hasMore, loadOlder } = useLiveChatMessages({
+const { messages: replies, loading, hasMore, loadMore } = useLiveChatMessages({
   conversationId,
   parentMessageId: messageId,   // pass parentMessageId to load thread replies
 });
+// In a thread, loadMore() fetches newer replies.
 
 const send = useSendMessage({ conversationId });
 

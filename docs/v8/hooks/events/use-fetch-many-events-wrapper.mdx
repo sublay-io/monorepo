@@ -6,9 +6,9 @@ icon: "plug"
 
 ## Overview
 
-`useFetchManyEventsWrapper` wraps [`useFetchManyEvents`](/v8/hooks/events/use-fetch-many-events) into a ready-to-render list: it holds the accumulated `events`, tracks `loading`/`hasMore`, manages sort state, and exposes `loadMore` and `refresh`. It mirrors `useFetchManyEntitiesWrapper`. Visibility is enforced server-side, so the list only contains events the current user may see. The space's active admins and moderators see every event in their space, `invite` events included; a host who isn't an active member of the event's space sees only what a regular viewer would. See [Event visibility](/v8/data-models/event#visibility).
+`useFetchManyEventsWrapper` wraps [`useFetchManyEvents`](/v8/hooks/events/use-fetch-many-events) into a ready-to-render list: it holds the accumulated `events`, tracks `loading`/`hasMore`, manages sort state, and exposes `loadMore` and `refetch`. It mirrors `useFetchManyEntitiesWrapper`. Visibility is enforced server-side, so the list only contains events the current user may see. The space's active admins and moderators see every event in their space, `invite` events included; a host who isn't an active member of the event's space sees only what a regular viewer would. See [Event visibility](/v8/data-models/event#visibility).
 
-Changing any filter prop (or calling `refresh`) resets the list to page 1.
+Changing any filter prop (or calling `refetch`) reloads the list from page 1.
 
 ## Usage Example
 
@@ -16,7 +16,7 @@ Changing any filter prop (or calling `refresh`) resets the list to page 1.
 import { useFetchManyEventsWrapper } from "@sublay/react-js";
 
 function EventsList() {
-  const { events, loading, hasMore, loadMore, sortBy, setSortBy, refresh } =
+  const { events, loading, hasMore, loadMore, sortBy, setSortBy, refetch } =
     useFetchManyEventsWrapper({
       timeWindow: "upcoming",
       limit: 20,
@@ -62,13 +62,14 @@ function EventsList() {
 
 <ResponseField name="events" type="Event[]">The accumulated events.</ResponseField>
 <ResponseField name="loading" type="boolean">`true` while fetching.</ResponseField>
-<ResponseField name="hasMore" type="boolean">Whether more pages remain.</ResponseField>
+<ResponseField name="error" type="Error | null">The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it.</ResponseField>
+<ResponseField name="hasMore" type="boolean">`true` while `loadMore()` has something to fetch: a next page, or a load that failed.</ResponseField>
 <ResponseField name="sortBy" type='"startTime" | "going"'>Current sort field.</ResponseField>
 <ResponseField name="sortDir" type='"asc" | "desc" | null'>Current sort direction; `null` means the sort's natural one.</ResponseField>
 <ResponseField name="setSortBy" type="(s) => void">Change the sort field (resets to page 1).</ResponseField>
 <ResponseField name="setSortDir" type="(d) => void">Change the sort direction (resets to page 1). Pass `null` to go back to the sort's natural direction.</ResponseField>
-<ResponseField name="loadMore" type="() => void">Advance to the next page.</ResponseField>
-<ResponseField name="refresh" type="() => void">Re-run the query from page 1.</ResponseField>
+<ResponseField name="loadMore" type="() => Promise<void>">Load the next page and append it, or retry the load that failed. Does nothing while a load is running or when there is nothing more. Never rejects: a failure lands in `error`.</ResponseField>
+<ResponseField name="refetch" type="() => Promise<void>">Reload from page 1 with the current filters and sort. The loaded events stay until the new first page replaces them. Never rejects: a failure lands in `error`.</ResponseField>
 
 ## See Also
 

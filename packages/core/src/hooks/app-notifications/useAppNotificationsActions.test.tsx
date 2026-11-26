@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { act, cleanup } from "@testing-library/react";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { act, cleanup, waitFor } from "@testing-library/react";
 
 import {
   renderHookWithStore,
@@ -56,15 +56,40 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   unstubFetchMock();
+  vi.restoreAllMocks();
 });
 
 describe("useAppNotificationsActions", () => {
-  it("loadMore dispatches the slice's page increment", () => {
+  it("loadMore fetches the page after the last one loaded, and moves the page when it lands", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        data: [NOTIFICATION],
+        pagination: { page: 2, pageSize: 10, totalPages: 2, totalItems: 11, hasMore: false },
+      }),
+    );
     const { result, store } = renderHookWithStore(() => useAppNotificationsActions(), {
       projectId: "test-project",
     });
-    act(() => result.current.loadMore());
+    act(() => store.dispatch(setUser(makeAuthUser())));
+
+    await act(async () => {
+      await result.current.loadMore();
+    });
+
+    expect(new URL(fetchHandle.calls()[0].url).searchParams.get("page")).toBe("2");
     expect(selectAppNotificationsPage(store.getState())).toBe(2);
+    expect(selectAppNotifications(store.getState())).toHaveLength(1);
+    expect(selectAppNotificationsLoading(store.getState())).toBe(false);
+  });
+
+  it("loadMore is a silent no-op without an authenticated user", async () => {
+    const { result } = renderHookWithStore(() => useAppNotificationsActions(), {
+      projectId: "test-project",
+    });
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    expect(fetchHandle.calls()).toHaveLength(0);
   });
 
   describe("markNotificationAsRead", () => {
@@ -151,7 +176,7 @@ describe("useAppNotificationsActions", () => {
     });
   });
 
-  describe("resetAppNotifications", () => {
+  describe("refetch", () => {
     it("resets then loads page 1, marking isFirstPage", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(
         jsonResponse({
@@ -166,7 +191,7 @@ describe("useAppNotificationsActions", () => {
       act(() => store.dispatch(setUser(makeAuthUser())));
 
       await act(async () => {
-        await result.current.resetAppNotifications();
+        await result.current.refetch();
       });
 
       expect(selectAppNotifications(store.getState())).toHaveLength(1);
@@ -174,49 +199,27 @@ describe("useAppNotificationsActions", () => {
       expect(url.searchParams.get("page")).toBe("1");
     });
 
-    it("throws when there is no authenticated user", async () => {
+    it("does nothing, and doesn't reject, without an authenticated user", async () => {
       const { result } = renderHookWithStore(() => useAppNotificationsActions(), {
         projectId: "test-project",
       });
 
-      await expect(result.current.resetAppNotifications()).rejects.toThrow(
-        "No project ID or authenticated user available",
-      );
+      await expect(result.current.refetch()).resolves.toBeUndefined();
+      expect(fetchHandle.calls()).toHaveLength(0);
     });
-  });
 
-  describe("fetchMoreNotifications", () => {
-    it("appends the requested page and toggles loading", async () => {
-      fetchHandle.fetchMock.mockResolvedValueOnce(
-        jsonResponse({
-          data: [NOTIFICATION],
-          pagination: { page: 2, pageSize: 10, totalPages: 2, totalItems: 11, hasMore: false },
-        }),
-      );
+    it("keeps the failure in error and doesn't reject", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
+      vi.spyOn(console, "error").mockImplementation(() => {});
       const { result, store } = renderHookWithStore(
         () => useAppNotificationsActions(),
         { projectId: "test-project" },
       );
       act(() => store.dispatch(setUser(makeAuthUser())));
 
-      await act(async () => {
-        await result.current.fetchMoreNotifications({ pageToFetch: 2 });
-      });
-
-      expect(selectAppNotifications(store.getState())).toHaveLength(1);
+      await expect(result.current.refetch()).resolves.toBeUndefined();
+      await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
       expect(selectAppNotificationsLoading(store.getState())).toBe(false);
-    });
-
-    it("is a silent no-op without an authenticated user", async () => {
-      const { result } = renderHookWithStore(() => useAppNotificationsActions(), {
-        projectId: "test-project",
-      });
-
-      await act(async () => {
-        await result.current.fetchMoreNotifications({ pageToFetch: 2 });
-      });
-
-      expect(fetchHandle.calls()).toHaveLength(0);
     });
   });
 

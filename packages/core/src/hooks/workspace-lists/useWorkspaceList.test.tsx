@@ -8,6 +8,7 @@ import {
   jsonResponse,
   type FetchMockHandle,
 } from "../../test-utils";
+import { describeStoreListContract } from "../../test-utils/storeListContract";
 import useWorkspaceList from "./useWorkspaceList";
 
 let fetchHandle: FetchMockHandle;
@@ -244,7 +245,7 @@ describe("useWorkspaceList", () => {
       await waitFor(() => expect(result.current.workspaces).toHaveLength(1));
 
       fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "w1" }, { id: "w2" }], false));
-      act(() => result.current.refetch());
+      await act(async () => { await result.current.refetch(); });
       await waitFor(() => expect(result.current.workspaces.map((w) => w.id)).toEqual(["w1", "w2"]));
 
       const last = listUrls()[1].searchParams;
@@ -332,4 +333,26 @@ describe("useWorkspaceList", () => {
       expect(result.current.workspaces.map((w) => w.id)).toEqual(["w2"]);
     });
   });
+});
+
+describeStoreListContract({
+  name: "useWorkspaceList",
+  useList: (listId) => {
+    const list = useWorkspaceList({ listId });
+    return {
+      ids: list.workspaces.map((w) => w.id),
+      loading: list.loading,
+      error: list.error,
+      hasMore: list.hasMore,
+      loadMore: list.loadMore,
+      refetch: list.refetch,
+      start: () => list.fetchWorkspaces({}),
+      changeFilterDebounced: () => list.fetchWorkspaces({ relation: "direct" }),
+      changeFilterNow: () =>
+        list.fetchWorkspaces({ relation: "direct" }, undefined, { fetchImmediately: true }),
+    };
+  },
+  fetchHandle: () => fetchHandle,
+  listUrls,
+  filterParam: ["relation", "direct"],
 });

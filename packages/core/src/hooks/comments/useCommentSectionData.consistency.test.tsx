@@ -188,3 +188,38 @@ describe("useCommentSectionData — store consistency", () => {
     });
   });
 });
+
+describe("useCommentSectionData — refetch", () => {
+  it("keeps the viewer's new comments and the highlighted comment, and replaces the rest", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    const target = makeComment({ id: T, content: "deep linked", parentCommentId: null });
+    const created = makeComment({ id: G, content: "mine", user: { id: "user-1", username: "u" } as any });
+    let listPage = page([makeComment({ id: X, content: "old" })]);
+    vi.spyOn(axiosPrivate, "get").mockImplementation((url: string) =>
+      url.endsWith(`/comments/${T}`) ? ok(target) : ok(listPage),
+    );
+    vi.spyOn(axiosPrivate, "post").mockImplementation(() => ok(created));
+    const { result } = renderHookWithAxios(
+      () => useCommentSectionData({ entity, highlightedCommentId: T }),
+      { user: makeAuthUser({ id: "user-1", username: "u" }) },
+    );
+    await waitFor(() => expect(result.current.highlightedComment).not.toBeNull());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    await act(async () => {
+      await result.current.createComment({ content: "mine" });
+    });
+    expect(result.current.newComments.map((c) => c.id)).toEqual([G]);
+
+    const FRESH = "55555555-5555-4555-8555-555555555555";
+    listPage = page([makeComment({ id: FRESH, content: "fresh" })]);
+    await act(async () => {
+      await result.current.refetch();
+    });
+    // The highlighted comment is seeded first, as on the first load.
+    expect(result.current.comments.map((c) => c.id)).toEqual([T, FRESH]);
+    expect(result.current.newComments.map((c) => c.id)).toEqual([G]);
+    expect(result.current.getComment(X)).toBeUndefined();
+    expect(result.current.highlightedComment?.comment.id).toBe(T);
+    expect(result.current.getComment(T)).toBeDefined();
+  });
+});

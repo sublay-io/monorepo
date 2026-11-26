@@ -5,7 +5,7 @@ import reducer, {
   updateFiltersAndSortConfig,
   setEntityListLoading,
   setEntityListEntities,
-  incrementPage,
+  setEntityListPage,
   setEntityListHasMore,
   setEntityListError,
   addEntity,
@@ -150,15 +150,15 @@ describe("entityListsSlice", () => {
     });
   });
 
-  describe("incrementPage", () => {
-    it("increments the page for an existing list", () => {
+  describe("setEntityListPage", () => {
+    it("sets the page last loaded for an existing list", () => {
       let s = reducer(initial, initializeList({ listId: "feed" }));
-      s = reducer(s, incrementPage("feed"));
-      expect(s.lists.feed.page).toBe(2);
+      s = reducer(s, setEntityListPage({ listId: "feed", page: 3 }));
+      expect(s.lists.feed.page).toBe(3);
     });
 
     it("is a no-op for a missing list", () => {
-      const s = reducer(initial, incrementPage("missing"));
+      const s = reducer(initial, setEntityListPage({ listId: "missing", page: 3 }));
       expect(s).toEqual(initial);
     });
   });
@@ -469,7 +469,7 @@ describe("entityListsSlice", () => {
 
     it("resets pagination as a side effect", () => {
       let s = reducer(initial, initializeList({ listId: "feed" }));
-      s = reducer(s, incrementPage("feed"));
+      s = reducer(s, setEntityListPage({ listId: "feed", page: 2 }));
       s = reducer(s, updateKeywordsFilters({ listId: "feed", type: "add", key: "includes", value: "foo" }));
       expect(s.lists.feed.page).toBe(1);
       expect(s.lists.feed.hasMore).toBe(true);

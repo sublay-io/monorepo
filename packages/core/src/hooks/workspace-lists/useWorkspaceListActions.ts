@@ -67,7 +67,8 @@ export function useWorkspaceListActions() {
   const fetchWorkspaces = useCallback(
     async (
       listId: string,
-      options: FetchWorkspacesOptions
+      options: FetchWorkspacesOptions,
+      isCurrent: () => boolean = () => true
     ): Promise<Workspace[] | null> => {
       if (!projectId) {
         throw new Error("No project ID available");
@@ -85,6 +86,9 @@ export function useWorkspaceListActions() {
           sortDir: options.sortDir,
           include: options.include,
         }).unwrap();
+
+        // A newer load (or a reset) replaced this one: it writes nothing.
+        if (!isCurrent()) return null;
 
         if (result) {
           const append = options.page > 1;
@@ -106,6 +110,7 @@ export function useWorkspaceListActions() {
 
         return null;
       } catch (err) {
+        if (!isCurrent()) throw err;
         console.error(
           `[WorkspaceListActions] Failed to fetch workspaces for listId: ${listId}`,
           err
@@ -116,7 +121,7 @@ export function useWorkspaceListActions() {
         );
         throw err;
       } finally {
-        dispatch(setWorkspaceListLoading({ listId, loading: false }));
+        if (isCurrent()) dispatch(setWorkspaceListLoading({ listId, loading: false }));
       }
     },
     [dispatch, projectId, triggerFetchWorkspaces]

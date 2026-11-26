@@ -80,14 +80,18 @@ function MessagesWithReplies({ conversationId }: { conversationId: string }) {
   `true` while a fetch is in progress.
 </ResponseField>
 
+<ResponseField name="error" type="Error | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it.
+</ResponseField>
+
 <ResponseField name="hasMore" type="boolean">
-  `true` if more messages can be loaded.
+  `true` while `loadMore()` has something to fetch: a next page, or a load that failed.
 </ResponseField>
 
-<ResponseField name="loadMore" type="() => void">
-  Loads the next page in the direction of `sortDir` and appends it. No-ops while loading or when there are no more pages.
+<ResponseField name="loadMore" type="() => Promise<void>">
+  Loads the next page in the direction of `sortDir` and appends it: older messages with `"desc"` (the default), newer ones with `"asc"`. Retries the load that failed instead, when there is one. Does nothing while loading or when there is nothing more. Never rejects: a failure lands in `error`.
 </ResponseField>
 
-<ResponseField name="refetch" type="() => void">
-  Re-fetches the first page from scratch (e.g. to pick up new matches).
+<ResponseField name="refetch" type="() => Promise<void>">
+  Reloads the first page (e.g. to pick up new matches). The loaded messages stay until the new first page replaces them. Never rejects: a failure lands in `error`.
 </ResponseField>

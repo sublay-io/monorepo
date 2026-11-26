@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
-import { resetAxiosMocks } from "../../test-utils";
+import { resetAxiosMocks, makeAuthUser } from "../../test-utils";
 import { renderWithCommentSection, makeComment, makeEntity } from "./testHelpers";
 import useReplies from "./useReplies";
 import useCommentSection from "./useCommentSection";
@@ -485,5 +485,148 @@ describe("useReplies — one instance moved to another comment", () => {
     rerender();
     expect(result.current.replies.replies.map((c) => c.id)).toEqual([R1a]);
     expect(result.current.replies.hasMore).toBe(false);
+  });
+});
+
+describe("useReplies — refetch", () => {
+  const R2 = "33333333-3333-4333-8333-333333333333";
+  const MINE = "44444444-4444-4444-8444-444444444444";
+
+  it("reloads the first page of replies and keeps the viewer's new reply", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    const { result, axiosPrivate } = renderWithCommentSection(
+      () => ({ replies: useReplies({ commentId: C1 }), section: useCommentSection() }),
+      {
+        providerProps: { entity },
+        user: makeAuthUser({ id: "user-1", username: "u" }),
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeComment({ id: C1, repliesCount: 4 })], null)),
+      },
+    );
+    await settled(result);
+
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: R1, parentCommentId: C1 })], "next"));
+    await act(async () => {
+      await result.current.replies.loadMore();
+    });
+    axiosPrivate.mockResponse(
+      "post",
+      makeComment({ id: MINE, parentCommentId: C1, user: { id: "user-1", username: "u" } as any }),
+    );
+    await act(async () => {
+      await result.current.section.createComment!({ parentCommentId: C1, content: "mine" });
+    });
+    expect(result.current.replies.newReplies.map((r) => r.id)).toEqual([MINE]);
+
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: R2, parentCommentId: C1 })], null));
+    await act(async () => {
+      await result.current.replies.refetch();
+    });
+    expect(result.current.replies.replies.map((r) => r.id)).toEqual([R2]);
+    expect(result.current.replies.newReplies.map((r) => r.id)).toEqual([MINE]);
+    // The replaced reply is gone from the store, the viewer's own one isn't.
+    expect(result.current.section.getComment!(R1)).toBeUndefined();
+    expect(result.current.section.getComment!(MINE)).toBeDefined();
+    const calls = axiosPrivate.calls("get");
+    expect(calls[calls.length - 1].config?.params).not.toHaveProperty("cursor");
+  });
+
+  it("a failed refetch is retried by loadMore as a refetch", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { result, axiosPrivate } = renderReplies({
+      topLevel: [makeComment({ id: C1, repliesCount: 4 })],
+    });
+    await settled(result);
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: R1, parentCommentId: C1 })], "next"));
+    await act(async () => {
+      await result.current.replies.loadMore();
+    });
+
+    axiosPrivate.mockError("get", 500);
+    await act(async () => {
+      await result.current.replies.refetch();
+    });
+    await waitFor(() => expect(result.current.replies.error).toBeInstanceOf(Error));
+    expect(result.current.replies.replies.map((r) => r.id)).toEqual([R1]);
+
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: R2, parentCommentId: C1 })], null));
+    await act(async () => {
+      await result.current.replies.loadMore();
+    });
+    // Retried from the first page (no cursor), replacing R1 — not "next".
+    const calls = axiosPrivate.calls("get");
+    expect(calls[calls.length - 1].config?.params).not.toHaveProperty("cursor");
+    expect(result.current.replies.replies.map((r) => r.id)).toEqual([R2]);
+    expect(result.current.replies.error).toBeNull();
+    vi.restoreAllMocks();
+  });
+});
+
+describe("useReplies — a top-level refetch of the section", () => {
+  const MINE = "55555555-5555-4555-8555-555555555555";
+
+  it("keeps the replies loaded under a comment still listed, and the viewer's new reply", async () => {
+    const entity = makeEntity({ id: "entity-1" });
+    const { result, axiosPrivate } = renderWithCommentSection(
+      () => ({ replies: useReplies({ commentId: C1 }), section: useCommentSection() }),
+      {
+        providerProps: { entity },
+        user: makeAuthUser({ id: "user-1", username: "u" }),
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeComment({ id: C1, repliesCount: 4 })], null)),
+      },
+    );
+    await settled(result);
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: R1, parentCommentId: C1 })], "next"));
+    await act(async () => {
+      await result.current.replies.loadMore();
+    });
+    axiosPrivate.mockResponse(
+      "post",
+      makeComment({ id: MINE, parentCommentId: C1, user: { id: "user-1", username: "u" } as any }),
+    );
+    await act(async () => {
+      await result.current.section.createComment!({ parentCommentId: C1, content: "mine" });
+    });
+
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: C1, repliesCount: 5, content: "edited" })], null));
+    await act(async () => {
+      await result.current.section.refetch!();
+    });
+    expect(result.current.replies.comment?.content).toBe("edited");
+    expect(result.current.replies.replies.map((r) => r.id)).toEqual([R1]);
+    expect(result.current.replies.newReplies.map((r) => r.id)).toEqual([MINE]);
+    expect(result.current.replies.hasMore).toBe(true);
+
+    // Paging the replies continues from where it was.
+    axiosPrivate.mockResponse("get", makePage([], null));
+    await act(async () => {
+      await result.current.replies.loadMore();
+    });
+    const calls = axiosPrivate.calls("get");
+    expect(calls[calls.length - 1].config?.params).toMatchObject({ parentCommentId: C1, cursor: "next" });
+  });
+});
+
+describe("useReplies — hasMore after a failure", () => {
+  it("stays true after a failed refetch of a fully loaded thread, so loadMore can retry it", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { result, axiosPrivate } = renderReplies({
+      topLevel: [makeComment({ id: C1, repliesCount: 1 })],
+    });
+    await settled(result);
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: R1, parentCommentId: C1 })], null));
+    await act(async () => {
+      await result.current.replies.loadMore();
+    });
+    expect(result.current.replies.hasMore).toBe(false);
+
+    axiosPrivate.mockError("get", 500);
+    await act(async () => {
+      await result.current.replies.refetch();
+    });
+    await waitFor(() => expect(result.current.replies.error).toBeInstanceOf(Error));
+    expect(result.current.replies.hasMore).toBe(true);
+    vi.restoreAllMocks();
   });
 });

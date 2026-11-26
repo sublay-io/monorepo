@@ -3,6 +3,8 @@ import { act, waitFor } from "@testing-library/react";
 
 import { renderHookWithAxios, resetAxiosMocks, makeChatMessage } from "../../../test-utils";
 import useLiveChatMessages from "./useLiveChatMessages";
+import { axiosPrivate as axiosPrivateInstance } from "../../../config/axios";
+import { okAxiosResponse, axiosErrorWithStatus } from "../../../test-utils";
 import type { ChatMessageListIncludeParam } from "../../../interfaces/models/ChatMessage";
 import { addOptimisticMessage, setThreadReplies, upsertMessage } from "../../../store/slices/chatSlice";
 
@@ -161,7 +163,7 @@ describe("useLiveChatMessages", () => {
     expect(call.config?.params).toMatchObject({ sortDir: "asc", parentMessageId: "message-1" });
   });
 
-  it("thread loadOlder pages from the newest fetched reply, not a live reply beyond a gap", async () => {
+  it("thread loadMore pages from the newest fetched reply, not a live reply beyond a gap", async () => {
     const reply = (id: string, createdAt: string) =>
       makeChatMessage({ id, conversationId: "conversation-1", parentMessageId: "message-1", createdAt });
 
@@ -187,7 +189,7 @@ describe("useLiveChatMessages", () => {
       pagination: { hasMore: false },
     });
     await act(async () => {
-      await result.current.loadOlder();
+      await result.current.loadMore();
     });
 
     expect(axiosPrivate.calls("get")[1].config?.params.after).toBe("reply-1");
@@ -244,14 +246,14 @@ describe("useLiveChatMessages", () => {
       pagination: { hasMore: false },
     });
     await act(async () => {
-      await result.current.loadOlder();
+      await result.current.loadMore();
     });
 
     expect(axiosPrivate.calls("get")[2].config?.params.after).toBe("reply-2");
     expect(result.current.messages.map((m) => m.id)).toEqual(["reply-1", "reply-2", "reply-3", "reply-9"]);
   });
 
-  it("loadOlder fetches using the oldest loaded message as the before cursor", async () => {
+  it("loadMore fetches using the oldest loaded message as the before cursor", async () => {
     const oldest = makeChatMessage({ id: "message-1", createdAt: "2024-01-02T00:00:00.000Z" });
     const evenOlder = makeChatMessage({ id: "message-0", createdAt: "2024-01-01T00:00:00.000Z" });
 
@@ -274,7 +276,7 @@ describe("useLiveChatMessages", () => {
     });
 
     await act(async () => {
-      await result.current.loadOlder();
+      await result.current.loadMore();
     });
 
     expect(result.current.messages.map((m) => m.id)).toEqual(["message-0", "message-1"]);
@@ -284,7 +286,7 @@ describe("useLiveChatMessages", () => {
     expect(calls[1].config?.params).toMatchObject({ before: oldest.id });
   });
 
-  it("loadOlder never pages from an optimistic message", async () => {
+  it("loadMore never pages from an optimistic message", async () => {
     // Only an optimistic send is held, yet the server says there is history.
     const { result, store, axiosPrivate } = renderHookWithAxios(
       () => useLiveChatMessages({ conversationId: "conversation-1" }),
@@ -308,13 +310,13 @@ describe("useLiveChatMessages", () => {
       );
     });
     await act(async () => {
-      await result.current.loadOlder();
+      await result.current.loadMore();
     });
 
     expect(axiosPrivate.calls("get")).toHaveLength(1);
   });
 
-  it("loadOlder is a no-op when there is no more data", async () => {
+  it("loadMore is a no-op when there is no more data", async () => {
     const { result, axiosPrivate } = renderHookWithAxios(
       () => useLiveChatMessages({ conversationId: "conversation-1" }),
       {
@@ -329,7 +331,7 @@ describe("useLiveChatMessages", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     await act(async () => {
-      await result.current.loadOlder();
+      await result.current.loadMore();
     });
 
     expect(axiosPrivate.calls("get")).toHaveLength(1);
@@ -346,5 +348,160 @@ describe("useLiveChatMessages", () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.messages).toEqual([]);
+  });
+});
+
+describe("useLiveChatMessages — refetch", () => {
+  const at = (day: number) => `2024-01-${String(day).padStart(2, "0")}T00:00:00.000Z`;
+  const msg = (id: string, day: number) =>
+    makeChatMessage({ id, conversationId: "conversation-1", createdAt: at(day) });
+
+  it("replaces the loaded messages with the latest page, keeping optimistic and newer live ones", async () => {
+    const { result, store, axiosPrivate } = renderHookWithAxios(
+      () => useLiveChatMessages({ conversationId: "conversation-1" }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", {
+            data: [msg("m2", 2), msg("m1", 1)],
+            pagination: { hasMore: true },
+          }),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    act(() => {
+      store.dispatch(
+        addOptimisticMessage(
+          makeChatMessage({ id: "temp-abc", localId: "abc", conversationId: "conversation-1", createdAt: at(20) }),
+        ),
+      );
+      store.dispatch(upsertMessage(msg("live", 10)));
+    });
+
+    // The latest page (newest first): m3 and m2 again. m1 is older than it and goes.
+    axiosPrivate.mockResponse("get", {
+      data: [msg("m3", 3), msg("m2", 2)],
+      pagination: { hasMore: true },
+    });
+    await act(async () => {
+      await result.current.refetch();
+    });
+    expect(result.current.messages.map((m) => m.id)).toEqual(["m2", "m3", "live", "temp-abc"]);
+    expect(axiosPrivate.calls("get")[1].config?.params).not.toHaveProperty("before", expect.anything());
+  });
+
+  it("a failed refetch is retried by loadMore as a refetch (replace), not as a merge", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useLiveChatMessages({ conversationId: "conversation-1" }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", {
+            data: [msg("m2", 2), msg("m1", 1)],
+            pagination: { hasMore: true },
+          }),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    axiosPrivate.mockError("get", 500);
+    await act(async () => {
+      await result.current.refetch();
+    });
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+    expect(result.current.hasMore).toBe(true);
+
+    // After a long gap, the latest page doesn't reach what's held.
+    axiosPrivate.mockResponse("get", {
+      data: [msg("m9", 9), msg("m8", 8)],
+      pagination: { hasMore: true },
+    });
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    expect(result.current.error).toBeNull();
+    // Replaced: no gap between m2 and m8.
+    expect(result.current.messages.map((m) => m.id)).toEqual(["m8", "m9"]);
+    expect(axiosPrivate.calls("get")[2].config?.params).not.toHaveProperty("before", expect.anything());
+    vi.restoreAllMocks();
+  });
+});
+
+describe("useLiveChatMessages — two hooks opening one conversation", () => {
+  function holdTwo() {
+    const releases: Array<(fn: () => unknown) => void> = [];
+    for (let i = 0; i < 2; i++) {
+      vi.mocked(axiosPrivateInstance.get).mockImplementationOnce(
+        () =>
+          new Promise((resolve, reject) => {
+            releases.push((fn) => {
+              try {
+                resolve(fn());
+              } catch (e) {
+                reject(e);
+              }
+            });
+          }) as never,
+      );
+    }
+    return releases;
+  }
+  const page = (id: string) =>
+    okAxiosResponse(
+      { data: [makeChatMessage({ id, conversationId: "conversation-1" })], pagination: { hasMore: false } },
+      200,
+    );
+
+  it("stays loading until both opens have settled", async () => {
+    let releases!: ReturnType<typeof holdTwo>;
+    const { result } = renderHookWithAxios(
+      () => ({
+        a: useLiveChatMessages({ conversationId: "conversation-1", include: "files" }),
+        b: useLiveChatMessages({ conversationId: "conversation-1" }),
+      }),
+      { beforeRender: () => { releases = holdTwo(); } },
+    );
+    await waitFor(() => expect(releases).toHaveLength(2));
+    expect(result.current.a.loading).toBe(true);
+
+    await act(async () => {
+      releases[0](() => page("m1"));
+      await new Promise((r) => setTimeout(r, 10));
+    });
+    expect(result.current.a.loading).toBe(true);
+    expect(result.current.b.loading).toBe(true);
+
+    await act(async () => {
+      releases[1](() => page("m1"));
+      await new Promise((r) => setTimeout(r, 10));
+    });
+    expect(result.current.a.loading).toBe(false);
+    expect(result.current.b.loading).toBe(false);
+  });
+
+  it("one open landing clears the error the other open left", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    let releases!: ReturnType<typeof holdTwo>;
+    const { result } = renderHookWithAxios(
+      () => ({
+        a: useLiveChatMessages({ conversationId: "conversation-1", include: "files" }),
+        b: useLiveChatMessages({ conversationId: "conversation-1" }),
+      }),
+      { beforeRender: () => { releases = holdTwo(); } },
+    );
+    await waitFor(() => expect(releases).toHaveLength(2));
+
+    await act(async () => {
+      releases[0](() => { throw axiosErrorWithStatus(500, {}); });
+      await new Promise((r) => setTimeout(r, 10));
+    });
+    expect(result.current.a.error).toBeInstanceOf(Error);
+
+    await act(async () => {
+      releases[1](() => page("m1"));
+      await new Promise((r) => setTimeout(r, 10));
+    });
+    expect(result.current.a.error).toBeNull();
+    expect(result.current.b.messages.map((m) => m.id)).toEqual(["m1"]);
+    vi.restoreAllMocks();
   });
 });

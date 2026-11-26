@@ -195,6 +195,13 @@ export interface UseCommentSectionDataValues {
    * never throws (failures land in `error`).
    */
   loadMore: () => Promise<void>;
+  /**
+   * Reload the top-level comments from the first page with the current sort;
+   * what is loaded stays until the new page replaces it. When the entity
+   * lookup failed, it retries that instead. Never throws (failures land in
+   * `error`).
+   */
+  refetch: () => Promise<void>;
   sortBy: CommentsSortByOptions;
   setSortBy: (newSortBy: CommentsSortByOptions) => void;
   /** Applies to every sort. */
@@ -396,6 +403,7 @@ export function useCommentSectionDataInternal(
     sortByReaction,
     setSortByReaction,
     loadMore,
+    refetch,
     getComment,
   } = entityComments;
   const { store, setStore, seedRef } = internals;
@@ -1224,6 +1232,21 @@ export function useCommentSectionDataInternal(
     await loadMore();
   }, [loadMore, requestEntity]);
 
+  const sectionRefetch = useCallback(async () => {
+    const wantedKey = wantedEntityKeyRef.current;
+    if (wantedKey !== null && currentEntityIdRef.current === null) {
+      // No entity yet: same as loadMore — retry a failed lookup.
+      if (
+        failedEntityKeyRef.current === wantedKey &&
+        requestedEntityKeyRef.current !== wantedKey
+      ) {
+        await requestEntity(wantedKey);
+      }
+      return;
+    }
+    await refetch();
+  }, [refetch, requestEntity]);
+
   const values: UseCommentSectionDataValues = {
     entity,
     callbacks,
@@ -1240,6 +1263,7 @@ export function useCommentSectionDataInternal(
     createError,
 
     loadMore: sectionLoadMore,
+    refetch: sectionRefetch,
     sortBy,
     setSortBy,
     sortDir,

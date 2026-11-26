@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useViewerKey } from "../list/useViewerKey";
+import useProject from "../projects/useProject";
 import { Reaction, ReactionType } from "../../interfaces/models/Reaction";
 import useFetchEntityReactions from "./useFetchEntityReactions";
-import { handleError } from "../../utils/handleError";
+import { useListEngine } from "../list/useListEngine";
+import { pageNumberPaging } from "../list/paging";
 
 export interface UseFetchEntityReactionsWrapperProps {
   entityId: string;
@@ -14,9 +16,18 @@ export interface UseFetchEntityReactionsWrapperProps {
 export interface UseFetchEntityReactionsWrapperValues {
   reactions: Reaction[];
   loading: boolean;
+  /** The last load failure. Cleared when the next load starts; `loadMore()` retries it. */
+  error: Error | null;
+  /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
-  loadMore: () => void;
-  refetch: () => void;
+  /**
+   * Load the next page, or retry the load that failed. With `autoFetch` off,
+   * the first call loads page 1. Does nothing while loading or when there is
+   * nothing more. Never rejects.
+   */
+  loadMore: () => Promise<void>;
+  /** Reload from page 1. Never rejects. */
+  refetch: () => Promise<void>;
 }
 
 function useFetchEntityReactionsWrapper(
@@ -32,100 +43,35 @@ function useFetchEntityReactionsWrapper(
 
   const fetchEntityReactions = useFetchEntityReactions();
 
-  const loading = useRef(false);
-  const [loadingState, setLoadingState] = useState(false);
+  // A different project is a different list, and so is a different viewer
+  // (results carry the viewer's reactions, follows, blocks).
+  const { projectId } = useProject();
+  const viewerId = useViewerKey();
 
-  const hasMore = useRef(true);
-  const [hasMoreState, setHasMoreState] = useState(true);
+  // The one request builder for every page.
+  const buildParams = (page: number) => ({
+    entityId,
+    page,
+    limit,
+    reactionType,
+    sortDir,
+  });
 
-  const [page, setPage] = useState(1);
-  const [reactions, setReactions] = useState<Reaction[]>([]);
-
-  const resetReactions = useCallback(async () => {
-    if (!entityId) {
-      return;
-    }
-
-    try {
-      loading.current = true;
-      setLoadingState(true);
-
-      hasMore.current = true;
-      setHasMoreState(true);
-
-      setPage(1);
-
-      const response = await fetchEntityReactions({
-        entityId,
-        page: 1,
-        limit,
-        reactionType,
-        sortDir,
-      });
-
-      if (response) {
-        const { data: newReactions, pagination } = response;
-        setReactions(newReactions);
-        hasMore.current = pagination.hasMore;
-        setHasMoreState(pagination.hasMore);
-      }
-    } catch (err) {
-      handleError(err, "Failed to reset reactions:");
-    } finally {
-      loading.current = false;
-      setLoadingState(false);
-    }
-  }, [fetchEntityReactions, limit, reactionType, sortDir, entityId]);
-
-  const loadMore = () => {
-    if (loading.current || !hasMore.current) return;
-    setPage((prevPage) => prevPage + 1);
-  };
-
-  useEffect(() => {
-    if (autoFetch) {
-      resetReactions();
-    }
-  }, [resetReactions, autoFetch]);
-
-  useEffect(() => {
-    const loadMoreReactions = async () => {
-      loading.current = true;
-      setLoadingState(true);
-      try {
-        const response = await fetchEntityReactions({
-          entityId,
-          page,
-          limit,
-          reactionType,
-          sortDir,
-        });
-
-        if (response) {
-          const { data: newReactions, pagination } = response;
-          setReactions((prevReactions) => [...prevReactions, ...newReactions]);
-          hasMore.current = pagination.hasMore;
-          setHasMoreState(pagination.hasMore);
-        }
-      } catch (err) {
-        handleError(err, "Loading more reactions failed:");
-      } finally {
-        loading.current = false;
-        setLoadingState(false);
-      }
-    };
-
-    if (page > 1 && hasMore.current && !loading.current) {
-      loadMoreReactions();
-    }
-  }, [page, fetchEntityReactions, entityId, limit, reactionType, sortDir]);
+  const list = useListEngine<Reaction, number>({
+    enabled: !!entityId,
+    resetKey: JSON.stringify([projectId, viewerId, buildParams(1)]),
+    autoLoad: autoFetch,
+    fetchPage: pageNumberPaging((page) => fetchEntityReactions(buildParams(page))),
+    errorLabel: "Failed to fetch reactions:",
+  });
 
   return {
-    reactions,
-    loading: loadingState,
-    hasMore: hasMoreState,
-    loadMore,
-    refetch: resetReactions,
+    reactions: list.items,
+    loading: list.loading,
+    error: list.error,
+    hasMore: list.hasMore,
+    loadMore: list.loadMore,
+    refetch: list.refetch,
   };
 }
 

@@ -69,16 +69,24 @@ function ThreadPanel({
   `true` while a fetch is in progress.
 </ResponseField>
 
+<ResponseField name="error" type="Error | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook showing the same thread.
+</ResponseField>
+
 <ResponseField name="hasMore" type="boolean">
-  `true` if there are more replies to load.
+  `true` while `loadMore()` has something to fetch: newer replies, or a load that failed.
 </ResponseField>
 
 <ResponseField name="loadMore" type="() => Promise<void>">
-  Fetches the next page of newer replies. No-ops if `loading` is `true` or `hasMore` is `false`.
+  Fetches the next page of newer replies, or retries the load that failed. Does nothing while a page is loading or when there is nothing more. Never rejects: a failure lands in `error`.
 </ResponseField>
 
-<ResponseField name="sendReply" type="(params: Omit<SendMessageParams, 'parentMessageId'>) => Promise<ChatMessage>">
-  Sends a reply to this thread. Accepts the same parameters as `useSendMessage` except `parentMessageId` (set automatically). Returns the confirmed [ChatMessage](/v8/data-models/chat-message).
+<ResponseField name="refetch" type="() => Promise<void>">
+  Reloads the thread from its first reply. Never rejects: a failure lands in `error`.
+</ResponseField>
+
+<ResponseField name="sendReply" type="(params: Omit<SendMessageParams, 'parentMessageId'>) => Promise<SendMessageResult>">
+  Sends a reply to this thread. Accepts the same parameters as `useSendMessage` except `parentMessageId` (set automatically). Resolves to the same `SendMessageResult` as [`useSendMessage`](/v8/hooks/chat/messages/use-send-message): the server-confirmed [ChatMessage](/v8/data-models/chat-message), without `reactionCounts`, `userReactions` and `grants`, with `localId` echoed back.
 </ResponseField>
 
 ## Notes

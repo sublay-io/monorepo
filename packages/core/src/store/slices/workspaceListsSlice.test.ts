@@ -5,7 +5,7 @@ import reducer, {
   updateFilters,
   setWorkspaceListLoading,
   setWorkspaceListWorkspaces,
-  incrementPage,
+  setWorkspaceListPage,
   setWorkspaceListHasMore,
   setWorkspaceListError,
   addWorkspace,
@@ -166,17 +166,17 @@ describe("workspaceListsSlice", () => {
     });
   });
 
-  it("incrementPage, setWorkspaceListHasMore and setWorkspaceListError update their fields; no-ops for a missing list", () => {
+  it("setWorkspaceListPage, setWorkspaceListHasMore and setWorkspaceListError update their fields; no-ops for a missing list", () => {
     let s = reducer(initial, initializeList({ listId: "feed" }));
-    s = reducer(s, incrementPage("feed"));
-    expect(s.lists.feed.page).toBe(2);
+    s = reducer(s, setWorkspaceListPage({ listId: "feed", page: 3 }));
+    expect(s.lists.feed.page).toBe(3);
     s = reducer(s, setWorkspaceListHasMore({ listId: "feed", hasMore: false }));
     expect(s.lists.feed.hasMore).toBe(false);
     s = reducer(s, setWorkspaceListError({ listId: "feed", error: "boom" }));
     expect(s.lists.feed.error).toBe("boom");
     expect(s.lists.feed.loading).toBe(false);
 
-    expect(reducer(initial, incrementPage("missing"))).toEqual(initial);
+    expect(reducer(initial, setWorkspaceListPage({ listId: "missing", page: 3 }))).toEqual(initial);
     expect(reducer(initial, setWorkspaceListLoading({ listId: "missing", loading: true }))).toEqual(initial);
   });
 

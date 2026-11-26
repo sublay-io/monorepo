@@ -16,6 +16,9 @@ import { makeProvidersWrapper, createFakeSocket, type FakeSocket } from "./testH
 import { ChatContext, type ChatContextValue } from "./chat-context";
 import { ConversationProvider, useConversationContext } from "./conversation-context";
 import { SublayContext, type SublayContextValues } from "./sublay-context";
+import { axiosPrivate as axiosPrivateInstance } from "../config/axios";
+import { okAxiosResponse } from "../test-utils";
+import useLiveChatMessages from "../hooks/chat/messages/useLiveChatMessages";
 
 afterEach(() => {
   resetAxiosMocks();
@@ -672,11 +675,111 @@ describe("ConversationProvider", () => {
       // Older history continues from the page, right below it.
       axiosPrivate.mockResponse("get", page([msg("message-1b", "2024-01-01T00:00:01.500Z")]));
       await act(async () => {
-        await result.current.loadOlder!();
+        await result.current.loadMore!();
       });
       const all = catchUpCalls(axiosPrivate);
       expect(all).toHaveLength(3);
       expect(all[2].config.params).toMatchObject({ before: "message-2", sortDir: "desc" });
+    });
+
+    it("a successful catch-up clears the error of a failed load", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")], true),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      await waitForMarked(axiosPrivate, "message-1");
+
+      axiosPrivate.mockError("get", 500);
+      await act(async () => {
+        await result.current.loadMore!();
+      });
+      await waitFor(() => expect(result.current.messagesError).toBeInstanceOf(Error));
+
+      axiosPrivate.mockResponse("get", page([msg("message-2", "2024-01-01T00:00:02.000Z")]));
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+      await waitFor(() => expect(result.current.messagesError).toBeNull());
+      await waitForMarked(axiosPrivate, "message-2");
+      vi.mocked(console.error).mockRestore();
+    });
+
+    it("an older page still in flight doesn't land after the catch-up started over", async () => {
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")], true),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      await waitForMarked(axiosPrivate, "message-1");
+
+      let release!: (v: unknown) => void;
+      vi.mocked(axiosPrivateInstance.get).mockImplementationOnce(
+        () => new Promise((r) => { release = r; }) as never,
+      );
+      act(() => {
+        result.current.loadMore!();
+      });
+      axiosPrivate.mockError("get", 400, {
+        error: "Invalid cursor",
+        code: "chat/invalid-cursor",
+        param: "after",
+      });
+      axiosPrivate.mockResponse(
+        "get",
+        page(
+          [msg("message-3", "2024-01-01T00:00:03.000Z"), msg("message-2", "2024-01-01T00:00:02.000Z")],
+          true,
+        ),
+      );
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+      await waitFor(() =>
+        expect(result.current.messages!.map((m) => m.id)).toEqual(["message-2", "message-3"]),
+      );
+      await waitForMarked(axiosPrivate, "message-3");
+
+      await act(async () => {
+        release(okAxiosResponse(page([msg("message-0", "2024-01-01T00:00:00.500Z")], true), 200));
+        await new Promise((r) => setTimeout(r, 20));
+      });
+      expect(result.current.messages!.map((m) => m.id)).toEqual(["message-2", "message-3"]);
+      expect(result.current.messagesLoading).toBe(false);
+    });
+
+    it("doesn't leave messagesLoading stuck when the fallback fetch fails too, with an older page in flight", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const fakeSocket = createFakeSocket();
+      fakeSocket.connected = true;
+      const { result, axiosPrivate } = renderConversation(
+        fakeSocket,
+        page([msg("message-1", "2024-01-01T00:00:01.000Z")], true),
+      );
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      await waitForMarked(axiosPrivate, "message-1");
+
+      vi.mocked(axiosPrivateInstance.get).mockImplementationOnce(
+        () => new Promise(() => {}) as never,
+      );
+      act(() => {
+        result.current.loadMore!();
+      });
+      await waitFor(() => expect(result.current.messagesLoading).toBe(true));
+      const invalid = { error: "Invalid cursor", code: "chat/invalid-cursor", param: "after" };
+      axiosPrivate.mockError("get", 400, invalid);
+      axiosPrivate.mockError("get", 500);
+      await act(async () => {
+        fakeSocket.trigger("connect");
+      });
+      await waitFor(() => expect(catchUpCalls(axiosPrivate)).toHaveLength(3));
+      await waitFor(() => expect(result.current.messagesLoading).toBe(false));
+      vi.mocked(console.error).mockRestore();
     });
 
     it("anchors on the newest real message, not an optimistic one, when the socket drops", async () => {
@@ -771,5 +874,41 @@ describe("ConversationProvider", () => {
       expect(calls[0].config.params).toEqual({ limit: 50, sortDir: "desc" });
       await waitForMarked(axiosPrivate, "message-2");
     });
+  });
+});
+
+describe("ConversationProvider — a child opening the same conversation", () => {
+  it("keeps the child's page: a child asking for include=files gets files, alongside the provider's own load", async () => {
+    const { Wrapper } = makeProvidersWrapper();
+    const file = { id: "file-1" } as any;
+    vi.mocked(axiosPrivateInstance.get).mockImplementation(async (url: string, config?: any) => {
+      if (url.endsWith("/members")) return okAxiosResponse(emptyMembersPage(), 200);
+      const withFiles = String(config?.params?.include ?? "").includes("files");
+      const message = makeChatMessage({ id: "message-1", conversationId: "conversation-1" });
+      const { files: _files, ...withoutFiles } = message as any;
+      return okAxiosResponse(
+        { data: [withFiles ? { ...message, files: [file] } : withoutFiles], pagination: { hasMore: false } },
+        200,
+      );
+    });
+
+    const { result } = renderHook(
+      () => useLiveChatMessages({ conversationId: "conversation-1", include: "files" }),
+      {
+        wrapper: ({ children }) => (
+          <Wrapper>
+            <ConversationProvider conversationId="conversation-1">{children}</ConversationProvider>
+          </Wrapper>
+        ),
+      },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    await waitFor(() => expect(result.current.messages).toHaveLength(1));
+    const messageCalls = vi
+      .mocked(axiosPrivateInstance.get)
+      .mock.calls.filter((c) => String(c[0]).endsWith("/messages"));
+    expect(messageCalls).toHaveLength(2);
+    expect(result.current.messages[0].files).toEqual([file]);
   });
 });

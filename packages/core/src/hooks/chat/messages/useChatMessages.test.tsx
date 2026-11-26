@@ -27,7 +27,7 @@ describe("useChatMessages", () => {
 
     expect(result.current.messages).toEqual([message]);
     expect(result.current.hasMore).toBe(false);
-    expect(typeof result.current.loadOlder).toBe("function");
+    expect(typeof result.current.loadMore).toBe("function");
 
     const [call] = axiosPrivate.calls("get");
     expect(call.url).toBe("/test-project/chat/conversations/conversation-1/messages");

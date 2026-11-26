@@ -297,3 +297,119 @@ describe("useFetchManyCommentsWrapper — the target going away", () => {
     expect(result.current.loading).toBe(false);
   });
 });
+
+describe("useFetchManyCommentsWrapper — the list contract", () => {
+  it("drops a page that lands after the entity changed", async () => {
+    let releaseStale!: (v: unknown) => void;
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (p: { entityId: string }) => useFetchManyCommentsWrapper(p),
+      {
+        initialProps: { entityId: "entity-1" },
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeComment({ id: "e1-a" })], "c2")),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    vi.mocked(axiosPrivateInstance.get).mockImplementationOnce(
+      () => new Promise((resolve) => { releaseStale = resolve; }) as never,
+    );
+    act(() => {
+      result.current.loadMore();
+    });
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: "e2-a" })], null));
+    rerender({ entityId: "entity-2" });
+    await waitFor(() => expect(result.current.comments.map((c) => c.id)).toEqual(["e2-a"]));
+
+    await act(async () => {
+      releaseStale({ data: makePage([makeComment({ id: "e1-b" })], null), status: 200 });
+      await new Promise((r) => setTimeout(r, 10));
+    });
+    expect(result.current.comments.map((c) => c.id)).toEqual(["e2-a"]);
+    expect(axiosPrivate.calls("get")[2].config?.params).toMatchObject({ entityId: "entity-2" });
+    expect(axiosPrivate.calls("get")[2].config?.params).not.toHaveProperty("cursor");
+  });
+
+  it("retries a failed first page as the first page (no cursor)", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useFetchManyCommentsWrapper({ entityId: "entity-1" }),
+      { beforeRender: ({ axiosPrivate }) => axiosPrivate.mockError("get", 500) },
+    );
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+    expect(result.current.hasMore).toBe(true);
+
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: "c1" })], null));
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    expect(result.current.comments.map((c) => c.id)).toEqual(["c1"]);
+    expect(axiosPrivate.calls("get")[1].config?.params).not.toHaveProperty("cursor");
+  });
+
+  it("advances exactly one page on two loadMore calls in the same tick", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useFetchManyCommentsWrapper({ entityId: "entity-1" }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeComment({ id: "c1" })], "c2")),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: "c2" })], "c3"));
+    await act(async () => {
+      await Promise.all([result.current.loadMore(), result.current.loadMore()]);
+    });
+    expect(axiosPrivate.calls("get")).toHaveLength(2);
+    expect(result.current.comments.map((c) => c.id)).toEqual(["c1", "c2"]);
+  });
+
+  it("refetch reloads the first page with the current sort and replaces the list", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useFetchManyCommentsWrapper({ entityId: "entity-1" }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeComment({ id: "c1" })], "c2")),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: "c2" })], "c3"));
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: "old-1" })], "x"));
+    act(() => result.current.setSortDir("asc"));
+    await waitFor(() => expect(result.current.comments.map((c) => c.id)).toEqual(["old-1"]));
+
+    axiosPrivate.mockResponse("get", makePage([makeComment({ id: "old-1b" })], null));
+    await act(async () => {
+      await result.current.refetch();
+    });
+    expect(result.current.comments.map((c) => c.id)).toEqual(["old-1b"]);
+    expect(result.current.hasMore).toBe(false);
+    const calls = axiosPrivate.calls("get");
+    const last = calls[calls.length - 1].config?.params;
+    expect(last).toMatchObject({ entityId: "entity-1", sortDir: "asc" });
+    expect(last).not.toHaveProperty("cursor");
+  });
+
+  it("loadMore and refetch never reject", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { result, axiosPrivate } = renderHookWithAxios(
+      () => useFetchManyCommentsWrapper({ entityId: "entity-1" }),
+      {
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeComment({ id: "c1" })], "c2")),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    axiosPrivate.mockError("get", 500);
+    await expect(result.current.loadMore()).resolves.toBeUndefined();
+    axiosPrivate.mockNetworkError("get");
+    await expect(result.current.refetch()).resolves.toBeUndefined();
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+    expect(result.current.loading).toBe(false);
+    expect(result.current.comments.map((c) => c.id)).toEqual(["c1"]);
+  });
+});

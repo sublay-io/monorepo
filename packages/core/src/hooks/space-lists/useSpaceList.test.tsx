@@ -8,6 +8,7 @@ import {
   jsonResponse,
   type FetchMockHandle,
 } from "../../test-utils";
+import { describeStoreListContract } from "../../test-utils/storeListContract";
 import useSpaceList from "./useSpaceList";
 
 let fetchHandle: FetchMockHandle;
@@ -332,4 +333,30 @@ describe("useSpaceList", () => {
       expect(result.current.spaces).toEqual([]);
     });
   });
+});
+
+describeStoreListContract({
+  name: "useSpaceList",
+  useList: (listId) => {
+    const list = useSpaceList({ listId });
+    return {
+      ids: list.spaces.map((s) => s.id),
+      loading: list.loading,
+      error: list.error,
+      hasMore: list.hasMore,
+      loadMore: list.loadMore,
+      refetch: list.refetch,
+      start: () => list.fetchSpaces({}),
+      changeFilterDebounced: () => list.fetchSpaces({ query: "garden" }),
+      changeFilterNow: () =>
+        list.fetchSpaces({ query: "garden" }, undefined, { fetchImmediately: true }),
+    };
+  },
+  fetchHandle: () => fetchHandle,
+  listUrls: () =>
+    fetchHandle
+      .calls()
+      .map((c) => new URL(c.url))
+      .filter((u) => /\/spaces$/.test(u.pathname)),
+  filterParam: ["query", "garden"],
 });

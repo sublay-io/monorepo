@@ -41,7 +41,7 @@ If the entity stands for a record in your own database, identify it by that reco
 
 ## What the Provider Manages
 
-- **Loading comments** — fetches the first page of top-level comments on mount and provides `loadMore` / `hasMore` for the next ones (cursor-paginated, so new comments never shift what you get)
+- **Loading comments** — fetches the first page of top-level comments on mount and provides `loadMore` / `hasMore` for the next ones and `refetch` to reload from the first page (cursor-paginated, so new comments never shift what you get)
 - **Nested replies** — optionally brings a few levels of replies with every page (`replyDepth`, `replyLimit`); [`useReplies`](/v8/hooks/comments/use-replies) loads more for any comment, continuing from what's already loaded
 - **One copy of each comment** — every loaded comment is kept once, so an edit or delete shows up everywhere it's rendered; read any loaded comment with `getComment(id)`
 - **New comments** — tracks freshly submitted comments separately from fetched ones, so they don't jump around
@@ -49,7 +49,7 @@ If the entity stands for a record in your own database, identify it by that reco
 - **Reply state** — tracks which comment is being replied to and shows/hides the reply banner
 - **CRUD actions** — `createComment`, `updateComment`, `deleteComment` with optimistic updates
 - **Sort** — `sortBy`/`setSortBy` for switching between `"createdAt"`, `"top"` (raw count of `sortByReaction`, default upvotes) and `"controversial"`, plus `sortDir`/`setSortDir` (`"asc"`/`"desc"`), which applies to `"createdAt"` and `"top"` (`"controversial"` always ranks most controversial first)
-- **Errors** — a failed load lands in `error`; `loadMore` never throws
+- **Errors** — a failed load lands in `error` and `loadMore` retries it; `loadMore` and `refetch` never throw
 
 ## In This Section
 

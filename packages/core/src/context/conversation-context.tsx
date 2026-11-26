@@ -21,11 +21,13 @@ import {
   clearUnread,
   replaceMessages,
   setMessagesHasMore,
+  setMessagesLoading,
   upsertMessage,
 } from "../store/slices/chatSlice";
 import type { ChatMessage } from "../interfaces/models/ChatMessage";
 import type { ConversationMember } from "../interfaces/models/ConversationMember";
 import { handleError } from "../utils/handleError";
+import { useSharedListStatus } from "../hooks/list/sharedListStatus";
 
 // ─── Context shape ────────────────────────────────────────────────────────────
 
@@ -69,6 +71,12 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
 
   const mark = useMarkConversationAsRead({ conversationId });
 
+  // The load status `useLiveChatMessages` keeps for this conversation: the
+  // reconnect catch-up below updates it too.
+  const { status: messagesStatus } = useSharedListStatus(
+    `chatMessages:${conversationId}`,
+  );
+
   // Keep a ref to the messages state so socket handlers can find latest messages
   const messagesRef = useRef<ChatMessage[]>([]);
   const reduxMessages = useSublaySelector(
@@ -85,7 +93,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
   // the latest page the way the mount fetch does. If the server can't page
   // from the anchor (`chat/invalid-cursor`: that message is gone), start the
   // conversation over from its latest page, once: the messages held before it
-  // are replaced, so no gap is left between them and the page that `loadOlder`
+  // are replaced, so no gap is left between them and the page that `loadMore`
   // (which pages from the oldest held message) could never fill.
   //
   // `anchorId` is the newest message loaded when the socket dropped. Paging
@@ -106,6 +114,8 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
     try {
       if (!anchorId) {
         await loadLatestPage();
+        // The conversation is up to date: a failed load is no longer pending.
+        messagesStatus.clearFailure();
         return;
       }
 
@@ -121,15 +131,25 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
           });
         } catch (err) {
           if (!isInvalidChatCursorError(err)) throw err;
-          const latest = await fetchMany({ conversationId, sortDir: "desc" });
-          dispatch(
-            replaceMessages({
-              conversationId,
-              // Newest first from the server; the store keeps messages ascending.
-              messages: [...latest.data].reverse(),
-              hasMore: latest.pagination.hasMore,
-            }),
-          );
+          // A fresh start: an older page still in flight (`loadMore`) must
+          // not land after it and reopen the gap.
+          messagesStatus.invalidate();
+          try {
+            const latest = await fetchMany({ conversationId, sortDir: "desc" });
+            dispatch(
+              replaceMessages({
+                conversationId,
+                // Newest first from the server; the store keeps messages ascending.
+                messages: [...latest.data].reverse(),
+                hasMore: latest.pagination.hasMore,
+              }),
+            );
+          } finally {
+            // The dropped page (if one was loading) won't clear `loading`,
+            // whether this fetch lands or fails.
+            dispatch(setMessagesLoading({ conversationId, loading: false }));
+          }
+          messagesStatus.clearFailure();
           return;
         }
         page.data.forEach((msg) => dispatch(upsertMessage(msg)));
@@ -140,10 +160,11 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
         }
         after = last.id;
       }
+      messagesStatus.clearFailure();
     } catch (err) {
       handleError(err, "Failed to fetch missed messages");
     }
-  }, [projectId, conversationId, fetchMany, dispatch]);
+  }, [projectId, conversationId, fetchMany, dispatch, messagesStatus]);
 
   // ── Conversation data (messages, send, members, etc.) ─────────────────────
   // Called before the socket effects so upsertMember / removeMemberLocally are

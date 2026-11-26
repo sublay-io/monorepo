@@ -19,8 +19,17 @@ export interface UseConversationDataValues {
   // Messages
   messages: ChatMessage[];
   messagesLoading: boolean;
+  /** The last failure loading messages. Cleared when the next load starts; `loadMore()` retries it. */
+  messagesError: Error | null;
+  /** Whether `loadMore()` has anything to fetch: older messages, or a load that failed. */
   hasMore: boolean;
-  loadOlder: () => Promise<void>;
+  /**
+   * Load the next messages in reading order (older ones), or retry the load
+   * that failed. Never rejects.
+   */
+  loadMore: () => Promise<void>;
+  /** Reload the latest messages, replacing the ones loaded. Never rejects. */
+  refetchMessages: () => Promise<void>;
 
   // Send
   send: (params: SendMessageParams) => Promise<SendMessageResult>;
@@ -51,7 +60,14 @@ export interface UseConversationDataValues {
 function useConversationData({
   conversationId,
 }: UseConversationDataProps): UseConversationDataValues {
-  const { messages, loading: messagesLoading, hasMore, loadOlder } = useLiveChatMessages({
+  const {
+    messages,
+    loading: messagesLoading,
+    error: messagesError,
+    hasMore,
+    loadMore,
+    refetch: refetchMessages,
+  } = useLiveChatMessages({
     conversationId,
   });
 
@@ -77,8 +93,10 @@ function useConversationData({
   return {
     messages,
     messagesLoading,
+    messagesError,
     hasMore,
-    loadOlder,
+    loadMore,
+    refetchMessages,
     send,
     members,
     membersLoading,

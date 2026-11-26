@@ -220,13 +220,18 @@ export const spaceListsSlice = createSlice({
       // Note: hasMore is set explicitly by the caller based on limit from hook props
     },
 
-    // Increment page for load more
-    incrementPage: (state, action: PayloadAction<string>) => {
-      const listId = action.payload;
+    // The page last loaded: set when a page lands, so a failed page is
+    // fetched again rather than skipped
+    setSpaceListPage: (
+      state,
+      action: PayloadAction<{ listId: string; page: number }>
+    ) => {
+      const { listId, page } = action.payload;
       if (state.lists[listId]) {
-        state.lists[listId].page += 1;
+        state.lists[listId].page = page;
       }
     },
+
 
     // Set hasMore for space list
     setSpaceListHasMore: (
@@ -326,7 +331,7 @@ export const {
   updateFilters,
   setSpaceListLoading,
   setSpaceListSpaces,
-  incrementPage,
+  setSpaceListPage,
   setSpaceListHasMore,
   setSpaceListError,
   addSpace,

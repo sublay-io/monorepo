@@ -1,13 +1,20 @@
 import { useCallback, useMemo, useRef } from "react";
 import type { SpaceSearchFields } from "../../interfaces/SpaceSearch";
+import { useStore } from "react-redux";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
+import type { SublayState } from "../../store/sublayReducers";
+import {
+  runSharedListLoad,
+  sharedLoadMore,
+  useSharedListStatus,
+} from "../list/sharedListStatus";
 
 import {
   initializeList,
   updateFilters,
   setSpaceListLoading,
   setSpaceListSpaces,
-  incrementPage,
+  setSpaceListPage,
   selectSpaceList,
   selectSpaceListSpaces,
   selectSpaceListLoading,
@@ -61,6 +68,12 @@ export interface SpaceListDeleteSpaceProps {
 export interface UseSpaceListValues {
   spaces: Space[];
   loading: boolean;
+  /**
+   * The last load failure, shared by every hook on this `listId`. Cleared
+   * when the next load starts; `loadMore()` retries it.
+   */
+  error: Error | null;
+  /** Whether `loadMore()` has anything to fetch: a next page, or a load that failed. */
   hasMore: boolean;
 
   // Current filters
@@ -80,7 +93,18 @@ export interface UseSpaceListValues {
     config?: SpaceListConfig,
     options?: SpaceListFetchOptions
   ) => void;
-  loadMore: () => void;
+  /**
+   * Load the next page, or retry the load that failed (a failed first page
+   * included). Does nothing while a page of this list is loading, while a
+   * filter change is waiting to be fetched, or when there is nothing more.
+   * Never rejects.
+   */
+  loadMore: () => Promise<void>;
+  /**
+   * Reload page 1 with the list's current filters and page size. The spaces
+   * stay until the new page replaces them. Never rejects.
+   */
+  refetch: () => Promise<void>;
   createSpace: (
     props: SpaceListCreateSpaceProps
   ) => Promise<SpaceWithPermissions | undefined>;
@@ -113,8 +137,51 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
   // Get space actions hook
   const spaceActions = useSpaceListActions();
 
+  // Load bookkeeping shared by every hook showing this list.
+  const store = useStore<{ sublay: SublayState }>();
+  const { status, error } = useSharedListStatus(`spaceList:${listId}`);
+  const getList = useCallback(
+    () => selectSpaceList(store.getState(), listId),
+    [store, listId]
+  );
+
   // Debounce timer for filter changes
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load page 1 (`first`) or the page after the last one loaded, with the
+  // filters and page size stored for the list — the one request builder, so
+  // every page carries the same params.
+  const loadPage = useCallback(
+    (first: boolean) =>
+      runSharedListLoad(
+        status,
+        // useSpaceListActions logs the failure.
+        { first, errorLabel: null },
+        async (isCurrent) => {
+          const list = getList();
+          if (!list || !list.sortBy) return;
+          const page = first ? 1 : list.page + 1;
+          dispatch(setSpaceListLoading({ listId, loading: true }));
+          const data = await spaceActions.fetchSpaces(
+            listId,
+            {
+              page,
+              sortBy: list.sortBy,
+              sortDir: list.sortDir,
+              query: list.query,
+              searchFields: list.searchFields,
+              parentSpaceId: list.parentSpaceId,
+              limit: list.limit,
+            },
+            isCurrent
+          );
+          if (isCurrent() && data) {
+            dispatch(setSpaceListPage({ listId, page }));
+          }
+        }
+      ),
+    [status, getList, dispatch, listId, spaceActions.fetchSpaces]
+  );
 
   // Fetch spaces function (always triggers a fetch)
   const handleFetchSpaces = useCallback(
@@ -129,7 +196,13 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
         ...newConfig,
       };
 
-      // Ensure Redux state is initialized and update filters/config
+      // A new query: whatever is loading belongs to the old one, and no page
+      // loads until this one's first page has been requested.
+      status.invalidate();
+      status.pendingReset = true;
+
+      // Ensure Redux state is initialized and update filters/config (the
+      // slice applies them: `null` on the parent filter is its default).
       dispatch(initializeList({ listId }));
       dispatch(
         updateFilters({
@@ -145,123 +218,60 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
         dispatch(setSpaceListSpaces({ listId, spaces: [], append: false }));
       }
 
-      // Define the fetch logic
-      const performFetch = async () => {
-        // Use the applied config (configWithDefaults is the source of truth for this fetch)
-        const currentConfig = { limit: configWithDefaults.limit };
-
-        // Build final filters by taking current state and applying new filters
-        const currentState = spaceList || {
-          sortBy: "createdAt",
-          sortDir: null,
-          query: null,
-          searchFields: null,
-          parentSpaceId: "none",
-        };
-        const finalFilters = { ...currentState };
-
-        // Apply resetUnspecified logic (only reset filter properties)
-        if (options?.resetUnspecified) {
-          finalFilters.sortBy = "createdAt";
-          finalFilters.sortDir = null;
-          finalFilters.query = null;
-          finalFilters.searchFields = null;
-          finalFilters.parentSpaceId = "none";
-        }
-
-        // Apply new filters
-        Object.keys(newFilters).forEach((key) => {
-          if (newFilters[key as keyof typeof newFilters] !== undefined) {
-            (finalFilters as any)[key] =
-              newFilters[key as keyof typeof newFilters];
-          }
-        });
-
-        // `null` on the parent filter means "not set": the default, top-level.
-        finalFilters.parentSpaceId = finalFilters.parentSpaceId ?? "none";
-
-        if (!finalFilters.sortBy) return; // sortBy is required
-
-        dispatch(setSpaceListLoading({ listId, loading: true }));
-
-        try {
-          await spaceActions.fetchSpaces(listId, {
-            page: 1,
-            // User-controlled filters from Redux state + new filters
-            sortBy: finalFilters.sortBy,
-            sortDir: finalFilters.sortDir,
-            query: finalFilters.query,
-            searchFields: finalFilters.searchFields,
-            parentSpaceId: finalFilters.parentSpaceId,
-            // Configuration parameters from current config
-            limit: currentConfig.limit,
-          });
-        } catch (err) {
-          console.error(
-            `[SpaceList] Failed to fetch spaces for listId: ${listId}`,
-            err
-          );
-        }
-      };
-
       // Execute immediately if requested, otherwise debounce
       // For initial loads (empty filters object), make it immediate by default
       const shouldBeImmediate =
         options?.fetchImmediately || Object.keys(newFilters).length === 0;
 
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
+      }
       if (shouldBeImmediate) {
-        performFetch();
+        loadPage(true);
       } else {
-        // Clear existing debounce timer
-        if (debounceTimer.current) {
-          clearTimeout(debounceTimer.current);
-        }
-
         // Debounce the actual fetch
         debounceTimer.current = setTimeout(() => {
-          performFetch();
+          debounceTimer.current = null;
+          loadPage(true);
         }, 800); // 800ms debounce delay
       }
     },
-    [dispatch, listId, spaceList, config, spaceActions.fetchSpaces]
+    [dispatch, listId, status, loadPage]
   );
 
   // Load more function
   const loadMore = useCallback(async () => {
-    if (!spaceList || loading || !hasMore) return;
-
-    // Check if fetchSpaces has been called before (safeguard)
-    if (!config) {
+    const list = getList();
+    if (!list) {
       console.error(
         `[SpaceList] loadMore called before fetchSpaces for listId: ${listId}. ` +
           `fetchSpaces must be called first to initialize configuration.`
       );
       return;
     }
+    await sharedLoadMore(status, {
+      hasMore: () => !!getList()?.hasMore,
+      retryFirst: () => loadPage(true),
+      next: () => loadPage(false),
+    });
+  }, [getList, listId, status, loadPage]);
 
-    const nextPage = spaceList.page + 1;
-    dispatch(incrementPage(listId));
-
-    // Directly fetch the next page
-    try {
-      await spaceActions.fetchSpaces(listId, {
-        page: nextPage,
-        // User-controlled filters from Redux state
-        sortBy: spaceList.sortBy,
-        sortDir: spaceList.sortDir,
-        query: spaceList.query,
-        searchFields: spaceList.searchFields,
-        parentSpaceId: spaceList.parentSpaceId,
-        // Configuration parameters from state (single source of truth)
-        limit: config.limit,
-      });
-    } catch (err) {
+  // Reload page 1 with the stored filters and page size.
+  const refetch = useCallback(async () => {
+    if (!getList()) {
       console.error(
-        `[SpaceList] Failed to load more spaces for listId: ${listId}`,
-        err
+        `[SpaceList] refetch called before fetchSpaces for listId: ${listId}. ` +
+          `fetchSpaces must be called first to initialize configuration.`
       );
+      return;
     }
-  }, [dispatch, listId, config, spaceList, loading, hasMore, spaceActions.fetchSpaces]);
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+      debounceTimer.current = null;
+    }
+    await loadPage(true);
+  }, [getList, listId, loadPage]);
 
   // Create space function
   const createSpace = useCallback(
@@ -299,7 +309,9 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
     () => ({
       spaces,
       loading,
-      hasMore,
+      error,
+      // A failed load is still to do: `loadMore()` retries it.
+      hasMore: hasMore || error !== null,
 
       sortBy: filters?.sortBy || null,
       sortDir: filters?.sortDir || null,
@@ -310,16 +322,19 @@ function useSpaceList({ listId }: UseSpaceListProps): UseSpaceListValues {
       fetchSpaces: handleFetchSpaces,
 
       loadMore,
+      refetch,
       createSpace,
       deleteSpace,
     }),
     [
       spaces,
       loading,
+      error,
       hasMore,
       filters,
       handleFetchSpaces,
       loadMore,
+      refetch,
       createSpace,
       deleteSpace,
     ]

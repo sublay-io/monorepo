@@ -1,3 +1,5 @@
+import { useViewerKey } from "../list/useViewerKey";
+import useProject from "../projects/useProject";
 import { useCallback } from "react";
 import { oneWaySortFields } from "../../helpers/oneWaySorts";
 import {
@@ -63,7 +65,13 @@ function useFetchManyCommentsWrapper(
 
   const fetchManyComments = useFetchManyComments();
 
+  // A different project is a different list, and so is a different viewer
+  // (results carry the viewer's reactions, follows, blocks).
+  const { projectId } = useProject();
+  const viewerId = useViewerKey();
   const resetKey = JSON.stringify({
+    projectId,
+    viewerId,
     entityId,
     parentCommentId,
     limit,

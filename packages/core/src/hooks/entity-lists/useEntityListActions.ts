@@ -87,7 +87,7 @@ interface DeleteEntityOptions {
 }
 
 export interface UseEntityListActionsValues {
-  fetchEntities: (listId: string, options: FetchEntitiesOptions) => Promise<Entity[] | null>;
+  fetchEntities: (listId: string, options: FetchEntitiesOptions, isCurrent?: () => boolean) => Promise<Entity[] | null>;
   /** JSON only: to create an entity with images or files, use `useCreateEntity`. */
   createEntity: (listId: string, options: CreateEntityOptions) => Promise<Entity | undefined>;
   deleteEntity: (listId: string, options: DeleteEntityOptions) => Promise<void>;
@@ -112,7 +112,8 @@ export function useEntityListActions(): UseEntityListActionsValues {
   const fetchEntities = useCallback(
     async (
       listId: string,
-      options: FetchEntitiesOptions
+      options: FetchEntitiesOptions,
+      isCurrent: () => boolean = () => true
     ): Promise<Entity[] | null> => {
       if (!projectId) {
         throw new Error("No project ID available");
@@ -159,6 +160,9 @@ export function useEntityListActions(): UseEntityListActionsValues {
           spaceReputationDescendants: reputationParams.spaceReputationDescendants,
         }).unwrap();
 
+        // A newer load (or a reset) replaced this one: it writes nothing.
+        if (!isCurrent()) return null;
+
         if (result) {
           const append = options.page > 1;
           dispatch(setEntityListEntities({ listId, entities: result.data, append }));
@@ -173,6 +177,7 @@ export function useEntityListActions(): UseEntityListActionsValues {
 
         return null;
       } catch (err) {
+        if (!isCurrent()) throw err;
         console.error(
           `[EntityListActionsRedux] Failed to fetch entities for listId: ${listId}`,
           err
@@ -183,7 +188,7 @@ export function useEntityListActions(): UseEntityListActionsValues {
         );
         throw err;
       } finally {
-        dispatch(setEntityListLoading({ listId, loading: false }));
+        if (isCurrent()) dispatch(setEntityListLoading({ listId, loading: false }));
       }
     },
     [dispatch, projectId, triggerFetchEntities]

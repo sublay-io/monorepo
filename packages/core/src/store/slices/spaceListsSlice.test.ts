@@ -5,7 +5,7 @@ import reducer, {
   updateFilters,
   setSpaceListLoading,
   setSpaceListSpaces,
-  incrementPage,
+  setSpaceListPage,
   setSpaceListHasMore,
   setSpaceListError,
   addSpace,
@@ -132,15 +132,15 @@ describe("spaceListsSlice", () => {
     });
   });
 
-  describe("incrementPage", () => {
-    it("increments the page for an existing list", () => {
+  describe("setSpaceListPage", () => {
+    it("sets the page last loaded for an existing list", () => {
       let s = reducer(initial, initializeList({ listId: "feed" }));
-      s = reducer(s, incrementPage("feed"));
-      expect(s.lists.feed.page).toBe(2);
+      s = reducer(s, setSpaceListPage({ listId: "feed", page: 3 }));
+      expect(s.lists.feed.page).toBe(3);
     });
 
     it("is a no-op for a missing list", () => {
-      const s = reducer(initial, incrementPage("missing"));
+      const s = reducer(initial, setSpaceListPage({ listId: "missing", page: 3 }));
       expect(s).toEqual(initial);
     });
   });

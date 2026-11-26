@@ -1,8 +1,14 @@
 import { useCallback } from "react";
+import { useStore } from "react-redux";
 import { useSublayDispatch, useSublaySelector } from "../../store/hooks";
+import type { SublayState } from "../../store/sublayReducers";
 import {
-  loadMore as loadMoreAction,
-  resetNotifications,
+  runSharedListLoad,
+  sharedLoadMore,
+  useSharedListStatus,
+} from "../list/sharedListStatus";
+import {
+  setPage,
   setLoading,
   addNotifications,
   markAsReadLocally,
@@ -14,6 +20,7 @@ import {
   selectCurrentProjectId,
   selectAppNotificationsPage,
   selectAppNotificationsLimit,
+  selectAppNotificationsHasMore,
 } from "../../store/slices/appNotificationsSlice";
 import {
   useLazyFetchAppNotificationsQuery,
@@ -26,11 +33,18 @@ import useProject from "../projects/useProject";
 import { useUser } from "../user";
 
 export interface UseAppNotificationsActionsValues {
-  loadMore: () => void;
+  /** The last load failure, shared by every hook showing the notifications. Cleared when the next load starts. */
+  error: Error | null;
+  /**
+   * Load the next page, or retry the load that failed (a failed first page
+   * included). Does nothing while a page is loading or when there is nothing
+   * more. Never rejects.
+   */
+  loadMore: () => Promise<void>;
+  /** Reload page 1. Never rejects. */
+  refetch: () => Promise<void>;
   markNotificationAsRead: ({ notificationId }: { notificationId: string }) => Promise<void>;
   markAllNotificationsAsRead: () => Promise<void>;
-  resetAppNotifications: () => Promise<void>;
-  fetchMoreNotifications: ({ pageToFetch }: { pageToFetch: number }) => Promise<void>;
   updateUnreadCount: () => Promise<void>;
 }
 
@@ -46,8 +60,6 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
 
   // Get current state for actions
   const projectIdFromSlice = useSublaySelector(selectCurrentProjectId);
-  const page = useSublaySelector(selectAppNotificationsPage);
-  const limit = useSublaySelector(selectAppNotificationsLimit);
   const notifications = useSublaySelector(selectAppNotifications);
   const unreadCount = useSublaySelector(selectUnreadCount);
 
@@ -63,11 +75,6 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
   const [markNotificationAsReadMutation] = useMarkNotificationAsReadMutation();
   const [markAllNotificationsAsReadMutation] = useMarkAllNotificationsAsReadMutation();
   const [triggerCountUnread] = useLazyCountUnreadNotificationsQuery();
-
-  // Load more action
-  const loadMore = useCallback(() => {
-    dispatch(loadMoreAction());
-  }, [dispatch]);
 
   // Mark notification as read action
   const markNotificationAsRead = useCallback(
@@ -100,84 +107,60 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
     [dispatch, projectId, user, notifications, markNotificationAsReadMutation]
   );
 
-  // Reset notifications action
-  const resetAppNotifications = useCallback(async () => {
-    if (!projectId || !user) {
-      throw new Error("No project ID or authenticated user available");
-    }
+  // Load bookkeeping shared by every hook showing the notifications.
+  const store = useStore<{ sublay: SublayState }>();
+  const { status, error } = useSharedListStatus("appNotifications");
 
-    try {
-      dispatch(setLoading(true));
-      dispatch(resetNotifications());
-
-      // Fetch first page
-      const response = await triggerFetchNotifications({
-        projectId,
-        page: 1,
-        limit,
-      }).unwrap();
-
-      if (response) {
-        const { data: notifications, pagination } = response;
-        // Store raw notifications - templates applied at display time
-        dispatch(
-          addNotifications({
-            notifications,
-            hasMore: pagination.hasMore,
-            isFirstPage: true,
-          })
-        );
-      }
-    } catch (error) {
-      handleError(error, "Failed to refresh notifications:");
-      throw error;
-    }
-  }, [
-    dispatch,
-    projectId,
-    user,
-    triggerFetchNotifications,
-    limit,
-  ]);
-
-  // Fetch more notifications (internal action triggered by page changes)
-  const fetchMoreNotifications = useCallback(
-    async ({ pageToFetch }: { pageToFetch: number }) => {
-      if (!projectId || !user) return;
-
-      try {
-        dispatch(setLoading(true));
-
-        const response = await triggerFetchNotifications({
-          projectId,
-          page: pageToFetch,
-          limit,
-        }).unwrap();
-
-        if (response) {
-          const { data: notifications, pagination } = response;
-          // Store raw notifications - templates applied at display time
-          dispatch(
-            addNotifications({
-              notifications,
-              hasMore: pagination.hasMore,
-            })
-          );
+  // Load page 1 (`first`) or the page after the last one loaded.
+  const loadPage = useCallback(
+    (first: boolean) =>
+      runSharedListLoad(
+        status,
+        { first, errorLabel: "Failed to fetch notifications:" },
+        async (isCurrent) => {
+          if (!projectId || !user) return;
+          const state = store.getState();
+          const page = first ? 1 : selectAppNotificationsPage(state) + 1;
+          dispatch(setLoading(true));
+          try {
+            const response = await triggerFetchNotifications({
+              projectId,
+              page,
+              limit: selectAppNotificationsLimit(state),
+            }).unwrap();
+            if (!isCurrent() || !response) return;
+            const { data: notifications, pagination } = response;
+            // Store raw notifications - templates applied at display time
+            dispatch(
+              addNotifications({
+                notifications,
+                hasMore: pagination.hasMore,
+                isFirstPage: first,
+              })
+            );
+            dispatch(setPage(page));
+          } finally {
+            if (isCurrent()) dispatch(setLoading(false));
+          }
         }
-      } catch (error) {
-        handleError(error, "Loading more app notifications failed:");
-      } finally {
-        dispatch(setLoading(false));
-      }
-    },
-    [
-      dispatch,
-      projectId,
-      user,
-      triggerFetchNotifications,
-      limit,
-    ]
+      ),
+    [status, store, dispatch, projectId, user, triggerFetchNotifications]
   );
+
+  const loadMore = useCallback(async () => {
+    if (!projectId || !user) return;
+    await sharedLoadMore(status, {
+      hasMore: () => selectAppNotificationsHasMore(store.getState()),
+      retryFirst: () => loadPage(true),
+      next: () => loadPage(false),
+    });
+  }, [projectId, user, status, store, loadPage]);
+
+  // Reload page 1. The notifications stay until the new page replaces them.
+  const refetch = useCallback(async () => {
+    if (!projectId || !user) return;
+    await loadPage(true);
+  }, [projectId, user, loadPage]);
 
   // Update unread count
   const updateUnreadCount = useCallback(async () => {
@@ -215,11 +198,11 @@ export function useAppNotificationsActions(): UseAppNotificationsActionsValues {
   }, [dispatch, projectId, user, notifications, unreadCount, markAllNotificationsAsReadMutation]);
 
   return {
+    error,
     loadMore,
+    refetch,
     markNotificationAsRead,
     markAllNotificationsAsRead,
-    resetAppNotifications,
-    fetchMoreNotifications, // Internal action
     updateUnreadCount, // Internal action
   };
 }

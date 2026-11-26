@@ -1,7 +1,7 @@
 /**
  * NotificationList - Tailwind Variant
  *
- * Notification list with infinite scroll, loading and empty states.
+ * Notification list with infinite scroll, loading, error and empty states.
  * Uses Tailwind CSS for styling with dark mode support.
  *
  * TAILWIND CLASSES USED:
@@ -32,6 +32,8 @@ import { cn } from "~shared/react/cn";
 interface NotificationListProps {
   notifications: AppNotification.PotentiallyPopulatedUnifiedAppNotification[];
   loading: boolean;
+  /** The last load failure; "Try again" calls `onLoadMore`, which retries it. */
+  error: Error | null;
   hasMore: boolean;
   onLoadMore: () => void;
   onNotificationClick?: (
@@ -74,6 +76,26 @@ function EmptyState() {
   );
 }
 
+function ErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center p-8 text-center">
+      <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2 m-0">
+        Couldn't load notifications
+      </h3>
+      <button
+        onClick={onRetry}
+        className={cn(
+          "bg-transparent border-none p-2 text-sm text-gray-600 dark:text-gray-400",
+          "cursor-pointer rounded transition-colors",
+          "hover:text-gray-900 dark:hover:text-gray-100"
+        )}
+      >
+        Try again
+      </button>
+    </div>
+  );
+}
+
 function LoadingState() {
   return (
     <div className="flex flex-col gap-1">
@@ -87,6 +109,7 @@ function LoadingState() {
 function NotificationList({
   notifications,
   loading,
+  error,
   hasMore,
   onLoadMore,
   onNotificationClick,
@@ -94,6 +117,11 @@ function NotificationList({
   // Show loading state for initial load
   if (loading && notifications.length === 0) {
     return <LoadingState />;
+  }
+
+  // A failed first page: offer a retry, not the empty state
+  if (!loading && error && notifications.length === 0) {
+    return <ErrorState onRetry={onLoadMore} />;
   }
 
   // Show empty state when no notifications
@@ -146,7 +174,9 @@ function NotificationList({
                     "hover:text-gray-900 dark:hover:text-gray-100"
                   )}
                 >
-                  Load more notifications
+                  {error
+                    ? "Couldn't load notifications. Try again"
+                    : "Load more notifications"}
                 </button>
               )}
             </div>

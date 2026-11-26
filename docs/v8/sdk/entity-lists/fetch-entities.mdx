@@ -126,7 +126,7 @@ Choose it based on how often new entities arrive:
 
 ## Infinite Scroll
 
-Call `loadMore()` to append the next page. The hook tracks pagination state internally.
+Call `loadMore()` to append the next page. The hook tracks pagination state internally. A failed load lands in `error` and keeps `hasMore` `true`, so the same `loadMore()` retries it; `refetch()` reloads page 1 with the list's stored filters, sort and config.
 
 ```tsx
 <button onClick={loadMore} disabled={loading || !hasMore}>
@@ -134,7 +134,18 @@ Call `loadMore()` to append the next page. The hook tracks pagination state inte
 </button>
 ```
 
-`hasMore` reflects the value returned by the server, based on the total item count.
+`hasMore` reflects the value returned by the server, based on the total item count, and is also `true` after a failed load. When you load the next page automatically (on scroll), skip it while `error` is set and let the user retry from a button, so a failing request isn't repeated in a loop:
+
+```tsx
+const { loadMore, hasMore, loading, error } = useEntityList({ listId: "my-feed" });
+
+// Called by your scroll / in-view trigger
+const onReachEnd = () => {
+  if (hasMore && !loading && !error) loadMore();
+};
+
+{error && <button onClick={() => loadMore()}>Try again</button>}
+```
 
 ## Creating Entities Within a List
 

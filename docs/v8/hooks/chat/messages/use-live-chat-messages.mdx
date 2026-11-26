@@ -18,14 +18,14 @@ The live, canonical view of a conversation's messages. Results are stored in Red
 import { useLiveChatMessages } from "@sublay/react-js";
 
 function MessageList({ conversationId }: { conversationId: string }) {
-  const { messages, loading, hasMore, loadOlder } = useLiveChatMessages({
+  const { messages, loading, hasMore, loadMore } = useLiveChatMessages({
     conversationId,
   });
 
   return (
     <div>
       {hasMore && (
-        <button onClick={loadOlder} disabled={loading}>
+        <button onClick={loadMore} disabled={loading}>
           Load older messages
         </button>
       )}
@@ -53,7 +53,7 @@ function MessageList({ conversationId }: { conversationId: string }) {
 </ParamField>
 
 <ParamField body="parentMessageId" type="string | null">
-  When provided, loads thread replies for this parent message ID instead of the main stream. Replies are sorted ascending (oldest first); `loadOlder` fetches newer replies.
+  When provided, loads thread replies for this parent message ID instead of the main stream. Replies are sorted ascending (oldest first); `loadMore` fetches newer replies.
 </ParamField>
 
 <ParamField body="limit" type="number">
@@ -76,14 +76,21 @@ function MessageList({ conversationId }: { conversationId: string }) {
   `true` while a fetch is in progress.
 </ResponseField>
 
-<ResponseField name="hasMore" type="boolean">
-  `true` if there are more messages to load.
+<ResponseField name="error" type="Error | null">
+  The last load failure, or `null`. Cleared when the next load starts; `loadMore()` retries it. Shared by every mounted hook showing the same conversation (or the same thread).
 </ResponseField>
 
-<ResponseField name="loadOlder" type="() => Promise<void>">
-  For the main stream: fetches messages older than the oldest currently loaded.
-  For threads: fetches the next page of newer replies.
-  No-ops if `loading` is `true` or `hasMore` is `false`.
+<ResponseField name="hasMore" type="boolean">
+  `true` while `loadMore()` has something to fetch: a next page, or a load that failed.
+</ResponseField>
+
+<ResponseField name="loadMore" type="() => Promise<void>">
+  Loads the next page in reading order. For the main stream: messages older than the oldest currently loaded. For threads (`parentMessageId` set): the next page of newer replies.
+  Retries the load that failed instead, when there is one (a failed first page included). Does nothing while a page is loading or when there is nothing more. Never rejects: a failure lands in `error`.
+</ResponseField>
+
+<ResponseField name="refetch" type="() => Promise<void>">
+  Reloads from the first page. For the main stream: the latest page replaces the loaded messages, keeping optimistic messages and newer live ones; a message on the page keeps the `files` / `grants` another hook on the conversation fetched for it, except what the server hides on a deleted or removed message: its files (its author still sees the files of their own removed message) and a removed message's grants. For threads: starts over from the thread's first reply. Never rejects: a failure lands in `error`.
 </ResponseField>
 
 ## Notes

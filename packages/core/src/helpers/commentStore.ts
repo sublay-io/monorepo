@@ -194,6 +194,128 @@ export function applyRepliesPage(
 }
 
 /**
+ * Carry over what a top-level refetch should keep, from `previous` (the store
+ * before) into `next` (the fresh store with the new first page in it):
+ *
+ * - the reply pages loaded under a comment that is still listed: its loaded
+ *   replies (and everything under them), cursor and `hasMore`, when the new
+ *   page didn't bring its replies itself;
+ * - the viewer's own new comments, at any level, wherever their parent is
+ *   still in the store (or at the top level), with everything under them,
+ *   linked under that parent again.
+ *
+ * Comments `next` already holds keep `next`'s copy.
+ */
+export function carryOverOnRefetch(
+  previous: CommentStore,
+  next: CommentStore,
+): CommentStore {
+  const nodes: Record<string, CommentNode> = { ...next.nodes };
+  const rootIds = [...next.rootIds];
+  const copySubtree = (rootId: string) => {
+    const stack = [rootId];
+    while (stack.length) {
+      const id = stack.pop()!;
+      const node = previous.nodes[id];
+      if (!node || nodes[id]) continue;
+      nodes[id] = node;
+      stack.push(...node.childIds);
+    }
+  };
+  const link = (parentId: string, childId: string) => {
+    const parent = nodes[parentId];
+    if (parent && !parent.childIds.includes(childId)) {
+      nodes[parentId] = { ...parent, childIds: [...parent.childIds, childId] };
+    }
+  };
+
+  // Reply pages loaded under comments that are still listed.
+  for (const id of Object.keys(next.nodes)) {
+    const before = previous.nodes[id];
+    const now = nodes[id];
+    if (!before?.repliesLoaded || now.repliesLoaded) continue;
+    nodes[id] = {
+      ...now,
+      repliesLoaded: true,
+      repliesCursor: before.repliesCursor,
+      repliesHasMore: before.repliesHasMore,
+    };
+    for (const childId of before.childIds) {
+      copySubtree(childId);
+      link(id, childId);
+    }
+  }
+
+  // The viewer's new comments whose parent is still there. Repeated until
+  // nothing changes, so a new reply under another carried comment finds it.
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const [id, node] of Object.entries(previous.nodes)) {
+      if (!node.new || nodes[id]) continue;
+      const parentId = node.comment.parentCommentId;
+      if (parentId && !nodes[parentId]) continue;
+      copySubtree(id);
+      if (parentId) link(parentId, id);
+      else if (!rootIds.includes(id)) rootIds.push(id);
+      changed = true;
+    }
+  }
+  // A new comment already carried (inside a subtree) is linked to its parent.
+  for (const [id, node] of Object.entries(nodes)) {
+    const parentId = node.comment.parentCommentId;
+    if (node.new && parentId && nodes[parentId]) link(parentId, id);
+    else if (node.new && !parentId && !rootIds.includes(id)) rootIds.push(id);
+  }
+
+  return { nodes, rootIds };
+}
+
+/**
+ * Store a comment's first page of replies again (a refetch): the replies
+ * loaded before are unlinked from the parent and dropped from the store with
+ * everything under them — except the viewer's own new replies and the
+ * `pinned` ids (the highlighted comment and its parent) — and the page is
+ * applied as by `applyRepliesPage`. A kept new reply whose parent the page
+ * brought again is linked under it again.
+ */
+export function replaceRepliesPage(
+  store: CommentStore,
+  parentId: string,
+  page: CursorPaginatedResponse<Comment>,
+  pinned: ReadonlySet<string> = new Set(),
+): CommentStore {
+  const parent = store.nodes[parentId];
+  if (!parent) return applyRepliesPage(store, parentId, page);
+  const keep = (id: string) => !!store.nodes[id]?.new || pinned.has(id);
+  const nodes = {
+    ...store.nodes,
+    [parentId]: { ...parent, childIds: parent.childIds.filter(keep) },
+  };
+  const stack = parent.childIds.filter((id) => !keep(id));
+  while (stack.length) {
+    const id = stack.pop()!;
+    const node = nodes[id];
+    if (!node || keep(id)) continue;
+    delete nodes[id];
+    stack.push(...node.childIds);
+  }
+  const next = applyRepliesPage({ ...store, nodes }, parentId, page);
+  // A kept new reply under a reply the page brought again (a fresh node,
+  // with only the page's own children) is linked under it once more.
+  let relinked: Record<string, CommentNode> | null = null;
+  for (const [id, node] of Object.entries(next.nodes)) {
+    const parentOf = node.comment.parentCommentId;
+    if (!node.new || !parentOf) continue;
+    const current = (relinked ?? next.nodes)[parentOf];
+    if (!current || current.childIds.includes(id)) continue;
+    relinked = relinked ?? { ...next.nodes };
+    relinked[parentOf] = { ...current, childIds: [...current.childIds, id] };
+  }
+  return relinked ? { ...next, nodes: relinked } : next;
+}
+
+/**
  * Insert a deep-linked comment: the parent first, then the target. The parent
  * lists the target as a child and — unless its replies were already loaded —
  * stays "not loaded", so it has more to load exactly when its `repliesCount`

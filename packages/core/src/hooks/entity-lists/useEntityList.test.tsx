@@ -483,6 +483,7 @@ describe("useEntityList — the list contract", () => {
   });
 
   it("doesn't warn outside development", async () => {
+    vi.stubEnv("NODE_ENV", "production");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     fetchHandle.fetchMock.mockResolvedValueOnce(paginated([], false));
     const { result, unmount } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
@@ -493,6 +494,7 @@ describe("useEntityList — the list contract", () => {
     expect(warn).not.toHaveBeenCalledWith(expect.stringContaining("fetchEntities takes"));
     await waitFor(() => expect(result.current.loading).toBe(false));
     unmount();
+    vi.unstubAllEnvs();
   });
 
   it("fetchEntities() with no argument loads the default first page", async () => {

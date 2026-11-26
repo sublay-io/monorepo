@@ -1078,7 +1078,7 @@ describe("chatSlice — replaceMessages", () => {
     expect(state.messages[CONV].items[0].files).toEqual([]);
   });
 
-  describe("a deleted or removed message never keeps its held files and grants", () => {
+  describe("a deleted or removed message keeps only the held files and grants the server would show", () => {
     const files = [{ id: "file-1" }] as any;
     const grants = { total: 2 } as any;
     const held = () =>
@@ -1101,27 +1101,34 @@ describe("chatSlice — replaceMessages", () => {
       }) as any;
       return rest;
     };
-    const cases: Array<[string, Record<string, unknown>]> = [
-      ["deleted", { userDeletedAt: "2024-01-02T00:00:00.000Z" }],
-      ["removed", { moderationStatus: "removed" }],
+    // What the server blanks: files on a deleted message and on a removed one
+    // shown to someone other than its author (sender blanked); grants on any
+    // removed message. The author sees their own removed message whole.
+    const cases: Array<[string, Record<string, unknown>, { files: boolean; grants: boolean }]> = [
+      ["deleted", { userDeletedAt: "2024-01-02T00:00:00.000Z" }, { files: false, grants: true }],
+      ["removed, seen by others", { moderationStatus: "removed", userId: null, user: null }, { files: false, grants: false }],
+      ["removed, seen by its author", { moderationStatus: "removed" }, { files: true, grants: false }],
     ];
 
-    for (const [label, extra] of cases) {
+    const check = (m: any, keeps: { files: boolean; grants: boolean }) => {
+      if (keeps.files) expect(m.files).toEqual(files);
+      else expect(m.files).toBeUndefined();
+      if (keeps.grants) expect(m.grants).toEqual(grants);
+      else expect(m.grants).toBeUndefined();
+    };
+
+    for (const [label, extra, keeps] of cases) {
       it(`replaceMessages: ${label}`, () => {
         const state = reducer(
           held(),
           replaceMessages({ conversationId: CONV, messages: [placeholder(extra)], hasMore: false }),
         );
-        const [m] = state.messages[CONV].items;
-        expect(m.files).toBeUndefined();
-        expect(m.grants).toBeUndefined();
+        check(state.messages[CONV].items[0], keeps);
       });
 
       it(`upsertMessage (open / catch-up merge): ${label}`, () => {
         const state = reducer(held(), upsertMessage(placeholder(extra)));
-        const [m] = state.messages[CONV].items;
-        expect(m.files).toBeUndefined();
-        expect(m.grants).toBeUndefined();
+        check(state.messages[CONV].items[0], keeps);
       });
     }
 

@@ -296,11 +296,22 @@ function withModerationDetails<T extends Record<string, any>>(
 const INCLUDE_ONLY_FIELDS = ["files", "grants"] as const;
 
 /**
- * A deleted or removed message: the server blanks its attachments and grants
- * (when it sends them), so a held copy's must never be kept on it.
+ * Whether a held copy's `files` / `grants` must not be kept on this message,
+ * following what the server blanks:
+ * - `files`: on a deleted message (for everyone), and on a removed message
+ *   shown to someone other than its author (the server blanks its sender,
+ *   `userId: null`); the author still sees their own removed message whole.
+ * - `grants`: on any removed message (hidden from everyone, its author
+ *   included).
  */
-const isPlaceholder = (message: Partial<ChatMessage>) =>
-  !!message.userDeletedAt || message.moderationStatus === "removed";
+const dropsHeldField = (
+  message: Partial<ChatMessage>,
+  key: (typeof INCLUDE_ONLY_FIELDS)[number],
+): boolean => {
+  const removed = message.moderationStatus === "removed";
+  if (key === "grants") return removed;
+  return !!message.userDeletedAt || (removed && message.userId == null);
+};
 
 function upsertInto(
   items: ChatMessage[],
@@ -320,11 +331,9 @@ function upsertInto(
     }
     if (!message.id.startsWith("temp-")) delete merged.sendFailed;
     // A placeholder fetched without an `include` doesn't keep the held
-    // copy's files or grants.
-    if (isPlaceholder(merged)) {
-      for (const key of INCLUDE_ONLY_FIELDS) {
-        if (!(key in message)) delete merged[key];
-      }
+    // copy's files or grants (see `dropsHeldField`).
+    for (const key of INCLUDE_ONLY_FIELDS) {
+      if (!(key in message) && dropsHeldField(merged, key)) delete merged[key];
     }
     return merged;
   };
@@ -727,8 +736,8 @@ const chatSlice = createSlice({
      * Kept: optimistic `temp-` messages, and messages newer than the page's
      * newest (live ones that landed while the page was in flight). A message
      * on the page keeps its held `files` / `grants` when the page's copy has
-     * none (fetched without that `include`), unless the page shows it deleted
-     * or removed.
+     * none (fetched without that `include`), except where the server blanks
+     * them (`dropsHeldField`).
      */
     replaceMessages(
       state,
@@ -759,9 +768,11 @@ const chatSlice = createSlice({
       for (const m of messages) {
         const prev = heldById.get(m.id);
         const kept: Partial<ChatMessage> = {};
-        if (prev && !isPlaceholder(m)) {
+        if (prev) {
           for (const key of INCLUDE_ONLY_FIELDS) {
-            if (!(key in m) && key in prev) (kept as any)[key] = prev[key];
+            if (!(key in m) && key in prev && !dropsHeldField(m, key)) {
+              (kept as any)[key] = prev[key];
+            }
           }
         }
         upsertInto(bucket.items, { ...m, ...kept });

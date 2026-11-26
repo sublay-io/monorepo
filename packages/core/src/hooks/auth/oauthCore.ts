@@ -2,7 +2,7 @@ import type { AppDispatch } from "../../store/types";
 import { setTokens, setInitialized } from "../../store/slices/authSlice";
 import { completeOAuthSignInThunk } from "../../store/slices/authThunks";
 import { getAuthorizedTokenForAccount } from "../../config/authGate";
-import { SublayError, toSublayError } from "../../errors/SublayError";
+import { SublayError, toSublayError, isPlainObject } from "../../errors/SublayError";
 
 /**
  * Platform-agnostic OAuth helpers shared by the web (`@sublay/react-js`) and
@@ -98,6 +98,7 @@ export async function requestOAuthAuthorizationUrl({
       code: text(data?.code),
       param: text(data?.param),
       status: response.status,
+      body: isPlainObject(data) ? data : undefined,
     });
   }
 

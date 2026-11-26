@@ -244,7 +244,12 @@ describe("requestOAuthAuthorizationUrl", () => {
       redirectAfterAuth: "https://app.example.com/done",
     }).catch((e: unknown) => e);
     expect(err).toBeInstanceOf(SublayError);
-    expect(err).toMatchObject({ code: "oauth/invalid-provider", param: "provider", status: 400 });
+    expect(err).toMatchObject({
+      code: "oauth/invalid-provider",
+      param: "provider",
+      status: 400,
+      body: { error: "Unsupported provider", code: "oauth/invalid-provider", param: "provider" },
+    });
   });
 });
 

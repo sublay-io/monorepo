@@ -249,6 +249,7 @@ describe("useSwitchAccount", () => {
     expect(result.current.error).toBeInstanceOf(SublayError);
     expect(result.current.error?.message).toBe("Refresh token revoked");
     expect(result.current.error?.status).toBe(403);
+    expect(result.current.error?.body).toEqual({ error: "Refresh token revoked" });
 
     const state = store.getState();
     // Still signed in as user-1: selection, tokens, gate and cached feature

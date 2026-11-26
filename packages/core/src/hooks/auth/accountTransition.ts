@@ -126,7 +126,13 @@ export class AccountTransitionError extends SublayError {
      * The server's `code` / `param` / `status` when the failure was a server
      * answer, and the original error as `cause`.
      */
-    details: { code?: string; status?: number; param?: string; cause?: unknown } = {}
+    details: {
+      code?: string;
+      status?: number;
+      param?: string;
+      body?: Record<string, unknown>;
+      cause?: unknown;
+    } = {}
   ) {
     super(message, details);
     this.name = "AccountTransitionError";
@@ -257,6 +263,7 @@ export async function activateStoredAccount({
       code: failure.code,
       status: failure.status,
       param: failure.param,
+      body: failure.body,
       cause: error,
     });
   }

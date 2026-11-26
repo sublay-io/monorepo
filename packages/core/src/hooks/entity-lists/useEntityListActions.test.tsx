@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { act, cleanup } from "@testing-library/react";
 
 import {
@@ -16,6 +16,7 @@ import {
   selectEntityListHasMore,
   selectEntityList,
 } from "../../store/slices/entityListsSlice";
+import { SuspendedError, isSuspendedError } from "../../errors/SuspendedError";
 
 let fetchHandle: FetchMockHandle;
 
@@ -162,6 +163,27 @@ describe("useEntityListActions", () => {
 
       expect(created?.id).toBe("e1");
       expect(selectEntityListEntities(store.getState(), "feed").map((e) => e.id)).toEqual(["e1"]);
+    });
+
+    it("rejects a suspended user's create with a real SuspendedError (the RTK Query path)", async () => {
+      fetchHandle.fetchMock.mockResolvedValueOnce(
+        jsonResponse(
+          { error: "Your account is suspended.", code: "user/suspended", reason: "spam", endDate: null },
+          403,
+        ),
+      );
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const { result, store } = renderHookWithStore(() => useEntityListActions(), {
+        projectId: "test-project",
+      });
+      act(() => store.dispatch(initializeList({ listId: "feed" })));
+
+      const err = await result.current.createEntity({ listId: "feed", title: "Hi" }).catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(SuspendedError);
+      expect(isSuspendedError(err)).toBe(true);
+      expect(err).toMatchObject({ reason: "spam", endDate: null, status: 403, code: "user/suspended" });
+      expect((err as SuspendedError).body).toMatchObject({ reason: "spam" });
     });
 
     it("inserts last when requested", async () => {

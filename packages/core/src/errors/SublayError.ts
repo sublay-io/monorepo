@@ -49,6 +49,113 @@ export class SublayError extends Error {
   }
 }
 
+/**
+ * Thrown when a write is blocked because the acting user is suspended.
+ *
+ * The server rejects participation/content writes for a suspended user with
+ * `403` + body `{ error, code: "user/suspended", reason, endDate }`
+ * (`endDate: null` = indefinite). The response interceptor
+ * (`config/useAxiosPrivate.ts`) discriminates that response on `code` BEFORE
+ * the generic 403 → token-refresh branch and rejects with this typed error, so
+ * a blocked write neither triggers a spurious token refresh nor is silently
+ * retried. `toSublayError` builds the same error from any `user/suspended`
+ * response (the RTK Query paths included), so app callers can `catch` it and
+ * branch on the suspension.
+ *
+ * Defined here rather than in `SuspendedError.ts` (which re-exports it) so
+ * `toSublayError` can build it without a circular import.
+ */
+export const SUSPENDED_ERROR_CODE = "user/suspended";
+
+/**
+ * A {@link SublayError} with `code: "user/suspended"` and `status: 403`, plus
+ * the suspension's `reason` and `endDate`.
+ */
+export class SuspendedError extends SublayError {
+  /** Always `"user/suspended"` — matches the server's response `code`. */
+  readonly code: typeof SUSPENDED_ERROR_CODE;
+  /** Human-readable reason for the suspension, if the moderator provided one. */
+  readonly reason: string | null;
+  /** ISO end date of the suspension, or `null` for an indefinite suspension. */
+  readonly endDate: string | null;
+
+  constructor({
+    message,
+    reason,
+    endDate,
+    body,
+    cause,
+  }: {
+    message?: string;
+    reason: string | null;
+    endDate: string | null;
+    /** The server's JSON error body, when it answered with one. */
+    body?: Record<string, unknown>;
+    /** The original error (the HTTP client's 403). */
+    cause?: unknown;
+  }) {
+    super(message ?? "This account is suspended.", {
+      code: SUSPENDED_ERROR_CODE,
+      status: 403,
+      body,
+      cause,
+    });
+    this.name = "SuspendedError";
+    this.code = SUSPENDED_ERROR_CODE;
+    this.reason = reason;
+    this.endDate = endDate;
+
+    // Restore prototype chain for `instanceof` across transpile targets.
+    Object.setPrototypeOf(this, SuspendedError.prototype);
+  }
+}
+
+const stringOrNull = (value: unknown): string | null =>
+  typeof value === "string" ? value : null;
+
+/**
+ * Narrowing helper so callers don't have to rely on `instanceof` alone (a
+ * second copy of the SDK has its own class). Duck-typed: the suspension code
+ * plus the `reason` and `endDate` fields it narrows to.
+ */
+export function isSuspendedError(err: unknown): err is SuspendedError {
+  if (err instanceof SuspendedError) return true;
+  if (typeof err !== "object" || err === null) return false;
+  const candidate = err as { code?: unknown; reason?: unknown; endDate?: unknown };
+  return (
+    candidate.code === SUSPENDED_ERROR_CODE &&
+    (typeof candidate.reason === "string" || candidate.reason === null) &&
+    (typeof candidate.endDate === "string" || candidate.endDate === null)
+  );
+}
+
+// The `name`s of `SublayError` and the SDK's subclasses of it.
+const SUBLAY_ERROR_NAMES = new Set([
+  "SublayError",
+  "SuspendedError",
+  "AccountTransitionError",
+  "AccountTokenMintError",
+  "AccountStorageMultiProjectError",
+  "AccountStorageProjectMismatchError",
+]);
+
+/**
+ * Whether `err` is a `SublayError`. Duck-typed as well as `instanceof`, so it
+ * also holds for one made by another copy of the SDK (two installed versions)
+ * and for one that went through a serializer (a Redux thunk's
+ * `{ name, message, code }`), which `instanceof` misses.
+ */
+export function isSublayError(err: unknown): err is SublayError {
+  if (err instanceof SublayError) return true;
+  if (typeof err !== "object" || err === null) return false;
+  const candidate = err as { name?: unknown; message?: unknown };
+  return (
+    typeof candidate.message === "string" &&
+    typeof candidate.name === "string" &&
+    SUBLAY_ERROR_NAMES.has(candidate.name)
+  );
+}
+
 const UNKNOWN_ERROR_MESSAGE = "Unknown error";
 
 const ABORT_NAMES = new Set(["AbortError", "CanceledError"]);
@@ -110,6 +217,15 @@ export function toSublayError(err: unknown): SublayError {
   const http = readHttpFailure(err);
   if (http) {
     const body = isPlainObject(http.body) ? http.body : null;
+    if (body?.code === SUSPENDED_ERROR_CODE) {
+      return new SuspendedError({
+        message: nonEmptyString(body.error),
+        reason: stringOrNull(body.reason),
+        endDate: stringOrNull(body.endDate),
+        body,
+        cause: err,
+      });
+    }
     const message =
       nonEmptyString(body?.error) ??
       nonEmptyString((err as { message?: unknown }).message) ??
@@ -125,6 +241,40 @@ export function toSublayError(err: unknown): SublayError {
 
   if (typeof err === "string") {
     return new SublayError(err || UNKNOWN_ERROR_MESSAGE, { cause: err });
+  }
+
+  if (isSublayError(err)) {
+    // A SublayError this class didn't make (another copy of the SDK, or one a
+    // serializer flattened): keep its fields.
+    const other = err as {
+      name: string;
+      message: string;
+      code?: unknown;
+      status?: unknown;
+      param?: unknown;
+      body?: unknown;
+      reason?: unknown;
+      endDate?: unknown;
+    };
+    const body = isPlainObject(other.body) ? other.body : undefined;
+    if (isSuspendedError(err)) {
+      return new SuspendedError({
+        message: other.message,
+        reason: stringOrNull(other.reason),
+        endDate: stringOrNull(other.endDate),
+        body,
+        cause: err,
+      });
+    }
+    const error = new SublayError(other.message || UNKNOWN_ERROR_MESSAGE, {
+      code: nonEmptyString(other.code),
+      status: typeof other.status === "number" ? other.status : undefined,
+      param: nonEmptyString(other.param),
+      body,
+      cause: err,
+    });
+    error.name = other.name;
+    return error;
   }
 
   if (typeof err === "object" && err !== null) {

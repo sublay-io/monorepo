@@ -121,7 +121,7 @@ async function submit() {
 }
 ```
 
-Use `isSuspendedError(err)` (or `err instanceof SuspendedError`) to narrow. Both `SuspendedError` and `isSuspendedError` are exported from `@sublay/core`. `SuspendedError` is a [`SublayError`](/v8/hooks/overview#sublayerror) with `code: "user/suspended"` and `status: 403`, so a hook that exposes `error` shows it there too, and `error.code === "user/suspended"` identifies it.
+Use `isSuspendedError(err)` (or `err instanceof SuspendedError`) to narrow. Both `SuspendedError` and `isSuspendedError` are exported from `@sublay/core`. `SuspendedError` is a [`SublayError`](/v8/hooks/overview#sublayerror) with `code: "user/suspended"` and `status: 403`, so a hook that exposes `error` shows it there too, and `error.code === "user/suspended"` identifies it. Every SDK call refused for a suspension rejects with it, `reason` and `endDate` included, and its `body` is the server's response.
 
 ## Dashboard flow
 

@@ -5,7 +5,7 @@ export {
   getSublayLogLevel,
   type SublayLogLevel,
 } from "./utils/handleError";
-export { SublayError, toSublayError } from "./errors/SublayError";
+export { SublayError, toSublayError, isSublayError } from "./errors/SublayError";
 export {
   SuspendedError,
   isSuspendedError,

@@ -15,6 +15,7 @@ import {
 } from "../test-utils";
 import { armAuthGate, syncAuthGate, setAuthGateRefresher } from "./authGate";
 import { SublayError } from "../errors/SublayError";
+import { SuspendedError } from "../errors/SuspendedError";
 
 const mockedUseAuth = vi.mocked(useAuth);
 
@@ -114,6 +115,22 @@ describe("useAxiosPrivate", () => {
     expect(r1.data).toEqual({ ok: true });
     expect(r2.data).toEqual({ ok: true });
     expect(requestNewAccessToken).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects a user/suspended 403 with a SuspendedError carrying the body, without refreshing", async () => {
+    const requestNewAccessToken = vi.fn();
+    mockedUseAuth.mockReturnValue({ accessToken: "token-a", requestNewAccessToken } as never);
+    const sent = { error: "Suspended.", code: "user/suspended", reason: "spam", endDate: null };
+    stubAxiosAdapter(axiosPrivate, async (config) => {
+      throw axiosErrorWithStatus(403, sent, config);
+    });
+
+    renderHook(() => useAxiosPrivate());
+
+    const err = await axiosPrivate.post("/a", {}).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(SuspendedError);
+    expect(err).toMatchObject({ reason: "spam", endDate: null, body: sent });
+    expect(requestNewAccessToken).not.toHaveBeenCalled();
   });
 
   it("does not refresh on a coded 403 (semantic rejection) and rejects as-is", async () => {

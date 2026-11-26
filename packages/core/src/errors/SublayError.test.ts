@@ -3,11 +3,12 @@ import { AxiosError, AxiosHeaders } from "axios";
 
 import {
   SublayError,
+  isSublayError,
   toSublayError,
   toSublayErrorRecord,
   fromSublayErrorRecord,
 } from "./SublayError";
-import { SuspendedError } from "./SuspendedError";
+import { SuspendedError, isSuspendedError } from "./SuspendedError";
 import { AccountTransitionError } from "../hooks/auth/accountTransition";
 
 function axiosFailure(status: number, data: unknown): AxiosError {
@@ -189,5 +190,92 @@ describe("SublayError records", () => {
 
     expect(error).toBeInstanceOf(SublayError);
     expect(error).toMatchObject({ message: "boom", code: "a/b", status: 500 });
+  });
+});
+
+describe("suspensions", () => {
+  const suspended = {
+    error: "Your account is suspended.",
+    code: "user/suspended",
+    reason: "spam",
+    endDate: "2030-01-01T00:00:00.000Z",
+  };
+
+  it("an axios user/suspended response becomes a real SuspendedError", () => {
+    const original = axiosFailure(403, suspended);
+
+    const error = toSublayError(original);
+
+    expect(error).toBeInstanceOf(SuspendedError);
+    expect(error).toMatchObject({
+      message: "Your account is suspended.",
+      code: "user/suspended",
+      status: 403,
+      reason: "spam",
+      endDate: "2030-01-01T00:00:00.000Z",
+      body: suspended,
+    });
+    expect(error.cause).toBe(original);
+    expect(isSuspendedError(error)).toBe(true);
+  });
+
+  it("an RTK Query user/suspended response becomes a real SuspendedError", () => {
+    const error = toSublayError({ status: 403, data: { ...suspended, endDate: null } });
+
+    expect(error).toBeInstanceOf(SuspendedError);
+    expect((error as SuspendedError).reason).toBe("spam");
+    expect((error as SuspendedError).endDate).toBeNull();
+  });
+
+  it("isSuspendedError narrows only to something with reason and endDate", () => {
+    expect(isSuspendedError({ code: "user/suspended" })).toBe(false);
+    expect(isSuspendedError({ code: "user/suspended", endDate: null })).toBe(false);
+    expect(isSuspendedError({ code: "user/suspended", reason: null })).toBe(false);
+    expect(isSuspendedError({ code: "user/suspended", reason: null, endDate: null })).toBe(true);
+    expect(isSuspendedError(new SublayError("x", { code: "user/suspended" }))).toBe(false);
+  });
+});
+
+describe("isSublayError", () => {
+  it("holds for a SublayError, a subclass, and one from another copy of the SDK", () => {
+    expect(isSublayError(new SublayError("x"))).toBe(true);
+    expect(isSublayError(new SuspendedError({ reason: null, endDate: null }))).toBe(true);
+    expect(isSublayError({ name: "SublayError", message: "x", code: "a/b" })).toBe(true);
+    expect(isSublayError(new Error("x"))).toBe(false);
+    expect(isSublayError({ name: "SublayError" })).toBe(false);
+    expect(isSublayError("SublayError")).toBe(false);
+  });
+
+  it("toSublayError keeps the fields of a SublayError-shaped object", () => {
+    const other = {
+      name: "SublayError",
+      message: "Not allowed.",
+      code: "space/forbidden",
+      status: 403,
+      param: "spaceId",
+      body: { error: "Not allowed.", code: "space/forbidden" },
+    };
+
+    const error = toSublayError(other);
+
+    expect(error).toBeInstanceOf(SublayError);
+    expect(error).toMatchObject(other);
+    expect(error.cause).toBe(other);
+  });
+
+  it("keeps the code of a serialized thunk error ({ name, message, code })", () => {
+    const error = toSublayError({ name: "AccountTransitionError", message: "Gone.", code: "auth/x" });
+
+    expect(error.code).toBe("auth/x");
+    expect(error.name).toBe("AccountTransitionError");
+  });
+
+  it("doesn't take the code of an error that isn't a SublayError", () => {
+    const network = Object.assign(new Error("Network Error"), { code: "ERR_NETWORK", status: 0 });
+
+    const error = toSublayError(network);
+
+    expect(error.code).toBeUndefined();
+    expect(error.status).toBeUndefined();
   });
 });

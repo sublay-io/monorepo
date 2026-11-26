@@ -440,3 +440,142 @@ describe("useEntityList", () => {
     expect(third.has("topCommentsSortByReaction")).toBe(false);
   });
 });
+
+describe("useEntityList — the list contract", () => {
+  const pageParam = (i: number) => new URL(fetchHandle.calls()[i].url).searchParams;
+
+  it("drops a page that lands after fetchEntities started a new query", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "a1" }], true));
+    const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+    act(() => result.current.fetchEntities({}));
+    await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["a1"]));
+
+    let releaseStale!: (r: Response) => void;
+    fetchHandle.fetchMock.mockImplementationOnce(
+      () => new Promise<Response>((resolve) => { releaseStale = resolve; }),
+    );
+    act(() => {
+      result.current.loadMore();
+    });
+    await waitFor(() => expect(fetchHandle.calls()).toHaveLength(2));
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "b1" }], false));
+    act(() =>
+      result.current.fetchEntities({ userId: "user-b" }, undefined, undefined, {
+        fetchImmediately: true,
+      }),
+    );
+    await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["b1"]));
+
+    await act(async () => {
+      releaseStale(await paginated([{ id: "a2" }], true));
+      await new Promise((r) => setTimeout(r, 20));
+    });
+    expect(result.current.entities.map((e) => e.id)).toEqual(["b1"]);
+    expect(result.current.hasMore).toBe(false);
+    expect(result.current.loading).toBe(false);
+    expect(pageParam(2).get("userId")).toBe("user-b");
+    expect(pageParam(2).get("page")).toBe("1");
+  });
+
+  it("a failed first page sets error and loadMore retries page 1", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({ message: "boom" }, 500));
+    const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+    act(() => result.current.fetchEntities({}));
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+    expect(result.current.loading).toBe(false);
+    expect(result.current.hasMore).toBe(true);
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e1" }], true));
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    expect(result.current.error).toBeNull();
+    expect(result.current.entities.map((e) => e.id)).toEqual(["e1"]);
+    expect(pageParam(1).get("page")).toBe("1");
+
+    // And the page after that is page 2, not 3.
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e2" }], false));
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    expect(pageParam(2).get("page")).toBe("2");
+    vi.restoreAllMocks();
+  });
+
+  it("two hooks on the same listId calling loadMore in the same tick load one page", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e1" }], true));
+    const { result } = renderHookWithStore(
+      () => ({
+        a: useEntityList({ listId: "feed" }),
+        b: useEntityList({ listId: "feed" }),
+      }),
+      { projectId: "test-project" },
+    );
+    act(() => result.current.a.fetchEntities({}));
+    await waitFor(() => expect(result.current.b.entities.map((e) => e.id)).toEqual(["e1"]));
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e2" }], true));
+    await act(async () => {
+      await Promise.all([result.current.a.loadMore(), result.current.b.loadMore()]);
+    });
+    expect(fetchHandle.calls()).toHaveLength(2);
+    expect(result.current.a.entities.map((e) => e.id)).toEqual(["e1", "e2"]);
+    expect(pageParam(1).get("page")).toBe("2");
+  });
+
+  it("refetch reloads page 1 with the stored filters and config", async () => {
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e1" }], true));
+    const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+    act(() =>
+      result.current.fetchEntities(
+        { userId: "user-1" },
+        { sortBy: "createdAt" },
+        { limit: 5, sourceId: "src" },
+        { fetchImmediately: true },
+      ),
+    );
+    await waitFor(() => expect(result.current.entities).toHaveLength(1));
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e2" }], true));
+    await act(async () => {
+      await result.current.loadMore();
+    });
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "fresh" }], false));
+    await act(async () => {
+      await result.current.refetch();
+    });
+    expect(result.current.entities.map((e) => e.id)).toEqual(["fresh"]);
+    const params = pageParam(2);
+    expect(params.get("page")).toBe("1");
+    expect(params.get("userId")).toBe("user-1");
+    expect(params.get("sortBy")).toBe("createdAt");
+    expect(params.get("limit")).toBe("5");
+    expect(params.get("sourceId")).toBe("src");
+  });
+
+  it("loadMore and refetch never reject", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    fetchHandle.fetchMock.mockResolvedValueOnce(paginated([{ id: "e1" }], true));
+    const { result } = renderHookWithStore(() => useEntityList({ listId: "feed" }), {
+      projectId: "test-project",
+    });
+    act(() => result.current.fetchEntities({}));
+    await waitFor(() => expect(result.current.entities).toHaveLength(1));
+
+    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({}, 500));
+    await expect(result.current.loadMore()).resolves.toBeUndefined();
+    fetchHandle.fetchMock.mockResolvedValueOnce(jsonResponse({}, 500));
+    await expect(result.current.refetch()).resolves.toBeUndefined();
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+    expect(result.current.entities.map((e) => e.id)).toEqual(["e1"]);
+    vi.restoreAllMocks();
+  });
+});

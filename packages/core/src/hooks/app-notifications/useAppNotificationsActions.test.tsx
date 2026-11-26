@@ -176,7 +176,7 @@ describe("useAppNotificationsActions", () => {
     });
   });
 
-  describe("resetAppNotifications", () => {
+  describe("refetch", () => {
     it("resets then loads page 1, marking isFirstPage", async () => {
       fetchHandle.fetchMock.mockResolvedValueOnce(
         jsonResponse({

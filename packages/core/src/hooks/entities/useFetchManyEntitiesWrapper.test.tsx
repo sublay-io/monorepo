@@ -1,14 +1,36 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { act, waitFor } from "@testing-library/react";
 
-import { renderHookWithAxios, resetAxiosMocks, makeEntity } from "../../test-utils";
+import {
+  renderHookWithAxios,
+  resetAxiosMocks,
+  makeEntity,
+  okAxiosResponse,
+} from "../../test-utils";
+import { axiosPrivate as axiosPrivateInstance } from "../../config/axios";
 import useFetchManyEntitiesWrapper from "./useFetchManyEntitiesWrapper";
 import type { PaginatedResponse } from "../../interfaces/PaginatedResponse";
 import type { Entity } from "../../interfaces/models/Entity";
 
 afterEach(() => {
   resetAxiosMocks();
+  vi.restoreAllMocks();
 });
+
+/** The next GET waits until the returned function is called with its page. */
+function holdNextGet(): (page: PaginatedResponse<Entity>) => Promise<void> {
+  let release!: (value: unknown) => void;
+  // The harness has already replaced `get` with its recording spy.
+  vi.mocked(axiosPrivateInstance.get).mockImplementationOnce(
+    () => new Promise((resolve) => { release = resolve; }) as never,
+  );
+  return async (page) => {
+    await act(async () => {
+      release(okAxiosResponse(page, 200));
+      await new Promise((r) => setTimeout(r, 10));
+    });
+  };
+}
 
 function makePage(entities: Entity[], hasMore: boolean): PaginatedResponse<Entity> {
   return {
@@ -144,6 +166,130 @@ describe("useFetchManyEntitiesWrapper", () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.entities).toEqual([]);
+    expect(result.current.error).toBeInstanceOf(Error);
+  });
+
+  it("drops a page that lands after the filters changed", async () => {
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (p: { userId: string }) => useFetchManyEntitiesWrapper(p),
+      {
+        initialProps: { userId: "user-a" },
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "a1" })], true)),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    // Page 2 for user-a is in flight when the filter changes.
+    const releasePage2 = holdNextGet();
+    act(() => {
+      result.current.loadMore();
+    });
+    axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "b1" })], false));
+    rerender({ userId: "user-b" });
+    await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["b1"]));
+
+    await releasePage2(makePage([makeEntity({ id: "a2" })], false));
+    expect(result.current.entities.map((e) => e.id)).toEqual(["b1"]);
+    expect(result.current.loading).toBe(false);
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls[2].config?.params).toMatchObject({ page: 1, userId: "user-b" });
+  });
+
+  it("retries a failed first page as page 1, through loadMore", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyEntitiesWrapper({}), {
+      beforeRender: ({ axiosPrivate }) => axiosPrivate.mockError("get", 500, { message: "boom" }),
+    });
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+    expect(result.current.loading).toBe(false);
+    // `hasMore` says there's something for loadMore to do: the failed page.
+    expect(result.current.hasMore).toBe(true);
+
+    axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "e1" })], true));
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    expect(result.current.error).toBeNull();
+    expect(result.current.entities.map((e) => e.id)).toEqual(["e1"]);
+
+    const calls = axiosPrivate.calls("get");
+    expect(calls).toHaveLength(2);
+    expect(calls[1].config?.params).toMatchObject({ page: 1 });
+  });
+
+  it("advances exactly one page on two loadMore calls in the same tick", async () => {
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyEntitiesWrapper({}), {
+      beforeRender: ({ axiosPrivate }) =>
+        axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "e1" })], true)),
+    });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "e2" })], true));
+    axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "e3" })], false));
+    await act(async () => {
+      await Promise.all([result.current.loadMore(), result.current.loadMore()]);
+    });
+    expect(result.current.entities.map((e) => e.id)).toEqual(["e1", "e2"]);
+    expect(axiosPrivate.calls("get").map((c) => c.config?.params?.page)).toEqual([1, 2]);
+
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    expect(axiosPrivate.calls("get").map((c) => c.config?.params?.page)).toEqual([1, 2, 3]);
+  });
+
+  it("refetch reloads page 1 with the current filters and sort", async () => {
+    const { result, rerender, axiosPrivate } = renderHookWithAxios(
+      (p: { sourceId: string }) =>
+        useFetchManyEntitiesWrapper({ ...p, titleFilters: { includes: ["x"] } }),
+      {
+        initialProps: { sourceId: "src-1" },
+        beforeRender: ({ axiosPrivate }) =>
+          axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "e1" })], true)),
+      },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "e2" })], true));
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "t1" })], true));
+    act(() => result.current.setSortBy("top"));
+    await waitFor(() => expect(result.current.entities.map((e) => e.id)).toEqual(["t1"]));
+
+    axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "t1-new" })], false));
+    rerender({ sourceId: "src-1" });
+    await act(async () => {
+      await result.current.refetch();
+    });
+    expect(result.current.entities.map((e) => e.id)).toEqual(["t1-new"]);
+
+    const calls = axiosPrivate.calls("get");
+    const last = calls[calls.length - 1].config?.params;
+    expect(calls).toHaveLength(4);
+    expect(last).toMatchObject({ page: 1, sortBy: "top", sourceId: "src-1" });
+    expect(JSON.stringify(last)).toContain("x");
+  });
+
+  it("loadMore and refetch never reject", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { result, axiosPrivate } = renderHookWithAxios(() => useFetchManyEntitiesWrapper({}), {
+      beforeRender: ({ axiosPrivate }) =>
+        axiosPrivate.mockResponse("get", makePage([makeEntity({ id: "e1" })], true)),
+    });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    axiosPrivate.mockError("get", 500);
+    await expect(result.current.loadMore()).resolves.toBeUndefined();
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+
+    axiosPrivate.mockNetworkError("get");
+    await expect(result.current.refetch()).resolves.toBeUndefined();
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.entities.map((e) => e.id)).toEqual(["e1"]);
   });
 
   it("sends blockedFilter on load-more pages as well as page 1", async () => {
